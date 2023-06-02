@@ -141,14 +141,7 @@ public:
         auto* attribute = graphModel.attributeByName(attributeName);
 
         if(!userDataVector->canConvertTo(type))
-        {
-            // If the conversion isn't possible, redetect the underlying type
-            // of the vector in case it's been forced into being something its not
-            userDataVector->resetType();
-
-            if(!userDataVector->canConvertTo(type))
-                return false;
-        }
+            return false;
 
         // Reset all flags that will be set below
         attribute->resetFlag(AttributeFlag::AutoRange);

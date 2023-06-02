@@ -20,67 +20,77 @@
 
 #include <QString>
 
-void TypeIdentity::updateType(const QString& value)
+static TypeIdentity::Type typeOf(const QString& value)
 {
     // If the value is empty we can't determine its type
     if(value.isEmpty())
-        return;
+        return TypeIdentity::Type::Unknown;
 
     bool conversionSucceeded = false;
 
     auto intValue = value.toLongLong(&conversionSucceeded);
     Q_UNUSED(intValue); // Keep cppcheck happy
-    const bool isInt = conversionSucceeded;
+    if(conversionSucceeded)
+        return TypeIdentity::Type::Int;
 
     auto doubleValue = value.toDouble(&conversionSucceeded);
     Q_UNUSED(doubleValue); // Keep cppcheck happy
-    const bool isFloat = conversionSucceeded;
+    if(conversionSucceeded)
+        return TypeIdentity::Type::Float;
 
-    switch(_type)
-    {
-    default:
-    case Type::Unknown:
-        if(isInt)
-            _type = Type::Int;
-        else if(isFloat)
-            _type = Type::Float;
-        else
-            _type = Type::String;
+    return TypeIdentity::Type::String;
+}
 
-        break;
+size_t TypeIdentity::count(Type type) const
+{
+    return _typeCounts.at(static_cast<size_t>(type));
+}
 
-    case Type::Int:
-        if(!isInt)
-        {
-            if(isFloat)
-                _type = Type::Float;
-            else
-                _type = Type::String;
-        }
+void TypeIdentity::increment(Type type)
+{
+    auto& count = _typeCounts.at(static_cast<size_t>(type));
+    count++;
+}
 
-        break;
+void TypeIdentity::decrement(Type type)
+{
+    auto& count = _typeCounts.at(static_cast<size_t>(type));
+    Q_ASSERT(count > 0);
+    count--;
+}
 
-    case Type::Float:
-        if(isFloat || isInt)
-            _type = Type::Float;
-        else
-            _type = Type::String;
+void TypeIdentity::updateType(const QString& value, const QString& previousValue)
+{
+    auto previousType = typeOf(previousValue);
+    auto type = typeOf(value);
 
-        break;
+    if(previousType != Type::Unknown)
+        decrement(previousType);
 
-    case Type::String:
-        _type = Type::String;
+    if(type != Type::Unknown)
+        increment(type);
+}
 
-        break;
-    }
+TypeIdentity::Type TypeIdentity::type() const
+{
+    if(count(Type::String) > 0)
+        return Type::String;
+
+    if(count(Type::Float) > 0)
+        return Type::Float;
+
+    if(count(Type::Int) > 0)
+        return Type::Int;
+
+    return Type::Unknown;
 }
 
 bool TypeIdentity::canConvertTo(Type type) const
 {
-    if(type == _type)
+    if(type == this->type())
         return true;
 
-    switch(_type)
+    switch(this->type())
     {
     case Type::Float:
         return type == Type::String;

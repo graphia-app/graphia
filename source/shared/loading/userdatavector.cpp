@@ -53,9 +53,8 @@ bool UserDataVector::set(size_t index, const QString& newValue)
 
     auto& value = _values.at(index);
     changed = changed || (value != newValue);
+    updateType(newValue, value);
     value = newValue;
-
-    updateType(value);
 
     return changed;
 }
@@ -68,23 +67,9 @@ QString UserDataVector::get(size_t index) const
     return _values.at(index);
 }
 
-bool UserDataVector::resetType()
-{
-    return updateType(_values);
-}
-
 json UserDataVector::save(const std::vector<size_t>& indexes) const
 {
     json jsonObject;
-
-    switch(type())
-    {
-    default:
-    case Type::Unknown: jsonObject["type"] = "Unknown"; break;
-    case Type::String:  jsonObject["type"] = "String"; break;
-    case Type::Int:     jsonObject["type"] = "Int"; break;
-    case Type::Float:   jsonObject["type"] = "Float"; break;
-    }
 
     if(!indexes.empty())
     {
@@ -110,24 +95,14 @@ bool UserDataVector::load(const QString& name, const json& jsonObject)
 {
     _name = name;
 
-    if(!jsonObject["type"].is_string())
-        return false;
-
-    if(jsonObject["type"] == "String")
-        setType(Type::String);
-    else if(jsonObject["type"] == "Int")
-        setType(Type::Int);
-    else if(jsonObject["type"] == "Float")
-        setType(Type::Float);
-    else
-        setType(Type::Unknown);
-
     if(!jsonObject["values"].is_array())
         return false;
 
     _values.clear();
     for(const auto& value : jsonObject["values"])
         _values.push_back(value);
+
+    updateType(_values);
 
     return true;
 }

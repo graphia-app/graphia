@@ -21,6 +21,8 @@
 
 #include "shared/attributes/valuetype.h"
 
+#include <array>
+
 class QString;
 
 class TypeIdentity
@@ -28,33 +30,31 @@ class TypeIdentity
 public:
     enum class Type
     {
-        Unknown,
-        String,
-        Int,
-        Float
+        Unknown = -1,
+        Int = 0,
+        Float,
+        String
     };
 
 private:
-    Type _type = Type::Unknown;
+    std::array<size_t, 3> _typeCounts = {};
+
+    size_t count(Type type) const;
+    void increment(Type type);
+    void decrement(Type type);
 
 public:
-    void updateType(const QString& value);
+    void updateType(const QString& value, const QString& previousValue = {});
 
     template<typename C>
-    bool updateType(const C& values)
+    void updateType(const C& values)
     {
-        auto oldType = type();
-
-        setType(Type::Unknown);
+        _typeCounts = {};
         for(const auto& value : values)
             updateType(value);
-
-        return type() != oldType;
     }
 
-    void setType(Type type) { _type = type; }
-    Type type() const { return _type; }
-
+    Type type() const;
 
     bool canConvertTo(Type type) const;
     static Type equivalentTypeFor(ValueType valueType);
