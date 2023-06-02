@@ -845,7 +845,7 @@ void CorrelationPlotItem::configureLegend()
     {
         accumulatedHeight += (legend->rowSpacing() + legendElementHeight);
         maxNumberOfElementsToDraw++;
-    };
+    }
 
     std::map<QString, QCPAbstractPlottable*> plottablesMap;
 
