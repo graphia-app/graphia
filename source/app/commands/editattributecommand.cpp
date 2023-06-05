@@ -26,8 +26,9 @@
 using namespace Qt::Literals::StringLiterals;
 
 EditAttributeCommand::EditAttributeCommand(GraphModel* graphModel, const QString& attributeName,
-    const AttributeEdits& edits, ValueType newType) :
-    _graphModel(graphModel), _attributeName(attributeName), _edits(edits), _newType(newType)
+    const AttributeEdits& edits, ValueType newType, const QString& description) :
+    _graphModel(graphModel), _attributeName(attributeName), _edits(edits),
+    _newType(newType), _newDescription(description)
 {}
 
 QString EditAttributeCommand::description() const
@@ -108,6 +109,14 @@ bool EditAttributeCommand::execute()
             Q_ASSERT(success);
         }
 
+        if(_newDescription != attribute->description())
+        {
+            _originalDescription = attribute->description();
+
+            bool success = userData.setAttributeDescription(*_graphModel, _attributeName, _newDescription);
+            Q_ASSERT(success);
+        }
+
         for(const auto& [elementId, value] : edits)
         {
             reverseEdits[elementId] = attribute->stringValueOf(elementId);
@@ -146,6 +155,10 @@ void EditAttributeCommand::undo()
             Q_ASSERT(success);
             _originalType = ValueType::Unknown;
         }
+
+        bool success = userData.setAttributeDescription(*_graphModel, _attributeName, _originalDescription);
+        Q_ASSERT(success);
+        _originalDescription = {};
     };
 
     if(attribute->elementType() == ElementType::Node)

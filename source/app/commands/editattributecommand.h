@@ -36,12 +36,14 @@ private:
     QString _attributeName;
     AttributeEdits _edits;
     ValueType _newType = ValueType::Unknown;
+    QString _newDescription;
     AttributeEdits _reverseEdits;
     ValueType _originalType = ValueType::Unknown;
+    QString _originalDescription;
 
 public:
     EditAttributeCommand(GraphModel* graphModel, const QString& attributeName,
-        const AttributeEdits& edits, ValueType newType = ValueType::Unknown);
+        const AttributeEdits& edits, ValueType newType, const QString& description);
 
     QString description() const override;
     QString verb() const override;
