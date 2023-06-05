@@ -49,8 +49,14 @@ private:
     std::unique_ptr<ElementIdArray<E, Index>> _indexes;
     std::map<size_t, E> _indexToElementIdMap;
     std::map<QString, QString> _exposedAsAttributes;
-    std::map<QString, ValueType> _exposedAttributeTypes;
     std::map<QString, QString> _inverseExposedAsAttributes;
+
+    struct AttributeOverride
+    {
+        ValueType _type;
+    };
+
+    std::map<QString, AttributeOverride> _exposedAttributeOverrides;
 
     void generateElementIdMapping(E elementId)
     {
@@ -124,7 +130,7 @@ public:
     {
         UserData::remove(name);
         _inverseExposedAsAttributes.erase(_exposedAsAttributes.at(name));
-        _exposedAttributeTypes.erase(name);
+        _exposedAttributeOverrides.erase(name);
         _exposedAsAttributes.erase(name);
     }
 
@@ -206,7 +212,7 @@ public:
         default: break;
         }
 
-        _exposedAttributeTypes[attributeName] = attribute->valueType();
+        _exposedAttributeOverrides[attributeName]._type = attribute->valueType();
 
         return true;
     }
@@ -232,8 +238,8 @@ public:
             _inverseExposedAsAttributes.emplace(attributeName, userDataVectorName);
             createdAttributeNames.emplace_back(attributeName);
 
-            auto type = _exposedAttributeTypes.contains(attributeName) ?
-                UserDataVector::equivalentTypeFor(_exposedAttributeTypes.at(attributeName)) :
+            auto type = _exposedAttributeOverrides.contains(attributeName) ?
+                UserDataVector::equivalentTypeFor(_exposedAttributeOverrides.at(attributeName)._type) :
                 userDataVector->type();
 
             setAttributeType(graphModel, attributeName, type);
@@ -308,11 +314,13 @@ public:
         json jsonObject = UserData::save(progressable, indexes);
         jsonObject["ids"] = jsonIds;
 
-        json attributeTypes = json::object();
-        for(const auto& [attributeName, type] : _exposedAttributeTypes)
+        json jsonAttributes = json::object();
+        for(const auto& [attributeName, override] : _exposedAttributeOverrides)
         {
+            auto& jsonAttribute = jsonAttributes[attributeName.toStdString()];
+
             const char* typeString = nullptr;
-            switch(type)
+            switch(override._type)
             {
             case ValueType::Int:    typeString = "Int"; break;
             case ValueType::Float:  typeString = "Float"; break;
@@ -321,10 +329,10 @@ public:
             }
 
             if(typeString != nullptr)
-                attributeTypes[attributeName.toStdString()] = typeString;
+                jsonAttribute["type"] = typeString;
         }
 
-        jsonObject["attributeTypes"] = attributeTypes;
+        jsonObject["attributes"] = jsonAttributes;
 
         return jsonObject;
     }
@@ -370,21 +378,28 @@ public:
                 setElementIdForIndex(elementId, index++);
         }
 
-        if(u::contains(jsonObject, "attributeTypes"))
+        if(u::contains(jsonObject, "attributes"))
         {
-            const auto& attributeTypes = jsonObject["attributeTypes"];
+            const auto& attributeTypes = jsonObject["attributes"];
             for(const auto& i : attributeTypes.items())
             {
-                ValueType type = ValueType::Unknown;
+                auto attributeName = QString::fromStdString(i.key());
+                const auto& override = i.value();
 
-                if(i.value() == "Int")
-                    type = ValueType::Int;
-                else if(i.value() == "Float")
-                    type = ValueType::Float;
-                else if(i.value() == "String")
-                    type = ValueType::String;
+                if(u::contains(override, "type"))
+                {
+                    const auto& typeString = override["type"];
+                    ValueType type = ValueType::Unknown;
 
-                _exposedAttributeTypes[QString::fromStdString(i.key())] = type;
+                    if(typeString == "Int")
+                        type = ValueType::Int;
+                    else if(typeString == "Float")
+                        type = ValueType::Float;
+                    else if(typeString == "String")
+                        type = ValueType::String;
+
+                    _exposedAttributeOverrides[attributeName]._type = type;
+                }
             }
         }
 
