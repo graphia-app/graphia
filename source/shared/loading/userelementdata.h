@@ -53,7 +53,8 @@ private:
 
     struct AttributeOverride
     {
-        ValueType _type;
+        ValueType _type = ValueType::Unknown;
+        QString _description;
     };
 
     std::map<QString, AttributeOverride> _exposedAttributeOverrides;
@@ -217,6 +218,21 @@ public:
         return true;
     }
 
+    bool setAttributeDescription(IGraphModel& graphModel, const QString& attributeName, const QString& description)
+    {
+        if(!_inverseExposedAsAttributes.contains(attributeName))
+            return false;
+
+        if(!graphModel.attributeExists(attributeName))
+            return false;
+
+        auto* attribute = graphModel.attributeByName(attributeName);
+        attribute->setDescription(description);
+        _exposedAttributeOverrides[attributeName]._description = attribute->description();
+
+        return true;
+    }
+
     std::vector<QString> exposeAsAttributes(IGraphModel& graphModel)
     {
         std::vector<QString> createdAttributeNames;
@@ -236,10 +252,12 @@ public:
 
             _exposedAsAttributes.emplace(userDataVectorName, attributeName);
             _inverseExposedAsAttributes.emplace(attributeName, userDataVectorName);
+            const auto& attributeOverride =
+                _exposedAttributeOverrides.emplace(attributeName, AttributeOverride()).first->second;
             createdAttributeNames.emplace_back(attributeName);
 
-            auto type = _exposedAttributeOverrides.contains(attributeName) ?
-                UserDataVector::equivalentTypeFor(_exposedAttributeOverrides.at(attributeName)._type) :
+            auto type = attributeOverride._type != ValueType::Unknown ?
+                UserDataVector::equivalentTypeFor(attributeOverride._type) :
                 userDataVector->type();
 
             setAttributeType(graphModel, attributeName, type);
@@ -267,7 +285,11 @@ public:
                 return QVariantMap{{u"userDataType"_s, static_cast<int>(valueType)}};
             });
 
-            attribute.setDescription(QString(QObject::tr("%1 is a user defined attribute.")).arg(userDataVectorName));
+            auto description = !attributeOverride._description.isEmpty() ?
+                attributeOverride._description :
+                QObject::tr("%1 is a user defined attribute.").arg(userDataVectorName);
+
+            setAttributeDescription(graphModel, attributeName, description);
         }
 
         return createdAttributeNames;
@@ -330,6 +352,8 @@ public:
 
             if(typeString != nullptr)
                 jsonAttribute["type"] = typeString;
+
+            jsonAttribute["description"] = override._description.toStdString();
         }
 
         jsonObject["attributes"] = jsonAttributes;
@@ -399,6 +423,12 @@ public:
                         type = ValueType::String;
 
                     _exposedAttributeOverrides[attributeName]._type = type;
+                }
+
+                if(u::contains(override, "description"))
+                {
+                    _exposedAttributeOverrides[attributeName]._description =
+                        QString::fromStdString(override["description"]);
                 }
             }
         }
