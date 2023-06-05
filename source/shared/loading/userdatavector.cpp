@@ -41,7 +41,7 @@ size_t UserDataVector::numUniqueValues() const
     return v.size();
 }
 
-bool UserDataVector::set(size_t index, const QString& newValue)
+bool UserDataVector::set(size_t index, const QString& value)
 {
     bool changed = false;
 
@@ -51,10 +51,10 @@ bool UserDataVector::set(size_t index, const QString& newValue)
         changed = true;
     }
 
-    auto& value = _values.at(index);
-    changed = changed || (value != newValue);
-    updateType(newValue, value);
-    value = newValue;
+    auto& previousValue = _values.at(index);
+    changed = changed || (previousValue != value);
+    updateType(value, previousValue);
+    previousValue = value;
 
     return changed;
 }
