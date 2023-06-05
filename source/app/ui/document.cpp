@@ -3094,14 +3094,16 @@ void Document::cloneAttribute(const QString& sourceAttributeName, const QString&
         std::make_unique<CloneAttributeCommand>(_graphModel.get(), sourceAttributeName, newAttributeName));
 }
 
-void Document::editAttribute(const QString& attributeName, const AttributeEdits& edits, ValueType newType)
+void Document::editAttribute(const QString& attributeName, const AttributeEdits& edits,
+    ValueType newType, const QString& newDescription)
 {
     if(busy())
         return;
 
     _commandManager.execute(ExecutePolicy::Add,
         std::make_unique<EditAttributeCommand>(_graphModel.get(),
-        Attribute::parseAttributeName(attributeName)._name, edits, newType));
+        Attribute::parseAttributeName(attributeName)._name,
+        edits, newType, newDescription));
 }
 
 // NOLINTNEXTLINE readability-make-member-function-const

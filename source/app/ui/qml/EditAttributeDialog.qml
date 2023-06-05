@@ -76,6 +76,7 @@ Window
         if(!root._selectedAttribute)
             return;
 
+        descriptionTextField.text = root._selectedAttribute.description;
         dataTypeComboBox.setCurrentValueTo(root._selectedAttribute.valueType);
         editAllSharedValuesCheckbox.checked = false;
 
@@ -107,6 +108,8 @@ Window
 
         attributeList.model = document.availableAttributesModel();
         editAllSharedValuesCheckbox.checked = false;
+        descriptionTextField.text = root._selectedAttribute ?
+            root._selectedAttribute.description : "";
         dataTypeComboBox.setCurrentValueTo(root._selectedAttribute ?
             root._selectedAttribute.valueType : ValueType.Unknown);
 
@@ -233,7 +236,7 @@ Window
 
                 text: (root.attributeName.length === 0 ? qsTr("Please select an attribute. ") : "") +
                     qsTr("Double click on a value to edit it. " +
-                    "Some attributes can have their type manually changed. " +
+                    "Attributes can have their description and type manually changed. " +
                     "For attributes with shared values, selecting <i>Edit All Shared Values</i> " +
                     "allows for bulk editing many attribute values at once.")
             }
@@ -280,10 +283,30 @@ Window
                 let doSelect = function() { root._selectedAttributeName = newValue; };
                 let cancelSelect = function() { attributeList.select(attributeList.model.find(root._selectedAttributeName)); };
 
-                if(editAttributeTableModel.hasEdits || dataTypeComboBox.hasChanged)
+                if(editAttributeTableModel.hasEdits || dataTypeComboBox.hasChanged || descriptionTextField.hasChanged)
                     confirmDiscard.confirm(doSelect, cancelSelect);
                 else
                     doSelect();
+            }
+        }
+
+        RowLayout
+        {
+            visible: root._selectedAttribute !== null
+
+            Label { text: qsTr("Description:") }
+
+            TextField
+            {
+                id: descriptionTextField
+                Layout.fillWidth: true
+
+                font.bold: hasChanged && !focus
+
+                property bool hasChanged: root._selectedAttribute &&
+                    root._selectedAttribute.description !== descriptionTextField.text
+
+                onEditingFinished: { focus = false; }
             }
         }
 
@@ -856,12 +879,13 @@ Window
             {
                 text: qsTr("OK")
                 enabled: root._selectedAttribute &&
-                    (editAttributeTableModel.hasEdits || dataTypeComboBox.hasChanged)
+                    (editAttributeTableModel.hasEdits || dataTypeComboBox.hasChanged || descriptionTextField.hasChanged)
 
                 onClicked: function(mouse)
                 {
                     document.editAttribute(root._attributeName,
-                        editAttributeTableModel.edits, root._selectedType);
+                        editAttributeTableModel.edits, root._selectedType,
+                        descriptionTextField.text);
                     root.close();
                 }
             }
