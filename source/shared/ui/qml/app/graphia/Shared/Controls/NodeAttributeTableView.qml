@@ -768,6 +768,10 @@ Item
                                 else if(mouse.button === Qt.RightButton)
                                     contextMenu.show();
                             }
+
+                            ToolTip.visible: containsMouse && ToolTip.text.length > 0
+                            ToolTip.delay: Constants.toolTipDelay
+                            ToolTip.text: { return root.model.descriptionFor(headerItem.text); }
                         }
 
                         Rectangle
