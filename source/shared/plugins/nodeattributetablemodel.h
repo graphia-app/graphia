@@ -98,8 +98,8 @@ public:
     Q_INVOKABLE void moveFocusToNodeForRowIndex(size_t row);
     Q_INVOKABLE virtual bool columnIsFloatingPoint(const QString& columnName) const;
     Q_INVOKABLE virtual bool columnIsNumerical(const QString& columnName) const;
-    Q_INVOKABLE virtual bool rowVisible(size_t row) const;
-    Q_INVOKABLE virtual QString columnNameFor(size_t column) const;
+    Q_INVOKABLE bool rowVisible(size_t row) const;
+    Q_INVOKABLE QString columnNameFor(size_t column) const;
     Q_INVOKABLE std::vector<size_t> sourcesOf(const std::vector<size_t>& rows) const;
     Q_INVOKABLE std::vector<size_t> targetsOf(const std::vector<size_t>& rows) const;
     Q_INVOKABLE std::vector<size_t> neighboursOf(const std::vector<size_t>& rows) const;
