@@ -124,10 +124,14 @@ Item
 
     function setColumnVisibility(columnName, columnVisible)
     {
+        let newHiddenColumns = [];
         if(columnVisible)
-            hiddenColumns = Utils.setRemove(hiddenColumns, columnName);
+            newHiddenColumns = Utils.setRemove(hiddenColumns, columnName);
         else
-            hiddenColumns = Utils.setAdd(hiddenColumns, columnName);
+            newHiddenColumns = Utils.setAdd(hiddenColumns, columnName);
+
+        if(!Utils.arraysMatch(root.hiddenColumns, newHiddenColumns))
+            root.hiddenColumns = newHiddenColumns;
     }
 
     function showAllColumns()

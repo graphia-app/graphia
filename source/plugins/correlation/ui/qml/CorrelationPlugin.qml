@@ -891,6 +891,7 @@ PluginContent
 
             onSortIndicatorColumnChanged: { root.saveRequired = true; }
             onSortIndicatorOrderChanged: { root.saveRequired = true; }
+            onHiddenColumnsChanged: { root.saveRequired = true; }
         }
 
         Rectangle
