@@ -113,6 +113,7 @@ struct GPUGraphData : OpenGLFunctions
         float _basePosition[3] = {0.0f, 0.0f, 0.0f};
         float _glyphOffset[2] = {0.0f, 0.0f};
         float _glyphSize[2] = {0.0f, 0.0f};
+        float _glyphScale = 0.0f;
         float _color[3] = {0.0f, 0.0f, 0.0f};
     };
 

@@ -136,6 +136,7 @@ class Document : public QObject, public IDocument, public FailureReason
 
     Q_PROPERTY(float nodeSize READ nodeSize WRITE setNodeSize NOTIFY nodeSizeChanged)
     Q_PROPERTY(float edgeSize READ edgeSize WRITE setEdgeSize NOTIFY edgeSizeChanged)
+    Q_PROPERTY(float textSize READ textSize WRITE setTextSize NOTIFY textSizeChanged)
 
 public:
     explicit Document(QObject* parent = nullptr);
@@ -227,6 +228,9 @@ public:
 
     float edgeSize() const;
     void setEdgeSize(float edgeSize);
+
+    float textSize() const;
+    void setTextSize(float textSize);
 
 private:
     Application* _application = nullptr;
@@ -404,6 +408,7 @@ signals:
     void layoutSettingChanged(const QString& name, float value);
     void nodeSizeChanged();
     void edgeSizeChanged();
+    void textSizeChanged();
 
 public:
     // Main QML interface
@@ -529,6 +534,7 @@ public:
 
     Q_INVOKABLE void resetNodeSize();
     Q_INVOKABLE void resetEdgeSize();
+    Q_INVOKABLE void resetTextSize();
 
     Q_INVOKABLE void cancelCommand();
 

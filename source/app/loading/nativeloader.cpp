@@ -569,6 +569,9 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
     if(u::contains(jsonBody, "edgeSize"))
         graphModel->setEdgeSize(jsonBody["edgeSize"]);
 
+    if(u::contains(jsonBody, "textSize"))
+        graphModel->setTextSize(jsonBody["textSize"]);
+
     if(version >= 2 && u::contains(jsonBody, "ui"))
     {
         const auto& jsonUiDataJsonValue = jsonBody["ui"];

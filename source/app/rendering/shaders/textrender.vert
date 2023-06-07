@@ -30,12 +30,12 @@ layout (location = 5) in int textureLayer;
 layout (location = 6) in vec3 basePosition;
 layout (location = 7) in vec2 glyphOffset;
 layout (location = 8) in vec2 glyphSize;
-layout (location = 9) in vec3 color;
+layout (location = 9) in float glyphScale;
+layout (location = 10) in vec3 color;
 
 uniform samplerBuffer componentData;
 uniform int componentDataElementSize;
 uniform sampler2DArray tex;
-uniform float textScale;
 
 out vec2 texCoord;
 flat out int texLayer;
@@ -71,7 +71,7 @@ void main()
   vec3 cameraUp =    normalize(vec3(modelViewMatrix[0].y, modelViewMatrix[1].y, modelViewMatrix[2].y));
   vec3 cameraRight = normalize(vec3(modelViewMatrix[0].x, modelViewMatrix[1].x, modelViewMatrix[2].x));
 
-  vec2 scaledGlyphSize = glyphSize * textScale;
+  vec2 scaledGlyphSize = glyphSize * glyphScale;
   vec3 billboardPosition = (cameraRight * vertexPosition.x * scaledGlyphSize.x) +
                            (cameraUp *    vertexPosition.y * scaledGlyphSize.y);
   vec3 billboardOffset = (cameraRight * glyphOffset.x) + (cameraUp * glyphOffset.y);

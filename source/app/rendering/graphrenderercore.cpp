@@ -127,6 +127,7 @@ void GPUGraphData::prepareTextVAO(QOpenGLShaderProgram& shader)
     shader.enableAttributeArray("basePosition");
     shader.enableAttributeArray("glyphOffset");
     shader.enableAttributeArray("glyphSize");
+    shader.enableAttributeArray("glyphScale");
     shader.enableAttributeArray("color");
 
     glVertexAttribIPointer(static_cast<GLuint>(shader.attributeLocation("component")),              1, GL_INT,  sizeof(GlyphData),
@@ -137,6 +138,7 @@ void GPUGraphData::prepareTextVAO(QOpenGLShaderProgram& shader)
     shader.setAttributeBuffer("basePosition",    GL_FLOAT, offsetof(GlyphData, _basePosition),      3,          sizeof(GlyphData));
     shader.setAttributeBuffer("glyphOffset",     GL_FLOAT, offsetof(GlyphData, _glyphOffset),       2,          sizeof(GlyphData));
     shader.setAttributeBuffer("glyphSize",       GL_FLOAT, offsetof(GlyphData, _glyphSize),         2,          sizeof(GlyphData));
+    shader.setAttributeBuffer("glyphScale",      GL_FLOAT, offsetof(GlyphData, _glyphScale),        1,          sizeof(GlyphData));
     shader.setAttributeBuffer("color",           GL_FLOAT, offsetof(GlyphData, _color),             3,          sizeof(GlyphData));
     glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("component")),               1);
     glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("textureCoord")),            1);
@@ -144,6 +146,7 @@ void GPUGraphData::prepareTextVAO(QOpenGLShaderProgram& shader)
     glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("basePosition")),            1);
     glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("glyphOffset")),             1);
     glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("glyphSize")),               1);
+    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("glyphScale")),              1);
     glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("color")),                   1);
 
     _textVBO.release();
@@ -560,7 +563,6 @@ void GraphRendererCore::renderText(GPUGraphData& gpuGraphData)
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     _textShader.setUniformValue("tex", 0);
-    _textShader.setUniformValue("textScale", u::pref(u"visuals/textSize"_s).toFloat());
 
     glActiveTexture(GL_TEXTURE0 + 1);
     glBindTexture(GL_TEXTURE_BUFFER, _componentDataTexture);

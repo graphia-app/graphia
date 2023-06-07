@@ -39,6 +39,8 @@ Rectangle
     // Don't pass clicks through
     MouseArea { anchors.fill: parent }
 
+    LimitConstants { id: limitConstants }
+
     Preferences
     {
         id: visuals
@@ -89,7 +91,8 @@ Rectangle
         }
 
         return Utils.floatCompare(root.document.nodeSize, visuals.defaultNormalNodeSize) === 0 &&
-            Utils.floatCompare(root.document.edgeSize, visuals.defaultNormalEdgeSize) === 0;
+            Utils.floatCompare(root.document.edgeSize, visuals.defaultNormalEdgeSize) === 0 &&
+            Utils.floatCompare(root.document.textSize, limitConstants.defaultTextSize) === 0;
     }
 
     function evaluateSettings()
@@ -128,6 +131,12 @@ Rectangle
             if(Utils.floatCompare(preset.edgeSize, root.document.edgeSize) !== 0)
                 continue;
 
+            if(preset.textSize === undefined)
+                preset.textSize = limitConstants.defaultTextSize;
+
+            if(Utils.floatCompare(preset.textSize, root.document.textSize) !== 0)
+                continue;
+
             newMatchingPresetName = presetName;
             break;
         }
@@ -152,7 +161,8 @@ Rectangle
             "layoutName": root.document.layoutName,
             "layoutSettings": layoutSettings,
             "nodeSize": root.document.nodeSize,
-            "edgeSize": root.document.edgeSize
+            "edgeSize": root.document.edgeSize,
+            "textSize": root.document.textSize
         };
 
         let presets = root.layoutPresets;
@@ -197,6 +207,7 @@ Rectangle
         function onLayoutSettingChanged()   { root.evaluateSettings(); }
         function onNodeSizeChanged()        { root.evaluateSettings(); }
         function onEdgeSizeChanged()        { root.evaluateSettings(); }
+        function onTextSizeChanged()        { root.evaluateSettings(); }
     }
 
     implicitWidth: layout.implicitWidth + (Constants.padding * 2)
@@ -298,6 +309,7 @@ Rectangle
 
                             root.document.resetNodeSize();
                             root.document.resetEdgeSize();
+                            root.document.resetTextSize();
 
                             presetChooser.selectedValue = "";
                         }
@@ -313,6 +325,9 @@ Rectangle
 
                             root.document.nodeSize = preset.nodeSize;
                             root.document.edgeSize = preset.edgeSize;
+
+                            if(preset.textSize !== undefined)
+                                root.document.textSize = preset.textSize;
                         }
                     }
 
@@ -467,6 +482,17 @@ Rectangle
             onValueChanged: { root.document.edgeSize = value; }
             onReset: { root.document.resetEdgeSize(); }
         }
+
+        LayoutSetting
+        {
+            id: textSizeSetting
+            Layout.leftMargin: _buttonMenuOffset
+            name: qsTr("Text")
+            description: qsTr("Text Size")
+
+            onValueChanged: { root.document.textSize = value; }
+            onReset: { root.document.resetTextSize(); }
+        }
     }
 
     Connections
@@ -475,6 +501,7 @@ Rectangle
 
         function onNodeSizeChanged() { nodeSizeSetting.value = root.document.nodeSize; }
         function onEdgeSizeChanged() { edgeSizeSetting.value = root.document.edgeSize; }
+        function onTextSizeChanged() { textSizeSetting.value = root.document.textSize; }
     }
 
     function show()

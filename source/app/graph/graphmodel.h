@@ -100,9 +100,11 @@ public:
 
     void setNodeSize(float nodeSize);
     void setEdgeSize(float edgeSize);
+    void setTextSize(float textSize);
 
     float nodeSize() const;
     float edgeSize() const;
+    float textSize() const;
 
     const ElementVisual& nodeVisual(NodeId nodeId) const;
     const ElementVisual& edgeVisual(EdgeId edgeId) const;

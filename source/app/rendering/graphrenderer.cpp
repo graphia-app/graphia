@@ -209,6 +209,7 @@ void GraphRenderer::createGPUGlyphData(const QString& text, const QColor& textCo
         glyphData._glyphOffset[1] = baseOffset[1] - ((textureGlyph._height + textureGlyph._ascent) * textScale);
         glyphData._glyphSize[0] = textureGlyph._width;
         glyphData._glyphSize[1] = textureGlyph._height;
+        glyphData._glyphScale = textScale;
 
         glyphData._textureCoord[0] = textureGlyph._u;
         glyphData._textureCoord[1] = textureGlyph._v;
@@ -307,7 +308,8 @@ void GraphRenderer::updateGPUDataIfRequired()
                 if(showNodeText == TextState::Focused && componentRenderer->focusNodeId() != nodeId)
                     continue;
 
-                createGPUGlyphData(nodeVisual._text, textColor, textAlignment, textScale,
+                createGPUGlyphData(nodeVisual._text, textColor, textAlignment,
+                    textScale * nodeVisual._textSize,
                     nodeVisual._size, nodePosition, componentIndex,
                     gpuGraphDataForOverlay(componentRenderer->alpha()));
             }
@@ -386,7 +388,8 @@ void GraphRenderer::updateGPUDataIfRequired()
                     continue;
 
                 const QVector3D midPoint = (sourcePosition + targetPosition) * 0.5f;
-                createGPUGlyphData(edgeVisual._text, textColor, textAlignment, textScale,
+                createGPUGlyphData(edgeVisual._text, textColor, textAlignment,
+                    textScale * edgeVisual._textSize,
                     edgeVisual._size, midPoint, componentIndex,
                     gpuGraphDataForOverlay(componentRenderer->alpha()));
             }

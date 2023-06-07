@@ -36,11 +36,12 @@ using IUserEdgeData = IUserElementData<EdgeId>;
 
 enum class VisualChangeFlags
 {
-    None    = 0x0,
-    Size    = 0x1,
-    Color   = 0x2,
-    Text    = 0x4,
-    State   = 0x8
+    None        = 0x00,
+    Size        = 0x01,
+    Color       = 0x02,
+    Text        = 0x04,
+    TextSize    = 0x08,
+    State       = 0x10
 };
 
 class IGraphModel

@@ -31,6 +31,10 @@ class LimitConstants : public QObject
     Q_PROPERTY(float minimumEdgeSize READ minimumEdgeSize CONSTANT)
     Q_PROPERTY(float maximumEdgeSize READ maximumEdgeSize CONSTANT)
 
+    Q_PROPERTY(float minimumTextSize READ minimumTextSize CONSTANT)
+    Q_PROPERTY(float maximumTextSize READ maximumTextSize CONSTANT)
+    Q_PROPERTY(float defaultTextSize READ defaultTextSize CONSTANT)
+
     Q_PROPERTY(float minimumMinimumComponentRadius READ minimumMinimumComponentRadius CONSTANT)
     Q_PROPERTY(float maximumMinimumComponentRadius READ maximumMinimumComponentRadius CONSTANT)
 
@@ -43,6 +47,10 @@ public:
 
     static constexpr float minimumEdgeSize() { return 0.02f; }
     static constexpr float maximumEdgeSize() { return 2.0f; }
+
+    static constexpr float minimumTextSize() { return 0.33f; }
+    static constexpr float maximumTextSize() { return 4.0f; }
+    static constexpr float defaultTextSize() { return 0.5f; } // Normalised [0,1]
 
     static constexpr float minimumMinimumComponentRadius() { return 0.05f; }
     static constexpr float maximumMinimumComponentRadius() { return 15.0f; }

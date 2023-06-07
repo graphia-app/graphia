@@ -20,6 +20,7 @@
 
 #include "application.h"
 #include "preferences.h"
+#include "limitconstants.h"
 
 #include "attributes/enrichmentcalculator.h"
 
@@ -877,6 +878,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
     emit commandVerbChanged(); // Stop showing loading message
     emit nodeSizeChanged();
     emit edgeSizeChanged();
+    emit textSizeChanged();
 
     // Load UI saved data
     if(_uiData.size() > 0)
@@ -2702,6 +2704,32 @@ void Document::resetEdgeSize()
 {
     auto defaultNormalEdgeSize = u::pref(u"visuals/defaultNormalEdgeSize"_s).toFloat();
     setEdgeSize(defaultNormalEdgeSize);
+}
+
+float Document::textSize() const
+{
+    if(_graphModel == nullptr)
+        return 1.0f;
+
+    return _graphModel->textSize();
+}
+
+void Document::setTextSize(float textSize)
+{
+    if(_graphModel == nullptr)
+        return;
+
+    if(textSize != _graphModel->textSize())
+    {
+        _graphModel->setTextSize(textSize);
+        emit textSizeChanged();
+        setSaveRequired();
+    }
+}
+
+void Document::resetTextSize()
+{
+    setTextSize(LimitConstants::defaultTextSize());
 }
 
 void Document::cancelCommand()

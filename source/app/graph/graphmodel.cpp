@@ -116,6 +116,7 @@ private:
 
     float _nodeSize = u::pref(u"visuals/defaultNormalNodeSize"_s).toFloat();
     float _edgeSize = u::pref(u"visuals/defaultNormalEdgeSize"_s).toFloat();
+    float _textSize = LimitConstants::defaultTextSize();
 
     NodeVisuals _nodeVisuals;
     EdgeVisuals _edgeVisuals;
@@ -392,8 +393,15 @@ void GraphModel::setEdgeSize(float edgeSize)
     updateVisuals();
 }
 
+void GraphModel::setTextSize(float textSize)
+{
+    _->_textSize = textSize;
+    updateVisuals();
+}
+
 float GraphModel::nodeSize() const { return _->_nodeSize; }
 float GraphModel::edgeSize() const { return _->_edgeSize; }
+float GraphModel::textSize() const { return _->_textSize; }
 
 const ElementVisual& GraphModel::nodeVisual(NodeId nodeId) const { return _->_nodeVisuals.at(nodeId); }
 const ElementVisual& GraphModel::edgeVisual(EdgeId edgeId) const { return _->_edgeVisuals.at(edgeId); }
@@ -1127,6 +1135,9 @@ void GraphModel::updateVisuals(bool force)
     auto multiColor     = u::pref(u"visuals/multiElementColor"_s).value<QColor>();
     auto nodeSize       = u::interpolate(LimitConstants::minimumNodeSize(), LimitConstants::maximumNodeSize(), _->_nodeSize);
     auto edgeSize       = u::interpolate(LimitConstants::minimumEdgeSize(), LimitConstants::maximumEdgeSize(), _->_edgeSize);
+    auto textSize       = _->_textSize < 0.5f ?
+        u::interpolate(LimitConstants::minimumTextSize(), 1.0f, _->_textSize / 0.5f) :
+        u::interpolate(1.0f, LimitConstants::maximumTextSize(), (_->_textSize - 0.5f) / 0.5f);
     auto meIndicators   = u::pref(u"visuals/showMultiElementIndicators"_s).toBool();
 
     auto newNodeVisuals = _->_nodeVisuals;
@@ -1163,6 +1174,8 @@ void GraphModel::updateVisuals(bool force)
             newNodeVisuals[nodeId]._text = _->_mappedNodeVisuals[nodeId]._text;
         else
             newNodeVisuals[nodeId]._text = nodeName(nodeId);
+
+        newNodeVisuals[nodeId]._textSize = textSize;
 
         auto nodeIsSelected = u::contains(_->_selectedNodeIds, nodeId);
 
@@ -1221,6 +1234,8 @@ void GraphModel::updateVisuals(bool force)
             newEdgeVisuals[edgeId]._text = _->_mappedEdgeVisuals[edgeId]._text;
         else
             newEdgeVisuals[edgeId]._text.clear();
+
+        newEdgeVisuals[edgeId]._textSize = textSize;
     }
 
     auto findChange = [](const auto& elementIds, const auto& previous, const auto& current)
@@ -1248,6 +1263,12 @@ void GraphModel::updateVisuals(bool force)
             {
                 change.set(previous[elementId]._text != current[elementId]._text ?
                     VisualChangeFlags::Text : VisualChangeFlags::None);
+            }
+
+            if(!change.test(VisualChangeFlags::TextSize))
+            {
+                change.set(previous[elementId]._textSize != current[elementId]._textSize ?
+                    VisualChangeFlags::TextSize : VisualChangeFlags::None);
             }
 
             if(!change.test(VisualChangeFlags::State))

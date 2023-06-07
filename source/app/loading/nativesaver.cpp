@@ -211,6 +211,7 @@ bool NativeSaver::save()
 
     content["nodeSize"] = _document->nodeSize();
     content["edgeSize"] = _document->edgeSize();
+    content["textSize"] = _document->textSize();
 
     content["projection"] = _document->projection();
     content["2dshading"] = _document->shading2D();
