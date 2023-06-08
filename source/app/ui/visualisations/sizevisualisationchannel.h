@@ -25,9 +25,9 @@ class SizeVisualisationChannel : public VisualisationChannel
 {
 public:
     using VisualisationChannel::VisualisationChannel;
+    using VisualisationChannel::apply;
 
     void apply(double value, ElementVisual& elementVisual) const override;
-    void apply(const QString&, ElementVisual&) const override {} //FIXME
 
     bool supports(ValueType type) const override { return type == ValueType::Int || type == ValueType::Float; }
 
