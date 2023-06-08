@@ -1118,9 +1118,12 @@ static float mappedSize(float min, float max, float user, float mapped)
     return min + (out * (max - min));
 }
 
-static float mappedTextSize(float user, float mapped)
+static float mappedTextSize(float user, float mapped = -1.0f)
 {
-    auto value = user * mapped;
+    auto value = mapped >= 0.0f ?
+        ((1.0f * user) + (2.0f * mapped)) / 3.0f :
+        user;
+
     return value < 0.5f ?
         u::interpolate(LimitConstants::minimumTextSize(), 1.0f, value / 0.5f) :
         u::interpolate(1.0f, LimitConstants::maximumTextSize(), (value - 0.5f) / 0.5f);
@@ -1148,7 +1151,7 @@ void GraphModel::updateVisuals(bool force)
     auto multiColor     = u::pref(u"visuals/multiElementColor"_s).value<QColor>();
     auto nodeSize       = u::interpolate(LimitConstants::minimumNodeSize(), LimitConstants::maximumNodeSize(), _->_nodeSize);
     auto edgeSize       = u::interpolate(LimitConstants::minimumEdgeSize(), LimitConstants::maximumEdgeSize(), _->_edgeSize);
-    auto textSize       = mappedTextSize(_->_textSize, 1.0f);
+    auto textSize       = mappedTextSize(_->_textSize);
     auto textColor      = Document::contrastingColorForBackground();
     auto meIndicators   = u::pref(u"visuals/showMultiElementIndicators"_s).toBool();
 
