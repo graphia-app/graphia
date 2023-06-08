@@ -1173,10 +1173,10 @@ void GraphModel::updateVisuals(bool force)
             newNodeVisuals[nodeId]._size = nodeSize;
 
         // Color
-        if(!_->_mappedNodeVisuals[nodeId]._outerColor.isValid())
-            newNodeVisuals[nodeId]._outerColor = nodeColor;
-        else
+        if(_->_mappedNodeVisuals[nodeId]._outerColor.isValid())
             newNodeVisuals[nodeId]._outerColor = _->_mappedNodeVisuals[nodeId]._outerColor;
+        else
+            newNodeVisuals[nodeId]._outerColor = nodeColor;
 
         newNodeVisuals[nodeId]._innerColor = !meIndicators || graph().typeOf(nodeId) == MultiElementType::Not ?
             newNodeVisuals[nodeId]._outerColor : multiColor;
@@ -1194,10 +1194,11 @@ void GraphModel::updateVisuals(bool force)
             newNodeVisuals[nodeId]._textSize = textSize;
 
         // Text Color
-        if(!_->_mappedNodeVisuals[nodeId]._textColor.isValid())
-            newNodeVisuals[nodeId]._textColor = textColor;
-        else
+        if(_->_mappedNodeVisuals[nodeId]._textColor.isValid())
             newNodeVisuals[nodeId]._textColor = _->_mappedNodeVisuals[nodeId]._textColor;
+        else
+            newNodeVisuals[nodeId]._textColor = textColor;
+
 
         auto nodeIsSelected = u::contains(_->_selectedNodeIds, nodeId);
 
@@ -1243,10 +1244,10 @@ void GraphModel::updateVisuals(bool force)
         newEdgeVisuals[edgeId]._size = std::min(newEdgeVisuals[edgeId]._size, minEdgeNodesSize);
 
         // Color
-        if(!_->_mappedEdgeVisuals[edgeId]._outerColor.isValid())
-            newEdgeVisuals[edgeId]._outerColor = edgeColor;
-        else
+        if(_->_mappedEdgeVisuals[edgeId]._outerColor.isValid())
             newEdgeVisuals[edgeId]._outerColor = _->_mappedEdgeVisuals[edgeId]._outerColor;
+        else
+            newEdgeVisuals[edgeId]._outerColor = edgeColor;
 
         newEdgeVisuals[edgeId]._innerColor = !meIndicators || graph().typeOf(edgeId) == MultiElementType::Not ?
             newEdgeVisuals[edgeId]._outerColor : multiColor;
@@ -1264,10 +1265,11 @@ void GraphModel::updateVisuals(bool force)
             newEdgeVisuals[edgeId]._textSize = textSize;
 
         // Text Color
-        if(!_->_mappedEdgeVisuals[edgeId]._textColor.isValid())
-            newEdgeVisuals[edgeId]._textColor = textColor;
-        else
+        if(_->_mappedEdgeVisuals[edgeId]._textColor.isValid())
             newEdgeVisuals[edgeId]._textColor = _->_mappedEdgeVisuals[edgeId]._textColor;
+        else
+            newEdgeVisuals[edgeId]._textColor = textColor;
+
     }
 
     auto findChange = [](const auto& elementIds, const auto& previous, const auto& current)
