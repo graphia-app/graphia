@@ -224,6 +224,9 @@ Item
                     return "view-fullscreen";
                 }
 
+                if(channel === "Text Colour")
+                    return "text-color";
+
                 if(channel === "Text Size")
                     return "text-size";
 

@@ -40,8 +40,9 @@ enum class VisualChangeFlags
     Size        = 0x01,
     Color       = 0x02,
     Text        = 0x04,
-    TextSize    = 0x08,
-    State       = 0x10
+    TextColor   = 0x08,
+    TextSize    = 0x10,
+    State       = 0x20
 };
 
 class IGraphModel

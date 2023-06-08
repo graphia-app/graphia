@@ -16,37 +16,20 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef COLORVISUALISATIONCHANNEL_H
-#define COLORVISUALISATIONCHANNEL_H
+#ifndef TEXTCOLORVISUALISATIONCHANNEL_H
+#define TEXTCOLORVISUALISATIONCHANNEL_H
 
-#include "visualisationchannel.h"
+#include "colorvisualisationchannel.h"
 
-#include "shared/ui/visualisations/colorgradient.h"
-#include "shared/ui/visualisations/colorpalette.h"
-
-#include <vector>
-#include <QString>
-
-class ColorVisualisationChannel : public VisualisationChannel
+class TextColorVisualisationChannel : public ColorVisualisationChannel
 {
 public:
-    using VisualisationChannel::VisualisationChannel;
+    using ColorVisualisationChannel::ColorVisualisationChannel;
 
     void apply(double value, ElementVisual& elementVisual) const override;
     void apply(const QString& value, ElementVisual& elementVisual) const override;
 
-    bool supports(ValueType valueType) const override { return valueType != ValueType::Unknown; }
-
     QString description(ElementType, ValueType) const override;
-
-    void reset() override;
-    QVariantMap defaultParameters(ValueType valueType) const override;
-    void setParameter(const QString& name, const QString& value) override;
-
-protected:
-    ColorGradient _colorGradient;
-    ColorPalette _colorPalette;
-    std::vector<QString> _sharedValues;
 };
 
-#endif // COLORVISUALISATIONCHANNEL_H
+#endif // TEXTCOLORVISUALISATIONCHANNEL_H

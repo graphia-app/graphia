@@ -59,6 +59,7 @@
 #include "ui/visualisations/colorvisualisationchannel.h"
 #include "ui/visualisations/sizevisualisationchannel.h"
 #include "ui/visualisations/textvisualisationchannel.h"
+#include "ui/visualisations/textcolorvisualisationchannel.h"
 #include "ui/visualisations/textsizevisualisationchannel.h"
 #include "ui/visualisations/visualisationconfigparser.h"
 #include "ui/visualisations/visualisationbuilder.h"
@@ -340,6 +341,7 @@ GraphModel::GraphModel(const QString& name, IPlugin* plugin) :
     _->_visualisationChannels.emplace(tr("Colour"), std::make_unique<ColorVisualisationChannel>());
     _->_visualisationChannels.emplace(tr("Size"), std::make_unique<SizeVisualisationChannel>());
     _->_visualisationChannels.emplace(tr("Text"), std::make_unique<TextVisualisationChannel>());
+    _->_visualisationChannels.emplace(tr("Text Colour"), std::make_unique<TextColorVisualisationChannel>());
     _->_visualisationChannels.emplace(tr("Text Size"), std::make_unique<TextSizeVisualisationChannel>());
 }
 
@@ -1192,7 +1194,10 @@ void GraphModel::updateVisuals(bool force)
             newNodeVisuals[nodeId]._textSize = textSize;
 
         // Text Color
-        newNodeVisuals[nodeId]._textColor = textColor;
+        if(!_->_mappedNodeVisuals[nodeId]._textColor.isValid())
+            newNodeVisuals[nodeId]._textColor = textColor;
+        else
+            newNodeVisuals[nodeId]._textColor = _->_mappedNodeVisuals[nodeId]._textColor;
 
         auto nodeIsSelected = u::contains(_->_selectedNodeIds, nodeId);
 
@@ -1259,7 +1264,10 @@ void GraphModel::updateVisuals(bool force)
             newEdgeVisuals[edgeId]._textSize = textSize;
 
         // Text Color
-        newEdgeVisuals[edgeId]._textColor = textColor;
+        if(!_->_mappedEdgeVisuals[edgeId]._textColor.isValid())
+            newEdgeVisuals[edgeId]._textColor = textColor;
+        else
+            newEdgeVisuals[edgeId]._textColor = _->_mappedEdgeVisuals[edgeId]._textColor;
     }
 
     auto findChange = [](const auto& elementIds, const auto& previous, const auto& current)
@@ -1287,6 +1295,12 @@ void GraphModel::updateVisuals(bool force)
             {
                 change.set(previous[elementId]._text != current[elementId]._text ?
                     VisualChangeFlags::Text : VisualChangeFlags::None);
+            }
+
+            if(!change.test(VisualChangeFlags::TextColor))
+            {
+                change.set(previous[elementId]._textColor != current[elementId]._textColor ?
+                    VisualChangeFlags::TextColor : VisualChangeFlags::None);
             }
 
             if(!change.test(VisualChangeFlags::TextSize))
