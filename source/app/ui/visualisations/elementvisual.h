@@ -34,6 +34,7 @@ struct ElementVisual : IElementVisual
     QColor outerColor() const override { return _outerColor; }
     QColor innerColor() const override { return _innerColor; }
     QString text() const override { return _text; }
+    float textSize() const override { return _textSize; }
     Flags<VisualFlags> state() const override { return _state; }
 };
 

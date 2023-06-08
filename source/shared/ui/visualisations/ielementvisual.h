@@ -44,6 +44,7 @@ struct IElementVisual
     virtual QColor outerColor() const = 0;
     virtual QColor innerColor() const = 0;
     virtual QString text() const = 0;
+    virtual float textSize() const = 0;
     virtual Flags<VisualFlags> state() const = 0;
 };
 
