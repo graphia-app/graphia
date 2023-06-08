@@ -58,6 +58,7 @@
 #include "ui/visualisations/colorvisualisationchannel.h"
 #include "ui/visualisations/sizevisualisationchannel.h"
 #include "ui/visualisations/textvisualisationchannel.h"
+#include "ui/visualisations/textsizevisualisationchannel.h"
 #include "ui/visualisations/visualisationconfigparser.h"
 #include "ui/visualisations/visualisationbuilder.h"
 #include "ui/visualisations/visualisationinfo.h"
@@ -338,6 +339,7 @@ GraphModel::GraphModel(const QString& name, IPlugin* plugin) :
     _->_visualisationChannels.emplace(tr("Colour"), std::make_unique<ColorVisualisationChannel>());
     _->_visualisationChannels.emplace(tr("Size"), std::make_unique<SizeVisualisationChannel>());
     _->_visualisationChannels.emplace(tr("Text"), std::make_unique<TextVisualisationChannel>());
+    _->_visualisationChannels.emplace(tr("Text Size"), std::make_unique<TextSizeVisualisationChannel>());
 }
 
 GraphModel::~GraphModel() // NOLINT
@@ -1113,6 +1115,14 @@ static float mappedSize(float min, float max, float user, float mapped)
     return min + (out * (max - min));
 }
 
+static float mappedTextSize(float user, float mapped)
+{
+    auto value = user * mapped;
+    return value < 0.5f ?
+        u::interpolate(LimitConstants::minimumTextSize(), 1.0f, value / 0.5f) :
+        u::interpolate(1.0f, LimitConstants::maximumTextSize(), (value - 0.5f) / 0.5f);
+}
+
 // NOLINTNEXTLIME readability-make-member-function-const
 void GraphModel::updateVisuals(bool force)
 {
@@ -1135,9 +1145,7 @@ void GraphModel::updateVisuals(bool force)
     auto multiColor     = u::pref(u"visuals/multiElementColor"_s).value<QColor>();
     auto nodeSize       = u::interpolate(LimitConstants::minimumNodeSize(), LimitConstants::maximumNodeSize(), _->_nodeSize);
     auto edgeSize       = u::interpolate(LimitConstants::minimumEdgeSize(), LimitConstants::maximumEdgeSize(), _->_edgeSize);
-    auto textSize       = _->_textSize < 0.5f ?
-        u::interpolate(LimitConstants::minimumTextSize(), 1.0f, _->_textSize / 0.5f) :
-        u::interpolate(1.0f, LimitConstants::maximumTextSize(), (_->_textSize - 0.5f) / 0.5f);
+    auto textSize       = mappedTextSize(_->_textSize, 1.0f);
     auto meIndicators   = u::pref(u"visuals/showMultiElementIndicators"_s).toBool();
 
     auto newNodeVisuals = _->_nodeVisuals;
@@ -1175,7 +1183,11 @@ void GraphModel::updateVisuals(bool force)
         else
             newNodeVisuals[nodeId]._text = nodeName(nodeId);
 
-        newNodeVisuals[nodeId]._textSize = textSize;
+        // Text Size
+        if(_->_mappedNodeVisuals[nodeId]._textSize >= 0.0f)
+            newNodeVisuals[nodeId]._textSize = mappedTextSize(_->_textSize, _->_mappedNodeVisuals[nodeId]._textSize);
+        else
+            newNodeVisuals[nodeId]._textSize = textSize;
 
         auto nodeIsSelected = u::contains(_->_selectedNodeIds, nodeId);
 
@@ -1235,7 +1247,11 @@ void GraphModel::updateVisuals(bool force)
         else
             newEdgeVisuals[edgeId]._text.clear();
 
-        newEdgeVisuals[edgeId]._textSize = textSize;
+        // Text Size
+        if(_->_mappedEdgeVisuals[edgeId]._textSize >= 0.0f)
+            newEdgeVisuals[edgeId]._textSize = mappedTextSize(_->_textSize, _->_mappedEdgeVisuals[edgeId]._textSize);
+        else
+            newEdgeVisuals[edgeId]._textSize = textSize;
     }
 
     auto findChange = [](const auto& elementIds, const auto& previous, const auto& current)

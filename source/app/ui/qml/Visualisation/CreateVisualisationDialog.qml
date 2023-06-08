@@ -244,6 +244,15 @@ Window
 
                     NamedIcon
                     {
+                        id: textSizeIcon
+                        width: channelIndicator._elementSize
+                        height: channelIndicator._elementSize
+
+                        iconName: "text-size"
+                    }
+
+                    NamedIcon
+                    {
                         id: textIcon
                         width: channelIndicator._elementSize
                         height: channelIndicator._elementSize
@@ -270,6 +279,7 @@ Window
                         let colourSelected = channelList.selectedValues.indexOf(qsTr("Colour")) >= 0;
                         let sizeSelected = channelList.selectedValues.indexOf(qsTr("Size")) >= 0;
                         let textSelected = channelList.selectedValues.indexOf(qsTr("Text")) >= 0;
+                        let textSizeSelected = channelList.selectedValues.indexOf(qsTr("Text Size")) >= 0;
 
                         if(colourSelected)
                         {
@@ -286,6 +296,7 @@ Window
                         }
 
                         textIcon.visible = textSelected;
+                        textSizeIcon.visible = textSizeSelected;
                     }
                 }
 

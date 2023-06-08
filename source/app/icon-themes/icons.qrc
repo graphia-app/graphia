@@ -139,6 +139,9 @@
 		<file>Tango/16x16/actions/tab-new.png</file>
 		<file>Tango/22x22/actions/tab-new.png</file>
 		<file>Tango/32x32/actions/tab-new.png</file>
+		<file>Tango/16x16/graphia/text-size.png</file>
+		<file>Tango/22x22/graphia/text-size.png</file>
+		<file>Tango/32x32/graphia/text-size.png</file>
 		<file>Tango/16x16/mimetypes/text-x-generic.png</file>
 		<file>Tango/22x22/mimetypes/text-x-generic.png</file>
 		<file>Tango/32x32/mimetypes/text-x-generic.png</file>

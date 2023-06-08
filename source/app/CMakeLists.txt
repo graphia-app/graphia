@@ -151,6 +151,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/elementvisual.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/sizevisualisationchannel.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/textvisualisationchannel.h
+    ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/textsizevisualisationchannel.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationbuilder.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationchannel.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationconfig.h
@@ -272,6 +273,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/colorvisualisationchannel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/sizevisualisationchannel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/textvisualisationchannel.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/textsizevisualisationchannel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationchannel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationconfig.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationconfigparser.cpp
