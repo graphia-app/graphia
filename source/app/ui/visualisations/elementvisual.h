@@ -28,6 +28,7 @@ struct ElementVisual : IElementVisual
     QColor _innerColor;
     QString _text;
     float _textSize = -1.0f;
+    QColor _textColor;
     Flags<VisualFlags> _state = VisualFlags::None;
 
     float size() const override { return _size; }
@@ -35,6 +36,7 @@ struct ElementVisual : IElementVisual
     QColor innerColor() const override { return _innerColor; }
     QString text() const override { return _text; }
     float textSize() const override { return _textSize; }
+    QColor textColor() const override { return _textColor; }
     Flags<VisualFlags> state() const override { return _state; }
 };
 

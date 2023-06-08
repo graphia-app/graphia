@@ -24,6 +24,7 @@
 #include "compute/sdfcomputejob.h"
 
 #include "app/preferences.h"
+#include "app/layout/nodepositions.h"
 
 #include "shared/utils/doasyncthen.h"
 
@@ -32,7 +33,6 @@
 
 #include "ui/graphcomponentinteractor.h"
 #include "ui/graphoverviewinteractor.h"
-#include "ui/document.h"
 #include "ui/graphquickitem.h"
 #include "ui/selectionmanager.h"
 #include "ui/visualisations/elementvisual.h"
@@ -247,7 +247,6 @@ void GraphRenderer::updateGPUDataIfRequired()
 
     const float textScale = u::pref(u"visuals/textSize"_s).toFloat();
     auto textAlignment = normaliseQmlEnum<TextAlignment>(u::pref(u"visuals/textAlignment"_s).toInt());
-    auto textColor = Document::contrastingColorForBackground();
     auto showNodeText = normaliseQmlEnum<TextState>(u::pref(u"visuals/showNodeText"_s).toInt());
     auto showEdgeText = normaliseQmlEnum<TextState>(u::pref(u"visuals/showEdgeText"_s).toInt());
     auto edgeVisualType = normaliseQmlEnum<EdgeVisualType>(u::pref(u"visuals/edgeVisualType"_s).toInt());
@@ -308,7 +307,8 @@ void GraphRenderer::updateGPUDataIfRequired()
                 if(showNodeText == TextState::Focused && componentRenderer->focusNodeId() != nodeId)
                     continue;
 
-                createGPUGlyphData(nodeVisual._text, textColor, textAlignment,
+                createGPUGlyphData(nodeVisual._text,
+                    nodeVisual._textColor, textAlignment,
                     textScale * nodeVisual._textSize,
                     nodeVisual._size, nodePosition, componentIndex,
                     gpuGraphDataForOverlay(componentRenderer->alpha()));
@@ -388,7 +388,8 @@ void GraphRenderer::updateGPUDataIfRequired()
                     continue;
 
                 const QVector3D midPoint = (sourcePosition + targetPosition) * 0.5f;
-                createGPUGlyphData(edgeVisual._text, textColor, textAlignment,
+                createGPUGlyphData(edgeVisual._text,
+                    edgeVisual._textColor, textAlignment,
                     textScale * edgeVisual._textSize,
                     edgeVisual._size, midPoint, componentIndex,
                     gpuGraphDataForOverlay(componentRenderer->alpha()));

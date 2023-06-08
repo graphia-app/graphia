@@ -26,6 +26,7 @@
 
 #include "layout/nodepositions.h"
 
+#include "ui/document.h"
 #include "ui/selectionmanager.h"
 #include "ui/searchmanager.h"
 
@@ -1146,6 +1147,7 @@ void GraphModel::updateVisuals(bool force)
     auto nodeSize       = u::interpolate(LimitConstants::minimumNodeSize(), LimitConstants::maximumNodeSize(), _->_nodeSize);
     auto edgeSize       = u::interpolate(LimitConstants::minimumEdgeSize(), LimitConstants::maximumEdgeSize(), _->_edgeSize);
     auto textSize       = mappedTextSize(_->_textSize, 1.0f);
+    auto textColor      = Document::contrastingColorForBackground();
     auto meIndicators   = u::pref(u"visuals/showMultiElementIndicators"_s).toBool();
 
     auto newNodeVisuals = _->_nodeVisuals;
@@ -1188,6 +1190,9 @@ void GraphModel::updateVisuals(bool force)
             newNodeVisuals[nodeId]._textSize = mappedTextSize(_->_textSize, _->_mappedNodeVisuals[nodeId]._textSize);
         else
             newNodeVisuals[nodeId]._textSize = textSize;
+
+        // Text Color
+        newNodeVisuals[nodeId]._textColor = textColor;
 
         auto nodeIsSelected = u::contains(_->_selectedNodeIds, nodeId);
 
@@ -1252,6 +1257,9 @@ void GraphModel::updateVisuals(bool force)
             newEdgeVisuals[edgeId]._textSize = mappedTextSize(_->_textSize, _->_mappedEdgeVisuals[edgeId]._textSize);
         else
             newEdgeVisuals[edgeId]._textSize = textSize;
+
+        // Text Color
+        newEdgeVisuals[edgeId]._textColor = textColor;
     }
 
     auto findChange = [](const auto& elementIds, const auto& previous, const auto& current)
