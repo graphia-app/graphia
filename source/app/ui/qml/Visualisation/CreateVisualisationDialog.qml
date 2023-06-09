@@ -130,9 +130,9 @@ Window
 
             Label
             {
-                visible: !descriptionLayout.visible
-                Layout.minimumWidth: descriptionLayout.Layout.minimumWidth
-                Layout.maximumWidth: descriptionLayout.Layout.maximumWidth
+                visible: !descriptionItem.visible
+                Layout.minimumWidth: descriptionItem.Layout.minimumWidth
+                Layout.maximumWidth: descriptionItem.Layout.maximumWidth
                 Layout.fillHeight: true
 
                 horizontalAlignment: Qt.AlignCenter
@@ -144,174 +144,212 @@ Window
                 text: qsTr("Select an Attribute and Channel")
             }
 
-            ColumnLayout
+            Item
             {
-                id: descriptionLayout
-
-                Layout.minimumWidth: 250
-                Layout.maximumWidth: 250
+                id: descriptionItem
 
                 visible: description.text.length > 0
 
-                Text
+                Layout.minimumWidth: 250
+                Layout.maximumWidth: 250
+                Layout.fillHeight: true
+
+                ScrollView
                 {
-                    id: description
+                    id: scrollView
 
-                    Layout.fillWidth: true
+                    anchors.fill: parent
 
-                    textFormat: Text.StyledText
-                    wrapMode: Text.WordWrap
+                    property bool needsFrame: contentHeight > availableHeight
 
-                    PointingCursorOnHoverLink {}
-                    onLinkActivated: function(link) { Qt.openUrlExternally(link); }
-
-                    function update()
+                    Component.onCompleted:
                     {
-                        text = "";
+                        // contentItem is the Flickable; only clip when required
+                        contentItem.clip = Qt.binding(() => scrollView.needsFrame);
 
-                        if(attributeList.selectedValue === undefined || !attributeList.currentIndexIsSelectable)
-                            return;
+                        // Make the scrolling behaviour more desktop-y
+                        contentItem.boundsBehavior = Flickable.StopAtBounds;
+                        contentItem.flickableDirection = Flickable.VerticalFlick;
+                    }
 
-                        let attribute = document.attribute(attributeList.selectedValue);
+                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                    ScrollBar.vertical.policy: ScrollBar.AsNeeded
 
-                        if(attribute.description === undefined)
-                            return;
+                    readonly property real scrollBarWidth:
+                        ScrollBar.vertical.size < 1 ? ScrollBar.vertical.width : 0
 
-                        text += attribute.description;
+                    ColumnLayout
+                    {
+                        width: scrollView.width - scrollView.scrollBarWidth
 
-                        if(channelList.selectedValues === undefined || channelList.selectedValues.length === 0)
-                            return;
-
-                        let visualisationDescriptions = document.visualisationDescription(
-                            attributeList.selectedValue, channelList.selectedValues);
-
-                        visualisationDescriptions.forEach(function(visualisationDescription)
+                        Text
                         {
-                            text += "<br><br>" + visualisationDescription;
-                        });
+                            id: description
+
+                            Layout.fillWidth: true
+                            Layout.margins: scrollView.needsFrame ? Constants.margin : 0
+
+                            textFormat: Text.StyledText
+                            wrapMode: Text.WordWrap
+
+                            PointingCursorOnHoverLink {}
+                            onLinkActivated: function(link) { Qt.openUrlExternally(link); }
+
+                            function update()
+                            {
+                                text = "";
+
+                                if(attributeList.selectedValue === undefined || !attributeList.currentIndexIsSelectable)
+                                    return;
+
+                                let attribute = document.attribute(attributeList.selectedValue);
+
+                                if(attribute.description === undefined)
+                                    return;
+
+                                text += attribute.description;
+
+                                if(channelList.selectedValues === undefined || channelList.selectedValues.length === 0)
+                                    return;
+
+                                let visualisationDescriptions = document.visualisationDescription(
+                                    attributeList.selectedValue, channelList.selectedValues);
+
+                                visualisationDescriptions.forEach(function(visualisationDescription)
+                                {
+                                    text += "<br><br>" + visualisationDescription;
+                                });
+                            }
+                        }
+
+                        RowLayout
+                        {
+                            id: channelIndicator
+
+                            readonly property int _elementSize: 24
+
+                            Layout.fillWidth: true
+
+                            GradientKey
+                            {
+                                id: gradientKey
+
+                                Layout.fillWidth: true
+                                keyHeight: channelIndicator._elementSize
+
+                                configuration: visuals.defaultGradient
+                                showLabels: false
+                                hoverEnabled: false
+                            }
+
+                            PaletteKey
+                            {
+                                id: paletteKey
+
+                                Layout.fillWidth: true
+                                keyHeight: channelIndicator._elementSize
+
+                                configuration: visuals.defaultPalette
+                                separateKeys: false
+                                hoverEnabled: false
+                            }
+
+                            NamedIcon
+                            {
+                                id: nodeSizeIcon
+                                width: channelIndicator._elementSize
+                                height: channelIndicator._elementSize
+
+                                iconName: "node-size"
+                            }
+
+                            NamedIcon
+                            {
+                                id: edgeSizeIcon
+                                width: channelIndicator._elementSize
+                                height: channelIndicator._elementSize
+
+                                iconName: "edge-size"
+                            }
+
+                            NamedIcon
+                            {
+                                id: textSizeIcon
+                                width: channelIndicator._elementSize
+                                height: channelIndicator._elementSize
+
+                                iconName: "text-size"
+                            }
+
+                            NamedIcon
+                            {
+                                id: textColorIcon
+                                width: channelIndicator._elementSize
+                                height: channelIndicator._elementSize
+
+                                iconName: "text-color"
+                            }
+
+                            NamedIcon
+                            {
+                                id: textIcon
+                                width: channelIndicator._elementSize
+                                height: channelIndicator._elementSize
+
+                                iconName: "format-text-bold"
+                            }
+
+                            Item { Layout.fillWidth: !gradientKey.visible && !paletteKey.visible }
+
+                            function update()
+                            {
+                                gradientKey.visible =
+                                    paletteKey.visible =
+                                    nodeSizeIcon.visible =
+                                    edgeSizeIcon.visible =
+                                    textIcon.visible =
+                                    false;
+
+                                if(attributeList.selectedValue === undefined || !attributeList.currentIndexIsSelectable)
+                                    return;
+
+                                let attribute = document.attribute(attributeList.selectedValue);
+
+                                let colourSelected = channelList.selectedValues.indexOf(qsTr("Colour")) >= 0;
+                                let sizeSelected = channelList.selectedValues.indexOf(qsTr("Size")) >= 0;
+                                let textSelected = channelList.selectedValues.indexOf(qsTr("Text")) >= 0;
+                                let textColourSelected = channelList.selectedValues.indexOf(qsTr("Text Colour")) >= 0;
+                                let textSizeSelected = channelList.selectedValues.indexOf(qsTr("Text Size")) >= 0;
+
+                                if(colourSelected)
+                                {
+                                    if(attribute.valueType === ValueType.Float || attribute.valueType === ValueType.Int)
+                                        gradientKey.visible = true;
+                                    else
+                                        paletteKey.visible = true;
+                                }
+
+                                if(sizeSelected)
+                                {
+                                    nodeSizeIcon.visible = (attribute.elementType === ElementType.Node);
+                                    edgeSizeIcon.visible = (attribute.elementType === ElementType.Edge);
+                                }
+
+                                textIcon.visible = textSelected;
+                                textColorIcon.visible = textColourSelected;
+                                textSizeIcon.visible = textSizeSelected;
+                            }
+                        }
+
+                        Item { Layout.fillHeight: true }
                     }
                 }
 
-                RowLayout
+                Outline
                 {
-                    id: channelIndicator
-
-                    readonly property int _elementSize: 24
-
-                    Layout.fillWidth: true
-
-                    GradientKey
-                    {
-                        id: gradientKey
-
-                        Layout.fillWidth: true
-                        keyHeight: channelIndicator._elementSize
-
-                        configuration: visuals.defaultGradient
-                        showLabels: false
-                        hoverEnabled: false
-                    }
-
-                    PaletteKey
-                    {
-                        id: paletteKey
-
-                        Layout.fillWidth: true
-                        keyHeight: channelIndicator._elementSize
-
-                        configuration: visuals.defaultPalette
-                        separateKeys: false
-                        hoverEnabled: false
-                    }
-
-                    NamedIcon
-                    {
-                        id: nodeSizeIcon
-                        width: channelIndicator._elementSize
-                        height: channelIndicator._elementSize
-
-                        iconName: "node-size"
-                    }
-
-                    NamedIcon
-                    {
-                        id: edgeSizeIcon
-                        width: channelIndicator._elementSize
-                        height: channelIndicator._elementSize
-
-                        iconName: "edge-size"
-                    }
-
-                    NamedIcon
-                    {
-                        id: textSizeIcon
-                        width: channelIndicator._elementSize
-                        height: channelIndicator._elementSize
-
-                        iconName: "text-size"
-                    }
-
-                    NamedIcon
-                    {
-                        id: textColorIcon
-                        width: channelIndicator._elementSize
-                        height: channelIndicator._elementSize
-
-                        iconName: "text-color"
-                    }
-
-                    NamedIcon
-                    {
-                        id: textIcon
-                        width: channelIndicator._elementSize
-                        height: channelIndicator._elementSize
-
-                        iconName: "format-text-bold"
-                    }
-
-                    Item { Layout.fillWidth: !gradientKey.visible && !paletteKey.visible }
-
-                    function update()
-                    {
-                        gradientKey.visible =
-                            paletteKey.visible =
-                            nodeSizeIcon.visible =
-                            edgeSizeIcon.visible =
-                            textIcon.visible =
-                            false;
-
-                        if(attributeList.selectedValue === undefined || !attributeList.currentIndexIsSelectable)
-                            return;
-
-                        let attribute = document.attribute(attributeList.selectedValue);
-
-                        let colourSelected = channelList.selectedValues.indexOf(qsTr("Colour")) >= 0;
-                        let sizeSelected = channelList.selectedValues.indexOf(qsTr("Size")) >= 0;
-                        let textSelected = channelList.selectedValues.indexOf(qsTr("Text")) >= 0;
-                        let textColourSelected = channelList.selectedValues.indexOf(qsTr("Text Colour")) >= 0;
-                        let textSizeSelected = channelList.selectedValues.indexOf(qsTr("Text Size")) >= 0;
-
-                        if(colourSelected)
-                        {
-                            if(attribute.valueType === ValueType.Float || attribute.valueType === ValueType.Int)
-                                gradientKey.visible = true;
-                            else
-                                paletteKey.visible = true;
-                        }
-
-                        if(sizeSelected)
-                        {
-                            nodeSizeIcon.visible = (attribute.elementType === ElementType.Node);
-                            edgeSizeIcon.visible = (attribute.elementType === ElementType.Edge);
-                        }
-
-                        textIcon.visible = textSelected;
-                        textColorIcon.visible = textColourSelected;
-                        textSizeIcon.visible = textSizeSelected;
-                    }
+                    anchors.fill: parent
+                    outlineVisible: scrollView.needsFrame
                 }
-
-                Item { Layout.fillHeight: true }
             }
         }
 
