@@ -44,7 +44,7 @@ QString TextColorVisualisationChannel::description(ElementType elementType, Valu
     case ValueType::Int:
     case ValueType::Float:
         return QString(QObject::tr("The attribute will be visualised by "
-            "continuously varying the colour of the %1 text"
+            "continuously varying the colour of the %1 text "
             "using a gradient.")).arg(elementTypeString);
 
     case ValueType::String:
