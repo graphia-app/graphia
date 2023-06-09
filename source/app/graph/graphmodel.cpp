@@ -816,7 +816,7 @@ QStringList GraphModel::visualisationDescription(const QString& attributeName, c
 {
     QStringList descriptions;
 
-    if(!u::contains(_->_attributes, attributeName))
+    if(!attributeExists(attributeName))
         return descriptions;
 
     for(const auto& channelName : channelNames)
