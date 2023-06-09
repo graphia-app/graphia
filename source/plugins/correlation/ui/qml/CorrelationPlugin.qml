@@ -739,7 +739,7 @@ PluginContent
             {
                 savePlotImageAction.showSaveImageDialog(function(filename, extension)
                 {
-                    plot.savePlotImageByRow(filename, extension)
+                    plot.savePlotImageByRow(filename, extension);
                 });
             });
 
@@ -754,7 +754,7 @@ PluginContent
                     {
                         savePlotImageAction.showSaveImageDialog(function(filename, extension)
                         {
-                            plot.savePlotImageByAttribute(filename, extension, attributeName)
+                            plot.savePlotImageByAttribute(filename, extension, attributeName);
                         });
                     });
                 });
