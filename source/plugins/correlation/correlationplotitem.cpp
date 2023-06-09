@@ -1737,10 +1737,12 @@ void CorrelationPlotItem::savePlotImage(const QString& filename)
 {
     QFileInfo fileInfo(filename);
 
-    if(fileInfo.completeSuffix() == QStringLiteral("png"))
+    if(fileInfo.suffix() == QStringLiteral("png"))
         _customPlot.savePng(filename);
-    else if(fileInfo.completeSuffix() == QStringLiteral("pdf"))
+    else if(fileInfo.suffix() == QStringLiteral("pdf"))
         _customPlot.savePdf(filename);
-    else if(fileInfo.completeSuffix() == QStringLiteral("jpg"))
+    else if(fileInfo.suffix() == QStringLiteral("jpg"))
         _customPlot.saveJpg(filename);
+    else
+        qDebug() << "CorrelationPlotItem::savePlotImage unknown suffix:" << fileInfo.suffix();
 }

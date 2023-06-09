@@ -80,17 +80,23 @@ CorrelationPlotSaveImageCommand::CorrelationPlotSaveImageCommand(
         QString filename;
         QUrl target;
 
+        const QFileInfo fileInfo(_baseFilename);
+        QString extensionlessBaseFilename =
+            QString::compare(fileInfo.suffix(), _extension, Qt::CaseInsensitive) == 0 ?
+            fileInfo.completeBaseName() : fileInfo.fileName();
+
         if(!image._label.isEmpty())
         {
-            QFileInfo fileInfo(_baseFilename);
             filename = QStringLiteral("%1/%2-%3.%4")
-                .arg(fileInfo.dir().path(), fileInfo.baseName(),
-                image._label, fileInfo.completeSuffix());
+                .arg(fileInfo.absolutePath(), extensionlessBaseFilename,
+                image._label, _extension);
             target = QUrl::fromLocalFile(fileInfo.dir().path());
         }
         else
         {
-            filename = _baseFilename;
+            filename = QStringLiteral("%1/%2.%3")
+                .arg(fileInfo.absolutePath(), extensionlessBaseFilename,
+                _extension);
             target = QUrl::fromLocalFile(filename);
         }
 
