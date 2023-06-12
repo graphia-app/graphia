@@ -149,6 +149,15 @@ Window
 
         property bool _performedAtLeastOnce: false
 
+        function startIfNotPerformed()
+        {
+            if(!keyAttributeList.selectedValue && keyHeaderComboBox.enabled &&
+                !importAttributesKeyDetection._performedAtLeastOnce)
+            {
+                importAttributesKeyDetection.start();
+            }
+        }
+
         onResultChanged:
         {
             if(result.attributeName === undefined || result.column === undefined)
@@ -301,7 +310,7 @@ Window
 
                 RowLayout
                 {
-                    enabled: !importAttributesKeyDetection.busy
+                    enabled: !importAttributesKeyDetection.busy && keyHeaderComboBox.enabled
 
                     Layout.alignment: Qt.AlignHCenter
                     Layout.topMargin: Constants.spacing * 2
@@ -341,8 +350,8 @@ Window
 
             onActiveChanged:
             {
-                if(active && !keyAttributeList.selectedValue && !importAttributesKeyDetection._performedAtLeastOnce)
-                    importAttributesKeyDetection.start();
+                if(active)
+                    importAttributesKeyDetection.startIfNotPerformed();
             }
 
             RowLayout
@@ -449,8 +458,8 @@ Window
 
             onActiveChanged:
             {
-                if(active && !keyAttributeList.selectedValue && !importAttributesKeyDetection._performedAtLeastOnce)
-                    importAttributesKeyDetection.start();
+                if(active)
+                    importAttributesKeyDetection.startIfNotPerformed();
             }
 
             ColumnLayout
