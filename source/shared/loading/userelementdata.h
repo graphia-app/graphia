@@ -82,9 +82,15 @@ public:
         return {};
     }
 
+    // The order this returns the names in is important; it should match the input file
     std::vector<QString> exposedAttributeNames() const override
     {
-        return u::keysFor(_inverseExposedAsAttributes);
+        auto attributeNames = vectorNames();
+
+        std::transform(attributeNames.begin(), attributeNames.end(), attributeNames.begin(),
+            [this](const auto& vectorName) { return _exposedAsAttributes.at(vectorName); });
+
+        return attributeNames;
     }
 
     void setElementIdForIndex(E elementId, size_t index) override
