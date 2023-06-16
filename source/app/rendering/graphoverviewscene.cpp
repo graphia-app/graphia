@@ -301,8 +301,11 @@ void GraphOverviewScene::updateZoomedComponentLayoutData()
         _zoomedComponentLayoutData[componentId] = zoomedLayoutData(_componentLayoutData[componentId]);
 }
 
-void GraphOverviewScene::applyComponentLayout()
+void GraphOverviewScene::setViewportSize(int width, int height)
 {
+    _width = width;
+    _height = height;
+
     if(_nextComponentLayoutDataChanged.exchange(false))
         _componentLayoutData = _nextComponentLayoutData;
 
@@ -331,14 +334,6 @@ void GraphOverviewScene::applyComponentLayout()
             _componentAlpha[merger] = _componentAlpha[newComponentId];
         }
     }
-}
-
-void GraphOverviewScene::setViewportSize(int width, int height)
-{
-    _width = width;
-    _height = height;
-
-    applyComponentLayout();
 
     for(auto componentId : _componentIds)
     {

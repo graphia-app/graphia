@@ -110,7 +110,6 @@ private:
     std::unique_ptr<ComponentLayout> _componentLayout;
 
     void updateZoomedComponentLayoutData();
-    void applyComponentLayout();
 
     std::vector<ComponentId> _removedComponentIds;
     std::vector<ComponentMergeSet> _componentMergeSets;
