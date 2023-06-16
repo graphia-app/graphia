@@ -76,6 +76,8 @@ public:
     void pan(float dx, float dy);
     void zoom(float delta, float x, float y, bool doTransition);
 
+    void zoomTo(const std::vector<ComponentId>& componentIds, bool doTransition = true);
+
     Transition& startTransitionFromComponentMode(ComponentId componentModeComponentId,
         float duration = 0.3f, Transition::Type transitionType = Transition::Type::EaseInEaseOut);
     Transition& startTransitionToComponentMode(ComponentId componentModeComponentId,

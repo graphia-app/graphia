@@ -197,6 +197,23 @@ void GraphOverviewScene::zoom(float delta, float x, float y, bool doTransition)
     setOffset(static_cast<float>(_offset.x()) - (oldCentreX - newCentreX),
         static_cast<float>(_offset.y()) - (oldCentreY - newCentreY));
 
+    if(doTransition)
+        startZoomTransition();
+    else
+        updateZoomedComponentLayoutData();
+}
+
+void GraphOverviewScene::zoomTo(const std::vector<ComponentId>& componentIds, bool doTransition)
+{
+    auto zoomedBoundingBox = _componentLayout->boundingBoxFor(componentIds, _componentLayoutData);
+    auto componentsZoomFactor = zoomFactorFor(static_cast<float>(_width), static_cast<float>(_height),
+        static_cast<float>(zoomedBoundingBox.width()), static_cast<float>(zoomedBoundingBox.height()));
+
+    bool zoomFactorChanged = setZoomFactor(componentsZoomFactor);
+    bool offsetChanged = setOffsetForBoundingBox(zoomedBoundingBox);
+
+    if(!zoomFactorChanged && !offsetChanged)
+        return;
 
     if(doTransition)
         startZoomTransition();
