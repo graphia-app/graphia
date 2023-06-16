@@ -93,7 +93,6 @@ private:
 
     float _zoomFactor = 1.0f; // Multiply by raw layout data to get screen coords
     Transition _zoomTransition;
-    bool _autoZooming = true;
     QPointF _offset;
 
     std::atomic_bool _renderersRequireReset = false;
@@ -122,7 +121,10 @@ private:
 
     float minZoomFactor() const;
     bool setZoomFactor(float zoomFactor);
-    void setOffset(float x, float y);
+    QPointF defaultOffset() const;
+    bool setOffset(QPointF offset);
+    bool setOffset(float x, float y);
+    bool setOffsetForBoundingBox(const QRectF& boundingBox);
 
     void setVisible(bool visible);
 

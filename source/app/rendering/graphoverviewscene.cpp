@@ -153,7 +153,7 @@ void GraphOverviewScene::onHide()
 void GraphOverviewScene::resetView(bool doTransition)
 {
     setZoomFactor(minZoomFactor());
-    setOffset(0.0f, 0.0f);
+    setOffset(defaultOffset());
 
     if(doTransition)
         startZoomTransition();
@@ -163,7 +163,7 @@ void GraphOverviewScene::resetView(bool doTransition)
 
 bool GraphOverviewScene::viewIsReset() const
 {
-    return _autoZooming;
+    return _zoomFactor == minZoomFactor() && _offset == defaultOffset();
 }
 
 void GraphOverviewScene::pan(float dx, float dy)
@@ -171,8 +171,8 @@ void GraphOverviewScene::pan(float dx, float dy)
     const float scaledDx = dx / (_zoomFactor);
     const float scaledDy = dy / (_zoomFactor);
 
-    setOffset(static_cast<float>(_offset.x()) - scaledDx,
-              static_cast<float>(_offset.y()) - scaledDy);
+    setOffset(static_cast<float>(_offset.x()) + scaledDx,
+              static_cast<float>(_offset.y()) + scaledDy);
 
     updateZoomedComponentLayoutData();
 }
@@ -185,11 +185,17 @@ void GraphOverviewScene::zoom(float delta, float x, float y, bool doTransition)
     if(!setZoomFactor(_zoomFactor + (delta * _zoomFactor)))
         return;
 
+    if(_zoomFactor == minZoomFactor())
+    {
+        resetView(doTransition);
+        return;
+    }
+
     const float newCentreX = x / _zoomFactor;
     const float newCentreY = y / _zoomFactor;
 
-    setOffset(static_cast<float>(_offset.x()) + (oldCentreX - newCentreX),
-              static_cast<float>(_offset.y()) + (oldCentreY - newCentreY));
+    setOffset(static_cast<float>(_offset.x()) - (oldCentreX - newCentreX),
+        static_cast<float>(_offset.y()) - (oldCentreY - newCentreY));
 
 
     if(doTransition)
@@ -202,7 +208,7 @@ Circle GraphOverviewScene::zoomedLayoutData(const Circle& data) const
 {
     Circle newData(data);
 
-    newData.translate(-_offset);
+    newData.translate(_offset);
     newData.scale(_zoomFactor);
 
     return newData;
@@ -219,36 +225,47 @@ bool GraphOverviewScene::setZoomFactor(float zoomFactor)
     zoomFactor = std::max(minZoomFactor(), zoomFactor);
     const bool changed = _zoomFactor != zoomFactor;
     _zoomFactor = zoomFactor;
-    _autoZooming = (_zoomFactor == minZoomFactor());
 
     return changed;
 }
 
-void GraphOverviewScene::setOffset(float x, float y)
+QPointF GraphOverviewScene::defaultOffset() const
 {
-    const float scaledBoundingWidth = _componentLayout->boundingWidth() * _zoomFactor;
-    const float scaledBoundingHeight = _componentLayout->boundingHeight() * _zoomFactor;
+    return offsetFor(static_cast<float>(_width), static_cast<float>(_height), {0.0, 0.0,
+        static_cast<double>(_componentLayout->boundingWidth()),
+        static_cast<double>(_componentLayout->boundingHeight())}, _zoomFactor);
+}
 
-    const float xDiff = (scaledBoundingWidth - static_cast<float>(_width)) / _zoomFactor;
-    const float xMin = std::min(xDiff, 0.0f);
-    const float xMax = std::max(xDiff, 0.0f);
+bool GraphOverviewScene::setOffset(QPointF offset)
+{
+    const auto scaledHalfSceneWidth = (static_cast<double>(_width) * 0.5) / static_cast<double>(_zoomFactor);
+    const auto scaledHalfSceneHeight = (static_cast<double>(_height) * 0.5) / static_cast<double>(_zoomFactor);
 
-    if(scaledBoundingWidth > static_cast<float>(_width))
-        x = std::clamp(x, xMin, xMax);
-    else
-        x = (xMin + xMax) * 0.5f;
+    const auto xMin = scaledHalfSceneWidth - static_cast<double>(_componentLayout->boundingWidth());
+    const auto xMax = scaledHalfSceneWidth;
+    offset.setX(std::clamp(offset.x(), xMin, xMax));
 
-    const float yDiff = (scaledBoundingHeight - static_cast<float>(_height)) / _zoomFactor;
-    const float yMin = std::min(yDiff, 0.0f);
-    const float yMax = std::max(yDiff, 0.0f);
+    const auto yMin = scaledHalfSceneHeight - static_cast<double>(_componentLayout->boundingHeight());
+    const auto yMax = scaledHalfSceneHeight;
+    offset.setY(std::clamp(offset.y(), yMin, yMax));
 
-    if(scaledBoundingHeight > static_cast<float>(_height))
-        y = std::clamp(y, yMin, yMax);
-    else
-        y = (yMin + yMax) * 0.5f;
+    if(offset != _offset)
+    {
+        _offset = offset;
+        return true;
+    }
 
-    _offset.setX(x);
-    _offset.setY(y);
+    return false;
+}
+
+bool GraphOverviewScene::setOffset(float x, float y)
+{
+    return setOffset({x, y});
+}
+
+bool GraphOverviewScene::setOffsetForBoundingBox(const QRectF& boundingBox)
+{
+    return setOffset(offsetFor(static_cast<float>(_width), static_cast<float>(_height), boundingBox, _zoomFactor));
 }
 
 Transition& GraphOverviewScene::startTransitionFromComponentMode(ComponentId componentModeComponentId,
@@ -319,14 +336,24 @@ void GraphOverviewScene::updateZoomedComponentLayoutData()
 
 void GraphOverviewScene::setViewportSize(int width, int height)
 {
+    bool viewWasReset = viewIsReset();
+
     _width = width;
     _height = height;
 
     if(_nextComponentLayoutDataChanged.exchange(false))
         _componentLayoutData = _nextComponentLayoutData;
 
-    setZoomFactor(_autoZooming ? minZoomFactor() : _zoomFactor);
-    setOffset(static_cast<float>(_offset.x()), static_cast<float>(_offset.y()));
+    if(viewWasReset)
+    {
+        setZoomFactor(minZoomFactor());
+        setOffset(defaultOffset());
+    }
+    else
+    {
+        setZoomFactor(_zoomFactor);
+        setOffset(_offset);
+    }
 
     updateZoomedComponentLayoutData();
 
