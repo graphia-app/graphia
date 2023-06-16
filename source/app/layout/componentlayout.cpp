@@ -37,3 +37,14 @@ void ComponentLayout::execute(const Graph& graph, const std::vector<ComponentId>
 
     _boundingBox.translate(-_boundingBox.x(), -_boundingBox.y());
 }
+
+QRectF ComponentLayout::boundingBoxFor(const std::vector<ComponentId>& componentIds,
+                                       ComponentLayoutData& componentLayoutData) const
+{
+    QRectF boundingBox;
+
+    for(auto componentId : componentIds)
+        boundingBox = boundingBox.united(componentLayoutData[componentId].boundingBox());
+
+    return boundingBox;
+}

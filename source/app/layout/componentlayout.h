@@ -36,6 +36,9 @@ public:
     void execute(const Graph& graph, const std::vector<ComponentId>& componentIds,
         ComponentLayoutData& componentLayoutData);
 
+    QRectF boundingBoxFor(const std::vector<ComponentId>& componentIds,
+        ComponentLayoutData& componentLayoutData) const;
+
     float boundingWidth() const { return static_cast<float>(_boundingBox.width()); }
     float boundingHeight() const { return static_cast<float>(_boundingBox.height()); }
 
