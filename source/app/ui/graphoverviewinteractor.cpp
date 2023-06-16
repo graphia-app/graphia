@@ -73,6 +73,8 @@ void GraphOverviewInteractor::leftDoubleClick()
 
     if(!componentId.isNull())
         _graphRenderer->switchToComponentMode(true, componentId, clickedNodeId());
+    else
+        _scene->resetView();
 }
 
 void GraphOverviewInteractor::wheelMove(float angle, float x, float y)
