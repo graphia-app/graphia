@@ -68,7 +68,7 @@ public:
 
     const ComponentLayoutData& componentLayout() { return _zoomedComponentLayoutData; }
 
-    void resetView(bool doTransition) override;
+    void resetView(bool doTransition = true) override;
     bool viewIsReset() const override;
 
     void setProjection(Projection projection) override;
