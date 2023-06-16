@@ -286,6 +286,7 @@ bool GraphOverviewScene::setOffsetForBoundingBox(const QRectF& boundingBox)
 }
 
 Transition& GraphOverviewScene::startTransitionFromComponentMode(ComponentId componentModeComponentId,
+    const std::vector<ComponentId>& focusComponentIds,
     float duration, Transition::Type transitionType)
 {
     Q_ASSERT(!componentModeComponentId.isNull());
@@ -310,6 +311,9 @@ Transition& GraphOverviewScene::startTransitionFromComponentMode(ComponentId com
         auto* renderer = _graphRenderer->componentRendererForId(componentModeComponentId);
         renderer->freeze();
     }
+
+    if(!focusComponentIds.empty())
+        zoomTo(focusComponentIds, false);
 
     auto& transition = startTransition(duration, transitionType);
 

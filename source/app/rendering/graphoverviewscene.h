@@ -79,6 +79,7 @@ public:
     void zoomTo(const std::vector<ComponentId>& componentIds, bool doTransition = true);
 
     Transition& startTransitionFromComponentMode(ComponentId componentModeComponentId,
+        const std::vector<ComponentId>& focusComponentIds,
         float duration = 0.3f, Transition::Type transitionType = Transition::Type::EaseInEaseOut);
     Transition& startTransitionToComponentMode(ComponentId componentModeComponentId,
         float duration = 0.3f, Transition::Type transitionType = Transition::Type::EaseInEaseOut);

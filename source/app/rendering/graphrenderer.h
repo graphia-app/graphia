@@ -29,6 +29,7 @@
 #include "projection.h"
 #include "shading.h"
 
+#include "shared/graph/elementid_containers.h"
 #include "shared/graph/grapharray.h"
 #include "graph/qmlelementid.h"
 
@@ -131,7 +132,8 @@ public:
     bool viewIsReset() const;
     void setTextColor(QColor textColor);
 
-    void switchToOverviewMode(bool doTransition = true);
+    void switchToOverviewMode(bool doTransition = true,
+        const std::vector<ComponentId>& focusComponentIds = {});
     void switchToComponentMode(bool doTransition = true,
         ComponentId componentId = {}, NodeId nodeId = {}, float radius = -1.0f);
     void rendererStartedTransition();
@@ -277,14 +279,15 @@ private:
 
     void updateScene();
 
-    Mode bestFocusParameters(GraphQuickItem* graphQuickItem, NodeId& focusNodeId, float& radius) const;
+    Mode bestFocusParameters(GraphQuickItem* graphQuickItem, ComponentIdSet& componentIds,
+        NodeId& focusNodeId, float& radius) const;
 
     QOpenGLFramebufferObject* createFramebufferObject(const QSize& size) override;
     void render() override;
     void synchronize(QQuickFramebufferObject* item) override;
 
-    void finishTransitionToOverviewMode(bool doTransition);
-    void finishTransitionToOverviewModeOnRendererThread(bool doTransition);
+    void finishTransitionToOverviewMode(bool doTransition, const std::vector<ComponentId>& focusComponentIds);
+    void finishTransitionToOverviewModeOnRendererThread(bool doTransition, const std::vector<ComponentId>& focusComponentIds);
     void finishTransitionToComponentMode(bool doTransition);
     void finishTransitionToComponentModeOnRendererThread(bool doTransition);
 
@@ -304,6 +307,7 @@ private:
 
     void moveFocusToNode(NodeId nodeId, float radius = -1.0f);
     void moveFocusToComponent(ComponentId componentId);
+    void moveFocusToComponents(const std::vector<ComponentId>& componentIds);
 
     void createGPUGlyphData(const QString& text, const QColor& textColor, const TextAlignment& textAlignment,
                          float textScale, float elementSize, const QVector3D& elementPosition,

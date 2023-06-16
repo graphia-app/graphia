@@ -26,6 +26,7 @@
 #include "app/preferences.h"
 #include "app/layout/nodepositions.h"
 
+#include "shared/utils/container.h"
 #include "shared/utils/doasyncthen.h"
 
 #include "graph/graph.h"
@@ -548,6 +549,12 @@ void GraphRenderer::moveFocusToComponent(ComponentId componentId)
     }
 }
 
+void GraphRenderer::moveFocusToComponents(const std::vector<ComponentId>& componentIds)
+{
+    if(mode() == Mode::Overview)
+        _graphOverviewScene->zoomTo(componentIds);
+}
+
 void GraphRenderer::rendererStartedTransition()
 {
     if(!_transitionPotentiallyInProgress)
@@ -631,11 +638,14 @@ void GraphRenderer::onEdgeMovedBetweenComponents(const Graph*, EdgeId edgeId, Co
     _hiddenEdges.set(edgeId, true);
 }
 
-void GraphRenderer::finishTransitionToOverviewMode(bool doTransition)
+void GraphRenderer::finishTransitionToOverviewMode(bool doTransition,
+    const std::vector<ComponentId>& focusComponentIds)
 {
     setMode(GraphRenderer::Mode::Overview);
     setScene(_graphOverviewScene);
     setInteractor(_graphOverviewInteractor);
+
+    _graphOverviewScene->resetView(false);
 
     if(doTransition)
     {
@@ -647,19 +657,20 @@ void GraphRenderer::finishTransitionToOverviewMode(bool doTransition)
             renderer->resetView();
         }
 
-        _graphOverviewScene->resetView(false);
-        _graphOverviewScene->startTransitionFromComponentMode(_graphComponentScene->componentId());
+        _graphOverviewScene->startTransitionFromComponentMode(
+            _graphComponentScene->componentId(), focusComponentIds);
     }
 
     updateGPUData(When::Later);
 }
 
-void GraphRenderer::finishTransitionToOverviewModeOnRendererThread(bool doTransition)
+void GraphRenderer::finishTransitionToOverviewModeOnRendererThread(bool doTransition,
+    const std::vector<ComponentId>& focusComponentIds)
 {
     setMode(GraphRenderer::Mode::Overview);
-    executeOnRendererThread([this, doTransition]
+    executeOnRendererThread([this, doTransition, focusComponentIds]
     {
-        finishTransitionToOverviewMode(doTransition);
+        finishTransitionToOverviewMode(doTransition, focusComponentIds);
     }, u"GraphRenderer::finishTransitionToOverviewMode"_s);
 }
 
@@ -688,7 +699,7 @@ void GraphRenderer::finishTransitionToComponentModeOnRendererThread(bool doTrans
     }, u"GraphRenderer::finishTransitionToComponentMode"_s);
 }
 
-void GraphRenderer::switchToOverviewMode(bool doTransition)
+void GraphRenderer::switchToOverviewMode(bool doTransition, const std::vector<ComponentId>& focusComponentIds)
 {
     // Refuse to switch to overview mode if there is nothing to display
     if(_graphModel->graph().numComponents() <= 1)
@@ -700,7 +711,7 @@ void GraphRenderer::switchToOverviewMode(bool doTransition)
     if(doTransition)
         rendererStartedTransition();
 
-    executeOnRendererThread([this, doTransition]
+    executeOnRendererThread([this, doTransition, focusComponentIds]
     {
         // So that we can return to the current view parameters later
         _graphComponentScene->saveViewData();
@@ -710,20 +721,20 @@ void GraphRenderer::switchToOverviewMode(bool doTransition)
             if(!_graphComponentScene->viewIsReset())
             {
                 _graphComponentScene->startTransition().then(
-                [this]
+                [this, focusComponentIds]
                 {
                     sceneFinishedTransition();
                     _transition.willBeImmediatelyReused();
-                    finishTransitionToOverviewModeOnRendererThread(true);
+                    finishTransitionToOverviewModeOnRendererThread(true, focusComponentIds);
                 });
 
                 _graphComponentScene->resetView(false);
             }
             else
-                finishTransitionToOverviewModeOnRendererThread(true);
+                finishTransitionToOverviewModeOnRendererThread(true, focusComponentIds);
         }
         else
-            finishTransitionToOverviewMode(false);
+            finishTransitionToOverviewMode(false, focusComponentIds);
 
     }, u"GraphRenderer::switchToOverviewMode"_s);
 }
@@ -1062,7 +1073,7 @@ void GraphRenderer::updateScene()
 }
 
 GraphRenderer::Mode GraphRenderer::bestFocusParameters(GraphQuickItem* graphQuickItem,
-    NodeId& focusNodeId, float& radius) const
+    ComponentIdSet& componentIds, NodeId& focusNodeId, float& radius) const
 {
     radius = 0.0f;
     focusNodeId = {};
@@ -1086,7 +1097,6 @@ GraphRenderer::Mode GraphRenderer::bestFocusParameters(GraphQuickItem* graphQuic
         return Mode::Component;
     }
 
-    ComponentIdSet componentIds;
     for(auto nodeId : nodeIds)
         componentIds.insert(_graphModel->graph().componentIdOfNode(nodeId));
 
@@ -1198,13 +1208,14 @@ void GraphRenderer::synchronize(QQuickFramebufferObject* item)
     setShading(graphQuickItem->projection() == Projection::TwoDee ?
         graphQuickItem->shading2D() : graphQuickItem->shading3D());
 
-    float radius = GraphComponentRenderer::COMFORTABLE_ZOOM_RADIUS;
+    ComponentIdSet componentIds;
     NodeId focusNodeId;
-    auto targetMode = bestFocusParameters(graphQuickItem, focusNodeId, radius);
+    float radius = GraphComponentRenderer::COMFORTABLE_ZOOM_RADIUS;
+    auto targetMode = bestFocusParameters(graphQuickItem, componentIds, focusNodeId, radius);
     const ComponentId focusComponentId = graphQuickItem->desiredFocusComponentId();
 
     if(mode() == Mode::Component && targetMode == Mode::Overview)
-        switchToOverviewMode();
+        switchToOverviewMode(true, u::vectorFrom(componentIds));
     else if(!focusNodeId.isNull())
         moveFocusToNode(focusNodeId, radius);
     else if(!focusComponentId.isNull())
@@ -1214,6 +1225,8 @@ void GraphRenderer::synchronize(QQuickFramebufferObject* item)
         else
             moveFocusToComponent(focusComponentId);
     }
+    else if(mode() == Mode::Overview && !componentIds.empty())
+        moveFocusToComponents(u::vectorFrom(componentIds));
 
     ifSceneUpdateEnabled([this, &graphQuickItem]
     {
