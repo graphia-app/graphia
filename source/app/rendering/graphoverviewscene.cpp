@@ -167,8 +167,6 @@ void GraphOverviewScene::zoom(float delta, float x, float y, bool doTransition)
     setOffset(static_cast<float>(_offset.x()) + (oldCentreX - newCentreX),
               static_cast<float>(_offset.y()) + (oldCentreY - newCentreY));
 
-    _zoomCentre.setX(newCentreX);
-    _zoomCentre.setY(newCentreY);
 
     if(doTransition)
         startZoomTransition();
@@ -180,9 +178,8 @@ Circle GraphOverviewScene::zoomedLayoutData(const Circle& data) const
 {
     Circle newData(data);
 
-    newData.translate(-_offset - _zoomCentre);
+    newData.translate(-_offset);
     newData.scale(_zoomFactor);
-    newData.translate(_zoomCentre * _zoomFactor);
 
     return newData;
 }

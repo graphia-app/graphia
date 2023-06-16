@@ -92,7 +92,6 @@ private:
     int _height = 0;
 
     float _zoomFactor = 1.0f; // Multiply by raw layout data to get screen coords
-    QPointF _zoomCentre;
     Transition _zoomTransition;
     bool _autoZooming = true;
     QPointF _offset;
