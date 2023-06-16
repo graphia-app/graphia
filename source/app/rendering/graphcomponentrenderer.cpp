@@ -576,7 +576,6 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
     }
 }
 
-// NOLINTNEXTLINE readability-make-member-function-const
 void GraphComponentRenderer::moveFocusToNode(NodeId nodeId, float radius)
 {
     if(!componentIsValid())
@@ -595,7 +594,6 @@ void GraphComponentRenderer::moveFocusToNode(NodeId nodeId, float radius)
     centreNodeInViewport(nodeId, zoomDistance);
 }
 
-// NOLINTNEXTLINE readability-make-member-function-const
 void GraphComponentRenderer::moveSavedFocusToNode(NodeId nodeId, float radius)
 {
     if(!componentIsValid())
@@ -625,7 +623,6 @@ void GraphComponentRenderer::resetView()
     moveFocusToCentreOfComponent();
 }
 
-// NOLINTNEXTLIME readability-make-member-function-const
 void GraphComponentRenderer::moveFocusToCentreOfComponent()
 {
     if(!componentIsValid())
@@ -637,7 +634,6 @@ void GraphComponentRenderer::moveFocusToCentreOfComponent()
     centrePositionInViewport(_viewData._componentCentre);
 }
 
-// NOLINTNEXTLIME readability-make-member-function-const
 void GraphComponentRenderer::moveFocusToNodeClosestCameraVector()
 {
     if(!componentIsValid())
@@ -663,7 +659,6 @@ void GraphComponentRenderer::moveFocusTo(const QVector3D& position, float radius
     centrePositionInViewport(_viewData._componentCentre, _viewData._zoomDistance, rotation);
 }
 
-// NOLINTNEXTLINE readability-make-member-function-const
 void GraphComponentRenderer::doProjectionTransition()
 {
     if(!componentIsValid())

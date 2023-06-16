@@ -225,7 +225,6 @@ void GraphCommonInteractor::mouseMoveEvent(const QPoint& pos, Qt::KeyboardModifi
         _mouseMoving = true;
 }
 
-// NOLINTNEXTLINE readability-make-member-function-const
 void GraphCommonInteractor::mouseDoubleClickEvent(const QPoint&, Qt::KeyboardModifiers modifiers, Qt::MouseButton button)
 {
     if(_mouseMoving)

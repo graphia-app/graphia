@@ -1541,7 +1541,7 @@ bool CorrelationPlotItem::columnSortOrderCanBePinned() const
     });
 }
 
-QString CorrelationPlotItem::elideLabel(const QString& label) // NOLINT readability-make-member-function-const
+QString CorrelationPlotItem::elideLabel(const QString& label)
 {
     if(_elideLabelWidth <= 0)
         return {};

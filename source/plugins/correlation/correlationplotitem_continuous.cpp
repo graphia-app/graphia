@@ -26,7 +26,6 @@
 
 using namespace Qt::Literals::StringLiterals;
 
-// NOLINTNEXTLINE readability-make-member-function-const
 void CorrelationPlotItem::setContinousYAxisRange(double min, double max)
 {
     if(_includeYZero)

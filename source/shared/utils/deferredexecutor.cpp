@@ -33,7 +33,7 @@ DeferredExecutor::~DeferredExecutor()
     cancel();
 }
 
-size_t DeferredExecutor::enqueue(TaskFn&& function, const QString& description) // NOLINT readability-make-member-function-const
+size_t DeferredExecutor::enqueue(TaskFn&& function, const QString& description)
 {
     const std::unique_lock<std::recursive_mutex> lock(_mutex);
 
@@ -49,7 +49,7 @@ size_t DeferredExecutor::enqueue(TaskFn&& function, const QString& description) 
     return _tasks.size();
 }
 
-void DeferredExecutor::execute() // NOLINT readability-make-member-function-const
+void DeferredExecutor::execute()
 {
     const std::unique_lock<std::recursive_mutex> lock(_mutex);
 
@@ -68,7 +68,7 @@ void DeferredExecutor::execute() // NOLINT readability-make-member-function-cons
         executeOne();
 }
 
-void DeferredExecutor::executeOne() // NOLINT readability-make-member-function-const
+void DeferredExecutor::executeOne()
 {
     const std::unique_lock<std::recursive_mutex> lock(_mutex);
 
@@ -125,7 +125,7 @@ bool DeferredExecutor::hasTasks() const
     return !_tasks.empty();
 }
 
-void DeferredExecutor::waitFor(size_t numTasks) // NOLINT readability-make-member-function-const
+void DeferredExecutor::waitFor(size_t numTasks)
 {
     std::unique_lock<std::recursive_mutex> lock(_mutex);
 

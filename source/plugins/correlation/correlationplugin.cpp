@@ -478,7 +478,7 @@ void CorrelationPluginInstance::setDimensions(size_t numContinuousColumns, size_
     _discreteData.resize(numDiscreteColumns * numRows);
 }
 
-void CorrelationPluginInstance::setDataColumnName(size_t column, const QString& name) // NOLINT readability-make-member-function-const
+void CorrelationPluginInstance::setDataColumnName(size_t column, const QString& name)
 {
     Q_ASSERT(column < (_numContinuousColumns + _numDiscreteColumns));
     _dataColumnNames.at(column) = name;
@@ -507,7 +507,6 @@ void CorrelationPluginInstance::makeDataColumnNamesUnique()
     }
 }
 
-// NOLINTNEXTLIME readability-make-member-function-const
 void CorrelationPluginInstance::finishDataRow(size_t row)
 {
     Q_ASSERT(row < _numRows);
@@ -575,7 +574,6 @@ void CorrelationPluginInstance::buildColumnAnnotations()
     emit columnAnnotationNamesChanged();
 }
 
-// NOLINTNEXTLINE readability-make-member-function-const
 void CorrelationPluginInstance::buildDiscreteDataValueIndex(Progressable& progressable)
 {
     if(_correlationDataType != CorrelationDataType::Discrete)

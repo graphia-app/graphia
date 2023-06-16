@@ -208,7 +208,6 @@ bool GraphOverviewScene::setZoomFactor(float zoomFactor)
     return changed;
 }
 
-// NOLINTNEXTLINE readability-make-member-function-const
 void GraphOverviewScene::setOffset(float x, float y)
 {
     const float scaledBoundingWidth = _componentLayout->boundingWidth() * _zoomFactor;
@@ -236,7 +235,6 @@ void GraphOverviewScene::setOffset(float x, float y)
     _offset.setY(y);
 }
 
-// NOLINTNEXTLIME readability-make-member-function-const
 Transition& GraphOverviewScene::startTransitionFromComponentMode(ComponentId focusComponentId,
     float duration, Transition::Type transitionType)
 {
@@ -275,7 +273,6 @@ Transition& GraphOverviewScene::startTransitionFromComponentMode(ComponentId foc
     return transition;
 }
 
-// NOLINTNEXTLINE readability-make-member-function-const
 Transition& GraphOverviewScene::startTransitionToComponentMode(ComponentId focusComponentId,
     float duration, Transition::Type transitionType)
 {

@@ -1129,7 +1129,6 @@ static float mappedTextSize(float user, float mapped = -1.0f)
         u::interpolate(1.0f, LimitConstants::maximumTextSize(), (value - 0.5f) / 0.5f);
 }
 
-// NOLINTNEXTLIME readability-make-member-function-const
 void GraphModel::updateVisuals(bool force)
 {
     // Prevent any changes to the graph while we read from it
