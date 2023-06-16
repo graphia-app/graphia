@@ -210,13 +210,8 @@ Circle GraphOverviewScene::zoomedLayoutData(const Circle& data) const
 
 float GraphOverviewScene::minZoomFactor() const
 {
-    if(_componentLayout->boundingWidth() <= 0.0f && _componentLayout->boundingHeight() <= 0.0f)
-        return 1.0f;
-
-    const float minWidthZoomFactor = static_cast<float>(_width) / _componentLayout->boundingWidth();
-    const float minHeightZoomFactor = static_cast<float>(_height) / _componentLayout->boundingHeight();
-
-    return std::min(minWidthZoomFactor, minHeightZoomFactor);
+    return zoomFactorFor(static_cast<float>(_width), static_cast<float>(_height),
+        _componentLayout->boundingWidth(), _componentLayout->boundingHeight());
 }
 
 bool GraphOverviewScene::setZoomFactor(float zoomFactor)
