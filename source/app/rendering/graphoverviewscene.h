@@ -76,9 +76,9 @@ public:
     void pan(float dx, float dy);
     void zoom(float delta, float x, float y, bool doTransition);
 
-    Transition& startTransitionFromComponentMode(ComponentId focusComponentId,
+    Transition& startTransitionFromComponentMode(ComponentId componentModeComponentId,
         float duration = 0.3f, Transition::Type transitionType = Transition::Type::EaseInEaseOut);
-    Transition& startTransitionToComponentMode(ComponentId focusComponentId,
+    Transition& startTransitionToComponentMode(ComponentId componentModeComponentId,
         float duration = 0.3f, Transition::Type transitionType = Transition::Type::EaseInEaseOut);
 
 private:
