@@ -46,6 +46,30 @@
 
 using namespace Qt::Literals::StringLiterals;
 
+static float zoomFactorFor(float sceneWidth, float sceneHeight,
+    float boundingWidth, float boundingHeight)
+{
+    if(boundingWidth <= 0.0f && boundingHeight <= 0.0f)
+        return 1.0f;
+
+    const float minWidthZoomFactor = sceneWidth / boundingWidth;
+    const float minHeightZoomFactor = sceneHeight / boundingHeight;
+
+    return std::min(minWidthZoomFactor, minHeightZoomFactor);
+}
+
+static QPointF offsetFor(float sceneWidth, float sceneHeight, const QRectF& boundingBox, float zoomFactor)
+{
+    const auto scaledSceneWidth = sceneWidth / zoomFactor;
+    const auto scaledSceneHeight = sceneHeight / zoomFactor;
+
+    const auto xOffset = (scaledSceneWidth - static_cast<float>(boundingBox.width())) * 0.5f;
+    const auto yOffset = (scaledSceneHeight - static_cast<float>(boundingBox.height())) * 0.5f;
+
+    return {xOffset - static_cast<float>(boundingBox.x()),
+        yOffset - static_cast<float>(boundingBox.y())};
+}
+
 GraphOverviewScene::GraphOverviewScene(CommandManager* commandManager, GraphRenderer* graphRenderer) :
     Scene(graphRenderer),
     _graphRenderer(graphRenderer),
