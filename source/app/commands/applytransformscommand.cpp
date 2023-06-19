@@ -19,7 +19,6 @@
 #include "applytransformscommand.h"
 
 #include "graph/graphmodel.h"
-#include "ui/selectionmanager.h"
 #include "ui/document.h"
 
 #include <QObject>
@@ -28,15 +27,13 @@
 #include <algorithm>
 
 ApplyTransformsCommand::ApplyTransformsCommand(GraphModel* graphModel,
-                                               SelectionManager* selectionManager, Document* document,
+                                               Document* document,
                                                QStringList previousTransformations,
                                                QStringList transformations) :
     _graphModel(graphModel),
-    _selectionManager(selectionManager),
     _document(document),
     _previousTransformations(std::move(previousTransformations)),
-    _transformations(std::move(transformations)),
-    _selectedNodeIds(_selectionManager->selectedNodes())
+    _transformations(std::move(transformations))
 {
     const bool transformsValid = std::all_of(_transformations.begin(), _transformations.end(), // clazy:exclude=detaching-member
     [graphModel](const auto& transform)
@@ -91,9 +88,6 @@ bool ApplyTransformsCommand::execute()
 void ApplyTransformsCommand::undo()
 {
     doTransform(_previousTransformations, _transformations);
-
-    // Restore the selection to what it was prior to the transformation
-    _selectionManager->selectNodes(_selectedNodeIds);
 }
 
 void ApplyTransformsCommand::cancel()

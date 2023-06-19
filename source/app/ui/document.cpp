@@ -948,7 +948,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
         {
             commands.emplace_back(
                 std::make_unique<ApplyTransformsCommand>(
-                _graphModel.get(), _selectionManager.get(), this,
+                _graphModel.get(), this,
                 _graphTransforms, graphTransformConfigurationsFromUI()));
         }
 
@@ -2285,7 +2285,7 @@ void Document::moveGraphTransform(int from, int to)
 
     _commandManager.execute(ExecutePolicy::Add,
         std::make_unique<ApplyTransformsCommand>(
-        _graphModel.get(), _selectionManager.get(), this,
+        _graphModel.get(), this,
         _graphTransforms, newGraphTransforms));
 }
 
@@ -2484,7 +2484,7 @@ void Document::apply(const QStringList& graphTransforms, const QStringList& visu
     if(transformsValid && transformsDiffer(_graphTransforms, graphTransforms, true))
     {
         commands.emplace_back(std::make_unique<ApplyTransformsCommand>(
-            _graphModel.get(), _selectionManager.get(), this,
+            _graphModel.get(), this,
             _graphTransforms, graphTransforms));
 
         // This is necessary for the visualisation patching in ApplyVisualisationsCommand,
