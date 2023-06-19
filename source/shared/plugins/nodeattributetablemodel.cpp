@@ -206,6 +206,17 @@ void NodeAttributeTableModel::moveFocusToNodeForRowIndex(size_t row)
     _document->moveFocusToNode(nodeId);
 }
 
+void NodeAttributeTableModel::moveFocusToNodesForRowIndices(const std::vector<size_t>& rows)
+{
+    std::vector<NodeId> nodeIds;
+    nodeIds.reserve(rows.size());
+
+    for(auto row : rows)
+        nodeIds.push_back(_userNodeData->elementIdForIndex(row));
+
+    _document->moveFocusToNodes(nodeIds);
+}
+
 bool NodeAttributeTableModel::columnIsFloatingPoint(const QString& columnName) const
 {
     const auto* graphModel = _document->graphModel();
