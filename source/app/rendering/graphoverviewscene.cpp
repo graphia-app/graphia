@@ -234,7 +234,8 @@ Circle GraphOverviewScene::zoomedLayoutData(const Circle& data) const
 float GraphOverviewScene::minZoomFactor() const
 {
     return zoomFactorFor(static_cast<float>(_width), static_cast<float>(_height),
-        _componentLayout->boundingWidth(), _componentLayout->boundingHeight());
+        static_cast<float>(_componentLayoutSize.width()),
+        static_cast<float>(_componentLayoutSize.height()));
 }
 
 bool GraphOverviewScene::setZoomFactor(float zoomFactor)
@@ -249,8 +250,7 @@ bool GraphOverviewScene::setZoomFactor(float zoomFactor)
 QPointF GraphOverviewScene::defaultOffset() const
 {
     return offsetFor(static_cast<float>(_width), static_cast<float>(_height), {0.0, 0.0,
-        static_cast<double>(_componentLayout->boundingWidth()),
-        static_cast<double>(_componentLayout->boundingHeight())}, _zoomFactor);
+        _componentLayoutSize.width(), _componentLayoutSize.height()}, _zoomFactor);
 }
 
 bool GraphOverviewScene::setOffset(QPointF offset)
@@ -258,11 +258,11 @@ bool GraphOverviewScene::setOffset(QPointF offset)
     const auto scaledHalfSceneWidth = (static_cast<double>(_width) * 0.5) / static_cast<double>(_zoomFactor);
     const auto scaledHalfSceneHeight = (static_cast<double>(_height) * 0.5) / static_cast<double>(_zoomFactor);
 
-    const auto xMin = scaledHalfSceneWidth - static_cast<double>(_componentLayout->boundingWidth());
+    const auto xMin = scaledHalfSceneWidth - _componentLayoutSize.width();
     const auto xMax = scaledHalfSceneWidth;
     offset.setX(std::clamp(offset.x(), xMin, xMax));
 
-    const auto yMin = scaledHalfSceneHeight - static_cast<double>(_componentLayout->boundingHeight());
+    const auto yMin = scaledHalfSceneHeight - _componentLayoutSize.height();
     const auto yMax = scaledHalfSceneHeight;
     offset.setY(std::clamp(offset.y(), yMin, yMax));
 
@@ -363,7 +363,11 @@ void GraphOverviewScene::setViewportSize(int width, int height)
     _height = height;
 
     if(_nextComponentLayoutDataChanged.exchange(false))
+    {
         _componentLayoutData = _nextComponentLayoutData;
+        auto boundingBox = _componentLayout->boundingBoxFor(_componentIds, _componentLayoutData);
+        _componentLayoutSize = boundingBox.size();
+    }
 
     if(viewWasReset)
     {

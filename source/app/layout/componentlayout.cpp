@@ -27,15 +27,11 @@ void ComponentLayout::execute(const Graph& graph, const std::vector<ComponentId>
 
     executeReal(graph, componentIds, componentLayoutData);
 
-    _boundingBox = QRectF();
+    auto boundingBox = boundingBoxFor(componentIds, componentLayoutData);
 
+    // Normalise layout data to start at 0, 0
     for(auto componentId : componentIds)
-        _boundingBox = _boundingBox.united(componentLayoutData[componentId].boundingBox());
-
-    for(auto componentId : componentIds)
-        componentLayoutData[componentId].translate(-_boundingBox.topLeft());
-
-    _boundingBox.translate(-_boundingBox.x(), -_boundingBox.y());
+        componentLayoutData[componentId].translate(-boundingBox.topLeft());
 }
 
 QRectF ComponentLayout::boundingBoxFor(const std::vector<ComponentId>& componentIds,

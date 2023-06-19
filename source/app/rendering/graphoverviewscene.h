@@ -108,6 +108,7 @@ private:
     ComponentLayoutData _componentLayoutData;
     ComponentLayoutData _previousZoomedComponentLayoutData;
     ComponentLayoutData _zoomedComponentLayoutData;
+    QSizeF _componentLayoutSize;
     std::unique_ptr<ComponentLayout> _componentLayout;
 
     void updateZoomedComponentLayoutData();
