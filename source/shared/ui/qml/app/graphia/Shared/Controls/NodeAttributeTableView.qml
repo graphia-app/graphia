@@ -183,6 +183,7 @@ Item
         MenuUtils.addActionTo(menu, resizeColumnsToContentsAction);
         MenuUtils.addActionTo(menu, selectColumnsAction);
         MenuUtils.addActionTo(menu, exportTableAction);
+        MenuUtils.addActionTo(menu, autoFocusAction);
         MenuUtils.addSeparatorTo(menu);
         MenuUtils.addActionTo(menu, selectAllTableAction);
 
@@ -233,12 +234,25 @@ Item
         root.model.moveFocusToNodesForRowIndices(root.selectedRows);
     }
 
+    function autoFocusSelection()
+    {
+        if(autoFocusAction.checked)
+            root.focusSelection();
+    }
+
+    onSelectedRowsChanged:
+    {
+        if(root.selectedRows.length < root.visibleRows.length)
+            root.autoFocusSelection();
+    }
+
     Preferences
     {
         id: misc
         section: "misc"
 
         property var fileSaveInitialFolder
+        property alias autoFocusSelectedNodes: autoFocusAction.checked
     }
 
     SaveFileDialogComponent { id: saveFileDialogComponent }
@@ -309,7 +323,11 @@ Item
         icon.name: "edit-select-all"
         enabled: root.rowCount > 0
 
-        onTriggered: { root.selectAll(); }
+        onTriggered:
+        {
+            root.selectAll();
+            root.autoFocusSelection();
+        }
     }
 
     Action
@@ -346,6 +364,18 @@ Item
         enabled: root.rowCount > 0
 
         onTriggered: { root.cropToSelection(); }
+    }
+
+    property alias focusAction: autoFocusAction
+
+    Action
+    {
+        id: autoFocusAction
+        text: qsTr("Auto &Focus")
+        icon.name: "view-fullscreen"
+        checkable: true
+
+        onCheckedChanged: { root.autoFocusSelection(); }
     }
 
     Action

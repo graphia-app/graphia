@@ -52,6 +52,7 @@ PluginContent
             ToolBarButton { action: tableView.resizeColumnsAction }
             ToolBarButton { action: tableView.selectAction }
             ToolBarButton { action: tableView.exportAction }
+            ToolBarButton { action: tableView.focusAction }
 
             Item { Layout.fillWidth: true }
         }
