@@ -193,6 +193,7 @@ Item
 
         MenuUtils.addActionTo(menu, selectNeighboursTableAction);
         MenuUtils.addActionTo(menu, cropToSelectionAction);
+        MenuUtils.addActionTo(menu, focusSelectionAction);
 
         tableView._tableMenu = menu;
         MenuUtils.clone(menu, contextMenu);
@@ -225,6 +226,11 @@ Item
     {
         root.aboutToCrop();
         root.model.cropTo(root.selectedRows);
+    }
+
+    function focusSelection()
+    {
+        root.model.moveFocusToNodesForRowIndices(root.selectedRows);
     }
 
     Preferences
@@ -340,6 +346,15 @@ Item
         enabled: root.rowCount > 0
 
         onTriggered: { root.cropToSelection(); }
+    }
+
+    Action
+    {
+        id: focusSelectionAction
+        text: qsTr("Focus Selection")
+        enabled: root.rowCount > 0
+
+        onTriggered: { root.focusSelection(); }
     }
 
     property int lastClickedColumn: -1
