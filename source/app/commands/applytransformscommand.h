@@ -27,27 +27,22 @@
 #include <QStringList>
 
 class GraphModel;
-class SelectionManager;
 class Document;
 
 class ApplyTransformsCommand : public ICommand
 {
 private:
     GraphModel* _graphModel = nullptr;
-    SelectionManager* _selectionManager = nullptr;
     Document* _document = nullptr;
 
     QStringList _previousTransformations;
     QStringList _transformations;
-
-    const NodeIdSet _selectedNodeIds;
 
     void doTransform(const QStringList& transformations,
                      const QStringList& previousTransformations);
 
 public:
     ApplyTransformsCommand(GraphModel* graphModel,
-                           SelectionManager* selectionManager,
                            Document* document,
                            QStringList previousTransformations,
                            QStringList transformations);
