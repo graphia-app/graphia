@@ -71,7 +71,10 @@ CStreamCapture::CStreamCapture(const QString &filename, FILE *stream) :
 void CStreamCapture::closeFile()
 {
     if(_file != nullptr)
+    {
         static_cast<void>(std::fclose(_file));
+        _file = nullptr;
+    }
 }
 
 CStreamCapture::~CStreamCapture()
