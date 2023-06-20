@@ -31,20 +31,35 @@ QString IConsoleCapture::filename() const
 }
 
 IoStreamCapture::IoStreamCapture(const QString &filename, std::ostream &stream) :
-    IConsoleCapture(filename)
+    IConsoleCapture(filename), _stream(&stream)
 {
     _file.open(this->filename().toLocal8Bit().constData());
-    stream.rdbuf(_file.rdbuf());
+
+    if(_file.is_open())
+        _originalStreambuf = stream.rdbuf(_file.rdbuf());
+}
+
+void IoStreamCapture::closeFile()
+{
+    if(_file.is_open())
+    {
+        // Restore prior state
+        _stream->rdbuf(_originalStreambuf);
+        _originalStreambuf = nullptr;
+        _stream = nullptr;
+
+        _file.close();
+    }
 }
 
 IoStreamCapture::~IoStreamCapture()
 {
-    _file.close();
+    closeFile();
 }
 
 void IoStreamCapture::close()
 {
-    _file.close();
+    closeFile();
 }
 
 CStreamCapture::CStreamCapture(const QString &filename, FILE *stream) :
