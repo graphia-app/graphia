@@ -41,6 +41,10 @@ class IoStreamCapture : public IConsoleCapture
 {
 private:
     std::ofstream _file;
+    std::ostream* _stream = nullptr;
+    std::streambuf* _originalStreambuf = nullptr;
+
+    void closeFile();
 
 public:
     IoStreamCapture(const QString& filename, std::ostream& stream);
