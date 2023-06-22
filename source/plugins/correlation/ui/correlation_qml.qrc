@@ -4,5 +4,6 @@
         <file>qml/CorrelationParameters.qml</file>
         <file>qml/PlotModalControls.qml</file>
         <file>plots.svg</file>
+        <file>qml/AttributeValueCorrelationHeatmapDialog.qml</file>
     </qresource>
 </RCC>
