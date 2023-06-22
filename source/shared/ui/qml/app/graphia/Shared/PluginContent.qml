@@ -33,6 +33,7 @@ Item
 
     function updateMenu() { _mainWindow.updatePluginMenus(); }
 
+    function availableAttributesModel() { return _mainWindow ? _mainWindow.availableAttributesModel() : null; }
     function attributeIsEditable(attributeName) { return _mainWindow.attributeIsEditable(attributeName); }
     function cloneAttribute(attributeName) { _mainWindow.cloneAttribute(attributeName); }
     function editAttribute(attributeName) { _mainWindow.editAttribute(attributeName); }

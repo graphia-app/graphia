@@ -373,6 +373,14 @@ ApplicationWindow
             ExitType.Restart);
     }
 
+    function availableAttributesModel()
+    {
+        if(!currentTab)
+            return null;
+
+        return currentTab.document.availableAttributesModel();
+    }
+
     Labs.MessageDialog
     {
         id: errorOpeningFileMessageDialog
