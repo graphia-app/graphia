@@ -90,6 +90,9 @@ public:
         connect(graphModelQObject, SIGNAL(visualsChanged(VisualChangeFlags,VisualChangeFlags)),
                 this, SLOT(onVisualsChanged(VisualChangeFlags,VisualChangeFlags)), Qt::DirectConnection);
 
+        connect(graphModelQObject, SIGNAL(attributesChanged(QStringList,QStringList,QStringList,bool)),
+                this, SIGNAL(attributesChanged(QStringList,QStringList,QStringList,bool)), Qt::DirectConnection);
+
         const auto* parserThreadQObject = dynamic_cast<const QObject*>(parserThread);
         Q_ASSERT(parserThreadQObject != nullptr);
 
@@ -142,6 +145,9 @@ signals:
 
     void selectionChanged(const ISelectionManager* selectionManager);
     void visualsChanged(VisualChangeFlags nodeChange, VisualChangeFlags edgeChange);
+
+    void attributesChanged(const QStringList& addedNames, const QStringList& removedNames,
+        const QStringList& changedValuesNames, bool graphChanged);
 
     void loadSuccess();
 
