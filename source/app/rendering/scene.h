@@ -52,6 +52,8 @@ public:
     virtual void setProjection(Projection projection) = 0;
 
 protected:
+    static constexpr float defaultDuration = 0.3f;
+
     bool visible() const { return _visible; }
 
 private:

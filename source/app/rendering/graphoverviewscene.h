@@ -80,9 +80,9 @@ public:
 
     Transition& startTransitionFromComponentMode(ComponentId componentModeComponentId,
         const std::vector<ComponentId>& focusComponentIds,
-        float duration = 0.3f, Transition::Type transitionType = Transition::Type::EaseInEaseOut);
+        float duration = defaultDuration, Transition::Type transitionType = Transition::Type::EaseInEaseOut);
     Transition& startTransitionToComponentMode(ComponentId componentModeComponentId,
-        float duration = 0.3f, Transition::Type transitionType = Transition::Type::EaseInEaseOut);
+        float duration = defaultDuration, Transition::Type transitionType = Transition::Type::EaseInEaseOut);
 
 private:
     GraphRenderer* _graphRenderer = nullptr;
@@ -115,9 +115,8 @@ private:
 
     std::vector<ComponentId> _removedComponentIds;
     std::vector<ComponentMergeSet> _componentMergeSets;
-    Transition& startTransition(float duration = 1.0f,
-        Transition::Type transitionType = Transition::Type::EaseInEaseOut);
-    void startZoomTransition(float duration = 0.3f);
+    Transition& startTransition(float duration, Transition::Type transitionType);
+    void startZoomTransition(float duration = defaultDuration);
 
     std::vector<ComponentId> _componentIds;
 

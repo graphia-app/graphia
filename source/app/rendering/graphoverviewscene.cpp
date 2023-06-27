@@ -728,7 +728,7 @@ void GraphOverviewScene::setProjection(Projection projection)
 
     _graphRenderer->executeOnRendererThread([this, projection]
     {
-        startTransition(0.3f, projection == Projection::Perspective ?
+        startTransition(defaultDuration, projection == Projection::Perspective ?
             Transition::Type::Power : Transition::Type::InversePower);
 
         for(GraphComponentRenderer* componentRenderer : _graphRenderer->componentRenderers())

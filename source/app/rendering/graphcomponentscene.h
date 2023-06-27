@@ -73,7 +73,7 @@ public:
     GraphComponentRenderer* componentRenderer() const;
     GraphComponentRenderer* transitioningComponentRenderer() const;
 
-    Transition& startTransition(float duration = 0.3f,
+    Transition& startTransition(float duration = defaultDuration,
         Transition::Type transitionType = Transition::Type::EaseInEaseOut);
 
 private:

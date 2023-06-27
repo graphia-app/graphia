@@ -192,7 +192,7 @@ void GraphComponentScene::finishComponentTransition(ComponentId componentId, boo
     if(doTransition)
     {
         _transitionStyle = transitionStyle;
-        _graphRenderer->transition().start(0.3f, transitionType,
+        _graphRenderer->transition().start(defaultDuration, transitionType,
         [this](float f)
         {
             _transitionValue = f;
