@@ -205,6 +205,8 @@ void GraphOverviewScene::zoom(float delta, float x, float y, bool doTransition)
 
 void GraphOverviewScene::zoomTo(const std::vector<ComponentId>& componentIds, bool doTransition)
 {
+    Q_ASSERT(!componentIds.empty());
+
     auto zoomedBoundingBox = _componentLayout->boundingBoxFor(componentIds, _componentLayoutData);
     auto componentsZoomFactor = zoomFactorFor(static_cast<float>(_width), static_cast<float>(_height),
         static_cast<float>(zoomedBoundingBox.width()), static_cast<float>(zoomedBoundingBox.height()));
