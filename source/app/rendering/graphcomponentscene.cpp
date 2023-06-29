@@ -139,6 +139,7 @@ void GraphComponentScene::onShow()
 void GraphComponentScene::onHide()
 {
     _transitioningComponentId.setToNull();
+    clearQueuedTransition();
 }
 
 void GraphComponentScene::finishComponentTransition(ComponentId componentId, bool doTransition)
@@ -411,6 +412,8 @@ GraphComponentRenderer* GraphComponentScene::transitioningComponentRenderer() co
 
 Transition& GraphComponentScene::startTransition(float duration, Transition::Type transitionType)
 {
+    clearQueuedTransition();
+
     return _graphRenderer->transition().start(duration, transitionType,
     [this](float f)
     {

@@ -718,6 +718,8 @@ void GraphRenderer::switchToOverviewMode(bool doTransition, const std::vector<Co
 
         if(doTransition)
         {
+            _graphComponentScene->clearQueuedTransition();;
+
             if(!_graphComponentScene->viewIsReset())
             {
                 _graphComponentScene->startTransition().then(
