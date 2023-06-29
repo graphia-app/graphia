@@ -667,7 +667,6 @@ void GraphRenderer::finishTransitionToOverviewMode(bool doTransition,
 void GraphRenderer::finishTransitionToOverviewModeOnRendererThread(bool doTransition,
     const std::vector<ComponentId>& focusComponentIds)
 {
-    setMode(GraphRenderer::Mode::Overview);
     executeOnRendererThread([this, doTransition, focusComponentIds]
     {
         finishTransitionToOverviewMode(doTransition, focusComponentIds);
@@ -692,7 +691,6 @@ void GraphRenderer::finishTransitionToComponentMode(bool doTransition)
 
 void GraphRenderer::finishTransitionToComponentModeOnRendererThread(bool doTransition)
 {
-    setMode(GraphRenderer::Mode::Component);
     executeOnRendererThread([this, doTransition]
     {
         finishTransitionToComponentMode(doTransition);
