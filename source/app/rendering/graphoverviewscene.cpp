@@ -213,8 +213,9 @@ void GraphOverviewScene::zoomTo(const std::vector<ComponentId>& componentIds, bo
 
     bool zoomFactorChanged = setZoomFactor(componentsZoomFactor);
     bool offsetChanged = setOffsetForBoundingBox(zoomedBoundingBox);
+    bool force = _graphRenderer->transition().active();
 
-    if(!zoomFactorChanged && !offsetChanged)
+    if(!zoomFactorChanged && !offsetChanged && !force)
         return;
 
     if(doTransition)
