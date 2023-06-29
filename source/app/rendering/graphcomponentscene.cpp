@@ -245,7 +245,7 @@ void GraphComponentScene::clearQueuedTransition()
     _queuedTransitionRadius = -1.0f;
 }
 
-void GraphComponentScene::performQueuedTransition()
+bool GraphComponentScene::performQueuedTransition()
 {
     if(!_queuedTransitionNodeId.isNull())
     {
@@ -256,7 +256,11 @@ void GraphComponentScene::performQueuedTransition()
         }, u"GraphComponentScene::performQueuedTransition"_s);
 
         clearQueuedTransition();
+
+        return true;
     }
+
+    return false;
 }
 
 bool GraphComponentScene::componentTransitionActive() const

@@ -103,7 +103,7 @@ private:
     void finishComponentTransitionOnRendererThread(ComponentId componentId, bool doTransition);
 
     void clearQueuedTransition();
-    void performQueuedTransition();
+    bool performQueuedTransition();
 
     bool componentTransitionActive() const;
 
