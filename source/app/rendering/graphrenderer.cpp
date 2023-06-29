@@ -722,17 +722,23 @@ void GraphRenderer::switchToOverviewMode(bool doTransition, const std::vector<Co
         {
             _graphComponentScene->clearQueuedTransition();;
 
+            auto doPostViewResetTransition = [this, focusComponentIds]
+            {
+                sceneFinishedTransition();
+                _transition.willBeImmediatelyReused();
+                finishTransitionToOverviewModeOnRendererThread(true, focusComponentIds);
+            };
+
             if(!_graphComponentScene->viewIsReset())
             {
-                _graphComponentScene->startTransition().then(
-                [this, focusComponentIds]
-                {
-                    sceneFinishedTransition();
-                    _transition.willBeImmediatelyReused();
-                    finishTransitionToOverviewModeOnRendererThread(true, focusComponentIds);
-                });
-
+                _graphComponentScene->startTransition().then(doPostViewResetTransition);
                 _graphComponentScene->resetView(false);
+            }
+            else if(_graphComponentScene->transitionActive())
+            {
+                // The view reset transition is still in progress but our ultimate
+                // target has (potentially) changed
+                _transition.alternativeThen(doPostViewResetTransition);
             }
             else
                 finishTransitionToOverviewModeOnRendererThread(true, focusComponentIds);
