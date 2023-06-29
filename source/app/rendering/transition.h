@@ -72,6 +72,15 @@ public:
         return *this;
     }
 
+    template<typename FinishedFn>
+    Transition& alternativeThen(FinishedFn&& finishedFn)
+    {
+        if(!_finishedFunctions.empty())
+            _finishedFunctions.pop_back();
+
+        return then(std::forward<FinishedFn>(finishedFn));
+    }
+
     bool update(float dTime);
     bool active() const { return _elapsed == 0.0f || _elapsed < _duration; }
     void cancel();
