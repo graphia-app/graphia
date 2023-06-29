@@ -136,6 +136,11 @@ void GraphComponentScene::onShow()
     updateRendererVisibility();
 }
 
+void GraphComponentScene::onHide()
+{
+    _transitioningComponentId.setToNull();
+}
+
 void GraphComponentScene::finishComponentTransition(ComponentId componentId, bool doTransition)
 {
     // KEEP IN MIND: at this point _componentId may refer to a frozen component that is no longer

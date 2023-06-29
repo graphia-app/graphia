@@ -49,6 +49,7 @@ public:
     bool transitionActive() const override;
 
     void onShow() override;
+    void onHide() override;
 
     ComponentId componentId() const { return _componentId; }
     void setComponentId(ComponentId componentId, bool doTransition = false);
