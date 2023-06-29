@@ -534,26 +534,33 @@ void GraphOverviewScene::startZoomTransition(float duration)
     _graphRenderer->transition().cancel();
 
     ComponentLayoutData targetZoomedComponentLayoutData(_graphModel->graph());
+    ComponentArray<float> targetComponentAlpha(_graphModel->graph(), 1.0f);
 
     _previousZoomedComponentLayoutData = _zoomedComponentLayoutData;
+    _previousComponentAlpha = _componentAlpha;
 
     for(auto componentId : _componentIds)
         targetZoomedComponentLayoutData[componentId] = zoomedLayoutData(_componentLayoutData[componentId]);
 
     _zoomTransition.start(duration, Transition::Type::InversePower,
-    [this, targetZoomedComponentLayoutData](float f)
+    [this, targetZoomedComponentLayoutData, targetComponentAlpha](float f)
     {
         for(auto componentId : _componentIds)
         {
             _zoomedComponentLayoutData[componentId] =
                 interpolateCircle(_previousZoomedComponentLayoutData[componentId],
                 targetZoomedComponentLayoutData[componentId], f);
+
+            _componentAlpha[componentId] = u::interpolate(
+                _previousComponentAlpha[componentId],
+                targetComponentAlpha[componentId], f);
         }
     }).then(
     [this]
     {
         // When the zoom is complete, don't leave previous data out of date
         _previousZoomedComponentLayoutData = _zoomedComponentLayoutData;
+        _previousComponentAlpha = _componentAlpha;
     });
 }
 
