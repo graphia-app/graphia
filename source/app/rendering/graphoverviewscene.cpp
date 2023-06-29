@@ -440,6 +440,8 @@ static Circle interpolateCircle(const Circle& a, const Circle& b, float f)
 
 Transition& GraphOverviewScene::startTransition(float duration, Transition::Type transitionType)
 {
+    _zoomTransition.cancel();
+
     auto targetComponentLayoutData = _zoomedComponentLayoutData;
     auto targetComponentAlpha = _componentAlpha;
 
@@ -528,6 +530,8 @@ Transition& GraphOverviewScene::startTransition(float duration, Transition::Type
 
 void GraphOverviewScene::startZoomTransition(float duration)
 {
+    _graphRenderer->transition().cancel();
+
     ComponentLayoutData targetZoomedComponentLayoutData(_graphModel->graph());
 
     _previousZoomedComponentLayoutData = _zoomedComponentLayoutData;
