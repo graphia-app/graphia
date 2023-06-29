@@ -89,6 +89,7 @@ private:
     float _transitionValue = 0.0f;
     enum class TransitionStyle { None, SlideLeft, SlideRight, Fade } _transitionStyle = TransitionStyle::None;
     NodeId _queuedTransitionNodeId;
+    float _queuedTransitionRadius = -1.0f;
 
     bool _beingRemoved = false;
     size_t _componentSize = 0;
@@ -99,6 +100,8 @@ private:
 
     void finishComponentTransition(ComponentId componentId, bool doTransition);
     void finishComponentTransitionOnRendererThread(ComponentId componentId, bool doTransition);
+
+    void clearQueuedTransition();
     void performQueuedTransition();
 
     bool componentTransitionActive() const;

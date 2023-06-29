@@ -233,16 +233,23 @@ void GraphComponentScene::finishComponentTransitionOnRendererThread(ComponentId 
     }, u"GraphComponentScene::finishComponentTransition"_s);
 }
 
+void GraphComponentScene::clearQueuedTransition()
+{
+    _queuedTransitionNodeId.setToNull();
+    _queuedTransitionRadius = -1.0f;
+}
+
 void GraphComponentScene::performQueuedTransition()
 {
     if(!_queuedTransitionNodeId.isNull())
     {
-        _graphRenderer->executeOnRendererThread([this, nodeId = _queuedTransitionNodeId]
+        _graphRenderer->executeOnRendererThread([this,
+            nodeId = _queuedTransitionNodeId, radius = _queuedTransitionRadius]
         {
-            moveFocusToNode(nodeId);
+            moveFocusToNode(nodeId, radius);
         }, u"GraphComponentScene::performQueuedTransition"_s);
 
-        _queuedTransitionNodeId.setToNull();
+        clearQueuedTransition();
     }
 }
 
@@ -374,7 +381,7 @@ void GraphComponentScene::moveFocusToNode(NodeId nodeId, float radius)
     }
     else if(!componentTransitionRequired && !componentTransitionActive())
     {
-        _queuedTransitionNodeId.setToNull();
+        clearQueuedTransition();
         startTransition().then([this] { performQueuedTransition(); });
         componentRenderer()->moveFocusToNode(nodeId, radius);
     }
@@ -383,6 +390,7 @@ void GraphComponentScene::moveFocusToNode(NodeId nodeId, float radius)
         // A component transition is already in progress,
         // so queue the refocus up for later
         _queuedTransitionNodeId = nodeId;
+        _queuedTransitionRadius = radius;
     }
 }
 
