@@ -72,6 +72,12 @@ bool Transition::update(float dTime)
     return true;
 }
 
+void Transition::cancel()
+{
+    if(active())
+        _elapsed = _duration;
+}
+
 void Transition::willBeImmediatelyReused()
 {
     _suppressSignals = true;
