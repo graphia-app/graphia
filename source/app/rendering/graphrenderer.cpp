@@ -641,6 +641,10 @@ void GraphRenderer::onEdgeMovedBetweenComponents(const Graph*, EdgeId edgeId, Co
 void GraphRenderer::finishTransitionToOverviewMode(bool doTransition,
     const std::vector<ComponentId>& focusComponentIds)
 {
+    // If component mode has a queued transition nodeId, cancel the switch to overview
+    if(_graphComponentScene->performQueuedTransition())
+        return;
+
     setMode(GraphRenderer::Mode::Overview);
     setScene(_graphOverviewScene);
     setInteractor(_graphOverviewInteractor);
@@ -682,7 +686,7 @@ void GraphRenderer::finishTransitionToComponentMode(bool doTransition)
     if(doTransition)
     {
         // Go back to where we were before
-        _graphComponentScene->startTransition();
+        _graphComponentScene->startTransition().then([this] { _graphComponentScene->performQueuedTransition(); });
         _graphComponentScene->restoreViewData();
     }
 
