@@ -203,10 +203,10 @@ void ComponentManager::update(const Graph* graph)
         std::inserter(componentIdsToBeRemoved, componentIdsToBeRemoved.begin()));
 
     // Find nodes and edges that have been added or removed
-    NodeIdMap<ComponentId> nodeIdAdds;
-    EdgeIdMap<ComponentId> edgeIdAdds;
-    NodeIdMap<ComponentId> nodeIdRemoves;
-    EdgeIdMap<ComponentId> edgeIdRemoves;
+    ComponentIdMap<NodeIdSet> nodeIdAdds;
+    ComponentIdMap<EdgeIdSet> edgeIdAdds;
+    ComponentIdMap<NodeIdSet> nodeIdRemoves;
+    ComponentIdMap<EdgeIdSet> edgeIdRemoves;
     NodeIdMap<std::pair<ComponentId, ComponentId>> nodeIdMoves;
     EdgeIdMap<std::pair<ComponentId, ComponentId>> edgeIdMoves;
 
@@ -220,15 +220,15 @@ void ComponentManager::update(const Graph* graph)
             continue;
 
         if(oldComponentId.isNull() && !newComponentId.isNull())
-            nodeIdAdds[nodeId] = newComponentId;
+            nodeIdAdds[newComponentId].insert(nodeId);
         else if(!oldComponentId.isNull() && newComponentId.isNull())
-            nodeIdRemoves[nodeId] = oldComponentId;
+            nodeIdRemoves[oldComponentId].insert(nodeId);
         else if(!oldComponentId.isNull() && !newComponentId.isNull())
         {
             if(!componentIdsToBeRemoved.contains(oldComponentId) && !componentIdsToBeAdded.contains(newComponentId))
                 nodeIdMoves[nodeId] = {oldComponentId, newComponentId};
             else if(componentIdsToBeRemoved.contains(oldComponentId) && componentIdsToBeAdded.contains(newComponentId))
-                nodeIdAdds[nodeId] = newComponentId;
+                nodeIdAdds[newComponentId].insert(nodeId);
         }
     }
 
@@ -242,15 +242,15 @@ void ComponentManager::update(const Graph* graph)
             continue;
 
         if(oldComponentId.isNull() && !newComponentId.isNull())
-            edgeIdAdds[edgeId] = newComponentId;
+            edgeIdAdds[newComponentId].insert(edgeId);
         else if(!oldComponentId.isNull() && newComponentId.isNull())
-            edgeIdRemoves[edgeId] = oldComponentId;
+            edgeIdRemoves[oldComponentId].insert(edgeId);
         else if(!oldComponentId.isNull() && !newComponentId.isNull())
         {
             if(!componentIdsToBeRemoved.contains(oldComponentId) && !componentIdsToBeAdded.contains(newComponentId))
                 edgeIdMoves[edgeId] = {oldComponentId, newComponentId};
             else if(componentIdsToBeRemoved.contains(oldComponentId) && componentIdsToBeAdded.contains(newComponentId))
-                edgeIdAdds[edgeId] = newComponentId;
+                edgeIdAdds[newComponentId].insert(edgeId);
         }
     }
 
@@ -289,8 +289,8 @@ void ComponentManager::update(const Graph* graph)
 
         if(!hasMerged)
         {
-            std::erase_if(nodeIdRemoves, [&](const auto& nodeIdRemove) { return nodeIdRemove.second == componentId; });
-            std::erase_if(edgeIdRemoves, [&](const auto& edgeIdRemove) { return edgeIdRemove.second == componentId; });
+            nodeIdRemoves.erase(componentId);
+            edgeIdRemoves.erase(componentId);
         }
 
         _componentIdsSet.erase(componentId);
@@ -339,8 +339,8 @@ void ComponentManager::update(const Graph* graph)
 
         if(!hasSplit)
         {
-            std::erase_if(nodeIdAdds, [&](const auto& nodeIdAdd) { return nodeIdAdd.second == componentId; });
-            std::erase_if(edgeIdAdds, [&](const auto& edgeIdAdd) { return edgeIdAdd.second == componentId; });
+            nodeIdAdds.erase(componentId);
+            edgeIdAdds.erase(componentId);
         }
     }
 
@@ -352,17 +352,29 @@ void ComponentManager::update(const Graph* graph)
     }
 
     // Notify node adds and removes
-    for(const auto& [nodeId, componentId] : nodeIdAdds)
-        emit nodeAddedToComponent(graph, nodeId, componentId);
+    for(const auto& [componentId, nodeIdSet] : nodeIdAdds)
+    {
+        for(auto nodeId : nodeIdSet)
+            emit nodeAddedToComponent(graph, nodeId, componentId);
+    }
 
-    for(const auto& [edgeId, componentId] : edgeIdAdds)
-        emit edgeAddedToComponent(graph, edgeId, componentId);
+    for(const auto& [componentId, edgeIdSet] : edgeIdAdds)
+    {
+        for(auto edgeId : edgeIdSet)
+            emit edgeAddedToComponent(graph, edgeId, componentId);
+    }
 
-    for(const auto& [nodeId, componentId] : nodeIdRemoves)
-        emit nodeRemovedFromComponent(graph, nodeId, componentId);
+    for(const auto& [componentId, nodeIdSet] : nodeIdRemoves)
+    {
+        for(auto nodeId : nodeIdSet)
+            emit nodeRemovedFromComponent(graph, nodeId, componentId);
+    }
 
-    for(const auto& [edgeId, componentId] : edgeIdRemoves)
-        emit edgeRemovedFromComponent(graph, edgeId, componentId);
+    for(const auto& [componentId, edgeIdSet] : edgeIdRemoves)
+    {
+        for(auto edgeId : edgeIdSet)
+            emit edgeRemovedFromComponent(graph, edgeId, componentId);
+    }
 
     for(const auto& [nodeId, moveComponentIds] : nodeIdMoves)
         emit nodeMovedBetweenComponents(graph, nodeId, moveComponentIds.first, moveComponentIds.second);
