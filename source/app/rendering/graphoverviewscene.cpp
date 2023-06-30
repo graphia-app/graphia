@@ -335,19 +335,25 @@ Transition& GraphOverviewScene::startTransitionToComponentMode(ComponentId compo
 {
     Q_ASSERT(!componentModeComponentId.isNull());
 
+    // Transition between the current state and the neutral state
     _previousZoomedComponentLayoutData = _zoomedComponentLayoutData;
-    _previousComponentAlpha = _componentAlpha;
+    updateZoomedComponentLayoutData();
 
+    // Always fade from 1.0 to 0.0, abandoning the current state; we
+    // do this because otherwise there is a possibility that the
+    // number of distinct alpha levels in the scene exceeds the
+    // renderer core's maximum number of render layers
     for(auto componentId : _componentIds)
     {
-        if(componentId != componentModeComponentId)
-            _componentAlpha[componentId] = 0.0f;
+        _previousComponentAlpha[componentId] = 1.0f;
+        _componentAlpha[componentId] = 0.0f;
     }
 
     const float halfWidth = static_cast<float>(_width) * 0.5f;
     const float halfHeight = static_cast<float>(_height) * 0.5f;
     _zoomedComponentLayoutData[componentModeComponentId].set(
         halfWidth, halfHeight, std::min(halfWidth, halfHeight));
+    _componentAlpha[componentModeComponentId] = 1.0f;
 
     return startTransition(duration, transitionType);
 }
