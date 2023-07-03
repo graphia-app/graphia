@@ -112,7 +112,6 @@ void ImportAttributesKeyDetection::start()
 
 void ImportAttributesKeyDetection::reset()
 {
-    _attributeValues = {};
     _result = {};
     emit resultChanged();
 }

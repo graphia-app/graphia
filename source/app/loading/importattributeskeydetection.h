@@ -32,14 +32,12 @@ class ImportAttributesKeyDetection : public QObject, public Cancellable
     Q_OBJECT
 
     Q_PROPERTY(Document* document MEMBER _document)
-    Q_PROPERTY(QVariantMap attributeValues MEMBER _attributeValues)
     Q_PROPERTY(std::shared_ptr<TabularData> tabularData MEMBER _tabularData)
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
     Q_PROPERTY(QVariantMap result MEMBER _result NOTIFY resultChanged)
 
 private:
     Document* _document = nullptr;
-    QVariantMap _attributeValues;
     std::shared_ptr<TabularData> _tabularData = nullptr;
     QFutureWatcher<void> _watcher;
     QVariantMap _result;
