@@ -2830,8 +2830,7 @@ ApplicationWindow
                 {
                     let tab = currentTab;
                     tab.application = application;
-                    if(!tab.openUrl(url, type, pluginName, parameters))
-                        onLoadFailure(findTabIndex(tab), url);
+                    tab.openUrl(url, type, pluginName, parameters);
                 }
 
                 function closeTab(index, onCloseFunction)

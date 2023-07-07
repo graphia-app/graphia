@@ -537,7 +537,12 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
     auto* plugin = _application->pluginForName(pluginName);
 
     if(plugin == nullptr)
+    {
+        setFailureReason(tr("The plugin %1 could not be found.").arg(pluginName));
+        emit failureReasonChanged();
+        emit loadComplete(url, false);
         return false;
+    }
 
     if(type != Application::NativeFileType)
     {
@@ -612,7 +617,12 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
 
         if(parser == nullptr)
         {
-            qDebug() << "Plugin does not provide parser";
+            setFailureReason(tr("The plugin %1 does not provide a parser for %2. "
+                "This is probably a bug, please report it to the developers.")
+                .arg(pluginName, type));
+
+            emit failureReasonChanged();
+            emit loadComplete(url, false);
             return false;
         }
     }
