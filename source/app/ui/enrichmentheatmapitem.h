@@ -23,8 +23,6 @@
 
 #include <qcustomplotquickitem.h>
 
-#include <QQuickPaintedItem>
-
 class EnrichmentHeatmapItem : public QCustomPlotQuickItem
 {
     Q_OBJECT
@@ -80,7 +78,6 @@ private:
 
 public:
     explicit EnrichmentHeatmapItem(QQuickItem* parent = nullptr);
-    void setData(EnrichmentTableModel::Table table);
 
     Q_INVOKABLE void buildPlot();
     Q_INVOKABLE void savePlotImage(const QUrl &url, const QStringList& extensions);
