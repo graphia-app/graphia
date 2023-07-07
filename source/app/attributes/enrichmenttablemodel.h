@@ -53,7 +53,7 @@ public:
     using Table = std::vector<Row>;
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
     QVariant data(const QModelIndex& index, int role) const override;
     QVariant data(int row, EnrichmentTableModel::Results result) const;
     int rowFromAttributeSets(const QString& attributeA, const QString& attributeB) const;
