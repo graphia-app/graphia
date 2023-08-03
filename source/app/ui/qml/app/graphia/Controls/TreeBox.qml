@@ -663,8 +663,10 @@ Item
         if(!root._indexIsSelectable(modelIndex))
             return;
 
-
         let index = sortFilterProxyModel.mapFromSource(modelIndex);
+
+        if(!index.valid)
+            return;
 
         treeView.expandToIndex(index);
 
