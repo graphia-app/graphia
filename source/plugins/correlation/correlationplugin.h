@@ -185,6 +185,7 @@ public:
     QString rowName(size_t row) const;
     QString columnName(size_t column) const;
     QColor nodeColorForRow(size_t row) const;
+    QColor nodeColorForRows(const std::vector<size_t>& rows) const;
 
     const std::vector<ColumnAnnotation>& columnAnnotations() const { return _columnAnnotations; }
     const ColumnAnnotation* columnAnnotationByName(const QString& name) const;

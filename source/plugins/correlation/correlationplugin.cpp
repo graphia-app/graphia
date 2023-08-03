@@ -819,6 +819,28 @@ QColor CorrelationPluginInstance::nodeColorForRow(size_t row) const
     return graphModel()->nodeVisual(nodeId).outerColor();
 }
 
+QColor CorrelationPluginInstance::nodeColorForRows(const std::vector<size_t>& rows) const
+{
+    if(rows.empty())
+        return {};
+
+    auto color = nodeColorForRow(rows.at(0));
+
+    auto colorsInconsistent = std::any_of(rows.begin(), rows.end(),
+    [this, &color](auto row)
+    {
+        return nodeColorForRow(row) != color;
+    });
+
+    if(colorsInconsistent)
+    {
+        // The colours are not consistent, so just use black
+        color = Qt::black;
+    }
+
+    return color;
+}
+
 const ColumnAnnotation* CorrelationPluginInstance::columnAnnotationByName(const QString& name) const
 {
     auto it = std::find_if(_columnAnnotations.begin(), _columnAnnotations.end(),
