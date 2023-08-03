@@ -39,6 +39,9 @@ Item
     function editAttribute(attributeName) { _mainWindow.editAttribute(attributeName); }
     function removeAttributes(attributeNames) { _mainWindow.removeAttributes(attributeNames); }
 
+    function find(term, options, attributeNames, findSelectStyle) { _mainWindow.find(term, options, attributeNames, findSelectStyle); }
+    function selectByAttributeValue(attributeName, value) { _mainWindow.selectByAttributeValue(attributeName, value); }
+
     function writeTableModelToFile(model, fileName, type, columnNames)
     {
         _mainWindow.writeTableModelToFile(model, fileName, type, columnNames);

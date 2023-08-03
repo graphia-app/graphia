@@ -381,6 +381,24 @@ ApplicationWindow
         return currentTab.document.availableAttributesModel();
     }
 
+    function find(term, options, attributeNames, findSelectStyle)
+    {
+        if(!currentTab)
+            return null;
+
+        currentTab.hideFind();
+        return currentTab.document.find(term, options, attributeNames, findSelectStyle);
+    }
+
+    function selectByAttributeValue(attributeName, value)
+    {
+        if(!currentTab)
+            return null;
+
+        currentTab.hideFind();
+        return currentTab.document.selectByAttributeValue(attributeName, value);
+    }
+
     Labs.MessageDialog
     {
         id: errorOpeningFileMessageDialog
