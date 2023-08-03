@@ -254,8 +254,6 @@ public:
     void setColorGroupByAnnotationName(const QString& annotationName);
 
     static bool axisRectIsColumnAnnotations(const QCPAxisRect* axisRect);
-    static QColor colorForRows(const CorrelationPluginInstance* pluginInstance,
-        const QVector<int>& rows);
 
     void clone(CorrelationPlotItem& target) const;
     void savePlotImage(const QString& filename);

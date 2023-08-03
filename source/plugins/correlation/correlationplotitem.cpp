@@ -759,29 +759,6 @@ void CorrelationPlotItem::wheelEvent(QWheelEvent* event)
         event->ignore();
 }
 
-QColor CorrelationPlotItem::colorForRows(const CorrelationPluginInstance* pluginInstance,
-    const QVector<int>& rows)
-{
-    if(rows.isEmpty())
-        return {};
-
-    auto color = pluginInstance->nodeColorForRow(static_cast<size_t>(rows.at(0)));
-
-    auto colorsInconsistent = std::any_of(rows.begin(), rows.end(),
-    [pluginInstance, &color](auto row)
-    {
-        return pluginInstance->nodeColorForRow(static_cast<size_t>(row)) != color;
-    });
-
-    if(colorsInconsistent)
-    {
-        // The colours are not consistent, so just use black
-        color = Qt::black;
-    }
-
-    return color;
-}
-
 void CorrelationPlotItem::configureLegend()
 {
     if(_selectedRows.empty() || !_showLegend)

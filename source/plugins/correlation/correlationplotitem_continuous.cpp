@@ -237,7 +237,7 @@ void addPlotPerAttributeValue(const CorrelationPluginInstance* pluginInstance,
     for(const auto& value : keys)
     {
         const auto& rows = map.value(value);
-        auto color = CorrelationPlotItem::colorForRows(pluginInstance, rows);
+        auto color = pluginInstance->nodeColorForRows({rows.begin(), rows.end()});
 
         addPlotFn(color, nameTemplate.arg(attributeName, value), rows);
     }
@@ -278,7 +278,7 @@ void CorrelationPlotItem::populateMeanLinePlot()
     }
     else
     {
-        addMeanPlot(CorrelationPlotItem::colorForRows(_pluginInstance, _selectedRows),
+        addMeanPlot(_pluginInstance->nodeColorForRows({_selectedRows.begin(), _selectedRows.end()}),
             tr("Mean average of selection"), _selectedRows);
     }
 
@@ -338,7 +338,7 @@ void CorrelationPlotItem::populateMedianLinePlot()
     }
     else
     {
-        addMedianPlot(CorrelationPlotItem::colorForRows(_pluginInstance, _selectedRows),
+        addMedianPlot(_pluginInstance->nodeColorForRows({_selectedRows.begin(), _selectedRows.end()}),
             tr("Median average of selection"), _selectedRows);
     }
 
@@ -401,7 +401,7 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
     }
     else
     {
-        addMeanBars(colorForRows(_pluginInstance, _selectedRows),
+        addMeanBars(_pluginInstance->nodeColorForRows({_selectedRows.begin(), _selectedRows.end()}),
             tr("Mean histogram of selection"), _selectedRows);
     }
 
