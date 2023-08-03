@@ -189,6 +189,7 @@ public:
     const std::vector<ColumnAnnotation>& columnAnnotations() const { return _columnAnnotations; }
     const ColumnAnnotation* columnAnnotationByName(const QString& name) const;
 
+    std::vector<size_t> rowsForGraph() const;
     QString attributeValueFor(const QString& attributeName, size_t row) const;
 
     Q_INVOKABLE void computeHierarchicalClustering();

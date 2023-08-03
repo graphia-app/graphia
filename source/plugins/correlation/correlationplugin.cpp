@@ -830,6 +830,17 @@ const ColumnAnnotation* CorrelationPluginInstance::columnAnnotationByName(const 
     return nullptr;
 }
 
+std::vector<size_t> CorrelationPluginInstance::rowsForGraph() const
+{
+    std::vector<size_t> rows;
+    rows.reserve(_graphModel->graph().numNodes());
+
+    for(auto nodeId : _graphModel->graph().nodeIds())
+        rows.push_back(_graphModel->userNodeData().indexFor(nodeId));
+
+    return rows;
+}
+
 QString CorrelationPluginInstance::attributeValueFor(const QString& attributeName, size_t row) const
 {
     const auto* attribute = _graphModel->attributeByName(attributeName);
