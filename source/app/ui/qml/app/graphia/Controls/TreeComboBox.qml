@@ -169,4 +169,10 @@ Item
         popupTreeBox.select(modelIndex);
         root.selectedValue = popupTreeBox.selectedValue;
     }
+
+    function clearSelection()
+    {
+        root.selectedValue = undefined;
+        popupTreeBox.clearSelection();
+    }
 }
