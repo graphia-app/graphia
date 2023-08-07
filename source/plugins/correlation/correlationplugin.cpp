@@ -21,6 +21,8 @@
 #include "correlation.h"
 #include "correlationplotitem.h"
 #include "graphsizeestimateplotitem.h"
+#include "attributevaluecorrelationheatmapitem.h"
+#include "attributevaluecorrelationheatmapworker.h"
 
 #include "hierarchicalclusteringcommand.h"
 
@@ -1410,6 +1412,8 @@ CorrelationPlugin::CorrelationPlugin()
     qmlRegisterType<CorrelationPlotItem>("app.graphia", 1, 0, "CorrelationPlot");
     qmlRegisterType<GraphSizeEstimatePlotItem>("app.graphia", 1, 0, "GraphSizeEstimatePlot");
     qmlRegisterType<CorrelationTabularDataParser>("app.graphia", 1, 0, "CorrelationTabularDataParser");
+    qmlRegisterType<AttributeValueCorrelationHeatmapItem>("app.graphia", 1, 0, "AttributeValueCorrelationHeatmapItem");
+    qmlRegisterType<AttributeValueCorrelationHeatmapWorker>("app.graphia", 1, 0, "AttributeValueCorrelationHeatmapWorker");
 }
 
 QVariantMap CorrelationPlugin::correlationInfoFor(int correlationType) const

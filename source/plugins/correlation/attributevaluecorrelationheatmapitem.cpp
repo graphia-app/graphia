@@ -19,7 +19,6 @@
 #include "attributevaluecorrelationheatmapitem.h"
 
 #include "shared/rendering/multisamples.h"
-#include "shared/utils/static_block.h"
 
 #include <vector>
 
@@ -302,10 +301,4 @@ void AttributeValueCorrelationHeatmapItem::hoverMoveEvent(QHoverEvent* event)
 void AttributeValueCorrelationHeatmapItem::hoverLeaveEvent(QHoverEvent*)
 {
     hideTooltip();
-}
-
-static_block
-{
-    qmlRegisterType<AttributeValueCorrelationHeatmapItem>(
-        APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "AttributeValueCorrelationHeatmapItem");
 }

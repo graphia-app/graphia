@@ -21,9 +21,6 @@
 #include "correlationdatavector.h"
 #include "correlation.h"
 
-#include "shared/utils/static_block.h"
-
-#include <QQmlEngine>
 #include <QDebug>
 
 #include <map>
@@ -124,10 +121,4 @@ void AttributeValueCorrelationHeatmapWorker::start(const QString& attributeName)
     });
 
     _watcher.setFuture(future);
-}
-
-static_block
-{
-    qmlRegisterType<AttributeValueCorrelationHeatmapWorker>(
-        APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "AttributeValueCorrelationHeatmapWorker");
 }
