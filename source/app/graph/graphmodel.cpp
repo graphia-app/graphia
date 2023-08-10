@@ -318,6 +318,7 @@ GraphModel::GraphModel(const QString& name, IPlugin* plugin) :
     _->_graphTransformFactories.emplace(tr("Contract Edges"),           std::make_unique<EdgeContractionTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("MCL Cluster"),              std::make_unique<MCLTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("Louvain Cluster"),          std::make_unique<LouvainTransformFactory>(this));
+    _->_graphTransformFactories.emplace(tr("Meta Louvain Cluster"),          std::make_unique<MetaLouvainTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("Weighted Louvain Cluster"), std::make_unique<WeightedLouvainTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("PageRank"),                 std::make_unique<PageRankTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("Eccentricity"),             std::make_unique<EccentricityTransformFactory>(this));

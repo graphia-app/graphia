@@ -130,6 +130,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/louvaintransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/percentnntransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/filtertransform.h
+    ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/metaclustertransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/mcltransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/pageranktransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/spanningtreetransform.h

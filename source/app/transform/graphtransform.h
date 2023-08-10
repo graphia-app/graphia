@@ -75,7 +75,7 @@ public:
     void setProgress(int percent) override;
     void setPhase(const QString& phase) override;
 
-private:
+public: //FIXME
     void setIndex(int index) { _index = index; }
     void setConfig(const GraphTransformConfig& config) { _config = config; }
 

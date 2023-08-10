@@ -337,18 +337,23 @@ void LouvainTransform::apply(TransformedGraph& target)
             clusterNumbers[communityId] = clusterNumber++;
     }
 
-    NodeArray<QString> clusterNames(target);
-    NodeArray<int> clusterSizes(target);
+    NodeArray<QString> clusterNames(_graphModel->graph());
+    NodeArray<int> clusterSizes(_graphModel->graph());
 
     for(auto nodeId : target.nodeIds())
     {
         auto communityId = communities[nodeId];
         if(communityId.isNull())
+        {
             continue;
+        }
 
-        clusterNumber = clusterNumbers[communityId];
-        clusterNames[nodeId] = QObject::tr("Cluster %1").arg(clusterNumber);
-        clusterSizes[nodeId] = static_cast<int>(communityHistogram.at(communityId));
+        for(auto mergedNodeId : target.mutableGraph().mergedNodeIdsForNodeId(nodeId))
+        {
+            clusterNumber = clusterNumbers[communityId];
+            clusterNames[mergedNodeId] = QObject::tr("Cluster %1").arg(clusterNumber);
+            clusterSizes[mergedNodeId] = static_cast<int>(communityHistogram.at(communityId));
+        }
     }
 
     _graphModel->createAttribute(QObject::tr(_weighted ? "Weighted Louvain Cluster" : "Louvain Cluster")) // clazy:exclude=tr-non-literal

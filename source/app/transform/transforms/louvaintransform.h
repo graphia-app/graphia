@@ -20,6 +20,7 @@
 #define LOUVAINTRANSFORM_H
 
 #include "transform/graphtransform.h"
+#include "transform/transforms/metaclustertransform.h"
 
 #include "shared/utils/flags.h"
 #include "shared/utils/redirects.h"
@@ -27,7 +28,7 @@
 class LouvainTransform : public GraphTransform
 {
 public:
-    explicit LouvainTransform(GraphModel* graphModel, bool weighted) :
+    explicit LouvainTransform(GraphModel* graphModel, bool weighted = false) :
         _graphModel(graphModel), _weighted(weighted) {}
     void apply(TransformedGraph& target) override;
 
@@ -74,6 +75,8 @@ public:
     {
         return std::make_unique<LouvainTransform>(graphModel(), false);
     }
+
+    using TransformType = LouvainTransform;
 };
 
 class WeightedLouvainTransformFactory : public LouvainTransformFactory
@@ -103,5 +106,8 @@ public:
         return std::make_unique<LouvainTransform>(graphModel(), true);
     }
 };
+
+using MetaLouvainTransform = MetaClusterTransform<LouvainTransformFactory>;
+using MetaLouvainTransformFactory = MetaClusterTransformFactory<LouvainTransformFactory>;
 
 #endif // LOUVAINTRANSFORM_H
