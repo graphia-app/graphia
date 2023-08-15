@@ -248,6 +248,7 @@ QString TabularData::contentIdentityOf(const QUrl& url)
 
     const int maxLines = 50;
     int numLinesScanned = 0;
+    std::map<char, size_t> counts;
 
     std::istream* is = nullptr;
     do
@@ -256,7 +257,6 @@ QString TabularData::contentIdentityOf(const QUrl& url)
 
         is = &u::getline(file, line);
 
-        std::map<char, size_t> counts;
         bool inQuotes = false;
 
         for(auto character : line)
@@ -278,25 +278,24 @@ QString TabularData::contentIdentityOf(const QUrl& url)
             }
         }
 
-        if(!counts.empty())
-        {
-            auto maxCount = std::max_element(counts.begin(), counts.end(),
-                [](const auto& a, const auto& b) { return a.second < b.second; });
-
-            auto character = maxCount->first;
-
-            switch(character)
-            {
-            case ',':  identity = u"CSV"_s; break;
-            case ';':  identity = u"SSV"_s; break;
-            case '\t': identity = u"TSV"_s; break;
-            }
-        }
-
         numLinesScanned++;
-    } while(identity.isEmpty() &&
-        !is->fail() && !is->eof() &&
+    } while(!is->fail() && !is->eof() &&
         numLinesScanned < maxLines);
+
+    if(!counts.empty())
+    {
+        auto maxCount = std::max_element(counts.begin(), counts.end(),
+            [](const auto& a, const auto& b) { return a.second < b.second; });
+
+        auto character = maxCount->first;
+
+        switch(character)
+        {
+        case ',':  identity = u"CSV"_s; break;
+        case ';':  identity = u"SSV"_s; break;
+        case '\t': identity = u"TSV"_s; break;
+        }
+    }
 
     return identity;
 }
