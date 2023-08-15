@@ -148,7 +148,7 @@ bool ImportAttributesCommand::execute()
 
             for(auto elementId : elementIds)
             {
-                auto value = u::contains(map, elementId) ?
+                auto value = map.contains(elementId) ?
                     _data.valueAt(static_cast<size_t>(columnIndex), map.at(elementId)) : QString{};
                 userData->setValueBy(elementId, name, value);
             }
