@@ -237,6 +237,8 @@ public:
 
     Q_INVOKABLE void showAllColumnAnnotations();
     Q_INVOKABLE void hideAllColumnAnnotations();
+    Q_INVOKABLE void showColumnAnnotations(const QStringList& annotations);
+    Q_INVOKABLE void hideColumnAnnotations(const QStringList& annotations);
 
     void setSelectedRows(const QVector<int>& selectedRows);
     void setScaleType(int scaleType);

@@ -276,6 +276,32 @@ void CorrelationPlotItem::hideAllColumnAnnotations()
     rebuildPlot();
 }
 
+void CorrelationPlotItem::showColumnAnnotations(const QStringList& annotations)
+{
+    for(const auto& annotation : annotations)
+    {
+        Q_ASSERT(_pluginInstance->columnAnnotationNames().contains(annotation));
+        _visibleColumnAnnotationNames.insert(annotation);
+    }
+
+    emit visibleColumnAnnotationNamesChanged();
+    emit plotOptionsChanged();
+    rebuildPlot();
+}
+
+void CorrelationPlotItem::hideColumnAnnotations(const QStringList& annotations)
+{
+    for(const auto& annotation : annotations)
+    {
+        Q_ASSERT(_visibleColumnAnnotationNames.contains(annotation));
+        _visibleColumnAnnotationNames.erase(annotation);
+    }
+
+    emit visibleColumnAnnotationNamesChanged();
+    emit plotOptionsChanged();
+    rebuildPlot();
+}
+
 int CorrelationPlotItem::plotMode() const
 {
     return static_cast<int>(_plotMode);
@@ -478,21 +504,15 @@ void CorrelationPlotItem::onClickColumnAnnotation(const QCPAxisRect* axisRect, c
         {
             // Click is on the annotation name itself (with checkbox)
             if(u::contains(_visibleColumnAnnotationNames, name))
-                _visibleColumnAnnotationNames.erase(name);
+                hideColumnAnnotations({name});
             else
-                _visibleColumnAnnotationNames.insert(name);
-
-            emit visibleColumnAnnotationNamesChanged();
-            emit plotOptionsChanged();
+                showColumnAnnotations({name});
         }
         else if(!u::contains(_visibleColumnAnnotationNames, name))
         {
             // Clicking anywhere else enables a column annotation
             // when it's disabled...
-            _visibleColumnAnnotationNames.insert(name);
-
-            emit visibleColumnAnnotationNamesChanged();
-            emit plotOptionsChanged();
+            showColumnAnnotations({name});
         }
         else
         {

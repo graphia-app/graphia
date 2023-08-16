@@ -140,7 +140,6 @@ private:
 
     QAbstractTableModel* nodeAttributeTableModel() { return &_nodeAttributeTableModel; }
     void setNodeAttributeTableModelDataColumns();
-    QStringList columnAnnotationNames() const;
 
     void buildDiscreteDataValueIndex(Progressable& progressable);
 
@@ -190,6 +189,7 @@ public:
 
     UserData& userColumnData() { return _userColumnData; }
     void rebuildColumnAnnotations();
+    QStringList columnAnnotationNames() const;
     const std::vector<ColumnAnnotation>& columnAnnotations() const { return _columnAnnotations; }
     const ColumnAnnotation* columnAnnotationByName(const QString& name) const;
 
