@@ -172,6 +172,8 @@ public:
     QStringList defaultTransforms() const override;
     QStringList defaultVisualisations() const override;
 
+    size_t numColumns() const { return _numContinuousColumns + _numDiscreteColumns; }
+
     size_t numContinuousColumns() const { return _numContinuousColumns; }
     double continuousDataAt(size_t row, size_t column) const;
     double continuousEpsilon() const { return _continuousEpsilon; }
