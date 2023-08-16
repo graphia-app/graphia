@@ -564,15 +564,23 @@ void CorrelationPluginInstance::onLoadSuccess()
 
 void CorrelationPluginInstance::rebuildColumnAnnotations()
 {
-    _columnAnnotations.reserve(_userColumnData.numUserDataVectors());
+    std::vector<ColumnAnnotation> columnAnnotations;
+    columnAnnotations.reserve(_userColumnData.numUserDataVectors());
 
     for(const auto& name : _userColumnData)
     {
         const auto* values = _userColumnData.vector(name);
-        _columnAnnotations.emplace_back(name, values->begin(), values->end());
+        columnAnnotations.emplace_back(name, values->begin(), values->end());
     }
 
-    emit columnAnnotationNamesChanged();
+    auto before = columnAnnotationNames();
+    _columnAnnotations = columnAnnotations;
+    auto after = columnAnnotationNames();
+
+    QStringList addedNames = u::toQStringList(u::setDifference(after, before));
+    QStringList removedNames = u::toQStringList(u::setDifference(before, after));
+
+    emit columnAnnotationNamesChanged(addedNames, removedNames);
 }
 
 void CorrelationPluginInstance::buildDiscreteDataValueIndex(Progressable& progressable)

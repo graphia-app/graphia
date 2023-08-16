@@ -210,7 +210,7 @@ private slots:
     void onSelectionChanged(const ISelectionManager* selectionManager);
 
 signals:
-    void columnAnnotationNamesChanged();
+    void columnAnnotationNamesChanged(const QStringList& added, const QStringList& removed);
     void sharedValuesAttributeNamesChanged();
     void numericalAttributeNamesChanged();
     void highlightedRowsChanged();
