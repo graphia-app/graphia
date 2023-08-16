@@ -142,7 +142,6 @@ private:
     void setNodeAttributeTableModelDataColumns();
     QStringList columnAnnotationNames() const;
 
-    void buildColumnAnnotations();
     void buildDiscreteDataValueIndex(Progressable& progressable);
 
     const ContinuousDataVector& continuousDataRowForNodeId(NodeId nodeId) const;
@@ -187,6 +186,7 @@ public:
     QColor nodeColorForRow(size_t row) const;
     QColor nodeColorForRows(const std::vector<size_t>& rows) const;
 
+    void rebuildColumnAnnotations();
     const std::vector<ColumnAnnotation>& columnAnnotations() const { return _columnAnnotations; }
     const ColumnAnnotation* columnAnnotationByName(const QString& name) const;
 

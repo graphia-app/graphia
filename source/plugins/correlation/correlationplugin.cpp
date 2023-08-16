@@ -558,11 +558,11 @@ QStringList CorrelationPluginInstance::columnAnnotationNames() const
 
 void CorrelationPluginInstance::onLoadSuccess()
 {
-    buildColumnAnnotations();
+    rebuildColumnAnnotations();
     _nodeAttributeTableModel.updateColumnNames();
 }
 
-void CorrelationPluginInstance::buildColumnAnnotations()
+void CorrelationPluginInstance::rebuildColumnAnnotations()
 {
     _columnAnnotations.reserve(_userColumnData.numUserDataVectors());
 
