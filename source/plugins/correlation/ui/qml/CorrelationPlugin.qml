@@ -529,6 +529,15 @@ PluginContent
                 plot.scaleByAttributeName = "";
             }
         }
+
+        function onColumnAnnotationNamesChanged(added, removed)
+        {
+            if(added.length > 0)
+                plot.showColumnAnnotations(added);
+
+            if(removed.length > 0)
+                plot.hideColumnAnnotations(removed);
+        }
     }
 
     property var _plotMenuStateUpdateFns: []
