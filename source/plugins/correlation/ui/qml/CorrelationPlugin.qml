@@ -33,6 +33,14 @@ PluginContent
     anchors.fill: parent
     minimumHeight: 320
 
+    Preferences
+    {
+        id: misc
+        section: "misc"
+
+        property var fileOpenInitialFolder
+    }
+
     Action
     {
         id: toggleUiOrientationAction
@@ -364,6 +372,44 @@ PluginContent
             }
             else
                 plot.colorGroupByAnnotationName = "";
+        }
+    }
+
+    ImportAnnotationsDialog
+    {
+        id: importAnnotationsDialog
+        pluginModel: plugin.model
+    }
+
+    Labs.FileDialog
+    {
+        id: importAnnotationsFileOpenDialog
+        nameFilters:
+        [
+            "All Files (*.csv *.tsv *.ssv *.xlsx)",
+            "CSV Files (*.csv)",
+            "TSV Files (*.tsv)",
+            "SSV Files (*.ssv)",
+            "Excel Files (*.xlsx)"
+        ]
+
+        onAccepted:
+        {
+            misc.fileOpenInitialFolder = folder.toString();
+            importAnnotationsDialog.open(file);
+        }
+    }
+
+    Action
+    {
+        id: importAnnotationsAction
+        text: qsTr("Import Annotations From Table…")
+        onTriggered: function(source)
+        {
+            if(misc.fileOpenInitialFolder !== undefined)
+                importAnnotationsFileOpenDialog.folder = misc.fileOpenInitialFolder;
+
+            importAnnotationsFileOpenDialog.open();
         }
     }
 
@@ -773,6 +819,8 @@ PluginContent
                     });
                 });
             }
+
+            MenuUtils.addActionTo(menu, importAnnotationsAction);
 
             MenuUtils.addSeparatorTo(menu);
             MenuUtils.addActionTo(menu, savePlotImageAction);
