@@ -79,7 +79,7 @@ Window
 
         onDataChanged:
         {
-            let idHeaders = headers(ValueType.Identifier);
+            let idHeaders = rowHeaders(ValueType.Identifier);
 
             // ComboBox gets upset if you change one or other of these
             // on live data, so reset them first
@@ -430,7 +430,7 @@ Window
 
                         function updateModel()
                         {
-                            let headers = tabularDataParser.headers(ValueType.All,
+                            let headers = tabularDataParser.rowHeaders(ValueType.All,
                                 [keyHeaderComboBox.currentText]);
                             model = headers;
                             selectAll();

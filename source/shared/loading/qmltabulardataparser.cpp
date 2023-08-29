@@ -270,7 +270,7 @@ void QmlTabularDataParser::reset()
     }
 }
 
-QmlTabularDataHeaderModel* QmlTabularDataParser::headers(int _valueTypes, const QStringList& skip) const
+QmlTabularDataHeaderModel* QmlTabularDataParser::rowHeaders(int _valueTypes, const QStringList& skip) const
 {
     Q_ASSERT(_dataPtr != nullptr);
     if(_dataPtr == nullptr)

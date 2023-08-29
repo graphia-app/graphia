@@ -116,7 +116,7 @@ public:
     Q_INVOKABLE void cancelParse();
     Q_INVOKABLE void reset();
 
-    Q_INVOKABLE QmlTabularDataHeaderModel* headers(
+    Q_INVOKABLE QmlTabularDataHeaderModel* rowHeaders(
         int _valueTypes = static_cast<int>(ValueType::All),
         const QStringList& skip = {}) const;
 
