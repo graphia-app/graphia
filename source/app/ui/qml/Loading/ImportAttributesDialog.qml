@@ -373,7 +373,7 @@ Window
                     Text
                     {
                         text: qsTr("Please select the required attributes from the list on the right. Multiple " +
-                            "attributes may be selected by holding down <i>Ctrl</i> or a range may be selected " +
+                            "attributes may be selected by holding down <i>Ctrl</i>, or a range may be selected " +
                             "by holding <i>Shift</i>, then clicking as desired.")
                         wrapMode: Text.WordWrap
                         textFormat: Text.StyledText
