@@ -43,7 +43,7 @@ bool TabularDataModel::columnIsNumerical(int column) const
 
     if(_data != nullptr && c < _data->numColumns())
     {
-        auto type = _data->typeIdentity(c, 0).type();
+        auto type = _data->columnTypeIdentity(c, 0).type();
 
         return type == TypeIdentity::Type::Int || type == TypeIdentity::Type::Float;
     }

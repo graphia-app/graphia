@@ -50,7 +50,7 @@ void ImportAttributesKeyDetection::start()
         auto attributeNames = _document->availableAttributeNames(
             static_cast<int>(ElementType::NodeAndEdge), static_cast<int>(ValueType::Identifier));
 
-        auto typeIdentities = _tabularData->typeIdentities();
+        auto typeIdentities = _tabularData->columnTypeIdentities();
 
         for(size_t columnIndex = 0; columnIndex < _tabularData->numColumns(); columnIndex++)
         {

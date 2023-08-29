@@ -75,8 +75,8 @@ public:
     void reset();
 
     // First row is assumed to be a header, by default
-    TypeIdentity typeIdentity(size_t columnIndex, size_t rowIndex = 1) const;
-    std::vector<TypeIdentity> typeIdentities(Progressable* progressable = nullptr, size_t rowIndex = 1) const;
+    TypeIdentity columnTypeIdentity(size_t columnIndex, size_t rowIndex = 1) const;
+    std::vector<TypeIdentity> columnTypeIdentities(Progressable* progressable = nullptr, size_t rowIndex = 1) const;
 
     int columnMatchPercentage(size_t columnIndex, const QStringList& referenceValues) const;
 

@@ -138,7 +138,7 @@ QmlTabularDataParser::~QmlTabularDataParser() // NOLINT modernize-use-equals-def
 
 void QmlTabularDataParser::updateColumnTypes()
 {
-    _columnTypeIdentities = _dataPtr->typeIdentities(this);
+    _columnTypeIdentities = _dataPtr->columnTypeIdentities(this);
 }
 
 bool QmlTabularDataParser::parse(const QUrl& fileUrl)

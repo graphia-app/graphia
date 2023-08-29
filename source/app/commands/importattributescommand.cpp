@@ -136,7 +136,7 @@ bool ImportAttributesCommand::execute()
             auto* existingVector = userData->vector(name);
 
             const bool replace = _replace && existingVector != nullptr &&
-                existingVector->type() == _data.typeIdentity(static_cast<size_t>(columnIndex)).type();
+                existingVector->type() == _data.columnTypeIdentity(static_cast<size_t>(columnIndex)).type();
 
             if(replace)
                 _replacedUserDataVectors.emplace_back(*existingVector);
