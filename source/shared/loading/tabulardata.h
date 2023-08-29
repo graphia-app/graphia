@@ -83,6 +83,7 @@ public:
     std::vector<TypeIdentity> rowTypeIdentities(Progressable* progressable = nullptr, size_t columnIndex = 1) const;
 
     int columnMatchPercentage(size_t columnIndex, const QStringList& referenceValues) const;
+    int rowMatchPercentage(size_t rowIndex, const QStringList& referenceValues) const;
 
     static QString contentIdentityOf(const QUrl& url);
 };

@@ -270,6 +270,31 @@ int TabularData::columnMatchPercentage(size_t columnIndex, const QStringList& re
     return percent;
 }
 
+int TabularData::rowMatchPercentage(size_t rowIndex, const QStringList& referenceValues) const
+{
+    const std::set<QString> referenceSet(referenceValues.begin(), referenceValues.end());
+
+    std::set<QString> rowValues;
+    std::set<QString> intersection;
+
+    for(size_t column = 1; column < numColumns(); column++)
+        rowValues.insert(valueAt(column, rowIndex));
+
+    std::set_intersection(referenceSet.begin(), referenceSet.end(),
+        rowValues.begin(), rowValues.end(),
+        std::inserter(intersection, intersection.begin()));
+
+    auto percent = static_cast<int>((intersection.size() * 100) /
+        static_cast<size_t>(referenceValues.size()));
+
+    // In the case where the intersection is very small, but non-zero,
+    // don't report a 0% match
+    if(percent == 0 && !intersection.empty())
+        percent = 1;
+
+    return percent;
+}
+
 QString TabularData::contentIdentityOf(const QUrl& url)
 {
     if(XlsxTabularDataParser::canLoad(url))
