@@ -209,6 +209,42 @@ std::vector<TypeIdentity> TabularData::columnTypeIdentities(Progressable* progre
     return t;
 }
 
+TypeIdentity TabularData::rowTypeIdentity(size_t rowIndex, size_t columnIndex) const
+{
+    TypeIdentity identity;
+
+    for(; columnIndex < numColumns(); columnIndex++)
+    {
+        const auto& value = valueAt(columnIndex, rowIndex);
+        identity.updateType(value);
+    }
+
+    return identity;
+}
+
+std::vector<TypeIdentity> TabularData::rowTypeIdentities(Progressable* progressable, size_t columnIndex) const
+{
+    std::vector<TypeIdentity> t;
+
+    t.resize(numRows());
+
+    if(progressable != nullptr)
+        progressable->setProgress(-1);
+
+    for(size_t rowIndex = 0; rowIndex < numRows(); rowIndex++)
+    {
+        if(progressable != nullptr)
+            progressable->setProgress(static_cast<int>((rowIndex * 100) / numRows()));
+
+        t.at(rowIndex) = rowTypeIdentity(rowIndex, columnIndex);
+    }
+
+    if(progressable != nullptr)
+        progressable->setProgress(-1);
+
+    return t;
+}
+
 int TabularData::columnMatchPercentage(size_t columnIndex, const QStringList& referenceValues) const
 {
     const std::set<QString> referenceSet(referenceValues.begin(), referenceValues.end());

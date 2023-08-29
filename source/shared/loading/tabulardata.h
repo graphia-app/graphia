@@ -78,6 +78,10 @@ public:
     TypeIdentity columnTypeIdentity(size_t columnIndex, size_t rowIndex = 1) const;
     std::vector<TypeIdentity> columnTypeIdentities(Progressable* progressable = nullptr, size_t rowIndex = 1) const;
 
+    // First column is assumed to be a header, by default
+    TypeIdentity rowTypeIdentity(size_t rowIndex, size_t columnIndex = 1) const;
+    std::vector<TypeIdentity> rowTypeIdentities(Progressable* progressable = nullptr, size_t columnIndex = 1) const;
+
     int columnMatchPercentage(size_t columnIndex, const QStringList& referenceValues) const;
 
     static QString contentIdentityOf(const QUrl& url);
