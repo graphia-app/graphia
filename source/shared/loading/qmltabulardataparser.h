@@ -38,29 +38,35 @@
 class QmlTabularDataParser;
 class QAbstractTableModel;
 
+DEFINE_QML_ENUM(
+    Q_GADGET, HeaderModelType,
+    Rows, Columns);
+
 class QmlTabularDataHeaderModel : public QAbstractListModel
 {
     Q_OBJECT
 
 public:
     explicit QmlTabularDataHeaderModel(const QmlTabularDataParser* parser,
-        ValueType valueTypes = ValueType::All, const QStringList& skip = {});
+        ValueType valueTypes = ValueType::All, const QStringList& skip = {},
+        HeaderModelType headerModelType = HeaderModelType::Rows);
 
     enum Roles
     {
-        ColumnIndex = Qt::UserRole + 1,
+        Index = Qt::UserRole + 1,
     };
 
     int rowCount(const QModelIndex&) const override;
-    QVariant data(const QModelIndex& index, int role) const override;
+    QVariant data(const QModelIndex& modelIndex, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    Q_INVOKABLE int columnIndexFor(const QModelIndex& index) const;
-    Q_INVOKABLE QModelIndex indexOf(int columnIndex) const;
+    Q_INVOKABLE int indexFor(const QModelIndex& modelIndex) const;
+    Q_INVOKABLE QModelIndex modelIndexOf(int roleIndex) const;
 
 private:
     const QmlTabularDataParser* _parser = nullptr;
-    std::vector<size_t> _columnIndices;
+    HeaderModelType _type = HeaderModelType::Rows;
+    std::vector<size_t> _indices;
 };
 
 class QmlTabularDataParser : public QObject, virtual public Cancellable, virtual public Progressable
@@ -84,6 +90,7 @@ private:
     TabularDataModel _model;
 
     std::vector<TypeIdentity> _columnTypeIdentities;
+    std::vector<TypeIdentity> _rowTypeIdentities;
 
     int _progress = -1;
     std::atomic<Cancellable*> _cancellableParser = nullptr;
@@ -91,7 +98,7 @@ private:
     bool _failed = false;
     QString _failureReason;
 
-    void updateColumnTypes();
+    void updateTypes();
 
 public:
     struct MatrixTypeResult
@@ -117,6 +124,10 @@ public:
     Q_INVOKABLE void reset();
 
     Q_INVOKABLE QmlTabularDataHeaderModel* rowHeaders(
+        int _valueTypes = static_cast<int>(ValueType::All),
+        const QStringList& skip = {}) const;
+
+    Q_INVOKABLE QmlTabularDataHeaderModel* columnHeaders(
         int _valueTypes = static_cast<int>(ValueType::All),
         const QStringList& skip = {}) const;
 

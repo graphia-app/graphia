@@ -172,7 +172,7 @@ Window
                 if(modelIndex.valid)
                     keyAttributeList.select(modelIndex);
 
-                keyHeaderComboBox.currentIndex = keyHeaderComboBox.model.indexOf(result.column).row;
+                keyHeaderComboBox.currentIndex = keyHeaderComboBox.model.modelIndexOf(result.column).row;
             }
         }
 
@@ -535,13 +535,13 @@ Window
             }
 
             let keyAttributeName = keyAttributeList.selectedValue;
-            let keyColumnIndex = keyHeaderComboBox.model.columnIndexFor(
+            let keyColumnIndex = keyHeaderComboBox.model.indexFor(
                     keyHeaderComboBox.model.index(keyHeaderComboBox.currentIndex, 0));
 
             let attributeColumnIndices = [];
             for(let selectedIndex of headersList.selectedIndices)
             {
-                let columnIndex = headersList.model.columnIndexFor(
+                let columnIndex = headersList.model.indexFor(
                     headersList.model.index(selectedIndex, 0));
                 attributeColumnIndices.push(columnIndex);
             }

@@ -35,14 +35,20 @@
 using namespace Qt::Literals::StringLiterals;
 
 QmlTabularDataHeaderModel::QmlTabularDataHeaderModel(const QmlTabularDataParser* parser,
-    ValueType valueTypes, const QStringList& skip) :
-    _parser(parser)
+    ValueType valueTypes, const QStringList& skip, HeaderModelType headerModelType) :
+    _parser(parser), _type(headerModelType)
 {
-    _columnIndices.reserve(_parser->_dataPtr->numColumns());
+    size_t num = _type == HeaderModelType::Rows ?
+        _parser->_dataPtr->numColumns() :
+        _parser->_dataPtr->numRows();
 
-    for(size_t column = 0; column < _parser->_dataPtr->numColumns(); column++)
+    _indices.reserve(num);
+
+    for(size_t index = 0; index < num; index++)
     {
-        auto type = _parser->_columnTypeIdentities.at(column).type();
+        auto type = _type == HeaderModelType::Rows ?
+            _parser->_columnTypeIdentities.at(index).type() :
+            _parser->_rowTypeIdentities.at(index).type();
 
         if(type == TypeIdentity::Type::String && !(valueTypes & ValueType::String))
             continue;
@@ -53,7 +59,9 @@ QmlTabularDataHeaderModel::QmlTabularDataHeaderModel(const QmlTabularDataParser*
         if(type == TypeIdentity::Type::Float && !(valueTypes & ValueType::Float))
             continue;
 
-        const auto& value = _parser->_dataPtr->valueAt(column, 0);
+        const auto& value = _type == HeaderModelType::Rows ?
+            _parser->_dataPtr->valueAt(index, 0) :
+            _parser->_dataPtr->valueAt(0, index);
 
         if(value.isEmpty())
             continue;
@@ -61,30 +69,33 @@ QmlTabularDataHeaderModel::QmlTabularDataHeaderModel(const QmlTabularDataParser*
         if(!skip.isEmpty() && skip.contains(value))
             continue;
 
-        _columnIndices.emplace_back(column);
+        _indices.emplace_back(index);
     }
 }
 
 int QmlTabularDataHeaderModel::rowCount(const QModelIndex&) const
 {
-    return static_cast<int>(_columnIndices.size());
+    return static_cast<int>(_indices.size());
 }
 
-QVariant QmlTabularDataHeaderModel::data(const QModelIndex& index, int role) const
+QVariant QmlTabularDataHeaderModel::data(const QModelIndex& modelIndex, int role) const
 {
-    // Rows in the model correspond to columns in the data table
-    auto columnIndicesIndex = static_cast<size_t>(index.row());
+    auto indicesIndex = static_cast<size_t>(modelIndex.row());
 
-    if(columnIndicesIndex >= _columnIndices.size())
+    if(indicesIndex >= _indices.size())
         return {};
 
-    auto columnIndex = _columnIndices.at(columnIndicesIndex);
+    auto index = _indices.at(indicesIndex);
 
     if(role == Qt::DisplayRole)
-        return _parser->_dataPtr->valueAt(columnIndex, 0);
+    {
+        return _type == HeaderModelType::Rows ?
+            _parser->_dataPtr->valueAt(index, 0) :
+            _parser->_dataPtr->valueAt(0, index);
+    }
 
-    if(role == Roles::ColumnIndex)
-        return {static_cast<int>(columnIndex)};
+    if(role == Roles::Index)
+        return {static_cast<int>(index)};
 
     return {};
 }
@@ -93,19 +104,19 @@ QHash<int, QByteArray> QmlTabularDataHeaderModel::roleNames() const
 {
     auto names = QAbstractItemModel::roleNames();
 
-    names[Roles::ColumnIndex] = "columnIndex";
+    names[Roles::Index] = "indexRole";
 
     return names;
 }
 
-int QmlTabularDataHeaderModel::columnIndexFor(const QModelIndex& index) const
+int QmlTabularDataHeaderModel::indexFor(const QModelIndex& modelIndex) const
 {
-    return data(index, Roles::ColumnIndex).toInt();
+    return data(modelIndex, Roles::Index).toInt();
 }
 
-QModelIndex QmlTabularDataHeaderModel::indexOf(int columnIndex) const
+QModelIndex QmlTabularDataHeaderModel::modelIndexOf(int roleIndex) const
 {
-    auto row = u::indexOf(_columnIndices, columnIndex);
+    auto row = u::indexOf(_indices, roleIndex);
 
     if(row < 0)
         return {};
@@ -136,9 +147,10 @@ QmlTabularDataParser::~QmlTabularDataParser() // NOLINT modernize-use-equals-def
     _dataParserWatcher.waitForFinished();
 }
 
-void QmlTabularDataParser::updateColumnTypes()
+void QmlTabularDataParser::updateTypes()
 {
     _columnTypeIdentities = _dataPtr->columnTypeIdentities(this);
+    _rowTypeIdentities = _dataPtr->rowTypeIdentities(this);
 }
 
 bool QmlTabularDataParser::parse(const QUrl& fileUrl)
@@ -168,7 +180,7 @@ bool QmlTabularDataParser::parse(const QUrl& fileUrl)
             }
 
             _dataPtr = std::make_shared<TabularData>(std::move(parser.tabularData()));
-            updateColumnTypes();
+            updateTypes();
             emit dataChanged();
 
             return true;
@@ -279,7 +291,19 @@ QmlTabularDataHeaderModel* QmlTabularDataParser::rowHeaders(int _valueTypes, con
     auto valueTypes = static_cast<ValueType>(_valueTypes);
 
     // Caller takes ownership (usually QML/JS)
-    return new QmlTabularDataHeaderModel(this, valueTypes, skip);
+    return new QmlTabularDataHeaderModel(this, valueTypes, skip, HeaderModelType::Rows);
+}
+
+QmlTabularDataHeaderModel* QmlTabularDataParser::columnHeaders(int _valueTypes, const QStringList& skip) const
+{
+    Q_ASSERT(_dataPtr != nullptr);
+    if(_dataPtr == nullptr)
+        return {};
+
+    auto valueTypes = static_cast<ValueType>(_valueTypes);
+
+    // Caller takes ownership (usually QML/JS)
+    return new QmlTabularDataHeaderModel(this, valueTypes, skip, HeaderModelType::Columns);
 }
 
 void QmlTabularDataParser::onDataLoaded()
