@@ -25,6 +25,7 @@
 #include "attributevaluecorrelationheatmapworker.h"
 
 #include "importannotationscommand.h"
+#include "importannotationskeydetection.h"
 
 #include "hierarchicalclusteringcommand.h"
 
@@ -1437,6 +1438,7 @@ CorrelationPlugin::CorrelationPlugin()
     qmlRegisterType<CorrelationTabularDataParser>("app.graphia", 1, 0, "CorrelationTabularDataParser");
     qmlRegisterType<AttributeValueCorrelationHeatmapItem>("app.graphia", 1, 0, "AttributeValueCorrelationHeatmapItem");
     qmlRegisterType<AttributeValueCorrelationHeatmapWorker>("app.graphia", 1, 0, "AttributeValueCorrelationHeatmapWorker");
+    qmlRegisterType<ImportAnnotationsKeyDetection>("app.graphia", 1, 0, "ImportAnnotationsKeyDetection");
 }
 
 QVariantMap CorrelationPlugin::correlationInfoFor(int correlationType) const
