@@ -429,7 +429,7 @@ Window
                         function updateModel()
                         {
                             let headers = tabularDataParser.headers(ValueType.All,
-                                keyHeaderComboBox.currentText);
+                                [keyHeaderComboBox.currentText]);
                             model = headers;
                             selectAll();
                         }
