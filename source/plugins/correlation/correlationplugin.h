@@ -208,6 +208,9 @@ public:
 
     QString log() const;
 
+    Q_INVOKABLE void importAnnotationsFromTable(std::shared_ptr<TabularData> data,
+        int keyRowIndex, const std::vector<int>& importRowIndices, bool replace);
+
 private slots:
     void onLoadSuccess();
     void onSelectionChanged(const ISelectionManager* selectionManager);

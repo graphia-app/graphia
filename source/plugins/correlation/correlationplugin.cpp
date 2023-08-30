@@ -24,6 +24,8 @@
 #include "attributevaluecorrelationheatmapitem.h"
 #include "attributevaluecorrelationheatmapworker.h"
 
+#include "importannotationscommand.h"
+
 #include "hierarchicalclusteringcommand.h"
 
 #include "shared/graph/grapharray_json.h"
@@ -1412,6 +1414,14 @@ QString CorrelationPluginInstance::log() const
     }
 
     return text;
+}
+
+void CorrelationPluginInstance::importAnnotationsFromTable(
+    std::shared_ptr<TabularData> data, // NOLINT performance-unnecessary-value-param
+    int keyRowIndex, const std::vector<int>& importRowIndices, bool replace)
+{
+    commandManager()->execute(ExecutePolicy::Add, std::make_unique<ImportAnnotationsCommand>(
+        this, &(*data), keyRowIndex, importRowIndices, replace));
 }
 
 CorrelationPlugin::CorrelationPlugin()
