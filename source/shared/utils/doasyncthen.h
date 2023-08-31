@@ -19,8 +19,9 @@
 #ifndef DOASYNCTHEN_H
 #define DOASYNCTHEN_H
 
-#include <QtConcurrent/QtConcurrent>
+#include <QtConcurrentRun>
 #include <QFuture>
+#include <QFutureWatcher>
 
 #include <type_traits>
 

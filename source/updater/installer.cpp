@@ -26,6 +26,7 @@
 
 #include <QString>
 #include <QFile>
+#include <QFutureWatcher>
 
 #include <iostream>
 

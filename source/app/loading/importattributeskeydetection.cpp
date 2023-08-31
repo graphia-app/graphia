@@ -19,7 +19,7 @@
 #include "importattributeskeydetection.h"
 
 #include <QFuture>
-#include <QtConcurrent/QtConcurrent>
+#include <QtConcurrentRun>
 #include <QQmlEngine>
 
 #include "shared/utils/static_block.h"

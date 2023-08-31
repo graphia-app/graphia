@@ -356,9 +356,10 @@ endif()
 
 target_link_libraries(${PROJECT_NAME} thirdparty_static thirdparty shared)
 
-find_package(Qt6 COMPONENTS REQUIRED Core Qml Quick QuickControls2 OpenGL Svg PrintSupport Widgets Xml Network WebEngineQuick)
+find_package(Qt6 COMPONENTS REQUIRED Concurrent Core Qml Quick QuickControls2 OpenGL Svg PrintSupport Widgets Xml Network WebEngineQuick)
 target_link_libraries(${PROJECT_NAME}
     Qt6::Core
+    Qt6::Concurrent
     Qt6::Qml
     Qt6::Quick
     Qt6::QuickControls2

@@ -195,8 +195,9 @@ list(APPEND SOURCES ${SHARED_SOURCES})
 
 add_library(shared STATIC ${SOURCES} ${HEADERS} ${RESOURCES})
 
-find_package(Qt6 COMPONENTS REQUIRED Qml Widgets Xml)
+find_package(Qt6 COMPONENTS REQUIRED Concurrent Qml Widgets Xml)
 target_link_libraries(shared
+    Qt6::Concurrent
     Qt6::Qml
     Qt6::Widgets
     Qt6::Xml

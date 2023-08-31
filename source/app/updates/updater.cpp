@@ -36,6 +36,8 @@
 #include <QDir>
 #include <QTimer>
 #include <QTemporaryFile>
+#include <QStandardPaths>
+#include <QFutureWatcher>
 
 #include <QUrl>
 #include <QNetworkReply>

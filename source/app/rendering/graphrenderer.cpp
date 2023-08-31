@@ -52,6 +52,7 @@
 #include <QNativeGestureEvent>
 #include <QTextLayout>
 #include <QBuffer>
+#include <QFutureWatcher>
 
 #include <utility>
 

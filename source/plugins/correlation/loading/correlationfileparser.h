@@ -34,7 +34,8 @@
 #include <QString>
 #include <QRect>
 #include <QVariantMap>
-#include <QtConcurrent/QtConcurrent>
+#include <QtConcurrentRun>
+#include <QFutureWatcher>
 
 #include <memory>
 #include <atomic>

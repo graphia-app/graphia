@@ -64,9 +64,10 @@ endif()
 
 target_link_libraries(${PluginName} thirdparty shared)
 
-find_package(Qt6 COMPONENTS REQUIRED Core Qml Quick QuickControls2 OpenGL PrintSupport Svg Widgets Xml)
+find_package(Qt6 COMPONENTS REQUIRED Core Concurrent Qml Quick QuickControls2 OpenGL PrintSupport Svg Widgets Xml)
 target_link_libraries(${PluginName}
     Qt6::Core
+    Qt6::Concurrent
     Qt6::Qml
     Qt6::Quick
     Qt6::QuickControls2

@@ -27,7 +27,7 @@
 
 #include <QFileInfo>
 #include <QFuture>
-#include <QtConcurrent/QtConcurrent>
+#include <QtConcurrentRun>
 #include <QQmlEngine>
 
 #include <map>
