@@ -239,6 +239,7 @@ public:
     Q_INVOKABLE void hideAllColumnAnnotations();
     Q_INVOKABLE void showColumnAnnotations(const QStringList& annotations);
     Q_INVOKABLE void hideColumnAnnotations(const QStringList& annotations);
+    Q_INVOKABLE void refreshColumnAnnotations();
 
     void setSelectedRows(const QVector<int>& selectedRows);
     void setScaleType(int scaleType);

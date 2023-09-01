@@ -302,6 +302,12 @@ void CorrelationPlotItem::hideColumnAnnotations(const QStringList& annotations)
     rebuildPlot();
 }
 
+void CorrelationPlotItem::refreshColumnAnnotations()
+{
+    emit plotOptionsChanged();
+    rebuildPlot();
+}
+
 int CorrelationPlotItem::plotMode() const
 {
     return static_cast<int>(_plotMode);
