@@ -50,6 +50,8 @@ public:
 
     bool isNumeric() const { return _hasOnlyNumericValues; }
     double normalisedNumericValueAt(size_t index) const;
+
+    auto operator<=>(const ColumnAnnotation& other) const = default;
 };
 
 #endif // COLUMNANNOTATION_H
