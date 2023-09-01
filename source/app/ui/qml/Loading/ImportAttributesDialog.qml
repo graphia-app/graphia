@@ -47,6 +47,8 @@ Window
     {
         if(!visible)
             keyAttributeList.model = null;
+        else
+            replaceCheckbox.checked = false;
     }
 
     function open(fileUrl)
