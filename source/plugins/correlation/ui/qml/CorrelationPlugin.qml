@@ -538,6 +538,11 @@ PluginContent
             if(removed.length > 0)
                 plot.hideColumnAnnotations(removed);
         }
+
+        function onColumnAnnotationValuesChanged()
+        {
+            plot.refreshColumnAnnotations();
+        }
     }
 
     property var _plotMenuStateUpdateFns: []
