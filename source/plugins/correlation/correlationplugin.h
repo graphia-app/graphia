@@ -211,6 +211,7 @@ private slots:
 
 signals:
     void columnAnnotationNamesChanged(const QStringList& added, const QStringList& removed);
+    void columnAnnotationValuesChanged();
     void sharedValuesAttributeNamesChanged();
     void numericalAttributeNamesChanged();
     void highlightedRowsChanged();

@@ -573,6 +573,8 @@ void CorrelationPluginInstance::rebuildColumnAnnotations()
         columnAnnotations.emplace_back(name, values->begin(), values->end());
     }
 
+    auto changed = columnAnnotations != _columnAnnotations;
+
     auto before = columnAnnotationNames();
     _columnAnnotations = columnAnnotations;
     auto after = columnAnnotationNames();
@@ -581,6 +583,9 @@ void CorrelationPluginInstance::rebuildColumnAnnotations()
     QStringList removedNames = u::toQStringList(u::setDifference(before, after));
 
     emit columnAnnotationNamesChanged(addedNames, removedNames);
+
+    if(changed)
+        emit columnAnnotationValuesChanged();
 }
 
 void CorrelationPluginInstance::buildDiscreteDataValueIndex(Progressable& progressable)
