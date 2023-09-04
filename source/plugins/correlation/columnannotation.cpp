@@ -75,3 +75,8 @@ double ColumnAnnotation::normalisedNumericValueAt(size_t index) const
 
     return (value - _minValue) / (_maxValue - _minValue);
 }
+
+bool ColumnAnnotation::operator==(const ColumnAnnotation& other) const
+{
+    return _name == other._name && _values == other._values;
+}

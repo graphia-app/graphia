@@ -51,7 +51,7 @@ public:
     bool isNumeric() const { return _hasOnlyNumericValues; }
     double normalisedNumericValueAt(size_t index) const;
 
-    auto operator<=>(const ColumnAnnotation& other) const = default;
+    bool operator==(const ColumnAnnotation& other) const;
 };
 
 #endif // COLUMNANNOTATION_H
