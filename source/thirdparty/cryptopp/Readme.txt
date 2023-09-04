@@ -1,5 +1,5 @@
 Crypto++: free C++ Class Library of Cryptographic Schemes
-Version 8.5 - March 7, 2021
+Version 8.8 - June 25, 2023
 
 Crypto++ Library is a free C++ class library of cryptographic schemes.
 Currently the library contains the following algorithms:
@@ -28,9 +28,9 @@ Currently the library contains the following algorithms:
                                    Poly1305, Poly1305 (IETF), SipHash, Two-Track-MAC,
                                    VMAC
 
-                                   BLAKE2s, BLAKE2b, Keccack (F1600), SHA-1,
-                   hash functions  SHA-2 (224/256/384/512), SHA-3 (224/256/384/512),
-                                   SHAKE (128/256), SipHash, SM3, Tiger,
+                                   BLAKE2s, BLAKE2b, Keccack (F1600), LSH (256/512),
+                   hash functions  SHA-1, SHA-2 (224/256/384/512), SHA-3 (224/256),
+                                   SHA-3 (384/512), SHAKE (128/256), SipHash, SM3, Tiger,
                                    RIPEMD (128/160/256/320), WHIRLPOOL
 
                                    RSA, DSA, Deterministic DSA, ElGamal,
@@ -76,8 +76,8 @@ Other features include:
   * A high level interface for most of the above, using a filter/pipeline
     metaphor
   * benchmarks and validation testing
-  * x86, x64 (x86-64), x32 (ILP32), ARM-32, Aarch32, Aarch64 and Power8 in-core code
-    for the commonly used algorithms
+  * x86, x64 (x86-64), x32 (ILP32), ARM-32, Aarch32, Aarch64 and Power8
+    in-core code for the commonly used algorithms
       + run-time CPU feature detection and code selection
       + supports GCC-style and MSVC-style inline assembly, and MASM for x64
       + x86, x64 (x86-64), x32 provides MMX, SSE2, and SSE4 implementations
@@ -91,13 +91,13 @@ for any purpose without paying anyone, but see License.txt for the fine print.
 The following compilers are supported for this release. Please visit
 http://www.cryptopp.com the most up to date build instructions and porting notes.
 
-  * Visual Studio 2003 - 2019
-  * GCC 3.3 - 10.1
+  * Visual Studio 2003 - 2022
+  * GCC 3.3 - 13.1
   * Apple Clang 4.3 - 12.0
-  * LLVM Clang 2.9 - 11.0
+  * LLVM Clang 2.9 - 14.0
   * C++ Builder 2015
   * Intel C++ Compiler 9 - 16.0
-  * Sun Studio 12u1 - 12.6
+  * Sun Studio 12u1 - 12.7
   * IBM XL C/C++ 10.0 - 14.0
 
 *** Important Usage Notes ***
@@ -128,9 +128,8 @@ cryptdll - This builds the DLL. Please note that if you wish to use Crypto++
 dlltest - This builds a sample application that only uses the DLL.
 
 The DLL used to provide FIPS validated cryptography. The library was moved
-to the CMVP's <A HREF=
-"http://csrc.nist.gov/groups/STM/cmvp/documents/140-1/140val-historical.htm">
-Historical Validation List</A>. The library and the DLL are no longer considered
+to the CMVP's [Historical Validation List](http://csrc.nist.gov/groups/STM/cmvp/documents/140-1/140val-historical.htm).
+The library and the DLL are no longer considered
 validated. You should no longer use the DLL.
 
 To use the Crypto++ DLL in your application, #include "dll.h" before including
@@ -206,21 +205,21 @@ library in your programs to help avoid unwanted redirections.
 *** Side Channel Attacks ***
 
 Crypto++ attempts to resist side channel attacks using various remediations.
-The remdiations are applied as a best effort but are probably incomplete. They
+The remediations are applied as a best effort but are probably incomplete. They
 are incomplete due to cpu speculation bugs like Spectre, Meltdown, Foreshadow.
 The attacks target both cpu caches and internal buffers. Intel generally refers
 to internal buffer attacks as "Microarchitectural Data Sampling" (MDS).
 
 The library uses hardware instructions when possible for block ciphers, hashes
 and other operations. The hardware acceleration remediates some timing
-attacks. The library also uses cache-aware algoirthms and access patterns
+attacks. The library also uses cache-aware algorithms and access patterns
 to minimize leakage cache evictions.
 
 Elliptic curves over binary fields are believed to leak information. The task is a
 work in progress. We don't believe binary fields are used in production, so we feel it
 is a low risk at the moment.
 
-Crypto++ does not enagage Specter remediations at this time. The GCC options
+Crypto++ does not engage Specter remediations at this time. The GCC options
 for Specter are -mfunction-return=thunk and -mindirect-branch=thunk, and the
 library uses them during testing. If you want the Specter workarounds then add
 the GCC options to your CXXFLAGS when building the library.
@@ -235,7 +234,7 @@ processed through Doxygen to produce an HTML reference manual. You can find
 a link to the manual from http://www.cryptopp.com. Also at that site is
 the Crypto++ FAQ, which you should browse through before attempting to
 use this library, because it will likely answer many of questions that
-may come up. Finally, the site provide the wiki which has many topics
+may come up. Finally, the site provides the wiki which has many topics
 and code examples.
 
 If you run into any problems, please try the Crypto++ mailing list.
@@ -269,7 +268,7 @@ who can help resolve the issue. If you want to contribute a bug fix to the libra
 then make a Pull Request or make a Diff available somewhere. Also see Bug Reports on
 the wiki.
 
-Features and enhancements are welcomend additions to the library. This category tends
+Features and enhancements are welcomed additions to the library. This category tends
 to be time consuming because algorithms and their test cases need to be reviewed and
 merged. Please be mindful of the test cases, and attempt to procure them from an
 independent source.
@@ -295,11 +294,64 @@ documentation is one of the highest returns on investment.
 The items in this section comprise the most recent history. Please see History.txt
 for the record back to Crypto++ 1.0.
 
+8.8.0 - June 25, 2023
+      - minor release, recompile of programs required
+      - expanded community input and support
+        * 88 unique contributors as of this release
+      - fix crash in cryptest.exe when invoked with no options
+      - fix crash in library due to GCC removing live code
+      - fix RSA with key size 16 may provide an invalid key
+      - fix failure to build on 32-bit x86
+      - fix failure to build on iPhone Simulator for arm64
+      - fix failure to build on Windows arm64
+      - test for SSSE3 before using the ISA
+      - fix include of <x86intrin.h> when using MSVC
+      - improve performance of CRC32C_Update_SSE42 for x86-64
+      - update documentation
+
+8.7.0 - August 7, 2022
+      - minor release, recompile of programs required
+      - expanded community input and support
+        * 81 unique contributors as of this release
+      - fix RSA key generation for small moduli
+      - fix AES-GCM with AESNI but without CLMUL
+      - fix Clang warning with C++17
+      - fix MinGW builds due to use of O_NOFOLLOW
+      - rework CFB_CipherTemplate::ProcessData and AdditiveCipherTemplate::ProcessData
+        * restored performance and avoided performance penalty of a temp buffer
+      - fix undersized SecBlock buffer in Integer bit operations
+      - work around several GCC 11 & 12 problems
+
+8.6.0 - September 21, 2021
+      - minor release, recompile of programs required
+      - expanded community input and support
+        * 74 unique contributors as of this release
+      - fix ElGamal encryption
+      - fix ChaCha20 AVX2 implementation
+      - add octal and decimal literal prefix parsing to Integer
+      - add missing overload in ed25519Signer and ed25519Verifier
+      - make SHA-NI independent of AVX and AVX2
+      - fix OldRandomPool GenerateWord32
+      - use CPPFLAGS during feature testing
+      - fix compile on CentOS 5
+      - fix compile on FreeBSD
+      - fix feature testing on ARM A-32 and Aarch64
+      - enable inline ASM for CRC and PMULL on Apple M1
+      - fix Intel oneAPI compile
+      - rename test files with *.cpp extension
+      - fix GCC compile error due to missing _mm256_set_m128i
+      - add LSH-256 and LSH-512 hash functions
+      - add ECIES_P1363 for backwards compatibility
+      - fix AdditiveCipherTemplate<T> ProcessData
+      - remove CRYPTOPP_NO_CXX11 define
+      - add -fno-common for Darwin builds
+      - update documentation
+
 8.5.0 - March 7, 2021
       - minor release, no recompile of programs required
       - expanded community input and support
         * 70 unique contributors as of this release
-      - port to Apple M1
+      - port to Apple M1 hardware
 
 8.4.0 - January 2, 2021
       - minor release, recompile of programs required

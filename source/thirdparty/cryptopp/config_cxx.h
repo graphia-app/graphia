@@ -39,7 +39,10 @@
 
 // You may need to force include a C++ header on Android when using STLPort
 // to ensure _STLPORT_VERSION is defined
-#if (defined(_MSC_VER) && _MSC_VER <= 1300) || defined(__MWERKS__) || (defined(_STLPORT_VERSION) && ((_STLPORT_VERSION < 0x450) || defined(_STLP_NO_UNCAUGHT_EXCEPT_SUPPORT)))
+#if (defined(_MSC_VER) && _MSC_VER <= 1300) || \
+	defined(__MWERKS__) || \
+	(defined(_STLPORT_VERSION) && ((_STLPORT_VERSION < 0x450) || defined(_STLP_NO_UNCAUGHT_EXCEPT_SUPPORT)) || \
+	(__cplusplus >= 202002L))
 #define CRYPTOPP_DISABLE_UNCAUGHT_EXCEPTION
 #endif
 
@@ -54,21 +57,9 @@
 # define __has_feature(x) 0
 #endif
 
-// Define CRYPTOPP_NO_CXX11 to avoid C++11 related features shown at the
-// end of this file. Some compilers and standard C++ headers advertise C++11
-// but they are really just C++03 with some additional C++11 headers and
-// non-conforming classes. Also see Issues 529.
-// #define CRYPTOPP_NO_CXX11 1
-
-// Define CRYPTOPP_NO_CXX17 to avoid C++17 related features shown at the end of
-// this file. At the moment it should only affect std::uncaught_exceptions.
-// #define CRYPTOPP_NO_CXX17 1
-
 // C++11 macro version, https://stackoverflow.com/q/7223991/608639
-#if !defined(CRYPTOPP_NO_CXX11)
-#  if ((_MSC_VER >= 1600) || (__cplusplus >= 201103L)) && !defined(_STLPORT_VERSION)
-#    define CRYPTOPP_CXX11 1
-#  endif
+#if ((_MSC_VER >= 1600) || (__cplusplus >= 201103L)) && !defined(_STLPORT_VERSION)
+#  define CRYPTOPP_CXX11 1
 #endif
 
 // Hack ahead. Apple's standard library does not have C++'s unique_ptr in C++11.

@@ -102,7 +102,7 @@ void ChaCha_OperateKeystream(KeystreamOperation operation,
         {
             while (iterationCount >= 8 && MultiBlockSafe(state[12], 8))
             {
-                const bool xorInput = (operation & INPUT_NULL) != INPUT_NULL;
+                const bool xorInput = (operation & EnumToInt(INPUT_NULL)) != EnumToInt(INPUT_NULL);
                 ChaCha_OperateKeystream_AVX2(state, xorInput ? input : NULLPTR, output, rounds);
 
                 // MultiBlockSafe avoids overflow on the counter words
@@ -120,7 +120,7 @@ void ChaCha_OperateKeystream(KeystreamOperation operation,
         {
             while (iterationCount >= 4 && MultiBlockSafe(state[12], 4))
             {
-                const bool xorInput = (operation & INPUT_NULL) != INPUT_NULL;
+                const bool xorInput = (operation & EnumToInt(INPUT_NULL)) != EnumToInt(INPUT_NULL);
                 ChaCha_OperateKeystream_SSE2(state, xorInput ? input : NULLPTR, output, rounds);
 
                 // MultiBlockSafe avoids overflow on the counter words
@@ -138,7 +138,7 @@ void ChaCha_OperateKeystream(KeystreamOperation operation,
         {
             while (iterationCount >= 4 && MultiBlockSafe(state[12], 4))
             {
-                const bool xorInput = (operation & INPUT_NULL) != INPUT_NULL;
+                const bool xorInput = (operation & EnumToInt(INPUT_NULL)) != EnumToInt(INPUT_NULL);
                 ChaCha_OperateKeystream_NEON(state, xorInput ? input : NULLPTR, output, rounds);
 
                 // MultiBlockSafe avoids overflow on the counter words
@@ -156,7 +156,7 @@ void ChaCha_OperateKeystream(KeystreamOperation operation,
         {
             while (iterationCount >= 4 && MultiBlockSafe(state[12], 4))
             {
-                const bool xorInput = (operation & INPUT_NULL) != INPUT_NULL;
+                const bool xorInput = (operation & EnumToInt(INPUT_NULL)) != EnumToInt(INPUT_NULL);
                 ChaCha_OperateKeystream_ALTIVEC(state, xorInput ? input : NULLPTR, output, rounds);
 
                 // MultiBlockSafe avoids overflow on the counter words
@@ -442,7 +442,7 @@ void ChaChaTLS_Policy::SeekToIteration(lword iterationCount)
     // large then we can wrap and process more data as long as
     // data processed in the security context does not exceed
     // 2^32 blocks or approximately 256 GB of data.
-    CRYPTOPP_ASSERT(iterationCount <= std::numeric_limits<word32>::max());
+    CRYPTOPP_ASSERT(iterationCount <= (std::numeric_limits<word32>::max)());
     m_state[12] = (word32)iterationCount;  // low word
 }
 

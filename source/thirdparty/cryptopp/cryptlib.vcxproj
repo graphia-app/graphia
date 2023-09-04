@@ -38,7 +38,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <!-- Microsoft documentation clearly shows the Global property group -->
-  <!-- preceeds the import of Cpp.Default.props and Cpp.props -->
+  <!-- precedes the import of Cpp.Default.props and Cpp.props -->
   <!-- https://msdn.microsoft.com/en-us/library/2208a1f2.aspx -->
   <PropertyGroup Label="Globals">
     <ProjectGuid>{c39f4b46-6e89-4074-902e-ca57073044d2}</ProjectGuid>
@@ -262,6 +262,12 @@
     <ClCompile Include="keccak_simd.cpp" />
     <ClCompile Include="lea.cpp" />
     <ClCompile Include="lea_simd.cpp" />
+    <ClCompile Include="lsh256.cpp" />
+    <ClCompile Include="lsh256_sse.cpp" />
+    <ClCompile Include="lsh256_avx.cpp" />
+    <ClCompile Include="lsh512.cpp" />
+    <ClCompile Include="lsh512_sse.cpp" />
+    <ClCompile Include="lsh512_avx.cpp" />
     <ClCompile Include="luc.cpp" />
     <ClCompile Include="mars.cpp" />
     <ClCompile Include="marss.cpp" />
@@ -484,6 +490,7 @@
     <ClInclude Include="keccak.h" />
     <ClInclude Include="lubyrack.h" />
     <ClInclude Include="lea.h" />
+    <ClInclude Include="lsh.h" />
     <ClInclude Include="luc.h" />
     <ClInclude Include="mars.h" />
     <ClInclude Include="md2.h" />

@@ -245,7 +245,7 @@ void AutoSeededX917RNG<BLOCK_CIPHER>::Reseed(bool blocking, const byte *input, s
 {
 	enum {BlockSize=BLOCK_CIPHER::BLOCKSIZE};
 	enum {KeyLength=BLOCK_CIPHER::DEFAULT_KEYLENGTH};
-	enum {SeedSize=BlockSize + KeyLength};
+	enum {SeedSize=EnumToInt(BlockSize)+EnumToInt(KeyLength)};
 
 	SecByteBlock seed(SeedSize), temp(SeedSize);
 	const byte label[] = "X9.17 key generation";
@@ -265,7 +265,7 @@ void AutoSeededX917RNG<BLOCK_CIPHER>::Reseed(bool blocking, const byte *input, s
 
 		key = seed + BlockSize;
 	}	// check that seed and key don't have same value
-	while (memcmp(key, seed, STDMIN((size_t)BlockSize, (size_t)KeyLength)) == 0);
+	while (std::memcmp(key, seed, STDMIN((size_t)BlockSize, (size_t)KeyLength)) == 0);
 
 	Reseed(key, KeyLength, seed, NULLPTR);
 }

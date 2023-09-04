@@ -23,11 +23,11 @@
 #endif
 
 #if defined(__XOP__)
-# include <ammintrin.h>
-# if defined(__GNUC__)
+# if defined(CRYPTOPP_GCC_COMPATIBLE)
 #  include <x86intrin.h>
 # endif
-#endif
+# include <ammintrin.h>
+#endif  // XOP
 
 #if (CRYPTOPP_ARM_NEON_HEADER)
 # include "adv_simd.h"
@@ -285,14 +285,6 @@ inline void SIMON128_Dec_6_Blocks(uint64x2_t &block0, uint64x2_t &block1,
 // ***************************** IA-32 ***************************** //
 
 #if (CRYPTOPP_SSSE3_AVAILABLE)
-
-// Clang intrinsic casts, http://bugs.llvm.org/show_bug.cgi?id=20670
-#ifndef M128_CAST
-# define M128_CAST(x) ((__m128i *)(void *)(x))
-#endif
-#ifndef CONST_M128_CAST
-# define CONST_M128_CAST(x) ((const __m128i *)(const void *)(x))
-#endif
 
 // GCC double casts, https://www.spinics.net/lists/gcchelp/msg47735.html
 #ifndef DOUBLE_CAST

@@ -193,7 +193,7 @@ int scoped_main(int argc, char *argv[])
 		std::string command, executableName, macFilename;
 
 		if (argc < 2)
-			command = 'h';
+			command = "X-help";
 		else
 			command = argv[1];
 
@@ -398,7 +398,10 @@ int scoped_main(int argc, char *argv[])
 		else if (command == "ir")
 			InformationRecoverFile(argc-3, argv[2], argv+3);
 		else if (command == "v" || command == "vv")
-			return !Validate(argc>2 ? StringToValue<int, true>(argv[2]) : 0, argv[1][1] == 'v');
+		{
+			int testNumber = argc>2 ? StringToValue<int, true>(argv[2]) : 0;
+			return Validate(testNumber, command == "vv" /*thorough*/) ? 0 : 1;
+        }
 		else if (command.substr(0,1) == "b") // "b", "b1", "b2", ...
 			BenchmarkWithCommand(argc, argv);
 		else if (command == "z")
@@ -423,10 +426,10 @@ int scoped_main(int argc, char *argv[])
 			HmacFile(argv[2], argv[3]);
 		else if (command == "ae")
 			AES_CTR_Encrypt(argv[2], argv[3], argv[4], argv[5]);
-		else if (command == "h")
+		else if (command == "h" || command == "X-help")
 		{
 			FileSource usage(DataDir("TestData/usage.dat").c_str(), true, new FileSink(std::cout));
-			return 1;
+			return command == "h" ? 0 : 1;
 		}
 		else if (command == "V")
 		{
@@ -1009,7 +1012,8 @@ bool Validate(int alg, bool thorough)
 	case 65: result = ValidateARIA(); break;
 	case 66: result = ValidateCamellia(); break;
 	case 67: result = ValidateWhirlpool(); break;
-	case 68: result = ValidateTTMAC(); break;
+	case 68: result = ValidateLSH(); break;
+	case 69: result = ValidateTTMAC(); break;
 	case 70: result = ValidateSalsa(); break;
 	case 71: result = ValidateChaCha(); break;
 	case 72: result = ValidateChaChaTLS(); break;
@@ -1059,12 +1063,13 @@ bool Validate(int alg, bool thorough)
 	case 9994: result = TestHuffmanCodes(); break;
 	// http://github.com/weidai11/cryptopp/issues/346
 	case 9993: result = TestASN1Parse(); break;
+	case 9992: result = TestASN1Functions(); break;
 	// http://github.com/weidai11/cryptopp/issues/242
-	case 9992: result = TestX25519(); break;
+	case 9991: result = TestX25519(); break;
 	// http://github.com/weidai11/cryptopp/issues/346
-	case 9991: result = TestEd25519(); break;
+	case 9990: result = TestEd25519(); break;
 # if defined(CRYPTOPP_ALTIVEC_AVAILABLE)
-	case 9990: result = TestAltivecOps(); break;
+	case 9989: result = TestAltivecOps(); break;
 # endif
 #endif
 

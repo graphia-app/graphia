@@ -22,14 +22,10 @@
 // 0.3 to 0.4 cpb profit
 #if defined(__SSE2__) || defined(_M_X64)
 # include <emmintrin.h>
-// Clang intrinsic casts
-# define M128_CAST(x) ((__m128i *)(void *)(x))
-# define CONST_M128_CAST(x) ((const __m128i *)(const void *)(x))
 #endif
 
-
 #if defined(__aarch32__) || defined(__aarch64__) || defined(_M_ARM64)
-# if (CRYPTOPP_ARM_NEON_HEADER)
+# if (CRYPTOPP_ARM_NEON_HEADER) || (CRYPTOPP_ARM_ASIMD_AVAILABLE)
 #  include <arm_neon.h>
 # endif
 #endif
@@ -97,7 +93,16 @@ inline void XorBuffer(byte *buf, const byte *mask, size_t count)
 // Borrowed from CMAC, but little-endian representation
 inline void GF_Double(byte *out, const byte* in, unsigned int len)
 {
-#if defined(_M_X64) || defined(_M_ARM64) || defined(_LP64) || defined(__LP64__)
+#if defined(CRYPTOPP_WORD128_AVAILABLE)
+    word128 carry = 0, x;
+    for (size_t i=0, idx=0; i<len/16; ++i, idx+=16)
+    {
+        x = GetWord<word128>(false, LITTLE_ENDIAN_ORDER, in+idx);
+        word128 y = (x >> 127); x = (x << 1) + carry;
+        PutWord<word128>(false, LITTLE_ENDIAN_ORDER, out+idx, x);
+        carry = y;
+    }
+#elif defined(_M_X64) || defined(_M_ARM64) || defined(_LP64) || defined(__LP64__)
     word64 carry = 0, x;
     for (size_t i=0, idx=0; i<len/8; ++i, idx+=8)
     {

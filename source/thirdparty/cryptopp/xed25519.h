@@ -69,7 +69,7 @@ public:
     /// \brief Create a x25519 object
     /// \details This constructor creates an empty x25519 object. It is
     ///  intended for use in loading existing parameters, like CryptoBox
-    ///  parameters. If you are perfoming key agreement you should use a
+    ///  parameters. If you are performing key agreement you should use a
     ///   constructor that generates random parameters on construction.
     x25519() {}
 
@@ -157,7 +157,7 @@ public:
     /// \param bt BufferedTransformation object
     /// \details Save() will write the OID associated with algorithm or scheme.
     ///  In the case of public and private keys, this function writes the
-    ///  subjectPubicKeyInfo parts.
+    ///  subjectPublicKeyInfo parts.
     /// \details The default OID is from RFC 8410 using <tt>id-X25519</tt>.
     ///  The default private key format is RFC 5208, which is the old format.
     ///  The old format provides the best interop, and keys will work
@@ -173,7 +173,7 @@ public:
     /// \param v1 flag indicating v1
     /// \details Save() will write the OID associated with algorithm or scheme.
     ///  In the case of public and private keys, this function writes the
-    ///  subjectPubicKeyInfo parts.
+    ///  subjectPublicKeyInfo parts.
     /// \details The default OID is from RFC 8410 using <tt>id-X25519</tt>.
     ///  The default private key format is RFC 5208.
     /// \details v1 means INTEGER 0 is written. INTEGER 0 means
@@ -206,7 +206,7 @@ public:
     /// \param version indicates version
     /// \details DEREncode() will write the OID associated with algorithm or
     ///  scheme. In the case of public and private keys, this function writes
-    ///  the subjectPubicKeyInfo parts.
+    ///  the subjectPublicKeyInfo parts.
     /// \details The default OID is from RFC 8410 using <tt>id-X25519</tt>.
     ///  The default private key format is RFC 5208.
     /// \details The value of version is written as the INTEGER. INTEGER 0 means
@@ -350,7 +350,7 @@ protected:
 ///  If you call GetPrivateExponent() then the little-endian byte
 ///  array is converted to a big-endian Integer() so it can be
 ///  returned the way a caller expects. And calling
-///  SetPrivateExponent perfoms a similar internal conversion.
+///  SetPrivateExponent performs a similar internal conversion.
 /// \since Crypto++ 8.0
 struct ed25519PrivateKey : public PKCS8PrivateKey
 {
@@ -360,11 +360,13 @@ struct ed25519PrivateKey : public PKCS8PrivateKey
     /// \brief Size of the public key
     /// \details PUBLIC_KEYLENGTH is the size of the public key, in bytes.
     CRYPTOPP_CONSTANT(PUBLIC_KEYLENGTH = 32);
-    /// \brief Size of the siganture
+    /// \brief Size of the signature
     /// \details SIGNATURE_LENGTH is the size of the signature, in bytes.
     ///  ed25519 is a DL-based signature scheme. The signature is the
     ///  concatenation of <tt>r || s</tt>.
     CRYPTOPP_CONSTANT(SIGNATURE_LENGTH = 64);
+
+    virtual ~ed25519PrivateKey() {}
 
     // CryptoMaterial
     bool Validate(RandomNumberGenerator &rng, unsigned int level) const;
@@ -380,7 +382,7 @@ struct ed25519PrivateKey : public PKCS8PrivateKey
     /// \param bt BufferedTransformation object
     /// \details Save() will write the OID associated with algorithm or scheme.
     ///  In the case of public and private keys, this function writes the
-    ///  subjectPubicKeyInfo parts.
+    ///  subjectPublicKeyInfo parts.
     /// \details The default OID is from RFC 8410 using <tt>id-Ed25519</tt>.
     ///  The default private key format is RFC 5208, which is the old format.
     ///  The old format provides the best interop, and keys will work
@@ -396,7 +398,7 @@ struct ed25519PrivateKey : public PKCS8PrivateKey
     /// \param v1 flag indicating v1
     /// \details Save() will write the OID associated with algorithm or scheme.
     ///  In the case of public and private keys, this function writes the
-    ///  subjectPubicKeyInfo parts.
+    ///  subjectPublicKeyInfo parts.
     /// \details The default OID is from RFC 8410 using <tt>id-Ed25519</tt>.
     ///  The default private key format is RFC 5208.
     /// \details v1 means INTEGER 0 is written. INTEGER 0 means
@@ -433,7 +435,7 @@ struct ed25519PrivateKey : public PKCS8PrivateKey
     /// \param version indicates version
     /// \details DEREncode() will write the OID associated with algorithm or
     ///  scheme. In the case of public and private keys, this function writes
-    ///  the subjectPubicKeyInfo parts.
+    ///  the subjectPublicKeyInfo parts.
     /// \details The default OID is from RFC 8410 using <tt>id-X25519</tt>.
     ///  The default private key format is RFC 5208.
     /// \details The value of version is written as the INTEGER. INTEGER 0 means
@@ -501,7 +503,7 @@ struct ed25519Signer : public PK_Signer
     /// \brief Size of the public key
     /// \details PUBLIC_KEYLENGTH is the size of the public key, in bytes.
     CRYPTOPP_CONSTANT(PUBLIC_KEYLENGTH = 32);
-    /// \brief Size of the siganture
+    /// \brief Size of the signature
     /// \details SIGNATURE_LENGTH is the size of the signature, in bytes.
     ///  ed25519 is a DL-based signature scheme. The signature is the
     ///  concatenation of <tt>r || s</tt>.
@@ -510,43 +512,50 @@ struct ed25519Signer : public PK_Signer
 
     virtual ~ed25519Signer() {}
 
-    /// \brief Create a ed25519Signer object
+    /// \brief Create an ed25519Signer object
     ed25519Signer() {}
 
-    /// \brief Create a ed25519Signer object
+    /// \brief Create an ed25519Signer object
     /// \param y public key
     /// \param x private key
-    /// \details This constructor creates a ed25519Signer object using existing parameters.
+    /// \details This constructor creates an ed25519Signer object using existing parameters.
     /// \note The public key is not validated.
     ed25519Signer(const byte y[PUBLIC_KEYLENGTH], const byte x[SECRET_KEYLENGTH]);
 
-    /// \brief Create a ed25519Signer object
+    /// \brief Create an ed25519Signer object
     /// \param x private key
-    /// \details This constructor creates a ed25519Signer object using existing parameters.
+    /// \details This constructor creates an ed25519Signer object using existing parameters.
     ///  The public key is calculated from the private key.
     ed25519Signer(const byte x[SECRET_KEYLENGTH]);
 
-    /// \brief Create a ed25519Signer object
+    /// \brief Create an ed25519Signer object
     /// \param y public key
     /// \param x private key
-    /// \details This constructor creates a ed25519Signer object using existing parameters.
+    /// \details This constructor creates an ed25519Signer object using existing parameters.
     /// \note The public key is not validated.
     ed25519Signer(const Integer &y, const Integer &x);
 
-    /// \brief Create a ed25519Signer object
+    /// \brief Create an ed25519Signer object
     /// \param x private key
-    /// \details This constructor creates a ed25519Signer object using existing parameters.
+    /// \details This constructor creates an ed25519Signer object using existing parameters.
     ///  The public key is calculated from the private key.
     ed25519Signer(const Integer &x);
 
-    /// \brief Create a ed25519Signer object
+    /// \brief Create an ed25519Signer object
+    /// \param key PKCS8 private key
+    /// \details This constructor creates an ed25519Signer object using existing private key.
+    /// \note The keys are not validated.
+    /// \since Crypto++ 8.6
+    ed25519Signer(const PKCS8PrivateKey &key);
+
+    /// \brief Create an ed25519Signer object
     /// \param rng RandomNumberGenerator derived class
     /// \details This constructor creates a new ed25519Signer using the random number generator.
     ed25519Signer(RandomNumberGenerator &rng);
 
-    /// \brief Create a ed25519Signer object
+    /// \brief Create an ed25519Signer object
     /// \param params public and private key
-    /// \details This constructor creates a ed25519Signer object using existing parameters.
+    /// \details This constructor creates an ed25519Signer object using existing parameters.
     ///  The <tt>params</tt> can be created with <tt>Save</tt>.
     /// \note The public key is not validated.
     ed25519Signer(BufferedTransformation &params);
@@ -620,7 +629,7 @@ protected:
 ///  If you call GetPublicElement() then the little-endian byte
 ///  array is converted to a big-endian Integer() so it can be
 ///  returned the way a caller expects. And calling
-///  SetPublicElement() perfoms a similar internal conversion.
+///  SetPublicElement() performs a similar internal conversion.
 /// \since Crypto++ 8.0
 struct ed25519PublicKey : public X509PublicKey
 {
@@ -628,6 +637,8 @@ struct ed25519PublicKey : public X509PublicKey
     /// \details PUBLIC_KEYLENGTH is the size of the public key, in bytes.
     CRYPTOPP_CONSTANT(PUBLIC_KEYLENGTH = 32);
     typedef Integer Element;
+
+    virtual ~ed25519PublicKey() {}
 
     OID GetAlgorithmID() const {
         return m_oid.Empty() ? ASN1::Ed25519() : m_oid;
@@ -637,7 +648,7 @@ struct ed25519PublicKey : public X509PublicKey
     /// \param bt BufferedTransformation object
     /// \details Save() will write the OID associated with algorithm or scheme.
     ///  In the case of public and private keys, this function writes the
-    ///  subjectPubicKeyInfo parts.
+    ///  subjectPublicKeyInfo parts.
     /// \details The default OID is from RFC 8410 using <tt>id-X25519</tt>.
     ///  The default private key format is RFC 5208, which is the old format.
     ///  The old format provides the best interop, and keys will work
@@ -706,31 +717,38 @@ struct ed25519Verifier : public PK_Verifier
 
     virtual ~ed25519Verifier() {}
 
-    /// \brief Create a ed25519Verifier object
+    /// \brief Create an ed25519Verifier object
     ed25519Verifier() {}
 
-    /// \brief Create a ed25519Verifier object
+    /// \brief Create an ed25519Verifier object
     /// \param y public key
-    /// \details This constructor creates a ed25519Verifier object using existing parameters.
+    /// \details This constructor creates an ed25519Verifier object using existing parameters.
     /// \note The public key is not validated.
     ed25519Verifier(const byte y[PUBLIC_KEYLENGTH]);
 
-    /// \brief Create a ed25519Verifier object
+    /// \brief Create an ed25519Verifier object
     /// \param y public key
-    /// \details This constructor creates a ed25519Verifier object using existing parameters.
+    /// \details This constructor creates an ed25519Verifier object using existing parameters.
     /// \note The public key is not validated.
     ed25519Verifier(const Integer &y);
 
-    /// \brief Create a ed25519Verifier object
+    /// \brief Create an ed25519Verifier object
+    /// \param key X509 public key
+    /// \details This constructor creates an ed25519Verifier object using an existing public key.
+    /// \note The public key is not validated.
+    /// \since Crypto++ 8.6
+    ed25519Verifier(const X509PublicKey &key);
+
+    /// \brief Create an ed25519Verifier object
     /// \param params public and private key
-    /// \details This constructor creates a ed25519Verifier object using existing parameters.
+    /// \details This constructor creates an ed25519Verifier object using existing parameters.
     ///  The <tt>params</tt> can be created with <tt>Save</tt>.
     /// \note The public key is not validated.
     ed25519Verifier(BufferedTransformation &params);
 
-    /// \brief Create a ed25519Verifier object
+    /// \brief Create an ed25519Verifier object
     /// \param signer ed25519 signer object
-    /// \details This constructor creates a ed25519Verifier object using existing parameters.
+    /// \details This constructor creates an ed25519Verifier object using existing parameters.
     ///  The <tt>params</tt> can be created with <tt>Save</tt>.
     /// \note The public key is not validated.
     ed25519Verifier(const ed25519Signer& signer);

@@ -11,7 +11,7 @@
 
 NAMESPACE_BEGIN(CryptoPP)
 
-static const unsigned int s_maxAutoNodeSize = 16*1024;
+static const unsigned int s_maxAutoNodeSize = 16*1024u;
 
 // this class for use by ByteQueue only
 class ByteQueueNode
@@ -50,7 +50,7 @@ public:
 		if (!begin || !length) return length;
 		size_t l = STDMIN(length, MaxSize()-m_tail);
 		if (m_buf+m_tail != begin)
-			memcpy(m_buf+m_tail, begin, l);
+			std::memcpy(m_buf+m_tail, begin, l);
 		m_tail += l;
 		return l;
 	}
@@ -67,7 +67,7 @@ public:
 	inline size_t Peek(byte *target, size_t copyMax) const
 	{
 		size_t len = STDMIN(copyMax, m_tail-m_head);
-		memcpy(target, m_buf+m_head, len);
+		std::memcpy(target, m_buf+m_head, len);
 		return len;
 	}
 
@@ -136,8 +136,9 @@ public:
 // ********************************************************
 
 ByteQueue::ByteQueue(size_t nodeSize)
-	: Bufferless<BufferedTransformation>(), m_autoNodeSize(!nodeSize), m_nodeSize(nodeSize)
-	, m_head(NULLPTR), m_tail(NULLPTR), m_lazyString(NULLPTR), m_lazyLength(0), m_lazyStringModifiable(false)
+	: Bufferless<BufferedTransformation>()
+	, m_head(NULLPTR), m_tail(NULLPTR), m_lazyString(NULLPTR), m_lazyLength(0)
+	, m_nodeSize(nodeSize), m_lazyStringModifiable(false), m_autoNodeSize(!nodeSize)
 {
 	// See GH #962 for the reason for this assert.
 	CRYPTOPP_ASSERT(nodeSize != SIZE_MAX);
@@ -254,7 +255,7 @@ size_t ByteQueue::Put2(const byte *inString, size_t length, int messageEnd, bool
 
 void ByteQueue::CleanupUsedNodes()
 {
-	// Test for m_head due to Enterprise Anlysis finding
+	// Test for m_head due to Enterprise Analysis finding
 	while (m_head && m_head != m_tail && m_head->UsedUp())
 	{
 		ByteQueueNode *temp=m_head;
@@ -262,7 +263,7 @@ void ByteQueue::CleanupUsedNodes()
 		delete temp;
 	}
 
-	// Test for m_head due to Enterprise Anlysis finding
+	// Test for m_head due to Enterprise Analysis finding
 	if (m_head && m_head->CurrentSize() == 0)
 		m_head->Clear();
 }
@@ -409,7 +410,7 @@ void ByteQueue::Unget(const byte *inString, size_t length)
 	size_t len = STDMIN(length, m_head->m_head);
 	length -= len;
 	m_head->m_head = m_head->m_head - len;
-	memcpy(m_head->m_buf + m_head->m_head, inString + length, len);
+	std::memcpy(m_head->m_buf + m_head->m_head, inString + length, len);
 
 	if (length > 0)
 	{
@@ -476,18 +477,18 @@ bool ByteQueue::operator==(const ByteQueue &rhs) const
 	return true;
 }
 
-byte ByteQueue::operator[](lword i) const
+byte ByteQueue::operator[](lword index) const
 {
 	for (ByteQueueNode *current=m_head; current; current=current->m_next)
 	{
-		if (i < current->CurrentSize())
-			return (*current)[(size_t)i];
+		if (index < current->CurrentSize())
+			return (*current)[(size_t)index];
 
-		i -= current->CurrentSize();
+		index -= current->CurrentSize();
 	}
 
-	CRYPTOPP_ASSERT(i < m_lazyLength);
-	return m_lazyString[i];
+	CRYPTOPP_ASSERT(index < m_lazyLength);
+	return m_lazyString[index];
 }
 
 void ByteQueue::swap(ByteQueue &rhs)

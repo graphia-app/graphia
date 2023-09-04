@@ -1,7 +1,7 @@
 // oids.h - originally written and placed in the public domain by Wei Dai
 
 /// \file oids.h
-/// \brief ASN.1 object identifiers for algorthms and schemes
+/// \brief ASN.1 object identifiers for algorithms and schemes
 /// \details Most OIDs can be found at http://www.oid-info.com/. The Chinese OIDs
 ///   are assigned in GM/T 0006-2012, Cryptographic Application Identifier Criterion
 ///   Specification. A reproduction can be found at http://gmssl.org/docs/oid.html.
@@ -83,6 +83,9 @@ DEFINE_OID(1, iso)
 					DEFINE_OID(rsadsi_digestAlgorithm()+5, id_md5)
 	DEFINE_OID(iso()+3, identified_organization)
 		// Arc from http://tools.ietf.org/html/draft-josefsson-pkix-newcurves
+		// GNU and OpenPGP uses 1.3.6.1.4.1.11591.15.1 for Ed25519. See
+		// https://www.gnu.org/prep/standards/html_node/OID-Allocations.html,
+		// https://datatracker.ietf.org/doc/html/draft-ietf-openpgp-rfc4880bis
 		DEFINE_OID(identified_organization()+6, dod)
 			DEFINE_OID(dod()+1, internet)
 				DEFINE_OID(internet()+4, internet_private)

@@ -87,7 +87,7 @@ void CMAC_Base::UncheckedSetKey(const byte *key, unsigned int length, const Name
 
 	cipher.ProcessBlock(m_reg, m_reg+blockSize);
 	MulU(m_reg+blockSize, blockSize);
-	memcpy(m_reg+2*blockSize, m_reg+blockSize, blockSize);
+	std::memcpy(m_reg+2*blockSize, m_reg+blockSize, blockSize);
 	MulU(m_reg+2*blockSize, blockSize);
 }
 
@@ -151,10 +151,12 @@ void CMAC_Base::TruncatedFinal(byte *mac, size_t size)
 	else
 		cipher.AdvancedProcessBlocks(m_reg, m_reg+blockSize, m_reg, blockSize, BlockTransformation::BT_DontIncrementInOutPointers|BlockTransformation::BT_XorInput);
 
-	memcpy(mac, m_reg, size);
+	// UBsan finding
+	if (mac)
+		std::memcpy(mac, m_reg, size);
 
 	m_counter = 0;
-	memset(m_reg, 0, blockSize);
+	std::memset(m_reg, 0, blockSize);
 }
 
 NAMESPACE_END

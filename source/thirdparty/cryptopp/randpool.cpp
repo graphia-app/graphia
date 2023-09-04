@@ -68,7 +68,7 @@ void RandomPool::GenerateIntoBufferedTransformation(BufferedTransformation &targ
 		do
 		{
 			m_pCipher->ProcessBlock(m_seed);
-			size_t len = UnsignedMin(16, size);
+			size_t len = UnsignedMin(16u, size);
 			target.ChannelPut(channel, m_seed, len);
 			size -= len;
 		} while (size > 0);
@@ -103,6 +103,28 @@ void OldRandomPool::IncorporateEntropy(const byte *input, size_t length)
 		addPos += length;
 		getPos = pool.size(); // Force stir on get
 	}
+}
+
+// GenerateWord32 is overridden and provides Crypto++ 5.4 behavior.
+// Taken from RandomNumberGenerator::GenerateWord32 in cryptlib.cpp.
+word32 OldRandomPool::GenerateWord32 (word32 min, word32 max)
+{
+	const word32 range = max-min;
+	const unsigned int maxBytes = BytePrecision(range);
+	const unsigned int maxBits = BitPrecision(range);
+
+	word32 value;
+
+	do
+	{
+		value = 0;
+		for (unsigned int i=0; i<maxBytes; i++)
+			value = (value << 8) | GenerateByte();
+
+		value = Crop(value, maxBits);
+	} while (value > range);
+
+	return value+min;
 }
 
 void OldRandomPool::Stir()
