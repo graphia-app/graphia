@@ -64,7 +64,7 @@ public:
 
     template<typename T, typename E>
     using ValueFn = std::variant<
-        void*,
+        int*, // Enable setting a ValueFn to nullptr
         std::function<T(E)>,
         std::function<T(E, const IAttribute&)>
     >;
