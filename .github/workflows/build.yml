@@ -80,6 +80,9 @@ jobs:
     - name: Compile
       shell: cmd
       run: call scripts\windows-build.bat
+      env:
+        CC: cl.exe
+        CXX: cl.exe
     - name: NSIS Installer
       shell: cmd
       run: call installers\windows\build.bat
@@ -104,6 +107,7 @@ jobs:
       shell: bash
       env:
         SYM_UPLOAD_URL: ${{ secrets.SYM_UPLOAD_URL }}
+
   macos:
     name: macOS
     runs-on: macos-12
