@@ -215,6 +215,37 @@ jobs:
           build/clang/**/*.cpp
           build/clang/**/*.cxx
 
+  windows-clang:
+    name: Windows Clang
+    runs-on: windows-2019
+    steps:
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        modules: ${{ env.QT_MODULES }}
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.ref }}
+        fetch-depth: 0
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        variant: sccache
+        key: windows-clang
+    - uses: ilammy/msvc-dev-cmd@v1
+    - uses: seanmiddleditch/gha-setup-ninja@v3
+    - name: Compile
+      shell: cmd
+      run: call scripts\windows-build.bat
+      env:
+        CC: clang-cl.exe
+        CXX: clang-cl.exe
+    - uses: actions/upload-artifact@v3
+      with:
+        name: Windows Clang Logs
+        path: build/*.log
+
   clang-tidy:
     name: Clang-Tidy
     runs-on: ubuntu-latest
@@ -531,6 +562,7 @@ jobs:
       - windows
       - macos
       - clang-debug
+      - windows-clang
       - clang-tidy
       - cppcheck
       - clazy
@@ -552,6 +584,10 @@ jobs:
       with:
         name: Windows Logs
         path: logs/windows
+    - uses: actions/download-artifact@v3
+      with:
+        name: Windows Clang Logs
+        path: logs/windows-clang
     - uses: actions/download-artifact@v3
       with:
         name: Static Analysis Logs
