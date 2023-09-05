@@ -82,9 +82,14 @@ if(MSVC)
     # Disable deprecated warnings
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996")
 
-    # Only do MSVC code analysis on CI
-    if(DEFINED ENV{CI})
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /analyze")
+    if(NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        # Only do MSVC code analysis on CI
+        if(DEFINED ENV{CI})
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /analyze")
+        endif()
+
+        # Clang-cl doesn't seem to understand this
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:throwingNew")
     endif()
 
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
@@ -95,7 +100,7 @@ if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
         /permissive- \
         /Zc:rvalueCast /Zc:inline /Zc:strictStrings \
-        /Zc:wchar_t /Zc:throwingNew")
+        /Zc:wchar_t")
 
     # Assembler
     ENABLE_LANGUAGE(ASM_MASM)

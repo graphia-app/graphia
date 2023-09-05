@@ -21,6 +21,11 @@ include(${CMAKE_CURRENT_LIST_DIR}/xlsxio/xlsxio.cmake)
 if(MSVC)
     # Need to put the shared library next to the binary, on Windows
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+    if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        # Disable for breakpad
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c++11-narrowing")
+    endif()
 endif()
 
 add_library(thirdparty_static STATIC
