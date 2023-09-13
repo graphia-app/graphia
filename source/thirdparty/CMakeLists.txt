@@ -59,6 +59,9 @@ if(MSVC)
     # Don't use /analyze when building third party code
     string(REPLACE "${VC_ANALYZE_FLAGS}" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
     string(REPLACE "${VC_ANALYZE_FLAGS}" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+
+    # Required by HDF5
+    target_link_libraries(thirdparty shlwapi.lib)
 else()
     set_target_properties(thirdparty PROPERTIES COMPILE_FLAGS "-w")
     set_target_properties(thirdparty_static PROPERTIES COMPILE_FLAGS "-w")
