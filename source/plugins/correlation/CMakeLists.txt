@@ -10,8 +10,6 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 list(APPEND HEADERS
-    ${CMAKE_CURRENT_LIST_DIR}/attributevaluecorrelationheatmapitem.h
-    ${CMAKE_CURRENT_LIST_DIR}/attributevaluecorrelationheatmapworker.h
     ${CMAKE_CURRENT_LIST_DIR}/columnannotation.h
     ${CMAKE_CURRENT_LIST_DIR}/correlation.h
     ${CMAKE_CURRENT_LIST_DIR}/correlationdatavector.h
@@ -33,8 +31,6 @@ list(APPEND HEADERS
 )
 
 list(APPEND SOURCES
-    ${CMAKE_CURRENT_LIST_DIR}/attributevaluecorrelationheatmapitem.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/attributevaluecorrelationheatmapworker.cpp
     ${CMAKE_CURRENT_LIST_DIR}/columnannotation.cpp
     ${CMAKE_CURRENT_LIST_DIR}/correlation.cpp
     ${CMAKE_CURRENT_LIST_DIR}/correlationdatavector.cpp

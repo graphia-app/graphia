@@ -461,23 +461,6 @@ PluginContent
         onTriggered: { yAxisLabelDialog.open(); }
     }
 
-    Action
-    {
-        id: attributeValueCorrelationHeatmapAction
-        checkable: true
-        enabled: plugin.model.numContinuousColumns > 0
-        text: qsTr("Attribute Value Heatmap…")
-        icon.name: "heatmap"
-
-        onCheckedChanged: function(checked)
-        {
-            if(checked && !attributeValueCorrelationHeatmapDialog.visible)
-                attributeValueCorrelationHeatmapDialog.show();
-            else if(!checked && attributeValueCorrelationHeatmapDialog.visible)
-                attributeValueCorrelationHeatmapDialog.close();
-        }
-    }
-
     Dialog
     {
         id: xAxisLabelDialog
@@ -537,19 +520,6 @@ PluginContent
         onAccepted: plot.yAxisLabel = yAxisTextField.text;
     }
 
-    AttributeValueCorrelationHeatmapDialog
-    {
-        id: attributeValueCorrelationHeatmapDialog
-        model: plugin.model
-        pluginContent: root
-
-        onVisibleChanged:
-        {
-            if(!visible)
-                attributeValueCorrelationHeatmapAction.checked = false;
-        }
-    }
-
     Connections
     {
         target: plugin.model
@@ -561,8 +531,6 @@ PluginContent
                 // The averaging attribute doesn't exist any more, so unset it
                 plot.averagingAttributeName = "";
             }
-
-            attributeValueCorrelationHeatmapDialog.refresh();
         }
 
         function onNumericalAttributeNamesChanged()
@@ -937,11 +905,6 @@ PluginContent
             {
                 visible: toggleShowOutliers.enabled
                 action: toggleShowOutliers
-            }
-            ToolBarButton
-            {
-                visible: attributeValueCorrelationHeatmapAction.enabled
-                action: attributeValueCorrelationHeatmapAction
             }
             ToolBarButton { action: savePlotImageAction }
 

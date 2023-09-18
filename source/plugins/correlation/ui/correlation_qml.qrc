@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>qml/AttributeValueCorrelationHeatmapDialog.qml</file>
         <file>qml/CorrelationPlugin.qml</file>
         <file>qml/CorrelationParameters.qml</file>
         <file>qml/ImportAnnotationsDialog.qml</file>
