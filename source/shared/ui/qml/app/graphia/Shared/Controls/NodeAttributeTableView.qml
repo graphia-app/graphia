@@ -255,7 +255,11 @@ Item
         property alias autoFocusSelectedNodes: autoFocusAction.checked
     }
 
-    SaveFileDialogComponent { id: saveFileDialogComponent }
+    Component
+    {
+        id: saveFileDialogComponent
+        SaveFileDialog {}
+    }
 
     property alias resizeColumnsAction: resizeColumnsToContentsAction
 

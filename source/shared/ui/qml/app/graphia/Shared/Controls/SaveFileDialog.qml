@@ -21,14 +21,11 @@ import Qt.labs.platform as Labs
 
 import app.graphia
 
-Component
+Labs.FileDialog
 {
-    Labs.FileDialog
-    {
-        id: fileDialog
+    id: fileDialog
 
-        fileMode: Labs.FileDialog.SaveFile
-        defaultSuffix: selectedNameFilter.extensions[0]
-        selectedNameFilter.index: 0
-    }
+    fileMode: Labs.FileDialog.SaveFile
+    defaultSuffix: selectedNameFilter.extensions[0]
+    selectedNameFilter.index: 0
 }

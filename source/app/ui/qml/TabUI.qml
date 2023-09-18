@@ -529,7 +529,11 @@ Item
         _document.gotoAllBookmarks();
     }
 
-    SaveFileDialogComponent { id: exportNodePositionsFileDialogComponent }
+    Component
+    {
+        id: exportNodePositionsFileDialogComponent
+        SaveFileDialog {}
+    }
 
     function exportNodePositions()
     {

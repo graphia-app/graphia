@@ -465,7 +465,11 @@ ApplicationWindow
         return path;
     }
 
-    SaveFileDialogComponent { id: saveFileDialogComponent }
+    Component
+    {
+        id: saveFileDialogComponent
+        SaveFileDialog {}
+    }
 
     Preferences
     {

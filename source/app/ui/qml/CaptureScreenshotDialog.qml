@@ -455,7 +455,11 @@ Window
         updateValues.recursing = false;
     }
 
-    SaveFileDialogComponent { id: fileDialogComponent }
+    Component
+    {
+        id: fileDialogComponent
+        SaveFileDialog {}
+    }
 
     onAspectRatioChanged:
     {

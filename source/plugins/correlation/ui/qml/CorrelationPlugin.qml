@@ -1238,7 +1238,11 @@ PluginContent
 
     PlatformMenu { id: plotContextMenu }
 
-    SaveFileDialogComponent { id: saveFileDialogComponent }
+    Component
+    {
+        id: saveFileDialogComponent
+        SaveFileDialog {}
+    }
 
     Preferences
     {

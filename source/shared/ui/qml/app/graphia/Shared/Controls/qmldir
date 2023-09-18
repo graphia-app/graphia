@@ -15,7 +15,7 @@ PlatformMenuBar 1.0 PlatformMenuBar.qml
 PlatformMenuItem 1.0 PlatformMenuItem.qml
 PlatformMenuSeparator 1.0 PlatformMenuSeparator.qml
 PointingCursorOnHoverLink 1.0 PointingCursorOnHoverLink.qml
-SaveFileDialogComponent 1.0 SaveFileDialogComponent.qml
+SaveFileDialog 1.0 SaveFileDialog.qml
 ScrollableTextArea 1.0 ScrollableTextArea.qml
 ScrollBarCornerFiller 1.0 ScrollBarCornerFiller.qml
 SlidingPanel 1.0 SlidingPanel.qml
