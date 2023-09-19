@@ -291,6 +291,8 @@ Window
                         anchors.fill: parent
 
                         property bool needsFrame: contentHeight > availableHeight
+                        readonly property real frameMargin: needsFrame ? Constants.margin : 0
+                        readonly property real scrollBarWidth: ScrollBar.vertical.size < 1 ? ScrollBar.vertical.width : 0
 
                         Component.onCompleted:
                         {
@@ -305,17 +307,17 @@ Window
                         ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
                         ScrollBar.vertical.policy: ScrollBar.AsNeeded
 
-                        readonly property real scrollBarWidth:
-                            ScrollBar.vertical.size < 1 ? ScrollBar.vertical.width : 0
-
                         RowLayout
                         {
-                            width: scrollView.width - scrollView.scrollBarWidth
+                            width: scrollView.width
 
                             ColumnLayout
                             {
                                 Layout.fillWidth: true
-                                Layout.margins: scrollView.needsFrame ? Constants.margin : 0
+                                Layout.leftMargin: scrollView.frameMargin
+                                Layout.rightMargin: scrollView.frameMargin + scrollView.scrollBarWidth
+                                Layout.topMargin: scrollView.frameMargin
+                                Layout.bottomMargin: scrollView.frameMargin
 
                                 spacing: 20
 

@@ -161,6 +161,8 @@ Window
                     anchors.fill: parent
 
                     property bool needsFrame: contentHeight > availableHeight
+                    readonly property real frameMargin: needsFrame ? Constants.margin : 0
+                    readonly property real scrollBarWidth: ScrollBar.vertical.size < 1 ? ScrollBar.vertical.width : 0
 
                     Component.onCompleted:
                     {
@@ -175,19 +177,18 @@ Window
                     ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
                     ScrollBar.vertical.policy: ScrollBar.AsNeeded
 
-                    readonly property real scrollBarWidth:
-                        ScrollBar.vertical.size < 1 ? ScrollBar.vertical.width : 0
-
                     ColumnLayout
                     {
-                        width: scrollView.width - scrollView.scrollBarWidth
+                        width: scrollView.width
 
                         Text
                         {
                             id: description
 
                             Layout.fillWidth: true
-                            Layout.margins: scrollView.needsFrame ? Constants.margin : 0
+                            Layout.leftMargin: scrollView.frameMargin
+                            Layout.rightMargin: scrollView.frameMargin + scrollView.scrollBarWidth
+                            Layout.topMargin: scrollView.frameMargin
 
                             textFormat: Text.StyledText
                             wrapMode: Text.WordWrap
@@ -229,6 +230,9 @@ Window
                             readonly property int _elementSize: 24
 
                             Layout.fillWidth: true
+                            Layout.leftMargin: scrollView.frameMargin
+                            Layout.rightMargin: scrollView.frameMargin + scrollView.scrollBarWidth
+                            Layout.bottomMargin: scrollView.frameMargin
 
                             GradientKey
                             {
