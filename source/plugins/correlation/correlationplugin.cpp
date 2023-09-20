@@ -915,8 +915,8 @@ size_t CorrelationPluginInstance::hcColumn(size_t column) const
     return _continuousHcOrder.at(column);
 }
 
-std::vector<size_t> CorrelationPluginInstance::rowsOfInterestByColumns(const std::vector<size_t>& columns,
-    const std::vector<size_t>& rows, int percentile, double weight)
+std::vector<int> CorrelationPluginInstance::rowsOfInterestByColumns(const std::vector<int>& columns,
+    const std::vector<int>& rows, int percentile, double weight)
 {
     if(rows.empty())
         return {};
@@ -926,7 +926,7 @@ std::vector<size_t> CorrelationPluginInstance::rowsOfInterestByColumns(const std
 
     struct RowScore
     {
-        size_t _row = 0;
+        int _row = 0;
         double _value = 0.0;
     };
 
@@ -935,11 +935,11 @@ std::vector<size_t> CorrelationPluginInstance::rowsOfInterestByColumns(const std
 
     for(auto row : rows)
     {
-        const auto& dataRow = _continuousDataRows.at(row);
+        const auto& dataRow = _continuousDataRows.at(static_cast<size_t>(row));
 
         double columnsSum = 0.0;
         for(auto column : columns)
-            columnsSum += dataRow.valueAt(column);
+            columnsSum += dataRow.valueAt(static_cast<size_t>(column));
 
         double otherColumnsSum = dataRow.sum() - columnsSum;
 
@@ -962,7 +962,7 @@ std::vector<size_t> CorrelationPluginInstance::rowsOfInterestByColumns(const std
 
     rowScores.resize(rowsPercentile);
 
-    std::vector<size_t> outRows;
+    std::vector<int> outRows;
     outRows.reserve(rowScores.size());
     for(const auto& rowMean : rowScores)
         outRows.push_back(rowMean._row);

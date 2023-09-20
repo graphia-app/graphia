@@ -206,13 +206,13 @@ void NodeAttributeTableModel::moveFocusToNodeForRowIndex(size_t row)
     _document->moveFocusToNode(nodeId);
 }
 
-void NodeAttributeTableModel::moveFocusToNodesForRowIndices(const std::vector<size_t>& rows)
+void NodeAttributeTableModel::moveFocusToNodesForRowIndices(const std::vector<int>& rows)
 {
     std::vector<NodeId> nodeIds;
     nodeIds.reserve(rows.size());
 
     for(auto row : rows)
-        nodeIds.push_back(_userNodeData->elementIdForIndex(row));
+        nodeIds.push_back(_userNodeData->elementIdForIndex(static_cast<size_t>(row)));
 
     _document->moveFocusToNodes(nodeIds);
 }
@@ -267,32 +267,32 @@ QString NodeAttributeTableModel::columnNameFor(size_t column) const
 }
 
 template<typename RelatedNodesFn>
-static std::vector<size_t> relatedNodes(const IUserNodeData* userNodeData,
-    const std::vector<size_t>& rows, RelatedNodesFn&& relatedNodesFn)
+static std::vector<int> relatedNodes(const IUserNodeData* userNodeData,
+    const std::vector<int>& rows, RelatedNodesFn&& relatedNodesFn)
 {
     NodeIdSet relatedNodeIds;
 
     for(auto row : rows)
     {
-        auto nodeId = userNodeData->elementIdForIndex(row);
+        auto nodeId = userNodeData->elementIdForIndex(static_cast<size_t>(row));
         relatedNodeIds.insert(nodeId);
         auto nodeIds = relatedNodesFn(nodeId);
         relatedNodeIds.insert(nodeIds.begin(), nodeIds.end());
     }
 
-    std::vector<size_t> relatedRows;
+    std::vector<int> relatedRows;
     relatedRows.reserve(relatedNodeIds.size());
 
     for(auto nodeId : relatedNodeIds)
     {
         auto row = userNodeData->indexFor(nodeId);
-        relatedRows.push_back(row);
+        relatedRows.push_back(static_cast<int>(row));
     }
 
     return relatedRows;
 }
 
-std::vector<size_t> NodeAttributeTableModel::sourcesOf(const std::vector<size_t>& rows) const
+std::vector<int> NodeAttributeTableModel::sourcesOf(const std::vector<int>& rows) const
 {
     return relatedNodes(_userNodeData, rows, [this](auto nodeId)
     {
@@ -300,7 +300,7 @@ std::vector<size_t> NodeAttributeTableModel::sourcesOf(const std::vector<size_t>
     });
 }
 
-std::vector<size_t> NodeAttributeTableModel::targetsOf(const std::vector<size_t>& rows) const
+std::vector<int> NodeAttributeTableModel::targetsOf(const std::vector<int>& rows) const
 {
     return relatedNodes(_userNodeData, rows, [this](auto nodeId)
     {
@@ -308,7 +308,7 @@ std::vector<size_t> NodeAttributeTableModel::targetsOf(const std::vector<size_t>
     });
 }
 
-std::vector<size_t> NodeAttributeTableModel::neighboursOf(const std::vector<size_t>& rows) const
+std::vector<int> NodeAttributeTableModel::neighboursOf(const std::vector<int>& rows) const
 {
     return relatedNodes(_userNodeData, rows, [this](auto nodeId)
     {
@@ -316,13 +316,13 @@ std::vector<size_t> NodeAttributeTableModel::neighboursOf(const std::vector<size
     });
 }
 
-void NodeAttributeTableModel::cropTo(const std::vector<size_t>& rows) const
+void NodeAttributeTableModel::cropTo(const std::vector<int>& rows) const
 {
     NodeIdSet nodeIds;
 
     for(auto row : rows)
     {
-        auto nodeId = _userNodeData->elementIdForIndex(row);
+        auto nodeId = _userNodeData->elementIdForIndex(static_cast<size_t>(row));
         nodeIds.insert(nodeId);
     }
 

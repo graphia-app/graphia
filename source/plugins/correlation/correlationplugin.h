@@ -200,8 +200,8 @@ public:
     void setHcOrdering(const std::vector<size_t>& ordering);
     size_t hcColumn(size_t column) const;
 
-    Q_INVOKABLE std::vector<size_t> rowsOfInterestByColumns(const std::vector<size_t>& columns,
-        const std::vector<size_t>& rows, int percentile, double weight);
+    Q_INVOKABLE std::vector<int> rowsOfInterestByColumns(const std::vector<int>& columns,
+        const std::vector<int>& rows, int percentile, double weight);
 
     QByteArray save(IMutableGraph& graph, Progressable& progressable) const override;
     bool load(const QByteArray& data, int dataVersion, IMutableGraph& graph, IParser& parser) override;

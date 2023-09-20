@@ -85,7 +85,7 @@ QItemSelectionRange TableProxyModel::buildRowSelectionRange(int topRow, int bott
     return {index(topRow, 0), index(bottomRow, columnCount() - 1)};
 }
 
-QItemSelection TableProxyModel::buildRowSelection(const std::vector<size_t>& rows)
+QItemSelection TableProxyModel::buildRowSelection(const std::vector<int>& rows)
 {
     if(rows.empty())
         return {};
@@ -102,28 +102,26 @@ QItemSelection TableProxyModel::buildRowSelection(const std::vector<size_t>& row
     {
         if(row > (last + 1))
         {
-            selection.append({index(static_cast<int>(first), 0),
-                index(static_cast<int>(last), columnCount() - 1)});
+            selection.append({index(first, 0), index(last, columnCount() - 1)});
             first = last = row;
         }
         else
             last = row;
     }
 
-    selection.append({index(static_cast<int>(first), 0),
-        index(static_cast<int>(last), columnCount() - 1)});
+    selection.append({index(first, 0), index(last, columnCount() - 1)});
 
     return selection;
 }
 
-void TableProxyModel::setRowOrder(const std::vector<size_t>& rows)
+void TableProxyModel::setRowOrder(const std::vector<int>& rows)
 {
     _rowOrderMap.clear();
 
     for(size_t i = 0; i < rows.size(); i++)
     {
         auto row = rows[i];
-        _rowOrderMap[row] = i;
+        _rowOrderMap[static_cast<size_t>(row)] = i;
     }
 
     resort();

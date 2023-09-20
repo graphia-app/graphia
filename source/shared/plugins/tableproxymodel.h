@@ -106,9 +106,9 @@ public:
     Q_INVOKABLE int mapFromSourceRow(int sourceRow) const;
     Q_INVOKABLE int mapOrderedToSourceColumn(int proxyColumn) const;
     Q_INVOKABLE QItemSelectionRange buildRowSelectionRange(int topRow, int bottomRow);
-    Q_INVOKABLE QItemSelection buildRowSelection(const std::vector<size_t>& rows);
+    Q_INVOKABLE QItemSelection buildRowSelection(const std::vector<int>& rows);
 
-    Q_INVOKABLE void setRowOrder(const std::vector<size_t>& rows);
+    Q_INVOKABLE void setRowOrder(const std::vector<int>& rows);
 
     using QSortFilterProxyModel::mapToSource;
 

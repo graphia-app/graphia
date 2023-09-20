@@ -96,16 +96,16 @@ public:
     Q_INVOKABLE virtual bool columnIsCalculated(const QString& columnName) const;
     Q_INVOKABLE virtual bool columnIsHiddenByDefault(const QString& columnName) const;
     Q_INVOKABLE void moveFocusToNodeForRowIndex(size_t row);
-    Q_INVOKABLE void moveFocusToNodesForRowIndices(const std::vector<size_t>& rows);
+    Q_INVOKABLE void moveFocusToNodesForRowIndices(const std::vector<int>& rows);
     Q_INVOKABLE virtual bool columnIsFloatingPoint(const QString& columnName) const;
     Q_INVOKABLE virtual bool columnIsNumerical(const QString& columnName) const;
     Q_INVOKABLE QString descriptionFor(const QString& columnName) const;
     Q_INVOKABLE bool rowVisible(size_t row) const;
     Q_INVOKABLE QString columnNameFor(size_t column) const;
-    Q_INVOKABLE std::vector<size_t> sourcesOf(const std::vector<size_t>& rows) const;
-    Q_INVOKABLE std::vector<size_t> targetsOf(const std::vector<size_t>& rows) const;
-    Q_INVOKABLE std::vector<size_t> neighboursOf(const std::vector<size_t>& rows) const;
-    Q_INVOKABLE void cropTo(const std::vector<size_t>& rows) const;
+    Q_INVOKABLE std::vector<int> sourcesOf(const std::vector<int>& rows) const;
+    Q_INVOKABLE std::vector<int> targetsOf(const std::vector<int>& rows) const;
+    Q_INVOKABLE std::vector<int> neighboursOf(const std::vector<int>& rows) const;
+    Q_INVOKABLE void cropTo(const std::vector<int>& rows) const;
 
     void updateColumnNames();
 
