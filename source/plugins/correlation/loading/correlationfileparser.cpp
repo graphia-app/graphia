@@ -151,8 +151,10 @@ static QRect findLargestNonNumericalDataRect(const TabularData& tabularData, Pro
     return findLargestDataRect(tabularData, [](const auto& value) { return !u::isNumeric(value); }, progressable);
 }
 
-static bool dataRectHasDiscreteValues(const TabularData& tabularData, const QRect& dataRect)
+static bool dataRectHasDiscreteValues(const TabularData& tabularData, const QRect& dataRect, Progressable* progressable = nullptr)
 {
+    auto numColumns = dataRect.right() - dataRect.left();
+
     for(auto column = dataRect.left(); column <= dataRect.right(); column++)
     {
         for(auto row = dataRect.top(); row <= dataRect.bottom(); row++)
@@ -163,13 +165,21 @@ static bool dataRectHasDiscreteValues(const TabularData& tabularData, const QRec
             if(!value.isEmpty() && !u::isNumeric(value))
                 return true;
         }
+
+        if(progressable != nullptr)
+        {
+            auto columnIndex = column - dataRect.left();
+            progressable->setProgress((columnIndex * 100) / numColumns);
+        }
     }
 
     return false;
 }
 
-static bool dataRectHasMissingValues(const TabularData& tabularData, const QRect& dataRect)
+static bool dataRectHasMissingValues(const TabularData& tabularData, const QRect& dataRect, Progressable* progressable = nullptr)
 {
+    auto numColumns = dataRect.right() - dataRect.left();
+
     for(auto column = dataRect.left(); column <= dataRect.right(); column++)
     {
         for(auto row = dataRect.top(); row <= dataRect.bottom(); row++)
@@ -180,6 +190,12 @@ static bool dataRectHasMissingValues(const TabularData& tabularData, const QRect
             if(value.isEmpty())
                 return true;
         }
+
+        if(progressable != nullptr)
+        {
+            auto columnIndex = column - dataRect.left();
+            progressable->setProgress((columnIndex * 100) / numColumns);
+        }
     }
 
     return false;
@@ -187,8 +203,9 @@ static bool dataRectHasMissingValues(const TabularData& tabularData, const QRect
 
 // This is designed to detect the case where a numerical dataRect contains continuous values
 // It's all a bit finger in the air, but should hopefully catch the obvious cases
-static bool dataRectAppearsToBeContinuous(const TabularData& tabularData, const QRect& dataRect)
+static bool dataRectAppearsToBeContinuous(const TabularData& tabularData, const QRect& dataRect, Progressable* progressable = nullptr)
 {
+    auto numColumns = dataRect.right() - dataRect.left();
     size_t numProbablyDiscreteColumns = 0;
 
     for(auto column = dataRect.left(); column <= dataRect.right(); column++)
@@ -221,13 +238,20 @@ static bool dataRectAppearsToBeContinuous(const TabularData& tabularData, const 
         // assume it's discrete data
         if(percentOfValuesInColumnThatAreUnique < 50)
             numProbablyDiscreteColumns++;
+
+        if(progressable != nullptr)
+        {
+            auto columnIndex = column - dataRect.left();
+            progressable->setProgress((columnIndex * 100) / numColumns);
+        }
     }
 
     return numProbablyDiscreteColumns == 0;
 }
 
-static std::pair<double, double> dataRectMinMax(const TabularData& tabularData, const QRect& dataRect)
+static std::pair<double, double> dataRectMinMax(const TabularData& tabularData, const QRect& dataRect, Progressable* progressable = nullptr)
 {
+    auto numColumns = dataRect.right() - dataRect.left();
     auto min = std::numeric_limits<double>::max();
     auto max = std::numeric_limits<double>::lowest();
 
@@ -248,6 +272,12 @@ static std::pair<double, double> dataRectMinMax(const TabularData& tabularData, 
 
             min = std::min(number, min);
             max = std::max(number, max);
+        }
+
+        if(progressable != nullptr)
+        {
+            auto columnIndex = column - dataRect.left();
+            progressable->setProgress((columnIndex * 100) / numColumns);
         }
     }
 
