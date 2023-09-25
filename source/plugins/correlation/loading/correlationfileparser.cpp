@@ -552,10 +552,10 @@ bool CorrelationFileParser::parse(const QUrl& fileUrl, IGraphModel*)
     if(_dataRect.isEmpty())
     {
         setProgress(-1);
-        _dataRect = findLargestNumericalDataRect(_tabularData);
+        _dataRect = findLargestNumericalDataRect(_tabularData, this);
 
         if(_dataRect.isEmpty())
-            _dataRect = findLargestNonNumericalDataRect(_tabularData);
+            _dataRect = findLargestNonNumericalDataRect(_tabularData, this);
     }
 
     if(_dataRect.isEmpty() || cancelled())
@@ -739,10 +739,7 @@ bool CorrelationTabularDataParser::parse(const QUrl& fileUrl, const QString& fil
 
             _dataPtr = std::make_shared<TabularData>(std::move(parser.tabularData()));
 
-            // findLargestNumericalDataRect can take a while for big datasets
-            setProgress(-1);
-
-            _dataHasNumericalRect = !findLargestNumericalDataRect(*_dataPtr).isEmpty();
+            _dataHasNumericalRect = !findLargestNumericalDataRect(*_dataPtr, this).isEmpty();
             emit dataHasNumericalRectChanged();
 
             return true;
@@ -783,7 +780,7 @@ void CorrelationTabularDataParser::autoDetectDataRectangle()
 
     const QFuture<void> future = QtConcurrent::run([this]()
     {
-        auto numericalDataRect = findLargestNumericalDataRect(*_dataPtr);
+        auto numericalDataRect = findLargestNumericalDataRect(*_dataPtr, this);
 
         if(numericalDataRect.isEmpty())
         {
@@ -799,11 +796,13 @@ void CorrelationTabularDataParser::autoDetectDataRectangle()
         {
             _dataRect = numericalDataRect;
             _hasDiscreteValues = false;
-            _appearsToBeContinuous = dataRectAppearsToBeContinuous(*_dataPtr, _dataRect);
-            _numericalMinMax = dataRectMinMax(*_dataPtr, _dataRect);
+            _appearsToBeContinuous = dataRectAppearsToBeContinuous(*_dataPtr, _dataRect, this);
+            _numericalMinMax = dataRectMinMax(*_dataPtr, _dataRect, this);
         }
 
-        _hasMissingValues = dataRectHasMissingValues(*_dataPtr, _dataRect);
+        _hasMissingValues = dataRectHasMissingValues(*_dataPtr, _dataRect, this);
+
+        setProgress(-1);
     });
     _dataRectangleFutureWatcher.setFuture(future);
 }
@@ -827,12 +826,12 @@ void CorrelationTabularDataParser::setDataRectangle(size_t column, size_t row)
             static_cast<int>(_dataPtr->numRows() - row)
         };
 
-        _hasDiscreteValues = dataRectHasDiscreteValues(*_dataPtr, _dataRect);
+        _hasDiscreteValues = dataRectHasDiscreteValues(*_dataPtr, _dataRect, this);
 
         if(!_hasDiscreteValues)
         {
-            _appearsToBeContinuous = dataRectAppearsToBeContinuous(*_dataPtr, _dataRect);
-            _numericalMinMax = dataRectMinMax(*_dataPtr, _dataRect);
+            _appearsToBeContinuous = dataRectAppearsToBeContinuous(*_dataPtr, _dataRect, this);
+            _numericalMinMax = dataRectMinMax(*_dataPtr, _dataRect, this);
         }
         else
         {
@@ -840,7 +839,9 @@ void CorrelationTabularDataParser::setDataRectangle(size_t column, size_t row)
             _numericalMinMax = {};
         }
 
-        _hasMissingValues = dataRectHasMissingValues(*_dataPtr, _dataRect);
+        _hasMissingValues = dataRectHasMissingValues(*_dataPtr, _dataRect, this);
+
+        setProgress(-1);
     });
     _dataRectangleFutureWatcher.setFuture(future);
 }
