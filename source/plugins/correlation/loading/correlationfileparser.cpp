@@ -53,7 +53,7 @@ CorrelationFileParser::CorrelationFileParser(CorrelationPluginInstance* plugin, 
 {}
 
 template<typename Fn>
-static QRect findLargestDataRect(const TabularData& tabularData, Fn predicate)
+static QRect findLargestDataRect(const TabularData& tabularData, Fn predicate, Progressable* progressable = nullptr)
 {
     std::vector<size_t> heightHistogram(tabularData.numColumns());
 
@@ -67,7 +67,13 @@ static QRect findLargestDataRect(const TabularData& tabularData, Fn predicate)
             else
                 break;
         }
+
+        if(progressable != nullptr)
+            progressable->setProgress(static_cast<int>((column * 100) / tabularData.numColumns()));
     }
+
+    if(progressable != nullptr)
+        progressable->setProgress(-1);
 
     std::stack<size_t> heights;
     std::stack<size_t> indexes;
@@ -135,14 +141,14 @@ static QRect findLargestDataRect(const TabularData& tabularData, Fn predicate)
     return dataRect;
 }
 
-static QRect findLargestNumericalDataRect(const TabularData& tabularData)
+static QRect findLargestNumericalDataRect(const TabularData& tabularData, Progressable* progressable = nullptr)
 {
-    return findLargestDataRect(tabularData, [](const auto& value) { return u::isNumeric(value); });
+    return findLargestDataRect(tabularData, [](const auto& value) { return u::isNumeric(value); }, progressable);
 }
 
-static QRect findLargestNonNumericalDataRect(const TabularData& tabularData)
+static QRect findLargestNonNumericalDataRect(const TabularData& tabularData, Progressable* progressable = nullptr)
 {
-    return findLargestDataRect(tabularData, [](const auto& value) { return !u::isNumeric(value); });
+    return findLargestDataRect(tabularData, [](const auto& value) { return !u::isNumeric(value); }, progressable);
 }
 
 static bool dataRectHasDiscreteValues(const TabularData& tabularData, const QRect& dataRect)
