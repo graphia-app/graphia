@@ -426,7 +426,7 @@ BaseParameterDialog
                     ProgressBar
                     {
                         anchors.centerIn: parent
-                        visible: dataRectPage._busy
+                        visible: tabularDataParser.busy
                         value: tabularDataParser.progress >= 0.0 ? tabularDataParser.progress / 100.0 : 0.0
                         indeterminate: tabularDataParser.progress < 0.0
                     }
@@ -1793,12 +1793,12 @@ BaseParameterDialog
                         return summaryString;
                     }
 
-                    enabled: !tabularDataParser.graphSizeEstimateInProgress && !dataRectPage._busy
+                    enabled: !tabularDataParser.graphSizeEstimateInProgress && !tabularDataParser.busy
                     BusyIndicator
                     {
                         visible: parent.visible
                         anchors.centerIn: parent
-                        running: tabularDataParser.graphSizeEstimateInProgress || dataRectPage._busy
+                        running: tabularDataParser.graphSizeEstimateInProgress || tabularDataParser.busy
                     }
                 }
             }
