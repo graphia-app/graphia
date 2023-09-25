@@ -416,6 +416,7 @@ BaseParameterDialog
                     id: dataTable
                     Layout.fillWidth: true
                     Layout.fillHeight: true
+                    enabled: !dataRectPage._busy
 
                     model: tabularDataParser.model
 
