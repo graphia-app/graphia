@@ -422,10 +422,12 @@ BaseParameterDialog
                     highlightedProvider: (column, row) => isInsideRect(column, row, tabularDataParser.dataRect)
                     onClicked: function(column, row, mouse) { tabularDataParser.setDataRectangle(column, row); }
 
-                    BusyIndicator
+                    ProgressBar
                     {
                         anchors.centerIn: parent
                         visible: dataRectPage._busy
+                        value: tabularDataParser.progress >= 0.0 ? tabularDataParser.progress / 100.0 : 0.0
+                        indeterminate: tabularDataParser.progress < 0.0
                     }
 
                     NamedIcon
