@@ -104,7 +104,7 @@ public:
     static bool canLoad(const QUrl&) { return true; }
 };
 
-class CorrelationTabularDataParser : public QObject, public Cancellable
+class CorrelationTabularDataParser : public QObject, public Cancellable, public Progressable
 {
     Q_OBJECT
 
@@ -141,7 +141,7 @@ private:
     bool _complete = false;
     bool _failed = false;
 
-    void setProgress(int progress);
+    void setProgress(int progress) override;
 
     QVariantMap _graphSizeEstimateQueuedParameters;
 
