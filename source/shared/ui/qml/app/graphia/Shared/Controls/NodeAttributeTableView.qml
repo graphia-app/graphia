@@ -968,11 +968,10 @@ Item
                     Connections
                     {
                         target: tableView
-                        function onContentYChanged()
-                        {
-                            backgroundCanvas.requestPaint();
-                        }
+                        function onContentYChanged() { backgroundCanvas.requestPaint(); }
                     }
+
+                    PaletteChangeNotifier { onPaletteChanged: { backgroundCanvas.requestPaint(); } }
                 }
 
                 ScrollBar.horizontal: ScrollBar
