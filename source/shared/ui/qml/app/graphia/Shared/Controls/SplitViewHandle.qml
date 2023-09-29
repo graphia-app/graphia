@@ -18,6 +18,8 @@
 
 import QtQuick
 
+import app.graphia
+
 Rectangle
 {
     id: root
@@ -81,6 +83,8 @@ Rectangle
             }
         }
     }
+
+    PaletteChangeNotifier { onPaletteChanged: { canvas.requestPaint(); } }
 
     onVisibleChanged:
     {
