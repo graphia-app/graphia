@@ -26,3 +26,4 @@ ToolBarSeparator 1.0 ToolBarSeparator.qml
 Wizard 1.0 Wizard.qml
 
 singleton FontPointSize 1.0 FontPointSize.qml
+singleton OutlineColor 1.0 OutlineColor.qml
