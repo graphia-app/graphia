@@ -103,6 +103,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/utils/movablepointer.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/msvcwarningsuppress.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/pair_iterator.h
+    ${CMAKE_CURRENT_LIST_DIR}/utils/palettechangenotifier.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/passkey.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/performancecounter.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/preferences.h
@@ -167,6 +168,7 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/utils/failurereason.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/macosfileopeneventfilter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/modelcompleter.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/utils/palettechangenotifier.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/performancecounter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/random.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/scopetimer.cpp
