@@ -390,6 +390,14 @@ void CorrelationPlotItem::updatePixmap(CorrelationPlotUpdateType updateType)
         Q_ARG(CorrelationPlotUpdateType, updateType));
 }
 
+bool CorrelationPlotItem::event(QEvent* event)
+{
+    if(event->type() == QEvent::ApplicationPaletteChange)
+        rebuildPlot();
+
+    return QQuickPaintedItem::event(event);
+}
+
 void CorrelationPlotItem::paint(QPainter* painter)
 {
     if(_pixmap.isNull())

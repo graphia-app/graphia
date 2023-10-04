@@ -227,6 +227,7 @@ public:
     explicit CorrelationPlotItem(QQuickItem* parent = nullptr);
     ~CorrelationPlotItem() override;
 
+    bool event(QEvent* event) override;
     void paint(QPainter* painter) override;
 
     Q_INVOKABLE void savePlotImage(const QUrl& url, const QString& extension);
