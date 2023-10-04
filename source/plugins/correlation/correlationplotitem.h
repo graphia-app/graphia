@@ -26,6 +26,7 @@
 #include "shared/utils/qmlenum.h"
 
 #include <qcustomplot.h>
+#include <qcustomplotcolorprovider.h>
 
 #include <QQuickPaintedItem>
 #include <QVector>
@@ -173,7 +174,7 @@ signals:
     void zoomedChanged();
 };
 
-class CorrelationPlotItem : public QQuickPaintedItem
+class CorrelationPlotItem : public QQuickPaintedItem, protected QCustomPlotColorProvider
 {
     Q_OBJECT
     Q_PROPERTY(CorrelationPluginInstance* model MEMBER _pluginInstance WRITE setPluginInstance)
