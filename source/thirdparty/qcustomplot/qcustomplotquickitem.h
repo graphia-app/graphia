@@ -38,12 +38,16 @@ public:
 private:
     QCustomPlot _customPlot;
 
+    bool event(QEvent* event) override;
+
 protected:
     QCustomPlot& customPlot() { return _customPlot; }
     const QCustomPlot& customPlot() const { return _customPlot; }
 
     void updatePlotSize();
     void routeMouseEvent(QMouseEvent* event);
+
+    virtual void buildPlot() = 0;
 
 private slots:
     void onReplot();

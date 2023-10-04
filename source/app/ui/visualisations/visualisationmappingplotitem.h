@@ -58,7 +58,7 @@ private:
     void setMinimum(double min);
     void setMaximum(double max);
 
-    void buildPlot();
+    void buildPlot() override;
 
     enum class DragType
     {

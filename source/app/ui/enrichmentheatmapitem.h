@@ -79,7 +79,7 @@ private:
 public:
     explicit EnrichmentHeatmapItem(QQuickItem* parent = nullptr);
 
-    Q_INVOKABLE void buildPlot();
+    Q_INVOKABLE void buildPlot() override;
     Q_INVOKABLE void savePlotImage(const QUrl &url, const QStringList& extensions);
 
 protected:

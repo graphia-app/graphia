@@ -56,7 +56,7 @@ private:
     void setGraphSizeEstimate(const QVariantMap& graphSizeEstimate);
 
     void updateThresholdIndicator();
-    void buildPlot();
+    void buildPlot() override;
 
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;

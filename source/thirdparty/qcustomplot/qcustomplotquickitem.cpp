@@ -84,6 +84,14 @@ void QCustomPlotQuickItem::paint(QPainter* painter)
     }
 }
 
+bool QCustomPlotQuickItem::event(QEvent* event)
+{
+    if(event->type() == QEvent::ApplicationPaletteChange)
+        buildPlot();
+
+    return QQuickPaintedItem::event(event);
+}
+
 void QCustomPlotQuickItem::updatePlotSize()
 {
     // QML does some spurious resizing, which can result in odd
