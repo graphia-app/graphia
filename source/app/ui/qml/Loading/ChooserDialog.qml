@@ -70,13 +70,18 @@ Window
 
             text: explanationText
             wrapMode: Text.WordWrap
+            color: palette.buttonText
         }
 
         RowLayout
         {
             spacing: Constants.spacing
 
-            Text { text: root.choiceLabelText }
+            Text
+            {
+                color: palette.buttonText
+                text: root.choiceLabelText
+            }
 
             ComboBox
             {

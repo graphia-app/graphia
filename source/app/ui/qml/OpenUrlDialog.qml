@@ -58,7 +58,11 @@ Window
         anchors.margins: Constants.margin
         spacing: Constants.spacing
 
-        Label { text: qsTr("Enter a resource URL:") }
+        Label
+        {
+            color: palette.buttonText
+            text: qsTr("Enter a resource URL:")
+        }
 
         RowLayout
         {

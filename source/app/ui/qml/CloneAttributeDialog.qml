@@ -101,6 +101,7 @@ Window
                 textFormat: Text.StyledText
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
+                color: palette.buttonText
 
                 text: root.sourceAttributeName.length === 0 ?
                     qsTr("Please select an attribute to clone, then enter a name for the new attribute.") :

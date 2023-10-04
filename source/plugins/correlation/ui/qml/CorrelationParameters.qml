@@ -131,6 +131,7 @@ BaseParameterDialog
 
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.Wrap
+            color: palette.buttonText
 
             text: Utils.format(tabularDataParser.failed ?
                 qsTr("Failed to Load {0}.") : qsTr("Loading {0}…"),
@@ -190,6 +191,7 @@ BaseParameterDialog
                     text: qsTr("<h2>Correlation Graph Analysis</h2>")
                     Layout.alignment: Qt.AlignLeft
                     textFormat: Text.StyledText
+                    color: palette.buttonText
                 }
 
                 RowLayout
@@ -208,6 +210,7 @@ BaseParameterDialog
                         wrapMode: Text.WordWrap
                         textFormat: Text.StyledText
                         Layout.fillWidth: true
+                        color: palette.buttonText
 
                         PointingCursorOnHoverLink {}
                         onLinkActivated: function(link) { Qt.openUrlExternally(link); }
@@ -240,12 +243,14 @@ BaseParameterDialog
                     text: qsTr("<h2>Data Selection - Select and Adjust</h2>")
                     Layout.alignment: Qt.AlignLeft
                     textFormat: Text.StyledText
+                    color: palette.buttonText
                 }
 
                 Text
                 {
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
+                    color: palette.buttonText
                     text: qsTr("A dataframe has been automatically selected for your dataset. " +
                         "If you would like to adjust it, select the new starting cell below. " +
                         "Note that the dataframe always extends to the bottom rightmost cell of the dataset.")
@@ -283,6 +288,7 @@ BaseParameterDialog
                     {
                         text: qsTr("Data Type:")
                         Layout.alignment: Qt.AlignRight
+                        color: palette.buttonText
                     }
 
                     ComboBox
@@ -467,6 +473,7 @@ BaseParameterDialog
 
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
+                    color: palette.buttonText
 
                     text:
                     {
@@ -498,6 +505,7 @@ BaseParameterDialog
                     {
                         text: qsTr("<h2>Correlation - Adjust Parameters</h2>")
                         textFormat: Text.StyledText
+                        color: palette.buttonText
                     }
 
                     Item { Layout.fillWidth: true }
@@ -547,6 +555,7 @@ BaseParameterDialog
                             "on the top right.")
                         wrapMode: Text.WordWrap
                         textFormat: Text.StyledText
+                        color: palette.buttonText
                     }
 
                     ColumnLayout
@@ -564,6 +573,7 @@ BaseParameterDialog
                                 visible: dataTypeComboBox.value === CorrelationDataType.Discrete
                                 text: qsTr("Algorithm:")
                                 Layout.alignment: Qt.AlignRight
+                                color: palette.buttonText
                             }
 
                             ComboBox
@@ -606,6 +616,7 @@ BaseParameterDialog
                                 visible: dataTypeComboBox.value === CorrelationDataType.Continuous
                                 text: qsTr("Algorithm:")
                                 Layout.alignment: Qt.AlignRight
+                                color: palette.buttonText
                             }
 
                             ComboBox
@@ -651,6 +662,7 @@ BaseParameterDialog
                                 visible: dataTypeComboBox.value === CorrelationDataType.Continuous
                                 text: qsTr("Polarity:")
                                 Layout.alignment: Qt.AlignRight
+                                color: palette.buttonText
                             }
 
                             ComboBox
@@ -697,6 +709,7 @@ BaseParameterDialog
                                     tabularDataParser.dataRect.hasMissingValues
                                 text: qsTr("Imputation:")
                                 Layout.alignment: Qt.AlignRight
+                                color: palette.buttonText
                             }
 
                             ComboBox
@@ -809,6 +822,7 @@ BaseParameterDialog
                                 visible: dataTypeComboBox.value === CorrelationDataType.Continuous
                                 text: qsTr("Clipping:")
                                 Layout.alignment: Qt.AlignRight
+                                color: palette.buttonText
                             }
 
                             ComboBox
@@ -939,6 +953,7 @@ BaseParameterDialog
                                 visible: dataTypeComboBox.value === CorrelationDataType.Continuous
                                 text: qsTr("Scaling:")
                                 Layout.alignment: Qt.AlignRight
+                                color: palette.buttonText
                             }
 
                             ComboBox
@@ -1028,6 +1043,7 @@ BaseParameterDialog
                                 visible: dataTypeComboBox.value === CorrelationDataType.Continuous
                                 text: qsTr("Normalisation:")
                                 Layout.alignment: Qt.AlignRight
+                                color: palette.buttonText
                             }
 
                             ComboBox
@@ -1147,6 +1163,7 @@ BaseParameterDialog
                             {
                                 text: qsTr("Filtering:")
                                 Layout.alignment: Qt.AlignRight
+                                color: palette.buttonText
                             }
 
                             ComboBox
@@ -1216,7 +1233,11 @@ BaseParameterDialog
                     {
                         Layout.fillWidth: true
 
-                        Text { text:  qsTr("Minimum:") }
+                        Text
+                        {
+                            color: palette.buttonText
+                            text: qsTr("Minimum:")
+                        }
 
                         DoubleSpinBox
                         {
@@ -1271,6 +1292,7 @@ BaseParameterDialog
                         Text
                         {
                             visible: filterTypeComboBox.value === CorrelationFilterType.Knn
+                            color: palette.buttonText
                             text: qsTr("Maximum k:")
                         }
 
@@ -1377,6 +1399,7 @@ BaseParameterDialog
 
                         Text
                         {
+                            color: palette.buttonText
                             text: filterTypeComboBox.value === CorrelationFilterType.Threshold ?
                                 qsTr("Initial:") : qsTr("Initial k:")
                         }
@@ -1510,6 +1533,7 @@ BaseParameterDialog
                         font.italic: true
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
+                        color: palette.buttonText
                     }
                 }
             }
@@ -1528,6 +1552,7 @@ BaseParameterDialog
                     text: qsTr("<h2>Template</h2>")
                     Layout.alignment: Qt.AlignLeft
                     textFormat: Text.StyledText
+                    color: palette.buttonText
                 }
 
                 ColumnLayout
@@ -1545,6 +1570,7 @@ BaseParameterDialog
                             "specific application method.")
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
+                        color: palette.buttonText
                     }
 
                     RowLayout
@@ -1656,6 +1682,7 @@ BaseParameterDialog
                     text: qsTr("<h2>Summary</h2>")
                     Layout.alignment: Qt.AlignLeft
                     textFormat: Text.StyledText
+                    color: palette.buttonText
                 }
 
                 Text
@@ -1663,6 +1690,7 @@ BaseParameterDialog
                     text: qsTr("A graph will be created using the following parameters:")
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
+                    color: palette.buttonText
                 }
 
                 ScrollableTextArea

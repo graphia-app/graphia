@@ -245,6 +245,7 @@ Window
 
                         textFormat: Text.StyledText
                         wrapMode: Text.WordWrap
+                        color: palette.buttonText
 
                         PointingCursorOnHoverLink {}
                         onLinkActivated: function(link) { Qt.openUrlExternally(link); }
@@ -273,6 +274,7 @@ Window
                     verticalAlignment: Qt.AlignVCenter
                     font.pixelSize: 16
                     font.italic: true
+                    color: palette.buttonText
 
                     text: _transform !== undefined && _numParameters === 0 && _numAttributeParameters === 0 ?
                               qsTr("No Parameters Required") : qsTr("Select A Transform")
@@ -348,6 +350,7 @@ Window
                                         {
                                             Layout.topMargin: Constants.margin
                                             Layout.alignment: Qt.AlignTop
+                                            color: palette.buttonText
                                             text: qsTr("where")
                                         }
 
@@ -529,6 +532,7 @@ Window
 
                                         textFormat: Text.StyledText
                                         wrapMode: Text.WordWrap
+                                        color: palette.buttonText
 
                                         PointingCursorOnHoverLink {}
                                         onLinkActivated: function(link) { Qt.openUrlExternally(link); }
@@ -584,6 +588,7 @@ Window
                                                     Layout.alignment: Qt.AlignTop
                                                     font.italic: true
                                                     font.bold: true
+                                                    color: palette.buttonText
                                                     text: modelData
                                                 }
 
@@ -594,6 +599,7 @@ Window
                                                     textFormat: Text.StyledText
                                                     wrapMode: Text.Wrap
                                                     elide: Text.ElideRight
+                                                    color: palette.buttonText
 
                                                     PointingCursorOnHoverLink {}
                                                     onLinkActivated: function(link) { Qt.openUrlExternally(link); }
@@ -665,6 +671,7 @@ Window
                                                     Layout.alignment: Qt.AlignTop
                                                     font.italic: true
                                                     font.bold: true
+                                                    color: palette.buttonText
                                                     text: modelData
                                                 }
 
@@ -675,6 +682,7 @@ Window
                                                     textFormat: Text.StyledText
                                                     wrapMode: Text.Wrap
                                                     elide: Text.ElideRight
+                                                    color: palette.buttonText
 
                                                     PointingCursorOnHoverLink {}
                                                     onLinkActivated: function(link) { Qt.openUrlExternally(link); }
@@ -756,6 +764,7 @@ Window
                                         Layout.alignment: Qt.AlignTop
                                         font.italic: true
                                         font.bold: true
+                                        color: palette.buttonText
                                         text: qsTr("Visualisations")
                                     }
 
@@ -780,6 +789,7 @@ Window
                                                 Label
                                                 {
                                                     font.italic: attributeName.length === 0
+                                                    color: palette.buttonText
                                                     text: attributeName.length > 0 ?
                                                         Utils.Attribute.prettify(attributeName) :
                                                         qsTr("Invalid Attribute Name")

@@ -94,7 +94,11 @@ Rectangle
             id: rowsOfInterestColumnSelectionControls
             enabled: plot.selectedColumns.length > 0
 
-            Text { text: qsTr("Relative") }
+            Text
+            {
+                color: palette.buttonText
+                text: qsTr("Relative")
+            }
 
             Slider
             {
@@ -109,7 +113,11 @@ Rectangle
                 onValueChanged: { plot.selectRowsOfInterest(); }
             }
 
-            Text { text: qsTr("Absolute") }
+            Text
+            {
+                color: palette.buttonText
+                text: qsTr("Absolute")
+            }
 
             HelpTooltip
             {
@@ -133,6 +141,7 @@ Rectangle
             {
                 Layout.preferredWidth: 40
                 horizontalAlignment: Text.AlignRight
+                color: palette.buttonText
 
                 text:
                 {

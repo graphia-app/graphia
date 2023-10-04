@@ -74,6 +74,7 @@ Window
                 textFormat: Text.StyledText
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
+                color: palette.buttonText
 
                 text: qsTr("Please select an attribute(s) to remove.")
             }

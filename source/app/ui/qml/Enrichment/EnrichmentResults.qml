@@ -152,6 +152,7 @@ ApplicationWindow
             {
                 anchors.centerIn: parent
                 text: qsTr("No Results")
+                color: palette.buttonText
             }
         }
 
@@ -226,6 +227,7 @@ ApplicationWindow
                     anchors.centerIn: parent
                     text: qsTr("No Significant Results")
                     visible: table.rowCount <= 1 // rowCount includes header
+                    color: palette.buttonText
                 }
 
                 model: SortFilterProxyModel

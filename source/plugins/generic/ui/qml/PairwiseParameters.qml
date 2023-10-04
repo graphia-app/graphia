@@ -81,6 +81,7 @@ BaseParameterDialog
 
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.WordWrap
+            color: palette.buttonText
 
             text:
             {
@@ -146,6 +147,7 @@ BaseParameterDialog
                 textFormat: Text.StyledText
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
+                color: palette.buttonText
 
                 text: qsTr("A graph can be created from pairwise information, that is " +
                     "to say two columns in a table may be used to indicate pairs of nodes " +

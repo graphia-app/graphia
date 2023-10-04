@@ -77,7 +77,11 @@ Window
 
         RowLayout
         {
-            Text { text: qsTr("Preset:") }
+            Text
+            {
+                text: qsTr("Preset:")
+                color: palette.buttonText
+            }
 
             ComboBox
             {
@@ -225,6 +229,7 @@ Window
                     {
                         text: qsTr("Width:")
                         Layout.alignment: Qt.AlignRight
+                        color: palette.buttonText
                     }
                     SpinBox
                     {
@@ -240,12 +245,14 @@ Window
                     {
                         text: qsTr("px")
                         Layout.alignment: Qt.AlignLeft
+                        color: palette.buttonText
                     }
 
                     Text
                     {
                         text: qsTr("Height:")
                         Layout.alignment: Qt.AlignRight
+                        color: palette.buttonText
                     }
                     SpinBox
                     {
@@ -261,6 +268,7 @@ Window
                     {
                         text: qsTr("px")
                         Layout.alignment: Qt.AlignLeft
+                        color: palette.buttonText
                     }
 
                     CheckBox
@@ -279,6 +287,7 @@ Window
                     {
                         text: qsTr("DPI:")
                         Layout.alignment: Qt.AlignRight
+                        color: palette.buttonText
                     }
                     SpinBox
                     {
@@ -296,6 +305,7 @@ Window
                     {
                         text: qsTr("Print Width:")
                         Layout.alignment: Qt.AlignRight
+                        color: palette.buttonText
                     }
                     SpinBox
                     {
@@ -311,12 +321,14 @@ Window
                     {
                         text: qsTr("mm")
                         Layout.alignment: Qt.AlignLeft
+                        color: palette.buttonText
                     }
 
                     Text
                     {
                         text: qsTr("Print Height:")
                         Layout.alignment: Qt.AlignRight
+                        color: palette.buttonText
                     }
                     SpinBox
                     {
@@ -332,6 +344,7 @@ Window
                     {
                         text: qsTr("mm")
                         Layout.alignment: Qt.AlignLeft
+                        color: palette.buttonText
                     }
 
                     RadioButton

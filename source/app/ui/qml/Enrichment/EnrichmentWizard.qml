@@ -114,6 +114,7 @@ Wizard
                 text: qsTr("<h2>Enrichment</h2>")
                 Layout.alignment: Qt.AlignLeft
                 textFormat: Text.StyledText
+                color: palette.buttonText
             }
 
             RowLayout
@@ -140,6 +141,7 @@ Wizard
                         wrapMode: Text.WordWrap
                         textFormat: Text.StyledText
                         Layout.fillWidth: true
+                        color: palette.buttonText
                     }
 
                 }
@@ -168,6 +170,7 @@ Wizard
                 text: qsTr("<h2>Enrichment Attribute - A</h2>")
                 Layout.alignment: Qt.AlignLeft
                 textFormat: Text.StyledText
+                color: palette.buttonText
             }
 
             ColumnLayout
@@ -182,6 +185,7 @@ Wizard
                     Layout.alignment: Qt.AlignLeft
                     textFormat: Text.StyledText
                     Layout.fillWidth: true
+                    color: palette.buttonText
                 }
 
                 FramedScrollView
@@ -257,6 +261,7 @@ Wizard
                 text: qsTr("<h2>Enrichment Attribute - B</h2>")
                 Layout.alignment: Qt.AlignLeft
                 textFormat: Text.StyledText
+                color: palette.buttonText
             }
 
             ColumnLayout
@@ -271,6 +276,7 @@ Wizard
                     Layout.alignment: Qt.AlignLeft
                     textFormat: Text.StyledText
                     Layout.fillWidth: true
+                    color: palette.buttonText
                 }
 
                 FramedScrollView

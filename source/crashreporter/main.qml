@@ -107,6 +107,7 @@ ApplicationWindow
             wrapMode: Text.WordWrap
             Layout.margins: Constants.margin
             Layout.fillWidth: true
+            color: palette.buttonText
         }
 
         TextField

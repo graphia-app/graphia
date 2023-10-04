@@ -162,6 +162,7 @@ ColumnLayout
 
                     font.italic: true
                     font.bold: true
+                    color: palette.buttonText
                     text: qsTr("Automatic Assignments")
                 }
             }
@@ -218,8 +219,9 @@ ColumnLayout
                 Text
                 {
                     Layout.fillWidth: true
-
                     elide: Text.ElideRight
+                    color: palette.buttonText
+
                     text:
                     {
                         if(index >= root.stringValues.length)
@@ -231,6 +233,8 @@ ColumnLayout
 
                 Text
                 {
+                    color: palette.buttonText
+
                     visible:
                     {
                         let v = root.stringValues[index];
@@ -309,6 +313,7 @@ ColumnLayout
 
                 font.italic: true
                 font.bold: true
+                color: palette.buttonText
                 text: qsTr("Other Values")
             }
         }
@@ -393,6 +398,7 @@ ColumnLayout
 
                     font.italic: true
                     font.bold: true
+                    color: palette.buttonText
                     text: qsTr("Fixed Assignments")
                 }
             }
@@ -474,6 +480,7 @@ ColumnLayout
 
         Text
         {
+            color: palette.buttonText
             visible: paletteFixedColorListRepeater.model !== undefined ?
                 paletteFixedColorListRepeater.model.length === 0 : true
             text: qsTr("<i>None</i>")

@@ -234,6 +234,7 @@ Window
                 textFormat: Text.StyledText
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
+                color: palette.buttonText
 
                 text: (root.attributeName.length === 0 ? qsTr("Please select an attribute. ") : "") +
                     qsTr("Double click on a value to edit it. " +
@@ -295,7 +296,11 @@ Window
         {
             visible: root._selectedAttribute !== null
 
-            Label { text: qsTr("Description:") }
+            Label
+            {
+                text: qsTr("Description:")
+                color: palette.buttonText
+            }
 
             TextField
             {
@@ -319,6 +324,8 @@ Window
             Label
             {
                 visible: dataTypeComboBox.visible
+                color: palette.buttonText
+
                 text: qsTr("Type:")
             }
 
@@ -442,6 +449,7 @@ Window
             verticalAlignment: Qt.AlignVCenter
             font.pixelSize: 16
             font.italic: true
+            color: palette.buttonText
 
             text: qsTr("Select an Attribute")
         }

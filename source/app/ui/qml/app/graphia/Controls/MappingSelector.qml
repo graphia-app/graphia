@@ -155,6 +155,8 @@ Window
                 Text
                 {
                     Layout.preferredWidth: 250
+                    color: palette.buttonText
+
                     text: qsTr("The Y-axis of the plot shows the visualised " +
                         "attribute's values and their distribution. The X-axis " +
                         "represents the value of the chosen visualisation " +

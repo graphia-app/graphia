@@ -594,6 +594,7 @@ Item
 
                     elide: Text.ElideRight
                     font.italic: true
+                    color: palette.buttonText
 
                     text: root.prettifyFunction(parent.text)
                 }

@@ -289,11 +289,12 @@ Window
                     Text
                     {
                         Layout.fillWidth: true
-
                         wrapMode: Text.WordWrap
+                        color: palette.buttonText
+
                         text: qsTr("Click on the bar to add a marker.<br>" +
-                                   "Double click a marker to change its color.<br>" +
-                                   "Right click a marker to remove it.")
+                            "Double click a marker to change its color.<br>" +
+                            "Right click a marker to remove it.")
                     }
 
                     Button

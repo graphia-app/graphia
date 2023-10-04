@@ -150,6 +150,7 @@ Item
             Layout.alignment: Qt.AlignTop
             wrapMode: Text.Wrap
             textFormat: Text.StyledText
+            color: palette.buttonText
 
             text: Utils.format(qsTr("The pluggable nature of {0} " +
                 "means that it may be the case that some " +

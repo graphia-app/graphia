@@ -477,6 +477,7 @@ PluginContent
             {
                 Layout.bottomMargin: 12
                 text: qsTr("Please enter the X Axis label:")
+                color: palette.buttonText
             }
             TextField
             {
@@ -506,6 +507,7 @@ PluginContent
             {
                 Layout.bottomMargin: 12
                 text: qsTr("Please enter the Y Axis label:")
+                color: palette.buttonText
             }
             TextField
             {
@@ -1134,6 +1136,7 @@ PluginContent
                                 Layout.margins: Constants.margin
                                 Layout.preferredWidth: 256
                                 wrapMode: Text.WordWrap
+                                color: palette.buttonText
 
                                 text: qsTr("Click on a column or a column annotation " +
                                     "to select. Hold <i>Ctrl</i> and click to select multiple columns.")

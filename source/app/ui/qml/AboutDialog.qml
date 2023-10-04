@@ -61,6 +61,7 @@ Window
 
                 wrapMode: Text.WordWrap
                 textFormat: Text.StyledText
+                color: palette.buttonText
 
                 text: Utils.format(
                     qsTr("{0} is a tool for the visualisation and analysis of graphs.<br><br>" +

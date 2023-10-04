@@ -93,6 +93,7 @@ Window
             Layout.fillHeight: true
             Layout.margins: Constants.margin
             wrapMode: Text.WordWrap
+            color: palette.buttonText
 
             text: pluginDescription
         }

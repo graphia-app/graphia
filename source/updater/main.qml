@@ -70,6 +70,7 @@ ApplicationWindow
                     "<b>Release Notes:</b>"), Qt.application.name, version, Qt.application.version)
                 wrapMode: Text.WordWrap
                 Layout.fillWidth: true
+                color: palette.buttonText
             }
 
             ScrollableTextArea
@@ -140,6 +141,7 @@ ApplicationWindow
             text: Utils.format(qsTr("Updating to Version {0}…"), version)
             font.pointSize: 16
             font.bold: true
+            color: palette.buttonText
         }
 
         BusyIndicator
@@ -167,6 +169,7 @@ ApplicationWindow
                 qsTr("Update Complete!") : qsTr("Update Failed:")
             font.pointSize: 16
             font.bold: true
+            color: palette.buttonText
         }
 
         TextArea
@@ -181,6 +184,7 @@ ApplicationWindow
             text: installer !== null && installer.error
             font.family: "monospace"
             font.pointSize: 8
+            color: palette.buttonText
         }
 
         RowLayout

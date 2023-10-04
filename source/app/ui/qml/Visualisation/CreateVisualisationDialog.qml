@@ -193,6 +193,7 @@ Window
 
                             textFormat: Text.StyledText
                             wrapMode: Text.WordWrap
+                            color: palette.buttonText
 
                             PointingCursorOnHoverLink {}
                             onLinkActivated: function(link) { Qt.openUrlExternally(link); }

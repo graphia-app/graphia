@@ -68,6 +68,7 @@ Window
                 textFormat: Text.StyledText
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
+                color: palette.buttonText
 
                 text: qsTr("A template is a named set of transforms and visualisations " +
                     "that can be saved and then applied to other graphs in future, saving " +
@@ -89,7 +90,11 @@ Window
 
         RowLayout
         {
-            Label { text: qsTr("Name:") }
+            Label
+            {
+                text: qsTr("Name:")
+                color: palette.buttonText
+            }
 
             TextField
             {
@@ -99,7 +104,11 @@ Window
                 selectByMouse: true
             }
 
-            Label { text: qsTr("Application Method:") }
+            Label
+            {
+                text: qsTr("Application Method:")
+                color: palette.buttonText
+            }
 
             ComboBox
             {
@@ -108,7 +117,12 @@ Window
             }
         }
 
-        Label { text: qsTr("Transforms:") }
+        Label
+        {
+            text: qsTr("Transforms:")
+            color: palette.buttonText
+        }
+
         CheckBoxList
         {
             id: transformsCheckBoxList
@@ -126,7 +140,12 @@ Window
             }
         }
 
-        Label { text: qsTr("Visualisations:") }
+        Label
+        {
+            text: qsTr("Visualisations:")
+            color: palette.buttonText
+        }
+
         CheckBoxList
         {
             id: visualisationsCheckBoxList

@@ -122,6 +122,7 @@ Window
 
         Text
         {
+            color: palette.buttonText
             text: Utils.format(tabularDataParser.failed ?
                 qsTr("Failed to Load {0}.") : qsTr("Loading {0}…"), loadingInfo.baseFileName)
         }
@@ -203,6 +204,7 @@ Window
                     text: qsTr("<h2>Import Attributes</h2>")
                     Layout.alignment: Qt.AlignLeft
                     textFormat: Text.StyledText
+                    color: palette.buttonText
                 }
 
                 Text
@@ -213,6 +215,7 @@ Window
                     wrapMode: Text.WordWrap
                     textFormat: Text.StyledText
                     Layout.fillWidth: true
+                    color: palette.buttonText
                 }
             }
         }
@@ -230,6 +233,7 @@ Window
                     text: qsTr("<h2>Key Selection</h2>")
                     Layout.alignment: Qt.AlignLeft
                     textFormat: Text.StyledText
+                    color: palette.buttonText
                 }
 
                 Text
@@ -242,6 +246,7 @@ Window
                     wrapMode: Text.WordWrap
                     textFormat: Text.StyledText
                     Layout.fillWidth: true
+                    color: palette.buttonText
                 }
 
                 RowLayout
@@ -295,7 +300,11 @@ Window
                         }
                     }
 
-                    Label { text: qsTr("Corresponds To") }
+                    Label
+                    {
+                        color: palette.buttonText
+                        text: qsTr("Corresponds To")
+                    }
 
                     ComboBox
                     {
@@ -343,6 +352,7 @@ Window
                         }
 
                         visible: !importAttributesKeyDetection.busy
+                        color: palette.buttonText
                     }
                 }
             }
@@ -372,6 +382,7 @@ Window
                         text: qsTr("<h2>Attribute Selection</h2>")
                         Layout.alignment: Qt.AlignLeft
                         textFormat: Text.StyledText
+                        color: palette.buttonText
                     }
 
                     Text
@@ -382,6 +393,7 @@ Window
                         wrapMode: Text.WordWrap
                         textFormat: Text.StyledText
                         Layout.fillWidth: true
+                        color: palette.buttonText
                     }
 
                     CheckBox
@@ -475,6 +487,7 @@ Window
                     text: qsTr("<h2>Summary</h2>")
                     Layout.alignment: Qt.AlignLeft
                     textFormat: Text.StyledText
+                    color: palette.buttonText
                 }
 
                 Text
@@ -499,6 +512,7 @@ Window
                     wrapMode: Text.WordWrap
                     textFormat: Text.RichText
                     Layout.fillWidth: true
+                    color: palette.buttonText
                 }
 
                 ScrollableTextArea
@@ -580,6 +594,8 @@ Window
             Text
             {
                 Layout.alignment: Qt.AlignHCenter
+                color: palette.buttonText
+
                 text: qsTr("Detecting Keys")
             }
 
