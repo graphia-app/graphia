@@ -20,12 +20,13 @@
 #define QCUSTOMPLOTQUICKITEM_H
 
 #include <qcustomplot.h>
+#include <qcustomplotcolorprovider.h>
 
 #include <QQuickPaintedItem>
 
 class QMouseEvent;
 
-class QCP_LIB_DECL QCustomPlotQuickItem : public QQuickPaintedItem
+class QCP_LIB_DECL QCustomPlotQuickItem : public QQuickPaintedItem, protected QCustomPlotColorProvider
 {
     Q_OBJECT
 public:
