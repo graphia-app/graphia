@@ -423,15 +423,16 @@ void CorrelationPlotItem::paint(QPainter* painter)
         // we just use an alpha value in the destination buffer instead
         painter->setCompositionMode(QPainter::CompositionMode_DestinationOver);
 
-        auto backgroundColor = QColor(Qt::white);
-        backgroundColor.setAlpha(127);
+        auto alphaBackgroundColor = backgroundColor();
+        alphaBackgroundColor.setAlpha(127);
 
-        painter->fillRect(QRectF{0.0, 0.0, width(), height()}, backgroundColor);
+        painter->fillRect(QRectF{0.0, 0.0, width(), height()}, alphaBackgroundColor);
         painter->drawPixmap(0, yDest, QPixmap::fromImage(image));
     }
     else
     {
-        painter->fillRect(QRectF{0.0, 0.0, width(), height()}, Qt::white);
+        painter->setCompositionMode(QPainter::CompositionMode_SourceOver);
+        painter->fillRect(QRectF{0.0, 0.0, width(), height()}, backgroundColor());
         painter->drawPixmap(0, yDest, _pixmap);
     }
 }
