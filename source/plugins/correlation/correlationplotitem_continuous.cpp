@@ -420,6 +420,10 @@ std::pair<double, double> CorrelationPlotItem::addIQRBoxPlotTo(QCPAxis* keyAxis,
 
     auto* statisticalBox = new QCPStatisticalBox(keyAxis, valueAxis);
     statisticalBox->setName(!text.isEmpty() ? QObject::tr("IQR of %1").arg(text) : QObject::tr("IQR"));
+    statisticalBox->setPen(QPen(penColor()));
+    statisticalBox->setWhiskerPen(QPen(penColor()));
+    statisticalBox->setWhiskerBarPen(QPen(penColor()));
+    statisticalBox->setMedianPen(QPen(penColor()));
 
     if(color.isValid())
         statisticalBox->setBrush(color);
@@ -542,6 +546,7 @@ void CorrelationPlotItem::plotDispersion(QCPAbstractPlottable* meanPlot,
         stdDevBars->setAntialiased(false);
         stdDevBars->setDataPlottable(meanPlot);
         stdDevBars->setData(stdDevs);
+        stdDevBars->setPen(QPen(penColor()));
     }
     else if(visualType == PlotDispersionVisualType::Area)
     {
@@ -829,12 +834,34 @@ void CorrelationPlotItem::configureContinuousAxisRect()
     _continuousXAxis->grid()->setVisible(_showGridLines);
     _continuousYAxis->grid()->setVisible(_showGridLines);
 
+    _continuousXAxis->setBasePen(QPen(penColor()));
+    _continuousXAxis->setTickPen(QPen(penColor()));
+    _continuousXAxis->setSubTickPen(QPen(penColor()));
+
+    auto xAxisGridPen = _continuousXAxis->grid()->pen();
+    xAxisGridPen.setColor(lightPenColor());
+    _continuousXAxis->grid()->setPen(xAxisGridPen);
+
+    _continuousYAxis->setBasePen(QPen(penColor()));
+    _continuousYAxis->setTickPen(QPen(penColor()));
+    _continuousYAxis->setSubTickPen(QPen(penColor()));
+
+    auto yAxisGridPen = _continuousYAxis->grid()->pen();
+    yAxisGridPen.setColor(lightPenColor());
+    _continuousYAxis->grid()->setPen(yAxisGridPen);
+
+    _continuousYAxis->setTickLabelColor(penColor());
+
     if(_discreteAxisRect == nullptr)
+    {
         _continuousYAxis->setLabel(_yAxisLabel);
+        _continuousYAxis->setLabelColor(penColor());
+    }
 
     auto* xAxis = configureColumnAnnotations(_continuousAxisRect);
 
     xAxis->setTickLabelRotation(90);
+    xAxis->setTickLabelColor(penColor());
     xAxis->setTickLabels(showColumnNames() && (_elideLabelWidth > 0));
 
     if(xAxis->tickLabels())

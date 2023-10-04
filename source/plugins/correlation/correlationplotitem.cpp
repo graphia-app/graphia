@@ -1709,6 +1709,7 @@ void CorrelationPlotItem::configureAxisRects()
         }
 
         _xAxisLabelTextElement->setText(xAxisLabel);
+        _xAxisLabelTextElement->setTextColor(penColor());
         _xAxisLabelTextElement->setMargins({0, 0, 0, _bottomPadding});
     }
     else if(_xAxisLabelTextElement != nullptr)

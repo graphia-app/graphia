@@ -24,6 +24,7 @@
 
 #include <QVariantMap>
 #include <QVector>
+#include <QGuiApplication>
 
 #include <algorithm>
 
@@ -138,17 +139,27 @@ void GraphSizeEstimatePlotItem::buildPlot()
     auto* nodesGraph = customPlot().addGraph();
     auto* edgesGraph = customPlot().addGraph();
 
+    auto nodesColor = QColor(Qt::red);
+    auto edgesColor = QColor(Qt::blue);
+
+    if(QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark)
+    {
+        nodesColor = nodesColor.lighter();
+        edgesColor = edgesColor.lighter();
+    }
+
     nodesGraph->setData(_keys, _numNodes, true);
-    nodesGraph->setPen(QPen(Qt::red));
+    nodesGraph->setPen(QPen(nodesColor));
     nodesGraph->setName(tr("Nodes"));
     edgesGraph->setData(_keys, _uniqueEdgesOnly ? _numUniqueEdges : _numEdges, true);
-    edgesGraph->setPen(QPen(Qt::blue));
+    edgesGraph->setPen(QPen(edgesColor));
     edgesGraph->setName(tr("Edges"));
 
     _thresholdIndicator = new QCPItemStraightLine(&customPlot());
 
     QPen indicatorPen;
     indicatorPen.setStyle(Qt::DashLine);
+    indicatorPen.setColor(penColor());
     _thresholdIndicator->setPen(indicatorPen);
 
     updateThresholdIndicator();
@@ -169,6 +180,23 @@ void GraphSizeEstimatePlotItem::buildPlot()
     customPlot().xAxis->setRangeReversed(largestKey < smallestKey);
 
     customPlot().yAxis->rescale();
+
+    customPlot().xAxis->setBasePen(QPen(penColor()));
+    customPlot().xAxis->setTickPen(QPen(penColor()));
+    customPlot().xAxis->setSubTickPen(QPen(penColor()));
+    customPlot().xAxis->setTickLabelColor(penColor());
+    auto xAxisGridPen = customPlot().xAxis->grid()->pen();
+    xAxisGridPen.setColor(lightPenColor());
+    customPlot().xAxis->grid()->setPen(xAxisGridPen);
+    customPlot().xAxis->setLabelColor(penColor());
+
+    customPlot().yAxis->setBasePen(QPen(penColor()));
+    customPlot().yAxis->setTickPen(QPen(penColor()));
+    customPlot().yAxis->setSubTickPen(QPen(penColor()));
+    customPlot().yAxis->setTickLabelColor(penColor());
+    auto yAxisGridPen = customPlot().yAxis->grid()->pen();
+    yAxisGridPen.setColor(lightPenColor());
+    customPlot().yAxis->grid()->setPen(yAxisGridPen);
 
     customPlot().legend->setVisible(true);
     customPlot().legend->setBrush(QBrush(QColor(255, 255, 255, 127)));

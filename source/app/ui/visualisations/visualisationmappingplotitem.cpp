@@ -129,8 +129,24 @@ void VisualisationMappingPlotItem::buildPlot()
     mainXAxis->setTickLabels(false);
     mainXAxis->setTicks(false);
 
+    mainXAxis->setBasePen(QPen(penColor()));
+    mainXAxis->setTickPen(QPen(penColor()));
+    mainXAxis->setSubTickPen(QPen(penColor()));
+    auto xAxisGridPen = mainXAxis->grid()->pen();
+    xAxisGridPen.setColor(lightPenColor());
+    mainXAxis->grid()->setPen(xAxisGridPen);
+
+    mainYAxis->setBasePen(QPen(penColor()));
+    mainYAxis->setTickPen(QPen(penColor()));
+    mainYAxis->setSubTickPen(QPen(penColor()));
+    auto yAxisGridPen = mainYAxis->grid()->pen();
+    yAxisGridPen.setColor(lightPenColor());
+    mainYAxis->grid()->setPen(yAxisGridPen);
+
+    mainYAxis->setTickLabelColor(penColor());
+
     auto* line = new QCPGraph(mainXAxis, mainYAxis);
-    line->setPen(QPen(Qt::black));
+    line->setPen(QPen(penColor()));
 
     QVector<double> x;
     QVector<double> y;
@@ -155,7 +171,7 @@ void VisualisationMappingPlotItem::buildPlot()
 
     line->setData(x, y);
 
-    auto limitPen = QPen(Qt::black, 1.0, Qt::DashLine);
+    auto limitPen = QPen(penColor(), 1.0, Qt::DashLine);
 
     auto* upperLimit = new QCPGraph(mainXAxis, mainYAxis);
     upperLimit->setPen(limitPen);

@@ -45,6 +45,14 @@ EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) :
     customPlot().plotLayout()->addElement(1, 0, _colorScale);
     _colorScale->setMinimumMargins(QMargins(6, 0, 6, 0));
 
+    for(auto* axis : _colorScale->axis()->axisRect()->axes())
+        axis->setBasePen(QPen(penColor()));
+
+    _colorScale->axis()->setTickPen(QPen(penColor()));
+    _colorScale->axis()->setSubTickPen(QPen(penColor()));
+    _colorScale->axis()->setTickLabelColor(penColor());
+    _colorScale->axis()->setLabelColor(penColor());
+
     _textLayer = customPlot().layer(u"textLayer"_s);
     _textLayer->setMode(QCPLayer::LayerMode::lmBuffered);
 
@@ -154,15 +162,33 @@ void EnrichmentHeatmapItem::buildPlot()
 
     customPlot().xAxis->setTicker(xCategoryTicker);
     customPlot().xAxis->setTickLabelRotation(90);
+
+    customPlot().xAxis->setBasePen(QPen(penColor()));
+    customPlot().xAxis->setTickPen(QPen(penColor()));
+    customPlot().xAxis->setSubTickPen(QPen(penColor()));
+    customPlot().xAxis->setTickLabelColor(penColor());
+
     customPlot().yAxis2->setTicker(yCategoryTicker);
+    customPlot().yAxis2->setTickLabelColor(penColor());
+
+    customPlot().yAxis2->setBasePen(QPen(penColor()));
+    customPlot().yAxis2->setTickPen(QPen(penColor()));
+    customPlot().yAxis2->setSubTickPen(QPen(penColor()));
+    customPlot().yAxis2->setTickLabelColor(penColor());
 
     customPlot().plotLayout()->setMargins(QMargins(0, 0, 0, 0));
 
     if(!_xAxisLabel.isEmpty())
+    {
         customPlot().xAxis->setLabel(_xAxisLabel);
+        customPlot().xAxis->setLabelColor(penColor());
+    }
 
     if(!_yAxisLabel.isEmpty())
+    {
         customPlot().yAxis2->setLabel(_yAxisLabel);
+        customPlot().yAxis2->setLabelColor(penColor());
+    }
 
     std::set<QString> attributeValueSetA;
     std::set<QString> attributeValueSetB;

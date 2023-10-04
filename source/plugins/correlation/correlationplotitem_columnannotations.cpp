@@ -181,6 +181,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
         caYAxis->setTicker(nullptr);
 
     caYAxis->setTickPen(QPen(Qt::transparent)); // NOLINT clang-analyzer-cplusplus.NewDeleteLeaks
+    caYAxis->setTickLabelColor(penColor());
     caYAxis->setRange(0.0, static_cast<double>(numColumnAnnotations));
 
     caXAxis->setTickPen(QPen(Qt::transparent));

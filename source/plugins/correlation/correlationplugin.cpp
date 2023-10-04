@@ -851,7 +851,7 @@ QColor CorrelationPluginInstance::nodeColorForRows(const std::vector<size_t>& ro
     if(colorsInconsistent)
     {
         // The colours are not consistent, so just use black
-        color = Qt::black;
+        color = QCustomPlotColorProvider::penColor();
     }
 
     return color;

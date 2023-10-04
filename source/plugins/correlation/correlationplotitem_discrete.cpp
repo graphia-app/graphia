@@ -145,12 +145,34 @@ void CorrelationPlotItem::configureDiscreteAxisRect()
     _discreteXAxis->grid()->setVisible(_showGridLines);
     _discreteYAxis->grid()->setVisible(_showGridLines);
 
+    _discreteXAxis->setBasePen(QPen(penColor()));
+    _discreteXAxis->setTickPen(QPen(penColor()));
+    _discreteXAxis->setSubTickPen(QPen(penColor()));
+
+    auto xAxisGridPen = _discreteXAxis->grid()->pen();
+    xAxisGridPen.setColor(lightPenColor());
+    _discreteXAxis->grid()->setPen(xAxisGridPen);
+
+    _discreteYAxis->setBasePen(QPen(penColor()));
+    _discreteYAxis->setTickPen(QPen(penColor()));
+    _discreteYAxis->setSubTickPen(QPen(penColor()));
+
+    auto yAxisGridPen = _discreteYAxis->grid()->pen();
+    yAxisGridPen.setColor(lightPenColor());
+    _discreteYAxis->grid()->setPen(yAxisGridPen);
+
+    _discreteYAxis->setTickLabelColor(penColor());
+
     if(_continuousAxisRect == nullptr)
+    {
         _discreteYAxis->setLabel(_yAxisLabel);
+        _discreteYAxis->setLabelColor(penColor());
+    }
 
     auto* xAxis = configureColumnAnnotations(_discreteAxisRect);
 
     xAxis->setTickLabelRotation(90);
+    xAxis->setTickLabelColor(penColor());
     xAxis->setTickLabels(showColumnNames() && (_elideLabelWidth > 0));
 
     if(xAxis->tickLabels())
