@@ -34,6 +34,7 @@ Window
 
     title: Utils.format(qsTr("About {0}"), application.name)
     flags: Qt.Window|Qt.Dialog
+    color: palette.window
 
     minimumWidth: 500
     minimumHeight: 200

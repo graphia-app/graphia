@@ -46,6 +46,7 @@ Window
     title: qsTr("Clone Attribute")
     modality: Qt.ApplicationModal
     flags: Qt.Window|Qt.Dialog
+    color: palette.window
 
     readonly property int _preselectedAttributeDialogHeight: (mainLayout.implicitHeight + (2 * Constants.margin))
 

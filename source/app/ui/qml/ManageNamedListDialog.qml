@@ -35,6 +35,8 @@ Window
     title: qsTr("Manage List")
     modality: Qt.ApplicationModal
     flags: Qt.Window|Qt.Dialog
+    color: palette.window
+
     width: 360
     height: 240
     minimumWidth: 360

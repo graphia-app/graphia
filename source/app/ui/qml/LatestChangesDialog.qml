@@ -34,6 +34,7 @@ Window
 
     title: qsTr("Latest Changes for Version " + root.version)
     flags: Qt.Window|Qt.Dialog
+    color: palette.window
 
     minimumWidth: 640
     minimumHeight: 480

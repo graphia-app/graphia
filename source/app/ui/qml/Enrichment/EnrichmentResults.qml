@@ -49,6 +49,7 @@ ApplicationWindow
     onYChanged: { if(y < 0 || y >= Screen.desktopAvailableHeight) y = 0; }
 
     title: qsTr("Enrichment Results")
+    color: palette.window
 
     minimumWidth: 800
     minimumHeight: 400

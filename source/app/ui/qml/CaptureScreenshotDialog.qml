@@ -33,6 +33,8 @@ Window
     title: qsTr("Save As Image")
     modality: Qt.ApplicationModal
     flags: Qt.Window|Qt.Dialog
+    color: palette.window
+
     width: 800
     height: 600
 

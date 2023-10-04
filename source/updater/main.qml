@@ -29,6 +29,7 @@ ApplicationWindow
     id: root
     visible: true
     flags: Qt.Window|Qt.Dialog
+    color: palette.window
 
     title: Qt.application.name + " " + qsTr("Update")
 

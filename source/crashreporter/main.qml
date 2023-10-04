@@ -30,6 +30,7 @@ ApplicationWindow
     id: window
     visible: true
     flags: Qt.Window|Qt.Dialog
+    color: palette.window
 
     title: Qt.application.name + " " + qsTr("Crash Reporter")
 

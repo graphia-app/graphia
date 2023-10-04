@@ -46,6 +46,7 @@ Window
     title: qsTr("Edit Palette")
     modality: Qt.ApplicationModal
     flags: Qt.Window|Qt.Dialog
+    color: palette.window
 
     minimumWidth: 640
     minimumHeight: 480

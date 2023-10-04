@@ -33,6 +33,8 @@ Window
     title: qsTr("Open URL")
     modality: Qt.ApplicationModal
     flags: Qt.Window|Qt.Dialog
+    color: palette.window
+
     width: 480
     minimumWidth: 480
 

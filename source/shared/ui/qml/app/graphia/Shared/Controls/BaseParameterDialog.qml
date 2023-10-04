@@ -24,6 +24,7 @@ Window
 {
     modality: Qt.ApplicationModal
     flags: Qt.Window|Qt.Dialog
+    color: palette.window
 
     property var parameters: ({})
     property url url: ""

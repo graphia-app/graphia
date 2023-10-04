@@ -39,6 +39,7 @@ Window
 
     modality: Qt.WindowModal
     flags: Qt.Dialog | (Qt.platform.os === "osx" ? Qt.Sheet : 0)
+    color: palette.window
 
     width: 420
     minimumWidth: width

@@ -32,6 +32,7 @@ Window
 
     title: qsTr("Options")
     flags: Qt.Window|Qt.Dialog
+    color: palette.window
 
     minimumWidth: 700
     minimumHeight: 420

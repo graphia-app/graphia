@@ -41,6 +41,7 @@ Window
 
     modality: Qt.WindowModal
     flags: Qt.Window|Qt.Dialog
+    color: palette.window
 
     width: 640
     minimumWidth: 640

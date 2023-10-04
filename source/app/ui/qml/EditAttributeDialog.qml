@@ -88,6 +88,7 @@ Window
 
     title: qsTr("Edit Attribute")
     flags: Qt.Window|Qt.Dialog
+    color: palette.window
 
     minimumWidth: 500
     minimumHeight: 600

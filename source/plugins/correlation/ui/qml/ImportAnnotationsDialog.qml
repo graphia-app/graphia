@@ -36,6 +36,8 @@ Window
     title: qsTr("Import Column Annotations")
     modality: Qt.ApplicationModal
     flags: Qt.Window|Qt.Dialog
+    color: palette.window
+
     minimumWidth: 640
     minimumHeight: 400
 

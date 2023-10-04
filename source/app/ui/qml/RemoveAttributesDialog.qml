@@ -37,6 +37,7 @@ Window
     title: qsTr("Remove Attributes")
     modality: Qt.ApplicationModal
     flags: Qt.Window|Qt.Dialog
+    color: palette.window
 
     minimumWidth: 400
     minimumHeight: 250

@@ -45,6 +45,8 @@ Rectangle
 
     property bool showBorder: true
 
+    color: palette.window
+
     enum DataTableSelectionMode
     {
         NoSelection,
