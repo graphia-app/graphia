@@ -96,6 +96,7 @@ Rectangle
         anchors.leftMargin: -leftInset
         rightPadding: root.scrollBarWidth
         leftInset: -8
+        bottomPadding: 1
 
         background: Rectangle
         {
