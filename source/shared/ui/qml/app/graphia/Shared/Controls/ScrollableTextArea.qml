@@ -36,7 +36,7 @@ Rectangle
     property alias font: textArea.font
     property alias outlineVisible: outline.outlineVisible
 
-    color: "white"
+    color: palette.window
 
     ScrollView
     {
@@ -60,6 +60,7 @@ Rectangle
 
             wrapMode: TextArea.Wrap
             selectByMouse: true
+            color: palette.windowText
 
             onEditingFinished: { root.editingFinished(); }
             onLinkActivated: function(link) { root.linkActivated(link); }
