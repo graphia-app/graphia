@@ -139,7 +139,7 @@ ApplicationWindow
         {
             Layout.fillWidth: true
             height: 1
-            color: palette.mid
+            color: OutlineColor.scheme
         }
 
         Item
@@ -295,13 +295,12 @@ ApplicationWindow
                 }
             }
 
-            Rectangle
+            Item
             {
                 SplitView.fillHeight: true
                 SplitView.minimumWidth: 300
 
                 visible: showHeatmapButton.checked
-                color: "white"
 
                 EnrichmentHeatmap
                 {
