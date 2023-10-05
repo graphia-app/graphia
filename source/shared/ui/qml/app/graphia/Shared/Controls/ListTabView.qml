@@ -75,7 +75,7 @@ Item
                 Layout.fillHeight: true
                 Layout.preferredWidth: tabSelector.maxChildWidth + (Constants.padding * 2)
 
-                color: "white"
+                color: palette.window
 
                 ListView
                 {
@@ -108,7 +108,7 @@ Item
                             {
                                 anchors.margins: _padding
                                 anchors.centerIn: parent
-                                color: index === _currentIndex ? palette.highlightedText : palette.text
+                                color: index === _currentIndex ? palette.highlightedText : palette.windowText
                                 text: listTabs[index] ? listTabs[index].title : ""
 
                                 TextMetrics
