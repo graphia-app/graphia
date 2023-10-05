@@ -959,7 +959,7 @@ PluginContent
             onHiddenColumnsChanged: { root.saveRequired = true; }
         }
 
-        Rectangle
+        Item
         {
             // This Item exists solely as a parent for the Flickable's vertical scrollbar
             // See https://doc.qt.io/qt-6/qml-qtquick-controls2-scrollbar.html#attaching-scrollbar-to-a-flickable
@@ -968,8 +968,6 @@ PluginContent
             SplitView.fillHeight: splitView.orientation !== Qt.Vertical
             SplitView.minimumHeight: 150 // Should be <= the minimum that CorrelationPlot::minimumHeight returns
             SplitView.minimumWidth: 200
-
-            color: "white"
 
             Flickable
             {
