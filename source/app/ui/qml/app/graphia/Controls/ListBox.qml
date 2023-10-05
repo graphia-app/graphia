@@ -97,15 +97,17 @@ Rectangle
         rightPadding: root.scrollBarWidth
         leftInset: -8
 
-        property var highlightColor: root.highlightedProvider(index) ?
-            palette.highlight : "transparent"
-
-        background: Rectangle { color: parent.highlightColor }
+        background: Rectangle
+        {
+            visible: root.highlightedProvider(index)
+            color: palette.highlight
+        }
 
         text: model[root.displayRole] ?
             model[root.displayRole] : modelData
 
-        color: QmlUtils.contrastingColor(highlightColor)
+        color: root.highlightedProvider(index) ?
+            palette.highlightedText : palette.text
         elide: Text.ElideRight
         renderType: Text.NativeRendering
     }
@@ -141,7 +143,7 @@ Rectangle
     // Just some semi-sensible defaults
     width: 200
     height: 100
-    color: "white"
+    color: palette.light
 
     ListView
     {
