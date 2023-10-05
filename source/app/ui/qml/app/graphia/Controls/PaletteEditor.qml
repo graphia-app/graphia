@@ -181,7 +181,7 @@ ColumnLayout
                     let colors = root._autoColors;
 
                     let newColor = root.stringValues.length > 0 ?
-                        QmlUtils.colorForString(root.stringValues[0]) : "red";
+                        QmlUtils.colorForString(root.stringValues[0]) : Qt.red;
 
                     if(root._autoColors.length > 0)
                     {
@@ -450,7 +450,7 @@ ColumnLayout
                     let colors = root._fixedColors;
 
                     let newColor = initialValue.length > 0 ?
-                        QmlUtils.colorForString(initialValue) : "red";
+                        QmlUtils.colorForString(initialValue) : Qt.red;
 
                     // Use either the latest fixed colour to generate a new one, or the
                     // latest auto colour if there isn't one

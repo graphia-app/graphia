@@ -965,7 +965,7 @@ ApplicationWindow
                         continue;
 
                     if(item.urlText === url)
-                        item.urlTextField.color = "red";
+                        item.urlTextField.color = Qt.red;
                 }
             }
 
