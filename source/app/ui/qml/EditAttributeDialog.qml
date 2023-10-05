@@ -539,7 +539,7 @@ Window
                             {
                                 anchors.fill: parent
                                 color: headerMouseArea.containsMouse && headerMouseArea.cursorShape !== Qt.SizeHorCursor ?
-                                    Qt.lighter(palette.highlight, 2.0) : palette.light
+                                    palette.highlight : palette.button
                             }
 
                             Text
@@ -556,7 +556,7 @@ Window
                                 elide: Text.ElideRight
                                 wrapMode: Text.NoWrap
                                 renderType: Text.NativeRendering
-                                color: palette.text
+                                color: headerMouseArea.containsMouse ? palette.highlightedText : palette.buttonText
                                 text: model.display
                             }
 
@@ -596,7 +596,7 @@ Window
                                 anchors.right: parent.right
                                 width: 1
                                 height: parent.height
-                                color: palette.midlight
+                                color: OutlineColor.scheme
                             }
 
                             Rectangle
@@ -604,7 +604,7 @@ Window
                                 anchors.bottom: parent.bottom
                                 width: parent.width
                                 height: 1
-                                color: palette.midlight
+                                color: OutlineColor.scheme
                             }
 
                             MouseArea
