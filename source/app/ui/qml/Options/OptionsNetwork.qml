@@ -191,7 +191,7 @@ Item
                     Layout.fillWidth: true
 
                     selectByMouse: true
-                    color: QmlUtils.userUrlStringIsValid(webSearchEngineField.text) ? "black" : "red"
+                    color: QmlUtils.userUrlStringIsValid(webSearchEngineField.text) ? palette.text : "red"
 
                     property string _defaultValue: "https://www.google.com/search?q=%1"
                     function reset() { text = _defaultValue; }

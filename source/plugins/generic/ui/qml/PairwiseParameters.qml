@@ -365,7 +365,7 @@ BaseParameterDialog
                         visible: false
 
                         validator: RegularExpressionValidator { regularExpression: new RegExp(QmlUtils.validAttributeNameRegex) }
-                        color: acceptableInput ? "black" : "red"
+                        color: attributeNameTextField.length === 0 || acceptableInput ? palette.text : Qt.red
 
                         function activate()
                         {
