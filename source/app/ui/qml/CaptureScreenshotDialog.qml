@@ -174,8 +174,8 @@ Window
                 Layout.fillHeight: true
                 Layout.fillWidth: true
 
-                color: palette.midlight
-                border.color: palette.dark
+                color: palette.alternateBase
+                border.color: OutlineColor.scheme
                 border.width: 1
 
                 Rectangle
@@ -205,7 +205,7 @@ Window
                 {
                     anchors.fill: previewImage
                     color: "transparent"
-                    border.color: QmlUtils.contrastingColor(visuals.backgroundColor)
+                    border.color: OutlineColor.scheme
                     border.width: 1
                 }
 
