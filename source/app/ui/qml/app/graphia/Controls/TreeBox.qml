@@ -131,7 +131,7 @@ Item
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            color: enabled ? "white" : palette.window
+            color: palette.light
 
             TreeView
             {
@@ -420,7 +420,7 @@ Item
                         text: { return hasSectionRow ? treeView.sectionTextFor(model.row) : ""; }
                     }
 
-                    color: enabled ? "transparent" : palette.window
+                    color: palette.light
 
                     TreeViewDelegate
                     {
@@ -576,9 +576,9 @@ Item
                 anchors.top: parent.top
                 anchors.left: parent.left
 
-                color: "white"
+                color: palette.light
                 border.width: 1
-                border.color: "grey"
+                border.color: OutlineColor.scheme
                 radius: 2
 
                 opacity: show ? 1.0 : 0.0
@@ -594,7 +594,7 @@ Item
 
                     elide: Text.ElideRight
                     font.italic: true
-                    color: palette.buttonText
+                    color: palette.text
 
                     text: root.prettifyFunction(parent.text)
                 }
