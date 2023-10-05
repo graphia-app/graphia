@@ -273,7 +273,7 @@ BaseParameterDialog
                     background: Rectangle
                     {
                         color: headerMouseArea.containsMouse ?
-                            Qt.lighter(palette.highlight, 2.0) : palette.light;
+                            palette.highlight : palette.button;
 
                         MouseArea
                         {
@@ -284,7 +284,8 @@ BaseParameterDialog
                         }
                     }
 
-                    color: palette.text
+                    color: headerMouseArea.containsMouse ?
+                        palette.highlightedText : palette.buttonText
                     padding: Constants.padding
 
                     PlatformMenu
