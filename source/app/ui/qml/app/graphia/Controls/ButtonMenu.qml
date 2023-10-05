@@ -33,8 +33,8 @@ Item
 
     property string text: ""
     property string selectedValue: ""
-    property color hoverColor: "grey"
-    property color textColor: "black"
+    property color hoverColor: palette.mid
+    property color textColor: palette.buttonText
     property alias font: label.font
     property alias textAlignment: label.horizontalAlignment
 
