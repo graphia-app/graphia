@@ -71,8 +71,6 @@ Window
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
-                color: palette.light
-
                 StackLayout
                 {
                     anchors.fill: parent

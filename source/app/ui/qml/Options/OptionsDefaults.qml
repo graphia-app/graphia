@@ -177,11 +177,12 @@ Item
             }
         }
 
-        Item
+        Rectangle
         {
             Layout.fillWidth: true
             Layout.fillHeight: true
             visible: root.ambiguityInExtensionsOrPlugins
+            color: palette.light
 
             ScrollView
             {
