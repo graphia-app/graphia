@@ -1113,7 +1113,7 @@ PluginContent
 
                         color: palette.light
                         border.width: 1
-                        border.color: palette.dark
+                        border.color: OutlineColor.scheme
                         radius: 5
 
                         Behavior on opacity { NumberAnimation { easing.type: Easing.InOutQuad } }
