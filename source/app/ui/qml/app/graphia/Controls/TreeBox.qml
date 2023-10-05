@@ -442,6 +442,12 @@ Item
                         model: parent.model
                         row: parent.row
 
+                        background: Rectangle
+                        {
+                            visible: selected
+                            color: palette.highlight
+                        }
+
                         Component.onCompleted:
                         {
                             // Everything in here is speculative and relies on the actual internal
@@ -467,6 +473,10 @@ Item
                                 if(indicator.children[i].color !== undefined)
                                     indicator.children[i].color = contrastBinding;
                             }
+
+                            // Hack that uses the indicator to affect the overall height of the row
+                            if(indicator.implicitHeight)
+                                indicator.implicitHeight = contentItem.implicitHeight + 1;
                         }
 
                         property var sourceIndex:
