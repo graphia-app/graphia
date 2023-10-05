@@ -1314,10 +1314,10 @@ Item
                     width: implicitWidth + (Constants.margin * 2)
                     height: implicitHeight + (Constants.margin * 2)
 
-                    border.color: "black"
+                    border.color: OutlineColor.scheme
                     border.width: 1
                     radius: 4
-                    color: "white"
+                    color: palette.light
 
                     RowLayout
                     {

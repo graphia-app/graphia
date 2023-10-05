@@ -215,10 +215,10 @@ Rectangle
     width: implicitWidth + (Constants.margin * 4)
     height: implicitHeight + (Constants.margin * 4)
 
-    border.color: document.contrastingColor
+    border.color: OutlineColor.scheme
     border.width: 1
     radius: 4
-    color: "white"
+    color: palette.light
 
     Action
     {

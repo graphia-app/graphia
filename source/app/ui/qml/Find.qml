@@ -202,10 +202,10 @@ Rectangle
     width: implicitWidth + (Constants.margin * 4)
     height: implicitHeight + (Constants.margin * 4)
 
-    border.color: document.contrastingColor
+    border.color: OutlineColor.scheme
     border.width: 1
     radius: 4
-    color: !root._interrupted ? "white" : "#f0f0f0"
+    color: !root._interrupted ? palette.light : palette.alternateBase
 
     Action
     {
@@ -435,7 +435,7 @@ Rectangle
                             else
                                 return qsTr("Not Found");
                         }
-                        color: "grey"
+                        color: palette.mid
                     }
 
                     MouseArea
