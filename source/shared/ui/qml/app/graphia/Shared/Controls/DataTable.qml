@@ -188,8 +188,8 @@ Rectangle
             maximumLineCount: 1
             text: value
 
-            background: Rectangle { color: palette.light }
-            color: palette.text
+            background: Rectangle { color: palette.button }
+            color: palette.buttonText
             padding: root._padding
             elide: Text.ElideRight
             renderType: Text.NativeRendering
@@ -208,7 +208,7 @@ Rectangle
             Layout.fillHeight: true
             Layout.preferredWidth: sortIndicator.width + 4
 
-            color: palette.light
+            color: palette.button
 
             Shape
             {
@@ -274,7 +274,7 @@ Rectangle
             return modelRow % 2 ? palette.window : palette.alternateBase;
         }
 
-        color: QmlUtils.contrastingColor(backgroundColor)
+        color: palette.buttonText
         leftPadding: root._padding
         rightPadding: root._padding
         topPadding: root._padding * 0.5
@@ -294,7 +294,7 @@ Rectangle
     property int _cellDelegateHeight: 0
 
     border.width: root.showBorder ? 1 : 0
-    border.color: palette.dark
+    border.color: OutlineColor.scheme
 
     ColumnLayout
     {
@@ -370,7 +370,7 @@ Rectangle
                     anchors.right: parent.right
                     height: parent.height
                     width: 1
-                    color: palette.midlight
+                    color: OutlineColor.scheme
 
                     MouseArea
                     {
@@ -423,7 +423,7 @@ Rectangle
         {
             Layout.fillWidth: true
             height: 1
-            color: palette.midlight
+            color: OutlineColor.scheme
         }
 
         Item
