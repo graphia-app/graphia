@@ -203,33 +203,42 @@ Rectangle
             }
         }
 
-        Shape
+        Rectangle
         {
-            id: sortIndicator
+            Layout.fillHeight: true
+            Layout.preferredWidth: sortIndicator.width + 4
 
-            Layout.alignment: Qt.AlignVCenter
-            Layout.rightMargin: 4
+            color: palette.light
 
-            antialiasing: false
-            width: 7
-            height: 4
-            visible: showSortIndicator
-            transform: Rotation
+            Shape
             {
-                origin.x: sortIndicator.width * 0.5
-                origin.y: sortIndicator.height * 0.5
-                angle: sortIndicatorOrder === Qt.DescendingOrder ? 0 : 180
-            }
+                id: sortIndicator
 
-            ShapePath
-            {
-                miterLimit: 0
-                strokeColor: palette.mid
-                fillColor: "transparent"
-                strokeWidth: 2
-                startY: sortIndicator.height - 1
-                PathLine { x: Math.round((sortIndicator.width - 1) * 0.5); y: 0 }
-                PathLine { x: sortIndicator.width - 1; y: sortIndicator.height - 1 }
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
+
+                antialiasing: false
+                width: 7
+                height: 4
+                visible: showSortIndicator
+
+                transform: Rotation
+                {
+                    origin.x: sortIndicator.width * 0.5
+                    origin.y: sortIndicator.height * 0.5
+                    angle: sortIndicatorOrder === Qt.DescendingOrder ? 0 : 180
+                }
+
+                ShapePath
+                {
+                    miterLimit: 0
+                    strokeColor: palette.mid
+                    fillColor: "transparent"
+                    strokeWidth: 2
+                    startY: sortIndicator.height - 1
+                    PathLine { x: Math.round((sortIndicator.width - 1) * 0.5); y: 0 }
+                    PathLine { x: sortIndicator.width - 1; y: sortIndicator.height - 1 }
+                }
             }
 
             MouseArea
@@ -424,7 +433,6 @@ Rectangle
 
             Layout.fillHeight: true
             Layout.fillWidth: true
-            Layout.margins: 1
 
             TableView
             {
