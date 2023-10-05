@@ -50,7 +50,7 @@ BaseParameterDialog
     {
         anchors.margins: Constants.margin
         anchors.fill: parent
-        Rectangle
+        Item
         {
             id: content
             Layout.fillWidth: true
