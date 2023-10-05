@@ -583,7 +583,7 @@ Item
                 {
                     height: headerView.height
                     width: headerView.width
-                    color: palette.light
+                    color: palette.window
                 }
 
                 delegate: DropArea
@@ -676,8 +676,7 @@ Item
                         Rectangle
                         {
                             anchors.fill: parent
-                            color: headerMouseArea.containsMouse ?
-                                       Qt.lighter(palette.highlight, 2.0) : palette.light
+                            color: headerMouseArea.containsMouse ? palette.highlight : palette.button
                         }
 
                         Item
@@ -722,7 +721,7 @@ Item
                             maximumLineCount: 1
                             width: parent.width - (headerView.sortIndicatorMargin + headerView.sortIndicatorWidth)
                             text: headerItem.text
-                            color: palette.text
+                            color: headerMouseArea.containsMouse ? palette.highlightedText : palette.buttonText
                             padding: headerView.delegatePadding
                             renderType: Text.NativeRendering
                         }
@@ -828,7 +827,7 @@ Item
                             anchors.right: parent.right
                             height: parent.height
                             width: 1
-                            color: palette.midlight
+                            color: headerUnderline.color
                             MouseArea
                             {
                                 id: resizeHandleMouseArea
@@ -859,12 +858,13 @@ Item
             }
         }
 
-        // Header underline
         Rectangle
         {
+            id: headerUnderline
+
             Layout.fillWidth: true
             height: 1
-            color: palette.midlight
+            color: OutlineColor.scheme
         }
 
         Item
@@ -960,7 +960,7 @@ Item
                         for(let i = 0; i < Math.ceil(tableView.height / tableView.rowHeight) + 1; i++)
                         {
                             let yOffset = (i * tableView.rowHeight);
-                            ctx.fillStyle = i % 2 ? palette.window : palette.alternateBase;
+                            ctx.fillStyle = i % 2 ? palette.light : palette.midlight;
                             ctx.fillRect(0, yOffset, width, tableView.rowHeight);
                         }
                     }
@@ -1189,7 +1189,7 @@ Item
                             if(model.subSelected)
                                 return palette.highlight;
 
-                            return model.row % 2 ? palette.window : palette.alternateBase;
+                            return model.row % 2 ? palette.light : palette.midlight;
                         }
 
                         // Ripped more or less verbatim from qtquickcontrols/src/controls/Styles/Desktop/TableViewStyle.qml
