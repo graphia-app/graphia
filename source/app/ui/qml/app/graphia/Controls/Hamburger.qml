@@ -26,7 +26,7 @@ Item
     id: root
 
     property real radius: height * 0.1
-    property color color: "white"
+    property color color: palette.light
     property color hoverColor: color
     property bool propogatePresses: false
 
