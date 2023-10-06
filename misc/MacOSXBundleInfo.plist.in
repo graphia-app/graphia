@@ -113,9 +113,5 @@
 	<!-- This is necessary to enable high DPI -->
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
-
-	<!-- Qt Quick and dark mode are not friends -->
-	<key>NSRequiresAquaSystemAppearance</key>
-	<string>true</string>
 </dict>
 </plist>
