@@ -555,7 +555,6 @@ Window
                                 clip: true
                                 elide: Text.ElideRight
                                 wrapMode: Text.NoWrap
-                                renderType: Text.NativeRendering
                                 color: headerMouseArea.containsMouse ? palette.highlightedText : palette.buttonText
                                 text: model.display
                             }

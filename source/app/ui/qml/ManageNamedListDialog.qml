@@ -87,7 +87,6 @@ Window
                     color: listBox.highlightedProvider(index) ?
                         palette.highlightedText : palette.windowText
                     elide: Text.ElideRight
-                    renderType: Text.NativeRendering
                 }
 
                 TextField
@@ -99,7 +98,6 @@ Window
                     anchors.fill: label
                     padding: 0
                     background: Item {}
-                    renderType: Text.NativeRendering
 
                     onAccepted: { finish(); }
 

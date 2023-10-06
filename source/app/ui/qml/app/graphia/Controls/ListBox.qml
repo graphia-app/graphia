@@ -110,7 +110,6 @@ Rectangle
         color: root.highlightedProvider(index) ?
             palette.highlightedText : palette.text
         elide: Text.ElideRight
-        renderType: Text.NativeRendering
     }
 
     property var _selectedIndices: []

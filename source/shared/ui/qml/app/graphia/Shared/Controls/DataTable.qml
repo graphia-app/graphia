@@ -192,7 +192,6 @@ Rectangle
             color: palette.buttonText
             padding: root._padding
             elide: Text.ElideRight
-            renderType: Text.NativeRendering
 
             MouseArea
             {
@@ -280,7 +279,6 @@ Rectangle
         topPadding: root._padding * 0.5
         bottomPadding: root._padding * 0.5
         elide: Text.ElideRight
-        renderType: Text.NativeRendering
 
         MouseArea
         {

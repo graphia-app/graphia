@@ -723,7 +723,6 @@ Item
                             text: headerItem.text
                             color: headerMouseArea.containsMouse ? palette.highlightedText : palette.buttonText
                             padding: headerView.delegatePadding
-                            renderType: Text.NativeRendering
                         }
 
                         Shape
@@ -1201,7 +1200,6 @@ Item
                             elide: Text.ElideRight
                             wrapMode: Text.NoWrap
                             textFormat: Text.StyledText
-                            renderType: Text.NativeRendering
                             width: parent.width
                             anchors.left: parent.left
                             anchors.right: parent.right
