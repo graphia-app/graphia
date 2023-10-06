@@ -435,7 +435,7 @@ Rectangle
                             else
                                 return qsTr("Not Found");
                         }
-                        color: palette.mid
+                        color: Qt.platform.os === "osx" ? palette.dark : palette.mid
                     }
 
                     MouseArea
