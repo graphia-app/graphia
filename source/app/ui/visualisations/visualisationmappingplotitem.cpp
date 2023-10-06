@@ -29,9 +29,7 @@ using namespace Qt::Literals::StringLiterals;
 
 VisualisationMappingPlotItem::VisualisationMappingPlotItem(QQuickItem* parent) :
     QCustomPlotQuickItem(multisamples(), parent)
-{
-    buildPlot();
-}
+{}
 
 void VisualisationMappingPlotItem::setRangeToMinMax()
 {
