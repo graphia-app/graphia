@@ -76,14 +76,16 @@ Window
                     rightPadding: listBox.scrollBarWidth
                     leftInset: -8
 
-                    property var highlightColor: listBox.highlightedProvider(index) ?
-                        palette.highlight : "transparent"
-
-                    background: Rectangle { color: parent.highlightColor }
+                    background: Rectangle
+                    {
+                        visible: listBox.highlightedProvider(index)
+                        color: palette.highlight
+                    }
 
                     text: modelData
 
-                    color: QmlUtils.contrastingColor(highlightColor)
+                    color: listBox.highlightedProvider(index) ?
+                        palette.highlightedText : palette.windowText
                     elide: Text.ElideRight
                     renderType: Text.NativeRendering
                 }
