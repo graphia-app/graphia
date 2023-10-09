@@ -469,6 +469,8 @@ ApplicationWindow
         text: mainWindow.environment
     }
 
+    ShowPaletteDialog { id: showPaletteDialog }
+
     TextDialog
     {
         id: provenanceLogDialog
@@ -1872,6 +1874,13 @@ ApplicationWindow
 
     Action
     {
+        id: showPaletteAction
+        text: qsTr("Show Palette")
+        onTriggered: function(source) { showPaletteDialog.show(); }
+    }
+
+    Action
+    {
         id: testCommandAction
         text: qsTr("Test Command")
         onTriggered: function(source)
@@ -2435,6 +2444,7 @@ ApplicationWindow
             PlatformMenuItem { action: reportScopeTimersAction }
             PlatformMenuItem { action: showCommandLineArgumentsAction }
             PlatformMenuItem { action: showEnvironmentAction }
+            PlatformMenuItem { action: showPaletteAction }
             PlatformMenuItem { action: testCommandAction }
             PlatformMenuItem { action: testInfiniteParseAction }
             PlatformMenuItem { action: restartAction }

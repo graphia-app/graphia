@@ -68,5 +68,6 @@
         <file>qml/Visualisation/Visualisation.qml</file>
         <file>qml/Visualisation/Visualisations.qml</file>
         <file>qml/Visualisation/VisualisationUtils.js</file>
+        <file>qml/ShowPaletteDialog.qml</file>
     </qresource>
 </RCC>
