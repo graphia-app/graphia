@@ -588,7 +588,7 @@ Item
 
                 color: palette.light
                 border.width: 1
-                border.color: OutlineColor.scheme
+                border.color: ControlColors.outline
                 radius: 2
 
                 opacity: show ? 1.0 : 0.0

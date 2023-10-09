@@ -37,6 +37,6 @@
         <file>qml/app/graphia/Shared/Utils.js</file>
         <file>qml/app/graphia/Shared/qmldir</file>
         <file>qml/app/graphia/Shared/Templates.qml</file>
-        <file>qml/app/graphia/Shared/Controls/OutlineColor.qml</file>
+        <file>qml/app/graphia/Shared/Controls/ControlColors.qml</file>
     </qresource>
 </RCC>

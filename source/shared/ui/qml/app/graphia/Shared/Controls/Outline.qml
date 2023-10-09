@@ -25,6 +25,6 @@ Rectangle
 
     color: "transparent"
     border.width: outlineVisible ? 1 : 0
-    border.color: OutlineColor.scheme
+    border.color: ControlColors.outline
     clip: outlineVisible
 }

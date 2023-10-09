@@ -175,7 +175,7 @@ Window
                 Layout.fillWidth: true
 
                 color: palette.alternateBase
-                border.color: OutlineColor.scheme
+                border.color: ControlColors.outline
                 border.width: 1
 
                 Rectangle
@@ -205,7 +205,7 @@ Window
                 {
                     anchors.fill: previewImage
                     color: "transparent"
-                    border.color: OutlineColor.scheme
+                    border.color: ControlColors.outline
                     border.width: 1
                 }
 

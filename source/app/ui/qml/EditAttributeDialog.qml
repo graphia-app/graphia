@@ -595,7 +595,7 @@ Window
                                 anchors.right: parent.right
                                 width: 1
                                 height: parent.height
-                                color: OutlineColor.scheme
+                                color: ControlColors.outline
                             }
 
                             Rectangle
@@ -603,7 +603,7 @@ Window
                                 anchors.bottom: parent.bottom
                                 width: parent.width
                                 height: 1
-                                color: OutlineColor.scheme
+                                color: ControlColors.outline
                             }
 
                             MouseArea

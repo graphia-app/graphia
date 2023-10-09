@@ -202,7 +202,7 @@ Rectangle
     width: implicitWidth + (Constants.margin * 4)
     height: implicitHeight + (Constants.margin * 4)
 
-    border.color: OutlineColor.scheme
+    border.color: ControlColors.outline
     border.width: 1
     radius: 4
     color: !root._interrupted ? palette.light : palette.alternateBase

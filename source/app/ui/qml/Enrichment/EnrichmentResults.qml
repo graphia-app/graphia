@@ -139,7 +139,7 @@ ApplicationWindow
         {
             Layout.fillWidth: true
             height: 1
-            color: OutlineColor.scheme
+            color: ControlColors.outline
         }
 
         Item

@@ -292,7 +292,7 @@ Rectangle
     property int _cellDelegateHeight: 0
 
     border.width: root.showBorder ? 1 : 0
-    border.color: OutlineColor.scheme
+    border.color: ControlColors.outline
 
     ColumnLayout
     {
@@ -368,7 +368,7 @@ Rectangle
                     anchors.right: parent.right
                     height: parent.height
                     width: 1
-                    color: OutlineColor.scheme
+                    color: ControlColors.outline
 
                     MouseArea
                     {
@@ -421,7 +421,7 @@ Rectangle
         {
             Layout.fillWidth: true
             height: 1
-            color: OutlineColor.scheme
+            color: ControlColors.outline
         }
 
         Item

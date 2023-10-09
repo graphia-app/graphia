@@ -21,8 +21,7 @@ import QtQuick
 
 Item
 {
-    readonly property color light: palette.mid
-    readonly property color dark: Qt.platform.os === "osx" ? palette.mid : palette.dark
-    readonly property color scheme: Application.styleHints.colorScheme === Qt.Light ?
-        light : dark
+    readonly property color outline:
+        Application.styleHints.colorScheme === Qt.Light || Qt.platform.os === "osx" ?
+        palette.mid : palette.dark
 }

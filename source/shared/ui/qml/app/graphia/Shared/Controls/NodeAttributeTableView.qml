@@ -863,7 +863,7 @@ Item
 
             Layout.fillWidth: true
             height: 1
-            color: OutlineColor.scheme
+            color: ControlColors.outline
         }
 
         Item
@@ -1312,7 +1312,7 @@ Item
                     width: implicitWidth + (Constants.margin * 2)
                     height: implicitHeight + (Constants.margin * 2)
 
-                    border.color: OutlineColor.scheme
+                    border.color: ControlColors.outline
                     border.width: 1
                     radius: 4
                     color: palette.light
