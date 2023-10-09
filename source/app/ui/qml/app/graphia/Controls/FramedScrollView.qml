@@ -26,7 +26,7 @@ Rectangle
     property alias contentChildren: scrollView.contentChildren
     default property alias contentData: scrollView.contentData
 
-    color: palette.light
+    color: ControlColors.background
 
     ScrollView
     {

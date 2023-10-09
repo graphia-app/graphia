@@ -218,7 +218,7 @@ Rectangle
     border.color: ControlColors.outline
     border.width: 1
     radius: 4
-    color: palette.light
+    color: ControlColors.background
 
     Action
     {

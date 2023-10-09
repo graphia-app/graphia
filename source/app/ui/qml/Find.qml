@@ -205,7 +205,7 @@ Rectangle
     border.color: ControlColors.outline
     border.width: 1
     radius: 4
-    color: !root._interrupted ? palette.light : palette.alternateBase
+    color: !root._interrupted ? ControlColors.background : palette.mid
 
     Action
     {

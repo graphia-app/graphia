@@ -1111,7 +1111,7 @@ PluginContent
                         implicitWidth: roiInstructionsLayout.implicitWidth
                         implicitHeight: roiInstructionsLayout.implicitHeight
 
-                        color: palette.light
+                        color: ControlColors.background
                         border.width: 1
                         border.color: ControlColors.outline
                         radius: 5

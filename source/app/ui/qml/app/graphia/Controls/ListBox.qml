@@ -143,7 +143,7 @@ Rectangle
     // Just some semi-sensible defaults
     width: 200
     height: 100
-    color: palette.light
+    color: ControlColors.background
 
     ListView
     {

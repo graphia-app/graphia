@@ -36,7 +36,7 @@ Rectangle
     property alias font: textArea.font
     property alias outlineVisible: outline.outlineVisible
 
-    color: palette.window
+    color: ControlColors.background
 
     ScrollView
     {

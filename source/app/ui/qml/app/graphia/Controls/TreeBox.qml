@@ -131,7 +131,7 @@ Item
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            color: palette.light
+            color: ControlColors.background
 
             TreeView
             {
@@ -420,7 +420,7 @@ Item
                         text: { return hasSectionRow ? treeView.sectionTextFor(model.row) : ""; }
                     }
 
-                    color: palette.light
+                    color: ControlColors.background
 
                     TreeViewDelegate
                     {
@@ -586,7 +586,7 @@ Item
                 anchors.top: parent.top
                 anchors.left: parent.left
 
-                color: palette.light
+                color: ControlColors.background
                 border.width: 1
                 border.color: ControlColors.outline
                 radius: 2

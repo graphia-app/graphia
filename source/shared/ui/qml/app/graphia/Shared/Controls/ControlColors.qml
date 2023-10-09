@@ -24,4 +24,6 @@ Item
     readonly property color outline:
         Application.styleHints.colorScheme === Qt.Light || Qt.platform.os === "osx" ?
         palette.mid : palette.dark
+
+    readonly property color background: palette.active.light
 }

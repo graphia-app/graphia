@@ -182,7 +182,7 @@ Item
             Layout.fillWidth: true
             Layout.fillHeight: true
             visible: root.ambiguityInExtensionsOrPlugins
-            color: palette.light
+            color: ControlColors.background
 
             ScrollView
             {
