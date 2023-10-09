@@ -946,6 +946,8 @@ Item
                 visible: tableView.columns !== 0
                 boundsBehavior: Flickable.StopAtBounds
 
+                // This entire canvas's purpose is to render
+                // alternating colours when no rows are selected
                 Canvas
                 {
                     id: backgroundCanvas
