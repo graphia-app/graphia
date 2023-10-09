@@ -502,9 +502,9 @@ Window
         width: 150
         height: 150
 
-        color: palette.light
+        color: palette.base
         border.width: 1
-        border.color: palette.dark
+        border.color: ControlColors.outline
         radius: 5
 
         ColumnLayout
