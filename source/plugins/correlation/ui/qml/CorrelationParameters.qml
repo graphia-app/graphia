@@ -1627,6 +1627,8 @@ BaseParameterDialog
 
                     ScrollableTextArea
                     {
+                        id: templateTextArea
+
                         Layout.fillWidth: true
                         Layout.fillHeight: true
 
@@ -1634,7 +1636,7 @@ BaseParameterDialog
 
                         textFormat: TextEdit.RichText
                         wrapMode: TextEdit.Wrap
-                        outlineVisible: templateComboBox.transforms.length > 0 ||
+                        visible: templateComboBox.transforms.length > 0 ||
                             templateComboBox.visualisations.length > 0
 
                         text:
@@ -1667,6 +1669,12 @@ BaseParameterDialog
 
                             return s;
                         }
+                    }
+
+                    Item
+                    {
+                        Layout.fillHeight: true
+                        visible: !templateTextArea.visible
                     }
                 }
             }
