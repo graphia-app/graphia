@@ -270,7 +270,7 @@ Rectangle
             if(root.highlightedProvider(modelColumn, modelRow))
                 return palette.highlight;
 
-            return modelRow % 2 ? palette.window : palette.alternateBase;
+            return modelRow % 2 ? ControlColors.tableRow1 : ControlColors.tableRow2;
         }
 
         color: palette.buttonText

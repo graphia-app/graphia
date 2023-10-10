@@ -26,4 +26,6 @@ Item
         palette.mid : palette.dark
 
     readonly property color background: palette.active.light
+    readonly property color tableRow1: palette.active.light
+    readonly property color tableRow2: palette.active.button
 }

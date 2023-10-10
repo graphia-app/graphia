@@ -961,7 +961,7 @@ Item
                         for(let i = 0; i < Math.ceil(tableView.height / tableView.rowHeight) + 1; i++)
                         {
                             let yOffset = (i * tableView.rowHeight);
-                            ctx.fillStyle = i % 2 ? palette.light : palette.midlight;
+                            ctx.fillStyle = i % 2 ? ControlColors.tableRow1 : ControlColors.tableRow2;
                             ctx.fillRect(0, yOffset, width, tableView.rowHeight);
                         }
                     }
@@ -1190,7 +1190,7 @@ Item
                             if(model.subSelected)
                                 return palette.highlight;
 
-                            return model.row % 2 ? palette.light : palette.midlight;
+                            return model.row % 2 ? ControlColors.tableRow1 : ControlColors.tableRow2;
                         }
 
                         // Ripped more or less verbatim from qtquickcontrols/src/controls/Styles/Desktop/TableViewStyle.qml
