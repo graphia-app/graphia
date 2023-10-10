@@ -1519,6 +1519,8 @@ BaseParameterDialog
 
                             delayedRunning: tabularDataParser.graphSizeEstimateInProgress
                         }
+
+                        Outline { anchors.fill: parent }
                     }
 
                     Text
