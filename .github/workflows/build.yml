@@ -114,7 +114,7 @@ jobs:
 
   macos:
     name: macOS
-    runs-on: macos-12
+    runs-on: macos-13
     steps:
     - name: Force Python to version 3.10 to workaround node-gyp install problem (remove later)
       uses: actions/setup-python@v4
