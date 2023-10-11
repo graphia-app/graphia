@@ -100,6 +100,7 @@ Control
             locale: spinBox.locale.name
             bottom: Math.min(root.from, root.to)
             top: Math.max(root.from, root.to)
+            notation: DoubleValidator.StandardNotation
         }
 
         property QtObject _intValidator: IntValidator
