@@ -805,6 +805,9 @@ void CorrelationPlotItem::configureLegend()
 
     legend->setLayer(u"legend"_s);
     legend->clear();
+    legend->setBorderPen(QPen(penColor()));
+    legend->setBrush(backgroundColor());
+    legend->setTextColor(penColor());
 
     const int marginSize = 5;
     legend->setMargins(QMargins(marginSize, marginSize, marginSize, marginSize));
