@@ -44,7 +44,7 @@ GCC_TREAT_WARNINGS_AS_ERRORS=NO xcodebuild -project \
   cd ${BUILD_DIR}
   cmake --version || exit $?
   cmake -DCMAKE_UNITY_BUILD=${UNITY_BUILD} -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
-    -DCMAKE_OSX_DEPLOYMENT_TARGET=10.14 \
+    -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 \
     -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" \
     -GNinja .. || exit $?
   cat variables.sh
