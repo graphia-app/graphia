@@ -73,6 +73,13 @@ Item
             visible: root.pinned
         }
 
+        Label
+        {
+            text: "⟳"
+            color: textColor
+            visible: root.repeating
+        }
+
         RowLayout
         {
             id: expression
@@ -170,6 +177,7 @@ Item
     property bool ready: false
 
     property bool pinned: { return isFlagSet("pinned"); }
+    property bool repeating: { return isFlagSet("repeating"); }
 
     function toggle()
     {
