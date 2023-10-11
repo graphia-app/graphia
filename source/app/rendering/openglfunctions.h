@@ -52,6 +52,7 @@ public:
     static QString info();
 
     static QSurfaceFormat minimumFormat();
+    static void requestMinimumFormat();
 
 private:
     PFNGLMINSAMPLESHADINGARBPROC _glMinSampleShadingARBFnPtr = nullptr;

@@ -57,6 +57,17 @@ QSurfaceFormat OpenGLFunctions::minimumFormat()
     return format;
 }
 
+void OpenGLFunctions::requestMinimumFormat()
+{
+    auto defaultFormat = QSurfaceFormat::defaultFormat();
+    std::pair<int, int> defaultVersion = {defaultFormat.majorVersion(), defaultFormat.minorVersion()};
+    auto requestFormat = minimumFormat();
+    std::pair<int, int> requestVersion = {requestFormat.majorVersion(), requestFormat.minorVersion()};
+
+    if(defaultVersion < requestVersion)
+        QSurfaceFormat::setDefaultFormat(requestFormat);
+}
+
 class QueryFunctions
 {
 private:

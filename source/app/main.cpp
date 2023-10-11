@@ -288,6 +288,8 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
         return 1;
     }
 
+    OpenGLFunctions::requestMinimumFormat();
+
     configureXDG();
 
     qRegisterMetaType<size_t>("size_t");
