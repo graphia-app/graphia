@@ -21,6 +21,8 @@
 
 #include "updates/updater.h"
 
+#include "rendering/openglfunctions.h"
+
 #include "shared/iapplication.h"
 #include "shared/utils/qmlenum.h"
 #include "shared/utils/downloadqueue.h"
@@ -135,6 +137,7 @@ class Application : public QObject, public IApplication
     Q_PROPERTY(QStringList arguments READ arguments CONSTANT)
 
     Q_PROPERTY(QStringList environment READ environment CONSTANT)
+    Q_PROPERTY(QString openGLInfo READ openGLInfo CONSTANT)
 
     Q_PROPERTY(QStringList nameFilters READ nameFilters NOTIFY nameFiltersChanged)
     Q_PROPERTY(QStringListModel* loadableExtensions READ loadableExtensions NOTIFY loadableExtensionsChanged)
@@ -168,6 +171,7 @@ public:
     static QStringList arguments() { return QCoreApplication::arguments(); }
 
     static QStringList environment() { return QProcessEnvironment::systemEnvironment().toStringList(); }
+    static QString openGLInfo() { return OpenGLFunctions::info(); }
 
     Q_INVOKABLE bool canOpen(const QString& urlTypeName) const;
     Q_INVOKABLE bool canOpenAnyOf(const QStringList& urlTypeNames) const;

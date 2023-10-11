@@ -469,6 +469,12 @@ ApplicationWindow
         text: mainWindow.environment
     }
 
+    TextDialog
+    {
+        id: openGLInfoDialog
+        text: application.openGLInfo
+    }
+
     ShowPaletteDialog { id: showPaletteDialog }
 
     TextDialog
@@ -1874,6 +1880,13 @@ ApplicationWindow
 
     Action
     {
+        id: showOpenGLInfoAction
+        text: qsTr("Show OpenGL Info")
+        onTriggered: function(source) { openGLInfoDialog.show(); }
+    }
+
+    Action
+    {
         id: showPaletteAction
         text: qsTr("Show Palette")
         onTriggered: function(source) { showPaletteDialog.show(); }
@@ -2444,6 +2457,7 @@ ApplicationWindow
             PlatformMenuItem { action: reportScopeTimersAction }
             PlatformMenuItem { action: showCommandLineArgumentsAction }
             PlatformMenuItem { action: showEnvironmentAction }
+            PlatformMenuItem { action: showOpenGLInfoAction }
             PlatformMenuItem { action: showPaletteAction }
             PlatformMenuItem { action: testCommandAction }
             PlatformMenuItem { action: testInfiniteParseAction }
