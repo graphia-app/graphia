@@ -944,8 +944,11 @@ Window
             {
                 expression += " using";
 
-                for(let attributeName in attributeParameters._attributeNames)
-                    expression += " $" + attributeParameters._attributeNames[attributeName];
+                for(let attributeParameterName of _transform.attributeParameterNames)
+                {
+                    if(attributeParameterName in attributeParameters._attributeNames)
+                        expression += " $" + attributeParameters._attributeNames[attributeParameterName];
+                }
             }
 
             if(_numParameters > 0)
