@@ -141,12 +141,28 @@ void CorrelationPlotItem::setAveragingType(int averagingType)
 
     if(_averagingType != averagingType)
     {
+        auto invalidateCache = InvalidateCache::No;
         _averagingType = averagingType;
+
         if(_averagingType != static_cast<int>(PlotAveragingType::IQR))
             _showIqrOutliers = true;
 
+        auto scaleType = normaliseQmlEnum<PlotScaleType>(_scaleType);
+        switch(scaleType)
+        {
+        case PlotScaleType::Raw:
+        case PlotScaleType::Log:
+        case PlotScaleType::AntiLog:
+            break;
+
+        default:
+            _scaleType = static_cast<int>(PlotScaleType::Raw);
+            invalidateCache = InvalidateCache::Yes;
+            break;
+        }
+
         emit plotOptionsChanged();
-        rebuildPlot();
+        rebuildPlot(invalidateCache);
         resetZoom();
     }
 }
