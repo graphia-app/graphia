@@ -82,7 +82,7 @@ Window
                 {
                     id: paletteListScrollView
 
-                    implicitWidth: 160 // Instead of Layout.preferredWidth (QTBUG-109471)
+                    Layout.preferredWidth: 160
                     Layout.fillHeight: true
 
                     Column
