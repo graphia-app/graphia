@@ -955,11 +955,8 @@ Window
             {
                 expression += " with";
 
-                for(let index in _transform.parameterNames)
-                {
-                    let parameterName = _transform.parameterNames[index];
+                for(let parameterName of _transform.parameterNames)
                     expression += " \"" + parameterName + "\" = " + parameters.valueOf(parameterName);
-                }
             }
 
             if(lhsAttributeList.selectedValue !== undefined)
