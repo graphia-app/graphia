@@ -222,6 +222,15 @@ PluginContent
 
         Action
         {
+            id: antiLogScaling
+            text:  qsTr("AntiLog");
+            checkable: true
+            checked: plot.scaleType === PlotScaleType.AntiLog
+            onTriggered: { plot.scaleType = PlotScaleType.AntiLog; }
+        }
+
+        Action
+        {
             id: meanCentreScaling
             text: qsTr("Mean Centre Scaling")
             enabled: !plot.iqrStyle
@@ -610,6 +619,7 @@ PluginContent
                 let scalingMenu = MenuUtils.addSubMenuTo(menu, qsTr("Scaling"));
                 MenuUtils.addActionTo(scalingMenu, rawScaling);
                 MenuUtils.addActionTo(scalingMenu, logScaling);
+                MenuUtils.addActionTo(scalingMenu, antiLogScaling);
                 MenuUtils.addActionTo(scalingMenu, meanCentreScaling);
                 MenuUtils.addActionTo(scalingMenu, unitVarianceScaling);
                 MenuUtils.addActionTo(scalingMenu, paretoScaling);

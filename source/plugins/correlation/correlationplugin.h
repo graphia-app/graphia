@@ -242,7 +242,7 @@ public:
 
     QString imageSource() const override { return u"qrc:///plots.svg"_s; }
 
-    int dataVersion() const override { return 14; }
+    int dataVersion() const override { return 15; }
 
     QStringList identifyUrl(const QUrl& url) const override;
     QString failureReason(const QUrl& url) const override;

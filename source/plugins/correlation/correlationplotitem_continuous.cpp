@@ -40,10 +40,16 @@ void CorrelationPlotItem::setContinousYAxisRange(double min, double max)
         Q_ARG(QCPAxis*, _continuousYAxis), Q_ARG(double, min), Q_ARG(double, max));
 }
 
-double CorrelationPlotItem::logScale(double value, double epsilon)
+double CorrelationPlotItem::scale(double value) const
 {
-    // Adding an epsilon prevents log(0) = -inf shenanigans
-    return std::log(value + epsilon);
+    switch(normaliseQmlEnum<PlotScaleType>(_scaleType))
+    {
+    case PlotScaleType::Log:        return std::log(value + _pluginInstance->continuousEpsilon());
+    case PlotScaleType::AntiLog:    return std::exp(value);
+    default:                        return value;
+    }
+
+    return value;
 }
 
 void CorrelationPlotItem::setContinousYAxisRangeForSelection()
@@ -56,9 +62,7 @@ void CorrelationPlotItem::setContinousYAxisRangeForSelection()
         for(size_t column = 0; column < _pluginInstance->numContinuousColumns(); column++)
         {
             auto value = _pluginInstance->continuousDataAt(static_cast<size_t>(row), _sortMap.at(column));
-
-            if(_scaleType == static_cast<int>(PlotScaleType::Log))
-                value = logScale(value, _pluginInstance->continuousEpsilon());
+            value = scale(value);
 
             maxY = std::max(maxY, value);
             minY = std::min(minY, value);
@@ -220,12 +224,22 @@ QVector<double> CorrelationPlotItem::meanAverageData(double& min, double& max, c
     // Use Average Calculation
     QVector<double> yDataAvg; yDataAvg.reserve(rows.size());
 
-    for(size_t col = 0; col < _pluginInstance->numContinuousColumns(); col++)
+    for(size_t column = 0; column < _pluginInstance->numContinuousColumns(); column++)
     {
-        const double runningTotal = std::accumulate(rows.begin(), rows.end(), 0.0,
-        [this, col](auto partial, auto row)
+        QVector<double> values;
+
+        std::transform(rows.begin(), rows.end(), std::back_inserter(values),
+        [this, column](auto row)
         {
-            return partial + _pluginInstance->continuousDataAt(static_cast<size_t>(row), _sortMap.at(col));
+            return _pluginInstance->continuousDataAt(static_cast<size_t>(row), _sortMap.at(column));
+        });
+
+        scale(values);
+
+        const double runningTotal = std::accumulate(values.begin(), values.end(), 0.0,
+        [](auto partial, auto value)
+        {
+            return partial + value;
         });
 
         yDataAvg.append(runningTotal / static_cast<double>(rows.length()));
@@ -312,6 +326,8 @@ void CorrelationPlotItem::populateMedianLinePlot()
     auto addMedianPlot =
     [this, &minY, &maxY](const QColor& color, const QString& name, const QVector<int>& rows)
     {
+        Q_ASSERT(!rows.empty());
+
         auto* graph = _customPlot.addGraph();
         graph->setPen(QPen(color, 2.0, Qt::DashLine));
         graph->setName(name);
@@ -320,25 +336,24 @@ void CorrelationPlotItem::populateMedianLinePlot()
         // xData is just the column indices
         std::iota(std::begin(xData), std::end(xData), 0);
 
-        QVector<double> rowsEntries(rows.length());
         QVector<double> yDataAvg(static_cast<int>(_pluginInstance->numContinuousColumns()));
 
-        for(size_t col = 0; col < _pluginInstance->numContinuousColumns(); col++)
+        for(size_t column = 0; column < _pluginInstance->numContinuousColumns(); column++)
         {
-            rowsEntries.clear();
-            std::transform(rows.begin(), rows.end(), std::back_inserter(rowsEntries),
-            [this, col](auto row)
+            QVector<double> values;
+
+            std::transform(rows.begin(), rows.end(), std::back_inserter(values),
+            [this, column](auto row)
             {
-                return _pluginInstance->continuousDataAt(static_cast<size_t>(row), _sortMap.at(col));
+                return _pluginInstance->continuousDataAt(static_cast<size_t>(row), _sortMap.at(column));
             });
 
-            if(!rows.empty())
-            {
-                yDataAvg[static_cast<int>(col)] = u::medianOf(rowsEntries);
+            scale(values);
 
-                maxY = std::max(maxY, yDataAvg.at(static_cast<int>(col)));
-                minY = std::min(minY, yDataAvg.at(static_cast<int>(col)));
-            }
+            yDataAvg[static_cast<int>(column)] = u::medianOf(values);
+
+            maxY = std::max(maxY, yDataAvg.at(static_cast<int>(column)));
+            minY = std::min(minY, yDataAvg.at(static_cast<int>(column)));
         }
 
         graph->setData(xData, yDataAvg, true);
@@ -538,8 +553,7 @@ void CorrelationPlotItem::populateIQRPlot()
             return _pluginInstance->continuousDataAt(static_cast<size_t>(row), _sortMap.at(column));
         });
 
-        if(_scaleType == static_cast<int>(PlotScaleType::Log))
-            logScale(values, _pluginInstance->continuousEpsilon());
+        scale(values);
 
         auto minmax = addIQRBoxPlotTo(_continuousXAxis, _continuousYAxis, column, std::move(values), _showIqrOutliers);
         minY = std::min(minY, minmax.first);
@@ -615,19 +629,21 @@ void CorrelationPlotItem::populateStdDevPlot(QCPAbstractPlottable* meanPlot,
 {
     QVector<double> stdDevs(static_cast<int>(_pluginInstance->numContinuousColumns()));
 
-    for(size_t col = 0; col < _pluginInstance->numContinuousColumns(); col++)
+    for(size_t column = 0; column < _pluginInstance->numContinuousColumns(); column++)
     {
         double stdDev = 0.0;
         for(auto row : rows)
         {
-            auto value = _pluginInstance->continuousDataAt(static_cast<size_t>(row), _sortMap.at(col)) -
-                means.at(static_cast<int>(col));
+            auto value = _pluginInstance->continuousDataAt(static_cast<size_t>(row), _sortMap.at(column));
+            value = scale(value);
+
+            value = value - means.at(static_cast<int>(column));
             stdDev += (value * value);
         }
 
         stdDev /= static_cast<double>(_pluginInstance->numContinuousColumns());
         stdDev = std::sqrt(stdDev);
-        stdDevs[static_cast<int>(col)] = stdDev;
+        stdDevs[static_cast<int>(column)] = stdDev;
     }
 
     plotDispersion(meanPlot, minY, maxY, stdDevs, tr("Std Dev"));
@@ -639,19 +655,21 @@ void CorrelationPlotItem::populateStdErrorPlot(QCPAbstractPlottable* meanPlot,
 {
     QVector<double> stdErrs(static_cast<int>(_pluginInstance->numContinuousColumns()));
 
-    for(size_t col = 0; col < _pluginInstance->numContinuousColumns(); col++)
+    for(size_t column = 0; column < _pluginInstance->numContinuousColumns(); column++)
     {
         double stdErr = 0.0;
         for(auto row : rows)
         {
-            auto value = _pluginInstance->continuousDataAt(static_cast<size_t>(row), _sortMap.at(col)) -
-                means.at(static_cast<int>(col));
+            auto value = _pluginInstance->continuousDataAt(static_cast<size_t>(row), _sortMap.at(column));
+            value = scale(value);
+
+            value = value - means.at(static_cast<int>(column));
             stdErr += (value * value);
         }
 
         stdErr /= static_cast<double>(_pluginInstance->numContinuousColumns());
         stdErr = std::sqrt(stdErr) / std::sqrt(static_cast<double>(rows.length()));
-        stdErrs[static_cast<int>(col)] = stdErr;
+        stdErrs[static_cast<int>(column)] = stdErr;
     }
 
     plotDispersion(meanPlot, minY, maxY, stdErrs, tr("Std Err"));
@@ -733,7 +751,8 @@ void CorrelationPlotItem::populateLinePlot()
                 switch(normaliseQmlEnum<PlotScaleType>(_scaleType))
                 {
                 case PlotScaleType::Log:
-                    value = logScale(value, _pluginInstance->continuousEpsilon());
+                case PlotScaleType::AntiLog:
+                    value = scale(value);
                     break;
                 case PlotScaleType::MeanCentre:
                     value -= rowMean;

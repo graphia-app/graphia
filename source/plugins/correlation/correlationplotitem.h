@@ -54,7 +54,8 @@ DEFINE_QML_ENUM(
     MeanCentre,
     UnitVariance,
     Pareto,
-    ByAttribute);
+    ByAttribute,
+    AntiLog);
 
 DEFINE_QML_ENUM(
     Q_GADGET, PlotAveragingType,
@@ -460,13 +461,13 @@ private:
         const QCPAbstractPlottable* plottable, double xCoord);
     bool columnAnnotationTooltip(const QCPAxisRect* axisRect);
 
-    static double logScale(double value, double epsilon = std::nextafter(0.0, 1.0));
+    double scale(double value) const;
 
     template<typename C>
-    void logScale(C& values, double epsilon = std::nextafter(0.0, 1.0))
+    void scale(C& values) const
     {
         for(auto& value : values)
-            value = logScale(value, epsilon);
+            value = scale(value);
     }
 
     static std::pair<double, double> addIQRBoxPlotTo(QCPAxis* keyAxis, QCPAxis* valueAxis,

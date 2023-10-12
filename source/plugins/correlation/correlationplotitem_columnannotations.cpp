@@ -213,8 +213,7 @@ void CorrelationPlotItem::populateIQRAnnotationPlot(const QCPColumnAnnotations* 
                 values.append(_pluginInstance->continuousDataAt(static_cast<size_t>(row), groupedColumn));
         }
 
-        if(_scaleType == static_cast<int>(PlotScaleType::Log))
-            logScale(values);
+        scale(values);
 
         QColor color;
         QString value;
