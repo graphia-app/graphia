@@ -233,7 +233,7 @@ PluginContent
         {
             id: meanCentreScaling
             text: qsTr("Mean Centre Scaling")
-            enabled: !plot.iqrStyle
+            enabled: plot.complexScalingEnabled
             checkable: true
             checked: plot.scaleType === PlotScaleType.MeanCentre
             onTriggered: { plot.scaleType = PlotScaleType.MeanCentre; }
@@ -243,7 +243,7 @@ PluginContent
         {
             id: unitVarianceScaling
             text: qsTr("Unit Variance Scaling")
-            enabled: !plot.iqrStyle
+            enabled: plot.complexScalingEnabled
             checkable: true
             checked: plot.scaleType === PlotScaleType.UnitVariance
             onTriggered: { plot.scaleType = PlotScaleType.UnitVariance; }
@@ -253,7 +253,7 @@ PluginContent
         {
             id: paretoScaling
             text: qsTr("Pareto Scaling")
-            enabled: !plot.iqrStyle
+            enabled: plot.complexScalingEnabled
             checkable: true
             checked: plot.scaleType === PlotScaleType.Pareto
             onTriggered: { plot.scaleType = PlotScaleType.Pareto; }
@@ -623,13 +623,11 @@ PluginContent
                 MenuUtils.addActionTo(scalingMenu, meanCentreScaling);
                 MenuUtils.addActionTo(scalingMenu, unitVarianceScaling);
                 MenuUtils.addActionTo(scalingMenu, paretoScaling);
-                scalingMenu.enabled = Qt.binding(() =>
-                    plot.averagingType === PlotAveragingType.Individual || plot.iqrStyle);
 
                 MenuUtils.addSeparatorTo(scalingMenu);
 
                 let scaleByAttributeMenu = MenuUtils.addSubMenuTo(scalingMenu, qsTr("By Attribute"));
-                scaleByAttributeMenu.enabled = Qt.binding(() => !plot.iqrStyle);
+                scaleByAttributeMenu.enabled = Qt.binding(() => plot.complexScalingEnabled);
                 plugin.model.numericalAttributeNames.forEach(function(attributeName)
                 {
                     let attributeMenuItem = MenuUtils.addItemTo(scaleByAttributeMenu, attributeName);
@@ -1068,6 +1066,8 @@ PluginContent
 
                     property bool iqrStyle: plot.groupByAnnotation || plot.averagingType === PlotAveragingType.IQR
                     onIqrStyleChanged: { updateMenu(); }
+
+                    property bool complexScalingEnabled: plot.averagingType === PlotAveragingType.Individual
 
                     horizontalScrollPosition: horizontalPlotScrollBar.position / (1.0 - horizontalPlotScrollBar.size)
 
