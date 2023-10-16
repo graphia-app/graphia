@@ -36,6 +36,7 @@
 #include <QDesktopServices>
 #include <QSet>
 #include <QCollator>
+#include <QQuickWindow>
 #include <QDebug>
 
 #include <cmath>
@@ -94,6 +95,11 @@ void CorrelationPlotWorker::updateZoomed()
 void CorrelationPlotWorker::setShowGridLines(bool showGridLines)
 {
     _showGridLines = showGridLines;
+}
+
+void CorrelationPlotWorker::setDevicePixelRatio(double devicePixelRatio)
+{
+    _devicePixelRatio = devicePixelRatio;
 }
 
 void CorrelationPlotWorker::setWidth(int width)
@@ -200,11 +206,12 @@ void CorrelationPlotWorker::updatePixmap(CorrelationPlotUpdateType updateType)
 
 void CorrelationPlotWorker::clone(CorrelationPlotWorker& target) const
 {
-    target._width           = _width;
-    target._height          = _height;
-    target._xAxisMin        = _xAxisMin;
-    target._xAxisMax        = _xAxisMax;
-    target._showGridLines   = _showGridLines;
+    target._devicePixelRatio    = _devicePixelRatio;
+    target._width               = _width;
+    target._height              = _height;
+    target._xAxisMin            = _xAxisMin;
+    target._xAxisMax            = _xAxisMax;
+    target._showGridLines       = _showGridLines;
 }
 
 void CorrelationPlotWorker::renderPixmap()
@@ -293,7 +300,14 @@ void CorrelationPlotWorker::renderPixmap()
 
     // This assumes that the Qt platform has the QPlatformIntegration::ThreadedPixmaps capability,
     // which should be true on the desktop, but a console warning will be shown if it isn't
-    const QPixmap pixmap = _customPlot->toPixmap();
+    QPixmap pixmap(
+        static_cast<int>(_width * _devicePixelRatio),
+        static_cast<int>(_height * _devicePixelRatio));
+
+    pixmap.fill(Qt::transparent);
+    QCPPainter painter(&pixmap);
+    painter.scale(_devicePixelRatio, _devicePixelRatio);
+    _customPlot->toPainter(&painter);
 
     if(_debug)
         qDebug() << "render" << _pixmapTimer.elapsed() << "ms";
@@ -350,6 +364,16 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) :
             Q_ARG(int, std::max(static_cast<int>(height()), static_cast<int>(minimumHeight()))));
     });
 
+    connect(this, &QQuickPaintedItem::windowChanged, [this]
+    {
+        if(window() == nullptr)
+            return;
+
+        auto devicePixelRatio = window()->devicePixelRatio();
+        QMetaObject::invokeMethod(_worker, "setDevicePixelRatio", Qt::QueuedConnection,
+            Q_ARG(double, devicePixelRatio));
+    });
+
     connect(_worker, &CorrelationPlotWorker::pixmapUpdated, this, &CorrelationPlotItem::onPixmapUpdated);
     connect(_worker, &CorrelationPlotWorker::pixmapUpdated, this, &CorrelationPlotItem::pixmapUpdated);
     connect(this, &CorrelationPlotItem::enabledChanged, [this] { update(); });
@@ -403,10 +427,27 @@ void CorrelationPlotItem::paint(QPainter* painter)
     if(_pixmap.isNull())
         return;
 
+    auto devicePixelRatio = window()->devicePixelRatio();
+
     // Render the plot in the bottom left; that way when its container
     // is resized, it doesn't hop around vertically, as it would if
     // it had been rendered from the top left
-    const int yDest = static_cast<int>(height()) - _pixmap.height();
+    const int yOffset = static_cast<int>(height() - (_pixmap.height() / devicePixelRatio));
+
+    QRect target
+    {
+        0,
+        yOffset,
+        static_cast<int>(width()),
+        static_cast<int>(height()) - yOffset
+    };
+
+    QRect source
+    {
+        0, 0,
+        static_cast<int>(width() * devicePixelRatio),
+        static_cast<int>((height() - yOffset) * devicePixelRatio)
+    };
 
     if(!isEnabled())
     {
@@ -435,13 +476,13 @@ void CorrelationPlotItem::paint(QPainter* painter)
         alphaBackgroundColor.setAlpha(127);
 
         painter->fillRect(QRectF{0.0, 0.0, width(), height()}, alphaBackgroundColor);
-        painter->drawPixmap(0, yDest, QPixmap::fromImage(image));
+        painter->drawPixmap(target, QPixmap::fromImage(image), source);
     }
     else
     {
         painter->setCompositionMode(QPainter::CompositionMode_SourceOver);
         painter->fillRect(QRectF{0.0, 0.0, width(), height()}, backgroundColor());
-        painter->drawPixmap(0, yDest, _pixmap);
+        painter->drawPixmap(target, _pixmap, source);
     }
 }
 

@@ -113,6 +113,7 @@ public:
     void updateZoomed();
 
     Q_INVOKABLE void setShowGridLines(bool showGridLines);
+    Q_INVOKABLE void setDevicePixelRatio(double devicePixelRatio);
     Q_INVOKABLE void setWidth(int width);
     Q_INVOKABLE void setHeight(int height);
     Q_INVOKABLE void setXAxisRange(double min, double max);
@@ -135,6 +136,7 @@ private:
     QCustomPlot* _customPlot = nullptr;
     QOffscreenSurface* _surface = nullptr;
 
+    double _devicePixelRatio = 1.0;
     int _width = -1;
     int _height = -1;
     double _xAxisMin = 0.0;
