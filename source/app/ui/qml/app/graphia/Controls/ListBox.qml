@@ -300,7 +300,15 @@ Rectangle
     }
 
     function clearSelection() { root._selectedIndices = []; }
-    function select(index) { root._selectedIndices = [index]; }
+
+    function select(index)
+    {
+        if(root._selectedIndices.length === 1 && root._selectedIndices[0] === index)
+            return;
+
+        root._selectedIndices = [index];
+    }
+
     function selectAll()
     {
         if(!root.allowMultipleSelection)
