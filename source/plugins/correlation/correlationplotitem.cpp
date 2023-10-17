@@ -146,6 +146,10 @@ void CorrelationPlotWorker::zoom(QCPAxis* axis, double centre, int direction)
 
     auto& parameters = _axisParameters[axis];
 
+    // Can't zoom if no range has been established
+    if(parameters._min > parameters._max)
+        return;
+
     auto zoomFactor = zoomStepFactor;
     if(direction < 0)
         zoomFactor = 1.0 / zoomFactor;
