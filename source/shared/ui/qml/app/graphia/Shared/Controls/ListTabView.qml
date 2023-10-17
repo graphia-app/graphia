@@ -22,6 +22,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 import app.graphia.Shared
+import app.graphia.Controls
 
 // This dialog is conceptually similar to a tabview in a dialog however the user
 // interface consists of a vertical list of tabs with buttons to OPTIONALLY
@@ -70,76 +71,16 @@ Item
             Layout.fillHeight: true
             spacing: Constants.spacing
 
-            Rectangle
+            ListBox
             {
+                id: tabSelectorListBox
+
                 Layout.fillHeight: true
-                Layout.preferredWidth: tabSelector.maxChildWidth + (Constants.padding * 2)
+                Layout.preferredWidth: 150
 
-                color: palette.window
-
-                ListView
+                onSelectedIndexChanged:
                 {
-                    id: tabSelector
-                    enabled: root.controlsEnabled
-                    model: listTabs.length
-
-                    boundsBehavior: Flickable.StopAtBounds
-
-                    anchors.fill: parent
-                    anchors.margins: outline.outlineWidth
-                    clip: true
-
-                    property var _childWidths: []
-                    property int maxChildWidth: 0
-
-                    delegate: Item
-                    {
-                        width: parent.width
-                        height: delegateRectangle.height
-                        Rectangle
-                        {
-                            id: delegateRectangle
-                            color: index === _currentIndex ? palette.highlight : "transparent"
-                            anchors.centerIn: parent
-                            width: parent.width
-                            height: children[0].height + (_padding * 2.0)
-
-                            Text
-                            {
-                                anchors.margins: _padding
-                                anchors.centerIn: parent
-                                color: index === _currentIndex ? palette.highlightedText : palette.windowText
-                                text: listTabs[index] ? listTabs[index].title : ""
-
-                                TextMetrics
-                                {
-                                    text: listTabs[index] ? listTabs[index].title : ""
-                                    onTextChanged:
-                                    {
-                                        tabSelector._childWidths[index] = width;
-
-                                        let w = 0;
-                                        for(let i = 0; i < tabSelector._childWidths.length; i++)
-                                            w = Math.max(w, tabSelector._childWidths[i]);
-
-                                        tabSelector.maxChildWidth = w;
-                                    }
-                                }
-                            }
-
-                            MouseArea
-                            {
-                                anchors.fill: parent
-                                onClicked: goToTab(index);
-                            }
-                        }
-                    }
-                }
-
-                Outline
-                {
-                    id: outline
-                    anchors.fill: parent
+                    goToTab(selectedIndex);
                 }
             }
 
@@ -229,6 +170,8 @@ Item
     {
         for(let index = 0; index < listTabs.length; index++)
             listTabs[index].active = (index === _currentIndex);
+
+        tabSelectorListBox.select(_currentIndex);
     }
 
     on_CurrentIndexChanged:
@@ -258,6 +201,9 @@ Item
 
     function goToTab(index)
     {
+        if(index === _currentIndex)
+            return;
+
         if(index <= listTabs.length - 1 && index >= 0)
         {
             _currentIndex = index;
@@ -306,16 +252,22 @@ Item
 
     Component.onCompleted:
     {
+        let listBoxModel = [];
+
         for(let i = 0; i < listTabs.length; i++)
         {
             listTabs[i].parent = content;
             listTabs[i].x = Qt.binding(function()
             {
-                return indexOf(this) * contentContainer.width + tabSelector.implicitWidth;
+                return indexOf(this) * contentContainer.width + tabSelectorListBox.implicitWidth;
             });
             listTabs[i].width = Qt.binding(() => contentContainer.width);
             listTabs[i].height = Qt.binding(() => contentContainer.height);
+
+            listBoxModel.push(listTabs[i].title);
         }
+
+        tabSelectorListBox.model = listBoxModel;
 
         _updateActiveTab();
     }
