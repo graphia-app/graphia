@@ -19,6 +19,7 @@
 #include "qcustomplotquickitem.h"
 
 #include <QMouseEvent>
+#include <QQuickWindow>
 #include <QCoreApplication>
 
 QCustomPlotQuickItem::QCustomPlotQuickItem(int multisamples, QQuickItem* parent) :
@@ -47,10 +48,34 @@ QCustomPlotQuickItem::QCustomPlotQuickItem(int multisamples, QQuickItem* parent)
 
 void QCustomPlotQuickItem::paint(QPainter* painter)
 {
+    auto devicePixelRatio = window()->devicePixelRatio();
+
+    QRect target
+    {
+        0, 0,
+        static_cast<int>(width()),
+        static_cast<int>(height())
+    };
+
+    QRect source
+    {
+        0, 0,
+        static_cast<int>(width() * devicePixelRatio),
+        static_cast<int>((height()) * devicePixelRatio)
+    };
+
+    QPixmap pixmap(
+        static_cast<int>(width() * devicePixelRatio),
+        static_cast<int>(height() * devicePixelRatio));
+        pixmap.fill(Qt::transparent);
+    QCPPainter qcpPainter(&pixmap);
+    qcpPainter.scale(devicePixelRatio, devicePixelRatio);
+    _customPlot.toPainter(&qcpPainter);
+
     if(!isEnabled())
     {
         // Create a desaturated version of the pixmap
-        auto image = _customPlot.toPixmap().toImage();
+        auto image = pixmap.toImage();
         const auto bytes = image.depth() >> 3;
 
         for(int y = 0; y < image.height(); y++)
@@ -74,13 +99,13 @@ void QCustomPlotQuickItem::paint(QPainter* painter)
         alphaBackgroundColor.setAlpha(127);
 
         painter->fillRect(QRectF{0.0, 0.0, width(), height()}, alphaBackgroundColor);
-        painter->drawPixmap(0, 0, QPixmap::fromImage(image));
+        painter->drawPixmap(target, QPixmap::fromImage(image), source);
     }
     else
     {
         painter->setCompositionMode(QPainter::CompositionMode_SourceOver);
         painter->fillRect(QRectF{0.0, 0.0, width(), height()}, backgroundColor());
-        painter->drawPixmap(0, 0, _customPlot.toPixmap());
+        painter->drawPixmap(target, pixmap, source);
     }
 }
 
