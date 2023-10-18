@@ -1646,8 +1646,8 @@ Item
 
         title: qsTr("Application Method")
 
-        modality: Qt.WindowModal
-        flags: Qt.Dialog | (Qt.platform.os === "osx" ? Qt.Sheet : 0)
+        modality: Qt.ApplicationModal
+        flags: Qt.Dialog
 
         width: 380
         minimumWidth: width

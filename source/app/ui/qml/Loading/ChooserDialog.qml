@@ -37,8 +37,8 @@ Window
 
     property var values: []
 
-    modality: Qt.WindowModal
-    flags: Qt.Dialog | (Qt.platform.os === "osx" ? Qt.Sheet : 0)
+    modality: Qt.ApplicationModal
+    flags: Qt.Dialog
     color: palette.window
 
     width: 420

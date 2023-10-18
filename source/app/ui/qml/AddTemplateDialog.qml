@@ -39,8 +39,8 @@ Window
 
     property var document: null
 
-    modality: Qt.WindowModal
-    flags: Qt.Window|Qt.Dialog
+    modality: Qt.ApplicationModal
+    flags: Qt.Dialog
     color: palette.window
 
     width: 640
