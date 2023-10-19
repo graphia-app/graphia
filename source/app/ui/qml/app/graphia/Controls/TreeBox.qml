@@ -413,7 +413,7 @@ Item
                         visible: hasSectionRow
                         font.bold: true
                         font.italic: true
-                        color: palette.text
+                        color: root.palette.text
 
                         text: { return hasSectionRow ? treeView.sectionTextFor(model.row) : ""; }
                     }
@@ -443,7 +443,7 @@ Item
                         background: Rectangle
                         {
                             visible: selected
-                            color: palette.highlight
+                            color: root.palette.highlight
                         }
 
                         Component.onCompleted:
@@ -452,7 +452,7 @@ Item
                             // structure of the delegate implementation, so it could break in future
 
                             let contrastBinding = Qt.binding(() =>
-                                selected ? palette.highlightedText : palette.text);
+                                selected ? root.palette.highlightedText : root.palette.text);
 
                             if(contentItem instanceof Text)
                             {
@@ -602,7 +602,7 @@ Item
 
                     elide: Text.ElideRight
                     font.italic: true
-                    color: palette.text
+                    color: root.palette.text
 
                     text: root.prettifyFunction(parent.text)
                 }
