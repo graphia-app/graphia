@@ -390,23 +390,31 @@ Rectangle
             {
                 visible: _type === Find.Simple || _type === Find.Advanced
 
-                TextField
+                Item
                 {
-                    id: findField
-                    width: 150
-                    font.strikeout: root._interrupted
-                    selectByMouse: true
+                    Layout.fillHeight: true
+                    Layout.preferredWidth: 192
+                    Layout.margins: Constants.margin
+                    clip: true
 
-                    onAccepted: { selectAllAction.trigger(); }
-
-                    background: Rectangle
+                    TextInput
                     {
-                        implicitWidth: 192
-                        color: "transparent"
-                    }
+                        id: findField
 
-                    Keys.onUpPressed: { _previousAction.trigger(); }
-                    Keys.onDownPressed: { _nextAction.trigger(); }
+                        anchors.fill: parent
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        font.strikeout: root._interrupted
+                        selectByMouse: true
+                        color: palette.text
+                        selectionColor: palette.highlight
+                        selectedTextColor: palette.highlightedText
+
+                        onAccepted: { selectAllAction.trigger(); }
+
+                        Keys.onUpPressed: { _previousAction.trigger(); }
+                        Keys.onDownPressed: { _nextAction.trigger(); }
+                    }
                 }
 
                 Item

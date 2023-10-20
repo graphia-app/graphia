@@ -84,25 +84,32 @@ Rectangle
 
         RowLayout
         {
-            TextField
+            Item
             {
-                id: nameField
-                width: 150
+                Layout.fillHeight: true
+                Layout.preferredWidth: 192
+                Layout.margins: Constants.margin
+                clip: true
 
-                selectByMouse: true
-
-                onAccepted: { doneAction.trigger(); }
-
-                background: Rectangle
+                TextInput
                 {
-                    implicitWidth: 192
-                    color: "transparent"
-                }
+                    id: nameField
 
-                onFocusChanged:
-                {
-                    if(!focus)
-                        closeAction.trigger();
+                    anchors.fill: parent
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    selectByMouse: true
+                    color: palette.text
+                    selectionColor: palette.highlight
+                    selectedTextColor: palette.highlightedText
+
+                    onAccepted: { doneAction.trigger(); }
+
+                    onFocusChanged:
+                    {
+                        if(!focus)
+                            closeAction.trigger();
+                    }
                 }
             }
 

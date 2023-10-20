@@ -89,15 +89,17 @@ Window
                     elide: Text.ElideRight
                 }
 
-                TextField
+                TextInput
                 {
                     id: editField
                     visible: false
                     selectByMouse: true
+                    color: palette.text
+                    selectionColor: palette.highlight
+                    selectedTextColor: palette.highlightedText
 
                     anchors.fill: label
                     padding: 0
-                    background: Item {}
 
                     onAccepted: { finish(); }
 
