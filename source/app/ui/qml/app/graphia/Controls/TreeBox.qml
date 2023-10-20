@@ -420,6 +420,13 @@ Item
 
                     color: ControlColors.background
 
+                    Rectangle
+                    {
+                        anchors.fill: treeViewDelegate
+                        visible: selected
+                        color: root.palette.highlight
+                    }
+
                     TreeViewDelegate
                     {
                         id: treeViewDelegate
@@ -440,12 +447,6 @@ Item
                         model: parent.model
                         row: parent.row
 
-                        background: Rectangle
-                        {
-                            visible: selected
-                            color: root.palette.highlight
-                        }
-
                         Component.onCompleted:
                         {
                             // Everything in here is speculative and relies on the actual internal
@@ -453,6 +454,10 @@ Item
 
                             let contrastBinding = Qt.binding(() =>
                                 selected ? root.palette.highlightedText : root.palette.text);
+
+                            // On some styles, the background can't be changed, so we display the selection
+                            // marker separately (see above), and hide the original background entirely
+                            background.visible = false;
 
                             if(contentItem instanceof Text)
                             {
