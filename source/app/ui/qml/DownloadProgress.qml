@@ -78,21 +78,12 @@ RowLayout
     Button
     {
         visible: root.waitingForOpen
-        implicitWidth: downloadProgressBar.implicitWidth
 
-        contentItem: Text
+        text:
         {
-            anchors.fill: parent
-            horizontalAlignment: Text.AlignHCenter
-            elide: Text.ElideRight
-
-            text:
-            {
-                let filename = QmlUtils.baseFileNameForUrl(root.blockedUrl);
-                return qsTr("Open ") + (filename.length > 0 ? filename : qsTr("Download"));
-            }
+            let filename = QmlUtils.baseFileNameForUrl(root.blockedUrl);
+            return qsTr("Open ") + (filename.length > 0 ? filename : qsTr("Download"));
         }
-
 
         onClicked: function(mouse)
         {
