@@ -18,6 +18,8 @@
 
 import QtQuick
 
+import app.graphia
+
 Rectangle
 {
     property bool outlineVisible: true

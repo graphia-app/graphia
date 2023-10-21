@@ -19,6 +19,7 @@
 import QtQuick
 import QtQuick.Controls
 
+import app.graphia
 import app.graphia.Shared.Controls
 
 Rectangle

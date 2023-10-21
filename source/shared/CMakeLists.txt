@@ -108,6 +108,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/utils/performancecounter.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/preferences.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/progressable.h
+    ${CMAKE_CURRENT_LIST_DIR}/utils/qmlcontrolcolors.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/qmlenum.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/qmlutils.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/random.h
@@ -170,6 +171,7 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/utils/modelcompleter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/palettechangenotifier.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/performancecounter.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/utils/qmlcontrolcolors.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/random.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/scopetimer.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/showinfolder.cpp
