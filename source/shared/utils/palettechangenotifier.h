@@ -19,21 +19,21 @@
 #ifndef PALETTECHANGENOTIFIER_H
 #define PALETTECHANGENOTIFIER_H
 
-#include <QObject>
+#include <QQuickItem>
 #include <QEvent>
 
-class PaletteChangeNotifier : public QObject
+class PaletteChangeNotifier : public QQuickItem
 {
     Q_OBJECT
 
 public:
-    explicit PaletteChangeNotifier(QObject* parent = nullptr);
+    explicit PaletteChangeNotifier(QQuickItem* parent = nullptr);
 
 signals:
     void paletteChanged();
 
 protected:
-    bool eventFilter(QObject* watched, QEvent* event) override;
+    bool event(QEvent* event) override;
 };
 
 #endif // PALETTECHANGENOTIFIER_H

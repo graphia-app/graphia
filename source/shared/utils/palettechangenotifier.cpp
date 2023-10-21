@@ -23,17 +23,18 @@
 #include <QApplication>
 #include <QQmlEngine>
 
-PaletteChangeNotifier::PaletteChangeNotifier(QObject* parent) : QObject(parent)
-{
-    QCoreApplication::instance()->installEventFilter(this);
-}
+PaletteChangeNotifier::PaletteChangeNotifier(QQuickItem* parent) : QQuickItem(parent)
+{}
 
-bool PaletteChangeNotifier::eventFilter(QObject* watched, QEvent* event)
+bool PaletteChangeNotifier::event(QEvent* event)
 {
     if(event->type() == QEvent::ApplicationPaletteChange)
+    {
         emit paletteChanged();
+        return true;
+    }
 
-    return QObject::eventFilter(watched, event);
+    return QObject::event(event);
 }
 
 static_block
