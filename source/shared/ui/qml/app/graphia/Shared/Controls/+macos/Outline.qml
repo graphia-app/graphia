@@ -19,6 +19,7 @@
 import QtQuick
 
 import app.graphia
+import app.graphia.Shared
 import app.graphia.Shared.Controls
 
 // The Rectangle based implementation of Outline can't render half pixel widths
@@ -60,7 +61,7 @@ Canvas
 
     onOutlineVisibleChanged: { requestPaint(); }
     onColorChanged: { requestPaint(); }
-    PaletteChangeNotifier { onPaletteChanged: { root.requestPaint(); } }
+    CanvasPaletteHelper {}
     Connections
     {
         target: Screen

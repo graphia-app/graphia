@@ -18,7 +18,7 @@
 
 import QtQuick
 
-import app.graphia
+import app.graphia.Shared
 
 Rectangle
 {
@@ -82,9 +82,9 @@ Rectangle
                     y += separation;
             }
         }
-    }
 
-    PaletteChangeNotifier { onPaletteChanged: { canvas.requestPaint(); } }
+        CanvasPaletteHelper {}
+    }
 
     onVisibleChanged:
     {

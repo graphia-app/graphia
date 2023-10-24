@@ -972,7 +972,7 @@ Item
                         function onContentYChanged() { backgroundCanvas.requestPaint(); }
                     }
 
-                    PaletteChangeNotifier { onPaletteChanged: { backgroundCanvas.requestPaint(); } }
+                    CanvasPaletteHelper {}
                 }
 
                 ScrollBar.horizontal: ScrollBar
