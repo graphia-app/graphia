@@ -303,7 +303,11 @@ void GlyphMap::renderImages(const QFont &font)
     // Save Glyphmap(s) for debug purposes if needed
     if(u::pref(u"debug/saveGlyphMaps"_s).toBool())
     {
+        const char* outFilePrefix = "graphia-GlyphMap";
+
         for(int i = 0; const auto& debugImage : debugImages)
-            debugImage.save(QDir::currentPath() + "/GlyphMap" + QString::number(i++) + ".png");
+            debugImage.save(u"%1/%2/%3.png"_s.arg(QDir::tempPath(), outFilePrefix, QString::number(i++)));
+
+        qDebug() << u"Glyph images saved to: %1/%2*.png"_s.arg(QDir::tempPath(), outFilePrefix);
     }
 }

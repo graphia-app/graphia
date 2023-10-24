@@ -185,19 +185,22 @@ void SDFComputeJob::generateSDF()
         glBindTexture(GL_TEXTURE_2D_ARRAY, sdfTexture);
         glGetTexImage(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
 
+        const char* outFilePrefix = "graphia-SDF";
+
         // Save each layer as its own image for debug
         for(size_t layer = 0; layer < numImages; ++layer)
         {
             auto offset = (static_cast<size_t>(_glyphMap->images().at(0).sizeInBytes()) /
                 static_cast<size_t>(scaleFactor * scaleFactor)) * layer;
             const QImage sdfImage(pixels.data() + offset, renderWidth, renderHeight, QImage::Format_RGBA8888);
-            sdfImage.save(QDir::currentPath() + "/SDF" + QString::number(layer) + ".png");
+            sdfImage.save(u"%1/%2/%3.png"_s.arg(QDir::tempPath(), outFilePrefix, QString::number(layer)));
         }
 
         // Print Memory consumption
         auto memoryConsumption = static_cast<size_t>(renderWidth * renderHeight * 4) * numImages;
-        qDebug() << "SDF texture memory consumption MB:" <<
+        qDebug() << u"SDF texture memory consumption MB:"_s <<
             static_cast<float>(memoryConsumption) / (1000.0f * 1000.0f);
+        qDebug() << u"SDF images saved to: %1/%2*.png"_s.arg(QDir::tempPath(), outFilePrefix);
     }
 
     screenQuadVAO.release();
