@@ -39,5 +39,6 @@
         <file>qml/app/graphia/Shared/Utils.js</file>
         <file>qml/app/graphia/Shared/qmldir</file>
         <file>qml/app/graphia/Shared/Templates.qml</file>
+        <file>qml/app/graphia/Shared/CanvasPaletteHelper.qml</file>
     </qresource>
 </RCC>

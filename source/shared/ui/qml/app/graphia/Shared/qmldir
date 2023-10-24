@@ -1,6 +1,7 @@
 module app.graphia.Shared
 
 PluginContent 1.0 PluginContent.qml
+CanvasPaletteHelper 1.0 CanvasPaletteHelper.qml
 Constants 1.0 Constants.js
 MenuUtils 1.0 MenuUtils.js
 Templates 1.0 Templates.qml
