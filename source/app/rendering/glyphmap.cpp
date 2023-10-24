@@ -222,6 +222,7 @@ void GlyphMap::renderImages(const QFont &font)
 
             painter.setFont(font);
             painter.setPen(Qt::white);
+            path.setFillRule(Qt::FillRule::WindingFill);
             painter.fillPath(path.translated(x, y - glyphAscent), QBrush(Qt::white));
         };
 
