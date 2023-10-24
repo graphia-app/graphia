@@ -83,7 +83,7 @@ void main()
 
     // Uncomment for outline
     //if(normalised > 0.5)
-    //   fragColor = vec4(1.0);
+    //    outColor = vec4(1.0);
     //else
         outColor = vec4(normalised, normalised, normalised, 1.0);
 }
