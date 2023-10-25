@@ -42,6 +42,7 @@ Control
     function _update()
     {
         spinBox._setting = true;
+        root.value = Math.min(Math.max(root.value, root.from), root.to);
         spinBox.value = spinBox.intValue(root.value);
         spinBox._setting = false;
     }
@@ -98,16 +99,12 @@ Control
         property QtObject _doubleValidator: DoubleValidator
         {
             locale: spinBox.locale.name
-            bottom: Math.min(root.from, root.to)
-            top: Math.max(root.from, root.to)
             notation: DoubleValidator.StandardNotation
         }
 
         property QtObject _intValidator: IntValidator
         {
             locale: spinBox.locale.name
-            bottom: Math.round(Math.min(root.from, root.to))
-            top: Math.round(Math.max(root.from, root.to))
         }
 
         validator: root.decimals > 0 ? _doubleValidator : _intValidator
