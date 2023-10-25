@@ -80,9 +80,18 @@ Control
         function doubleValue(i) { return root.from + ((root.to - root.from) / (to - from)) * (i - from); }
         function intValue(d)    { return from + ((to - from) / (root.to - root.from)) * (d - root.from); }
 
-        from: -0x7FFFFFFF
-        to: 0x7FFFFFFF
+        from: -0x3FFFFFFF
+        to: 0x3FFFFFFF
         stepSize: root.stepSize * ((spinBox.to - spinBox.from) / (root.to - root.from))
+
+        onStepSizeChanged:
+        {
+            let wouldUnderflow = (-0x7FFFFFFF + spinBox.stepSize) > spinBox.from;
+            let wouldOverflow = (0x7FFFFFFF - spinBox.stepSize) < spinBox.to;
+
+            if(wouldUnderflow || wouldOverflow)
+                console.log("DoubleSpinBox.stepSize is set such that under/overflow may occur (QTBUG-118544)");
+        }
 
         Component.onCompleted:
         {
