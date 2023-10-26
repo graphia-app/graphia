@@ -27,7 +27,7 @@ using namespace Qt::Literals::StringLiterals;
 class GMLSaver : public ISaver
 {
 private:
-    const QUrl& _url;
+    QUrl _url;
     IGraphModel* _graphModel;
     static QString indent(int level) { return u"    "_s.repeated(level); }
 

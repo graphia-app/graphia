@@ -32,7 +32,7 @@ class IGraph;
 class JSONGraphSaver : public ISaver
 {
 private:
-    const QUrl& _url;
+    QUrl _url;
     IGraphModel* _graphModel;
 public:
     static QString name() { return u"JSON Graph"_s; }

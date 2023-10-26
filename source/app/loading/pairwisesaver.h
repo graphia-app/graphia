@@ -22,13 +22,14 @@
 #include "loading/saverfactory.h"
 
 #include <QString>
+#include <QUrl>
 
 using namespace Qt::Literals::StringLiterals;
 
 class PairwiseSaver : public ISaver
 {
 private:
-    const QUrl& _url;
+    QUrl _url;
     IGraphModel* _graphModel;
 public:
     static QString name() { return u"Pairwise Text"_s; }
