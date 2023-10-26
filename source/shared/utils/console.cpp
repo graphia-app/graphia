@@ -28,6 +28,7 @@
 #else
 #include <unistd.h>
 #include <sys/ioctl.h>
+#include <cstdio>
 #endif
 
 #ifdef Q_OS_WIN
