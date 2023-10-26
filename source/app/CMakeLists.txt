@@ -334,6 +334,10 @@ else()
             RENAME ${PROJECT_NAME}.png)
     endforeach()
 
+    install(FILES ${CMAKE_CURRENT_LIST_DIR}/icon/Icon.svg
+        DESTINATION share/icons/hicolor/scalable/apps
+        RENAME ${PROJECT_NAME}.svg)
+
     configure_file(${CMAKE_CURRENT_LIST_DIR}/application.desktop.in
         ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.desktop @ONLY)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.desktop
