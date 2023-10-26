@@ -330,7 +330,7 @@ else()
 
     foreach(RESOLUTION 1024x1024 512x512 256x256 128x128 64x64 48x48 32x32 16x16)
         install(FILES ${CMAKE_CURRENT_LIST_DIR}/icon/Icon${RESOLUTION}.png
-            DESTINATION share/icons/hicolor/${RESOLUTION}
+            DESTINATION share/icons/hicolor/${RESOLUTION}/apps
             RENAME ${PROJECT_NAME}.png)
     endforeach()
 
