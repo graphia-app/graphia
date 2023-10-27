@@ -35,7 +35,7 @@ private:
     using clock_type = std::chrono::steady_clock;
     clock_type::time_point _expectedExpiry;
 
-    const std::chrono::seconds _defaultTimeoutDuration{30};
+    std::chrono::seconds _defaultTimeoutDuration{30};
     std::chrono::seconds _timeoutDuration{_defaultTimeoutDuration};
 
     void startTimer();

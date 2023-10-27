@@ -329,7 +329,7 @@ public:
         bool operator!=(iterator other) const { return !(*this == other); }
         value_type operator*() const { return _num; }
     };
-    MatrixType& matrix;
+    MatrixType matrix;
     explicit ColumnsIterator(MatrixType& _matrix) : matrix(_matrix) {}
     iterator begin() { return iterator(0); }
     iterator end() { return iterator(matrix.columns()); }

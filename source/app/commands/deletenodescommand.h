@@ -35,8 +35,8 @@ private:
     SelectionManager* _selectionManager = nullptr;
 
     bool _multipleNodes = false;
-    const NodeIdSet _selectedNodeIds;
-    const NodeIdSet _nodeIds;
+    NodeIdSet _selectedNodeIds;
+    NodeIdSet _nodeIds;
     std::vector<Edge> _edges;
 
 public:

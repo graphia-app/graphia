@@ -174,7 +174,7 @@ private:
     {
         struct Visitor
         {
-            E _elementId;
+            E _elementId; // NOLINT cppcoreguidelines-avoid-const-or-ref-data-members
             const IAttribute* _attribute;
 
             explicit Visitor(E elementId_, const IAttribute* attribute) :
