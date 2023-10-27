@@ -202,7 +202,7 @@ namespace u
         return values;
     }
 
-    template<typename T> struct reversing_wrapper { T& container; };
+    template<typename T> struct reversing_wrapper { T& container; }; // NOLINT cppcoreguidelines-avoid-const-or-ref-data-members
     template<typename T> auto begin(reversing_wrapper<T> wrapper) { return std::rbegin(wrapper.container); }
     template<typename T> auto end(reversing_wrapper<T> wrapper) { return std::rend(wrapper.container); }
 
