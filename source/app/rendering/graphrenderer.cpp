@@ -180,13 +180,24 @@ void GraphRenderer::createGPUGlyphData(const QString& text, const QColor& textCo
 
     auto& textLayout = _textLayoutResults._layouts[text];
 
-    auto verticalCentre = -textLayout._xHeight * textScale * 0.5f;
-    auto top = elementSize;
-    auto bottom = (-elementSize) - (textLayout._xHeight * textScale);
+    const auto verticalCentre = -textLayout._xHeight * textScale * 0.5f;
+    const auto top = elementSize;
+    const auto bottom = (-elementSize) - (textLayout._xHeight * textScale);
 
-    auto horizontalCentre = -textLayout._width * textScale * 0.5f;
-    auto right = elementSize;
-    auto left = (-elementSize) - (textLayout._width * textScale);
+    const auto horizontalCentre = -textLayout._width * textScale * 0.5f;
+    const auto right = elementSize;
+    const auto left = (-elementSize) - (textLayout._width * textScale);
+
+    std::array<float, 2> baseOffset{{0.0f, 0.0f}};
+    switch(textAlignment)
+    {
+    default:
+    case TextAlignment::Right:  baseOffset = {{right,            verticalCentre}}; break;
+    case TextAlignment::Left:   baseOffset = {{left,             verticalCentre}}; break;
+    case TextAlignment::Centre: baseOffset = {{horizontalCentre, verticalCentre}}; break;
+    case TextAlignment::Top:    baseOffset = {{horizontalCentre, top           }}; break;
+    case TextAlignment::Bottom: baseOffset = {{horizontalCentre, bottom        }}; break;
+    }
 
     for(const auto& glyph : textLayout._glyphs)
     {
@@ -195,17 +206,6 @@ void GraphRenderer::createGPUGlyphData(const QString& text, const QColor& textCo
         auto textureGlyph = _textLayoutResults._glyphs[glyph._index];
 
         glyphData._component = componentIndex;
-
-        std::array<float, 2> baseOffset{{0.0f, 0.0f}};
-        switch(textAlignment)
-        {
-        default:
-        case TextAlignment::Right:  baseOffset = {{right,            verticalCentre}}; break;
-        case TextAlignment::Left:   baseOffset = {{left,             verticalCentre}}; break;
-        case TextAlignment::Centre: baseOffset = {{horizontalCentre, verticalCentre}}; break;
-        case TextAlignment::Top:    baseOffset = {{horizontalCentre, top           }}; break;
-        case TextAlignment::Bottom: baseOffset = {{horizontalCentre, bottom        }}; break;
-        }
 
         glyphData._glyphOffset[0] = baseOffset[0] + (static_cast<float>(glyph._advance) * textScale);
         glyphData._glyphOffset[1] = baseOffset[1] - ((textureGlyph._height + textureGlyph._ascent) * textScale);
