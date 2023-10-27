@@ -31,6 +31,8 @@
 
 using namespace Qt::Literals::StringLiterals;
 
+static const double HEATMAP_OFFSET = 0.5;
+
 EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) :
     QCustomPlotQuickItem(multisamples(), parent),
     _colorMap(new QCPColorMap(customPlot().xAxis, customPlot().yAxis2)),
@@ -314,9 +316,9 @@ void EnrichmentHeatmapItem::scaleXAxis()
     const double position = (_attributeACount - (visiblePlotWidth / textHeight)) * _scrollXAmount;
 
     if(position + (visiblePlotWidth / textHeight) <= maxX)
-        customPlot().xAxis->setRange(position - _HEATMAP_OFFSET, position + (visiblePlotWidth / textHeight) - _HEATMAP_OFFSET);
+        customPlot().xAxis->setRange(position - HEATMAP_OFFSET, position + (visiblePlotWidth / textHeight) - HEATMAP_OFFSET);
     else
-        customPlot().xAxis->setRange(-_HEATMAP_OFFSET, maxX - _HEATMAP_OFFSET);
+        customPlot().xAxis->setRange(-HEATMAP_OFFSET, maxX - HEATMAP_OFFSET);
 }
 
 void EnrichmentHeatmapItem::scaleYAxis()
@@ -328,9 +330,9 @@ void EnrichmentHeatmapItem::scaleYAxis()
     const double position = (_attributeBCount - (visiblePlotHeight / textHeight)) * (1.0-_scrollYAmount);
 
     if((visiblePlotHeight / textHeight) <= maxY)
-        customPlot().yAxis2->setRange(position - _HEATMAP_OFFSET, position + (visiblePlotHeight / textHeight) - _HEATMAP_OFFSET);
+        customPlot().yAxis2->setRange(position - HEATMAP_OFFSET, position + (visiblePlotHeight / textHeight) - HEATMAP_OFFSET);
     else
-        customPlot().yAxis2->setRange(-_HEATMAP_OFFSET, maxY - _HEATMAP_OFFSET);
+        customPlot().yAxis2->setRange(-HEATMAP_OFFSET, maxY - HEATMAP_OFFSET);
 }
 
 void EnrichmentHeatmapItem::setElideLabelWidth(int elideLabelWidth)

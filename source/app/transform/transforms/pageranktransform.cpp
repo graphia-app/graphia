@@ -33,6 +33,12 @@
 
 using namespace Qt::Literals::StringLiterals;
 
+static const float PAGERANK_DAMPING = 0.8f;
+static const float PAGERANK_EPSILON = 1e-6f;
+static const float PAGERANK_ACCELERATION_MINIMUM = 1e-10f;
+static const int PAGERANK_ITERATION_LIMIT = 1000;
+static const int AVG_COUNT = 10;
+
 using VectorType = blaze::DynamicVector<float>;
 
 void PageRankTransform::apply(TransformedGraph& target)

@@ -48,16 +48,8 @@ class ForceDirectedLayout : public Layout
 {
     Q_OBJECT
 private:
-    const float MINIMUM_STDDEV_THRESHOLD = 0.008f;
-    const float FINETUNE_STDDEV_DELTA = 0.000005f;
-    const float OSCILLATE_STDDEV_DELTA_PERCENT = 1.0f;
-    const float MAXIMUM_AVG_FORCE_FOR_STOP = 1.0f;
-    static const size_t OSCILLATE_DELTA_SAMPLE_SIZE = 500;
-    static const size_t OSCILLATE_RUN_COUNT = 5;
-    static const size_t STDDEV_INCREASES_BEFORE_SWITCH_TO_OSCILLATE = 500;
     static const size_t FINETUNE_DELTA_SAMPLE_SIZE = 50;
-    static const size_t FINETUNE_SMOOTHING_SIZE = 10;
-    static const size_t INITIAL_SMOOTHING_SIZE = 50;
+    static const size_t OSCILLATE_DELTA_SAMPLE_SIZE = 500;
 
     CircularBuffer<float, FINETUNE_DELTA_SAMPLE_SIZE> _prevStdDevs;
     CircularBuffer<float, FINETUNE_DELTA_SAMPLE_SIZE> _prevAvgForces;

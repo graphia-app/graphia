@@ -37,9 +37,6 @@ private:
     void disableDebugMatrices(){ _debugMatrices = false; }
 
 private:
-    const float MCL_PRUNE_LIMIT = 1e-4f;
-    const float MCL_CONVERGENCE_LIMIT = 1e-3f;
-
     bool _debugIteration = false;
     bool _debugMatrices = false;
 

@@ -33,6 +33,9 @@
 
 using namespace Qt::Literals::StringLiterals;
 
+static const float MCL_PRUNE_LIMIT = 1e-4f;
+static const float MCL_CONVERGENCE_LIMIT = 1e-3f;
+
 using MatrixType = blaze::CompressedMatrix<float, blaze::columnMajor>;
 using VectorType = blaze::DynamicVector<float, blaze::columnVector>;
 

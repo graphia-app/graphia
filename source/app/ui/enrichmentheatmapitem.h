@@ -55,7 +55,6 @@ private:
     double _scrollXAmount = 0.0;
     double _scrollYAmount = 0.0;
     int _elideLabelWidth = 120;
-    const double _HEATMAP_OFFSET = 0.5;
     QString _xAxisLabel;
     QString _yAxisLabel;
 

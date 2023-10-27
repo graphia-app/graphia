@@ -34,12 +34,6 @@ public:
     void disableDebug() { _debug = false; }
 
 private:
-    const float PAGERANK_DAMPING = 0.8f;
-    const float PAGERANK_EPSILON = 1e-6f;
-    const float PAGERANK_ACCELERATION_MINIMUM = 1e-10f;
-    const int PAGERANK_ITERATION_LIMIT = 1000;
-    const int AVG_COUNT = 10;
-
     bool _debug = false;
 
     void calculatePageRank(TransformedGraph& target);

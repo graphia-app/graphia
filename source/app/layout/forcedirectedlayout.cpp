@@ -32,6 +32,15 @@
 
 using namespace Qt::Literals::StringLiterals;
 
+static const float MINIMUM_STDDEV_THRESHOLD = 0.008f;
+static const float FINETUNE_STDDEV_DELTA = 0.000005f;
+static const float OSCILLATE_STDDEV_DELTA_PERCENT = 1.0f;
+static const float MAXIMUM_AVG_FORCE_FOR_STOP = 1.0f;
+static const size_t OSCILLATE_RUN_COUNT = 5;
+static const size_t STDDEV_INCREASES_BEFORE_SWITCH_TO_OSCILLATE = 500;
+static const size_t FINETUNE_SMOOTHING_SIZE = 10;
+static const size_t INITIAL_SMOOTHING_SIZE = 50;
+
 template<typename T> float meanWeightedAvgBuffer(size_t start, size_t end, const T& buffer)
 {
     float average = 0.0f;
