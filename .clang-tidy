@@ -40,6 +40,7 @@ Checks: >
     -misc-non-private-member-variables-in-classes,
     -misc-no-recursion,
     -misc-unused-parameters,
+    -misc-use-anonymous-namespace,
     -modernize-avoid-c-arrays,
     -modernize-pass-by-value,
     -modernize-use-nodiscard,
