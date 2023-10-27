@@ -83,7 +83,7 @@ CorrelationPlotSaveImageCommand::CorrelationPlotSaveImageCommand(
         QUrl target;
 
         const QFileInfo fileInfo(_baseFilename);
-        QString extensionlessBaseFilename =
+        const QString extensionlessBaseFilename =
             QString::compare(fileInfo.suffix(), _extension, Qt::CaseInsensitive) == 0 ?
             fileInfo.completeBaseName() : fileInfo.fileName();
 

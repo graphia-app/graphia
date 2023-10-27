@@ -98,14 +98,14 @@ bool EditAttributeCommand::execute()
             if(userDataVector == nullptr)
                 return false;
 
-            UserDataVector::Type type = UserDataVector::equivalentTypeFor(_newType);
+            const UserDataVector::Type type = UserDataVector::equivalentTypeFor(_newType);
 
             if(!userDataVector->canConvertTo(type))
                 return false;
 
             _originalType = attribute->valueType();
 
-            bool success = userData.setAttributeType(*_graphModel, _attributeName, type);
+            const bool success = userData.setAttributeType(*_graphModel, _attributeName, type);
             Q_ASSERT(success);
         }
 
@@ -113,7 +113,7 @@ bool EditAttributeCommand::execute()
         {
             _originalDescription = attribute->description();
 
-            bool success = userData.setAttributeDescription(*_graphModel, _attributeName, _newDescription);
+            const bool success = userData.setAttributeDescription(*_graphModel, _attributeName, _newDescription);
             Q_ASSERT(success);
         }
 
@@ -150,13 +150,13 @@ void EditAttributeCommand::undo()
 
         if(_originalType != ValueType::Unknown)
         {
-            UserDataVector::Type type = UserDataVector::equivalentTypeFor(_originalType);
-            bool success = userData.setAttributeType(*_graphModel, _attributeName, type);
+            const UserDataVector::Type type = UserDataVector::equivalentTypeFor(_originalType);
+            const bool success = userData.setAttributeType(*_graphModel, _attributeName, type);
             Q_ASSERT(success);
             _originalType = ValueType::Unknown;
         }
 
-        bool success = userData.setAttributeDescription(*_graphModel, _attributeName, _originalDescription);
+        const bool success = userData.setAttributeDescription(*_graphModel, _attributeName, _originalDescription);
         Q_ASSERT(success);
         _originalDescription = {};
     };

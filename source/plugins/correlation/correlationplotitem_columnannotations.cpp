@@ -485,7 +485,7 @@ void CorrelationPlotItem::onClickColumnAnnotation(const QCPAxisRect* axisRect, c
     }
 
     auto pos = event->pos() - axisRect->topLeft();
-    bool clickOnName = pos.x() < 0;
+    const bool clickOnName = pos.x() < 0;
     auto p = columnAnnotationPositionForPixel(axisRect, pos.toPointF());
 
     if(p.y() < 0)
@@ -534,7 +534,7 @@ void CorrelationPlotItem::onClickColumnAnnotation(const QCPAxisRect* axisRect, c
         const auto* rect = qcpColumnAnnotations->rectAt(
             static_cast<size_t>(p.x()), *columnAnnotations.at(static_cast<size_t>(p.y())));
 
-        bool toggle = event->modifiers().testFlag(Qt::ControlModifier);
+        const bool toggle = event->modifiers().testFlag(Qt::ControlModifier);
 
         if(!toggle)
             _selectedColumns.clear();
@@ -552,7 +552,7 @@ void CorrelationPlotItem::onClickColumnAnnotation(const QCPAxisRect* axisRect, c
                 indices.push_back(_sortMap.at(i));
         }
 
-        bool selected = std::all_of(indices.begin(), indices.end(),
+        const bool selected = std::all_of(indices.begin(), indices.end(),
             [this](size_t index) { return _selectedColumns.contains(index); });
 
         for(auto index : indices)

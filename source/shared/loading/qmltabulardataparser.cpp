@@ -38,7 +38,7 @@ QmlTabularDataHeaderModel::QmlTabularDataHeaderModel(const QmlTabularDataParser*
     ValueType valueTypes, const QStringList& skip, HeaderModelType headerModelType) :
     _parser(parser), _type(headerModelType)
 {
-    size_t num = _type == HeaderModelType::Rows ?
+    const size_t num = _type == HeaderModelType::Rows ?
         _parser->_dataPtr->numColumns() :
         _parser->_dataPtr->numRows();
 

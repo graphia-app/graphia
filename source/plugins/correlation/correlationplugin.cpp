@@ -580,8 +580,8 @@ void CorrelationPluginInstance::rebuildColumnAnnotations()
     _columnAnnotations = columnAnnotations;
     auto after = columnAnnotationNames();
 
-    QStringList addedNames = u::toQStringList(u::setDifference(after, before));
-    QStringList removedNames = u::toQStringList(u::setDifference(before, after));
+    const QStringList addedNames = u::toQStringList(u::setDifference(after, before));
+    const QStringList removedNames = u::toQStringList(u::setDifference(before, after));
 
     emit columnAnnotationNamesChanged(addedNames, removedNames);
 
@@ -941,9 +941,9 @@ std::vector<int> CorrelationPluginInstance::rowsOfInterestByColumns(const std::v
         for(auto column : columns)
             columnsSum += dataRow.valueAt(static_cast<size_t>(column));
 
-        double otherColumnsSum = dataRow.sum() - columnsSum;
+        const double otherColumnsSum = dataRow.sum() - columnsSum;
 
-        RowScore rowScore
+        const RowScore rowScore
         {
             row,
             (columnsSum * positiveWeight) - (otherColumnsSum * negativeWeight)

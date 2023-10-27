@@ -438,7 +438,7 @@ void CorrelationPlotItem::paint(QPainter* painter)
     // it had been rendered from the top left
     const int yOffset = static_cast<int>(height() - (_pixmap.height() / devicePixelRatio));
 
-    QRect target
+    const QRect target
     {
         0,
         yOffset,
@@ -446,7 +446,7 @@ void CorrelationPlotItem::paint(QPainter* painter)
         static_cast<int>(height()) - yOffset
     };
 
-    QRect source
+    const QRect source
     {
         0, 0,
         static_cast<int>(width() * devicePixelRatio),
@@ -969,7 +969,7 @@ void CorrelationPlotItem::onClick(const QMouseEvent* event)
         auto* axis = axisRect->axis(QCPAxis::atBottom);
         auto column = static_cast<size_t>(std::round(axis->pixelToCoord(event->pos().x())));
 
-        bool toggle = event->modifiers().testFlag(Qt::ControlModifier);
+        const bool toggle = event->modifiers().testFlag(Qt::ControlModifier);
 
         if(!toggle)
             _selectedColumns.clear();

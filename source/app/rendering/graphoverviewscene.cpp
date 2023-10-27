@@ -211,9 +211,9 @@ void GraphOverviewScene::zoomTo(const std::vector<ComponentId>& componentIds, bo
     auto componentsZoomFactor = zoomFactorFor(static_cast<float>(_width), static_cast<float>(_height),
         static_cast<float>(zoomedBoundingBox.width()), static_cast<float>(zoomedBoundingBox.height()));
 
-    bool zoomFactorChanged = setZoomFactor(componentsZoomFactor);
-    bool offsetChanged = setOffsetForBoundingBox(zoomedBoundingBox);
-    bool force = _graphRenderer->transition().active();
+    const bool zoomFactorChanged = setZoomFactor(componentsZoomFactor);
+    const bool offsetChanged = setOffsetForBoundingBox(zoomedBoundingBox);
+    const bool force = _graphRenderer->transition().active();
 
     if(!zoomFactorChanged && !offsetChanged && !force)
         return;
@@ -366,7 +366,7 @@ void GraphOverviewScene::updateZoomedComponentLayoutData()
 
 void GraphOverviewScene::setViewportSize(int width, int height)
 {
-    bool viewWasReset = viewIsReset();
+    const bool viewWasReset = viewIsReset();
 
     _width = width;
     _height = height;
@@ -540,7 +540,7 @@ void GraphOverviewScene::startZoomTransition(float duration)
     _graphRenderer->transition().cancel();
 
     ComponentLayoutData targetZoomedComponentLayoutData(_graphModel->graph());
-    ComponentArray<float> targetComponentAlpha(_graphModel->graph(), 1.0f);
+    const ComponentArray<float> targetComponentAlpha(_graphModel->graph(), 1.0f);
 
     _previousZoomedComponentLayoutData = _zoomedComponentLayoutData;
     _previousComponentAlpha = _componentAlpha;

@@ -46,7 +46,7 @@ QObject* QmlControlColors::qmlInstance(QQmlEngine*, QJSEngine*)
 
 bool QmlControlColors::eventFilter(QObject* watched, QEvent* event)
 {
-    bool watchedQObjectIsApplication = (watched == QCoreApplication::instance());
+    const bool watchedQObjectIsApplication = (watched == QCoreApplication::instance());
 
     if(watchedQObjectIsApplication && event->type() == QEvent::ApplicationPaletteChange)
         emit paletteChanged();
