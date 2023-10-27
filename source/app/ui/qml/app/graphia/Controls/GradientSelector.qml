@@ -110,7 +110,7 @@ Window
                             gradientListModel.remove(index);
                         }
 
-                        function add(configuration)
+                        function addPreset(configuration)
                         {
                             let savedGradients = savedGradientsFromPreferences();
                             savedGradients.unshift(JSON.parse(configuration));
@@ -211,7 +211,7 @@ Window
 
                     onClicked: function(mouse)
                     {
-                        gradientPresets.add(gradientEditor.configuration);
+                        gradientPresets.addPreset(gradientEditor.configuration);
                     }
                 }
 
@@ -269,7 +269,7 @@ Window
                     {
                         // Add a preset too, if it doesn't exist already
                         if(gradientPresets.selectedIndex < 0)
-                            gradientPresets.add(gradientEditor.configuration);
+                            gradientPresets.addPreset(gradientEditor.configuration);
 
                         visuals.defaultGradient = gradientEditor.configuration;
                     }

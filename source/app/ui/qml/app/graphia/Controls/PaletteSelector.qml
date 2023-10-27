@@ -114,7 +114,7 @@ Window
                             paletteListModel.remove(index);
                         }
 
-                        function add(configuration)
+                        function addPreset(configuration)
                         {
                             let savedPalettes = savedPalettesFromPreferences();
                             savedPalettes.unshift(JSON.parse(configuration));
@@ -215,7 +215,7 @@ Window
 
                     onClicked: function(mouse)
                     {
-                        palettePresets.add(paletteEditor.configuration);
+                        palettePresets.addPreset(paletteEditor.configuration);
                     }
                 }
 
@@ -273,7 +273,7 @@ Window
                     {
                         // Add a preset too, if it doesn't exist already
                         if(palettePresets.selectedIndex < 0)
-                            palettePresets.add(paletteEditor.configuration);
+                            palettePresets.addPreset(paletteEditor.configuration);
 
                         visuals.defaultPalette = paletteEditor.configuration;
                     }
