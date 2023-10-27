@@ -15,6 +15,7 @@ Checks: >
     -clang-diagnostic-error,
     -clang-diagnostic-unknown-warning-option,
     -cppcoreguidelines-avoid-c-arrays,
+    -cppcoreguidelines-avoid-do-while,
     -cppcoreguidelines-avoid-magic-numbers,
     -cppcoreguidelines-avoid-non-const-global-variables,
     -cppcoreguidelines-init-variables,
