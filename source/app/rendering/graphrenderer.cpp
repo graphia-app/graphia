@@ -1135,12 +1135,12 @@ GraphRenderer::Mode GraphRenderer::bestFocusParameters(GraphQuickItem* graphQuic
 
     // If the request is for more than 1 node, then find their barycentre and
     // pick the closest node to where ever this happens to be
-    std::vector<QVector3D> points(nodeIds.size());
-    size_t i = 0;
+    std::vector<QVector3D> points;
+    points.reserve(nodeIds.size());
     for(auto nodeId : nodeIds)
     {
         auto nodePosition = _graphModel->nodePositions().get(nodeId);
-        points.at(i++) = nodePosition;
+        points.push_back(nodePosition);
     }
 
     const BoundingSphere boundingSphere(points);
