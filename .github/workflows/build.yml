@@ -245,10 +245,30 @@ jobs:
       env:
         CC: clang-cl.exe
         CXX: clang-cl.exe
+    - name: NSIS Installer
+      shell: cmd
+      run: call installers\windows\build.bat
+      env:
+        CRTDIRECTORY: ${{ env.VcToolsRedistDir }}\x64\Microsoft.VC142.CRT
+        WINDOWS_SIGN_KEYSTORE_BASE64: ${{ secrets.WINDOWS_SIGN_KEYSTORE_BASE64 }}
+        WINDOWS_SIGN_PASSWORD: ${{ secrets.WINDOWS_SIGN_PASSWORD }}
+        WINDOWS_SIGN_SUBJECTNAME: ${{ secrets.WINDOWS_SIGN_SUBJECTNAME }}
+        WINDOWS_SIGN_TSA: ${{ secrets.WINDOWS_SIGN_TSA }}
+    - uses: actions/upload-artifact@v3
+      if: github.event_name != 'pull_request'
+      with:
+        name: Windows Clang Installer
+        path: build/Graphia-*-installer.exe
     - uses: actions/upload-artifact@v3
       with:
         name: Windows Clang Logs
         path: build/*.log
+    - name: Upload Symbols
+      if: github.event_name != 'pull_request'
+      run: scripts/upload-symbols.sh
+      shell: bash
+      env:
+        SYM_UPLOAD_URL: ${{ secrets.SYM_UPLOAD_URL }}
 
   clang-tidy:
     name: Clang-Tidy
@@ -552,6 +572,7 @@ jobs:
       - linux
       - windows
       - macos
+      - windows-clang
     steps:
     - uses: actions/download-artifact@v3
       with:
@@ -577,6 +598,14 @@ jobs:
       with:
         name: Windows Logs
         path: prerelease/Windows Logs
+    - uses: actions/download-artifact@v3
+      with:
+        name: Windows Clang Installer
+        path: prerelease/Windows Clang Installer
+    - uses: actions/download-artifact@v3
+      with:
+        name: Windows Clang Logs
+        path: prerelease/Windows Clang Logs
     - uses: horochx/deploy-via-scp@master
       with:
         host: ${{ secrets.PRERELEASE_HOST }}
