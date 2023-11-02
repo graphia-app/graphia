@@ -36,11 +36,15 @@ cat ${BUILD_DIR}/compile_commands.json | jq ".[].command += \" ${SYSTEM_INCLUDE_
     _compile_commands.json
 mv _compile_commands.json ${BUILD_DIR}/compile_commands.json
 
+cat ${BUILD_DIR}/compile_commands.json | \
+    jq 'map(select(.file | test("qrc_|mocs_compilation|thirdparty") | not))' > \
+    _compile_commands.json
+mv _compile_commands.json ${BUILD_DIR}/compile_commands.json
+
 cp ${BUILD_DIR}/compile_commands.json ${BUILD_DIR}/compile_commands-${VERSION}.log
 
 CPP_FILES=$(cat ${BUILD_DIR}/compile_commands.json | \
-    jq '.[].file' | grep -vE "qrc_|mocs_compilation|thirdparty" | \
-    sed -e 's/"//g')
+    jq '.[].file' | sed -e 's/"//g')
 
 INCLUDE_DIRS=$(cat ${BUILD_DIR}/compile_commands.json | \
     jq '.[].command' | grep -oP '(?<=-I) *.*?(?= )' | \
