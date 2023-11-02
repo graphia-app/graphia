@@ -426,6 +426,57 @@ jobs:
         name: Static Analysis Logs
         path: build/clang/*.log
 
+  iwyu:
+    name: Include What You Use
+    runs-on: ubuntu-latest
+    needs:
+      - clang-debug
+    steps:
+    - name: Install Tools
+      run: |
+        sudo wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh
+        sudo bash /tmp/llvm.sh ${{ env.CLANG_VERSION }}
+        sudo apt install g++ cmake clang llvm-${{ env.CLANG_VERSION }}-dev git-core libclang-${{ env.CLANG_VERSION }}-dev
+        sudo update-alternatives --install /usr/bin/llvm-config llvm-config /usr/bin/llvm-config-${{ env.CLANG_VERSION }} 100
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        modules: ${{ env.QT_MODULES }}
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.ref }}
+        fetch-depth: 0
+    - uses: actions/checkout@v3
+      with:
+        repository: include-what-you-use/include-what-you-use
+        ref: clang_${{ env.CLANG_VERSION }}
+        path: iwyu
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: iwyu
+    - uses: seanmiddleditch/gha-setup-ninja@v3
+    - name: Build IWYU
+      run: |
+        cd iwyu/
+        cmake -DCMAKE_PREFIX_PATH=/usr/lib/llvm-${{ env.CLANG_VERSION }} -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -G Ninja
+        cmake --build .
+        sudo cmake --build . --target install
+    - uses: actions/download-artifact@v3
+      with:
+        name: Static Analysis Build
+        path: build/clang/
+    - name: Analyse
+      run: scripts/iwyu.sh
+      env:
+        BUILD_DIR: build/clang/
+        IWYU_SOURCE: ${{ github.workspace }}/iwyu
+    - uses: actions/upload-artifact@v3
+      with:
+        name: Static Analysis Logs
+        path: build/clang/*.log
+
   check-is-release:
     if: github.event_name != 'pull_request'
     name: Check For Release Tag
@@ -543,6 +594,7 @@ jobs:
       - clang-tidy
       - cppcheck
       - clazy
+      - iwyu
       - qmllint
     steps:
     - uses: actions/download-artifact@v3
