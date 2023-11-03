@@ -28,4 +28,4 @@ fi
 
 include-what-you-use --version
 iwyu_tool.py -p ${BUILD_DIR} -j$(nproc --all) -- \
-    -Xiwyu --mapping_file=${IWYU_SOURCE}/qt5_11.imp 2>&1 | tee iwyu-${VERSION}.log
+    -Xiwyu --mapping_file=${IWYU_SOURCE}/qt5_11.imp 2>&1 | tee ${BUILD_DIR}/iwyu-${VERSION}.log
