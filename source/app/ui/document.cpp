@@ -30,7 +30,6 @@
 #include "shared/utils/string.h"
 #include "shared/loading/userelementdata.h"
 #include "shared/utils/static_block.h"
-#include "shared/utils/scopetimer.h"
 
 #include "graph/mutablegraph.h"
 #include "graph/graphmodel.h"
@@ -84,6 +83,7 @@
 #include <QVector>
 #include <QClipboard>
 #include <QQmlEngine>
+#include <QThread>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -423,15 +423,26 @@ void Document::setTransforms(const QStringList& transforms)
 
 void Document::setVisualisations(const QStringList& visualisations)
 {
-    SCOPE_TIMER_MULTISAMPLES(50)
-
     _visualisations = visualisations;
-    _graphModel->buildVisualisations(_visualisations);
 
     _visualisationsFromUI = visualisations;
     emit visualisationsChanged();
 
     setSaveRequired();
+}
+
+void Document::refreshVisualisations()
+{
+    // This shouldn't be called on the main thread as GraphModel::buildVisualisations
+    // can potentially take some time to complete
+    Q_ASSERT(QThread::currentThread() != QApplication::instance()->thread());
+
+    _graphModel->buildVisualisations(_visualisations);
+
+    executeOnMainThreadAndWait([this]
+    {
+        setVisualisations(_visualisations);
+    }, u"Document refreshVisualisations"_s);
 }
 
 
@@ -814,7 +825,7 @@ void Document::onPreferenceChanged(const QString& key, const QVariant&)
     else if(key == u"visuals/showEdgeText"_s)
     {
         // showEdgeText affects the warning state of TextVisualisationChannel
-        setVisualisations(_visualisations);
+        _commandManager.executeOnce([this](Command&) { refreshVisualisations(); });
     }
 }
 
@@ -1050,12 +1061,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
 
     connect(&_graphModel->graph(), &Graph::graphChanged, [this]
     {
-        executeOnMainThreadAndWait([this]
-        {
-            // If the graph changes then so do our visualisations
-            setVisualisations(_visualisations);
-        }, u"Document graphChanged"_s);
-
+        refreshVisualisations();
         setSaveRequired();
     });
 

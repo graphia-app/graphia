@@ -206,6 +206,7 @@ public:
 
     QStringList visualisations() const { return _visualisations; }
     void setVisualisations(const QStringList& visualisations);
+    void refreshVisualisations();
 
     const QVariantList& enrichmentTableModels() { return _enrichmentTableModels; }
 
