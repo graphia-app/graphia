@@ -817,7 +817,8 @@ Window
 
                                             Component.onCompleted:
                                             {
-                                                let visualisationChannelNames = document.availableVisualisationChannelNames(visualisation.valueType);
+                                                let visualisationChannelNames = document.availableVisualisationChannelNames(
+                                                    visualisation.elementType, visualisation.valueType);
                                                 visualisationsComboBox.model = ["None"].concat(visualisationChannelNames);
                                                 visualisationsComboBox.currentIndex = visualisationsComboBox.model.indexOf(visualisation.channelName);
                                             }

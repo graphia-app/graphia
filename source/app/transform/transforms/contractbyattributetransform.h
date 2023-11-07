@@ -70,8 +70,8 @@ public:
     {
         return
         {
-            {"Node Multiplicity", ValueType::Int, {}, QObject::tr("Size")},
-            {"Edge Multiplicity", ValueType::Int, {}, QObject::tr("Size")}
+            {"Node Multiplicity", ElementType::Node, ValueType::Int, {}, QObject::tr("Size")},
+            {"Edge Multiplicity", ElementType::Edge, ValueType::Int, {}, QObject::tr("Size")}
         };
     }
 

@@ -73,7 +73,7 @@ public:
 
     DefaultVisualisations defaultVisualisations() const override
     {
-        return {{"Name", ValueType::String, {}, QObject::tr("Colour")}};
+        return {{"Name", _elementType, ValueType::String, {}, QObject::tr("Colour")}};
     }
 
     bool configIsValid(const GraphTransformConfig& graphTransformConfig) const override;

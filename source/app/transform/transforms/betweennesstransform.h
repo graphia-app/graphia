@@ -54,8 +54,8 @@ public:
     {
         return
         {
-            {"Node Betweenness", ValueType::Float, {AttributeFlag::VisualiseByComponent}, QObject::tr("Colour")},
-            {"Edge Betweenness", ValueType::Float, {AttributeFlag::VisualiseByComponent}, QObject::tr("Colour")}
+            {"Node Betweenness", ElementType::Node, ValueType::Float, {AttributeFlag::VisualiseByComponent}, QObject::tr("Colour")},
+            {"Edge Betweenness", ElementType::Edge, ValueType::Float, {AttributeFlag::VisualiseByComponent}, QObject::tr("Colour")}
         };
     }
 

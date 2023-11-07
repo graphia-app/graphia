@@ -150,7 +150,7 @@ public:
     void buildVisualisations(const QStringList& visualisations);
     bool hasValidEdgeTextVisualisation() const;
 
-    QStringList availableVisualisationChannelNames(ValueType valueType) const;
+    QStringList availableVisualisationChannelNames(ElementType elementType, ValueType valueType) const;
     bool visualisationChannelAllowsMapping(const QString& channelName) const;
 
     QStringList visualisationDescription(const QString& attributeName, const QStringList& channelNames) const;

@@ -823,14 +823,14 @@ bool GraphModel::hasValidEdgeTextVisualisation() const
     return _->_hasValidEdgeTextVisualisation;
 }
 
-QStringList GraphModel::availableVisualisationChannelNames(ValueType valueType) const
+QStringList GraphModel::availableVisualisationChannelNames(ElementType elementType, ValueType valueType) const
 {
     QStringList stringList;
 
-    for(auto& t : _->_visualisationChannels)
+    for(const auto& [channelName, channel] : _->_visualisationChannels)
     {
-        if(t.second->supports(valueType))
-            stringList.append(t.first);
+        if(channel->appliesTo(elementType) && channel->supports(valueType))
+            stringList.append(channelName);
     }
 
     return stringList;

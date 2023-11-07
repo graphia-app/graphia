@@ -503,7 +503,7 @@ public:
     Q_INVOKABLE void removeGraphTransform(int index);
     Q_INVOKABLE void moveGraphTransform(int from, int to);
 
-    Q_INVOKABLE QStringList availableVisualisationChannelNames(int valueType) const;
+    Q_INVOKABLE QStringList availableVisualisationChannelNames(int elementType, int valueType) const;
     Q_INVOKABLE bool visualisationChannelAllowsMapping(const QString& channelName) const;
 
     Q_INVOKABLE QStringList visualisationDescription(const QString& attributeName, const QStringList& channelNames) const;

@@ -39,6 +39,7 @@ public:
     virtual void apply(double, ElementVisual&) const { qFatal("apply not implemented"); }
     virtual void apply(const QString&, ElementVisual&) const { qFatal("apply not implemented"); }
 
+    virtual bool appliesTo(ElementType) const { return true; }
     virtual bool supports(ValueType) const = 0;
     virtual bool requiresRange() const { return true; }
     virtual bool allowsMapping() const { return true; }

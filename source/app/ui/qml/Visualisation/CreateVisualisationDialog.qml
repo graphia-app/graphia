@@ -98,7 +98,7 @@ Window
                     if(currentIndexIsSelectable && attribute.isValid)
                     {
                         channelList.model = document.availableVisualisationChannelNames(
-                            attribute.valueType);
+                            attribute.elementType, attribute.valueType);
                     }
                     else if(channelList.model)
                         channelList.model = null;

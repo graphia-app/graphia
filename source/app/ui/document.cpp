@@ -2010,6 +2010,7 @@ QVariantMap Document::transform(const QString& transformName) const
             auto attributeName = Attribute::enquoteAttributeName(defaultVisualisation._attributeName);
             defaultVisualisationMap.insert(u"name"_s, attributeName);
             defaultVisualisationMap.insert(u"flags"_s, static_cast<int>(*defaultVisualisation._attributeFlags));
+            defaultVisualisationMap.insert(u"elementType"_s, static_cast<int>(defaultVisualisation._elementType));
             defaultVisualisationMap.insert(u"valueType"_s, static_cast<int>(defaultVisualisation._attributeValueType));
             defaultVisualisationMap.insert(u"channelName"_s, defaultVisualisation._channel);
             defaultVisualisations.insert(attributeName, defaultVisualisationMap);
@@ -2350,10 +2351,10 @@ void Document::moveGraphTransform(int from, int to)
         _graphTransforms, newGraphTransforms));
 }
 
-QStringList Document::availableVisualisationChannelNames(int valueType) const
+QStringList Document::availableVisualisationChannelNames(int elementType, int valueType) const
 {
     return _graphModel != nullptr ? _graphModel->availableVisualisationChannelNames(
-                                        static_cast<ValueType>(valueType)) : QStringList();
+        static_cast<ElementType>(elementType), static_cast<ValueType>(valueType)) : QStringList();
 }
 
 bool Document::visualisationChannelAllowsMapping(const QString& channelName) const

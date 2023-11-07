@@ -93,6 +93,7 @@ struct DefaultVisualisation
     // the parameter value will be used as the attribute name
     QString _attributeName;
 
+    ElementType _elementType;
     ValueType _attributeValueType;
     Flags<AttributeFlag> _attributeFlags;
     QString _channel;
