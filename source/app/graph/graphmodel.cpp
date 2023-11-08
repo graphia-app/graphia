@@ -173,7 +173,7 @@ private:
     }
 
     QStringList _removedDynamicAttributeNames;
-    QStringList _updatedDynamicAttributeNames;
+    QStringList _changedDynamicAttributeNames;
 
     void updateSharedAttributeValues(Attribute& attribute) const
     {
@@ -238,7 +238,7 @@ GraphModel::GraphModel(const QString& name, IPlugin* plugin) :
     connect(&_->_transformedGraph, &TransformedGraph::attributeValuesChanged,
     [this](const QStringList& attributeNames)
     {
-        _->_updatedDynamicAttributeNames = attributeNames;
+        _->_changedDynamicAttributeNames = attributeNames;
     });
 
     connect(&_->_userNodeData, &UserData::vectorValuesChanged, [this](const QString& vectorName)
@@ -1413,7 +1413,7 @@ void GraphModel::onTransformedGraphChanged(const Graph*, bool changeOccurred)
     std::transform(addedAttributeIdentities.begin(), addedAttributeIdentities.end(),
         std::back_inserter(addedAttributeNames), identityToName);
 
-    QStringList changedAttributeNames(std::move(_->_updatedDynamicAttributeNames));
+    QStringList changedAttributeNames(std::move(_->_changedDynamicAttributeNames));
 
     changedAttributeNames.erase(std::remove_if(changedAttributeNames.begin(), changedAttributeNames.end(), // clazy:exclude=strict-iterators
     [&removedAttributeNames, &addedAttributeNames](const auto& dynamicAttributeName)
