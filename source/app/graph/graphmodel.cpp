@@ -1428,6 +1428,7 @@ void GraphModel::onTransformedGraphChanged(const Graph*, bool changeOccurred)
     _graphTransformsAreChanging = false;
 }
 
+// This will also be called when the transformed graph changes, even if there are no actual attribute changes
 void GraphModel::onAttributesChanged(const QStringList& addedNames, const QStringList& removedNames,
     const QStringList& changedValuesNames, bool graphChangeOccurred)
 {
