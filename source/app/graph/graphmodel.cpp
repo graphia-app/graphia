@@ -172,6 +172,7 @@ private:
         return attributeIdentities;
     }
 
+    QStringList _removedDynamicAttributeNames;
     QStringList _updatedDynamicAttributeNames;
 
     void updateSharedAttributeValues(Attribute& attribute) const
@@ -374,7 +375,10 @@ void GraphModel::removeDynamicAttributes()
     }
 
     for(const auto& attributeName : dynamicAttributeNames)
+    {
+        _->_removedDynamicAttributeNames.append(attributeName);
         _->_attributes.erase(attributeName);
+    }
 }
 
 QString GraphModel::normalisedAttributeName(QString attribute) const
@@ -943,7 +947,12 @@ Attribute& GraphModel::createAttribute(QString name, QString* assignedName)
         attribute.setFlag(AttributeFlag::Dynamic);
 
     for(auto* tracker : _->_attributeChangesTrackers)
-        tracker->add(name);
+    {
+        if(_graphTransformsAreChanging && _->_removedDynamicAttributeNames.contains(name))
+            tracker->change(name);
+        else
+            tracker->add(name);
+    }
 
     return attribute;
 }
@@ -1386,6 +1395,8 @@ void GraphModel::onTransformedGraphWillChange(const Graph*)
 
 void GraphModel::onTransformedGraphChanged(const Graph*, bool changeOccurred)
 {
+    _->_removedDynamicAttributeNames.clear();
+
     auto attributeIdentities = _->currentAttributeIdentities();
 
     // Compare with previous attributes
