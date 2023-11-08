@@ -120,8 +120,8 @@ bool TransformedGraph::update()
 
 std::vector<QString> TransformedGraph::createdAttributeNamesAtTransformIndex(int index) const
 {
-    if(u::contains(_createdAttributeNames, index))
-        return _createdAttributeNames.at(index);
+    if(u::contains(_addedOrChangedAttributeNames, index))
+        return _addedOrChangedAttributeNames.at(index);
 
     return {};
 }
@@ -148,13 +148,13 @@ void TransformedGraph::rebuild()
         _changeSignalsEmitted = false;
 
         TransformCache newCache(*_graphModel);
-        CreatedAttributeNamesMap newCreatedAttributeNames;
+        AddedOrChangedAttributeNamesMap newAddedOrChangedAttributeNames;
         *this = *_source;
         _target.update();
 
         // Save previous state in case we get cancelled
         auto oldCache = _cache;
-        auto oldCreatedAttributeNames = _createdAttributeNames;
+        auto oldAddedOrChangedAttributeNames = _addedOrChangedAttributeNames;
 
         // Save attributes of current graph so we can remove ones added if cancelled
         auto fixedAttributeNames = _graphModel->attributeNames();
@@ -169,13 +169,7 @@ void TransformedGraph::rebuild()
             result = _cache.apply(transform->index(), result._config, *this);
             if(result.wasApplied())
             {
-                auto newAttributeNames = u::keysFor(result._newAttributes);
-                auto changedAttributeNames = u::keysFor(result._changedAttributes);
-
-                for(const auto& attributeName : u::combine(newAttributeNames, changedAttributeNames))
-                    updatedAttributeNames.append(attributeName);
-
-                newCreatedAttributeNames[transform->index()] = newAttributeNames;
+                newAddedOrChangedAttributeNames[transform->index()] = u::keysFor(result._addedOrChangedAttributes);
                 newCache.add(std::move(result));
                 continue;
             }
@@ -198,25 +192,18 @@ void TransformedGraph::rebuild()
             if(_cancelled)
                 break;
 
-            const auto& addedAttributeNames = tracker.added();
-            const auto& changedAttributeNames = tracker.changed();
-            const auto& addedOrChangedAttributeNames = tracker.addedOrChanged();
-
-            for(const auto& attributeName : addedAttributeNames)
-                result._newAttributes.emplace(attributeName, _graphModel->attributeValueByName(attributeName));
-
-            for(const auto& attributeName : changedAttributeNames)
-                result._changedAttributes.emplace(attributeName, _graphModel->attributeValueByName(attributeName));
-
-            for(const auto& attributeName : addedOrChangedAttributeNames)
-            {
-                _cache.attributeAddedOrChanged(attributeName);
+            for(const auto& attributeName : tracker.changed())
                 updatedAttributeNames.append(attributeName);
+
+            for(const auto& attributeName : tracker.addedOrChanged())
+            {
+                result._addedOrChangedAttributes.emplace(attributeName, _graphModel->attributeValueByName(attributeName));
+                _cache.attributeAddedOrChanged(attributeName);
             }
 
             result._index = transform->index();
 
-            newCreatedAttributeNames[transform->index()] = u::toQStringVector(tracker.added());
+            newAddedOrChangedAttributeNames[transform->index()] = u::toQStringVector(tracker.addedOrChanged());
             newCache.add(std::move(result));
 
             // Revert to indeterminate in case any more long running work occurs subsequently
@@ -229,7 +216,7 @@ void TransformedGraph::rebuild()
         {
             // We've been cancelled so rollback to our previous state
             _cache = std::move(oldCache);
-            _createdAttributeNames = std::move(oldCreatedAttributeNames);
+            _addedOrChangedAttributeNames = std::move(oldAddedOrChangedAttributeNames);
             updatedAttributeNames.clear();
             const auto* cachedGraph = _cache.graph();
             *this = (cachedGraph != nullptr ? *cachedGraph : *_source);
@@ -246,7 +233,7 @@ void TransformedGraph::rebuild()
         else
         {
             _cache = std::move(newCache);
-            _createdAttributeNames = std::move(newCreatedAttributeNames);
+            _addedOrChangedAttributeNames = std::move(newAddedOrChangedAttributeNames);
         }
     });
 

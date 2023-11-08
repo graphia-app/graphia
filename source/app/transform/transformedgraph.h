@@ -106,8 +106,8 @@ private:
 
     TransformCache _cache;
 
-    using CreatedAttributeNamesMap = std::map<int, std::vector<QString>>;
-    CreatedAttributeNamesMap _createdAttributeNames;
+    using AddedOrChangedAttributeNamesMap = std::map<int, std::vector<QString>>;
+    AddedOrChangedAttributeNamesMap _addedOrChangedAttributeNames;
 
     bool _graphChangeOccurred = false;
     bool _changeSignalsEmitted = false;

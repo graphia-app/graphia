@@ -57,11 +57,11 @@ std::vector<QString> TransformCache::attributesChangedByLastResult() const
 
     for(const auto& result : _cache.back())
     {
-        auto newAttributeNames = u::keysFor(result._newAttributes);
-        auto changedAttributeNames = u::keysFor(result._changedAttributes);
-        auto resultAttributeNames = u::combine(newAttributeNames, changedAttributeNames);
+        auto addedOrChangedAttributeNames = u::keysFor(result._addedOrChangedAttributes);
 
-        attributeNames.insert(attributeNames.end(), resultAttributeNames.begin(), resultAttributeNames.end());
+        attributeNames.insert(attributeNames.end(),
+            addedOrChangedAttributeNames.begin(),
+            addedOrChangedAttributeNames.end());
     }
 
     return attributeNames;
@@ -97,7 +97,7 @@ void TransformCache::attributeAddedOrChanged(const QString& attributeName)
             }
 
             // Creates attributeName
-            if(u::contains(resultIt->_newAttributes, attributeName))
+            if(u::contains(resultIt->_addedOrChangedAttributes, attributeName))
             {
                 resultSetIt->erase(resultIt, resultEnd);
                 break;
@@ -134,8 +134,7 @@ TransformCache::Result TransformCache::apply(int index, const GraphTransformConf
         auto& cachedResult = *it;
 
         // Apply the cached result
-        _graphModel->addAttributes(cachedResult._newAttributes);
-        _graphModel->replaceAttributes(cachedResult._changedAttributes);
+        _graphModel->addAttributes(cachedResult._addedOrChangedAttributes);
         if(cachedResult._graph != nullptr)
         {
             graph = *(cachedResult._graph);
@@ -190,9 +189,7 @@ std::map<QString, Attribute> TransformCache::attributes() const
     {
         for(const auto& cachedResult : resultSet)
         {
-            auto attributes = u::combine(cachedResult._newAttributes, cachedResult._changedAttributes);
-
-            for(const auto& [attributeName, attribute] : attributes)
+            for(const auto& [attributeName, attribute] : cachedResult._addedOrChangedAttributes)
                 map[attributeName] = attribute;
         }
     }

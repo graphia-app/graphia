@@ -39,16 +39,14 @@ public:
             _index(other._index),
             _config(other._config),
             _graph(other._graph ? std::make_unique<MutableGraph>(*other._graph) : nullptr),
-            _newAttributes(other._newAttributes),
-            _changedAttributes(other._changedAttributes)
+            _addedOrChangedAttributes(other._addedOrChangedAttributes)
         {}
 
         Result(Result&& other) noexcept :
             _index(other._index),
             _config(std::move(other._config)),
             _graph(std::move(other._graph)),
-            _newAttributes(std::move(other._newAttributes)),
-            _changedAttributes(std::move(other._changedAttributes))
+            _addedOrChangedAttributes(std::move(other._addedOrChangedAttributes))
         {}
 
         Result& operator=(Result&& other) noexcept
@@ -56,14 +54,13 @@ public:
             _index = other._index;
             _config = std::move(other._config);
             _graph = std::move(other._graph);
-            _newAttributes = std::move(other._newAttributes);
-            _changedAttributes = std::move(other._changedAttributes);
+            _addedOrChangedAttributes = std::move(other._addedOrChangedAttributes);
 
             return *this;
         }
 
         bool changesGraph() const { return _graph != nullptr; }
-        bool wasApplied() const { return changesGraph() || !_newAttributes.empty() || !_changedAttributes.empty(); }
+        bool wasApplied() const { return changesGraph() || !_addedOrChangedAttributes.empty(); }
 
         std::vector<QString> referencedAttributeNames() const
         {
@@ -73,8 +70,7 @@ public:
         int _index = -1;
         GraphTransformConfig _config;
         std::unique_ptr<MutableGraph> _graph;
-        std::map<QString, Attribute> _newAttributes;
-        std::map<QString, Attribute> _changedAttributes;
+        std::map<QString, Attribute> _addedOrChangedAttributes;
     };
 
     using ResultSet = std::vector<Result>;
