@@ -2253,9 +2253,9 @@ QStringList Document::allAttributeValues(const QString& attributeName) const
     return attributeValues;
 }
 
-QStringList Document::createdAttributeNamesAtTransformIndexOrLater(int firstIndex) const
+QStringList Document::addedOrChangedAttributeNamesAtTransformIndexOrLater(int firstIndex) const
 {
-    return u::toQStringList(_graphModel->createdAttributeNamesAtTransformIndexOrLater(firstIndex));
+    return u::toQStringList(_graphModel->addedOrChangedAttributeNamesAtTransformIndexOrLater(firstIndex));
 }
 
 // NOLINTNEXTLINE readability-convert-member-functions-to-static

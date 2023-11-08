@@ -493,7 +493,7 @@ public:
         int skipFlags = static_cast<int>(AttributeFlag::None)) const;
     Q_INVOKABLE QStringList allAttributeValues(const QString& attributeName) const;
 
-    Q_INVOKABLE QStringList createdAttributeNamesAtTransformIndexOrLater(int firstIndex) const;
+    Q_INVOKABLE QStringList addedOrChangedAttributeNamesAtTransformIndexOrLater(int firstIndex) const;
 
     Q_INVOKABLE QVariantMap parseGraphTransform(const QString& transform) const;
     Q_INVOKABLE bool graphTransformIsValid(const QString& transform) const;

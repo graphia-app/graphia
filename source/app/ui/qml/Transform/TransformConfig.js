@@ -316,7 +316,7 @@ function Create(transformIndex, transform)
                     // Don't allow the user to choose attributes that don't exist at the point
                     // in time when the transform is executed
                     let unavailableAttributeNames =
-                        document.createdAttributeNamesAtTransformIndexOrLater(transformIndex);
+                        document.addedOrChangedAttributeNamesAtTransformIndexOrLater(transformIndex);
 
                     parameterData.initialValue = document.availableAttributesModel(
                         parameter.elementType, parameter.valueType,

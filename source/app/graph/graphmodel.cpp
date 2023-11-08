@@ -643,20 +643,20 @@ const TransformInfo& GraphModel::transformInfoAtIndex(int index) const
     return nullTransformInfo;
 }
 
-std::vector<QString> GraphModel::createdAttributeNamesAtTransformIndex(int index) const
+std::vector<QString> GraphModel::addedOrChangedAttributeNamesAtTransformIndex(int index) const
 {
-    return _->_transformedGraph.createdAttributeNamesAtTransformIndex(index);
+    return _->_transformedGraph.addedOrChangedAttributeNamesAtTransformIndex(index);
 }
 
-std::vector<QString> GraphModel::createdAttributeNamesAtTransformIndexOrLater(int firstIndex) const
+std::vector<QString> GraphModel::addedOrChangedAttributeNamesAtTransformIndexOrLater(int firstIndex) const
 {
     std::vector<QString> attributeNames;
 
     for(int index = firstIndex; index < static_cast<int>(_->_transformedGraph.numTransforms()); index++)
     {
-        auto createdAttributeNames = createdAttributeNamesAtTransformIndex(index);
+        auto addedOrChangedAttributeNames = addedOrChangedAttributeNamesAtTransformIndex(index);
         attributeNames.insert(attributeNames.end(),
-            createdAttributeNames.begin(), createdAttributeNames.end());
+            addedOrChangedAttributeNames.begin(), addedOrChangedAttributeNames.end());
     }
 
     return attributeNames;

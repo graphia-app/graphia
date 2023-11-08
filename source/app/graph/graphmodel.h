@@ -140,8 +140,8 @@ public:
     QStringList avaliableConditionFnOps(const QString& attributeName) const;
     bool hasTransformInfo() const;
     const TransformInfo& transformInfoAtIndex(int index) const;
-    std::vector<QString> createdAttributeNamesAtTransformIndex(int index) const;
-    std::vector<QString> createdAttributeNamesAtTransformIndexOrLater(int firstIndex) const;
+    std::vector<QString> addedOrChangedAttributeNamesAtTransformIndex(int index) const;
+    std::vector<QString> addedOrChangedAttributeNamesAtTransformIndexOrLater(int firstIndex) const;
     ValueType valueTypeOfTransformAttributeName(const QString& attributeName) const;
 
     static bool opIsUnary(const QString& op);

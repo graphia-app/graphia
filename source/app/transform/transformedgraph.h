@@ -89,7 +89,7 @@ public:
     void resetChangeOccurred(const PassKey<GraphTransform>&) { _graphChangeOccurred = false; }
     bool changeOccurred(const PassKey<GraphTransform>&) const { return _graphChangeOccurred; }
 
-    std::vector<QString> createdAttributeNamesAtTransformIndex(int index) const;
+    std::vector<QString> addedOrChangedAttributeNamesAtTransformIndex(int index) const;
 
 private:
     GraphModel* _graphModel = nullptr;

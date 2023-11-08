@@ -85,7 +85,7 @@ QStringList ApplyVisualisationsCommand::patchedVisualisations() const
         // When a transform creates a new attribute, its name may not match the default
         // visualisation that it created for it, so we need to do a bit of patching
 
-        auto createdAttributeNames = _graphModel->createdAttributeNamesAtTransformIndex(_transformIndex);
+        auto createdAttributeNames = _graphModel->addedOrChangedAttributeNamesAtTransformIndex(_transformIndex);
 
         if(!createdAttributeNames.empty())
         {

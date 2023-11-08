@@ -118,7 +118,7 @@ bool TransformedGraph::update()
     return _graphChangeOccurred;
 }
 
-std::vector<QString> TransformedGraph::createdAttributeNamesAtTransformIndex(int index) const
+std::vector<QString> TransformedGraph::addedOrChangedAttributeNamesAtTransformIndex(int index) const
 {
     if(u::contains(_addedOrChangedAttributeNames, index))
         return _addedOrChangedAttributeNames.at(index);
