@@ -141,9 +141,9 @@ void TransformedGraph::rebuild()
     // ComponentManager instance
     disableComponentManagement();
 
-    QStringList updatedAttributeNames;
+    QStringList changedAttributeNames;
 
-    _target.performTransaction([this, &updatedAttributeNames](IMutableGraph&)
+    _target.performTransaction([this, &changedAttributeNames](IMutableGraph&)
     {
         _changeSignalsEmitted = false;
 
@@ -193,7 +193,7 @@ void TransformedGraph::rebuild()
                 break;
 
             for(const auto& attributeName : tracker.changed())
-                updatedAttributeNames.append(attributeName);
+                changedAttributeNames.append(attributeName);
 
             for(const auto& attributeName : tracker.addedOrChanged())
             {
@@ -217,7 +217,7 @@ void TransformedGraph::rebuild()
             // We've been cancelled so rollback to our previous state
             _cache = std::move(oldCache);
             _addedOrChangedAttributeNames = std::move(oldAddedOrChangedAttributeNames);
-            updatedAttributeNames.clear();
+            changedAttributeNames.clear();
             const auto* cachedGraph = _cache.graph();
             *this = (cachedGraph != nullptr ? *cachedGraph : *_source);
 
@@ -237,8 +237,8 @@ void TransformedGraph::rebuild()
         }
     });
 
-    if(!updatedAttributeNames.empty())
-        emit attributeValuesChanged(updatedAttributeNames);
+    if(!changedAttributeNames.empty())
+        emit attributeValuesChanged(changedAttributeNames);
 
     enableComponentManagement();
 
