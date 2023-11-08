@@ -1061,7 +1061,6 @@ void Document::onLoadComplete(const QUrl&, bool success)
 
     connect(&_graphModel->graph(), &Graph::graphChanged, [this]
     {
-        refreshVisualisations();
         setSaveRequired();
     });
 

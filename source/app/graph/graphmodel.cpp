@@ -1429,7 +1429,7 @@ void GraphModel::onTransformedGraphChanged(const Graph*, bool changeOccurred)
 }
 
 void GraphModel::onAttributesChanged(const QStringList& addedNames, const QStringList& removedNames,
-    const QStringList& changedValuesNames)
+    const QStringList& changedValuesNames, bool graphChangeOccurred)
 {
     for(const auto& attributeName : u::combine(addedNames, changedValuesNames))
     {
@@ -1446,24 +1446,20 @@ void GraphModel::onAttributesChanged(const QStringList& addedNames, const QStrin
         _->updateSharedAttributeValues(attribute);
     }
 
-    if(!_graphTransformsAreChanging)
-    {
-        // If the attribute change isn't as a result of a graph transform, any change
-        // may actually require a graph transform or visualisation to be rebuilt, so check for this
-        QStringList changed;
-        changed << addedNames << removedNames << changedValuesNames;
-        u::removeDuplicates(changed);
+    // Attribute changes may require a graph transform or visualisation to be rebuilt
+    QStringList changed;
+    changed << addedNames << removedNames << changedValuesNames;
+    u::removeDuplicates(changed);
 
-        const bool transformRebuildRequired =
-            _->_transformedGraph.onAttributeValuesChangedExternally(changed);
+    const bool transformRebuildRequired = !_graphTransformsAreChanging &&
+        _->_transformedGraph.onAttributeValuesChangedExternally(changed);
 
-        const bool visualisationRebuildRequired = !u::setIntersection(
-            static_cast<const QList<QString>&>(_->_visualisedAttributeNames),
-            static_cast<const QList<QString>&>(changed)).empty();
+    const bool visualisationRebuildRequired = graphChangeOccurred || !u::setIntersection(
+        static_cast<const QList<QString>&>(_->_visualisedAttributeNames),
+        static_cast<const QList<QString>&>(changed)).empty();
 
-        if(transformRebuildRequired || visualisationRebuildRequired)
-            emit rebuildRequired(transformRebuildRequired, visualisationRebuildRequired);
-    }
+    if(transformRebuildRequired || visualisationRebuildRequired)
+        emit rebuildRequired(transformRebuildRequired, visualisationRebuildRequired);
 }
 
 AttributeChangesTracker::AttributeChangesTracker(GraphModel* graphModel, bool emitOnDestruct) :

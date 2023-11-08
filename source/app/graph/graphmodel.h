@@ -200,7 +200,7 @@ private slots:
     void onTransformedGraphChanged(const Graph* graph, bool changeOccurred);
 
     void onAttributesChanged(const QStringList& addedNames, const QStringList& removedNames,
-        const QStringList& changedValuesNames);
+        const QStringList& changedValuesNames, bool graphChangeOccurred);
 
 signals:
     void visualsWillChange();
