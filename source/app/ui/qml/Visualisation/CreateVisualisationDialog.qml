@@ -305,6 +305,15 @@ Window
                                 iconName: "format-text-bold"
                             }
 
+                            NamedIcon
+                            {
+                                id: sharedTextIcon
+                                width: channelIndicator._elementSize
+                                height: channelIndicator._elementSize
+
+                                iconName: "shared-text"
+                            }
+
                             Item { Layout.fillWidth: !gradientKey.visible && !paletteKey.visible }
 
                             function update()
@@ -323,6 +332,7 @@ Window
 
                                 let colourSelected = channelList.selectedValues.indexOf(qsTr("Colour")) >= 0;
                                 let sizeSelected = channelList.selectedValues.indexOf(qsTr("Size")) >= 0;
+                                let sharedTextSelected = channelList.selectedValues.indexOf(qsTr("Shared Text")) >= 0;
                                 let textSelected = channelList.selectedValues.indexOf(qsTr("Text")) >= 0;
                                 let textColourSelected = channelList.selectedValues.indexOf(qsTr("Text Colour")) >= 0;
                                 let textSizeSelected = channelList.selectedValues.indexOf(qsTr("Text Size")) >= 0;
@@ -341,6 +351,7 @@ Window
                                     edgeSizeIcon.visible = (attribute.elementType === ElementType.Edge);
                                 }
 
+                                sharedTextIcon.visible = sharedTextSelected;
                                 textIcon.visible = textSelected;
                                 textColorIcon.visible = textColourSelected;
                                 textSizeIcon.visible = textSizeSelected;

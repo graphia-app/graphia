@@ -133,6 +133,9 @@
 		<file>Tango/16x16/actions/process-stop.png</file>
 		<file>Tango/22x22/actions/process-stop.png</file>
 		<file>Tango/32x32/actions/process-stop.png</file>
+		<file>Tango/16x16/graphia/shared-text.png</file>
+		<file>Tango/22x22/graphia/shared-text.png</file>
+		<file>Tango/32x32/graphia/shared-text.png</file>
 		<file>Tango/16x16/graphia/show-outliers.png</file>
 		<file>Tango/22x22/graphia/show-outliers.png</file>
 		<file>Tango/32x32/graphia/show-outliers.png</file>

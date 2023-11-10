@@ -210,6 +210,9 @@ Item
                 if(!root._valid || channel.length === 0)
                     return "applications-other";
 
+                if(channel === "Shared Text")
+                    return "shared-text";
+
                 if(channel === "Text")
                     return "format-text-bold";
 

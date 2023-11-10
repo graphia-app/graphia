@@ -58,6 +58,7 @@
 
 #include "ui/visualisations/colorvisualisationchannel.h"
 #include "ui/visualisations/sizevisualisationchannel.h"
+#include "ui/visualisations/sharedtextvisualisationchannel.h"
 #include "ui/visualisations/textvisualisationchannel.h"
 #include "ui/visualisations/textcolorvisualisationchannel.h"
 #include "ui/visualisations/textsizevisualisationchannel.h"
@@ -368,6 +369,7 @@ GraphModel::GraphModel(const QString& name, IPlugin* plugin) :
 
     _->_visualisationChannels.emplace(tr("Colour"), std::make_unique<ColorVisualisationChannel>());
     _->_visualisationChannels.emplace(tr("Size"), std::make_unique<SizeVisualisationChannel>());
+    _->_visualisationChannels.emplace(tr("Shared Text"), std::make_unique<SharedTextVisualisationChannel>());
     _->_visualisationChannels.emplace(tr("Text"), std::make_unique<TextVisualisationChannel>());
     _->_visualisationChannels.emplace(tr("Text Colour"), std::make_unique<TextColorVisualisationChannel>());
     _->_visualisationChannels.emplace(tr("Text Size"), std::make_unique<TextSizeVisualisationChannel>());
