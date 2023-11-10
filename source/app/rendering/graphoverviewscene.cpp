@@ -158,7 +158,10 @@ void GraphOverviewScene::resetView(bool doTransition)
     if(doTransition)
         startZoomTransition();
     else
+    {
         updateZoomedComponentLayoutData();
+        _previousZoomedComponentLayoutData = _zoomedComponentLayoutData;
+    }
 }
 
 bool GraphOverviewScene::viewIsReset() const
