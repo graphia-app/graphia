@@ -205,7 +205,7 @@ private slots:
 
 signals:
     void visualsWillChange();
-    void visualsChanged(VisualChangeFlags nodeChange, VisualChangeFlags edgeChange);
+    void visualsChanged(VisualChangeFlags nodeChange, VisualChangeFlags edgeChange, VisualChangeFlags textChange);
     void attributesChanged(const QStringList& addedNames, const QStringList& removedNames,
         const QStringList& changedValuesNames, bool graphChanged);
 

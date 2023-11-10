@@ -87,8 +87,8 @@ public:
         const auto* graphModelQObject = dynamic_cast<const QObject*>(_graphModel);
         Q_ASSERT(graphModelQObject != nullptr);
 
-        connect(graphModelQObject, SIGNAL(visualsChanged(VisualChangeFlags,VisualChangeFlags)),
-                this, SLOT(onVisualsChanged(VisualChangeFlags,VisualChangeFlags)), Qt::DirectConnection);
+        connect(graphModelQObject, SIGNAL(visualsChanged(VisualChangeFlags,VisualChangeFlags,VisualChangeFlags)),
+                this, SLOT(onVisualsChanged(VisualChangeFlags,VisualChangeFlags,VisualChangeFlags)), Qt::DirectConnection);
 
         connect(graphModelQObject, SIGNAL(attributesChanged(QStringList,QStringList,QStringList,bool)),
                 this, SIGNAL(attributesChanged(QStringList,QStringList,QStringList,bool)), Qt::DirectConnection);
@@ -129,7 +129,8 @@ private slots:
 
     void onSelectionChanged(const SelectionManager*)    { emit selectionChanged(_selectionManager); }
     void onVisualsChanged(VisualChangeFlags nodeChange,
-        VisualChangeFlags edgeChange)                   { emit visualsChanged(nodeChange, edgeChange); }
+        VisualChangeFlags edgeChange,
+        VisualChangeFlags textChange)                   { emit visualsChanged(nodeChange, edgeChange, textChange); }
 
     void onLoadSuccess()                                { emit loadSuccess(); }
 
@@ -144,7 +145,7 @@ signals:
     void graphChanged();
 
     void selectionChanged(const ISelectionManager* selectionManager);
-    void visualsChanged(VisualChangeFlags nodeChange, VisualChangeFlags edgeChange);
+    void visualsChanged(VisualChangeFlags nodeChange, VisualChangeFlags edgeChange, VisualChangeFlags textChange);
 
     void attributesChanged(const QStringList& addedNames, const QStringList& removedNames,
         const QStringList& changedValuesNames, bool graphChanged);

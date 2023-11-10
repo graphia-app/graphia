@@ -1325,15 +1325,16 @@ void GraphModel::updateVisuals(bool force)
 
     const VisualChangeFlags nodeChange = findChange(graph().nodeIds(), _->_nodeVisuals, newNodeVisuals);
     const VisualChangeFlags edgeChange = findChange(graph().edgeIds(), _->_edgeVisuals, newEdgeVisuals);
+    const VisualChangeFlags textChange = VisualChangeFlags::None;
 
-    if(force || nodeChange != VisualChangeFlags::None || edgeChange != VisualChangeFlags::None)
+    if(force || nodeChange != VisualChangeFlags::None || edgeChange != VisualChangeFlags::None || textChange != VisualChangeFlags::None)
     {
         emit visualsWillChange();
 
         _->_nodeVisuals = newNodeVisuals;
         _->_edgeVisuals = newEdgeVisuals;
 
-        emit visualsChanged(nodeChange, edgeChange);
+        emit visualsChanged(nodeChange, edgeChange, textChange);
     }
 }
 
