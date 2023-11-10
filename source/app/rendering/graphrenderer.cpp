@@ -37,6 +37,7 @@
 #include "ui/graphquickitem.h"
 #include "ui/selectionmanager.h"
 #include "ui/visualisations/elementvisual.h"
+#include "ui/visualisations/textvisual.h"
 
 #include "shadertools.h"
 #include "screenshotrenderer.h"
@@ -401,6 +402,18 @@ void GraphRenderer::updateGPUDataIfRequired()
                     edgeVisual._textColor, textAlignment,
                     textScale * edgeVisual._textSize,
                     edgeVisual._size, midPoint, componentIndex,
+                    gpuGraphDataForOverlay(componentRenderer->alpha()));
+            }
+        }
+
+        if(_graphModel->textVisuals().contains(componentRenderer->componentId()))
+        {
+            for(const auto& textVisual : _graphModel->textVisuals().at(componentRenderer->componentId()))
+            {
+                createGPUGlyphData(textVisual._text,
+                    textVisual._color, textAlignment,
+                    textScale * textVisual._size,
+                    textVisual._radius, textVisual._centre, componentIndex,
                     gpuGraphDataForOverlay(componentRenderer->alpha()));
             }
         }
@@ -921,6 +934,12 @@ void GraphRenderer::updateText(bool wait)
 
     for(auto edgeId : _graphModel->graph().edgeIds())
         _glyphMap->addText(_graphModel->edgeVisual(edgeId)._text);
+
+    for(const auto& [componentId, textVisuals] : _graphModel->textVisuals())
+    {
+        for(const auto& textVisual : textVisuals)
+            _glyphMap->addText(textVisual._text);
+    }
 
     if(_glyphMap->updateRequired())
     {
