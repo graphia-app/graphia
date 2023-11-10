@@ -245,10 +245,11 @@ void LayoutThread::run()
 
             if(requiresFlattening)
                 _graphModel->nodePositions().flatten();
+
+            emit executed();
         }
 
         _performanceCounter.tick();
-        emit executed();
 
         std::unique_lock<std::mutex> lock(_mutex);
 
