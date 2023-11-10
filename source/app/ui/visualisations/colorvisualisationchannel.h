@@ -31,6 +31,7 @@ class ColorVisualisationChannel : public VisualisationChannel
 {
 public:
     using VisualisationChannel::VisualisationChannel;
+    using VisualisationChannel::apply;
 
     void apply(double value, ElementVisual& elementVisual) const override;
     void apply(const QString& value, ElementVisual& elementVisual) const override;

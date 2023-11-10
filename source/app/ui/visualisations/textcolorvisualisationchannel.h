@@ -25,6 +25,7 @@ class TextColorVisualisationChannel : public ColorVisualisationChannel
 {
 public:
     using ColorVisualisationChannel::ColorVisualisationChannel;
+    using ColorVisualisationChannel::apply;
 
     void apply(double value, ElementVisual& elementVisual) const override;
     void apply(const QString& value, ElementVisual& elementVisual) const override;
