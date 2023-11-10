@@ -175,6 +175,7 @@ void GraphRenderer::createGPUGlyphData(const QString& text, const QColor& textCo
     Q_ASSERT(gpuGraphData != nullptr);
 
     auto& textLayout = _textLayoutResults._layouts[text];
+    Q_ASSERT(textLayout._initialised);
 
     auto verticalCentre = -textLayout._xHeight * textScale * 0.5f;
     auto top = elementSize;
@@ -296,6 +297,9 @@ void GraphRenderer::updateGPUDataIfRequired()
                 if(nodeData._selected != 0.0f)
                     gpuGraphData->_elementsSelected = true;
 
+                if(nodeVisual._text.isEmpty())
+                    continue;
+
                 if(showNodeText == TextState::Off || nodeVisual._state.test(VisualFlags::Unhighlighted))
                     continue;
 
@@ -376,6 +380,9 @@ void GraphRenderer::updateGPUDataIfRequired()
 
                 if(edgeData._selected != 0.0f)
                     gpuGraphData->_elementsSelected = true;
+
+                if(edgeVisual._text.isEmpty())
+                    continue;
 
                 if(showEdgeText == TextState::Off || edgeVisual._state.test(VisualFlags::Unhighlighted))
                     continue;
