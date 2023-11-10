@@ -65,6 +65,7 @@
 #include "ui/visualisations/visualisationbuilder.h"
 #include "ui/visualisations/visualisationinfo.h"
 #include "ui/visualisations/elementvisual.h"
+#include "ui/visualisations/textvisual.h"
 
 #include "shared/plugins/iplugin.h"
 #include "shared/commands/icommand.h"
@@ -91,6 +92,16 @@ using namespace Qt::Literals::StringLiterals;
 
 using NodeVisuals = NodeArray<ElementVisual>;
 using EdgeVisuals = EdgeArray<ElementVisual>;
+
+static void updateTextVisualPositions(TextVisuals& textVisuals, const NodePositions& nodePositions)
+{
+    // This must be called when the layout is paused or otherwise locked
+    for(auto& [componentId, textVisuals_] : textVisuals)
+    {
+        for(auto& textVisual : textVisuals_)
+            textVisual.updatePositions(nodePositions);
+    }
+}
 
 class GraphModelImpl
 {
@@ -127,6 +138,9 @@ private:
     EdgeVisuals _mappedEdgeVisuals;
     QStringList _visualisedAttributeNames;
     VisualisationInfosMap _visualisationInfos;
+
+    TextVisuals _newTextVisuals;
+    TextVisuals _textVisuals;
 
     NodeArray<QString> _nodeNames;
 
@@ -450,6 +464,8 @@ std::vector<ElementVisual> GraphModel::edgeVisuals(const std::vector<EdgeId>& ed
     return visuals;
 }
 
+const TextVisuals& GraphModel::textVisuals() const { return _->_textVisuals; }
+
 NodePositions& GraphModel::nodePositions() { return _->_nodePositions; }
 const NodePositions& GraphModel::nodePositions() const { return _->_nodePositions; }
 
@@ -707,6 +723,7 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
 
     _->_mappedNodeVisuals.resetElements();
     _->_mappedEdgeVisuals.resetElements();
+    _->_newTextVisuals.clear();
     clearVisualisationInfos();
 
     _->_visualisedAttributeNames.clear();
@@ -827,11 +844,20 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
         default:
             break;
         }
+
+        auto textVisuals = channel->textVisuals(attributeName, *this, _->_transformedGraph);
+
+        for(const auto& [componentId, textVisual] : textVisuals)
+        {
+            auto& existingTextVisuals = _->_newTextVisuals[componentId];
+            existingTextVisuals.insert(existingTextVisuals.end(), textVisual.begin(), textVisual.end());
+        }
     }
 
     nodeVisualisationsBuilder.findOverrideAlerts(_->_visualisationInfos);
     edgeVisualisationsBuilder.findOverrideAlerts(_->_visualisationInfos);
 
+    updateTextVisualPositions(_->_newTextVisuals, _->_nodePositions);
     updateVisuals();
 }
 
@@ -1104,6 +1130,7 @@ void GraphModel::highlightNodes(const NodeIdSet& nodeIds)
 void GraphModel::enableVisualUpdates()
 {
     _visualUpdatesEnabled = true;
+    updateTextVisualPositions(_->_newTextVisuals, _->_nodePositions);
     updateVisuals();
 }
 
@@ -1271,7 +1298,17 @@ void GraphModel::updateVisuals(bool force)
             newEdgeVisuals[edgeId]._textColor = _->_mappedEdgeVisuals[edgeId]._textColor;
         else
             newEdgeVisuals[edgeId]._textColor = textColor;
+    }
 
+    for(auto& [componentId, textVisuals] : _->_newTextVisuals)
+    {
+        for(auto& textVisual : textVisuals)
+        {
+            // This is a reasonable approximation for fixing the text size to something that
+            // is close to the average radius of the node island being annotated
+            textVisual._size = textSize * std::cbrt(static_cast<float>(textVisual._nodeIds.size()));
+            textVisual._color = textColor;
+        }
     }
 
     auto findChange = [](const auto& elementIds, const auto& previous, const auto& current)
@@ -1323,9 +1360,49 @@ void GraphModel::updateVisuals(bool force)
         return *change;
     };
 
+    auto findTextVisualsChange = [](const TextVisuals& previous, const TextVisuals& current)
+    {
+        Flags<VisualChangeFlags> change;
+
+        if(previous.size() != current.size())
+            return VisualChangeFlags::State;
+
+        auto previousComponentIds = u::keysFor(previous);
+        auto currentComponentIds = u::keysFor(current);
+
+        if(previousComponentIds != currentComponentIds)
+            return VisualChangeFlags::State;
+
+        for(const ComponentId componentId : previousComponentIds)
+        {
+            const auto& previousTextVisuals = previous.at(componentId);
+            const auto& currentTextVisuals = current.at(componentId);
+
+            if(previousTextVisuals.size() != currentTextVisuals.size())
+                return VisualChangeFlags::State;
+
+            for(size_t i = 0; i < previousTextVisuals.size(); i++)
+            {
+                const auto& previousTextVisual = previousTextVisuals.at(i);
+                const auto& currentTextVisual = currentTextVisuals.at(i);
+
+                if(previousTextVisual._nodeIds != currentTextVisual._nodeIds)
+                    return VisualChangeFlags::State;
+
+                if(previousTextVisual._color != currentTextVisual._color)
+                    change.set(VisualChangeFlags::TextColor);
+
+                if(previousTextVisual._size != currentTextVisual._size)
+                    change.set(VisualChangeFlags::TextSize);
+            }
+        }
+
+        return *change;
+    };
+
     const VisualChangeFlags nodeChange = findChange(graph().nodeIds(), _->_nodeVisuals, newNodeVisuals);
     const VisualChangeFlags edgeChange = findChange(graph().edgeIds(), _->_edgeVisuals, newEdgeVisuals);
-    const VisualChangeFlags textChange = VisualChangeFlags::None;
+    const VisualChangeFlags textChange = findTextVisualsChange(_->_textVisuals, _->_newTextVisuals);
 
     if(force || nodeChange != VisualChangeFlags::None || edgeChange != VisualChangeFlags::None || textChange != VisualChangeFlags::None)
     {
@@ -1333,6 +1410,7 @@ void GraphModel::updateVisuals(bool force)
 
         _->_nodeVisuals = newNodeVisuals;
         _->_edgeVisuals = newEdgeVisuals;
+        _->_textVisuals = _->_newTextVisuals;
 
         emit visualsChanged(nodeChange, edgeChange, textChange);
     }
@@ -1371,6 +1449,7 @@ void GraphModel::onPreferenceChanged(const QString& name, const QVariant&)
 void GraphModel::onLayoutChanged()
 {
     // This occurs on the layout thread
+    updateTextVisualPositions(_->_textVisuals, _->_nodePositions);
 }
 
 void GraphModel::onMutableGraphChanged(const Graph* graph)

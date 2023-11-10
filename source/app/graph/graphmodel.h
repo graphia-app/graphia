@@ -51,6 +51,8 @@ class ICommand;
 class IPlugin;
 
 struct ElementVisual;
+struct TextVisual;
+using TextVisuals = std::map<ComponentId, std::vector<TextVisual>>;
 
 class TransformInfo;
 class VisualisationInfo;
@@ -110,6 +112,7 @@ public:
     const ElementVisual& edgeVisual(EdgeId edgeId) const;
     std::vector<ElementVisual> nodeVisuals(const std::vector<NodeId>& nodeIds) const;
     std::vector<ElementVisual> edgeVisuals(const std::vector<EdgeId>& edgeIds) const;
+    const TextVisuals& textVisuals() const;
 
     NodePositions& nodePositions();
     const NodePositions& nodePositions() const;
