@@ -193,6 +193,7 @@ public slots:
     void onSelectionChanged(const SelectionManager* selectionManager);
     void onFoundNodeIdsChanged(const SearchManager* searchManager);
     void onPreferenceChanged(const QString&, const QVariant&);
+    void onLayoutChanged();
 
 private slots:
     void onMutableGraphChanged(const Graph* graph);

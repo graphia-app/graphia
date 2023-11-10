@@ -66,7 +66,7 @@ LayoutThread::LayoutThread(GraphModel& graphModel,
     connect(&graphModel.graph(), &Graph::componentSplit, this, &LayoutThread::onComponentSplit, Qt::DirectConnection);
     connect(&graphModel.graph(), &Graph::componentAdded, this, &LayoutThread::onComponentAdded, Qt::DirectConnection);
     connect(&graphModel.graph(), &Graph::componentWillBeRemoved, this, &LayoutThread::onComponentWillBeRemoved, Qt::DirectConnection);
-
+    connect(this, &LayoutThread::executed, &graphModel, &GraphModel::onLayoutChanged, Qt::DirectConnection);
 
     connect(&_layoutFactory->settings(), &LayoutSettings::settingChanged,
     [this]

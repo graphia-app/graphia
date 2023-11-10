@@ -1367,6 +1367,11 @@ void GraphModel::onPreferenceChanged(const QString& name, const QVariant&)
     updateVisuals(force);
 }
 
+void GraphModel::onLayoutChanged()
+{
+    // This occurs on the layout thread
+}
+
 void GraphModel::onMutableGraphChanged(const Graph* graph)
 {
     calculateAttributeRanges(graph, _->_attributes);
