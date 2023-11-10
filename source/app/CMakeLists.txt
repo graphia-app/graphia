@@ -150,6 +150,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/colorvisualisationchannel.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/elementvisual.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/sizevisualisationchannel.h
+    ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/sharedtextvisualisationchannel.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/textvisual.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/textvisualisationchannel.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/textcolorvisualisationchannel.h
@@ -274,6 +275,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/ui/enrichmentheatmapitem.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/colorvisualisationchannel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/sizevisualisationchannel.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/sharedtextvisualisationchannel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/textvisual.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/textvisualisationchannel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/textcolorvisualisationchannel.cpp
