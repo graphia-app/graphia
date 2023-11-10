@@ -20,6 +20,7 @@
 #define VISUALISATIONCHANNEL_H
 
 #include "ui/visualisations/elementvisual.h"
+#include "ui/visualisations/textvisual.h"
 #include "shared/attributes/valuetype.h"
 #include "shared/graph/elementtype.h"
 
@@ -30,6 +31,8 @@
 #include <map>
 
 class VisualisationInfo;
+class GraphModel;
+class TransformedGraph;
 
 class VisualisationChannel
 {
@@ -38,6 +41,9 @@ public:
 
     virtual void apply(double, ElementVisual&) const { qFatal("apply not implemented"); }
     virtual void apply(const QString&, ElementVisual&) const { qFatal("apply not implemented"); }
+
+    virtual TextVisuals textVisuals(const QString& /*attributeName*/,
+        const GraphModel&, const TransformedGraph&) { return {}; }
 
     virtual bool appliesTo(ElementType) const { return true; }
     virtual bool supports(ValueType) const = 0;
