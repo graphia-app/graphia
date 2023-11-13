@@ -182,7 +182,7 @@ Item
 
             implicitWidth: 180
             model: root.similarAttributes
-            enabled: !isFlagSet("disabled")
+            enabled: !isFlagSet("disabled") && root._valid
             placeholderText: root.attributeName
 
             onSelectedValueChanged:
@@ -204,11 +204,11 @@ Item
         NamedIcon
         {
             visible: iconName.length > 0
-            enabled: enabledMenuItem.checked && !root._error
+            enabled: enabledMenuItem.checked
             iconName:
             {
-                if(channel.length === 0)
-                    return "";
+                if(!root._valid || channel.length === 0)
+                    return "applications-other";
 
                 if(channel === "Text")
                     return "format-text-bold";
@@ -710,6 +710,7 @@ Item
     }
 
     property bool _error: false
+    property bool _valid: true
     property int index: -1
     property string value
     onValueChanged:
@@ -731,6 +732,8 @@ Item
 
                 _error = root._visualisationInfo.alertType === AlertType.Error;
             }
+
+            _valid = document.visualisationIsValid(value);
 
             parseParameters();
 
