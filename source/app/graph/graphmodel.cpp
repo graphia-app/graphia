@@ -1274,6 +1274,8 @@ void GraphModel::onPreferenceChanged(const QString& name, const QVariant&)
         name.endsWith(QStringLiteral("showNodeText")) ||
         name.endsWith(QStringLiteral("showEdgeText")) ||
         name.endsWith(QStringLiteral("highlightColor")) ||
+        name.endsWith(QStringLiteral("textFont")) ||
+        name.endsWith(QStringLiteral("textSize")) ||
         name.endsWith(QStringLiteral("textAlignment"));
 
     updateVisuals(force);
