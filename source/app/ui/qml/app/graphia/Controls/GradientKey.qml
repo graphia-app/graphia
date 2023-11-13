@@ -47,7 +47,7 @@ Item
 
     property color _contrastingColor:
     {
-        if(mouseArea.containsMouse && hoverEnabled)
+        if(root.enabled && mouseArea.containsMouse && hoverEnabled)
             return QmlUtils.contrastingColor(hoverColor);
 
         return textColor;
@@ -110,7 +110,7 @@ Item
         radius: 2
         color:
         {
-            if(mouseArea.containsMouse && hoverEnabled)
+            if(root.enabled && mouseArea.containsMouse && hoverEnabled)
                 return root.hoverColor;
             else if(selected)
                 return palette.highlight;
