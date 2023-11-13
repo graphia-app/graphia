@@ -194,7 +194,12 @@ Item
                 Button
                 {
                     text: visuals.textFont + " " + visuals.textSize + "pt";
-                    onClicked: function(mouse) { fontDialog.visible = true }
+                    onClicked: function(mouse)
+                    {
+                        fontDialog.currentFont.family = visuals.textFont;
+                        fontDialog.currentFont.pointSize = visuals.textSize;
+                        fontDialog.visible = true;
+                    }
                 }
 
                 Label { text: qsTr("Alignment") }
@@ -267,17 +272,15 @@ Item
         }
     }
 
-    Labs.FontDialog
+    FontDialog
     {
         id: fontDialog
-        title: qsTr("Please choose a font")
-        currentFont: Qt.font({ family: visuals.textFont, pointSize: visuals.textSize, weight: Font.Normal })
-        font: Qt.font({ family: visuals.textFont, pointSize: visuals.textSize, weight: Font.Normal })
+        title: qsTr("Select a Font")
 
         onAccepted:
         {
-            visuals.textFont = fontDialog.font.family;
-            visuals.textSize = fontDialog.font.pointSize;
+            visuals.textFont = fontDialog.selectedFont.family;
+            visuals.textSize = fontDialog.selectedFont.pointSize;
         }
     }
 }
