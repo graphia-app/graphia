@@ -693,7 +693,10 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
         }
 
         if(!u::contains(_->_visualisationChannels, channelName))
+        {
+            info.addAlert(AlertType::Error, tr("Visualisation channel '%1' doesn't exist").arg(channelName));
             continue;
+        }
 
         auto attribute = attributeValueByName(attributeName);
         auto& channel = _->_visualisationChannels.at(channelName);
@@ -805,7 +808,6 @@ bool GraphModel::visualisationChannelAllowsMapping(const QString& channelName) c
     if(channelName.isEmpty())
         return false;
 
-    Q_ASSERT(u::contains(_->_visualisationChannels, channelName));
     if(!u::contains(_->_visualisationChannels, channelName))
         return false;
 
