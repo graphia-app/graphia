@@ -19,6 +19,8 @@
 #include "textvisualisationchannel.h"
 #include "visualisationinfo.h"
 
+#include "shared/utils/string.h"
+
 #include "rendering/graphrenderer.h"
 
 #include "app/preferences.h"
@@ -29,7 +31,7 @@ using namespace Qt::Literals::StringLiterals;
 
 void TextVisualisationChannel::apply(double value, ElementVisual& elementVisual) const
 {
-    elementVisual._text = QString::number(value, 'g', 3);
+    elementVisual._text = u::formatNumberScientific(value);
 }
 
 void TextVisualisationChannel::apply(const QString& value, ElementVisual& elementVisual) const
