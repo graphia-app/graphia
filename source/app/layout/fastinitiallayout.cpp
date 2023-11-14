@@ -30,7 +30,7 @@ void FastInitialLayout::positionNode(QVector3D& offsetPosition, const QMatrix4x4
 {
     const float SPHERE_RADIUS = 20.0f;
     offsetPosition = offsetPosition * SPHERE_RADIUS;
-    offsetPosition = offsetPosition * orientationMatrix;
+    offsetPosition = (QVector4D(offsetPosition, 1.0f) * orientationMatrix).toVector3D();
 
     directionNodeVectors.set(childNodeId, offsetPosition.normalized());
     positions().set(childNodeId, parentNodePosition + offsetPosition);

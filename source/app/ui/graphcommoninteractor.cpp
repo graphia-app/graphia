@@ -324,7 +324,7 @@ static QQuaternion mouseMoveToRotation(const QPoint& prev, const QPoint& cur,
         const QVector3D previous = virtualTrackballVector(w, h, prev);
         const QVector3D current = virtualTrackballVector(w, h, cur);
 
-        const QVector3D axis = QVector3D::crossProduct(current, previous).normalized();
+        QVector3D axis = QVector3D::crossProduct(current, previous).normalized();
 
         const float dot = QVector3D::dotProduct(previous, current);
         float value = dot / (previous.length() * current.length());
@@ -335,7 +335,9 @@ static QQuaternion mouseMoveToRotation(const QPoint& prev, const QPoint& cur,
         auto m = renderer->camera()->viewMatrix();
         m.setColumn(3, QVector4D(0.0f, 0.0f, 0.0f, 1.0f));
 
-        rotation = QQuaternion::fromAxisAndAngle(axis * m, angle) *
+        axis = (QVector4D(axis, 1.0f) * m).toVector3D();
+
+        rotation = QQuaternion::fromAxisAndAngle(axis, angle) *
             renderer->camera()->rotation();
     }
 
