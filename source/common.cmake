@@ -13,7 +13,6 @@ add_definitions(-DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 # https://www.kdab.com/disabling-narrowing-conversions-in-signal-slot-connections/
 add_definitions(-DQT_NO_NARROWING_CONVERSIONS_IN_CONNECT)
 
-add_definitions(-DQT_DEPRECATED_WARNINGS)
 # disables all the APIs deprecated before Qt 6.0.0
 add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0x060000)
 
