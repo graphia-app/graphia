@@ -13,8 +13,13 @@ add_definitions(-DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 # https://www.kdab.com/disabling-narrowing-conversions-in-signal-slot-connections/
 add_definitions(-DQT_NO_NARROWING_CONVERSIONS_IN_CONNECT)
 
-# disables all the APIs deprecated before Qt 6.0.0
-add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0x060000)
+# Disable all deprecated APIs at or before the Qt version being used
+string(REGEX MATCHALL "[0-9]+" QT_VERSION_LIST "${Qt6Core_VERSION}")
+list(GET QT_VERSION_LIST 0 QT_MAJOR)
+list(GET QT_VERSION_LIST 1 QT_MINOR)
+list(GET QT_VERSION_LIST 2 QT_PATCH)
+math(EXPR QT_VERSION_HEX "(${QT_MAJOR} << 16) + (${QT_MINOR} << 8) + ${QT_PATCH}")
+add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=${QT_VERSION_HEX})
 
 add_definitions(-DAPP_URI="app.graphia")
 add_definitions(-DAPP_MINOR_VERSION=0)
