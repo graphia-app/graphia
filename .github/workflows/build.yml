@@ -25,6 +25,7 @@ jobs:
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }} qtserialport
+        cache: true
     - uses: actions/checkout@v3
       with:
         ref: ${{ github.ref }}
@@ -70,6 +71,7 @@ jobs:
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
+        cache: true
     - uses: actions/checkout@v3
       with:
         ref: ${{ github.ref }}
@@ -125,6 +127,7 @@ jobs:
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
+        cache: true
         setup-python: false # Python installed above
     - uses: actions/checkout@v3
       with:
@@ -184,6 +187,7 @@ jobs:
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
+        cache: true
     - uses: actions/checkout@v3
       with:
         ref: ${{ github.ref }}
@@ -228,6 +232,7 @@ jobs:
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
+        cache: true
     - uses: actions/checkout@v3
       with:
         ref: ${{ github.ref }}
@@ -309,6 +314,7 @@ jobs:
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
+        cache: true
     - uses: actions/checkout@v3
       with:
         ref: ${{ github.ref }}
@@ -350,6 +356,7 @@ jobs:
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
+        cache: true
     - uses: actions/checkout@v3
       with:
         ref: ${{ github.ref }}
@@ -385,6 +392,7 @@ jobs:
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
+        cache: true
     - uses: actions/checkout@v3
       with:
         ref: ${{ github.ref }}
@@ -430,6 +438,7 @@ jobs:
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
+        cache: true
     - uses: actions/checkout@v3
       with:
         ref: ${{ github.ref }}
@@ -464,6 +473,7 @@ jobs:
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
+        cache: true
     - uses: actions/checkout@v3
       with:
         ref: ${{ github.ref }}
