@@ -46,6 +46,7 @@
 #include "report.h"
 #include "app/rendering/openglfunctions.h"
 #include "shared/utils/preferences.h"
+#include "shared/utils/qmlcontrolcolors.h"
 
 #include <google_breakpad/processor/minidump.h>
 #include <google_breakpad/processor/process_state.h>
@@ -321,6 +322,9 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationDomain(u"graphia.app"_s);
     QCoreApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
     QCoreApplication::setApplicationVersion(QStringLiteral(VERSION));
+
+    qmlRegisterSingletonType<QmlControlColors>(
+        APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "ControlColors", &QmlControlColors::qmlInstance);
 
     QCommandLineParser p;
 
