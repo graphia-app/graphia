@@ -24,6 +24,7 @@
 #include "shared/utils/container.h"
 #include "shared/utils/preferences.h"
 #include "shared/utils/consolecapture.h"
+#include "shared/utils/qmlcontrolcolors.h"
 
 #include <QApplication>
 #include <QQmlApplicationEngine>
@@ -159,6 +160,9 @@ int main(int argc, char *argv[])
     QApplication::setOrganizationDomain(u"graphia.app"_s);
     QApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
     QApplication::setApplicationVersion(QStringLiteral(VERSION));
+
+    qmlRegisterSingletonType<QmlControlColors>(
+        APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "ControlColors", &QmlControlColors::qmlInstance);
 
     auto consoleOutputFiles = captureConsoleOutput(
         QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation),
