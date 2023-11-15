@@ -31,6 +31,8 @@ ApplicationWindow
 {
     id: root
 
+    color: palette.window
+
     Settings
     {
         id: settings
@@ -868,7 +870,7 @@ ApplicationWindow
                                             root.checksums[text] = "";
 
                                         setSaveRequired();
-                                        url.color = "black";
+                                        url.color = palette.text;
                                     }
                                 }
                             }
