@@ -860,7 +860,7 @@ void CorrelationPlotItem::configureLegend()
         auto* plottable = _customPlot.plottable(i);
 
         // Don't add invisible plots to the legend
-        if(!plottable->visible())
+        if(!plottable->visible() || plottable->name().isEmpty())
             continue;
 
         if(plottable->valueAxis() != _continuousYAxis && plottable->valueAxis() != _discreteYAxis)
