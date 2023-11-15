@@ -16,11 +16,11 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import QtCore
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-import Qt.labs.settings
 import Qt.labs.platform as Labs
 
 import app.graphia
