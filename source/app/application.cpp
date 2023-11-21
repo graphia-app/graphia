@@ -721,7 +721,7 @@ void Application::loadPlugins()
     pluginsDirs.emplace_back(usrDir.absolutePath() + "/lib/" + name() + "/plugins");
 #endif
 
-    for(auto& pluginsDir : pluginsDirs)
+    for(const auto& pluginsDir : pluginsDirs)
     {
         if(pluginsDir.isEmpty() || !QDir(pluginsDir).exists())
             continue;
@@ -729,7 +729,7 @@ void Application::loadPlugins()
         std::cerr << "Loading plugins from " << pluginsDir.toStdString() << "\n";
 
         const QDir pluginsQDir(pluginsDir);
-        auto fileNames = pluginsQDir.entryList(QDir::Files);
+        const auto fileNames = pluginsQDir.entryList(QDir::Files);
 
         if(fileNames.empty())
         {
@@ -737,7 +737,7 @@ void Application::loadPlugins()
             continue;
         }
 
-        for(auto& fileName : fileNames)
+        for(const auto& fileName : fileNames)
         {
             if(!QLibrary::isLibrary(fileName))
             {
@@ -755,40 +755,13 @@ void Application::loadPlugins()
 
                 QMessageBox::warning(nullptr, QObject::tr("Plugin Load Failed"),
                     QObject::tr("The plugin \"%1\" failed to load. The reported error is:\n%2")
-                                     .arg(fileName, pluginLoader->errorString()), QMessageBox::Ok);
+                    .arg(fileName, pluginLoader->errorString()), QMessageBox::Ok);
 
                 continue;
             }
 
-            if(plugin != nullptr)
-            {
-                auto* iplugin = qobject_cast<IPlugin*>(plugin);
-                if(iplugin != nullptr)
-                {
-                    const bool pluginNameAlreadyUsed = std::any_of(_loadedPlugins.begin(), _loadedPlugins.end(),
-                    [pluginName = iplugin->name()](const auto& loadedPlugin)
-                    {
-                        return loadedPlugin._interface->name().compare(pluginName, Qt::CaseInsensitive) == 0;
-                    });
-
-                    if(pluginNameAlreadyUsed)
-                    {
-                        std::cerr << "  ..." << QFileInfo(fileName).fileName().toStdString() <<
-                            " (" << iplugin->name().toStdString() <<
-                            ") is already loaded from a different location\n";
-                        pluginLoader->unload();
-                        continue;
-                    }
-
-                    initialisePlugin(iplugin, std::move(pluginLoader));
-
-                    std::cerr << "  ..." << QFileInfo(fileName).fileName().toStdString() <<
-                        " (" << iplugin->name().toStdString() << ") loaded successfully\n";
-
-                    // Some plugins might have static_blocks
-                    execute_static_blocks();
-                }
-            }
+            auto* iplugin = qobject_cast<IPlugin*>(plugin);
+            initialisePlugin(iplugin, std::move(pluginLoader));
         }
     }
 
@@ -799,12 +772,49 @@ void Application::loadPlugins()
     updateLoadingCapabilities();
 }
 
-void Application::initialisePlugin(IPlugin* plugin, std::unique_ptr<QPluginLoader> pluginLoader)
+bool Application::initialisePlugin(IPlugin* plugin, std::unique_ptr<QPluginLoader> pluginLoader)
 {
+    if(plugin == nullptr)
+        return false;
+
+    const auto pluginName = plugin->name();
+    const QString fileName = pluginLoader != nullptr ?
+        QFileInfo(pluginLoader->fileName()).fileName() :
+        QString(u"Static"_s);
+
+    const bool pluginNameAlreadyUsed = std::any_of(_loadedPlugins.begin(), _loadedPlugins.end(),
+    [&pluginName](const auto& loadedPlugin)
+    {
+        return loadedPlugin._interface->name().compare(pluginName, Qt::CaseInsensitive) == 0;
+    });
+
+    if(pluginNameAlreadyUsed)
+    {
+        auto message = QObject::tr("  ...%1 (%2) is already loaded from a different location\n")
+            .arg(pluginName, fileName);
+
+        std::cerr << message.toStdString();
+
+        if(pluginLoader != nullptr)
+            pluginLoader->unload();
+
+        return false;
+    }
+
     plugin->initialise(this);
     _loadedPlugins.emplace_back(plugin, std::move(pluginLoader));
     _urlTypeDetails.update();
     _pluginDetails.update();
+
+    auto message = QObject::tr("  ...%1 (%2) loaded successfully\n")
+        .arg(pluginName, fileName);
+
+    std::cerr << message.toStdString();
+
+    // Plugin might have static_blocks
+    execute_static_blocks();
+
+    return true;
 }
 
 void Application::updateLoadingCapabilities()
@@ -874,8 +884,13 @@ void Application::updateLoadingCapabilities()
 
 void Application::unloadPlugins()
 {
-    for(const auto& loadedPlugin : _loadedPlugins)
-        loadedPlugin._loader->unload();
+    for(auto& loadedPlugin : _loadedPlugins)
+    {
+        if(loadedPlugin._loader != nullptr)
+            loadedPlugin._loader->unload();
+
+        loadedPlugin._interface = nullptr;
+    }
 
     _loadedPlugins.clear();
 }

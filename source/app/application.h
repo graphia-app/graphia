@@ -262,7 +262,7 @@ private:
     QStringListModel _loadableExtensions;
 
     void loadPlugins();
-    void initialisePlugin(IPlugin* plugin, std::unique_ptr<QPluginLoader> pluginLoader);
+    bool initialisePlugin(IPlugin* plugin, std::unique_ptr<QPluginLoader> pluginLoader);
     void updateLoadingCapabilities();
     void unloadPlugins();
 
