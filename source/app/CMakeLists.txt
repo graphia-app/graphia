@@ -236,6 +236,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/rectangle.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/sphere.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/screenshotrenderer.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/rendering/shadertools.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/transition.cpp
     ${CMAKE_CURRENT_LIST_DIR}/preferences.cpp
     ${CMAKE_CURRENT_LIST_DIR}/tracking.cpp
