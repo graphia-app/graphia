@@ -888,6 +888,8 @@ void Application::unloadPlugins()
     {
         if(loadedPlugin._loader != nullptr)
             loadedPlugin._loader->unload();
+        else
+            delete loadedPlugin._interface;
 
         loadedPlugin._interface = nullptr;
     }
