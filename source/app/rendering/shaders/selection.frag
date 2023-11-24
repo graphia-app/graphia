@@ -25,15 +25,6 @@ uniform int multisamples;
 uniform vec4 highlightColor;
 uniform float alpha;
 
-uniform mat3 G[2] = mat3[](
-    mat3( 1.0,  2.0,  1.0,
-          0.0,  0.0,  0.0,
-         -1.0, -2.0, -1.0),
-    mat3( 1.0,  0.0, -1.0,
-          2.0,  0.0, -2.0,
-          1.0,  0.0, -1.0)
-);
-
 vec4 multisampledValue(ivec2 coord)
 {
     vec4 accumulator = vec4(0.0);
@@ -41,7 +32,7 @@ vec4 multisampledValue(ivec2 coord)
     {
         accumulator += texelFetch(frameBufferTexture, coord, s);
     }
-    accumulator /= multisamples;
+    accumulator /= float(multisamples);
     accumulator.a *= alpha;
 
     return accumulator;
@@ -49,6 +40,15 @@ vec4 multisampledValue(ivec2 coord)
 
 void main()
 {
+    mat3 G[2] = mat3[](
+        mat3( 1.0,  2.0,  1.0,
+              0.0,  0.0,  0.0,
+             -1.0, -2.0, -1.0),
+        mat3( 1.0,  0.0, -1.0,
+              2.0,  0.0, -2.0,
+              1.0,  0.0, -1.0)
+    );
+
     // Sobel edge detection
     ivec2 coord = ivec2(vPosition);
     mat3 I;

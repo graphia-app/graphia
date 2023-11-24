@@ -37,7 +37,7 @@ float meanOfMSFor(ivec2 coord, int channel, uint s)
     for(int i = 0; i < multisamples; i++)
     {
         float v = texelFetch(frameBufferTexture, coord, i)[channel];
-        mean += (v / s);
+        mean += (v / float(s));
     }
 
     return mean;

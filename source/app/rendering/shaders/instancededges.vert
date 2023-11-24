@@ -159,7 +159,7 @@ void main()
         // Scale to match edgeSize
         conePosition *= size;
         // Scale arrow head (cone) length
-        conePosition.y *= 16;
+        conePosition.y *= 16.0;
 
         // Limit the cone size to MAX_ARROW_HEAD_LENGTH * edge length
         if(abs(conePosition.y) > edgeLength * MAX_ARROW_HEAD_LENGTH)

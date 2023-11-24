@@ -37,7 +37,7 @@ vec4 multisampledValue(ivec2 coord)
         if(texel.a > 0.0)
         {
             rgb += texel.rgb;
-            a += (texel.a / multisamples);
+            a += (texel.a / float(multisamples));
             numTexels++;
         }
     }
@@ -45,7 +45,7 @@ vec4 multisampledValue(ivec2 coord)
     if(disableAlphaBlending != 0 && numTexels > 0)
         a = 1.0;
 
-    return vec4(rgb / numTexels, a);
+    return vec4(rgb / float(numTexels), a);
 }
 
 void main()
