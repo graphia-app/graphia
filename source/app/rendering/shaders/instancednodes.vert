@@ -42,8 +42,9 @@ out float lightOffset;
 out float lightScale;
 out float projectionScale;
 
-uniform samplerBuffer componentData;
+uniform sampler2D componentData;
 uniform int componentDataElementSize;
+uniform int componentDataTextureMaxDimension;
 
 mat4 makeOrientationMatrix(vec3 forward)
 {
@@ -60,32 +61,26 @@ mat4 makeOrientationMatrix(vec3 forward)
     return mat4(m);
 }
 
-int componentDataOffset()
+float floatFromComponentData(int offset)
 {
-    return component * componentDataElementSize;
+    int index = (component * componentDataElementSize) + offset;
+    int y = index / componentDataTextureMaxDimension;
+    int x = index % componentDataTextureMaxDimension;
+    ivec2 coord = ivec2(x, y);
+
+    return texelFetch(componentData, coord, 0).r;
 }
 
 mat4 mat4FromComponentData(int offset)
 {
     mat4 m;
-    int index = componentDataOffset() + offset;
+    int index = offset;
 
     for(int j = 0; j < 4; j++)
-    {
         for(int i = 0; i < 4; i++)
-        {
-            m[j][i] = texelFetch(componentData, index).r;
-            index++;
-        }
-    }
+            m[j][i] = floatFromComponentData(index++);
 
     return m;
-}
-
-float floatFromComponentData(int offset)
-{
-    int index = componentDataOffset() + offset;
-    return texelFetch(componentData, index).r;
 }
 
 float approxProjectionScaleFor(vec3 position, float extent, mat4 p)

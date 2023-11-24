@@ -431,12 +431,6 @@ GraphRendererCore::GraphRendererCore() :
 
 GraphRendererCore::~GraphRendererCore()
 {
-    if(_componentDataTBO != 0)
-    {
-        glDeleteBuffers(1, &_componentDataTBO);
-        _componentDataTBO = 0;
-    }
-
     if(_componentDataTexture != 0)
     {
         glDeleteTextures(1, &_componentDataTexture);
@@ -486,6 +480,17 @@ static void setShaderLightingParameters(QOpenGLShaderProgram& program)
     program.setUniformValue("material.shininess", 50.0f);
 }
 
+void GraphRendererCore::bindComponentDataTexture(GLenum textureUnit, QOpenGLShaderProgram& shader)
+{
+    glActiveTexture(textureUnit);
+    glBindTexture(GL_TEXTURE_2D, _componentDataTexture);
+    shader.setUniformValue("componentDataElementSize",
+        static_cast<int>(_componentDataElementSize));
+    shader.setUniformValue("componentDataTextureMaxDimension",
+        static_cast<int>(_componentDataMaxTextureSize));
+    shader.setUniformValue("componentData", textureUnit - GL_TEXTURE0);
+}
+
 void GraphRendererCore::renderNodes(GPUGraphData& gpuGraphData)
 {
     if(gpuGraphData.numNodes() == 0)
@@ -496,11 +501,7 @@ void GraphRendererCore::renderNodes(GPUGraphData& gpuGraphData)
 
     gpuGraphData._nodeVBO.bind();
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_BUFFER, _componentDataTexture);
-    _nodesShader.setUniformValue("componentDataElementSize",
-        static_cast<int>(_componentDataElementSize));
-    _nodesShader.setUniformValue("componentData", 0);
+    bindComponentDataTexture(GL_TEXTURE0, _nodesShader);
 
     _nodesShader.setUniformValue("flatness", shading() == Shading::Flat ? 1.0f : 0.0f);
 
@@ -509,7 +510,7 @@ void GraphRendererCore::renderNodes(GPUGraphData& gpuGraphData)
                             GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(gpuGraphData.numNodes()));
     gpuGraphData._sphere.vertexArrayObject()->release();
 
-    glBindTexture(GL_TEXTURE_BUFFER, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
     gpuGraphData._nodeVBO.release();
     _nodesShader.release();
 }
@@ -524,11 +525,7 @@ void GraphRendererCore::renderEdges(GPUGraphData& gpuGraphData)
 
     gpuGraphData._edgeVBO.bind();
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_BUFFER, _componentDataTexture);
-    _edgesShader.setUniformValue("componentDataElementSize",
-        static_cast<int>(_componentDataElementSize));
-    _edgesShader.setUniformValue("componentData", 0);
+    bindComponentDataTexture(GL_TEXTURE0, _edgesShader);
 
     _edgesShader.setUniformValue("flatness", shading() == Shading::Flat ? 1.0f : 0.0f);
 
@@ -537,7 +534,7 @@ void GraphRendererCore::renderEdges(GPUGraphData& gpuGraphData)
                             GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(gpuGraphData.numEdges()));
     gpuGraphData._arrow.vertexArrayObject()->release();
 
-    glBindTexture(GL_TEXTURE_BUFFER, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
     gpuGraphData._edgeVBO.release();
     _edgesShader.release();
 }
@@ -564,18 +561,14 @@ void GraphRendererCore::renderText(GPUGraphData& gpuGraphData)
 
     _textShader.setUniformValue("tex", 0);
 
-    glActiveTexture(GL_TEXTURE0 + 1);
-    glBindTexture(GL_TEXTURE_BUFFER, _componentDataTexture);
-    _textShader.setUniformValue("componentDataElementSize",
-        static_cast<int>(_componentDataElementSize));
-    _textShader.setUniformValue("componentData", 1);
+    bindComponentDataTexture(GL_TEXTURE0 + 1, _textShader);
 
     gpuGraphData._rectangle.vertexArrayObject()->bind();
     glDrawElementsInstanced(GL_TRIANGLES, Primitive::Rectangle::glIndexCount(),
                             GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(gpuGraphData.numGlyphs()));
     gpuGraphData._rectangle.vertexArrayObject()->release();
 
-    glBindTexture(GL_TEXTURE_BUFFER, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     gpuGraphData._textVBO.release();
     _textShader.release();
@@ -682,10 +675,12 @@ void GraphRendererCore::appendGPUComponentData(const QMatrix4x4& modelViewMatrix
 
 void GraphRendererCore::uploadGPUComponentData()
 {
-    glBindBuffer(GL_TEXTURE_BUFFER, _componentDataTBO);
-    glBufferData(GL_TEXTURE_BUFFER, static_cast<GLsizeiptr>(_componentData.size() * sizeof(GLfloat)),
-        _componentData.data(), GL_STATIC_DRAW);
-    glBindBuffer(GL_TEXTURE_BUFFER, 0);
+    glBindTexture(GL_TEXTURE_2D, _componentDataTexture);
+    Q_ASSERT(_componentData.size() <= static_cast<size_t>(_componentDataMaxTextureSize * _componentDataMaxTextureSize));
+    const GLint textureHeight = (static_cast<GLint>(_componentData.size()) / _componentDataMaxTextureSize) + 1;
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F,
+        _componentDataMaxTextureSize, textureHeight, 0, GL_RED, GL_FLOAT, _componentData.data());
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 Shading GraphRendererCore::shading() const
@@ -795,14 +790,11 @@ void GraphRendererCore::prepareComponentDataTexture()
     if(_componentDataTexture == 0)
         glGenTextures(1, &_componentDataTexture);
 
-    if(_componentDataTBO == 0)
-        glGenBuffers(1, &_componentDataTBO);
+    glBindTexture(GL_TEXTURE_2D, _componentDataTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // Effectively disable mipmaps
+    glBindTexture(GL_TEXTURE_2D, 0);
 
-    glBindTexture(GL_TEXTURE_BUFFER, _componentDataTexture);
-    glBindBuffer(GL_TEXTURE_BUFFER, _componentDataTBO);
-    glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, _componentDataTBO);
-    glBindBuffer(GL_TEXTURE_BUFFER, 0);
-    glBindTexture(GL_TEXTURE_BUFFER, 0);
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &_componentDataMaxTextureSize);
 }
 
 std::vector<size_t> GraphRendererCore::gpuGraphDataRenderOrder() const

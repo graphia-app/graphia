@@ -31,32 +31,34 @@ layout (location = 8) in vec2 glyphSize;
 layout (location = 9) in float glyphScale;
 layout (location = 10) in vec3 color;
 
-uniform samplerBuffer componentData;
+uniform sampler2D componentData;
 uniform int componentDataElementSize;
+uniform int componentDataTextureMaxDimension;
+
 uniform sampler2DArray tex;
 
 out vec2 texCoord;
 flat out int texLayer;
 out vec3 textColor;
 
-int componentDataOffset()
+float floatFromComponentData(int offset)
 {
-    return component * componentDataElementSize;
+    int index = (component * componentDataElementSize) + offset;
+    int y = index / componentDataTextureMaxDimension;
+    int x = index % componentDataTextureMaxDimension;
+    ivec2 coord = ivec2(x, y);
+
+    return texelFetch(componentData, coord, 0).r;
 }
 
 mat4 mat4FromComponentData(int offset)
 {
     mat4 m;
-    int index = componentDataOffset() + offset;
+    int index = offset;
 
     for(int j = 0; j < 4; j++)
-    {
         for(int i = 0; i < 4; i++)
-        {
-            m[j][i] = texelFetch(componentData, index).r;
-            index++;
-        }
-    }
+            m[j][i] = floatFromComponentData(index++);
 
     return m;
 }

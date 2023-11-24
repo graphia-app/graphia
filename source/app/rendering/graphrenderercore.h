@@ -171,8 +171,8 @@ private:
 
     GLuint _depthTexture = 0;
 
-    GLuint _componentDataTBO = 0;
     GLuint _componentDataTexture = 0;
+    GLint _componentDataMaxTextureSize = 0;
     std::vector<GLfloat> _componentData;
     size_t _componentDataElementSize = 0;
 
@@ -190,6 +190,8 @@ private:
     void prepareScreenQuad();
 
     std::vector<size_t> gpuGraphDataRenderOrder() const;
+
+    void bindComponentDataTexture(GLenum textureUnit, QOpenGLShaderProgram& shader);
 
     void prepare();
 
