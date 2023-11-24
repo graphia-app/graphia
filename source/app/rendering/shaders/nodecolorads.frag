@@ -16,8 +16,6 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#version 330 core
-
 const int MAX_LIGHTS = 8;
 
 uniform int numberOfLights;

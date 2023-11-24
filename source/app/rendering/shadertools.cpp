@@ -21,13 +21,34 @@
 #include "shared/utils/scope_exit.h"
 
 #include <QOpenGLShaderProgram>
+#include <QOpenGLContext>
+#include <QSurfaceFormat>
 #include <QString>
 #include <QObject>
+#include <QFile>
 #include <QtGlobal>
 
 #include <iostream>
 
 using namespace Qt::Literals::StringLiterals;
+
+static QString shaderStringFromFile(const QString& filename)
+{
+    QFile file(filename);
+    if(!file.open(QFile::ReadOnly))
+    {
+        qFatal("Failed to open shader file");
+        return {};
+    }
+
+    const QString contents = file.readAll();
+
+    const QSurfaceFormat currentSurfaceFormat = QOpenGLContext::currentContext()->format();
+    const QString version = currentSurfaceFormat.renderableType() == QSurfaceFormat::OpenGLES ?
+        u"#version 300 es\nprecision mediump float;\n"_s : u"#version 330 core\n"_s;
+
+    return version + contents;
+}
 
 bool ShaderTools::loadShaderProgram(QOpenGLShaderProgram& program,
     const QString& vertexShader, const QString& fragmentShader, bool allowFailure)
@@ -44,14 +65,14 @@ bool ShaderTools::loadShaderProgram(QOpenGLShaderProgram& program,
     auto atExit = std::experimental::make_scope_exit([] { qInstallMessageHandler(nullptr); });
 
     shaderName = vertexShader;
-    if(!program.addShaderFromSourceFile(QOpenGLShader::Vertex, vertexShader))
+    if(!program.addShaderFromSourceCode(QOpenGLShader::Vertex, shaderStringFromFile(vertexShader)))
     {
         if(!allowFailure) qFatal("Vertex shader compilation failure");
         return false;
     }
 
     shaderName = fragmentShader;
-    if(!program.addShaderFromSourceFile(QOpenGLShader::Fragment, fragmentShader))
+    if(!program.addShaderFromSourceCode(QOpenGLShader::Fragment, shaderStringFromFile(fragmentShader)))
     {
         if(!allowFailure) qFatal("Fragment shader compilation failure");
         return false;

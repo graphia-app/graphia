@@ -16,8 +16,6 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#version 330 core
-
 in vec2 texCoord;
 flat in int texLayer;
 in vec3 textColor;

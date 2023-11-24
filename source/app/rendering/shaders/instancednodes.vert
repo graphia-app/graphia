@@ -16,7 +16,6 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#version 330 core
 #define PI 3.14159265359
 
 layout (location = 0) in vec3 vertexPosition;

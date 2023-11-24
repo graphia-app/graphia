@@ -16,8 +16,6 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#version 330 core
-
 in vec3 position;
 in vec3 centre;
 in float radius;

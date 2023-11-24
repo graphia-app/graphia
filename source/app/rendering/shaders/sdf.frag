@@ -16,8 +16,6 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#version 330 core
-
 // This Shader Generates an SDF map of a large texture
 // the resulting texture will be texSize.x/scaleFactor wide and texSize.y/scaleFactor talln
 // tex is the texture to SDF
