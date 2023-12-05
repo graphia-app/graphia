@@ -235,13 +235,12 @@ Window
                 {
                     visible: _transform !== undefined
                     Layout.fillWidth: true
-                    Layout.bottomMargin: Constants.spacing * 2
+                    Layout.bottomMargin: Constants.spacing
 
                     Text
                     {
-                        id: description
                         Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignTop
+                        Layout.preferredHeight: 64
 
                         textFormat: Text.StyledText
                         wrapMode: Text.WordWrap
@@ -251,15 +250,14 @@ Window
                         onLinkActivated: function(link) { Qt.openUrlExternally(link); }
 
                         text: _transform !== undefined ?
-                            "<h3>" + _transform.name + "</h3><br>" + _transform.description : ""
+                            "<h3>" + _transform.name + "</h3>" + _transform.description : ""
                     }
 
                     Image
                     {
-                        Layout.alignment: Qt.AlignTop
-                        Layout.preferredHeight: 56
+                        Layout.preferredHeight: 64
                         fillMode: Image.PreserveAspectFit
-                        sourceSize.height: 56
+                        sourceSize.height: 64
                         source: _transform !== undefined ? _transform.image : ""
                     }
                 }
@@ -579,13 +577,14 @@ Window
                                                 });
                                             }
 
-                                            ColumnLayout
+                                            Column
                                             {
                                                 Layout.fillWidth: true
+                                                Layout.fillHeight: true
+                                                spacing: Constants.spacing
 
                                                 Label
                                                 {
-                                                    Layout.alignment: Qt.AlignTop
                                                     font.italic: true
                                                     font.bold: true
                                                     color: palette.buttonText
@@ -594,7 +593,7 @@ Window
 
                                                 Text
                                                 {
-                                                    Layout.fillWidth: true
+                                                    width: parent.width
                                                     text: parameterData.description
                                                     textFormat: Text.StyledText
                                                     wrapMode: Text.Wrap
@@ -604,8 +603,6 @@ Window
                                                     PointingCursorOnHoverLink {}
                                                     onLinkActivated: function(link) { Qt.openUrlExternally(link); }
                                                 }
-
-                                                Item { Layout.fillHeight: true }
                                             }
 
                                             TreeBox
@@ -662,13 +659,14 @@ Window
                                         {
                                             property var parameterData: _transform.parameters[modelData]
 
-                                            ColumnLayout
+                                            Column
                                             {
                                                 Layout.fillWidth: true
+                                                Layout.fillHeight: true
+                                                spacing: Constants.spacing
 
                                                 Label
                                                 {
-                                                    Layout.alignment: Qt.AlignTop
                                                     font.italic: true
                                                     font.bold: true
                                                     color: palette.buttonText
@@ -677,7 +675,7 @@ Window
 
                                                 Text
                                                 {
-                                                    Layout.fillWidth: true
+                                                    width: parent.width
                                                     text: parameterData.description
                                                     textFormat: Text.StyledText
                                                     wrapMode: Text.Wrap
