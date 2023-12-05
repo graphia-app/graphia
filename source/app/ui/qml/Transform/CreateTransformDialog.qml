@@ -308,8 +308,11 @@ Window
                         ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
                         ScrollBar.vertical.policy: ScrollBar.AsNeeded
 
+                        contentHeight: parametersLayout.implicitHeight
+
                         RowLayout
                         {
+                            id: parametersLayout
                             width: scrollView.width
 
                             ColumnLayout

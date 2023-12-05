@@ -203,8 +203,12 @@ Item
                     contentItem.flickableDirection = Flickable.VerticalFlick;
                 }
 
+                contentHeight: defaultsLayout.implicitHeight
+
                 RowLayout
                 {
+                    id: defaultsLayout
+
                     width: scrollView.width
 
                     ColumnLayout

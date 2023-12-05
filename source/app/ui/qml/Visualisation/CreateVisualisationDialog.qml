@@ -178,8 +178,12 @@ Window
                     ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
                     ScrollBar.vertical.policy: ScrollBar.AsNeeded
 
+                    contentHeight: descriptionLayout.implicitHeight
+
                     ColumnLayout
                     {
+                        id: descriptionLayout
+
                         width: scrollView.width
 
                         Text
