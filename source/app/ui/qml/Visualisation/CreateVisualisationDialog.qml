@@ -180,20 +180,25 @@ Window
 
                     contentHeight: descriptionLayout.implicitHeight
 
-                    ColumnLayout
+                    Column
                     {
                         id: descriptionLayout
 
                         width: scrollView.width
+                        spacing: Constants.spacing
+
+                        leftPadding: scrollView.frameMargin
+                        rightPadding: scrollView.frameMargin + scrollView.scrollBarWidth
+                        topPadding: scrollView.frameMargin
+                        bottomPadding: scrollView.frameMargin
+
+                        property real _contentWidth: width - (leftPadding + rightPadding)
 
                         Text
                         {
                             id: description
 
-                            Layout.fillWidth: true
-                            Layout.leftMargin: scrollView.frameMargin
-                            Layout.rightMargin: scrollView.frameMargin + scrollView.scrollBarWidth
-                            Layout.topMargin: scrollView.frameMargin
+                            width: descriptionLayout._contentWidth
 
                             textFormat: Text.StyledText
                             wrapMode: Text.WordWrap
@@ -232,6 +237,8 @@ Window
                         RowLayout
                         {
                             id: channelIndicator
+
+                            width: descriptionLayout._contentWidth
 
                             readonly property int _elementSize: 24
 
@@ -361,8 +368,6 @@ Window
                                 textSizeIcon.visible = textSizeSelected;
                             }
                         }
-
-                        Item { Layout.fillHeight: true }
                     }
                 }
 
