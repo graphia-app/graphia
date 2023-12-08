@@ -183,6 +183,7 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
 
     QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
     QQuickWindow::setDefaultAlphaBuffer(true);
+    OpenGLFunctions::requestMinimumFormat();
 
     QtWebEngineQuick::initialize();
 
@@ -287,8 +288,6 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
 
         return 1;
     }
-
-    OpenGLFunctions::requestMinimumFormat();
 
     configureXDG();
 
