@@ -59,6 +59,7 @@ QSurfaceFormat OpenGLFunctions::minimumFormat()
 
 void OpenGLFunctions::requestMinimumFormat()
 {
+#ifndef Q_OS_WIN // For reasons not understood, this causes problems on Windows
     const auto defaultFormat = QSurfaceFormat::defaultFormat();
     const std::pair<int, int> defaultVersion = {defaultFormat.majorVersion(), defaultFormat.minorVersion()};
     const auto requestFormat = minimumFormat();
@@ -66,6 +67,7 @@ void OpenGLFunctions::requestMinimumFormat()
 
     if(defaultVersion < requestVersion)
         QSurfaceFormat::setDefaultFormat(requestFormat);
+#endif
 }
 
 class QueryFunctions
