@@ -27,7 +27,6 @@
 
 #include "commands/commandmanager.h"
 
-#include <QOpenGLContext>
 #include <QQmlEngine>
 
 GraphQuickItem::GraphQuickItem(QQuickItem* parent) :
