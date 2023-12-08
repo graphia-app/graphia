@@ -95,7 +95,9 @@ RequestExecutionLevel highest
 
         notSilent:
         IntCmp $ALREADY_RUNNING 603 notRunning
-            !insertmacro FatalError "${PRODUCT_NAME} is still running. Please close it before making changes."
+            !insertmacro FatalError "${PRODUCT_NAME} is still running. Please close it before making changes. \
+                If ${PRODUCT_NAME} doesn't appear to be running, please open Windows Task Manager to the \
+                Details tab, find ${PRODUCT_NAME}.exe and click End Task."
         notRunning:
 
         UserInfo::GetAccountType
