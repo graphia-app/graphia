@@ -193,7 +193,7 @@ void SDFComputeJob::generateSDF()
             auto offset = (static_cast<size_t>(_glyphMap->images().at(0).sizeInBytes()) /
                 static_cast<size_t>(scaleFactor * scaleFactor)) * layer;
             const QImage sdfImage(pixels.data() + offset, renderWidth, renderHeight, QImage::Format_RGBA8888);
-            sdfImage.save(u"%1/%2/%3.png"_s.arg(QDir::tempPath(), outFilePrefix, QString::number(layer)));
+            sdfImage.save(u"%1/%2%3.png"_s.arg(QDir::tempPath(), outFilePrefix, QString::number(layer)));
         }
 
         // Print Memory consumption

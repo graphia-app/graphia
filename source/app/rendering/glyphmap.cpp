@@ -307,7 +307,7 @@ void GlyphMap::renderImages(const QFont &font)
         const char* outFilePrefix = "graphia-GlyphMap";
 
         for(int i = 0; const auto& debugImage : debugImages)
-            debugImage.save(u"%1/%2/%3.png"_s.arg(QDir::tempPath(), outFilePrefix, QString::number(i++)));
+            debugImage.save(u"%1/%2%3.png"_s.arg(QDir::tempPath(), outFilePrefix, QString::number(i++)));
 
         qDebug() << u"Glyph images saved to: %1/%2*.png"_s.arg(QDir::tempPath(), outFilePrefix);
     }
