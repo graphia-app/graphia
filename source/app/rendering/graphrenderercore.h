@@ -44,15 +44,17 @@ struct GPUGraphData : OpenGLFunctions
     GPUGraphData();
     ~GPUGraphData() override;
 
-    void initialise(QOpenGLShaderProgram& nodesShader, QOpenGLShaderProgram& edgesShader,
-                    QOpenGLShaderProgram& textShader);
+    void initialise(QOpenGLShaderProgram& nodesShader,
+        QOpenGLShaderProgram& edgesShader,
+        QOpenGLShaderProgram& textShader);
     void prepareVertexBuffers();
     void prepareNodeVAO(QOpenGLShaderProgram& shader);
     void prepareEdgeVAO(QOpenGLShaderProgram& shader);
     void prepareTextVAO(QOpenGLShaderProgram& shader);
 
     bool prepareRenderBuffers(int width, int height, GLuint depthTexture, GLint numMultiSamples);
-    void copyState(const GPUGraphData &gpuGraphData, QOpenGLShaderProgram &nodesShader, QOpenGLShaderProgram &edgesShader, QOpenGLShaderProgram &textShader);
+    void copyState(const GPUGraphData &gpuGraphData, QOpenGLShaderProgram &nodesShader,
+        QOpenGLShaderProgram &edgesShader, QOpenGLShaderProgram &textShader);
 
     void reset();
     void clearFramebuffer(GLbitfield buffers = GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
