@@ -743,6 +743,68 @@ bool GraphRendererCore::resize(int width, int height)
     return FBOcomplete;
 }
 
+void GraphRendererCore::prepareSelectionMarkerVAO()
+{
+    _selectionMarkerDataVAO.create();
+
+    _selectionMarkerDataVAO.bind();
+    _selectionMarkerShader.bind();
+
+    _selectionMarkerDataBuffer.create();
+    _selectionMarkerDataBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+    _selectionMarkerDataBuffer.bind();
+
+    _selectionMarkerShader.enableAttributeArray("position");
+    _selectionMarkerShader.enableAttributeArray("color");
+    _selectionMarkerShader.disableAttributeArray("texCoord");
+    _selectionMarkerShader.setAttributeBuffer("position", GL_FLOAT, 0, 2, 5 * sizeof(GLfloat));
+    _selectionMarkerShader.setAttributeBuffer("color", GL_FLOAT, 2 * sizeof(GLfloat), 3, 5 * sizeof(GLfloat));
+
+    _selectionMarkerDataBuffer.release();
+    _selectionMarkerDataVAO.release();
+    _selectionMarkerShader.release();
+}
+
+void GraphRendererCore::prepareScreenQuad()
+{
+    if(!_screenQuadVAO.isCreated())
+        _screenQuadVAO.create();
+
+    _screenQuadVAO.bind();
+
+    _screenQuadDataBuffer.create();
+    _screenQuadDataBuffer.bind();
+    _screenQuadDataBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+
+    for(auto* shader : {&_screenShader, &_outlineShader, &_selectionShader})
+    {
+        shader->bind();
+        shader->enableAttributeArray("position");
+        shader->setAttributeBuffer("position", GL_FLOAT, 0, 2, 2 * sizeof(GLfloat));
+        shader->setUniformValue("frameBufferTexture", 0);
+        shader->setUniformValue("multisamples", _numMultiSamples);
+        shader->release();
+    }
+
+    _screenQuadDataBuffer.release();
+    _screenQuadVAO.release();
+}
+
+void GraphRendererCore::prepareComponentDataTexture()
+{
+    if(_componentDataTexture == 0)
+        glGenTextures(1, &_componentDataTexture);
+
+    if(_componentDataTBO == 0)
+        glGenBuffers(1, &_componentDataTBO);
+
+    glBindTexture(GL_TEXTURE_BUFFER, _componentDataTexture);
+    glBindBuffer(GL_TEXTURE_BUFFER, _componentDataTBO);
+    glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, _componentDataTBO);
+    glBindBuffer(GL_TEXTURE_BUFFER, 0);
+    glBindTexture(GL_TEXTURE_BUFFER, 0);
+}
+
 std::vector<size_t> GraphRendererCore::gpuGraphDataRenderOrder() const
 {
     std::vector<size_t> renderOrder;
@@ -975,66 +1037,4 @@ void GraphRendererCore::renderToFramebuffer(Flags<Type> type)
 
     _screenQuadDataBuffer.release();
     _screenQuadVAO.release();
-}
-
-void GraphRendererCore::prepareSelectionMarkerVAO()
-{
-    _selectionMarkerDataVAO.create();
-
-    _selectionMarkerDataVAO.bind();
-    _selectionMarkerShader.bind();
-
-    _selectionMarkerDataBuffer.create();
-    _selectionMarkerDataBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
-    _selectionMarkerDataBuffer.bind();
-
-    _selectionMarkerShader.enableAttributeArray("position");
-    _selectionMarkerShader.enableAttributeArray("color");
-    _selectionMarkerShader.disableAttributeArray("texCoord");
-    _selectionMarkerShader.setAttributeBuffer("position", GL_FLOAT, 0, 2, 5 * sizeof(GLfloat));
-    _selectionMarkerShader.setAttributeBuffer("color", GL_FLOAT, 2 * sizeof(GLfloat), 3, 5 * sizeof(GLfloat));
-
-    _selectionMarkerDataBuffer.release();
-    _selectionMarkerDataVAO.release();
-    _selectionMarkerShader.release();
-}
-
-void GraphRendererCore::prepareScreenQuad()
-{
-    if(!_screenQuadVAO.isCreated())
-        _screenQuadVAO.create();
-
-    _screenQuadVAO.bind();
-
-    _screenQuadDataBuffer.create();
-    _screenQuadDataBuffer.bind();
-    _screenQuadDataBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
-
-    for(auto* shader : {&_screenShader, &_outlineShader, &_selectionShader})
-    {
-        shader->bind();
-        shader->enableAttributeArray("position");
-        shader->setAttributeBuffer("position", GL_FLOAT, 0, 2, 2 * sizeof(GLfloat));
-        shader->setUniformValue("frameBufferTexture", 0);
-        shader->setUniformValue("multisamples", _numMultiSamples);
-        shader->release();
-    }
-
-    _screenQuadDataBuffer.release();
-    _screenQuadVAO.release();
-}
-
-void GraphRendererCore::prepareComponentDataTexture()
-{
-    if(_componentDataTexture == 0)
-        glGenTextures(1, &_componentDataTexture);
-
-    if(_componentDataTBO == 0)
-        glGenBuffers(1, &_componentDataTBO);
-
-    glBindTexture(GL_TEXTURE_BUFFER, _componentDataTexture);
-    glBindBuffer(GL_TEXTURE_BUFFER, _componentDataTBO);
-    glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, _componentDataTBO);
-    glBindBuffer(GL_TEXTURE_BUFFER, 0);
-    glBindTexture(GL_TEXTURE_BUFFER, 0);
 }
