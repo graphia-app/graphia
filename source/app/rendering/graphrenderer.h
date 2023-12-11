@@ -256,7 +256,6 @@ private:
     std::unique_ptr<ScreenshotRenderer> _screenshotRenderer;
 
     GLuint sdfTexture() const override;
-    GLuint sdfTextureOffscreen() const;
     void swapSdfTexture();
 
     void updateText(bool wait = false);
