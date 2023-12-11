@@ -151,7 +151,7 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
         else
             switchToOverviewMode(false);
 
-        updateText(true);
+        updateText();
 
     }).then([this]
     {
@@ -883,7 +883,7 @@ void GraphRenderer::onPreferenceChanged(const QString& key, const QVariant& valu
     if(key == u"visuals/textFont"_s)
     {
         _glyphMap->setFontName(value.toString());
-        updateText();
+        u::doAsync([this] { updateText(); });
     }
     else if(key == u"visuals/backgroundColor"_s)
         update();
@@ -925,9 +925,9 @@ GLuint GraphRenderer::sdfTexture() const
     return _sdfTexture.front();
 }
 
-void GraphRenderer::updateText(bool wait)
+void GraphRenderer::updateText()
 {
-    std::unique_lock<std::recursive_mutex> glyphMapLock(_glyphMap->mutex());
+    const std::unique_lock<std::recursive_mutex> lock(_glyphMap->mutex());
 
     for(auto nodeId : _graphModel->graph().nodeIds())
         _glyphMap->addText(_graphModel->nodeVisual(nodeId)._text);
@@ -943,25 +943,17 @@ void GraphRenderer::updateText(bool wait)
 
     if(_glyphMap->updateRequired())
     {
-        glyphMapLock.unlock();
+        _glyphMap->update();
 
-        auto job = std::make_unique<SDFComputeJob>(&_sdfTexture, _glyphMap.get());
-        job->executeWhenComplete([this]
+        executeOnRendererThread([this]
         {
-            executeOnRendererThread([this]
-            {
-                _sdfTexture.swap();
-                _textLayoutResults = _glyphMap->results();
+            renderSdfTexture(*_glyphMap, _sdfTexture.back());
+            _sdfTexture.swap();
+            _textLayoutResults = _glyphMap->results();
 
-                updateGPUData(When::Later);
-                update(); // QQuickFramebufferObject::Renderer::update
-            }, u"GraphRenderer::updateText"_s);
-        });
-
-        _gpuComputeThread->enqueue(job);
-
-        if(wait)
-            _gpuComputeThread->wait();
+            updateGPUData(When::Later);
+            update(); // QQuickFramebufferObject::Renderer::update
+        }, u"GraphRenderer::updateText"_s);
     }
 }
 

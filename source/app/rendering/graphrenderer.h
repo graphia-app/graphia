@@ -258,7 +258,7 @@ private:
     GLuint sdfTexture() const override;
     void swapSdfTexture();
 
-    void updateText(bool wait = false);
+    void updateText();
 
     void enableSceneUpdate();
     void disableSceneUpdate();

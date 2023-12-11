@@ -38,6 +38,7 @@
 #include <vector>
 
 class ScreenshotRenderer;
+class GlyphMap;
 
 struct GPUGraphData : OpenGLFunctions
 {
@@ -161,6 +162,8 @@ private:
 
     std::array<GPUGraphData, 7> _gpuGraphData;
 
+    QOpenGLShaderProgram _sdfShader;
+
     QOpenGLShaderProgram _nodesShader;
     QOpenGLShaderProgram _edgesShader;
     QOpenGLShaderProgram _textShader;
@@ -232,6 +235,7 @@ protected:
 
     void renderToFramebuffer(Flags<Type> type = Type::All);
 
+    void renderSdfTexture(const GlyphMap& glyphMap, GLuint texture);
     virtual GLuint sdfTexture() const = 0;
 };
 
