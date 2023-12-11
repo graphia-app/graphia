@@ -185,7 +185,7 @@ private:
 
     void prepareComponentDataTexture();
     void prepareSelectionMarkerVAO();
-    void prepareQuad();
+    void prepareScreenQuad();
 
     std::vector<size_t> gpuGraphDataRenderOrder() const;
 

@@ -426,7 +426,7 @@ GraphRendererCore::GraphRendererCore() :
 
     prepareComponentDataTexture();
     prepareSelectionMarkerVAO();
-    prepareQuad();
+    prepareScreenQuad();
 }
 
 GraphRendererCore::~GraphRendererCore()
@@ -999,7 +999,7 @@ void GraphRendererCore::prepareSelectionMarkerVAO()
     _selectionMarkerShader.release();
 }
 
-void GraphRendererCore::prepareQuad()
+void GraphRendererCore::prepareScreenQuad()
 {
     if(!_screenQuadVAO.isCreated())
         _screenQuadVAO.create();
