@@ -20,7 +20,6 @@
 #define GRAPHQUICKITEM_H
 
 #include "graph/qmlelementid.h"
-#include "rendering/compute/gpucomputethread.h"
 #include "rendering/projection.h"
 #include "rendering/shading.h"
 
@@ -66,10 +65,7 @@ class GraphQuickItem : public QQuickFramebufferObject
 public:
     explicit GraphQuickItem(QQuickItem* parent = nullptr);
 
-    void initialise(GraphModel *graphModel,
-                    CommandManager* commandManager,
-                    SelectionManager *selectionManager,
-                    GPUComputeThread *gpuComputeThread);
+    void initialise(GraphModel *graphModel, CommandManager* commandManager, SelectionManager *selectionManager);
 
     GraphModel* graphModel() { return _graphModel; }
     SelectionManager* selectionManager() { return _selectionManager; }
@@ -133,7 +129,6 @@ private:
     void wheelEvent(QWheelEvent* e) override;
 
     GraphModel* _graphModel = nullptr;
-    GPUComputeThread* _gpuComputeThread = nullptr;
     CommandManager* _commandManager = nullptr;
     SelectionManager* _selectionManager = nullptr;
 

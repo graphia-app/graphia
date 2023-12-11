@@ -21,7 +21,6 @@
 #include "glyphmap.h"
 #include "graphcomponentscene.h"
 #include "graphoverviewscene.h"
-#include "compute/sdfcomputejob.h"
 
 #include "app/preferences.h"
 #include "app/layout/nodepositions.h"
@@ -68,13 +67,9 @@ void initialiseFromGraph(const Graph* graph, Target& target)
     target.onGraphChanged(graph, true);
 }
 
-GraphRenderer::GraphRenderer(GraphModel* graphModel,
-                             CommandManager* commandManager,
-                             SelectionManager* selectionManager,
-                             GPUComputeThread* gpuComputeThread) :
+GraphRenderer::GraphRenderer(GraphModel* graphModel, CommandManager* commandManager, SelectionManager* selectionManager) :
     _graphModel(graphModel),
     _selectionManager(selectionManager),
-    _gpuComputeThread(gpuComputeThread),
     _componentRenderers(_graphModel->graph()),
     _graphOverviewScene(new GraphOverviewScene(commandManager, this)),
     _graphComponentScene(new GraphComponentScene(this)),

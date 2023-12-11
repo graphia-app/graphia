@@ -26,7 +26,6 @@
 #include "graph/qmlelementid.h"
 #include "layout/layout.h"
 #include "loading/parserthread.h"
-#include "rendering/compute/gpucomputethread.h"
 #include "rendering/projection.h"
 #include "rendering/shading.h"
 #include "shared/plugins/iplugin.h"
@@ -251,7 +250,6 @@ private:
     std::atomic_bool _layoutRequired;
 
     std::unique_ptr<GraphModel> _graphModel;
-    std::unique_ptr<GPUComputeThread> _gpuComputeThread;
 
     std::unique_ptr<IPluginInstance> _pluginInstance;
     QString _pluginName;

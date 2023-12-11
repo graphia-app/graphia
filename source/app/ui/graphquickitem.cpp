@@ -39,15 +39,11 @@ GraphQuickItem::GraphQuickItem(QQuickItem* parent) :
     setAcceptedMouseButtons(Qt::AllButtons);
 }
 
-void GraphQuickItem::initialise(GraphModel* graphModel,
-                                CommandManager* commandManager,
-                                SelectionManager* selectionManager,
-                                GPUComputeThread* gpuComputeThread)
+void GraphQuickItem::initialise(GraphModel* graphModel, CommandManager* commandManager, SelectionManager* selectionManager)
 {
     _graphModel = graphModel;
     _commandManager = commandManager;
     _selectionManager = selectionManager;
-    _gpuComputeThread = gpuComputeThread;
 
     setFlag(Flag::ItemHasContents, true);
 
@@ -260,11 +256,7 @@ ComponentId GraphQuickItem::focusedComponentId() const
 
 QQuickFramebufferObject::Renderer* GraphQuickItem::createRenderer() const
 {
-    // The compute thread must be initialised where there is a current OpenGL
-    // context available, and this is as good a place as any for that
-    _gpuComputeThread->initialise();
-
-    auto* graphRenderer = new GraphRenderer(_graphModel, _commandManager, _selectionManager, _gpuComputeThread);
+    auto* graphRenderer = new GraphRenderer(_graphModel, _commandManager, _selectionManager);
     connect(this, &GraphQuickItem::commandsStarted, graphRenderer, &GraphRenderer::onCommandsStarted, Qt::DirectConnection);
     connect(this, &GraphQuickItem::commandsFinished, graphRenderer, &GraphRenderer::onCommandsFinished, Qt::DirectConnection);
     connect(this, &GraphQuickItem::commandsFinished, this, &GraphQuickItem::updateRenderer, Qt::DirectConnection);

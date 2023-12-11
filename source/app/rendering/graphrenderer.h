@@ -63,7 +63,6 @@ class GraphQuickItem;
 class GraphModel;
 class CommandManager;
 class SelectionManager;
-class GPUComputeThread;
 class QOpenGLDebugMessage;
 
 class Scene;
@@ -102,10 +101,7 @@ class GraphRenderer :
     friend void initialiseFromGraph<GraphRenderer>(const Graph*, GraphRenderer&);
 
 public:
-    GraphRenderer(GraphModel* graphModel,
-                  CommandManager* commandManager,
-                  SelectionManager* selectionManager,
-                  GPUComputeThread* gpuComputeThread);
+    GraphRenderer(GraphModel* graphModel, CommandManager* commandManager, SelectionManager* selectionManager);
     ~GraphRenderer() override;
 
     ComponentArray<MovablePointer<GraphComponentRenderer>, LockingGraphArray>& componentRenderers()
@@ -180,7 +176,6 @@ private:
 
     PreferencesWatcher _preferencesWatcher;
 
-    GPUComputeThread* _gpuComputeThread = nullptr;
     std::unique_ptr<GlyphMap> _glyphMap;
 
     // Store a copy of the text layout results as its computation is a long running

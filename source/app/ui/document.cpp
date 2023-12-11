@@ -113,10 +113,6 @@ Document::~Document()
 
     // Execute anything pending (primarily to avoid deadlock)
     executeDeferred();
-
-    // This must be called from the main thread before deletion
-    if(_gpuComputeThread != nullptr)
-        _gpuComputeThread->destroySurface();
 }
 
 const IGraphModel* Document::graphModel() const
@@ -587,7 +583,6 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
 
     _graphModel = std::make_unique<GraphModel>(url.fileName(), plugin);
 
-    _gpuComputeThread = std::make_unique<GPUComputeThread>();
     _graphFileParserThread = std::make_unique<ParserThread>(*_graphModel, url);
 
     _selectionManager = std::make_unique<SelectionManager>(*_graphModel);
@@ -922,7 +917,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
     emit layoutNameChanged();
     emit layoutDisplayNameChanged();
 
-    _graphQuickItem->initialise(_graphModel.get(), &_commandManager, _selectionManager.get(), _gpuComputeThread.get());
+    _graphQuickItem->initialise(_graphModel.get(), &_commandManager, _selectionManager.get());
 
     connect(_graphQuickItem, &GraphQuickItem::initialisedChanged, this, &Document::maybeEmitBusyChanged, Qt::QueuedConnection);
     connect(_graphQuickItem, &GraphQuickItem::updatingChanged, this, &Document::maybeEmitBusyChanged, Qt::QueuedConnection);
