@@ -694,6 +694,26 @@ void GraphRendererCore::setShading(Shading shading)
         _shading = shading;
 }
 
+void GraphRendererCore::resizeScreenQuad(int width, int height)
+{
+    auto w = static_cast<GLfloat>(width);
+    auto h = static_cast<GLfloat>(height);
+    GLfloat quadData[] =
+    {
+        0, 0,
+        w, 0,
+        w, h,
+
+        w, h,
+        0, h,
+        0, 0,
+    };
+
+    _screenQuadDataBuffer.bind();
+    _screenQuadDataBuffer.allocate(static_cast<void*>(quadData), static_cast<int>(sizeof(quadData)));
+    _screenQuadDataBuffer.release();
+}
+
 bool GraphRendererCore::resize(int width, int height)
 {
     _width = width;
@@ -717,23 +737,6 @@ bool GraphRendererCore::resize(int width, int height)
         else
             FBOcomplete = false;
     }
-
-    auto w = static_cast<GLfloat>(_width);
-    auto h = static_cast<GLfloat>(_height);
-    GLfloat quadData[] =
-    {
-        0, 0,
-        w, 0,
-        w, h,
-
-        w, h,
-        0, h,
-        0, 0,
-    };
-
-    _screenQuadDataBuffer.bind();
-    _screenQuadDataBuffer.allocate(static_cast<void*>(quadData), static_cast<int>(sizeof(quadData)));
-    _screenQuadDataBuffer.release();
 
     return FBOcomplete;
 }
@@ -994,6 +997,7 @@ void GraphRendererCore::renderToFramebuffer(Flags<Type> type)
         Document::contrastingColorForBackground());
     _outlineShader.release();
 
+    resizeScreenQuad(_width, _height);
     _screenQuadDataBuffer.bind();
     _screenQuadVAO.bind();
 

@@ -199,6 +199,7 @@ protected:
     int width() const { return _width; }
     int height() const { return _height; }
 
+    void resizeScreenQuad(int width, int height);
     bool resize(int width, int height);
 
     GPUGraphData* gpuGraphDataForAlpha(float componentAlpha, float unhighlightAlpha);
