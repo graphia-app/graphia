@@ -118,6 +118,8 @@ jobs:
     name: macOS
     runs-on: macos-13
     steps:
+    - name: Sync Clock
+      run: sudo sntp -sS time.windows.com
     - name: Force Python to version 3.10 to workaround node-gyp install problem (remove later)
       uses: actions/setup-python@v4
       with:
