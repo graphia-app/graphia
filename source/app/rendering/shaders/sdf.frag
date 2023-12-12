@@ -49,8 +49,7 @@ void main()
     vec2 uv = scaledFragCoord / texSize.xy;
 
     const float range = 8.0;
-    // Have to set manually to scaleFactor! (4.0 in this case)
-    const int scalediRange = int(range * 4.0);
+    int scalediRange = int(range * scaleFactor);
     float scaledHalfRange = (range / 2.0) * scaleFactor;
     vec2 startPosition = vec2(scaledFragCoord.x - scaledHalfRange, scaledFragCoord.y - scaledHalfRange);
 
