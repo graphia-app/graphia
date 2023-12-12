@@ -777,10 +777,16 @@ void GraphRendererCore::prepareScreenQuad()
     for(auto* shader : {&_screenShader, &_outlineShader, &_selectionShader})
     {
         shader->bind();
+
         shader->enableAttributeArray("position");
         shader->setAttributeBuffer("position", GL_FLOAT, 0, 2, 2 * sizeof(GLfloat));
-        shader->setUniformValue("frameBufferTexture", 0);
-        shader->setUniformValue("multisamples", _numMultiSamples);
+
+        if(shader->uniformLocation("frameBufferTexture") >= 0)
+            shader->setUniformValue("frameBufferTexture", 0);
+
+        if(shader->uniformLocation("multisamples") >= 0)
+            shader->setUniformValue("multisamples", _numMultiSamples);
+
         shader->release();
     }
 
