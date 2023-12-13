@@ -52,8 +52,6 @@ public:
         _cancelledFn = cancelledFn;
     }
 
-    struct cancelled_exception {};
-
 private:
     friend class boost::iterator_core_access;
 
@@ -66,7 +64,10 @@ private:
             _onPositionChangedFn(_position);
 
         if(_cancelledFn != nullptr && _cancelledFn())
-            throw cancelled_exception();
+        {
+            // Reset the underlying iterator, effectively making it eof
+            this->base_reference() = BaseItType();
+        }
     }
 };
 

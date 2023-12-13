@@ -428,14 +428,8 @@ bool DotFileParser::parse(const QUrl& url, IGraphModel* graphModel)
     setPhase(QObject::tr("Parsing"));
 
     SpiritDotParser::DotGraph dot;
-    bool success = false;
-
-    try
-    {
-        success = SpiritDotParser::x3::phrase_parse(it, end,
-            SpiritDotParser::dotGraph, SpiritDotParser::skipper, dot);
-    }
-    catch(DotIterator::cancelled_exception&) {}
+    const bool success = SpiritDotParser::x3::phrase_parse(it, end,
+        SpiritDotParser::dotGraph, SpiritDotParser::skipper, dot);
 
     if(cancelled() || !success || it != end)
         return false;

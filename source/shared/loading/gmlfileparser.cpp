@@ -334,14 +334,8 @@ bool GmlFileParser::parse(const QUrl& url, IGraphModel* graphModel)
     setPhase(QObject::tr("Parsing"));
 
     SpiritGmlParser::List gml;
-    bool success = false;
-
-    try
-    {
-        success = SpiritGmlParser::x3::phrase_parse(it, end,
-            SpiritGmlParser::gmlList, SpiritGmlParser::ascii::space, gml);
-    }
-    catch(GmlIterator::cancelled_exception&) {}
+    const bool success = SpiritGmlParser::x3::phrase_parse(it, end,
+        SpiritGmlParser::gmlList, SpiritGmlParser::ascii::space, gml);
 
     if(cancelled() || !success || it != end)
         return false;

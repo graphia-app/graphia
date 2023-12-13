@@ -136,7 +136,6 @@ inline json parseJsonFrom(const QByteArray& byteArray, IParser* parser = nullptr
         if(parser != nullptr)
             parser->setFailureReason(QString::fromStdString(e.what()));
     }
-    catch(JSONByteArrayIterator::cancelled_exception&) {}
 
     return result;
 }
