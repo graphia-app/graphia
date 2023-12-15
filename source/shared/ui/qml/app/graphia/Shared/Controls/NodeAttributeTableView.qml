@@ -806,6 +806,8 @@ Item
             {
                 id: tableView
                 anchors.fill: parent
+                bottomMargin: horizontalTableViewScrollBar.visible ?
+                    horizontalTableViewScrollBar.height : 0
 
                 syncDirection: Qt.Horizontal
                 syncView: headerView
