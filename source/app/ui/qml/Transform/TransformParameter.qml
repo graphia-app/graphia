@@ -287,7 +287,7 @@ GridLayout
                 spinBox.from = minimumValue;
             }
             else
-                spinBox.from = -0x7FFFFFFF;
+                spinBox.from = -0x3FFFFFFF;
 
             if(hasMaximumValue)
             {
@@ -297,7 +297,7 @@ GridLayout
                 spinBox.to = maximumValue;
             }
             else
-                spinBox.to = 0x7FFFFFFF;
+                spinBox.to = 0x3FFFFFFF;
 
             spinBox.value = floatValue;
             slider.value = Utils.normalise(root.minimumValue, root.maximumValue, floatValue);
