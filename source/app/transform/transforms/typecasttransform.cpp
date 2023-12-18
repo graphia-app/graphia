@@ -71,12 +71,25 @@ void TypeCastTransform::apply(TransformedGraph&)
     auto cast = [&]<typename E>
     {
         if(type == u"Integer"_s)
-            attribute.setIntValueFn([sourceAttribute](E elementId) { return sourceAttribute->intValueOf(elementId); });
+        {
+            attribute.setIntValueFn([this, sourceAttributeName](E elementId)
+            {
+                return _graphModel->attributeByName(sourceAttributeName)->intValueOf(elementId);
+            });
+        }
         else if(type == u"Float"_s)
-            attribute.setFloatValueFn([sourceAttribute](E elementId) { return sourceAttribute->floatValueOf(elementId); });
+        {
+            attribute.setFloatValueFn([this, sourceAttributeName](E elementId)
+            {
+                return _graphModel->attributeByName(sourceAttributeName)->floatValueOf(elementId);
+            });
+        }
         else if(type == u"String"_s)
         {
-            attribute.setStringValueFn([sourceAttribute](E elementId) { return sourceAttribute->stringValueOf(elementId); })
+            attribute.setStringValueFn([this, sourceAttributeName](E elementId)
+            {
+                return _graphModel->attributeByName(sourceAttributeName)->stringValueOf(elementId);
+            })
                 .setFlag(AttributeFlag::FindShared)
                 .setFlag(AttributeFlag::Searchable);
         }
