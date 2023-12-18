@@ -63,12 +63,6 @@ Control
     {
         id: spinBox
 
-        //FIXME: this is set to avoid the contentItem control escaping the control
-        // bounds, but in that case it overlaps the control decoration. OTOH if
-        // clip is set on contentItem itself then it clips excessively; needs
-        // another look after upgrading to Qt6 widget styles
-        clip: true
-
         width: root.availableWidth
         height: root.availableHeight
 
