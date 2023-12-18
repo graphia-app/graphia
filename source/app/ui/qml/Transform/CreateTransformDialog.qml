@@ -307,6 +307,7 @@ Window
 
                         ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
                         ScrollBar.vertical.policy: ScrollBar.AsNeeded
+                        ScrollBar.vertical.visible: ScrollBar.vertical.size < 1.0 // So that it's invisible to mouse clicks
 
                         contentHeight: parametersLayout.implicitHeight
 
