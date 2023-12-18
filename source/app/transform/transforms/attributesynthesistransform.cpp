@@ -102,7 +102,8 @@ void AttributeSynthesisTransform::apply(TransformedGraph& target)
             for(auto elementId : elementIds)
                 newIntValues[elementId] = newValues[elementId].toInt();
 
-            attribute.setIntValueFn([newIntValues](E elementId) { return newIntValues[elementId]; });
+            attribute.setIntValueFn([newIntValues](E elementId) { return newIntValues[elementId]; })
+                .setFlag(AttributeFlag::AutoRange);
             break;
         }
 
@@ -112,7 +113,8 @@ void AttributeSynthesisTransform::apply(TransformedGraph& target)
             for(auto elementId : elementIds)
                 newFloatValues[elementId] = newValues[elementId].toDouble();
 
-            attribute.setFloatValueFn([newFloatValues](E elementId) { return newFloatValues[elementId]; });
+            attribute.setFloatValueFn([newFloatValues](E elementId) { return newFloatValues[elementId]; })
+                .setFlag(AttributeFlag::AutoRange);
             break;
         }
         }

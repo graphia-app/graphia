@@ -173,6 +173,7 @@ void PageRankTransform::calculatePageRank(TransformedGraph& target)
         .floatRange().setMin(0.0f)
         .floatRange().setMax(1.0f)
         .setFloatValueFn([pageRankScores](NodeId nodeId) { return pageRankScores[nodeId]; })
+        .setFlag(AttributeFlag::AutoRange)
         .setFlag(AttributeFlag::VisualiseByComponent);
 }
 

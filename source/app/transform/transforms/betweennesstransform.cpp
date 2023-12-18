@@ -144,11 +144,13 @@ void BetweennessTransform::apply(TransformedGraph& target)
     _graphModel->createAttribute(QObject::tr("Node Betweenness"))
         .setDescription(QObject::tr("A node's betweenness is the number of shortest paths that pass through it."))
         .setFloatValueFn([nodeBetweenness](NodeId nodeId) { return nodeBetweenness[nodeId]; })
+        .setFlag(AttributeFlag::AutoRange)
         .setFlag(AttributeFlag::VisualiseByComponent);
 
     _graphModel->createAttribute(QObject::tr("Edge Betweenness"))
         .setDescription(QObject::tr("An edge's betweenness is the number of shortest paths that pass through it."))
         .setFloatValueFn([edgeBetweenness](EdgeId edgeId) { return edgeBetweenness[edgeId]; })
+        .setFlag(AttributeFlag::AutoRange)
         .setFlag(AttributeFlag::VisualiseByComponent);
 }
 

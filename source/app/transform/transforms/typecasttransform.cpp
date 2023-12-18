@@ -75,14 +75,16 @@ void TypeCastTransform::apply(TransformedGraph&)
             attribute.setIntValueFn([this, sourceAttributeName](E elementId)
             {
                 return _graphModel->attributeByName(sourceAttributeName)->intValueOf(elementId);
-            });
+            })
+                .setFlag(AttributeFlag::AutoRange);
         }
         else if(type == u"Float"_s)
         {
             attribute.setFloatValueFn([this, sourceAttributeName](E elementId)
             {
                 return _graphModel->attributeByName(sourceAttributeName)->floatValueOf(elementId);
-            });
+            })
+                .setFlag(AttributeFlag::AutoRange);
         }
         else if(type == u"String"_s)
         {

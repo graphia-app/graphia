@@ -69,7 +69,8 @@ void AverageAttributeTransform::apply(TransformedGraph& target)
 
     auto& meanAttribute = _graphModel->createAttribute(meanAttributeName)
         .setDescription(QObject::tr("The mean of %1 for each value of %2.")
-        .arg(sourceAttributeName, sharedValuesAttributeName));
+        .arg(sourceAttributeName, sharedValuesAttributeName))
+        .setFlag(AttributeFlag::AutoRange);
 
     auto setAverageFunction = [&](const auto& elementIds)
     {
