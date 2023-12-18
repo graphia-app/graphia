@@ -58,16 +58,15 @@ void addEdge(IGraphModel* graphModel, IUserEdgeData* userEdgeData,
     }
 }
 
-bool parseAdjacencyMatrix(const TabularData& tabularData,
-    Progressable& progressable, FailureReason& failureReason,
+bool parseAdjacencyMatrix(const TabularData& tabularData, IParser& parser,
     IGraphModel* graphModel, IUserNodeData* userNodeData, IUserEdgeData* userEdgeData,
     double minimumAbsEdgeWeight, bool skipDuplicates)
 {
-    progressable.setProgress(-1);
+    parser.setProgress(-1);
 
     if(tabularData.numRows() == 0 || tabularData.numColumns() == 0)
     {
-        failureReason.setFailureReason(QObject::tr("Matrix is empty."));
+        parser.setFailureReason(QObject::tr("Matrix is empty."));
         return false;
     }
 
@@ -104,7 +103,7 @@ bool parseAdjacencyMatrix(const TabularData& tabularData,
     auto dataWidth = tabularData.numColumns() - dataStartColumn;
     if(dataWidth != dataHeight)
     {
-        failureReason.setFailureReason(QObject::tr("Matrix is not square."));
+        parser.setFailureReason(QObject::tr("Matrix is not square."));
         return false;
     }
 
@@ -151,24 +150,29 @@ bool parseAdjacencyMatrix(const TabularData& tabularData,
             const NodeId targetNodeId = addNode(rowIndex, rowHeader);
             addEdge(graphModel, userEdgeData, sourceNodeId, targetNodeId, edgeWeight, absEdgeWeight, skipDuplicates);
 
-            progressable.setProgress(static_cast<int>((progress++ * 100) / totalIterations));
+            parser.setProgress(static_cast<int>((progress++ * 100) / totalIterations));
+        }
+
+        if(parser.cancelled())
+        {
+            parser.setProgress(-1);
+            return false;
         }
     }
 
-    progressable.setProgress(-1);
+    parser.setProgress(-1);
 
     return true;
 }
 
-bool parseEdgeList(const TabularData& tabularData,
-    Progressable& progressable, FailureReason&,
+bool parseEdgeList(const TabularData& tabularData, IParser& parser,
     IGraphModel* graphModel, IUserNodeData* userNodeData, IUserEdgeData* userEdgeData,
     double minimumAbsEdgeWeight, bool skipDuplicates)
 {
     std::map<QString, NodeId> nodeIdMap;
 
     size_t progress = 0;
-    progressable.setProgress(-1);
+    parser.setProgress(-1);
 
     for(size_t rowIndex = 0; rowIndex < tabularData.numRows(); rowIndex++)
     {
@@ -213,10 +217,16 @@ bool parseEdgeList(const TabularData& tabularData,
 
         addEdge(graphModel, userEdgeData, sourceNodeId, targetNodeId, edgeWeight, absEdgeWeight, skipDuplicates);
 
-        progressable.setProgress(static_cast<int>((progress++ * 100) / tabularData.numRows()));
+        if(parser.cancelled())
+        {
+            parser.setProgress(-1);
+            return false;
+        }
+
+        parser.setProgress(static_cast<int>((progress++ * 100) / tabularData.numRows()));
     }
 
-    progressable.setProgress(-1);
+    parser.setProgress(-1);
 
     return true;
 }
@@ -384,15 +394,13 @@ QmlTabularDataParser::MatrixTypeResult AdjacencyMatrixTabularDataParser::isEdgeL
     return {true, {}};
 }
 
-bool AdjacencyMatrixTabularDataParser::parse(const TabularData& tabularData,
-    Progressable& progressable, FailureReason& failureReason,
+bool AdjacencyMatrixTabularDataParser::parse(const TabularData& tabularData, IParser& parser,
     IGraphModel* graphModel, IUserNodeData* userNodeData, IUserEdgeData* userEdgeData) const
 {
     auto edgeListResult = isEdgeList(tabularData);
     if(edgeListResult)
     {
-        return parseEdgeList(tabularData,
-            progressable, failureReason,
+        return parseEdgeList(tabularData, parser,
             graphModel, userNodeData, userEdgeData,
             _minimumAbsEdgeWeight, _skipDuplicates);
     }
@@ -400,13 +408,12 @@ bool AdjacencyMatrixTabularDataParser::parse(const TabularData& tabularData,
     auto adjacencyMatrixResult = isAdjacencyMatrix(tabularData);
     if(adjacencyMatrixResult)
     {
-        return parseAdjacencyMatrix(tabularData,
-            progressable, failureReason,
+        return parseAdjacencyMatrix(tabularData, parser,
             graphModel, userNodeData, userEdgeData,
             _minimumAbsEdgeWeight, _skipDuplicates);
     }
 
-    failureReason.setFailureReason(tr("Failed to identify matrix type:\n %1\n %2")
+    parser.setFailureReason(tr("Failed to identify matrix type:\n %1\n %2")
         .arg(edgeListResult._reason, adjacencyMatrixResult._reason));
 
     return false;
