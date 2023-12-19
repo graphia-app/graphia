@@ -1209,7 +1209,7 @@ void GraphRenderer::render()
     if(!framebufferObject()->bind())
         qWarning() << "QQuickFrameBufferobject::Renderer FBO not bound";
 
-    renderToFramebuffer();
+    renderToScreen();
 
     QQuickOpenGLUtils::resetOpenGLState();
 

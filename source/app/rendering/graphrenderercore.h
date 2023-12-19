@@ -233,7 +233,7 @@ protected:
         All = Color | Selection
     };
 
-    void renderToFramebuffer(Flags<Type> type = Type::All);
+    void renderToScreen(Flags<Type> type = Type::All);
 
     void renderSdfTexture(const GlyphMap& glyphMap, GLuint texture);
     virtual GLuint sdfTexture() const = 0;

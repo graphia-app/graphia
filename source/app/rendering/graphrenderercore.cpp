@@ -967,7 +967,7 @@ static void render2DComposite(OpenGLFunctions& f, QOpenGLShaderProgram& shader, 
     shader.release();
 }
 
-void GraphRendererCore::renderToFramebuffer(Flags<Type> type)
+void GraphRendererCore::renderToScreen(Flags<Type> type)
 {
     glViewport(0, 0, _width, _height);
 
