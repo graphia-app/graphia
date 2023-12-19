@@ -609,7 +609,7 @@ GPUGraphData* GraphRendererCore::gpuGraphDataForOverlay(float alpha)
 {
     for(auto& gpuGraphData : _gpuGraphData)
     {
-        if(gpuGraphData._isOverlay)
+        if(gpuGraphData._isOverlay && qFuzzyCompare(gpuGraphData._componentAlpha, alpha))
             return &gpuGraphData;
     }
 
