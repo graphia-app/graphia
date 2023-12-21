@@ -39,6 +39,8 @@
 #include "loading/nativesaver.h"
 #include "loading/nativeloader.h"
 
+#include "rendering/openglfunctions.h"
+
 #include "transform/graphtransformconfigparser.h"
 #include "ui/visualisations/visualisationconfigparser.h"
 
@@ -116,6 +118,7 @@ static std::vector<UrlType> urlTypesForPlugins(const std::vector<LoadedPlugin>& 
 
 Application::Application(QObject *parent, bool enableUpdateCheck) :
     QObject(parent),
+    _openGLInfo(OpenGLFunctions::info()),
     _urlTypeDetails(&_loadedPlugins),
     _pluginDetails(&_loadedPlugins)
 {
