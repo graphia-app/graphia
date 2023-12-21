@@ -584,7 +584,7 @@ GPUGraphData* GraphRendererCore::gpuGraphDataForAlpha(float componentAlpha, floa
 {
     for(auto& gpuGraphData : _gpuGraphData)
     {
-        if(gpuGraphData._componentAlpha == componentAlpha && gpuGraphData._unhighlightAlpha == unhighlightAlpha)
+        if(qFuzzyCompare(gpuGraphData._componentAlpha, componentAlpha) && qFuzzyCompare(gpuGraphData._unhighlightAlpha, unhighlightAlpha))
             return &gpuGraphData;
     }
 
