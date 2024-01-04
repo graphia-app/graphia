@@ -20,23 +20,40 @@ in vec2 vPosition;
 
 layout (location = 0) out vec4 fragColor;
 
+#ifdef GL_ES
+uniform sampler2D frameBufferTexture;
+#else
 uniform sampler2DMS frameBufferTexture;
+#endif
+
+uniform int width;
+uniform int height;
 uniform int multisamples;
 uniform vec4 highlightColor;
 uniform float alpha;
 
-vec4 multisampledValue(ivec2 coord)
+#ifdef GL_ES
+vec4 resolvedValue(vec2 coord)
+{
+    vec4 value = texture(frameBufferTexture, coord);
+    value.a *= alpha;
+
+    return value;
+}
+#else
+vec4 resolvedValue(vec2 coord)
 {
     vec4 accumulator = vec4(0.0);
     for(int s = 0; s < multisamples; s++)
     {
-        accumulator += texelFetch(frameBufferTexture, coord, s);
+        accumulator += texelFetch(frameBufferTexture, ivec2(coord), s);
     }
     accumulator /= float(multisamples);
     accumulator.a *= alpha;
 
     return accumulator;
 }
+#endif
 
 void main()
 {
@@ -49,16 +66,25 @@ void main()
               1.0,  0.0, -1.0)
     );
 
+    float pixelWidth = 1.0;
+    float pixelHeight = 1.0;
+
+#ifdef GL_ES
+    pixelWidth /= float(width);
+    pixelHeight /= float(height);
+#endif
+
     // Sobel edge detection
-    ivec2 coord = ivec2(vPosition);
     mat3 I;
     float cnv[2];
 
-    for(int i = 0; i < 3; i++)
+    for(int i = -1; i <= 1; i++)
     {
-        for(int j = 0; j < 3; j++)
+        for(int j = -1; j <= 1; j++)
         {
-            I[i][j] = multisampledValue(coord + ivec2(i - 1, j - 1)).r;
+            vec2 offset = vec2(float(i) * pixelWidth, float(j) * pixelHeight);
+            vec2 offsetPosition = vPosition + offset;
+            I[i + 1][j + 1] = resolvedValue(offsetPosition).r;
         }
     }
 

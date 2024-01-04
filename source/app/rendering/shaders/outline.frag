@@ -20,38 +20,61 @@ in vec2 vPosition;
 
 layout (location = 0) out vec4 fragColor;
 
+#ifdef GL_ES
+uniform sampler2D frameBufferTexture;
+#else
 uniform sampler2DMS frameBufferTexture;
+#endif
+
 uniform int width;
 uniform int height;
 uniform int multisamples;
 uniform vec4 outlineColor;
 uniform float alpha;
 
-// Find the mean of the available samples using a method that avoids integer overflow
-float meanOfMSFor(ivec2 coord, int channel, uint s)
+#ifdef GL_ES
+float meanOfNonZeroMSFor(vec2 coord, int channel)
 {
-    coord.x = clamp(coord.x, 0, width - 1);
-    coord.y = clamp(coord.y, 0, height - 1);
+    return texture(frameBufferTexture, coord)[channel];
+}
+
+float quantOfMSFor(vec2 coord, int channel)
+{
+    return texture(frameBufferTexture, coord)[channel];
+}
+#else
+vec2 clampCoord(vec2 coord)
+{
+    vec2 clamped;
+
+    clamped.x = clamp(coord.x, 0.0, float(width - 1));
+    clamped.y = clamp(coord.y, 0.0, float(height - 1));
+
+    return clamped;
+}
+
+float meanOfMSFor(vec2 coord, int channel, uint s)
+{
+    coord = clampCoord(coord);
 
     float mean = 0.0;
     for(int i = 0; i < multisamples; i++)
     {
-        float v = texelFetch(frameBufferTexture, coord, i)[channel];
+        float v = texelFetch(frameBufferTexture, ivec2(coord), i)[channel];
         mean += (v / float(s));
     }
 
     return mean;
 }
 
-float meanOfNonZeroMSFor(ivec2 coord, int channel)
+float meanOfNonZeroMSFor(vec2 coord, int channel)
 {
-    coord.x = clamp(coord.x, 0, width - 1);
-    coord.y = clamp(coord.y, 0, height - 1);
+    coord = clampCoord(coord);
 
     uint numNonZeroSamples = 0u;
     for(int i = 0; i < multisamples; i++)
     {
-        float v = texelFetch(frameBufferTexture, coord, i)[channel];
+        float v = texelFetch(frameBufferTexture, ivec2(coord), i)[channel];
 
         if(v > 0.0)
             numNonZeroSamples++;
@@ -63,10 +86,9 @@ float meanOfNonZeroMSFor(ivec2 coord, int channel)
     return meanOfMSFor(coord, channel, numNonZeroSamples);
 }
 
-float quantOfMSFor(ivec2 coord, int channel)
+float quantOfMSFor(vec2 coord, int channel)
 {
-    coord.x = clamp(coord.x, 0, width - 1);
-    coord.y = clamp(coord.y, 0, height - 1);
+    coord = clampCoord(coord);
 
     float mean = meanOfMSFor(coord, channel, uint(multisamples));
 
@@ -78,7 +100,7 @@ float quantOfMSFor(ivec2 coord, int channel)
 
     for(int i = 0; i < multisamples; i++)
     {
-        float v = texelFetch(frameBufferTexture, coord, i)[channel];
+        float v = texelFetch(frameBufferTexture, ivec2(coord), i)[channel];
         float diff = v < mean ? mean - v : v - mean;
 
         if(diff < min)
@@ -88,11 +110,20 @@ float quantOfMSFor(ivec2 coord, int channel)
         }
     }
 
-    return texelFetch(frameBufferTexture, coord, qi)[channel];
+    return texelFetch(frameBufferTexture, ivec2(coord), qi)[channel];
 }
+#endif
 
-float edgeStrengthAt(ivec2 coord)
+float edgeStrengthAt(vec2 coord)
 {
+    float pixelWidth = 1.0;
+    float pixelHeight = 1.0;
+
+#ifdef GL_ES
+    pixelWidth /= float(width);
+    pixelHeight /= float(height);
+#endif
+
     float s = quantOfMSFor(coord, 0);
 
     float numDiffPixels = 0.0;
@@ -105,7 +136,9 @@ float edgeStrengthAt(ivec2 coord)
             if(i == 0 && j == 0)
                 continue;
 
-            if(s != quantOfMSFor(coord + ivec2(i, j), 0))
+            vec2 offset = vec2(float(i) * pixelWidth, float(j) * pixelHeight);
+
+            if(s != quantOfMSFor(coord + offset, 0))
                 numDiffPixels += 1.0;
         }
     }
@@ -120,7 +153,9 @@ float edgeStrengthAt(ivec2 coord)
             if(i == 0 && j == 0)
                 continue;
 
-            float p = float(meanOfNonZeroMSFor(coord + ivec2(i, j), 1));
+            vec2 offset = vec2(float(i) * pixelWidth, float(j) * pixelHeight);
+
+            float p = float(meanOfNonZeroMSFor(coord + offset, 1));
 
             if(p > projectionScale)
                 projectionScale = p;
@@ -152,10 +187,6 @@ float edgeStrengthAt(ivec2 coord)
 
 void main()
 {
-    ivec2 coord = ivec2(vPosition);
-    float outlineAlpha = edgeStrengthAt(coord);
-
+    float outlineAlpha = edgeStrengthAt(vPosition);
     fragColor = vec4(outlineColor.rgb, outlineAlpha * alpha);
 }
-
-
