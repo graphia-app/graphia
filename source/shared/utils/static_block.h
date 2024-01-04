@@ -33,7 +33,7 @@ void execute_static_blocks();
 
 #define STATIC_BLOCK_ID_CONCAT(p, l) p ## l // NOLINT cppcoreguidelines-macro-usage
 #define STATIC_BLOCK_ID_EXPAND(p, l) STATIC_BLOCK_ID_CONCAT(p, l) // NOLINT cppcoreguidelines-macro-usage
-#define STATIC_BLOCK_ID STATIC_BLOCK_ID_EXPAND(static_block_,  __COUNTER__) // NOLINT cppcoreguidelines-macro-usage
+#define STATIC_BLOCK_ID STATIC_BLOCK_ID_EXPAND(static_block_, __COUNTER__) // NOLINT cppcoreguidelines-macro-usage
 
 #define STATIC_BLOCK_2(f, c) /* NOLINT cppcoreguidelines-macro-usage */ \
     static void f(); \
