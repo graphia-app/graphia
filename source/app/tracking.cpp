@@ -40,6 +40,7 @@
 #include <QString>
 #include <QStringList>
 #include <QObject>
+#include <QLocale>
 #include <QDebug>
 
 #include <thread>
