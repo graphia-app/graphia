@@ -43,7 +43,10 @@
 #include <QSettings>
 #include <QNetworkProxy>
 #include <QQmlFileSelector>
+
+#if __has_include(<QtWebEngineQuick>)
 #include <QtWebEngineQuick>
+#endif
 
 #include <iostream>
 #include <fstream>
@@ -185,7 +188,9 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
     QQuickWindow::setDefaultAlphaBuffer(true);
     OpenGLFunctions::requestMinimumFormat();
 
+#ifdef QTWEBENGINEQUICK_VERSION
     QtWebEngineQuick::initialize();
+#endif
 
     // Without this setting, rendering artefacts appear on systems with
     // non-integral scaling factors (e.g. using high DPI monitors on Windows)
