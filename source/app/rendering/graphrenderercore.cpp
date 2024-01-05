@@ -845,6 +845,8 @@ void GraphRendererCore::renderGraph()
 {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
     glEnable(GL_MULTISAMPLE);
     glDisable(GL_BLEND);
     glDisable(GL_DITHER);
@@ -903,6 +905,10 @@ void GraphRendererCore::render2D(QRect selectionRect)
     glBindFramebuffer(GL_FRAMEBUFFER, gpuGraphData._fbo);
 
     glDisable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+
     glViewport(0, 0, _width, _height);
 
     QMatrix4x4 m;
