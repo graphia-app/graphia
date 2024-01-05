@@ -492,6 +492,7 @@ static bool copyUpdaterToTemporaryLocation(QString& updaterExeFileName)
 
 bool Updater::showUpdatePrompt(const QStringList& arguments)
 {
+#if QT_CONFIG(process)
     auto updaterExeFileName = Application::resolvedExe(u"Updater"_s);
 
 #ifdef Q_OS_WIN
@@ -515,4 +516,8 @@ bool Updater::showUpdatePrompt(const QStringList& arguments)
     }
 
     return true;
+#else
+    Q_UNUSED(arguments);
+    return false;
+#endif
 }

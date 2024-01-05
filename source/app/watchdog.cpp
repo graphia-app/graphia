@@ -56,6 +56,7 @@ Watchdog::~Watchdog()
 
 void WatchdogWorker::showWarning()
 {
+#if QT_CONFIG(process)
     const QString messageBoxExe = Application::resolvedExe(u"MessageBox"_s);
 
     if(messageBoxExe.isEmpty())
@@ -90,6 +91,7 @@ void WatchdogWorker::showWarning()
 
     std::cerr << "Starting " << messageBoxExe.toStdString() << "\n";
     warningProcess->start(messageBoxExe, arguments);
+#endif
 }
 
 void WatchdogWorker::onReset()
@@ -143,6 +145,7 @@ void WatchdogWorker::startTimer()
     _timer->start(_timeoutDuration);
 }
 
+#if QT_CONFIG(process)
 void WatchdogWorker::onWarningProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
     // Check for a sane exit code and status in case our warning has been killed (by us)
@@ -162,3 +165,4 @@ void WatchdogWorker::onWarningProcessFinished(int exitCode, QProcess::ExitStatus
     else
         std::cerr << "Watchdog warning cancelled; process recovered\n";
 }
+#endif

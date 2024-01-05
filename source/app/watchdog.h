@@ -45,7 +45,9 @@ public slots:
     void onReset();
 
 private slots:
+#if QT_CONFIG(process)
     void onWarningProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
+#endif
 
 signals:
     void reset();

@@ -93,7 +93,7 @@ static QString resolvedExeName(const QString& baseExeName)
 
 static void configureXDG()
 {
-#if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS) && QT_CONFIG(process)
     auto dotDesktopFileContent = QStringLiteral(
         "[Desktop Entry]\n"
         "Name=%1\n"
@@ -528,9 +528,11 @@ int main(int argc, char *argv[])
         }
         else
         {
+#if QT_CONFIG(process)
             std::cerr << "Restarting " << exeName.toStdString() << "...\n";
             if(!QProcess::startDetached(exeName, {}))
                 std::cerr << "  ...failed\n";
+#endif
         }
     }
 
