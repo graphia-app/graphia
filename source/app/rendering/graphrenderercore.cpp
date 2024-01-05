@@ -885,7 +885,9 @@ void GraphRendererCore::renderGraph()
         renderText(gpuGraphData);
     }
 
-    glDisable(GL_SAMPLE_SHADING_ARB);
+    if(hasSampleShading())
+        glDisable(GL_SAMPLE_SHADING_ARB);
+
     glDisable(GL_MULTISAMPLE);
 }
 
