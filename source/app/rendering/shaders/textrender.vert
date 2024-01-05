@@ -35,7 +35,7 @@ uniform sampler2D componentData;
 uniform int componentDataElementSize;
 uniform int componentDataTextureMaxDimension;
 
-uniform sampler2DArray tex;
+uniform mediump sampler2DArray tex;
 
 out vec2 texCoord;
 flat out int texLayer;

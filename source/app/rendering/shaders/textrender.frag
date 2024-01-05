@@ -24,7 +24,7 @@ layout (location = 0) out vec4  outColor;
 layout (location = 1) out vec2  outElement;
 layout (location = 2) out vec4  outSelection;
 
-uniform sampler2DArray tex;
+uniform mediump sampler2DArray tex;
 
 void main()
 {

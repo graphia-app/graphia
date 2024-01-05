@@ -45,7 +45,7 @@ static QString shaderStringFromFile(const QString& filename)
 
     const QSurfaceFormat currentSurfaceFormat = QOpenGLContext::currentContext()->format();
     const QString version = currentSurfaceFormat.renderableType() == QSurfaceFormat::OpenGLES ?
-        u"#version 300 es\nprecision mediump float;\n"_s : u"#version 330 core\n"_s;
+        u"#version 300 es\nprecision mediump float;\n"_s : u"#version 330 core\n#define mediump\n"_s;
 
     return version + contents;
 }
