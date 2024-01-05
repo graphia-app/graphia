@@ -282,8 +282,8 @@ void GPUGraphData::clearDepthbuffer()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 
-    GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT2};
-    glDrawBuffers(2, static_cast<GLenum*>(drawBuffers));
+    GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_NONE, GL_COLOR_ATTACHMENT2};
+    glDrawBuffers(3, static_cast<GLenum*>(drawBuffers));
 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_DEPTH_BUFFER_BIT);
@@ -933,7 +933,8 @@ void GraphRendererCore::render2D(QRect selectionRect)
             static_cast<GLfloat>(color.redF()), static_cast<GLfloat>(color.blueF()), static_cast<GLfloat>(color.greenF()),
         };
 
-        glDrawBuffer(GL_COLOR_ATTACHMENT2);
+        GLenum drawBuffers[] = {GL_NONE, GL_NONE, GL_COLOR_ATTACHMENT2};
+        glDrawBuffers(3, static_cast<GLenum*>(drawBuffers));
 
         _selectionMarkerDataBuffer.bind();
         _selectionMarkerDataBuffer.allocate(quadData.data(), static_cast<int>(quadData.size() * sizeof(GLfloat)));

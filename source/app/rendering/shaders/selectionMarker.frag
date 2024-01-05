@@ -19,7 +19,7 @@
 in vec2 vPosition;
 in vec3 vColor;
 
-layout (location = 0) out vec4 fragColor;
+layout (location = 2) out vec4 fragColor;
 
 void main()
 {
