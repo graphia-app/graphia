@@ -510,7 +510,7 @@ void GraphRendererCore::renderNodes(GPUGraphData& gpuGraphData)
 
     gpuGraphData._sphere.vertexArrayObject()->bind();
     glDrawElementsInstanced(GL_TRIANGLES, gpuGraphData._sphere.glIndexCount(),
-                            GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(gpuGraphData.numNodes()));
+        GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(gpuGraphData.numNodes()));
     gpuGraphData._sphere.vertexArrayObject()->release();
 
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -534,7 +534,7 @@ void GraphRendererCore::renderEdges(GPUGraphData& gpuGraphData)
 
     gpuGraphData._arrow.vertexArrayObject()->bind();
     glDrawElementsInstanced(GL_TRIANGLES, gpuGraphData._arrow.glIndexCount(),
-                            GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(gpuGraphData.numEdges()));
+        GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(gpuGraphData.numEdges()));
     gpuGraphData._arrow.vertexArrayObject()->release();
 
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -568,7 +568,7 @@ void GraphRendererCore::renderText(GPUGraphData& gpuGraphData)
 
     gpuGraphData._rectangle.vertexArrayObject()->bind();
     glDrawElementsInstanced(GL_TRIANGLES, Primitive::Rectangle::glIndexCount(),
-                            GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(gpuGraphData.numGlyphs()));
+        GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(gpuGraphData.numGlyphs()));
     gpuGraphData._rectangle.vertexArrayObject()->release();
 
     glBindTexture(GL_TEXTURE_2D, 0);
