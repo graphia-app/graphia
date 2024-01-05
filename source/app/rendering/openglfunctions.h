@@ -25,13 +25,18 @@
 #include <memory>
 
 // MacOS's glext.h is rubbish
+#if !defined(GL_APIENTRY) && defined(APIENTRY)
+#define GL_APIENTRY APIENTRY
+#define GL_APIENTRYP APIENTRYP
+#endif
+
 #ifndef GL_ARB_sample_shading
 #define GL_ARB_sample_shading 1 // NOLINT cppcoreguidelines-macro-usage
 #define GL_SAMPLE_SHADING_ARB             0x8C36 // NOLINT cppcoreguidelines-macro-usage
 #define GL_MIN_SAMPLE_SHADING_VALUE_ARB   0x8C37 // NOLINT cppcoreguidelines-macro-usage
-typedef void (APIENTRYP PFNGLMINSAMPLESHADINGARBPROC) (GLfloat value); // NOLINT modernize-use-using
+typedef void (GL_APIENTRYP PFNGLMINSAMPLESHADINGARBPROC) (GLfloat value); // NOLINT modernize-use-using
 #ifdef GL_GLEXT_PROTOTYPES
-GLAPI void APIENTRY glMinSampleShadingARB (GLfloat value);
+GLAPI void GL_APIENTRY glMinSampleShadingARB (GLfloat value);
 #endif
 #endif /* GL_ARB_sample_shading */
 
