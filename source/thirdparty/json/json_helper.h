@@ -129,7 +129,11 @@ inline json parseJsonFrom(const QByteArray& byteArray, IParser* parser = nullptr
 
     try
     {
+#ifdef DISABLE_EXCEPTION_THROWING
+        result = json::parse(it, end, nullptr, false);
+#else
         result = json::parse(it, end);
+#endif
     }
     catch(json::parse_error& e)
     {
