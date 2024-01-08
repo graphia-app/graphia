@@ -31,7 +31,7 @@ jobs:
         ref: ${{ github.ref }}
         fetch-depth: 0
     - name: ccache
-      uses: hendrikmuhs/ccache-action@v1.2
+      uses: hendrikmuhs/ccache-action@main
       with:
         key: linux
     - uses: seanmiddleditch/gha-setup-ninja@v3
@@ -77,7 +77,7 @@ jobs:
         ref: ${{ github.ref }}
         fetch-depth: 0
     - name: ccache
-      uses: hendrikmuhs/ccache-action@v1.2
+      uses: hendrikmuhs/ccache-action@main
       with:
         variant: sccache
         key: windows
@@ -136,7 +136,7 @@ jobs:
         ref: ${{ github.ref }}
         fetch-depth: 0
     - name: ccache
-      uses: hendrikmuhs/ccache-action@v1.2
+      uses: hendrikmuhs/ccache-action@main
       with:
         key: macos
     - uses: seanmiddleditch/gha-setup-ninja@v3
@@ -195,7 +195,7 @@ jobs:
         ref: ${{ github.ref }}
         fetch-depth: 0
     - name: ccache
-      uses: hendrikmuhs/ccache-action@v1.2
+      uses: hendrikmuhs/ccache-action@main
       with:
         key: clang-debug
     - uses: seanmiddleditch/gha-setup-ninja@v3
@@ -240,7 +240,7 @@ jobs:
         ref: ${{ github.ref }}
         fetch-depth: 0
     - name: ccache
-      uses: hendrikmuhs/ccache-action@v1.2
+      uses: hendrikmuhs/ccache-action@main
       with:
         variant: sccache
         key: windows-clang
@@ -404,7 +404,7 @@ jobs:
         repository: KDE/clazy
         path: clazy
     - name: ccache
-      uses: hendrikmuhs/ccache-action@v1.2
+      uses: hendrikmuhs/ccache-action@main
       with:
         key: clazy
     - uses: seanmiddleditch/gha-setup-ninja@v3
@@ -486,7 +486,7 @@ jobs:
         ref: clang_${{ env.CLANG_VERSION }}
         path: iwyu
     - name: ccache
-      uses: hendrikmuhs/ccache-action@v1.2
+      uses: hendrikmuhs/ccache-action@main
       with:
         key: iwyu
     - uses: seanmiddleditch/gha-setup-ninja@v3
