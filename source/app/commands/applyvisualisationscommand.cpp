@@ -18,14 +18,14 @@
 
 #include "applyvisualisationscommand.h"
 
-#include <QObject>
-#include <QSet>
-#include <QRegularExpression>
-
 #include "graph/graphmodel.h"
 #include "ui/document.h"
 
 #include "ui/visualisations/visualisationconfigparser.h"
+
+#include <QObject>
+#include <QSet>
+#include <QRegularExpression>
 
 using namespace Qt::Literals::StringLiterals;
 
