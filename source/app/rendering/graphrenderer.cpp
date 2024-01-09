@@ -429,11 +429,13 @@ void GraphRenderer::updateGPUData(GraphRenderer::When when)
 
 void GraphRenderer::onPreviewRequested(int width, int height, bool fillSize)
 {
+    makeContextCurrent();
     _screenshotRenderer->requestPreview(*this, width, height, fillSize);
 }
 
 void GraphRenderer::onScreenshotRequested(int width, int height, const QString& path, int dpi, bool fillSize)
 {
+    makeContextCurrent();
     _screenshotRenderer->requestScreenshot(*this, width, height, path, dpi, fillSize);
 }
 

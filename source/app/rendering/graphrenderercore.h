@@ -39,6 +39,7 @@
 
 class ScreenshotRenderer;
 class GlyphMap;
+class QOpenGLContext;
 
 struct GPUGraphData : OpenGLFunctions
 {
@@ -155,6 +156,8 @@ public:
     ~GraphRendererCore() override;
 
 private:
+    QOpenGLContext* _context = nullptr;
+
     GLint _numMultiSamples = 0;
 
     int _width = 0;
@@ -199,6 +202,8 @@ private:
     void prepare();
 
 protected:
+    bool makeContextCurrent();
+
     int width() const { return _width; }
     int height() const { return _height; }
 

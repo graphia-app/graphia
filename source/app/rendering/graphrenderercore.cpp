@@ -28,6 +28,7 @@
 
 #include <QColor>
 #include <QDir>
+#include <QOpenGLContext>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -396,6 +397,7 @@ void GPUGraphData::copyState(const GPUGraphData& gpuGraphData,
 }
 
 GraphRendererCore::GraphRendererCore() :
+    _context(QOpenGLContext::currentContext()),
     _numMultiSamples(multisamples())
 {
     resolveOpenGLFunctions();
@@ -492,6 +494,11 @@ void GraphRendererCore::bindComponentDataTexture(GLenum textureUnit, QOpenGLShad
     shader.setUniformValue("componentDataTextureMaxDimension",
         static_cast<int>(_componentDataMaxTextureSize));
     shader.setUniformValue("componentData", textureUnit - GL_TEXTURE0);
+}
+
+bool GraphRendererCore::makeContextCurrent()
+{
+    return _context->makeCurrent(_context->surface());
 }
 
 void GraphRendererCore::renderNodes(GPUGraphData& gpuGraphData)
