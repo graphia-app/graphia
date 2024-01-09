@@ -25,14 +25,14 @@
 
 #include <QObject>
 #include <QQuickPaintedItem>
-#include <QVector>
+#include <QList>
 
 class VisualisationMappingPlotItem : public QCustomPlotQuickItem
 {
     Q_OBJECT
 
 public:
-    Q_PROPERTY(QVector<double> values MEMBER _values WRITE setValues)
+    Q_PROPERTY(QList<double> values MEMBER _values WRITE setValues)
     Q_PROPERTY(bool invert MEMBER _invert WRITE setInvert)
     Q_PROPERTY(double exponent MEMBER _exponent WRITE setExponent)
     Q_PROPERTY(double minimum MEMBER _min WRITE setMinimum NOTIFY minimumChanged)
@@ -44,7 +44,7 @@ public:
     Q_INVOKABLE void setRangeToStddev();
 
 private:
-    QVector<double> _values;
+    QList<double> _values;
     u::Statistics _statistics;
 
     bool _invert = false;
@@ -52,7 +52,7 @@ private:
     double _min = 0.0;
     double _max = 1.0;
 
-    void setValues(const QVector<double>& values);
+    void setValues(const QList<double>& values);
     void setInvert(bool invert);
     void setExponent(double exponent);
     void setMinimum(double min);

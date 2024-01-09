@@ -25,7 +25,7 @@
 #include <QObject>
 #include <QAbstractItemModel>
 #include <QString>
-#include <QVector>
+#include <QList>
 
 class ModelCompleter : public QObject
 {
@@ -33,14 +33,14 @@ class ModelCompleter : public QObject
 
     Q_PROPERTY(QAbstractItemModel* model MEMBER _model NOTIFY modelChanged)
     Q_PROPERTY(QString startsWith MEMBER _term NOTIFY termChanged)
-    Q_PROPERTY(QVector<QModelIndex> candidates MEMBER _candidates READ candidates NOTIFY candidatesChanged)
+    Q_PROPERTY(QList<QModelIndex> candidates MEMBER _candidates READ candidates NOTIFY candidatesChanged)
     Q_PROPERTY(QString commonPrefix MEMBER _commonPrefix READ commonPrefix NOTIFY commonPrefixChanged)
     Q_PROPERTY(QModelIndex closestMatch MEMBER _closestMatch READ closestMatch NOTIFY closestMatchChanged)
 
 private:
     QAbstractItemModel* _model = nullptr;
     QString _term;
-    QVector<QModelIndex> _candidates;
+    QList<QModelIndex> _candidates;
     QString _commonPrefix;
     QModelIndex _closestMatch;
 

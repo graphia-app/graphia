@@ -29,6 +29,8 @@
 
 #include "shared/graph/grapharray.h"
 
+#include <QList>
+
 #include <memory>
 
 // This implements some basic functionality that will be common to plugins
@@ -41,7 +43,7 @@ class BaseGenericPluginInstance : public BasePluginInstance
     Q_PROPERTY(QString selectedNodeNames READ selectedNodeNames NOTIFY selectedNodeNamesChanged)
     Q_PROPERTY(QAbstractTableModel* nodeAttributeTableModel READ nodeAttributeTableModel CONSTANT)
 
-    Q_PROPERTY(QVector<int> highlightedRows MEMBER _highlightedRows
+    Q_PROPERTY(QList<int> highlightedRows MEMBER _highlightedRows
         WRITE setHighlightedRows NOTIFY highlightedRowsChanged)
 
 private:
@@ -75,13 +77,13 @@ public:
 
 private:
     // The rows that are selected in the table view
-    QVector<int> _highlightedRows;
+    QList<int> _highlightedRows;
 
     void initialise(const IPlugin* plugin, IDocument* document,
                     const IParserThread* parserThread) override;
 
     QString selectedNodeNames() const;
-    void setHighlightedRows(const QVector<int>& highlightedRows);
+    void setHighlightedRows(const QList<int>& highlightedRows);
 
 private slots:
     void onLoadSuccess();

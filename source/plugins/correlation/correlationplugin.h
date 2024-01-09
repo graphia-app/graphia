@@ -42,7 +42,7 @@
 
 #include <QString>
 #include <QStringList>
-#include <QVector>
+#include <QList>
 #include <QVariantList>
 #include <QVariantMap>
 #include <QColor>
@@ -64,7 +64,7 @@ class CorrelationPluginInstance : public BasePluginInstance
     Q_PROPERTY(QStringList numericalAttributeNames READ numericalAttributeNames
         NOTIFY numericalAttributeNamesChanged)
 
-    Q_PROPERTY(QVector<int> highlightedRows MEMBER _highlightedRows
+    Q_PROPERTY(QList<int> highlightedRows MEMBER _highlightedRows
         WRITE setHighlightedRows NOTIFY highlightedRowsChanged)
 
     Q_PROPERTY(size_t numContinuousColumns MEMBER _numContinuousColumns NOTIFY numColumnsChanged)
@@ -128,7 +128,7 @@ private:
     QString _correlationAbsAttributeName;
 
     // The rows that are selected in the table view
-    QVector<int> _highlightedRows;
+    QList<int> _highlightedRows;
 
     void initialise(const IPlugin* plugin, IDocument* document,
                     const IParserThread* parserThread) override;
@@ -146,7 +146,7 @@ private:
     const ContinuousDataVector& continuousDataRowForNodeId(NodeId nodeId) const;
     const DiscreteDataVector& discreteDataRowForNodeId(NodeId nodeId) const;
 
-    void setHighlightedRows(const QVector<int>& highlightedRows);
+    void setHighlightedRows(const QList<int>& highlightedRows);
 
     QStringList sharedValuesAttributeNames() const;
     QStringList numericalAttributeNames() const;
