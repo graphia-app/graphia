@@ -1062,10 +1062,10 @@ void GraphRendererCore::renderToScreen(Flags<Type> type)
     _screenQuadVAO.release();
 }
 
-void GraphRendererCore::renderSdfTexture(const GlyphMap& glyphMap, GLuint texture)
+QSize GraphRendererCore::renderSdfTexture(const GlyphMap& glyphMap, GLuint texture)
 {
     if(glyphMap.images().empty())
-        return;
+        return {0, 0};
 
     const auto scaleFactor = 4;
     const auto sourceWidth = glyphMap.images().at(0).width();
@@ -1160,4 +1160,6 @@ void GraphRendererCore::renderSdfTexture(const GlyphMap& glyphMap, GLuint textur
     _sdfShader.release();
 
     glDeleteFramebuffers(1, &fbo);
+
+    return {renderWidth, renderHeight};
 }

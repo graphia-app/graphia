@@ -240,7 +240,7 @@ protected:
 
     void renderToScreen(Flags<Type> type = Type::All);
 
-    void renderSdfTexture(const GlyphMap& glyphMap, GLuint texture);
+    QSize renderSdfTexture(const GlyphMap& glyphMap, GLuint texture);
     virtual GLuint sdfTexture() const = 0;
 };
 

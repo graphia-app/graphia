@@ -50,6 +50,7 @@
 #include <QImage>
 #include <QPixmap>
 #include <QPainter>
+#include <QSize>
 
 #include <functional>
 #include <memory>
@@ -221,6 +222,7 @@ private:
     GLuint _colorTexture = 0;
 
     DoubleBufferedTexture _sdfTexture;
+    QSize _sdfTextureSize;
 
     std::mutex _initialisationMutex;
 
@@ -251,6 +253,7 @@ private:
     std::unique_ptr<ScreenshotRenderer> _screenshotRenderer;
 
     GLuint sdfTexture() const override;
+    QSize sdfTextureSize() const;
     void swapSdfTexture();
 
     void updateText();

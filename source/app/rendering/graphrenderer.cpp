@@ -922,6 +922,11 @@ GLuint GraphRenderer::sdfTexture() const
     return _sdfTexture.front();
 }
 
+QSize GraphRenderer::sdfTextureSize() const
+{
+    return _sdfTextureSize;
+}
+
 void GraphRenderer::updateText()
 {
     const std::unique_lock<std::recursive_mutex> lock(_glyphMap->mutex());
@@ -944,7 +949,7 @@ void GraphRenderer::updateText()
 
         executeOnRendererThread([this]
         {
-            renderSdfTexture(*_glyphMap, _sdfTexture.back());
+            _sdfTextureSize = renderSdfTexture(*_glyphMap, _sdfTexture.back());
             _sdfTexture.swap();
             _textLayoutResults = _glyphMap->results();
 
