@@ -733,7 +733,7 @@ bool GraphRendererCore::resize(int width, int height)
 
     if(width > 0 && height > 0)
     {
-        setupTexture(this, _depthTexture, width, height, GL_DEPTH_COMPONENT32, _numMultiSamples);
+        setupTexture(this, _depthTexture, width, height, GL_DEPTH_COMPONENT32F, _numMultiSamples);
 
         if(!_gpuGraphData.empty())
         {
