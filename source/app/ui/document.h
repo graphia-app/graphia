@@ -541,7 +541,7 @@ public:
         const QString& extension = u"csv"_s, const QStringList& columnHeaders = {});
 
     Q_INVOKABLE void copyTableModelColumnToClipboard(QAbstractItemModel* model,
-        int column, const QVector<int>& rows);
+        int column, const QList<int>& rows);
 
     Q_INVOKABLE void addBookmark(const QString& name);
     Q_INVOKABLE void removeBookmarks(const QStringList& names);
