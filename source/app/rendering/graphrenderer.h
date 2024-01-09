@@ -47,14 +47,14 @@
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLShaderProgram>
 #include <QQuickFramebufferObject>
+#include <QImage>
+#include <QPixmap>
+#include <QPainter>
 
 #include <functional>
 #include <memory>
 #include <atomic>
 #include <vector>
-#include <QImage>
-#include <QPixmap>
-#include <QPainter>
 #include <array>
 #include <queue>
 
