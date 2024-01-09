@@ -144,7 +144,7 @@ void ScreenshotRenderer::render()
 
     // Bind to screenshot FBO
     glBindFramebuffer(GL_FRAMEBUFFER, _screenshotFBO);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _screenshotTex, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _screenshotTex, 0);
 
     GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0};
     glDrawBuffers(1, static_cast<GLenum*>(drawBuffers));
