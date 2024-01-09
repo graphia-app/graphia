@@ -27,6 +27,8 @@
 #include <QSet>
 #include <QRegularExpression>
 
+#include <utility>
+
 using namespace Qt::Literals::StringLiterals;
 
 ApplyVisualisationsCommand::ApplyVisualisationsCommand(GraphModel* graphModel,
@@ -58,7 +60,7 @@ QString ApplyVisualisationsCommand::debugDescription() const
 
     auto text = description();
 
-    for(const auto& visualisation : diff)
+    for(const auto& visualisation : std::as_const(diff))
         text.append(u"\n  %1"_s.arg(visualisation));
 
     return text;

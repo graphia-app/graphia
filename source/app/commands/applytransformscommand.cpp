@@ -25,6 +25,7 @@
 #include <QSet>
 
 #include <algorithm>
+#include <utility>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -64,7 +65,7 @@ QString ApplyTransformsCommand::debugDescription() const
 
     auto text = description();
 
-    for(const auto& transform : diff)
+    for(const auto& transform : std::as_const(diff))
         text.append(u"\n  %1"_s.arg(transform));
 
     return text;
