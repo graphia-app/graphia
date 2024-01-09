@@ -273,12 +273,11 @@ bool ScreenshotRenderer::copyState(const GraphRenderer& renderer)
 
     glBindFramebuffer(GL_FRAMEBUFFER, textureFBO);
 
-    int renderWidth = 0;
-    int renderHeight = 0;
-
     glBindTexture(GL_TEXTURE_2D_ARRAY, renderer.sdfTexture());
-    glGetTexLevelParameteriv(GL_TEXTURE_2D_ARRAY, 0, GL_TEXTURE_WIDTH, &renderWidth);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D_ARRAY, 0, GL_TEXTURE_HEIGHT, &renderHeight);
+
+    const auto sdfTextureSize = renderer.sdfTextureSize();
+    const int renderWidth = sdfTextureSize.width();
+    const int renderHeight = sdfTextureSize.height();
 
     if(!renderer._glyphMap->images().empty())
     {
