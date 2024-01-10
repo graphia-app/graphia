@@ -926,7 +926,7 @@ void GraphRendererCore::render2D(QRect selectionRect)
     glViewport(0, 0, _width, _height);
 
     QMatrix4x4 m;
-    m.ortho(0.0f, static_cast<float>(_width), 0.0f, static_cast<float>(_height), -1.0f, 1.0f);
+    m.ortho(0, static_cast<float>(_width), 0, static_cast<float>(_height), -1.0f, 1.0f);
 
     if(!selectionRect.isNull())
     {
@@ -1005,7 +1005,12 @@ void GraphRendererCore::renderToScreen(Flags<Type> type)
     glDisable(GL_DEPTH_TEST);
 
     QMatrix4x4 m;
-    m.ortho(0, static_cast<float>(_width), 0, static_cast<float>(_height), -1.0f, 1.0f);
+
+#ifdef OPENGL_ES
+    m.ortho(0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f);
+#else
+    m.ortho(0.0f, static_cast<float>(_width), 0.0f, static_cast<float>(_height), -1.0f, 1.0f);
+#endif
 
     glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ZERO, GL_ONE);
     glEnable(GL_BLEND);
