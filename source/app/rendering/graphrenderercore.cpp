@@ -443,17 +443,19 @@ GraphRendererCore::GraphRendererCore() :
 {
     resolveOpenGLFunctions();
 
-    GLint maxSamples = 0;
-
+#ifndef OPENGL_ES
     // We need to use the minimum of GL_MAX_COLOR_TEXTURE_SAMPLES,
     // and GL_MAX_DEPTH_TEXTURE_SAMPLES for our sample count as we
     // use the textures in an FBO, where the sample counts for
     // each attachment must be the same
 
+    GLint maxSamples = 0;
+
     glGetIntegerv(GL_MAX_COLOR_TEXTURE_SAMPLES, &maxSamples);
     _numMultiSamples = std::min(maxSamples, _numMultiSamples);
     glGetIntegerv(GL_MAX_DEPTH_TEXTURE_SAMPLES, &maxSamples);
     _numMultiSamples = std::min(maxSamples, _numMultiSamples);
+#endif
 
     ShaderTools::loadShaderProgram(_screenShader, u":/shaders/screen.vert"_s, u":/shaders/screen.frag"_s);
     ShaderTools::loadShaderProgram(_outlineShader, u":/shaders/screen.vert"_s, u":/shaders/outline.frag"_s);
@@ -897,9 +899,12 @@ void GraphRendererCore::renderGraph()
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
-    glEnable(GL_MULTISAMPLE);
     glDisable(GL_BLEND);
     glDisable(GL_DITHER);
+
+#ifndef OPENGL_ES
+    glEnable(GL_MULTISAMPLE);
+#endif
 
     if(hasSampleShading())
     {
@@ -940,7 +945,9 @@ void GraphRendererCore::renderGraph()
     if(hasSampleShading())
         glDisable(GL_SAMPLE_SHADING_ARB);
 
+#ifndef OPENGL_ES
     glDisable(GL_MULTISAMPLE);
+#endif
 }
 
 void GraphRendererCore::render2D(QRect selectionRect)
