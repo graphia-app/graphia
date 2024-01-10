@@ -56,23 +56,22 @@ list(APPEND RESOURCES
     ${CMAKE_CURRENT_LIST_DIR}/ui/correlation_qml.qrc
 )
 
-add_library(${PluginName} SHARED ${SOURCES} ${HEADERS} ${RESOURCES})
+qt_add_library(${PluginName} SHARED ${SOURCES} ${HEADERS} ${RESOURCES})
 
 if(NOT APPLE AND NOT MSVC)
     install(TARGETS ${PluginName} LIBRARY DESTINATION lib/${PROJECT_NAME}/plugins)
 endif()
 
-target_link_libraries(${PluginName} thirdparty shared)
+target_link_libraries(${PluginName} PRIVATE thirdparty shared)
 
-find_package(Qt6 COMPONENTS REQUIRED Core Concurrent Qml Quick QuickControls2 OpenGL PrintSupport Svg Widgets Xml)
-target_link_libraries(${PluginName}
+find_package(Qt6 COMPONENTS REQUIRED Core Concurrent Qml Quick QuickControls2 OpenGL Svg Widgets Xml)
+target_link_libraries(${PluginName} PRIVATE
     Qt6::Core
     Qt6::Concurrent
     Qt6::Qml
     Qt6::Quick
     Qt6::QuickControls2
     Qt6::OpenGL
-    Qt6::PrintSupport
     Qt6::Svg
     Qt6::Widgets
     Qt6::Xml

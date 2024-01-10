@@ -17,11 +17,11 @@ list(APPEND RESOURCES
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 if(MSVC)
-  add_executable(MessageBox WIN32 ${SOURCES} ${HEADERS} ${RESOURCES})
+  qt_add_executable(MessageBox WIN32 ${SOURCES} ${HEADERS} ${RESOURCES})
 else()
-  add_executable(MessageBox ${SOURCES} ${HEADERS} ${RESOURCES})
+  qt_add_executable(MessageBox ${SOURCES} ${HEADERS} ${RESOURCES})
   install(TARGETS MessageBox RUNTIME DESTINATION bin)
 endif()
 
 find_package(Qt6 COMPONENTS REQUIRED Widgets)
-target_link_libraries(MessageBox Qt6::Widgets)
+target_link_libraries(MessageBox PRIVATE Qt6::Widgets)

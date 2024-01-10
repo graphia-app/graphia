@@ -25,14 +25,15 @@ list(APPEND RESOURCES
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 if(MSVC)
-    add_executable(Updater WIN32 ${SOURCES} ${HEADERS} ${RESOURCES})
+    qt_add_executable(Updater WIN32 ${SOURCES} ${HEADERS} ${RESOURCES})
 else()
-    add_executable(Updater ${SOURCES} ${HEADERS} ${RESOURCES})
+    qt_add_executable(Updater ${SOURCES} ${HEADERS} ${RESOURCES})
     install(TARGETS Updater RUNTIME DESTINATION bin)
 endif()
 
-find_package(Qt6 COMPONENTS REQUIRED Qml Quick QuickControls2 Xml Widgets)
-target_link_libraries(Updater
+find_package(Qt6 COMPONENTS REQUIRED Concurrent Qml Quick QuickControls2 Xml Widgets)
+target_link_libraries(Updater PRIVATE
+    Qt6::Concurrent
     Qt6::Qml
     Qt6::Quick
     Qt6::QuickControls2
@@ -40,4 +41,4 @@ target_link_libraries(Updater
     Qt6::Widgets
 )
 
-target_link_libraries(Updater shared)
+target_link_libraries(Updater PRIVATE shared)

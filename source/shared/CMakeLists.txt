@@ -195,18 +195,19 @@ set(QML_IMPORT_PATH "${QML_IMPORT_PATH};${CMAKE_CURRENT_LIST_DIR}/ui/qml/" PAREN
 
 list(APPEND SOURCES ${SHARED_SOURCES})
 
-add_library(shared STATIC ${SOURCES} ${HEADERS} ${RESOURCES})
+qt_add_library(shared STATIC ${SOURCES} ${HEADERS} ${RESOURCES})
 
-find_package(Qt6 COMPONENTS REQUIRED Concurrent Qml Widgets Xml)
-target_link_libraries(shared
+find_package(Qt6 COMPONENTS REQUIRED Concurrent Qml Quick Widgets Xml)
+target_link_libraries(shared PRIVATE
     Qt6::Concurrent
     Qt6::Qml
+    Qt6::Quick
     Qt6::Widgets
     Qt6::Xml
 )
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
-target_link_libraries(shared Threads::Threads)
+target_link_libraries(shared PRIVATE Threads::Threads)
 
-target_link_libraries(shared thirdparty thirdparty_static)
+target_link_libraries(shared PRIVATE thirdparty thirdparty_static)

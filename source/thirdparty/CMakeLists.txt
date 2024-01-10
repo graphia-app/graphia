@@ -28,12 +28,12 @@ if(MSVC)
     endif()
 endif()
 
-add_library(thirdparty_static STATIC
+qt_add_library(thirdparty_static STATIC
     ${STATIC_THIRDPARTY_SOURCES}
     ${STATIC_THIRDPARTY_HEADERS}
     ${STATIC_THIRDPARTY_RESOURCES})
 
-add_library(thirdparty SHARED
+qt_add_library(thirdparty SHARED
     ${SHARED_THIRDPARTY_SOURCES}
     ${SHARED_THIRDPARTY_HEADERS}
     ${SHARED_THIRDPARTY_RESOURCES})
@@ -61,14 +61,14 @@ if(MSVC)
     string(REPLACE "${VC_ANALYZE_FLAGS}" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
     # Required by HDF5
-    target_link_libraries(thirdparty shlwapi.lib)
+    target_link_libraries(thirdparty PRIVATE shlwapi.lib)
 else()
     set_target_properties(thirdparty PROPERTIES COMPILE_FLAGS "-w")
     set_target_properties(thirdparty_static PROPERTIES COMPILE_FLAGS "-w")
 endif()
 
 find_package(Qt6 COMPONENTS REQUIRED Core Qml Quick QuickControls2 Network Widgets PrintSupport)
-target_link_libraries(thirdparty
+target_link_libraries(thirdparty PRIVATE
     Qt6::Core
     Qt6::Qml
     Qt6::Quick
@@ -77,16 +77,12 @@ target_link_libraries(thirdparty
     Qt6::Widgets
     Qt6::PrintSupport
 )
-target_link_libraries(thirdparty_static
+target_link_libraries(thirdparty_static PRIVATE
     Qt6::Core
     Qt6::Qml
     Qt6::Widgets
 )
 
-if(APPLE)
-    target_link_libraries(thirdparty "-framework CoreFoundation")
-elseif(MSVC)
-    #NOP
-else()
+if(UNIX AND NOT APPLE)
     install(TARGETS thirdparty LIBRARY DESTINATION lib)
 endif()

@@ -316,16 +316,16 @@ if(APPLE)
     set(ICON ${CMAKE_CURRENT_LIST_DIR}/icon/Icon.icns)
     set_source_files_properties(${ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 
-    add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${RESOURCES} ${ICON})
+    qt_add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${RESOURCES} ${ICON})
 
     set_target_properties(${PROJECT_NAME} PROPERTIES
         MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/misc/MacOSXBundleInfo.plist.in)
 elseif(MSVC)
     set(ICON ${CMAKE_CURRENT_LIST_DIR}/icon/Icon.rc)
 
-    add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${HEADERS} ${RESOURCES} ${ICON})
+    qt_add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${HEADERS} ${RESOURCES} ${ICON})
 else()
-    add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${RESOURCES})
+    qt_add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${RESOURCES})
     install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
 
     foreach(RESOLUTION 1024x1024 512x512 256x256 128x128 64x64 48x48 32x32 16x16)
@@ -358,17 +358,16 @@ elseif(MSVC)
     file(APPEND ${PROJECT_BINARY_DIR}/variables.bat "SET \"NATIVE_EXTENSION=${NativeExtension}\"\n")
 endif()
 
-target_link_libraries(${PROJECT_NAME} thirdparty_static thirdparty shared)
+target_link_libraries(${PROJECT_NAME} PRIVATE thirdparty_static thirdparty shared)
 
-find_package(Qt6 COMPONENTS REQUIRED Concurrent Core Qml Quick QuickControls2 OpenGL Svg PrintSupport Widgets Xml Network WebEngineQuick)
-target_link_libraries(${PROJECT_NAME}
+find_package(Qt6 COMPONENTS REQUIRED Concurrent Core Qml Quick QuickControls2 OpenGL Svg Widgets Xml Network WebEngineQuick)
+target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::Core
     Qt6::Concurrent
     Qt6::Qml
     Qt6::Quick
     Qt6::QuickControls2
     Qt6::OpenGL
-    Qt6::PrintSupport
     Qt6::Svg
     Qt6::Widgets
     Qt6::Xml
@@ -377,14 +376,10 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 find_package(OpenGL REQUIRED)
-target_link_libraries(${PROJECT_NAME} ${OPENGL_gl_LIBRARY})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${OPENGL_gl_LIBRARY})
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
-target_link_libraries(${PROJECT_NAME} Threads::Threads)
-
-if(APPLE)
-    target_link_libraries(${PROJECT_NAME} "-framework CoreFoundation")
-endif()
+target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
 
 add_definitions(-DQCUSTOMPLOT_USE_LIBRARY)

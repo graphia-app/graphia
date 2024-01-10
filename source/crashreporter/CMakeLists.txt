@@ -26,31 +26,29 @@ list(APPEND RESOURCES
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 if(MSVC)
-    add_executable(CrashReporter WIN32 ${SOURCES} ${HEADERS} ${RESOURCES})
+    qt_add_executable(CrashReporter WIN32 ${SOURCES} ${HEADERS} ${RESOURCES})
 else()
-    add_executable(CrashReporter ${SOURCES} ${HEADERS} ${RESOURCES})
+    qt_add_executable(CrashReporter ${SOURCES} ${HEADERS} ${RESOURCES})
     install(TARGETS CrashReporter RUNTIME DESTINATION bin)
 endif()
 
-find_package(Qt6 COMPONENTS REQUIRED Qml Quick QuickControls2 OpenGL Xml Network)
-target_link_libraries(CrashReporter
+find_package(Qt6 COMPONENTS REQUIRED Concurrent Qml Quick QuickControls2 OpenGL Xml Network Widgets)
+target_link_libraries(CrashReporter PRIVATE
+    Qt6::Concurrent
     Qt6::Qml
     Qt6::Quick
     Qt6::QuickControls2
     Qt6::OpenGL
     Qt6::Xml
     Qt6::Network
+    Qt6::Widgets
 )
 
 find_package(OpenGL REQUIRED)
-target_link_libraries(CrashReporter ${OPENGL_gl_LIBRARY})
+target_link_libraries(CrashReporter PRIVATE ${OPENGL_gl_LIBRARY})
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
-target_link_libraries(CrashReporter Threads::Threads)
+target_link_libraries(CrashReporter PRIVATE Threads::Threads)
 
-if(APPLE)
-    target_link_libraries(CrashReporter "-framework CoreFoundation")
-endif()
-
-target_link_libraries(CrashReporter thirdparty_static shared)
+target_link_libraries(CrashReporter PRIVATE thirdparty_static shared)
