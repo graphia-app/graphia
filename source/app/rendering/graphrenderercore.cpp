@@ -32,15 +32,20 @@
 
 using namespace Qt::Literals::StringLiterals;
 
+#ifdef OPENGL_ES
+static const auto GL_TEXTURE_2D_ = GL_TEXTURE_2D;
+#else
+static const auto GL_TEXTURE_2D_ = GL_TEXTURE_2D_MULTISAMPLE;
+#endif
+
 template<typename T>
 void setupTexture(T t, GLuint& texture, int width, int height, GLint format, int numMultiSamples)
 {
     if(texture == 0)
         t->glGenTextures(1, &texture);
-    t->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texture);
-    t->glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE,
-        numMultiSamples, format, width, height, GL_FALSE);
-    t->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+    t->glBindTexture(GL_TEXTURE_2D_, texture);
+    t->glTexImage2DMultisample(GL_TEXTURE_2D_, numMultiSamples, format, width, height, GL_FALSE);
+    t->glBindTexture(GL_TEXTURE_2D_, 0);
 }
 
 GPUGraphData::GPUGraphData()
@@ -241,10 +246,10 @@ bool GPUGraphData::prepareRenderBuffers(int width, int height, GLuint depthTextu
     if(_fbo == 0)
         glGenFramebuffers(1, &_fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, _colorTexture, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D_MULTISAMPLE, _elementTexture, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D_MULTISAMPLE, _selectionTexture, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,  GL_TEXTURE_2D_MULTISAMPLE, depthTexture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_, _colorTexture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D_, _elementTexture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D_, _selectionTexture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,  GL_TEXTURE_2D_, depthTexture, 0);
 
     const GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     const bool fboValid = (status == GL_FRAMEBUFFER_COMPLETE);
@@ -980,7 +985,7 @@ static void render2DComposite(OpenGLFunctions& f, QOpenGLShaderProgram& shader, 
     shader.setUniformValue("alpha", alpha);
     shader.setUniformValue("disableAlphaBlending", disableAlphaBlending ? 1 : 0);
     f.glActiveTexture(GL_TEXTURE0);
-    f.glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texture);
+    f.glBindTexture(GL_TEXTURE_2D_, texture);
     f.glDrawArrays(GL_TRIANGLES, 0, 6);
     shader.release();
 }
