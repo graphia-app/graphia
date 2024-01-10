@@ -50,9 +50,16 @@ QSurfaceFormat OpenGLFunctions::minimumFormat()
 {
     QSurfaceFormat format;
 
+#ifdef OPENGL_ES
+    format.setRenderableType(QSurfaceFormat::OpenGLES);
+    format.setMajorVersion(3);
+    format.setMinorVersion(0);
+#else
+    format.setRenderableType(QSurfaceFormat::OpenGL);
+    format.setProfile(QSurfaceFormat::CoreProfile);
     format.setMajorVersion(3);
     format.setMinorVersion(3);
-    format.setProfile(QSurfaceFormat::CoreProfile);
+#endif
 
     return format;
 }

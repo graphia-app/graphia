@@ -19,7 +19,12 @@
 #ifndef OPENGLFUNCTIONS_H
 #define OPENGLFUNCTIONS_H
 
+#ifdef OPENGL_ES
+#include <QOpenGLFunctions_ES2>
+#else
 #include <QOpenGLFunctions_3_3_Core>
+#endif
+
 #include <QString>
 
 #include <memory>
@@ -40,7 +45,11 @@ GLAPI void GL_APIENTRY glMinSampleShadingARB (GLfloat value);
 #endif
 #endif /* GL_ARB_sample_shading */
 
+#ifdef OPENGL_ES
+class OpenGLFunctions : public QOpenGLFunctions_ES2
+#else
 class OpenGLFunctions : public QOpenGLFunctions_3_3_Core
+#endif
 {
 public:
     void resolveOpenGLFunctions();
