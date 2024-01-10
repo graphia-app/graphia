@@ -38,15 +38,51 @@ static const auto GL_TEXTURE_2D_ = GL_TEXTURE_2D;
 static const auto GL_TEXTURE_2D_ = GL_TEXTURE_2D_MULTISAMPLE;
 #endif
 
-template<typename T>
-void setupTexture(T t, GLuint& texture, int width, int height, GLint format, int numMultiSamples)
+namespace
+{
+#ifdef OPENGL_ES
+struct TextureFormatAndType
+{
+    GLenum _format = 0;
+    GLenum _type = 0;
+};
+
+TextureFormatAndType textureFormatAndTypeFor(GLint internalFormat)
+{
+    TextureFormatAndType tfat;
+
+    switch(internalFormat)
+    {
+    case GL_RGBA:               tfat = {GL_RGBA, GL_UNSIGNED_BYTE};     break;
+    case GL_RG32F:              tfat = {GL_RG, GL_FLOAT};               break;
+    case GL_DEPTH_COMPONENT32F: tfat = {GL_DEPTH_COMPONENT, GL_FLOAT};  break;
+
+    default: qFatal("Unhandled OpenGL internal format");
+    }
+
+    return tfat;
+}
+#endif
+
+void setupTexture(OpenGLFunctions* t, GLuint& texture, int width, int height, GLint internalFormat, int numMultiSamples)
 {
     if(texture == 0)
         t->glGenTextures(1, &texture);
+
     t->glBindTexture(GL_TEXTURE_2D_, texture);
-    t->glTexImage2DMultisample(GL_TEXTURE_2D_, numMultiSamples, format, width, height, GL_FALSE);
+
+#ifdef OPENGL_ES
+    Q_UNUSED(numMultiSamples);
+    auto tfat = textureFormatAndTypeFor(internalFormat);
+    t->glTexImage2D(GL_TEXTURE_2D_, 0, internalFormat, width, height, 0, tfat._format, tfat._type, nullptr);
+    t->glTexParameteri(GL_TEXTURE_2D_, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+#else
+    t->glTexImage2DMultisample(GL_TEXTURE_2D_, numMultiSamples, internalFormat, width, height, GL_FALSE);
+#endif
+
     t->glBindTexture(GL_TEXTURE_2D_, 0);
 }
+} // namespace
 
 GPUGraphData::GPUGraphData()
 {
