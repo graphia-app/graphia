@@ -773,7 +773,9 @@ void GraphRendererCore::prepareScreenQuad()
 
     _screenQuadVAO.bind();
 
-    _screenQuadDataBuffer.create();
+    if(!_screenQuadDataBuffer.isCreated())
+        _screenQuadDataBuffer.create();
+
     _screenQuadDataBuffer.bind();
     _screenQuadDataBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
 
