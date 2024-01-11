@@ -1081,6 +1081,7 @@ void GraphRendererCore::renderSdfTexture(const GlyphMap& glyphMap, GLuint textur
     _screenQuadVAO.bind();
 
     glEnable(GL_BLEND);
+    glDisable(GL_CULL_FACE);
     glDepthMask(GL_FALSE);
 
     GLuint fbo = 0u;
