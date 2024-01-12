@@ -17,6 +17,20 @@
  */
 
 #include "crashhandler.h"
+
+#include <QtGlobal>
+
+#ifdef Q_OS_WASM
+
+// No-op stubs for Emscripten
+namespace google_breakpad { class ExceptionHandler {}; }
+
+CrashHandler::CrashHandler(const QString&) {}
+CrashHandler::~CrashHandler() {}
+void CrashHandler::submitMinidump(const QString&) {}
+
+#else
+
 #include "exceptionrecord.h"
 
 #include "shared/utils/thread.h"
@@ -351,3 +365,5 @@ void CrashHandler::submitMinidump(const QString& reason)
     _handler->WriteMinidump();
     _reason.clear();
 }
+
+#endif // Q_OS_WASM
