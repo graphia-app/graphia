@@ -126,6 +126,13 @@ if(MSVC)
     set(CMAKE_ASM_MASM_FLAGS "/nologo /D_M_X64 /W3 /Cx /Z7")
 endif()
 
+if(EMSCRIPTEN)
+    set(LINK_TYPE STATIC)
+    set(QT_WASM_PTHREAD_POOL_SIZE navigator.hardwareConcurrency)
+    add_definitions(-DDISABLE_EXCEPTION_THROWING)
+    add_definitions(-DOPENGL_ES)
+endif()
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DBUILD_SOURCE_DIR=\\\"${CMAKE_SOURCE_DIR}\\\"")
 
 # Always build with symbols
