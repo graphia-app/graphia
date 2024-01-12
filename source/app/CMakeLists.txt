@@ -370,7 +370,7 @@ if(LINK_TYPE STREQUAL STATIC)
     endforeach()
 endif()
 
-find_package(Qt6 COMPONENTS REQUIRED Concurrent Core Qml Quick QuickControls2 OpenGL Svg Widgets Xml Network WebEngineQuick)
+find_package(Qt6 COMPONENTS REQUIRED Concurrent Core Qml Quick QuickControls2 OpenGL Svg Widgets Xml Network)
 target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::Core
     Qt6::Concurrent
@@ -382,8 +382,12 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::Widgets
     Qt6::Xml
     Qt6::Network
-    Qt6::WebEngineQuick
 )
+
+if(NOT EMSCRIPTEN)
+    find_package(Qt6 COMPONENTS REQUIRED WebEngineQuick)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::WebEngineQuick)
+endif()
 
 find_package(OpenGL REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${OPENGL_gl_LIBRARY})

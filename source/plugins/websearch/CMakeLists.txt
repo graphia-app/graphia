@@ -34,7 +34,7 @@ endif()
 
 target_link_libraries(${PluginName} PRIVATE thirdparty shared)
 
-find_package(Qt6 COMPONENTS REQUIRED Core Concurrent Qml Quick QuickControls2 OpenGL Svg Widgets Xml WebEngineQuick)
+find_package(Qt6 COMPONENTS REQUIRED Core Concurrent Qml Quick QuickControls2 OpenGL Svg Widgets Xml)
 target_link_libraries(${PluginName} PRIVATE
     Qt6::Core
     Qt6::Concurrent
@@ -45,5 +45,9 @@ target_link_libraries(${PluginName} PRIVATE
     Qt6::Svg
     Qt6::Widgets
     Qt6::Xml
-    Qt6::WebEngineQuick
 )
+
+if(NOT EMSCRIPTEN)
+    find_package(Qt6 COMPONENTS REQUIRED WebEngineQuick)
+    target_link_libraries(${PluginName} PRIVATE Qt6::WebEngineQuick)
+endif()
