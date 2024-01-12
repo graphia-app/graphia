@@ -181,8 +181,10 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
     if(u::currentThreadName().isEmpty())
         u::setCurrentThreadName(QStringLiteral(PRODUCT_NAME));
 
+#ifndef OPENGL_ES
     SharedTools::QtSingleApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
     SharedTools::QtSingleApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
+#endif
 
     QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
     QQuickWindow::setDefaultAlphaBuffer(true);
