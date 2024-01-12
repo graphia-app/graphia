@@ -19,6 +19,10 @@
 #ifndef QMLCONTROLCOLORS_H
 #define QMLCONTROLCOLORS_H
 
+#include "shared/utils/static_block.h"
+
+#include <QQmlEngine>
+#include <QGuiApplication>
 #include <QObject>
 #include <QColor>
 #include <QPalette>
@@ -54,5 +58,11 @@ private:
 signals:
     void paletteChanged();
 };
+
+static_block
+{
+    qmlRegisterSingletonType<QmlControlColors>(
+        APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "ControlColors", &QmlControlColors::qmlInstance);
+}
 
 #endif // QMLCONTROLCOLORS_H

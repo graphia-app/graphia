@@ -22,9 +22,6 @@
 
 #include "shared/utils/container.h"
 #include "shared/utils/string.h"
-#include "shared/utils/static_block.h"
-
-#include <QQmlEngine>
 
 bool TableProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
 {
@@ -402,9 +399,4 @@ bool TableProxyModel::lessThan(const QModelIndex& a, const QModelIndex& b) const
     }
 
     return false;
-}
-
-static_block
-{
-    qmlRegisterType<TableProxyModel>(APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "TableProxyModel");
 }

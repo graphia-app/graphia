@@ -18,10 +18,6 @@
 
 #include "iconitem.h"
 
-#include "shared/utils/static_block.h"
-
-#include <QQmlEngine>
-
 IconItem::IconItem(QQuickItem* parent) : QQuickPaintedItem(parent)
 {
     // Default size
@@ -54,10 +50,4 @@ void IconItem::setIconName(const QString& iconName)
         emit validChanged();
 
     emit iconNameChanged();
-}
-
-static_block
-{
-    qmlRegisterType<IconItem>(
-        APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "NamedIcon");
 }

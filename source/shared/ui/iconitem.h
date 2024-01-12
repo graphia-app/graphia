@@ -19,6 +19,9 @@
 #ifndef ICONITEM_H
 #define ICONITEM_H
 
+#include "shared/utils/static_block.h"
+
+#include <QQmlEngine>
 #include <QQuickPaintedItem>
 #include <QIcon>
 #include <QString>
@@ -53,5 +56,11 @@ signals:
     void selectedChanged();
     void validChanged();
 };
+
+static_block
+{
+    qmlRegisterType<IconItem>(
+        APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "NamedIcon");
+}
 
 #endif // ICONITEM_H

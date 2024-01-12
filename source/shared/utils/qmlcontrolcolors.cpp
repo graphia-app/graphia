@@ -18,10 +18,6 @@
 
 #include "qmlcontrolcolors.h"
 
-#include "shared/utils/static_block.h"
-
-#include <QGuiApplication>
-#include <QQmlEngine>
 #include <QStyleHints>
 
 QmlControlColors::QmlControlColors(QObject* parent) :
@@ -76,10 +72,3 @@ QColor QmlControlColors::tableRow2() const
 {
     return _palette.color(QPalette::Button);
 }
-
-static_block
-{
-    qmlRegisterSingletonType<QmlControlColors>(
-        APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "ControlColors", &QmlControlColors::qmlInstance);
-}
-

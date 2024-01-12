@@ -19,6 +19,9 @@
 #ifndef TABLEPROXYMODEL_H
 #define TABLEPROXYMODEL_H
 
+#include "shared/utils/static_block.h"
+
+#include <QQmlEngine>
 #include <QSortFilterProxyModel>
 #include <QTimer>
 #include <QItemSelectionRange>
@@ -140,5 +143,10 @@ signals:
 public slots:
     void invalidateFilter();
 };
+
+static_block
+{
+    qmlRegisterType<TableProxyModel>(APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "TableProxyModel");
+}
 
 #endif // TABLEPROXYMODEL_H
