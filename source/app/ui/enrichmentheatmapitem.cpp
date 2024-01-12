@@ -25,6 +25,7 @@
 #include "shared/rendering/multisamples.h"
 
 #include <QQmlEngine>
+#include <QtGlobal>
 
 #include <set>
 #include <iterator>
@@ -468,7 +469,9 @@ void EnrichmentHeatmapItem::savePlotImage(const QUrl& url, const QStringList& ex
     else if(extensions.contains(u"jpg"_s))
         customPlot().saveJpg(url.toLocalFile());
 
+#ifndef Q_OS_WASM
     QDesktopServices::openUrl(url);
+#endif
 }
 
 void EnrichmentHeatmapItem::hideTooltip()

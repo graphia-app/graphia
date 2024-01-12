@@ -21,6 +21,7 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QFileInfo>
+#include <QtGlobal>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -110,7 +111,11 @@ CorrelationPlotSaveImageCommand::CorrelationPlotSaveImageCommand(
         _cv.notify_one();
 
         if(_images.empty())
+        {
+#ifndef Q_OS_WASM
             QDesktopServices::openUrl(target);
+#endif
+        }
         else
             saveNextImage();
     });

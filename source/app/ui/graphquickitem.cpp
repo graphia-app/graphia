@@ -28,6 +28,7 @@
 #include "commands/commandmanager.h"
 
 #include <QQmlEngine>
+#include <QtGlobal>
 
 GraphQuickItem::GraphQuickItem(QQuickItem* parent) :
     QQuickFramebufferObject(parent)
@@ -356,7 +357,9 @@ void GraphQuickItem::onScreenshotComplete(const QImage& screenshot, const QStrin
     {
         // Ensure local filesystem path
         screenshot.save(QUrl(path).toLocalFile());
+#ifndef Q_OS_WASM
         QDesktopServices::openUrl(QUrl(path).toLocalFile());
+#endif
     }, {tr("Save Screenshot"), tr("Saving Screenshot"), tr("Screenshot Saved")});
 }
 
