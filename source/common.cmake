@@ -58,13 +58,13 @@ endif()
 if(APPLE)
     # https://stackoverflow.com/questions/52310835
     add_definitions(-D_LIBCPP_DISABLE_AVAILABILITY)
-
-    # C++17 notionally removed std::unary_function
-    # Boost 1.67 depends on std::unary_function
-    # Contemporary Boost removes that dependency but needs changes to boost_spirit_qstring_adapter.h
-    # Apple clang *actually* removes std::unary_function ...unless this define is added
-    add_definitions(-D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION)
 endif()
+
+# C++17 notionally removed std::unary_function
+# Boost 1.67 depends on std::unary_function
+# Contemporary Boost removes that dependency but needs changes to boost_spirit_qstring_adapter.h
+# Recent versions of libcpp *actually* remove std::unary_function ...unless this define is added
+add_definitions(-D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION)
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     # GCC
