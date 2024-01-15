@@ -131,7 +131,7 @@ endif()
 
 find_program(GIT "git")
 
-if (NOT "$ENV{VERSION}" STREQUAL "")
+if(NOT "$ENV{VERSION}" STREQUAL "")
     set(Version $ENV{VERSION})
 elseif(GIT)
     execute_process(COMMAND ${GIT} -C ${CMAKE_SOURCE_DIR} describe --always
