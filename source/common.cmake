@@ -129,6 +129,14 @@ else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 endif()
 
+if(NOT DEFINED LINK_TYPE)
+    set(LINK_TYPE SHARED)
+endif()
+
+if(LINK_TYPE STREQUAL STATIC)
+    add_definitions(-DSTATIC_LINKING)
+endif()
+
 find_program(GIT "git")
 
 if(NOT "$ENV{VERSION}" STREQUAL "")

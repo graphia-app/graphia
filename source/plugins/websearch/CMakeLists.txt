@@ -17,7 +17,7 @@ list(APPEND RESOURCES
     ${CMAKE_CURRENT_LIST_DIR}/ui/websearch_qml.qrc
 )
 
-qt_add_library(${PluginName} SHARED ${SOURCES} ${HEADERS} ${RESOURCES})
+qt_add_library(${PluginName} ${LINK_TYPE} ${SOURCES} ${HEADERS} ${RESOURCES})
 
 if(NOT APPLE AND NOT MSVC)
     install(TARGETS ${PluginName} LIBRARY DESTINATION lib/${PROJECT_NAME}/plugins)

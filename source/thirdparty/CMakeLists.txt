@@ -28,15 +28,29 @@ if(MSVC)
     endif()
 endif()
 
-qt_add_library(thirdparty_static STATIC
-    ${STATIC_THIRDPARTY_SOURCES}
-    ${STATIC_THIRDPARTY_HEADERS}
-    ${STATIC_THIRDPARTY_RESOURCES})
+if(LINK_TYPE STREQUAL STATIC)
+    # In the static build case, thirdparty is static itself so we have no need for
+    # thirdparty_static, therefore all the static sources get added to thirdparty whereas...
+    list(APPEND SHARED_THIRDPARTY_HEADERS ${STATIC_THIRDPARTY_HEADERS})
+    list(APPEND SHARED_THIRDPARTY_SOURCES ${STATIC_THIRDPARTY_SOURCES})
+    list(APPEND SHARED_THIRDPARTY_RESOURCES ${STATIC_THIRDPARTY_RESOURCES})
 
-qt_add_library(thirdparty SHARED
+    # ...thirdparty_static is now redundant so it's just made empty so as not to disrupt the rest of the build
+    file(WRITE ${PROJECT_BINARY_DIR}/thirdparty_static_dummy.cpp "// This file is intentionally left blank\n")
+    qt_add_library(thirdparty_static STATIC ${PROJECT_BINARY_DIR}/thirdparty_static_dummy.cpp)
+else()
+    qt_add_library(thirdparty_static STATIC
+        ${STATIC_THIRDPARTY_SOURCES}
+        ${STATIC_THIRDPARTY_HEADERS}
+        ${STATIC_THIRDPARTY_RESOURCES})
+endif()
+
+qt_add_library(thirdparty ${LINK_TYPE}
     ${SHARED_THIRDPARTY_SOURCES}
     ${SHARED_THIRDPARTY_HEADERS}
     ${SHARED_THIRDPARTY_RESOURCES})
+
+target_link_libraries(thirdparty PRIVATE ${CMAKE_DL_LIBS})
 
 # Disable unity build for third party files
 foreach(FILE IN LISTS STATIC_THIRDPARTY_SOURCES)
