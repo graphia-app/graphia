@@ -13,6 +13,10 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/websearchplugin.h
 )
 
+list(APPEND SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/websearchplugin.cpp
+)
+
 list(APPEND RESOURCES
     ${CMAKE_CURRENT_LIST_DIR}/ui/websearch_qml.qrc
 )

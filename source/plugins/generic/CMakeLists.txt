@@ -13,6 +13,10 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/genericplugin.h
 )
 
+list(APPEND SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/genericplugin.cpp
+)
+
 list(APPEND RESOURCES
     ${CMAKE_CURRENT_LIST_DIR}/ui/generic_qml.qrc
 )

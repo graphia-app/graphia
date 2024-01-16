@@ -32,6 +32,8 @@ class GenericPlugin : public BaseGenericPlugin, public PluginInstanceProvider<Ge
     Q_PLUGIN_METADATA(IID IPluginIID FILE "GenericPlugin.json")
 
 public:
+    GenericPlugin();
+
     QString name() const { return "Generic"; }
     QString description() const
     {

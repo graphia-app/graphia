@@ -45,6 +45,8 @@
 
 #include <json_helper.h>
 
+#include <QDir>
+
 #include <map>
 
 using namespace Qt::Literals::StringLiterals;
@@ -1429,6 +1431,8 @@ CorrelationPlugin::CorrelationPlugin()
     registerUrlType(u"CorrelationTSV"_s, QObject::tr("Correlation TSV File"), QObject::tr("Correlation TSV Files"), {"tsv"});
     registerUrlType(u"CorrelationSSV"_s, QObject::tr("Correlation SSV File"), QObject::tr("Correlation SSV Files"), {"ssv"});
     registerUrlType(u"CorrelationXLSX"_s, QObject::tr("Correlation Excel File"), QObject::tr("Correlation Excel Files"), {"xlsx"});
+
+    Q_INIT_RESOURCE(correlation_qml);
 
     qmlRegisterType<CorrelationPluginInstance>("app.graphia", 1, 0, "CorrelationPluginInstance");
     qmlRegisterType<CorrelationPlotItem>("app.graphia", 1, 0, "CorrelationPlot");

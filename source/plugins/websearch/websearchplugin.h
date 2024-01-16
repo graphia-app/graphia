@@ -32,6 +32,8 @@ class WebSearchPlugin : public BaseGenericPlugin, PluginInstanceProvider<WebSear
     Q_PLUGIN_METADATA(IID IPluginIID FILE "WebsearchPlugin.json")
 
 public:
+    WebSearchPlugin();
+
     QString name() const { return "WebSearch"; }
     QString description() const
     {
