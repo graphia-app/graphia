@@ -21,6 +21,8 @@
 
 #include "shared/plugins/basegenericplugin.h"
 
+using namespace Qt::Literals::StringLiterals;
+
 class GenericPluginInstance : public BaseGenericPluginInstance
 {
     Q_OBJECT
@@ -34,15 +36,14 @@ class GenericPlugin : public BaseGenericPlugin, public PluginInstanceProvider<Ge
 public:
     GenericPlugin();
 
-    QString name() const override { return "Generic"; }
+    QString name() const override { return u"Generic"_s; }
     QString description() const override
     {
-        return tr("A plugin that loads generic graphs from a variety "
-                  "of file formats.");
+        return tr("A plugin that loads generic graphs from a variety of file formats.");
     }
-    QString imageSource() const override { return "qrc:///tools.svg"; }
+    QString imageSource() const override { return u"qrc:///tools.svg"_s; }
     int dataVersion() const override { return 3; }
-    QString qmlPath() const override { return "qrc:///qml/GenericPlugin.qml"; }
+    QString qmlPath() const override { return u"qrc:///qml/GenericPlugin.qml"_s; }
 };
 
 #endif // GENERICPLUGIN_H

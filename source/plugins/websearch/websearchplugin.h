@@ -21,6 +21,8 @@
 
 #include "shared/plugins/basegenericplugin.h"
 
+using namespace Qt::Literals::StringLiterals;
+
 class WebSearchPluginInstance : public BaseGenericPluginInstance
 {
     Q_OBJECT
@@ -34,15 +36,14 @@ class WebSearchPlugin : public BaseGenericPlugin, PluginInstanceProvider<WebSear
 public:
     WebSearchPlugin();
 
-    QString name() const override { return "WebSearch"; }
+    QString name() const override { return u"WebSearch"_s; }
     QString description() const override
     {
-        return tr("An embedded web browser that searches for the "
-                  "node selection using a URL template.");
+        return tr("An embedded web browser that searches for the node selection using a URL template.");
     }
-    QString imageSource() const override { return "qrc:///globe.svg"; }
+    QString imageSource() const override { return u"qrc:///globe.svg"_s; }
     int dataVersion() const override { return 1; }
-    QString qmlPath() const override { return "qrc:///qml/WebsearchPlugin.qml"; }
+    QString qmlPath() const override { return u"qrc:///qml/WebsearchPlugin.qml"_s; }
 };
 
 #endif // WEBSEARCHPLUGIN_H
