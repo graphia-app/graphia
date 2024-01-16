@@ -360,6 +360,16 @@ endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE thirdparty_static thirdparty shared)
 
+if(LINK_TYPE STREQUAL STATIC)
+    # Link with all of the available plugins in the static build case
+    get_property(PLUGIN_DIRECTORIES DIRECTORY "${PROJECT_SOURCE_DIR}/source/plugins" PROPERTY SUBDIRECTORIES)
+
+    foreach(PLUGIN_DIRECTORY IN LISTS PLUGIN_DIRECTORIES)
+        get_property(PLUGIN_TARGET DIRECTORY "${PLUGIN_DIRECTORY}" PROPERTY BUILDSYSTEM_TARGETS)
+        target_link_libraries(${PROJECT_NAME} PRIVATE ${PLUGIN_TARGET})
+    endforeach()
+endif()
+
 find_package(Qt6 COMPONENTS REQUIRED Concurrent Core Qml Quick QuickControls2 OpenGL Svg Widgets Xml Network WebEngineQuick)
 target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::Core
