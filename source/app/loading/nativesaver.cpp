@@ -109,7 +109,7 @@ static json bookmarksAsJson(const Document& document)
 {
     json jsonObject = json::object();
 
-    auto bookmarks = document.bookmarks();
+    const auto bookmarks = document.bookmarks();
     for(const auto& bookmark : bookmarks)
     {
         json nodeIds;

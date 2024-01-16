@@ -89,7 +89,7 @@ static std::vector<UrlType> urlTypesForPlugins(const std::vector<LoadedPlugin>& 
 
     for(const auto& plugin : plugins)
     {
-        auto urlTypeNames = plugin._interface->loadableUrlTypeNames();
+        const auto urlTypeNames = plugin._interface->loadableUrlTypeNames();
         for(const auto& urlTypeName : urlTypeNames)
         {
             const UrlType fileType =
@@ -244,7 +244,7 @@ QStringList Application::urlTypesFor(const QString& extension) const
 
     for(const auto& loadedPlugin : _loadedPlugins)
     {
-        auto loadableUrlTypeNames = loadedPlugin._interface->loadableUrlTypeNames();
+        const auto loadableUrlTypeNames = loadedPlugin._interface->loadableUrlTypeNames();
         for(const auto& urlTypeName : loadableUrlTypeNames)
         {
             if(u::contains(loadedPlugin._interface->extensionsForUrlTypeName(urlTypeName), extension))

@@ -192,10 +192,10 @@ void TransformedGraph::rebuild()
             if(_cancelled)
                 break;
 
-            for(const auto& attributeName : tracker.changed())
+            for(const auto& attributeName : tracker.changed()) // clazy:exclude=range-loop-detach
                 changedAttributeNames.append(attributeName);
 
-            for(const auto& attributeName : tracker.addedOrChanged())
+            for(const auto& attributeName : tracker.addedOrChanged()) // clazy:exclude=range-loop-detach
             {
                 result._addedOrChangedAttributes.emplace(attributeName, _graphModel->attributeValueByName(attributeName));
                 _cache.attributeAddedOrChanged(attributeName);

@@ -269,10 +269,10 @@ void CorrelationPlotWorker::renderPixmap()
     // calculating if the columns are considered to be dense
     _customPlot->plotLayout()->update(QCPLayoutElement::upLayout);
 
-    auto elements = _customPlot->plotLayout()->elements(true);
-    for(auto* element : elements)
+    const auto elements = _customPlot->plotLayout()->elements(true);
+    for(const auto* element : elements)
     {
-        auto* axisRect = dynamic_cast<QCPAxisRect*>(element);
+        const auto* axisRect = dynamic_cast<const QCPAxisRect*>(element);
         if(axisRect != nullptr)
         {
             auto numVisibleColumns = (_xAxisMax - _xAxisMin);
@@ -1832,7 +1832,7 @@ void CorrelationPlotItem::savePlotImageByRow(const QUrl& url, const QString& ext
     auto cpsic = std::make_unique<CorrelationPlotSaveImageCommand>(*this,
         url.toLocalFile(), extension);
 
-    for(auto selectedRow : _selectedRows)
+    for(auto selectedRow : std::as_const(_selectedRows))
     {
         auto rowName = _pluginInstance->rowName(static_cast<size_t>(selectedRow));
         const static QRegularExpression re(QStringLiteral(R"(\s+)"));
@@ -1854,7 +1854,7 @@ void CorrelationPlotItem::savePlotImageByAttribute(const QUrl& url, const QStrin
 
     std::map<QString, QVector<int>> images;
 
-    for(auto selectedRow : _selectedRows)
+    for(auto selectedRow : std::as_const(_selectedRows))
     {
         auto attributeValue = _pluginInstance->attributeValueFor(attributeName,
             static_cast<size_t>(selectedRow));

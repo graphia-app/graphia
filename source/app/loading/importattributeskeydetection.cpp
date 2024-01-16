@@ -47,7 +47,7 @@ void ImportAttributesKeyDetection::start()
         size_t bestColumnIndex = 0;
         int bestPercent = 0;
 
-        auto attributeNames = _document->availableAttributeNames(
+        const auto attributeNames = _document->availableAttributeNames(
             static_cast<int>(ElementType::NodeAndEdge), static_cast<int>(ValueType::Identifier));
 
         auto typeIdentities = _tabularData->columnTypeIdentities();

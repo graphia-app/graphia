@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
     mb.setIcon(parseIcon(p.value(u"icon"_s)));
     auto defaultButtonText = p.value(u"defaultButton"_s);
 
-    auto buttonTexts = p.values(u"button"_s);
+    const auto buttonTexts = p.values(u"button"_s);
     for(const auto& buttonText : buttonTexts)
     {
         auto button = parseButton(buttonText);

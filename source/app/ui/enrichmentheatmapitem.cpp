@@ -47,7 +47,7 @@ EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) :
     customPlot().plotLayout()->addElement(1, 0, _colorScale);
     _colorScale->setMinimumMargins(QMargins(6, 0, 6, 0));
 
-    for(auto* axis : _colorScale->axis()->axisRect()->axes())
+    for(auto* axis : _colorScale->axis()->axisRect()->axes()) // clazy:exclude=range-loop-detach
         axis->setBasePen(QPen(penColor()));
 
     _colorScale->axis()->setTickPen(QPen(penColor()));
