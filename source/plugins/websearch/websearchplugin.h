@@ -34,15 +34,15 @@ class WebSearchPlugin : public BaseGenericPlugin, PluginInstanceProvider<WebSear
 public:
     WebSearchPlugin();
 
-    QString name() const { return "WebSearch"; }
-    QString description() const
+    QString name() const override { return "WebSearch"; }
+    QString description() const override
     {
         return tr("An embedded web browser that searches for the "
                   "node selection using a URL template.");
     }
-    QString imageSource() const { return "qrc:///globe.svg"; }
-    int dataVersion() const { return 1; }
-    QString qmlPath() const { return "qrc:///qml/WebsearchPlugin.qml"; }
+    QString imageSource() const override { return "qrc:///globe.svg"; }
+    int dataVersion() const override { return 1; }
+    QString qmlPath() const override { return "qrc:///qml/WebsearchPlugin.qml"; }
 };
 
 #endif // WEBSEARCHPLUGIN_H

@@ -34,15 +34,15 @@ class GenericPlugin : public BaseGenericPlugin, public PluginInstanceProvider<Ge
 public:
     GenericPlugin();
 
-    QString name() const { return "Generic"; }
-    QString description() const
+    QString name() const override { return "Generic"; }
+    QString description() const override
     {
         return tr("A plugin that loads generic graphs from a variety "
                   "of file formats.");
     }
-    QString imageSource() const { return "qrc:///tools.svg"; }
-    int dataVersion() const { return 3; }
-    QString qmlPath() const { return "qrc:///qml/GenericPlugin.qml"; }
+    QString imageSource() const override { return "qrc:///tools.svg"; }
+    int dataVersion() const override { return 3; }
+    QString qmlPath() const override { return "qrc:///qml/GenericPlugin.qml"; }
 };
 
 #endif // GENERICPLUGIN_H
