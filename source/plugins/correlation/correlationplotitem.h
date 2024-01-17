@@ -132,7 +132,7 @@ private:
 
     mutable std::recursive_mutex* _mutex;
     std::atomic_bool _busy;
-    int _threadId = -1;
+    std::thread::id _threadId;
 
     QCustomPlot* _customPlot = nullptr;
     QOffscreenSurface* _surface = nullptr;

@@ -245,7 +245,7 @@ void CorrelationPlotWorker::renderPixmap()
 
     // OpenGL must be enabled on the thread which does the updates,
     // so that the context is created with the correct affinity
-    if(!_customPlot->openGl())
+    if(_threadId == std::thread::id())
     {
         _customPlot->setOpenGl(true, _surface->format().samples(), _surface);
 
@@ -253,10 +253,10 @@ void CorrelationPlotWorker::renderPixmap()
         _surface = nullptr;
 
         u::setCurrentThreadName(u"CorrPlotRender"_s);
-        _threadId = u::currentThreadId();
+        _threadId = std::this_thread::get_id();
     }
 
-    if(_threadId != u::currentThreadId())
+    if(_threadId != std::this_thread::get_id())
         FATAL_ERROR(CorrPlotOnWrongThread);
 
     _customPlot->setGeometry(0, 0, _width, _height);
