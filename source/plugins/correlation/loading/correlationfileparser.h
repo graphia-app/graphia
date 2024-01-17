@@ -28,8 +28,8 @@
 
 #include "shared/graph/edgelist.h"
 
-#include "correlationtype.h"
-#include "correlationdatavector.h"
+#include "plugins/correlation/correlationtype.h"
+#include "plugins/correlation/correlationdatavector.h"
 
 #include <QString>
 #include <QRect>
