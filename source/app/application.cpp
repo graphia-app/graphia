@@ -765,6 +765,17 @@ void Application::loadPlugins()
         }
     }
 
+    if(!QPluginLoader::staticInstances().empty())
+    {
+        std::cerr << "Loading static plugins...\n";
+
+        for(auto* staticPluginInstance : QPluginLoader::staticInstances()) // clazy:exclude=range-loop-detach
+        {
+            auto* iplugin = qobject_cast<IPlugin*>(staticPluginInstance);
+            initialisePlugin(iplugin, nullptr);
+        }
+    }
+
     // Force event processing here so that we initialise any qmlenum.h based enums
     // that were created in plugins
     QCoreApplication::processEvents();
