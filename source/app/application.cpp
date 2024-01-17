@@ -726,7 +726,7 @@ void Application::loadPlugins()
         if(pluginsDir.isEmpty() || !QDir(pluginsDir).exists())
             continue;
 
-        std::cerr << "Loading plugins from " << pluginsDir.toStdString() << "\n";
+        std::cerr << "Loading plugins from " << pluginsDir.toStdString() << "...\n";
 
         const QDir pluginsQDir(pluginsDir);
         const auto fileNames = pluginsQDir.entryList(QDir::Files);
