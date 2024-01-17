@@ -375,7 +375,11 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
 
     u::definePref(u"proxy/type"_s,                              "disabled");
 
+#ifdef Q_OS_WASM
+    u::definePref(u"system/uiTheme"_s,                          "Fusion");
+#else
     u::definePref(u"system/uiTheme"_s,                          "Default");
+#endif
 
     u::updateOldPrefs();
 
