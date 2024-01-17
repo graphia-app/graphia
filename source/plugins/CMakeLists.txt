@@ -6,4 +6,7 @@ endif()
 
 add_subdirectory(correlation)
 add_subdirectory(generic)
-add_subdirectory(websearch)
+
+if(NOT EMSCRIPTEN)
+    add_subdirectory(websearch)
+endif()
