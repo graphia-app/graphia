@@ -20,10 +20,20 @@
 
 #include "shared/utils/thread.h"
 
+#include <QtGlobal>
+
 using namespace Qt::Literals::StringLiterals;
 
 ThreadPool::ThreadPool(const QString& threadNamePrefix, unsigned int numThreads)
 {
+#ifdef Q_OS_WASM
+    // On Emscripten thread support is implemented by providing a fixed pthread pool
+    // which we size relative to hardware concurrency (via navigator.hardwareConcurrency)
+    // Exhausting this pool potentially results in deadlock, so for /our/ thread pool,
+    // we only occupy half of them, hopefully reducing the chance of this occuring
+    numThreads = std::min(numThreads, std::thread::hardware_concurrency() / 2);
+#endif
+
     for(unsigned int i = 0U; i < numThreads; i++)
     {
         auto threadName = u"%1%2"_s.arg(threadNamePrefix).arg(i + 1);
