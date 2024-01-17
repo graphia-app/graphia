@@ -31,7 +31,7 @@ class WebSearchPluginInstance : public BaseGenericPluginInstance
 class WebSearchPlugin : public BaseGenericPlugin, PluginInstanceProvider<WebSearchPluginInstance>
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID IPluginIID FILE "WebsearchPlugin.json")
+    Q_PLUGIN_METADATA(IID IPluginIID(WebSearch) FILE "WebsearchPlugin.json")
 
 public:
     WebSearchPlugin();
@@ -45,5 +45,7 @@ public:
     int dataVersion() const override { return 1; }
     QString qmlPath() const override { return u"qrc:///qml/WebsearchPlugin.qml"_s; }
 };
+
+Q_DECLARE_INTERFACE(WebSearchPlugin, IPluginIID(WebSearch)) // NOLINT cppcoreguidelines-pro-type-const-cast
 
 #endif // WEBSEARCHPLUGIN_H

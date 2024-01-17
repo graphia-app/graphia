@@ -228,7 +228,7 @@ signals:
 class CorrelationPlugin : public BasePlugin, public PluginInstanceProvider<CorrelationPluginInstance>
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID IPluginIID FILE "CorrelationPlugin.json")
+    Q_PLUGIN_METADATA(IID IPluginIID(Correlation) FILE "CorrelationPlugin.json")
 
 public:
     CorrelationPlugin();
@@ -255,5 +255,7 @@ public:
 
     Q_INVOKABLE QVariantMap correlationInfoFor(int correlationType) const;
 };
+
+Q_DECLARE_INTERFACE(CorrelationPlugin, IPluginIID(Correlation)) // NOLINT cppcoreguidelines-pro-type-const-cast
 
 #endif // CORRELATIONPLUGIN_H

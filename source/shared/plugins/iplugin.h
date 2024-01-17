@@ -98,7 +98,7 @@ public:
     virtual QObject* ptr() = 0;
 };
 
-#define IPluginIID "app.graphia.IPlugin/" VERSION // NOLINT cppcoreguidelines-macro-usage
-Q_DECLARE_INTERFACE(IPlugin, IPluginIID) // NOLINT cppcoreguidelines-pro-type-const-cast
+#define IPluginIID(NAME) "app.graphia.IPlugin:" #NAME "/" VERSION // NOLINT cppcoreguidelines-macro-usage
+Q_DECLARE_INTERFACE(IPlugin, IPluginIID(Base)) // NOLINT cppcoreguidelines-pro-type-const-cast
 
 #endif // IPLUGIN_H

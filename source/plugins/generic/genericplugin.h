@@ -31,7 +31,7 @@ class GenericPluginInstance : public BaseGenericPluginInstance
 class GenericPlugin : public BaseGenericPlugin, public PluginInstanceProvider<GenericPluginInstance>
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID IPluginIID FILE "GenericPlugin.json")
+    Q_PLUGIN_METADATA(IID IPluginIID(Generic) FILE "GenericPlugin.json")
 
 public:
     GenericPlugin();
@@ -45,5 +45,7 @@ public:
     int dataVersion() const override { return 3; }
     QString qmlPath() const override { return u"qrc:///qml/GenericPlugin.qml"_s; }
 };
+
+Q_DECLARE_INTERFACE(GenericPlugin, IPluginIID(Generic)) // NOLINT cppcoreguidelines-pro-type-const-cast
 
 #endif // GENERICPLUGIN_H
