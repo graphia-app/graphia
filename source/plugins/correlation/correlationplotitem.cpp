@@ -38,6 +38,7 @@
 #include <QCollator>
 #include <QQuickWindow>
 #include <QDebug>
+#include <QtGlobal>
 
 #include <cmath>
 #include <algorithm>
@@ -247,7 +248,9 @@ void CorrelationPlotWorker::renderPixmap()
     // so that the context is created with the correct affinity
     if(_threadId == std::thread::id())
     {
+#ifndef Q_OS_WASM
         _customPlot->setOpenGl(true, _surface->format().samples(), _surface);
+#endif
 
         // We don't need to use the surface any more, so give up access to it
         _surface = nullptr;
