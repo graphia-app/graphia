@@ -279,7 +279,9 @@ ApplicationWindow
                 mainWindow.y -= (bottomEdge - Screen.desktopAvailableHeight);
         }
 
-        if(windowPreferences.maximised !== undefined && Utils.castToBool(windowPreferences.maximised))
+        if(application.runningWasm)
+            mainWindow.showFullScreen();
+        else if(windowPreferences.maximised !== undefined && Utils.castToBool(windowPreferences.maximised))
             mainWindow.showMaximized();
         else
             mainWindow.showNormal();
