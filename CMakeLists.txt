@@ -22,6 +22,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/scripts/defaults.sh
     ${CMAKE_CURRENT_LIST_DIR}/scripts/linux-build.sh
     ${CMAKE_CURRENT_LIST_DIR}/scripts/macos-build.sh
+    ${CMAKE_CURRENT_LIST_DIR}/scripts/wasm-build.sh
     ${CMAKE_CURRENT_LIST_DIR}/scripts/windows-build.bat
 )
 
@@ -40,6 +41,7 @@ list(APPEND HEADERS
 list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/installers/linux/build.sh
     ${CMAKE_CURRENT_LIST_DIR}/installers/macos/build.sh
+    ${CMAKE_CURRENT_LIST_DIR}/installers/wasm/build.sh
     ${CMAKE_CURRENT_LIST_DIR}/installers/windows/build.bat
     ${CMAKE_CURRENT_LIST_DIR}/installers/windows/installer.nsi
 )
