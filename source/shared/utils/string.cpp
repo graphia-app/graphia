@@ -18,6 +18,7 @@
 
 #include "string.h" //NOLINT
 
+#include <QStringView>
 #include <QStringList>
 #include <QRegularExpression>
 #include <QLocale>
@@ -363,4 +364,64 @@ QString u::pluralise(size_t count, const QString& singular, const QString& plura
         return u"1 %1"_s.arg(singular);
 
     return u"%1 %2"_s.arg(count).arg(plural);
+}
+
+static int numericCompare(const QString& a, const QString& b, Qt::CaseSensitivity cs = Qt::CaseSensitive)
+{
+    auto tokenise = [](const QStringView& s)
+    {
+        std::vector<qsizetype> indices;
+
+        for(qsizetype i = 1; i < s.size(); i++)
+        {
+            if(s[i].isDigit() != s[i - 1].isDigit())
+                indices.push_back(i);
+        }
+
+        indices.push_back(s.size());
+
+        return indices;
+    };
+
+    auto aTokens = tokenise(a);
+    auto bTokens = tokenise(b);
+
+    auto aIt = aTokens.begin();
+    auto bIt = bTokens.begin();
+    qsizetype aIndex = 0;
+    qsizetype bIndex = 0;
+
+    while(aIt != aTokens.end() && bIt != bTokens.end())
+    {
+        auto aToken = QStringView(a).sliced(aIndex, *aIt - aIndex);
+        auto bToken = QStringView(b).sliced(bIndex, *bIt - bIndex);
+        int diff = 0;
+
+        if(aToken.front().isDigit() && bToken.front().isDigit())
+        {
+            auto aInt = aToken.toInt(nullptr);
+            auto bInt = bToken.toInt(nullptr);
+            diff = aInt - bInt;
+        }
+        else
+            diff = aToken.compare(bToken, cs);
+
+        if(diff != 0)
+            return diff;
+
+        aIndex = *aIt++;
+        bIndex = *bIt++;
+    }
+
+    return a.compare(b, cs);
+}
+
+int u::numericCompare(const QString& a, const QString& b)
+{
+    return numericCompare(a, b, Qt::CaseSensitive);
+}
+
+int u::numericCompareCaseInsensitive(const QString& a, const QString& b)
+{
+    return numericCompare(a, b, Qt::CaseInsensitive);
 }
