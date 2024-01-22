@@ -74,9 +74,9 @@ QStringList showUpdater(int argc, char *argv[])
     if(arguments.size() <= 1)
         return {};
 
+    static QRegularExpression re(QStringLiteral("^\"(.*)\"$"));
     auto unquotedArguments = arguments.mid(1);
-    unquotedArguments.replaceInStrings(QRegularExpression(QStringLiteral("^\"(.*)\"$")),
-        QStringLiteral(R"(\1)"));
+    unquotedArguments.replaceInStrings(re, QStringLiteral(R"(\1)"));
     auto exe = unquotedArguments.at(0);
 
     Q_INIT_RESOURCE(shared);
