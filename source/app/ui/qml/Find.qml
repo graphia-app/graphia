@@ -533,7 +533,7 @@ Rectangle
                         let attribute = document.attribute(selectAttributeComboBox.currentText);
 
                         if(preferences.findByAttributeSortLexically)
-                            attribute.sharedValues.sort(QmlUtils.localeCompareStrings);
+                            attribute.sharedValues.sort(QmlUtils.compareStrings);
 
                         _modelChanging = true;
                         model = attribute.sharedValues;

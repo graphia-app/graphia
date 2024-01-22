@@ -41,7 +41,7 @@ Preferences
 
     function namesAsArray()
     {
-        return asArray().map(e => e.name).sort(QmlUtils.localeCompareStrings);
+        return asArray().map(e => e.name).sort(QmlUtils.compareStrings);
     }
 
     function remove(names)

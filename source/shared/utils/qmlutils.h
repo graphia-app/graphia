@@ -135,7 +135,7 @@ public:
     }
 
     // QML JS comparelocale doesn't include numeric implementation...
-    Q_INVOKABLE int localeCompareStrings(const QString& left, const QString& right, bool numeric = true)
+    Q_INVOKABLE int compareStrings(const QString& left, const QString& right, bool numeric = true)
     {
         _collator.setNumericMode(numeric);
         return _collator.compare(left, right);
