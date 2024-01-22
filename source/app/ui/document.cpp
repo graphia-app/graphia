@@ -76,7 +76,6 @@
 #include <QFile>
 #include <QAbstractItemModel>
 #include <QMessageBox>
-#include <QCollator>
 #include <QApplication>
 #include <QElapsedTimer>
 #include <QVariantList>
@@ -470,14 +469,10 @@ QStringList Document::bookmarks() const
     for(const auto& name : u::keysFor(_bookmarks))
         list.append(name);
 
-    QCollator sorter;
-    sorter.setNumericMode(true);
-    sorter.setCaseSensitivity(Qt::CaseInsensitive);
-
     std::sort(list.begin(), list.end(),
-    [&](const auto& a, const auto& b)
+    [](const auto& a, const auto& b)
     {
-        return sorter.compare(a, b) < 0;
+        return u::numericCompareCaseInsensitive(a, b) < 0;
     });
 
     return list;

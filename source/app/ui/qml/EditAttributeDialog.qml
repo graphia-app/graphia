@@ -731,7 +731,7 @@ Window
 
                             sortOrder: proxyModel.ascendingSortOrder ?
                                 Qt.AscendingOrder : Qt.DescendingOrder
-                            numericMode: true
+                            numericMode: true //FIXME this won't work properly under wasm, where QCollator is broken
                         }
                     }
 

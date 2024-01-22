@@ -34,7 +34,6 @@
 #include <array>
 #include <type_traits>
 
-#include <QCollator>
 #include <QtGlobal>
 
 using namespace Qt::Literals::StringLiterals;

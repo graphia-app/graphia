@@ -26,7 +26,6 @@
 #include <QTimer>
 #include <QItemSelectionRange>
 #include <QStandardItemModel>
-#include <QCollator>
 #include <QStringList>
 
 #include <vector>
@@ -69,7 +68,6 @@ private:
     QStringList _sourceColumnOrder;
     std::vector<int> _orderedProxyToSourceColumn;
 
-    QCollator _collator;
     std::deque<std::pair<QString, Qt::SortOrder>> _sortColumnAndOrders;
     std::map<size_t, size_t> _rowOrderMap;
 

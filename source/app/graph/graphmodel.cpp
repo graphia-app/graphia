@@ -788,9 +788,6 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
 
         if(attribute.valueType() == ValueType::String)
         {
-            QCollator collator;
-            collator.setNumericMode(true);
-
             auto sharedValues = attribute.sharedValues();
             if(sharedValues.empty())
             {
@@ -805,9 +802,9 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
                 // Sort in natural order so that e.g. "Thing 1" is always
                 // assigned a visualisation before "Thing 2"
                 std::sort(sharedValues.begin(), sharedValues.end(),
-                [&collator](const auto& a, const auto& b)
+                [](const auto& a, const auto& b)
                 {
-                    return collator.compare(a._value, b._value) < 0;
+                    return u::numericCompare(a._value, b._value) < 0;
                 });
             }
             else
@@ -817,10 +814,10 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
                 // if it's not sorted (for whatever reason), we need it
                 // to be sorted
                 std::sort(sharedValues.begin(), sharedValues.end(),
-                [&collator](const auto& a, const auto& b)
+                [](const auto& a, const auto& b)
                 {
                     if(a._count == b._count)
-                        return collator.compare(a._value, b._value) < 0;
+                        return u::numericCompare(a._value, b._value) < 0;
 
                     return a._count > b._count;
                 });

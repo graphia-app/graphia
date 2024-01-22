@@ -25,6 +25,7 @@
 #include "shared/graph/igraphcomponent.h"
 #include "shared/utils/flags.h"
 #include "shared/utils/statistics.h"
+#include "shared/utils/string.h"
 
 #include "shared/attributes/valuetype.h"
 
@@ -35,7 +36,6 @@
 #include <map>
 
 #include <QString>
-#include <QCollator>
 
 class Attribute;
 
@@ -449,13 +449,11 @@ public:
         });
 
         // Sort in reverse order of how often the value occurs
-        QCollator collator;
-        collator.setNumericMode(true);
         std::sort(result.begin(), result.end(),
-        [collator = std::move(collator)](const auto& a, const auto& b)
+        [](const auto& a, const auto& b)
         {
             if(a._count == b._count)
-                return collator.compare(a._value, b._value) < 0;
+                return u::numericCompare(a._value, b._value) < 0;
 
             return a._count > b._count;
         });

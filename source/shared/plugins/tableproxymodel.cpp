@@ -160,8 +160,6 @@ TableProxyModel::TableProxyModel(QObject* parent) : QSortFilterProxyModel(parent
 
     connect(this, &QAbstractProxyModel::sourceModelChanged, this, &TableProxyModel::updateSourceModelFilter);
     connect(this, &TableProxyModel::columnNamesChanged, this, &TableProxyModel::onColumnNamesChanged);
-
-    _collator.setNumericMode(true);
 }
 
 void TableProxyModel::setHiddenColumns(const QStringList& hiddenColumns)
@@ -389,8 +387,8 @@ bool TableProxyModel::lessThan(const QModelIndex& a, const QModelIndex& b) const
             static_cast<QMetaType::Type>(valueB.typeId()) == QMetaType::QString)
         {
             return order == Qt::DescendingOrder ?
-                _collator.compare(valueB.toString(), valueA.toString()) < 0 :
-                _collator.compare(valueA.toString(), valueB.toString()) < 0;
+                u::numericCompare(valueB.toString(), valueA.toString()) < 0 :
+                u::numericCompare(valueA.toString(), valueB.toString()) < 0;
         }
 
         return order == Qt::DescendingOrder ?

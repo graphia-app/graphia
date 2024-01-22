@@ -35,7 +35,6 @@
 
 #include <QDesktopServices>
 #include <QSet>
-#include <QCollator>
 #include <QQuickWindow>
 #include <QDebug>
 #include <QtGlobal>
@@ -1274,9 +1273,6 @@ bool CorrelationPlotItem::updateSortMap()
     _sortMap.resize(numColumns());
     std::iota(_sortMap.begin(), _sortMap.end(), 0);
 
-    QCollator collator;
-    collator.setNumericMode(true);
-
     // Convert the javascript/QML object array into something
     // efficient to access from inside the sort lambda function
     struct ColumnSortOrder
@@ -1391,7 +1387,7 @@ bool CorrelationPlotItem::updateSortMap()
     }
 
     std::sort(_sortMap.begin(), _sortMap.end(),
-    [this, &columnSortOrders, &collator](size_t a, size_t b)
+    [this, &columnSortOrders](size_t a, size_t b)
     {
         for(const auto& columnSortOrder : columnSortOrders)
         {
@@ -1411,8 +1407,8 @@ bool CorrelationPlotItem::updateSortMap()
                     continue;
 
                 return columnSortOrder._order == Qt::AscendingOrder ?
-                    collator.compare(columnNameA, columnNameB) < 0 :
-                    collator.compare(columnNameB, columnNameA) < 0;
+                    u::numericCompare(columnNameA, columnNameB) < 0 :
+                    u::numericCompare(columnNameB, columnNameA) < 0;
             }
 
             case PlotColumnSortType::DataValue:
@@ -1436,8 +1432,8 @@ bool CorrelationPlotItem::updateSortMap()
                 }
 
                 return columnSortOrder._order == Qt::AscendingOrder ?
-                    collator.compare(annotationValueA, annotationValueB) < 0 :
-                    collator.compare(annotationValueB, annotationValueA) < 0;
+                    u::numericCompare(annotationValueA, annotationValueB) < 0 :
+                    u::numericCompare(annotationValueB, annotationValueA) < 0;
             }
 
             case PlotColumnSortType::HierarchicalClustering:

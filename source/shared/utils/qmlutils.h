@@ -35,7 +35,6 @@
 #include <QUrl>
 #include <QDebug>
 #include <QFileInfo>
-#include <QCollator>
 #include <QByteArray>
 #include <QTemporaryDir>
 #include <QFile>
@@ -137,8 +136,7 @@ public:
     // QML JS comparelocale doesn't include numeric implementation...
     Q_INVOKABLE int compareStrings(const QString& left, const QString& right, bool numeric = true)
     {
-        _collator.setNumericMode(numeric);
-        return _collator.compare(left, right);
+        return numeric ? u::numericCompare(left, right) : QString::compare(left, right);
     }
 
     static QObject* qmlInstance(QQmlEngine*, QJSEngine*)
@@ -330,9 +328,6 @@ public:
         return QKeySequence(shortcut, QKeySequence::PortableText)
             .toString(QKeySequence::NativeText);
     }
-
-private:
-    QCollator _collator;
 };
 
 // NOLINTEND(readability-convert-member-functions-to-static)

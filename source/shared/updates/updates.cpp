@@ -30,7 +30,6 @@
 
 #include <QString>
 #include <QStringList>
-#include <QCollator>
 #include <QStandardPaths>
 #include <QSysInfo>
 #include <QDir>
@@ -112,31 +111,28 @@ json updateStringToJson(const QString& updateString, QString* status)
         return payloads.find(QSysInfo::kernelType().toStdString()) == payloads.end();
     }), updates.end());
 
-    QCollator collator;
-    collator.setNumericMode(true);
-
     // Remove updates that are older than the running version
     updates.erase(std::remove_if(updates.begin(), updates.end(),
-    [&collator](const auto& update)
+    [](const auto& update)
     {
         // Don't discard updates on the basis of version number if they are forced
         if(u::contains(update, "force"))
             return false;
 
-        return collator.compare(update["version"], VERSION) < 0;
+        return u::numericCompare(update["version"], VERSION) < 0;
     }), updates.end());
 
     if(updates.empty())
         return {};
 
     std::sort(updates.begin(), updates.end(),
-    [&collator](const auto& a, const auto& b)
+    [](const auto& a, const auto& b)
     {
         // Forced updates get sorted to the front
         if(u::exclusiveOr(u::contains(a, "force"), u::contains(b, "force")))
             return u::contains(a, "force");
 
-        return collator.compare(QString::fromStdString(a["version"]),
+        return u::numericCompare(QString::fromStdString(a["version"]),
             QString::fromStdString(b["version"])) > 0;
     });
 

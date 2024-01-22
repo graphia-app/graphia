@@ -209,12 +209,11 @@ void EnrichmentHeatmapItem::buildPlot()
     }
 
     // Sensible sort strings using numbers
-    QCollator collator;
-    collator.setNumericMode(true);
+    auto compare = [](const auto& a, const auto& b) { return u::numericCompare(a, b) < 0; };
     std::vector<QString> sortAttributeValueSetA(attributeValueSetA.begin(), attributeValueSetA.end());
     std::vector<QString> sortAttributeValueSetB(attributeValueSetB.begin(), attributeValueSetB.end());
-    std::sort(sortAttributeValueSetA.begin(), sortAttributeValueSetA.end(), collator);
-    std::sort(sortAttributeValueSetB.rbegin(), sortAttributeValueSetB.rend(), collator);
+    std::sort(sortAttributeValueSetA.begin(), sortAttributeValueSetA.end(), compare);
+    std::sort(sortAttributeValueSetB.rbegin(), sortAttributeValueSetB.rend(), compare);
 
     const QFontMetrics metrics(_defaultFont9Pt);
 
