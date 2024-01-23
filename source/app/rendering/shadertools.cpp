@@ -17,6 +17,7 @@
  */
 
 #include "shadertools.h"
+#include "openglfunctions.h"
 
 #include "shared/utils/scope_exit.h"
 
@@ -34,6 +35,11 @@ using namespace Qt::Literals::StringLiterals;
 
 static QString shaderStringFromFile(const QString& filename)
 {
+    const QSurfaceFormat minimumFormat = OpenGLFunctions::minimumFormat();
+    const int shaderVersionNumber = (minimumFormat.majorVersion() * 100) +
+        (minimumFormat.minorVersion() * 10);
+
+
     QFile file(filename);
     if(!file.open(QFile::ReadOnly))
     {
@@ -45,7 +51,8 @@ static QString shaderStringFromFile(const QString& filename)
 
     const QSurfaceFormat currentSurfaceFormat = QOpenGLContext::currentContext()->format();
     const QString version = currentSurfaceFormat.renderableType() == QSurfaceFormat::OpenGLES ?
-        u"#version 300 es\nprecision mediump float;\n"_s : u"#version 330 core\n#define mediump\n"_s;
+        u"#version %1 es\nprecision mediump float;\n"_s.arg(shaderVersionNumber) :
+        u"#version %1 core\n#define mediump\n"_s.arg(shaderVersionNumber);
 
     return version + contents;
 }
