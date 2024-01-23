@@ -36,8 +36,8 @@ if(LINK_TYPE STREQUAL STATIC)
     list(APPEND SHARED_THIRDPARTY_RESOURCES ${STATIC_THIRDPARTY_RESOURCES})
 
     # ...thirdparty_static is now redundant so it's just made empty so as not to disrupt the rest of the build
-    file(WRITE ${PROJECT_BINARY_DIR}/thirdparty_static_dummy.cpp "// This file is intentionally left blank\n")
-    qt_add_library(thirdparty_static STATIC ${PROJECT_BINARY_DIR}/thirdparty_static_dummy.cpp)
+    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/thirdparty_static_dummy.cpp "// This file is intentionally left blank\n")
+    qt_add_library(thirdparty_static STATIC ${CMAKE_CURRENT_BINARY_DIR}/thirdparty_static_dummy.cpp)
 else()
     qt_add_library(thirdparty_static STATIC
         ${STATIC_THIRDPARTY_SOURCES}
