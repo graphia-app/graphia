@@ -25,6 +25,7 @@
 
 #include <QSettings>
 #include <QCoreApplication>
+#include <QtGlobal>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -32,7 +33,13 @@ namespace
 {
 QSettings settings()
 {
-    return {QSettings::Format::IniFormat, QSettings::Scope::UserScope,
+#ifdef Q_OS_WASM
+    const QSettings::Format format = QSettings::Format::NativeFormat;
+#else
+    const QSettings::Format format = QSettings::Format::IniFormat;
+#endif
+
+    return {format, QSettings::Scope::UserScope,
             QCoreApplication::organizationName(), QCoreApplication::applicationName()};
 }
 } // namespace

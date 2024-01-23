@@ -22,6 +22,7 @@
 #include <QVariant>
 #include <QSettings>
 #include <QCoreApplication>
+#include <QtGlobal>
 
 class QString;
 
@@ -29,7 +30,13 @@ namespace u
 {
     inline QVariant getPref(const QString& key)
     {
-        const QSettings settings(QSettings::Format::IniFormat, QSettings::Scope::UserScope,
+#ifdef Q_OS_WASM
+        const QSettings::Format format = QSettings::Format::NativeFormat;
+#else
+        const QSettings::Format format = QSettings::Format::IniFormat;
+#endif
+
+        const QSettings settings(format, QSettings::Scope::UserScope,
             QCoreApplication::organizationName(), QCoreApplication::applicationName());
 
         return settings.value(key);
