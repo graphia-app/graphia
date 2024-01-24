@@ -19,8 +19,6 @@
 import QtQuick
 import QtQuick.Dialogs
 
-import app.graphia
-
 FileDialog
 {
     fileMode: FileDialog.SaveFile
