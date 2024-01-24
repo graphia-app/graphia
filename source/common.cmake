@@ -25,7 +25,8 @@ add_definitions(-DAPP_URI="app.graphia")
 add_definitions(-DAPP_MINOR_VERSION=0)
 add_definitions(-DAPP_MAJOR_VERSION=1)
 
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/build_defines.h "// This file contains defines created by the build system\n\n")
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/build_defines.h "// This file contains defines created by the build system\n \
+    \n// NOLINTBEGIN(cppcoreguidelines-macro-usage)\n\n")
 
 if(UNIX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wpedantic -Wall -Wextra -Wcast-align -Wcast-qual \
@@ -176,7 +177,8 @@ endif()
 
 string(TIMESTAMP CURRENT_YEAR "%Y")
 set(Copyright "\(c\) 2013-${CURRENT_YEAR} ${Publisher}")
-file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/build_defines.h "#define COPYRIGHT \"${Copyright}\"\n")
+file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/build_defines.h "#define COPYRIGHT \"${Copyright}\"\n \
+    \n// NOLINTEND(cppcoreguidelines-macro-usage)\n")
 
 string(TOLOWER "${PROJECT_NAME}" NativeExtension)
 
