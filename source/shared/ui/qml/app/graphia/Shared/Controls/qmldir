@@ -9,6 +9,7 @@ Hubble 1.0 Hubble.qml
 ListTab 1.0 ListTab.qml
 ListTabView 1.0 ListTabView.qml
 NodeAttributeTableView 1.0 NodeAttributeTableView.qml
+OpenFileDialog 1.0 OpenFileDialog.qml
 PlatformMenu 1.0 PlatformMenu.qml
 PlatformMenuBar 1.0 PlatformMenuBar.qml
 PlatformMenuItem 1.0 PlatformMenuItem.qml
