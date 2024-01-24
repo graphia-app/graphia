@@ -879,7 +879,7 @@ ApplicationWindow
             tabBar.createTab(openInCurrentTab);
     }
 
-    FileDialog
+    OpenFileDialog
     {
         id: fileOpenDialog
         nameFilters: application.nameFilters
@@ -1336,7 +1336,7 @@ ApplicationWindow
         document: currentTab && currentTab.document
     }
 
-    FileDialog
+    OpenFileDialog
     {
         id: importAttributesFileOpenDialog
         nameFilters:

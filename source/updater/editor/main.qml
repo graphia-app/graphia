@@ -254,10 +254,9 @@ ApplicationWindow
     minimumWidth: 800
     minimumHeight: 600
 
-    FileDialog
+    OpenFileDialog
     {
         id: imageFileDialog
-        fileMode: FileDialog.OpenFile
         nameFilters: ["Image files (*.jpg *.jpeg *.png)", "All files (*)"]
 
         onAccepted:
@@ -278,10 +277,9 @@ ApplicationWindow
         }
     }
 
-    FileDialog
+    OpenFileDialog
     {
         id: keyFileDialog
-        fileMode: FileDialog.OpenFile
         nameFilters: ["PEM files (*.pem)", "All files (*)"]
 
         onAccepted:
@@ -556,11 +554,10 @@ ApplicationWindow
         saveDialog.open();
     }
 
-    FileDialog
+    OpenFileDialog
     {
         id: openDialog
         title: qsTr("Open File…")
-        fileMode: FileDialog.OpenFile
         defaultSuffix: "json"
 
         onAccepted:
@@ -631,11 +628,10 @@ ApplicationWindow
         return true;
     }
 
-    FileDialog
+    SaveFileDialog
     {
         id: saveDialog
         title: qsTr("Save File…")
-        fileMode: FileDialog.SaveFile
         defaultSuffix: "json"
 
         property var onComplete

@@ -389,7 +389,7 @@ PluginContent
         pluginModel: plugin.model
     }
 
-    FileDialog
+    OpenFileDialog
     {
         id: importAnnotationsFileOpenDialog
         nameFilters:

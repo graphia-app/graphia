@@ -276,13 +276,11 @@ Item
         _document.saveFile(desiredFileUrl, saverName, uiData, pluginUiData);
     }
 
-    FileDialog
+    SaveFileDialog
     {
         id: fileSaveDialog
 
         title: qsTr("Save File…")
-        fileMode: FileDialog.SaveFile
-        defaultSuffix: selectedNameFilter.extensions[0]
         nameFilters:
         {
             let filters = [];
@@ -543,7 +541,7 @@ Item
         exportNodePositionsFileDialog.open();
     }
 
-    FileDialog
+    OpenFileDialog
     {
         id: nodePositionFileImportDialog
 
