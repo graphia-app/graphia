@@ -433,26 +433,21 @@ PluginContent
                 QmlUtils.fileNameForUrl(folder),
                 root.baseFileNameNoExtension);
 
-            let fileDialog = saveFileDialogComponent.createObject(root,
-            {
-                "title": qsTr("Save Plot As Image"),
-                "currentFolder": folder,
-                "nameFilters": [qsTr("PNG Image (*.png)"), qsTr("JPEG Image (*.jpg *.jpeg)"), qsTr("PDF Document (*.pdf)")],
-                "selectedFile": QmlUtils.urlForFileName(path)
-            });
-
-            fileDialog.accepted.connect(function()
-            {
-                screenshot.path = fileDialog.currentFolder.toString();
-                onAcceptedFn(fileDialog.selectedFile, fileDialog.selectedNameFilter.extensions[0]);
-            });
-
-            fileDialog.open();
+            savePlotImageFileDialog.currentFolder = folder;
+            savePlotImageFileDialog.selectedFile = QmlUtils.urlForFileName(path);
+            savePlotImageFileDialog.onAcceptedFn = onAcceptedFn;
+            savePlotImageFileDialog.open();
         }
 
         text: qsTr("Save As &Image…")
         icon.name: "camera-photo"
-        onTriggered: { showSaveImageDialog(plot.savePlotImage); }
+        onTriggered:
+        {
+            showSaveImageDialog(function(filename, extension)
+            {
+                plot.savePlotImage(filename, extension);
+            });
+        }
     }
 
     Action
@@ -1248,10 +1243,21 @@ PluginContent
 
     PlatformMenu { id: plotContextMenu }
 
-    Component
+    SaveFileDialog
     {
-        id: saveFileDialogComponent
-        SaveFileDialog {}
+        id: savePlotImageFileDialog
+
+        title: qsTr("Save Plot As Image")
+        nameFilters: [qsTr("PNG Image (*.png)"), qsTr("JPEG Image (*.jpg *.jpeg)"), qsTr("PDF Document (*.pdf)")]
+
+        property var onAcceptedFn: null
+
+        onAccepted:
+        {
+            screenshot.path = savePlotImageFileDialog.currentFolder.toString();
+            savePlotImageFileDialog.onAcceptedFn(savePlotImageFileDialog.selectedFile,
+                savePlotImageFileDialog.selectedNameFilter.extensions[0]);
+        }
     }
 
     Preferences

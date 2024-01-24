@@ -517,10 +517,18 @@ Item
         _document.gotoAllBookmarks();
     }
 
-    Component
+    SaveFileDialog
     {
-        id: exportNodePositionsFileDialogComponent
-        SaveFileDialog {}
+        id: exportNodePositionsFileDialog
+
+        title: qsTr("Export Node Positions")
+        nameFilters: [qsTr("JSON File (*.json)")]
+
+        onAccepted:
+        {
+            misc.fileSaveInitialFolder = exportNodePositionsFileDialog.currentFolder.toString();
+            _document.saveNodePositionsToFile(exportNodePositionsFileDialog.selectedFile);
+        }
     }
 
     function exportNodePositions()
@@ -530,21 +538,9 @@ Item
         let path = Utils.format(qsTr("{0}/{1}-node-positions"), QmlUtils.fileNameForUrl(folder),
             root.baseFileNameNoExtension);
 
-        let fileDialog = exportNodePositionsFileDialogComponent.createObject(root,
-        {
-            "title": qsTr("Export Node Positions"),
-            "currentFolder": folder,
-            "nameFilters": [qsTr("JSON File (*.json)")],
-            "selectedFile": QmlUtils.urlForFileName(path)
-        });
-
-        fileDialog.accepted.connect(function()
-        {
-            misc.fileSaveInitialFolder = fileDialog.currentFolder.toString();
-            _document.saveNodePositionsToFile(fileDialog.selectedFile);
-        });
-
-        fileDialog.open();
+        exportNodePositionsFileDialog.currentFolder = folder;
+        exportNodePositionsFileDialog.selectedFile = QmlUtils.urlForFileName(path);
+        exportNodePositionsFileDialog.open();
     }
 
     FileDialog

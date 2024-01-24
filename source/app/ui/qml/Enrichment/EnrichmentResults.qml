@@ -396,21 +396,9 @@ ApplicationWindow
                 let folder = screenshot.path !== undefined ? screenshot.path : "";
                 let path = root.saveFileName(folder);
 
-                let fileDialog = saveFileDialogComponent.createObject(root,
-                {
-                    "title": qsTr("Save Plot As Image"),
-                    "currentFolder": folder,
-                    "nameFilters": [qsTr("PNG Image (*.png)"), qsTr("JPEG Image (*.jpg *.jpeg)"), qsTr("PDF Document (*.pdf)")],
-                    "selectedFile": QmlUtils.urlForFileName(path)
-                });
-
-                fileDialog.accepted.connect(function()
-                {
-                    screenshot.path = fileDialog.currentFolder.toString();
-                    heatmap.savePlotImage(fileDialog.selectedFile, fileDialog.selectedNameFilter.extensions);
-                });
-
-                fileDialog.open();
+                saveImageFileDialog.currentFolder = folder;
+                saveImageFileDialog.selectedFile = QmlUtils.urlForFileName(path);
+                saveImageFileDialog.open();
             }
         }
     }
@@ -429,23 +417,9 @@ ApplicationWindow
                 let folder = misc.fileSaveInitialFolder !== undefined ? misc.fileSaveInitialFolder : "";
                 let path = root.saveFileName(folder);
 
-                let fileDialog = saveFileDialogComponent.createObject(root,
-                {
-                    "title": qsTr("Export Table"),
-                    "currentFolder": folder,
-                    "nameFilters": [qsTr("CSV File (*.csv)"), qsTr("TSV File (*.tsv)")],
-                    "selectedFile": QmlUtils.urlForFileName(path)
-                });
-
-                fileDialog.accepted.connect(function()
-                {
-                    misc.fileSaveInitialFolder = fileDialog.currentFolder.toString();
-                    wizard.document.writeTableModelToFile(
-                        table.model, fileDialog.selectedFile,
-                        fileDialog.selectedNameFilter.extensions[0]);
-                });
-
-                fileDialog.open();
+                exportTableFileDialog.currentFolder = folder;
+                exportTableFileDialog.selectedFile = QmlUtils.urlForFileName(path);
+                exportTableFileDialog.open();
             }
         }
     }
@@ -467,11 +441,36 @@ ApplicationWindow
         return path;
     }
 
-    Component
+    SaveFileDialog
     {
-        id: saveFileDialogComponent
-        SaveFileDialog {}
+        id: saveImageFileDialog
+
+        title: qsTr("Save Plot As Image")
+        nameFilters: [qsTr("PNG Image (*.png)"), qsTr("JPEG Image (*.jpg *.jpeg)"), qsTr("PDF Document (*.pdf)")]
+
+        onAccepted:
+        {
+            screenshot.path = saveImageFileDialog.currentFolder.toString();
+            heatmap.savePlotImage(saveImageFileDialog.selectedFile, saveImageFileDialog.selectedNameFilter.extensions);
+        }
     }
+
+    SaveFileDialog
+    {
+        id: exportTableFileDialog
+
+        title: qsTr("Export Table")
+        nameFilters: [qsTr("CSV File (*.csv)"), qsTr("TSV File (*.tsv)")]
+
+        onAccepted:
+        {
+            misc.fileSaveInitialFolder = exportTableFileDialog.currentFolder.toString();
+            wizard.document.writeTableModelToFile(
+                table.model, exportTableFileDialog.selectedFile,
+                exportTableFileDialog.selectedNameFilter.extensions[0]);
+        }
+    }
+
 
     Preferences
     {

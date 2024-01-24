@@ -389,22 +389,8 @@ Window
                         QmlUtils.fileNameForUrl(screenshot.path), application.name,
                         new Date().toLocaleString(Qt.locale(), "yyyy-MM-dd-hhmmss"));
 
-                    let fileDialog = fileDialogComponent.createObject(root,
-                    {
-                        "title": qsTr("Save As Image"),
-                        "currentFolder": screenshot.path,
-                        "nameFilters": [qsTr("PNG Image (*.png)"), qsTr("JPEG Image (*.jpg)"), qsTr("Bitmap Image (*.bmp)")],
-                        "selectedFile": QmlUtils.urlForFileName(path)
-                    });
-
-                    fileDialog.accepted.connect(function()
-                    {
-                        root.close();
-                        screenshot.path = fileDialog.currentFolder.toString();
-                        graphView.captureScreenshot(pixelWidthSpin.value, pixelHeightSpin.value,
-                            fileDialog.selectedFile, dpiSpin.value, fillSize.checked);
-                    });
-
+                    fileDialog.currentFolder = screenshot.path;
+                    fileDialog.selectedFile = QmlUtils.urlForFileName(path);
                     fileDialog.open();
                 }
             }
@@ -469,10 +455,20 @@ Window
         updateValues.recursing = false;
     }
 
-    Component
+    SaveFileDialog
     {
-        id: fileDialogComponent
-        SaveFileDialog {}
+        id: fileDialog
+
+        title: qsTr("Save As Image")
+        nameFilters: [qsTr("PNG Image (*.png)"), qsTr("JPEG Image (*.jpg)"), qsTr("Bitmap Image (*.bmp)")]
+
+        onAccepted:
+        {
+            root.close();
+            screenshot.path = fileDialog.currentFolder.toString();
+            graphView.captureScreenshot(pixelWidthSpin.value, pixelHeightSpin.value,
+                fileDialog.selectedFile, dpiSpin.value, fillSize.checked);
+        }
     }
 
     onAspectRatioChanged:

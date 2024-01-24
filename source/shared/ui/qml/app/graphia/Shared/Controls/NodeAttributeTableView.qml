@@ -253,10 +253,19 @@ Item
         property alias autoFocusSelectedNodes: autoFocusAction.checked
     }
 
-    Component
+    SaveFileDialog
     {
-        id: saveFileDialogComponent
-        SaveFileDialog {}
+        id: exportTableFileDialog
+
+        title: qsTr("Export Table")
+        nameFilters: [qsTr("CSV File (*.csv)"), qsTr("TSV File (*.tsv)")]
+
+        onAccepted:
+        {
+            misc.fileSaveInitialFolder = exportTableFileDialog.currentFolder.toString();
+            pluginContent.writeTableModelToFile(tableView.model, exportTableFileDialog.selectedFile,
+                exportTableFileDialog.selectedNameFilter.extensions[0], tableView.visibleColumnNames());
+        }
     }
 
     property alias resizeColumnsAction: resizeColumnsToContentsAction
@@ -299,22 +308,9 @@ Item
             let folder = misc.fileSaveInitialFolder !== undefined ? misc.fileSaveInitialFolder : "";
             let path = Utils.format("{0}/{1}", QmlUtils.fileNameForUrl(folder), root.exportBaseFileName);
 
-            let fileDialog = saveFileDialogComponent.createObject(root,
-            {
-                "title": qsTr("Export Table"),
-                "currentFolder": folder,
-                "nameFilters": [qsTr("CSV File (*.csv)"), qsTr("TSV File (*.tsv)")],
-                "selectedFile": QmlUtils.urlForFileName(path)
-            });
-
-            fileDialog.accepted.connect(function()
-            {
-                misc.fileSaveInitialFolder = fileDialog.currentFolder.toString();
-                pluginContent.writeTableModelToFile(tableView.model, fileDialog.selectedFile,
-                    fileDialog.selectedNameFilter.extensions[0], tableView.visibleColumnNames());
-            });
-
-            fileDialog.open();
+            exportTableFileDialog.currentFolder = folder;
+            exportTableFileDialog.selectedFile = QmlUtils.urlForFileName(path);
+            exportTableFileDialog.open();
         }
     }
 
