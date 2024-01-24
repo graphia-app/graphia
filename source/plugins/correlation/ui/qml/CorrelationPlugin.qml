@@ -19,8 +19,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
-
-import Qt.labs.platform as Labs
+import QtQuick.Dialogs
 
 import app.graphia
 import app.graphia.Shared
@@ -390,7 +389,7 @@ PluginContent
         pluginModel: plugin.model
     }
 
-    Labs.FileDialog
+    FileDialog
     {
         id: importAnnotationsFileOpenDialog
         nameFilters:
@@ -404,8 +403,8 @@ PluginContent
 
         onAccepted:
         {
-            misc.fileOpenInitialFolder = folder.toString();
-            importAnnotationsDialog.open(file);
+            misc.fileOpenInitialFolder = currentFolder.toString();
+            importAnnotationsDialog.open(selectedFile);
         }
     }
 
@@ -416,7 +415,7 @@ PluginContent
         onTriggered: function(source)
         {
             if(misc.fileOpenInitialFolder !== undefined)
-                importAnnotationsFileOpenDialog.folder = misc.fileOpenInitialFolder;
+                importAnnotationsFileOpenDialog.currentFolder = misc.fileOpenInitialFolder;
 
             importAnnotationsFileOpenDialog.open();
         }
@@ -437,15 +436,15 @@ PluginContent
             let fileDialog = saveFileDialogComponent.createObject(root,
             {
                 "title": qsTr("Save Plot As Image"),
-                "folder": folder,
+                "currentFolder": folder,
                 "nameFilters": [qsTr("PNG Image (*.png)"), qsTr("JPEG Image (*.jpg *.jpeg)"), qsTr("PDF Document (*.pdf)")],
-                "currentFile": QmlUtils.urlForFileName(path)
+                "selectedFile": QmlUtils.urlForFileName(path)
             });
 
             fileDialog.accepted.connect(function()
             {
-                screenshot.path = fileDialog.folder.toString();
-                onAcceptedFn(fileDialog.file, fileDialog.selectedNameFilter.extensions[0]);
+                screenshot.path = fileDialog.currentFolder.toString();
+                onAcceptedFn(fileDialog.selectedFile, fileDialog.selectedNameFilter.extensions[0]);
             });
 
             fileDialog.open();

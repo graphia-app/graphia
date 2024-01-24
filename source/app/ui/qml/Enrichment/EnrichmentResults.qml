@@ -399,15 +399,15 @@ ApplicationWindow
                 let fileDialog = saveFileDialogComponent.createObject(root,
                 {
                     "title": qsTr("Save Plot As Image"),
-                    "folder": folder,
+                    "currentFolder": folder,
                     "nameFilters": [qsTr("PNG Image (*.png)"), qsTr("JPEG Image (*.jpg *.jpeg)"), qsTr("PDF Document (*.pdf)")],
-                    "currentFile": QmlUtils.urlForFileName(path)
+                    "selectedFile": QmlUtils.urlForFileName(path)
                 });
 
                 fileDialog.accepted.connect(function()
                 {
-                    screenshot.path = fileDialog.folder.toString();
-                    heatmap.savePlotImage(fileDialog.file, fileDialog.selectedNameFilter.extensions);
+                    screenshot.path = fileDialog.currentFolder.toString();
+                    heatmap.savePlotImage(fileDialog.selectedFile, fileDialog.selectedNameFilter.extensions);
                 });
 
                 fileDialog.open();
@@ -432,16 +432,16 @@ ApplicationWindow
                 let fileDialog = saveFileDialogComponent.createObject(root,
                 {
                     "title": qsTr("Export Table"),
-                    "folder": folder,
+                    "currentFolder": folder,
                     "nameFilters": [qsTr("CSV File (*.csv)"), qsTr("TSV File (*.tsv)")],
-                    "currentFile": QmlUtils.urlForFileName(path)
+                    "selectedFile": QmlUtils.urlForFileName(path)
                 });
 
                 fileDialog.accepted.connect(function()
                 {
-                    misc.fileSaveInitialFolder = fileDialog.folder.toString();
+                    misc.fileSaveInitialFolder = fileDialog.currentFolder.toString();
                     wizard.document.writeTableModelToFile(
-                        table.model, fileDialog.file,
+                        table.model, fileDialog.selectedFile,
                         fileDialog.selectedNameFilter.extensions[0]);
                 });
 

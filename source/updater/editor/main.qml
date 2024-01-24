@@ -20,6 +20,7 @@ import QtCore
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Dialogs
 
 import Qt.labs.platform as Labs
 
@@ -253,20 +254,20 @@ ApplicationWindow
     minimumWidth: 800
     minimumHeight: 600
 
-    Labs.FileDialog
+    FileDialog
     {
         id: imageFileDialog
-        fileMode: Labs.FileDialog.OpenFile
+        fileMode: FileDialog.OpenFile
         nameFilters: ["Image files (*.jpg *.jpeg *.png)", "All files (*)"]
 
         onAccepted:
         {
             setSaveRequired();
-            settings.defaultImageOpenFolder = imageFileDialog.folder;
+            settings.defaultImageOpenFolder = currentFolder;
 
-            let basename = QmlUtils.baseFileNameForUrl(file);
+            let basename = QmlUtils.baseFileNameForUrl(selectedFile);
 
-            let originalFilename = QmlUtils.fileNameForUrl(file);
+            let originalFilename = QmlUtils.fileNameForUrl(selectedFile);
             let targetFilename = root._workingDirectory + "/" + basename;
 
             if(!QmlUtils.copy(originalFilename, targetFilename))
@@ -277,16 +278,16 @@ ApplicationWindow
         }
     }
 
-    Labs.FileDialog
+    FileDialog
     {
         id: keyFileDialog
-        fileMode: Labs.FileDialog.OpenFile
+        fileMode: FileDialog.OpenFile
         nameFilters: ["PEM files (*.pem)", "All files (*)"]
 
         onAccepted:
         {
             setSaveRequired();
-            settings.privateKeyFile = file;
+            settings.privateKeyFile = selectedFile;
         }
     }
 
@@ -551,22 +552,22 @@ ApplicationWindow
         }
 
         saveDialog.onComplete = onSaveComplete;
-        saveDialog.currentFile = root.lastUsedFilename;
+        saveDialog.selectedFile = root.lastUsedFilename;
         saveDialog.open();
     }
 
-    Labs.FileDialog
+    FileDialog
     {
         id: openDialog
         title: qsTr("Open File…")
-        fileMode: Labs.FileDialog.OpenFile
+        fileMode: FileDialog.OpenFile
         defaultSuffix: "json"
 
         onAccepted:
         {
-            root.open(file);
-            settings.defaultOpenFolder = openDialog.folder;
-            root.lastUsedFilename = file;
+            root.open(selectedFile);
+            settings.defaultOpenFolder = currentFolder;
+            root.lastUsedFilename = selectedFile;
         }
     }
 
@@ -630,19 +631,19 @@ ApplicationWindow
         return true;
     }
 
-    Labs.FileDialog
+    FileDialog
     {
         id: saveDialog
         title: qsTr("Save File…")
-        fileMode: Labs.FileDialog.SaveFile
+        fileMode: FileDialog.SaveFile
         defaultSuffix: "json"
 
         property var onComplete
 
         onAccepted:
         {
-            root.saveFile(file, saveDialog.onComplete);
-            root.lastUsedFilename = file;
+            root.saveFile(selectedFile, saveDialog.onComplete);
+            root.lastUsedFilename = selectedFile;
         }
     }
 

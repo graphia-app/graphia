@@ -17,15 +17,13 @@
  */
 
 import QtQuick
-import Qt.labs.platform as Labs
+import QtQuick.Dialogs
 
 import app.graphia
 
-Labs.FileDialog
+FileDialog
 {
-    id: fileDialog
-
-    fileMode: Labs.FileDialog.SaveFile
+    fileMode: FileDialog.SaveFile
     defaultSuffix: selectedNameFilter.extensions[0]
     selectedNameFilter.index: 0
 }

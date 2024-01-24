@@ -21,7 +21,6 @@ import QtQuick.Window
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Dialogs
-import Qt.labs.platform as Labs
 
 import app.graphia
 import app.graphia.Shared
@@ -393,17 +392,17 @@ Window
                     let fileDialog = fileDialogComponent.createObject(root,
                     {
                         "title": qsTr("Save As Image"),
-                        "folder": screenshot.path,
+                        "currentFolder": screenshot.path,
                         "nameFilters": [qsTr("PNG Image (*.png)"), qsTr("JPEG Image (*.jpg)"), qsTr("Bitmap Image (*.bmp)")],
-                        "currentFile": QmlUtils.urlForFileName(path)
+                        "selectedFile": QmlUtils.urlForFileName(path)
                     });
 
                     fileDialog.accepted.connect(function()
                     {
                         root.close();
-                        screenshot.path = fileDialog.folder.toString();
+                        screenshot.path = fileDialog.currentFolder.toString();
                         graphView.captureScreenshot(pixelWidthSpin.value, pixelHeightSpin.value,
-                            fileDialog.file, dpiSpin.value, fillSize.checked);
+                            fileDialog.selectedFile, dpiSpin.value, fillSize.checked);
                     });
 
                     fileDialog.open();

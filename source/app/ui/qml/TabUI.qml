@@ -276,46 +276,37 @@ Item
         _document.saveFile(desiredFileUrl, saverName, uiData, pluginUiData);
     }
 
-    Component
+    FileDialog
     {
-        // We use a Component here because for whatever reason, the Labs FileDialog only seems
-        // to allow you to set currentFile once. From looking at the source code it appears as
-        // if setting currentFile adds to the currently selected files, rather than replaces
-        // the currently selected files with a new one. Until this is fixed, we work around
-        // it by simply recreating the FileDialog everytime we need one.
+        id: fileSaveDialog
 
-        id: fileSaveDialogComponent
-
-        Labs.FileDialog
+        title: qsTr("Save File…")
+        fileMode: FileDialog.SaveFile
+        defaultSuffix: selectedNameFilter.extensions[0]
+        nameFilters:
         {
-            title: qsTr("Save File…")
-            fileMode: Labs.FileDialog.SaveFile
-            defaultSuffix: selectedNameFilter.extensions[0]
-            nameFilters:
-            {
-                let filters = [];
-                let saverTypes = application.saverFileTypes();
-                for(let i = 0; i < saverTypes.length; i++)
-                    filters.push(Utils.format(qsTr("{0} files (*.{1})"), saverTypes[i].name, saverTypes[i].extension));
+            let filters = [];
+            let saverTypes = application ? application.saverFileTypes() : [];
+            for(let i = 0; i < saverTypes.length; i++)
+                filters.push(Utils.format(qsTr("{0} files (*.{1})"), saverTypes[i].name, saverTypes[i].extension));
 
-                filters.push(qsTr("All files (*)"));
-                return filters;
-            }
+            filters.push(qsTr("All files (*)"));
+            return filters;
+        }
 
-            onAccepted:
-            {
-                let saverName = "";
-                let saverTypes = application.saverFileTypes();
+        onAccepted:
+        {
+            let saverName = "";
+            let saverTypes = application.saverFileTypes();
 
-                // If no saver is found fall back to default saver (All Files filter will do this)
-                if(selectedNameFilter.index < saverTypes.length)
-                    saverName = saverTypes[selectedNameFilter.index].name;
-                else
-                    saverName = appName;
+            // If no saver is found fall back to default saver (All Files filter will do this)
+            if(selectedNameFilter.index < saverTypes.length)
+                saverName = saverTypes[selectedNameFilter.index].name;
+            else
+                saverName = appName;
 
-                misc.fileSaveInitialFolder = folder.toString();
-                saveAsNamedFile(file, saverName);
-            }
+            misc.fileSaveInitialFolder = currentFolder.toString();
+            saveAsNamedFile(selectedFile, saverName);
         }
     }
 
@@ -323,12 +314,9 @@ Item
     {
         let initialFileUrl = QmlUtils.removeExtension(root.hasBeenSaved ? root.savedFileUrl : root.url);
 
-        let fileSaveDialogObject = fileSaveDialogComponent.createObject(mainWindow,
-        {
-            "currentFile": initialFileUrl,
-            "folder": misc.fileSaveInitialFolder !== undefined ? misc.fileSaveInitialFolder: ""
-        });
-        fileSaveDialogObject.open();
+        fileSaveDialog.selectedFile = initialFileUrl;
+        fileSaveDialog.currentFolder = misc.fileSaveInitialFolder !== undefined ? misc.fileSaveInitialFolder: "";
+        fileSaveDialog.open();
     }
 
     function saveFile()
@@ -545,28 +533,31 @@ Item
         let fileDialog = exportNodePositionsFileDialogComponent.createObject(root,
         {
             "title": qsTr("Export Node Positions"),
-            "folder": folder,
+            "currentFolder": folder,
             "nameFilters": [qsTr("JSON File (*.json)")],
-            "currentFile": QmlUtils.urlForFileName(path)
+            "selectedFile": QmlUtils.urlForFileName(path)
         });
 
         fileDialog.accepted.connect(function()
         {
-            misc.fileSaveInitialFolder = fileDialog.folder.toString();
-            _document.saveNodePositionsToFile(fileDialog.file);
+            misc.fileSaveInitialFolder = fileDialog.currentFolder.toString();
+            _document.saveNodePositionsToFile(fileDialog.selectedFile);
         });
 
         fileDialog.open();
     }
 
-    Component
+    FileDialog
     {
-        id: nodePositionFileImportDialogComponent
+        id: nodePositionFileImportDialog
 
-        Labs.FileDialog
+        title: qsTr("Import From File…")
+        nameFilters: "Graphia Node Positions (*.json)"
+
+        onAccepted:
         {
-            title: qsTr("Import From File…")
-            nameFilters: "Graphia Node Positions (*.json)"
+            misc.fileOpenInitialFolder = currentFolder.toString();
+            _document.loadNodePositionsFromFile(selectedFile);
         }
     }
 
@@ -575,15 +566,8 @@ Item
         let folder = misc.fileOpenInitialFolder !== undefined ?
             misc.fileOpenInitialFolder : "";
 
-        let fileDialog = nodePositionFileImportDialogComponent.createObject(root, {"folder": folder});
-
-        fileDialog.accepted.connect(function()
-        {
-            misc.fileOpenInitialFolder = fileDialog.folder.toString();
-            _document.loadNodePositionsFromFile(fileDialog.file);
-        });
-
-        fileDialog.open();
+        nodePositionFileImportDialog.currentFolder = folder;
+        nodePositionFileImportDialog.open();
     }
 
     function searchWebForNode(nodeId)

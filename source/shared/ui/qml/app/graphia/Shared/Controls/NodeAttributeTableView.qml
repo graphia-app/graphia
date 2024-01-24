@@ -23,8 +23,6 @@ import QtQuick.Layouts
 import QtQml.Models
 import QtQuick.Shapes
 
-import Qt.labs.platform as Labs
-
 import app.graphia
 import app.graphia.Shared
 
@@ -304,15 +302,15 @@ Item
             let fileDialog = saveFileDialogComponent.createObject(root,
             {
                 "title": qsTr("Export Table"),
-                "folder": folder,
+                "currentFolder": folder,
                 "nameFilters": [qsTr("CSV File (*.csv)"), qsTr("TSV File (*.tsv)")],
-                "currentFile": QmlUtils.urlForFileName(path)
+                "selectedFile": QmlUtils.urlForFileName(path)
             });
 
             fileDialog.accepted.connect(function()
             {
-                misc.fileSaveInitialFolder = fileDialog.folder.toString();
-                pluginContent.writeTableModelToFile(tableView.model, fileDialog.file,
+                misc.fileSaveInitialFolder = fileDialog.currentFolder.toString();
+                pluginContent.writeTableModelToFile(tableView.model, fileDialog.selectedFile,
                     fileDialog.selectedNameFilter.extensions[0], tableView.visibleColumnNames());
             });
 

@@ -22,6 +22,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Window
+import QtQuick.Dialogs
 
 import Qt.labs.platform as Labs
 
@@ -878,18 +879,18 @@ ApplicationWindow
             tabBar.createTab(openInCurrentTab);
     }
 
-    Labs.FileDialog
+    FileDialog
     {
         id: fileOpenDialog
         nameFilters: application.nameFilters
         onAccepted:
         {
-            misc.fileOpenInitialFolder = folder.toString();
+            misc.fileOpenInitialFolder = currentFolder.toString();
 
             if(type.length !== 0)
-                openUrlOfType(file, type, inTab);
+                openUrlOfType(selectedFile, type, inTab);
             else
-                openUrl(file, inTab);
+                openUrl(selectedFile, inTab);
         }
 
         Connections
@@ -927,7 +928,7 @@ ApplicationWindow
             fileOpenDialog.type = "";
 
             if(misc.fileOpenInitialFolder !== undefined)
-                fileOpenDialog.folder = misc.fileOpenInitialFolder;
+                fileOpenDialog.currentFolder = misc.fileOpenInitialFolder;
 
             fileOpenDialog.open();
         }
@@ -946,7 +947,7 @@ ApplicationWindow
             fileOpenDialog.type = "";
 
             if(misc.fileOpenInitialFolder !== undefined)
-                fileOpenDialog.folder = misc.fileOpenInitialFolder;
+                fileOpenDialog.currentFolder = misc.fileOpenInitialFolder;
 
             fileOpenDialog.open();
         }
@@ -1335,7 +1336,7 @@ ApplicationWindow
         document: currentTab && currentTab.document
     }
 
-    Labs.FileDialog
+    FileDialog
     {
         id: importAttributesFileOpenDialog
         nameFilters:
@@ -1349,8 +1350,8 @@ ApplicationWindow
 
         onAccepted:
         {
-            misc.fileOpenInitialFolder = folder.toString();
-            importAttributesDialog.open(file);
+            misc.fileOpenInitialFolder = currentFolder.toString();
+            importAttributesDialog.open(selectedFile);
         }
     }
 
@@ -1438,7 +1439,7 @@ ApplicationWindow
         onTriggered: function(source)
         {
             if(misc.fileOpenInitialFolder !== undefined)
-                importAttributesFileOpenDialog.folder = misc.fileOpenInitialFolder;
+                importAttributesFileOpenDialog.currentFolder = misc.fileOpenInitialFolder;
 
             importAttributesFileOpenDialog.open();
         }
