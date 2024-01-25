@@ -38,5 +38,6 @@
         <file>qml/app/graphia/Shared/Templates.qml</file>
         <file>qml/app/graphia/Shared/CanvasPaletteHelper.qml</file>
         <file>qml/app/graphia/Shared/Controls/OpenFileDialog.qml</file>
+        <file>qml/app/graphia/Shared/Controls/+wasm/OpenFileDialog.qml</file>
     </qresource>
 </RCC>
