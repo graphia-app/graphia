@@ -194,6 +194,11 @@ if(MSVC)
     list(APPEND SHARED_SOURCES ${CMAKE_CURRENT_LIST_DIR}/utils/odsconsolecapture.cpp)
 endif()
 
+if(EMSCRIPTEN)
+    list(APPEND HEADERS ${CMAKE_CURRENT_LIST_DIR}/loading/wasmlocalfileaccess.h)
+    list(APPEND SHARED_SOURCES ${CMAKE_CURRENT_LIST_DIR}/loading/wasmlocalfileaccess.cpp)
+endif()
+
 set(QML_IMPORT_PATH "${QML_IMPORT_PATH};${CMAKE_CURRENT_LIST_DIR}/ui/qml/" PARENT_SCOPE)
 
 list(APPEND SOURCES ${SHARED_SOURCES})
