@@ -973,7 +973,10 @@ ApplicationWindow
             if(currentTab === null)
                 return;
 
-            currentTab.saveFile();
+            if(application.runningWasm)
+                currentTab.saveAsFile();
+            else
+                currentTab.saveFile();
         }
     }
 
@@ -2123,7 +2126,7 @@ ApplicationWindow
                 }
             }
             PlatformMenuSeparator {}
-            PlatformMenuItem { action: fileSaveAction }
+            PlatformMenuItem { hidden: application.runningWasm; action: fileSaveAction }
             PlatformMenuItem { action: fileSaveAsAction }
             PlatformMenuItem { action: saveImageAction }
             PlatformMenuSeparator {}
