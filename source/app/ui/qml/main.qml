@@ -2113,6 +2113,7 @@ ApplicationWindow
             PlatformMenu
             {
                 id: recentFileMenu
+                hidden: application.runningWasm
                 title: qsTr("&Recent Files")
 
                 Instantiator
