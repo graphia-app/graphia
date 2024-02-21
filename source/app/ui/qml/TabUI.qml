@@ -1791,7 +1791,7 @@ Item
                     QmlUtils.baseFileNameForUrl(root.url));
                 errorSavingFileMessageDialog.open();
             }
-            else
+            else if(!application.runningWasm)
             {
                 savedFileUrl = fileUrl;
                 savedFileSaver = saverName;

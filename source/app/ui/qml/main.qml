@@ -596,6 +596,12 @@ ApplicationWindow
 
     function addToRecentFiles(fileUrl)
     {
+        if(application.runningWasm)
+        {
+            console.log("WARNING: Can't call addToRecentFiles under WASM");
+            return;
+        }
+
         let fileUrlString = fileUrl.toString();
 
         if(mainWindow.recentFiles === undefined)
@@ -2771,7 +2777,7 @@ ApplicationWindow
                             // it probably is, so start the tutorial
                             startTutorial();
                         }
-                        else if(!application.downloaded(url))
+                        else if(!application.downloaded(url) && !application.runningWasm)
                             addToRecentFiles(url);
 
                         if(currentTab !== null)
