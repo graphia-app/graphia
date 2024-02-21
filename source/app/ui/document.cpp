@@ -782,6 +782,13 @@ void Document::saveFile(const QUrl& fileUrl, const QString& saverName, const QBy
     auto* factory = _application->saverFactoryByName(saverName);
     if(factory != nullptr)
     {
+#ifdef Q_OS_WASM
+        // Under wasm, fileUrl will be a temporary file name
+        auto filename = tr("file");
+#else
+        auto filename = fileUrl.fileName();
+#endif
+
         _commandManager.executeOnce(
         [this, factory, fileUrl, saverName, uiData, pluginUiData](Command& command) mutable
         {
@@ -793,9 +800,9 @@ void Document::saveFile(const QUrl& fileUrl, const QString& saverName, const QBy
             return success;
         },
         {
-            tr("Save %1").arg(fileUrl.fileName()),
-            tr("Saving %1").arg(fileUrl.fileName()),
-            tr("Saved %1").arg(fileUrl.fileName())
+            tr("Save %1").arg(filename),
+            tr("Saving %1").arg(filename),
+            tr("Saved %1").arg(filename)
         });
 
         _saveRequired = false;
