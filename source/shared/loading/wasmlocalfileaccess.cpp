@@ -20,8 +20,10 @@
 
 #include <QFileDialog>
 #include <QByteArray>
-#include <QTemporaryDir>
 #include <QFile>
+#include <QTemporaryDir>
+#include <QTemporaryFile>
+#include <QTimer>
 #include <QDebug>
 
 using namespace Qt::Literals::StringLiterals;
@@ -61,4 +63,41 @@ void WasmLocalFileAccess::open(const QStringList& nameFilters)
 
     QString nameFilterString = nameFilters.join('\n');
     QFileDialog::getOpenFileContent(nameFilterString, fileContentReady);
+}
+
+QUrl WasmLocalFileAccess::save(const QString& filenameHint)
+{
+    // Create a temporary file, and immediately delete it
+    QTemporaryFile tempFile;
+    tempFile.open();
+    auto tempFilename = tempFile.fileName();
+    tempFile.close();
+    tempFile.remove();
+
+    // The timer here is a (very) crude file system watcher that polls
+    // for the target file to exist and be closed, the slightly ropey
+    // assumption being that it has been written completely
+    // (QFileSystemWatcher has no wasm implementation)
+    auto* timer = new QTimer();
+    connect(timer, &QTimer::timeout,
+    [filenameHint, tempFilename, timer]
+    {
+        QFile file(tempFilename);
+
+        if(file.exists() && !file.isOpen())
+        {
+            if(file.open(QIODevice::ReadOnly))
+            {
+                QFileDialog::saveFileContent(file.readAll(), filenameHint);
+                file.close();
+            }
+
+            file.remove();
+            timer->stop();
+            timer->deleteLater();
+        }
+    });
+    timer->start(500);
+
+    return QUrl::fromLocalFile(tempFilename);
 }

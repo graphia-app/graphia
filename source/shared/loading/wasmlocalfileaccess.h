@@ -37,6 +37,7 @@ public:
     explicit WasmLocalFileAccess(QQuickItem* parent = nullptr);
 
     Q_INVOKABLE void open(const QStringList& nameFilters);
+    Q_INVOKABLE QUrl save(const QString& filenameHint);
 
 private:
     QUrl _fileUrl;
