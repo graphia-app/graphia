@@ -131,7 +131,7 @@ static bool decompress(const QString& filePath, QByteArray& byteArray,
 
             numBytes = ChunkSize - static_cast<int>(zstream.avail_out);
             bytesDecompressed += static_cast<uint64_t>(numBytes);
-            byteArray.append(reinterpret_cast<const char*>(outBuffer.data()), numBytes);
+            byteArray.append(reinterpret_cast<const char*>(outBuffer.data()), static_cast<qsizetype>(numBytes));
 
             // Check if we've read more than we've been asked to
             if(maxReadSize >= 0 && bytesDecompressed >= static_cast<uint64_t>(maxReadSize))
@@ -173,7 +173,7 @@ static bool load(const QString& filePath, QByteArray& byteArray,
         std::vector<unsigned char> buffer(ChunkSize);
 
         auto numBytes = input.readRawData(reinterpret_cast<char*>(buffer.data()), ChunkSize);
-        byteArray.append(reinterpret_cast<char*>(buffer.data()), numBytes);
+        byteArray.append(reinterpret_cast<char*>(buffer.data()), static_cast<qsizetype>(numBytes));
 
         bytesRead += numBytes;
 
