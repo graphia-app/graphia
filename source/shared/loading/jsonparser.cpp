@@ -55,7 +55,7 @@ bool JsonParser::parse(const QUrl& url, IGraphModel* graphModel)
         std::vector<unsigned char> buffer(ChunkSize);
 
         auto numBytes = input.readRawData(reinterpret_cast<char*>(buffer.data()), ChunkSize);
-        byteArray.append(reinterpret_cast<char*>(buffer.data()), numBytes);
+        byteArray.append(reinterpret_cast<char*>(buffer.data()), static_cast<qsizetype>(numBytes));
 
         bytesRead += numBytes;
 
