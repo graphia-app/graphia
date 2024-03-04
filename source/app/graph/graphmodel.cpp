@@ -1440,6 +1440,7 @@ void GraphModel::onPreferenceChanged(const QString& name, const QVariant&)
         name.endsWith(u"showNodeText"_s) ||
         name.endsWith(u"showEdgeText"_s) ||
         name.endsWith(u"showEdges"_s) ||
+        name.endsWith(u"edgeVisualType"_s) ||
         name.endsWith(u"highlightColor"_s) ||
         name.endsWith(u"textFont"_s) ||
         name.endsWith(u"textSize"_s) ||
