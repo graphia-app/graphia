@@ -1273,6 +1273,7 @@ void GraphModel::onPreferenceChanged(const QString& name, const QVariant&)
     const bool force = name.endsWith(QStringLiteral("backgroundColor")) ||
         name.endsWith(QStringLiteral("showNodeText")) ||
         name.endsWith(QStringLiteral("showEdgeText")) ||
+        name.endsWith(QStringLiteral("edgeVisualType")) ||
         name.endsWith(QStringLiteral("highlightColor")) ||
         name.endsWith(QStringLiteral("textFont")) ||
         name.endsWith(QStringLiteral("textSize")) ||
