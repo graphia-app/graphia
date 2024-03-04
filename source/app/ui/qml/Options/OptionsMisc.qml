@@ -28,6 +28,8 @@ import app.graphia.Shared.Controls
 
 Item
 {
+    property var application: null
+
     Preferences
     {
         id: misc
@@ -151,16 +153,20 @@ Item
             {
                 font.bold: true
                 text: qsTr("Performance")
+
+                visible: disableMultisamplingCheckbox.visible || macOsOldHardwareText.visible
             }
 
             CheckBox
             {
                 id: disableMultisamplingCheckbox
+                visible: !root.application.runningWasm
                 text: qsTr("Disable Multisampling (Restart Required)")
             }
 
             Text
             {
+                id: macOsOldHardwareText
                 Layout.preferredWidth: parent.width
 
                 visible: Qt.platform.os === "osx"

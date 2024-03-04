@@ -78,7 +78,7 @@ Window
                     currentIndex: tabBar.currentIndex
 
                     OptionsAppearance {}
-                    OptionsMisc {}
+                    OptionsMisc { application: root.application }
                     OptionsNetwork {}
                     OptionsDefaults { application: root.application }
                 }
