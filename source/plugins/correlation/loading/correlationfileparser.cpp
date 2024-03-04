@@ -153,8 +153,6 @@ static QRect findLargestNonNumericalDataRect(const TabularData& tabularData, Pro
 
 static bool dataRectHasDiscreteValues(const TabularData& tabularData, const QRect& dataRect, Progressable* progressable = nullptr)
 {
-    auto numColumns = dataRect.right() - dataRect.left();
-
     for(auto column = dataRect.left(); column <= dataRect.right(); column++)
     {
         for(auto row = dataRect.top(); row <= dataRect.bottom(); row++)
@@ -169,7 +167,7 @@ static bool dataRectHasDiscreteValues(const TabularData& tabularData, const QRec
         if(progressable != nullptr)
         {
             auto columnIndex = column - dataRect.left();
-            progressable->setProgress((columnIndex * 100) / numColumns);
+            progressable->setProgress((columnIndex * 100) / dataRect.width());
         }
     }
 
@@ -178,8 +176,6 @@ static bool dataRectHasDiscreteValues(const TabularData& tabularData, const QRec
 
 static bool dataRectHasMissingValues(const TabularData& tabularData, const QRect& dataRect, Progressable* progressable = nullptr)
 {
-    auto numColumns = dataRect.right() - dataRect.left();
-
     for(auto column = dataRect.left(); column <= dataRect.right(); column++)
     {
         for(auto row = dataRect.top(); row <= dataRect.bottom(); row++)
@@ -194,7 +190,7 @@ static bool dataRectHasMissingValues(const TabularData& tabularData, const QRect
         if(progressable != nullptr)
         {
             auto columnIndex = column - dataRect.left();
-            progressable->setProgress((columnIndex * 100) / numColumns);
+            progressable->setProgress((columnIndex * 100) / dataRect.width());
         }
     }
 
@@ -205,7 +201,6 @@ static bool dataRectHasMissingValues(const TabularData& tabularData, const QRect
 // It's all a bit finger in the air, but should hopefully catch the obvious cases
 static bool dataRectAppearsToBeContinuous(const TabularData& tabularData, const QRect& dataRect, Progressable* progressable = nullptr)
 {
-    auto numColumns = dataRect.right() - dataRect.left();
     size_t numProbablyDiscreteColumns = 0;
 
     for(auto column = dataRect.left(); column <= dataRect.right(); column++)
@@ -242,7 +237,7 @@ static bool dataRectAppearsToBeContinuous(const TabularData& tabularData, const 
         if(progressable != nullptr)
         {
             auto columnIndex = column - dataRect.left();
-            progressable->setProgress((columnIndex * 100) / numColumns);
+            progressable->setProgress((columnIndex * 100) / dataRect.width());
         }
     }
 
@@ -251,7 +246,6 @@ static bool dataRectAppearsToBeContinuous(const TabularData& tabularData, const 
 
 static std::pair<double, double> dataRectMinMax(const TabularData& tabularData, const QRect& dataRect, Progressable* progressable = nullptr)
 {
-    auto numColumns = dataRect.right() - dataRect.left();
     auto min = std::numeric_limits<double>::max();
     auto max = std::numeric_limits<double>::lowest();
 
@@ -277,7 +271,7 @@ static std::pair<double, double> dataRectMinMax(const TabularData& tabularData, 
         if(progressable != nullptr)
         {
             auto columnIndex = column - dataRect.left();
-            progressable->setProgress((columnIndex * 100) / numColumns);
+            progressable->setProgress((columnIndex * 100) / dataRect.width());
         }
     }
 
