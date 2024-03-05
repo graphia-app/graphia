@@ -195,6 +195,35 @@ QString u::parentProcessName()
 // Sigh... windows.h
 #undef min
 #undef max
+#elif defined(EMSCRIPTEN)
+#include <pthread.h>
+#include <emscripten/threading.h>
+
+#include <map>
+
+inline std::map<pthread_t, QString> emscriptenThreadNames;
+
+inline void u::setCurrentThreadName(const QString& name)
+{
+    // This is apparently only applicable when --threadprofiler is added to the linker flags...
+    emscripten_set_thread_name(pthread_self(), static_cast<const char*>(name.toUtf8().constData()));
+
+    // ...otherwise we just track our own thread names
+    emscriptenThreadNames[pthread_self()] = name;
+}
+
+inline QString u::currentThreadName()
+{
+    if(emscriptenThreadNames.contains(pthread_self()))
+        return emscriptenThreadNames.at(pthread_self());
+
+    if(emscripten_is_main_runtime_thread() == 0)
+        return QString::number(u::currentThreadId());
+
+    return {};
+}
+
+inline QString u::parentProcessName() { return {}; }
 #else
 inline void u::setCurrentThreadName(const QString&) {}
 
