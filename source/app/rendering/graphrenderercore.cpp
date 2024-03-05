@@ -1127,8 +1127,6 @@ QSize GraphRendererCore::renderSdfTexture(const GlyphMap& glyphMap, GLuint textu
     const auto renderHeight = glyphMap.images().at(0).height() / scaleFactor;
     const auto numImages = glyphMap.images().size();
 
-    glViewport(0, 0, renderWidth, renderHeight);
-
     QMatrix4x4 m;
     m.ortho(0, static_cast<float>(renderWidth), 0, static_cast<float>(renderHeight), -1.0f, 1.0f);
 
@@ -1213,6 +1211,8 @@ QSize GraphRendererCore::renderSdfTexture(const GlyphMap& glyphMap, GLuint textu
     _sdfShader.release();
 
     glDeleteFramebuffers(1, &fbo);
+
+    glDepthMask(GL_TRUE);
 
     return {renderWidth, renderHeight};
 }
