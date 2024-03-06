@@ -66,17 +66,19 @@ Item
             visible: false
         }
 
-        Label
+        NamedIcon
         {
-            text: "📌"
-            color: textColor
+            width: 16
+            height: 16
+            iconName: "pin"
             visible: root.pinned
         }
 
-        Label
+        NamedIcon
         {
-            text: "⟳"
-            color: textColor
+            width: 16
+            height: 16
+            iconName: "view-refresh"
             visible: root.repeating
         }
 
