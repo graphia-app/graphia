@@ -5967,9 +5967,9 @@ QCPLabelPainterPrivate::CachedLabel *QCPLabelPainterPrivate::createCachedLabel(c
     result->pixmap = QPixmap(labelData.rotatedTotalBounds.size()*mParentPlot->bufferDevicePixelRatio());
 #ifdef QCP_DEVICEPIXELRATIO_SUPPORTED
 #  ifdef QCP_DEVICEPIXELRATIO_FLOAT
-    result->pixmap.setDevicePixelRatio(mParentPlot->devicePixelRatioF());
+    result->pixmap.setDevicePixelRatio(mParentPlot->bufferDevicePixelRatio());
 #  else
-    result->pixmap.setDevicePixelRatio(mParentPlot->devicePixelRatio());
+    result->pixmap.setDevicePixelRatio(mParentPlot->bufferDevicePixelRatio());
 #  endif
 #endif
   } else
@@ -10240,9 +10240,9 @@ void QCPAxisPainterPrivate::placeTickLabel(QCPPainter *painter, double position,
         cachedLabel->pixmap = QPixmap(labelData.rotatedTotalBounds.size()*mParentPlot->bufferDevicePixelRatio());
 #ifdef QCP_DEVICEPIXELRATIO_SUPPORTED
 #  ifdef QCP_DEVICEPIXELRATIO_FLOAT
-        cachedLabel->pixmap.setDevicePixelRatio(mParentPlot->devicePixelRatioF());
+        cachedLabel->pixmap.setDevicePixelRatio(mParentPlot->bufferDevicePixelRatio());
 #  else
-        cachedLabel->pixmap.setDevicePixelRatio(mParentPlot->devicePixelRatio());
+        cachedLabel->pixmap.setDevicePixelRatio(mParentPlot->bufferDevicePixelRatio());
 #  endif
 #endif
       } else
