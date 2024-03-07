@@ -21,8 +21,12 @@ list(APPEND RESOURCES
     ${CMAKE_CURRENT_LIST_DIR}/ui/generic_qml.qrc
 )
 
-qt_add_plugin(${PluginName} ${LINK_TYPE} CLASS_NAME GenericPlugin
-    ${SOURCES} ${HEADERS} ${RESOURCES})
+if(LINK_TYPE STREQUAL STATIC)
+    qt_add_plugin(${PluginName} ${LINK_TYPE} CLASS_NAME GenericPlugin
+        ${SOURCES} ${HEADERS} ${RESOURCES})
+else()
+    qt_add_library(${PluginName} ${LINK_TYPE} ${SOURCES} ${HEADERS} ${RESOURCES})
+endif()
 
 if(NOT APPLE AND NOT MSVC)
     install(TARGETS ${PluginName} LIBRARY DESTINATION lib/${PROJECT_NAME}/plugins)
