@@ -760,7 +760,7 @@ void Application::loadPlugins()
                 continue;
             }
 
-            auto* iplugin = qobject_cast<IPlugin*>(plugin);
+            auto* iplugin = dynamic_cast<IPlugin*>(plugin);
             initialisePlugin(iplugin, std::move(pluginLoader));
         }
     }
@@ -771,7 +771,7 @@ void Application::loadPlugins()
 
         for(auto* staticPluginInstance : QPluginLoader::staticInstances()) // clazy:exclude=range-loop-detach
         {
-            auto* iplugin = qobject_cast<IPlugin*>(staticPluginInstance);
+            auto* iplugin = dynamic_cast<IPlugin*>(staticPluginInstance);
             initialisePlugin(iplugin, nullptr);
         }
     }
