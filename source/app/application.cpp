@@ -755,7 +755,7 @@ void Application::loadPlugins()
 
             if(plugin != nullptr)
             {
-                auto* iplugin = qobject_cast<IPlugin*>(plugin);
+                auto* iplugin = dynamic_cast<IPlugin*>(plugin);
                 if(iplugin != nullptr)
                 {
                     const bool pluginNameAlreadyUsed = std::any_of(_loadedPlugins.begin(), _loadedPlugins.end(),
