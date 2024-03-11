@@ -195,11 +195,6 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
     QtWebEngineQuick::initialize();
 #endif
 
-    // Without this setting, rendering artefacts appear on systems with
-    // non-integral scaling factors (e.g. using high DPI monitors on Windows)
-    QGuiApplication::setHighDpiScaleFactorRoundingPolicy(
-        Qt::HighDpiScaleFactorRoundingPolicy::Round);
-
     SharedTools::QtSingleApplication app(QStringLiteral(PRODUCT_NAME), argc, argv);
 
     Application::setAppDir(QCoreApplication::applicationDirPath());
