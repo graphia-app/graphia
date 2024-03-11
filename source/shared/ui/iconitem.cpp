@@ -18,6 +18,9 @@
 
 #include "iconitem.h"
 
+#include <QPainter>
+#include <QQuickWindow>
+
 IconItem::IconItem(QQuickItem* parent) : QQuickPaintedItem(parent)
 {
     // Default size
@@ -33,10 +36,21 @@ IconItem::IconItem(QQuickItem* parent) : QQuickPaintedItem(parent)
 void IconItem::paint(QPainter* painter)
 {
     auto mode = _selected ? QIcon::Selected : QIcon::Normal;
+    auto size = painter->viewport().size();
 
-    _icon.paint(painter, boundingRect().toRect(),
-        Qt::AlignCenter, isEnabled() ? mode : QIcon::Disabled,
+    auto pixmap = _icon.pixmap(this->size().toSize(),
+        isEnabled() ? mode : QIcon::Disabled,
         _on ? QIcon::On : QIcon::Off);
+
+    auto x = (size.width() - pixmap.width()) / 2;
+    auto y = (size.height() - pixmap.height()) / 2;
+
+    pixmap.setDevicePixelRatio(window()->devicePixelRatio());
+    painter->drawPixmap(x, y, pixmap);
+
+    //FIXME: there is clearly still some scaling going on here at non-1.0 DPRs, which
+    // appears like it's a scale up by the DPR, then a scale down by 1/DPR, so the
+    // image looks dimensionally correct, but has lost some fidelity in the process
 }
 
 void IconItem::setIconName(const QString& iconName)
