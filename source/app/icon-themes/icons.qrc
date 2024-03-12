@@ -22,6 +22,12 @@
 		<file>Tango/16x16/graphia/column-select.png</file>
 		<file>Tango/22x22/graphia/column-select.png</file>
 		<file>Tango/32x32/graphia/column-select.png</file>
+		<file>Tango/16x16/status/dialog-error.png</file>
+		<file>Tango/22x22/status/dialog-error.png</file>
+		<file>Tango/32x32/status/dialog-error.png</file>
+		<file>Tango/16x16/status/dialog-warning.png</file>
+		<file>Tango/22x22/status/dialog-warning.png</file>
+		<file>Tango/32x32/status/dialog-warning.png</file>
 		<file>Tango/16x16/actions/document-open.png</file>
 		<file>Tango/22x22/actions/document-open.png</file>
 		<file>Tango/32x32/actions/document-open.png</file>

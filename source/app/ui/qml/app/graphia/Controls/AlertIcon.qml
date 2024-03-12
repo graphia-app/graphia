@@ -19,20 +19,24 @@
 import QtQuick
 import QtQuick.Controls
 
+import app.graphia
 import app.graphia.Shared
 
-Image
+NamedIcon
 {
     property string type
     property string text
 
-    source:
+    width: 16
+    height: 16
+
+    iconName:
     {
         switch(type)
         {
-        case "error": return "qrc:///qml/app/graphia/Controls/error.png";
+        case "error": return "dialog-error";
         default:
-        case "warning": return "qrc:///qml/app/graphia/Controls/warning.png";
+        case "warning": return "dialog-warning";
         }
     }
 

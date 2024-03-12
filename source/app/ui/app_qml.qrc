@@ -7,7 +7,6 @@
         <file>qml/app/graphia/Controls/ColorPickButton.qml</file>
         <file>qml/app/graphia/Controls/DoubleSpinBox.qml</file>
         <file>qml/app/graphia/Controls/DraggableList.qml</file>
-        <file>qml/app/graphia/Controls/error.png</file>
         <file>qml/app/graphia/Controls/FramedScrollView.qml</file>
         <file>qml/app/graphia/Controls/GradientEditor.qml</file>
         <file>qml/app/graphia/Controls/GradientKey.qml</file>
@@ -24,7 +23,6 @@
         <file>qml/app/graphia/Controls/TreeBoxSearch.qml</file>
         <file>qml/app/graphia/Controls/TreeComboBox.qml</file>
         <file>qml/app/graphia/Controls/Tutorial.qml</file>
-        <file>qml/app/graphia/Controls/warning.png</file>
         <file>qml/app/graphia/Controls/qmldir</file>
         <file>qml/app/graphia/Utils/qmldir</file>
         <file>qml/AboutDialog.qml</file>
