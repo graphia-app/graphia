@@ -182,7 +182,7 @@ Rectangle
                 return parent.indexAt(mouse.x + parent.contentX, mouse.y + parent.contentY);
             }
 
-            onWheel: function(wheel) { parent.flick(0, wheel.angleDelta.y * 5); }
+            onWheel: function(wheel) { parent.flick(0, wheel.angleDelta.y * 16); }
 
             onPressed: function(mouse)
             {

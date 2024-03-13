@@ -540,7 +540,7 @@ Item
                 MouseArea
                 {
                     anchors.fill: parent
-                    onWheel: function(wheel) { treeView.flick(0, wheel.angleDelta.y * (root.height > 150.0 ? 6 : 4)); }
+                    onWheel: function(wheel) { treeView.flick(0, wheel.angleDelta.y * 16); }
                 }
 
                 onContentYChanged: { parentGuideTimer.restart(); }
