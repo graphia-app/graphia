@@ -458,6 +458,7 @@ Item
                             // On some styles, the background can't be changed, so we display the selection
                             // marker separately (see above), and hide the original background entirely
                             background.visible = false;
+                            background.implicitHeight = 0;
 
                             if(contentItem instanceof Text)
                             {
