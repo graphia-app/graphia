@@ -91,8 +91,8 @@ Rectangle
 
     property Component delegate: Label
     {
-        anchors.left: parent.left
-        anchors.right: parent.right
+        anchors.left: parent ? parent.left : undefined
+        anchors.right: parent ? parent.right : undefined
         anchors.leftMargin: -leftInset
         rightPadding: root.scrollBarWidth
         leftInset: -8
