@@ -46,7 +46,7 @@ Rectangle
             gradient.addColorStop(0, palette.light);
             gradient.addColorStop(0.05, Qt.lighter(palette.window, gradientFactor));
             gradient.addColorStop(0.95, Qt.darker(palette.window, gradientFactor));
-            gradient.addColorStop(1, palette.shadow);
+            gradient.addColorStop(1, palette.dark);
 
             context.fillStyle = gradient;
             context.fillRect(0, 0, parent.width, parent.height);
