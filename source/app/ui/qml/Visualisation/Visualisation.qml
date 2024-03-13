@@ -325,7 +325,6 @@ Item
 
                     text: qsTr("Enabled")
                     checkable: true
-                    enabled: !root._error
 
                     onCheckedChanged:
                     {
