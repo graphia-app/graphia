@@ -646,7 +646,10 @@ Item
         if(flags.length > 0)
             flagsString = "[" + flags.toString() + "] ";
 
-        let newExpression = flagsString + attributeList.selectedValue + " \"" + channel + "\"";
+        let newAttributeName = attributeList.selectedValue ?
+            attributeList.selectedValue :
+            " \"" + root.attributeName + "\"";
+        let newExpression = flagsString + newAttributeName + " \"" + channel + "\"";
 
         if(Object.keys(parameters).length !== 0)
             newExpression += " with";
