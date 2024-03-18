@@ -3,7 +3,7 @@ on: [push, pull_request]
 env:
   QT_VERSION: 6.6.3
   QT_MODULES: qtwebengine qtwebchannel qtpositioning
-  GCC_VERSION: 11
+  GCC_VERSION: 13
   CLANG_VERSION: 17
 
 jobs:
