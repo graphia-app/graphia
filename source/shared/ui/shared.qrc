@@ -10,8 +10,6 @@
         <file>qml/app/graphia/Shared/Controls/ListTab.qml</file>
         <file>qml/app/graphia/Shared/Controls/ListTabView.qml</file>
         <file>qml/app/graphia/Shared/Controls/NodeAttributeTableView.qml</file>
-        <file>qml/app/graphia/Shared/Controls/Outline.qml</file>
-        <file>qml/app/graphia/Shared/Controls/+macos/Outline.qml</file>
         <file>qml/app/graphia/Shared/Controls/PlatformMenuItem.qml</file>
         <file>qml/app/graphia/Shared/Controls/PlatformMenu.qml</file>
         <file>qml/app/graphia/Shared/Controls/PlatformMenuBar.qml</file>

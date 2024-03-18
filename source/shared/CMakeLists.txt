@@ -67,6 +67,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/ui/iconitem.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/idocument.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/iselectionmanager.h
+    ${CMAKE_CURRENT_LIST_DIR}/ui/outline.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/defaultgradients.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/defaultpalettes.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/ielementvisual.h
@@ -156,6 +157,7 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/plugins/tableproxymodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/updates/updates.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/iconitem.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ui/outline.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/colorgradient.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/colorpalette.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/apppathname.cpp
