@@ -45,8 +45,8 @@ void Outline::paint(QPainter* painter)
     if(!_outlineVisible)
         return;
 
-    qreal outlineWidth = _outlineWidth * _widthModifier;
-    qreal halfOutlineWidth = outlineWidth * 0.5;
+    const qreal outlineWidth = _outlineWidth * _widthModifier;
+    const qreal halfOutlineWidth = outlineWidth * 0.5;
 
     painter->setPen(QPen(_qmlControlColors.outline(), outlineWidth, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin));
     painter->drawRect(QRectF(halfOutlineWidth, halfOutlineWidth,
