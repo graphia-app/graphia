@@ -26,6 +26,7 @@ FloatingButton
 
     padding: 5
     implicitHeight: 42
+    scaleIconToFill: true
     selected: down
 
     background: Rectangle

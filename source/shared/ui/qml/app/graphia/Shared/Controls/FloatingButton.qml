@@ -30,6 +30,7 @@ AbstractButton
     id: root
 
     property double hoverOpacity: 1.0
+    property bool scaleIconToFill: false
     property alias selected: namedIcon.selected
 
     implicitHeight: 32
@@ -71,6 +72,7 @@ AbstractButton
             Layout.preferredWidth: height
             Layout.preferredHeight: root.height - (root.topPadding + root.bottomPadding)
             iconName: parent._iconName
+            fill: root.scaleIconToFill
         }
 
         Text
