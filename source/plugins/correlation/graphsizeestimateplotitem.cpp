@@ -85,12 +85,10 @@ void GraphSizeEstimatePlotItem::updateThresholdIndicator()
 
     // Clamp the indicator x coordinate to within the bounds of the
     // plot by a small margin, so that it's always visible
-    auto bounds = std::minmax(
-        std::as_const(_keys).first(),
-        std::as_const(_keys).last());
+    auto firstKey = std::as_const(_keys).first();
+    auto lastKey = std::as_const(_keys).last();
+    auto [smallestKey, largestKey] = std::minmax(firstKey, lastKey);
 
-    auto smallestKey = bounds.first;
-    auto largestKey = bounds.second;
     const double keepVisibleOffset = (largestKey - smallestKey) * 0.002;
 
     auto x = std::clamp(_threshold,
