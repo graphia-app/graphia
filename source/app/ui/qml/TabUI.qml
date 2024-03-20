@@ -649,8 +649,6 @@ Item
                 {
                     id: contextMenu
 
-                    onAboutToHide: { contextMenu.clickedNodeId = undefined; }
-
                     TextMetrics
                     {
                         id: elidedNodeName
