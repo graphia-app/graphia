@@ -31,6 +31,7 @@ IconItem::IconItem(QQuickItem* parent) : QQuickPaintedItem(parent)
     connect(this, &IconItem::iconNameChanged, [this] { update(); });
     connect(this, &IconItem::onChanged, [this] { update(); });
     connect(this, &IconItem::selectedChanged, [this] { update(); });
+    connect(this, &IconItem::fillChanged, [this] { update(); });
 }
 
 void IconItem::paint(QPainter* painter)
@@ -42,11 +43,17 @@ void IconItem::paint(QPainter* painter)
         isEnabled() ? mode : QIcon::Disabled,
         _on ? QIcon::On : QIcon::Off);
 
-    auto x = static_cast<double>((size.width() - pixmap.width())) / (2.0 * window()->devicePixelRatio());
-    auto y = static_cast<double>((size.height() - pixmap.height())) / (2.0 * window()->devicePixelRatio());
-
     pixmap.setDevicePixelRatio(window()->devicePixelRatio());
-    painter->drawPixmap(static_cast<int>(x), static_cast<int>(y), pixmap);
+
+    if(!_fill)
+    {
+        auto x = static_cast<double>((size.width() - pixmap.width())) / (2.0 * window()->devicePixelRatio());
+        auto y = static_cast<double>((size.height() - pixmap.height())) / (2.0 * window()->devicePixelRatio());
+
+        painter->drawPixmap(static_cast<int>(x), static_cast<int>(y), pixmap);
+    }
+    else
+        painter->drawPixmap(boundingRect().toRect(), pixmap);
 
     //FIXME: there is clearly still some scaling going on here at non-1.0 DPRs, which
     // appears like it's a scale up by the DPR, then a scale down by 1/DPR, so the

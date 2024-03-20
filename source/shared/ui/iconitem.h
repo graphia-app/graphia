@@ -33,6 +33,7 @@ class IconItem : public QQuickPaintedItem
     Q_PROPERTY(QString iconName READ iconName WRITE setIconName NOTIFY iconNameChanged)
     Q_PROPERTY(bool on MEMBER _on NOTIFY onChanged)
     Q_PROPERTY(bool selected MEMBER _selected NOTIFY selectedChanged)
+    Q_PROPERTY(bool fill MEMBER _fill NOTIFY fillChanged)
     Q_PROPERTY(bool valid READ valid NOTIFY validChanged)
 
 public:
@@ -48,12 +49,14 @@ private:
     QString _iconName;
     bool _on = false;
     bool _selected = false;
+    bool _fill = false;
     QIcon _icon;
 
 signals:
     void iconNameChanged();
     void onChanged();
     void selectedChanged();
+    void fillChanged();
     void validChanged();
 };
 
