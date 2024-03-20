@@ -25,3 +25,4 @@ let padding = 4;
 
 let toolTipDelay = 750;
 
+let mouseWheelStep = Qt.platform.os === "linux" ? 32 : 8;

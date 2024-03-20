@@ -541,7 +541,7 @@ Item
                 MouseArea
                 {
                     anchors.fill: parent
-                    onWheel: function(wheel) { treeView.flick(0, wheel.angleDelta.y * 16); }
+                    onWheel: function(wheel) { treeView.flick(0, wheel.angleDelta.y * Constants.mouseWheelStep); }
                 }
 
                 onContentYChanged: { parentGuideTimer.restart(); }
