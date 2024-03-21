@@ -23,10 +23,14 @@ import app.graphia
 
 MenuItem
 {
+    id: root
+
     property bool hidden: false
 
     clip: true
     height: hidden ? 0 : implicitHeight
+
+    property color _textColor: root.down || root.highlighted ? palette.highlightedText : palette.text
 
     Label
     {
@@ -36,7 +40,7 @@ MenuItem
         anchors.verticalCenter: parent.verticalCenter
 
         text: action && action.shortcut ? QmlUtils.nativeShortcutSequence(action.shortcut) : ""
-        color: highlighted ? palette.highlightedText : palette.text
+        color: root._textColor
     }
 
     Component.onCompleted:
@@ -49,5 +53,7 @@ MenuItem
         rightPadding = Qt.binding(() =>
             (shortcutLabel.text.length > 0 ? shortcutLabelSpacing + shortcutLabel.implicitWidth : 0) +
             defaultRightPadding);
+
+        contentItem.color = Qt.binding(() => root._textColor);
     }
 }
