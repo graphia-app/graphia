@@ -19,6 +19,8 @@
 import QtQuick
 import QtQuick.Controls
 
+import app.graphia.Shared
+
 Menu
 {
     property bool hidden: false
