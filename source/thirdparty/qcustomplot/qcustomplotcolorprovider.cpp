@@ -18,23 +18,25 @@
 
 #include "qcustomplotcolorprovider.h"
 
+#include "shared/utils/shadedcolors.h"
+
 #include <QGuiApplication>
 #include <QPalette>
 
 QColor QCustomPlotColorProvider::backgroundColor()
 {
     auto palette = QGuiApplication::palette();
-    return palette.color(QPalette::Light);
+    return ShadedColors::light(palette);
 }
 
 QColor QCustomPlotColorProvider::lightPenColor()
 {
     auto palette = QGuiApplication::palette();
-    return palette.color(QPalette::Mid);
+    return ShadedColors::mid(palette);
 }
 
 QColor QCustomPlotColorProvider::penColor()
 {
     auto palette = QGuiApplication::palette();
-    return palette.color(QPalette::Text);
+    return ShadedColors::darkest(palette);
 }
