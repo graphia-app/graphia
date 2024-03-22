@@ -40,6 +40,14 @@ class QmlControlColors : public QObject
     Q_PROPERTY(QColor tableRow1 READ tableRow1 NOTIFY paletteChanged)
     Q_PROPERTY(QColor tableRow2 READ tableRow2 NOTIFY paletteChanged)
 
+    Q_PROPERTY(QColor light READ light NOTIFY paletteChanged)
+    Q_PROPERTY(QColor neutral READ neutral NOTIFY paletteChanged)
+    Q_PROPERTY(QColor midlight READ midlight NOTIFY paletteChanged)
+    Q_PROPERTY(QColor mid READ mid NOTIFY paletteChanged)
+    Q_PROPERTY(QColor dark READ dark NOTIFY paletteChanged)
+    Q_PROPERTY(QColor shadow READ shadow NOTIFY paletteChanged)
+    Q_PROPERTY(QColor darkest READ darkest NOTIFY paletteChanged)
+
 public:
     explicit QmlControlColors(QObject* parent = nullptr);
     static QObject* qmlInstance(QQmlEngine*, QJSEngine*);
@@ -48,6 +56,14 @@ public:
     QColor background() const;
     QColor tableRow1() const;
     QColor tableRow2() const;
+
+    QColor light() const;
+    QColor neutral() const;
+    QColor midlight() const;
+    QColor mid() const;
+    QColor dark() const;
+    QColor shadow() const;
+    QColor darkest() const;
 
 protected:
     bool eventFilter(QObject* watched, QEvent* event) override;

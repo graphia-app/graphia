@@ -18,6 +18,8 @@
 
 #include "qmlcontrolcolors.h"
 
+#include "shared/utils/shadedcolors.h"
+
 #include <QStyleHints>
 
 QmlControlColors::QmlControlColors(QObject* parent) :
@@ -50,25 +52,15 @@ bool QmlControlColors::eventFilter(QObject* watched, QEvent* event)
     return QObject::eventFilter(watched, event);
 }
 
-QColor QmlControlColors::outline() const
-{
-    auto colorScheme = QGuiApplication::styleHints()->colorScheme();
+QColor QmlControlColors::outline() const    { return mid(); }
+QColor QmlControlColors::background() const { return light(); }
+QColor QmlControlColors::tableRow1() const  { return light(); }
+QColor QmlControlColors::tableRow2() const  { return midlight(); }
 
-    return colorScheme == Qt::ColorScheme::Light ?
-        _palette.color(QPalette::Mid) : _palette.color(QPalette::Dark);
-}
-
-QColor QmlControlColors::background() const
-{
-    return _palette.color(QPalette::Light);
-}
-
-QColor QmlControlColors::tableRow1() const
-{
-    return _palette.color(QPalette::Light);
-}
-
-QColor QmlControlColors::tableRow2() const
-{
-    return _palette.color(QPalette::Button);
-}
+QColor QmlControlColors::light() const      { return ShadedColors::light(_palette); }
+QColor QmlControlColors::neutral() const    { return ShadedColors::neutral(_palette); }
+QColor QmlControlColors::midlight() const   { return ShadedColors::midlight(_palette); }
+QColor QmlControlColors::mid() const        { return ShadedColors::mid(_palette); }
+QColor QmlControlColors::dark() const       { return ShadedColors::dark(_palette); }
+QColor QmlControlColors::shadow() const     { return ShadedColors::shadow(_palette); }
+QColor QmlControlColors::darkest() const    { return ShadedColors::darkest(_palette); }
