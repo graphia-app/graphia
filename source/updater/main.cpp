@@ -25,6 +25,7 @@
 #include "shared/utils/preferences.h"
 #include "shared/utils/consolecapture.h"
 #include "shared/utils/qmlcontrolcolors.h"
+#include "shared/utils/static_block.h"
 
 #include <QApplication>
 #include <QQmlApplicationEngine>
@@ -156,6 +157,10 @@ QStringList showUpdater(int argc, char *argv[])
 // NOLINTNEXTLINE bugprone-exception-escape
 int main(int argc, char *argv[])
 {
+    Q_INIT_RESOURCE(shared);
+
+    execute_static_blocks();
+
     QApplication::setOrganizationName(u"Graphia"_s);
     QApplication::setOrganizationDomain(u"graphia.app"_s);
     QApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
