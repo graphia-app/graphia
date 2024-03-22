@@ -19,6 +19,8 @@
 import QtQuick
 import QtQuick.Controls
 
+import app.graphia
+
 Rectangle
 {
     property ScrollBar horizontalScrollBar
@@ -38,6 +40,6 @@ Rectangle
         if(!verticalScrollBar || !verticalScrollBar.background)
             return "transparent";
 
-        return palette.midlight;
+        return ControlColors.midlight;
     }
 }

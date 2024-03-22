@@ -23,6 +23,7 @@ import QtQuick.Dialogs
 
 import Qt.labs.platform as Labs
 
+import app.graphia
 import app.graphia.Shared
 
 Item
@@ -248,7 +249,7 @@ Item
                         id: canvas
 
                         property color fillColor: modelData.color
-                        property color borderColor: palette.dark
+                        property color borderColor: ControlColors.dark
 
                         property bool highlighted: picker.selected === marker
 
@@ -277,9 +278,9 @@ Item
                             ctx.stroke();
                             ctx.restore();
 
-                            ctx.fillStyle = palette.mid;
+                            ctx.fillStyle = ControlColors.mid;
                             if(highlighted)
-                                ctx.fillStyle = palette.light;
+                                ctx.fillStyle = ControlColors.light;
 
                             // Triangle cap
                             ctx.beginPath();
@@ -369,8 +370,8 @@ Item
 
         visible: false
 
-        color: palette.light
-        border.color: palette.midlight
+        color: ControlColors.light
+        border.color: ControlColors.midlight
         border.width: 1
 
         property alias text: toolTipText.text

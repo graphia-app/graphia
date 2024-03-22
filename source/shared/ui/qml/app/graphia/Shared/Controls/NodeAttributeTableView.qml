@@ -745,7 +745,7 @@ Item
                             ShapePath
                             {
                                 miterLimit: 0
-                                strokeColor: palette.mid
+                                strokeColor: ControlColors.mid
                                 fillColor: "transparent"
                                 strokeWidth: 2
                                 startY: sortIndicator.height - 1

@@ -19,6 +19,7 @@
 import QtQuick
 import QtQuick.Controls
 
+import app.graphia
 import app.graphia.Shared.Controls
 
 Item
@@ -26,7 +27,7 @@ Item
     id: root
 
     property real radius: height * 0.1
-    property color color: palette.light
+    property color color: ControlColors.light
     property color hoverColor: color
     property bool propogatePresses: false
 

@@ -21,6 +21,7 @@ import QtQuick.Window
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import app.graphia
 import app.graphia.Shared
 
 BaseParameterDialog
@@ -77,13 +78,13 @@ BaseParameterDialog
 
                     ctx.save();
                     ctx.clearRect(0, 0, width, height);
-                    ctx.strokeStyle = palette.dark;
-                    ctx.fillStyle = palette.dark;
+                    ctx.strokeStyle = ControlColors.dark;
+                    ctx.fillStyle = ControlColors.dark;
 
                     ctx.lineJoin = "round";
                     ctx.lineWidth = 1;
 
-                    ctx.strokeStyle = palette.dark;
+                    ctx.strokeStyle = ControlColors.dark;
 
                     // Draw lines between pips
                     //let pipNum = 0;
@@ -98,8 +99,8 @@ BaseParameterDialog
                     // Draw pips
                     for(let pipNum = 0; pipNum < listPages.length; pipNum++)
                     {
-                        ctx.strokeStyle = palette.dark;
-                        ctx.fillStyle = palette.dark;
+                        ctx.strokeStyle = ControlColors.dark;
+                        ctx.fillStyle = ControlColors.dark;
 
                         let left = _padding + (pipNum * spacing);
                         let top = topPip;

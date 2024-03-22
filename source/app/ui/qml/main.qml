@@ -2970,7 +2970,7 @@ ApplicationWindow
                 visible: tabBar.count > 1
 
                 height: 1
-                color: palette.mid
+                color: ControlColors.mid
             }
 
             StackLayout

@@ -18,6 +18,7 @@
 
 import QtQuick
 
+import app.graphia
 import app.graphia.Shared
 
 Rectangle
@@ -43,15 +44,15 @@ Rectangle
             let gradient = context.createLinearGradient(0, 0,
                 parent.orientation === Qt.Horizontal ? parent.width  : 0,
                 parent.orientation !== Qt.Horizontal ? parent.height : 0);
-            gradient.addColorStop(0, palette.light);
-            gradient.addColorStop(0.05, Qt.lighter(palette.window, gradientFactor));
-            gradient.addColorStop(0.95, Qt.darker(palette.window, gradientFactor));
-            gradient.addColorStop(1, palette.dark);
+            gradient.addColorStop(0, ControlColors.light);
+            gradient.addColorStop(0.05, Qt.lighter(ControlColors.neutral, gradientFactor));
+            gradient.addColorStop(0.95, Qt.darker(ControlColors.neutral, gradientFactor));
+            gradient.addColorStop(1, ControlColors.dark);
 
             context.fillStyle = gradient;
             context.fillRect(0, 0, parent.width, parent.height);
 
-            context.fillStyle = palette.midlight;
+            context.fillStyle = ControlColors.midlight;
 
             const numPips = 4;
             const pipSize = 1.5;
@@ -73,7 +74,7 @@ Rectangle
 
                 context.fill();
                 context.lineWidth = 0.7;
-                context.strokeStyle = palette.mid;
+                context.strokeStyle = ControlColors.mid;
                 context.stroke();
 
                 if(parent.orientation === Qt.Vertical)

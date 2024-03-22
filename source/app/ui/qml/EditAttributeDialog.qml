@@ -579,7 +579,7 @@ Window
                                 ShapePath
                                 {
                                     miterLimit: 0
-                                    strokeColor: palette.mid
+                                    strokeColor: ControlColors.mid
                                     fillColor: "transparent"
                                     strokeWidth: 2
                                     startY: sortIndicator.height - 1
@@ -700,7 +700,7 @@ Window
                         {
                             implicitWidth: 5
                             radius: width / 2
-                            color: palette.dark
+                            color: ControlColors.dark
                         }
                         minimumSize: 0.1
                         visible: size < 1.0 && tableView.rows > 0

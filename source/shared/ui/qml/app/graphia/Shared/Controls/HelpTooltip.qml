@@ -94,7 +94,7 @@ NamedIcon
             anchors.fill: parent
             color: Qt.rgba(0.96, 0.96, 0.96, 0.96)
             border.width: 1
-            border.color: palette.dark
+            border.color: ControlColors.dark
             radius: 3
         }
 

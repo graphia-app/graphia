@@ -205,7 +205,7 @@ Rectangle
     border.color: ControlColors.outline
     border.width: 1
     radius: 4
-    color: !root._interrupted ? ControlColors.background : palette.mid
+    color: !root._interrupted ? ControlColors.background : ControlColors.mid
 
     Action
     {
@@ -443,7 +443,7 @@ Rectangle
                             else
                                 return qsTr("Not Found");
                         }
-                        color: Qt.platform.os === "osx" ? palette.dark : palette.mid
+                        color: ControlColors.mid
                     }
 
                     MouseArea
