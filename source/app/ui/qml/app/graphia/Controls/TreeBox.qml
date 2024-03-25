@@ -104,24 +104,34 @@ Item
     {
         anchors.fill: root
 
-        TreeBoxSearch
+        Item
         {
+            // This is a hack to avoid a bug on macOS where the layout
+            // gets out of whack and ends up shorter than it should be
             id: treeBoxSearch
 
             Layout.fillWidth: true
+            height: _treeBoxSearch.height
 
             visible: false
 
-            onVisibleChanged:
+            TreeBoxSearch
             {
-                searchButton.checked = visible;
+                id: _treeBoxSearch
 
-                if(!visible)
-                    treeView.forceActiveFocus();
+                width: parent.width
+
+                onVisibleChanged:
+                {
+                    searchButton.checked = visible;
+
+                    if(!visible)
+                        treeView.forceActiveFocus();
+                }
+
+                treeBox: root
+                onAccepted: { visible = false; }
             }
-
-            treeBox: root
-            onAccepted: { visible = false; }
         }
 
         Rectangle
