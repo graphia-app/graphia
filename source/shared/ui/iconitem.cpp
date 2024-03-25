@@ -53,7 +53,12 @@ void IconItem::paint(QPainter* painter)
         painter->drawPixmap(static_cast<int>(x), static_cast<int>(y), pixmap);
     }
     else
+    {
+        if(boundingRect().size() != pixmap.size().toSizeF())
+            painter->setRenderHint(QPainter::SmoothPixmapTransform);
+
         painter->drawPixmap(boundingRect().toRect(), pixmap);
+    }
 
     //FIXME: there is clearly still some scaling going on here at non-1.0 DPRs, which
     // appears like it's a scale up by the DPR, then a scale down by 1/DPR, so the
