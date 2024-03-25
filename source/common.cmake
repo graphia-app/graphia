@@ -59,6 +59,13 @@ endif()
 if(APPLE)
     # https://stackoverflow.com/questions/52310835
     add_definitions(-D_LIBCPP_DISABLE_AVAILABILITY)
+
+    if(CMAKE_VERSION VERSION_LESS "3.29.0")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-no_warn_duplicate_libraries")
+        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-no_warn_duplicate_libraries")
+    else()
+        message(FATAL_ERROR "In theory -no_warn_duplicate_libraries in no longer required post CMake 3.29 (CMP0156)")
+    endif()
 endif()
 
 # C++17 notionally removed std::unary_function

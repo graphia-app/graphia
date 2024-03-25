@@ -358,7 +358,7 @@ elseif(MSVC)
     file(APPEND ${PROJECT_BINARY_DIR}/variables.bat "SET \"NATIVE_EXTENSION=${NativeExtension}\"\n")
 endif()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE thirdparty_static thirdparty shared)
+target_link_libraries(${PROJECT_NAME} PRIVATE shared)
 
 if(LINK_TYPE STREQUAL STATIC)
     # Link with all of the available plugins in the static build case
