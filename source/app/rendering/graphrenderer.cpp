@@ -1203,13 +1203,12 @@ void GraphRenderer::render()
         return;
     }
 
-    QQuickOpenGLUtils::resetOpenGLState();
+    updateScene();
 
+    QQuickOpenGLUtils::resetOpenGLState();
     glViewport(0, 0, width(), height());
 
-    updateScene();
     renderGraph();
-
     render2D(_selectionRect);
 
     // Check the normal FBO
