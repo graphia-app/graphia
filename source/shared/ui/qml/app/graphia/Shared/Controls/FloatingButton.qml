@@ -30,7 +30,10 @@ AbstractButton
     id: root
 
     property double hoverOpacity: 1.0
+
+    // This probably doesn't make sense if we ever use icons bigger than 32x32
     property bool scaleIconToFill: Screen.devicePixelRatio >= 2.0
+
     property alias selected: namedIcon.selected
 
     implicitHeight: 32
