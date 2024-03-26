@@ -28,7 +28,7 @@ QmlControlColors::QmlControlColors(QObject* parent) :
     QCoreApplication::instance()->installEventFilter(this);
 
     connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged,
-        this, &QmlControlColors::paletteChanged);
+        [this] { emit colorSchemeChanged(); });
 
     connect(this, &QmlControlColors::paletteChanged, [this]
     {

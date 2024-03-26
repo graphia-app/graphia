@@ -48,7 +48,7 @@ class QmlControlColors : public QObject
     Q_PROPERTY(QColor shadow READ shadow NOTIFY paletteChanged)
     Q_PROPERTY(QColor darkest READ darkest NOTIFY paletteChanged)
 
-    Q_PROPERTY(Qt::ColorScheme scheme READ scheme NOTIFY paletteChanged)
+    Q_PROPERTY(Qt::ColorScheme scheme READ scheme NOTIFY colorSchemeChanged)
 
 public:
     explicit QmlControlColors(QObject* parent = nullptr);
@@ -77,6 +77,7 @@ private:
 
 signals:
     void paletteChanged();
+    void colorSchemeChanged();
 };
 
 static_block
