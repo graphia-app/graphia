@@ -115,19 +115,19 @@ Item
 
             visible: false
 
+            onVisibleChanged:
+            {
+                searchButton.checked = visible;
+
+                if(!visible)
+                    treeView.forceActiveFocus();
+            }
+
             TreeBoxSearch
             {
                 id: _treeBoxSearch
 
                 width: parent.width
-
-                onVisibleChanged:
-                {
-                    searchButton.checked = visible;
-
-                    if(!visible)
-                        treeView.forceActiveFocus();
-                }
 
                 treeBox: root
                 onAccepted: { visible = false; }
