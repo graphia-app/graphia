@@ -99,12 +99,12 @@ public:
     void executeOnce(CommandFn&& executeFn, const QString& commandDescription)
     {
         execute(ExecutePolicy::Once, std::make_unique<Command>(Command::CommandDescription{commandDescription,
-            commandDescription, commandDescription}, executeFn));
+            commandDescription, commandDescription}, std::move(executeFn)));
     }
 
     void executeOnce(CommandFn&& executeFn, const Command::CommandDescription& commandDescription = {})
     {
-        execute(ExecutePolicy::Once, std::make_unique<Command>(commandDescription, executeFn));
+        execute(ExecutePolicy::Once, std::make_unique<Command>(commandDescription, std::move(executeFn)));
     }
 
     virtual void setPhase(const QString& phase) = 0;

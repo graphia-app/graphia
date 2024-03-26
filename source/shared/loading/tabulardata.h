@@ -69,7 +69,7 @@ public:
     const QString& valueAt(size_t column, size_t row) const;
 
     void setTransposed(bool transposed) { _transposed = transposed; }
-    void setValueAt(size_t column, size_t row, QString&& value, int progressHint = -1);
+    void setValueAt(size_t column, size_t row, const QString& value, int progressHint = -1);
 
     void shrinkToFit();
     void reset();

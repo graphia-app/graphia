@@ -92,10 +92,8 @@ public:
     };
 
     Command(const CommandDescription& commandDescription,
-            // cppcheck-suppress passedByValue
-            CommandFn executeFn,
-            // cppcheck-suppress passedByValue
-            CommandFn undoFn = [](Command&) { qFatal("undoFn not implemented"); }) :
+            CommandFn&& executeFn,
+            CommandFn&& undoFn = [](Command&) { qFatal("undoFn not implemented"); }) :
         _description(commandDescription._description),
         _verb(commandDescription._verb),
         _pastParticiple(commandDescription._pastParticiple),

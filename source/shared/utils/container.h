@@ -83,7 +83,7 @@ namespace u
         return contains(container, value, 0);
     }
 
-    template<typename C, typename T> bool containsAnyOf(const C& container, std::initializer_list<T>&& values)
+    template<typename C, typename T> bool containsAnyOf(const C& container, const std::initializer_list<T>& values)
     {
         return std::any_of(values.begin(), values.end(), [&container](const auto& value)
         {
@@ -91,7 +91,7 @@ namespace u
         });
     }
 
-    template<typename C, typename T> bool containsAllOf(const C& container, std::initializer_list<T>&& values)
+    template<typename C, typename T> bool containsAllOf(const C& container, const std::initializer_list<T>& values)
     {
         return std::all_of(values.begin(), values.end(), [&container](const auto& value)
         {

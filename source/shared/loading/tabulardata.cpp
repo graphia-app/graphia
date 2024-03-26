@@ -83,7 +83,7 @@ size_t TabularData::numRows() const
     return !_transposed ? _rows : _columns;
 }
 
-void TabularData::setValueAt(size_t column, size_t row, QString&& value, int progressHint)
+void TabularData::setValueAt(size_t column, size_t row, const QString& value, int progressHint)
 {
     const size_t columns = column >= _columns ? column + 1 : _columns;
     const size_t rows = row >= _rows ? row + 1 : _rows;

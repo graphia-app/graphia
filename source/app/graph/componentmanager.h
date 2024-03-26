@@ -45,7 +45,7 @@ private:
 
 public:
     ComponentSplitSet(ComponentId oldComponentId, ComponentIdSet&& splitters) :
-        _oldComponentId(oldComponentId), _splitters(splitters)
+        _oldComponentId(oldComponentId), _splitters(std::move(splitters))
     {
         Q_ASSERT(!oldComponentId.isNull());
         Q_ASSERT(!std::any_of(_splitters.begin(), _splitters.end(),
@@ -64,7 +64,7 @@ private:
 
 public:
     ComponentMergeSet(ComponentIdSet&& mergers, ComponentId newComponentId) :
-        _mergers(mergers), _newComponentId(newComponentId)
+        _mergers(std::move(mergers)), _newComponentId(newComponentId)
     {
         Q_ASSERT(!newComponentId.isNull());
         Q_ASSERT(!std::any_of(_mergers.begin(), _mergers.end(),

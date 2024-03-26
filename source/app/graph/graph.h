@@ -75,12 +75,6 @@ public:
                   _targetId(other.targetId())
     {}
 
-    explicit Edge(IEdge&& other) noexcept :
-                  _id(other.id()),
-                  _sourceId(other.sourceId()),
-                  _targetId(other.targetId())
-    {}
-
     Edge& operator=(const IEdge& other)
     {
         if(this != &other)
