@@ -529,7 +529,7 @@ void CorrelationPlotItem::onClickColumnAnnotation(const QCPAxisRect* axisRect, c
         break;
 
     case PlotMode::RowsOfInterestColumnSelection:
-        const auto& plottable = axisRect->plottables().at(0);
+        const auto* plottable = axisRect->plottables().at(0);
         const auto* qcpColumnAnnotations = dynamic_cast<const QCPColumnAnnotations*>(plottable);
         const auto* rect = qcpColumnAnnotations->rectAt(
             static_cast<size_t>(p.x()), *columnAnnotations.at(static_cast<size_t>(p.y())));
