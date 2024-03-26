@@ -64,3 +64,8 @@ QColor QmlControlColors::mid() const        { return ShadedColors::mid(_palette)
 QColor QmlControlColors::dark() const       { return ShadedColors::dark(_palette); }
 QColor QmlControlColors::shadow() const     { return ShadedColors::shadow(_palette); }
 QColor QmlControlColors::darkest() const    { return ShadedColors::darkest(_palette); }
+
+Qt::ColorScheme QmlControlColors::scheme() const
+{
+    return QGuiApplication::styleHints()->colorScheme();
+}

@@ -48,6 +48,8 @@ class QmlControlColors : public QObject
     Q_PROPERTY(QColor shadow READ shadow NOTIFY paletteChanged)
     Q_PROPERTY(QColor darkest READ darkest NOTIFY paletteChanged)
 
+    Q_PROPERTY(Qt::ColorScheme scheme READ scheme NOTIFY paletteChanged)
+
 public:
     explicit QmlControlColors(QObject* parent = nullptr);
     static QObject* qmlInstance(QQmlEngine*, QJSEngine*);
@@ -64,6 +66,8 @@ public:
     QColor dark() const;
     QColor shadow() const;
     QColor darkest() const;
+
+    Qt::ColorScheme scheme() const;
 
 protected:
     bool eventFilter(QObject* watched, QEvent* event) override;
