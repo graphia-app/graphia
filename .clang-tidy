@@ -38,6 +38,7 @@ Checks: >
     -llvmlibc-*,
     llvm-namespace-comment,
     -misc-definitions-in-headers,
+    -misc-include-cleaner,
     -misc-non-private-member-variables-in-classes,
     -misc-no-recursion,
     -misc-unused-parameters,
