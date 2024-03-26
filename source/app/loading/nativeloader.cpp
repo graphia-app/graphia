@@ -125,6 +125,8 @@ static bool decompress(const QString& filePath, QByteArray& byteArray,
             case Z_DATA_ERROR:
             case Z_MEM_ERROR:
                 return false;
+
+            default: break;
             }
 
             numBytes = ChunkSize - static_cast<int>(zstream.avail_out);

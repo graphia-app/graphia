@@ -108,6 +108,7 @@ QVariant EditAttributeTableModel::data(const QModelIndex& index, int role) const
     {
     case LabelRole:     column = 0; break;
     case AttributeRole: column = 1; break;
+    default: break;
     }
 
     if(_attribute == nullptr)

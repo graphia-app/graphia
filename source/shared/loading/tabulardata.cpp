@@ -355,6 +355,7 @@ QString TabularData::contentIdentityOf(const QUrl& url)
         case ',':  identity = u"CSV"_s; break;
         case ';':  identity = u"SSV"_s; break;
         case '\t': identity = u"TSV"_s; break;
+        default: break;
         }
     }
 
