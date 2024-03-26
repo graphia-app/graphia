@@ -30,10 +30,10 @@ template<typename Enum>
 constexpr bool EnableBitMaskOperators = false;
 
 template<typename Enum>
-typename std::enable_if<EnableBitMaskOperators<Enum>, Enum>::type
+typename std::enable_if_t<EnableBitMaskOperators<Enum>, Enum>
 operator|(Enum lhs, Enum rhs)
 {
-    using underlying = typename std::underlying_type<Enum>::type;
+    using underlying = typename std::underlying_type_t<Enum>;
 
     return static_cast<Enum>(
         static_cast<underlying>(lhs) |
@@ -42,10 +42,10 @@ operator|(Enum lhs, Enum rhs)
 }
 
 template<typename Enum>
-typename std::enable_if<EnableBitMaskOperators<Enum>, Enum>::type
+typename std::enable_if_t<EnableBitMaskOperators<Enum>, Enum>
 operator&(Enum lhs, Enum rhs)
 {
-    using underlying = typename std::underlying_type<Enum>::type;
+    using underlying = typename std::underlying_type_t<Enum>;
 
     return static_cast<Enum>(
         static_cast<underlying>(lhs) &
@@ -54,10 +54,10 @@ operator&(Enum lhs, Enum rhs)
 }
 
 template<typename Lhs, typename Enum>
-typename std::enable_if<EnableBitMaskOperators<Enum>, bool>::type
+typename std::enable_if_t<EnableBitMaskOperators<Enum>, bool>
 operator&&(Lhs lhs, Enum rhs)
 {
-    using underlying = typename std::underlying_type<Enum>::type;
+    using underlying = typename std::underlying_type_t<Enum>;
 
     return lhs && (
         static_cast<underlying>(rhs) !=
@@ -66,10 +66,10 @@ operator&&(Lhs lhs, Enum rhs)
 }
 
 template<typename Enum, typename Rhs>
-typename std::enable_if<EnableBitMaskOperators<Enum>, bool>::type
+typename std::enable_if_t<EnableBitMaskOperators<Enum>, bool>
 operator&&(Enum lhs, Rhs rhs)
 {
-    using underlying = typename std::underlying_type<Enum>::type;
+    using underlying = typename std::underlying_type_t<Enum>;
 
     return (
         static_cast<underlying>(lhs) !=

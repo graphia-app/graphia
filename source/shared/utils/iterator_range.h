@@ -28,7 +28,7 @@ struct is_const_iterator
 {
     using pointer = typename std::iterator_traits<Iterator>::pointer;
     static constexpr bool value =
-        std::is_const_v<typename std::remove_pointer<pointer>::type>;
+        std::is_const_v<typename std::remove_pointer_t<pointer>>;
 };
 
 template<typename Iterator>

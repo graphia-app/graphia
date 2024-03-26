@@ -318,7 +318,7 @@ using EdgeIdDistinctSetCollection = ElementIdDistinctSetCollection<EdgeId>;
 
 template<typename C, typename T> class ElementIdDistinctSet
 {
-    static_assert(std::is_same_v<ElementIdDistinctSetCollection<T>, typename std::remove_const<C>::type>,
+    static_assert(std::is_same_v<ElementIdDistinctSetCollection<T>, typename std::remove_const_t<C>>,
                   "C must be an ElementIdDistinctSetCollection");
 
     friend class ElementIdDistinctSets<ElementIdDistinctSet<C, T>>;
