@@ -19,8 +19,31 @@
 import QtQuick
 import QtQuick.Controls
 
-Item
+import app.graphia
+
+Rectangle
 {
     property ScrollBar horizontalScrollBar
     property ScrollBar verticalScrollBar
+
+    width: verticalScrollBar && verticalScrollBar.size < 1 ? verticalScrollBar.width : 0
+    height: horizontalScrollBar && horizontalScrollBar.size < 1 ? horizontalScrollBar.height : 0
+
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+
+    color:
+    {
+        if(!horizontalScrollBar || !horizontalScrollBar.background)
+            return "transparent";
+
+        if(!verticalScrollBar || !verticalScrollBar.background)
+            return "transparent";
+
+        // Special case for dark macOS, loosely matching transparent NSScrollers
+        if(Qt.platform.os === "osx" && ControlColors.scheme === Qt.Dark)
+            return "#08FFFFFF";
+
+        return ControlColors.midlight;
+    }
 }
