@@ -45,7 +45,7 @@ public:
     // If this is called more than once, it will block until a subsequent call to swap
     GLuint back();
 
-    GLuint swap();
+    GLuint swap() noexcept;
 };
 
 #endif // DOUBLEBUFFEREDTEXTURE_H

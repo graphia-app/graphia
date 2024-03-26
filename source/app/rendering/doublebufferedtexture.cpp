@@ -49,7 +49,7 @@ GLuint DoubleBufferedTexture::back()
     return _textures.at(1 - _currentIndex);
 }
 
-GLuint DoubleBufferedTexture::swap()
+GLuint DoubleBufferedTexture::swap() noexcept
 {
     const std::unique_lock<std::mutex> lock(_mutex);
     _currentIndex = 1 - _currentIndex;
