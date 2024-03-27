@@ -48,7 +48,7 @@ private:
 
 public:
     template<typename Fn>
-    Transition& start(float duration, Type type, Fn&& function)
+    Transition& start(float duration, Type type, const Fn& function)
     {
         Q_ASSERT(!_finishing);
 
@@ -58,7 +58,7 @@ public:
         _duration = duration;
         _elapsed = 0.0f;
         _type = type;
-        _function = std::forward<Fn>(function);
+        _function = function;
         _finishedFunctions.clear();
         _suppressSignals = false;
 
@@ -66,19 +66,19 @@ public:
     }
 
     template<typename FinishedFn>
-    Transition& then(FinishedFn&& finishedFn)
+    Transition& then(const FinishedFn& finishedFn)
     {
-        _finishedFunctions.emplace_back(std::forward<FinishedFn>(finishedFn));
+        _finishedFunctions.emplace_back(finishedFn);
         return *this;
     }
 
     template<typename FinishedFn>
-    Transition& alternativeThen(FinishedFn&& finishedFn)
+    Transition& alternativeThen(const FinishedFn& finishedFn)
     {
         if(!_finishedFunctions.empty())
             _finishedFunctions.pop_back();
 
-        return then(std::forward<FinishedFn>(finishedFn));
+        return then(finishedFn);
     }
 
     bool update(float dTime);
