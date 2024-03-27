@@ -127,11 +127,10 @@ std::string u::rsaSignString(const std::string& string, const std::string& priva
         CryptoPP::AutoSeededRandomPool rng;
         const CryptoPP::RSASSA_PKCS1v15_SHA_Signer signer(privateKey);
 
-        const CryptoPP::StringSource ss(string, true,
-            new CryptoPP::SignerFilter(rng, signer,
-                new CryptoPP::StringSink(signature)
-           ) // SignerFilter
-        ); // StringSource
+        auto* sink = new CryptoPP::StringSink(signature);
+        auto* filter = new CryptoPP::SignerFilter(rng, signer, sink);
+
+        const CryptoPP::StringSource ss(string, true, filter);
         Q_UNUSED(ss);
     }
     catch(std::exception&)
@@ -158,14 +157,13 @@ bool u::rsaVerifySignature(const std::string& signaturePlusString,
 
     try
     {
-        const CryptoPP::StringSource ss(signaturePlusString, true,
-            new CryptoPP::SignatureVerificationFilter(
-                rsaVerifier, new CryptoPP::StringSink(recoveredMessage),
-                CryptoPP::SignatureVerificationFilter::SIGNATURE_AT_BEGIN |
-                CryptoPP::SignatureVerificationFilter::PUT_MESSAGE |
-                CryptoPP::SignatureVerificationFilter::THROW_EXCEPTION
-            ) // SignatureVerificationFilter
-        ); // StringSource
+        auto* sink = new CryptoPP::StringSink(recoveredMessage);
+        auto* filter = new CryptoPP::SignatureVerificationFilter(rsaVerifier, sink,
+            CryptoPP::SignatureVerificationFilter::SIGNATURE_AT_BEGIN |
+            CryptoPP::SignatureVerificationFilter::PUT_MESSAGE |
+            CryptoPP::SignatureVerificationFilter::THROW_EXCEPTION);
+
+        const CryptoPP::StringSource ss(signaturePlusString, true, filter);
         Q_UNUSED(ss);
     }
     catch(std::exception&)
@@ -187,11 +185,10 @@ std::string u::rsaEncryptString(const std::string& string, const std::string& pu
     CryptoPP::AutoSeededRandomPool rng;
     std::vector<CryptoPP::byte> cipher(rsaEncryptor.FixedCiphertextLength());
 
-    const CryptoPP::StringSource ss(string, true,
-        new CryptoPP::PK_EncryptorFilter(rng, rsaEncryptor,
-            new CryptoPP::ArraySink(cipher.data(), cipher.size())
-        ) // PK_EncryptorFilter
-    ); // StringSource
+    auto* sink = new CryptoPP::ArraySink(cipher.data(), cipher.size());
+    auto* filter = new CryptoPP::PK_EncryptorFilter(rng, rsaEncryptor, sink);
+
+    const CryptoPP::StringSource ss(string, true, filter);
     Q_UNUSED(ss);
 
     return u::bytesToHex(cipher);
