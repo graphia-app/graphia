@@ -51,6 +51,7 @@ void SpanningTreeTransform::apply(TransformedGraph& target)
         };
 
         std::deque<S> deque;
+        // NOLINTNEXTLINE modernize-use-emplace
         deque.push_back({componentManager.componentById(componentId)->nodeIds().at(0), {}});
 
         while(!deque.empty())
