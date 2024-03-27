@@ -56,6 +56,7 @@ struct NodeStatement
 
 using EdgeEnd = std::variant<DotNode, boost::recursive_wrapper<DotSubGraph>>;
 
+// NOLINTNEXTLINE bugprone-exception-escape
 struct EdgeStatement
 {
     EdgeEnd _edgeEnd;
