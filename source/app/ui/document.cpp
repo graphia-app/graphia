@@ -788,7 +788,7 @@ void Document::saveFile(const QUrl& fileUrl, const QString& saverName, const QBy
     if(factory != nullptr)
     {
         _commandManager.executeOnce(
-        [=, this](Command& command) mutable
+        [this, factory, fileUrl, saverName, uiData, pluginUiData](Command& command) mutable
         {
             auto saver = factory->create(fileUrl, this, _pluginInstance.get(), uiData, pluginUiData);
             saver->setProgressFn([&command](int percentage){ command.setProgress(percentage); });
@@ -1445,7 +1445,7 @@ void Document::find(const QString& term, int options, const QStringList& attribu
     if(_searchManager == nullptr)
         return;
 
-    _commandManager.executeOnce([=, this](Command&)
+    _commandManager.executeOnce([this, term, options, attributeNames, findSelectStyle](Command&)
     {
         _searchManager->findNodes(term, static_cast<FindOptions>(options),
             attributeNames, static_cast<FindSelectStyle>(findSelectStyle));
@@ -1470,9 +1470,9 @@ void Document::selectAndFocusNode(NodeId nodeId)
 {
     _commandManager.execute(ExecutePolicy::Once,
         makeSelectNodeCommand(_selectionManager.get(), nodeId),
-        [=, this](Command&)
+        [this, nodeId](Command&)
         {
-            executeOnMainThread([=, this]
+            executeOnMainThread([this, nodeId]
             {
                 if(shouldMoveFindFocus(_graphQuickItem->inOverviewMode()))
                     _graphQuickItem->moveFocusToNode(nodeId);
@@ -1484,9 +1484,9 @@ void Document::selectAndFocusNodes(const std::vector<NodeId>& nodeIds)
 {
     _commandManager.execute(ExecutePolicy::Once,
         makeSelectNodesCommand(_selectionManager.get(), nodeIds),
-        [=, this](Command&)
+        [this, nodeIds](Command&)
         {
-            executeOnMainThread([=, this]
+            executeOnMainThread([this, nodeIds]
             {
                 if(shouldMoveFindFocus(_graphQuickItem->inOverviewMode()))
                     _graphQuickItem->moveFocusToNodes(nodeIds);
