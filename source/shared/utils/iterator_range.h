@@ -63,7 +63,7 @@ private:
 };
 
 template<typename BeginIt, typename EndIt>
-auto make_iterator_range(BeginIt&& begin, EndIt&& end)
+auto make_iterator_range(BeginIt begin, EndIt end)
 {
     return iterator_range<BeginIt, EndIt>(begin, end);
 }

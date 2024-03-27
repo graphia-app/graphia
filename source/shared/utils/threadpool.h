@@ -539,7 +539,7 @@ class ThreadPoolSingleton : public ThreadPool, public Singleton<ThreadPoolSingle
 template<typename Fn, typename... Args>
 auto execute_on_threadpool(Fn&& f, Args&&... args)
 {
-    return ThreadPoolSingleton::instance()->execute_on_threadpool(std::forward<Fn>(f), args...);
+    return ThreadPoolSingleton::instance()->execute_on_threadpool(std::forward<Fn>(f), std::forward<Args>(args)...);
 }
 
 template<typename It, typename Fn>

@@ -186,7 +186,7 @@ public:
     }
 
     template<typename Generator>
-    void generate(Generator&& generator)
+    void generate(const Generator& generator)
     {
         const MaybeLock lock(_mutex);
 

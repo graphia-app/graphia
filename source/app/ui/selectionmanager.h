@@ -80,7 +80,7 @@ private:
     bool signalsSuppressed();
 
     template<typename Fn>
-    bool callFnAndMaybeEmit(Fn&& fn)
+    bool callFnAndMaybeEmit(const Fn& fn)
     {
         const std::unique_lock<std::recursive_mutex> lock(_mutex);
 

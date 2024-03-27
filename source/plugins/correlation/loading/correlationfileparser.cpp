@@ -498,7 +498,7 @@ double CorrelationFileParser::epsilonFor(const std::vector<double>& data)
 }
 
 template<typename ParseFn>
-static bool parseUsing(const QString& fileType, ParseFn&& parseFn)
+static bool parseUsing(const QString& fileType, const ParseFn& parseFn)
 {
     if(fileType == u"CorrelationCSV"_s)
         return parseFn(CsvFileParser());

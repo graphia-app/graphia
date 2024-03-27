@@ -268,7 +268,7 @@ QString NodeAttributeTableModel::columnNameFor(size_t column) const
 
 template<typename RelatedNodesFn>
 static std::vector<int> relatedNodes(const IUserNodeData* userNodeData,
-    const std::vector<int>& rows, RelatedNodesFn&& relatedNodesFn)
+    const std::vector<int>& rows, const RelatedNodesFn& relatedNodesFn)
 {
     NodeIdSet relatedNodeIds;
 

@@ -43,13 +43,13 @@ public:
     template<typename OnPositionChangedFn>
     void onPositionChanged(OnPositionChangedFn&& onPositionChangedFn)
     {
-        _onPositionChangedFn = onPositionChangedFn;
+        _onPositionChangedFn = std::forward<OnPositionChangedFn>(onPositionChangedFn);
     }
 
     template<typename CancelledFn>
     void setCancelledFn(CancelledFn&& cancelledFn)
     {
-        _cancelledFn = cancelledFn;
+        _cancelledFn = std::forward<CancelledFn>(cancelledFn);
     }
 
 private:

@@ -115,7 +115,7 @@ public:
     };
 
     template<typename Fn>
-    void performTransaction(Fn&& transaction)
+    void performTransaction(const Fn& transaction)
     {
         const ScopedTransaction lock(*this);
         transaction(*this);

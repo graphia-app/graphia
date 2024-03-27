@@ -254,7 +254,7 @@ QVector<double> CorrelationPlotItem::meanAverageData(double& min, double& max, c
 template<typename Fn>
 void addPlotPerAttributeValue(const CorrelationPluginInstance* pluginInstance,
     const QString& nameTemplate, const QString& attributeName,
-    const QVector<int>& selectedRows, Fn&& addPlotFn)
+    const QVector<int>& selectedRows, const Fn& addPlotFn)
 {
     QMap<QString, QVector<int>> map;
     for(auto selectedRow : selectedRows)

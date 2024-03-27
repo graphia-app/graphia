@@ -76,7 +76,7 @@ public:
     virtual std::vector<QString> attributeNames(ElementType elementType = ElementType::All) const = 0;
 
     template<typename Fn>
-    std::vector<QString> attributeNamesMatching(Fn&& predicate) const
+    std::vector<QString> attributeNamesMatching(const Fn& predicate) const
     {
         std::vector<QString> matchingAttributeNames;
         matchingAttributeNames.reserve(attributeNames().size());

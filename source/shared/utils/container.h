@@ -207,7 +207,7 @@ namespace u
     template<typename T> auto end(reversing_wrapper<T> wrapper) { return std::rend(wrapper.container); }
 
     template<typename T>
-    reversing_wrapper<T> reverse(T&& container) { return {container}; }
+    reversing_wrapper<T> reverse(T& container) { return {container}; }
 
     template<Container C>
     std::vector<size_t> sortedIndicesOf(const C& container)

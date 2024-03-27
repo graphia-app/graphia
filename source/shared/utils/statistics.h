@@ -54,7 +54,7 @@ struct Statistics
 
 template<typename C, typename Fn>
 Statistics findStatisticsFor(const C& container,
-    Fn&& fn, bool storeValues = false)
+    const Fn& fn, bool storeValues = false)
 {
     Statistics s;
 

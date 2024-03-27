@@ -43,7 +43,7 @@ namespace u
         {
             auto* watcher = new QFutureWatcher<AsyncFnResult>;
             QObject::connect(watcher, &QFutureWatcher<AsyncFnResult>::finished,
-            [thenFn, watcher]
+            [thenFn = std::forward<ThenFn>(thenFn), watcher]
             {
                 if constexpr(!std::is_same_v<AsyncFnResult, void>)
                     thenFn(watcher->result());
@@ -60,7 +60,7 @@ namespace u
     template<typename AsyncFn>
     auto doAsync(AsyncFn&& thisFn)
     {
-        auto future = QtConcurrent::run(thisFn);
+        auto future = QtConcurrent::run(std::forward<AsyncFn>(thisFn));
 
         return _Then<std::invoke_result_t<AsyncFn>>(std::move(future));
     }
