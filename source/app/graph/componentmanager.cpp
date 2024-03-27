@@ -52,7 +52,7 @@ ComponentManager::ComponentManager(Graph& graph,
     update(&graph);
 }
 
-ComponentManager::~ComponentManager() // NOLINT modernize-use-equals-default
+ComponentManager::~ComponentManager()
 {
     // Let the ComponentArrays know that we're going away
     for(auto* componentArray : _componentArrays)
@@ -554,7 +554,7 @@ public:
         }
     }
 
-    ~unique_lock_with_warning() // NOLINT modernize-use-equals-default
+    ~unique_lock_with_warning()
     {
         if(_lock.owns_lock())
             _lock.unlock();

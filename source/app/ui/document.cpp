@@ -512,7 +512,7 @@ static QStringList sortedTransforms(QStringList transforms)
             return false;
 
         if(!aPinned && bPinned)
-            return true; // NOLINT
+            return true;
 
         return false;
     });
@@ -2252,7 +2252,6 @@ QStringList Document::addedOrChangedAttributeNamesAtTransformIndexOrLater(int fi
     return u::toQStringList(_graphModel->addedOrChangedAttributeNamesAtTransformIndexOrLater(firstIndex));
 }
 
-// NOLINTNEXTLINE readability-convert-member-functions-to-static
 QVariantMap Document::parseGraphTransform(const QString& transform) const
 {
     GraphTransformConfigParser p;
@@ -2428,7 +2427,6 @@ QVariantMap Document::visualisationInfoAtIndex(int index) const
     return map;
 }
 
-// NOLINTNEXTLINE readability-convert-member-functions-to-static
 QVariantMap Document::parseVisualisation(const QString& visualisation) const
 {
     VisualisationConfigParser p;

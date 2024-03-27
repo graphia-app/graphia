@@ -99,6 +99,6 @@ public:
 };
 
 #define IPluginIID(NAME) "app.graphia.IPlugin:" #NAME "/" VERSION // NOLINT cppcoreguidelines-macro-usage
-Q_DECLARE_INTERFACE(IPlugin, IPluginIID(Base)) // NOLINT cppcoreguidelines-pro-type-const-cast
+Q_DECLARE_INTERFACE(IPlugin, IPluginIID(Base))
 
 #endif // IPLUGIN_H

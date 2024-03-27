@@ -28,7 +28,7 @@
 #include <iostream>
 #include <cstdio>
 
-DownloadQueue::DownloadQueue() // NOLINT modernize-use-equals-default
+DownloadQueue::DownloadQueue()
 {
     _networkManager.setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
     connect(&_networkManager, &QNetworkAccessManager::finished, this, &DownloadQueue::onReplyReceived);

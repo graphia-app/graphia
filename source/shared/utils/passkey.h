@@ -25,8 +25,8 @@ template<typename T>
 class PassKey
 {
     friend T;
-    PassKey() {} // NOLINT
-    PassKey(PassKey const&) {} // NOLINT
+    PassKey() = default;
+    PassKey(PassKey const&) = default;
 };
 
 #endif // PASSKEY_H

@@ -36,10 +36,10 @@
 #endif
 
 #ifndef GL_ARB_sample_shading
-#define GL_ARB_sample_shading 1 // NOLINT cppcoreguidelines-macro-usage
-#define GL_SAMPLE_SHADING_ARB             0x8C36 // NOLINT cppcoreguidelines-macro-usage
-#define GL_MIN_SAMPLE_SHADING_VALUE_ARB   0x8C37 // NOLINT cppcoreguidelines-macro-usage
-typedef void (GL_APIENTRYP PFNGLMINSAMPLESHADINGARBPROC) (GLfloat value); // NOLINT modernize-use-using
+#define GL_ARB_sample_shading 1
+#define GL_SAMPLE_SHADING_ARB             0x8C36
+#define GL_MIN_SAMPLE_SHADING_VALUE_ARB   0x8C37
+typedef void (GL_APIENTRYP PFNGLMINSAMPLESHADINGARBPROC) (GLfloat value); // modernize-use-using
 #ifdef GL_GLEXT_PROTOTYPES
 GLAPI void GL_APIENTRY glMinSampleShadingARB (GLfloat value);
 #endif

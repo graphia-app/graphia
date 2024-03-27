@@ -46,6 +46,6 @@ public:
     QString qmlPath() const override { return u"qrc:///qml/GenericPlugin.qml"_s; }
 };
 
-Q_DECLARE_INTERFACE(GenericPlugin, IPluginIID(Generic)) // NOLINT cppcoreguidelines-pro-type-const-cast
+Q_DECLARE_INTERFACE(GenericPlugin, IPluginIID(Generic))
 
 #endif // GENERICPLUGIN_H

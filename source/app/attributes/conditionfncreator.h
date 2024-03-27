@@ -48,7 +48,7 @@ private:
 
     public:
         // cppcheck-suppress noExplicitConstructor
-        TerminalValueWrapper(GraphTransformConfig::TerminalValue terminalValue) : // NOLINT
+        TerminalValueWrapper(GraphTransformConfig::TerminalValue terminalValue) : // NOLINT google-explicit-constructor
             _terminalValue(std::move(terminalValue))
         {}
 
@@ -480,7 +480,7 @@ private:
                     _graphModel(graphModel)
                 {}
 
-                ResolvedTerminalValue operator()(double v) const { return v; } // NOLINT
+                ResolvedTerminalValue operator()(double v) const { return v; }
                 ResolvedTerminalValue operator()(int v) const { return v; }
                 ResolvedTerminalValue operator()(const QString& v) const
                 {

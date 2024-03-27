@@ -88,7 +88,7 @@ public:
     static QString contentIdentityOf(const QUrl& url);
 };
 
-Q_DECLARE_METATYPE(std::shared_ptr<TabularData>) // NOLINT performance-no-int-to-ptr
+Q_DECLARE_METATYPE(std::shared_ptr<TabularData>)
 
 enum class EmptyCellPolicy { Keep, Skip };
 

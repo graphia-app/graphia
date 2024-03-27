@@ -79,7 +79,7 @@ private:
     NodeLayoutPositions* _positions;
 
 protected:
-    const LayoutSettings* _settings; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
+    const LayoutSettings* _settings;
 
     NodeLayoutPositions& positions() { return *_positions; }
 
@@ -127,8 +127,8 @@ class GraphModel;
 class LayoutFactory
 {
 protected:
-    GraphModel* _graphModel = nullptr; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
-    LayoutSettings _layoutSettings; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
+    GraphModel* _graphModel = nullptr;
+    LayoutSettings _layoutSettings;
 
 public:
     explicit LayoutFactory(GraphModel* graphModel) :

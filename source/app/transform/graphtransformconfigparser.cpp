@@ -74,17 +74,17 @@ using x3::int_;
 using x3::lexeme;
 using unicode::char_;
 
-const x3::rule<class QuotedString, QString> quotedString = "quotedString"; // NOLINT bugprone-forward-declaration-namespace
+const x3::rule<class QuotedString, QString> quotedString = "quotedString";
 const auto escapedQuote = lit('\\') >> char_('"');
 const auto quotedString_def = lexeme['"' >> *(escapedQuote | ~char_('"')) >> '"'];
 
-const x3::rule<class Identifier, QString> identifier = "identifier"; // NOLINT bugprone-forward-declaration-namespace
+const x3::rule<class Identifier, QString> identifier = "identifier";
 const auto identifier_def = lexeme[char_("a-zA-Z_") >> *char_("a-zA-Z0-9_")];
 
-const x3::rule<class AttributeParameter, QString> attributeParameter = "attributeParameter"; // NOLINT bugprone-forward-declaration-namespace
+const x3::rule<class AttributeParameter, QString> attributeParameter = "attributeParameter";
 const auto attributeParameter_def = lexeme[char_('.') >> (quotedString | identifier)];
 
-const x3::rule<class AttributeName, QString> attributeName = "attributeName"; // NOLINT bugprone-forward-declaration-namespace
+const x3::rule<class AttributeName, QString> attributeName = "attributeName";
 const auto attributeName_def = lexeme[char_('$') >> (quotedString | identifier) >> *attributeParameter];
 
 struct equality_op_ : x3::symbols<ConditionFnOp::Equality>
@@ -164,7 +164,7 @@ const auto condition_def = (operand >> logical_op >> operand) | operand;
 
 const auto attributeNameNoDollarCapture = lexeme[lit('$') >> (quotedString | identifier) >> *attributeParameter];
 
-const x3::rule<class Parameter, GraphTransformConfig::Parameter> parameter = "parameter"; // NOLINT bugprone-forward-declaration-namespace
+const x3::rule<class Parameter, GraphTransformConfig::Parameter> parameter = "parameter";
 const auto parameterName = quotedString | identifier;
 const auto parameter_def = parameterName >> lit('=') >> (double_ | int_ | quotedString);
 

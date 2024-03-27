@@ -27,13 +27,13 @@
 #include <string>
 
 #ifndef APP_URI
-#define APP_URI "uri.missing" // NOLINT cppcoreguidelines-macro-usage
+#define APP_URI "uri.missing"
 #endif
 #ifndef APP_MAJOR_VERSION
-#define APP_MAJOR_VERSION (-1) // NOLINT cppcoreguidelines-macro-usage
+#define APP_MAJOR_VERSION (-1)
 #endif
 #ifndef APP_MINOR_VERSION
-#define APP_MINOR_VERSION (-1) // NOLINT cppcoreguidelines-macro-usage
+#define APP_MINOR_VERSION (-1)
 #endif
 
 constexpr bool static_strcmp(char const* a, char const* b)
@@ -55,7 +55,7 @@ constexpr bool static_strcmp(char const* a, char const* b)
         "First parameter to DEFINE_QML_ENUM must be Q_GADGET"); \
     class _REFLECTOR(ENUM_NAME) \
     { \
-        _Q_GADGET /* NOLINT */ \
+        _Q_GADGET \
     public: \
         enum class Enum {__VA_ARGS__, Max}; Q_ENUM(Enum) \
         static void initialise() \
@@ -95,7 +95,7 @@ constexpr bool static_strcmp(char const* a, char const* b)
         return static_cast<bool>(static_cast<int>(lhs) & \
             static_cast<int>(rhs)); \
     } \
-    using ENUM_NAME = QML_ENUM_PROPERTY(ENUM_NAME) /* NOLINT */
+    using ENUM_NAME = QML_ENUM_PROPERTY(ENUM_NAME)
 
 template<typename QmlEnumType>
 QmlEnumType normaliseQmlEnum(auto v)

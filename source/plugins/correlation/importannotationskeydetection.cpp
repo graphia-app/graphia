@@ -26,13 +26,13 @@
 
 using namespace Qt::Literals::StringLiterals;
 
-ImportAnnotationsKeyDetection::ImportAnnotationsKeyDetection() // NOLINT modernize-use-equals-default
+ImportAnnotationsKeyDetection::ImportAnnotationsKeyDetection()
 {
     connect(&_watcher, &QFutureWatcher<void>::started, this, &ImportAnnotationsKeyDetection::busyChanged);
     connect(&_watcher, &QFutureWatcher<void>::finished, this, &ImportAnnotationsKeyDetection::busyChanged);
 }
 
-ImportAnnotationsKeyDetection::~ImportAnnotationsKeyDetection() // NOLINT modernize-use-equals-default
+ImportAnnotationsKeyDetection::~ImportAnnotationsKeyDetection()
 {
     _watcher.waitForFinished();
 }

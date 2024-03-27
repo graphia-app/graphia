@@ -57,7 +57,7 @@ static bool isCompressed(const QString& filePath)
 
     unsigned char header[GzipHeaderSize];
 
-    if(file.read(reinterpret_cast<char*>(header), GzipHeaderSize) != GzipHeaderSize) // NOLINT
+    if(file.read(reinterpret_cast<char*>(header), GzipHeaderSize) != GzipHeaderSize)
         return false;
 
     // Gzip magic number
@@ -97,7 +97,7 @@ static bool decompress(const QString& filePath, QByteArray& byteArray,
         const int ChunkSize = 1 << 14;
         std::vector<unsigned char> inBuffer(ChunkSize);
 
-        auto numBytes = input.readRawData(reinterpret_cast<char*>(inBuffer.data()), ChunkSize); // NOLINT
+        auto numBytes = input.readRawData(reinterpret_cast<char*>(inBuffer.data()), ChunkSize);
 
         bytesRead += static_cast<uint64_t>(numBytes);
 
@@ -131,7 +131,7 @@ static bool decompress(const QString& filePath, QByteArray& byteArray,
 
             numBytes = ChunkSize - static_cast<int>(zstream.avail_out);
             bytesDecompressed += static_cast<uint64_t>(numBytes);
-            byteArray.append(reinterpret_cast<const char*>(outBuffer.data()), numBytes); // NOLINT
+            byteArray.append(reinterpret_cast<const char*>(outBuffer.data()), numBytes);
 
             // Check if we've read more than we've been asked to
             if(maxReadSize >= 0 && bytesDecompressed >= static_cast<uint64_t>(maxReadSize))

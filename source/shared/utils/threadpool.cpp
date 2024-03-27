@@ -58,7 +58,7 @@ ThreadPool::ThreadPool(const QString& threadNamePrefix, unsigned int numThreads)
     }
 }
 
-ThreadPool::~ThreadPool() // NOLINT modernize-use-equals-default
+ThreadPool::~ThreadPool()
 {
     // Cancel all pending tasks
     std::unique_lock<std::mutex> lock(_mutex);

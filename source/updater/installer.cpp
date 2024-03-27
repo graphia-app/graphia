@@ -164,7 +164,6 @@ void Installer::retry()
     start();
 }
 
-// NOLINTNEXTLINE readability-convert-member-functions-to-static
 void Installer::setStatus(const QString& status)
 {
     storeUpdateStatus(status);

@@ -32,7 +32,7 @@ private:
 
 public:
     // cppcheck-suppress noExplicitConstructor
-    ElementId(int value = NullValue) : // NOLINT
+    ElementId(int value = NullValue) : // NOLINT google-explicit-constructor
         _value(value)
     {
         static_assert(sizeof(ElementId) == sizeof(_value), "ElementId should not be larger than an int");

@@ -124,7 +124,7 @@ QModelIndex QmlTabularDataHeaderModel::modelIndexOf(int roleIndex) const
     return index(row);
 }
 
-QmlTabularDataParser::QmlTabularDataParser() // NOLINT modernize-use-equals-default
+QmlTabularDataParser::QmlTabularDataParser()
 {
     connect(&_dataParserWatcher, &QFutureWatcher<void>::started, this, &QmlTabularDataParser::busyChanged);
     connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &QmlTabularDataParser::busyChanged);
@@ -142,7 +142,7 @@ QmlTabularDataParser::QmlTabularDataParser() // NOLINT modernize-use-equals-defa
     _dataPtr = std::make_shared<TabularData>();
 }
 
-QmlTabularDataParser::~QmlTabularDataParser() // NOLINT modernize-use-equals-default
+QmlTabularDataParser::~QmlTabularDataParser()
 {
     _dataParserWatcher.waitForFinished();
 }

@@ -70,7 +70,7 @@ Headless::Headless(const QStringList& sourceFilenames, const QString& parameters
     _(std::make_unique<HeadlessState>(sourceFilenames, parametersFilename))
 {}
 
-Headless::~Headless() // NOLINT
+Headless::~Headless() // NOLINT modernize-use-equals-default
 {
     // Only here so that we can have a unique_ptr to HeadlessImpl
 }

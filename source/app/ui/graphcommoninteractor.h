@@ -47,10 +47,10 @@ public:
                           GraphRenderer* graphRenderer);
 
 protected:
-    GraphModel* _graphModel = nullptr; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
-    CommandManager* _commandManager = nullptr; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
-    SelectionManager* _selectionManager = nullptr; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
-    GraphRenderer* _graphRenderer = nullptr; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
+    GraphModel* _graphModel = nullptr;
+    CommandManager* _commandManager = nullptr;
+    SelectionManager* _selectionManager = nullptr;
+    GraphRenderer* _graphRenderer = nullptr;
 
 private:
     QPoint _cursorPosition;

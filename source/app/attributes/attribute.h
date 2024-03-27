@@ -45,7 +45,7 @@ template<typename T> class AttributeRange
 class _AttributeRange
 {
 protected:
-    Attribute* _attribute = nullptr; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
+    Attribute* _attribute = nullptr;
 
 public:
     void setAttribute(Attribute& attribute) { _attribute = &attribute; }
@@ -229,7 +229,7 @@ private:
     void disableAutoRange();
 
 public:
-    Attribute() // NOLINT modernize-use-equals-default
+    Attribute()
     {
         _intRange.setAttribute(*this);
         _floatRange.setAttribute(*this);

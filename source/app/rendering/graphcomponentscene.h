@@ -30,7 +30,7 @@ class GraphRenderer;
 class GraphComponentRenderer;
 
 template<typename Target>
-void initialiseFromGraph(const Graph*, Target&); // NOLINT
+void initialiseFromGraph(const Graph*, Target&); // NOLINT readability-redundant-declaration
 
 class GraphComponentScene :
         public Scene

@@ -30,12 +30,12 @@ private:
 public:
     Flags() = default;
     // cppcheck-suppress noExplicitConstructor
-    Flags(Enum value) : // NOLINT
+    Flags(Enum value) : // NOLINT google-explicit-constructor
         _value(value)
     {}
 
     template<typename... Tail>
-    Flags(Enum value, Tail... values) // NOLINT
+    Flags(Enum value, Tail... values) // NOLINT google-explicit-constructor
     {
         set(value);
         set(values...);

@@ -47,7 +47,7 @@ std::string u::aesDecryptBytes(const std::vector<std::byte>& bytes, const u::Aes
         sizeof(aesKey._aes), reinterpret_cast<const CryptoPP::byte*>(aesKey._iv));
     decryption.ProcessData(outBytes.data(), reinterpret_cast<const CryptoPP::byte*>(bytes.data()), bytes.size());
 
-    return std::string(reinterpret_cast<const char*>(outBytes.data()), outBytes.size()); // NOLINT
+    return {reinterpret_cast<const char*>(outBytes.data()), outBytes.size()};
 }
 
 std::string u::aesDecryptString(const std::string& string, const u::AesKey& aesKey)
@@ -56,14 +56,14 @@ std::string u::aesDecryptString(const std::string& string, const u::AesKey& aesK
 
     CryptoPP::CFB_Mode<CryptoPP::AES>::Decryption decryption(reinterpret_cast<const CryptoPP::byte*>(aesKey._aes),
         sizeof(aesKey._aes), reinterpret_cast<const CryptoPP::byte*>(aesKey._iv));
-    decryption.ProcessData(outBytes.data(), reinterpret_cast<const CryptoPP::byte*>(string.data()), string.size()); // NOLINT
+    decryption.ProcessData(outBytes.data(), reinterpret_cast<const CryptoPP::byte*>(string.data()), string.size());
 
-    return std::string(reinterpret_cast<const char*>(outBytes.data()), outBytes.size()); // NOLINT
+    return {reinterpret_cast<const char*>(outBytes.data()), outBytes.size()};
 }
 
 std::string u::aesEncryptString(const std::string& string, const u::AesKey& aesKey)
 {
-    auto inBytes = reinterpret_cast<const CryptoPP::byte*>(string.data()); // NOLINT
+    const auto* inBytes = reinterpret_cast<const CryptoPP::byte*>(string.data());
     auto bytesSize = string.size();
 
     std::vector<CryptoPP::byte> outBytes(bytesSize);
@@ -107,7 +107,7 @@ Key loadKey(const std::string& fileName)
 
     byteArray = decodeFromPem(byteArray);
 
-    CryptoPP::ArraySource arraySource(reinterpret_cast<const CryptoPP::byte*>(byteArray.constData()), // NOLINT
+    CryptoPP::ArraySource arraySource(reinterpret_cast<const CryptoPP::byte*>(byteArray.constData()),
         static_cast<size_t>(byteArray.size()), true);
 
     Key key;

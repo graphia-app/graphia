@@ -47,7 +47,7 @@ Watchdog::Watchdog()
     _thread.start();
 }
 
-// NOLINTNEXTLINE modernize-use-equals-default
+// modernize-use-equals-default
 Watchdog::~Watchdog()
 {
     _thread.quit();
@@ -125,7 +125,7 @@ void WatchdogWorker::startTimer()
             }
 
             // Don't bother doing anything when running under Valgrind
-            if(RUNNING_ON_VALGRIND) // NOLINT
+            if(RUNNING_ON_VALGRIND)
                 return;
 
             qWarning() << "Watchdog timed out! Deadlock? "

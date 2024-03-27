@@ -375,7 +375,7 @@ GraphModel::GraphModel(const QString& name, IPlugin* plugin) :
     _->_visualisationChannels.emplace(tr("Text Size"), std::make_unique<TextSizeVisualisationChannel>());
 }
 
-GraphModel::~GraphModel() // NOLINT
+GraphModel::~GraphModel() // NOLINT modernize-use-equals-default
 {
     // Only here so that we can have a unique_ptr to GraphModelImpl
 }

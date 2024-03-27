@@ -34,7 +34,7 @@ AvailableAttributesModel::Item::Item(const QString& value, const QString& attrib
     _value(value), _attributeName(attributeName)
 {}
 
-AvailableAttributesModel::Item::~Item() // NOLINT modernize-use-equals-default
+AvailableAttributesModel::Item::~Item()
 {
     qDeleteAll(_children);
 }
@@ -149,7 +149,7 @@ AvailableAttributesModel::AvailableAttributesModel(const GraphModel& graphModel,
     }
 }
 
-// NOLINTNEXTLINE modernize-use-equals-default
+// modernize-use-equals-default
 AvailableAttributesModel::~AvailableAttributesModel()
 {
     delete _root;

@@ -80,7 +80,7 @@ struct SubVolume
             const auto zh = _boundingBox.zLength() * 0.5f;
 
             if(cz + zh == cz || cz - zh == cz)
-                return false; // NOLINT
+                return false;
         }
 
         return true;
@@ -105,14 +105,14 @@ private:
     BoundingBox<NumDimensions> _boundingBox;
 
 protected:
-    size_t _depthFirstTraversalStackSizeRequirement = 0; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
-    std::array<SubVolumeType, NumSubVolumes()> _subVolumes = {}; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
+    size_t _depthFirstTraversalStackSizeRequirement = 0;
+    std::array<SubVolumeType, NumSubVolumes()> _subVolumes = {};
 
-    std::array<const SubVolumeType*, NumSubVolumes()> _nonEmptyLeaves = {}; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
-    size_t _numNonEmptyLeaves = 0; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
+    std::array<const SubVolumeType*, NumSubVolumes()> _nonEmptyLeaves = {};
+    size_t _numNonEmptyLeaves = 0;
 
-    std::array<const SubVolumeType*, NumSubVolumes()> _internalNodes = {}; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
-    size_t _numInternalNodes = 0; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
+    std::array<const SubVolumeType*, NumSubVolumes()> _internalNodes = {};
+    size_t _numInternalNodes = 0;
 
 private:
     unsigned int _maxNodesPerLeaf = 1;
@@ -123,7 +123,7 @@ private:
         SpatialTree* _tree;
         std::vector<NodeId> _nodeIds;
 
-        NewTree(SpatialTree* tree, const std::vector<NodeId>& nodeIds) noexcept : // NOLINT
+        NewTree(SpatialTree* tree, const std::vector<NodeId>& nodeIds) noexcept :
             _tree(tree), _nodeIds(nodeIds)
         {}
 
@@ -133,8 +133,8 @@ private:
 
         NewTree(const NewTree& other) = default;
         NewTree& operator=(const NewTree& other) = default;
-        NewTree(NewTree&& other) = default; // NOLINT
-        NewTree& operator=(NewTree&& other) = default; // NOLINT
+        NewTree(NewTree&& other) = default;
+        NewTree& operator=(NewTree&& other) = default;
     };
 
     void initialiseSubVolumes()

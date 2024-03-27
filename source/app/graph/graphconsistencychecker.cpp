@@ -163,7 +163,6 @@ template<typename G, typename C> bool check(const G& graph, const C& component,
     return consistent;
 }
 
-// NOLINTNEXTLINE readability-convert-member-functions-to-static
 void GraphConsistencyChecker::onGraphChanged(const Graph* graph)
 {
     check(*graph, *graph);

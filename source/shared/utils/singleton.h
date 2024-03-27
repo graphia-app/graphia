@@ -21,7 +21,7 @@
 
 #include <QtGlobal>
 
-template<typename T> class Singleton // NOLINT
+template<typename T> class Singleton
 {
 public:
   Singleton()

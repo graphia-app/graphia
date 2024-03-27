@@ -21,8 +21,7 @@
 
 #include <type_traits>
 
-namespace std{ // NOLINT
-namespace experimental{ // NOLINT
+namespace std::experimental{ // NOLINT cert-dcl58-cpp
 
 // Copy and pasted from https://en.cppreference.com/w/cpp/experimental/is_detected
 namespace detail {
@@ -75,6 +74,5 @@ using is_detected_convertible = std::is_convertible<detected_t<Op, Args...>, To>
 template <class To, template<class...> class Op, class... Args>
 constexpr bool is_detected_convertible_v = is_detected_convertible<To, Op, Args...>::value;
 
-} // namespace experimental
-} // namespace std
+} // namespace std::experimental
 #endif // IS_DETECTED_H

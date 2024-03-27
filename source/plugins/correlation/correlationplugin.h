@@ -256,6 +256,6 @@ public:
     Q_INVOKABLE QVariantMap correlationInfoFor(int correlationType) const;
 };
 
-Q_DECLARE_INTERFACE(CorrelationPlugin, IPluginIID(Correlation)) // NOLINT cppcoreguidelines-pro-type-const-cast
+Q_DECLARE_INTERFACE(CorrelationPlugin, IPluginIID(Correlation))
 
 #endif // CORRELATIONPLUGIN_H

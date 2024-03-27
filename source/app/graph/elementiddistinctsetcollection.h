@@ -382,7 +382,7 @@ public:
         using difference_type = int;
 
     protected:
-        pointer _p; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
+        pointer _p;
 
     private:
         const ElementIdDistinctSet* _set = nullptr;
@@ -524,7 +524,7 @@ public:
         size_t _i = 0;
 
     protected:
-        pointer _p; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
+        pointer _p;
 
     private:
         const typename ElementIdDistinctSetCollection<typename T::value_type>::ListNode& listNode() const

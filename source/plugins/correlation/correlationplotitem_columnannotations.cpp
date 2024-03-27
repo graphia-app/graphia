@@ -146,8 +146,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
     // We only want the ticker on the left most column annotation QCPAxisRect
     if(layoutColumn == 0)
     {
-        // NOLINTNEXTLINE clang-analyzer-cplusplus.NewDeleteLeaks
-        QSharedPointer<QCPAxisTickerText> columnAnnotationTicker(new QCPAxisTickerText);
+        const QSharedPointer<QCPAxisTickerText> columnAnnotationTicker(new QCPAxisTickerText);
 
         forEachColumnAnnotation([this, columnAnnotationTicker](const ColumnAnnotation& columnAnnotation,
             bool selected, size_t y, size_t)
@@ -180,7 +179,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
     else
         caYAxis->setTicker(nullptr);
 
-    caYAxis->setTickPen(QPen(Qt::transparent)); // NOLINT clang-analyzer-cplusplus.NewDeleteLeaks
+    caYAxis->setTickPen(QPen(Qt::transparent));
     caYAxis->setTickLabelColor(penColor());
     caYAxis->setRange(0.0, static_cast<double>(numColumnAnnotations));
 

@@ -47,11 +47,11 @@
     };
 
 // cppcheck-suppress noExplicitConstructor
-QML_ELEMENTID(NodeId) // NOLINT
+QML_ELEMENTID(NodeId)
 // cppcheck-suppress noExplicitConstructor
-QML_ELEMENTID(EdgeId) // NOLINT
+QML_ELEMENTID(EdgeId)
 // cppcheck-suppress noExplicitConstructor
-QML_ELEMENTID(ComponentId) // NOLINT
+QML_ELEMENTID(ComponentId)
 
 static_block
 {

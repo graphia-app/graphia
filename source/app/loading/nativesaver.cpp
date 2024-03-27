@@ -72,7 +72,7 @@ static bool compress(const QByteArray& byteArray, const QString& filePath, Progr
         const int ChunkSize = 1 << 14;
         std::vector<unsigned char> inBuffer(ChunkSize);
 
-        auto numBytes = input.readRawData(reinterpret_cast<char*>(inBuffer.data()), ChunkSize); // NOLINT
+        auto numBytes = input.readRawData(reinterpret_cast<char*>(inBuffer.data()), ChunkSize);
 
         bytePosition += static_cast<uint64_t>(numBytes);
         progressable.setProgress(static_cast<int>((bytePosition * 100u) / totalBytes));
@@ -93,7 +93,7 @@ static bool compress(const QByteArray& byteArray, const QString& filePath, Progr
 
             numBytes = ChunkSize - static_cast<int>(zstream.avail_out);
             if(output.writeRawData(reinterpret_cast<const char*>(outBuffer.data()), numBytes) !=
-               numBytes) // NOLINT
+               numBytes)
                 return false;
 
         } while(zstream.avail_out == 0);

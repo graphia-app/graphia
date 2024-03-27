@@ -27,14 +27,14 @@ template<typename T> struct EnumStrings
     static size_t size;
 };
 
-#define DECLARE_REFLECTED_ENUM(E) /* NOLINT cppcoreguidelines-macro-usage */ \
+#define DECLARE_REFLECTED_ENUM(E) \
     template<> struct EnumStrings<E> \
     { \
         static QString values[]; \
         static size_t size; \
     };
 
-#define DEFINE_REFLECTED_ENUM(E, ...)  /* NOLINT cppcoreguidelines-macro-usage */ \
+#define DEFINE_REFLECTED_ENUM(E, ...)  \
     QString EnumStrings<E>::values[] = \
     {__VA_ARGS__}; \
     size_t EnumStrings<E>::size = \

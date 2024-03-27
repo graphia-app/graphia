@@ -24,8 +24,7 @@
 // This is more or less directly lifted from N4189
 
 // modeled slightly after Andrescu’s talk and article(s)
-namespace std{ // NOLINT
-namespace experimental{ // NOLINT
+namespace std::experimental{ // NOLINT cert-dcl58-cpp
 template <typename EF>
 struct scope_exit {
     // construction
@@ -58,7 +57,6 @@ template <typename EF>
 auto make_scope_exit(EF &&exit_function) noexcept {
     return scope_exit<std::remove_reference_t<EF>>(std::forward<EF>(exit_function));
 }
-} // namespace experimental
-} // namespace std
+} // namespace std::experimental
 
 #endif // SCOPE_EXIT_H

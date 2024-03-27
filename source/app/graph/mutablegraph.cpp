@@ -23,12 +23,12 @@
 
 #include "shared/utils/container.h"
 
-MutableGraph::MutableGraph(const MutableGraph& other) // NOLINT bugprone-copy-constructor-init
+MutableGraph::MutableGraph(const MutableGraph& other)
 {
     clone(other);
 }
 
-MutableGraph::~MutableGraph() // NOLINT modernize-use-equals-default
+MutableGraph::~MutableGraph()
 {
     // Ensure no transactions are in progress
     const std::unique_lock<std::mutex> lock(_mutex);
@@ -592,12 +592,12 @@ MutableGraph::Diff MutableGraph::diffTo(const MutableGraph& other)
     {
         if(nodeId < nextNodeId() && nodeId < other.nextNodeId())
         {
-            if(containsNodeId(nodeId) && !other.containsNodeId(nodeId)) // NOLINT clang-analyzer-optin.cplusplus.VirtualCall
+            if(containsNodeId(nodeId) && !other.containsNodeId(nodeId))
                 diff._nodesRemoved.push_back(nodeId);
-            else if(!containsNodeId(nodeId) && other.containsNodeId(nodeId)) // NOLINT clang-analyzer-optin.cplusplus.VirtualCall
+            else if(!containsNodeId(nodeId) && other.containsNodeId(nodeId))
                 diff._nodesAdded.push_back(nodeId);
         }
-        else if(nodeId < nextNodeId() && containsNodeId(nodeId)) // NOLINT clang-analyzer-optin.cplusplus.VirtualCall
+        else if(nodeId < nextNodeId() && containsNodeId(nodeId))
             diff._nodesRemoved.push_back(nodeId);
         else if(nodeId < other.nextNodeId() && other.containsNodeId(nodeId))
             diff._nodesAdded.push_back(nodeId);
@@ -608,12 +608,12 @@ MutableGraph::Diff MutableGraph::diffTo(const MutableGraph& other)
     {
         if(edgeId < nextEdgeId() && edgeId < other.nextEdgeId())
         {
-            if(containsEdgeId(edgeId) && !other.containsEdgeId(edgeId)) // NOLINT clang-analyzer-optin.cplusplus.VirtualCall
+            if(containsEdgeId(edgeId) && !other.containsEdgeId(edgeId))
                 diff._edgesRemoved.push_back(edgeId);
-            else if(!containsEdgeId(edgeId) && other.containsEdgeId(edgeId)) // NOLINT clang-analyzer-optin.cplusplus.VirtualCall
+            else if(!containsEdgeId(edgeId) && other.containsEdgeId(edgeId))
                 diff._edgesAdded.push_back(edgeId);
         }
-        else if(edgeId < nextEdgeId() && containsEdgeId(edgeId)) // NOLINT clang-analyzer-optin.cplusplus.VirtualCall
+        else if(edgeId < nextEdgeId() && containsEdgeId(edgeId))
             diff._edgesRemoved.push_back(edgeId);
         else if(edgeId < other.nextEdgeId() && other.containsEdgeId(edgeId))
             diff._edgesAdded.push_back(edgeId);

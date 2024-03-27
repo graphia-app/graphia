@@ -46,6 +46,6 @@ public:
     QString qmlPath() const override { return u"qrc:///qml/WebsearchPlugin.qml"_s; }
 };
 
-Q_DECLARE_INTERFACE(WebSearchPlugin, IPluginIID(WebSearch)) // NOLINT cppcoreguidelines-pro-type-const-cast
+Q_DECLARE_INTERFACE(WebSearchPlugin, IPluginIID(WebSearch))
 
 #endif // WEBSEARCHPLUGIN_H

@@ -80,7 +80,7 @@ static QPoint renderOffsetForFill(int imageWidth, int imageHeight, float aspect)
     return offset;
 }
 
-// NOLINTNEXTLINE modernize-use-equals-default
+// modernize-use-equals-default
 ScreenshotRenderer::ScreenshotRenderer()
 {
     glGenFramebuffers(1, &_screenshotFBO);
@@ -88,7 +88,7 @@ ScreenshotRenderer::ScreenshotRenderer()
     glGenTextures(1, &_sdfTexture);
 }
 
-// NOLINTNEXTLINE modernize-use-equals-default
+// modernize-use-equals-default
 ScreenshotRenderer::~ScreenshotRenderer()
 {
     glDeleteTextures(1, &_sdfTexture);

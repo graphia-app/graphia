@@ -406,7 +406,7 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) :
     connect(this, &CorrelationPlotItem::columnSortOrderPinnedChanged, [this] { if(!_columnSortOrderPinned) rebuildPlot(); });
 }
 
-CorrelationPlotItem::~CorrelationPlotItem() // NOLINT modernize-use-equals-default
+CorrelationPlotItem::~CorrelationPlotItem()
 {
     _plotRenderThread.quit();
     _plotRenderThread.wait();

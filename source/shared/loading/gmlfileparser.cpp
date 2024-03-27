@@ -85,7 +85,7 @@ const auto gmlValue_def = double_ | int_ | noQuotesString | (lit('[') >> gmlList
 const x3::rule<class K, QString> gmlKey = "key";
 const auto gmlKey_def = lexeme[char_("a-zA-Z") >> *char_("a-zA-Z0-9")];
 
-const x3::rule<class KV, KeyValue> gmlKeyValue = "keyValue"; // NOLINT bugprone-forward-declaration-namespace
+const x3::rule<class KV, KeyValue> gmlKeyValue = "keyValue";
 const auto gmlKeyValue_def = gmlKey >> gmlValue;
 
 const auto gmlList_def = *gmlKeyValue;

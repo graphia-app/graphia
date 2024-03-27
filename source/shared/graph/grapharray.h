@@ -52,10 +52,10 @@ private:
     using MaybeLock = _MaybeLock<std::recursive_mutex, Locking>;
 
 protected:
-    const IGraphArrayClient* _graph; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
-    std::vector<Element> _array; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
-    mutable std::recursive_mutex _mutex; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
-    Element _defaultValue; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
+    const IGraphArrayClient* _graph;
+    std::vector<Element> _array;
+    mutable std::recursive_mutex _mutex;
+    Element _defaultValue;
 
     const Element& elementFor(Index index) const
     {
@@ -89,7 +89,6 @@ public:
     GenericGraphArray(GenericGraphArray&& other) noexcept :
         _graph(other._graph),
         _array(std::move(other._array)),
-        _mutex(), // NOLINT
         _defaultValue(std::move(other._defaultValue))
     {}
 
