@@ -38,8 +38,8 @@ public:
         static_assert(sizeof(ElementId) == sizeof(_value), "ElementId should not be larger than an int");
     }
 
-    template<typename I> using EnableIfConvertibleToInt = typename std::enable_if_t<
-        std::is_integral_v<I> && std::is_convertible_v<I, int>>;
+    template<typename Integer> using EnableIfConvertibleToInt = typename std::enable_if_t<
+        std::is_integral_v<Integer> && std::is_convertible_v<Integer, int>>;
 
     // Prevent warnings when initialising an ElementId with other integral types
     template<typename U, typename = EnableIfConvertibleToInt<U>>
