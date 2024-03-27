@@ -31,9 +31,11 @@ inline std::map<std::string, void(*)()> _static_blocks;
 
 void execute_static_blocks();
 
-#define STATIC_BLOCK_ID_CONCAT(p, l) p ## l // NOLINT cppcoreguidelines-macro-usage
-#define STATIC_BLOCK_ID_EXPAND(p, l) STATIC_BLOCK_ID_CONCAT(p, l) // NOLINT cppcoreguidelines-macro-usage
-#define STATIC_BLOCK_ID STATIC_BLOCK_ID_EXPAND(static_block_, __COUNTER__) // NOLINT cppcoreguidelines-macro-usage
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+
+#define STATIC_BLOCK_ID_CONCAT(p, l) p ## l
+#define STATIC_BLOCK_ID_EXPAND(p, l) STATIC_BLOCK_ID_CONCAT(p, l)
+#define STATIC_BLOCK_ID STATIC_BLOCK_ID_EXPAND(static_block_, __COUNTER__)
 
 #define STATIC_BLOCK_2(f, c) /* NOLINT cppcoreguidelines-macro-usage */ \
     static void f(); \
@@ -56,6 +58,8 @@ void execute_static_blocks();
         STATIC_BLOCK_ID_CONCAT(id, _class) \
     )
 
-#define static_block STATIC_BLOCK_1(STATIC_BLOCK_ID) // NOLINT cppcoreguidelines-macro-usage
+#define static_block STATIC_BLOCK_1(STATIC_BLOCK_ID)
+
+// NOLINTEND(cppcoreguidelines-macro-usage)
 
 #endif // STATIC_BLOCK_H
