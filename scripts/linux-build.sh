@@ -52,4 +52,4 @@ mkdir -p ${BUILD_DIR}
   . variables.sh
   cmake --build . --target install 2>&1 | tee compiler-${VERSION}.log
   [[ "${PIPESTATUS[0]}" -eq 0 ]] || exit ${PIPESTATUS[0]}
-)
+) || exit $?

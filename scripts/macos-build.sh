@@ -51,7 +51,7 @@ GCC_TREAT_WARNINGS_AS_ERRORS=NO xcodebuild -project \
   . variables.sh
   cmake --build . --target all 2>&1 | tee compiler-${VERSION}.log
   [[ "${PIPESTATUS[0]}" -eq 0 ]] || exit ${PIPESTATUS[0]}
-)
+) || exit $?
 
 function makeSymFile
 {
