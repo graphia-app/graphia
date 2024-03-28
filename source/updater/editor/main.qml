@@ -579,7 +579,7 @@ ApplicationWindow
         onTriggered: function(source)
         {
             if(settings.defaultOpenFolder !== undefined)
-                openDialog.folder = settings.defaultOpenFolder;
+                openDialog.currentFolder = settings.defaultOpenFolder;
 
             openDialog.open();
         }
@@ -822,7 +822,7 @@ ApplicationWindow
                                 onClicked: function(mouse)
                                 {
                                     if(settings.defaultImageOpenFolder !== undefined)
-                                        imageFileDialog.folder = settings.defaultImageOpenFolder;
+                                        imageFileDialog.currentFolder = settings.defaultImageOpenFolder;
 
                                     imageFileDialog.open();
                                 }
