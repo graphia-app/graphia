@@ -757,6 +757,8 @@ jobs:
           Text::Table::Tiny
     - name: Analyse
       run: |
+        SHORT_SHA=$(git rev-parse --short HEAD)
+        MESSAGE=$(git log --format=%B -n1 HEAD | head -n1)
         BRANCH=$(echo ${GITHUB_REF#refs/*/})
         eval "$(ssh-agent -s)"
         echo "${{ secrets.DEFECTS_SSH_PRIVATE_KEY }}" | ssh-add -
@@ -764,4 +766,4 @@ jobs:
         git config --global user.name "Log Analyser"
         git clone git@github.com:graphia-app/defects.git defects
         cd defects
-        ./update.sh -b $BRANCH -l "../logs" -m "${{ github.sha }}"
+        ./update.sh -b $BRANCH -l "../logs" -m "$SHORT_SHA $MESSAGE"
