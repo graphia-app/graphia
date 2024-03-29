@@ -718,7 +718,7 @@ void Application::loadPlugins()
         if(pluginsDir.isEmpty() || !QDir(pluginsDir).exists())
             continue;
 
-        std::cerr << "Loading plugins from " << pluginsDir.toStdString() << "...\n";
+        std::cerr << "Loading dynamic plugins from " << pluginsDir.toStdString() << "...\n";
 
         const QDir pluginsQDir(pluginsDir);
         const auto fileNames = pluginsQDir.entryList(QDir::Files);
@@ -757,16 +757,18 @@ void Application::loadPlugins()
         }
     }
 
-    if(!QPluginLoader::staticInstances().empty())
-    {
-        std::cerr << "Loading static plugins...\n";
+    int numLoadedStaticPlugins = 0;
+    std::cerr << "Loading static plugins...\n";
 
-        for(auto* staticPluginInstance : QPluginLoader::staticInstances()) // clazy:exclude=range-loop-detach
-        {
-            auto* iplugin = dynamic_cast<IPlugin*>(staticPluginInstance);
-            initialisePlugin(iplugin, nullptr);
-        }
+    for(auto* staticPluginInstance : QPluginLoader::staticInstances()) // clazy:exclude=range-loop-detach
+    {
+        auto* iplugin = dynamic_cast<IPlugin*>(staticPluginInstance);
+        if(initialisePlugin(iplugin, nullptr))
+            numLoadedStaticPlugins++;
     }
+
+    if(numLoadedStaticPlugins == 0)
+        std::cerr << "  ...none found\n";
 
     // Force event processing here so that we initialise any qmlenum.h based enums
     // that were created in plugins
@@ -809,7 +811,7 @@ bool Application::initialisePlugin(IPlugin* plugin, std::unique_ptr<QPluginLoade
     _urlTypeDetails.update();
     _pluginDetails.update();
 
-    auto message = QObject::tr("  ...%1 (%2) loaded successfully\n")
+    auto message = QObject::tr("  ...%1 (%2)\n")
         .arg(pluginName, fileName);
 
     std::cerr << message.toStdString();
