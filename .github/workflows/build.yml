@@ -4,7 +4,7 @@ env:
   QT_VERSION: 6.4.2
   QT_MODULES: qtwebengine qtwebchannel qtpositioning
   GCC_VERSION: 11
-  CLANG_VERSION: 14
+  CLANG_VERSION: 16
 
 jobs:
   linux:
