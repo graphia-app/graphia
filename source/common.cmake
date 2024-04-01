@@ -41,6 +41,13 @@ if(UNIX)
     # We need it because the plugins require symbols in order for certain things to
     # work e.g. dynamic_cast to QObject from IGraph, under clang
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -rdynamic")
+
+    find_program(MOLD_EXECUTABLE mold)
+    mark_as_advanced(MOLD_EXECUTABLE)
+    if(MOLD_EXECUTABLE)
+        message(STATUS "Enabling mold: ${MOLD_EXECUTABLE}")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=mold")
+    endif()
 endif()
 
 # Use ccache, if it's available (https://stackoverflow.com/a/34317588/2721809)
