@@ -21,8 +21,9 @@
 #include <QString>
 #include <QDir>
 #include <QFile>
-
 #include <QDebug>
+
+#include <utility>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -34,7 +35,7 @@ void u::qrcExtract(const QString& prefix, const QString& destination, const QStr
     auto files = QDir(fqSource).entryList(QDir::Files);
     auto directories = QDir(fqSource).entryList(QDir::Dirs|QDir::NoDotAndDotDot);
 
-    for(const auto& file : files)
+    for(const auto& file : std::as_const(files))
     {
         if(!QDir().mkpath(fqDestination))
         {
@@ -49,6 +50,6 @@ void u::qrcExtract(const QString& prefix, const QString& destination, const QStr
             qWarning() << "Failed to extract" << fqSourceFile << "to" << fqDestinationFile;
     }
 
-    for(const auto& directory : directories)
+    for(const auto& directory : std::as_const(directories))
         qrcExtract(prefix, destination, u"%1/%2"_s.arg(source, directory));
 }
