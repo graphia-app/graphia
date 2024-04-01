@@ -31,6 +31,7 @@
 #include "shared/utils/scopetimer.h"
 #include "shared/utils/msvcwarningsuppress.h"
 #include "shared/utils/static_block.h"
+#include "shared/utils/qrcextract.h"
 
 #include "loading/graphmlsaver.h"
 #include "loading/jsongraphsaver.h"
@@ -140,6 +141,11 @@ Application::Application(QObject *parent, bool enableUpdateCheck) :
 
     if(enableUpdateCheck)
         _updater.enableAutoBackgroundCheck();
+
+#ifdef Q_OS_WASM
+    u::qrcExtract(":/wasm_resource_files", QStandardPaths::writableLocation(
+        QStandardPaths::StandardLocation::AppDataLocation) + "/resources");
+#endif
 
     loadPlugins();
 }

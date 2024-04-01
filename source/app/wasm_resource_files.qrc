@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/wasm_resource_files">
+        <file>debug/infiniteParse.graphia</file>
+        <file>examples/Tutorial.graphia</file>
+    </qresource>
+</RCC>
