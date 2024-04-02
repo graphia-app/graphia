@@ -475,7 +475,7 @@ ApplicationWindow
         if(!root.privateKeyFileExists)
             return false;
 
-        return !root.busy
+        return !root.busy;
     }
 
     function saveFile(fileUrl, onSaveComplete)
