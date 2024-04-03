@@ -152,10 +152,7 @@ if(LINK_TYPE STREQUAL STATIC)
 endif()
 
 find_program(GIT "git")
-
-if(NOT "$ENV{VERSION}" STREQUAL "")
-    set(Version $ENV{VERSION})
-elseif(GIT)
+if(GIT)
     execute_process(COMMAND ${GIT} -C ${CMAKE_SOURCE_DIR} describe --always
         OUTPUT_VARIABLE GIT_DESCRIBE OUTPUT_STRIP_TRAILING_WHITESPACE)
     execute_process(COMMAND ${GIT} -C ${CMAKE_SOURCE_DIR} describe --abbrev=0
@@ -169,15 +166,22 @@ elseif(GIT)
 
     file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/build_defines.h "#define GIT_DESCRIBE \"${GIT_DESCRIBE}\"\n")
     file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/build_defines.h "#define GIT_SHA \"${GIT_SHA}\"\n")
+    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/build_defines.h "#define GIT_BRANCH \"${GIT_BRANCH}\"\n")
 
     if("${GIT_COMMIT_COUNT}" EQUAL 0 OR "${GIT_BRANCH}" MATCHES "^master|HEAD$")
-        set(Version "${GIT_DESCRIBE}")
+        set(GIT_VERSION "${GIT_DESCRIBE}")
     else()
-        set(Version "${GIT_DESCRIBE}-${GIT_BRANCH}")
-        file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/build_defines.h "#define GIT_BRANCH \"${GIT_BRANCH}\"\n")
+        set(GIT_VERSION "${GIT_DESCRIBE}-${GIT_BRANCH}")
     endif()
+endif()
+
+if(NOT "$ENV{VERSION}" STREQUAL "")
+    set(Version $ENV{VERSION})
+elseif(GIT_VERSION)
+    set(Version "${GIT_VERSION}")
 else()
-    set(Version "unknown")
+    file(TIMESTAMP ${CMAKE_SOURCE_DIR} SOURCE_DATE)
+    set(Version "source-date-${SOURCE_DATE}")
 endif()
 
 file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/build_defines.h "#define VERSION \"${Version}\"\n")
