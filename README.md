@@ -38,7 +38,7 @@ Graphia is a powerful open source visual analytics application developed to aid 
 
 ## **About**
 
-Graphia is designed and built by a small dedicated group of scientists working in Edinburgh, Scotland. We are passionate about graphs, the power of visualisation and creating tools that aid the interpretation of complex data. 
+Graphia is designed and built by a small group working in Edinburgh, UK. We are passionate about graphs, the power of visualisation and creating tools that aid the interpretation of complex data.
 
 Our journey started 20 years ago, as we began to envisage how graphs could help us analyse the relationships between genes and proteins. Over this time we developed multiple tools and refined our approach, eventually arriving where we are today with Graphia. We believe it is the best option for interactively visualising large graphs.
 
