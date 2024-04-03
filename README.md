@@ -42,14 +42,9 @@ Graphia is designed and built by a small dedicated group of scientists working i
 
 Our journey started 20 years ago, as we began to envisage how graphs could help us analyse the relationships between genes and proteins. Over this time we developed multiple tools and refined our approach, eventually arriving where we are today with Graphia. We believe it is the best option for interactively visualising large graphs.
 
-## **Working with us**
+## **Help**
 
-There are lots of new features and functionality we still wish to add to Graphia and envisage a desire from some to integrate it into local data infrastructures or web resources. If you are interested in working with us to further improve Graphia or need our help in other ways, we would love to hear from you.
-
-Please contact: <info@graphia.app>
-
-If you use Graphia and would like to support the project, we would very much appreciate and gratefully accept donations.
-
+If you have a question about how to do something that isn't explained in the [user guide](https://graphia.app/userguide.html), a suggestion for a feature or just want to discuss Graphia in some way, please use the [discussions](https://github.com/graphia-app/graphia/discussions) section on GitHub. If you believe you're experiencing a bug, please report it in the [issues](https://github.com/graphia-app/graphia/issues) section on GitHub and we will endeavour to solve it. For any other more general queries, email us directly: <info@graphia.app>.
 
 Please help us to help you!
 
