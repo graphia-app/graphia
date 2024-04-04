@@ -179,10 +179,14 @@ jobs:
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
+    - name: Determine appropriate emsdk version
+      run: |
+        EMSDK_VERSION=$(scripts/emsdk-version-for-qt-version.sh ${{ env.QT_VERSION }})
+        echo "EMSDK_VERSION=${EMSDK_VERSION}" >> $GITHUB_ENV
     - name: Install emsdk
       uses: mymindstorm/setup-emsdk@v13
       with:
-        version: 3.1.37
+        version: ${{ env.EMSDK_VERSION }}
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:
