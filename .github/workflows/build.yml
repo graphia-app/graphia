@@ -11,6 +11,10 @@ jobs:
     name: Linux
     runs-on: ubuntu-20.04
     steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.ref }}
+        fetch-depth: 0
     - name: Install Tools
       run: |
         sudo add-apt-repository ppa:ubuntu-toolchain-r/test
@@ -26,10 +30,6 @@ jobs:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }} qtserialport
         cache: true
-    - uses: actions/checkout@v3
-      with:
-        ref: ${{ github.ref }}
-        fetch-depth: 0
     - name: ccache
       uses: hendrikmuhs/ccache-action@main
       with:
@@ -66,16 +66,16 @@ jobs:
     name: Windows
     runs-on: windows-2019
     steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.ref }}
+        fetch-depth: 0
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
         cache: true
-    - uses: actions/checkout@v3
-      with:
-        ref: ${{ github.ref }}
-        fetch-depth: 0
     - name: ccache
       uses: hendrikmuhs/ccache-action@main
       with:
@@ -118,6 +118,10 @@ jobs:
     name: macOS
     runs-on: macos-13
     steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.ref }}
+        fetch-depth: 0
     - name: Force Python to version 3.10 to workaround node-gyp install problem (remove later)
       uses: actions/setup-python@v4
       with:
@@ -129,10 +133,6 @@ jobs:
         modules: ${{ env.QT_MODULES }}
         cache: true
         setup-python: false # Python installed above
-    - uses: actions/checkout@v3
-      with:
-        ref: ${{ github.ref }}
-        fetch-depth: 0
     - name: ccache
       uses: hendrikmuhs/ccache-action@main
       with:
@@ -175,6 +175,10 @@ jobs:
     name: WebAssembly
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.ref }}
+        fetch-depth: 0
     - name: Install emsdk
       uses: mymindstorm/setup-emsdk@v13
       with:
@@ -189,10 +193,6 @@ jobs:
         arch: wasm_multithread
         extra: --autodesktop
         cache: true
-    - uses: actions/checkout@v3
-      with:
-        ref: ${{ github.ref }}
-        fetch-depth: 0
     - name: ccache
       uses: hendrikmuhs/ccache-action@main
       with:
@@ -220,6 +220,10 @@ jobs:
     name: Clang Debug
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.ref }}
+        fetch-depth: 0
     - name: Install Tools
       run: |
         sudo wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh
@@ -233,10 +237,6 @@ jobs:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
         cache: true
-    - uses: actions/checkout@v3
-      with:
-        ref: ${{ github.ref }}
-        fetch-depth: 0
     - name: ccache
       uses: hendrikmuhs/ccache-action@main
       with:
@@ -272,16 +272,16 @@ jobs:
     name: Windows Clang
     runs-on: windows-2019
     steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.ref }}
+        fetch-depth: 0
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
         cache: true
-    - uses: actions/checkout@v3
-      with:
-        ref: ${{ github.ref }}
-        fetch-depth: 0
     - name: ccache
       uses: hendrikmuhs/ccache-action@main
       with:
@@ -326,6 +326,10 @@ jobs:
     needs:
       - clang-debug
     steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.ref }}
+        fetch-depth: 0
     - name: Install Tools
       run: |
         sudo wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh
@@ -360,10 +364,6 @@ jobs:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
         cache: true
-    - uses: actions/checkout@v3
-      with:
-        ref: ${{ github.ref }}
-        fetch-depth: 0
     - uses: actions/download-artifact@v3
       with:
         name: Static Analysis Build
@@ -387,6 +387,10 @@ jobs:
     needs:
       - clang-debug
     steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.ref }}
+        fetch-depth: 0
     - name: Install Tools
       run: |
         sudo wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh
@@ -402,10 +406,6 @@ jobs:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
         cache: true
-    - uses: actions/checkout@v3
-      with:
-        ref: ${{ github.ref }}
-        fetch-depth: 0
     - uses: actions/download-artifact@v3
       with:
         name: Static Analysis Build
@@ -426,6 +426,10 @@ jobs:
     needs:
       - clang-debug
     steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.ref }}
+        fetch-depth: 0
     - name: Install Tools
       run: |
         sudo wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh
@@ -438,10 +442,6 @@ jobs:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
         cache: true
-    - uses: actions/checkout@v3
-      with:
-        ref: ${{ github.ref }}
-        fetch-depth: 0
     - uses: actions/checkout@v3
       with:
         repository: KDE/clazy
@@ -478,16 +478,16 @@ jobs:
     needs:
       - clang-debug
     steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.ref }}
+        fetch-depth: 0
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
         cache: true
-    - uses: actions/checkout@v3
-      with:
-        ref: ${{ github.ref }}
-        fetch-depth: 0
     - uses: actions/download-artifact@v3
       with:
         name: Static Analysis Build
@@ -507,6 +507,10 @@ jobs:
     needs:
       - clang-debug
     steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.ref }}
+        fetch-depth: 0
     - name: Install Tools
       run: |
         sudo wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh
@@ -519,10 +523,6 @@ jobs:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
         cache: true
-    - uses: actions/checkout@v3
-      with:
-        ref: ${{ github.ref }}
-        fetch-depth: 0
     - uses: actions/checkout@v3
       with:
         repository: include-what-you-use/include-what-you-use
