@@ -177,6 +177,7 @@ private:
 
     GLuint _depthTexture = 0;
 
+    GLuint _componentDataTBO = 0;
     GLuint _componentDataTexture = 0;
     GLint _componentDataMaxTextureSize = 0;
     std::vector<GLfloat> _componentData;

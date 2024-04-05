@@ -34,8 +34,10 @@ using namespace Qt::Literals::StringLiterals;
 
 #ifdef OPENGL_ES
 static const auto GL_TEXTURE_2D_ = GL_TEXTURE_2D;
+static const auto COMPONENT_DATA_TARGET = GL_TEXTURE_2D;
 #else
 static const auto GL_TEXTURE_2D_ = GL_TEXTURE_2D_MULTISAMPLE;
+static const auto COMPONENT_DATA_TARGET = GL_TEXTURE_BUFFER;
 #endif
 
 namespace
@@ -479,6 +481,12 @@ GraphRendererCore::GraphRendererCore() :
 
 GraphRendererCore::~GraphRendererCore()
 {
+    if(_componentDataTBO != 0)
+    {
+        glDeleteBuffers(1, &_componentDataTBO);
+        _componentDataTBO = 0;
+    }
+
     if(_componentDataTexture != 0)
     {
         glDeleteTextures(1, &_componentDataTexture);
@@ -531,7 +539,7 @@ static void setShaderLightingParameters(QOpenGLShaderProgram& program)
 void GraphRendererCore::bindComponentDataTexture(GLenum textureUnit, QOpenGLShaderProgram& shader)
 {
     glActiveTexture(textureUnit);
-    glBindTexture(GL_TEXTURE_2D, _componentDataTexture);
+    glBindTexture(COMPONENT_DATA_TARGET, _componentDataTexture);
     shader.setUniformValue("componentDataElementSize",
         static_cast<int>(_componentDataElementSize));
     shader.setUniformValue("componentDataTextureMaxDimension",
@@ -563,7 +571,7 @@ void GraphRendererCore::renderNodes(GPUGraphData& gpuGraphData)
         GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(gpuGraphData.numNodes()));
     gpuGraphData._sphere.vertexArrayObject()->release();
 
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(COMPONENT_DATA_TARGET, 0);
     gpuGraphData._nodeVBO.release();
     _nodesShader.release();
 }
@@ -587,7 +595,7 @@ void GraphRendererCore::renderEdges(GPUGraphData& gpuGraphData)
         GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(gpuGraphData.numEdges()));
     gpuGraphData._arrow.vertexArrayObject()->release();
 
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(COMPONENT_DATA_TARGET, 0);
     gpuGraphData._edgeVBO.release();
     _edgesShader.release();
 }
@@ -621,7 +629,7 @@ void GraphRendererCore::renderText(GPUGraphData& gpuGraphData)
         GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(gpuGraphData.numGlyphs()));
     gpuGraphData._rectangle.vertexArrayObject()->release();
 
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(COMPONENT_DATA_TARGET, 0);
 
     gpuGraphData._textVBO.release();
     _textShader.release();
@@ -728,12 +736,19 @@ void GraphRendererCore::appendGPUComponentData(const QMatrix4x4& modelViewMatrix
 
 void GraphRendererCore::uploadGPUComponentData()
 {
-    glBindTexture(GL_TEXTURE_2D, _componentDataTexture);
+#ifdef OPENGL_ES
+    glBindTexture(COMPONENT_DATA_TARGET, _componentDataTexture);
     Q_ASSERT(_componentData.size() <= static_cast<size_t>(_componentDataMaxTextureSize * _componentDataMaxTextureSize));
     const GLint textureHeight = (static_cast<GLint>(_componentData.size()) / _componentDataMaxTextureSize) + 1;
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F,
+    glTexImage2D(COMPONENT_DATA_TARGET, 0, GL_R32F,
         _componentDataMaxTextureSize, textureHeight, 0, GL_RED, GL_FLOAT, _componentData.data());
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(COMPONENT_DATA_TARGET, 0);
+#else
+    glBindBuffer(COMPONENT_DATA_TARGET, _componentDataTBO);
+    glBufferData(COMPONENT_DATA_TARGET, static_cast<GLsizeiptr>(_componentData.size() * sizeof(GLfloat)),
+        _componentData.data(), GL_STATIC_DRAW);
+    glBindBuffer(COMPONENT_DATA_TARGET, 0);
+#endif
 }
 
 Shading GraphRendererCore::shading() const
@@ -854,9 +869,21 @@ void GraphRendererCore::prepareComponentDataTexture()
     if(_componentDataTexture == 0)
         glGenTextures(1, &_componentDataTexture);
 
-    glBindTexture(GL_TEXTURE_2D, _componentDataTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // Effectively disable mipmaps
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(COMPONENT_DATA_TARGET, _componentDataTexture);
+
+#ifdef OPENGL_ES
+    // Effectively disable mipmaps
+    glTexParameteri(COMPONENT_DATA_TARGET, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+#else
+    if(_componentDataTBO == 0)
+        glGenBuffers(1, &_componentDataTBO);
+
+    glBindBuffer(COMPONENT_DATA_TARGET, _componentDataTBO);
+    glTexBuffer(COMPONENT_DATA_TARGET, GL_R32F, _componentDataTBO);
+    glBindBuffer(COMPONENT_DATA_TARGET, 0);
+#endif
+
+    glBindTexture(COMPONENT_DATA_TARGET, 0);
 
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &_componentDataMaxTextureSize);
 }

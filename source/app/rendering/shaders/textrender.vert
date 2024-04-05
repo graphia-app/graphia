@@ -31,7 +31,12 @@ layout (location = 8) in vec2 glyphSize;
 layout (location = 9) in float glyphScale;
 layout (location = 10) in vec3 color;
 
+#ifdef GL_ES
 uniform sampler2D componentData;
+#else
+uniform samplerBuffer componentData;
+#endif
+
 uniform int componentDataElementSize;
 uniform int componentDataTextureMaxDimension;
 
@@ -44,11 +49,15 @@ out vec3 textColor;
 float floatFromComponentData(int offset)
 {
     int index = (component * componentDataElementSize) + offset;
+#ifdef GL_ES
     int y = index / componentDataTextureMaxDimension;
     int x = index % componentDataTextureMaxDimension;
     ivec2 coord = ivec2(x, y);
 
     return texelFetch(componentData, coord, 0).r;
+#else
+    return texelFetch(componentData, index).r;
+#endif
 }
 
 mat4 mat4FromComponentData(int offset)

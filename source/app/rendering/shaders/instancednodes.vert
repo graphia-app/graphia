@@ -42,7 +42,12 @@ out float lightOffset;
 out float lightScale;
 out float projectionScale;
 
+#ifdef GL_ES
 uniform sampler2D componentData;
+#else
+uniform samplerBuffer componentData;
+#endif
+
 uniform int componentDataElementSize;
 uniform int componentDataTextureMaxDimension;
 
@@ -64,11 +69,15 @@ mat4 makeOrientationMatrix(vec3 forward)
 float floatFromComponentData(int offset)
 {
     int index = (component * componentDataElementSize) + offset;
+#ifdef GL_ES
     int y = index / componentDataTextureMaxDimension;
     int x = index % componentDataTextureMaxDimension;
     ivec2 coord = ivec2(x, y);
 
     return texelFetch(componentData, coord, 0).r;
+#else
+    return texelFetch(componentData, index).r;
+#endif
 }
 
 mat4 mat4FromComponentData(int offset)
