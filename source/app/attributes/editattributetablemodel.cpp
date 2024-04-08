@@ -25,13 +25,15 @@
 
 #include "shared/utils/container.h"
 #include "shared/utils/static_block.h"
+#include "shared/utils/string.h"
 
 #include <QQmlEngine>
 
 template<typename ElementIds>
-static auto rowToElementIds(int row, const IAttribute* attribute, const ElementIds& elementIds)
+static auto rowToElementIds(int row, const IAttribute* attribute,
+    const std::vector<IAttribute::SharedValue>& sharedValues,
+    const ElementIds& elementIds)
 {
-    const auto& sharedValues = attribute->sharedValues();
     const auto& sharedValue = sharedValues.at(static_cast<size_t>(row))._value;
 
     using E = typename std::remove_reference_t<decltype(elementIds)>::value_type;
@@ -54,12 +56,38 @@ EditAttributeTableModel::EditAttributeTableModel()
 
         beginResetModel();
 
-        // Reset the edits when going from non-combined to combined (as in that case
-        // rows that are combined may have multiple different values)
+        _nodeIdsMap.clear();
+        _edgeIdsMap.clear();
+
         if(_combineSharedValues)
         {
+            // Reset the edits when going from non-combined to combined (as in that case
+            // rows that are combined may have multiple different values)
             _edits._nodeValues.clear();
             _edits._edgeValues.clear();
+
+            if(_document != nullptr && _attribute != nullptr)
+            {
+                switch(_attribute->elementType())
+                {
+                case ElementType::Node:
+                    for(int row = 0; row < rowCount(); row++)
+                    {
+                        _nodeIdsMap[row] = rowToElementIds(row, _attribute, _attributeSharedValues,
+                            _document->graphModel()->graph().nodeIds());
+                    }
+                    break;
+
+                case ElementType::Edge:
+                    for(int row = 0; row < rowCount(); row++)
+                    {
+                        _edgeIdsMap[row] = rowToElementIds(row, _attribute, _attributeSharedValues,
+                            _document->graphModel()->graph().edgeIds());
+                    }
+                    break;
+                default: break;
+                }
+            }
         }
 
         endResetModel();
@@ -69,7 +97,12 @@ EditAttributeTableModel::EditAttributeTableModel()
             emit hasEditsChanged();
             emit editsChanged();
         }
+
+        updateSortMap();
     });
+
+    connect(this, &EditAttributeTableModel::sortColumnChanged, this, &EditAttributeTableModel::updateSortMap);
+    connect(this, &EditAttributeTableModel::ascendingSortOrderChanged, this, &EditAttributeTableModel::updateSortMap);
 }
 
 int EditAttributeTableModel::rowCount(const QModelIndex&) const
@@ -78,7 +111,7 @@ int EditAttributeTableModel::rowCount(const QModelIndex&) const
         return 0;
 
     if(_combineSharedValues)
-        return static_cast<int>(_attribute->sharedValues().size());
+        return static_cast<int>(_attributeSharedValues.size());
 
     switch(_attribute->elementType())
     {
@@ -111,69 +144,23 @@ QVariant EditAttributeTableModel::data(const QModelIndex& index, int role) const
     default: break;
     }
 
-    if(_attribute == nullptr)
-        return {};
-
-    if(_combineSharedValues)
-    {
-        const auto& sharedValues = _attribute->sharedValues();
-        const auto& sharedValue = sharedValues.at(static_cast<size_t>(row));
-
-        if(column == 0)
-            return sharedValue._count;
-
-        if(column == 1)
-        {
-            if(_attribute->elementType() == ElementType::Node)
-            {
-                auto nodeIds = rowToElementIds(row, _attribute, _document->graphModel()->graph().nodeIds());
-
-                if(!nodeIds.empty() && u::contains(_edits._nodeValues, nodeIds.front()))
-                    return _edits._nodeValues.at(nodeIds.front());
-            }
-            else if(_attribute->elementType() == ElementType::Edge)
-            {
-                auto edgeIds = rowToElementIds(row, _attribute, _document->graphModel()->graph().edgeIds());
-
-                if(!edgeIds.empty() && u::contains(_edits._edgeValues, edgeIds.front()))
-                    return _edits._edgeValues.at(edgeIds.front());
-            }
-
-            return sharedValue._value;
-        }
-    }
-    else
-    {
-        if(_attribute->elementType() == ElementType::Node)
-        {
-            auto nodeId = rowToNodeId(row);
-            const auto& value = u::contains(_edits._nodeValues, nodeId) ? _edits._nodeValues.at(nodeId) : _attribute->valueOf(nodeId);
-            return column == 0 ? _document->graphModel()->nodeName(nodeId) : value;
-        }
-
-        if(_attribute->elementType() == ElementType::Edge)
-        {
-            auto edgeId = _document->graphModel()->graph().edgeIds().at(static_cast<size_t>(row));
-            const auto& value = u::contains(_edits._edgeValues, edgeId) ? _edits._edgeValues.at(edgeId) : _attribute->valueOf(edgeId);
-            return column == 0 ? static_cast<int>(edgeId) : value;
-        }
-    }
-
-    return {};
+    return valueAt(column, _sortMap.at(static_cast<size_t>(row)));
 }
 
 void EditAttributeTableModel::editValue(int row, const QString& value)
 {
+    auto sortedRow = _sortMap.at(static_cast<size_t>(row));
+
     if(_combineSharedValues)
     {
         if(_attribute->elementType() == ElementType::Node)
         {
-            for(auto nodeId : rowToElementIds(row, _attribute, _document->graphModel()->graph().nodeIds()))
+            for(auto nodeId : _nodeIdsMap.at(sortedRow))
                 _edits._nodeValues[nodeId] = value;
         }
         else if(_attribute->elementType() == ElementType::Edge)
         {
-            for(auto edgeId : rowToElementIds(row, _attribute, _document->graphModel()->graph().edgeIds()))
+            for(auto edgeId : _edgeIdsMap.at(sortedRow))
                 _edits._edgeValues[edgeId] = value;
         }
     }
@@ -181,39 +168,41 @@ void EditAttributeTableModel::editValue(int row, const QString& value)
     {
         if(_attribute->elementType() == ElementType::Node)
         {
-            auto nodeId = rowToNodeId(row);
+            auto nodeId = rowToNodeId(sortedRow);
 
             if(value != _attribute->valueOf(nodeId))
                 _edits._nodeValues[nodeId] = value;
         }
         else if(_attribute->elementType() == ElementType::Edge)
         {
-            auto edgeId = _document->graphModel()->graph().edgeIds().at(static_cast<size_t>(row));
+            auto edgeId = _document->graphModel()->graph().edgeIds().at(static_cast<size_t>(sortedRow));
 
             if(value != _attribute->valueOf(edgeId))
                 _edits._edgeValues[edgeId] = value;
         }
     }
 
-    emit dataChanged(index(row, 1), index(row, 1), {Qt::DisplayRole, AttributeRole, EditedRole});
+    emit dataChanged(index(row, 1), index(row, 1));
     emit hasEditsChanged();
     emit editsChanged();
 }
 
 void EditAttributeTableModel::resetRowValue(int row)
 {
+    auto sortedRow = _sortMap.at(static_cast<size_t>(row));
+
     size_t n = 0;
 
     if(_combineSharedValues)
     {
         if(_attribute->elementType() == ElementType::Node)
         {
-            for(auto nodeId : rowToElementIds(row, _attribute, _document->graphModel()->graph().nodeIds()))
+            for(auto nodeId : _nodeIdsMap.at(sortedRow))
                 n += _edits._nodeValues.erase(nodeId);
         }
         else if(_attribute->elementType() == ElementType::Edge)
         {
-            for(auto edgeId : rowToElementIds(row, _attribute, _document->graphModel()->graph().edgeIds()))
+            for(auto edgeId : _edgeIdsMap.at(sortedRow))
                 n += _edits._edgeValues.erase(edgeId);
         }
     }
@@ -221,14 +210,14 @@ void EditAttributeTableModel::resetRowValue(int row)
     {
         if(_attribute->elementType() == ElementType::Node)
         {
-            auto nodeId = rowToNodeId(row);
+            auto nodeId = rowToNodeId(sortedRow);
 
             if(u::contains(_edits._nodeValues, nodeId))
                 n = _edits._nodeValues.erase(nodeId);
         }
         else if(_attribute->elementType() == ElementType::Edge)
         {
-            auto edgeId = _document->graphModel()->graph().edgeIds().at(static_cast<size_t>(row));
+            auto edgeId = _document->graphModel()->graph().edgeIds().at(static_cast<size_t>(sortedRow));
 
             if(u::contains(_edits._edgeValues, edgeId))
                 n = _edits._edgeValues.erase(edgeId);
@@ -237,7 +226,7 @@ void EditAttributeTableModel::resetRowValue(int row)
 
     if(n > 0)
     {
-        emit dataChanged(index(row, 1), index(row, 1), {Qt::DisplayRole, AttributeRole, EditedRole});
+        emit dataChanged(index(row, 1), index(row, 1));
         emit hasEditsChanged();
         emit editsChanged();
     }
@@ -259,21 +248,23 @@ void EditAttributeTableModel::resetAllEdits()
 
 bool EditAttributeTableModel::rowIsEdited(int row) const
 {
-    if(_attribute == nullptr)
+    if(row < 0 || _attribute == nullptr)
         return false;
+
+    row = _sortMap.at(static_cast<size_t>(row));
 
     if(_combineSharedValues)
     {
         if(_attribute->elementType() == ElementType::Node)
         {
-            auto nodeIds = rowToElementIds(row, _attribute, _document->graphModel()->graph().nodeIds());
+            const auto& nodeIds = _nodeIdsMap.at(row);
 
             if(!nodeIds.empty())
                 return u::contains(_edits._nodeValues, nodeIds.front());
         }
         else if(_attribute->elementType() == ElementType::Edge)
         {
-            auto edgeIds = rowToElementIds(row, _attribute, _document->graphModel()->graph().edgeIds());
+            const auto& edgeIds = _edgeIdsMap.at(row);
 
             if(!edgeIds.empty())
                 return u::contains(_edits._edgeValues, edgeIds.front());
@@ -308,6 +299,58 @@ NodeId EditAttributeTableModel::rowToNodeId(int row) const
     auto index = static_cast<size_t>(row);
     if(index < v.size())
         return v.at(index);
+
+    return {};
+}
+
+QVariant EditAttributeTableModel::valueAt(int column, int row) const
+{
+    if(_attribute == nullptr)
+        return {};
+
+    if(_combineSharedValues)
+    {
+        const auto& sharedValue = _attributeSharedValues.at(static_cast<size_t>(row));
+
+        if(column == 0)
+            return sharedValue._count;
+
+        if(column == 1)
+        {
+            if(_attribute->elementType() == ElementType::Node)
+            {
+                const auto& nodeIds = _nodeIdsMap.at(row);
+
+                if(!nodeIds.empty() && u::contains(_edits._nodeValues, nodeIds.front()))
+                    return _edits._nodeValues.at(nodeIds.front());
+            }
+            else if(_attribute->elementType() == ElementType::Edge)
+            {
+                const auto& edgeIds = _edgeIdsMap.at(row);
+
+                if(!edgeIds.empty() && u::contains(_edits._edgeValues, edgeIds.front()))
+                    return _edits._edgeValues.at(edgeIds.front());
+            }
+
+            return sharedValue._value;
+        }
+    }
+    else
+    {
+        if(_attribute->elementType() == ElementType::Node)
+        {
+            auto nodeId = rowToNodeId(row);
+            const auto& value = u::contains(_edits._nodeValues, nodeId) ? _edits._nodeValues.at(nodeId) : _attribute->valueOf(nodeId);
+            return column == 0 ? _document->graphModel()->nodeName(nodeId) : value;
+        }
+
+        if(_attribute->elementType() == ElementType::Edge)
+        {
+            auto edgeId = _document->graphModel()->graph().edgeIds().at(static_cast<size_t>(row));
+            const auto& value = u::contains(_edits._edgeValues, edgeId) ? _edits._edgeValues.at(edgeId) : _attribute->valueOf(edgeId);
+            return column == 0 ? static_cast<int>(edgeId) : value;
+        }
+    }
 
     return {};
 }
@@ -348,8 +391,16 @@ void EditAttributeTableModel::setAttributeName(const QString& attributeName)
     beginResetModel();
 
     _attributeName = attributeName;
-    _attribute = !attributeName.isEmpty() ?
-        _document->graphModel()->attributeByName(attributeName) : nullptr;
+    if(!attributeName.isEmpty())
+    {
+        _attribute = _document->graphModel()->attributeByName(attributeName);
+        _attributeSharedValues = _attribute->sharedValues();
+    }
+    else
+    {
+        _attribute = nullptr;
+        _attributeSharedValues.clear();
+    }
 
     _edits._nodeValues.clear();
     _edits._edgeValues.clear();
@@ -359,6 +410,33 @@ void EditAttributeTableModel::setAttributeName(const QString& attributeName)
     emit attributeNameChanged();
     emit hasEditsChanged();
     emit editsChanged();
+
+    updateSortMap();
+}
+
+void EditAttributeTableModel::updateSortMap()
+{
+    _sortMap.resize(static_cast<size_t>(rowCount()));
+    std::iota(_sortMap.begin(), _sortMap.end(), 0);
+
+    if(_sortColumn < 0)
+        return;
+
+    std::sort(_sortMap.begin(), _sortMap.end(), [this](int rowA, int rowB)
+    {
+        if(!_ascendingSortOrder)
+            std::swap(rowA, rowB);
+
+        auto valueA = valueAt(_sortColumn, rowA);
+        auto valueB = valueAt(_sortColumn, rowB);
+
+        if(valueA.userType() == QMetaType::QString && valueB.userType() == QMetaType::QString)
+            return u::numericCompare(valueA.toString(), valueB.toString()) < 0;
+
+        return QVariant::compare(valueA, valueB) == QPartialOrdering::Less;
+    });
+
+    emit dataChanged(index(0,0), index(rowCount() - 1, columnCount() - 1));
 }
 
 void EditAttributeTableModel::onSelectionChanged()
@@ -379,6 +457,8 @@ void EditAttributeTableModel::onSelectionChanged()
     }
 
     endResetModel();
+
+    updateSortMap();
 }
 
 static_block

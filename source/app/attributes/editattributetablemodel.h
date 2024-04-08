@@ -27,6 +27,7 @@
 #include <QObject>
 #include <QString>
 #include <QAbstractTableModel>
+#include <QVariant>
 
 #include <vector>
 #include <map>
@@ -43,6 +44,8 @@ class EditAttributeTableModel : public QAbstractTableModel
     Q_PROPERTY(bool hasEdits READ hasEdits NOTIFY hasEditsChanged)
     Q_PROPERTY(AttributeEdits edits READ edits NOTIFY editsChanged)
     Q_PROPERTY(bool combineSharedValues MEMBER _combineSharedValues NOTIFY combineSharedValuesChanged)
+    Q_PROPERTY(int sortColumn MEMBER _sortColumn NOTIFY sortColumnChanged)
+    Q_PROPERTY(bool ascendingSortOrder MEMBER _ascendingSortOrder NOTIFY ascendingSortOrderChanged)
 
 public:
     EditAttributeTableModel();
@@ -63,9 +66,17 @@ private:
     Document* _document = nullptr;
     QString _attributeName;
     const IAttribute* _attribute = nullptr;
+    std::vector<IAttribute::SharedValue> _attributeSharedValues;
     bool _combineSharedValues = false;
 
+    std::vector<int> _sortMap;
+    int _sortColumn = 0;
+    bool _ascendingSortOrder = true;
+
     std::vector<NodeId> _selectedNodes;
+
+    std::map<int, std::vector<NodeId>> _nodeIdsMap;
+    std::map<int, std::vector<EdgeId>> _edgeIdsMap;
 
     AttributeEdits _edits;
 
@@ -87,6 +98,7 @@ private:
     };
 
     NodeId rowToNodeId(int row) const;
+    QVariant valueAt(int column, int row) const;
 
     void setDocument(Document* document);
     void setAttributeName(const QString& attributeName);
@@ -96,6 +108,7 @@ private:
     const AttributeEdits& edits() const { return _edits; }
 
 private slots:
+    void updateSortMap();
     void onSelectionChanged();
 
 signals:
@@ -104,6 +117,8 @@ signals:
     void hasEditsChanged();
     void editsChanged();
     void combineSharedValuesChanged();
+    void sortColumnChanged();
+    void ascendingSortOrderChanged();
 };
 
 #endif // EDITATTRIBUTETABLEMODEL_H

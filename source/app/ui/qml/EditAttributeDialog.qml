@@ -116,8 +116,8 @@ Window
 
         headerView.columnDivisorPosition = _defaultColumnDivisor;
         headerView.forceLayout();
-        proxyModel.sortColumn = -1;
-        proxyModel.ascendingSortOrder = true;
+        editAttributeTableModel.sortColumn = -1;
+        editAttributeTableModel.ascendingSortOrder = true;
     }
 
     onDocumentChanged: { root.initialise(); }
@@ -146,8 +146,8 @@ Window
 
         onCombineSharedValuesChanged:
         {
-            proxyModel.sortColumn = -1;
-            proxyModel.ascendingSortOrder = true;
+            editAttributeTableModel.sortColumn = -1;
+            editAttributeTableModel.ascendingSortOrder = true;
         }
     }
 
@@ -568,12 +568,12 @@ Window
                                 antialiasing: false
                                 width: headerView.sortIndicatorWidth
                                 height: headerView.sortIndicatorHeight
-                                visible: proxyModel.sortColumn === model.column
+                                visible: editAttributeTableModel.sortColumn === model.column
                                 transform: Rotation
                                 {
                                     origin.x: sortIndicator.width * 0.5
                                     origin.y: sortIndicator.height * 0.5
-                                    angle: proxyModel.ascendingSortOrder ? 180 : 0
+                                    angle: editAttributeTableModel.ascendingSortOrder ? 180 : 0
                                 }
 
                                 ShapePath
@@ -636,10 +636,10 @@ Window
                                 {
                                     if(!mouseOverResizeHandle && mouse.button === Qt.LeftButton)
                                     {
-                                        if(proxyModel.sortColumn === model.column)
-                                            proxyModel.ascendingSortOrder = !proxyModel.ascendingSortOrder;
+                                        if(editAttributeTableModel.sortColumn === model.column)
+                                            editAttributeTableModel.ascendingSortOrder = !editAttributeTableModel.ascendingSortOrder;
                                         else
-                                            proxyModel.sortColumn = model.column;
+                                            editAttributeTableModel.sortColumn = model.column;
                                     }
                                 }
 
@@ -708,32 +708,7 @@ Window
 
                     property var activeEditField: null
 
-                    model: SortFilterProxyModel
-                    {
-                        id: proxyModel
-
-                        property int sortColumn: -1
-
-                        sourceModel: editAttributeTableModel
-
-                        sorters: StringSorter
-                        {
-                            roleName:
-                            {
-                                switch(proxyModel.sortColumn)
-                                {
-                                case 0: return "label"
-                                case 1: return "attribute";
-                                }
-
-                                return "";
-                            }
-
-                            sortOrder: proxyModel.ascendingSortOrder ?
-                                Qt.AscendingOrder : Qt.DescendingOrder
-                            numericMode: true //FIXME this won't work properly under wasm, where QCollator is broken
-                        }
-                    }
+                    model: editAttributeTableModel
 
                     clip: true
                     boundsBehavior: Flickable.StopAtBounds
@@ -783,8 +758,7 @@ Window
                                     {
                                         if(mouse.button === Qt.RightButton)
                                         {
-                                            let row = model.index % proxyModel.rowCount();
-                                            contextMenu.resetRow = proxyModel.mapToSource(row);
+                                            contextMenu.resetRow = model.index % editAttributeTableModel.rowCount();
                                             contextMenu.popup();
                                         }
 
@@ -834,8 +808,7 @@ Window
                                 {
                                     if(visible)
                                     {
-                                        let row = model.index % proxyModel.rowCount();
-                                        row = proxyModel.mapToSource(row);
+                                        let row = model.index % editAttributeTableModel.rowCount();
                                         editAttributeTableModel.editValue(row, text);
                                         visible = false;
                                     }
