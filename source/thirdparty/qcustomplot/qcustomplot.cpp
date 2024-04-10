@@ -26230,7 +26230,8 @@ void QCPColorMapData::clearAlpha()
 void QCPColorMapData::fill(double z)
 {
   const int dataCount = mValueSize*mKeySize;
-  memset(mData, z, dataCount*sizeof(*mData));
+  for(size_t i = 0; i < dataCount; i++)
+    mData[i] = z;
   mDataBounds = QCPRange(z, z);
   mDataModified = true;
 }
