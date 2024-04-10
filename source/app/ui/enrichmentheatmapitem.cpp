@@ -414,13 +414,19 @@ void EnrichmentHeatmapItem::showTooltip()
 
     const std::pair<int, int> colorMapIndexPair = {std::round(key), std::round(value)};
     if(!u::containsKey(_colorMapKeyValueToTableIndex, colorMapIndexPair))
+    {
+        hideTooltip();
         return;
+    }
 
     auto tableIndex = _colorMapKeyValueToTableIndex.at(colorMapIndexPair);
 
     // Bounds check the row
     if(tableIndex >= _tableModel->rowCount() || tableIndex < 0)
+    {
+        hideTooltip();
         return;
+    }
 
     _hoverLabel->setVisible(true);
 
