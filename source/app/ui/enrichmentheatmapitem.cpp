@@ -327,7 +327,7 @@ void EnrichmentHeatmapItem::scaleYAxis()
     const double visiblePlotHeight = columnAxisHeight();
     const double textHeight = columnLabelSize();
 
-    const double position = (_attributeBCount - (visiblePlotHeight / textHeight)) * (1.0-_scrollYAmount);
+    const double position = (_attributeBCount - (visiblePlotHeight / textHeight)) * (1.0 - _scrollYAmount);
 
     if((visiblePlotHeight / textHeight) <= maxY)
         customPlot().yAxis2->setRange(position - HEATMAP_OFFSET, position + (visiblePlotHeight / textHeight) - HEATMAP_OFFSET);
