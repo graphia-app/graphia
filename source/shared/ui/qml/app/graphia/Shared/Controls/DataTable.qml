@@ -273,7 +273,7 @@ Rectangle
             return modelRow % 2 ? ControlColors.tableRow1 : ControlColors.tableRow2;
         }
 
-        color: palette.buttonText
+        color: { return QmlUtils.contrastingColor(backgroundColor); }
         leftPadding: root._padding
         rightPadding: root._padding
         topPadding: root._padding * 0.5
