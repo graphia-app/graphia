@@ -21,7 +21,6 @@ import QtQuick.Window
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Dialogs
-import SortFilterProxyModel
 
 import app.graphia
 import app.graphia.Controls
@@ -87,6 +86,15 @@ ApplicationWindow
                 checkable: true
                 checked: true
                 text: qsTr("Show only significant over-represented results")
+
+                onCheckedChanged:
+                {
+                    if(table.model !== null)
+                        table.model.enrichedOnly = checked;
+
+                    table.clearSelection();
+                    table.positionViewAt(0);
+                }
             }
 
             ToolBarButton
@@ -181,7 +189,23 @@ ApplicationWindow
                 sortIndicatorColumn: 0
                 sortIndicatorOrder: Qt.AscendingOrder
 
-                property int rowCount: proxyModel.count
+                onSortIndicatorColumnChanged:
+                {
+                    if(model !== null)
+                        model.sortColumn = sortIndicatorColumn;
+                }
+
+                onSortIndicatorOrderChanged:
+                {
+                    if(model !== null)
+                        model.ascendingSortOrder = (sortIndicatorOrder == Qt.AscendingOrder);
+                }
+
+                property int rowCount: 0
+                function updateRowCount()
+                {
+                    table.rowCount = table.model !== null ? table.model.rowCount() : 0;
+                }
 
                 onHeaderClicked: function(column, mouse)
                 {
@@ -230,60 +254,18 @@ ApplicationWindow
                     color: palette.buttonText
                 }
 
-                model: SortFilterProxyModel
+                model: root._currentModel
+
+                onModelChanged:
                 {
-                    id: proxyModel
-                    sourceModel: root._currentModel
+                    table.clearSelection();
+                    table.columnResizeRequired = true;
 
-                    onSourceModelChanged:
-                    {
-                        table.clearSelection();
-                        table.columnResizeRequired = true;
-                    }
+                    table.sortIndicatorColumn = model ? model.sortColumn : 0;
+                    table.sortIndicatorOrder = model ? (model.ascendingSortOrder === Qt.AscendingOrder) : true;
+                    showOnlyEnrichedButton.checked = model ? model.enrichedOnly : true;
 
-                    filters: ExpressionFilter
-                    {
-                        enabled: showOnlyEnrichedButton.checked
-                        expression: model.enriched
-                    }
-
-                    sorters: ExpressionSorter
-                    {
-                        id: expressionSorter
-
-                        // Qt. is not available from inside the expression, for some reason 🤷
-                        readonly property int descendingOrder: Qt.DescendingOrder
-
-                        enabled: table.sortIndicatorColumn >= 0
-                        expression:
-                        {
-                            let descending = table.sortIndicatorOrder === expressionSorter.descendingOrder;
-
-                            if(table.sortIndicatorColumn < 0)
-                                return true;
-
-                            let rowA = modelLeft.index;
-                            let rowB = modelRight.index;
-
-                            if(rowA < 0 || rowB < 0)
-                                return true;
-
-                            // Exclude header row from sort
-                            if(rowA === 0 || rowB === 0)
-                                return rowA === 0;
-
-                            let valueA = proxyModel.sourceModel.data(proxyModel.sourceModel.index(rowA, table.sortIndicatorColumn));
-                            let valueB = proxyModel.sourceModel.data(proxyModel.sourceModel.index(rowB, table.sortIndicatorColumn));
-
-                            if(descending)
-                                [valueA, valueB] = [valueB, valueA];
-
-                            if(!isNaN(valueA) && !isNaN(valueB))
-                                return Number(valueA) < Number(valueB);
-
-                            return table.stringCompare(valueA, valueB) < 0;
-                        }
-                    }
+                    table.updateRowCount();
                 }
 
                 cellValueProvider: function(value)
@@ -312,27 +294,13 @@ ApplicationWindow
 
                     model: root._currentModel
                     elideLabelWidth: 100
-                    showOnlyEnriched: showOnlyEnrichedButton.checked
                     xAxisLabel: model ? model.selectionA : ""
                     yAxisLabel: model ? model.selectionB : ""
 
-                    onShowOnlyEnrichedChanged:
-                    {
-                        table.clearSelection();
-                        table.positionViewAt(0);
-                    }
-
                     onPlotValueClicked: function(row)
                     {
-                        let proxyRow = proxyModel.mapFromSource(row);
-                        if(proxyRow < 0)
-                        {
-                            table.clearSelection();
-                            return;
-                        }
-
-                        table.selectRow(proxyRow);
-                        table.positionViewAt(proxyRow);
+                        table.selectRow(row);
+                        table.positionViewAt(row);
                     }
 
                     onRightClick: { plotContextMenu.popup(); }
@@ -377,7 +345,11 @@ ApplicationWindow
             Connections
             {
                 target: root._currentModel
-                function onModelReset() { heatmap.buildPlot(); }
+                function onModelReset()
+                {
+                    table.updateRowCount();
+                    heatmap.buildPlot();
+                }
             }
         }
     }

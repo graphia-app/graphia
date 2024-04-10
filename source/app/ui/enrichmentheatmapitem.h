@@ -35,7 +35,6 @@ class EnrichmentHeatmapItem : public QCustomPlotQuickItem
     Q_PROPERTY(int elideLabelWidth MEMBER _elideLabelWidth WRITE setElideLabelWidth)
     Q_PROPERTY(QString xAxisLabel MEMBER _xAxisLabel WRITE setXAxisLabel)
     Q_PROPERTY(QString yAxisLabel MEMBER _yAxisLabel WRITE setYAxisLabel)
-    Q_PROPERTY(bool showOnlyEnriched MEMBER _showOnlyEnriched WRITE setShowOnlyEnriched NOTIFY showOnlyEnrichedChanged)
 
 private:
     QCPLayer* _textLayer = nullptr;
@@ -58,8 +57,6 @@ private:
     QString _xAxisLabel;
     QString _yAxisLabel;
 
-    bool _showOnlyEnriched = false;
-
     double horizontalRangeSize();
     double verticalRangeSize();
     double columnAxisWidth();
@@ -72,7 +69,6 @@ private:
     void setElideLabelWidth(int elideLabelWidth);
     void setXAxisLabel(const QString& xAxisLabel);
     void setYAxisLabel(const QString& yAxisLabel);
-    void setShowOnlyEnriched(bool showOnlyEnriched);
     void scaleAxes();
 
 public:
@@ -95,7 +91,6 @@ signals:
     void horizontalRangeSizeChanged();
     void verticalRangeSizeChanged();
     void plotValueClicked(int row);
-    void showOnlyEnrichedChanged();
 
 public slots:
     void showTooltip();

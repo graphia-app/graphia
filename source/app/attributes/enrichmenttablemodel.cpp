@@ -19,6 +19,8 @@
 #include "enrichmenttablemodel.h"
 #include "enrichmentcalculator.h"
 
+#include "shared/utils/string.h"
+
 #include <QQmlEngine>
 #include <QDebug>
 
@@ -37,12 +39,16 @@ EnrichmentTableModel::EnrichmentTableModel(QObject *parent)
     _roleNames[RoleBase + Results::OverRep] = "OverRep";
     _roleNames[RoleBase + Results::Fishers] = "Fishers";
     _roleNames[RoleBase + Results::BonferroniAdjusted] = "BonferroniAdjusted";
+
+    connect(this, &EnrichmentTableModel::enrichedOnlyChanged, this, &EnrichmentTableModel::updateSortFilterMap);
+    connect(this, &EnrichmentTableModel::sortColumnChanged, this, &EnrichmentTableModel::updateSortFilterMap);
+    connect(this, &EnrichmentTableModel::ascendingSortOrderChanged, this, &EnrichmentTableModel::updateSortFilterMap);
 }
 
 int EnrichmentTableModel::rowCount(const QModelIndex& parent) const
 {
     Q_UNUSED(parent);
-    return static_cast<int>(_data.size() + 1 /* header */);
+    return static_cast<int>(_sortFilterMap.size() + 1 /* header */);
 }
 
 int EnrichmentTableModel::columnCount(const QModelIndex& parent) const
@@ -51,10 +57,20 @@ int EnrichmentTableModel::columnCount(const QModelIndex& parent) const
     return Results::NumResultColumns;
 }
 
+static bool enriched(const EnrichmentTableModel::Row& dataRow)
+{
+    const auto overRep = dataRow.at(static_cast<size_t>(EnrichmentTableModel::Results::OverRep)).toDouble();
+    const auto bonferroni = dataRow.at(static_cast<size_t>(EnrichmentTableModel::Results::BonferroniAdjusted)).toDouble();
+
+    return overRep > 1.0 && bonferroni <= 0.05;
+}
+
 QVariant EnrichmentTableModel::data(const QModelIndex& index, int role) const
 {
     auto row = static_cast<size_t>(index.row());
     Q_ASSERT(row < static_cast<size_t>(rowCount()));
+
+    auto sortedFilteredRow = row > 0 ? _sortFilterMap.at(row - 1) : 0;
 
     if(role == EnrichedRole)
     {
@@ -62,11 +78,7 @@ QVariant EnrichmentTableModel::data(const QModelIndex& index, int role) const
         if(row == 0)
             return true;
 
-        const auto& dataRow = _data.at(row - 1);
-        const auto overRep = dataRow.at(static_cast<int>(Results::OverRep)).toDouble();
-        const auto bonferroni = dataRow.at(static_cast<int>(Results::BonferroniAdjusted)).toDouble();
-
-        return overRep > 1.0 && bonferroni <= 0.05;
+        return enriched(_data.at(sortedFilteredRow));
     }
 
     auto column = static_cast<size_t>(index.column());
@@ -88,7 +100,7 @@ QVariant EnrichmentTableModel::data(const QModelIndex& index, int role) const
         }
     }
 
-    return _data.at(row - 1).at(column);
+    return _data.at(sortedFilteredRow).at(column);
 }
 
 QVariant EnrichmentTableModel::data(int row, Results result) const
@@ -144,5 +156,46 @@ void EnrichmentTableModel::setTableData(EnrichmentTableModel::Table data, QStrin
     _data = std::move(data);
     _selectionA = std::move(selectionA);
     _selectionB = std::move(selectionB);
+    updateSortFilterMap();
+    endResetModel();
+}
+
+void EnrichmentTableModel::updateSortFilterMap()
+{
+    beginResetModel();
+
+    _sortFilterMap.clear();
+
+    if(_enrichedOnly)
+    {
+        for(size_t i = 0; i < _data.size(); i++)
+        {
+            if(enriched(_data.at(i)))
+                _sortFilterMap.push_back(i);
+        }
+    }
+    else
+    {
+        _sortFilterMap.resize(_data.size());
+        std::iota(_sortFilterMap.begin(), _sortFilterMap.end(), 0);
+    }
+
+    if(_sortColumn >= 0)
+    {
+        std::sort(_sortFilterMap.begin(), _sortFilterMap.end(), [this](size_t rowA, size_t rowB)
+        {
+            if(!_ascendingSortOrder)
+                std::swap(rowA, rowB);
+
+            auto valueA = _data.at(rowA).at(static_cast<size_t>(_sortColumn));
+            auto valueB = _data.at(rowB).at(static_cast<size_t>(_sortColumn));
+
+            if(valueA.userType() == QMetaType::QString && valueB.userType() == QMetaType::QString)
+                return u::numericCompare(valueA.toString(), valueB.toString()) < 0;
+
+            return QVariant::compare(valueA, valueB) == QPartialOrdering::Less;
+        });
+    }
+
     endResetModel();
 }

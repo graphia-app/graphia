@@ -22,12 +22,18 @@
 #include <QObject>
 #include <QAbstractTableModel>
 
+#include <vector>
+
 class EnrichmentTableModel : public QAbstractTableModel
 {
     Q_OBJECT
 
     Q_PROPERTY(QString selectionA READ selectionA WRITE setSelectionA NOTIFY selectionNamesChanged)
     Q_PROPERTY(QString selectionB READ selectionB WRITE setSelectionB NOTIFY selectionNamesChanged)
+
+    Q_PROPERTY(bool enrichedOnly MEMBER _enrichedOnly NOTIFY enrichedOnlyChanged)
+    Q_PROPERTY(int sortColumn MEMBER _sortColumn NOTIFY sortColumnChanged)
+    Q_PROPERTY(bool ascendingSortOrder MEMBER _ascendingSortOrder NOTIFY ascendingSortOrderChanged)
 
 public:
     enum Results
@@ -71,10 +77,21 @@ private:
     QString _selectionA;
     QString _selectionB;
 
+    std::vector<size_t> _sortFilterMap;
+    bool _enrichedOnly = true;
+    int _sortColumn = -1;
+    bool _ascendingSortOrder = true;
+
     QHash<int, QByteArray> _roleNames;
+
+private slots:
+    void updateSortFilterMap();
 
 signals:
     void selectionNamesChanged();
+    void enrichedOnlyChanged();
+    void sortColumnChanged();
+    void ascendingSortOrderChanged();
 };
 
 #endif // ENRICHMENTTABLEMODEL_H

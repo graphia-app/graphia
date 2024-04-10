@@ -101,8 +101,6 @@ EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) :
     _hoverLabel->setVisible(false);
 
     connect(this, &EnrichmentHeatmapItem::tableModelChanged, this, &EnrichmentHeatmapItem::buildPlot);
-    connect(this, &EnrichmentHeatmapItem::tableModelChanged, this, &QQuickPaintedItem::widthChanged);
-    connect(this, &EnrichmentHeatmapItem::tableModelChanged, this, &QQuickPaintedItem::heightChanged);
 
     connect(this, &QQuickPaintedItem::widthChanged, this, &EnrichmentHeatmapItem::horizontalRangeSizeChanged);
     connect(this, &QQuickPaintedItem::heightChanged, this, &EnrichmentHeatmapItem::verticalRangeSizeChanged);
@@ -249,6 +247,8 @@ void EnrichmentHeatmapItem::buildPlot()
     _attributeACount = static_cast<int>(attributeValueSetA.size());
     _attributeBCount = static_cast<int>(attributeValueSetB.size());
 
+    _colorMap->data()->fill(1.0);
+
     for(int i = 1; i < _tableModel->rowCount(); i++)
     {
         // The data is offset by 1 to account for the empty margin
@@ -259,16 +259,6 @@ void EnrichmentHeatmapItem::buildPlot()
         auto pValue = _tableModel->data(i, EnrichmentTableModel::Results::BonferroniAdjusted).toDouble();
 
         _colorMapKeyValueToTableIndex.emplace(std::make_pair(xValue, yValue), i);
-
-        if(_showOnlyEnriched)
-        {
-            auto overRep = _tableModel->data(i, EnrichmentTableModel::Results::OverRep).toDouble();
-            if(overRep <= 1.0)
-            {
-                // Set a value that will map to grey, so that the heatmap matches the table
-                pValue = 1.0;
-            }
-        }
 
         _colorMap->data()->setCell(xValue + 1, yValue + 1, pValue);
 
@@ -287,6 +277,12 @@ void EnrichmentHeatmapItem::buildPlot()
         }
     }
     _colorScale->setDataRange(QCPRange(0, 0.06));
+
+    scaleXAxis();
+    scaleYAxis();
+
+    emit horizontalRangeSizeChanged();
+    emit verticalRangeSizeChanged();
 
     customPlot().replot(QCustomPlot::rpQueuedReplot);
 }
@@ -362,16 +358,6 @@ void EnrichmentHeatmapItem::setYAxisLabel(const QString& yAxisLabel)
     {
         _yAxisLabel = yAxisLabel;
         buildPlot();
-    }
-}
-
-void EnrichmentHeatmapItem::setShowOnlyEnriched(bool showOnlyEnriched)
-{
-    if(showOnlyEnriched != _showOnlyEnriched)
-    {
-        _showOnlyEnriched = showOnlyEnriched;
-        buildPlot();
-        emit showOnlyEnrichedChanged();
     }
 }
 
