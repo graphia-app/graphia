@@ -155,6 +155,7 @@ class Application : public QObject, public IApplication
     Q_PROPERTY(QStringList nameFilters READ nameFilters NOTIFY nameFiltersChanged)
     Q_PROPERTY(QStringListModel* loadableExtensions READ loadableExtensions NOTIFY loadableExtensionsChanged)
     Q_PROPERTY(QStringListModel* ambiguousExtensions READ ambiguousExtensions NOTIFY ambiguousExtensionsChanged)
+    Q_PROPERTY(QStringListModel* ambiguousUrlTypes READ ambiguousUrlTypes NOTIFY ambiguousUrlTypesChanged)
     Q_PROPERTY(QAbstractListModel* urlTypeDetails READ urlTypeDetails NOTIFY urlTypeDetailsChanged)
     Q_PROPERTY(QAbstractListModel* pluginDetails READ pluginDetails NOTIFY pluginDetailsChanged)
 
@@ -246,6 +247,7 @@ signals:
     void nameFiltersChanged();
     void loadableExtensionsChanged();
     void ambiguousExtensionsChanged();
+    void ambiguousUrlTypesChanged();
     void pluginDetailsChanged();
     void urlTypeDetailsChanged();
 
@@ -282,6 +284,7 @@ private:
     QStringList _nameFilters;
     QStringListModel _loadableExtensions;
     QStringListModel _ambiguousExtensions;
+    QStringListModel _ambiguousUrlTypes;
 
     void loadPlugins();
     bool initialisePlugin(IPlugin* plugin, std::unique_ptr<QPluginLoader> pluginLoader);
@@ -291,6 +294,7 @@ private:
     QStringList nameFilters() const { return _nameFilters; }
     QStringListModel* loadableExtensions() { return &_loadableExtensions; }
     QStringListModel* ambiguousExtensions() { return &_ambiguousExtensions; }
+    QStringListModel* ambiguousUrlTypes() { return &_ambiguousUrlTypes; }
 
     QAbstractListModel* urlTypeDetails();
     QAbstractListModel* pluginDetails();

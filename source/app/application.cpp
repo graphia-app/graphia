@@ -922,6 +922,25 @@ void Application::updateLoadingCapabilities()
 
     _ambiguousExtensions.setStringList(ambiguousExtensions);
     emit ambiguousExtensionsChanged();
+
+    std::map<QString, int> urlTypePluginCounts;
+    for(const auto& loadedPlugin : _loadedPlugins)
+    {
+        auto urlTypeNames = loadedPlugin._interface->loadableUrlTypeNames();
+
+        for(const auto& urlTypeName : urlTypeNames)
+            urlTypePluginCounts[urlTypeName]++;
+    }
+
+    QStringList ambiguousUrlTypes;
+    for(const auto& [urlTypeName, count] : urlTypePluginCounts)
+    {
+        if(count > 1)
+            ambiguousUrlTypes.append(urlTypeName);
+    }
+
+    _ambiguousUrlTypes.setStringList(ambiguousUrlTypes);
+    emit ambiguousUrlTypesChanged();
 }
 
 void Application::unloadPlugins()
