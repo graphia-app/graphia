@@ -62,6 +62,7 @@
 #include <mutex>
 #include <chrono>
 #include <algorithm>
+#include <map>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -904,6 +905,23 @@ void Application::updateLoadingCapabilities()
     _loadableExtensions.setStringList(loadableExtensions);
 
     emit loadableExtensionsChanged();
+
+    std::map<QString, int> extensionUrlTypeCounts;
+    for(const auto& fileType : fileTypes)
+    {
+        for(const auto& extension : fileType._extensions)
+            extensionUrlTypeCounts[extension]++;
+    }
+
+    QStringList ambiguousExtensions;
+    for(const auto& [extension, count] : extensionUrlTypeCounts)
+    {
+        if(count > 1)
+            ambiguousExtensions.append(extension);
+    }
+
+    _ambiguousExtensions.setStringList(ambiguousExtensions);
+    emit ambiguousExtensionsChanged();
 }
 
 void Application::unloadPlugins()

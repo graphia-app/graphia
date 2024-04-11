@@ -154,6 +154,7 @@ class Application : public QObject, public IApplication
 
     Q_PROPERTY(QStringList nameFilters READ nameFilters NOTIFY nameFiltersChanged)
     Q_PROPERTY(QStringListModel* loadableExtensions READ loadableExtensions NOTIFY loadableExtensionsChanged)
+    Q_PROPERTY(QStringListModel* ambiguousExtensions READ ambiguousExtensions NOTIFY ambiguousExtensionsChanged)
     Q_PROPERTY(QAbstractListModel* urlTypeDetails READ urlTypeDetails NOTIFY urlTypeDetailsChanged)
     Q_PROPERTY(QAbstractListModel* pluginDetails READ pluginDetails NOTIFY pluginDetailsChanged)
 
@@ -244,6 +245,7 @@ public:
 signals:
     void nameFiltersChanged();
     void loadableExtensionsChanged();
+    void ambiguousExtensionsChanged();
     void pluginDetailsChanged();
     void urlTypeDetailsChanged();
 
@@ -279,6 +281,7 @@ private:
 
     QStringList _nameFilters;
     QStringListModel _loadableExtensions;
+    QStringListModel _ambiguousExtensions;
 
     void loadPlugins();
     bool initialisePlugin(IPlugin* plugin, std::unique_ptr<QPluginLoader> pluginLoader);
@@ -287,6 +290,7 @@ private:
 
     QStringList nameFilters() const { return _nameFilters; }
     QStringListModel* loadableExtensions() { return &_loadableExtensions; }
+    QStringListModel* ambiguousExtensions() { return &_ambiguousExtensions; }
 
     QAbstractListModel* urlTypeDetails();
     QAbstractListModel* pluginDetails();
