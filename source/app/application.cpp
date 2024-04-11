@@ -123,9 +123,7 @@ static std::vector<UrlType> urlTypesForPlugins(const std::vector<LoadedPlugin>& 
 
 Application::Application(QObject *parent, bool enableUpdateCheck) :
     QObject(parent),
-    _openGLInfo(OpenGLFunctions::info()),
-    _urlTypeDetails(&_loadedPlugins),
-    _pluginDetails(&_loadedPlugins)
+    _openGLInfo(OpenGLFunctions::info())
 {
     connect(&_updater, &Updater::noNewUpdateAvailable, this, &Application::noNewUpdateAvailable);
     connect(&_updater, &Updater::updateDownloaded, this, &Application::newUpdateAvailable);
@@ -828,8 +826,6 @@ bool Application::initialisePlugin(IPlugin* plugin, std::unique_ptr<QPluginLoade
 
     plugin->initialise(this);
     _loadedPlugins.emplace_back(plugin, std::move(pluginLoader));
-    _urlTypeDetails.update();
-    _pluginDetails.update();
 
     auto message = QObject::tr("  ...%1 (%2)\n")
         .arg(pluginName, fileName);
@@ -956,16 +952,6 @@ void Application::unloadPlugins()
     }
 
     _loadedPlugins.clear();
-}
-
-QAbstractListModel* Application::urlTypeDetails()
-{
-    return &_urlTypeDetails;
-}
-
-QAbstractListModel* Application::pluginDetails()
-{
-    return &_pluginDetails;
 }
 
 int UrlTypeDetailsModel::rowCount(const QModelIndex&) const

@@ -94,8 +94,6 @@ public:
     QVariant data(const QModelIndex& index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    void update() { emit layoutChanged(); }
-
 private:
     const std::vector<LoadedPlugin>* _loadedPlugins;
     QStringList _filter;
@@ -126,8 +124,6 @@ public:
     QVariant data(const QModelIndex& index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    void update() { emit layoutChanged(); }
-
 private:
     const std::vector<LoadedPlugin>* _loadedPlugins;
     QStringList _filter;
@@ -156,8 +152,6 @@ class Application : public QObject, public IApplication
     Q_PROPERTY(QStringListModel* loadableExtensions READ loadableExtensions NOTIFY loadableExtensionsChanged)
     Q_PROPERTY(QStringListModel* ambiguousExtensions READ ambiguousExtensions NOTIFY ambiguousExtensionsChanged)
     Q_PROPERTY(QStringListModel* ambiguousUrlTypes READ ambiguousUrlTypes NOTIFY ambiguousUrlTypesChanged)
-    Q_PROPERTY(QAbstractListModel* urlTypeDetails READ urlTypeDetails NOTIFY urlTypeDetailsChanged)
-    Q_PROPERTY(QAbstractListModel* pluginDetails READ pluginDetails NOTIFY pluginDetailsChanged)
 
     Q_PROPERTY(int updateDownloadProgress READ updateDownloadProgress NOTIFY updateDownloadProgressChanged)
 
@@ -248,8 +242,6 @@ signals:
     void loadableExtensionsChanged();
     void ambiguousExtensionsChanged();
     void ambiguousUrlTypesChanged();
-    void pluginDetailsChanged();
-    void urlTypeDetailsChanged();
 
     void noNewUpdateAvailable(bool existing);
     void newUpdateAvailable();
@@ -275,10 +267,7 @@ private:
 
     DownloadQueue _downloadQueue;
 
-    UrlTypeDetailsModel _urlTypeDetails;
-
     std::vector<LoadedPlugin> _loadedPlugins;
-    PluginDetailsModel _pluginDetails;
     std::vector<std::unique_ptr<ISaverFactory>> _factories;
 
     QStringList _nameFilters;
@@ -295,9 +284,6 @@ private:
     QStringListModel* loadableExtensions() { return &_loadableExtensions; }
     QStringListModel* ambiguousExtensions() { return &_ambiguousExtensions; }
     QStringListModel* ambiguousUrlTypes() { return &_ambiguousUrlTypes; }
-
-    QAbstractListModel* urlTypeDetails();
-    QAbstractListModel* pluginDetails();
 
     int updateDownloadProgress() const { return _updater.progress(); }
 
