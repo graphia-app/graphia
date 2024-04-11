@@ -24,8 +24,6 @@ import app.graphia
 import app.graphia.Shared
 import app.graphia.Shared.Controls
 
-import SortFilterProxyModel
-
 Item
 {
     id: root
@@ -124,19 +122,11 @@ Item
         root._constructed = true;
     }
 
-    property var ambiguousExtensions: SortFilterProxyModel
+    property bool ambiguityInExtensionsOrPlugins:
     {
-        sourceModel: root.application.loadableExtensions
-        filters: [ ExpressionFilter { expression: { return model.index >= 0 && application.urlTypesFor(model.display).length > 1; } } ]
+        return root.application.ambiguousExtensions.rowCount() > 0 ||
+            root.application.ambiguousUrlTypes.rowCount() > 0;
     }
-
-    property var ambiguousUrlTypes: SortFilterProxyModel
-    {
-        sourceModel: root.application.urlTypeDetails
-        filters: [ ExpressionFilter { expression: { return model.index >= 0 && application.pluginNames(model.name).length > 1; } } ]
-    }
-
-    property bool ambiguityInExtensionsOrPlugins: ambiguousExtensions.count > 0 || ambiguousUrlTypes.count > 0
 
     RowLayout
     {
@@ -236,7 +226,7 @@ Item
 
                             Repeater
                             {
-                                model: root.ambiguousExtensions
+                                model: root.application.ambiguousExtensions
 
                                 Label
                                 {
@@ -251,7 +241,7 @@ Item
                             Repeater
                             {
                                 id: urlTypeSelectors
-                                model: root.ambiguousExtensions
+                                model: root.application.ambiguousExtensions
 
                                 ComboBox
                                 {
@@ -300,7 +290,7 @@ Item
 
                             Repeater
                             {
-                                model: root.ambiguousUrlTypes
+                                model: root.application.ambiguousUrlTypes
 
                                 Label
                                 {
@@ -308,14 +298,14 @@ Item
                                     Layout.column: 0
 
                                     font.italic: true
-                                    text: model.collectiveDescription
+                                    text: { return root.application.descriptionForUrlType(model.display); }
                                 }
                             }
 
                             Repeater
                             {
                                 id: pluginSelectors
-                                model: root.ambiguousUrlTypes
+                                model: root.application.ambiguousUrlTypes
 
                                 ComboBox
                                 {
@@ -325,7 +315,7 @@ Item
 
                                     model: [qsTr("Always Ask…"), ...applicablePlugins]
 
-                                    property string urlType: /*model.*/name
+                                    property string urlType: /*model.*/display
                                     property var applicablePlugins: { return application.pluginNames(urlType); }
 
                                     onCurrentIndexChanged:
