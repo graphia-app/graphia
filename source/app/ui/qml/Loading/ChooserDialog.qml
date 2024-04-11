@@ -23,8 +23,6 @@ import QtQuick.Layouts
 import app.graphia
 import app.graphia.Shared
 
-import SortFilterProxyModel
-
 Window
 {
     id: root
@@ -34,8 +32,6 @@ Window
     property string valueRole: "display"
     property string explanationText: ""
     property string choiceLabelText: ""
-
-    property var values: []
 
     modality: Qt.ApplicationModal
     flags: Qt.Dialog
@@ -88,44 +84,15 @@ Window
                 id: comboBox
                 Layout.preferredWidth: 200
 
-                model: SortFilterProxyModel
-                {
-                    id: proxyModel
-
-                    sourceModel: root.model
-                    filterRoleName: root.valueRole
-                    filterPattern:
-                    {
-                        let s = "";
-
-                        for(let i = 0; i < root.values.length; i++)
-                        {
-                            if(i !== 0) s += "|";
-                            s += root.values[i];
-                        }
-
-                        return s;
-                    }
-
-                    onFilterPatternChanged:
-                    {
-                        // Reset to first item
-                        comboBox.currentIndex = -1;
-                        comboBox.currentIndex = 0;
-                    }
-                }
+                model: root.model
 
                 property string selectedValue:
                 {
-                    if(root.model === null)
-                        return "";
-
-                    let row = proxyModel.mapToSource(currentIndex);
-                    if(row < 0)
+                    if(root.model === null || currentIndex < 0)
                         return "";
 
                     let role = QmlUtils.modelRoleForName(root.model, root.valueRole);
-                    return root.model.data(root.model.index(row, 0), role);
+                    return root.model.data(root.model.index(currentIndex, 0), role);
                 }
 
                 textRole: root.displayRole

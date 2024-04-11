@@ -420,11 +420,7 @@ ApplicationWindow
         }
     }
 
-    AboutPluginsDialog
-    {
-        id: aboutpluginsDialog
-        pluginDetails: application.pluginDetails
-    }
+    AboutPluginsDialog { id: aboutpluginsDialog }
 
     ChangeLog { id: changeLog }
     LatestChangesDialog
@@ -724,6 +720,9 @@ ApplicationWindow
             let defaultType = defaults.urlTypeFor(extension);
             if(defaultType === undefined || types.indexOf(defaultType) === -1)
             {
+                let model = application.urlTypeDetailsModel();
+                model.filter = types;
+
                 let urlTypeChooserDialog = chooserDialogComponent.createObject(mainWindow,
                 {
                     "title": qsTr("Type Ambiguous"),
@@ -731,10 +730,9 @@ ApplicationWindow
                         qsTr("{0} may be interpreted as two or more possible formats. " +
                         "Please select how you wish to proceed below."), userTextForUrl(url)),
                     "choiceLabelText": qsTr("Open As:"),
-                    "model": application.urlTypeDetails,
+                    "model": model,
                     "displayRole": "individualDescription",
-                    "valueRole": "name",
-                    "values": types
+                    "valueRole": "name"
                 });
 
                 urlTypeChooserDialog.open(function(selectedType, remember)
@@ -763,6 +761,9 @@ ApplicationWindow
                 let defaultPlugin = defaults.pluginFor(type);
                 if(defaultPlugin === undefined || pluginNames.indexOf(defaultPlugin) === -1)
                 {
+                    let model = application.pluginDetailsModel();
+                    model.filter = pluginNames;
+
                     let pluginChooserDialog = chooserDialogComponent.createObject(mainWindow,
                     {
                         "title": qsTr("Multiple Plugins Applicable"),
@@ -770,10 +771,9 @@ ApplicationWindow
                             qsTr("{0} may be loaded by two or more plugins. " +
                             "Please select how you wish to proceed below."), userTextForUrl(url)),
                         "choiceLabelText": qsTr("Open With Plugin:"),
-                        "model": application.pluginDetails,
+                        "model": model,
                         "displayRole": "name",
-                        "valueRole": "name",
-                        "values": pluginNames
+                        "valueRole": "name"
                     });
 
                     pluginChooserDialog.open(function(selectedPlugin, remember)
@@ -2006,6 +2006,7 @@ ApplicationWindow
         text: Qt.platform.os === "osx" ? qsTr("Plugins…") : qsTr("About Plugins…")
         onTriggered: function(source)
         {
+            aboutpluginsDialog.pluginDetails = application.pluginDetailsModel();
             aboutpluginsDialog.raise();
             aboutpluginsDialog.show();
         }
