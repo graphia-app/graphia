@@ -84,7 +84,7 @@ struct UrlType
     }
 };
 
-static std::vector<UrlType> urlTypesForPlugins(const std::vector<LoadedPlugin>& plugins)
+static std::vector<UrlType> urlTypesForPlugins(const std::vector<LoadedPlugin>& plugins, const QStringList& filter = {})
 {
     std::vector<UrlType> fileTypes;
 
@@ -93,6 +93,9 @@ static std::vector<UrlType> urlTypesForPlugins(const std::vector<LoadedPlugin>& 
         const auto urlTypeNames = plugin._interface->loadableUrlTypeNames();
         for(const auto& urlTypeName : urlTypeNames)
         {
+            if(!filter.empty() && !filter.contains(urlTypeName))
+                continue;
+
             const UrlType fileType =
             {
                 urlTypeName,
@@ -920,12 +923,12 @@ QAbstractListModel* Application::pluginDetails()
 
 int UrlTypeDetailsModel::rowCount(const QModelIndex&) const
 {
-    return static_cast<int>(urlTypesForPlugins(*_loadedPlugins).size());
+    return static_cast<int>(urlTypesForPlugins(*_loadedPlugins, _filter).size());
 }
 
 QVariant UrlTypeDetailsModel::data(const QModelIndex& index, int role) const
 {
-    auto urlTypes = urlTypesForPlugins(*_loadedPlugins);
+    auto urlTypes = urlTypesForPlugins(*_loadedPlugins, _filter);
 
     const int row = index.row();
 
@@ -957,7 +960,7 @@ QHash<int, QByteArray> UrlTypeDetailsModel::roleNames() const
 
 int PluginDetailsModel::rowCount(const QModelIndex&) const
 {
-    return static_cast<int>(_loadedPlugins->size());
+    return static_cast<int>(filteredPlugins().size());
 }
 
 QVariant PluginDetailsModel::data(const QModelIndex& index, int role) const
@@ -967,7 +970,7 @@ QVariant PluginDetailsModel::data(const QModelIndex& index, int role) const
     if(row < 0 || row >= rowCount(index))
         return {};
 
-    auto* plugin = _loadedPlugins->at(static_cast<size_t>(row))._interface;
+    const auto* plugin = filteredPlugins().at(static_cast<size_t>(row));
 
     switch(role)
     {
@@ -1010,6 +1013,21 @@ QHash<int, QByteArray> PluginDetailsModel::roleNames() const
     roles[Description] = "description";
     roles[ImageSource] = "imageSource";
     return roles;
+}
+
+std::vector<const IPlugin*> PluginDetailsModel::filteredPlugins() const
+{
+    std::vector<const IPlugin*> plugins;
+
+    for(const auto& plugin : *_loadedPlugins)
+    {
+        if(!_filter.empty() && !_filter.contains(plugin._interface->name()))
+            continue;
+
+        plugins.push_back(plugin._interface);
+    }
+
+    return plugins;
 }
 
 static_block

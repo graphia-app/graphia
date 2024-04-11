@@ -76,6 +76,8 @@ class UrlTypeDetailsModel : public QAbstractListModel
 {
     Q_OBJECT
 
+    Q_PROPERTY(QStringList filter MEMBER _filter NOTIFY filterChanged)
+
 public:
     explicit UrlTypeDetailsModel(const std::vector<LoadedPlugin>* loadedPlugins) :
         _loadedPlugins(loadedPlugins)
@@ -96,11 +98,17 @@ public:
 
 private:
     const std::vector<LoadedPlugin>* _loadedPlugins;
+    QStringList _filter;
+
+signals:
+    void filterChanged();
 };
 
 class PluginDetailsModel : public QAbstractListModel
 {
     Q_OBJECT
+
+    Q_PROPERTY(QStringList filter MEMBER _filter NOTIFY filterChanged)
 
 public:
     explicit PluginDetailsModel(const std::vector<LoadedPlugin>* loadedPlugins) :
@@ -122,6 +130,12 @@ public:
 
 private:
     const std::vector<LoadedPlugin>* _loadedPlugins;
+    QStringList _filter;
+
+    std::vector<const IPlugin*> filteredPlugins() const;
+
+signals:
+    void filterChanged();
 };
 
 class Application : public QObject, public IApplication
