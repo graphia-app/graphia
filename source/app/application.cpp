@@ -407,6 +407,16 @@ QString Application::parametersQmlPathForPlugin(const QString& pluginName,
     return {};
 }
 
+UrlTypeDetailsModel* Application::urlTypeDetailsModel() const
+{
+    return new UrlTypeDetailsModel(&_loadedPlugins);
+}
+
+PluginDetailsModel* Application::pluginDetailsModel() const
+{
+    return new PluginDetailsModel(&_loadedPlugins);
+}
+
 void Application::checkForUpdates()
 {
     if(Updater::updateStatus() != u"installed"_s)
@@ -1030,8 +1040,14 @@ std::vector<const IPlugin*> PluginDetailsModel::filteredPlugins() const
     return plugins;
 }
 
+Q_DECLARE_INTERFACE(UrlTypeDetailsModel, APP_URI)
+Q_DECLARE_INTERFACE(PluginDetailsModel, APP_URI)
+
 static_block
 {
     qmlRegisterType<Application>(
         APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "Application");
+
+    qmlRegisterInterface<UrlTypeDetailsModel>("UrlTypeDetailsModel", APP_MAJOR_VERSION);
+    qmlRegisterInterface<PluginDetailsModel>("PluginDetailsModel", APP_MAJOR_VERSION);
 }

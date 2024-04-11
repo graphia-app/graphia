@@ -208,6 +208,9 @@ public:
     Q_INVOKABLE QString parametersQmlPathForPlugin(const QString& pluginName,
         const QString& urlType) const;
 
+    Q_INVOKABLE UrlTypeDetailsModel* urlTypeDetailsModel() const;
+    Q_INVOKABLE PluginDetailsModel* pluginDetailsModel() const;
+
     static const char* uri() { return _uri; }
     static int majorVersion() { return _majorVersion; }
     static int minorVersion() { return _minorVersion; }
