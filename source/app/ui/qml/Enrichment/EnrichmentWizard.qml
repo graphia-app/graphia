@@ -27,8 +27,6 @@ import app.graphia.Controls
 import app.graphia.Shared
 import app.graphia.Shared.Controls
 
-import SortFilterProxyModel
-
 Wizard
 {
     id: root
@@ -62,37 +60,23 @@ Wizard
 
     Item
     {
-        SortFilterProxyModel
+        SimpleSortFilterProxyModel
         {
             id: proxyModel
 
             property var model: null
             sourceModel: model
 
-            filters:
-            [
-                ValueFilter
-                {
-                    roleName: "hasSharedValues"
-                    value: true
-                }
-            ]
+            filterRoleName: "hasSharedValues"
+            filterRegularExpression: /true/
 
-            sorters: ExpressionSorter
+            sortExpression: function(left, right)
             {
-                expression:
-                {
-                    // QML expressions are first evaluated with no captured variables
-                    // and the required variables are deduced after. If the variable is not
-                    // used during this no-context stage it cannot be captured hence this
-                    // seemingly pointless assignment
-                    let tempDoc = document;
-                    if(tempDoc === null)
-                        return false;
-                    let leftCount = document.attribute(modelLeft.display).sharedValues.length;
-                    let rightCount = document.attribute(modelRight.display).sharedValues.length;
-                    return leftCount < rightCount;
-                }
+                let leftAttributeName = model.data(left);
+                let rightAttributeName = model.data(right);
+                let leftCount = document.attribute(leftAttributeName).sharedValues.length;
+                let rightCount = document.attribute(rightAttributeName).sharedValues.length;
+                return leftCount < rightCount;
             }
 
             function rowIndexForAttributeName(attributeName)
