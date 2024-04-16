@@ -103,13 +103,10 @@ appendLicenseFromUrl Matio https://raw.githubusercontent.com/tbeu/matio/master/C
 
 appendOpenSSLLicense
 
-appendLicenseFromUrl SortFilterProxyModel \
-  https://raw.githubusercontent.com/oKcerG/SortFilterProxyModel/master/LICENSE
-
 appendLicense Tango \
   "Icons courtesy of the <a href=\"http://tango.freedesktop.org\">Tango Desktop Project</a>."
 
-appendLicenseFromHeader utfcpp ../../../thirdparty/utfcpp/utf8.h \
+appendLicenseFromHeader utfcpp ../../../thirdparty/utfcpp/source/utf8.h \
   "^Permission.*" ".*SOFTWARE\.$"
 
 appendLicenseFromHeader valgrind ../../../thirdparty/valgrind/valgrind.h \
