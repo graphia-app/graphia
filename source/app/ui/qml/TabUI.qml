@@ -26,8 +26,6 @@ import QtQuick.Dialogs
 
 import Qt.labs.platform as Labs
 
-import SortFilterProxyModel
-
 import app.graphia
 import app.graphia.Controls
 import app.graphia.Shared
@@ -117,21 +115,15 @@ Item
     readonly property bool panelVisible: find.showing ||
         addBookmark.showing || layoutSettings.showing
 
-    SortFilterProxyModel
+    SimpleSortFilterProxyModel
     {
         id: sharedValuesProxyModel
 
         property var model: null
         sourceModel: model
 
-        filters:
-        [
-            ValueFilter
-            {
-                roleName: "hasSharedValues"
-                value: true
-            }
-        ]
+        filterRoleName: "hasSharedValues"
+        filterRegularExpression: /true/
     }
 
     property int numAttributesWithSharedValues:
@@ -152,7 +144,7 @@ Item
         let attributeNames = [];
 
         for(let i = 0; i < sharedValuesProxyModel.count; i++)
-            attributeNames.push(sharedValuesProxyModel.get(i, "display"));
+            attributeNames.push(sharedValuesProxyModel.get(i));
 
         return attributeNames;
     }
