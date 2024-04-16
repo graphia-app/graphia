@@ -115,7 +115,7 @@ Item
     readonly property bool panelVisible: find.showing ||
         addBookmark.showing || layoutSettings.showing
 
-    SimpleSortFilterProxyModel
+    SortFilterProxyModel
     {
         id: sharedValuesProxyModel
 

@@ -60,7 +60,7 @@ Wizard
 
     Item
     {
-        SimpleSortFilterProxyModel
+        SortFilterProxyModel
         {
             id: proxyModel
 

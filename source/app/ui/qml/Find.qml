@@ -326,7 +326,7 @@ Rectangle
         onActivated: { closeAction.trigger(); }
     }
 
-    SimpleSortFilterProxyModel
+    SortFilterProxyModel
     {
         id: proxyModel
 

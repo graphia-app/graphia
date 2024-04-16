@@ -168,7 +168,7 @@ Item
                 //selectionBehavior: TableView.SelectRows
                 //selectionModel: ItemSelectionModel {}
 
-                model: SimpleSortFilterProxyModel
+                model: SortFilterProxyModel
                 {
                     id: sortFilterProxyModel
                     sourceModel: root.model !== undefined ? root.model : null

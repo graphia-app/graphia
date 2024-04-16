@@ -78,7 +78,7 @@ signals:
 static_block
 {
     qmlRegisterType<QmlSortFilterProxyModel>(
-        APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "SimpleSortFilterProxyModel");
+        APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "SortFilterProxyModel");
 }
 
 #endif // QMLSORTFILTERPROXYMODEL_H
