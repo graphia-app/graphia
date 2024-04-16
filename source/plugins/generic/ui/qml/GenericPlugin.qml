@@ -20,8 +20,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-import SortFilterProxyModel
-
 import app.graphia.Shared
 import app.graphia.Shared.Controls
 
