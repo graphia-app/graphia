@@ -14,7 +14,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/qcustomplot/qcustomplot.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/matio/matio.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/hdf5/hdf5.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/qtsingleapplication/qtsingleapplication.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/SortFilterProxyModel/SortFilterProxyModel.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/zlib/zlib.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/xlsxio/xlsxio.cmake)
 

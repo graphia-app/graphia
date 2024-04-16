@@ -78,7 +78,6 @@
 
 #include <qtsingleapplication/qtsingleapplication.h>
 #include <breakpad/crashhandler.h>
-#include <SortFilterProxyModel/register.h>
 
 #include "watchdog.h"
 
