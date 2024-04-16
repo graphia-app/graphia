@@ -21,8 +21,6 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 
-import SortFilterProxyModel
-
 import app.graphia
 import app.graphia.Shared
 import app.graphia.Shared.Controls
@@ -59,11 +57,16 @@ Item
     }
 
     property alias sortRoleName: sortFilterProxyModel.sortRoleName
-    property alias sorters: sortFilterProxyModel.sorters
+    property alias sortExpression: sortFilterProxyModel.sortExpression
     property alias ascendingSortOrder: sortFilterProxyModel.ascendingSortOrder
 
+    property alias filterRoleName: sortFilterProxyModel.filterRoleName
+    property alias filterRegularExpression: sortFilterProxyModel.filterRegularExpression
+    property alias filterExpression: sortFilterProxyModel.filterExpression
+
+    function modelRole(name) { return sortFilterProxyModel.role(name); }
+
     property bool allowMultipleSelection: false
-    property alias filters: sortFilterProxyModel.filters
 
     property var itemTextDelegateFunction: (model) => model.display
 
@@ -165,7 +168,7 @@ Item
                 //selectionBehavior: TableView.SelectRows
                 //selectionModel: ItemSelectionModel {}
 
-                model: SortFilterProxyModel
+                model: SimpleSortFilterProxyModel
                 {
                     id: sortFilterProxyModel
                     sourceModel: root.model !== undefined ? root.model : null

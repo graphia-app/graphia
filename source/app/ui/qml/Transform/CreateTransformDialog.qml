@@ -27,8 +27,6 @@ import app.graphia.Utils as Utils
 import app.graphia.Shared
 import app.graphia.Shared.Controls
 
-import SortFilterProxyModel
-
 import "TransformConfig.js" as TransformConfig
 
 Window
@@ -59,7 +57,7 @@ Window
         section: "misc"
 
         property alias transformSortOrder: transformsList.ascendingSortOrder
-        property alias transformSortBy: transformsList.sortBy
+        property alias transformSortBy: transformsList.sortRoleName
         property alias transformAttributeSortOrder: lhsAttributeList.ascendingSortOrder
         property alias transformAttributeSortBy: lhsAttributeList.sortRoleName
 
@@ -139,27 +137,29 @@ Window
                         return value;
                     }
 
-                    showSections: sortBy === "category"
+                    showSections: sortRoleName === "category"
                     sectionRoleName: "category"
-                    property string sortBy: "category"
+                    sortRoleName: "category"
 
-                    sorters: ExpressionSorter
+                    sortExpression: function(left, right)
                     {
-                        sortOrder: transformsList.ascendingSortOrder ? Qt.AscendingOrder : Qt.DescendingOrder
-                        expression:
+                        let leftIsFavourite = model.data(left, modelRole("isFavourite"));
+                        let rightIsFavourite = model.data(right, modelRole("isFavourite"));
+
+                        // Always sort favourites first
+                        if(leftIsFavourite !== rightIsFavourite)
                         {
-                            // Always sort favourites first
-                            if(modelLeft.isFavourite !== modelRight.isFavourite)
-                            {
-                                return transformsList.ascendingSortOrder ?
-                                    modelLeft.isFavourite : modelRight.isFavourite;
-                            }
-
-                            if(transformsList.sortBy !== "category" || modelLeft.category === modelRight.category)
-                                return modelLeft.display < modelRight.display;
-
-                            return modelLeft.category < modelRight.category;
+                            return transformsList.ascendingSortOrder ?
+                                leftIsFavourite : rightIsFavourite;
                         }
+
+                        let leftCategory = model.data(left, modelRole("category"));
+                        let rightCategory = model.data(right, modelRole("category"));
+
+                        if(transformsList.sortRoleName !== "category" || leftCategory === rightCategory)
+                            return model.data(left) < model.data(right);
+
+                        return leftCategory < rightCategory;
                     }
 
                     onSelectedValueChanged:

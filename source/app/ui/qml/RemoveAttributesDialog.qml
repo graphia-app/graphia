@@ -26,8 +26,6 @@ import app.graphia.Controls
 import app.graphia.Utils
 import app.graphia.Shared
 
-import SortFilterProxyModel
-
 Window
 {
     id: root
@@ -104,19 +102,13 @@ Window
 
             allowMultipleSelection: true
 
-            filters:
-            [
-                ValueFilter
-                {
-                    roleName: "userDefined"
-                    value: qsTr("User Defined")
-                },
-                ValueFilter
-                {
-                    roleName: "hasParameter"
-                    value: false
-                }
-            ]
+            filterExpression: function(row, parent)
+            {
+                let userDefined = model.data(model.index(row, 0), proxyModel.role("userDefined"));
+                let hasParameter = model.data(model.index(row, 0), proxyModel.role("hasParameter"));
+
+                return userDefined && hasParameter;
+            }
 
             AttributeListSortMenu { attributeList: parent }
         }

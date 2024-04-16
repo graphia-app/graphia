@@ -26,8 +26,6 @@ import app.graphia.Controls
 import app.graphia.Utils
 import app.graphia.Shared
 
-import SortFilterProxyModel
-
 Window
 {
     id: root
@@ -133,20 +131,8 @@ Window
             sortRoleName: "elementType"
             prettifyFunction: Attribute.prettify
 
-            filters: AnyOf
-            {
-                ValueFilter
-                {
-                    roleName: "elementType"
-                    value: qsTr("Node")
-                }
-
-                ValueFilter
-                {
-                    roleName: "elementType"
-                    value: qsTr("Edge")
-                }
-            }
+            filterRoleName: "elementType"
+            filterRegularExpression: { return new RegExp(qsTr("Node") + "|" + qsTr("Edge")); }
 
             onSelectedValueChanged:
             {

@@ -69,11 +69,11 @@ MouseArea
                     menuItem.text = qsTr(name);
                     menuItem.checked = Qt.binding(function()
                     {
-                        return transformsList.sortBy === roleName;
+                        return transformsList.sortRoleName === roleName;
                     });
                     menuItem.triggered.connect(function()
                     {
-                        return transformsList.sortBy = roleName;
+                        return transformsList.sortRoleName = roleName;
                     });
 
                     sortRoleMenu.addItem(menuItem);

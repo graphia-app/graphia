@@ -32,11 +32,14 @@ Item
     property alias currentIndexIsValid: popupTreeBox.currentIndexIsValid
 
     property alias sortRoleName: popupTreeBox.sortRoleName
+    property alias sortExpression: popupTreeBox.sortExpression
     property alias ascendingSortOrder: popupTreeBox.ascendingSortOrder
 
-    property alias showSections: popupTreeBox.showSections
+    property alias filterRoleName: popupTreeBox.filterRoleName
+    property alias filterRegularExpression: popupTreeBox.filterRegularExpression
+    property alias filterExpression: popupTreeBox.filterExpression
 
-    property alias filters: popupTreeBox.filters
+    property alias showSections: popupTreeBox.showSections
 
     property var previousIndex
 

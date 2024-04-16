@@ -31,8 +31,6 @@ import app.graphia.Utils
 import app.graphia.Shared
 import app.graphia.Shared.Controls
 
-import SortFilterProxyModel
-
 Window
 {
     id: root
@@ -267,14 +265,8 @@ Window
             sortRoleName: "elementType"
             prettifyFunction: Attribute.prettify
 
-            filters:
-            [
-                ValueFilter
-                {
-                    roleName: "editable"
-                    value: true
-                }
-            ]
+            filterRoleName: "editable"
+            filterRegularExpression: /true/
 
             onSelectedValueChanged:
             {
