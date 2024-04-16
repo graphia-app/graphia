@@ -7,7 +7,7 @@ then
 fi
 
 qt_version=$1
-url="https://code.qt.io/cgit/qt/qtdoc.git/plain/doc/src/platforms/wasm.qdoc?h=v$qt_version"
+url="https://raw.githubusercontent.com/qt/qtdoc/v$qt_version/doc/src/platforms/wasm.qdoc"
 qt_major_minor=$(echo "$qt_version" | cut -d. -f1,2)
 content=$(curl -s "$url")
 pattern="Qt $qt_major_minor: ([0-9]+\.[0-9]+\.[0-9]+)"
