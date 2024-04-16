@@ -128,7 +128,7 @@ cat ${SCRIPT_DIR}/dmg.spec.json.template | sed \
   -e "s|_SCRIPT_DIR_|${SCRIPT_DIR}|g" > \
   dmg.spec.json
 rm -f ${PRODUCT_NAME}-${VERSION}.dmg && appdmg dmg.spec.json \
-  ${PRODUCT_NAME}-${VERSION}.dmg
+  ${PRODUCT_NAME}-${VERSION}.dmg || exit $?
 
 if [ -z "${APPLE_NOTARIZATION_USERNAME}" ]
 then
