@@ -20,8 +20,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-import SortFilterProxyModel
-
 import app.graphia
 import app.graphia.Controls
 import app.graphia.Shared
@@ -328,30 +326,28 @@ Rectangle
         onActivated: { closeAction.trigger(); }
     }
 
-
-    SortFilterProxyModel
+    SimpleSortFilterProxyModel
     {
         id: proxyModel
 
         property var model: null
         sourceModel: model
+
         property bool _sourceChanging: false
 
-        filters:
-        [
-            ValueFilter
+        filterExpression: function(row, parent)
+        {
+            let searchable = sourceModel.data(sourceModel.index(row, 0), proxyModel.role("searchable"));
+            let hasSharedValues = sourceModel.data(sourceModel.index(row, 0), proxyModel.role("hasSharedValues"));
+
+            switch(_type)
             {
-                enabled: _type === Find.Advanced || _type === Find.ByAttribute
-                roleName: "searchable"
-                value: true
-            },
-            ValueFilter
-            {
-                enabled: _type === Find.ByAttribute
-                roleName: "hasSharedValues"
-                value: true
+            default:
+            case Find.Simple:       return true;
+            case Find.Advanced:     return searchable;
+            case Find.ByAttribute:  return searchable && hasSharedValues;
             }
-        ]
+        }
 
         function rowIndexForAttributeName(attributeName)
         {
