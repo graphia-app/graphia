@@ -188,12 +188,12 @@ jobs:
       with:
         version: ${{ env.EMSDK_VERSION }}
     - name: Install Qt
-      uses: jurplel/install-qt-action@v3
+      uses: timangus/install-qt-action@deployed
       with:
-        aqtversion: ==3.1.*
+        aqtsource: git+https://github.com/timangus/aqtinstall.git
         version: ${{ env.QT_VERSION }}
-        host: linux
-        target: desktop
+        host: all_os
+        target: wasm
         arch: wasm_multithread
         extra: --autodesktop
         cache: true

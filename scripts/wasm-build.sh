@@ -43,8 +43,8 @@ mkdir -p ${BUILD_DIR}
   cd ${BUILD_DIR}
   cmake --version || exit $?
   cmake -DCMAKE_UNITY_BUILD=${UNITY_BUILD} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-    -DQT_HOST_PATH=${Qt6_DIR}/../gcc_64 \
-    -DCMAKE_TOOLCHAIN_FILE:FILEPATH=${Qt6_DIR}/lib/cmake/Qt6/qt.toolchain.cmake \
+    -DQT_HOST_PATH=${QT_ROOT_DIR}/../gcc_64 \
+    -DCMAKE_TOOLCHAIN_FILE:FILEPATH=${QT_ROOT_DIR}/lib/cmake/Qt6/qt.toolchain.cmake \
     -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -GNinja ../.. || exit $?
   cat variables.sh
   . variables.sh
