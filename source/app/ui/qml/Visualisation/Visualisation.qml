@@ -588,7 +588,7 @@ Item
 
     property string attributeName
 
-    property var similarAttributes: []
+    property var similarAttributes: null
     function updateSimilarAttributes()
     {
         if(document.attributeExists(attributeName))
