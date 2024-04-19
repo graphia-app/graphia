@@ -59,7 +59,8 @@ DEFINE_QML_ENUM(
     Quantile,
     Mean,
     Standarisation,
-    UnitScaling);
+    UnitScaling,
+    Softmax);
 
 DEFINE_QML_ENUM(
     Q_GADGET, MissingDataType,

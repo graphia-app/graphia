@@ -28,6 +28,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/normaliser.h
     ${CMAKE_CURRENT_LIST_DIR}/qcpcolumnannotations.h
     ${CMAKE_CURRENT_LIST_DIR}/quantilenormaliser.h
+    ${CMAKE_CURRENT_LIST_DIR}/softmaxnormaliser.h
 )
 
 list(APPEND SOURCES
@@ -50,6 +51,7 @@ list(APPEND SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/loading/correlationfileparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/qcpcolumnannotations.cpp
     ${CMAKE_CURRENT_LIST_DIR}/quantilenormaliser.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/softmaxnormaliser.cpp
 )
 
 list(APPEND RESOURCES

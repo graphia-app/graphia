@@ -22,6 +22,7 @@
 #include "correlation.h"
 #include "featurescaling.h"
 #include "quantilenormaliser.h"
+#include "softmaxnormaliser.h"
 
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"
@@ -466,6 +467,12 @@ void CorrelationFileParser::normalise(NormaliseType normaliseType,
     case NormaliseType::Quantile:
     {
         const QuantileNormaliser normaliser;
+        normaliser.process(dataRows, parser);
+        break;
+    }
+    case NormaliseType::Softmax:
+    {
+        const SoftmaxNormaliser normaliser;
         normaliser.process(dataRows, parser);
         break;
     }

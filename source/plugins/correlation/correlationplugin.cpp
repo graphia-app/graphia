@@ -1412,6 +1412,7 @@ QString CorrelationPluginInstance::log() const
     case NormaliseType::Mean: text.append(tr("\nNormalisation: Mean")); break;
     case NormaliseType::Standarisation: text.append(tr("\nNormalisation: Standarisation")); break;
     case NormaliseType::UnitScaling: text.append(tr("\nNormalisation: Unit Scaling")); break;
+    case NormaliseType::Softmax: text.append(tr("\nNormalisation: Softmax Scaling")); break;
     }
 
     return text;

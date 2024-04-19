@@ -1060,6 +1060,7 @@ BaseParameterDialog
                                     ListElement { text: qsTr("Standardisation");    value: NormaliseType.Standarisation }
                                     ListElement { text: qsTr("Unit Scaling");       value: NormaliseType.UnitScaling }
                                     ListElement { text: qsTr("Quantile");           value: NormaliseType.Quantile }
+                                    ListElement { text: qsTr("Softmax");            value: NormaliseType.Softmax }
                                 }
                                 textRole: "text"
 
@@ -1153,6 +1154,22 @@ BaseParameterDialog
                                     Text
                                     {
                                         text: qsTr("Normalise the data so that the columns have equal distributions.");
+                                        wrapMode: Text.WordWrap
+                                        Layout.fillWidth: true
+                                    }
+
+                                    Text
+                                    {
+                                        text: qsTr("<b>Softmax:</b>")
+                                        textFormat: Text.StyledText
+                                        Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                                    }
+                                    Text
+                                    {
+                                        text: qsTr("The softmax function converts each column of data into a " +
+                                                   "probability distribution by exponentiating each element, " +
+                                                   "and normalising by dividing by the sum. Ultimately this " +
+                                                   "causes the largest values in each column to be exaggerated.");
                                         wrapMode: Text.WordWrap
                                         Layout.fillWidth: true
                                     }
