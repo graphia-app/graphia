@@ -276,10 +276,18 @@ function Create(transformIndex, transform)
 
                             if(locked)
                             {
-                                if(parameterData.valueType === Graphia.ValueType.String)
+                                switch(parameterData.valueType)
+                                {
+                                default:
+                                case Graphia.ValueType.String:
+                                case Graphia.ValueType.StringList:
                                     labelText += "\\\"" + Shared.Utils.addSlashes(operand) + "\\\"";
-                                else
+                                    break;
+                                case Graphia.ValueType.Int:
+                                case Graphia.ValueType.Float:
                                     labelText += Graphia.QmlUtils.formatNumberScientific(operand);
+                                    break;
+                                }
                             }
                             else
                                 addLabel();
