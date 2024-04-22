@@ -146,10 +146,7 @@ void QmlSortFilterProxyModel::setFilterExpression(const QJSValue& filterExpressi
 
 int QmlSortFilterProxyModel::count() const
 {
-    if(sourceModel() == nullptr)
-        return 0;
-
-    return sourceModel()->rowCount();
+    return rowCount();
 }
 
 void QmlSortFilterProxyModel::updateSortRole()
