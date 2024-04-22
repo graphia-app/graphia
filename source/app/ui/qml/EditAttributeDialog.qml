@@ -688,12 +688,6 @@ Window
                         z: 100
                         id: verticalTableViewScrollBar
                         policy: ScrollBar.AsNeeded
-                        contentItem: Rectangle
-                        {
-                            implicitWidth: 5
-                            radius: width / 2
-                            color: ControlColors.dark
-                        }
                         minimumSize: 0.1
                         visible: size < 1.0 && tableView.rows > 0
                     }
