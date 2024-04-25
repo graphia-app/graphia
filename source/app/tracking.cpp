@@ -139,6 +139,39 @@ static QString anonymousIdentity()
     return id;
 }
 
+#ifdef Q_OS_WASM
+#include <emscripten.h>
+
+#include <cstdlib>
+
+static QString hostBrowserName()
+{
+    char* s = static_cast<char*>(EM_ASM_PTR({
+        let userAgent = navigator.userAgent;
+        let browser = "Unknown";
+
+        if(/Chrome/.test(userAgent) && !/Chromium/.test(userAgent))
+            browser = "Chrome";
+        else if(/Edg/.test(userAgent))
+            browser = "Edge";
+        else if(/Firefox/.test(userAgent))
+            browser = "Firefox";
+        else if(/Safari/.test(userAgent))
+            browser = "Safari";
+        else if(/Trident/.test(userAgent))
+            browser = "IE";
+
+        return stringToNewUTF8(browser);
+    }));
+
+    QString qs(s);
+    std::free(s);
+
+    return qs;
+}
+
+#endif
+
 void Tracking::submit()
 {
     auto doSubmission = []
@@ -163,7 +196,12 @@ void Tracking::submit()
 
         auto os = u"%1 %2 %3 %4"_s.arg(
             QSysInfo::kernelType(), QSysInfo::kernelVersion(),
-            QSysInfo::productType(), QSysInfo::productVersion());
+            QSysInfo::productType(),
+#ifdef Q_OS_WASM
+            hostBrowserName());
+#else
+            QSysInfo::productVersion());
+#endif
 
         const json trackingJson =
         {
