@@ -22,6 +22,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 import app.graphia
+import app.graphia.Controls
 
 Item
 {

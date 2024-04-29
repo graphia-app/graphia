@@ -139,7 +139,6 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/ui/graphcomponentinteractor.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/graphoverviewinteractor.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/graphquickitem.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/hovermousepassthrough.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/interactor.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/searchmanager.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/selectionmanager.h
@@ -361,6 +360,9 @@ elseif(MSVC)
     file(APPEND ${PROJECT_BINARY_DIR}/variables.bat "SET \"PUBLISHER=${Publisher}\"\n")
     file(APPEND ${PROJECT_BINARY_DIR}/variables.bat "SET \"NATIVE_EXTENSION=${NativeExtension}\"\n")
 endif()
+
+add_subdirectory(ui/qml/app/graphia/Controls)
+target_link_libraries(${PROJECT_NAME} PRIVATE controls_qmlplugin)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE thirdparty_static thirdparty shared)
 

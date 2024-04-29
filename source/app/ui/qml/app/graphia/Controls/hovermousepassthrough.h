@@ -19,50 +19,30 @@
 #ifndef HOVERMOUSEPASSTHROUGH_H
 #define HOVERMOUSEPASSTHROUGH_H
 
-#include "shared/utils/static_block.h"
-
-#include <QQmlEngine>
 #include <QObject>
 #include <QQuickItem>
-#include <QMouseEvent>
+
+class QHoverEvent;
 
 class HoverMousePassthrough : public QQuickItem
 {
     Q_OBJECT
+    QML_ELEMENT
+
     Q_PROPERTY(bool hovered MEMBER _hovered NOTIFY hoveredChanged)
 
 private:
     bool _hovered = false;
 
 public:
-    explicit HoverMousePassthrough(QQuickItem* parent = nullptr) : QQuickItem(parent)
-    {
-        setAcceptHoverEvents(true);
-    }
+    explicit HoverMousePassthrough(QQuickItem* parent = nullptr);
 
 signals:
     void hoveredChanged();
 
 protected:
-    void hoverEnterEvent(QHoverEvent *event) override
-    {
-        event->ignore();
-        _hovered = true;
-        emit hoveredChanged();
-    }
-
-    void hoverLeaveEvent(QHoverEvent *event) override
-    {
-        event->ignore();
-        _hovered = false;
-        emit hoveredChanged();
-    }
+    void hoverEnterEvent(QHoverEvent* event) override;
+    void hoverLeaveEvent(QHoverEvent* event) override;
 };
-
-static_block
-{
-    qmlRegisterType<HoverMousePassthrough>(
-        APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "HoverMousePassthrough");
-}
 
 #endif // HOVERMOUSEPASSTHROUGH_H

@@ -1,29 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>qml/app/graphia/Controls/AlertIcon.qml</file>
-        <file>qml/app/graphia/Controls/AttributeListSortMenu.qml</file>
-        <file>qml/app/graphia/Controls/ButtonMenu.qml</file>
-        <file>qml/app/graphia/Controls/CheckBoxList.qml</file>
-        <file>qml/app/graphia/Controls/ColorPickButton.qml</file>
-        <file>qml/app/graphia/Controls/DoubleSpinBox.qml</file>
-        <file>qml/app/graphia/Controls/DraggableList.qml</file>
-        <file>qml/app/graphia/Controls/FramedScrollView.qml</file>
-        <file>qml/app/graphia/Controls/GradientEditor.qml</file>
-        <file>qml/app/graphia/Controls/GradientKey.qml</file>
-        <file>qml/app/graphia/Controls/GradientSelector.qml</file>
-        <file>qml/app/graphia/Controls/Hamburger.qml</file>
-        <file>qml/app/graphia/Controls/HiddenSwitch.qml</file>
-        <file>qml/app/graphia/Controls/ListBox.qml</file>
-        <file>qml/app/graphia/Controls/MappingSelector.qml</file>
-        <file>qml/app/graphia/Controls/PaletteEditor.qml</file>
-        <file>qml/app/graphia/Controls/PaletteKey.qml</file>
-        <file>qml/app/graphia/Controls/PaletteSelector.qml</file>
-        <file>qml/app/graphia/Controls/TransformListSortMenu.qml</file>
-        <file>qml/app/graphia/Controls/TreeBox.qml</file>
-        <file>qml/app/graphia/Controls/TreeBoxSearch.qml</file>
-        <file>qml/app/graphia/Controls/TreeComboBox.qml</file>
-        <file>qml/app/graphia/Controls/Tutorial.qml</file>
-        <file>qml/app/graphia/Controls/qmldir</file>
         <file>qml/app/graphia/Utils/qmldir</file>
         <file>qml/AboutDialog.qml</file>
         <file>qml/AboutPluginsDialog.qml</file>
