@@ -20,6 +20,7 @@ import QtQuick
 import QtQuick.Controls
 
 import app.graphia
+import app.graphia.Controls
 import app.graphia.Shared
 
 NamedIcon

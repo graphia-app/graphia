@@ -16,25 +16,25 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "iconitem.h"
+#include "namedicon.h"
 
 #include <QPainter>
 #include <QQuickWindow>
 
-IconItem::IconItem(QQuickItem* parent) : QQuickPaintedItem(parent)
+NamedIcon::NamedIcon(QQuickItem* parent) : QQuickPaintedItem(parent)
 {
     // Default size
     setWidth(24.0);
     setHeight(24.0);
 
-    connect(this, &IconItem::enabledChanged, [this] { update(); });
-    connect(this, &IconItem::iconNameChanged, [this] { update(); });
-    connect(this, &IconItem::onChanged, [this] { update(); });
-    connect(this, &IconItem::selectedChanged, [this] { update(); });
-    connect(this, &IconItem::fillChanged, [this] { update(); });
+    connect(this, &NamedIcon::enabledChanged, [this] { update(); });
+    connect(this, &NamedIcon::iconNameChanged, [this] { update(); });
+    connect(this, &NamedIcon::onChanged, [this] { update(); });
+    connect(this, &NamedIcon::selectedChanged, [this] { update(); });
+    connect(this, &NamedIcon::fillChanged, [this] { update(); });
 }
 
-void IconItem::paint(QPainter* painter)
+void NamedIcon::paint(QPainter* painter)
 {
     auto mode = _selected ? QIcon::Selected : QIcon::Normal;
     auto size = painter->viewport().size();
@@ -65,7 +65,7 @@ void IconItem::paint(QPainter* painter)
     // image looks dimensionally correct, but has lost some fidelity in the process
 }
 
-void IconItem::setIconName(const QString& iconName)
+void NamedIcon::setIconName(const QString& iconName)
 {
     const bool wasValid = valid();
 

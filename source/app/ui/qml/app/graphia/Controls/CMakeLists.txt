@@ -63,6 +63,7 @@ qt_add_qml_module(controls_qml
         +wasm/SaveFileDialog.qml
     SOURCES
         hovermousepassthrough.h hovermousepassthrough.cpp
+        namedicon.h namedicon.cpp
 )
 
 target_link_libraries(controls_qml
