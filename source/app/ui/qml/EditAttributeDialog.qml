@@ -29,7 +29,6 @@ import app.graphia
 import app.graphia.Controls
 import app.graphia.Utils
 import app.graphia.Shared
-import app.graphia.Shared.Controls
 
 Window
 {

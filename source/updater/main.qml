@@ -21,8 +21,8 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Dialogs
 
+import app.graphia.Controls
 import app.graphia.Shared
-import app.graphia.Shared.Controls
 
 ApplicationWindow
 {

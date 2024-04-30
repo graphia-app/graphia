@@ -22,7 +22,7 @@ import QtQuick
 import QtQuick.Controls
 
 import app.graphia
-import app.graphia.Shared.Controls
+import app.graphia.Controls
 
 Item
 {

@@ -18,14 +18,14 @@
  */
 
 .import QtQuick.Controls as QtQuickControls
-.import app.graphia.Shared.Controls as SharedControls
+.import app.graphia.Controls as Controls
 .import "Utils.js" as Utils
 
 function createQmlItem(itemName, parent)
 {
     return Qt.createQmlObject(
         "import QtQuick.Controls\n" +
-        "import app.graphia.Shared.Controls\n" +
+        "import app.graphia.Controls\n" +
         itemName + " {}", parent);
 }
 
@@ -89,10 +89,10 @@ function clone(from, to)
 
             if(toSubMenu.parent instanceof QtQuickControls.MenuItem)
                 Utils.proxyProperties(fromItem, toSubMenu.parent, ["enabled", "height"]);
-            else if(toSubMenu instanceof SharedControls.PlatformMenu)
+            else if(toSubMenu instanceof Controls.PlatformMenu)
                 Utils.proxyProperties(fromItem.subMenu, toSubMenu, ["enabled", "hidden"]);
         }
-        else if(fromItem instanceof SharedControls.PlatformMenuItem)
+        else if(fromItem instanceof Controls.PlatformMenuItem)
         {
             let toItem = createQmlItem("PlatformMenuItem", to);
             to.addItem(toItem);
@@ -130,7 +130,7 @@ function clone(from, to)
                     toItem.triggered.connect(function() { fromItem.triggered(); bindMenuProperties(); });
             }
         }
-        else if(fromItem instanceof SharedControls.PlatformMenuSeparator)
+        else if(fromItem instanceof Controls.PlatformMenuSeparator)
             addSeparatorTo(to);
     }
 

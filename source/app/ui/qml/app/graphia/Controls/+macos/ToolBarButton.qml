@@ -18,7 +18,7 @@
 
 import QtQuick
 
-import app.graphia.Shared.Controls
+import app.graphia.Controls
 
 FloatingButton
 {

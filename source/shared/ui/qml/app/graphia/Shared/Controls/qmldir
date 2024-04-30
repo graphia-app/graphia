@@ -1,28 +1,5 @@
 module app.graphia.Shared.Controls
 
-BaseParameterDialog 1.0 BaseParameterDialog.qml
-DataTable 1.0 DataTable.qml
-DelayedBusyIndicator 1.0 DelayedBusyIndicator.qml
-FloatingButton 1.0 FloatingButton.qml
-HelpTooltip 1.0 HelpTooltip.qml
-Hubble 1.0 Hubble.qml
-ListTab 1.0 ListTab.qml
-ListTabView 1.0 ListTabView.qml
-NodeAttributeTableView 1.0 NodeAttributeTableView.qml
-OpenFileDialog 1.0 OpenFileDialog.qml
-PlatformMenu 1.0 PlatformMenu.qml
-PlatformMenuBar 1.0 PlatformMenuBar.qml
-PlatformMenuItem 1.0 PlatformMenuItem.qml
-PlatformMenuSeparator 1.0 PlatformMenuSeparator.qml
 PointingCursorOnHoverLink 1.0 PointingCursorOnHoverLink.qml
-SaveFileDialog 1.0 SaveFileDialog.qml
 ScrollableTextArea 1.0 ScrollableTextArea.qml
-ScrollBarCornerFiller 1.0 ScrollBarCornerFiller.qml
-SlidingPanel 1.0 SlidingPanel.qml
 SplitViewHandle 1.0 SplitViewHandle.qml
-TabBarButton 1.0 TabBarButton.qml
-ToolBarButton 1.0 ToolBarButton.qml
-ToolBarSeparator 1.0 ToolBarSeparator.qml
-Wizard 1.0 Wizard.qml
-
-singleton FontPointSize 1.0 FontPointSize.qml
