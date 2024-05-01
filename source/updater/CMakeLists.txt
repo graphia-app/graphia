@@ -41,4 +41,4 @@ target_link_libraries(Updater PRIVATE
     Qt6::Widgets
 )
 
-target_link_libraries(Updater PRIVATE shared)
+target_link_libraries(Updater PRIVATE shared sharedcontrols_qmlplugin)

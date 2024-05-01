@@ -1,5 +1,0 @@
-module app.graphia.Shared.Controls
-
-PointingCursorOnHoverLink 1.0 PointingCursorOnHoverLink.qml
-ScrollableTextArea 1.0 ScrollableTextArea.qml
-SplitViewHandle 1.0 SplitViewHandle.qml

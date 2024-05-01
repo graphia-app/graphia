@@ -51,4 +51,5 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 target_link_libraries(CrashReporter PRIVATE Threads::Threads)
 
-target_link_libraries(CrashReporter PRIVATE thirdparty_static shared)
+target_link_libraries(CrashReporter PRIVATE shared sharedcontrols_qmlplugin)
+target_link_libraries(CrashReporter PRIVATE thirdparty_static)

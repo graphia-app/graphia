@@ -19,7 +19,6 @@
 #ifndef OUTLINE_H
 #define OUTLINE_H
 
-#include "shared/utils/static_block.h"
 #include "shared/utils/qmlcontrolcolors.h"
 
 #include <QQmlEngine>
@@ -28,6 +27,7 @@
 class Outline : public QQuickPaintedItem
 {
     Q_OBJECT
+    QML_ELEMENT
 
     Q_PROPERTY(bool outlineVisible MEMBER _outlineVisible NOTIFY outlineVisibleChanged)
     Q_PROPERTY(double outlineWidth MEMBER _outlineWidth NOTIFY outlineWidthChanged)
@@ -49,11 +49,5 @@ signals:
     void outlineVisibleChanged();
     void outlineWidthChanged();
 };
-
-static_block
-{
-    qmlRegisterType<Outline>(
-        APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "Outline");
-}
 
 #endif // OUTLINE_H

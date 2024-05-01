@@ -23,6 +23,7 @@ import QtQuick.Layouts
 import app.graphia
 import app.graphia.Controls
 import app.graphia.Shared
+import app.graphia.Shared.Controls
 
 Item
 {

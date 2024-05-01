@@ -64,7 +64,6 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/rendering/multisamples.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/idocument.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/iselectionmanager.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/outline.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/defaultgradients.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/defaultpalettes.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/ielementvisual.h
@@ -156,7 +155,6 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/plugins/nodeattributetablemodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/plugins/tableproxymodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/updates/updates.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/outline.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/colorgradient.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/colorpalette.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/apppathname.cpp
@@ -204,6 +202,8 @@ set(QML_IMPORT_PATH "${QML_IMPORT_PATH};${CMAKE_CURRENT_LIST_DIR}/ui/qml/" PAREN
 list(APPEND SOURCES ${SHARED_SOURCES})
 
 qt_add_library(shared STATIC ${SOURCES} ${HEADERS} ${RESOURCES})
+
+add_subdirectory(ui/qml/app/graphia/Shared/Controls)
 
 find_package(Qt6 COMPONENTS REQUIRED Concurrent Qml Quick Widgets Xml)
 target_link_libraries(shared PRIVATE

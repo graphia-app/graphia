@@ -364,7 +364,8 @@ endif()
 add_subdirectory(ui/qml/app/graphia/Controls)
 target_link_libraries(${PROJECT_NAME} PRIVATE controls_qmlplugin)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE thirdparty_static thirdparty shared)
+target_link_libraries(${PROJECT_NAME} PRIVATE shared sharedcontrols_qmlplugin)
+target_link_libraries(${PROJECT_NAME} PRIVATE thirdparty_static thirdparty)
 
 if(LINK_TYPE STREQUAL STATIC)
     # Link with all of the available plugins in the static build case

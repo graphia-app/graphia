@@ -38,4 +38,4 @@ target_link_libraries(UpdateEditor PRIVATE
     Qt6::Widgets
 )
 
-target_link_libraries(UpdateEditor PRIVATE shared)
+target_link_libraries(UpdateEditor PRIVATE shared sharedcontrols_qmlplugin)

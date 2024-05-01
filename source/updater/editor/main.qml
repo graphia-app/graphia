@@ -25,8 +25,8 @@ import QtQuick.Dialogs
 import Qt.labs.platform as Labs
 
 import app.graphia
-import app.graphia.Controls
 import app.graphia.Shared
+import app.graphia.Shared.Controls
 
 ApplicationWindow
 {
@@ -254,9 +254,10 @@ ApplicationWindow
     minimumWidth: 800
     minimumHeight: 600
 
-    OpenFileDialog
+    FileDialog
     {
         id: imageFileDialog
+        fileMode: FileDialog.OpenFile
         nameFilters: ["Image files (*.jpg *.jpeg *.png)", "All files (*)"]
 
         onAccepted:
@@ -277,9 +278,10 @@ ApplicationWindow
         }
     }
 
-    OpenFileDialog
+    FileDialog
     {
         id: keyFileDialog
+        fileMode: FileDialog.OpenFile
         nameFilters: ["PEM files (*.pem)", "All files (*)"]
 
         onAccepted:
@@ -554,9 +556,10 @@ ApplicationWindow
         saveDialog.open();
     }
 
-    OpenFileDialog
+    FileDialog
     {
         id: openDialog
+        fileMode: FileDialog.OpenFile
         title: qsTr("Open File…")
         defaultSuffix: "json"
 
@@ -628,9 +631,10 @@ ApplicationWindow
         return true;
     }
 
-    SaveFileDialog
+    FileDialog
     {
         id: saveDialog
+        fileMode: FileDialog.SaveFile
         title: qsTr("Save File…")
         defaultSuffix: "json"
 
@@ -682,7 +686,7 @@ ApplicationWindow
         onTriggered: { root.close(); }
     }
 
-    Component { id: tabButtonComponent; TabBarButton {} }
+    Component { id: tabButtonComponent; TabButton {} }
 
     Component
     {

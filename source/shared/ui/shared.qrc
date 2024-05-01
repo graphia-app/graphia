@@ -1,9 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>qml/app/graphia/Shared/Controls/PointingCursorOnHoverLink.qml</file>
-        <file>qml/app/graphia/Shared/Controls/ScrollableTextArea.qml</file>
-        <file>qml/app/graphia/Shared/Controls/SplitViewHandle.qml</file>
-        <file>qml/app/graphia/Shared/Controls/qmldir</file>
         <file>qml/app/graphia/Shared/PluginContent.qml</file>
         <file>qml/app/graphia/Shared/Constants.js</file>
         <file>qml/app/graphia/Shared/MenuUtils.js</file>
