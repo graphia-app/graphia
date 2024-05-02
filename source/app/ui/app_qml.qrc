@@ -1,11 +1,9 @@
 <RCC>
     <qresource prefix="/">
-        <file>qml/app/graphia/Utils/qmldir</file>
         <file>qml/AboutDialog.qml</file>
         <file>qml/AboutPluginsDialog.qml</file>
         <file>qml/AddBookmark.qml</file>
         <file>qml/AddTemplateDialog.qml</file>
-        <file>qml/AttributeUtils.js</file>
         <file>qml/CaptureScreenshotDialog.qml</file>
         <file>qml/CloneAttributeDialog.qml</file>
         <file>qml/DebugRectangle.qml</file>
@@ -41,7 +39,6 @@
         <file>qml/Visualisation/CreateVisualisationDialog.qml</file>
         <file>qml/Visualisation/Visualisation.qml</file>
         <file>qml/Visualisation/Visualisations.qml</file>
-        <file>qml/Visualisation/VisualisationUtils.js</file>
         <file>qml/ShowPaletteDialog.qml</file>
     </qresource>
 </RCC>

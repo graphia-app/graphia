@@ -16,31 +16,31 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "qmlsortfilterproxymodel.h"
+#include "sortfilterproxymodel.h"
 
-QmlSortFilterProxyModel::QmlSortFilterProxyModel(QObject* parent) : QSortFilterProxyModel(parent)
+SortFilterProxyModel::SortFilterProxyModel(QObject* parent) : QSortFilterProxyModel(parent)
 {
-    connect(this, &QmlSortFilterProxyModel::sourceModelChanged, this, &QmlSortFilterProxyModel::updateFilterRole);
-    connect(this, &QmlSortFilterProxyModel::sourceModelChanged, this, &QmlSortFilterProxyModel::updateSortRole);
+    connect(this, &SortFilterProxyModel::sourceModelChanged, this, &SortFilterProxyModel::updateFilterRole);
+    connect(this, &SortFilterProxyModel::sourceModelChanged, this, &SortFilterProxyModel::updateSortRole);
 
-    connect(this, &QmlSortFilterProxyModel::sourceModelChanged, this, &QmlSortFilterProxyModel::countChanged);
-    connect(this, &QmlSortFilterProxyModel::rowsInserted, this, &QmlSortFilterProxyModel::countChanged);
-    connect(this, &QmlSortFilterProxyModel::rowsRemoved, this, &QmlSortFilterProxyModel::countChanged);
-    connect(this, &QmlSortFilterProxyModel::modelReset, this, &QmlSortFilterProxyModel::countChanged);
-    connect(this, &QmlSortFilterProxyModel::layoutChanged, this, &QmlSortFilterProxyModel::countChanged);
+    connect(this, &SortFilterProxyModel::sourceModelChanged, this, &SortFilterProxyModel::countChanged);
+    connect(this, &SortFilterProxyModel::rowsInserted, this, &SortFilterProxyModel::countChanged);
+    connect(this, &SortFilterProxyModel::rowsRemoved, this, &SortFilterProxyModel::countChanged);
+    connect(this, &SortFilterProxyModel::modelReset, this, &SortFilterProxyModel::countChanged);
+    connect(this, &SortFilterProxyModel::layoutChanged, this, &SortFilterProxyModel::countChanged);
 
-    connect(this, &QmlSortFilterProxyModel::sourceModelChanged, this, &QmlSortFilterProxyModel::invalidate);
-    connect(this, &QmlSortFilterProxyModel::ascendingSortOrderChanged, this, &QmlSortFilterProxyModel::invalidate);
+    connect(this, &SortFilterProxyModel::sourceModelChanged, this, &SortFilterProxyModel::invalidate);
+    connect(this, &SortFilterProxyModel::ascendingSortOrderChanged, this, &SortFilterProxyModel::invalidate);
 
     sort(0);
 }
 
-QVariant QmlSortFilterProxyModel::get(int row, const QString& roleName) const
+QVariant SortFilterProxyModel::get(int row, const QString& roleName) const
 {
     return data(index(row, 0), role(roleName));
 }
 
-int QmlSortFilterProxyModel::role(const QString& name) const
+int SortFilterProxyModel::role(const QString& name) const
 {
     if(sourceModel() == nullptr)
         return -1;
@@ -52,7 +52,7 @@ int QmlSortFilterProxyModel::role(const QString& name) const
     return sourceModel()->roleNames().key(value);
 }
 
-bool QmlSortFilterProxyModel::lessThan(const QModelIndex& left, const QModelIndex& right) const
+bool SortFilterProxyModel::lessThan(const QModelIndex& left, const QModelIndex& right) const
 {
     if(!left.isValid())
         return false;
@@ -75,7 +75,7 @@ bool QmlSortFilterProxyModel::lessThan(const QModelIndex& left, const QModelInde
     return _ascendingSortOrder ? result : !result;
 }
 
-bool QmlSortFilterProxyModel::filterAcceptsRow(int row, const QModelIndex& parent) const
+bool SortFilterProxyModel::filterAcceptsRow(int row, const QModelIndex& parent) const
 {
     auto* engine = qjsEngine(this);
     if(engine != nullptr && _filterExpression.isCallable())
@@ -88,19 +88,19 @@ bool QmlSortFilterProxyModel::filterAcceptsRow(int row, const QModelIndex& paren
     return QSortFilterProxyModel::filterAcceptsRow(row, parent);
 }
 
-void QmlSortFilterProxyModel::setSortRoleName(const QString& sortRoleName)
+void SortFilterProxyModel::setSortRoleName(const QString& sortRoleName)
 {
     _sortRoleName = sortRoleName;
     updateSortRole();
     emit sortRoleNameChanged();
 }
 
-QJSValue QmlSortFilterProxyModel::sortExpression() const
+QJSValue SortFilterProxyModel::sortExpression() const
 {
     return _sortExpression;
 }
 
-void QmlSortFilterProxyModel::setSortExpression(const QJSValue& sortExpression)
+void SortFilterProxyModel::setSortExpression(const QJSValue& sortExpression)
 {
     if(!sortExpression.isNull() && !sortExpression.isUndefined() && !sortExpression.isCallable())
     {
@@ -116,19 +116,19 @@ void QmlSortFilterProxyModel::setSortExpression(const QJSValue& sortExpression)
     invalidate();
 }
 
-void QmlSortFilterProxyModel::setFilterRoleName(const QString& filterRoleName)
+void SortFilterProxyModel::setFilterRoleName(const QString& filterRoleName)
 {
     _filterRoleName = filterRoleName;
     updateFilterRole();
     emit filterRoleNameChanged();
 }
 
-QJSValue QmlSortFilterProxyModel::filterExpression() const
+QJSValue SortFilterProxyModel::filterExpression() const
 {
     return _filterExpression;
 }
 
-void QmlSortFilterProxyModel::setFilterExpression(const QJSValue& filterExpression)
+void SortFilterProxyModel::setFilterExpression(const QJSValue& filterExpression)
 {
     if(!filterExpression.isNull() && !filterExpression.isUndefined() && !filterExpression.isCallable())
     {
@@ -144,17 +144,17 @@ void QmlSortFilterProxyModel::setFilterExpression(const QJSValue& filterExpressi
     invalidate();
 }
 
-int QmlSortFilterProxyModel::count() const
+int SortFilterProxyModel::count() const
 {
     return rowCount();
 }
 
-void QmlSortFilterProxyModel::updateSortRole()
+void SortFilterProxyModel::updateSortRole()
 {
     setSortRole(role(_sortRoleName));
 }
 
-void QmlSortFilterProxyModel::updateFilterRole()
+void SortFilterProxyModel::updateFilterRole()
 {
     setFilterRole(role(_filterRoleName));
 }

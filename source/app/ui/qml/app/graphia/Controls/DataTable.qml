@@ -23,6 +23,7 @@ import QtQuick.Layouts
 import QtQuick.Shapes
 
 import app.graphia
+import app.graphia.Controls
 
 Rectangle
 {

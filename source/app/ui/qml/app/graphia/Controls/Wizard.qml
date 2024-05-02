@@ -22,7 +22,8 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 import app.graphia
-import app.graphia.Shared
+import app.graphia.Plugins
+import app.graphia.Utils
 
 BaseParameterDialog
 {

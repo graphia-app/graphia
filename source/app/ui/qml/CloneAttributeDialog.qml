@@ -24,7 +24,6 @@ import QtQuick.Layouts
 import app.graphia
 import app.graphia.Controls
 import app.graphia.Utils
-import app.graphia.Shared
 
 Window
 {
@@ -129,7 +128,7 @@ Window
             showSearch: true
             showParentGuide: true
             sortRoleName: "elementType"
-            prettifyFunction: Attribute.prettify
+            prettifyFunction: AttributeUtils.prettify
 
             filterRoleName: "elementType"
             filterRegularExpression: { return new RegExp(qsTr("Node") + "|" + qsTr("Edge")); }
@@ -154,7 +153,7 @@ Window
 
             function setDefaultName(attributeName)
             {
-                text = Utils.format(qsTr("Clone of {0}"), Attribute.prettify(attributeName));
+                text = Utils.format(qsTr("Clone of {0}"), AttributeUtils.prettify(attributeName));
             }
 
             property bool manuallyChanged: false

@@ -38,8 +38,6 @@ int main(int argc, char *argv[])
 {
     const QApplication app(argc, argv);
 
-    Q_INIT_RESOURCE(shared);
-
     execute_static_blocks();
 
     QCoreApplication::setOrganizationName(u"Graphia"_s);
@@ -64,7 +62,7 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
     engine.addImportPath(u"qrc:///qml/"_s);
-    engine.load(QUrl(u"qrc:/main.qml"_s));
+    engine.load(QUrl(u"qrc:/editor.qml"_s));
     Q_ASSERT(!engine.rootObjects().empty());
 
     return QCoreApplication::exec();

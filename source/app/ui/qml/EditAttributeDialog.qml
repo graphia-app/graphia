@@ -28,8 +28,6 @@ import Qt.labs.platform as Labs
 import app.graphia
 import app.graphia.Controls
 import app.graphia.Utils
-import app.graphia.Shared
-import app.graphia.Shared.Controls
 
 Window
 {
@@ -263,7 +261,7 @@ Window
 
             showSections: sortRoleName !== "display"
             sortRoleName: "elementType"
-            prettifyFunction: Attribute.prettify
+            prettifyFunction: AttributeUtils.prettify
 
             filterRoleName: "editable"
             filterRegularExpression: /true/

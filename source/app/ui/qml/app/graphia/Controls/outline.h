@@ -19,7 +19,7 @@
 #ifndef OUTLINE_H
 #define OUTLINE_H
 
-#include "shared/utils/qmlcontrolcolors.h"
+#include "controlcolors.h"
 
 #include <QQmlEngine>
 #include <QQuickPaintedItem>
@@ -38,7 +38,7 @@ public:
     void paint(QPainter *painter) override;
 
 private:
-    QmlControlColors _qmlControlColors;
+    ControlColors _controlColors;
 
     bool _outlineVisible = true;
     double _outlineWidth = 1.0;

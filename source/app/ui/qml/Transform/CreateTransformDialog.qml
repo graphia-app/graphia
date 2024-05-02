@@ -23,9 +23,7 @@ import QtQuick.Layouts
 
 import app.graphia
 import app.graphia.Controls
-import app.graphia.Utils as Utils
-import app.graphia.Shared
-import app.graphia.Shared.Controls
+import app.graphia.Utils
 
 import "TransformConfig.js" as TransformConfig
 
@@ -366,7 +364,7 @@ Window
                                             showSearch: true
                                             showParentGuide: true
                                             sortRoleName: "userDefined"
-                                            prettifyFunction: Utils.Attribute.prettify
+                                            prettifyFunction: AttributeUtils.prettify
 
                                             onSelectedValueChanged:
                                             {
@@ -481,7 +479,7 @@ Window
                                                 showSearch: true
                                                 showParentGuide: true
                                                 sortRoleName: lhsAttributeList.sortRoleName
-                                                prettifyFunction: Utils.Attribute.prettify
+                                                prettifyFunction: AttributeUtils.prettify
 
                                                 enabled: attributeRadioButton.checked
                                                 onSelectedValueChanged:
@@ -621,7 +619,7 @@ Window
                                                 showSearch: true
                                                 showParentGuide: true
                                                 sortRoleName: "userDefined"
-                                                prettifyFunction: Utils.Attribute.prettify
+                                                prettifyFunction: AttributeUtils.prettify
 
                                                 onSelectedValueChanged:
                                                 {
@@ -793,7 +791,7 @@ Window
                                                     font.italic: attributeName.length === 0
                                                     color: palette.buttonText
                                                     text: attributeName.length > 0 ?
-                                                        Utils.Attribute.prettify(attributeName) :
+                                                        AttributeUtils.prettify(attributeName) :
                                                         qsTr("Invalid Attribute Name")
                                                 }
 
@@ -999,7 +997,7 @@ Window
 
             if(channelName.length > 0)
             {
-                let expression = Utils.Visualisation.expressionFor(document,
+                let expression = VisualisationUtils.expressionFor(document,
                     attributeName, defaultVisualisation.flags,
                     defaultVisualisation.valueType, channelName);
 

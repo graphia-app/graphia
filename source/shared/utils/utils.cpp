@@ -17,7 +17,6 @@
  */
 
 #include "utils.h"
-#include "static_block.h"
 
 #include <numbers>
 
@@ -45,9 +44,4 @@ float u::normaliseAngle(float radians)
         radians += (2.0f * std::numbers::pi_v<float>);
 
     return radians;
-}
-
-static_block
-{
-    Q_INIT_RESOURCE(shared);
 }

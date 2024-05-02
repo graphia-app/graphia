@@ -23,7 +23,7 @@ import QtQuick.Layouts
 import QtQuick.Dialogs
 
 import app.graphia
-import app.graphia.Shared
+import app.graphia.Utils
 
 Window
 {

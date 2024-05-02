@@ -23,7 +23,6 @@ import QtQuick.Layouts
 import app.graphia
 import app.graphia.Controls
 import app.graphia.Utils
-import app.graphia.Shared
 
 Item
 {
@@ -190,7 +189,7 @@ Item
                     root.updateExpression();
             }
 
-            prettifyFunction: Attribute.prettify
+            prettifyFunction: AttributeUtils.prettify
 
             Preferences
             {

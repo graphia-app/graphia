@@ -19,8 +19,6 @@
 #ifndef TABLEPROXYMODEL_H
 #define TABLEPROXYMODEL_H
 
-#include "shared/utils/static_block.h"
-
 #include <QQmlEngine>
 #include <QSortFilterProxyModel>
 #include <QTimer>
@@ -49,6 +47,7 @@
 class TableProxyModel : public QSortFilterProxyModel
 {
     Q_OBJECT
+    QML_ELEMENT
 
     Q_PROPERTY(QAbstractItemModel* headerModel READ headerModel CONSTANT)
     Q_PROPERTY(QStringList columnNames MEMBER _columnNames NOTIFY columnNamesChanged)
@@ -141,10 +140,5 @@ signals:
 public slots:
     void invalidateFilter();
 };
-
-static_block
-{
-    qmlRegisterType<TableProxyModel>(APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "TableProxyModel");
-}
 
 #endif // TABLEPROXYMODEL_H

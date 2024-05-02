@@ -26,7 +26,7 @@ Outline::Outline(QQuickItem* parent) : QQuickPaintedItem(parent)
 {
     connect(this, &Outline::outlineVisibleChanged, [this] { update(); });
     connect(this, &Outline::outlineWidthChanged, [this] { update(); });
-    connect(&_qmlControlColors, &QmlControlColors::paletteChanged, [this] { update(); });
+    connect(&_controlColors, &ControlColors::paletteChanged, [this] { update(); });
 
 #ifdef Q_OS_MACOS
     // On macOS, outlines tend to be a single screen pixel, even on Retina displays
@@ -49,7 +49,7 @@ void Outline::paint(QPainter* painter)
     const qreal halfOutlineWidth = outlineWidth * 0.5;
 
     painter->setRenderHint(QPainter::Antialiasing);
-    painter->setPen(QPen(_qmlControlColors.outline(), outlineWidth, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin));
+    painter->setPen(QPen(_controlColors.outline(), outlineWidth, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin));
     painter->drawRect(QRectF(halfOutlineWidth, halfOutlineWidth,
         width() - outlineWidth, height() - outlineWidth));
 }

@@ -28,8 +28,8 @@ import Qt.labs.platform as Labs
 
 import app.graphia
 import app.graphia.Controls
-import app.graphia.Shared
-import app.graphia.Shared.Controls
+import app.graphia.Plugins
+import app.graphia.Utils
 
 import "Transform"
 import "Visualisation"

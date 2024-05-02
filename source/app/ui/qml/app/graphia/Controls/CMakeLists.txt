@@ -10,7 +10,6 @@ qt_add_qml_module(controls_qml
     QML_FILES
         AlertIcon.qml
         AttributeListSortMenu.qml
-        BaseParameterDialog.qml
         ButtonMenu.qml
         CheckBoxList.qml
         ColorPickButton.qml
@@ -41,9 +40,12 @@ qt_add_qml_module(controls_qml
         PlatformMenuBar.qml
         PlatformMenuItem.qml
         PlatformMenuSeparator.qml
+        PointingCursorOnHoverLink.qml
         SaveFileDialog.qml
+        ScrollableTextArea.qml
         ScrollBarCornerFiller.qml
         SlidingPanel.qml
+        SplitViewHandle.qml
         TabBarButton.qml
         ToolBarButton.qml
         ToolBarSeparator.qml
@@ -62,8 +64,10 @@ qt_add_qml_module(controls_qml
         +wasm/OpenFileDialog.qml
         +wasm/SaveFileDialog.qml
     SOURCES
+        controlcolors.h controlcolors.cpp
         hovermousepassthrough.h hovermousepassthrough.cpp
         namedicon.h namedicon.cpp
+        outline.h outline.cpp
 )
 
 target_link_libraries(controls_qml

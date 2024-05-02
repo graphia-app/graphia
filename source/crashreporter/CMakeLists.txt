@@ -20,7 +20,6 @@ list(APPEND SOURCES
 
 list(APPEND RESOURCES
     ${CMAKE_CURRENT_LIST_DIR}/resources.qrc
-    ${CMAKE_CURRENT_LIST_DIR}/../shared/ui/shared.qrc
 )
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
@@ -51,5 +50,5 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 target_link_libraries(CrashReporter PRIVATE Threads::Threads)
 
-target_link_libraries(CrashReporter PRIVATE shared sharedcontrols_qmlplugin)
+target_link_libraries(CrashReporter PRIVATE shared controls_qmlplugin utils_qmlplugin)
 target_link_libraries(CrashReporter PRIVATE thirdparty_static)

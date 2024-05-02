@@ -25,7 +25,8 @@ import QtQuick.Shapes
 
 import app.graphia
 import app.graphia.Controls
-import app.graphia.Shared
+import app.graphia.Plugins
+import app.graphia.Utils
 
 Item
 {

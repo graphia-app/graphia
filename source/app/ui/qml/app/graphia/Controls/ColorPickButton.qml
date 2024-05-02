@@ -24,7 +24,7 @@ import QtQuick.Dialogs
 import Qt.labs.platform as Labs
 
 import app.graphia
-import app.graphia.Shared
+import app.graphia.Utils
 
 Item
 {

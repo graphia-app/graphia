@@ -18,7 +18,7 @@
 
 #include "tableproxymodel.h"
 
-#include "nodeattributetablemodel.h"
+#include "shared/plugins/nodeattributetablemodel.h"
 
 #include "shared/utils/container.h"
 #include "shared/utils/string.h"

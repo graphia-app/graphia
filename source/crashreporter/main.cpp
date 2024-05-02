@@ -46,7 +46,6 @@
 #include "report.h"
 #include "app/rendering/openglfunctions.h"
 #include "shared/utils/preferences.h"
-#include "shared/utils/qmlcontrolcolors.h"
 #include "shared/utils/static_block.h"
 
 #include <google_breakpad/processor/minidump.h>
@@ -316,8 +315,6 @@ static void uploadReport(const QString& email, const QString& text,
 int main(int argc, char *argv[])
 {
     const QApplication app(argc, argv);
-
-    Q_INIT_RESOURCE(shared);
 
     execute_static_blocks();
 

@@ -19,7 +19,7 @@
 import QtQuick
 
 import app.graphia
-import app.graphia.Shared
+import app.graphia.Utils
 
 Item
 {

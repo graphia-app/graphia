@@ -18,8 +18,7 @@
  */
 
 .import app.graphia as Graphia
-.import app.graphia.Utils as Utils
-.import app.graphia.Shared as Shared
+.import app.graphia.Utils as GraphiaUtils
 
 function createTransformParameter(document, parent, parameterData, onParameterChanged)
 {
@@ -51,7 +50,7 @@ function addLabelTo(text, parent)
     Qt.createQmlObject("import QtQuick\n" +
         "import QtQuick.Controls\n" +
         "Label { text: \"" +
-        Shared.Utils.normaliseWhitespace(text) +
+        GraphiaUtils.Utils.normaliseWhitespace(text) +
         "\"; color: root.textColor }", parent);
 }
 
@@ -243,7 +242,7 @@ function Create(transformIndex, transform)
                     function addOperand(operand, opposite)
                     {
                         if(operand[0] === '$')
-                            labelText += Utils.Attribute.prettify(operand);
+                            labelText += GraphiaUtils.AttributeUtils.prettify(operand);
                         else
                         {
                             let parameterData = {};
@@ -281,7 +280,7 @@ function Create(transformIndex, transform)
                                 default:
                                 case Graphia.ValueType.String:
                                 case Graphia.ValueType.StringList:
-                                    labelText += "\\\"" + Shared.Utils.addSlashes(operand) + "\\\"";
+                                    labelText += "\\\"" + GraphiaUtils.Utils.addSlashes(operand) + "\\\"";
                                     break;
                                 case Graphia.ValueType.Int:
                                 case Graphia.ValueType.Float:
@@ -314,7 +313,7 @@ function Create(transformIndex, transform)
                     // The element is an attribute
 
                     if(locked)
-                        labelText += Utils.Attribute.prettify(parameter.attributeName);
+                        labelText += GraphiaUtils.AttributeUtils.prettify(parameter.attributeName);
 
                     addLabel();
 

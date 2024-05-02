@@ -24,7 +24,6 @@
 #include "shared/utils/container.h"
 #include "shared/utils/preferences.h"
 #include "shared/utils/consolecapture.h"
-#include "shared/utils/qmlcontrolcolors.h"
 #include "shared/utils/static_block.h"
 
 #include <QApplication>
@@ -80,7 +79,6 @@ QStringList showUpdater(int argc, char *argv[])
     unquotedArguments.replaceInStrings(re, QStringLiteral(R"(\1)"));
     auto exe = unquotedArguments.at(0);
 
-    Q_INIT_RESOURCE(shared);
     Q_INIT_RESOURCE(update_keys);
 
     QString status;
@@ -145,7 +143,7 @@ QStringList showUpdater(int argc, char *argv[])
             u"installer"_s, &installer);
 
         engine.addImportPath(u"qrc:///qml/"_s);
-        engine.load(QUrl(u"qrc:/main.qml"_s));
+        engine.load(QUrl(u"qrc:/updater.qml"_s));
         Q_ASSERT(!engine.rootObjects().empty());
 
         QApplication::exec();
@@ -157,17 +155,12 @@ QStringList showUpdater(int argc, char *argv[])
 // NOLINTNEXTLINE bugprone-exception-escape
 int main(int argc, char *argv[])
 {
-    Q_INIT_RESOURCE(shared);
-
     execute_static_blocks();
 
     QApplication::setOrganizationName(u"Graphia"_s);
     QApplication::setOrganizationDomain(u"graphia.app"_s);
     QApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
     QApplication::setApplicationVersion(QStringLiteral(VERSION));
-
-    qmlRegisterSingletonType<QmlControlColors>(
-        APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "ControlColors", &QmlControlColors::qmlInstance);
 
     auto consoleOutputFiles = captureConsoleOutput(
         QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation),

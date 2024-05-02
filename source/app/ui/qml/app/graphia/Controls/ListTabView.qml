@@ -21,8 +21,8 @@ import QtQuick.Window
 import QtQuick.Controls
 import QtQuick.Layouts
 
-import app.graphia.Shared
 import app.graphia.Controls
+import app.graphia.Utils
 
 // This dialog is conceptually similar to a tabview in a dialog however the user
 // interface consists of a vertical list of tabs with buttons to OPTIONALLY

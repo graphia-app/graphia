@@ -21,7 +21,7 @@ import QtQuick.Controls
 
 import app.graphia
 import app.graphia.Controls
-import app.graphia.Shared
+import app.graphia.Utils
 
 NamedIcon
 {

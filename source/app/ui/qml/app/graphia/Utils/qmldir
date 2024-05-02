@@ -1,4 +1,0 @@
-module app.graphia.Utils
-
-Attribute 1.0 ../../../AttributeUtils.js
-Visualisation 1.0 ../../../Visualisation/VisualisationUtils.js

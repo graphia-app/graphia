@@ -16,10 +16,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef QMLCONTROLCOLORS_H
-#define QMLCONTROLCOLORS_H
-
-#include "shared/utils/static_block.h"
+#ifndef CONTROLCOLORS_H
+#define CONTROLCOLORS_H
 
 #include <QQmlEngine>
 #include <QGuiApplication>
@@ -30,10 +28,13 @@
 class QQmlEngine;
 class QJSEngine;
 
-class QmlControlColors : public QObject
+class ControlColors : public QObject
 {
     Q_OBJECT
-    Q_DISABLE_COPY(QmlControlColors)
+    QML_ELEMENT
+    QML_SINGLETON
+
+    Q_DISABLE_COPY(ControlColors)
 
     Q_PROPERTY(QColor outline READ outline NOTIFY paletteChanged)
     Q_PROPERTY(QColor background READ background NOTIFY paletteChanged)
@@ -51,8 +52,7 @@ class QmlControlColors : public QObject
     Q_PROPERTY(Qt::ColorScheme scheme READ scheme NOTIFY colorSchemeChanged)
 
 public:
-    explicit QmlControlColors(QObject* parent = nullptr);
-    static QObject* qmlInstance(QQmlEngine*, QJSEngine*);
+    explicit ControlColors(QObject* parent = nullptr);
 
     QColor outline() const;
     QColor background() const;
@@ -80,10 +80,4 @@ signals:
     void colorSchemeChanged();
 };
 
-static_block
-{
-    qmlRegisterSingletonType<QmlControlColors>(
-        APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "ControlColors", &QmlControlColors::qmlInstance);
-}
-
-#endif // QMLCONTROLCOLORS_H
+#endif // CONTROLCOLORS_H

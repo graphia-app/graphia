@@ -24,7 +24,6 @@ import QtQuick.Layouts
 import app.graphia
 import app.graphia.Controls
 import app.graphia.Utils
-import app.graphia.Shared
 
 Window
 {
@@ -98,7 +97,7 @@ Window
             showSearch: true
             showParentGuide: true
             sortRoleName: "elementType"
-            prettifyFunction: Attribute.prettify
+            prettifyFunction: AttributeUtils.prettify
 
             allowMultipleSelection: true
 

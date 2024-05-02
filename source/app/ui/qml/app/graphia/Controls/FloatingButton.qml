@@ -22,7 +22,7 @@ import QtQuick.Layouts
 
 import app.graphia
 import app.graphia.Controls
-import app.graphia.Shared
+import app.graphia.Utils
 
 // This is basically a substitute for ToolButton,
 // that looks consistent across platforms

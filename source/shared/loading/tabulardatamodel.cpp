@@ -18,8 +18,6 @@
 
 #include "tabulardatamodel.h"
 
-#include "shared/utils/static_block.h"
-
 bool TabularDataModel::transposed() const
 {
     return _transposed;
@@ -89,9 +87,4 @@ void TabularDataModel::setTabularData(TabularData& data)
     _data = &data;
     _data->setTransposed(_transposed);
     endResetModel();
-}
-
-static_block
-{
-    qmlRegisterType<TabularDataModel>(APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "TabularDataModel");
 }

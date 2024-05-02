@@ -16,18 +16,17 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef QMLSORTFILTERPROXYMODEL_H
-#define QMLSORTFILTERPROXYMODEL_H
-
-#include "shared/utils/static_block.h"
+#ifndef SORTFILTERPROXYMODEL_H
+#define SORTFILTERPROXYMODEL_H
 
 #include <QSortFilterProxyModel>
 #include <QQmlEngine>
 #include <QJSValue>
 
-class QmlSortFilterProxyModel : public QSortFilterProxyModel
+class SortFilterProxyModel : public QSortFilterProxyModel
 {
     Q_OBJECT
+    QML_ELEMENT
 
     Q_PROPERTY(QString sortRoleName MEMBER _sortRoleName WRITE setSortRoleName NOTIFY sortRoleNameChanged)
     Q_PROPERTY(QJSValue sortExpression READ sortExpression WRITE setSortExpression NOTIFY sortExpressionChanged)
@@ -37,7 +36,7 @@ class QmlSortFilterProxyModel : public QSortFilterProxyModel
     Q_PROPERTY(int count READ count NOTIFY countChanged)
 
 public:
-    explicit QmlSortFilterProxyModel(QObject* parent = nullptr);
+    explicit SortFilterProxyModel(QObject* parent = nullptr);
 
     Q_INVOKABLE QVariant get(int row, const QString& roleName = {}) const;
     Q_INVOKABLE int role(const QString& name) const;
@@ -75,10 +74,4 @@ signals:
     void countChanged();
 };
 
-static_block
-{
-    qmlRegisterType<QmlSortFilterProxyModel>(
-        APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "SortFilterProxyModel");
-}
-
-#endif // QMLSORTFILTERPROXYMODEL_H
+#endif // SORTFILTERPROXYMODEL_H

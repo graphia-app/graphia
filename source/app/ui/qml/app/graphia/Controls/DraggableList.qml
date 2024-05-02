@@ -19,7 +19,7 @@
 import QtQuick
 import QtQml.Models
 
-import app.graphia.Shared
+import app.graphia.Utils
 
 Item
 {

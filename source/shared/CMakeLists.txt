@@ -46,11 +46,11 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/loading/pairwisefileparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/progressfn.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/progress_iterator.h
-    ${CMAKE_CURRENT_LIST_DIR}/loading/qmltabulardataparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/tabulardata.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/tabulardatamodel.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/matlabfileparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/adjacencymatrixfileparser.h
+    ${CMAKE_CURRENT_LIST_DIR}/loading/adjacencymatrixutils.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/xlsxtabulardataparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/urltypes.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/userdata.h
@@ -60,7 +60,6 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/plugins/baseplugin.h
     ${CMAKE_CURRENT_LIST_DIR}/plugins/iplugin.h
     ${CMAKE_CURRENT_LIST_DIR}/plugins/nodeattributetablemodel.h
-    ${CMAKE_CURRENT_LIST_DIR}/plugins/tableproxymodel.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/multisamples.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/idocument.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/iselectionmanager.h
@@ -96,7 +95,6 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/utils/is_detected.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/is_std_container.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/macosfileopeneventfilter.h
-    ${CMAKE_CURRENT_LIST_DIR}/utils/modelcompleter.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/movablepointer.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/msvcwarningsuppress.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/pair_iterator.h
@@ -104,9 +102,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/utils/performancecounter.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/preferences.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/progressable.h
-    ${CMAKE_CURRENT_LIST_DIR}/utils/qmlcontrolcolors.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/qmlenum.h
-    ${CMAKE_CURRENT_LIST_DIR}/utils/qmlsortfilterproxymodel.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/qmlutils.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/qrcextract.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/random.h
@@ -136,14 +132,12 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/loading/biopaxfileparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/cxparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/matlabfileparser.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/loading/adjacencymatrixfileparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/dotfileparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/gmlfileparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphsizeestimate.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/jsonparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/jsongraphparser.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/loading/qmltabulardataparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/xlsxtabulardataparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/tabulardata.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/tabulardatamodel.cpp
@@ -153,7 +147,6 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/plugins/baseplugin.cpp
     ${CMAKE_CURRENT_LIST_DIR}/plugins/basegenericplugin.cpp
     ${CMAKE_CURRENT_LIST_DIR}/plugins/nodeattributetablemodel.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/plugins/tableproxymodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/updates/updates.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/colorgradient.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/colorpalette.cpp
@@ -166,10 +159,7 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/utils/downloadqueue.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/failurereason.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/macosfileopeneventfilter.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/utils/modelcompleter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/performancecounter.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/utils/qmlcontrolcolors.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/utils/qmlsortfilterproxymodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/qrcextract.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/random.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/scopetimer.cpp
@@ -184,7 +174,6 @@ list(APPEND SHARED_SOURCES
 
 list(APPEND RESOURCES
     ${CMAKE_CURRENT_LIST_DIR}/updates/update_keys.qrc
-    ${CMAKE_CURRENT_LIST_DIR}/ui/shared.qrc
 )
 
 if(MSVC)
@@ -202,8 +191,6 @@ set(QML_IMPORT_PATH "${QML_IMPORT_PATH};${CMAKE_CURRENT_LIST_DIR}/ui/qml/" PAREN
 list(APPEND SOURCES ${SHARED_SOURCES})
 
 qt_add_library(shared STATIC ${SOURCES} ${HEADERS} ${RESOURCES})
-
-add_subdirectory(ui/qml/app/graphia/Shared/Controls)
 
 find_package(Qt6 COMPONENTS REQUIRED Concurrent Qml Quick Widgets Xml)
 target_link_libraries(shared PRIVATE

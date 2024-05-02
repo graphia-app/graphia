@@ -35,19 +35,20 @@
 #include <vector>
 #include <atomic>
 
-class QmlTabularDataParser;
+class TabularDataParser;
 class QAbstractTableModel;
 
 DEFINE_QML_ENUM(
     Q_GADGET, HeaderModelType,
     Rows, Columns);
 
-class QmlTabularDataHeaderModel : public QAbstractListModel
+class TabularDataHeaderModel : public QAbstractListModel
 {
     Q_OBJECT
+    QML_UNCREATABLE("Cannot create")
 
 public:
-    explicit QmlTabularDataHeaderModel(const QmlTabularDataParser* parser,
+    explicit TabularDataHeaderModel(const TabularDataParser* parser,
         ValueType valueTypes = ValueType::All, const QStringList& skip = {},
         HeaderModelType headerModelType = HeaderModelType::Rows);
 
@@ -64,16 +65,17 @@ public:
     Q_INVOKABLE QModelIndex modelIndexOf(int roleIndex) const;
 
 private:
-    const QmlTabularDataParser* _parser = nullptr;
+    const TabularDataParser* _parser = nullptr;
     HeaderModelType _type = HeaderModelType::Rows;
     std::vector<size_t> _indices;
 };
 
-class QmlTabularDataParser : public QObject, virtual public Cancellable, virtual public Progressable
+class TabularDataParser : public QObject, virtual public Cancellable, virtual public Progressable
 {
-    friend class QmlTabularDataHeaderModel;
+    friend class TabularDataHeaderModel;
 
     Q_OBJECT
+    QML_ELEMENT
 
     Q_PROPERTY(std::shared_ptr<TabularData> data MEMBER _dataPtr NOTIFY dataChanged)
     Q_PROPERTY(QAbstractTableModel* model READ tableModel NOTIFY dataLoaded)
@@ -100,15 +102,6 @@ private:
 
     void updateTypes();
 
-public:
-    struct MatrixTypeResult
-    {
-        bool _result = true;
-        QString _reason;
-
-        explicit operator bool() const { return _result; }
-    };
-
 protected:
     const TabularData& tabularData() const { return *_dataPtr; }
 
@@ -116,18 +109,18 @@ protected:
     virtual MatrixTypeResult onParseComplete() { return {}; }
 
 public:
-    QmlTabularDataParser();
-    ~QmlTabularDataParser() override;
+    TabularDataParser();
+    ~TabularDataParser() override;
 
     Q_INVOKABLE bool parse(const QUrl& fileUrl);
     Q_INVOKABLE void cancelParse();
     Q_INVOKABLE void reset();
 
-    Q_INVOKABLE QmlTabularDataHeaderModel* rowHeaders(
+    Q_INVOKABLE TabularDataHeaderModel* rowHeaders(
         int _valueTypes = static_cast<int>(ValueType::All),
         const QStringList& skip = {}) const;
 
-    Q_INVOKABLE QmlTabularDataHeaderModel* columnHeaders(
+    Q_INVOKABLE TabularDataHeaderModel* columnHeaders(
         int _valueTypes = static_cast<int>(ValueType::All),
         const QStringList& skip = {}) const;
 

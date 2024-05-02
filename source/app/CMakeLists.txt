@@ -364,7 +364,16 @@ endif()
 add_subdirectory(ui/qml/app/graphia/Controls)
 target_link_libraries(${PROJECT_NAME} PRIVATE controls_qmlplugin)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE shared sharedcontrols_qmlplugin)
+add_subdirectory(ui/qml/app/graphia/Loading)
+target_link_libraries(${PROJECT_NAME} PRIVATE loading_qmlplugin)
+
+add_subdirectory(ui/qml/app/graphia/Plugins)
+target_link_libraries(${PROJECT_NAME} PRIVATE plugins_qmlplugin)
+
+add_subdirectory(ui/qml/app/graphia/Utils)
+target_link_libraries(${PROJECT_NAME} PRIVATE utils_qmlplugin)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE shared)
 target_link_libraries(${PROJECT_NAME} PRIVATE thirdparty_static thirdparty)
 
 if(LINK_TYPE STREQUAL STATIC)

@@ -19,7 +19,8 @@
 import QtQuick
 
 import app.graphia
-import app.graphia.Shared
+import app.graphia.Utils
+import app.graphia.Controls
 
 Rectangle
 {

@@ -41,6 +41,14 @@
 
 class Progressable;
 
+struct MatrixTypeResult
+{
+    bool _isMatrix = true;
+    QString _reason;
+
+    explicit operator bool() const { return _isMatrix; }
+};
+
 class TabularData
 {
 private:

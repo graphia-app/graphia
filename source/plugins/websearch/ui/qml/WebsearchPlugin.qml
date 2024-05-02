@@ -21,7 +21,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtWebEngine
 
-import app.graphia.Shared
+import app.graphia.Plugins
 
 PluginContent
 {

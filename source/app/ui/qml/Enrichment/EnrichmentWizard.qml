@@ -24,7 +24,7 @@ import QtQuick.Window
 
 import app.graphia
 import app.graphia.Controls
-import app.graphia.Shared
+import app.graphia.Utils
 
 Wizard
 {

@@ -19,7 +19,6 @@ list(APPEND SOURCES
 
 list(APPEND RESOURCES
     ${CMAKE_CURRENT_LIST_DIR}/resources.qrc
-    ${CMAKE_CURRENT_LIST_DIR}/../shared/ui/shared.qrc
 )
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
@@ -41,4 +40,4 @@ target_link_libraries(Updater PRIVATE
     Qt6::Widgets
 )
 
-target_link_libraries(Updater PRIVATE shared sharedcontrols_qmlplugin)
+target_link_libraries(Updater PRIVATE shared controls_qmlplugin utils_qmlplugin)
