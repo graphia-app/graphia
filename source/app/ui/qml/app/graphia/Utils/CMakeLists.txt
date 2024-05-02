@@ -16,6 +16,8 @@ qt_add_qml_module(utils_qml
         tableproxymodel.h tableproxymodel.cpp
 )
 
+target_link_libraries(utils_qml PRIVATE shared)
+
 target_link_libraries(utils_qml
     PRIVATE Qt6::Quick
 )
