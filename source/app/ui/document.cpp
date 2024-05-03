@@ -2952,6 +2952,12 @@ void Document::dumpGraph()
 
 void Document::performEnrichment(const QString& selectedAttributeA, const QString& selectedAttributeB)
 {
+    if(!attributeExists(selectedAttributeA) || !attributeExists(selectedAttributeB))
+    {
+        qDebug() << "ERROR: performEnrichment attribute doesn't exist.";
+        return;
+    }
+
     auto* tableModel = new EnrichmentTableModel(this);
 
     commandManager()->executeOnce(
