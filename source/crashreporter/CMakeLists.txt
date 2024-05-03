@@ -7,6 +7,8 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
+find_package(Qt6 COMPONENTS REQUIRED Concurrent Qml Quick QuickControls2 OpenGL Xml Network Widgets)
+
 list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/report.h
     ${CMAKE_CURRENT_LIST_DIR}/../app/rendering/openglfunctions.h
@@ -18,20 +20,23 @@ list(APPEND SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/../app/rendering/openglfunctions.cpp
 )
 
-list(APPEND RESOURCES
-    ${CMAKE_CURRENT_LIST_DIR}/resources.qrc
-)
-
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 if(MSVC)
-    qt_add_executable(CrashReporter WIN32 ${SOURCES} ${HEADERS} ${RESOURCES})
+    qt_add_executable(CrashReporter WIN32 ${SOURCES} ${HEADERS})
 else()
-    qt_add_executable(CrashReporter ${SOURCES} ${HEADERS} ${RESOURCES})
+    qt_add_executable(CrashReporter ${SOURCES} ${HEADERS})
     install(TARGETS CrashReporter RUNTIME DESTINATION bin)
 endif()
 
-find_package(Qt6 COMPONENTS REQUIRED Concurrent Qml Quick QuickControls2 OpenGL Xml Network Widgets)
+qt_add_qml_module(CrashReporter
+    URI app.graphia.CrashReporter
+    QML_FILES
+        Main.qml
+    RESOURCES
+        icon.svg
+)
+
 target_link_libraries(CrashReporter PRIVATE
     Qt6::Concurrent
     Qt6::Qml
