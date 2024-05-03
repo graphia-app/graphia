@@ -7,6 +7,8 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
+find_package(Qt6 COMPONENTS REQUIRED Concurrent Qml Quick QuickControls2 Xml Widgets)
+
 list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/../shared/utils/preferences.h
     ${CMAKE_CURRENT_LIST_DIR}/installer.h
@@ -17,20 +19,39 @@ list(APPEND SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/main.cpp
 )
 
-list(APPEND RESOURCES
-    ${CMAKE_CURRENT_LIST_DIR}/resources.qrc
-)
-
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 if(MSVC)
-    qt_add_executable(Updater WIN32 ${SOURCES} ${HEADERS} ${RESOURCES})
+    qt_add_executable(Updater WIN32 ${SOURCES} ${HEADERS})
 else()
-    qt_add_executable(Updater ${SOURCES} ${HEADERS} ${RESOURCES})
+    qt_add_executable(Updater ${SOURCES} ${HEADERS})
     install(TARGETS Updater RUNTIME DESTINATION bin)
 endif()
 
-find_package(Qt6 COMPONENTS REQUIRED Concurrent Qml Quick QuickControls2 Xml Widgets)
+set_source_files_properties(../app/icon/Installer.svg PROPERTIES QT_RESOURCE_ALIAS icon.svg)
+set_source_files_properties(../app/icon/Icon16x16.png PROPERTIES QT_RESOURCE_ALIAS Icon16x16.png)
+set_source_files_properties(../app/icon/Icon32x32.png PROPERTIES QT_RESOURCE_ALIAS Icon32x32.png)
+set_source_files_properties(../app/icon/Icon48x48.png PROPERTIES QT_RESOURCE_ALIAS Icon48x48.png)
+set_source_files_properties(../app/icon/Icon64x64.png PROPERTIES QT_RESOURCE_ALIAS Icon64x64.png)
+set_source_files_properties(../app/icon/Icon128x128.png PROPERTIES QT_RESOURCE_ALIAS Icon128x128.png)
+set_source_files_properties(../app/icon/Icon256x256.png PROPERTIES QT_RESOURCE_ALIAS Icon256x256.png)
+set_source_files_properties(../app/icon/Icon512x512.png PROPERTIES QT_RESOURCE_ALIAS Icon512x512.png)
+
+qt_add_qml_module(Updater
+    URI app.graphia.Updater
+    QML_FILES
+        Main.qml
+    RESOURCES
+        ../app/icon/Installer.svg
+        ../app/icon/Icon16x16.png
+        ../app/icon/Icon32x32.png
+        ../app/icon/Icon48x48.png
+        ../app/icon/Icon64x64.png
+        ../app/icon/Icon128x128.png
+        ../app/icon/Icon256x256.png
+        ../app/icon/Icon512x512.png
+)
+
 target_link_libraries(Updater PRIVATE
     Qt6::Concurrent
     Qt6::Qml

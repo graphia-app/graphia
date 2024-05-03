@@ -86,12 +86,12 @@ QStringList showUpdater(int argc, char *argv[])
     if(update.is_object() && (status.isEmpty() || status == u"failed"_s))
     {
         QIcon mainIcon;
-        mainIcon.addFile(u":/Icon512x512.png"_s);
-        mainIcon.addFile(u":/Icon256x256.png"_s);
-        mainIcon.addFile(u":/Icon128x128.png"_s);
-        mainIcon.addFile(u":/Icon64x64.png"_s);
-        mainIcon.addFile(u":/Icon32x32.png"_s);
-        mainIcon.addFile(u":/Icon16x16.png"_s);
+        mainIcon.addFile(u":/qt/qml/app/graphia/Updater/Icon512x512.png"_s);
+        mainIcon.addFile(u":/qt/qml/app/graphia/Updater/Icon256x256.png"_s);
+        mainIcon.addFile(u":/qt/qml/app/graphia/Updater/Icon128x128.png"_s);
+        mainIcon.addFile(u":/qt/qml/app/graphia/Updater/Icon64x64.png"_s);
+        mainIcon.addFile(u":/qt/qml/app/graphia/Updater/Icon32x32.png"_s);
+        mainIcon.addFile(u":/qt/qml/app/graphia/Updater/Icon16x16.png"_s);
         QApplication::setWindowIcon(mainIcon);
 
         QQuickStyle::setStyle(u::getPref(u"system/uiTheme"_s).toString());
@@ -142,8 +142,7 @@ QStringList showUpdater(int argc, char *argv[])
         engine.rootContext()->setContextProperty(
             u"installer"_s, &installer);
 
-        engine.addImportPath(u"qrc:///qml/"_s);
-        engine.load(QUrl(u"qrc:/updater.qml"_s));
+        engine.loadFromModule(u"app.graphia.Updater"_s, u"Main"_s);
         Q_ASSERT(!engine.rootObjects().empty());
 
         QApplication::exec();
