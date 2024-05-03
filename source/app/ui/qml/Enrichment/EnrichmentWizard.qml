@@ -54,8 +54,14 @@ Wizard
     onVisibleChanged:
     {
         reset();
-        root.selectedAttributeGroupA = root.selectedAttributeGroupB = "";
-        proxyModel.model = visible ? document.availableAttributesModel(ElementType.Node) : null;
+
+        if(visible)
+        {
+            root.selectedAttributeGroupA = root.selectedAttributeGroupB = "";
+            proxyModel.model = document.availableAttributesModel(ElementType.Node);
+        }
+        else
+            proxyModel.model = null;
     }
 
     Item
@@ -215,7 +221,7 @@ Wizard
 
                                 text:
                                 {
-                                    if(document !== null && model.display.length > 0)
+                                    if(document && model.display && model.display.length > 0)
                                     {
                                         return Utils.format(qsTr("{0} ({1} entries)"), model.display,
                                             document.attribute(model.display).sharedValues.length);
@@ -297,7 +303,7 @@ Wizard
 
                                 text:
                                 {
-                                    if(document !== null && model.display.length > 0)
+                                    if(document && model.display && model.display.length > 0)
                                     {
                                         return Utils.format(qsTr("{0} ({1} entries)"), model.display,
                                             document.attribute(model.display).sharedValues.length);
