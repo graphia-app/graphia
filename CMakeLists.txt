@@ -11,6 +11,18 @@ qt_standard_project_setup(REQUIRES 6.5)
 
 include_directories(source)
 
+add_subdirectory(source/thirdparty)
+add_subdirectory(source/shared)
+add_subdirectory(source/plugins)
+add_subdirectory(source/app)
+
+if(NOT EMSCRIPTEN)
+    add_subdirectory(source/crashreporter)
+    add_subdirectory(source/messagebox)
+    add_subdirectory(source/updater)
+    add_subdirectory(source/updater/editor)
+endif()
+
 # The following sections are only here so that the files are available
 # for selection/editing in the IDE (if it supports it); nothing is
 # actually built
@@ -62,18 +74,6 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/.clang-tidy
     ${CMAKE_CURRENT_LIST_DIR}/.gitignore
 )
-
-add_subdirectory(source/thirdparty)
-add_subdirectory(source/shared)
-add_subdirectory(source/plugins)
-add_subdirectory(source/app)
-
-if(NOT EMSCRIPTEN)
-    add_subdirectory(source/crashreporter)
-    add_subdirectory(source/messagebox)
-    add_subdirectory(source/updater)
-    add_subdirectory(source/updater/editor)
-endif()
 
 list(REMOVE_DUPLICATES QML_IMPORT_PATH)
 set(QML_IMPORT_PATH ${QML_IMPORT_PATH} CACHE STRING "Qt Creator import paths" FORCE)
