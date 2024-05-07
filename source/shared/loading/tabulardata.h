@@ -32,6 +32,7 @@
 #include <QString>
 #include <QStringList>
 #include <QUrl>
+#include <QRect>
 
 #include <fstream>
 #include <iostream>
@@ -92,6 +93,9 @@ public:
 
     int columnMatchPercentage(size_t columnIndex, const QStringList& referenceValues) const;
     int rowMatchPercentage(size_t rowIndex, const QStringList& referenceValues) const;
+
+    QRect findLargestNumericalDataRect(Progressable* progressable = nullptr) const;
+    QRect findLargestNonNumericalDataRect(Progressable* progressable = nullptr) const;
 
     static QString contentIdentityOf(const QUrl& url);
 };

@@ -22,6 +22,7 @@
 #include "shared/utils/progressable.h"
 
 #include <set>
+#include <stack>
 #include <algorithm>
 
 using namespace Qt::Literals::StringLiterals;
@@ -293,6 +294,105 @@ int TabularData::rowMatchPercentage(size_t rowIndex, const QStringList& referenc
         percent = 1;
 
     return percent;
+}
+
+template<typename Fn>
+static QRect findLargestDataRect(const TabularData& tabularData, Fn predicate, Progressable* progressable = nullptr)
+{
+    std::vector<size_t> heightHistogram(tabularData.numColumns());
+
+    for(size_t column = 0; column < tabularData.numColumns(); column++)
+    {
+        for(size_t row = tabularData.numRows(); row-- > 0; )
+        {
+            const auto& value = tabularData.valueAt(column, row);
+            if(predicate(value) || value.isEmpty())
+                heightHistogram.at(column)++;
+            else
+                break;
+        }
+
+        if(progressable != nullptr)
+            progressable->setProgress(static_cast<int>((column * 100) / tabularData.numColumns()));
+    }
+
+    if(progressable != nullptr)
+        progressable->setProgress(-1);
+
+    std::stack<size_t> heights;
+    std::stack<size_t> indexes;
+    QRect dataRect;
+
+    for(size_t index = 0; index < heightHistogram.size(); index++)
+    {
+        if(heights.empty() || heightHistogram[index] > heights.top())
+        {
+            heights.push(heightHistogram[index]);
+            indexes.push(index);
+        }
+        else if(heightHistogram[index] < heights.top())
+        {
+            size_t lastIndex = 0;
+
+            while(!heights.empty() && heightHistogram[index] < heights.top())
+            {
+                lastIndex = indexes.top(); indexes.pop();
+                auto height = heights.top(); heights.pop();
+                auto width = (index - lastIndex);
+                auto area = width * height;
+                if(area > (static_cast<size_t>(dataRect.width()) * static_cast<size_t>(dataRect.height())))
+                {
+                    dataRect.setLeft(static_cast<int>(lastIndex));
+                    dataRect.setTop(static_cast<int>(tabularData.numRows() - height));
+                    dataRect.setWidth(static_cast<int>(width));
+                    dataRect.setHeight(static_cast<int>(height));
+                }
+            }
+
+            heights.push(heightHistogram[index]);
+            indexes.push(lastIndex);
+        }
+    }
+
+    while(!heights.empty())
+    {
+        auto lastIndex = indexes.top(); indexes.pop();
+        auto height = heights.top(); heights.pop();
+        auto width = heightHistogram.size() - lastIndex;
+        auto area = width * height;
+        if(area > (static_cast<size_t>(dataRect.width()) * static_cast<size_t>(dataRect.height())))
+        {
+            dataRect.setLeft(static_cast<int>(lastIndex));
+            dataRect.setTop(static_cast<int>(tabularData.numRows() - height));
+            dataRect.setWidth(static_cast<int>(width));
+            dataRect.setHeight(static_cast<int>(height));
+        }
+    }
+
+           // Enforce having at least one name/attribute row/column
+    if(dataRect.width() >= 2 && dataRect.left() == 0)
+        dataRect.setLeft(1);
+
+    if(dataRect.height() >= 2 && dataRect.top() == 0)
+        dataRect.setTop(1);
+
+    const int bottomMargin = dataRect.top() - (static_cast<int>(tabularData.numRows()) - dataRect.height());
+    const int rightMargin = dataRect.left() - (static_cast<int>(tabularData.numColumns()) - dataRect.width());
+
+    if(bottomMargin != 0 || rightMargin != 0)
+        return {};
+
+    return dataRect;
+}
+
+QRect TabularData::findLargestNumericalDataRect(Progressable* progressable) const
+{
+    return findLargestDataRect(*this, [](const auto& value) { return u::isNumeric(value); }, progressable);
+}
+
+QRect TabularData::findLargestNonNumericalDataRect(Progressable* progressable) const
+{
+    return findLargestDataRect(*this, [](const auto& value) { return !u::isNumeric(value); }, progressable);
 }
 
 QString TabularData::contentIdentityOf(const QUrl& url)
