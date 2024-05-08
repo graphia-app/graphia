@@ -16,18 +16,19 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CORRELATIONPLOTITEM_H
-#define CORRELATIONPLOTITEM_H
+#ifndef CORRELATIONPLOT_H
+#define CORRELATIONPLOT_H
 
-#include "correlationplugin.h"
-
-#include "columnannotation.h"
+#include "plugins/correlation/correlationplugin.h"
+#include "plugins/correlation/columnannotation.h"
 
 #include "shared/utils/qmlenum.h"
 
 #include <qcustomplot.h>
 #include <qcustomplotcolorprovider.h>
 
+#include <QObject>
+#include <QQmlEngine>
 #include <QQuickPaintedItem>
 #include <QVector>
 #include <QList>
@@ -178,9 +179,11 @@ signals:
     void zoomedChanged();
 };
 
-class CorrelationPlotItem : public QQuickPaintedItem, protected QCustomPlotColorProvider
+class CorrelationPlot : public QQuickPaintedItem, protected QCustomPlotColorProvider
 {
     Q_OBJECT
+    QML_ELEMENT
+
     Q_PROPERTY(CorrelationPluginInstance* model MEMBER _pluginInstance WRITE setPluginInstance)
     Q_PROPERTY(double horizontalScrollPosition MEMBER _horizontalScrollPosition
         WRITE setHorizontalScrollPosition NOTIFY horizontalScrollPositionChanged)
@@ -228,8 +231,8 @@ class CorrelationPlotItem : public QQuickPaintedItem, protected QCustomPlotColor
     Q_PROPERTY(double minimumHeight READ minimumHeight NOTIFY minimumHeightChanged)
 
 public:
-    explicit CorrelationPlotItem(QQuickItem* parent = nullptr);
-    ~CorrelationPlotItem() override;
+    explicit CorrelationPlot(QQuickItem* parent = nullptr);
+    ~CorrelationPlot() override;
 
     bool event(QEvent* event) override;
     void paint(QPainter* painter) override;
@@ -264,7 +267,7 @@ public:
 
     static bool axisRectIsColumnAnnotations(const QCPAxisRect* axisRect);
 
-    void clone(CorrelationPlotItem& target) const;
+    void clone(CorrelationPlot& target) const;
     void savePlotImage(const QString& filename);
 
 protected:
@@ -318,7 +321,6 @@ private:
 
     PlotMode _plotMode = PlotMode::Normal;
 
-    QCPAxisRect* _columnAnnotationsAxisRect = nullptr;
     bool _groupByAnnotation = false;
     QString _colorGroupByAnnotationName;
 
@@ -501,4 +503,4 @@ signals:
 
     void plotModeChanged();
 };
-#endif // CORRELATIONPLOTITEM_H
+#endif // CORRELATIONPLOT_H

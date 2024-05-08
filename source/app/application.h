@@ -201,7 +201,8 @@ public:
 
     Q_INVOKABLE QObject* qmlPluginForName(const QString& pluginName) const;
     Q_INVOKABLE QStringList pluginNames(const QString& urlTypeName) const;
-    Q_INVOKABLE QString parametersQmlPathForPlugin(const QString& pluginName,
+    Q_INVOKABLE QString qmlModuleForPlugin(const QString& pluginName) const;
+    Q_INVOKABLE QString parametersQmlTypeForPlugin(const QString& pluginName,
         const QString& urlType) const;
 
     Q_INVOKABLE UrlTypeDetailsModel* urlTypeDetailsModel() const;

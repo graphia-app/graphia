@@ -456,9 +456,9 @@ QObject* Document::pluginInstance()
     return dynamic_cast<QObject*>(_pluginInstance.get());
 }
 
-QString Document::pluginQmlPath() const
+QString Document::pluginQmlModule() const
 {
-    return _graphModel != nullptr ? _graphModel->pluginQmlPath() : QString();
+    return _graphModel != nullptr ? _graphModel->pluginQmlModule() : QString();
 }
 
 QStringList Document::bookmarks() const
@@ -903,7 +903,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
         emit uiDataChanged(_uiData);
 
     // This causes the plugin UI to be loaded
-    emit pluginQmlPathChanged(_pluginUiData, _pluginUiDataVersion);
+    emit pluginQmlModuleChanged(_pluginUiData, _pluginUiDataVersion);
 
     connect(_layoutThread.get(), &LayoutThread::pausedChanged, this, &Document::layoutPauseStateChanged);
     connect(_layoutThread.get(), &LayoutThread::settingChanged, [this] { _layoutRequired = true; });

@@ -61,13 +61,13 @@ void CorrelationPlotSaveImageCommand::saveNextImage()
 }
 
 CorrelationPlotSaveImageCommand::CorrelationPlotSaveImageCommand(
-    const CorrelationPlotItem& correlationPlotItem,
+    const CorrelationPlot& correlationPlotItem,
     const QString& baseFilename, const QString& extension) :
     _baseFilename(baseFilename), _extension(extension)
 {
     correlationPlotItem.clone(_correlationPlotItem);
 
-    connect(&_correlationPlotItem, &CorrelationPlotItem::pixmapUpdated,
+    connect(&_correlationPlotItem, &CorrelationPlot::pixmapUpdated,
     [this]
     {
         const std::unique_lock<std::mutex> lock(_mutex);

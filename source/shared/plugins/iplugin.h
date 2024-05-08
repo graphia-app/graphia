@@ -90,8 +90,8 @@ public:
     virtual bool editable() const = 0;
     virtual bool directed() const = 0;
 
-    virtual QString parametersQmlPath(const QString& urlType) const = 0;
-    virtual QString qmlPath() const = 0;
+    virtual QString parametersQmlType(const QString& urlType) const = 0;
+    virtual QString qmlModule() const = 0;
 
     virtual const IApplication* application() const = 0;
 

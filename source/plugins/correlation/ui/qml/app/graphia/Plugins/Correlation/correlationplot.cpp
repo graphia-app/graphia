@@ -16,9 +16,9 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "correlationplotitem.h"
+#include "correlationplot.h"
 
-#include "correlationplugin.h"
+#include "plugins/correlation/correlationplugin.h"
 #include "correlationplotsaveimagecommand.h"
 
 #include "qcpcolumnannotations.h"
@@ -324,7 +324,7 @@ void CorrelationPlotWorker::renderPixmap()
     emit pixmapUpdated(pixmap);
 }
 
-CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) :
+CorrelationPlot::CorrelationPlot(QQuickItem* parent) :
     QQuickPaintedItem(parent),
     _debug(qEnvironmentVariableIntValue("QCUSTOMPLOT_DEBUG") != 0),
     _mainLayoutGrid(new QCPLayoutGrid),
@@ -380,11 +380,11 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) :
             Q_ARG(double, devicePixelRatio));
     });
 
-    connect(_worker, &CorrelationPlotWorker::pixmapUpdated, this, &CorrelationPlotItem::onPixmapUpdated);
-    connect(_worker, &CorrelationPlotWorker::pixmapUpdated, this, &CorrelationPlotItem::pixmapUpdated);
-    connect(this, &CorrelationPlotItem::enabledChanged, [this] { update(); });
-    connect(_worker, &CorrelationPlotWorker::busyChanged, this, &CorrelationPlotItem::busyChanged);
-    connect(_worker, &CorrelationPlotWorker::zoomedChanged, this, &CorrelationPlotItem::zoomedChanged);
+    connect(_worker, &CorrelationPlotWorker::pixmapUpdated, this, &CorrelationPlot::onPixmapUpdated);
+    connect(_worker, &CorrelationPlotWorker::pixmapUpdated, this, &CorrelationPlot::pixmapUpdated);
+    connect(this, &CorrelationPlot::enabledChanged, [this] { update(); });
+    connect(_worker, &CorrelationPlotWorker::busyChanged, this, &CorrelationPlot::busyChanged);
+    connect(_worker, &CorrelationPlotWorker::zoomedChanged, this, &CorrelationPlot::zoomedChanged);
 
     connect(&_customPlot, &QCustomPlot::afterReplot, [this]
     {
@@ -396,31 +396,31 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) :
             _plotRenderThread.start();
     });
 
-    connect(this, &QQuickPaintedItem::widthChanged, this, &CorrelationPlotItem::updatePlotSize);
-    connect(this, &QQuickPaintedItem::heightChanged, this, &CorrelationPlotItem::updatePlotSize);
-    connect(this, &QQuickPaintedItem::widthChanged, this, &CorrelationPlotItem::visibleHorizontalFractionChanged);
-    connect(this, &QQuickPaintedItem::widthChanged, this, &CorrelationPlotItem::isWideChanged);
+    connect(this, &QQuickPaintedItem::widthChanged, this, &CorrelationPlot::updatePlotSize);
+    connect(this, &QQuickPaintedItem::heightChanged, this, &CorrelationPlot::updatePlotSize);
+    connect(this, &QQuickPaintedItem::widthChanged, this, &CorrelationPlot::visibleHorizontalFractionChanged);
+    connect(this, &QQuickPaintedItem::widthChanged, this, &CorrelationPlot::isWideChanged);
 
-    connect(this, &CorrelationPlotItem::numVisibleColumnsChanged, this, &CorrelationPlotItem::visibleHorizontalFractionChanged);
+    connect(this, &CorrelationPlot::numVisibleColumnsChanged, this, &CorrelationPlot::visibleHorizontalFractionChanged);
 
-    connect(this, &CorrelationPlotItem::visibleColumnAnnotationNamesChanged, this, &CorrelationPlotItem::minimumHeightChanged);
-    connect(this, &CorrelationPlotItem::plotModeChanged, this, &CorrelationPlotItem::minimumHeightChanged);
-    connect(this, &CorrelationPlotItem::columnSortOrderPinnedChanged, [this] { if(!_columnSortOrderPinned) rebuildPlot(); });
+    connect(this, &CorrelationPlot::visibleColumnAnnotationNamesChanged, this, &CorrelationPlot::minimumHeightChanged);
+    connect(this, &CorrelationPlot::plotModeChanged, this, &CorrelationPlot::minimumHeightChanged);
+    connect(this, &CorrelationPlot::columnSortOrderPinnedChanged, [this] { if(!_columnSortOrderPinned) rebuildPlot(); });
 }
 
-CorrelationPlotItem::~CorrelationPlotItem()
+CorrelationPlot::~CorrelationPlot()
 {
     _plotRenderThread.quit();
     _plotRenderThread.wait();
 }
 
-void CorrelationPlotItem::updatePixmap(CorrelationPlotUpdateType updateType)
+void CorrelationPlot::updatePixmap(CorrelationPlotUpdateType updateType)
 {
     QMetaObject::invokeMethod(_worker, "updatePixmap", Qt::QueuedConnection,
         Q_ARG(CorrelationPlotUpdateType, updateType));
 }
 
-bool CorrelationPlotItem::event(QEvent* event)
+bool CorrelationPlot::event(QEvent* event)
 {
     if(event->type() == QEvent::ApplicationPaletteChange)
         rebuildPlot();
@@ -428,7 +428,7 @@ bool CorrelationPlotItem::event(QEvent* event)
     return QQuickPaintedItem::event(event);
 }
 
-void CorrelationPlotItem::paint(QPainter* painter)
+void CorrelationPlot::paint(QPainter* painter)
 {
     if(_pixmap.isNull())
         return;
@@ -492,7 +492,7 @@ void CorrelationPlotItem::paint(QPainter* painter)
     }
 }
 
-void CorrelationPlotItem::onPixmapUpdated(const QPixmap& pixmap)
+void CorrelationPlot::onPixmapUpdated(const QPixmap& pixmap)
 {
     if(!pixmap.isNull())
     {
@@ -512,13 +512,13 @@ void CorrelationPlotItem::onPixmapUpdated(const QPixmap& pixmap)
         updateTooltip();
 }
 
-void CorrelationPlotItem::mousePressEvent(QMouseEvent* event)
+void CorrelationPlot::mousePressEvent(QMouseEvent* event)
 {
     _clickMousePosition = _lastMousePosition = event->pos();
     event->accept();
 }
 
-void CorrelationPlotItem::mouseReleaseEvent(QMouseEvent* event)
+void CorrelationPlot::mouseReleaseEvent(QMouseEvent* event)
 {
     auto delta = _clickMousePosition - event->pos();
 
@@ -534,7 +534,7 @@ void CorrelationPlotItem::mouseReleaseEvent(QMouseEvent* event)
     _tooltipUpdateRequired = true;
 }
 
-void CorrelationPlotItem::mouseMoveEvent(QMouseEvent* event)
+void CorrelationPlot::mouseMoveEvent(QMouseEvent* event)
 {
     auto* axisRectUnderCursor = _customPlot.axisRectAt(event->pos());
 
@@ -556,7 +556,7 @@ void CorrelationPlotItem::mouseMoveEvent(QMouseEvent* event)
     }
 }
 
-QCPAbstractPlottable* CorrelationPlotItem::abstractPlottableUnderCursor(double& keyCoord)
+QCPAbstractPlottable* CorrelationPlot::abstractPlottableUnderCursor(double& keyCoord)
 {
     QCPAbstractPlottable* nearestPlottable = nullptr;
 
@@ -641,7 +641,7 @@ QCPAbstractPlottable* CorrelationPlotItem::abstractPlottableUnderCursor(double& 
     return nearestPlottable;
 }
 
-bool CorrelationPlotItem::updateTooltip()
+bool CorrelationPlot::updateTooltip()
 {
     const std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
 
@@ -768,7 +768,7 @@ bool CorrelationPlotItem::updateTooltip()
     return true;
 }
 
-void CorrelationPlotItem::hoverMoveEvent(QHoverEvent* event)
+void CorrelationPlot::hoverMoveEvent(QHoverEvent* event)
 {
     if(event->position() == _hoverPoint)
         return;
@@ -780,7 +780,7 @@ void CorrelationPlotItem::hoverMoveEvent(QHoverEvent* event)
     updateTooltip();
 }
 
-void CorrelationPlotItem::hoverLeaveEvent(QHoverEvent*)
+void CorrelationPlot::hoverLeaveEvent(QHoverEvent*)
 {
     if(_hoverPoint.x() < 0.0 && _hoverPoint.y() < 0.0)
         return;
@@ -789,7 +789,7 @@ void CorrelationPlotItem::hoverLeaveEvent(QHoverEvent*)
     updateTooltip();
 }
 
-void CorrelationPlotItem::wheelEvent(QWheelEvent* event)
+void CorrelationPlot::wheelEvent(QWheelEvent* event)
 {
     auto* axisRectUnderCursor = _customPlot.axisRectAt(event->position());
 
@@ -815,7 +815,7 @@ void CorrelationPlotItem::wheelEvent(QWheelEvent* event)
         event->ignore();
 }
 
-void CorrelationPlotItem::configureLegend()
+void CorrelationPlot::configureLegend()
 {
     if(_selectedRows.empty() || !_showLegend)
     {
@@ -951,7 +951,7 @@ void CorrelationPlotItem::configureLegend()
     legend->setVisible(true);
 }
 
-void CorrelationPlotItem::onClick(const QMouseEvent* event)
+void CorrelationPlot::onClick(const QMouseEvent* event)
 {
     if(event->button() != Qt::LeftButton)
         return;
@@ -1001,13 +1001,13 @@ void CorrelationPlotItem::onClick(const QMouseEvent* event)
             sortBy(static_cast<int>(PlotColumnSortType::Natural));
         }
     }
-    else if(CorrelationPlotItem::axisRectIsColumnAnnotations(axisRect))
+    else if(CorrelationPlot::axisRectIsColumnAnnotations(axisRect))
         onClickColumnAnnotation(axisRect, event);
     else if(_plotMode == PlotMode::RowsOfInterestColumnSelection)
         selectColumn();
 }
 
-void CorrelationPlotItem::rebuildPlot(InvalidateCache invalidateCache)
+void CorrelationPlot::rebuildPlot(InvalidateCache invalidateCache)
 {
     if(_pluginInstance == nullptr)
         return;
@@ -1079,7 +1079,7 @@ void CorrelationPlotItem::rebuildPlot(InvalidateCache invalidateCache)
     updatePixmap(CorrelationPlotUpdateType::ReplotAndRenderAndTooltips);
 }
 
-size_t CorrelationPlotItem::numColumns() const
+size_t CorrelationPlot::numColumns() const
 {
     if(_pluginInstance == nullptr)
         return 0;
@@ -1093,7 +1093,7 @@ size_t CorrelationPlotItem::numColumns() const
         _pluginInstance->numContinuousColumns();
 }
 
-size_t CorrelationPlotItem::numVisibleColumns() const
+size_t CorrelationPlot::numVisibleColumns() const
 {
     if(_groupByAnnotation)
         return _annotationGroupMap.size();
@@ -1101,7 +1101,7 @@ size_t CorrelationPlotItem::numVisibleColumns() const
     return numColumns();
 }
 
-void CorrelationPlotItem::computeXAxisRange()
+void CorrelationPlot::computeXAxisRange()
 {
     auto min = 0.0;
     auto max = static_cast<double>(numVisibleColumns() - 1);
@@ -1123,7 +1123,7 @@ void CorrelationPlotItem::computeXAxisRange()
         Q_ARG(double, min), Q_ARG(double, max));
 }
 
-void CorrelationPlotItem::setYAxisLabel(const QString& plotYAxisLabel)
+void CorrelationPlot::setYAxisLabel(const QString& plotYAxisLabel)
 {
     if(_yAxisLabel != plotYAxisLabel)
     {
@@ -1133,7 +1133,7 @@ void CorrelationPlotItem::setYAxisLabel(const QString& plotYAxisLabel)
     }
 }
 
-void CorrelationPlotItem::setShowAllColumns(bool showAllColumns)
+void CorrelationPlot::setShowAllColumns(bool showAllColumns)
 {
     if(_showAllColumns != showAllColumns)
     {
@@ -1145,7 +1145,7 @@ void CorrelationPlotItem::setShowAllColumns(bool showAllColumns)
     }
 }
 
-void CorrelationPlotItem::setXAxisLabel(const QString& plotXAxisLabel)
+void CorrelationPlot::setXAxisLabel(const QString& plotXAxisLabel)
 {
     if(_xAxisLabel != plotXAxisLabel)
     {
@@ -1155,7 +1155,7 @@ void CorrelationPlotItem::setXAxisLabel(const QString& plotXAxisLabel)
     }
 }
 
-void CorrelationPlotItem::setShowLegend(bool showLegend)
+void CorrelationPlot::setShowLegend(bool showLegend)
 {
     if(_showLegend != showLegend)
     {
@@ -1165,12 +1165,12 @@ void CorrelationPlotItem::setShowLegend(bool showLegend)
     }
 }
 
-double CorrelationPlotItem::minimumHeight() const
+double CorrelationPlot::minimumHeight() const
 {
     return 150.0 + columnAnnotationsHeight();
 }
 
-void CorrelationPlotItem::setPluginInstance(CorrelationPluginInstance* pluginInstance)
+void CorrelationPlot::setPluginInstance(CorrelationPluginInstance* pluginInstance)
 {
     _pluginInstance = pluginInstance;
 
@@ -1182,7 +1182,7 @@ void CorrelationPlotItem::setPluginInstance(CorrelationPluginInstance* pluginIns
     });
 }
 
-void CorrelationPlotItem::setSelectedRows(const QList<int>& selectedRows)
+void CorrelationPlot::setSelectedRows(const QList<int>& selectedRows)
 {
     _selectedRows = selectedRows;
     emit selectedRowsChanged();
@@ -1190,7 +1190,7 @@ void CorrelationPlotItem::setSelectedRows(const QList<int>& selectedRows)
     rebuildPlot();
 }
 
-void CorrelationPlotItem::setElideLabelWidth(int elideLabelWidth)
+void CorrelationPlot::setElideLabelWidth(int elideLabelWidth)
 {
     const bool changed = (_elideLabelWidth != elideLabelWidth);
     _elideLabelWidth = elideLabelWidth;
@@ -1199,7 +1199,7 @@ void CorrelationPlotItem::setElideLabelWidth(int elideLabelWidth)
         rebuildPlot();
 }
 
-bool CorrelationPlotItem::showColumnNames() const
+bool CorrelationPlot::showColumnNames() const
 {
     if(!_showColumnNames)
         return false;
@@ -1213,7 +1213,7 @@ bool CorrelationPlotItem::showColumnNames() const
     return true;
 }
 
-void CorrelationPlotItem::setShowColumnNames(bool showColumnNames)
+void CorrelationPlot::setShowColumnNames(bool showColumnNames)
 {
     if(_showColumnNames != showColumnNames)
     {
@@ -1225,7 +1225,7 @@ void CorrelationPlotItem::setShowColumnNames(bool showColumnNames)
     }
 }
 
-void CorrelationPlotItem::setShowGridLines(bool showGridLines)
+void CorrelationPlot::setShowGridLines(bool showGridLines)
 {
     if(_showGridLines != showGridLines)
     {
@@ -1236,7 +1236,7 @@ void CorrelationPlotItem::setShowGridLines(bool showGridLines)
     }
 }
 
-void CorrelationPlotItem::setHorizontalScrollPosition(double horizontalScrollPosition)
+void CorrelationPlot::setHorizontalScrollPosition(double horizontalScrollPosition)
 {
     auto newHorizontalScrollPosition = std::clamp(horizontalScrollPosition, 0.0, 1.0);
 
@@ -1248,7 +1248,7 @@ void CorrelationPlotItem::setHorizontalScrollPosition(double horizontalScrollPos
     }
 }
 
-void CorrelationPlotItem::setRightPadding(int padding)
+void CorrelationPlot::setRightPadding(int padding)
 {
     if(_rightPadding != padding)
     {
@@ -1257,7 +1257,7 @@ void CorrelationPlotItem::setRightPadding(int padding)
     }
 }
 
-void CorrelationPlotItem::setBottomPadding(int padding)
+void CorrelationPlot::setBottomPadding(int padding)
 {
     if(_bottomPadding != padding)
     {
@@ -1266,7 +1266,7 @@ void CorrelationPlotItem::setBottomPadding(int padding)
     }
 }
 
-bool CorrelationPlotItem::updateSortMap()
+bool CorrelationPlot::updateSortMap()
 {
     auto previousSortmap = _sortMap;
 
@@ -1486,7 +1486,7 @@ bool CorrelationPlotItem::updateSortMap()
     return _sortMap != previousSortmap;
 }
 
-void CorrelationPlotItem::sortBy(int type, const QString& text)
+void CorrelationPlot::sortBy(int type, const QString& text)
 {
     const bool columnSortOrderCouldBePinned = columnSortOrderCanBePinned();
     const bool typeIsColumnAnnotation =
@@ -1545,7 +1545,7 @@ void CorrelationPlotItem::sortBy(int type, const QString& text)
     rebuildPlot(InvalidateCache::Yes);
 }
 
-void CorrelationPlotItem::resetZoom()
+void CorrelationPlot::resetZoom()
 {
     if(_worker == nullptr)
         return;
@@ -1554,7 +1554,7 @@ void CorrelationPlotItem::resetZoom()
     updatePixmap(CorrelationPlotUpdateType::Render);
 }
 
-void CorrelationPlotItem::setColumnSortOrders(const QVector<QVariantMap>& columnSortOrders) // clazy:exclude=qproperty-type-mismatch
+void CorrelationPlot::setColumnSortOrders(const QVector<QVariantMap>& columnSortOrders) // clazy:exclude=qproperty-type-mismatch
 {
     if(_columnSortOrders != columnSortOrders)
     {
@@ -1565,7 +1565,7 @@ void CorrelationPlotItem::setColumnSortOrders(const QVector<QVariantMap>& column
     }
 }
 
-bool CorrelationPlotItem::columnSortOrderCanBePinned() const
+bool CorrelationPlot::columnSortOrderCanBePinned() const
 {
     return std::any_of(_columnSortOrders.cbegin(), _columnSortOrders.cend(), [](const auto& value)
     {
@@ -1574,7 +1574,7 @@ bool CorrelationPlotItem::columnSortOrderCanBePinned() const
     });
 }
 
-QString CorrelationPlotItem::elideLabel(const QString& label)
+QString CorrelationPlot::elideLabel(const QString& label)
 {
     if(_elideLabelWidth <= 0)
         return {};
@@ -1593,7 +1593,7 @@ QString CorrelationPlotItem::elideLabel(const QString& label)
     return elidedLabel;
 }
 
-double CorrelationPlotItem::visibleHorizontalFraction() const
+double CorrelationPlot::visibleHorizontalFraction() const
 {
     if(_pluginInstance == nullptr)
         return 1.0;
@@ -1603,7 +1603,7 @@ double CorrelationPlotItem::visibleHorizontalFraction() const
     return std::min(f, 1.0);
 }
 
-double CorrelationPlotItem::labelHeight() const
+double CorrelationPlot::labelHeight() const
 {
     const int columnPadding = 1;
     return static_cast<double>(_defaultFontMetrics.height() + columnPadding);
@@ -1612,12 +1612,12 @@ double CorrelationPlotItem::labelHeight() const
 constexpr double minColumnPixelWidth = 1.0;
 constexpr double minColumnBoxPlotWidth = 10.0;
 
-bool CorrelationPlotItem::isWide() const
+bool CorrelationPlot::isWide() const
 {
     return (static_cast<double>(numVisibleColumns()) * minColumnPixelWidth) > columnAxisWidth();
 }
 
-double CorrelationPlotItem::minColumnWidth() const
+double CorrelationPlot::minColumnWidth() const
 {
     if(showColumnNames())
         return labelHeight();
@@ -1634,7 +1634,7 @@ double CorrelationPlotItem::minColumnWidth() const
     return minColumnPixelWidth;
 }
 
-double CorrelationPlotItem::columnAxisWidth() const
+double CorrelationPlot::columnAxisWidth() const
 {
     int marginWidth = 0;
 
@@ -1654,7 +1654,7 @@ double CorrelationPlotItem::columnAxisWidth() const
     return width() - marginWidth;
 }
 
-double CorrelationPlotItem::columnAnnotationsHeight() const
+double CorrelationPlot::columnAnnotationsHeight() const
 {
     if(_plotMode == PlotMode::ColumnAnnotationSelection)
         return static_cast<double>(_pluginInstance->columnAnnotations().size()) * labelHeight();
@@ -1662,7 +1662,7 @@ double CorrelationPlotItem::columnAnnotationsHeight() const
     return static_cast<double>(_visibleColumnAnnotationNames.size()) * labelHeight();
 }
 
-std::vector<size_t> CorrelationPlotItem::selectedColumns() const
+std::vector<size_t> CorrelationPlot::selectedColumns() const
 {
     std::vector<size_t> v;
     v.reserve(_selectedColumns.size());
@@ -1673,7 +1673,7 @@ std::vector<size_t> CorrelationPlotItem::selectedColumns() const
     return v;
 }
 
-void CorrelationPlotItem::createTooltip()
+void CorrelationPlot::createTooltip()
 {
     if(_tooltipLayer != nullptr)
         return;
@@ -1710,7 +1710,7 @@ void CorrelationPlotItem::createTooltip()
     _itemTracer->setClipToAxisRect(false);
 }
 
-void CorrelationPlotItem::configureAxisRects()
+void CorrelationPlot::configureAxisRects()
 {
     if(_axesLayoutGrid == nullptr)
     {
@@ -1770,13 +1770,13 @@ void CorrelationPlotItem::configureAxisRects()
     createTooltip();
 }
 
-void CorrelationPlotItem::updatePlotSize()
+void CorrelationPlot::updatePlotSize()
 {
     computeXAxisRange();
     updatePixmap(CorrelationPlotUpdateType::Render);
 }
 
-void CorrelationPlotItem::clone(CorrelationPlotItem& target) const
+void CorrelationPlot::clone(CorrelationPlot& target) const
 {
     target._pluginInstance                  = _pluginInstance;
     target._horizontalScrollPosition        = _horizontalScrollPosition;
@@ -1812,7 +1812,7 @@ void CorrelationPlotItem::clone(CorrelationPlotItem& target) const
     _worker->clone(*target._worker);
 }
 
-void CorrelationPlotItem::savePlotImage(const QUrl& url, const QString& extension)
+void CorrelationPlot::savePlotImage(const QUrl& url, const QString& extension)
 {
     const std::unique_lock<std::recursive_mutex> lock(_mutex);
 
@@ -1824,7 +1824,7 @@ void CorrelationPlotItem::savePlotImage(const QUrl& url, const QString& extensio
     _pluginInstance->commandManager()->execute(ExecutePolicy::Once, std::move(cpsic));
 }
 
-void CorrelationPlotItem::savePlotImageByRow(const QUrl& url, const QString& extension)
+void CorrelationPlot::savePlotImageByRow(const QUrl& url, const QString& extension)
 {
     const std::unique_lock<std::recursive_mutex> lock(_mutex);
 
@@ -1843,7 +1843,7 @@ void CorrelationPlotItem::savePlotImageByRow(const QUrl& url, const QString& ext
     _pluginInstance->commandManager()->execute(ExecutePolicy::Once, std::move(cpsic));
 }
 
-void CorrelationPlotItem::savePlotImageByAttribute(const QUrl& url, const QString& extension,
+void CorrelationPlot::savePlotImageByAttribute(const QUrl& url, const QString& extension,
     const QString& attributeName)
 {
     const std::unique_lock<std::recursive_mutex> lock(_mutex);
@@ -1868,7 +1868,7 @@ void CorrelationPlotItem::savePlotImageByAttribute(const QUrl& url, const QStrin
     _pluginInstance->commandManager()->execute(ExecutePolicy::Once, std::move(cpsic));
 }
 
-void CorrelationPlotItem::savePlotImage(const QString& filename)
+void CorrelationPlot::savePlotImage(const QString& filename)
 {
     const QFileInfo fileInfo(filename);
 

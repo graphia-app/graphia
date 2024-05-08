@@ -21,7 +21,7 @@
 
 #include <qcustomplot.h>
 
-#include "columnannotation.h"
+#include "plugins/correlation/columnannotation.h"
 
 #include "shared/ui/visualisations/colorgradient.h"
 #include "shared/ui/visualisations/colorpalette.h"

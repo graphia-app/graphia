@@ -18,7 +18,7 @@
 
 #include "importannotationskeydetection.h"
 
-#include "correlationplugin.h"
+#include "plugins/correlation/correlationplugin.h"
 
 #include <QFuture>
 #include <QtConcurrentRun>

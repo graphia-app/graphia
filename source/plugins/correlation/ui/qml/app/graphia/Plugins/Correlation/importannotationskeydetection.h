@@ -19,18 +19,20 @@
 #ifndef IMPORTANNOTATIONSKEYDETECTION_H
 #define IMPORTANNOTATIONSKEYDETECTION_H
 
+#include "plugins/correlation/correlationplugin.h"
+
 #include "shared/loading/tabulardata.h"
 #include "shared/utils/cancellable.h"
 
 #include <QObject>
+#include <QQmlEngine>
 #include <QFutureWatcher>
 #include <QVariantMap>
-
-class CorrelationPluginInstance;
 
 class ImportAnnotationsKeyDetection : public QObject, public Cancellable
 {
     Q_OBJECT
+    QML_ELEMENT
 
     Q_PROPERTY(CorrelationPluginInstance* plugin MEMBER _plugin)
     Q_PROPERTY(std::shared_ptr<TabularData> tabularData MEMBER _tabularData)

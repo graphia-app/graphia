@@ -16,7 +16,7 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "graphsizeestimateplotitem.h"
+#include "graphsizeestimateplot.h"
 
 #include "shared/utils/utils.h"
 #include "shared/utils/string.h"
@@ -30,18 +30,18 @@
 
 using namespace Qt::Literals::StringLiterals;
 
-GraphSizeEstimatePlotItem::GraphSizeEstimatePlotItem(QQuickItem* parent) :
+GraphSizeEstimatePlot::GraphSizeEstimatePlot(QQuickItem* parent) :
     QCustomPlotQuickItem(multisamples(), parent)
 {
-    connect(this, &GraphSizeEstimatePlotItem::uniqueEdgesOnlyChanged, [this] { buildPlot(); });
+    connect(this, &GraphSizeEstimatePlot::uniqueEdgesOnlyChanged, [this] { buildPlot(); });
 }
 
-double GraphSizeEstimatePlotItem::threshold() const
+double GraphSizeEstimatePlot::threshold() const
 {
     return _threshold;
 }
 
-void GraphSizeEstimatePlotItem::setThreshold(double threshold)
+void GraphSizeEstimatePlot::setThreshold(double threshold)
 {
     if(_integralThreshold)
         threshold = std::round(threshold);
@@ -56,7 +56,7 @@ void GraphSizeEstimatePlotItem::setThreshold(double threshold)
     }
 }
 
-void GraphSizeEstimatePlotItem::setGraphSizeEstimate(const QVariantMap& graphSizeEstimate)
+void GraphSizeEstimatePlot::setGraphSizeEstimate(const QVariantMap& graphSizeEstimate)
 {
     if(!graphSizeEstimate.contains(u"keys"_s))
         return;
@@ -78,7 +78,7 @@ void GraphSizeEstimatePlotItem::setGraphSizeEstimate(const QVariantMap& graphSiz
     buildPlot();
 }
 
-void GraphSizeEstimatePlotItem::updateThresholdIndicator()
+void GraphSizeEstimatePlot::updateThresholdIndicator()
 {
     if(_thresholdIndicator == nullptr || _keys.isEmpty())
         return;
@@ -126,7 +126,7 @@ void GraphSizeEstimatePlotItem::updateThresholdIndicator()
         u::formatNumberSIPostfix(static_cast<double>(numEdges))));
 }
 
-void GraphSizeEstimatePlotItem::buildPlot()
+void GraphSizeEstimatePlot::buildPlot()
 {
     if(_keys.isEmpty())
         return;
@@ -203,7 +203,7 @@ void GraphSizeEstimatePlotItem::buildPlot()
     customPlot().replot(QCustomPlot::rpQueuedReplot);
 }
 
-void GraphSizeEstimatePlotItem::mousePressEvent(QMouseEvent* event)
+void GraphSizeEstimatePlot::mousePressEvent(QMouseEvent* event)
 {
     routeMouseEvent(event);
     if(event->button() == Qt::MouseButton::LeftButton)
@@ -214,14 +214,14 @@ void GraphSizeEstimatePlotItem::mousePressEvent(QMouseEvent* event)
     }
 }
 
-void GraphSizeEstimatePlotItem::mouseReleaseEvent(QMouseEvent* event)
+void GraphSizeEstimatePlot::mouseReleaseEvent(QMouseEvent* event)
 {
     routeMouseEvent(event);
     if(event->button() == Qt::MouseButton::LeftButton)
         _dragging = false;
 }
 
-void GraphSizeEstimatePlotItem::mouseMoveEvent(QMouseEvent* event)
+void GraphSizeEstimatePlot::mouseMoveEvent(QMouseEvent* event)
 {
     routeMouseEvent(event);
     if(_dragging)

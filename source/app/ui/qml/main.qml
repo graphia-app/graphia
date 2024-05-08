@@ -801,11 +801,12 @@ ApplicationWindow
 
     function openUrlOfTypeWithPlugin(url, type, pluginName, inNewTab)
     {
-        let parametersQmlPath = application.parametersQmlPathForPlugin(pluginName, type);
+        let qmlModule = application.qmlModuleForPlugin(pluginName);
+        let parametersQmlType = application.parametersQmlTypeForPlugin(pluginName, type);
 
-        if(parametersQmlPath.length > 0)
+        if(qmlModule.length > 0 && parametersQmlType.length > 0)
         {
-            let component = Qt.createComponent(parametersQmlPath);
+            let component = Qt.createComponent(qmlModule, parametersQmlType);
             if(component.status !== Component.Ready)
             {
                 console.log("Error loading parameters QML: " + component.errorString());
@@ -815,7 +816,7 @@ ApplicationWindow
             let contentObject = component.createObject(mainWindow);
             if(contentObject === null)
             {
-                console.log(parametersQmlPath + ": failed to create instance");
+                console.log(parametersQmlType + ": failed to create instance");
                 return;
             }
 

@@ -176,7 +176,7 @@ BaseParameterDialog
 
                     sourceSize.width: 80
                     sourceSize.height: 80
-                    source: "../matrix.svg"
+                    source: "matrix.svg"
                 }
             }
 

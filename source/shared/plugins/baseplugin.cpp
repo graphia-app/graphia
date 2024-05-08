@@ -29,13 +29,13 @@ QString BasePlugin::imageSource() const
     return {};
 }
 
-QString BasePlugin::parametersQmlPath(const QString&) const
+QString BasePlugin::parametersQmlType(const QString&) const
 {
-    // Default to no settings UI
+    // Default to no parameters UI
     return {};
 }
 
-QString BasePlugin::qmlPath() const
+QString BasePlugin::qmlModule() const
 {
     // Default to no UI
     return {};

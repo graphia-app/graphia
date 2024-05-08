@@ -484,7 +484,7 @@ bool GraphModel::directed() const { return _plugin->directed(); }
 
 QString GraphModel::pluginName() const { return _plugin->name(); }
 int GraphModel::pluginDataVersion() const { return _plugin->dataVersion(); }
-QString GraphModel::pluginQmlPath() const { return _plugin->qmlPath(); }
+QString GraphModel::pluginQmlModule() const { return _plugin->qmlModule(); }
 
 bool GraphModel::graphTransformIsValid(const QString& transform) const
 {

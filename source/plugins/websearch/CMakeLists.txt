@@ -9,32 +9,27 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
+find_package(Qt6 COMPONENTS REQUIRED Core Concurrent Qml Quick QuickControls2 OpenGL Svg Widgets Xml)
+
 list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/websearchplugin.h
 )
 
-list(APPEND SOURCES
-    ${CMAKE_CURRENT_LIST_DIR}/websearchplugin.cpp
-)
-
-list(APPEND RESOURCES
-    ${CMAKE_CURRENT_LIST_DIR}/ui/websearch_qml.qrc
-)
-
 if(LINK_TYPE STREQUAL STATIC)
     qt_add_plugin(${PluginName} ${LINK_TYPE} CLASS_NAME WebSearchPlugin
-        ${SOURCES} ${HEADERS} ${RESOURCES})
+        ${SOURCES} ${HEADERS})
 else()
-    qt_add_library(${PluginName} ${LINK_TYPE} ${SOURCES} ${HEADERS} ${RESOURCES})
+    qt_add_library(${PluginName} ${LINK_TYPE} ${SOURCES} ${HEADERS})
 endif()
+
+add_subdirectory(ui/qml/app/graphia/Plugins/WebSearch)
 
 if(NOT APPLE AND NOT MSVC)
     install(TARGETS ${PluginName} LIBRARY DESTINATION lib/${PROJECT_NAME}/plugins)
 endif()
 
-target_link_libraries(${PluginName} PRIVATE thirdparty shared)
+target_link_libraries(${PluginName} PRIVATE websearch_qmlplugin thirdparty shared)
 
-find_package(Qt6 COMPONENTS REQUIRED Core Concurrent Qml Quick QuickControls2 OpenGL Svg Widgets Xml)
 target_link_libraries(${PluginName} PRIVATE
     Qt6::Core
     Qt6::Concurrent

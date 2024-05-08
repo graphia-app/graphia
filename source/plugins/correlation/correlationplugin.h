@@ -31,6 +31,7 @@
 #include "loading/correlationfileparser.h"
 
 #include "columnannotation.h"
+#include "correlationtype.h"
 #include "correlationdatavector.h"
 #include "correlationnodeattributetablemodel.h"
 
@@ -240,7 +241,7 @@ public:
                   "and edges represent correlations between said rows.");
     }
 
-    QString imageSource() const override { return u"qrc:///plots.svg"_s; }
+    QString imageSource() const override { return u"qrc:///qt/qml/app/graphia/Plugins/Correlation/plots.svg"_s; }
 
     int dataVersion() const override { return 15; }
 
@@ -250,8 +251,8 @@ public:
     bool editable() const override { return true; }
     bool directed() const override { return false; }
 
-    QString parametersQmlPath(const QString&) const override { return u"qrc:///qml/CorrelationParameters.qml"_s; }
-    QString qmlPath() const override { return u"qrc:///qml/CorrelationPlugin.qml"_s; }
+    QString parametersQmlType(const QString&) const override { return u"CorrelationParameters"_s; }
+    QString qmlModule() const override { return u"app.graphia.Plugins.Correlation"_s; }
 
     Q_INVOKABLE QVariantMap correlationInfoFor(int correlationType) const;
 };

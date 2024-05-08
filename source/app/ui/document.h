@@ -73,7 +73,7 @@ class Document : public QObject, public IDocument, public FailureReason
     Q_PROPERTY(GraphQuickItem* graph MEMBER _graphQuickItem NOTIFY graphQuickItemChanged)
     Q_PROPERTY(QObject* plugin READ pluginInstance NOTIFY pluginInstanceChanged)
     Q_PROPERTY(QString pluginName MEMBER _pluginName NOTIFY pluginNameChanged)
-    Q_PROPERTY(QString pluginQmlPath READ pluginQmlPath NOTIFY pluginQmlPathChanged)
+    Q_PROPERTY(QString pluginQmlModule READ pluginQmlModule NOTIFY pluginQmlModuleChanged)
 
     Q_PROPERTY(QColor contrastingColor READ contrastingColorForBackground NOTIFY contrastingColorChanged)
 
@@ -212,7 +212,7 @@ public:
     float fps() const;
 
     QObject* pluginInstance();
-    QString pluginQmlPath() const;
+    QString pluginQmlModule() const;
 
     QStringList bookmarks() const;
     NodeIdSet nodeIdsForBookmark(const QString& name) const;
@@ -334,7 +334,7 @@ signals:
 
     void pluginInstanceChanged();
     void pluginNameChanged();
-    void pluginQmlPathChanged(const QByteArray& pluginUiData, int pluginUiDataVersion); // clazy:exclude=qproperty-type-mismatch
+    void pluginQmlModuleChanged(const QByteArray& pluginUiData, int pluginUiDataVersion); // clazy:exclude=qproperty-type-mismatch
 
     void loadComplete(const QUrl& url, bool success); // clazy:exclude=qproperty-type-mismatch
     void failureReasonChanged();

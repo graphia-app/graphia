@@ -222,7 +222,7 @@ BaseParameterDialog
                         Layout.minimumHeight: 100
                         sourceSize.width: 100
                         sourceSize.height: 100
-                        source: "../plots.svg"
+                        source: "plots.svg"
                     }
                 }
             }

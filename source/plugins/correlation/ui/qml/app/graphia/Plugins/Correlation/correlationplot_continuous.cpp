@@ -16,9 +16,9 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "correlationplotitem.h"
+#include "correlationplot.h"
 
-#include "correlationplugin.h"
+#include "plugins/correlation/correlationplugin.h"
 #include "qcpcolumnannotations.h"
 
 #include "shared/utils/statistics.h"
@@ -26,7 +26,7 @@
 
 using namespace Qt::Literals::StringLiterals;
 
-void CorrelationPlotItem::setContinousYAxisRange(double min, double max)
+void CorrelationPlot::setContinousYAxisRange(double min, double max)
 {
     if(_includeYZero)
     {
@@ -40,7 +40,7 @@ void CorrelationPlotItem::setContinousYAxisRange(double min, double max)
         Q_ARG(QCPAxis*, _continuousYAxis), Q_ARG(double, min), Q_ARG(double, max));
 }
 
-double CorrelationPlotItem::scale(double value) const
+double CorrelationPlot::scale(double value) const
 {
     switch(normaliseQmlEnum<PlotScaleType>(_scaleType))
     {
@@ -52,7 +52,7 @@ double CorrelationPlotItem::scale(double value) const
     return value;
 }
 
-void CorrelationPlotItem::setContinousYAxisRangeForSelection()
+void CorrelationPlot::setContinousYAxisRangeForSelection()
 {
     double minY = std::numeric_limits<double>::max();
     double maxY = std::numeric_limits<double>::lowest();
@@ -72,7 +72,7 @@ void CorrelationPlotItem::setContinousYAxisRangeForSelection()
     setContinousYAxisRange(minY, maxY);
 }
 
-void CorrelationPlotItem::setDispersionVisualType(int dispersionVisualType)
+void CorrelationPlot::setDispersionVisualType(int dispersionVisualType)
 {
     dispersionVisualType = static_cast<int>(normaliseQmlEnum<PlotDispersionVisualType>(dispersionVisualType));
 
@@ -85,7 +85,7 @@ void CorrelationPlotItem::setDispersionVisualType(int dispersionVisualType)
     }
 }
 
-void CorrelationPlotItem::setIncludeYZero(bool includeYZero)
+void CorrelationPlot::setIncludeYZero(bool includeYZero)
 {
     if(_includeYZero != includeYZero)
     {
@@ -96,7 +96,7 @@ void CorrelationPlotItem::setIncludeYZero(bool includeYZero)
     }
 }
 
-void CorrelationPlotItem::setShowIqrOutliers(bool showIqrOutliers)
+void CorrelationPlot::setShowIqrOutliers(bool showIqrOutliers)
 {
     if(_showIqrOutliers != showIqrOutliers)
     {
@@ -107,7 +107,7 @@ void CorrelationPlotItem::setShowIqrOutliers(bool showIqrOutliers)
     }
 }
 
-void CorrelationPlotItem::setScaleType(int scaleType)
+void CorrelationPlot::setScaleType(int scaleType)
 {
     scaleType = static_cast<int>(normaliseQmlEnum<PlotScaleType>(scaleType));
 
@@ -120,7 +120,7 @@ void CorrelationPlotItem::setScaleType(int scaleType)
     }
 }
 
-void CorrelationPlotItem::setScaleByAttributeName(const QString& attributeName)
+void CorrelationPlot::setScaleByAttributeName(const QString& attributeName)
 {
     if(attributeName.isEmpty())
     {
@@ -139,7 +139,7 @@ void CorrelationPlotItem::setScaleByAttributeName(const QString& attributeName)
     }
 }
 
-void CorrelationPlotItem::setAveragingType(int averagingType)
+void CorrelationPlot::setAveragingType(int averagingType)
 {
     averagingType = static_cast<int>(normaliseQmlEnum<PlotAveragingType>(averagingType));
 
@@ -171,7 +171,7 @@ void CorrelationPlotItem::setAveragingType(int averagingType)
     }
 }
 
-void CorrelationPlotItem::setAveragingAttributeName(const QString& attributeName)
+void CorrelationPlot::setAveragingAttributeName(const QString& attributeName)
 {
     if(_averagingAttributeName != attributeName)
     {
@@ -182,7 +182,7 @@ void CorrelationPlotItem::setAveragingAttributeName(const QString& attributeName
     }
 }
 
-void CorrelationPlotItem::setGroupByAnnotation(bool groupByAnnotation)
+void CorrelationPlot::setGroupByAnnotation(bool groupByAnnotation)
 {
     if(_groupByAnnotation != groupByAnnotation)
     {
@@ -196,7 +196,7 @@ void CorrelationPlotItem::setGroupByAnnotation(bool groupByAnnotation)
     }
 }
 
-void CorrelationPlotItem::setColorGroupByAnnotationName(const QString& annotationName)
+void CorrelationPlot::setColorGroupByAnnotationName(const QString& annotationName)
 {
     if(_colorGroupByAnnotationName != annotationName)
     {
@@ -206,7 +206,7 @@ void CorrelationPlotItem::setColorGroupByAnnotationName(const QString& annotatio
     }
 }
 
-void CorrelationPlotItem::setDispersionType(int dispersionType)
+void CorrelationPlot::setDispersionType(int dispersionType)
 {
     dispersionType = static_cast<int>(normaliseQmlEnum<PlotDispersionType>(dispersionType));
 
@@ -219,7 +219,7 @@ void CorrelationPlotItem::setDispersionType(int dispersionType)
     }
 }
 
-QVector<double> CorrelationPlotItem::meanAverageData(double& min, double& max, const QVector<int>& rows)
+QVector<double> CorrelationPlot::meanAverageData(double& min, double& max, const QVector<int>& rows)
 {
     // Use Average Calculation
     QVector<double> yDataAvg; yDataAvg.reserve(rows.size());
@@ -273,7 +273,7 @@ void addPlotPerAttributeValue(const CorrelationPluginInstance* pluginInstance,
     }
 }
 
-void CorrelationPlotItem::populateMeanLinePlot()
+void CorrelationPlot::populateMeanLinePlot()
 {
     if(_selectedRows.isEmpty())
         return;
@@ -315,7 +315,7 @@ void CorrelationPlotItem::populateMeanLinePlot()
     setContinousYAxisRange(minY, maxY);
 }
 
-void CorrelationPlotItem::populateMedianLinePlot()
+void CorrelationPlot::populateMedianLinePlot()
 {
     if(_selectedRows.isEmpty())
         return;
@@ -376,7 +376,7 @@ void CorrelationPlotItem::populateMedianLinePlot()
     setContinousYAxisRange(minY, maxY);
 }
 
-void CorrelationPlotItem::populateMeanHistogramPlot()
+void CorrelationPlot::populateMeanHistogramPlot()
 {
     if(_selectedRows.isEmpty())
         return;
@@ -439,7 +439,7 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
     setContinousYAxisRange(minY, maxY);
 }
 
-std::pair<double, double> CorrelationPlotItem::addIQRBoxPlotTo(QCPAxis* keyAxis, QCPAxis* valueAxis,
+std::pair<double, double> CorrelationPlot::addIQRBoxPlotTo(QCPAxis* keyAxis, QCPAxis* valueAxis,
     size_t column, QVector<double> values, bool showOutliers, const QColor& color, const QString& text)
 {
     // Box-plots representing the InterQuatile Range
@@ -537,7 +537,7 @@ std::pair<double, double> CorrelationPlotItem::addIQRBoxPlotTo(QCPAxis* keyAxis,
     return {minValue, maxValue};
 }
 
-void CorrelationPlotItem::populateIQRPlot()
+void CorrelationPlot::populateIQRPlot()
 {
     auto minY = std::numeric_limits<double>::max();
     auto maxY = std::numeric_limits<double>::lowest();
@@ -563,7 +563,7 @@ void CorrelationPlotItem::populateIQRPlot()
     setContinousYAxisRange(minY, maxY);
 }
 
-void CorrelationPlotItem::plotDispersion(QCPAbstractPlottable* meanPlot,
+void CorrelationPlot::plotDispersion(QCPAbstractPlottable* meanPlot,
     double& minY, double& maxY,
     const QVector<double>& stdDevs, const QString& name = tr("Deviation"))
 {
@@ -623,7 +623,7 @@ void CorrelationPlotItem::plotDispersion(QCPAbstractPlottable* meanPlot,
     }
 }
 
-void CorrelationPlotItem::populateStdDevPlot(QCPAbstractPlottable* meanPlot,
+void CorrelationPlot::populateStdDevPlot(QCPAbstractPlottable* meanPlot,
     double& minY, double& maxY,
     const QVector<int>& rows, QVector<double>& means)
 {
@@ -649,7 +649,7 @@ void CorrelationPlotItem::populateStdDevPlot(QCPAbstractPlottable* meanPlot,
     plotDispersion(meanPlot, minY, maxY, stdDevs, tr("Std Dev"));
 }
 
-void CorrelationPlotItem::populateStdErrorPlot(QCPAbstractPlottable* meanPlot,
+void CorrelationPlot::populateStdErrorPlot(QCPAbstractPlottable* meanPlot,
     double& minY, double& maxY,
     const QVector<int>& rows, QVector<double>& means)
 {
@@ -675,7 +675,7 @@ void CorrelationPlotItem::populateStdErrorPlot(QCPAbstractPlottable* meanPlot,
     plotDispersion(meanPlot, minY, maxY, stdErrs, tr("Std Err"));
 }
 
-void CorrelationPlotItem::populateDispersion(QCPAbstractPlottable* meanPlot,
+void CorrelationPlot::populateDispersion(QCPAbstractPlottable* meanPlot,
     double& minY, double& maxY,
     const QVector<int>& rows, QVector<double>& means)
 {
@@ -694,7 +694,7 @@ void CorrelationPlotItem::populateDispersion(QCPAbstractPlottable* meanPlot,
         populateStdErrorPlot(meanPlot, minY, maxY, rows, means);
 }
 
-void CorrelationPlotItem::populateLinePlot()
+void CorrelationPlot::populateLinePlot()
 {
     double minY = std::numeric_limits<double>::max();
     double maxY = std::numeric_limits<double>::lowest();
@@ -804,7 +804,7 @@ void CorrelationPlotItem::populateLinePlot()
     setContinousYAxisRange(minY, maxY);
 }
 
-void CorrelationPlotItem::configureContinuousAxisRect()
+void CorrelationPlot::configureContinuousAxisRect()
 {
     if(_continuousAxisRect == nullptr)
     {
@@ -915,7 +915,7 @@ void CorrelationPlotItem::configureContinuousAxisRect()
     xAxis->setPadding(_xAxisLabel.isEmpty() ? _bottomPadding : 0);
 }
 
-bool CorrelationPlotItem::continuousTooltip(const QCPAxisRect* axisRect,
+bool CorrelationPlot::continuousTooltip(const QCPAxisRect* axisRect,
     const QCPAbstractPlottable* plottable, double xCoord)
 {
     if(axisRect != _continuousAxisRect || plottable == nullptr)

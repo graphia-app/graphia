@@ -34,16 +34,14 @@ class GenericPlugin : public BaseGenericPlugin, public PluginInstanceProvider<Ge
     Q_PLUGIN_METADATA(IID IPluginIID(Generic) FILE "GenericPlugin.json")
 
 public:
-    GenericPlugin();
-
     QString name() const override { return u"Generic"_s; }
     QString description() const override
     {
         return tr("A plugin that loads generic graphs from a variety of file formats.");
     }
-    QString imageSource() const override { return u"qrc:///tools.svg"_s; }
+    QString imageSource() const override { return u"qrc:///qt/qml/app/graphia/Plugins/Generic/tools.svg"_s; }
     int dataVersion() const override { return 3; }
-    QString qmlPath() const override { return u"qrc:///qml/GenericPlugin.qml"_s; }
+    QString qmlModule() const override { return u"app.graphia.Plugins.Generic"_s; }
 };
 
 Q_DECLARE_INTERFACE(GenericPlugin, IPluginIID(Generic))

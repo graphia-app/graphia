@@ -178,8 +178,8 @@ public:
     void initialise(const IApplication* application) override;
 
     QString imageSource() const override;
-    QString parametersQmlPath(const QString&) const override;
-    QString qmlPath() const override;
+    QString parametersQmlType(const QString&) const override;
+    QString qmlModule() const override;
     bool directed() const override;
     const IApplication* application() const override;
     QObject* ptr() override;

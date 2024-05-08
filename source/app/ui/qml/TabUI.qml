@@ -1703,7 +1703,7 @@ Item
         property bool canDeleteSelection: editable && !nodeSelectionEmpty
         property bool significantCommandInProgress: commandInProgress && !commandTimer.running
         property bool canChangeComponent: !busy && graph.numComponents > 1
-        property bool hasPluginUI: pluginQmlPath.length > 0
+        property bool hasPluginUI: pluginQmlModule.length > 0
 
         function shading()
         {
@@ -1729,16 +1729,15 @@ Item
                 find.lastFindByAttributeName = uiData.lastFindByAttributeName;
         }
 
-        onPluginQmlPathChanged: function(pluginUiData, pluginUiDataVersion)
+        onPluginQmlModuleChanged: function(pluginUiData, pluginUiDataVersion)
         {
-            if(_document.pluginQmlPath.length > 0)
+            if(_document.pluginQmlModule.length > 0)
             {
                 // Destroy anything already there
                 while(plugin.children.length > 0)
                     plugin.children[0].destroy();
 
-                let pluginComponent = Qt.createComponent(_document.pluginQmlPath);
-
+                let pluginComponent = Qt.createComponent(_document.pluginQmlModule, "Main");
                 if(pluginComponent.status !== Component.Ready)
                 {
                     console.log(pluginComponent.errorString());
@@ -1752,7 +1751,7 @@ Item
 
                 if(plugin.content === null)
                 {
-                    console.log(_document.pluginQmlPath + ": failed to create instance");
+                    console.log(_document.pluginQmlModule + ": failed to create instance");
                     return;
                 }
 

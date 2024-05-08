@@ -16,25 +16,28 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GRAPHSIZEESTIMATEPLOTITEM_H
-#define GRAPHSIZEESTIMATEPLOTITEM_H
+#ifndef GRAPHSIZEESTIMATEPLOT_H
+#define GRAPHSIZEESTIMATEPLOT_H
 
 #include <qcustomplotquickitem.h>
 
 #include <QObject>
+#include <QQmlEngine>
 #include <QQuickPaintedItem>
 #include <QVector>
 
-class GraphSizeEstimatePlotItem : public QCustomPlotQuickItem
+class GraphSizeEstimatePlot : public QCustomPlotQuickItem
 {
     Q_OBJECT
+    QML_ELEMENT
+
     Q_PROPERTY(QVariantMap graphSizeEstimate READ graphSizeEstimate WRITE setGraphSizeEstimate) // clazy:exclude=qproperty-without-notify
     Q_PROPERTY(double threshold READ threshold WRITE setThreshold NOTIFY thresholdChanged)
     Q_PROPERTY(bool uniqueEdgesOnly MEMBER _uniqueEdgesOnly NOTIFY uniqueEdgesOnlyChanged)
     Q_PROPERTY(bool integralThreshold MEMBER _integralThreshold)
 
 public:
-    explicit GraphSizeEstimatePlotItem(QQuickItem* parent = nullptr);
+    explicit GraphSizeEstimatePlot(QQuickItem* parent = nullptr);
 
 private:
     QCPItemStraightLine* _thresholdIndicator = nullptr;
@@ -67,4 +70,4 @@ signals:
     void uniqueEdgesOnlyChanged();
 };
 
-#endif // GRAPHSIZEESTIMATEPLOTITEM_H
+#endif // GRAPHSIZEESTIMATEPLOT_H

@@ -34,16 +34,14 @@ class WebSearchPlugin : public BaseGenericPlugin, PluginInstanceProvider<WebSear
     Q_PLUGIN_METADATA(IID IPluginIID(WebSearch) FILE "WebsearchPlugin.json")
 
 public:
-    WebSearchPlugin();
-
     QString name() const override { return u"WebSearch"_s; }
     QString description() const override
     {
         return tr("An embedded web browser that searches for the node selection using a URL template.");
     }
-    QString imageSource() const override { return u"qrc:///globe.svg"_s; }
+    QString imageSource() const override { return u"qrc:///qt/qml/app/graphia/Plugins/WebSearch/globe.svg"_s; }
     int dataVersion() const override { return 1; }
-    QString qmlPath() const override { return u"qrc:///qml/WebsearchPlugin.qml"_s; }
+    QString qmlModule() const override { return u"app.graphia.Plugins.WebSearch"_s; }
 };
 
 Q_DECLARE_INTERFACE(WebSearchPlugin, IPluginIID(WebSearch))

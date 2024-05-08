@@ -16,16 +16,15 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "correlationplotitem.h"
+#include "correlationplot.h"
 
-#include "correlationplugin.h"
 #include "qcpcolumnannotations.h"
 
 #include "shared/utils/container.h"
 
 using namespace Qt::Literals::StringLiterals;
 
-QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
+QCPAxis* CorrelationPlot::configureColumnAnnotations(QCPAxisRect* axisRect)
 {
     auto* xAxis = axisRect->axis(QCPAxis::atBottom);
 
@@ -195,7 +194,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
     return xAxis;
 }
 
-void CorrelationPlotItem::populateIQRAnnotationPlot(const QCPColumnAnnotations* qcpColumnAnnotations)
+void CorrelationPlot::populateIQRAnnotationPlot(const QCPColumnAnnotations* qcpColumnAnnotations)
 {
     const auto* columnAnnotation = _pluginInstance->columnAnnotationByName(_colorGroupByAnnotationName);
 
@@ -234,7 +233,7 @@ void CorrelationPlotItem::populateIQRAnnotationPlot(const QCPColumnAnnotations* 
     setContinousYAxisRange(minY, maxY);
 }
 
-QStringList CorrelationPlotItem::visibleColumnAnnotationNames() const
+QStringList CorrelationPlot::visibleColumnAnnotationNames() const
 {
     QStringList list;
     list.reserve(static_cast<int>(_visibleColumnAnnotationNames.size()));
@@ -245,7 +244,7 @@ QStringList CorrelationPlotItem::visibleColumnAnnotationNames() const
     return list;
 }
 
-void CorrelationPlotItem::setVisibleColumnAnnotationNames(const QStringList& columnAnnotations)
+void CorrelationPlot::setVisibleColumnAnnotationNames(const QStringList& columnAnnotations)
 {
     const std::set<QString> newVisibleColumnAnnotationNames(columnAnnotations.begin(), columnAnnotations.end());
 
@@ -256,7 +255,7 @@ void CorrelationPlotItem::setVisibleColumnAnnotationNames(const QStringList& col
     }
 }
 
-void CorrelationPlotItem::showAllColumnAnnotations()
+void CorrelationPlot::showAllColumnAnnotations()
 {
     for(const auto& columnAnnotation : _pluginInstance->columnAnnotations())
         _visibleColumnAnnotationNames.insert(columnAnnotation.name());
@@ -266,7 +265,7 @@ void CorrelationPlotItem::showAllColumnAnnotations()
     rebuildPlot();
 }
 
-void CorrelationPlotItem::hideAllColumnAnnotations()
+void CorrelationPlot::hideAllColumnAnnotations()
 {
     _visibleColumnAnnotationNames.clear();
 
@@ -275,7 +274,7 @@ void CorrelationPlotItem::hideAllColumnAnnotations()
     rebuildPlot();
 }
 
-void CorrelationPlotItem::showColumnAnnotations(const QStringList& annotations)
+void CorrelationPlot::showColumnAnnotations(const QStringList& annotations)
 {
     for(const auto& annotation : annotations)
     {
@@ -288,7 +287,7 @@ void CorrelationPlotItem::showColumnAnnotations(const QStringList& annotations)
     rebuildPlot();
 }
 
-void CorrelationPlotItem::hideColumnAnnotations(const QStringList& annotations)
+void CorrelationPlot::hideColumnAnnotations(const QStringList& annotations)
 {
     for(const auto& annotation : annotations)
     {
@@ -301,18 +300,18 @@ void CorrelationPlotItem::hideColumnAnnotations(const QStringList& annotations)
     rebuildPlot();
 }
 
-void CorrelationPlotItem::refreshColumnAnnotations()
+void CorrelationPlot::refreshColumnAnnotations()
 {
     emit plotOptionsChanged();
     rebuildPlot();
 }
 
-int CorrelationPlotItem::plotMode() const
+int CorrelationPlot::plotMode() const
 {
     return static_cast<int>(_plotMode);
 }
 
-void CorrelationPlotItem::setPlotMode(int plotModeInt)
+void CorrelationPlot::setPlotMode(int plotModeInt)
 {
     auto plotMode = normaliseQmlEnum<PlotMode>(plotModeInt);
 
@@ -339,7 +338,7 @@ void CorrelationPlotItem::setPlotMode(int plotModeInt)
     }
 }
 
-size_t CorrelationPlotItem::numVisibleColumnAnnotations() const
+size_t CorrelationPlot::numVisibleColumnAnnotations() const
 {
     if(_plotMode == PlotMode::ColumnAnnotationSelection)
         return _pluginInstance->columnAnnotations().size();
@@ -347,7 +346,7 @@ size_t CorrelationPlotItem::numVisibleColumnAnnotations() const
     return _visibleColumnAnnotationNames.size();
 }
 
-QString CorrelationPlotItem::columnAnnotationValueAt(size_t x, size_t y) const
+QString CorrelationPlot::columnAnnotationValueAt(size_t x, size_t y) const
 {
     const auto& columnAnnotations = _pluginInstance->columnAnnotations();
 
@@ -404,7 +403,7 @@ QString CorrelationPlotItem::columnAnnotationValueAt(size_t x, size_t y) const
     return columnAnnotation.valueAt(column);
 }
 
-bool CorrelationPlotItem::axisRectIsColumnAnnotations(const QCPAxisRect* axisRect)
+bool CorrelationPlot::axisRectIsColumnAnnotations(const QCPAxisRect* axisRect)
 {
     auto numPlottables = static_cast<int>(axisRect->plottables().size());
 
@@ -426,7 +425,7 @@ bool CorrelationPlotItem::axisRectIsColumnAnnotations(const QCPAxisRect* axisRec
     return numPlottables == numColumnAnnotations;
 }
 
-QPoint CorrelationPlotItem::columnAnnotationPositionForPixel(const QCPAxisRect* axisRect, const QPointF& position)
+QPoint CorrelationPlot::columnAnnotationPositionForPixel(const QCPAxisRect* axisRect, const QPointF& position)
 {
     auto* bottomAxis = axisRect->axis(QCPAxis::atBottom);
     const auto& bottomRange = bottomAxis->range();
@@ -443,7 +442,7 @@ QPoint CorrelationPlotItem::columnAnnotationPositionForPixel(const QCPAxisRect* 
     return {x, y};
 }
 
-bool CorrelationPlotItem::columnAnnotationTooltip(const QCPAxisRect* axisRect)
+bool CorrelationPlot::columnAnnotationTooltip(const QCPAxisRect* axisRect)
 {
     if(!axisRectIsColumnAnnotations(axisRect))
         return false;
@@ -467,7 +466,7 @@ bool CorrelationPlotItem::columnAnnotationTooltip(const QCPAxisRect* axisRect)
     return true;
 }
 
-void CorrelationPlotItem::onClickColumnAnnotation(const QCPAxisRect* axisRect, const QMouseEvent* event)
+void CorrelationPlot::onClickColumnAnnotation(const QCPAxisRect* axisRect, const QMouseEvent* event)
 {
     std::vector<const ColumnAnnotation*> columnAnnotations;
     std::transform(_pluginInstance->columnAnnotations().begin(), _pluginInstance->columnAnnotations().end(),

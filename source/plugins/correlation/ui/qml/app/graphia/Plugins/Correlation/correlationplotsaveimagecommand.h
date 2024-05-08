@@ -19,7 +19,7 @@
 #ifndef CORRELATIONPLOTSAVEIMAGECOMMAND_H
 #define CORRELATIONPLOTSAVEIMAGECOMMAND_H
 
-#include "correlationplotitem.h"
+#include "correlationplot.h"
 
 #include "shared/commands/icommand.h"
 #include "shared/utils/deferredexecutor.h"
@@ -36,7 +36,7 @@ class CorrelationPlotSaveImageCommand : public QObject, public ICommand
     Q_OBJECT
 
 private:
-    CorrelationPlotItem _correlationPlotItem;
+    CorrelationPlot _correlationPlotItem;
     QString _baseFilename;
     QString _extension;
 
@@ -58,7 +58,7 @@ private slots:
     void executeDeferred() { _deferredExecutor.execute(); }
 
 public:
-    CorrelationPlotSaveImageCommand(const CorrelationPlotItem& correlationPlotItem,
+    CorrelationPlotSaveImageCommand(const CorrelationPlot& correlationPlotItem,
         const QString& baseFilename, const QString& extension);
 
     QString description() const override { return QObject::tr("Saving Plot Image(s)"); }

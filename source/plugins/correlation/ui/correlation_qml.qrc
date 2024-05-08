@@ -1,9 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>qml/CorrelationPlugin.qml</file>
-        <file>qml/CorrelationParameters.qml</file>
-        <file>qml/ImportAnnotationsDialog.qml</file>
-        <file>qml/PlotModalControls.qml</file>
-        <file>plots.svg</file>
-    </qresource>
-</RCC>

@@ -312,13 +312,13 @@ QString BaseGenericPlugin::failureReason(const QUrl& url) const
     return {};
 }
 
-QString BaseGenericPlugin::parametersQmlPath(const QString& urlType) const
+QString BaseGenericPlugin::parametersQmlType(const QString& urlType) const
 {
     if(urlType.startsWith(u"Matrix"_s))
-        return u"qrc:///qml/MatrixParameters.qml"_s;
+        return u"MatrixParameters"_s;
 
     if(urlType.startsWith(u"Pairwise"_s))
-        return u"qrc:///qml/PairwiseParameters.qml"_s;
+        return u"PairwiseParameters"_s;
 
     return {};
 }

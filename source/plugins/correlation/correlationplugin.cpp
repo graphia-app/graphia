@@ -19,11 +19,8 @@
 #include "correlationplugin.h"
 
 #include "correlation.h"
-#include "correlationplotitem.h"
-#include "graphsizeestimateplotitem.h"
 
 #include "importannotationscommand.h"
-#include "importannotationskeydetection.h"
 
 #include "hierarchicalclusteringcommand.h"
 
@@ -44,6 +41,7 @@
 #include "shared/loading/xlsxtabulardataparser.h"
 
 #include <json_helper.h>
+#include <qcustomplotcolorprovider.h>
 
 #include <QDir>
 
@@ -1432,14 +1430,6 @@ CorrelationPlugin::CorrelationPlugin()
     registerUrlType(u"CorrelationTSV"_s, QObject::tr("Correlation TSV File"), QObject::tr("Correlation TSV Files"), {"tsv"});
     registerUrlType(u"CorrelationSSV"_s, QObject::tr("Correlation SSV File"), QObject::tr("Correlation SSV Files"), {"ssv"});
     registerUrlType(u"CorrelationXLSX"_s, QObject::tr("Correlation Excel File"), QObject::tr("Correlation Excel Files"), {"xlsx"});
-
-    Q_INIT_RESOURCE(correlation_qml);
-
-    qmlRegisterType<CorrelationPluginInstance>("app.graphia", 1, 0, "CorrelationPluginInstance");
-    qmlRegisterType<CorrelationPlotItem>("app.graphia", 1, 0, "CorrelationPlot");
-    qmlRegisterType<GraphSizeEstimatePlotItem>("app.graphia", 1, 0, "GraphSizeEstimatePlot");
-    qmlRegisterType<CorrelationTabularDataParser>("app.graphia", 1, 0, "CorrelationTabularDataParser");
-    qmlRegisterType<ImportAnnotationsKeyDetection>("app.graphia", 1, 0, "ImportAnnotationsKeyDetection");
 }
 
 QVariantMap CorrelationPlugin::correlationInfoFor(int correlationType) const

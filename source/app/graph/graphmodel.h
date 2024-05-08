@@ -128,7 +128,7 @@ public:
     bool directed() const;
     QString pluginName() const;
     int pluginDataVersion() const;
-    QString pluginQmlPath() const;
+    QString pluginQmlModule() const;
 
     bool graphTransformIsValid(const QString& transform) const;
     QStringList transformsWithMissingParametersSetToDefault(const QStringList& transforms) const;

@@ -1,6 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>qml/WebsearchPlugin.qml</file>
-        <file>globe.svg</file>
-    </qresource>
-</RCC>

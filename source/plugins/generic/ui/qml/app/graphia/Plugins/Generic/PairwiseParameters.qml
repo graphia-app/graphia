@@ -165,7 +165,7 @@ BaseParameterDialog
 
                 sourceSize.width: 80
                 sourceSize.height: 80
-                source: "../table.svg"
+                source: "table.svg"
             }
         }
 

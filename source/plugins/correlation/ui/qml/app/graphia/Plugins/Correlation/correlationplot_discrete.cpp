@@ -16,9 +16,7 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "correlationplotitem.h"
-
-#include "correlationplugin.h"
+#include "correlationplot.h"
 
 #include "shared/utils/color.h"
 
@@ -29,7 +27,7 @@
 
 using namespace Qt::Literals::StringLiterals;
 
-void CorrelationPlotItem::configureDiscreteAxisRect()
+void CorrelationPlot::configureDiscreteAxisRect()
 {
     if(_discreteAxisRect == nullptr)
     {
@@ -191,7 +189,7 @@ void CorrelationPlotItem::configureDiscreteAxisRect()
     xAxis->setPadding(_xAxisLabel.isEmpty() ? _bottomPadding : 0);
 }
 
-bool CorrelationPlotItem::discreteTooltip(const QCPAxisRect* axisRect,
+bool CorrelationPlot::discreteTooltip(const QCPAxisRect* axisRect,
     const QCPAbstractPlottable* plottable, double xCoord)
 {
     if(axisRect != _discreteAxisRect || plottable == nullptr)

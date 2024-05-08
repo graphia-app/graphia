@@ -107,7 +107,7 @@ public:
 
     bool editable() const override { return true; }
 
-    QString parametersQmlPath(const QString& urlType) const override;
+    QString parametersQmlType(const QString& urlType) const override;
 };
 
 #endif // BASEGENERICPLUGIN_H
