@@ -1,6 +1,7 @@
 include(${CMAKE_SOURCE_DIR}/source/common.cmake)
 
 add_definitions(-DPRODUCT_NAME="${PROJECT_NAME}")
+add_definitions(-DAPP_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)

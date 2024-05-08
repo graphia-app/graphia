@@ -183,9 +183,9 @@ QStringList Application::resourceDirectories()
             QStandardPaths::StandardLocation::AppDataLocation) + "/resources"
     };
 
-#ifdef SOURCE_DIR
+#ifdef APP_SOURCE_DIR
     // Add the source code directory as resources, to ease debugging
-    resourceDirs.append(QStringLiteral(SOURCE_DIR));
+    resourceDirs.append(QStringLiteral(APP_SOURCE_DIR));
 #endif
 
 #ifdef Q_OS_MACOS

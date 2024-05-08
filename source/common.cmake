@@ -8,8 +8,6 @@ endif()
 
 set(OpenGL_GL_PREFERENCE "LEGACY")
 
-add_definitions(-DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
-
 # https://www.kdab.com/disabling-narrowing-conversions-in-signal-slot-connections/
 add_definitions(-DQT_NO_NARROWING_CONVERSIONS_IN_CONNECT)
 
