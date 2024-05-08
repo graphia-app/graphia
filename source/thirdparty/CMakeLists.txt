@@ -1,5 +1,4 @@
 include(${CMAKE_SOURCE_DIR}/source/common.cmake)
-include(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty_headers.cmake)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
