@@ -1,4 +1,4 @@
-include(${CMAKE_CURRENT_SOURCE_DIR}/../common.cmake)
+include(${CMAKE_SOURCE_DIR}/source/common.cmake)
 
 add_definitions(-DPRODUCT_NAME="${PROJECT_NAME}")
 
