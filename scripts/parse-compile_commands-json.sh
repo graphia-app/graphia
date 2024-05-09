@@ -24,6 +24,8 @@ then
   BUILD_DIR="build/${COMPILER}"
 fi
 
+BUILD_DIR=$(realpath ${BUILD_DIR})
+
 . ${BUILD_DIR}/variables.sh
 
 # For some reason clang-tidy and clazy can't find various system headers, so we
@@ -37,7 +39,7 @@ cat ${BUILD_DIR}/compile_commands.json | jq ".[].command += \" ${SYSTEM_INCLUDE_
 mv _compile_commands.json ${BUILD_DIR}/compile_commands.json
 
 cat ${BUILD_DIR}/compile_commands.json | \
-    jq 'map(select(.file | test("qrc_|mocs_compilation|thirdparty") | not))' > \
+    jq "map(select(.file | test(\"qrc_|mocs_compilation|thirdparty|${BUILD_DIR}\") | not))" > \
     _compile_commands.json
 mv _compile_commands.json ${BUILD_DIR}/compile_commands.json
 
@@ -58,9 +60,9 @@ SYSTEM_INCLUDE_DIRS=$(cat ${BUILD_DIR}/compile_commands.json | \
     sed -e 's/\(.*\)/-I\1/')
 
 DEFINES=$(cat ${BUILD_DIR}/compile_commands.json | \
-    jq '.[].command' | grep -oP '(?<=-D) *.*?(?= -\D)' | \
-    grep -vE "SOURCE_DIR.*" | sort | uniq | \
-    sed -e 's/=.*\"/="dummyvalue"/g' |
+    jq '.[].command' | grep -oP '(?<= -D) *.*?(?= -\D)' | \
+    sort | uniq | \
+    sed -e 's/\\//g' |
     sed -e 's/\(.*\)/-D\1/')
 
 echo -e "export CPP_FILES=\"${CPP_FILES}\"\n" >> ${BUILD_DIR}/variables.sh
