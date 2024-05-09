@@ -12,6 +12,7 @@ qt_add_qml_module(utils_qml
         VisualisationUtils.js
     SOURCES
         modelcompleter.h modelcompleter.cpp
+        nativeutils.h nativeutils.cpp
         sortfilterproxymodel.h sortfilterproxymodel.cpp
         tableproxymodel.h tableproxymodel.cpp
 )
