@@ -58,8 +58,7 @@ class IParser;
 class ISaverFactory;
 class IPlugin;
 
-DEFINE_QML_ENUM(
-    Q_OBJECT, ExitType,
+DEFINE_QML_ENUM(ExitType,
     NormalExit = 0,
     Restart = 127);
 

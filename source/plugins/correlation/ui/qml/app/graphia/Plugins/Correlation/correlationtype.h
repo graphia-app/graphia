@@ -24,8 +24,7 @@
 // Note: the ordering of these enums is important from a save
 // file point of view; i.e. only append, don't reorder
 
-DEFINE_QML_ENUM(
-    Q_OBJECT, CorrelationType,
+DEFINE_QML_ENUM(CorrelationType,
     Pearson,
     SpearmanRank,
     Jaccard,
@@ -34,24 +33,20 @@ DEFINE_QML_ENUM(
     CosineSimilarity,
     Bicor);
 
-DEFINE_QML_ENUM(
-    Q_OBJECT, CorrelationDataType,
+DEFINE_QML_ENUM(CorrelationDataType,
     Continuous,
     Discrete);
 
-DEFINE_QML_ENUM(
-    Q_OBJECT, CorrelationPolarity,
+DEFINE_QML_ENUM(CorrelationPolarity,
     Positive,
     Negative,
     Both);
 
-DEFINE_QML_ENUM(
-    Q_OBJECT, CorrelationFilterType,
+DEFINE_QML_ENUM(CorrelationFilterType,
     Threshold,
     Knn);
 
-DEFINE_QML_ENUM(
-    Q_OBJECT, ScalingType,
+DEFINE_QML_ENUM(ScalingType,
     None,
     Log2,
     Log10,
@@ -59,8 +54,7 @@ DEFINE_QML_ENUM(
     AntiLog10,
     ArcSin);
 
-DEFINE_QML_ENUM(
-    Q_OBJECT, NormaliseType,
+DEFINE_QML_ENUM(NormaliseType,
     None,
     MinMax,
     Quantile,
@@ -69,14 +63,12 @@ DEFINE_QML_ENUM(
     UnitScaling,
     Softmax);
 
-DEFINE_QML_ENUM(
-    Q_OBJECT, MissingDataType,
+DEFINE_QML_ENUM(MissingDataType,
     Constant,
     ColumnAverage,
     RowInterpolation);
 
-DEFINE_QML_ENUM(
-    Q_OBJECT, ClippingType,
+DEFINE_QML_ENUM(ClippingType,
     None,
     Constant,
     Winsorization);

@@ -27,8 +27,7 @@
 #include <map>
 #include <utility>
 
-DEFINE_QML_ENUM(
-    Q_OBJECT, AlertType,
+DEFINE_QML_ENUM(AlertType,
     None,
     Warning,
     Error);

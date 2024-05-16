@@ -21,26 +21,25 @@
 
 #include "shared/utils/qmlenum.h"
 
-DEFINE_QML_ENUM(
-    Q_OBJECT, AttributeFlag,
+DEFINE_QML_ENUM(AttributeFlag,
     None                    = 0x0,
 
-       // Automatically set the range
+    // Automatically set the range
     AutoRange               = 0x1,
 
-       // Visualise on a per-component basis, by default
+    // Visualise on a per-component basis, by default
     VisualiseByComponent    = 0x2,
 
-       // Indicates this is a dynamically created attribute; set automatically
+    // Indicates this is a dynamically created attribute; set automatically
     Dynamic                 = 0x4,
 
-       // Track the set of shared values held by the attribute
+    // Track the set of shared values held by the attribute
     FindShared              = 0x8,
 
-       // Can't be used during transform
+    // Can't be used during transform
     DisableDuringTransform  = 0x10,
 
-       // Can be searched by the various find methods
+    // Can be searched by the various find methods
     Searchable              = 0x20);
 
 #endif // ATTRIBUTEFLAG_H

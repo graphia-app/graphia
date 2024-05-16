@@ -69,8 +69,7 @@ Q_DECLARE_OPAQUE_POINTER(const Graph*)
 Q_DECLARE_OPAQUE_POINTER(const SearchManager*)
 Q_DECLARE_OPAQUE_POINTER(const SelectionManager*)
 
-DEFINE_QML_ENUM(
-    Q_OBJECT, LayoutPauseState,
+DEFINE_QML_ENUM(LayoutPauseState,
     Running, RunningFinished, Paused);
 
 class Document : public QObject, public IDocument, public FailureReason

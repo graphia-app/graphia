@@ -197,5 +197,7 @@ file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/build_defines.h "#define COPYRIGHT \"${C
 
 string(TOLOWER "${PROJECT_NAME}" NativeExtension)
 
+list(APPEND CMAKE_AUTOMOC_MACRO_NAMES "DEFINE_QML_ENUM")
+
 include_directories(${CMAKE_CURRENT_LIST_DIR})
 include(${CMAKE_SOURCE_DIR}/source/thirdparty/thirdparty_headers.cmake)

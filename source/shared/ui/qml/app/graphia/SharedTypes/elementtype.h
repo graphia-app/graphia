@@ -23,8 +23,7 @@
 
 #include <QString>
 
-DEFINE_QML_ENUM(
-    Q_OBJECT, ElementType,
+DEFINE_QML_ENUM(ElementType,
     None        = 0x1,
     Node        = 0x2,
     Edge        = 0x4,

@@ -21,16 +21,16 @@
 
 #include "shared/utils/qmlenum.h"
 
-DEFINE_QML_ENUM(
-    Q_OBJECT, FindOptions,
+DEFINE_QML_ENUM(FindOptions,
     MatchCase           = 0x1,
     MatchWholeWords     = 0x2,
     MatchUsingRegex     = 0x4,
     MatchExact          = 0x8);
 
 // What to select when found nodes changes
-DEFINE_QML_ENUM(
-    Q_OBJECT, FindSelectStyle,
-    None, First, All);
+DEFINE_QML_ENUM(FindSelectStyle,
+    None,
+    First,
+    All);
 
 #endif // FINDTYPES_H

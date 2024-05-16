@@ -49,8 +49,7 @@
 
 class QCPColumnAnnotations;
 
-DEFINE_QML_ENUM(
-    Q_OBJECT, PlotScaleType,
+DEFINE_QML_ENUM(PlotScaleType,
     Raw,
     Log,
     MeanCentre,
@@ -59,36 +58,31 @@ DEFINE_QML_ENUM(
     ByAttribute,
     AntiLog);
 
-DEFINE_QML_ENUM(
-    Q_OBJECT, PlotAveragingType,
+DEFINE_QML_ENUM(PlotAveragingType,
     Individual,
     MeanLine,
     MedianLine,
     MeanHistogram,
     IQR);
 
-DEFINE_QML_ENUM(
-    Q_OBJECT, PlotDispersionType,
+DEFINE_QML_ENUM(PlotDispersionType,
     None,
     StdErr,
     StdDev);
 
-DEFINE_QML_ENUM(
-    Q_OBJECT, PlotDispersionVisualType,
+DEFINE_QML_ENUM(PlotDispersionVisualType,
     Bars,
     Area,
     StdDev);
 
-DEFINE_QML_ENUM(
-    Q_OBJECT, PlotColumnSortType,
+DEFINE_QML_ENUM(PlotColumnSortType,
     Natural,
     ColumnName,
     ColumnAnnotation,
     DataValue,
     HierarchicalClustering);
 
-DEFINE_QML_ENUM(
-    Q_OBJECT, PlotMode,
+DEFINE_QML_ENUM(PlotMode,
     Normal,
     ColumnAnnotationSelection,
     RowsOfInterestColumnSelection);

@@ -23,28 +23,25 @@
 #include <QQmlEngine>
 #include <QVariant>
 
-#include <string>
+/*
+Defining an enumeration that's available in both C++ and QML
+is awkward, so here is a macro to make it easier. Example:
 
-constexpr bool static_strcmp(char const* a, char const* b)
-{
-    return std::char_traits<char>::length(a) == std::char_traits<char>::length(b) &&
-        std::char_traits<char>::compare(a, b, std::char_traits<char>::length(a)) == 0;
-}
-
-// Defining an enumeration that's usable in QML is awkward, so
-// here is a macro to make it easier:
+DEFINE_QML_ENUM(Enumeration,
+    First,
+    Second,
+    Third)
+*/
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
 #define _REFLECTOR(x) x ## _reflector
 #define QML_ENUM_PROPERTY(x) _REFLECTOR(x)::Enum
 
-#define DEFINE_QML_ENUM(_Q_OBJECT, ENUM_NAME, ...) \
-    static_assert(static_strcmp(#_Q_OBJECT, "Q_OBJECT"), \
-        "First parameter to DEFINE_QML_ENUM must be Q_OBJECT"); \
+#define DEFINE_QML_ENUM(ENUM_NAME, ...) \
     class _REFLECTOR(ENUM_NAME) : public QObject \
     { \
-        _Q_OBJECT \
+        Q_OBJECT \
         QML_NAMED_ELEMENT(ENUM_NAME) \
         QML_UNCREATABLE("") \
         public: \
@@ -94,20 +91,6 @@ QmlEnumType qmlEnumFor(const QVariant& v)
 }
 
 // NOLINTEND(cppcoreguidelines-macro-usage)
-
-/*
-Example:
-
-DEFINE_QML_ENUM(
-    Q_OBJECT, Enumeration,
-    First,
-    Second,
-    Third)
-
-Note: the first parameter must be Q_OBJECT, so that the build system knows
-to generate a moc_ file, and because the scanner is a bit rubbish, Q_OBJECT
-must be the first thing on a line
-*/
 
 #endif // QMLENUM_H
 

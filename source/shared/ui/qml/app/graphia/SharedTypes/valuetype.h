@@ -21,8 +21,7 @@
 
 #include "shared/utils/qmlenum.h"
 
-DEFINE_QML_ENUM(
-    Q_OBJECT, ValueType,
+DEFINE_QML_ENUM(ValueType,
     Unknown     = 0x1,
     Int         = 0x2,
     Float       = 0x4,

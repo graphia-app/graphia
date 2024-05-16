@@ -21,25 +21,32 @@
 
 #include "shared/utils/qmlenum.h"
 
-DEFINE_QML_ENUM(
-    Q_OBJECT, TextAlignment,
-    Right, Left, Centre,
-    Top, Bottom);
+DEFINE_QML_ENUM(TextAlignment,
+    Right,
+    Left,
+    Centre,
+    Top,
+    Bottom);
 
-DEFINE_QML_ENUM(
-    Q_OBJECT, TextState,
-    Off, Selected, All, Focused);
+DEFINE_QML_ENUM(TextState,
+    Off,
+    Selected,
+    All,
+    Focused);
 
-DEFINE_QML_ENUM(
-    Q_OBJECT, EdgeVisualType,
-    Cylinder, Arrow);
+DEFINE_QML_ENUM(EdgeVisualType,
+    Cylinder,
+    Arrow);
 
-DEFINE_QML_ENUM(
-    Q_OBJECT, Projection,
-    Unset = -1, Perspective, Orthographic, TwoDee);
+DEFINE_QML_ENUM(Projection,
+    Unset = -1,
+    Perspective,
+    Orthographic,
+    TwoDee);
 
-DEFINE_QML_ENUM(
-    Q_OBJECT, Shading,
-    Unset = -1, Smooth, Flat);
+DEFINE_QML_ENUM(Shading,
+    Unset = -1,
+    Smooth,
+    Flat);
 
 #endif // GRAPHRENDERERTYPES_H
