@@ -18,7 +18,6 @@
 
 import QtQuick
 
-import app.graphia
 import app.graphia.Utils
 
 Item

@@ -25,7 +25,6 @@ import QtQuick.Shapes
 
 import Qt.labs.platform as Labs
 
-import app.graphia
 import app.graphia.Controls
 import app.graphia.SharedTypes
 import app.graphia.Utils

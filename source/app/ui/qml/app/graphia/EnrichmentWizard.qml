@@ -22,7 +22,6 @@ import QtQuick.Layouts
 import QtQuick.Dialogs
 import QtQuick.Window
 
-import app.graphia
 import app.graphia.Controls
 import app.graphia.SharedTypes
 import app.graphia.Utils

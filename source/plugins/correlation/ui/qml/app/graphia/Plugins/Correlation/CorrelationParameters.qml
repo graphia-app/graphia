@@ -22,7 +22,6 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Window
 
-import app.graphia
 import app.graphia.Controls
 import app.graphia.Plugins
 import app.graphia.Utils

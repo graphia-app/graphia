@@ -21,7 +21,6 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 
-import app.graphia
 import app.graphia.Controls
 import app.graphia.Utils
 

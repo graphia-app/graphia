@@ -21,7 +21,6 @@ import QtQuick.Layouts
 import QtQuick.Controls
 import QtQuick.Dialogs
 
-import app.graphia
 import app.graphia.Controls
 import app.graphia.Plugins
 import app.graphia.Utils

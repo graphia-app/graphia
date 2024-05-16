@@ -21,7 +21,6 @@ import QtQuick.Layouts
 import QtQuick.Window
 import QtQuick.Controls
 
-import app.graphia
 import app.graphia.Controls
 
 NamedIcon

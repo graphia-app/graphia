@@ -20,7 +20,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQml.Models
 
-import app.graphia
 import app.graphia.Utils
 
 TextField
