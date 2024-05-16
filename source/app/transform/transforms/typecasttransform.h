@@ -19,8 +19,8 @@
 #ifndef TYPECASTTRANSFORM_H
 #define TYPECASTTRANSFORM_H
 
-#include "transform/graphtransform.h"
-#include "attributes/attribute.h"
+#include "app/transform/graphtransform.h"
+#include "app/attributes/attribute.h"
 
 class TypeCastTransform : public GraphTransform
 {

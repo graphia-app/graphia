@@ -17,27 +17,26 @@
  */
 
 #include "graphcommoninteractor.h"
-#include "graphquickitem.h"
 #include "selectionmanager.h"
 
-#include "commands/commandmanager.h"
-#include "commands/selectnodescommand.h"
+#include "app/commands/commandmanager.h"
+#include "app/commands/selectnodescommand.h"
 
-#include "rendering/graphrenderer.h"
-#include "rendering/graphcomponentscene.h"
-#include "rendering/camera.h"
-#include "rendering/graphcomponentrenderer.h"
+#include "app/rendering/graphrenderer.h"
+#include "app/rendering/graphcomponentscene.h"
+#include "app/rendering/camera.h"
+#include "app/rendering/graphcomponentrenderer.h"
 
 #include "shared/utils/utils.h"
 
-#include "graph/graph.h"
-#include "graph/graphmodel.h"
+#include "app/graph/graph.h"
+#include "app/graph/graphmodel.h"
 
-#include "maths/frustum.h"
+#include "app/maths/frustum.h"
 
-#include "layout/collision.h"
+#include "app/layout/collision.h"
 
-#include "ui/visualisations/elementvisual.h"
+#include "app/ui/visualisations/elementvisual.h"
 
 #include <QMouseEvent>
 #include <QKeyEvent>

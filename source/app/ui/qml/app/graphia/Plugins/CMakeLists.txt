@@ -1,3 +1,5 @@
+include(${CMAKE_SOURCE_DIR}/source/common.cmake)
+
 find_package(Qt6 COMPONENTS REQUIRED Quick)
 
 qt_add_qml_module(plugins_qml

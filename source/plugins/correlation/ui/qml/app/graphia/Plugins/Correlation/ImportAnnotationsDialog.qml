@@ -24,6 +24,7 @@ import QtQuick.Layouts
 import app.graphia
 import app.graphia.Controls
 import app.graphia.Loading
+import app.graphia.SharedTypes
 import app.graphia.Utils
 
 Window
@@ -101,7 +102,7 @@ Window
 
         property string fileUrl: ""
         property string baseFileName: fileUrl && fileUrl.length > 0 ?
-            QmlUtils.baseFileNameForUrl(fileUrl) : ""
+            NativeUtils.baseFileNameForUrl(fileUrl) : ""
 
         anchors.centerIn: parent
         visible: !tabularDataParser.complete || tabularDataParser.failed

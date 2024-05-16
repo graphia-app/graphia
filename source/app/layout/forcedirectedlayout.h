@@ -20,7 +20,7 @@
 #define FORCEDIRECTEDLAYOUT_H
 
 #include "layout.h"
-#include "graph/componentmanager.h"
+#include "app/graph/componentmanager.h"
 #include "shared/utils/circularbuffer.h"
 
 #include <QVector3D>

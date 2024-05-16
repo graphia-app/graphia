@@ -19,8 +19,8 @@
 #ifndef KNNTRANSFORM_H
 #define KNNTRANSFORM_H
 
-#include "transform/graphtransform.h"
-#include "attributes/attribute.h"
+#include "app/transform/graphtransform.h"
+#include "app/attributes/attribute.h"
 
 #include "shared/utils/redirects.h"
 

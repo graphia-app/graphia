@@ -18,10 +18,8 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/application.h
     ${CMAKE_CURRENT_LIST_DIR}/attributes/attribute.h
     ${CMAKE_CURRENT_LIST_DIR}/attributes/attributeedits.h
-    ${CMAKE_CURRENT_LIST_DIR}/attributes/availableattributesmodel.h
     ${CMAKE_CURRENT_LIST_DIR}/attributes/conditionfncreator.h
     ${CMAKE_CURRENT_LIST_DIR}/attributes/condtionfnops.h
-    ${CMAKE_CURRENT_LIST_DIR}/attributes/editattributetablemodel.h
     ${CMAKE_CURRENT_LIST_DIR}/attributes/enrichmentcalculator.h
     ${CMAKE_CURRENT_LIST_DIR}/attributes/enrichmenttablemodel.h
     ${CMAKE_CURRENT_LIST_DIR}/commands/applytransformscommand.h
@@ -33,7 +31,6 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/commands/importattributescommand.h
     ${CMAKE_CURRENT_LIST_DIR}/commands/removeattributescommand.h
     ${CMAKE_CURRENT_LIST_DIR}/commands/selectnodescommand.h
-    ${CMAKE_CURRENT_LIST_DIR}/crashtype.h
     ${CMAKE_CURRENT_LIST_DIR}/graph/componentmanager.h
     ${CMAKE_CURRENT_LIST_DIR}/graph/elementiddistinctsetcollection_debug.h
     ${CMAKE_CURRENT_LIST_DIR}/graph/elementiddistinctsetcollection.h
@@ -63,7 +60,6 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/limitconstants.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/gmlsaver.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlsaver.h
-    ${CMAKE_CURRENT_LIST_DIR}/loading/importattributeskeydetection.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/isaver.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/jsongraphsaver.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/nativeloader.h
@@ -81,7 +77,6 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/maths/plane.h
     ${CMAKE_CURRENT_LIST_DIR}/maths/ray.h
     ${CMAKE_CURRENT_LIST_DIR}/preferenceswatcher.h
-    ${CMAKE_CURRENT_LIST_DIR}/qmlpreferences.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/camera.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/doublebufferedtexture.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/glyphmap.h
@@ -90,20 +85,18 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/rendering/graphoverviewscene.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/graphrenderer.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/graphrenderercore.h
+    ${CMAKE_CURRENT_LIST_DIR}/rendering/graphrenderertypes.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/opengldebuglogger.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/openglfunctions.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/arrow.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/rectangle.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/sphere.h
-    ${CMAKE_CURRENT_LIST_DIR}/rendering/projection.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/scene.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/screenshotrenderer.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/shadertools.h
-    ${CMAKE_CURRENT_LIST_DIR}/rendering/shading.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/transition.h
     ${CMAKE_CURRENT_LIST_DIR}/preferences.h
     ${CMAKE_CURRENT_LIST_DIR}/tracking.h
-    ${CMAKE_CURRENT_LIST_DIR}/transform/availabletransformsmodel.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/graphtransformattributeparameter.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/graphtransformconfig.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/graphtransformconfigparser.h
@@ -134,15 +127,13 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/removeleavestransform.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/alert.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/document.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/findoptions.h
+    ${CMAKE_CURRENT_LIST_DIR}/ui/findtypes.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/graphcommoninteractor.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/graphcomponentinteractor.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/graphoverviewinteractor.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/graphquickitem.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/interactor.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/searchmanager.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/selectionmanager.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/enrichmentheatmapitem.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/colorvisualisationchannel.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/elementvisual.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/sizevisualisationchannel.h
@@ -157,18 +148,13 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationconfigparser.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationinfo.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationmapping.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationmappingplotitem.h
-    ${CMAKE_CURRENT_LIST_DIR}/updates/changelog.h
     ${CMAKE_CURRENT_LIST_DIR}/updates/updater.h
     ${CMAKE_CURRENT_LIST_DIR}/watchdog.h
 )
 
 list(APPEND APP_SOURCES
-    ${CMAKE_CURRENT_LIST_DIR}/application.cpp
     ${CMAKE_CURRENT_LIST_DIR}/attributes/attribute.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/attributes/availableattributesmodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/attributes/conditionfncreator.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/attributes/editattributetablemodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/attributes/enrichmentcalculator.cpp
     ${CMAKE_CURRENT_LIST_DIR}/attributes/enrichmenttablemodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/commands/applytransformscommand.cpp
@@ -197,10 +183,8 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/layout/powerof2gridcomponentlayout.cpp
     ${CMAKE_CURRENT_LIST_DIR}/layout/randomlayout.cpp
     ${CMAKE_CURRENT_LIST_DIR}/layout/scalinglayout.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/limitconstants.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/gmlsaver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlsaver.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/loading/importattributeskeydetection.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/jsongraphsaver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/nativeloader.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/parserthread.cpp
@@ -215,7 +199,6 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/maths/plane.cpp
     ${CMAKE_CURRENT_LIST_DIR}/maths/ray.cpp
     ${CMAKE_CURRENT_LIST_DIR}/preferenceswatcher.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/qmlpreferences.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/camera.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/doublebufferedtexture.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/glyphmap.cpp
@@ -234,7 +217,6 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/rendering/transition.cpp
     ${CMAKE_CURRENT_LIST_DIR}/preferences.cpp
     ${CMAKE_CURRENT_LIST_DIR}/tracking.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/transform/availabletransformsmodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/graphtransformconfig.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/graphtransformconfigparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/graphtransform.cpp
@@ -260,14 +242,11 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/spanningtreetransform.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/typecasttransform.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/removeleavestransform.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/document.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/graphcommoninteractor.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/graphcomponentinteractor.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/graphoverviewinteractor.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/graphquickitem.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/searchmanager.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/selectionmanager.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/enrichmentheatmapitem.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/colorvisualisationchannel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/sizevisualisationchannel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/sharedtextvisualisationchannel.cpp
@@ -279,8 +258,6 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationconfig.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationconfigparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationmapping.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationmappingplotitem.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/updates/changelog.cpp
     ${CMAKE_CURRENT_LIST_DIR}/updates/updater.cpp
     ${CMAKE_CURRENT_LIST_DIR}/watchdog.cpp
 )
@@ -292,7 +269,6 @@ list(APPEND RESOURCES
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/images.qrc
     ${CMAKE_CURRENT_LIST_DIR}/ui/imagery.qrc
     ${CMAKE_CURRENT_LIST_DIR}/ui/licensing.qrc
-    ${CMAKE_CURRENT_LIST_DIR}/ui/app_qml.qrc
 )
 
 if(EMSCRIPTEN)
@@ -361,19 +337,10 @@ elseif(MSVC)
     file(APPEND ${PROJECT_BINARY_DIR}/variables.bat "SET \"NATIVE_EXTENSION=${NativeExtension}\"\n")
 endif()
 
-add_subdirectory(ui/qml/app/graphia/Controls)
-target_link_libraries(${PROJECT_NAME} PRIVATE controls_qmlplugin)
+add_subdirectory(ui/qml/app/graphia)
+target_link_libraries(${PROJECT_NAME} PRIVATE main_qmlplugin controls_qmlplugin loading_qmlplugin plugins_qmlplugin utils_qmlplugin)
 
-add_subdirectory(ui/qml/app/graphia/Loading)
-target_link_libraries(${PROJECT_NAME} PRIVATE loading_qmlplugin)
-
-add_subdirectory(ui/qml/app/graphia/Plugins)
-target_link_libraries(${PROJECT_NAME} PRIVATE plugins_qmlplugin)
-
-add_subdirectory(ui/qml/app/graphia/Utils)
-target_link_libraries(${PROJECT_NAME} PRIVATE utils_qmlplugin)
-
-target_link_libraries(${PROJECT_NAME} PRIVATE shared)
+target_link_libraries(${PROJECT_NAME} PRIVATE shared sharedtypes_qmlplugin)
 target_link_libraries(${PROJECT_NAME} PRIVATE thirdparty_static thirdparty)
 
 if(LINK_TYPE STREQUAL STATIC)

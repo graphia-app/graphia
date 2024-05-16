@@ -21,19 +21,19 @@
 
 // This simply provides QML accessible version of the ElementId types
 
-#include "application.h"
+#include "app/application.h"
 
 #include "shared/graph/elementid.h"
-#include "shared/utils/static_block.h"
 
-#include <QMetaType>
 #include <QObject>
+#include <QQmlEngine>
 
 #define QML_TYPE(Type) Qml ## Type /* NOLINT cppcoreguidelines-macro-usage */
 #define QML_ELEMENTID(Type) /* NOLINT cppcoreguidelines-macro-usage */ \
     class QML_TYPE(Type) \
     { \
         Q_GADGET \
+        QML_ANONYMOUS \
         Q_PROPERTY(int id READ id CONSTANT) \
         Q_PROPERTY(bool isNull READ isNull CONSTANT) \
     public: \
@@ -52,12 +52,5 @@ QML_ELEMENTID(NodeId)
 QML_ELEMENTID(EdgeId)
 // cppcheck-suppress noExplicitConstructor
 QML_ELEMENTID(ComponentId)
-
-static_block
-{
-    qRegisterMetaType<QmlNodeId>("QmlNodeId");
-    qRegisterMetaType<QmlNodeId>("QmlEdgeId");
-    qRegisterMetaType<QmlNodeId>("QmlComponentId");
-}
 
 #endif // QMLELEMENTID_H

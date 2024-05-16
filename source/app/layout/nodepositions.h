@@ -21,8 +21,8 @@
 
 #include "shared/graph/grapharray.h"
 #include "shared/utils/circularbuffer.h"
-#include "maths/boundingsphere.h"
-#include "maths/boundingbox.h"
+#include "app/maths/boundingsphere.h"
+#include "app/maths/boundingbox.h"
 
 #include <array>
 #include <mutex>

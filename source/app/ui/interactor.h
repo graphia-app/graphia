@@ -19,7 +19,7 @@
 #ifndef INTERACTOR_H
 #define INTERACTOR_H
 
-#include "graph/qmlelementid.h"
+#include "app/graph/qmlelementid.h"
 
 #include <QObject>
 #include <Qt>

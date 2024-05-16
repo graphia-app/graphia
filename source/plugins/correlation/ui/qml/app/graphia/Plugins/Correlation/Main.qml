@@ -431,11 +431,11 @@ PluginContent
         {
             let folder = screenshot.path !== undefined ? screenshot.path : "";
             let path = Utils.format(qsTr("{0}/{1}-correlation-plot"),
-                QmlUtils.fileNameForUrl(folder),
+                NativeUtils.fileNameForUrl(folder),
                 root.baseFileNameNoExtension);
 
             savePlotImageFileDialog.currentFolder = folder;
-            savePlotImageFileDialog.selectedFile = QmlUtils.urlForFileName(path);
+            savePlotImageFileDialog.selectedFile = NativeUtils.urlForFileName(path);
             savePlotImageFileDialog.onAcceptedFn = onAcceptedFn;
             savePlotImageFileDialog.open();
         }

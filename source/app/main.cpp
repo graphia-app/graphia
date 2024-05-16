@@ -53,7 +53,7 @@
 #include <chrono>
 #include <memory>
 
-#include "application.h"
+#include "app/application.h"
 #include "preferences.h"
 #include "preferenceswatcher.h"
 #include "headless.h"
@@ -71,10 +71,10 @@
 #include "shared/ui/visualisations/defaultgradients.h"
 #include "shared/ui/visualisations/defaultpalettes.h"
 
-#include "rendering/openglfunctions.h"
-#include "rendering/graphrenderer.h"
+#include "app/rendering/openglfunctions.h"
+#include "app/rendering/graphrenderer.h"
 
-#include "updates/updater.h"
+#include "app/updates/updater.h"
 
 #include <qtsingleapplication/qtsingleapplication.h>
 #include <breakpad/crashhandler.h>
@@ -409,8 +409,7 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
         qmlError += u"%1\n"_s.arg(msg);
     });
 
-    engine.addImportPath(u"qrc:///qml"_s);
-    engine.load(QUrl(u"qrc:///qml/main.qml"_s));
+    engine.loadFromModule(u"app.graphia"_s, u"Main"_s);
 
     qInstallMessageHandler(nullptr);
 

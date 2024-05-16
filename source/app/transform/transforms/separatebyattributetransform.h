@@ -19,8 +19,8 @@
 #ifndef SEPARATEBYATTRIBUTETRANSFORM_H
 #define SEPARATEBYATTRIBUTETRANSFORM_H
 
-#include "transform/graphtransform.h"
-#include "attributes/attribute.h"
+#include "app/transform/graphtransform.h"
+#include "app/attributes/attribute.h"
 
 #include <vector>
 

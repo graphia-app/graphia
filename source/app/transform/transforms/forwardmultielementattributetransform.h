@@ -19,8 +19,8 @@
 #ifndef FORWARDMULTIELEMENTATTRIBUTETRANSFORM_H
 #define FORWARDMULTIELEMENTATTRIBUTETRANSFORM_H
 
-#include "transform/graphtransform.h"
-#include "attributes/attribute.h"
+#include "app/transform/graphtransform.h"
+#include "app/attributes/attribute.h"
 
 class ForwardMultiElementAttributeTransform : public GraphTransform
 {

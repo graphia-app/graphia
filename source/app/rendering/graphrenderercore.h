@@ -20,7 +20,7 @@
 #define GRAPHRENDERERCORE_H
 
 #include "openglfunctions.h"
-#include "shading.h"
+#include "graphrenderertypes.h"
 
 #include "primitives/arrow.h"
 #include "primitives/rectangle.h"

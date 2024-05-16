@@ -22,46 +22,11 @@
 #include "shared/loading/iparser.h"
 #include "shared/loading/tabulardata.h"
 
-#include "shared/utils/qmlenum.h"
-
 #include "plugins/correlation/correlationdatavector.h"
+#include "plugins/correlation/correlationtype.h"
 
 #include <QString>
 #include <QRect>
-
-// Note: the ordering of these enums is important from a save
-// file point of view; i.e. only append, don't reorder
-
-DEFINE_QML_ENUM(
-    Q_GADGET, ScalingType,
-    None,
-    Log2,
-    Log10,
-    AntiLog2,
-    AntiLog10,
-    ArcSin);
-
-DEFINE_QML_ENUM(
-    Q_GADGET, NormaliseType,
-    None,
-    MinMax,
-    Quantile,
-    Mean,
-    Standarisation,
-    UnitScaling,
-    Softmax);
-
-DEFINE_QML_ENUM(
-    Q_GADGET, MissingDataType,
-    Constant,
-    ColumnAverage,
-    RowInterpolation);
-
-DEFINE_QML_ENUM(
-    Q_GADGET, ClippingType,
-    None,
-    Constant,
-    Winsorization);
 
 class CorrelationPluginInstance;
 

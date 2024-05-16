@@ -18,7 +18,7 @@
 
 #include "editattributecommand.h"
 
-#include "graph/graphmodel.h"
+#include "app/graph/graphmodel.h"
 #include "shared/attributes/valuetype.h"
 
 #include <QVariant>

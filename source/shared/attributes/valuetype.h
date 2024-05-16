@@ -16,21 +16,4 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef VALUETYPE_H
-#define VALUETYPE_H
-
-#include "shared/utils/qmlenum.h"
-
-DEFINE_QML_ENUM(
-    Q_GADGET, ValueType,
-    Unknown     = 0x1,
-    Int         = 0x2,
-    Float       = 0x4,
-    String      = 0x8,
-    StringList  = 0x10,
-    Numerical = Int|Float,
-    Identifier = Int|String,
-    All = Int|Float|String|StringList,
-    Attribute   = 0x20 /* Used to indicate transform attribute parameters */);
-
-#endif // VALUETYPE_H
+#include "shared/ui/qml/app/graphia/SharedTypes/valuetype.h"

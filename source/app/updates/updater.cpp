@@ -22,7 +22,7 @@
 
 #include "shared/updates/updates.h"
 
-#include "application.h"
+#include "app/application.h"
 #include "preferences.h"
 
 #include "shared/utils/container.h"

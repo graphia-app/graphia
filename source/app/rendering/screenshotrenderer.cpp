@@ -18,15 +18,15 @@
 
 #include "screenshotrenderer.h"
 
-#include "graph/graph.h"
+#include "app/graph/graph.h"
 
 #include "graphcomponentscene.h"
 #include "graphoverviewscene.h"
 
 #include "app/preferences.h"
 
-#include "ui/document.h"
-#include "ui/visualisations/elementvisual.h"
+#include "app/ui/document.h"
+#include "app/ui/visualisations/elementvisual.h"
 
 #include <QBuffer>
 #include <QDir>

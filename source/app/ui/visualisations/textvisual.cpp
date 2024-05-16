@@ -18,8 +18,8 @@
 
 #include "textvisual.h"
 
-#include "maths/boundingsphere.h"
-#include "layout/nodepositions.h"
+#include "app/maths/boundingsphere.h"
+#include "app/layout/nodepositions.h"
 
 void TextVisual::updatePositions(const NodePositions& nodePositions)
 {

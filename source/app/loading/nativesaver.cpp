@@ -27,10 +27,8 @@
 #include "shared/utils/string.h"
 #include "shared/loading/userelementdata.h"
 
-#include "graph/graphmodel.h"
-#include "graph/mutablegraph.h"
-
-#include "ui/document.h"
+#include "app/graph/graphmodel.h"
+#include "app/graph/mutablegraph.h"
 
 #include <QDataStream>
 #include <QFile>

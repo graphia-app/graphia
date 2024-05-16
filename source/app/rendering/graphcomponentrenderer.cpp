@@ -21,20 +21,19 @@
 
 #include "camera.h"
 
-#include "graph/graph.h"
-#include "graph/graphmodel.h"
-#include "graph/componentmanager.h"
+#include "app/graph/graph.h"
+#include "app/graph/graphmodel.h"
+#include "app/graph/componentmanager.h"
 
-#include "layout/layout.h"
-#include "layout/collision.h"
+#include "app/layout/layout.h"
+#include "app/layout/collision.h"
 
-#include "maths/boundingsphere.h"
-#include "maths/frustum.h"
-#include "maths/plane.h"
+#include "app/maths/boundingsphere.h"
+#include "app/maths/frustum.h"
+#include "app/maths/plane.h"
 
-#include "ui/graphquickitem.h"
-#include "ui/selectionmanager.h"
-#include "ui/visualisations/elementvisual.h"
+#include "app/ui/selectionmanager.h"
+#include "app/ui/visualisations/elementvisual.h"
 
 #include "shared/graph/elementid_debug.h"
 #include "app/preferences.h"

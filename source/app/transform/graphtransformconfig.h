@@ -19,7 +19,7 @@
 #ifndef GRAPHTRANSFORMCONFIG_H
 #define GRAPHTRANSFORMCONFIG_H
 
-#include "attributes/condtionfnops.h"
+#include "app/attributes/condtionfnops.h"
 #include "shared/attributes/valuetype.h"
 
 #include <QString>

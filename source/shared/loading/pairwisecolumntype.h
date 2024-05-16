@@ -16,28 +16,4 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "shared/utils/qmlenum.h"
-
-#include <map>
-
-#ifndef PAIRWISECOLUMNTYPE_H
-#define PAIRWISECOLUMNTYPE_H
-
-DEFINE_QML_ENUM(
-    Q_GADGET, PairwiseColumnType,
-    Unused,
-    SourceNode,
-    TargetNode,
-    EdgeAttribute,
-    SourceNodeAttribute,
-    TargetNodeAttribute);
-
-struct PairwiseColumnConfiguration
-{
-    PairwiseColumnType _type;
-    QString _name;
-};
-
-using PairwiseColumnsConfiguration = std::map<size_t, PairwiseColumnConfiguration>;
-
-#endif // PAIRWISECOLUMNTYPE_H
+#include "shared/ui/qml/app/graphia/SharedTypes/pairwisecolumntype.h"

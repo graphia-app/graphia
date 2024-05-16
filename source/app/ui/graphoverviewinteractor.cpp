@@ -17,16 +17,15 @@
  */
 
 #include "graphoverviewinteractor.h"
-#include "graphquickitem.h"
 
 #include "selectionmanager.h"
-#include "commands/commandmanager.h"
+#include "app/commands/commandmanager.h"
 
-#include "rendering/graphrenderer.h"
-#include "rendering/graphoverviewscene.h"
+#include "app/rendering/graphrenderer.h"
+#include "app/rendering/graphoverviewscene.h"
 
-#include "graph/graph.h"
-#include "graph/graphmodel.h"
+#include "app/graph/graph.h"
+#include "app/graph/graphmodel.h"
 
 #include <QMouseEvent>
 #include <QWheelEvent>

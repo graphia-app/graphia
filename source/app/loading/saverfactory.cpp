@@ -18,7 +18,7 @@
 
 #include "saverfactory.h"
 
-#include "ui/document.h"
+#include "app/ui/document.h"
 #include "shared/graph/igraphmodel.h"
 
 IGraphModel* graphModelFor(Document* document)

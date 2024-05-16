@@ -19,6 +19,7 @@
 import QtQuick
 
 import app.graphia
+import app.graphia.Utils
 
 Preferences
 {
@@ -41,7 +42,7 @@ Preferences
 
     function namesAsArray()
     {
-        return asArray().map(e => e.name).sort(QmlUtils.compareStrings);
+        return asArray().map(e => e.name).sort(NativeUtils.compareStrings);
     }
 
     function remove(names)

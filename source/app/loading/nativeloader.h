@@ -24,11 +24,10 @@
 
 #include "shared/graph/elementid_containers.h"
 
-#include "layout/layout.h"
-#include "layout/nodepositions.h"
-#include "rendering/projection.h"
-#include "rendering/shading.h"
-#include "attributes/enrichmenttablemodel.h"
+#include "app/layout/layout.h"
+#include "app/layout/nodepositions.h"
+#include "app/rendering/graphrenderertypes.h"
+#include "app/attributes/enrichmenttablemodel.h"
 
 #include <QString>
 #include <QStringList>

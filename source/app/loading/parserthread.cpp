@@ -18,8 +18,8 @@
 
 #include "parserthread.h"
 
-#include "graph/graphmodel.h"
-#include "graph/mutablegraph.h"
+#include "app/graph/graphmodel.h"
+#include "app/graph/mutablegraph.h"
 
 #include "shared/utils/thread.h"
 

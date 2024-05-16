@@ -308,10 +308,10 @@ Item
         onTriggered: function(source)
         {
             let folder = misc.fileSaveInitialFolder !== undefined ? misc.fileSaveInitialFolder : "";
-            let path = Utils.format("{0}/{1}", QmlUtils.fileNameForUrl(folder), root.exportBaseFileName);
+            let path = Utils.format("{0}/{1}", NativeUtils.fileNameForUrl(folder), root.exportBaseFileName);
 
             exportTableFileDialog.currentFolder = folder;
-            exportTableFileDialog.selectedFile = QmlUtils.urlForFileName(path);
+            exportTableFileDialog.selectedFile = NativeUtils.urlForFileName(path);
             exportTableFileDialog.open();
         }
     }
@@ -1205,7 +1205,7 @@ Item
                             anchors.right: parent.right
                             anchors.verticalCenter: parent.verticalCenter
                             anchors.leftMargin: 10
-                            color: QmlUtils.contrastingColor(parent.color)
+                            color: NativeUtils.contrastingColor(parent.color)
 
                             text:
                             {
@@ -1227,7 +1227,7 @@ Item
 
                                 let columnName = root.model.columnNameFor(sourceColumn);
                                 if(root.model.columnIsNumerical(columnName))
-                                    return QmlUtils.formatNumberScientific(model.display);
+                                    return NativeUtils.formatNumberScientific(model.display);
 
                                 if(typeof(model.display) === "string")
                                 {

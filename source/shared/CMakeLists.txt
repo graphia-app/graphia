@@ -5,6 +5,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 list(APPEND HEADERS
+    ${CMAKE_CURRENT_LIST_DIR}/attributes/attributeflag.h
     ${CMAKE_CURRENT_LIST_DIR}/attributes/iattribute.h
     ${CMAKE_CURRENT_LIST_DIR}/attributes/iattributerange.h
     ${CMAKE_CURRENT_LIST_DIR}/attributes/valuetype.h
@@ -17,7 +18,6 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/graph/elementid_containers.h
     ${CMAKE_CURRENT_LIST_DIR}/graph/elementid_debug.h
     ${CMAKE_CURRENT_LIST_DIR}/graph/elementid.h
-    ${CMAKE_CURRENT_LIST_DIR}/graph/elementtype.h
     ${CMAKE_CURRENT_LIST_DIR}/graph/grapharray.h
     ${CMAKE_CURRENT_LIST_DIR}/graph/grapharray_json.h
     ${CMAKE_CURRENT_LIST_DIR}/graph/igrapharrayclient.h
@@ -102,7 +102,6 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/utils/preferences.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/progressable.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/qmlenum.h
-    ${CMAKE_CURRENT_LIST_DIR}/utils/qmlutils.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/qrcextract.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/random.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/redirects.h
@@ -127,7 +126,6 @@ list(APPEND HEADERS
 
 list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/graph/covariancematrix.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/graph/elementtype.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/biopaxfileparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/cxparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/matlabfileparser.cpp
@@ -180,16 +178,13 @@ if(MSVC)
     list(APPEND SHARED_SOURCES ${CMAKE_CURRENT_LIST_DIR}/utils/odsconsolecapture.cpp)
 endif()
 
-if(EMSCRIPTEN)
-    list(APPEND HEADERS ${CMAKE_CURRENT_LIST_DIR}/loading/wasmlocalfileaccess.h)
-    list(APPEND SHARED_SOURCES ${CMAKE_CURRENT_LIST_DIR}/loading/wasmlocalfileaccess.cpp)
-endif()
-
 set(QML_IMPORT_PATH "${QML_IMPORT_PATH};${CMAKE_CURRENT_LIST_DIR}/ui/qml/" PARENT_SCOPE)
 
 list(APPEND SOURCES ${SHARED_SOURCES})
 
 qt_add_library(shared STATIC ${SOURCES} ${HEADERS} ${RESOURCES})
+
+add_subdirectory(ui/qml/app/graphia/SharedTypes)
 
 find_package(Qt6 COMPONENTS REQUIRED Concurrent Qml Quick Widgets Xml)
 target_link_libraries(shared PRIVATE

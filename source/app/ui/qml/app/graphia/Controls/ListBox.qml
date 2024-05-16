@@ -76,7 +76,7 @@ Rectangle
         }
 
         return root.model.data(root.model.index(index, 0),
-            QmlUtils.modelRoleForName(root.model, roleName));
+            NativeUtils.modelRoleForName(root.model, roleName));
     }
 
     property var model: null

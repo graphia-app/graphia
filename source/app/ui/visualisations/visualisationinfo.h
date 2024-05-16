@@ -19,7 +19,7 @@
 #ifndef VISUALISATIONINFO_H
 #define VISUALISATIONINFO_H
 
-#include "ui/alert.h"
+#include "app/ui/alert.h"
 
 #include "shared/utils/statistics.h"
 

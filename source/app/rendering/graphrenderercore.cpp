@@ -24,7 +24,7 @@
 #include "glyphmap.h"
 #include "shadertools.h"
 
-#include "ui/document.h"
+#include "app/ui/document.h"
 
 #include <QColor>
 #include <QDir>

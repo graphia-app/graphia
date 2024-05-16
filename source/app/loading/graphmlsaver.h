@@ -19,7 +19,7 @@
 #ifndef GRAPHMLEXPORTER_H
 #define GRAPHMLEXPORTER_H
 
-#include "loading/saverfactory.h"
+#include "app/loading/saverfactory.h"
 
 #include <QString>
 #include <QUrl>

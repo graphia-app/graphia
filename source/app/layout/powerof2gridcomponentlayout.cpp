@@ -18,9 +18,9 @@
 
 #include "powerof2gridcomponentlayout.h"
 
-#include "graph/graph.h"
-#include "graph/graphcomponent.h"
-#include "graph/componentmanager.h"
+#include "app/graph/graph.h"
+#include "app/graph/graphcomponent.h"
+#include "app/graph/componentmanager.h"
 #include "shared/utils/utils.h"
 
 #include <stack>

@@ -18,7 +18,7 @@
 
 #include "componentlayout.h"
 
-#include "graph/graph.h"
+#include "app/graph/graph.h"
 
 void ComponentLayout::execute(const Graph& graph, const std::vector<ComponentId>& componentIds,
                               ComponentLayoutData& componentLayoutData)

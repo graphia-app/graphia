@@ -1,3 +1,5 @@
+include(${CMAKE_SOURCE_DIR}/source/common.cmake)
+
 find_package(Qt6 COMPONENTS REQUIRED Quick Concurrent)
 
 qt_add_qml_module(loading_qml

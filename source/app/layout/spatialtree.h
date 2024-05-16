@@ -20,7 +20,7 @@
 #define SPATIALTREE_H
 
 #include "shared/graph/igraphcomponent.h"
-#include "maths/boundingbox.h"
+#include "app/maths/boundingbox.h"
 #include "nodepositions.h"
 #include "shared/utils/scopetimer.h"
 #include "shared/utils/threadpool.h"

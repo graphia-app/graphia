@@ -23,6 +23,7 @@ import QtQuick.Controls
 
 import app.graphia
 import app.graphia.Controls
+import app.graphia.Utils
 
 Item
 {
@@ -41,7 +42,7 @@ Item
     property color _contrastingColor:
     {
         if(mouseArea.containsMouse || root.menuDropped)
-            return QmlUtils.contrastingColor(hoverColor);
+            return NativeUtils.contrastingColor(hoverColor);
 
         return textColor;
     }

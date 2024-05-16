@@ -21,7 +21,7 @@
 
 #include "shared/commands/icommand.h"
 
-#include "graph/graph.h"
+#include "app/graph/graph.h"
 
 #include <vector>
 

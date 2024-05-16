@@ -18,10 +18,10 @@
 
 #include "spanningtreetransform.h"
 
-#include "transform/transformedgraph.h"
+#include "app/transform/transformedgraph.h"
 
-#include "graph/componentmanager.h"
-#include "graph/graphcomponent.h"
+#include "app/graph/componentmanager.h"
+#include "app/graph/graphcomponent.h"
 
 #include <memory>
 #include <deque>

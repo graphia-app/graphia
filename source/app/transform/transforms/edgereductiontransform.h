@@ -19,7 +19,7 @@
 #ifndef EDGEREDUCTIONTRANSFORM_H
 #define EDGEREDUCTIONTRANSFORM_H
 
-#include "transform/graphtransform.h"
+#include "app/transform/graphtransform.h"
 
 class EdgeReductionTransform : public GraphTransform
 {

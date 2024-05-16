@@ -18,12 +18,12 @@
 
 #include "collision.h"
 
-#include "graph/graph.h"
-#include "graph/graphmodel.h"
-#include "ui/visualisations/elementvisual.h"
+#include "app/graph/graph.h"
+#include "app/graph/graphmodel.h"
+#include "app/ui/visualisations/elementvisual.h"
 
-#include "maths/ray.h"
-#include "maths/plane.h"
+#include "app/maths/ray.h"
+#include "app/maths/plane.h"
 
 NodeId Collision::nodeClosestToLine(const std::vector<NodeId>& nodeIds, const QVector3D &point, const QVector3D &direction)
 {

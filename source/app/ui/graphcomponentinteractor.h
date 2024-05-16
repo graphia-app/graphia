@@ -20,7 +20,7 @@
 #define GRAPHCOMPONENTINTERACTOR_H
 
 #include "graphcommoninteractor.h"
-#include "rendering/graphcomponentscene.h"
+#include "app/rendering/graphcomponentscene.h"
 
 #include <QPoint>
 
@@ -29,7 +29,6 @@
 class GraphModel;
 class CommandManager;
 class SelectionManager;
-class GraphQuickItem;
 
 class GraphComponentInteractor : public GraphCommonInteractor
 {

@@ -18,12 +18,12 @@
 
 #include "louvaintransform.h"
 
-#include "transform/transformedgraph.h"
+#include "app/transform/transformedgraph.h"
 
 #include "shared/graph/grapharray.h"
 #include "shared/utils/container.h"
 
-#include "graph/graphmodel.h"
+#include "app/graph/graphmodel.h"
 
 #include <map>
 #include <vector>

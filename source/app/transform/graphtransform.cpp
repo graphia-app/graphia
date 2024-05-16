@@ -19,8 +19,8 @@
 #include "graphtransform.h"
 #include "transformedgraph.h"
 
-#include "graph/graph.h"
-#include "graph/graphmodel.h"
+#include "app/graph/graph.h"
+#include "app/graph/graphmodel.h"
 
 #include "shared/commands/icommand.h"
 

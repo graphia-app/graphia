@@ -22,13 +22,13 @@
 #include "graphtransform.h"
 #include "transformcache.h"
 
-#include "graph/graph.h"
-#include "graph/mutablegraph.h"
+#include "app/graph/graph.h"
+#include "app/graph/mutablegraph.h"
 
 #include "shared/graph/grapharray.h"
 #include "shared/utils/passkey.h"
 
-#include "attributes/attribute.h"
+#include "app/attributes/attribute.h"
 
 #include <QObject>
 #include <QString>

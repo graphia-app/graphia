@@ -19,8 +19,8 @@
 #ifndef GMLEXPORTER_H
 #define GMLEXPORTER_H
 
-#include "graph/graphmodel.h"
-#include "loading/saverfactory.h"
+#include "app/graph/graphmodel.h"
+#include "app/loading/saverfactory.h"
 
 using namespace Qt::Literals::StringLiterals;
 

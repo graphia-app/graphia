@@ -18,7 +18,7 @@
 
 #include "edgereductiontransform.h"
 
-#include "transform/transformedgraph.h"
+#include "app/transform/transformedgraph.h"
 
 #include <memory>
 #include <random>

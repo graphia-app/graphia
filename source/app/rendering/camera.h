@@ -24,10 +24,10 @@
 #include <QVector3D>
 #include <QSharedPointer>
 
-#include "maths/frustum.h"
-#include "maths/conicalfrustum.h"
-#include "maths/line.h"
-#include "maths/ray.h"
+#include "app/maths/frustum.h"
+#include "app/maths/conicalfrustum.h"
+#include "app/maths/line.h"
+#include "app/maths/ray.h"
 
 class QOpenGLShaderProgram;
 using QOpenGLShaderProgramPtr = QSharedPointer<QOpenGLShaderProgram>;

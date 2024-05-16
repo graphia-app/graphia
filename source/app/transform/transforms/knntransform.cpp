@@ -18,8 +18,8 @@
 
 #include "knntransform.h"
 
-#include "transform/transformedgraph.h"
-#include "graph/graphmodel.h"
+#include "app/transform/transformedgraph.h"
+#include "app/graph/graphmodel.h"
 #include "shared/utils/container.h"
 
 #include <algorithm>

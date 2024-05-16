@@ -23,7 +23,7 @@
 
 #include <QColor>
 
-enum VisualFlags
+enum class VisualFlags
 {
     None          = 0x0,
     Selected      = 0x1,

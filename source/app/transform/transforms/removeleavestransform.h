@@ -19,7 +19,7 @@
 #ifndef REMOVELEAVESTRANSFORM_H
 #define REMOVELEAVESTRANSFORM_H
 
-#include "transform/graphtransform.h"
+#include "app/transform/graphtransform.h"
 
 class RemoveLeavesTransform : public GraphTransform
 {

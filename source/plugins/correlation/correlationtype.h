@@ -16,40 +16,4 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CORRELATIONTYPE_H
-#define CORRELATIONTYPE_H
-
-#include "shared/utils/qmlenum.h"
-
-// Note: the ordering of these enums is important from a save
-// file point of view; i.e. only append, don't reorder
-
-DEFINE_QML_ENUM(
-    Q_GADGET, CorrelationType,
-    Pearson,
-    SpearmanRank,
-    Jaccard,
-    SMC,
-    EuclideanSimilarity,
-    CosineSimilarity,
-    Bicor);
-
-DEFINE_QML_ENUM(
-    Q_GADGET, CorrelationDataType,
-    Continuous,
-    Discrete);
-
-DEFINE_QML_ENUM(
-    Q_GADGET, CorrelationPolarity,
-    Positive,
-    Negative,
-    Both);
-
-DEFINE_QML_ENUM(
-    Q_GADGET, CorrelationFilterType,
-    Threshold,
-    Knn);
-
-bool correlationExceedsThreshold(CorrelationPolarity polarity, double r, double threshold);
-
-#endif // CORRELATIONTYPE_H
+#include "plugins/correlation/ui/qml/app/graphia/Plugins/Correlation/correlationtype.h"

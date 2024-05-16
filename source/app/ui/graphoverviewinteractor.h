@@ -29,7 +29,6 @@ class GraphModel;
 class GraphOverviewScene;
 class CommandManager;
 class SelectionManager;
-class GraphQuickItem;
 
 class GraphOverviewInteractor : public GraphCommonInteractor
 {

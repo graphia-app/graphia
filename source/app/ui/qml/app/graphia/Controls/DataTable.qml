@@ -24,6 +24,7 @@ import QtQuick.Shapes
 
 import app.graphia
 import app.graphia.Controls
+import app.graphia.Utils
 
 Rectangle
 {
@@ -274,7 +275,7 @@ Rectangle
             return modelRow % 2 ? ControlColors.tableRow1 : ControlColors.tableRow2;
         }
 
-        color: { return QmlUtils.contrastingColor(backgroundColor); }
+        color: { return NativeUtils.contrastingColor(backgroundColor); }
         leftPadding: root._padding
         rightPadding: root._padding
         topPadding: root._padding * 0.5

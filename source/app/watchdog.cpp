@@ -21,7 +21,7 @@
 #include "shared/utils/fatalerror.h"
 #include "shared/utils/thread.h"
 
-#include "application.h"
+#include "app/application.h"
 
 #ifndef _MSC_VER
 #include <valgrind/valgrind.h>

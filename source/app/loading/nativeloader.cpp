@@ -19,7 +19,7 @@
 #include "nativeloader.h"
 #include "nativesaver.h"
 
-#include "application.h"
+#include "app/application.h"
 
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"

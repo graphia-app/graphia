@@ -21,7 +21,7 @@
 
 #include "scene.h"
 
-#include "graph/componentmanager.h"
+#include "app/graph/componentmanager.h"
 #include "shared/graph/grapharray.h"
 #include "transition.h"
 

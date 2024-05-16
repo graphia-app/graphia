@@ -21,13 +21,13 @@
 #include "shared/graph/elementid.h"
 #include "shared/graph/elementid_containers.h"
 
-#include "graph/graphmodel.h"
-#include "graph/mutablegraph.h"
+#include "app/graph/graphmodel.h"
+#include "app/graph/mutablegraph.h"
 
-#include "transform/transformedgraph.h"
+#include "app/transform/transformedgraph.h"
 
-#include "transform/graphtransformconfig.h"
-#include "attributes/conditionfncreator.h"
+#include "app/transform/graphtransformconfig.h"
+#include "app/attributes/conditionfncreator.h"
 
 #include <QObject>
 

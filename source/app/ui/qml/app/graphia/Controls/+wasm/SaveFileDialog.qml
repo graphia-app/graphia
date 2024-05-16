@@ -57,7 +57,7 @@ Item
     function open()
     {
         const extension = root.defaultExtensions.length > 0 ? "." + root.defaultExtensions[0] : "";
-        const filenameHint = QmlUtils.baseFileNameForUrl(root.selectedFile) + extension;
+        const filenameHint = NativeUtils.baseFileNameForUrl(root.selectedFile) + extension;
 
         // WasmLocalFileAccess::save returns a temporary file name in which it
         // expects the data to be written, thereafter waiting for the file to be

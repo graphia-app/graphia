@@ -19,7 +19,7 @@
 #ifndef PAGERANKTRANSFORM_H
 #define PAGERANKTRANSFORM_H
 
-#include "transform/graphtransform.h"
+#include "app/transform/graphtransform.h"
 
 #include "shared/utils/flags.h"
 #include "shared/utils/redirects.h"

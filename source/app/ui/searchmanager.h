@@ -19,7 +19,7 @@
 #ifndef SEARCHMANAGER_H
 #define SEARCHMANAGER_H
 
-#include "findoptions.h"
+#include "findtypes.h"
 
 #include "shared/graph/elementid.h"
 #include "shared/graph/elementid_containers.h"
@@ -32,11 +32,6 @@
 #include <mutex>
 
 class GraphModel;
-
-// What to select when found nodes changes
-DEFINE_QML_ENUM(
-    Q_GADGET, FindSelectStyle,
-    None, First, All);
 
 class SearchManager : public QObject
 {

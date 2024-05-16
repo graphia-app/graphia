@@ -24,7 +24,6 @@ import QtQuick.Dialogs
 
 import Qt.labs.platform as Labs
 
-import app.graphia
 import app.graphia.Utils
 import app.graphia.Controls
 
@@ -47,7 +46,7 @@ ApplicationWindow
         onPrivateKeyFileChanged:
         {
             root.privateKeyFileExists =
-                QmlUtils.fileUrlExists(privateKeyFile);
+                NativeUtils.fileUrlExists(privateKeyFile);
         }
 
         property string defaultOpenFolder
@@ -128,8 +127,8 @@ ApplicationWindow
                     // Success
                     //FIXME for some reason, some combination of Qt's XMLHttpRequest implementation and github
                     // conspire to return binary files prepended with an HTML fragment indicating a redirect
-                    // has taken place; this doesn't appear to be normal, hence QmlUtils.filterHtmlHack
-                    root.checksums[url] = QmlUtils.sha256(QmlUtils.filterHtmlHack(xhr.response));
+                    // has taken place; this doesn't appear to be normal, hence NativeUtils.filterHtmlHack
+                    root.checksums[url] = NativeUtils.sha256(NativeUtils.filterHtmlHack(xhr.response));
                     onComplete(root.checksums[url]);
                 }
                 else
@@ -208,15 +207,15 @@ ApplicationWindow
         root.operatingSystems = JSON.parse(settings.operatingSystems);
         root.credentials = JSON.parse(settings.credentials);
 
-        let tempDir = QmlUtils.tempDirectory();
+        let tempDir = NativeUtils.tempDirectory();
         if(tempDir.length > 0)
         {
             root._workingDirectory = tempDir;
             root._removeWorkingDirectory = true;
-            QmlUtils.cd(root._workingDirectory);
+            NativeUtils.cd(root._workingDirectory);
         }
 
-        if(Qt.application.arguments.length > 1 && QmlUtils.fileExists(Qt.application.arguments[1]))
+        if(Qt.application.arguments.length > 1 && NativeUtils.fileExists(Qt.application.arguments[1]))
         {
             root.lastUsedFilename = "file://" + Qt.application.arguments[1];
             root.open(lastUsedFilename);
@@ -240,14 +239,14 @@ ApplicationWindow
         }
 
         if(root._removeWorkingDirectory)
-            QmlUtils.rmdir(root._workingDirectory);
+            NativeUtils.rmdir(root._workingDirectory);
     }
 
     visible: true
     flags: Qt.Window
 
     title: qsTr("Update Editor") + (root.lastUsedFilename.length > 0 ?
-        Utils.format(qsTr(" - {0}"), QmlUtils.baseFileNameForUrl(root.lastUsedFilename)) : "")
+        Utils.format(qsTr(" - {0}"), NativeUtils.baseFileNameForUrl(root.lastUsedFilename)) : "")
 
     width: 800
     height: 600
@@ -265,12 +264,12 @@ ApplicationWindow
             setSaveRequired();
             settings.defaultImageOpenFolder = currentFolder;
 
-            let basename = QmlUtils.baseFileNameForUrl(selectedFile);
+            let basename = NativeUtils.baseFileNameForUrl(selectedFile);
 
-            let originalFilename = QmlUtils.fileNameForUrl(selectedFile);
+            let originalFilename = NativeUtils.fileNameForUrl(selectedFile);
             let targetFilename = root._workingDirectory + "/" + basename;
 
-            if(!QmlUtils.copy(originalFilename, targetFilename))
+            if(!NativeUtils.copy(originalFilename, targetFilename))
                 console.log("Copy to " + targetFilename + " failed. Already exists?");
 
             tabBar.currentTab.markdownTextArea.insert(tabBar.currentTab.markdownTextArea.cursorPosition,
@@ -324,7 +323,7 @@ ApplicationWindow
             {
                 text: settings.privateKeyFile.length > 0 ?
                     (Utils.format(qsTr("Change Private Key ({0})"),
-                        QmlUtils.fileNameForUrl(settings.privateKeyFile))) :
+                        NativeUtils.fileNameForUrl(settings.privateKeyFile))) :
                     qsTr("Select Private Key");
 
                 onTriggered:
@@ -361,13 +360,13 @@ ApplicationWindow
 
     function open(file)
     {
-        let fileContents = QmlUtils.readFromFile(QmlUtils.fileNameForUrl(file));
+        let fileContents = NativeUtils.readFromFile(NativeUtils.fileNameForUrl(file));
 
         try
         {
             let savedObject = JSON.parse(fileContents);
-            let jsonString = QmlUtils.isHexString(savedObject.updates) ?
-                QmlUtils.hexStringAsString(savedObject.updates) : savedObject.updates;
+            let jsonString = NativeUtils.isHexString(savedObject.updates) ?
+                NativeUtils.hexStringAsString(savedObject.updates) : savedObject.updates;
 
             root.updatesArray = JSON.parse(jsonString);
         }
@@ -441,9 +440,9 @@ ApplicationWindow
             for(const image of update.images)
             {
                 let outFilename = root._workingDirectory + "/" + image.filename;
-                let content = QmlUtils.byteArrayFromBase64String(image.content);
+                let content = NativeUtils.byteArrayFromBase64String(image.content);
 
-                if(!QmlUtils.writeToFile(outFilename, content))
+                if(!NativeUtils.writeToFile(outFilename, content))
                 {
                     console.log("Failed to write to " + outFilename);
                     return false;
@@ -497,11 +496,11 @@ ApplicationWindow
         let onComplete = function()
         {
             let updatesString = settings.hexEncodeUpdatesString ?
-                QmlUtils.stringAsHexString(JSON.stringify(root.updatesArray)) :
+                NativeUtils.stringAsHexString(JSON.stringify(root.updatesArray)) :
                 JSON.stringify(root.updatesArray);
 
             let updatesSignature =
-                QmlUtils.rsaSignatureForString(updatesString, settings.privateKeyFile);
+                NativeUtils.rsaSignatureForString(updatesString, settings.privateKeyFile);
 
             let saveObject =
             {
@@ -514,7 +513,7 @@ ApplicationWindow
                 console.log("Failed to sign " + fileUrl);
                 status.text = qsTr("Failed to sign");
             }
-            else if(!QmlUtils.writeToFile(QmlUtils.fileNameForUrl(fileUrl), JSON.stringify(saveObject)))
+            else if(!NativeUtils.writeToFile(NativeUtils.fileNameForUrl(fileUrl), JSON.stringify(saveObject)))
             {
                 console.log("Failed to write " + fileUrl);
                 status.text = qsTr("Failed to save");
@@ -522,7 +521,7 @@ ApplicationWindow
             else
             {
                 resetSaveRequired();
-                status.text = Utils.format(qsTr("Saved {0}"), QmlUtils.baseFileNameForUrl(fileUrl));
+                status.text = Utils.format(qsTr("Saved {0}"), NativeUtils.baseFileNameForUrl(fileUrl));
             }
 
             if(onSaveComplete !== undefined && onSaveComplete !== null)
@@ -944,7 +943,7 @@ ApplicationWindow
                     if(item.urlTextField.text.trim().length === 0)
                         return false;
 
-                    if(!QmlUtils.urlStringIsValid(item.urlTextField.text.trim()))
+                    if(!NativeUtils.urlStringIsValid(item.urlTextField.text.trim()))
                         return false;
 
                     enabledOses.push(item.osName);
@@ -988,8 +987,8 @@ ApplicationWindow
                 let match;
                 while((match = mdImageRegex.exec(updateObject.changeLog)) !== null)
                 {
-                    let image = QmlUtils.fileNameForUrl(match[1]);
-                    let encoded = QmlUtils.base64EncodingOf(root._workingDirectory + "/" + image);
+                    let image = NativeUtils.fileNameForUrl(match[1]);
+                    let encoded = NativeUtils.base64EncodingOf(root._workingDirectory + "/" + image);
                     let baseImage = image.split('/').pop().split('#')[0].split('?')[0];
 
                     updateObject.images.push({filename: baseImage, content: encoded});

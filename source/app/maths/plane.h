@@ -19,7 +19,7 @@
 #ifndef PLANE_H
 #define PLANE_H
 
-#include "maths/ray.h"
+#include "app/maths/ray.h"
 
 #include <QVector3D>
 

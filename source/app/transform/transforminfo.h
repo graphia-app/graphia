@@ -19,7 +19,7 @@
 #ifndef TRANSFORMINFO_H
 #define TRANSFORMINFO_H
 
-#include "ui/alert.h"
+#include "app/ui/alert.h"
 
 #include <vector>
 

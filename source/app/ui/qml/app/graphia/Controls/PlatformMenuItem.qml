@@ -20,6 +20,7 @@ import QtQuick
 import QtQuick.Controls
 
 import app.graphia
+import app.graphia.Utils
 
 MenuItem
 {
@@ -53,7 +54,7 @@ MenuItem
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
 
-        text: action && action.shortcut ? QmlUtils.nativeShortcutSequence(action.shortcut) : ""
+        text: action && action.shortcut ? NativeUtils.nativeShortcutSequence(action.shortcut) : ""
         color: root._textColor
     }
 

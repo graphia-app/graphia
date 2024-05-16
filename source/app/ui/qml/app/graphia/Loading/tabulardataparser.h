@@ -38,9 +38,7 @@
 class TabularDataParser;
 class QAbstractTableModel;
 
-DEFINE_QML_ENUM(
-    Q_GADGET, HeaderModelType,
-    Rows, Columns);
+enum class HeaderModelType { Rows, Columns };
 
 class TabularDataHeaderModel : public QAbstractListModel
 {

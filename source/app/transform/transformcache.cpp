@@ -18,8 +18,8 @@
 
 #include "transformcache.h"
 
-#include "graph/graphmodel.h"
-#include "transform/transformedgraph.h"
+#include "app/graph/graphmodel.h"
+#include "app/transform/transformedgraph.h"
 
 #include "shared/utils/iterator_range.h"
 #include "shared/utils/container.h"

@@ -18,8 +18,8 @@
 
 #include "transformedgraph.h"
 
-#include "graph/componentmanager.h"
-#include "graph/graphmodel.h"
+#include "app/graph/componentmanager.h"
+#include "app/graph/graphmodel.h"
 
 #include "shared/commands/icommand.h"
 #include "shared/utils/container.h"

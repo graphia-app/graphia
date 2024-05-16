@@ -88,7 +88,7 @@ BaseParameterDialog
             {
                 if(tabularDataParser.failed)
                 {
-                    let failureMessage = Utils.format(qsTr("Failed to Load {0}"), QmlUtils.baseFileNameForUrl(url));
+                    let failureMessage = Utils.format(qsTr("Failed to Load {0}"), NativeUtils.baseFileNameForUrl(url));
 
                     if(tabularDataParser.failureReason.length > 0)
                         failureMessage += Utils.format(qsTr(":\n\n{0}"), tabularDataParser.failureReason);
@@ -98,7 +98,7 @@ BaseParameterDialog
                     return failureMessage;
                 }
 
-                return Utils.format(qsTr("Loading {0}…"), QmlUtils.baseFileNameForUrl(url));
+                return Utils.format(qsTr("Loading {0}…"), NativeUtils.baseFileNameForUrl(url));
             }
         }
 
@@ -366,7 +366,7 @@ BaseParameterDialog
 
                         visible: false
 
-                        validator: RegularExpressionValidator { regularExpression: new RegExp(QmlUtils.validAttributeNameRegex) }
+                        validator: RegularExpressionValidator { regularExpression: new RegExp(NativeUtils.validAttributeNameRegex) }
                         color: attributeNameTextField.length === 0 || acceptableInput ? palette.text : Qt.red
 
                         function activate()
@@ -378,7 +378,7 @@ BaseParameterDialog
 
                         onEditingFinished:
                         {
-                            text = QmlUtils.sanitiseAttributeName(text);
+                            text = NativeUtils.sanitiseAttributeName(text);
 
                             let newParameters = Object.assign({}, root.parameters);
                             newParameters.columns[modelColumn].name = text;
@@ -509,7 +509,7 @@ BaseParameterDialog
     {
         if(visible)
         {
-            if(QmlUtils.urlIsValid(root.url))
+            if(NativeUtils.urlIsValid(root.url))
                 tabularDataParser.parse(root.url);
             else
                 console.log("ERROR: url is invalid");

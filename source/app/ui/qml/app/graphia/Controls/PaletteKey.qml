@@ -72,7 +72,7 @@ Item
     property color _contrastingColor:
     {
         if(root.enabled && mouseArea.containsMouse && root.hoverEnabled)
-            return QmlUtils.contrastingColor(hoverColor);
+            return NativeUtils.contrastingColor(hoverColor);
 
         return textColor;
     }
@@ -265,7 +265,7 @@ Item
                     elide: Text.ElideRight
                     visible: parent._hovered
 
-                    color: QmlUtils.contrastingColor(key.color)
+                    color: NativeUtils.contrastingColor(key.color)
                     text: parent.stringValue
                 }
 
@@ -278,7 +278,7 @@ Item
                     {
                         let ctx = getContext("2d");
 
-                        let stripeColor = QmlUtils.contrastingColor(key.color);
+                        let stripeColor = NativeUtils.contrastingColor(key.color);
 
                         ctx.beginPath();
                         ctx.strokeStyle = stripeColor;

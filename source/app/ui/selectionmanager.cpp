@@ -18,8 +18,8 @@
 
 #include "selectionmanager.h"
 
-#include "graph/graph.h"
-#include "graph/graphmodel.h"
+#include "app/graph/graph.h"
+#include "app/graph/graphmodel.h"
 
 #include <algorithm>
 #include <utility>

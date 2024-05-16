@@ -19,7 +19,7 @@
 #ifndef PAIRWISEEXPORTER_H
 #define PAIRWISEEXPORTER_H
 
-#include "loading/saverfactory.h"
+#include "app/loading/saverfactory.h"
 
 #include <QString>
 #include <QUrl>

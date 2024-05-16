@@ -20,11 +20,11 @@
 #define IATTRIBUTE_H
 
 #include "iattributerange.h"
+#include "attributeflag.h"
 #include "valuetype.h"
 
 #include "shared/graph/elementid.h"
 #include "shared/graph/elementtype.h"
-#include "shared/utils/qmlenum.h"
 
 #include <functional>
 #include <vector>
@@ -32,28 +32,6 @@
 
 #include <QString>
 #include <QVariant>
-
-DEFINE_QML_ENUM(
-    Q_GADGET, AttributeFlag,
-    None                    = 0x0,
-
-    // Automatically set the range
-    AutoRange               = 0x1,
-
-    // Visualise on a per-component basis, by default
-    VisualiseByComponent    = 0x2,
-
-    // Indicates this is a dynamically created attribute; set automatically
-    Dynamic                 = 0x4,
-
-    // Track the set of shared values held by the attribute
-    FindShared              = 0x8,
-
-    // Can't be used during transform
-    DisableDuringTransform  = 0x10,
-
-    // Can be searched by the various find methods
-    Searchable              = 0x20);
 
 class IGraphComponent;
 

@@ -18,7 +18,7 @@
 
 #include "typecasttransform.h"
 
-#include "graph/graphmodel.h"
+#include "app/graph/graphmodel.h"
 
 #include <memory>
 

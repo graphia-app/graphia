@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.19)
 
 if(NOT "$ENV{PRODUCT_NAME}" STREQUAL "")
     project($ENV{PRODUCT_NAME} LANGUAGES C CXX ASM)

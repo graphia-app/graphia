@@ -23,7 +23,6 @@
 #include "shared/graph/igraph.h"
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"
-#include "ui/document.h"
 
 #include <json_helper.h>
 

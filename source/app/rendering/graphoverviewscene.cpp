@@ -20,16 +20,14 @@
 #include "graphrenderer.h"
 #include "graphcomponentrenderer.h"
 
-#include "graph/graph.h"
-#include "graph/graphmodel.h"
+#include "app/graph/graph.h"
+#include "app/graph/graphmodel.h"
 
-#include "layout/nodepositions.h"
-#include "layout/powerof2gridcomponentlayout.h"
-#include "layout/circlepackcomponentlayout.h"
+#include "app/layout/nodepositions.h"
+#include "app/layout/powerof2gridcomponentlayout.h"
+#include "app/layout/circlepackcomponentlayout.h"
 
-#include "commands/commandmanager.h"
-
-#include "ui/graphquickitem.h"
+#include "app/commands/commandmanager.h"
 
 #include "shared/utils/utils.h"
 #include "shared/utils/container.h"

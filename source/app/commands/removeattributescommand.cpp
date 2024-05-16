@@ -18,7 +18,7 @@
 
 #include "removeattributescommand.h"
 
-#include "graph/graphmodel.h"
+#include "app/graph/graphmodel.h"
 
 #include "shared/loading/userelementdata.h"
 

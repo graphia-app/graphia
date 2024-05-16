@@ -18,9 +18,9 @@
 
 #include "averageattributetransform.h"
 
-#include "transform/transformedgraph.h"
+#include "app/transform/transformedgraph.h"
 
-#include "graph/graphmodel.h"
+#include "app/graph/graphmodel.h"
 
 #include <memory>
 #include <type_traits>

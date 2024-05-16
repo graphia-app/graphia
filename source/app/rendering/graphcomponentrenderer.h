@@ -21,9 +21,9 @@
 
 #include "camera.h"
 #include "transition.h"
-#include "projection.h"
+#include "graphrenderertypes.h"
 
-#include "maths/boundingbox.h"
+#include "app/maths/boundingbox.h"
 
 #include "shared/graph/igraph.h"
 #include "shared/graph/grapharray.h"

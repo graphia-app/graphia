@@ -28,15 +28,15 @@
 #include "shared/utils/container.h"
 #include "shared/utils/doasyncthen.h"
 
-#include "graph/graph.h"
-#include "graph/graphmodel.h"
+#include "app/graph/graph.h"
+#include "app/graph/graphmodel.h"
 
-#include "ui/graphcomponentinteractor.h"
-#include "ui/graphoverviewinteractor.h"
-#include "ui/graphquickitem.h"
-#include "ui/selectionmanager.h"
-#include "ui/visualisations/elementvisual.h"
-#include "ui/visualisations/textvisual.h"
+#include "app/ui/graphcomponentinteractor.h"
+#include "app/ui/graphoverviewinteractor.h"
+#include "app/ui/selectionmanager.h"
+#include "app/ui/visualisations/elementvisual.h"
+#include "app/ui/visualisations/textvisual.h"
+#include "app/ui/qml/app/graphia/graphdisplay.h"
 
 #include "shadertools.h"
 #include "screenshotrenderer.h"
@@ -1103,13 +1103,13 @@ void GraphRenderer::updateScene()
     }
 }
 
-GraphRenderer::Mode GraphRenderer::bestFocusParameters(GraphQuickItem* graphQuickItem,
+GraphRenderer::Mode GraphRenderer::bestFocusParameters(GraphDisplay* graphDisplay,
     ComponentIdSet& componentIds, NodeId& focusNodeId, float& radius) const
 {
     radius = 0.0f;
     focusNodeId = {};
 
-    auto nodeIds = graphQuickItem->desiredFocusNodeIds();
+    auto nodeIds = graphDisplay->desiredFocusNodeIds();
 
     // Tail nodes aren't visible, so they can't be focused
     nodeIds.erase(std::remove_if(nodeIds.begin(), nodeIds.end(),
@@ -1226,23 +1226,23 @@ void GraphRenderer::synchronize(QQuickFramebufferObject* item)
 {
     _devicePixelRatio = item->window()->devicePixelRatio();
 
-    auto* graphQuickItem = qobject_cast<GraphQuickItem*>(item);
+    auto* graphDisplay = qobject_cast<GraphDisplay*>(item);
 
-    if(graphQuickItem->viewResetPending())
+    if(graphDisplay->viewResetPending())
         resetView();
 
-    if(graphQuickItem->overviewModeSwitchPending())
+    if(graphDisplay->overviewModeSwitchPending())
         switchToOverviewMode();
 
-    setProjection(graphQuickItem->projection());
-    setShading(graphQuickItem->projection() == Projection::TwoDee ?
-        graphQuickItem->shading2D() : graphQuickItem->shading3D());
+    setProjection(graphDisplay->projection());
+    setShading(graphDisplay->projection() == Projection::TwoDee ?
+        graphDisplay->shading2D() : graphDisplay->shading3D());
 
     ComponentIdSet componentIds;
     NodeId focusNodeId;
     float radius = GraphComponentRenderer::COMFORTABLE_ZOOM_RADIUS;
-    auto targetMode = bestFocusParameters(graphQuickItem, componentIds, focusNodeId, radius);
-    const ComponentId focusComponentId = graphQuickItem->desiredFocusComponentId();
+    auto targetMode = bestFocusParameters(graphDisplay, componentIds, focusNodeId, radius);
+    const ComponentId focusComponentId = graphDisplay->desiredFocusComponentId();
 
     if(mode() == Mode::Component && targetMode == Mode::Overview)
         switchToOverviewMode(true, u::vectorFrom(componentIds));
@@ -1258,9 +1258,9 @@ void GraphRenderer::synchronize(QQuickFramebufferObject* item)
     else if(mode() == Mode::Overview && !componentIds.empty())
         moveFocusToComponents(u::vectorFrom(componentIds));
 
-    ifSceneUpdateEnabled([this, &graphQuickItem]
+    ifSceneUpdateEnabled([this, &graphDisplay]
     {
-        auto& newEvents = graphQuickItem->events();
+        auto& newEvents = graphDisplay->events();
         while(!newEvents.empty())
         {
             _eventQueue.push(std::move(newEvents.front()));
@@ -1269,12 +1269,12 @@ void GraphRenderer::synchronize(QQuickFramebufferObject* item)
     });
 
     // Tell the QuickItem what we're doing
-    graphQuickItem->setViewIsReset(viewIsReset());
-    graphQuickItem->setCanEnterOverviewMode(mode() != Mode::Overview && _numComponents > 1);
-    graphQuickItem->setInOverviewMode(mode() == Mode::Overview);
+    graphDisplay->setViewIsReset(viewIsReset());
+    graphDisplay->setCanEnterOverviewMode(mode() != Mode::Overview && _numComponents > 1);
+    graphDisplay->setInOverviewMode(mode() == Mode::Overview);
 
     const ComponentId focusedComponentId = mode() != Mode::Overview ? _graphComponentScene->componentId() : ComponentId();
-    graphQuickItem->setFocusedComponentId(focusedComponentId);
+    graphDisplay->setFocusedComponentId(focusedComponentId);
 
     emit synchronizeComplete();
 }

@@ -20,8 +20,8 @@
 #define TRANSFORMCACHE_H
 
 #include "graphtransformconfig.h"
-#include "graph/mutablegraph.h"
-#include "attributes/attribute.h"
+#include "app/graph/mutablegraph.h"
+#include "app/attributes/attribute.h"
 
 #include <vector>
 

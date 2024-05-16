@@ -19,7 +19,7 @@
 #ifndef SCENE_H
 #define SCENE_H
 
-#include "projection.h"
+#include "graphrenderertypes.h"
 
 #include <QObject>
 

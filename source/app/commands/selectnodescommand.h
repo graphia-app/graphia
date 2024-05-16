@@ -24,7 +24,7 @@
 #include "shared/graph/elementid.h"
 #include "shared/utils/flags.h"
 
-#include "ui/selectionmanager.h"
+#include "app/ui/selectionmanager.h"
 
 #include <memory>
 #include <array>

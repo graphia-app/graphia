@@ -19,7 +19,7 @@
 #ifndef PREFERENCESWATCHER_H
 #define PREFERENCESWATCHER_H
 
-#include "preferences.h"
+#include "app/preferences.h"
 
 #include <QObject>
 #include <QString>

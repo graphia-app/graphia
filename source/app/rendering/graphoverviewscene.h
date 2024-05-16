@@ -22,13 +22,13 @@
 #include "scene.h"
 #include "transition.h"
 
-#include "graph/componentmanager.h"
+#include "app/graph/componentmanager.h"
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/grapharray.h"
 
 #include "app/preferenceswatcher.h"
 
-#include "layout/componentlayout.h"
+#include "app/layout/componentlayout.h"
 
 #include <vector>
 #include <mutex>

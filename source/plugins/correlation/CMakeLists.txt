@@ -33,7 +33,6 @@ list(APPEND SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/correlationdatavector.cpp
     ${CMAKE_CURRENT_LIST_DIR}/correlationnodeattributetablemodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/correlationplugin.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/correlationtype.cpp
     ${CMAKE_CURRENT_LIST_DIR}/featurescaling.cpp
     ${CMAKE_CURRENT_LIST_DIR}/hierarchicalclusteringcommand.cpp
     ${CMAKE_CURRENT_LIST_DIR}/importannotationscommand.cpp

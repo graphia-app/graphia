@@ -18,9 +18,9 @@
 
 #include "searchmanager.h"
 
-#include "graph/graph.h"
-#include "graph/graphmodel.h"
-#include "attributes/conditionfncreator.h"
+#include "app/graph/graph.h"
+#include "app/graph/graphmodel.h"
+#include "app/attributes/conditionfncreator.h"
 
 #include "shared/utils/container.h"
 

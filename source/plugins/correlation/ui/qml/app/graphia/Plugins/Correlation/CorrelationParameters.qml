@@ -76,7 +76,7 @@ BaseParameterDialog
             else if(dataRect.appearsToBeContinuous)
                 dataTypeComboBox.setContinuous();
 
-            clippingValueText.text = QmlUtils.formatNumber(dataRect.maxValue);
+            clippingValueText.text = NativeUtils.formatNumber(dataRect.maxValue);
 
             estimateGraphSize(parameters);
         }
@@ -135,7 +135,7 @@ BaseParameterDialog
 
             text: Utils.format(tabularDataParser.failed ?
                 qsTr("Failed to Load {0}.") : qsTr("Loading {0}…"),
-                QmlUtils.baseFileNameForUrl(url))
+                NativeUtils.baseFileNameForUrl(url))
         }
 
         RowLayout
@@ -205,7 +205,7 @@ BaseParameterDialog
                             "used to determine whether or not an edge is created between the nodes representing rows of data.<br>" +
                             "<br>" +
                             "The edges may be filtered using transforms once the graph has been created."),
-                            QmlUtils.redirectLink("correlation_coef", qsTr("correlation coefficient")))
+                            NativeUtils.redirectLink("correlation_coef", qsTr("correlation coefficient")))
 
                         wrapMode: Text.WordWrap
                         textFormat: Text.StyledText
@@ -1667,7 +1667,7 @@ BaseParameterDialog
                             for(const transform of templateComboBox.transforms)
                             {
                                 let transformText = root.plugin.displayTextForTransform(transform);
-                                transformText = QmlUtils.htmlEscape(transformText);
+                                transformText = NativeUtils.htmlEscape(transformText);
                                 s += indentString + transformText + "<br>";
                             }
 
@@ -1680,7 +1680,7 @@ BaseParameterDialog
                             for(const visualisation of templateComboBox.visualisations)
                             {
                                 let visualisationText = root.plugin.displayTextForVisualisation(visualisation);
-                                visualisationText = QmlUtils.htmlEscape(visualisationText);
+                                visualisationText = NativeUtils.htmlEscape(visualisationText);
                                 s += indentString + visualisationText + "<br>";
                             }
 
@@ -1743,12 +1743,12 @@ BaseParameterDialog
                         {
                             if(filterTypeComboBox.value === CorrelationFilterType.Threshold)
                             {
-                                summaryString += Utils.format(qsTr("Minimum Correlation Value: {0}<br>"), QmlUtils.formatNumberScientific(minimumThresholdSpinBox.value));
-                                summaryString += Utils.format(qsTr("Initial Correlation Threshold: {0}<br>"), QmlUtils.formatNumberScientific(initialThresholdSpinBox.value));
+                                summaryString += Utils.format(qsTr("Minimum Correlation Value: {0}<br>"), NativeUtils.formatNumberScientific(minimumThresholdSpinBox.value));
+                                summaryString += Utils.format(qsTr("Initial Correlation Threshold: {0}<br>"), NativeUtils.formatNumberScientific(initialThresholdSpinBox.value));
                             }
                             else if(filterTypeComboBox.value === CorrelationFilterType.Knn)
                             {
-                                summaryString += Utils.format(qsTr("Minimum Correlation Value: {0}<br>"), QmlUtils.formatNumberScientific(minimumThresholdSpinBox.value));
+                                summaryString += Utils.format(qsTr("Minimum Correlation Value: {0}<br>"), NativeUtils.formatNumberScientific(minimumThresholdSpinBox.value));
                                 summaryString += Utils.format(qsTr("Maximum k Value: {0}<br>"), maximumKnnSpinBox.value);
                                 summaryString += Utils.format(qsTr("Initial k Value: {0}<br>"), initialKnnSpinBox.value);
                             }
@@ -1820,7 +1820,7 @@ BaseParameterDialog
                                 edgesFont = warningFont;
 
                             summaryString += Utils.format(qsTr("{0}{3} Nodes{2}, {1}{4} Edges{2}"), nodesFont, edgesFont, "</font>",
-                                QmlUtils.formatNumberSIPostfix(numNodes), QmlUtils.formatNumberSIPostfix(numEdges));
+                                NativeUtils.formatNumberSIPostfix(numNodes), NativeUtils.formatNumberSIPostfix(numEdges));
 
                             if(numNodes > warningThreshold || numEdges > warningThreshold)
                             {
@@ -1975,7 +1975,7 @@ BaseParameterDialog
     {
         if(visible)
         {
-            if(QmlUtils.urlIsValid(root.url) && root.type.length !== 0)
+            if(NativeUtils.urlIsValid(root.url) && root.type.length !== 0)
                 tabularDataParser.parse(root.url, root.type);
             else
                 console.log("ERROR: url or type is empty");

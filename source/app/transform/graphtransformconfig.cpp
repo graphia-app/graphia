@@ -19,7 +19,7 @@
 #include "graphtransformconfig.h"
 #include "graphtransformconfigparser.h"
 
-#include "attributes/attribute.h"
+#include "app/attributes/attribute.h"
 
 #include "shared/utils/container.h"
 

@@ -100,8 +100,6 @@ public:
     static QString contentIdentityOf(const QUrl& url);
 };
 
-Q_DECLARE_METATYPE(std::shared_ptr<TabularData>)
-
 enum class EmptyCellPolicy { Keep, Skip };
 
 template<EmptyCellPolicy ECP, const char... Delimiters>

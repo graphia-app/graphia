@@ -19,8 +19,8 @@
 #ifndef COMBINEATTRIBUTESTRANSFORM_H
 #define COMBINEATTRIBUTESTRANSFORM_H
 
-#include "transform/graphtransform.h"
-#include "attributes/attribute.h"
+#include "app/transform/graphtransform.h"
+#include "app/attributes/attribute.h"
 
 class CombineAttributesTransform : public GraphTransform
 {

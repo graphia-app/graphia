@@ -25,10 +25,10 @@
 #include "shared/graph/igraphcomponent.h"
 #include "shared/graph/elementid_containers.h"
 
-#include "graph/graphmodel.h"
+#include "app/graph/graphmodel.h"
 
-#include "transform/graphtransformconfig.h"
-#include "transform/graphtransformconfigparser.h"
+#include "app/transform/graphtransformconfig.h"
+#include "app/transform/graphtransformconfigparser.h"
 #include "attribute.h"
 
 #include <boost/variant/static_visitor.hpp>

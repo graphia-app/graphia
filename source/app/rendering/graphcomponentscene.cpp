@@ -23,12 +23,10 @@
 
 #include "shared/utils/scope_exit.h"
 
-#include "graph/graph.h"
-#include "graph/graphmodel.h"
+#include "app/graph/graph.h"
+#include "app/graph/graphmodel.h"
 
-#include "layout/nodepositions.h"
-
-#include "ui/graphquickitem.h"
+#include "app/layout/nodepositions.h"
 
 using namespace Qt::Literals::StringLiterals;
 

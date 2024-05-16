@@ -18,7 +18,7 @@
 
 #include "camera.h"
 
-#include "maths/interpolation.h"
+#include "app/maths/interpolation.h"
 
 #include <QOpenGLShaderProgram>
 #include <QDebug>

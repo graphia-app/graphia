@@ -19,8 +19,8 @@
 #ifndef VISUALISATIONCHANNEL_H
 #define VISUALISATIONCHANNEL_H
 
-#include "ui/visualisations/elementvisual.h"
-#include "ui/visualisations/textvisual.h"
+#include "app/ui/visualisations/elementvisual.h"
+#include "app/ui/visualisations/textvisual.h"
 #include "shared/attributes/valuetype.h"
 #include "shared/graph/elementtype.h"
 

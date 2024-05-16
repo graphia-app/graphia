@@ -18,8 +18,8 @@
 
 #include "betweennesstransform.h"
 
-#include "transform/transformedgraph.h"
-#include "graph/graphmodel.h"
+#include "app/transform/transformedgraph.h"
+#include "app/graph/graphmodel.h"
 
 #include "shared/graph/grapharray.h"
 #include "shared/utils/threadpool.h"

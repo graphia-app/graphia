@@ -22,24 +22,21 @@
 #include "opengldebuglogger.h"
 #include "openglfunctions.h"
 #include "graphrenderercore.h"
+#include "graphrenderertypes.h"
 #include "graphcomponentrenderer.h"
 #include "transition.h"
 #include "glyphmap.h"
 #include "doublebufferedtexture.h"
-#include "projection.h"
-#include "shading.h"
 
 #include "shared/graph/elementid_containers.h"
 #include "shared/graph/grapharray.h"
-#include "graph/qmlelementid.h"
+#include "app/graph/qmlelementid.h"
 
 #include "shared/utils/movablepointer.h"
 #include "shared/utils/deferredexecutor.h"
 #include "shared/utils/performancecounter.h"
 
 #include "app/preferenceswatcher.h"
-
-#include "shared/utils/qmlenum.h"
 
 #include <QObject>
 #include <QElapsedTimer>
@@ -60,7 +57,7 @@
 #include <queue>
 
 class Graph;
-class GraphQuickItem;
+class GraphDisplay;
 class GraphModel;
 class CommandManager;
 class SelectionManager;
@@ -75,17 +72,6 @@ class GraphOverviewInteractor;
 class GraphComponentInteractor;
 
 class ICommand;
-
-DEFINE_QML_ENUM(
-    Q_GADGET, TextAlignment,
-    Right, Left, Centre,
-    Top, Bottom);
-DEFINE_QML_ENUM(
-    Q_GADGET, TextState,
-    Off, Selected, All, Focused);
-DEFINE_QML_ENUM(
-    Q_GADGET, EdgeVisualType,
-    Cylinder, Arrow);
 
 template<typename Target>
 void initialiseFromGraph(const Graph*, Target&); // NOLINT readability-redundant-declaration
@@ -276,7 +262,7 @@ private:
 
     void updateScene();
 
-    Mode bestFocusParameters(GraphQuickItem* graphQuickItem, ComponentIdSet& componentIds,
+    Mode bestFocusParameters(GraphDisplay* graphDisplay, ComponentIdSet& componentIds,
         NodeId& focusNodeId, float& radius) const;
 
     QOpenGLFramebufferObject* createFramebufferObject(const QSize& size) override;

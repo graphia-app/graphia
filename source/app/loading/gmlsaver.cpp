@@ -19,7 +19,6 @@
 #include "gmlsaver.h"
 
 #include "shared/graph/imutablegraph.h"
-#include "ui/document.h"
 
 #include <QFile>
 #include <QRegularExpression>

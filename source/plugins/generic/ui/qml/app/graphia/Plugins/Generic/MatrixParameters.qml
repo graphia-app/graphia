@@ -99,7 +99,7 @@ BaseParameterDialog
             {
                 if(tabularDataParser.failed)
                 {
-                    let failureMessage = Utils.format(qsTr("Failed to Load {0}"), QmlUtils.baseFileNameForUrl(url));
+                    let failureMessage = Utils.format(qsTr("Failed to Load {0}"), NativeUtils.baseFileNameForUrl(url));
 
                     if(tabularDataParser.failureReason.length > 0)
                         failureMessage += Utils.format(qsTr(":\n\n{0}"), tabularDataParser.failureReason);
@@ -109,7 +109,7 @@ BaseParameterDialog
                     return failureMessage;
                 }
 
-                return Utils.format(qsTr("Loading {0}…"), QmlUtils.baseFileNameForUrl(url));
+                return Utils.format(qsTr("Loading {0}…"), NativeUtils.baseFileNameForUrl(url));
             }
         }
 
@@ -425,7 +425,7 @@ BaseParameterDialog
                             edgesFont = warningFont;
 
                         summaryString += Utils.format(qsTr("{0}{3} Nodes{2}, {1}{4} Edges{2}"), nodesFont, edgesFont, "</font>",
-                            QmlUtils.formatNumberSIPostfix(numNodes), QmlUtils.formatNumberSIPostfix(numEdges));
+                            NativeUtils.formatNumberSIPostfix(numNodes), NativeUtils.formatNumberSIPostfix(numEdges));
 
                         if(numNodes > warningThreshold || numEdges > warningThreshold)
                         {
@@ -516,7 +516,7 @@ BaseParameterDialog
             ignoreDuplicateEdgesCheckbox.checked = false;
             filterEdgesCheckbox.checked = false;
 
-            if(QmlUtils.urlIsValid(root.url))
+            if(NativeUtils.urlIsValid(root.url))
                 tabularDataParser.parse(root.url);
             else
                 console.log("ERROR: url is invalid");

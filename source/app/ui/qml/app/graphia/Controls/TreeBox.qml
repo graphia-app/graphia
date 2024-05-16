@@ -180,10 +180,10 @@ Item
                         return -1;
 
                     if(root.sectionRoleName.length > 0)
-                        return QmlUtils.modelRoleForName(root.model, root.sectionRoleName);
+                        return NativeUtils.modelRoleForName(root.model, root.sectionRoleName);
 
                     if(root.sortRoleName.length > 0)
-                        return QmlUtils.modelRoleForName(root.model, root.sortRoleName);
+                        return NativeUtils.modelRoleForName(root.model, root.sortRoleName);
 
                     return -1;
                 }

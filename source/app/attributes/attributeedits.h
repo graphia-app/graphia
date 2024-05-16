@@ -22,9 +22,7 @@
 #include "shared/graph/elementid.h"
 #include "shared/graph/elementid_containers.h"
 
-#include "shared/utils/static_block.h"
-
-#include <QMetaType>
+#include <QQmlEngine>
 #include <QString>
 
 #include <map>
@@ -32,6 +30,7 @@
 class AttributeEdits
 {
     Q_GADGET
+    QML_ANONYMOUS
 
     friend class EditAttributeTableModel;
     friend class EditAttributeCommand;
@@ -44,10 +43,5 @@ public:
     auto nodeValues() const { return _nodeValues; }
     auto edgeValues() const { return _edgeValues; }
 };
-
-static_block
-{
-    qRegisterMetaType<AttributeEdits>("AttributeEdits");
-}
 
 #endif // ATTRIBUTEEDITS_H

@@ -24,11 +24,11 @@
 #include "visualisationinfo.h"
 #include "visualisationmapping.h"
 
-#include "graph/graph.h"
+#include "app/graph/graph.h"
 #include "shared/graph/grapharray.h"
 #include "shared/utils/utils.h"
 #include "shared/utils/container.h"
-#include "attributes/attribute.h"
+#include "app/attributes/attribute.h"
 
 #include <vector>
 #include <array>

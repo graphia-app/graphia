@@ -21,7 +21,7 @@
 
 #include "shared/graph/igraphcomponent.h"
 #include "shared/graph/elementid_containers.h"
-#include "graph/componentmanager.h"
+#include "app/graph/componentmanager.h"
 #include "nodepositions.h"
 
 #include "shared/utils/performancecounter.h"

@@ -18,12 +18,11 @@
 
 #include "graphmlsaver.h"
 
-#include "graph/graph.h"
-#include "graph/graphmodel.h"
-#include "layout/nodepositions.h"
+#include "app/graph/graph.h"
+#include "app/graph/graphmodel.h"
+#include "app/layout/nodepositions.h"
 #include "shared/attributes/iattribute.h"
 #include "shared/graph/imutablegraph.h"
-#include "ui/document.h"
 
 #include <QFile>
 #include <QString>

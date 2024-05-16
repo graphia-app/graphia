@@ -19,22 +19,11 @@
 #ifndef QMLENUM_H
 #define QMLENUM_H
 
+#include <QObject>
 #include <QQmlEngine>
-#include <QCoreApplication>
-#include <QTimer>
 #include <QVariant>
 
 #include <string>
-
-#ifndef APP_URI
-#define APP_URI "uri.missing"
-#endif
-#ifndef APP_MAJOR_VERSION
-#define APP_MAJOR_VERSION (-1)
-#endif
-#ifndef APP_MINOR_VERSION
-#define APP_MINOR_VERSION (-1)
-#endif
 
 constexpr bool static_strcmp(char const* a, char const* b)
 {
@@ -50,41 +39,17 @@ constexpr bool static_strcmp(char const* a, char const* b)
 #define _REFLECTOR(x) x ## _reflector
 #define QML_ENUM_PROPERTY(x) _REFLECTOR(x)::Enum
 
-#define DEFINE_QML_ENUM(_Q_GADGET, ENUM_NAME, ...) \
-    static_assert(static_strcmp(#_Q_GADGET, "Q_GADGET"), \
-        "First parameter to DEFINE_QML_ENUM must be Q_GADGET"); \
-    class _REFLECTOR(ENUM_NAME) \
+#define DEFINE_QML_ENUM(_Q_OBJECT, ENUM_NAME, ...) \
+    static_assert(static_strcmp(#_Q_OBJECT, "Q_OBJECT"), \
+        "First parameter to DEFINE_QML_ENUM must be Q_OBJECT"); \
+    class _REFLECTOR(ENUM_NAME) : public QObject \
     { \
-        _Q_GADGET \
-    public: \
-        enum class Enum {__VA_ARGS__, Max}; Q_ENUM(Enum) \
-        static void initialise() \
-        { \
-            static bool initialised = false; \
-            if(initialised) \
-                return; \
-            initialised = true; \
-            qmlRegisterUncreatableMetaObject(_REFLECTOR(ENUM_NAME)::staticMetaObject, \
-                APP_URI, \
-                APP_MAJOR_VERSION, \
-                APP_MINOR_VERSION, \
-                #ENUM_NAME, {}); \
-            qRegisterMetaType<_REFLECTOR(ENUM_NAME)::Enum>(#ENUM_NAME); \
-        } \
+        _Q_OBJECT \
+        QML_NAMED_ELEMENT(ENUM_NAME) \
+        QML_UNCREATABLE("") \
+        public: \
+        enum Enum {__VA_ARGS__, Max}; Q_ENUM(Enum) \
     }; \
-    static void ENUM_NAME ## _initialiser() \
-    { \
-        if(!QCoreApplication::instance()->startingUp()) \
-        { \
-            /* This will only occur from a DLL, where we need to delay the \
-            initialisation until later so we can guarantee it occurs \
-            after any static initialisation */ \
-            QTimer::singleShot(0, [] { _REFLECTOR(ENUM_NAME)::initialise(); }); \
-        } \
-        else \
-            _REFLECTOR(ENUM_NAME)::initialise(); \
-    } \
-    Q_COREAPP_STARTUP_FUNCTION(ENUM_NAME ## _initialiser) \
     inline bool operator&(QML_ENUM_PROPERTY(ENUM_NAME) lhs, \
         QML_ENUM_PROPERTY(ENUM_NAME) rhs) \
     { \
@@ -134,13 +99,13 @@ QmlEnumType qmlEnumFor(const QVariant& v)
 Example:
 
 DEFINE_QML_ENUM(
-    Q_GADGET, Enumeration,
+    Q_OBJECT, Enumeration,
     First,
     Second,
     Third)
 
-Note: the first parameter must be Q_GADGET, so that the build system knows
-to generate a moc_ file, and because the scanner is a bit rubbish, Q_GADGET
+Note: the first parameter must be Q_OBJECT, so that the build system knows
+to generate a moc_ file, and because the scanner is a bit rubbish, Q_OBJECT
 must be the first thing on a line
 */
 

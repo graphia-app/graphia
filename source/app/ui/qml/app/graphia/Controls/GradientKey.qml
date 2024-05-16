@@ -48,7 +48,7 @@ Item
     property color _contrastingColor:
     {
         if(root.enabled && mouseArea.containsMouse && hoverEnabled)
-            return QmlUtils.contrastingColor(hoverColor);
+            return NativeUtils.contrastingColor(hoverColor);
 
         return textColor;
     }
@@ -136,9 +136,9 @@ Item
             text:
             {
                 if(mappedMinimum > minimum)
-                    return "≤ " + QmlUtils.formatNumberScientific(root.mappedMinimum);
+                    return "≤ " + NativeUtils.formatNumberScientific(root.mappedMinimum);
 
-                return QmlUtils.formatNumberScientific(root.minimum);
+                return NativeUtils.formatNumberScientific(root.minimum);
             }
             color: root._contrastingColor
         }
@@ -178,9 +178,9 @@ Item
             text:
             {
                 if(mappedMaximum < maximum)
-                    return "≥ " + QmlUtils.formatNumberScientific(root.mappedMaximum);
+                    return "≥ " + NativeUtils.formatNumberScientific(root.mappedMaximum);
 
-                return QmlUtils.formatNumberScientific(root.maximum);
+                return NativeUtils.formatNumberScientific(root.maximum);
             }
             color: root._contrastingColor
         }

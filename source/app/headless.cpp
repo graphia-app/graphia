@@ -18,7 +18,7 @@
 
 #include "headless.h"
 
-#include "application.h"
+#include "app/application.h"
 #include "app/ui/document.h"
 
 #include "shared/utils/container.h"

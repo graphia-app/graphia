@@ -21,7 +21,7 @@
 
 #include "shared/utils/string.h"
 
-#include "rendering/graphrenderer.h"
+#include "app/rendering/graphrenderer.h"
 
 #include "app/preferences.h"
 

@@ -18,11 +18,11 @@
 
 #include "pageranktransform.h"
 
-#include "transform/transformedgraph.h"
+#include "app/transform/transformedgraph.h"
 
-#include "graph/graphcomponent.h"
-#include "graph/graphmodel.h"
-#include "graph/componentmanager.h"
+#include "app/graph/graphcomponent.h"
+#include "app/graph/graphmodel.h"
+#include "app/graph/componentmanager.h"
 
 #include <blaze/Blaze.h>
 

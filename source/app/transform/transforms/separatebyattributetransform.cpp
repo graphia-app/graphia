@@ -17,9 +17,9 @@
  */
 
 #include "separatebyattributetransform.h"
-#include "transform/transformedgraph.h"
-#include "attributes/conditionfncreator.h"
-#include "graph/graphmodel.h"
+#include "app/transform/transformedgraph.h"
+#include "app/attributes/conditionfncreator.h"
+#include "app/graph/graphmodel.h"
 
 #include "shared/utils/string.h"
 

@@ -20,7 +20,7 @@
 #define COMPONENTLAYOUT_H
 
 #include "shared/graph/grapharray.h"
-#include "maths/circle.h"
+#include "app/maths/circle.h"
 
 #include <QRectF>
 

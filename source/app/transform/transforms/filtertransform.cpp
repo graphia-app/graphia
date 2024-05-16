@@ -17,12 +17,12 @@
  */
 
 #include "filtertransform.h"
-#include "transform/transformedgraph.h"
-#include "attributes/conditionfncreator.h"
+#include "app/transform/transformedgraph.h"
+#include "app/attributes/conditionfncreator.h"
 
-#include "graph/graphmodel.h"
-#include "graph/graphcomponent.h"
-#include "graph/componentmanager.h"
+#include "app/graph/graphmodel.h"
+#include "app/graph/graphcomponent.h"
+#include "app/graph/componentmanager.h"
 
 #include "shared/utils/utils.h"
 #include "shared/utils/string.h"

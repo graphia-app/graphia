@@ -1,3 +1,5 @@
+include(${CMAKE_SOURCE_DIR}/source/common.cmake)
+
 find_package(Qt6 COMPONENTS REQUIRED Quick)
 
 set_source_files_properties(FontPointSize.qml PROPERTIES
@@ -68,6 +70,7 @@ qt_add_qml_module(controls_qml
         hovermousepassthrough.h hovermousepassthrough.cpp
         namedicon.h namedicon.cpp
         outline.h outline.cpp
+        visualisationmappingplot.h visualisationmappingplot.cpp
 )
 
 target_link_libraries(controls_qml

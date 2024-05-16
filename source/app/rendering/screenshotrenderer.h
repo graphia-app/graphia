@@ -19,7 +19,7 @@
 #ifndef SCREENSHOTRENDERER_H
 #define SCREENSHOTRENDERER_H
 
-#include "graph/graphmodel.h"
+#include "app/graph/graphmodel.h"
 #include "graphrenderer.h"
 #include "graphrenderercore.h"
 #include "graphcomponentrenderer.h"

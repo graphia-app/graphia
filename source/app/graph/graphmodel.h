@@ -27,7 +27,7 @@
 
 #include "app/preferenceswatcher.h"
 
-#include "attributes/attribute.h"
+#include "app/attributes/attribute.h"
 
 #include <QSet>
 #include <QString>

@@ -18,7 +18,6 @@
 
 #include "build_defines.h"
 
-#include "shared/utils/qmlutils.h"
 #include "shared/utils/preferences.h"
 #include "shared/utils/static_block.h"
 
@@ -45,9 +44,6 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
     QCoreApplication::setApplicationVersion(QStringLiteral(VERSION));
     QSettings::setDefaultFormat(QSettings::Format::IniFormat);
-
-    qmlRegisterSingletonType<QmlUtils>(APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION,
-        "QmlUtils", &QmlUtils::qmlInstance);
 
     QIcon mainIcon;
     mainIcon.addFile(u":/qt/qml/app/graphia/UpdateEditor/Icon512x512.png"_s);

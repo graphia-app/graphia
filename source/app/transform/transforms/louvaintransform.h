@@ -19,7 +19,7 @@
 #ifndef LOUVAINTRANSFORM_H
 #define LOUVAINTRANSFORM_H
 
-#include "transform/graphtransform.h"
+#include "app/transform/graphtransform.h"
 
 #include "shared/utils/flags.h"
 #include "shared/utils/redirects.h"

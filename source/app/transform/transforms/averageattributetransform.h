@@ -19,8 +19,8 @@
 #ifndef AVERAGEATTRIBUTETRANSFORM_H
 #define AVERAGEATTRIBUTETRANSFORM_H
 
-#include "transform/graphtransform.h"
-#include "attributes/attribute.h"
+#include "app/transform/graphtransform.h"
+#include "app/attributes/attribute.h"
 
 class AverageAttributeTransform : public GraphTransform
 {
