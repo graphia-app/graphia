@@ -19,10 +19,6 @@ list(GET QT_VERSION_LIST 2 QT_PATCH)
 math(EXPR QT_VERSION_HEX "(${QT_MAJOR} << 16) + (${QT_MINOR} << 8) + ${QT_PATCH}")
 add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=${QT_VERSION_HEX})
 
-add_definitions(-DAPP_URI="app.graphia")
-add_definitions(-DAPP_MINOR_VERSION=0)
-add_definitions(-DAPP_MAJOR_VERSION=1)
-
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/build_defines.h "// This file contains defines created by the build system\n \
     \n// NOLINTBEGIN(cppcoreguidelines-macro-usage)\n\n")
 

@@ -43,16 +43,6 @@
 #include <vector>
 #include <memory>
 
-#ifndef APP_URI
-#define APP_URI "uri.missing"
-#endif
-#ifndef APP_MAJOR_VERSION
-#define APP_MAJOR_VERSION (-1)
-#endif
-#ifndef APP_MINOR_VERSION
-#define APP_MINOR_VERSION (-1)
-#endif
-
 class GraphModel;
 class IParser;
 class ISaverFactory;
@@ -211,10 +201,6 @@ public:
     Q_INVOKABLE UrlTypeDetailsModel* urlTypeDetailsModel() const;
     Q_INVOKABLE PluginDetailsModel* pluginDetailsModel() const;
 
-    static const char* uri() { return _uri; }
-    static int majorVersion() { return _majorVersion; }
-    static int minorVersion() { return _minorVersion; }
-
     Q_INVOKABLE void checkForUpdates();
 
     Q_INVOKABLE void copyImageToClipboard(const QImage& image);
@@ -259,10 +245,6 @@ signals:
     void downloadComplete(const QUrl& url, const QString& fileName);
 
 private:
-    static const char* const _uri;
-    static const int _majorVersion = APP_MAJOR_VERSION;
-    static const int _minorVersion = APP_MINOR_VERSION;
-
     static QString _appDir;
 
     QString _openGLInfo;

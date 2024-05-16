@@ -67,7 +67,6 @@
 
 using namespace Qt::Literals::StringLiterals;
 
-const char* const Application::_uri = APP_URI;
 QString Application::_appDir = u"."_s;
 
 struct UrlType
