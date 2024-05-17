@@ -227,6 +227,7 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
 
     Q_INIT_RESOURCE(update_keys);
 
+#ifndef Q_OS_WASM
     auto dontUpdate = commandLineParser.isSet(u"dontUpdate"_s) ||
         commandLineParser.isSet(u"parameters"_s);
 
@@ -241,6 +242,7 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
             return 0;
         }
     }
+#endif
 
     if(commandLineParser.isSet(u"startMaximised"_s))
         u::setPref(u"window/maximised"_s, true);
@@ -524,6 +526,7 @@ int main(int argc, char *argv[])
     {
         auto exeName = resolvedExeName(argv[0]);
 
+#ifndef Q_OS_WASM
         if(Updater::updateAvailable() && Updater::showUpdatePrompt({exeName}))
         {
             // If there is an update available, save a bit of time by
@@ -531,6 +534,7 @@ int main(int argc, char *argv[])
             std::cerr << "Restarting to install update...\n";
         }
         else
+#endif
         {
 #if QT_CONFIG(process)
             std::cerr << "Restarting " << exeName.toStdString() << "...\n";

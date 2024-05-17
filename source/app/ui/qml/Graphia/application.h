@@ -253,7 +253,9 @@ private:
 
     QString _openGLInfo;
 
+#ifndef Q_OS_WASM
     Updater _updater;
+#endif
 
     DownloadQueue _downloadQueue;
 
@@ -277,7 +279,7 @@ private:
     QStringListModel* ambiguousUrlTypes() { return &_ambiguousUrlTypes; }
     bool hasAmbiguousUrlTypes() { return _ambiguousUrlTypes.rowCount() > 0; }
 
-    int updateDownloadProgress() const { return _updater.progress(); }
+    int updateDownloadProgress() const;
 
     bool downloadActive() const { return !_downloadQueue.idle(); }
     int downloadProgress() const { return _downloadQueue.progress(); }

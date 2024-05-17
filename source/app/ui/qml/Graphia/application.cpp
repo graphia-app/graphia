@@ -125,10 +125,17 @@ Application::Application(QObject *parent, bool enableUpdateCheck) :
     QObject(parent),
     _openGLInfo(OpenGLFunctions::info())
 {
+#ifndef Q_OS_WASM
     connect(&_updater, &Updater::noNewUpdateAvailable, this, &Application::noNewUpdateAvailable);
     connect(&_updater, &Updater::updateDownloaded, this, &Application::newUpdateAvailable);
     connect(&_updater, &Updater::progressChanged, this, &Application::updateDownloadProgressChanged);
     connect(&_updater, &Updater::changeLogStored, this, &Application::changeLogStored);
+
+    if(enableUpdateCheck)
+        _updater.enableAutoBackgroundCheck();
+#else
+    Q_UNUSED(enableUpdateCheck);
+#endif
 
     connect(&_downloadQueue, &DownloadQueue::idleChanged, this, &Application::downloadActiveChanged);
     connect(&_downloadQueue, &DownloadQueue::progressChanged, this, &Application::downloadProgressChanged);
@@ -140,9 +147,6 @@ Application::Application(QObject *parent, bool enableUpdateCheck) :
     registerSaverFactory(std::make_unique<GMLSaverFactory>());
     registerSaverFactory(std::make_unique<PairwiseSaverFactory>());
     registerSaverFactory(std::make_unique<JSONGraphSaverFactory>());
-
-    if(enableUpdateCheck)
-        _updater.enableAutoBackgroundCheck();
 
 #ifdef Q_OS_WASM
     u::qrcExtract(":/wasm_resource_files", QStandardPaths::writableLocation(
@@ -428,10 +432,12 @@ PluginDetailsModel* Application::pluginDetailsModel() const
 
 void Application::checkForUpdates()
 {
+#ifndef Q_OS_WASM
     if(Updater::updateStatus() != u"installed"_s)
         Updater::resetUpdateStatus();
 
     _updater.startBackgroundUpdateCheck();
+#endif
 }
 
 void Application::copyImageToClipboard(const QImage& image)
@@ -964,6 +970,15 @@ void Application::unloadPlugins()
     }
 
     _loadedPlugins.clear();
+}
+
+int Application::updateDownloadProgress() const
+{
+#ifdef Q_OS_WASM
+    return 0;
+#else
+    return _updater.progress();
+#endif
 }
 
 int UrlTypeDetailsModel::rowCount(const QModelIndex&) const

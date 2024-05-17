@@ -147,7 +147,6 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationconfigparser.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationinfo.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationmapping.h
-    ${CMAKE_CURRENT_LIST_DIR}/updates/updater.h
     ${CMAKE_CURRENT_LIST_DIR}/watchdog.h
 )
 
@@ -255,7 +254,6 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationconfig.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationconfigparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationmapping.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/updates/updater.cpp
     ${CMAKE_CURRENT_LIST_DIR}/watchdog.cpp
 )
 
@@ -267,6 +265,11 @@ list(APPEND RESOURCES
     ${CMAKE_CURRENT_LIST_DIR}/ui/imagery.qrc
     ${CMAKE_CURRENT_LIST_DIR}/ui/licensing.qrc
 )
+
+if(NOT EMSCRIPTEN)
+    list(APPEND HEADERS ${CMAKE_CURRENT_LIST_DIR}/updates/updater.h)
+    list(APPEND APP_SOURCES ${CMAKE_CURRENT_LIST_DIR}/updates/updater.cpp)
+endif()
 
 if(EMSCRIPTEN)
     list(APPEND RESOURCES ${CMAKE_CURRENT_LIST_DIR}/wasm_resource_files.qrc)

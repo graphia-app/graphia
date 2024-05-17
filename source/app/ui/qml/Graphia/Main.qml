@@ -2488,9 +2488,9 @@ ApplicationWindow
             PlatformMenuItem { action: aboutPluginsAction }
             PlatformMenuItem { action: aboutQtAction }
 
-            PlatformMenuSeparator {}
-            PlatformMenuItem { action: checkForUpdatesAction }
-            PlatformMenuItem { action: showLatestChangesAction }
+            PlatformMenuSeparator { hidden: application.runningWasm; }
+            PlatformMenuItem { hidden: application.runningWasm; action: checkForUpdatesAction }
+            PlatformMenuItem { hidden: application.runningWasm; action: showLatestChangesAction }
         }
     }
 
