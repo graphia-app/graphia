@@ -29,7 +29,7 @@ else()
 endif()
 
 qt_add_qml_module(CrashReporter
-    URI app.graphia.CrashReporter
+    URI Graphia.CrashReporter
     QML_FILES
         Main.qml
     RESOURCES

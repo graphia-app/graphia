@@ -184,7 +184,7 @@ list(APPEND SOURCES ${SHARED_SOURCES})
 
 qt_add_library(shared STATIC ${SOURCES} ${HEADERS} ${RESOURCES})
 
-add_subdirectory(ui/qml/app/graphia/SharedTypes)
+add_subdirectory(ui/qml/Graphia/SharedTypes)
 
 find_package(Qt6 COMPONENTS REQUIRED Concurrent Qml Quick Widgets Xml)
 target_link_libraries(shared PRIVATE

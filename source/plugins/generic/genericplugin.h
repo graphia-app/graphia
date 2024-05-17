@@ -39,9 +39,9 @@ public:
     {
         return tr("A plugin that loads generic graphs from a variety of file formats.");
     }
-    QString imageSource() const override { return u"qrc:///qt/qml/app/graphia/Plugins/Generic/tools.svg"_s; }
+    QString imageSource() const override { return u"qrc:///qt/qml/Graphia/Plugins/Generic/tools.svg"_s; }
     int dataVersion() const override { return 3; }
-    QString qmlModule() const override { return u"app.graphia.Plugins.Generic"_s; }
+    QString qmlModule() const override { return u"Graphia.Plugins.Generic"_s; }
 };
 
 Q_DECLARE_INTERFACE(GenericPlugin, IPluginIID(Generic))

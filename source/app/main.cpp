@@ -408,7 +408,7 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
         qmlError += u"%1\n"_s.arg(msg);
     });
 
-    engine.loadFromModule(u"app.graphia"_s, u"Main"_s);
+    engine.loadFromModule(u"Graphia"_s, u"Main"_s);
 
     qInstallMessageHandler(nullptr);
 

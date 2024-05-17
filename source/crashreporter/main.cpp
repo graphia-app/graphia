@@ -356,7 +356,7 @@ int main(int argc, char *argv[])
     Report report;
 
     QIcon mainIcon;
-    mainIcon.addFile(u":/qt/qml/app/graphia/CrashReporter/icon.svg"_s);
+    mainIcon.addFile(u":/qt/qml/Graphia/CrashReporter/icon.svg"_s);
     QApplication::setWindowIcon(mainIcon);
 
     auto module = crashedModule(positional.at(0));
@@ -377,7 +377,7 @@ int main(int argc, char *argv[])
         engine.rootContext()->setContextProperty(u"inVideoDriver"_s, inVideoDriver);
         engine.rootContext()->setContextProperty(u"emailAddress"_s, emailAddress);
 
-        engine.loadFromModule(u"app.graphia.CrashReporter"_s, u"Main"_s);
+        engine.loadFromModule(u"Graphia.CrashReporter"_s, u"Main"_s);
         Q_ASSERT(!engine.rootObjects().empty());
 
         exitCode = QCoreApplication::exec();

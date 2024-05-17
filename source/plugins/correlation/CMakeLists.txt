@@ -48,7 +48,7 @@ else()
     qt_add_library(${PluginName} ${LINK_TYPE} ${SOURCES} ${HEADERS})
 endif()
 
-add_subdirectory(ui/qml/app/graphia/Plugins/Correlation)
+add_subdirectory(ui/qml/Graphia/Plugins/Correlation)
 
 if(NOT APPLE AND NOT MSVC)
     install(TARGETS ${PluginName} LIBRARY DESTINATION lib/${PROJECT_NAME}/plugins)

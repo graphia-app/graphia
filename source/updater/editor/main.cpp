@@ -46,18 +46,18 @@ int main(int argc, char *argv[])
     QSettings::setDefaultFormat(QSettings::Format::IniFormat);
 
     QIcon mainIcon;
-    mainIcon.addFile(u":/qt/qml/app/graphia/UpdateEditor/Icon512x512.png"_s);
-    mainIcon.addFile(u":/qt/qml/app/graphia/UpdateEditor/Icon256x256.png"_s);
-    mainIcon.addFile(u":/qt/qml/app/graphia/UpdateEditor/Icon128x128.png"_s);
-    mainIcon.addFile(u":/qt/qml/app/graphia/UpdateEditor/Icon64x64.png"_s);
-    mainIcon.addFile(u":/qt/qml/app/graphia/UpdateEditor/Icon32x32.png"_s);
-    mainIcon.addFile(u":/qt/qml/app/graphia/UpdateEditor/Icon16x16.png"_s);
+    mainIcon.addFile(u":/qt/qml/Graphia/UpdateEditor/Icon512x512.png"_s);
+    mainIcon.addFile(u":/qt/qml/Graphia/UpdateEditor/Icon256x256.png"_s);
+    mainIcon.addFile(u":/qt/qml/Graphia/UpdateEditor/Icon128x128.png"_s);
+    mainIcon.addFile(u":/qt/qml/Graphia/UpdateEditor/Icon64x64.png"_s);
+    mainIcon.addFile(u":/qt/qml/Graphia/UpdateEditor/Icon32x32.png"_s);
+    mainIcon.addFile(u":/qt/qml/Graphia/UpdateEditor/Icon16x16.png"_s);
     QApplication::setWindowIcon(mainIcon);
 
     QQuickStyle::setStyle(u::getPref(u"system/uiTheme"_s).toString());
 
     QQmlApplicationEngine engine;
-    engine.loadFromModule(u"app.graphia.UpdateEditor"_s, u"Main"_s);
+    engine.loadFromModule(u"Graphia.UpdateEditor"_s, u"Main"_s);
     Q_ASSERT(!engine.rootObjects().empty());
 
     return QCoreApplication::exec();

@@ -33,7 +33,7 @@ set_source_files_properties(../../app/icon/Icon256x256.png PROPERTIES QT_RESOURC
 set_source_files_properties(../../app/icon/Icon512x512.png PROPERTIES QT_RESOURCE_ALIAS Icon512x512.png)
 
 qt_add_qml_module(UpdateEditor
-    URI app.graphia.UpdateEditor
+    URI Graphia.UpdateEditor
     QML_FILES
         Main.qml
         CommandsDialog.qml

@@ -241,7 +241,7 @@ public:
                   "and edges represent correlations between said rows.");
     }
 
-    QString imageSource() const override { return u"qrc:///qt/qml/app/graphia/Plugins/Correlation/plots.svg"_s; }
+    QString imageSource() const override { return u"qrc:///qt/qml/Graphia/Plugins/Correlation/plots.svg"_s; }
 
     int dataVersion() const override { return 15; }
 
@@ -252,7 +252,7 @@ public:
     bool directed() const override { return false; }
 
     QString parametersQmlType(const QString&) const override { return u"CorrelationParameters"_s; }
-    QString qmlModule() const override { return u"app.graphia.Plugins.Correlation"_s; }
+    QString qmlModule() const override { return u"Graphia.Plugins.Correlation"_s; }
 
     Q_INVOKABLE QVariantMap correlationInfoFor(int correlationType) const;
 };

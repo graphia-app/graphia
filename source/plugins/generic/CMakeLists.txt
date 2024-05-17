@@ -22,9 +22,9 @@ else()
 endif()
 
 set(GENERIC_PLUGIN_QML_MODULE_DIR
-    "${CMAKE_CURRENT_LIST_DIR}/ui/qml/app/graphia/Plugins/Generic" PARENT_SCOPE)
+    "${CMAKE_CURRENT_LIST_DIR}/ui/qml/Graphia/Plugins/Generic" PARENT_SCOPE)
 
-add_subdirectory(ui/qml/app/graphia/Plugins/Generic)
+add_subdirectory(ui/qml/Graphia/Plugins/Generic)
 
 if(NOT APPLE AND NOT MSVC)
     install(TARGETS ${PluginName} LIBRARY DESTINATION lib/${PROJECT_NAME}/plugins)

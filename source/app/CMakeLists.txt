@@ -334,7 +334,7 @@ elseif(MSVC)
     file(APPEND ${PROJECT_BINARY_DIR}/variables.bat "SET \"NATIVE_EXTENSION=${NativeExtension}\"\n")
 endif()
 
-add_subdirectory(ui/qml/app/graphia)
+add_subdirectory(ui/qml/Graphia)
 target_link_libraries(${PROJECT_NAME} PRIVATE main_qmlplugin controls_qmlplugin loading_qmlplugin plugins_qmlplugin utils_qmlplugin)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE shared sharedtypes_qmlplugin)

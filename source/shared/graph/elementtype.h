@@ -16,4 +16,4 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "shared/ui/qml/app/graphia/SharedTypes/elementtype.h"
+#include "shared/ui/qml/Graphia/SharedTypes/elementtype.h"

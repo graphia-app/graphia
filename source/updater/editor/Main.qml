@@ -24,8 +24,8 @@ import QtQuick.Dialogs
 
 import Qt.labs.platform as Labs
 
-import app.graphia.Utils
-import app.graphia.Controls
+import Graphia.Utils
+import Graphia.Controls
 
 ApplicationWindow
 {

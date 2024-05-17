@@ -16,4 +16,4 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "plugins/correlation/ui/qml/app/graphia/Plugins/Correlation/correlationtype.h"
+#include "plugins/correlation/ui/qml/Graphia/Plugins/Correlation/correlationtype.h"

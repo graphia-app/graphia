@@ -16,4 +16,4 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "app/ui/qml/app/graphia/graphrenderertypes.h"
+#include "app/ui/qml/Graphia/graphrenderertypes.h"

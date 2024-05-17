@@ -37,7 +37,7 @@ set_source_files_properties(../app/icon/Icon256x256.png PROPERTIES QT_RESOURCE_A
 set_source_files_properties(../app/icon/Icon512x512.png PROPERTIES QT_RESOURCE_ALIAS Icon512x512.png)
 
 qt_add_qml_module(Updater
-    URI app.graphia.Updater
+    URI Graphia.Updater
     QML_FILES
         Main.qml
     RESOURCES

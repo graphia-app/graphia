@@ -39,9 +39,9 @@ public:
     {
         return tr("An embedded web browser that searches for the node selection using a URL template.");
     }
-    QString imageSource() const override { return u"qrc:///qt/qml/app/graphia/Plugins/WebSearch/globe.svg"_s; }
+    QString imageSource() const override { return u"qrc:///qt/qml/Graphia/Plugins/WebSearch/globe.svg"_s; }
     int dataVersion() const override { return 1; }
-    QString qmlModule() const override { return u"app.graphia.Plugins.WebSearch"_s; }
+    QString qmlModule() const override { return u"Graphia.Plugins.WebSearch"_s; }
 };
 
 Q_DECLARE_INTERFACE(WebSearchPlugin, IPluginIID(WebSearch))

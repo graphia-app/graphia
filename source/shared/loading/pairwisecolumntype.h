@@ -16,4 +16,4 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "shared/ui/qml/app/graphia/SharedTypes/pairwisecolumntype.h"
+#include "shared/ui/qml/Graphia/SharedTypes/pairwisecolumntype.h"

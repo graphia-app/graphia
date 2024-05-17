@@ -36,7 +36,7 @@
 #include "app/ui/selectionmanager.h"
 #include "app/ui/visualisations/elementvisual.h"
 #include "app/ui/visualisations/textvisual.h"
-#include "app/ui/qml/app/graphia/graphdisplay.h"
+#include "app/ui/qml/Graphia/graphdisplay.h"
 
 #include "shadertools.h"
 #include "screenshotrenderer.h"
