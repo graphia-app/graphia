@@ -36,7 +36,7 @@
 #include "shared/utils/deferredexecutor.h"
 #include "shared/utils/performancecounter.h"
 
-#include "app/preferenceswatcher.h"
+#include "app/preferences.h"
 
 #include <QObject>
 #include <QElapsedTimer>

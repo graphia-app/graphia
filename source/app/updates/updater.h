@@ -19,7 +19,7 @@
 #ifndef UPDATER_H
 #define UPDATER_H
 
-#include "app/preferenceswatcher.h"
+#include "app/preferences.h"
 
 #include <QObject>
 #include <QTimer>

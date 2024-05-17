@@ -18,12 +18,121 @@
 
 #include "preferences.h"
 
-#include "app/preferences.h"
+#include "app/limitconstants.h"
 
+#include "shared/utils/utils.h"
+
+#include <QSettings>
+#include <QCoreApplication>
+#include <QtGlobal>
 #include <QRegularExpression>
-#include <QQmlEngine>
 
 using namespace Qt::Literals::StringLiterals;
+
+namespace
+{
+    QSettings settings()
+    {
+#ifdef Q_OS_WASM
+        const QSettings::Format format = QSettings::Format::NativeFormat;
+#else
+        const QSettings::Format format = QSettings::Format::IniFormat;
+#endif
+
+        return {format, QSettings::Scope::UserScope,
+                QCoreApplication::organizationName(), QCoreApplication::applicationName()};
+    }
+} // namespace
+
+void u::definePref(const QString& key, const QVariant& defaultValue)
+{
+    if(!u::prefExists(key))
+        u::setPref(key, defaultValue);
+}
+
+QVariant u::pref(const QString& key)
+{
+    u::definePref(key, {});
+
+    return settings().value(key);
+}
+
+bool u::prefExists(const QString& key)
+{
+    return settings().contains(key);
+}
+
+bool u::removePref(const QString& key)
+{
+    if(u::prefExists(key))
+    {
+        settings().remove(key);
+        return true;
+    }
+
+    return false;
+}
+
+void u::setPref(const QString& key, const QVariant& value)
+{
+    auto s = settings();
+    const bool changed = (value != s.value(key));
+
+    s.setValue(key, value);
+
+    if(changed)
+        PreferencesWatcher::setPref(key, value);
+}
+
+void u::updateOldPrefs()
+{
+    if(u::prefExists(u"visuals/defaultNodeSize"_s))
+    {
+        auto absNodeSize = u::pref(u"visuals/defaultNodeSize"_s).toFloat();
+        auto normalNodeSize = u::normalise(LimitConstants::minimumNodeSize(),
+                                           LimitConstants::maximumNodeSize(), absNodeSize);
+
+        u::setPref(u"visuals/defaultNormalNodeSize"_s, normalNodeSize);
+        u::removePref(u"visuals/defaultNodeSize"_s);
+    }
+
+    if(u::prefExists(u"visuals/defaultEdgeSize"_s))
+    {
+        auto absEdgeSize = u::pref(u"visuals/defaultEdgeSize"_s).toFloat();
+        auto normalEdgeSize = u::normalise(LimitConstants::minimumEdgeSize(),
+                                           LimitConstants::maximumEdgeSize(), absEdgeSize);
+
+        u::setPref(u"visuals/defaultNormalEdgeSize"_s, normalEdgeSize);
+        u::removePref(u"visuals/defaultEdgeSize"_s);
+    }
+}
+
+QString u::settingsFileName()
+{
+    return settings().fileName();
+}
+
+PreferencesWatcher::Watchers PreferencesWatcher::_watchers;
+
+PreferencesWatcher::PreferencesWatcher()
+{
+    const std::unique_lock<std::recursive_mutex> lock(PreferencesWatcher::_watchers._mutex);
+    PreferencesWatcher::_watchers._set.insert(this);
+}
+
+PreferencesWatcher::~PreferencesWatcher()
+{
+    const std::unique_lock<std::recursive_mutex> lock(PreferencesWatcher::_watchers._mutex);
+    PreferencesWatcher::_watchers._set.erase(this);
+}
+
+void PreferencesWatcher::setPref(const QString& key, const QVariant& value)
+{
+    const std::unique_lock<std::recursive_mutex> lock(PreferencesWatcher::_watchers._mutex);
+
+    for(auto* watcher : PreferencesWatcher::_watchers._set)
+        emit watcher->preferenceChanged(key, value);
+}
 
 Preferences::Preferences(QObject* parent) :
     QObject(parent)
@@ -64,7 +173,7 @@ void Preferences::componentComplete()
     {
         load();
 
-        // Connect all the property notify signals so we know when they change
+               // Connect all the property notify signals so we know when they change
         forEachProperty(this,
         [this](const QMetaProperty& property)
         {

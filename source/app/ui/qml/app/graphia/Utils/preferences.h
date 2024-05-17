@@ -16,17 +16,57 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef QMLPREFERENCES_H
-#define QMLPREFERENCES_H
-
-#include "app/preferenceswatcher.h"
+#ifndef PREFERENCES_H
+#define PREFERENCES_H
 
 #include <QObject>
 #include <QQmlEngine>
-#include <QVariant>
 #include <QString>
+#include <QVariant>
 #include <QQmlParserStatus>
 #include <QMetaProperty>
+
+#include <mutex>
+#include <set>
+
+class QString;
+
+namespace u
+{
+    void definePref(const QString& key, const QVariant& defaultValue);
+    QVariant pref(const QString& key);
+    bool prefExists(const QString& key);
+
+    bool removePref(const QString& key);
+    void setPref(const QString& key, const QVariant& value);
+
+    void updateOldPrefs();
+
+    QString settingsFileName();
+} // namespace u
+
+class PreferencesWatcher : public QObject
+{
+    Q_OBJECT
+
+    friend void u::setPref(const QString& key, const QVariant& value);
+
+private:
+    static struct Watchers
+    {
+        std::recursive_mutex _mutex;
+        std::set<PreferencesWatcher*> _set;
+    } _watchers;
+
+    static void setPref(const QString& key, const QVariant& value);
+
+public:
+    PreferencesWatcher();
+    ~PreferencesWatcher() override;
+
+signals:
+    void preferenceChanged(const QString& key, const QVariant& value);
+};
 
 class Preferences : public QObject, public QQmlParserStatus
 {
@@ -68,4 +108,4 @@ signals:
     void sectionChanged();
 };
 
-#endif // QMLPREFERENCES_H
+#endif // PREFERENCES_H

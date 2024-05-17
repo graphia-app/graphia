@@ -19,7 +19,7 @@
 #ifndef AVAILABLETRANSFORMSMODEL_H
 #define AVAILABLETRANSFORMSMODEL_H
 
-#include "app/preferenceswatcher.h"
+#include "app/preferences.h"
 
 #include <QObject>
 #include <QQmlEngine>

@@ -16,26 +16,5 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PREFERENCES_H
-#define PREFERENCES_H
-
-#include <QVariant>
-
-class QString;
-
-namespace u
-{
-    void definePref(const QString& key, const QVariant& defaultValue);
-    QVariant pref(const QString& key);
-    bool prefExists(const QString& key);
-
-    bool removePref(const QString& key);
-    void setPref(const QString& key, const QVariant& value);
-
-    void updateOldPrefs();
-
-    QString settingsFileName();
-} // namespace u
-
-#endif // PREFERENCES_H
+#include "app/ui/qml/app/graphia/Utils/preferences.h"
 

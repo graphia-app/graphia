@@ -55,7 +55,6 @@
 
 #include "app/application.h"
 #include "preferences.h"
-#include "preferenceswatcher.h"
 #include "headless.h"
 
 #include "shared/utils/threadpool.h"

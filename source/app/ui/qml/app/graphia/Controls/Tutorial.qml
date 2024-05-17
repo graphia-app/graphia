@@ -18,8 +18,8 @@
 
 import QtQuick
 
-import app.graphia
 import app.graphia.Controls
+import app.graphia.Utils
 
 Item
 {

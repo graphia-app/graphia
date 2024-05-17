@@ -66,7 +66,6 @@ qt_add_qml_module(main_qml
         graphrenderertypes.h
         importattributeskeydetection.h importattributeskeydetection.cpp
         limitconstants.h
-        preferences.h preferences.cpp
     RESOURCES
         tracking-background.png
 )

@@ -26,7 +26,7 @@
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/grapharray.h"
 
-#include "app/preferenceswatcher.h"
+#include "app/preferences.h"
 
 #include "app/layout/componentlayout.h"
 

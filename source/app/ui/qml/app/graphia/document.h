@@ -29,7 +29,7 @@
 #include "app/layout/layout.h"
 #include "app/loading/parserthread.h"
 #include "app/rendering/graphrenderertypes.h"
-#include "app/preferenceswatcher.h"
+#include "app/preferences.h"
 #include "app/ui/findtypes.h"
 
 #include "shared/attributes/iattribute.h"
