@@ -147,7 +147,7 @@ QCPAxis* CorrelationPlot::configureColumnAnnotations(QCPAxisRect* axisRect)
     {
         const QSharedPointer<QCPAxisTickerText> columnAnnotationTicker(new QCPAxisTickerText);
 
-        forEachColumnAnnotation([this, columnAnnotationTicker](const ColumnAnnotation& columnAnnotation,
+        forEachColumnAnnotation([this, &columnAnnotationTicker](const ColumnAnnotation& columnAnnotation,
             bool selected, size_t y, size_t)
         {
             QString prefix;
