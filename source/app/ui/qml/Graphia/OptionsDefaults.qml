@@ -213,12 +213,14 @@ Item
                         Label
                         {
                             font.bold: true
+                            visible: root.application.hasAmbiguousExtensions
                             text: qsTr("File Types")
                         }
 
                         GridLayout
                         {
                             Layout.fillWidth: true
+                            visible: root.application.hasAmbiguousExtensions
                             columns: 2
                             columnSpacing: Constants.spacing
                             rowSpacing: Constants.spacing
@@ -277,12 +279,14 @@ Item
                             Layout.topMargin: Constants.margin * 2
 
                             font.bold: true
+                            visible: root.application.hasAmbiguousUrlTypes
                             text: qsTr("Plugins")
                         }
 
                         GridLayout
                         {
                             Layout.fillWidth: true
+                            visible: root.application.hasAmbiguousUrlTypes
                             columns: 2
                             columnSpacing: Constants.spacing
                             rowSpacing: Constants.spacing

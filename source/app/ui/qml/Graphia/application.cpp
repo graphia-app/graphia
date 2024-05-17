@@ -928,6 +928,7 @@ void Application::updateLoadingCapabilities()
 
     _ambiguousExtensions.setStringList(ambiguousExtensions);
     emit ambiguousExtensionsChanged();
+    emit hasAmbiguousExtensionsChanged();
 
     std::map<QString, int> urlTypePluginCounts;
     for(const auto& loadedPlugin : _loadedPlugins)
@@ -947,6 +948,7 @@ void Application::updateLoadingCapabilities()
 
     _ambiguousUrlTypes.setStringList(ambiguousUrlTypes);
     emit ambiguousUrlTypesChanged();
+    emit hasAmbiguousUrlTypesChanged();
 }
 
 void Application::unloadPlugins()

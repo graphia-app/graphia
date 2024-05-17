@@ -144,7 +144,9 @@ class Application : public QObject, public IApplication
     Q_PROPERTY(QStringList nameFilters READ nameFilters NOTIFY nameFiltersChanged)
     Q_PROPERTY(QStringListModel* loadableExtensions READ loadableExtensions NOTIFY loadableExtensionsChanged)
     Q_PROPERTY(QStringListModel* ambiguousExtensions READ ambiguousExtensions NOTIFY ambiguousExtensionsChanged)
+    Q_PROPERTY(bool hasAmbiguousExtensions READ hasAmbiguousExtensions NOTIFY hasAmbiguousExtensionsChanged)
     Q_PROPERTY(QStringListModel* ambiguousUrlTypes READ ambiguousUrlTypes NOTIFY ambiguousUrlTypesChanged)
+    Q_PROPERTY(bool hasAmbiguousUrlTypes READ hasAmbiguousUrlTypes NOTIFY hasAmbiguousUrlTypesChanged)
 
     Q_PROPERTY(int updateDownloadProgress READ updateDownloadProgress NOTIFY updateDownloadProgressChanged)
 
@@ -231,7 +233,9 @@ signals:
     void nameFiltersChanged();
     void loadableExtensionsChanged();
     void ambiguousExtensionsChanged();
+    void hasAmbiguousExtensionsChanged();
     void ambiguousUrlTypesChanged();
+    void hasAmbiguousUrlTypesChanged();
 
     void noNewUpdateAvailable(bool existing);
     void newUpdateAvailable();
@@ -269,7 +273,9 @@ private:
     QStringList nameFilters() const { return _nameFilters; }
     QStringListModel* loadableExtensions() { return &_loadableExtensions; }
     QStringListModel* ambiguousExtensions() { return &_ambiguousExtensions; }
+    bool hasAmbiguousExtensions() { return _ambiguousExtensions.rowCount() > 0; }
     QStringListModel* ambiguousUrlTypes() { return &_ambiguousUrlTypes; }
+    bool hasAmbiguousUrlTypes() { return _ambiguousUrlTypes.rowCount() > 0; }
 
     int updateDownloadProgress() const { return _updater.progress(); }
 
