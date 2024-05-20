@@ -3,7 +3,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(NOT CMAKE_BUILD_TYPE STREQUAL "Release")
     add_definitions(-D_DEBUG)
-    add_definitions(-DQT_QML_DEBUG)
 endif()
 
 set(OpenGL_GL_PREFERENCE "LEGACY")
