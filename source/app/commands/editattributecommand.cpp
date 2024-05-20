@@ -109,10 +109,9 @@ bool EditAttributeCommand::execute()
             Q_ASSERT(success);
         }
 
-        if(_newDescription != attribute->description())
+        _originalDescription = attribute->description();
+        if(_newDescription != _originalDescription)
         {
-            _originalDescription = attribute->description();
-
             const bool success = userData.setAttributeDescription(*_graphModel, _attributeName, _newDescription);
             Q_ASSERT(success);
         }
@@ -156,9 +155,12 @@ void EditAttributeCommand::undo()
             _originalType = ValueType::Unknown;
         }
 
-        const bool success = userData.setAttributeDescription(*_graphModel, _attributeName, _originalDescription);
-        Q_ASSERT(success);
-        _originalDescription = {};
+        if(_originalDescription != attribute->description())
+        {
+            const bool success = userData.setAttributeDescription(*_graphModel, _attributeName, _originalDescription);
+            Q_ASSERT(success);
+            _originalDescription = {};
+        }
     };
 
     if(attribute->elementType() == ElementType::Node)
