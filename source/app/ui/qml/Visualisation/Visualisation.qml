@@ -444,7 +444,8 @@ Item
 
                     checkable: true
 
-                    enabled: visible && enabledMenuItem.checked && !root._error
+                    enabled: visible && enabledMenuItem.checked && !root._error &&
+                        root._visualisationInfo.hasNumericRange
                     hidden: !optionsMenu._showMappingOptions
 
                     onTriggered:
