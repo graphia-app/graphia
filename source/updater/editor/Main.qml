@@ -353,6 +353,7 @@ ApplicationWindow
                     commandsDialog.operatingSystems = [];
                     commandsDialog.operatingSystems = JSON.parse(settings.operatingSystems);
                     commandsDialog.show();
+                    commandsDialog.raise();
                 }
             }
         }
@@ -906,6 +907,7 @@ ApplicationWindow
                                         customCommandsDialog.operatingSystems = JSON.parse(settings.operatingSystems);
 
                                     customCommandsDialog.show();
+                                    customCommandsDialog.raise();
                                 }
                             }
                         }

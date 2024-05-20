@@ -59,6 +59,7 @@ Window
         importAnnotationsKeyDetection.reset();
 
         root.show();
+        root.raise();
     }
 
     TabularDataParser

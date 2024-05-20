@@ -107,7 +107,11 @@ Item
                 textColor: enabled ? enabledTextColor : disabledTextColor
                 hoverColor: heldColor
 
-                onClicked: function(mouse) { createTransformDialog.show(); }
+                onClicked: function(mouse)
+                {
+                    createTransformDialog.show();
+                    createTransformDialog.raise();
+                }
             }
 
             FloatingButton

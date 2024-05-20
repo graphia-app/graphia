@@ -466,6 +466,7 @@ Item
                             mappingSelector.reset();
 
                         mappingSelector.show();
+                        mappingSelector.raise();
                     }
                 }
 

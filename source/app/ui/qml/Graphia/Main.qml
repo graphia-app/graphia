@@ -961,7 +961,11 @@ ApplicationWindow
         id: urlOpenAction
         icon.name: "network-server"
         text: qsTr("Open &URL…")
-        onTriggered: function(source) { openUrlDialog.show(); }
+        onTriggered: function(source)
+        {
+            openUrlDialog.show();
+            openUrlDialog.raise();
+        }
     }
 
     Action
@@ -1274,8 +1278,8 @@ ApplicationWindow
         text: qsTr("&Options…")
         onTriggered: function(source)
         {
-            optionsDialog.raise();
             optionsDialog.show();
+            optionsDialog.raise();
         }
     }
 
@@ -1289,9 +1293,15 @@ ApplicationWindow
             if(currentTab !== null)
             {
                 if(enrichmentResults.models.length > 0)
+                {
                     enrichmentResults.show();
+                    encrichmentResults.raise();
+                }
                 else
+                {
                     enrichmentWizard.show();
+                    enrichmentWizard.raise();
+                }
             }
         }
     }
@@ -1376,6 +1386,7 @@ ApplicationWindow
         {
             cloneAttributeDialog.sourceAttributeName = "";
             cloneAttributeDialog.show();
+            cloneAttributeDialog.raise();
         }
     }
 
@@ -1386,6 +1397,7 @@ ApplicationWindow
 
         cloneAttributeDialog.sourceAttributeName = attributeName;
         cloneAttributeDialog.show();
+        cloneAttributeDialog.raise();
     }
 
     EditAttributeDialog
@@ -1403,6 +1415,7 @@ ApplicationWindow
         {
             editAttributeDialog.attributeName = "";
             editAttributeDialog.show();
+            editAttributeDialog.raise();
         }
     }
 
@@ -1413,6 +1426,7 @@ ApplicationWindow
 
         editAttributeDialog.attributeName = attributeName;
         editAttributeDialog.show();
+        editAttributeDialog.raise();
     }
 
     RemoveAttributesDialog
@@ -1426,7 +1440,11 @@ ApplicationWindow
         id: removeAttributesAction
         text: qsTr("Remove Attributes…")
         enabled: currentTab !== null && !currentTab.document.busy
-        onTriggered: function(source) { removeAttributesDialog.show(); }
+        onTriggered: function(source)
+        {
+            removeAttributesDialog.show();
+            removeAttributesDialog.raise();
+        }
     }
 
     function removeAttributes(attributeNames)
@@ -1598,8 +1616,8 @@ ApplicationWindow
         enabled: currentTab ? !currentTab.document.busy && currentTab.document.bookmarks.length > 0 : false
         onTriggered: function(source)
         {
-            manageBookmarks.raise();
             manageBookmarks.show();
+            manageBookmarks.raise();
         }
     }
 
@@ -1636,8 +1654,8 @@ ApplicationWindow
             currentTab.document.visualisations.length > 0) : false
         onTriggered: function(source)
         {
-            addTemplateDialog.raise();
             addTemplateDialog.show();
+            addTemplateDialog.raise();
         }
     }
 
@@ -1659,8 +1677,8 @@ ApplicationWindow
         enabled: { return templates.namesAsArray().length > 0; }
         onTriggered: function(source)
         {
-            manageTemplates.raise();
             manageTemplates.show();
+            manageTemplates.raise();
         }
     }
 
@@ -1869,21 +1887,33 @@ ApplicationWindow
     {
         id: showEnvironmentAction
         text: qsTr("Show Environment")
-        onTriggered: function(source) { environmentDialog.show(); }
+        onTriggered: function(source)
+        {
+            environmentDialog.show();
+            environmentDialog.raise();
+        }
     }
 
     Action
     {
         id: showOpenGLInfoAction
         text: qsTr("Show OpenGL Info")
-        onTriggered: function(source) { openGLInfoDialog.show(); }
+        onTriggered: function(source)
+        {
+            openGLInfoDialog.show();
+            openGLInfoDialog.raise();
+        }
     }
 
     Action
     {
         id: showPaletteAction
         text: qsTr("Show Palette")
-        onTriggered: function(source) { showPaletteDialog.show(); }
+        onTriggered: function(source)
+        {
+            showPaletteDialog.show();
+            showPaletteDialog.raise();
+        }
     }
 
     Action
@@ -1991,8 +2021,8 @@ ApplicationWindow
         enabled: currentTab !== null && !currentTab.document.busy
         onTriggered: function(source)
         {
-            provenanceLogDialog.raise();
             provenanceLogDialog.show();
+            provenanceLogDialog.raise();
         }
     }
 
@@ -2004,8 +2034,8 @@ ApplicationWindow
         onTriggered: function(source)
         {
             aboutpluginsDialog.pluginDetails = application.pluginDetailsModel();
-            aboutpluginsDialog.raise();
             aboutpluginsDialog.show();
+            aboutpluginsDialog.raise();
         }
     }
 
@@ -2015,8 +2045,8 @@ ApplicationWindow
         text: qsTr("About " + application.name + "…")
         onTriggered: function(source)
         {
-            aboutDialog.raise();
             aboutDialog.show();
+            aboutDialog.raise();
         }
     }
 
@@ -2061,8 +2091,8 @@ ApplicationWindow
 
         onTriggered: function(source)
         {
-            latestChangesDialog.raise();
             latestChangesDialog.show();
+            latestChangesDialog.raise();
         }
     }
 

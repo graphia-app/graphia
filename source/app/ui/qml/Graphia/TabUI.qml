@@ -477,7 +477,11 @@ Item
         }
     }
 
-    function screenshot() { captureScreenshotDialog.show(); }
+    function screenshot()
+    {
+        captureScreenshotDialog.show();
+        captureScreenshotDialog.raise();
+    }
 
     function copyImageToClipboard()
     {
@@ -1679,6 +1683,7 @@ Item
         case AddTemplateDialog.AlwaysAsk:
             applyMethodDialog.templateName = name;
             applyMethodDialog.show();
+            applyMethodDialog.raise();
             break;
 
         case AddTemplateDialog.Append:

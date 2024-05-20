@@ -81,7 +81,11 @@ Item
                 textColor: enabled ? enabledTextColor : disabledTextColor
                 hoverColor: heldColor
 
-                onClicked: function(mouse) { createVisualisationDialog.show(); }
+                onClicked: function(mouse)
+                {
+                    createVisualisationDialog.show();
+                    createVisualisationDialog.raise();
+                }
             }
 
             FloatingButton

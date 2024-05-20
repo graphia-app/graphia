@@ -72,6 +72,7 @@ Window
         importAttributesKeyDetection.reset();
 
         root.show();
+        root.raise();
     }
 
     TabularDataParser
