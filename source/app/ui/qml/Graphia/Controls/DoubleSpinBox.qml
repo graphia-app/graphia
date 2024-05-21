@@ -102,6 +102,7 @@ Control
         property QtObject _doubleValidator: DoubleValidator
         {
             locale: spinBox.locale.name
+            decimals: root.decimals
             notation: DoubleValidator.StandardNotation
         }
 
