@@ -27,11 +27,41 @@ IF DEFINED WINDOWS_SIGN_KEYSTORE_BASE64 (
   echo %WINDOWS_SIGN_KEYSTORE_BASE64% > %WINDOWS_SIGN_KEYSTORE_ENCODED%
 
   certutil -decode %WINDOWS_SIGN_KEYSTORE_ENCODED% %WINDOWS_SIGN_KEYSTORE%
-  certutil -p %WINDOWS_SIGN_PASSWORD% -dump %WINDOWS_SIGN_KEYSTORE%
-  certutil -p %WINDOWS_SIGN_PASSWORD% -importPFX %WINDOWS_SIGN_KEYSTORE%
+  certutil -p %WINDOWS_SIGN_PASSWORD% -dump %WINDOWS_SIGN_KEYSTORE% > CertDump.txt
+  type CertDump.txt
+
+  FOR /f "delims=" %%i in (CertDump.txt) DO (
+    FOR /f "tokens=1,2" %%j in ("%%i") DO (
+      IF "%%j"=="NotAfter:" set "EXPIRY_DATE=%%k"
+    )
+  )
+
+  IF DEFINED EXPIRY_DATE (
+    FOR /f "tokens=1-3 delims=/" %%i in ("!EXPIRY_DATE!") DO (
+      set M=%%i
+      set D=%%j
+      set Y=%%k
+    )
+
+    IF !D! LSS 10 set "d=0!D!"
+    IF !M! LSS 10 set "m=0!M!"
+
+    set EXPIRY_DATE=!Y!!M!!D!
+
+    FOR /f "tokens=*" %%i in ('powershell get-date -format "{yyyyMMdd}"') DO (
+      set CURRENT_DATE=%%i
+    )
+
+    if !CURRENT_DATE! GTR !EXPIRY_DATE! (
+      echo Certificate expired, signing disabled...
+    ) ELSE (
+      certutil -p %WINDOWS_SIGN_PASSWORD% -importPFX %WINDOWS_SIGN_KEYSTORE%
+      set SIGNING_ENABLED=true
+      echo Signing enabled...
+    )
+  )
+
   del %WINDOWS_SIGN_KEYSTORE_ENCODED% %WINDOWS_SIGN_KEYSTORE%
-  set SIGNING_ENABLED=true
-  echo Signing enabled...
 )
 
 set BUILD_DIR=build
