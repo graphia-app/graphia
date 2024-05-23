@@ -299,8 +299,6 @@ void TableProxyModel::invalidateFilter()
         return _columnNames.indexOf(sortColumnAndOrder.first) < 0;
     }), _sortColumnAndOrders.end());
 
-    QSortFilterProxyModel::invalidateFilter();
-
     calculateOrderedProxySourceMapping();
     endResetModel();
 }
