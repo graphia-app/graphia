@@ -1260,7 +1260,7 @@ Item
                     target: root.model
                     function onSelectionChanged()
                     {
-                        proxyModel.invalidateFilter();
+                        proxyModel.reset();
 
                         let allProxyRows = [...Array(proxyModel.rowCount()).keys()];
                         let newVisibleRows = allProxyRows.map(row => proxyModel.mapToSourceRow(row));

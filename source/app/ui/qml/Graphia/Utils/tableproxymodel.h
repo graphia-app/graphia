@@ -138,7 +138,7 @@ signals:
     void columnOrderChanged();
 
 public slots:
-    void invalidateFilter();
+    void reset();
 };
 
 #endif // TABLEPROXYMODEL_H

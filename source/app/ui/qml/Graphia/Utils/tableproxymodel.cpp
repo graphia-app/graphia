@@ -165,7 +165,7 @@ TableProxyModel::TableProxyModel(QObject* parent) : QSortFilterProxyModel(parent
 void TableProxyModel::setHiddenColumns(const QStringList& hiddenColumns)
 {
     _hiddenColumns = hiddenColumns;
-    invalidateFilter();
+    reset();
 }
 
 void TableProxyModel::calculateOrderedProxySourceMapping()
@@ -222,7 +222,7 @@ void TableProxyModel::setColumnOrder(const QStringList& columnOrder)
     if(newColumnOrder != _sourceColumnOrder)
     {
         _sourceColumnOrder = newColumnOrder;
-        invalidateFilter();
+        reset();
         emit columnOrderChanged();
     }
 }
@@ -288,7 +288,7 @@ void TableProxyModel::setSortOrder(Qt::SortOrder newSortOrder)
     emit isRowOrderSetChanged();
 }
 
-void TableProxyModel::invalidateFilter()
+void TableProxyModel::reset()
 {
     beginResetModel();
 
@@ -308,8 +308,8 @@ void TableProxyModel::updateSourceModelFilter()
     if(sourceModel() == nullptr)
         return;
 
-    connect(sourceModel(), &QAbstractItemModel::modelReset, this, &TableProxyModel::invalidateFilter);
-    connect(sourceModel(), &QAbstractItemModel::layoutChanged, this, &TableProxyModel::invalidateFilter);
+    connect(sourceModel(), &QAbstractItemModel::modelReset, this, &TableProxyModel::reset);
+    connect(sourceModel(), &QAbstractItemModel::layoutChanged, this, &TableProxyModel::reset);
 }
 
 void TableProxyModel::resort()
@@ -337,7 +337,7 @@ void TableProxyModel::onColumnNamesChanged()
     // Refresh column order
     setColumnOrder(_sourceColumnOrder);
 
-    invalidateFilter();
+    reset();
 }
 
 bool TableProxyModel::isRowOrderSet() const
