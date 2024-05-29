@@ -27,7 +27,7 @@ endif()
 # for selection/editing in the IDE (if it supports it); nothing is
 # actually built
 
-list(APPEND HEADERS
+list(APPEND MISC
     ${CMAKE_CURRENT_LIST_DIR}/scripts/defaults.bat
     ${CMAKE_CURRENT_LIST_DIR}/scripts/defaults.sh
     ${CMAKE_CURRENT_LIST_DIR}/scripts/linux-build.sh
@@ -36,7 +36,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/scripts/windows-build.bat
 )
 
-list(APPEND HEADERS
+list(APPEND MISC
     ${CMAKE_CURRENT_LIST_DIR}/scripts/clang-tidy.sh
     ${CMAKE_CURRENT_LIST_DIR}/scripts/clazy.sh
     ${CMAKE_CURRENT_LIST_DIR}/scripts/cloc.sh
@@ -49,7 +49,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/scripts/upload-symbols.sh
 )
 
-list(APPEND HEADERS
+list(APPEND MISC
     ${CMAKE_CURRENT_LIST_DIR}/installers/linux/build.sh
     ${CMAKE_CURRENT_LIST_DIR}/installers/macos/build.sh
     ${CMAKE_CURRENT_LIST_DIR}/installers/wasm/build.sh
@@ -57,16 +57,16 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/installers/windows/installer.nsi
 )
 
-list(APPEND HEADERS
+list(APPEND MISC
     ${CMAKE_CURRENT_LIST_DIR}/.github/workflows/build.yml
 )
 
-list(APPEND HEADERS
+list(APPEND MISC
     ${CMAKE_CURRENT_LIST_DIR}/misc/gdbVisualiser.py
     ${CMAKE_CURRENT_LIST_DIR}/misc/MacOSXBundleInfo.plist.in
 )
 
-list(APPEND HEADERS
+list(APPEND MISC
     ${CMAKE_CURRENT_LIST_DIR}/Doxyfile
     ${CMAKE_CURRENT_LIST_DIR}/LICENSE
     ${CMAKE_CURRENT_LIST_DIR}/README.md
@@ -74,6 +74,8 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/.clang-tidy
     ${CMAKE_CURRENT_LIST_DIR}/.gitignore
 )
+
+add_custom_target(Misc SOURCES ${MISC})
 
 list(REMOVE_DUPLICATES QML_IMPORT_PATH)
 set(QML_IMPORT_PATH ${QML_IMPORT_PATH} CACHE STRING "Qt Creator import paths" FORCE)
