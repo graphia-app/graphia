@@ -80,6 +80,13 @@
 
 #include "watchdog.h"
 
+#ifdef Q_OS_WASM
+#include <emscripten.h>
+#include <emscripten/val.h>
+
+#include <QUrlQuery>
+#endif
+
 using namespace Qt::Literals::StringLiterals;
 using namespace std::chrono_literals;
 
@@ -515,6 +522,32 @@ int main(int argc, char *argv[])
 
     auto consoleOutputFiles = captureConsoleOutput(
         QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation));
+
+#ifdef Q_OS_WASM
+    emscripten::val location = emscripten::val::global("location");
+    QUrlQuery query(QUrl(QString::fromStdString(location["href"].as<std::string>())));
+
+    // Proxy argv, the storage and pointers respectively
+    std::vector<QByteArray> arguments;
+    std::vector<char*> argvProxy;
+
+    if(query.hasQueryItem(u"arguments"_s))
+    {
+        // Copy existing arguments
+        for(int i = 0; i < argc; i++)
+            argvProxy.push_back(argv[i]);
+
+        const auto queryItems = query.queryItemValue(u"arguments"_s, QUrl::FullyEncoded).split('+');
+        for(const auto& queryItem : queryItems)
+        {
+            arguments.emplace_back(QUrl::fromPercentEncoding(queryItem.toUtf8()).toUtf8());
+            argvProxy.push_back(arguments.back().data());
+            argc++;
+        }
+
+        argv = argvProxy.data();
+    }
+#endif
 
     // The "real" main is separate to limit the scope of QtSingleApplication,
     // otherwise a restart causes the exiting instance to get activated
