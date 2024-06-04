@@ -43,6 +43,7 @@
 #include <QSettings>
 #include <QNetworkProxy>
 #include <QQmlFileSelector>
+#include <QUrl>
 
 #if __has_include(<QtWebEngineQuick>)
 #include <QtWebEngineQuick>
