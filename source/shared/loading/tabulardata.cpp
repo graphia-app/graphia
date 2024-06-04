@@ -210,6 +210,44 @@ std::vector<TypeIdentity> TabularData::columnTypeIdentities(Progressable* progre
     return t;
 }
 
+bool TabularData::columnHasDuplicates(size_t columnIndex, size_t rowIndex) const
+{
+    std::set<QString> values;
+
+    for(; rowIndex < numRows(); rowIndex++)
+    {
+        auto [it, inserted] = values.insert(valueAt(columnIndex, rowIndex));
+
+        if(!inserted)
+            return true;
+    }
+
+    return false;
+}
+
+std::vector<bool> TabularData::columnDuplicates(Progressable* progressable, size_t rowIndex) const
+{
+    std::vector<bool> b;
+
+    b.resize(numColumns());
+
+    if(progressable != nullptr)
+        progressable->setProgress(-1);
+
+    for(size_t columnIndex = 0; columnIndex < numColumns(); columnIndex++)
+    {
+        if(progressable != nullptr)
+            progressable->setProgress(static_cast<int>((columnIndex * 100) / numColumns()));
+
+        b.at(columnIndex) = columnHasDuplicates(columnIndex, rowIndex);
+    }
+
+    if(progressable != nullptr)
+        progressable->setProgress(-1);
+
+    return b;
+}
+
 TypeIdentity TabularData::rowTypeIdentity(size_t rowIndex, size_t columnIndex) const
 {
     TypeIdentity identity;
@@ -244,6 +282,44 @@ std::vector<TypeIdentity> TabularData::rowTypeIdentities(Progressable* progressa
         progressable->setProgress(-1);
 
     return t;
+}
+
+bool TabularData::rowHasDuplicates(size_t rowIndex, size_t columnIndex) const
+{
+    std::set<QString> values;
+
+    for(; columnIndex < numColumns(); columnIndex++)
+    {
+        auto [it, inserted] = values.insert(valueAt(columnIndex, rowIndex));
+
+        if(!inserted)
+            return true;
+    }
+
+    return false;
+}
+
+std::vector<bool> TabularData::rowDuplicates(Progressable* progressable, size_t columnIndex) const
+{
+    std::vector<bool> b;
+
+    b.resize(numRows());
+
+    if(progressable != nullptr)
+        progressable->setProgress(-1);
+
+    for(size_t rowIndex = 0; rowIndex < numRows(); rowIndex++)
+    {
+        if(progressable != nullptr)
+            progressable->setProgress(static_cast<int>((rowIndex * 100) / numRows()));
+
+        b.at(rowIndex) = rowHasDuplicates(rowIndex, columnIndex);
+    }
+
+    if(progressable != nullptr)
+        progressable->setProgress(-1);
+
+    return b;
 }
 
 int TabularData::columnMatchPercentage(size_t columnIndex, const QStringList& referenceValues) const

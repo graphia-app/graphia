@@ -87,9 +87,15 @@ public:
     TypeIdentity columnTypeIdentity(size_t columnIndex, size_t rowIndex = 1) const;
     std::vector<TypeIdentity> columnTypeIdentities(Progressable* progressable = nullptr, size_t rowIndex = 1) const;
 
+    bool columnHasDuplicates(size_t columnIndex, size_t rowIndex = 1) const;
+    std::vector<bool> columnDuplicates(Progressable* progressable = nullptr, size_t rowIndex = 1) const;
+
     // First column is assumed to be a header, by default
     TypeIdentity rowTypeIdentity(size_t rowIndex, size_t columnIndex = 1) const;
     std::vector<TypeIdentity> rowTypeIdentities(Progressable* progressable = nullptr, size_t columnIndex = 1) const;
+
+    bool rowHasDuplicates(size_t rowIndex, size_t columnIndex = 1) const;
+    std::vector<bool> rowDuplicates(Progressable* progressable = nullptr, size_t columnIndex = 1) const;
 
     int columnMatchPercentage(size_t columnIndex, const QStringList& referenceValues) const;
     int rowMatchPercentage(size_t rowIndex, const QStringList& referenceValues) const;

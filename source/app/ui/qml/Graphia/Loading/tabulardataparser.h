@@ -92,13 +92,16 @@ private:
     std::vector<TypeIdentity> _columnTypeIdentities;
     std::vector<TypeIdentity> _rowTypeIdentities;
 
+    std::vector<bool> _columnDuplicates;
+    std::vector<bool> _rowDuplicates;
+
     int _progress = -1;
     std::atomic<Cancellable*> _cancellableParser = nullptr;
     bool _complete = false;
     bool _failed = false;
     QString _failureReason;
 
-    void updateTypes();
+    void update();
 
 protected:
     const TabularData& tabularData() const { return *_dataPtr; }
@@ -121,6 +124,9 @@ public:
     Q_INVOKABLE TabularDataHeaderModel* columnHeaders(
         int _valueTypes = static_cast<int>(ValueType::All),
         const QStringList& skip = {}) const;
+
+    Q_INVOKABLE bool rowHasDuplicates(int row) const;
+    Q_INVOKABLE bool columnHasDuplicates(int column) const;
 
     bool busy() const { return _dataParserWatcher.isRunning(); }
 

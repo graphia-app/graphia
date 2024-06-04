@@ -146,10 +146,13 @@ TabularDataParser::~TabularDataParser()
     _dataParserWatcher.waitForFinished();
 }
 
-void TabularDataParser::updateTypes()
+void TabularDataParser::update()
 {
     _columnTypeIdentities = _dataPtr->columnTypeIdentities(this);
     _rowTypeIdentities = _dataPtr->rowTypeIdentities(this);
+
+    _columnDuplicates = _dataPtr->columnDuplicates(this);
+    _rowDuplicates = _dataPtr->rowDuplicates(this);
 }
 
 bool TabularDataParser::parse(const QUrl& fileUrl)
@@ -179,7 +182,7 @@ bool TabularDataParser::parse(const QUrl& fileUrl)
             }
 
             _dataPtr = std::make_shared<TabularData>(std::move(parser.tabularData()));
-            updateTypes();
+            update();
             emit dataChanged();
 
             return true;
@@ -303,6 +306,18 @@ TabularDataHeaderModel* TabularDataParser::columnHeaders(int _valueTypes, const 
 
     // Caller takes ownership (usually QML/JS)
     return new TabularDataHeaderModel(this, valueTypes, skip, HeaderModelType::Columns);
+}
+
+bool TabularDataParser::rowHasDuplicates(int row) const
+{
+    Q_ASSERT(static_cast<size_t>(row) < _rowDuplicates.size());
+    return _rowDuplicates.at(static_cast<size_t>(row));
+}
+
+bool TabularDataParser::columnHasDuplicates(int column) const
+{
+    Q_ASSERT(static_cast<size_t>(column) < _columnDuplicates.size());
+    return _columnDuplicates.at(static_cast<size_t>(column));
 }
 
 void TabularDataParser::onDataLoaded()
