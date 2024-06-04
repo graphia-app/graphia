@@ -29,7 +29,6 @@
 #include <QObject>
 #include <QFutureWatcher>
 #include <QAbstractListModel>
-#include <QVariantMap>
 
 #include <memory>
 #include <vector>
