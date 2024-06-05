@@ -43,6 +43,16 @@ Window
     property bool _keysSelected: keyAttributeList.selectedValue !== undefined && keyHeaderComboBox.enabled
     property bool _validParameters: _keysSelected && headersList.selectedValues.length > 0 &&
         !importAttributesKeyDetection.busy
+    property bool _selectedColumnHasDuplicates:
+    {
+        if(keyHeaderComboBox.currentIndex < 0)
+            return false;
+
+        if(tabularDataParser.complete && !tabularDataParser.columnHasDuplicates(keyHeaderComboBox.currentIndex))
+            return false;
+
+        return true;
+    }
 
     onVisibleChanged:
     {
@@ -321,6 +331,20 @@ Window
                     }
                 }
 
+                Text
+                {
+                    visible: text.length > 0
+
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                    textFormat: Text.StyledText
+                    color: "red"
+
+                    text: root._selectedColumnHasDuplicates ? Utils.format(
+                        qsTr("Selected column <b>{0}</b> has duplicate values, some rows will be ignored!"),
+                        keyHeaderComboBox.currentText) : "";
+                }
+
                 RowLayout
                 {
                     enabled: !importAttributesKeyDetection.busy && keyHeaderComboBox.enabled
@@ -501,9 +525,10 @@ Window
                         {
                             return Utils.format(qsTr("The following <b>{0}</b> " +
                                 "attribute(s) will be imported using the attribute <b>{1}</b> " +
-                                "and the column <b>{2}</b> as the keys:"),
+                                "and the column <b>{2}{3}</b> as the keys:"),
                                 keyAttributeList.elementType, keyAttributeList.display,
-                                keyHeaderComboBox.currentText);
+                                keyHeaderComboBox.currentText, root._selectedColumnHasDuplicates ?
+                                qsTr(" <font color=\"red\">(has duplicate values)</font>") : "");
                         }
 
                         return qsTr("<font color=\"red\">Attributes cannot be " +
