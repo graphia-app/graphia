@@ -30,7 +30,7 @@ struct String
     {
         char *dst = _data;
         const char *src = string;
-        while((*dst++ = *src++));
+        while((*dst++ = *src++) != '\0');
     }
 };
 
