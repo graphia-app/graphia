@@ -68,15 +68,15 @@ public:
 
     const ComponentLayoutData& componentLayout() { return _zoomedComponentLayoutData; }
 
-    void resetView(bool doTransition = true) override;
+    void resetView(NamedBool<"doTransition"> doTransition = "doTransition"_yes) override;
     bool viewIsReset() const override;
 
     void setProjection(Projection projection) override;
 
     void pan(float dx, float dy);
-    void zoom(float delta, float x, float y, bool doTransition);
+    void zoom(float delta, float x, float y, NamedBool<"doTransition"> doTransition);
 
-    void zoomTo(const std::vector<ComponentId>& componentIds, bool doTransition = true);
+    void zoomTo(const std::vector<ComponentId>& componentIds, NamedBool<"doTransition"> doTransition = "doTransition"_yes);
 
     Transition& startTransitionFromComponentMode(ComponentId componentModeComponentId,
         const std::vector<ComponentId>& focusComponentIds,

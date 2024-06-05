@@ -71,7 +71,7 @@ void GraphOverviewInteractor::leftDoubleClick()
     auto componentId = componentIdAtPosition(cursorPosition());
 
     if(!componentId.isNull())
-        _graphRenderer->switchToComponentMode(true, componentId, clickedNodeId());
+        _graphRenderer->switchToComponentMode("doTransition"_yes, componentId, clickedNodeId());
     else
         _scene->resetView();
 }
@@ -80,12 +80,12 @@ void GraphOverviewInteractor::wheelMove(float angle, float x, float y)
 {
     const float WHEEL_STEP_TRANSITION_SIZE = 0.2f / 120.0f;
 
-    _scene->zoom(angle * WHEEL_STEP_TRANSITION_SIZE, x, y, true);
+    _scene->zoom(angle * WHEEL_STEP_TRANSITION_SIZE, x, y, "doTransition"_yes);
 }
 
 void GraphOverviewInteractor::trackpadZoomGesture(float value, float x, float y)
 {
-    _scene->zoom(value, x, y, false);
+    _scene->zoom(value, x, y, "doTransition"_no);
 }
 
 void GraphOverviewInteractor::trackpadPanGesture(float dx, float dy, float x, float y)

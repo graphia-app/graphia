@@ -148,7 +148,7 @@ void GraphOverviewScene::onHide()
     setVisible(false);
 }
 
-void GraphOverviewScene::resetView(bool doTransition)
+void GraphOverviewScene::resetView(NamedBool<"doTransition"> doTransition)
 {
     setZoomFactor(minZoomFactor());
     setOffset(defaultOffset());
@@ -178,7 +178,7 @@ void GraphOverviewScene::pan(float dx, float dy)
     updateZoomedComponentLayoutData();
 }
 
-void GraphOverviewScene::zoom(float delta, float x, float y, bool doTransition)
+void GraphOverviewScene::zoom(float delta, float x, float y, NamedBool<"doTransition"> doTransition)
 {
     const float oldCentreX = x / _zoomFactor;
     const float oldCentreY = y / _zoomFactor;
@@ -204,7 +204,7 @@ void GraphOverviewScene::zoom(float delta, float x, float y, bool doTransition)
         updateZoomedComponentLayoutData();
 }
 
-void GraphOverviewScene::zoomTo(const std::vector<ComponentId>& componentIds, bool doTransition)
+void GraphOverviewScene::zoomTo(const std::vector<ComponentId>& componentIds, NamedBool<"doTransition"> doTransition)
 {
     Q_ASSERT(!componentIds.empty());
 
@@ -317,7 +317,7 @@ Transition& GraphOverviewScene::startTransitionFromComponentMode(ComponentId com
     }
 
     if(!focusComponentIds.empty())
-        zoomTo(focusComponentIds, false);
+        zoomTo(focusComponentIds, "doTransition"_no);
 
     auto& transition = startTransition(duration, transitionType);
 

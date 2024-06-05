@@ -52,7 +52,7 @@ public:
     void onHide() override;
 
     ComponentId componentId() const { return _componentId; }
-    void setComponentId(ComponentId componentId, bool doTransition = false);
+    void setComponentId(ComponentId componentId, NamedBool<"doTransition"> doTransition = "doTransition"_no);
 
     int width() const { return _width; }
     int height() const { return _height; }
@@ -61,7 +61,7 @@ public:
     bool savedViewIsReset() const;
     void restoreViewData() const;
 
-    void resetView(bool doTransition) override;
+    void resetView(NamedBool<"doTransition"> doTransition) override;
     bool viewIsReset() const override;
 
     void setProjection(Projection projection) override;
@@ -99,8 +99,8 @@ private:
 
     void updateRendererVisibility();
 
-    void finishComponentTransition(ComponentId componentId, bool doTransition);
-    void finishComponentTransitionOnRendererThread(ComponentId componentId, bool doTransition);
+    void finishComponentTransition(ComponentId componentId, NamedBool<"doTransition"> doTransition);
+    void finishComponentTransitionOnRendererThread(ComponentId componentId, NamedBool<"doTransition"> doTransition);
 
     void clearQueuedTransition();
     bool performQueuedTransition();

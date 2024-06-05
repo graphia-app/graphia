@@ -35,6 +35,7 @@
 #include "shared/utils/movablepointer.h"
 #include "shared/utils/deferredexecutor.h"
 #include "shared/utils/performancecounter.h"
+#include "shared/utils/namedbool.h"
 
 #include "app/preferences.h"
 
@@ -115,9 +116,9 @@ public:
     bool viewIsReset() const;
     void setTextColor(QColor textColor);
 
-    void switchToOverviewMode(bool doTransition = true,
+    void switchToOverviewMode(NamedBool<"doTransition"> doTransition = "doTransition"_yes,
         const std::vector<ComponentId>& focusComponentIds = {});
-    void switchToComponentMode(bool doTransition = true,
+    void switchToComponentMode(NamedBool<"doTransition"> doTransition = "doTransition"_yes,
         ComponentId componentId = {}, NodeId nodeId = {}, float radius = -1.0f);
     void rendererStartedTransition();
     void rendererFinishedTransition();
@@ -269,10 +270,10 @@ private:
     void render() override;
     void synchronize(QQuickFramebufferObject* item) override;
 
-    void finishTransitionToOverviewMode(bool doTransition, const std::vector<ComponentId>& focusComponentIds);
-    void finishTransitionToOverviewModeOnRendererThread(bool doTransition, const std::vector<ComponentId>& focusComponentIds);
-    void finishTransitionToComponentMode(bool doTransition);
-    void finishTransitionToComponentModeOnRendererThread(bool doTransition);
+    void finishTransitionToOverviewMode(NamedBool<"doTransition"> doTransition, const std::vector<ComponentId>& focusComponentIds);
+    void finishTransitionToOverviewModeOnRendererThread(NamedBool<"doTransition"> doTransition, const std::vector<ComponentId>& focusComponentIds);
+    void finishTransitionToComponentMode(NamedBool<"doTransition"> doTransition);
+    void finishTransitionToComponentModeOnRendererThread(NamedBool<"doTransition"> doTransition);
 
     void setScene(Scene* scene);
     void setInteractor(Interactor* interactor) { _interactor = interactor; }
