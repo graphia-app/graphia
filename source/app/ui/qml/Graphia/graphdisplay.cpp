@@ -203,7 +203,7 @@ void GraphDisplay::requestPreview(int width, int height, bool fillSize)
     update();
 }
 
-void GraphDisplay::switchToOverviewMode(bool)
+void GraphDisplay::switchToOverviewMode()
 {
     _overviewModeSwitchPending = true;
     update();

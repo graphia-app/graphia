@@ -94,7 +94,7 @@ public:
     bool inOverviewMode() const;
     bool canEnterOverviewMode() const;
 
-    void switchToOverviewMode(bool doTransition = true);
+    void switchToOverviewMode();
     bool overviewModeSwitchPending();
 
     void moveFocusToNode(NodeId nodeId);

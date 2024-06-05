@@ -1351,12 +1351,12 @@ void Document::resetView()
     _graphDisplay->resetView();
 }
 
-void Document::switchToOverviewMode(bool doTransition)
+void Document::switchToOverviewMode()
 {
     if(busy())
         return;
 
-    _graphDisplay->switchToOverviewMode(doTransition);
+    _graphDisplay->switchToOverviewMode();
 }
 
 int Document::projection() const

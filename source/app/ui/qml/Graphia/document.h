@@ -453,7 +453,7 @@ public:
 
     Q_INVOKABLE void resetView();
 
-    Q_INVOKABLE void switchToOverviewMode(bool doTransition = true);
+    Q_INVOKABLE void switchToOverviewMode();
 
     Q_INVOKABLE int projection() const;
     Q_INVOKABLE void setProjection(int projection);
