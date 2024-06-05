@@ -1662,13 +1662,13 @@ double CorrelationPlot::columnAnnotationsHeight() const
     return static_cast<double>(_visibleColumnAnnotationNames.size()) * labelHeight();
 }
 
-std::vector<size_t> CorrelationPlot::selectedColumns() const
+std::vector<int> CorrelationPlot::selectedColumns() const
 {
-    std::vector<size_t> v;
+    std::vector<int> v;
     v.reserve(_selectedColumns.size());
 
     for(auto column : _selectedColumns)
-        v.push_back(column);
+        v.push_back(static_cast<int>(column));
 
     return v;
 }
