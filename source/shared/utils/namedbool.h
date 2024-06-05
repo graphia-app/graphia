@@ -26,7 +26,7 @@ struct String
 {
     char _data[N] = {0};
 
-    consteval String(const char (&string)[N])
+    consteval String(const char (&string)[N]) // NOLINT google-explicit-constructor
     {
         char *dst = _data;
         const char *src = string;
@@ -47,7 +47,7 @@ public:
     constexpr NamedBool(NamedBool&& other) = default;
     constexpr NamedBool& operator=(bool value) { _value = value; return *this; }
 
-    constexpr operator bool() const { return _value; }
+    constexpr explicit operator bool() const { return _value; }
 };
 
 template <String string>
