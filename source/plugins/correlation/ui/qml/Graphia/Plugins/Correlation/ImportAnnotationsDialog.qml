@@ -43,6 +43,16 @@ Window
     property bool _keysSelected: keyHeaderComboBox.enabled
     property bool _validParameters: _keysSelected && headersList.selectedValues.length > 0 &&
         !importAnnotationsKeyDetection.busy
+    property bool _selectedRowHasDuplicates:
+    {
+        if(keyHeaderComboBox.currentIndex < 0)
+            return false;
+
+        if(tabularDataParser.complete && !tabularDataParser.rowHasDuplicates(keyHeaderComboBox.currentIndex))
+            return false;
+
+        return true;
+    }
 
     onVisibleChanged:
     {
@@ -259,6 +269,20 @@ Window
 
                 Text
                 {
+                    visible: text.length > 0
+
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                    textFormat: Text.StyledText
+                    color: "red"
+
+                    text: root._selectedRowHasDuplicates ? Utils.format(
+                        qsTr("Selected row <b>{0}</b> has duplicate values, some columns will be ignored!"),
+                        keyHeaderComboBox.currentText) : "";
+                }
+
+                Text
+                {
                     Layout.alignment: Qt.AlignHCenter
                     Layout.topMargin: Constants.spacing * 2
                     color: palette.buttonText
@@ -424,8 +448,9 @@ Window
                         {
                             return Utils.format(qsTr("The following " +
                                 "annotation(s) will be imported using the " +
-                                "row <b>{0}</b> as the key:"),
-                                keyHeaderComboBox.currentText);
+                                "row <b>{0}{1}</b> as the key:"),
+                                keyHeaderComboBox.currentText, root._selectedRowHasDuplicates ?
+                                qsTr(" <font color=\"red\">(has duplicate values)</font>") : "");
                         }
 
                         return qsTr("<font color=\"red\">Annotations cannot be " +
