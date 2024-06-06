@@ -180,7 +180,7 @@ ColumnLayout
                     let colors = root._autoColors;
 
                     let newColor = root.stringValues.length > 0 ?
-                        NativeUtils.colorForString(root.stringValues[0]) : Qt.red;
+                        NativeUtils.colorForString(root.stringValues[0]) : "red";
 
                     if(root._autoColors.length > 0)
                     {
@@ -449,7 +449,7 @@ ColumnLayout
                     let colors = root._fixedColors;
 
                     let newColor = initialValue.length > 0 ?
-                        NativeUtils.colorForString(initialValue) : Qt.red;
+                        NativeUtils.colorForString(initialValue) : "red";
 
                     // Use either the latest fixed colour to generate a new one, or the
                     // latest auto colour if there isn't one

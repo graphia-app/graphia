@@ -73,7 +73,7 @@ Window
                 selectByMouse: true
 
                 property bool valid: { return textField.length > 0 && NativeUtils.userUrlStringIsValid(text); }
-                color: textField.length === 0 || textField.valid ? palette.text : Qt.red
+                color: textField.length === 0 || textField.valid ? palette.text : "red"
             }
         }
 

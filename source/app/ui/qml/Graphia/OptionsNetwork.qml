@@ -189,7 +189,7 @@ Item
                     Layout.fillWidth: true
 
                     selectByMouse: true
-                    color: NativeUtils.userUrlStringIsValid(webSearchEngineField.text) ? palette.text : Qt.red
+                    color: NativeUtils.userUrlStringIsValid(webSearchEngineField.text) ? palette.text : "red"
 
                     property string _defaultValue: "https://www.google.com/search?q=%1"
                     function reset() { text = _defaultValue; }
