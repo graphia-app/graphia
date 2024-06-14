@@ -101,15 +101,16 @@ Item
     {
         anchors.fill: parent
         anchors.margins: Constants.margin
-        spacing: Constants.spacing
+        spacing: Constants.spacing * 4
 
-        Item
+        ColumnLayout
         {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
+            spacing: Constants.spacing
 
             GridLayout
             {
+                Layout.fillWidth: true
+
                 columns: 2
                 rowSpacing: Constants.spacing
                 columnSpacing: Constants.spacing
@@ -122,20 +123,30 @@ Item
                     text: qsTr("Default Colours")
                 }
 
-                Label { text: qsTr("Nodes") }
+                Label { Layout.fillWidth: true; text: qsTr("Nodes") }
                 ColorPickButton { id: nodeColorPickButton }
 
-                Label { text: qsTr("Edges") }
+                Label { Layout.fillWidth: true; text: qsTr("Edges") }
                 ColorPickButton { id: edgeColorPickButton }
 
-                Label { text: qsTr("Multi Elements") }
+                Label { Layout.fillWidth: true; text: qsTr("Multi Elements") }
                 ColorPickButton { id: multiElementColorPickButton }
 
-                Label { text: qsTr("Background") }
+                Label { Layout.fillWidth: true; text: qsTr("Background") }
                 ColorPickButton { id: backgroundColorPickButton }
 
-                Label { text: qsTr("Selection") }
+                Label { Layout.fillWidth: true; text: qsTr("Selection") }
                 ColorPickButton { id: highlightColorPickButton }
+
+            }
+
+            GridLayout
+            {
+                Layout.fillWidth: true
+
+                columns: 2
+                rowSpacing: Constants.spacing
+                columnSpacing: Constants.spacing
 
                 Label
                 {
@@ -146,7 +157,7 @@ Item
                     text: qsTr("Default Sizes")
                 }
 
-                Label { text: qsTr("Nodes") }
+                Label { Layout.fillWidth: true; text: qsTr("Nodes") }
                 Slider
                 {
                     id: nodeSizeSlider
@@ -156,7 +167,7 @@ Item
                     onValueChanged: { delayedPreferences.update(); }
                 }
 
-                Label { text: qsTr("Edges") }
+                Label { Layout.fillWidth: true; text: qsTr("Edges") }
                 Slider
                 {
                     id: edgeSizeSlider
@@ -166,28 +177,28 @@ Item
                     onValueChanged: { delayedPreferences.update(); }
                 }
             }
+
+            Item { Layout.fillHeight: true }
         }
 
-        Item
+        ColumnLayout
         {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
+            spacing: Constants.spacing
 
-            GridLayout
+            Label
             {
-                columns: 2
-                rowSpacing: Constants.spacing
-                columnSpacing: Constants.spacing
+                Layout.fillWidth: true
 
-                Label
-                {
-                    Layout.columnSpan: 2
+                font.bold: true
+                text: qsTr("Text")
+            }
 
-                    font.bold: true
-                    text: qsTr("Text")
-                }
+            RowLayout
+            {
+                Layout.fillWidth: true
+                spacing: Constants.spacing
 
-                Label { text: qsTr("Font") }
+                Label { Layout.fillWidth: true; text: qsTr("Font") }
                 Button
                 {
                     text: visuals.textFont + " " + visuals.textSize + "pt";
@@ -198,8 +209,14 @@ Item
                         fontDialog.visible = true;
                     }
                 }
+            }
 
-                Label { text: qsTr("Alignment") }
+            RowLayout
+            {
+                Layout.fillWidth: true
+                spacing: Constants.spacing
+
+                Label { Layout.fillWidth: true; text: qsTr("Alignment") }
                 ComboBox
                 {
                     id: textAlignmentCombobox
@@ -214,6 +231,15 @@ Item
                         qsTr("Bottom")
                     ]
                 }
+            }
+
+            GridLayout
+            {
+                Layout.fillWidth: true
+
+                columns: 2
+                rowSpacing: Constants.spacing
+                columnSpacing: Constants.spacing
 
                 Label
                 {
@@ -224,7 +250,7 @@ Item
                     text: qsTr("Miscellaneous")
                 }
 
-                Label { text: qsTr("Transition Time") }
+                Label { Layout.fillWidth: true; text: qsTr("Transition Time") }
                 Slider
                 {
                     id: transitionTimeSlider
@@ -232,7 +258,7 @@ Item
                     to: limitConstants.maximumTransitionTime
                 }
 
-                Label { text: qsTr("Component Radius") }
+                Label { Layout.fillWidth: true; text: qsTr("Component Radius") }
                 Slider
                 {
                     id: minimumComponentRadiusSlider
@@ -241,6 +267,16 @@ Item
 
                     onValueChanged: { delayedPreferences.update(); }
                 }
+            }
+
+            GridLayout
+            {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+
+                columns: 2
+                rowSpacing: Constants.spacing
+                columnSpacing: Constants.spacing
 
                 Label
                 {
@@ -257,7 +293,7 @@ Item
                     text: qsTr("(Restart Required)")
                 }
 
-                Label { text: qsTr("User Interface Theme") }
+                Label { Layout.fillWidth: true; text: qsTr("User Interface Theme") }
                 ComboBox
                 {
                     id: userInterfaceComboBox
@@ -266,6 +302,8 @@ Item
                     onCurrentTextChanged: { system.uiTheme = currentText; }
                 }
             }
+
+            Item { Layout.fillHeight: true }
         }
     }
 
