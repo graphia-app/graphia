@@ -178,8 +178,6 @@ Item
                 id: scrollView
                 anchors.fill: parent
 
-                property bool needsFrame: contentHeight > availableHeight
-                readonly property real frameMargin: needsFrame ? Constants.margin : 0
                 readonly property real scrollBarWidth: ScrollBar.vertical.size < 1 ? ScrollBar.vertical.width : 0
 
                 ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
@@ -204,10 +202,10 @@ Item
                     {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        Layout.leftMargin: scrollView.frameMargin
-                        Layout.rightMargin: scrollView.frameMargin + scrollView.scrollBarWidth
-                        Layout.topMargin: scrollView.frameMargin
-                        Layout.bottomMargin: scrollView.frameMargin
+                        Layout.leftMargin: Constants.margin
+                        Layout.rightMargin: Constants.margin + scrollView.scrollBarWidth
+                        Layout.topMargin: Constants.margin
+                        Layout.bottomMargin: Constants.margin
                         spacing: Constants.spacing
 
                         Label
@@ -342,11 +340,7 @@ Item
                 }
             }
 
-            Outline
-            {
-                anchors.fill: parent
-                outlineVisible: scrollView.needsFrame
-            }
+            Outline { anchors.fill: parent }
         }
     }
 }
