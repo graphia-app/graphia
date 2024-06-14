@@ -30,7 +30,7 @@ Window
     id: root
 
     title: qsTr("Options")
-    flags: Qt.Window|Qt.Dialog
+    flags: Constants.defaultWindowFlags
     color: palette.window
 
     minimumWidth: 700

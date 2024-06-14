@@ -1617,7 +1617,7 @@ Item
         title: qsTr("Application Method")
 
         modality: Qt.ApplicationModal
-        flags: Qt.Dialog
+        flags: Constants.defaultWindowFlags
 
         width: 380
         minimumWidth: width

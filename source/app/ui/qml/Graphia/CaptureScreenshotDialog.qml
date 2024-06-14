@@ -30,7 +30,7 @@ Window
     id: root
     title: qsTr("Save As Image")
     modality: Qt.ApplicationModal
-    flags: Qt.Window|Qt.Dialog
+    flags: Constants.defaultWindowFlags
     color: palette.window
 
     width: 800

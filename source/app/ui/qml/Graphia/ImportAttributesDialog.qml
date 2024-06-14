@@ -34,7 +34,7 @@ Window
 
     title: qsTr("Import Attributes")
     modality: Qt.ApplicationModal
-    flags: Qt.Window|Qt.Dialog
+    flags: Constants.defaultWindowFlags
     color: palette.window
 
     minimumWidth: 640

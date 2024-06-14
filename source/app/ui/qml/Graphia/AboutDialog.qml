@@ -31,7 +31,7 @@ Window
     property var application: null
 
     title: Utils.format(qsTr("About {0}"), application.name)
-    flags: Qt.Window|Qt.Dialog
+    flags: Constants.defaultWindowFlags
     color: palette.window
 
     minimumWidth: 500

@@ -39,7 +39,7 @@ Window
     property var document: null
 
     modality: Qt.ApplicationModal
-    flags: Qt.Dialog
+    flags: Constants.defaultWindowFlags
     color: palette.window
 
     width: 640

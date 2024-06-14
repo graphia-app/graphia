@@ -48,7 +48,7 @@ Window
     }
 
     title: qsTr("About Plugins")
-    flags: Qt.Window|Qt.Dialog
+    flags: Constants.defaultWindowFlags
     color: palette.window
 
     width: 600

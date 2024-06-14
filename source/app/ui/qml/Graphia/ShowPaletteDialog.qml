@@ -28,7 +28,7 @@ Window
 {
     id: root
 
-    flags: Qt.Window|Qt.Dialog
+    flags: Constants.defaultWindowFlags
     color: palette.window
     title: qsTr("Palette")
 

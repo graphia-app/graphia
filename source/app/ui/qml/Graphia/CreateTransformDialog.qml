@@ -33,7 +33,7 @@ Window
 
     title: qsTr("Add Transform")
     modality: Qt.ApplicationModal
-    flags: Qt.Window|Qt.Dialog
+    flags: Constants.defaultWindowFlags
     color: palette.window
     width: 900
     height: 475

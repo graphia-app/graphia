@@ -20,10 +20,12 @@ import QtQuick
 import QtQuick.Window
 import QtQuick.Layouts
 
+import Graphia.Utils
+
 Window
 {
     modality: Qt.ApplicationModal
-    flags: Qt.Window|Qt.Dialog
+    flags: Constants.defaultWindowFlags
     color: palette.window
 
     property var parameters: ({})

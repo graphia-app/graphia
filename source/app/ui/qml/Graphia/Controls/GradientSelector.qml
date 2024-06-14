@@ -43,7 +43,7 @@ Window
 
     title: qsTr("Edit Gradient")
     modality: Qt.ApplicationModal
-    flags: Qt.Window|Qt.Dialog
+    flags: Constants.defaultWindowFlags
     color: palette.window
 
     minimumWidth: 640

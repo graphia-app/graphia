@@ -33,7 +33,7 @@ Window
     property string choiceLabelText: ""
 
     modality: Qt.ApplicationModal
-    flags: Qt.Dialog
+    flags: Constants.defaultWindowFlags
     color: palette.window
 
     width: 420

@@ -31,7 +31,7 @@ Window
 
     title: qsTr("Add Visualisation")
     modality: Qt.ApplicationModal
-    flags: Qt.Window|Qt.Dialog
+    flags: Constants.defaultWindowFlags
     color: palette.window
     width: 640
     height: 350

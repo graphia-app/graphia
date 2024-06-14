@@ -83,7 +83,7 @@ Window
     property var _selectedType: ValueType.Unknown
 
     title: qsTr("Edit Attribute")
-    flags: Qt.Window|Qt.Dialog
+    flags: Constants.defaultWindowFlags
     color: palette.window
 
     minimumWidth: 500

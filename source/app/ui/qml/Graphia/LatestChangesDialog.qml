@@ -32,7 +32,7 @@ Window
     property string version
 
     title: qsTr("Latest Changes for Version " + root.version)
-    flags: Qt.Window|Qt.Dialog
+    flags: Constants.defaultWindowFlags
     color: palette.window
 
     minimumWidth: 640
