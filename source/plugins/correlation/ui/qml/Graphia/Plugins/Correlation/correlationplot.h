@@ -419,7 +419,7 @@ private:
     int plotMode() const;
     void setPlotMode(int plotModeInt);
 
-    std::vector<size_t> selectedColumns() const;
+    std::vector<size_t> selectedColumns() const; // clazy:exclude=qproperty-type-mismatch
 
     QStringList visibleColumnAnnotationNames() const;
     void setVisibleColumnAnnotationNames(const QStringList& columnAnnotations);
