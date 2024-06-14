@@ -75,9 +75,9 @@ Window
                     anchors.fill: parent
                     currentIndex: tabBar.currentIndex
 
-                    OptionsAppearance {}
+                    OptionsAppearance { application: root.application }
                     OptionsMisc { application: root.application }
-                    OptionsNetwork {}
+                    OptionsNetwork { application: root.application }
                     OptionsDefaults { application: root.application }
                 }
             }

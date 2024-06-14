@@ -26,6 +26,10 @@ import Graphia.Utils
 
 Item
 {
+    id: root
+
+    property var application: null
+
     LimitConstants { id: limitConstants }
 
     Preferences
@@ -271,6 +275,7 @@ Item
 
             GridLayout
             {
+                visible: !root.application.runningWasm
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 

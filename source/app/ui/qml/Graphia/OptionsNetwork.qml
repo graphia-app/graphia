@@ -28,6 +28,8 @@ Item
 {
     id: root
 
+    property var application: null
+
     Preferences
     {
         id: misc
@@ -211,6 +213,7 @@ Item
             CheckBox
             {
                 id: autoBackgroundUpdateCheckCheckbox
+                visible: !root.application.runningWasm
                 text: qsTr("Check For Updates Automatically")
             }
 
