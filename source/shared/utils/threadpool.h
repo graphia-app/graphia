@@ -63,6 +63,7 @@ public:
 private:
     template<typename Fn, typename... Args> using ReturnType = typename std::invoke_result_t<Fn, Args...>;
 
+    // NOLINTNEXTLINE cppcoreguidelines-missing-std-forward
     template<typename Fn, typename... Args> std::future<ReturnType<Fn, Args...>> makeFuture(Fn f, Args&&... args)
     {
         if(_stop)

@@ -38,8 +38,8 @@ namespace u
             _future(std::move(future))
         {}
 
-        template<typename ThenFn>
-        void then(ThenFn&& thenFn)
+        // NOLINTNEXTLINE cppcoreguidelines-missing-std-forward
+        template<typename ThenFn> void then(ThenFn&& thenFn)
         {
             auto* watcher = new QFutureWatcher<AsyncFnResult>;
             QObject::connect(watcher, &QFutureWatcher<AsyncFnResult>::finished,
