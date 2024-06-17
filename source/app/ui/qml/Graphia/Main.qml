@@ -1295,7 +1295,7 @@ ApplicationWindow
                 if(enrichmentResults.models.length > 0)
                 {
                     enrichmentResults.show();
-                    encrichmentResults.raise();
+                    enrichmentResults.raise();
                 }
                 else
                 {
