@@ -35,11 +35,10 @@ Item
     property color disabledTextColor
     property color heldColor
 
-    CreateTransformDialog
+    Component
     {
         id: createTransformDialog
-
-        document: root.document
+        CreateTransformDialog { document: root.document }
     }
 
     ColumnLayout
@@ -107,11 +106,7 @@ Item
                 textColor: enabled ? enabledTextColor : disabledTextColor
                 hoverColor: heldColor
 
-                onClicked: function(mouse)
-                {
-                    createTransformDialog.show();
-                    createTransformDialog.raise();
-                }
+                onClicked: function(mouse) { Utils.createWindow(root, createTransformDialog); }
             }
 
             FloatingButton
