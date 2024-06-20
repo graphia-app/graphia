@@ -477,11 +477,7 @@ Item
         }
     }
 
-    function screenshot()
-    {
-        captureScreenshotDialog.show();
-        captureScreenshotDialog.raise();
-    }
+    function screenshot() { Utils.createWindow(root, captureScreenshotDialog); }
 
     function copyImageToClipboard()
     {
@@ -568,11 +564,14 @@ Item
             Qt.openUrlExternally(NativeUtils.urlFrom(url));
     }
 
-    CaptureScreenshotDialog
+    Component
     {
         id: captureScreenshotDialog
-        graphView: graph
-        application: root.application
+        CaptureScreenshotDialog
+        {
+            graphView: graph
+            application: root.application
+        }
     }
 
     Labs.ColorDialog
