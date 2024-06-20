@@ -1634,14 +1634,17 @@ ApplicationWindow
         }
     }
 
-    AddTemplateDialog
+    Component
     {
         id: addTemplateDialog
-        document: currentTab && currentTab.document
-
-        onAccepted: function(name, method, transforms, visualisations)
+        AddTemplateDialog
         {
-            templates.add(name, method, transforms, visualisations);
+            document: currentTab && currentTab.document
+
+            onAccepted: function(name, method, transforms, visualisations)
+            {
+                templates.add(name, method, transforms, visualisations);
+            }
         }
     }
 
@@ -1653,11 +1656,7 @@ ApplicationWindow
         enabled: currentTab ? !currentTab.document.busy &&
             (currentTab.document.transforms.length > 0 ||
             currentTab.document.visualisations.length > 0) : false
-        onTriggered: function(source)
-        {
-            addTemplateDialog.show();
-            addTemplateDialog.raise();
-        }
+        onTriggered: function(source) { Utils.createWindow(mainWindow, addTemplateDialog); }
     }
 
     Component
