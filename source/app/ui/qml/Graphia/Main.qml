@@ -1396,10 +1396,10 @@ ApplicationWindow
         }
     }
 
-    CloneAttributeDialog
+    Component
     {
         id: cloneAttributeDialog
-        document: currentTab && currentTab.document
+        CloneAttributeDialog { document: currentTab && currentTab.document }
     }
 
     Action
@@ -1407,12 +1407,7 @@ ApplicationWindow
         id: cloneAttributeAction
         text: qsTr("Clone Attribute…")
         enabled: currentTab !== null && !currentTab.document.busy
-        onTriggered: function(source)
-        {
-            cloneAttributeDialog.sourceAttributeName = "";
-            cloneAttributeDialog.show();
-            cloneAttributeDialog.raise();
-        }
+        onTriggered: function(source) { Utils.createWindow(mainWindow, cloneAttributeDialog); }
     }
 
     function cloneAttribute(attributeName)
@@ -1420,15 +1415,13 @@ ApplicationWindow
         if(!cloneAttributeAction.enabled)
             return;
 
-        cloneAttributeDialog.sourceAttributeName = attributeName;
-        cloneAttributeDialog.show();
-        cloneAttributeDialog.raise();
+        Utils.createWindow(mainWindow, cloneAttributeDialog, {sourceAttributeName: attributeName});
     }
 
-    EditAttributeDialog
+    Component
     {
         id: editAttributeDialog
-        document: currentTab && currentTab.document
+        EditAttributeDialog { document: currentTab && currentTab.document }
     }
 
     Action
@@ -1436,28 +1429,21 @@ ApplicationWindow
         id: editAttributeAction
         text: qsTr("Edit Attribute…")
         enabled: currentTab !== null && !currentTab.document.busy
-        onTriggered: function(source)
-        {
-            editAttributeDialog.attributeName = "";
-            editAttributeDialog.show();
-            editAttributeDialog.raise();
-        }
+        onTriggered: function(source) { Utils.createWindow(mainWindow, editAttributeDialog); }
     }
 
-    function editAttribute(attributeName)
+    function editAttribute(targetAttributeName)
     {
         if(!editAttributeAction.enabled)
             return;
 
-        editAttributeDialog.attributeName = attributeName;
-        editAttributeDialog.show();
-        editAttributeDialog.raise();
+        Utils.createWindow(mainWindow, editAttributeDialog, {attributeName: targetAttributeName});
     }
 
-    RemoveAttributesDialog
+    Component
     {
         id: removeAttributesDialog
-        document: currentTab && currentTab.document
+        RemoveAttributesDialog { document: currentTab && currentTab.document }
     }
 
     Action
@@ -1465,11 +1451,7 @@ ApplicationWindow
         id: removeAttributesAction
         text: qsTr("Remove Attributes…")
         enabled: currentTab !== null && !currentTab.document.busy
-        onTriggered: function(source)
-        {
-            removeAttributesDialog.show();
-            removeAttributesDialog.raise();
-        }
+        onTriggered: function(source) { Utils.createWindow(mainWindow, removeAttributesDialog); }
     }
 
     function removeAttributes(attributeNames)
