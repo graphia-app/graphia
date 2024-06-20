@@ -35,11 +35,10 @@ Item
     property color disabledTextColor
     property color heldColor
 
-    CreateVisualisationDialog
+    Component
     {
         id: createVisualisationDialog
-
-        document: root.document
+        CreateVisualisationDialog { document: root.document }
     }
 
     GradientSelector { id: _gradientSelector }
@@ -81,11 +80,7 @@ Item
                 textColor: enabled ? enabledTextColor : disabledTextColor
                 hoverColor: heldColor
 
-                onClicked: function(mouse)
-                {
-                    createVisualisationDialog.show();
-                    createVisualisationDialog.raise();
-                }
+                onClicked: function(mouse) { Utils.createWindow(root, createVisualisationDialog); }
             }
 
             FloatingButton
