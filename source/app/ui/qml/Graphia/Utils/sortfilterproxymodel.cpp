@@ -67,7 +67,17 @@ bool SortFilterProxyModel::lessThan(const QModelIndex& left, const QModelIndex& 
     {
         auto leftValue = engine->toScriptValue(left);
         auto rightValue = engine->toScriptValue(right);
-        result = _sortExpression.call({leftValue, rightValue}).toBool();
+        auto value = _sortExpression.call({leftValue, rightValue});
+
+        if(value.isError())
+        {
+            qDebug() << "When executing" << this <<
+                "sortExpression caught QJSValue::ErrorType:" <<
+                value.errorType();
+            result = false;
+        }
+        else
+            result = value.toBool();
     }
     else
         result = QSortFilterProxyModel::lessThan(left, right);
@@ -82,6 +92,15 @@ bool SortFilterProxyModel::filterAcceptsRow(int row, const QModelIndex& parent) 
     {
         auto parentValue = engine->toScriptValue(parent);
         auto value = _filterExpression.call({row, parentValue});
+
+        if(value.isError())
+        {
+            qDebug() << "When executing" << this <<
+                "filterExpression caught QJSValue::ErrorType:" <<
+                value.errorType();
+            return false;
+        }
+
         return value.toBool();
     }
 
