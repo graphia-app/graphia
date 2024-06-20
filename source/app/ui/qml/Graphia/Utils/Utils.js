@@ -365,3 +365,43 @@ function normalise(min, max, value)
 {
     return (value - min) / (max - min);
 }
+
+function createWindow(parent, component, properties = {}, immediatelyShow = true)
+{
+    if(parent.windowInstanceMap === undefined)
+    {
+        // Add a Map to parent, which maps the
+        // component to a created window instance
+        Object.defineProperty(parent, "windowInstanceMap",
+            {enumerable: false, configurable: false,
+            writable: false, value: new Map()});
+    }
+
+    let window = null;
+    if(!parent.windowInstanceMap.has(component))
+    {
+        // Create the window
+        window = component.createObject(parent, properties);
+        parent.windowInstanceMap.set(component, window);
+
+        // Destroy the window when it is closed
+        window.closing.connect((close) =>
+        {
+            window.destroy();
+            parent.windowInstanceMap.delete(component);
+        });
+    }
+    else
+    {
+        // Window already exists
+        window = windowInstanceMap.get(component);
+    }
+
+    if(immediatelyShow)
+    {
+        window.show();
+        window.raise();
+    }
+
+    return window;
+}
