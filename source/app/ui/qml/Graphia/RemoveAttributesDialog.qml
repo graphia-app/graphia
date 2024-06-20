@@ -102,10 +102,10 @@ Window
 
             filterExpression: function(row, parent)
             {
-                let userDefined = model.data(model.index(row, 0), proxyModel.role("userDefined"));
-                let hasParameter = model.data(model.index(row, 0), proxyModel.role("hasParameter"));
+                let userDefined = model.data(model.index(row, 0), modelRole("userDefined"));
+                let hasParameter = model.data(model.index(row, 0), modelRole("hasParameter"));
 
-                return userDefined && hasParameter;
+                return (userDefined === qsTr("User Defined")) && !hasParameter;
             }
 
             AttributeListSortMenu { attributeList: parent }
