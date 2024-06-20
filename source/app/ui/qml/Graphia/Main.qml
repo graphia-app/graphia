@@ -1660,15 +1660,17 @@ ApplicationWindow
         }
     }
 
-    ManageNamedListDialog
+    Component
     {
-        id: manageTemplates
+        id: manageTemplatesDialog
+        ManageNamedListDialog
+        {
+            title: qsTr("Manage Templates")
+            model: { return templates.namesAsArray(); }
 
-        title: qsTr("Manage Templates")
-        model: { return templates.namesAsArray(); }
-
-        onRemove: function(names) { templates.remove(names); }
-        onRename: function(from, to) { templates.rename(from, to); }
+            onRemove: function(names) { templates.remove(names); }
+            onRename: function(from, to) { templates.rename(from, to); }
+        }
     }
 
     Action
@@ -1676,11 +1678,7 @@ ApplicationWindow
         id: manageTemplatesAction
         text: qsTr("Manage Templates…")
         enabled: { return templates.namesAsArray().length > 0; }
-        onTriggered: function(source)
-        {
-            manageTemplates.show();
-            manageTemplates.raise();
-        }
+        onTriggered: function(source) { Utils.createWindow(mainWindow, manageTemplatesDialog); }
     }
 
     ActionGroup
