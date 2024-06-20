@@ -396,35 +396,49 @@ ApplicationWindow
         }
     }
 
-    OptionsDialog
+    Component
     {
         id: optionsDialog
-        applicationRef: application
 
-        enabled: !mainWindow._anyTabsBusy
-    }
-
-    AboutDialog
-    {
-        id: aboutDialog
-        applicationRef: application
-
-        onHiddenSwitchActivated:
+        OptionsDialog
         {
-            console.log("Debug menu enabled");
-            mainWindow.debugMenuUnhidden = true;
+            applicationRef: application
+
+            enabled: !mainWindow._anyTabsBusy
         }
     }
 
-    AboutPluginsDialog { id: aboutpluginsDialog }
+    Component
+    {
+        id: aboutDialog
+
+        AboutDialog
+        {
+            applicationRef: application
+
+            onHiddenSwitchActivated:
+            {
+                console.log("Debug menu enabled");
+                mainWindow.debugMenuUnhidden = true;
+            }
+        }
+    }
+
+    Component
+    {
+        id: aboutPluginsDialog
+        AboutPluginsDialog {}
+    }
 
     ChangeLog { id: changeLog }
-    LatestChangesDialog
+    Component
     {
         id: latestChangesDialog
-
-        text: changeLog.text
-        version: application.version
+        LatestChangesDialog
+        {
+            text: changeLog.text
+            version: application.version
+        }
     }
 
     readonly property string environment:
@@ -443,25 +457,40 @@ ApplicationWindow
         return s;
     }
 
-    TextDialog
+    Component
     {
         id: environmentDialog
-        text: mainWindow.environment
+        TextDialog
+        {
+            title: qsTr("Environment")
+            text: mainWindow.environment
+        }
     }
 
-    TextDialog
+    Component
     {
         id: openGLInfoDialog
-        text: application.openGLInfo
+        TextDialog
+        {
+            title: qsTr("OpenGL Info")
+            text: application.openGLInfo
+        }
     }
 
-    ShowPaletteDialog { id: showPaletteDialog }
+    Component
+    {
+        id: showPaletteDialog
+        ShowPaletteDialog {}
+    }
 
-    TextDialog
+    Component
     {
         id: provenanceLogDialog
-        title: qsTr("Provenance Log")
-        text: currentTab !== null ? currentTab.document.log : ""
+        TextDialog
+        {
+            title: qsTr("Provenance Log")
+            text: currentTab !== null ? currentTab.document.log : ""
+        }
     }
 
     Preferences
@@ -1276,11 +1305,7 @@ ApplicationWindow
         enabled: !mainWindow._anyDocumentsBusy && !tracking.visible
         icon.name: "applications-system"
         text: qsTr("&Options…")
-        onTriggered: function(source)
-        {
-            optionsDialog.show();
-            optionsDialog.raise();
-        }
+        onTriggered: function(source) { Utils.createWindow(mainWindow, optionsDialog); }
     }
 
     Action
@@ -1887,33 +1912,21 @@ ApplicationWindow
     {
         id: showEnvironmentAction
         text: qsTr("Show Environment")
-        onTriggered: function(source)
-        {
-            environmentDialog.show();
-            environmentDialog.raise();
-        }
+        onTriggered: function(source) { Utils.createWindow(mainWindow, environmentDialog); }
     }
 
     Action
     {
         id: showOpenGLInfoAction
         text: qsTr("Show OpenGL Info")
-        onTriggered: function(source)
-        {
-            openGLInfoDialog.show();
-            openGLInfoDialog.raise();
-        }
+        onTriggered: function(source) { Utils.createWindow(mainWindow, openGLInfoDialog); }
     }
 
     Action
     {
         id: showPaletteAction
         text: qsTr("Show Palette")
-        onTriggered: function(source)
-        {
-            showPaletteDialog.show();
-            showPaletteDialog.raise();
-        }
+        onTriggered: function(source) { Utils.createWindow(mainWindow, showPaletteDialog); }
     }
 
     Action
@@ -2019,11 +2032,7 @@ ApplicationWindow
         id: showProvenanceLogAction
         text: qsTr("Show Provenance Log…")
         enabled: currentTab !== null && !currentTab.document.busy
-        onTriggered: function(source)
-        {
-            provenanceLogDialog.show();
-            provenanceLogDialog.raise();
-        }
+        onTriggered: function(source) { Utils.createWindow(mainWindow, provenanceLogDialog); }
     }
 
     Action
@@ -2033,9 +2042,7 @@ ApplicationWindow
         text: Qt.platform.os === "osx" ? qsTr("Plugins…") : qsTr("About Plugins…")
         onTriggered: function(source)
         {
-            aboutpluginsDialog.pluginDetails = application.pluginDetailsModel();
-            aboutpluginsDialog.show();
-            aboutpluginsDialog.raise();
+            Utils.createWindow(mainWindow, aboutPluginsDialog, {pluginDetails: application.pluginDetailsModel()});
         }
     }
 
@@ -2043,11 +2050,7 @@ ApplicationWindow
     {
         id: aboutAction
         text: qsTr("About " + application.name + "…")
-        onTriggered: function(source)
-        {
-            aboutDialog.show();
-            aboutDialog.raise();
-        }
+        onTriggered: function(source) { Utils.createWindow(mainWindow, aboutDialog); }
     }
 
     Action
@@ -2089,11 +2092,7 @@ ApplicationWindow
 
         text: qsTr("Latest Changes…")
 
-        onTriggered: function(source)
-        {
-            latestChangesDialog.show();
-            latestChangesDialog.raise();
-        }
+        onTriggered: function(source) { Utils.createWindow(mainWindow, latestChangesDialog); }
     }
 
     Action
