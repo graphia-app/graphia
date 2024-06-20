@@ -941,10 +941,10 @@ ApplicationWindow
         property string type: ""
     }
 
-    OpenUrlDialog
+    Component
     {
         id: openUrlDialog
-        onAccepted: { openUrl(openUrlDialog.url, true); }
+        OpenUrlDialog { onAccepted: { openUrl(openUrlDialog.url, true); } }
     }
 
     Action
@@ -990,11 +990,7 @@ ApplicationWindow
         id: urlOpenAction
         icon.name: "network-server"
         text: qsTr("Open &URL…")
-        onTriggered: function(source)
-        {
-            openUrlDialog.show();
-            openUrlDialog.raise();
-        }
+        onTriggered: function(source) { Utils.createWindow(mainWindow, openUrlDialog); }
     }
 
     Action
