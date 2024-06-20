@@ -1601,15 +1601,17 @@ ApplicationWindow
         }
     }
 
-    ManageNamedListDialog
+    Component
     {
-        id: manageBookmarks
+        id: manageBookmarksDialog
+        ManageNamedListDialog
+        {
+            title: qsTr("Manage Bookmarks")
+            model: currentTab ? currentTab.document.bookmarks : []
 
-        title: qsTr("Manage Bookmarks")
-        model: currentTab ? currentTab.document.bookmarks : []
-
-        onRemove: function(names) { currentTab.document.removeBookmarks(names); }
-        onRename: function(from, to) { currentTab.document.renameBookmark(from, to); }
+            onRemove: function(names) { currentTab.document.removeBookmarks(names); }
+            onRename: function(from, to) { currentTab.document.renameBookmark(from, to); }
+        }
     }
 
     Action
@@ -1617,11 +1619,7 @@ ApplicationWindow
         id: manageBookmarksAction
         text: qsTr("Manage Bookmarks…")
         enabled: currentTab ? !currentTab.document.busy && currentTab.document.bookmarks.length > 0 : false
-        onTriggered: function(source)
-        {
-            manageBookmarks.show();
-            manageBookmarks.raise();
-        }
+        onTriggered: function(source) { Utils.createWindow(mainWindow, manageBookmarksDialog); }
     }
 
     Action
