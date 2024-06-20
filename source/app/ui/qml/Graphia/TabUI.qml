@@ -1609,61 +1609,65 @@ Item
         modality: Qt.ApplicationModal
     }
 
-    Window
+    Component
     {
-        id: applyMethodDialog
-
-        title: qsTr("Application Method")
-
-        modality: Qt.ApplicationModal
-        flags: Constants.defaultWindowFlags
-
-        width: 380
-        minimumWidth: width
-        maximumWidth: width
-
-        height: 100
-        minimumHeight: height
-        maximumHeight: height
-
-        property string templateName: ""
-
-        ColumnLayout
+        id: applyMethodDialogComponent
+        Window
         {
-            spacing: Constants.spacing
-            anchors.fill: parent
-            anchors.margins: Constants.margin
+            id: applyMethodDialog
 
-            Text
+            title: qsTr("Application Method")
+
+            modality: Qt.ApplicationModal
+            flags: Constants.defaultWindowFlags
+
+            width: 380
+            minimumWidth: width
+            maximumWidth: width
+
+            height: 100
+            minimumHeight: height
+            maximumHeight: height
+
+            property string templateName: ""
+
+            ColumnLayout
             {
-                Layout.fillWidth: true
-                Layout.alignment: Qt.AlignTop|Qt.AlignHCenter
-                wrapMode: Text.Wrap
-                text: qsTr("Do you want to apply the template by appending to your existing " +
-                    "configuration, or by replacing it?")
-            }
+                spacing: Constants.spacing
+                anchors.fill: parent
+                anchors.margins: Constants.margin
 
-            RowLayout
-            {
-                Layout.alignment: Qt.AlignBottom|Qt.AlignHCenter
-
-                Button
+                Text
                 {
-                    text: qsTr("Append")
-                    onClicked:
-                    {
-                        applyMethodDialog.close();
-                        root.applyTemplate(applyMethodDialog.templateName, AddTemplateDialog.Append);
-                    }
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop|Qt.AlignHCenter
+                    wrapMode: Text.Wrap
+                    text: qsTr("Do you want to apply the template by appending to your existing " +
+                        "configuration, or by replacing it?")
                 }
 
-                Button
+                RowLayout
                 {
-                    text: qsTr("Replace")
-                    onClicked:
+                    Layout.alignment: Qt.AlignBottom|Qt.AlignHCenter
+
+                    Button
                     {
-                        applyMethodDialog.close();
-                        root.applyTemplate(applyMethodDialog.templateName, AddTemplateDialog.Replace);
+                        text: qsTr("Append")
+                        onClicked:
+                        {
+                            applyMethodDialog.close();
+                            root.applyTemplate(applyMethodDialog.templateName, AddTemplateDialog.Append);
+                        }
+                    }
+
+                    Button
+                    {
+                        text: qsTr("Replace")
+                        onClicked:
+                        {
+                            applyMethodDialog.close();
+                            root.applyTemplate(applyMethodDialog.templateName, AddTemplateDialog.Replace);
+                        }
                     }
                 }
             }
@@ -1680,9 +1684,7 @@ Item
         switch(template.method)
         {
         case AddTemplateDialog.AlwaysAsk:
-            applyMethodDialog.templateName = name;
-            applyMethodDialog.show();
-            applyMethodDialog.raise();
+            Utils.createWindow(root, applyMethodDialogComponent, {templateName: name});
             break;
 
         case AddTemplateDialog.Append:
