@@ -399,7 +399,7 @@ ApplicationWindow
     OptionsDialog
     {
         id: optionsDialog
-        application: application
+        applicationRef: application
 
         enabled: !mainWindow._anyTabsBusy
     }
@@ -407,7 +407,7 @@ ApplicationWindow
     AboutDialog
     {
         id: aboutDialog
-        application: application
+        applicationRef: application
 
         onHiddenSwitchActivated:
         {

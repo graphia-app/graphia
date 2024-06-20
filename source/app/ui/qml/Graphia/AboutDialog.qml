@@ -28,9 +28,9 @@ Window
 {
     id: root
 
-    property var application: null
+    property var applicationRef: null
 
-    title: Utils.format(qsTr("About {0}"), application.name)
+    title: Utils.format(qsTr("About {0}"), applicationRef.name)
     flags: Constants.defaultWindowFlags
     color: palette.window
 
@@ -65,7 +65,7 @@ Window
                     qsTr("{0} is a tool for the visualisation and analysis of graphs.<br><br>" +
                     "Version {1}.<br>{2}<br><br>" +
                     "<a href=\"LICENSE\">License</a>&nbsp;&nbsp;&nbsp;<a href=\"OSS\">Third Party Licenses</a>"),
-                    application.name, application.version, application.copyright)
+                    applicationRef.name, applicationRef.version, applicationRef.copyright)
 
                 PointingCursorOnHoverLink {}
                 onLinkActivated: function(link)

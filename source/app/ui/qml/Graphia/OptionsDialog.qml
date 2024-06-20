@@ -38,7 +38,7 @@ Window
     maximumWidth: minimumWidth
     maximumHeight: minimumHeight
 
-    property var application: null
+    property var applicationRef: null
 
     property bool enabled: true
 
@@ -75,10 +75,10 @@ Window
                     anchors.fill: parent
                     currentIndex: tabBar.currentIndex
 
-                    OptionsAppearance { application: root.application }
-                    OptionsMisc { application: root.application }
-                    OptionsNetwork { application: root.application }
-                    OptionsDefaults { application: root.application }
+                    OptionsAppearance { application: root.applicationRef }
+                    OptionsMisc { application: root.applicationRef }
+                    OptionsNetwork { application: root.applicationRef }
+                    OptionsDefaults { application: root.applicationRef }
                 }
             }
         }
