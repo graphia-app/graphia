@@ -311,30 +311,6 @@ Item
 
                 ButtonGroup { buttons: [minmaxMenuItem, stddevMenuItem, customMappingMenuItem] }
 
-                function setupMappingMenuItems()
-                {
-                    if(parameters.mapping === undefined)
-                    {
-                        minmaxMenuItem.checked = true;
-                        return;
-                    }
-
-                    let mappingString = Utils.unescapeQuotes(parameters["mapping"]);
-                    let mapping = JSON.parse(mappingString);
-
-                    if(mapping.exponent !== undefined && mapping.exponent !== 1.0)
-                        customMappingMenuItem.checked = true;
-                    else if(mapping.type !== undefined)
-                    {
-                        if(mapping.type === "minmax")
-                            minmaxMenuItem.checked = true;
-                        else if(mapping.type === "stddev")
-                            stddevMenuItem.checked = true;
-                    }
-                    else
-                        customMappingMenuItem.checked = true;
-                }
-
                 PlatformMenuItem
                 {
                     id: minmaxMenuItem
@@ -614,6 +590,30 @@ Item
         }
     }
 
+    function setupMappingMenuItems()
+    {
+        if(parameters.mapping === undefined)
+        {
+            minmaxMenuItem.checked = true;
+            return;
+        }
+
+        let mappingString = Utils.unescapeQuotes(parameters["mapping"]);
+        let mapping = JSON.parse(mappingString);
+
+        if(mapping.exponent !== undefined && mapping.exponent !== 1.0)
+            customMappingMenuItem.checked = true;
+        else if(mapping.type !== undefined)
+        {
+            if(mapping.type === "minmax")
+                minmaxMenuItem.checked = true;
+            else if(mapping.type === "stddev")
+                stddevMenuItem.checked = true;
+        }
+        else
+            customMappingMenuItem.checked = true;
+    }
+
     function parseParameters()
     {
         gradientKey.visible = false;
@@ -637,7 +637,7 @@ Item
                 break;
 
             case "mapping":
-                optionsMenu.setupMappingMenuItems();
+                setupMappingMenuItems();
                 break;
             }
         }
