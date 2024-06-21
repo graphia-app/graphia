@@ -37,6 +37,8 @@ Item
     implicitWidth: column.width
     implicitHeight: column.height
 
+    function itemAt(index) { return repeater.itemAt(index).item; }
+
     Component
     {
         id: dragDelegate
@@ -56,6 +58,7 @@ Item
             drag.maximumY: drag.minimumY + ((repeater.count - 1) * content.height)
 
             property int index: DelegateModel.itemsIndex
+            property alias item: loader.item
             property real hotspotY: content.y + (content.height * 0.5)
 
             property bool held
