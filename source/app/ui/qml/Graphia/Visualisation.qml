@@ -39,44 +39,6 @@ Item
     property color hoverColor
     property color textColor: enabledMenuItem.checked ? enabledTextColor : disabledTextColor
 
-    property var mappingSelector
-    Connections
-    {
-        target: mappingSelector
-
-        function onAccepted()
-        {
-            if(mappingSelector.visualisationIndex !== index)
-                return;
-
-            if(mappingSelector.applied)
-                return;
-
-            parameters["mapping"] = "\"" + Utils.escapeQuotes(mappingSelector.configuration) + "\"";
-            root.updateExpression();
-        }
-
-        function onRejected()
-        {
-            if(mappingSelector.visualisationIndex !== index)
-                return;
-
-            if(mappingSelector.applied)
-                document.rollback();
-            else
-                optionsMenu.setupMappingMenuItems();
-        }
-
-        function onApplyClicked(alreadyApplied)
-        {
-            if(mappingSelector.visualisationIndex !== index)
-                return;
-
-            parameters["mapping"] = "\"" + Utils.escapeQuotes(mappingSelector.configuration) + "\"";
-            root.updateExpression(alreadyApplied);
-        }
-    }
-
     MouseArea
     {
         anchors.fill: row
@@ -362,7 +324,7 @@ Item
 
                     onTriggered:
                     {
-                        mappingSelector.visualisationIndex = index;
+                        let mappingSelector = visualisations.createMappingSelector(index);
                         mappingSelector.values = root._visualisationInfo.numericValues;
                         mappingSelector.invert = isFlagSet("invert");
 

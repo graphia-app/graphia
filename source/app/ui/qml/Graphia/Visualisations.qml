@@ -111,7 +111,43 @@ Item
         return Utils.createWindow(root, paletteSelectorComponent, {visualisationIndex: index}, false);
     }
 
-    MappingSelector { id: _mappingSelector }
+    Component
+    {
+        id: mappingSelectorComponent
+        MappingSelector
+        {
+            onAccepted:
+            {
+                if(applied)
+                    return;
+
+                let visualisation = list.itemAt(visualisationIndex);
+                visualisation.parameters["mapping"] = "\"" + Utils.escapeQuotes(configuration) + "\"";
+                visualisation.updateExpression();
+            }
+
+            onRejected:
+            {
+                if(applied)
+                    document.rollback();
+
+                let visualisation = list.itemAt(visualisationIndex);
+                visualisation.setupMappingMenuItems();
+            }
+
+            onApplyClicked: function(alreadyApplied)
+            {
+                let visualisation = list.itemAt(visualisationIndex);
+                visualisation.parameters["mapping"] = "\"" + Utils.escapeQuotes(configuration) + "\"";
+                visualisation.updateExpression(alreadyApplied);
+            }
+        }
+    }
+
+    function createMappingSelector(index)
+    {
+        return Utils.createWindow(root, mappingSelectorComponent, {visualisationIndex: index}, false);
+    }
 
     ColumnLayout
     {
@@ -187,8 +223,6 @@ Item
                         enabledTextColor: root.enabledTextColor
                         disabledTextColor: root.disabledTextColor
                         hoverColor: root.heldColor
-
-                        mappingSelector: _mappingSelector
                     }
                 }
 
