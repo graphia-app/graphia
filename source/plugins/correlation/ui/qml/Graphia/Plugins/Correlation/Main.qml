@@ -383,10 +383,10 @@ PluginContent
         }
     }
 
-    ImportAnnotationsDialog
+    Component
     {
         id: importAnnotationsDialog
-        pluginModel: plugin.model
+        ImportAnnotationsDialog { pluginModel: plugin.model }
     }
 
     OpenFileDialog
@@ -404,7 +404,8 @@ PluginContent
         onAccepted:
         {
             misc.fileOpenInitialFolder = currentFolder.toString();
-            importAnnotationsDialog.open(selectedFile);
+            let instance = Utils.createWindow(root, importAnnotationsDialog, {}, false);
+            instance.open(selectedFile);
         }
     }
 
