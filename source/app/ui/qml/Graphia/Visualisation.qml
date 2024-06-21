@@ -31,48 +31,13 @@ Item
     width: row.width
     height: row.height
 
+    property var visualisations: null
     property var document: null
 
     property color enabledTextColor
     property color disabledTextColor
     property color hoverColor
     property color textColor: enabledMenuItem.checked ? enabledTextColor : disabledTextColor
-
-    property var gradientSelector
-    Connections
-    {
-        target: gradientSelector
-
-        function onAccepted()
-        {
-            if(gradientSelector.visualisationIndex !== index)
-                return;
-
-            if(gradientSelector.applied)
-                return;
-
-            parameters["gradient"] = "\"" + Utils.escapeQuotes(gradientSelector.configuration) + "\"";
-            root.updateExpression();
-        }
-
-        function onRejected()
-        {
-            if(gradientSelector.visualisationIndex !== index)
-                return;
-
-            if(gradientSelector.applied)
-                document.rollback();
-        }
-
-        function onApplyClicked(alreadyApplied)
-        {
-            if(gradientSelector.visualisationIndex !== index)
-                return;
-
-            parameters["gradient"] = "\"" + Utils.escapeQuotes(gradientSelector.configuration) + "\"";
-            root.updateExpression(alreadyApplied);
-        }
-    }
 
     property var paletteSelector
     Connections
@@ -237,7 +202,7 @@ Item
 
         function showGradientSelector()
         {
-            gradientSelector.visualisationIndex = index;
+            let gradientSelector = visualisations.createGradientSelector(index);
             gradientSelector.open(gradientKey.configuration);
         }
 

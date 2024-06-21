@@ -41,7 +41,41 @@ Item
         CreateVisualisationDialog { document: root.document }
     }
 
-    GradientSelector { id: _gradientSelector }
+    Component
+    {
+        id: gradientSelectorComponent
+        GradientSelector
+        {
+            onAccepted:
+            {
+                if(applied)
+                    return;
+
+                let visualisation = list.itemAt(visualisationIndex);
+                visualisation.parameters["gradient"] = "\"" + Utils.escapeQuotes(configuration) + "\"";
+                visualisation.updateExpression();
+            }
+
+            onRejected:
+            {
+                if(applied)
+                    document.rollback();
+            }
+
+            onApplyClicked: function(alreadyApplied)
+            {
+                let visualisation = list.itemAt(visualisationIndex);
+                visualisation.parameters["gradient"] = "\"" + Utils.escapeQuotes(configuration) + "\"";
+                visualisation.updateExpression(alreadyApplied);
+            }
+        }
+    }
+
+    function createGradientSelector(index)
+    {
+        return Utils.createWindow(root, gradientSelectorComponent, {visualisationIndex: index}, false);
+    }
+
     PaletteSelector { id: _paletteSelector }
     MappingSelector { id: _mappingSelector }
 
@@ -114,12 +148,12 @@ Item
                 {
                     Visualisation
                     {
+                        visualisations: root
                         document: root.document
                         enabledTextColor: root.enabledTextColor
                         disabledTextColor: root.disabledTextColor
                         hoverColor: root.heldColor
 
-                        gradientSelector: _gradientSelector
                         paletteSelector: _paletteSelector
                         mappingSelector: _mappingSelector
                     }
