@@ -1367,10 +1367,10 @@ ApplicationWindow
         return attribute.isValid && attribute.editable;
     }
 
-    ImportAttributesDialog
+    Component
     {
         id: importAttributesDialog
-        document: currentTab && currentTab.document
+        ImportAttributesDialog { document: currentTab && currentTab.document }
     }
 
     OpenFileDialog
@@ -1388,7 +1388,8 @@ ApplicationWindow
         onAccepted:
         {
             misc.fileOpenInitialFolder = currentFolder.toString();
-            importAttributesDialog.open(selectedFile);
+            let instance = Utils.createWindow(mainWindow, importAttributesDialog, {}, false);
+            instance.open(selectedFile);
         }
     }
 
