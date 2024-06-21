@@ -76,7 +76,41 @@ Item
         return Utils.createWindow(root, gradientSelectorComponent, {visualisationIndex: index}, false);
     }
 
-    PaletteSelector { id: _paletteSelector }
+    Component
+    {
+        id: paletteSelectorComponent
+        PaletteSelector
+        {
+            onAccepted:
+            {
+                if(applied)
+                    return;
+
+                let visualisation = list.itemAt(visualisationIndex);
+                visualisation.parameters["palette"] = "\"" + Utils.escapeQuotes(configuration) + "\"";
+                visualisation.updateExpression();
+            }
+
+            onRejected:
+            {
+                if(applied)
+                    document.rollback();
+            }
+
+            onApplyClicked: function(alreadyApplied)
+            {
+                let visualisation = list.itemAt(visualisationIndex);
+                visualisation.parameters["palette"] = "\"" + Utils.escapeQuotes(configuration) + "\"";
+                visualisation.updateExpression(alreadyApplied);
+            }
+        }
+    }
+
+    function createPaletteSelector(index)
+    {
+        return Utils.createWindow(root, paletteSelectorComponent, {visualisationIndex: index}, false);
+    }
+
     MappingSelector { id: _mappingSelector }
 
     ColumnLayout
@@ -154,7 +188,6 @@ Item
                         disabledTextColor: root.disabledTextColor
                         hoverColor: root.heldColor
 
-                        paletteSelector: _paletteSelector
                         mappingSelector: _mappingSelector
                     }
                 }

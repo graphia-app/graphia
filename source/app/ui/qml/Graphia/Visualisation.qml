@@ -39,42 +39,6 @@ Item
     property color hoverColor
     property color textColor: enabledMenuItem.checked ? enabledTextColor : disabledTextColor
 
-    property var paletteSelector
-    Connections
-    {
-        target: paletteSelector
-
-        function onAccepted()
-        {
-            if(paletteSelector.visualisationIndex !== index)
-                return;
-
-            if(paletteSelector.applied)
-                return;
-
-            parameters["palette"] = "\"" + Utils.escapeQuotes(paletteSelector.configuration) + "\"";
-            root.updateExpression();
-        }
-
-        function onRejected()
-        {
-            if(paletteSelector.visualisationIndex !== index)
-                return;
-
-            if(paletteSelector.applied)
-                document.rollback();
-        }
-
-        function onApplyClicked(alreadyApplied)
-        {
-            if(paletteSelector.visualisationIndex !== index)
-                return;
-
-            parameters["palette"] = "\"" + Utils.escapeQuotes(paletteSelector.configuration) + "\"";
-            root.updateExpression(alreadyApplied);
-        }
-    }
-
     property var mappingSelector
     Connections
     {
@@ -251,7 +215,7 @@ Item
 
         function showPaletteSelector()
         {
-            paletteSelector.visualisationIndex = index;
+            let paletteSelector = visualisations.createPaletteSelector(index);
             paletteSelector.open(paletteKey.configuration,
                 root._visualisationInfo.stringValues);
         }
