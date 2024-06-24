@@ -395,6 +395,14 @@ function createWindow(parent, component, properties = {}, immediatelyShow = true
     {
         // Window already exists
         window = windowInstanceMap.get(component);
+
+        Object.keys(properties).forEach(function(key)
+        {
+            if(window.hasOwnProperty(key))
+                window[key] = properties[key];
+            else
+                console.log("Utils.createWindow: " + window + " has no property " + key);
+        });
     }
 
     if(immediatelyShow)
