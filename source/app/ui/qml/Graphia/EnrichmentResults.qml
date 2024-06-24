@@ -33,7 +33,7 @@ ApplicationWindow
     id: root
 
     property var models
-    property var wizard
+    property var document
 
     property var _currentModel:
     {
@@ -69,6 +69,7 @@ ApplicationWindow
         }
     }
 
+    signal showWizard()
     signal removeResults(int index)
 
     header: ToolBar
@@ -117,7 +118,7 @@ ApplicationWindow
                 id: addEnrichment
                 icon.name: "list-add"
                 text: qsTr("New Enrichment")
-                onClicked: wizard.show()
+                onClicked: { root.showWizard(); }
             }
 
             ToolBarButton { action: exportTableAction }
@@ -402,7 +403,7 @@ ApplicationWindow
             return attributeName.replace(/\s+/g, "_").toLowerCase();
         }
 
-        let baseName = root.wizard.document.title.replace(/\.[^\.]+$/, "");
+        let baseName = root.document.title.replace(/\.[^\.]+$/, "");
         let attributes = Utils.format(qsTr("{0}-vs-{1}"),
             sanitiseAttributeName(root._currentModel.selectionA),
             sanitiseAttributeName(root._currentModel.selectionB));
@@ -436,7 +437,7 @@ ApplicationWindow
         onAccepted:
         {
             misc.fileSaveInitialFolder = exportTableFileDialog.currentFolder.toString();
-            wizard.document.writeTableModelToFile(
+            root.document.writeTableModelToFile(
                 table.model, exportTableFileDialog.selectedFile,
                 exportTableFileDialog.selectedNameFilter.extensions[0]);
         }

@@ -339,8 +339,11 @@ ApplicationWindow
             return;
         }
 
-        // Prevent any further access to enrichmentResults during destruction
-        enrichmentResults.models = [];
+        if(enrichmentResultsInstance)
+        {
+            // Prevent any further access to enrichmentResults during destruction
+            enrichmentResultsInstance.models = [];
+        }
 
         windowPreferences.maximised = mainWindow.maximised;
 
@@ -1313,16 +1316,10 @@ ApplicationWindow
         {
             if(currentTab !== null)
             {
-                if(enrichmentResults.models.length > 0)
-                {
-                    enrichmentResults.show();
-                    enrichmentResults.raise();
-                }
+                if(currentTab.document.enrichmentTableModels.length > 0)
+                    mainWindow.showEnrichmentResults();
                 else
-                {
-                    enrichmentWizard.show();
-                    enrichmentWizard.raise();
-                }
+                    Utils.createWindow(mainWindow, enrichmentWizard);
             }
         }
     }
@@ -2566,7 +2563,8 @@ ApplicationWindow
 
     function onDocumentShown(document)
     {
-        enrichmentResults.models = document.enrichmentTableModels;
+        if(enrichmentResultsInstance)
+            enrichmentResultsInstance.models = document.enrichmentTableModels;
 
         switch(document.projection())
         {
@@ -2603,28 +2601,38 @@ ApplicationWindow
         currentTab.document.copyTableModelColumnToClipboard(model, column, rows);
     }
 
-    EnrichmentResults
+    Component
     {
         id: enrichmentResults
-        wizard: enrichmentWizard
-        models: currentTab ? currentTab.document.enrichmentTableModels : []
-
-        onRemoveResults: function(index)
+        EnrichmentResults
         {
-            currentTab.document.removeEnrichmentResults(index);
+            document: currentTab && currentTab.document
+
+            onShowWizard: { Utils.createWindow(mainWindow, enrichmentWizard); }
+            onRemoveResults: function(index) { currentTab.document.removeEnrichmentResults(index); }
         }
     }
 
-    EnrichmentWizard
+    property EnrichmentResults enrichmentResultsInstance: null
+    function showEnrichmentResults()
+    {
+        enrichmentResultsInstance = Utils.createWindow(mainWindow, enrichmentResults,
+            {models: currentTab.document.enrichmentTableModels});
+    }
+
+    Component
     {
         id: enrichmentWizard
-        document: currentTab && currentTab.document
-        onAccepted:
+        EnrichmentWizard
         {
-            if(currentTab !== null)
-                currentTab.document.performEnrichment(selectedAttributeGroupA, selectedAttributeGroupB);
+            document: currentTab && currentTab.document
+            onAccepted:
+            {
+                if(currentTab !== null)
+                    currentTab.document.performEnrichment(selectedAttributeGroupA, selectedAttributeGroupB);
 
-            enrichmentWizard.reset();
+                this.reset();
+            }
         }
     }
 
@@ -2642,10 +2650,11 @@ ApplicationWindow
 
         function onEnrichmentTableModelsChanged()
         {
-            enrichmentResults.models = currentTab.document.enrichmentTableModels;
+            if(enrichmentResultsInstance)
+                enrichmentResultsInstance.models = currentTab.document.enrichmentTableModels;
         }
 
-        function onEnrichmentAnalysisComplete() { enrichmentResults.visible = true; }
+        function onEnrichmentAnalysisComplete() { mainWindow.showEnrichmentResults(); }
 
         // Plugin menus may reference attributes, so regenerate menus when these change
         function onAttributesChanged() { updatePluginMenus(); }
