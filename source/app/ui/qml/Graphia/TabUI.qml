@@ -1628,7 +1628,7 @@ Item
             minimumWidth: width
             maximumWidth: width
 
-            height: 100
+            height: 120
             minimumHeight: height
             maximumHeight: height
 
@@ -1643,7 +1643,7 @@ Item
                 Text
                 {
                     Layout.fillWidth: true
-                    Layout.alignment: Qt.AlignTop|Qt.AlignHCenter
+                    Layout.alignment: Qt.AlignHCenter
                     wrapMode: Text.Wrap
                     text: qsTr("Do you want to apply the template by appending to your existing " +
                         "configuration, or by replacing it?")
@@ -1651,7 +1651,7 @@ Item
 
                 RowLayout
                 {
-                    Layout.alignment: Qt.AlignBottom|Qt.AlignHCenter
+                    Layout.alignment: Qt.AlignHCenter
 
                     Button
                     {
