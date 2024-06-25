@@ -440,10 +440,10 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
         return 2;
     }
 
-#ifndef Q_OS_WASM
     auto rootObjects = engine.rootObjects();
     QObject* mainWindow = rootObjects.first();
 
+#ifndef Q_OS_WASM
     QObject::connect(&app, &ApplicationClass::messageReceived,
     mainWindow, [mainWindow](const QString& message, QObject*)
     {
