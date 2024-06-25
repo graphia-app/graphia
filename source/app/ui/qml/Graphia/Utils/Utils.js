@@ -407,7 +407,9 @@ function createWindow(parent, component, properties = {}, immediatelyShow = true
 
     if(immediatelyShow)
     {
-        window.show();
+        if(!window.visible)
+            window.showNormal();
+
         window.raise();
     }
 
