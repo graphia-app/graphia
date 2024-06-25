@@ -1226,7 +1226,7 @@ Item
                         enabled: !pluginToolBarContainer.transitioning
 
                         ToolBarButton { action: togglePluginMinimiseAction }
-                        ToolBarButton { action: togglePluginWindowAction }
+                        ToolBarButton { visible: Qt.platform.os !== "wasm"; action: togglePluginWindowAction }
                     }
                 }
             }
@@ -1386,6 +1386,9 @@ Item
 
     function loadPluginWindowState()
     {
+        if(Qt.platform.os === "wasm")
+            return;
+
         if(window.pluginPoppedOut === undefined)
             return;
 

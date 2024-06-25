@@ -1990,7 +1990,7 @@ ApplicationWindow
         text: currentTab ? Utils.format(qsTr("Display {0} In Separate &Window"), currentTab.document.pluginName) : ""
         checkable: true
         checked: currentTab && currentTab.pluginPoppedOut
-        enabled: currentTab && currentTab.document.hasPluginUI && !mainWindow._anyDocumentsBusy
+        enabled: currentTab && currentTab.document.hasPluginUI && !mainWindow._anyDocumentsBusy && Qt.platform.os !== "wasm"
         onTriggered: function(source)
         {
             if(currentTab)
@@ -2203,7 +2203,7 @@ ApplicationWindow
             PlatformMenuItem
             {
                 action: togglePluginWindowAction
-                hidden: !currentTab || !currentTab.document.hasPluginUI
+                hidden: !currentTab || !currentTab.document.hasPluginUI || Qt.platform.os === "wasm"
             }
             PlatformMenuItem
             {
