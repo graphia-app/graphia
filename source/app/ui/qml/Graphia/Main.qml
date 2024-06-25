@@ -1386,6 +1386,7 @@ ApplicationWindow
         {
             misc.fileOpenInitialFolder = currentFolder.toString();
             let instance = Utils.createWindow(mainWindow, importAttributesDialog, {}, false);
+            Utils.centreWindow(instance);
             instance.open(selectedFile);
         }
     }

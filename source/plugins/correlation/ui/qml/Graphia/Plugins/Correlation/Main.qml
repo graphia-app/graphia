@@ -405,6 +405,7 @@ PluginContent
         {
             misc.fileOpenInitialFolder = currentFolder.toString();
             let instance = Utils.createWindow(root, importAnnotationsDialog, {}, false);
+            Utils.centreWindow(instance);
             instance.open(selectedFile);
         }
     }

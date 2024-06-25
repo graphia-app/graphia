@@ -129,6 +129,7 @@ Item
         function showGradientSelector()
         {
             let gradientSelector = visualisations.createGradientSelector(index);
+            Utils.centreWindow(gradientSelector);
             gradientSelector.open(gradientKey.configuration);
         }
 
@@ -178,6 +179,7 @@ Item
         function showPaletteSelector()
         {
             let paletteSelector = visualisations.createPaletteSelector(index);
+            Utils.centreWindow(paletteSelector);
             paletteSelector.open(paletteKey.configuration,
                 root._visualisationInfo.stringValues);
         }
@@ -325,6 +327,7 @@ Item
                     onTriggered:
                     {
                         let mappingSelector = visualisations.createMappingSelector(index);
+                        Utils.centreWindow(mappingSelector);
                         mappingSelector.values = root._visualisationInfo.numericValues;
                         mappingSelector.invert = isFlagSet("invert");
 
