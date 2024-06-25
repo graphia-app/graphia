@@ -183,14 +183,20 @@ static void configureProxy()
 
 static QString qmlError;
 
+#ifdef Q_OS_WASM
+using ApplicationClass = QApplication;
+#else
+using ApplicationClass = SharedTools::QtSingleApplication;
+#endif
+
 int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
 {
     if(u::currentThreadName().isEmpty())
         u::setCurrentThreadName(QStringLiteral(PRODUCT_NAME));
 
 #ifndef OPENGL_ES
-    SharedTools::QtSingleApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
-    SharedTools::QtSingleApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
+    ApplicationClass::setAttribute(Qt::AA_UseDesktopOpenGL);
+    ApplicationClass::setAttribute(Qt::AA_ShareOpenGLContexts);
 #endif
 
     QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
@@ -201,7 +207,8 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
     QtWebEngineQuick::initialize();
 #endif
 
-    SharedTools::QtSingleApplication app(QStringLiteral(PRODUCT_NAME), argc, argv);
+#ifndef Q_OS_WASM
+    ApplicationClass app(QStringLiteral(PRODUCT_NAME), argc, argv);
 
     Application::setAppDir(QCoreApplication::applicationDirPath());
 
@@ -212,12 +219,15 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
     }
 
     // Wait until the application is active before setting the focus window
-    QObject::connect(&app, &SharedTools::QtSingleApplication::applicationStateChanged,
+    QObject::connect(&app, &ApplicationClass::applicationStateChanged,
     [&app]
     {
         if(app.activationWindow() == nullptr)
             app.setActivationWindow(QApplication::focusWindow());
     });
+#else
+    ApplicationClass app(argc, argv);
+#endif
 
     QCommandLineParser commandLineParser;
 
@@ -336,7 +346,7 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
 
     u::definePref(u"visuals/showNodeText"_s,                    QVariant::fromValue(static_cast<int>(TextState::Selected)));
     u::definePref(u"visuals/showEdgeText"_s,                    QVariant::fromValue(static_cast<int>(TextState::Selected)));
-    u::definePref(u"visuals/textFont"_s,                        SharedTools::QtSingleApplication::font().family());
+    u::definePref(u"visuals/textFont"_s,                        ApplicationClass::font().family());
     u::definePref(u"visuals/textSize"_s,                        24.0f);
     u::definePref(u"visuals/edgeVisualType"_s,                  QVariant::fromValue(static_cast<int>(EdgeVisualType::Cylinder)));
     u::definePref(u"visuals/textAlignment"_s,                   QVariant::fromValue(static_cast<int>(TextAlignment::Right)));
@@ -430,9 +440,11 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
         return 2;
     }
 
+#ifndef Q_OS_WASM
     auto rootObjects = engine.rootObjects();
     QObject* mainWindow = rootObjects.first();
-    QObject::connect(&app, &SharedTools::QtSingleApplication::messageReceived,
+
+    QObject::connect(&app, &ApplicationClass::messageReceived,
     mainWindow, [mainWindow](const QString& message, QObject*)
     {
         auto arguments = message.split(u"\n"_s);
@@ -448,6 +460,7 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
     {
         QMetaObject::invokeMethod(mainWindow, "processArguments", Q_ARG(QVariant, QStringList{argument}));
     });
+#endif
 
     int qmlExitCode = 0;
     QObject::connect(&engine, &QQmlApplicationEngine::exit,
