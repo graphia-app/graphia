@@ -154,7 +154,6 @@ class Application : public QObject, public IApplication
     Q_PROPERTY(int downloadProgress READ downloadProgress NOTIFY downloadProgressChanged)
 
     Q_PROPERTY(bool debugEnabled READ debugEnabled CONSTANT)
-    Q_PROPERTY(bool runningWasm READ runningWasm CONSTANT)
 
 public:
     static constexpr const char* NativeFileType = "Native";
@@ -287,15 +286,6 @@ private:
     static bool debugEnabled()
     {
 #ifdef _DEBUG
-        return true;
-#else
-        return false;
-#endif
-    }
-
-    static bool runningWasm()
-    {
-#ifdef Q_OS_WASM
         return true;
 #else
         return false;
