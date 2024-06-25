@@ -460,6 +460,8 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
     {
         QMetaObject::invokeMethod(mainWindow, "processArguments", Q_ARG(QVariant, QStringList{argument}));
     });
+#else
+    Q_UNUSED(mainWindow);
 #endif
 
     int qmlExitCode = 0;
