@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+.import QtQuick as QtQuick
+
 function watchPropertyChanges(object, handler)
 {
     for(let prop in object)
@@ -408,7 +410,17 @@ function createWindow(parent, component, properties = {}, immediatelyShow = true
     if(immediatelyShow)
     {
         if(!window.visible)
+        {
+            if(Qt.platform.os === "wasm")
+            {
+                // Under wasm windows need to be manually centred
+                // It seems to be fixed on Qt dev/6.8 so this can eventually be removed
+                window.x = (window.QtQuick.Screen.width - window.width) * 0.5;
+                window.y = (window.QtQuick.Screen.height - window.height) * 0.5;
+            }
+
             window.showNormal();
+        }
 
         window.raise();
     }
