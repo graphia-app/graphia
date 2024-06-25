@@ -158,7 +158,7 @@ Item
             CheckBox
             {
                 id: disableMultisamplingCheckbox
-                visible: !root.application.runningWasm
+                visible: !application.runningWasm
                 text: qsTr("Disable Multisampling (Restart Required)")
             }
 
