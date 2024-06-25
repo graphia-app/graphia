@@ -158,7 +158,7 @@ Item
             CheckBox
             {
                 id: disableMultisamplingCheckbox
-                visible: !application.runningWasm
+                visible: Qt.platform.os !== "wasm"
                 text: qsTr("Disable Multisampling (Restart Required)")
             }
 

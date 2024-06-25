@@ -213,7 +213,7 @@ Item
             CheckBox
             {
                 id: autoBackgroundUpdateCheckCheckbox
-                visible: !root.application.runningWasm
+                visible: Qt.platform.os !== "wasm"
                 text: qsTr("Check For Updates Automatically")
             }
 

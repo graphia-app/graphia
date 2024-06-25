@@ -276,7 +276,7 @@ ApplicationWindow
                 mainWindow.y -= (bottomEdge - Screen.desktopAvailableHeight);
         }
 
-        if(application.runningWasm)
+        if(Qt.platform.os === "wasm")
             mainWindow.showFullScreen();
         else if(windowPreferences.maximised !== undefined && Utils.castToBool(windowPreferences.maximised))
             mainWindow.showMaximized();
@@ -620,7 +620,7 @@ ApplicationWindow
 
     function addToRecentFiles(fileUrl)
     {
-        if(application.runningWasm)
+        if(Qt.platform.os === "wasm")
         {
             console.log("WARNING: Can't call addToRecentFiles under WASM");
             return;
@@ -1008,7 +1008,7 @@ ApplicationWindow
             if(currentTab === null)
                 return;
 
-            if(application.runningWasm)
+            if(Qt.platform.os === "wasm")
                 currentTab.saveAsFile();
             else
                 currentTab.saveFile();
@@ -2112,7 +2112,7 @@ ApplicationWindow
             PlatformMenu
             {
                 id: recentFileMenu
-                hidden: application.runningWasm
+                hidden: Qt.platform.os === "wasm"
                 title: qsTr("&Recent Files")
 
                 Instantiator
@@ -2132,7 +2132,7 @@ ApplicationWindow
                 }
             }
             PlatformMenuSeparator {}
-            PlatformMenuItem { hidden: application.runningWasm; action: fileSaveAction }
+            PlatformMenuItem { hidden: Qt.platform.os === "wasm"; action: fileSaveAction }
             PlatformMenuItem { action: fileSaveAsAction }
             PlatformMenuItem { action: saveImageAction }
             PlatformMenuSeparator {}
@@ -2489,9 +2489,9 @@ ApplicationWindow
             PlatformMenuItem { action: aboutPluginsAction }
             PlatformMenuItem { action: aboutQtAction }
 
-            PlatformMenuSeparator { hidden: application.runningWasm; }
-            PlatformMenuItem { hidden: application.runningWasm; action: checkForUpdatesAction }
-            PlatformMenuItem { hidden: application.runningWasm; action: showLatestChangesAction }
+            PlatformMenuSeparator { hidden: Qt.platform.os === "wasm"; }
+            PlatformMenuItem { hidden: Qt.platform.os === "wasm"; action: checkForUpdatesAction }
+            PlatformMenuItem { hidden: Qt.platform.os === "wasm"; action: showLatestChangesAction }
         }
     }
 
@@ -2789,7 +2789,7 @@ ApplicationWindow
                             // it probably is, so start the tutorial
                             startTutorial();
                         }
-                        else if(!application.downloaded(url) && !application.runningWasm)
+                        else if(!application.downloaded(url) && Qt.platform.os !== "wasm")
                             addToRecentFiles(url);
 
                         if(currentTab !== null)

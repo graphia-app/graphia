@@ -1789,7 +1789,7 @@ Item
                     NativeUtils.baseFileNameForUrl(root.url));
                 errorSavingFileMessageDialog.open();
             }
-            else if(!application.runningWasm)
+            else if(Qt.platform.os !== "wasm")
             {
                 savedFileUrl = fileUrl;
                 savedFileSaver = saverName;

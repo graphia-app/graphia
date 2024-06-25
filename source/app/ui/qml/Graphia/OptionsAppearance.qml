@@ -275,7 +275,7 @@ Item
 
             GridLayout
             {
-                visible: !root.application.runningWasm
+                visible: Qt.platform.os !== "wasm"
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
