@@ -34,7 +34,7 @@ Window
     color: palette.window
 
     minimumWidth: 640
-    minimumHeight: 400
+    minimumHeight: 450
 
     property bool applied: false
 
@@ -153,7 +153,7 @@ Window
 
                 Text
                 {
-                    Layout.preferredWidth: 250
+                    Layout.preferredWidth: 275
                     color: palette.buttonText
 
                     text: qsTr("The Y-axis of the plot shows the visualised " +
