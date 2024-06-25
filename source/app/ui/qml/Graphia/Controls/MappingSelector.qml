@@ -278,6 +278,8 @@ Window
                 onMinimumChanged: { minimumSpinBox.value = minimum; }
                 onMaximumChanged: { maximumSpinBox.value = maximum; }
                 onManualChangeToMinMax: { userDefinedRadioButton.checked = true; }
+
+                Outline { anchors.fill: parent }
             }
         }
 
