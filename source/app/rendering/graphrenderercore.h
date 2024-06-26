@@ -48,7 +48,8 @@ struct GPUGraphData : OpenGLFunctions
 
     void initialise(QOpenGLShaderProgram& nodesShader,
         QOpenGLShaderProgram& edgesShader,
-        QOpenGLShaderProgram& textShader);
+        QOpenGLShaderProgram& textShader,
+        size_t tessellationFactor = 1);
     void prepareVertexBuffers();
     void prepareNodeVAO(QOpenGLShaderProgram& shader);
     void prepareEdgeVAO(QOpenGLShaderProgram& shader);
@@ -56,7 +57,8 @@ struct GPUGraphData : OpenGLFunctions
 
     bool prepareRenderBuffers(int width, int height, GLuint depthTexture, GLint numMultiSamples);
     void copyState(const GPUGraphData &gpuGraphData, QOpenGLShaderProgram &nodesShader,
-        QOpenGLShaderProgram &edgesShader, QOpenGLShaderProgram &textShader);
+        QOpenGLShaderProgram &edgesShader, QOpenGLShaderProgram &textShader,
+        size_t tessellationFactor = 1);
 
     void reset();
     void clearFramebuffer(GLbitfield buffers = GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);

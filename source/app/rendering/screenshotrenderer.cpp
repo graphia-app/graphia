@@ -251,7 +251,7 @@ bool ScreenshotRenderer::copyState(const GraphRenderer& renderer)
     _componentCameraAndLightings.clear();
 
     for(size_t i = 0; i < renderer._gpuGraphData.size(); ++i)
-        _gpuGraphData.at(i).copyState(renderer._gpuGraphData.at(i), _nodesShader, _edgesShader, _textShader);
+        _gpuGraphData.at(i).copyState(renderer._gpuGraphData.at(i), _nodesShader, _edgesShader, _textShader, 4);
 
     for(const auto& componentRendererRef : renderer.componentRenderers())
     {

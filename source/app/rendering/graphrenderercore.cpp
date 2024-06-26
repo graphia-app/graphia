@@ -93,16 +93,17 @@ GPUGraphData::GPUGraphData()
 
 void GPUGraphData::initialise(QOpenGLShaderProgram& nodesShader,
                               QOpenGLShaderProgram& edgesShader,
-                              QOpenGLShaderProgram& textShader)
+                              QOpenGLShaderProgram& textShader,
+                              size_t tessellationFactor)
 {
     _sphere.setRadius(1.0f);
-    _sphere.setRings(16);
-    _sphere.setSlices(16);
+    _sphere.setRings(16 * tessellationFactor);
+    _sphere.setSlices(16 * tessellationFactor);
     _sphere.create(nodesShader);
 
     _arrow.setRadius(1.0f);
     _arrow.setLength(1.0f);
-    _arrow.setSlices(8);
+    _arrow.setSlices(8 * tessellationFactor);
     _arrow.create(edgesShader);
 
     _rectangle.create(textShader);
@@ -416,7 +417,8 @@ bool GPUGraphData::hasGraphElements() const
 void GPUGraphData::copyState(const GPUGraphData& gpuGraphData,
     QOpenGLShaderProgram& nodesShader,
     QOpenGLShaderProgram& edgesShader,
-    QOpenGLShaderProgram& textShader)
+    QOpenGLShaderProgram& textShader,
+    size_t tessellationFactor)
 {
     _componentAlpha = gpuGraphData._componentAlpha;
     _unhighlightAlpha = gpuGraphData._unhighlightAlpha;
@@ -436,7 +438,7 @@ void GPUGraphData::copyState(const GPUGraphData& gpuGraphData,
     _nodeVBO.destroy();
     _textVBO.destroy();
 
-    initialise(nodesShader, edgesShader, textShader);
+    initialise(nodesShader, edgesShader, textShader, tessellationFactor);
 }
 
 GraphRendererCore::GraphRendererCore() :
