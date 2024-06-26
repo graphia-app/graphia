@@ -26,12 +26,12 @@ DEPLOY_DIR=${BUILD_DIR}/${PRODUCT_NAME}-${VERSION}
 
 mkdir -p ${DEPLOY_DIR}
 
-cp ${BUILD_DIR}/${PRODUCT_NAME}.html \
-    ${BUILD_DIR}/${PRODUCT_NAME}.js \
-    ${BUILD_DIR}/${PRODUCT_NAME}.wasm \
-    ${BUILD_DIR}/${PRODUCT_NAME}.worker.js \
-    ${BUILD_DIR}/qtloader.js \
-    ${BUILD_DIR}/qtlogo.svg \
+cp ${BUILD_DIR}/*.html \
+    ${BUILD_DIR}/*.js \
+    ${BUILD_DIR}/*.css \
+    ${BUILD_DIR}/*.wasm \
+    ${BUILD_DIR}/*.svg \
+    ${BUILD_DIR}/*.ico \
     ${DEPLOY_DIR} || exit $?
 
 tar cvfz ${DEPLOY_DIR}.tar.gz ${DEPLOY_DIR} || exit $?
