@@ -207,7 +207,7 @@ jobs:
         scripts/wasm-build.sh
       env:
         UNITY_BUILD: OFF
-    - name: Deploy
+    - name: Archive
       run: |
         installers/wasm/build.sh
     - uses: actions/upload-artifact@v3
