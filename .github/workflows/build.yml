@@ -644,11 +644,35 @@ jobs:
       with:
         tag_name: ${{ github.ref }}
         release_name: Release ${{ github.ref }}
-    - name: Upload Binaries
+    - name: Upload Linux Binary
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: release/*/*
+        file: release/Linux AppImage/*.tar.gz
+        tag: ${{ github.ref }}
+        overwrite: true
+        file_glob: true
+    - name: Upload macOS Binary
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: release/macOS Disk Image/*.dmg
+        tag: ${{ github.ref }}
+        overwrite: true
+        file_glob: true
+    - name: Upload Windows Binary
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: release/Windows Installer/*.exe
+        tag: ${{ github.ref }}
+        overwrite: true
+        file_glob: true
+    - name: Upload WebAssembly Tarball
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: release/WebAssembly/*.tar.gz
         tag: ${{ github.ref }}
         overwrite: true
         file_glob: true
