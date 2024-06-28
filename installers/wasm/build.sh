@@ -22,7 +22,8 @@ BUILD_DIR="build/wasm"
 
 . ${BUILD_DIR}/variables.sh
 
-DEPLOY_DIR=${BUILD_DIR}/${PRODUCT_NAME}-${VERSION}
+DEPLOY_NAME=${PRODUCT_NAME}-WebAssembly-${VERSION}
+DEPLOY_DIR=${BUILD_DIR}/${DEPLOY_NAME}
 
 mkdir -p ${DEPLOY_DIR}
 
@@ -34,4 +35,4 @@ cp ${BUILD_DIR}/*.html \
     ${BUILD_DIR}/*.ico \
     ${DEPLOY_DIR} || exit $?
 
-tar cvfz ${DEPLOY_DIR}.tar.gz -C ${BUILD_DIR} ${PRODUCT_NAME}-${VERSION} || exit $?
+tar cvfz ${DEPLOY_DIR}.tar.gz -C ${BUILD_DIR} ${DEPLOY_NAME} || exit $?
