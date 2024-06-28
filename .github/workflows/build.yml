@@ -214,7 +214,7 @@ jobs:
       if: github.event_name != 'pull_request'
       with:
         name: WebAssembly
-        path: build/wasm/Graphia-*
+        path: build/wasm/Graphia-WebAssembly-*
     - uses: actions/upload-artifact@v3
       with:
         name: WebAssembly Logs
@@ -619,6 +619,7 @@ jobs:
       - linux
       - windows
       - macos
+      - wasm
     steps:
     - uses: actions/download-artifact@v3
       with:
@@ -632,6 +633,10 @@ jobs:
       with:
         name: Windows Installer
         path: release/Windows Installer
+    - uses: actions/download-artifact@v3
+      with:
+        name: WebAssembly
+        path: release/WebAssembly
     - name: Create Release
       uses: actions/create-release@v1
       env:
