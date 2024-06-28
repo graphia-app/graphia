@@ -34,4 +34,4 @@ cp ${BUILD_DIR}/*.html \
     ${BUILD_DIR}/*.ico \
     ${DEPLOY_DIR} || exit $?
 
-tar cvfz ${DEPLOY_DIR}.tar.gz ${DEPLOY_DIR} || exit $?
+tar cvfz ${DEPLOY_DIR}.tar.gz -C ${BUILD_DIR} ${PRODUCT_NAME}-${VERSION} || exit $?
