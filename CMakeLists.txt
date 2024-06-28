@@ -33,6 +33,7 @@ list(APPEND MISC
     ${CMAKE_CURRENT_LIST_DIR}/scripts/linux-build.sh
     ${CMAKE_CURRENT_LIST_DIR}/scripts/macos-build.sh
     ${CMAKE_CURRENT_LIST_DIR}/scripts/wasm-build.sh
+    ${CMAKE_CURRENT_LIST_DIR}/scripts/wasm-deploy.sh
     ${CMAKE_CURRENT_LIST_DIR}/scripts/windows-build.bat
 )
 
