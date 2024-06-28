@@ -220,6 +220,28 @@ jobs:
         name: WebAssembly Logs
         path: build/wasm/*.log
 
+  wasm-deploy:
+    name: Deploy WebAssembly
+    runs-on: ubuntu-latest
+    needs:
+      - wasm
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.ref }}
+        fetch-depth: 0
+    - uses: actions/checkout@v4
+      with:
+        repository: graphia-app/web
+        ssh-key: ${{ secrets.WASM_SSH_PRIVATE_KEY }}
+        path: web
+    - uses: actions/download-artifact@v3
+      with:
+        name: WebAssembly
+        path: build
+    - name: Deploy
+      run: scripts/wasm-deploy.sh web
+
   clang-debug:
     name: Clang Debug
     runs-on: ubuntu-latest
