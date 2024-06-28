@@ -58,47 +58,6 @@ mv ${BUILD_DIR}/${PRODUCT_NAME}.html ${BUILD_DIR}/index.html
 cp source/app/icon/Icon.svg ${BUILD_DIR}/qtlogo.svg
 cp source/app/icon/Icon-favicon.ico ${BUILD_DIR}/favicon.ico
 
-(
-cd ${BUILD_DIR}
-patch -p0 <<'EOF'
---- index.html
-+++ index.html
-@@ -1,6 +1,8 @@
- <!doctype html>
- <html lang="en-us">
-   <head>
-+    <script src="coi-serviceworker.js"></script>
-+    <link rel="stylesheet" href="loader.css">
-     <meta charset="utf-8">
-     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-
-@@ -20,7 +22,7 @@
-     <figure style="overflow:visible;" id="qtspinner">
-       <center style="margin-top:1.5em; line-height:150%">
-         <img src="qtlogo.svg" width="320" height="200" style="display:block"></img>
--        <strong>Qt for WebAssembly: Graphia</strong>
-+        <strong>Graphia for WebAssembly</strong>
-         <div id="qtstatus"></div>
-         <noscript>JavaScript is disabled. Please enable JavaScript to use this application.</noscript>
-       </center>
-@@ -43,13 +45,17 @@
-
-             try {
-                 showUi(spinner);
--                status.innerHTML = 'Loading...';
-+                status.classList.add('loader');
-
-                 const instance = await qtLoad({
-                     qt: {
-                         onLoaded: () => showUi(screen),
-                         onExit: exitData =>
-                         {
-+                            if(status.classList.contains('loader')) {
-+                                status.classList.remove('loader');
-+                            }
-+
-                             status.innerHTML = 'Application exit';
-                             status.innerHTML +=
-                                 exitData.code !== undefined ? ` with code ${exitData.code}` : '';
-EOF
-)
+sed -i -e 's/Qt for WebAssembly: Graphia/Graphia for WebAssembly/' ${BUILD_DIR}/index.html
+sed -i '/<head>/a <link rel="stylesheet" href="loader.css">' ${BUILD_DIR}/index.html
+sed -i -e 's/Loading.../<div class="loader"><\/div>/' ${BUILD_DIR}/index.html
