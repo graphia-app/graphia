@@ -751,7 +751,7 @@ ApplicationWindow
                 let model = application.urlTypeDetailsModel();
                 model.filter = types;
 
-                let urlTypeChooserDialog = chooserDialogComponent.createObject(mainWindow,
+                let urlTypeChooserDialog = Utils.createWindow(mainWindow, chooserDialogComponent,
                 {
                     "title": qsTr("Type Ambiguous"),
                     "explanationText": Utils.format(
@@ -761,8 +761,9 @@ ApplicationWindow
                     "model": model,
                     "displayRole": "individualDescription",
                     "valueRole": "name"
-                });
+                }, false);
 
+                Utils.centreWindow(urlTypeChooserDialog);
                 urlTypeChooserDialog.open(function(selectedType, remember)
                 {
                     if(remember)
@@ -792,7 +793,7 @@ ApplicationWindow
                     let model = application.pluginDetailsModel();
                     model.filter = pluginNames;
 
-                    let pluginChooserDialog = chooserDialogComponent.createObject(mainWindow,
+                    let pluginChooserDialog = Utils.createWindow(mainWindow, chooserDialogComponent,
                     {
                         "title": qsTr("Multiple Plugins Applicable"),
                         "explanationText": Utils.format(
@@ -802,8 +803,9 @@ ApplicationWindow
                         "model": model,
                         "displayRole": "name",
                         "valueRole": "name"
-                    });
+                    }, false);
 
+                    Utils.centreWindow(pluginChooserDialog);
                     pluginChooserDialog.open(function(selectedPlugin, remember)
                     {
                         if(remember)
@@ -841,44 +843,32 @@ ApplicationWindow
                 return;
             }
 
-            let contentObject = component.createObject(mainWindow);
-            if(contentObject === null)
+            let parameterDialog = Utils.createWindow(mainWindow, component,
             {
-                console.log(parametersQmlType + ": failed to create instance");
-                return;
-            }
+                "url": url,
+                "type": type,
+                "pluginName": pluginName,
+                "plugin": application.qmlPluginForName(pluginName),
+                "inNewTab": inNewTab
+            }, false);
 
-            if(!isValidParameterDialog(contentObject))
+            if(!isValidParameterDialog(parameterDialog))
             {
                 console.log("Failed to load Parameters dialog for " + pluginName);
                 console.log("Parameters QML must use BaseParameterDialog as root object");
                 return;
             }
 
-            contentObject.url = url
-            contentObject.type = type;
-            contentObject.pluginName = pluginName;
-            contentObject.plugin = application.qmlPluginForName(pluginName);
-            contentObject.inNewTab = inNewTab;
-
-            mainWindow.data.push(contentObject);
-
-            contentObject.accepted.connect(function()
+            parameterDialog.accepted.connect(function()
             {
-                openUrlOfTypeWithPluginAndParameters(contentObject.url,
-                    contentObject.type, contentObject.pluginName,
-                    contentObject.parameters, contentObject.inNewTab);
+                openUrlOfTypeWithPluginAndParameters(parameterDialog.url,
+                    parameterDialog.type, parameterDialog.pluginName,
+                    parameterDialog.parameters, parameterDialog.inNewTab);
             });
 
-            //FIXME: We should be doing this, but it seems to cause crashes
-            // after opening multiple (3 or so) files one after another
-            /*contentObject.closing.connect(function()
-            {
-                contentObject.destroy();
-            });*/
-
-            contentObject.initialised();
-            contentObject.show();
+            Utils.centreWindow(parameterDialog);
+            parameterDialog.initialised();
+            parameterDialog.show();
         }
         else
             openUrlOfTypeWithPluginAndParameters(url, type, pluginName, {}, inNewTab);
