@@ -537,6 +537,16 @@ public:
 
 class ThreadPoolSingleton : public ThreadPool, public Singleton<ThreadPoolSingleton> {};
 
+class ThreadPoolProvider
+{
+#ifndef Q_OS_WASM
+private: mutable ThreadPool t;
+public: ThreadPool& threadPool() const { return t; }
+#else
+public: ThreadPool& threadPool() const { return *ThreadPoolSingleton::instance(); }
+#endif
+};
+
 template<typename Fn, typename... Args>
 auto execute_on_threadpool(Fn&& f, Args&&... args)
 {
