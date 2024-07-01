@@ -816,6 +816,12 @@ bool Application::initialisePlugin(IPlugin* plugin, std::unique_ptr<QPluginLoade
     if(plugin == nullptr)
         return false;
 
+    auto* qObjectPlugin = dynamic_cast<QObject*>(plugin);
+    if(qObjectPlugin == nullptr)
+        return false;
+
+    qObjectPlugin->setParent(this);
+
     const auto pluginName = plugin->name();
     const QString fileName = pluginLoader != nullptr ?
         QFileInfo(pluginLoader->fileName()).fileName() :
