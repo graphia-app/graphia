@@ -11,7 +11,7 @@ jobs:
     name: Linux
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
@@ -46,14 +46,14 @@ jobs:
       env:
         CC: gcc-${{ env.GCC_VERSION }}
         CXX: g++-${{ env.GCC_VERSION }}
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       if: github.event_name != 'pull_request'
       with:
-        name: Linux AppImage
+        name: linux-appimage
         path: build/gcc/Graphia-*.tar.gz
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
-        name: Linux Logs
+        name: linux-logs
         path: build/gcc/*.log
     - name: Upload Symbols
       if: github.event_name != 'pull_request'
@@ -66,7 +66,7 @@ jobs:
     name: Windows
     runs-on: windows-2019
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
@@ -98,14 +98,14 @@ jobs:
         WINDOWS_SIGN_PASSWORD: ${{ secrets.WINDOWS_SIGN_PASSWORD }}
         WINDOWS_SIGN_SUBJECTNAME: ${{ secrets.WINDOWS_SIGN_SUBJECTNAME }}
         WINDOWS_SIGN_TSA: ${{ secrets.WINDOWS_SIGN_TSA }}
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       if: github.event_name != 'pull_request'
       with:
-        name: Windows Installer
+        name: windows-installer
         path: build/Graphia-*-installer.exe
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
-        name: Windows Logs
+        name: windows-logs
         path: build/*.log
     - name: Upload Symbols
       if: github.event_name != 'pull_request'
@@ -118,12 +118,12 @@ jobs:
     name: macOS
     runs-on: macos-13
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
     - name: Force Python to version 3.10 to workaround node-gyp install problem (remove later)
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.10'
     - name: Install Qt
@@ -138,7 +138,7 @@ jobs:
       with:
         key: macos
     - uses: seanmiddleditch/gha-setup-ninja@v3
-    - uses: actions/setup-node@v3
+    - uses: actions/setup-node@v4
       with:
         node-version: '12'
     - name: Compile
@@ -155,14 +155,14 @@ jobs:
         APPLE_NOTARIZATION_USERNAME: ${{ secrets.APPLE_NOTARIZATION_USERNAME }}
         APPLE_SIGN_ID: ${{ secrets.APPLE_SIGN_ID }}
         APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       if: github.event_name != 'pull_request'
       with:
-        name: macOS Disk Image
+        name: macos-disk-image
         path: build/Graphia-*.dmg
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
-        name: macOS Logs
+        name: macos-logs
         path: build/*.log
     - name: Upload Symbols
       if: github.event_name != 'pull_request'
@@ -175,7 +175,7 @@ jobs:
     name: WebAssembly
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
@@ -210,14 +210,14 @@ jobs:
     - name: Archive
       run: |
         installers/wasm/build.sh
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       if: github.event_name != 'pull_request'
       with:
-        name: WebAssembly
+        name: webassembly
         path: build/wasm/Graphia-WebAssembly-*
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
-        name: WebAssembly Logs
+        name: webassembly-logs
         path: build/wasm/*.log
 
   wasm-deploy:
@@ -228,7 +228,7 @@ jobs:
       - check-is-release
       - wasm
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
@@ -237,9 +237,9 @@ jobs:
         repository: graphia-app/web
         ssh-key: ${{ secrets.WASM_SSH_PRIVATE_KEY }}
         path: web
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
-        name: WebAssembly
+        name: webassembly
         path: build
     - name: Deploy
       run: scripts/wasm-deploy.sh web
@@ -248,7 +248,7 @@ jobs:
     name: Clang Debug
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
@@ -279,13 +279,13 @@ jobs:
         UNITY_BUILD: OFF
         CC: clang-${{ env.CLANG_VERSION }}
         CXX: clang++-${{ env.CLANG_VERSION }}
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
-        name: Static Analysis Logs
+        name: static-analysis-logs-clang
         path: build/clang/*.log
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
-        name: Static Analysis Build
+        name: static-analysis-build
         path: |
           build/clang/variables.sh
           build/clang/compile_commands.json
@@ -300,7 +300,7 @@ jobs:
     name: Windows Clang
     runs-on: windows-2019
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
@@ -332,14 +332,14 @@ jobs:
         WINDOWS_SIGN_PASSWORD: ${{ secrets.WINDOWS_SIGN_PASSWORD }}
         WINDOWS_SIGN_SUBJECTNAME: ${{ secrets.WINDOWS_SIGN_SUBJECTNAME }}
         WINDOWS_SIGN_TSA: ${{ secrets.WINDOWS_SIGN_TSA }}
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       if: github.event_name != 'pull_request'
       with:
-        name: Windows Clang Installer
+        name: windows-clang-installer
         path: build/Graphia-*-installer.exe
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
-        name: Windows Clang Logs
+        name: windows-clang-logs
         path: build/*.log
     - name: Upload Symbols
       if: github.event_name != 'pull_request'
@@ -354,7 +354,7 @@ jobs:
     needs:
       - clang-debug
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
@@ -367,7 +367,7 @@ jobs:
         sudo apt-get install libunwind-${{ env.CLANG_VERSION }}-dev
         sudo apt-get install clang-tidy-${{ env.CLANG_VERSION }}
     - name: Checkout ctcache
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: matus-chochlik/ctcache
         path: ctcache
@@ -380,7 +380,7 @@ jobs:
         echo "date=$(/bin/date -u "+%Y%m%d")" >> $GITHUB_OUTPUT
       shell: bash
     - name: Store ctcache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         key: ctcache-${{ steps.get-date.outputs.date }}
         path: /tmp/clang-tidy-cache
@@ -392,9 +392,9 @@ jobs:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
         cache: true
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
-        name: Static Analysis Build
+        name: static-analysis-build
         path: build/clang/
     - name: Analyse
       run: scripts/clang-tidy.sh
@@ -404,9 +404,9 @@ jobs:
         CTCACHE_CLANG_TIDY: clang-tidy-${{ env.CLANG_VERSION }}
         CTCACHE_SAVE_OUTPUT: 1
         BUILD_DIR: build/clang/
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
-        name: Static Analysis Logs
+        name: static-analysis-logs-clang-tidy
         path: build/clang/*.log
 
   cppcheck:
@@ -415,7 +415,7 @@ jobs:
     needs:
       - clang-debug
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
@@ -434,18 +434,18 @@ jobs:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
         cache: true
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
-        name: Static Analysis Build
+        name: static-analysis-build
         path: build/clang/
     - name: Analyse
       run: scripts/cppcheck.sh
       env:
         CPPCHECK: cppcheck
         BUILD_DIR: build/clang/
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
-        name: Static Analysis Logs
+        name: static-analysis-logs-cppcheck
         path: build/clang/*.log
 
   clazy:
@@ -454,7 +454,7 @@ jobs:
     needs:
       - clang-debug
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
@@ -470,7 +470,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
         cache: true
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         repository: KDE/clazy
         path: clazy
@@ -486,18 +486,18 @@ jobs:
         cmake -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -G Ninja
         cmake --build .
         sudo cmake --build . --target install
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
-        name: Static Analysis Build
+        name: static-analysis-build
         path: build/clang/
     - name: Analyse
       run: scripts/clazy.sh
       env:
         CLAZY: /usr/bin/clazy
         BUILD_DIR: build/clang/
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
-        name: Static Analysis Logs
+        name: static-analysis-logs-clazy
         path: build/clang/*.log
 
   qmllint:
@@ -506,7 +506,7 @@ jobs:
     needs:
       - clang-debug
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
@@ -516,17 +516,17 @@ jobs:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
         cache: true
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
-        name: Static Analysis Build
+        name: static-analysis-build
         path: build/clang/
     - name: Analyse
       run: scripts/qmllint.sh
       env:
         BUILD_DIR: build/clang/
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
-        name: Static Analysis Logs
+        name: static-analysis-logs-qmllint
         path: build/clang/*.log
 
   iwyu:
@@ -535,7 +535,7 @@ jobs:
     needs:
       - clang-debug
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
@@ -551,7 +551,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
         cache: true
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         repository: include-what-you-use/include-what-you-use
         ref: clang_${{ env.CLANG_VERSION }}
@@ -567,18 +567,18 @@ jobs:
         cmake -DCMAKE_PREFIX_PATH=/usr/lib/llvm-${{ env.CLANG_VERSION }} -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -G Ninja
         cmake --build .
         sudo cmake --build . --target install
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
-        name: Static Analysis Build
+        name: static-analysis-build
         path: build/clang/
     - name: Analyse
       run: scripts/iwyu.sh
       env:
         BUILD_DIR: build/clang/
         IWYU_SOURCE: ${{ github.workspace }}/iwyu
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
-        name: Static Analysis Logs
+        name: static-analysis-logs-iwyu
         path: build/clang/*.log
 
   check-is-release:
@@ -588,7 +588,7 @@ jobs:
     outputs:
       is-release: ${{ steps.is-release-test.outputs.result }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
@@ -621,21 +621,21 @@ jobs:
       - macos
       - wasm
     steps:
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
-        name: Linux AppImage
+        name: linux-appimage
         path: release/Linux AppImage
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
-        name: macOS Disk Image
+        name: macos-disk-image
         path: release/macOS Disk Image
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
-        name: Windows Installer
+        name: windows-installer
         path: release/Windows Installer
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
-        name: WebAssembly
+        name: webassembly
         path: release/WebAssembly
     - name: Create Release
       uses: actions/create-release@v1
@@ -688,45 +688,45 @@ jobs:
       - wasm
       - windows-clang
     steps:
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
-        name: Linux AppImage
+        name: linux-appimage
         path: prerelease/Linux AppImage
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
-        name: Linux Logs
+        name: linux-logs
         path: prerelease/Linux Logs
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
-        name: macOS Disk Image
+        name: macos-disk-image
         path: prerelease/macOS Disk Image
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
-        name: macOS Logs
+        name: macos-logs
         path: prerelease/macOS Logs
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
-        name: Windows Installer
+        name: windows-installer
         path: prerelease/Windows Installer
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
-        name: Windows Logs
+        name: windows-logs
         path: prerelease/Windows Logs
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
-        name: Windows Clang Installer
+        name: windows-clang-installer
         path: prerelease/Windows Clang Installer
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
-        name: Windows Clang Logs
+        name: windows-clang-logs
         path: prerelease/Windows Clang Logs
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
-        name: WebAssembly
+        name: webassembly
         path: prerelease/WebAssembly
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
-        name: WebAssembly Logs
+        name: webassembly-logs
         path: prerelease/WebAssembly Logs
     - uses: horochx/deploy-via-scp@master
       with:
@@ -748,9 +748,10 @@ jobs:
       - iwyu
       - qmllint
     steps:
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
-        name: Static Analysis Logs
+        pattern: static-analysis-logs-*
+        merge-multiple: true
         path: prerelease/Static Analysis Logs
     - uses: horochx/deploy-via-scp@master
       with:
@@ -776,33 +777,34 @@ jobs:
       - clazy
       - qmllint
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
-        name: Linux Logs
+        name: linux-logs
         path: logs/linux
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
-        name: macOS Logs
+        name: macos-logs
         path: logs/macos
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
-        name: Windows Logs
+        name: windows-logs
         path: logs/windows
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
-        name: Windows Clang Logs
+        name: windows-clang-logs
         path: logs/windows-clang
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
-        name: WebAssembly Logs
+        name: webassembly-logs
         path: logs/wasm
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
-        name: Static Analysis Logs
+        pattern: static-analysis-logs-*
+        merge-multiple: true
         path: logs/staticanalysis
     - name: Install Perl modules
       uses: perl-actions/install-with-cpanm@v1
