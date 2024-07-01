@@ -53,7 +53,7 @@ public:
     virtual QString attributeDescription() const = 0;
 };
 
-class ContinuousCorrelation : public ICorrelationInfo
+class ContinuousCorrelation : public ICorrelationInfo, public ThreadPoolProvider
 {
 public:
     virtual EdgeList edgeList(const ContinuousDataVectors& vectors, const QVariantMap& parameters,
@@ -158,7 +158,7 @@ private:
 
         std::atomic<uint64_t> cost(0);
 
-        auto results = ThreadPool(name()).parallel_for(vectors.begin(), vectors.end(),
+        auto results = threadPool().parallel_for(vectors.begin(), vectors.end(),
         [&](ContinuousDataVectors::const_iterator vectorAIt)
         {
             const auto* vectorA = &(*vectorAIt);
@@ -391,7 +391,7 @@ public:
 using BicorCorrelation = CovarianceCorrelation<BicorAlgorithm, ThresholdFilter>;
 using BicorCorrelationKnn = CovarianceCorrelation<BicorAlgorithm, KnnFilter>;
 
-class DiscreteCorrelation : public ICorrelationInfo
+class DiscreteCorrelation : public ICorrelationInfo, public ThreadPoolProvider
 {
 public:
     virtual EdgeList edgeList(const DiscreteDataVectors& vectors, const QVariantMap& parameters,
@@ -429,7 +429,7 @@ private:
 
         std::atomic<uint64_t> cost(0);
 
-        auto results = ThreadPool(name()).parallel_for(vectors.begin(), vectors.end(),
+        auto results = threadPool().parallel_for(vectors.begin(), vectors.end(),
         [&](TokenisedDataVectors::const_iterator vectorAIt)
         {
             typename FM::Results threadResults;
