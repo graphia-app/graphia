@@ -30,7 +30,7 @@ BaseParameterDialog
 {
     id: root
     //FIXME These should be set automatically by Wizard
-    minimumWidth: 750
+    minimumWidth: 800
     minimumHeight: 500
 
     property bool _suppressAutoUpdates: false
