@@ -395,6 +395,12 @@ function createWindow(parent, component, properties = {}, immediatelyShow = true
     {
         // Create the window
         window = component.createObject(parent, properties);
+        if(!window)
+        {
+            console.log("Utils.createWindow: createObject failed for " + component);
+            return null;
+        }
+
         parent.windowInstanceMap.set(component, window);
 
         // Destroy the window when it is closed
