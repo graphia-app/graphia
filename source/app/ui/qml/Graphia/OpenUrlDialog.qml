@@ -27,8 +27,6 @@ Window
 {
     id: root
 
-    property string url
-
     title: qsTr("Open URL")
     modality: Qt.ApplicationModal
     flags: Constants.defaultWindowFlags
@@ -122,18 +120,17 @@ Window
         if(!textField.valid)
             return;
 
-        root.url = NativeUtils.urlFrom(textField.text);
+        root.accepted(NativeUtils.urlFrom(textField.text));
         root.close();
-        root.accepted();
     }
 
     function reject()
     {
-        root.close();
         root.rejected();
+        root.close();
     }
 
-    signal accepted()
+    signal accepted(url: string)
     signal rejected()
 }
 
