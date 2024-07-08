@@ -175,6 +175,8 @@ void DownloadQueue::onReplyReceived(QNetworkReply* reply)
         if(_reply->error() != QNetworkReply::NetworkError::OperationCanceledError)
             emit error(_reply->url(), errorString);
 
+        _reply->deleteLater();
+        reset();
         return;
     }
 
