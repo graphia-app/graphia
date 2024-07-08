@@ -165,8 +165,15 @@ void DownloadQueue::onReplyReceived(QNetworkReply* reply)
 
     if(_reply->error() != QNetworkReply::NetworkError::NoError)
     {
+        auto httpCode = static_cast<int>(_reply->error());
+        auto networkErrorString = QVariant::fromValue(_reply->error()).toString();
+        auto errorString = QString("Network Error: %1 (%2/%3)")
+            .arg(_reply->errorString())
+            .arg(httpCode)
+            .arg(networkErrorString);
+
         if(_reply->error() != QNetworkReply::NetworkError::OperationCanceledError)
-            emit error(_reply->url(), _reply->errorString());
+            emit error(_reply->url(), errorString);
 
         return;
     }
