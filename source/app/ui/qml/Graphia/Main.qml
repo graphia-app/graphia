@@ -937,7 +937,7 @@ ApplicationWindow
     Component
     {
         id: openUrlDialog
-        OpenUrlDialog { onAccepted: { openUrl(openUrlDialog.url, true); } }
+        OpenUrlDialog { onAccepted: function(url) { openUrl(url, true); } }
     }
 
     Action
