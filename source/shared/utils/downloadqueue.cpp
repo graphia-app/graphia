@@ -28,6 +28,8 @@
 #include <iostream>
 #include <cstdio>
 
+using namespace Qt::Literals::StringLiterals;
+
 DownloadQueue::DownloadQueue()
 {
     _networkManager.setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
@@ -167,7 +169,7 @@ void DownloadQueue::onReplyReceived(QNetworkReply* reply)
     {
         auto httpCode = static_cast<int>(_reply->error());
         auto networkErrorString = QVariant::fromValue(_reply->error()).toString();
-        auto errorString = QString("Network Error: %1 (%2/%3)")
+        auto errorString = u"Network Error: %1 (%2/%3)"_s
             .arg(_reply->errorString())
             .arg(httpCode)
             .arg(networkErrorString);
