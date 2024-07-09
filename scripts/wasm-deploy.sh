@@ -55,6 +55,9 @@ tar --strip-components=1 -xzf ${TARBALL}
 cp /usr/local/lib/node_modules/coi-serviceworker/coi-serviceworker.js .
 sed -i '/<head>/a <script src="coi-serviceworker.js"></script>' index.html
 
+# Patch in setting CORS_PROXY
+sed -i '/qt: {/a environment: {"CORS_PROXY": "https://corsproxy.graphia.app"},' index.html
+
 # Commit
 git add *
 git commit -m "${BASENAME}"
