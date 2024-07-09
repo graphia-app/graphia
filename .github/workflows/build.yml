@@ -819,10 +819,10 @@ jobs:
         path: defects
     - name: Analyse
       run: |
-        cd defects
         SHORT_SHA=$(git rev-parse --short HEAD)
         MESSAGE=$(git log --format=%B -n1 HEAD | head -n1)
         BRANCH=$(echo ${GITHUB_REF#refs/*/})
+        cd defects
         git config user.email ""
         git config user.name "Log Analyser"
         ./update.sh -b $BRANCH -l "../logs" -m "$SHORT_SHA $MESSAGE"
