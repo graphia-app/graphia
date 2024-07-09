@@ -40,7 +40,7 @@ public:
     DownloadQueue();
     ~DownloadQueue() override;
 
-    bool add(const QUrl& url);
+    bool add(QUrl url);
     void cancel();
     bool resume();
 
