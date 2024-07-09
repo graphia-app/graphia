@@ -56,7 +56,7 @@ bool DownloadQueue::add(QUrl url)
     // it to the resource being downloaded, so that the WebAssembly
     // build doesn't run into CORS related denials when accessing
     // resources outside of its own domain
-    QUrl corsUrl(qEnvironmentVariable("CORS_PROXY"));
+    const QUrl corsUrl(qEnvironmentVariable("CORS_PROXY"));
     if(corsUrl.isValid())
         url = QUrl(u"%1/%2"_s.arg(corsUrl.toString(), url.toString()));
 
