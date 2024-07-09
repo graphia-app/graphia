@@ -323,6 +323,10 @@ else()
         DESTINATION share/applications)
 endif()
 
+if(EMSCRIPTEN)
+    set_property(TARGET ${PROJECT_NAME} PROPERTY QT_WASM_EXTRA_EXPORTED_METHODS "ENV")
+endif()
+
 if(UNIX)
     file(WRITE ${PROJECT_BINARY_DIR}/variables.sh "export PRODUCT_NAME=\"${PROJECT_NAME}\"\n")
     file(APPEND ${PROJECT_BINARY_DIR}/variables.sh "export VERSION=\"${Version}\"\n")
