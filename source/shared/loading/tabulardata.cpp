@@ -295,7 +295,12 @@ bool TabularData::rowHasDuplicates(size_t rowIndex, size_t columnIndex) const
 
     for(; columnIndex < numColumns(); columnIndex++)
     {
-        auto [it, inserted] = values.insert(valueAt(columnIndex, rowIndex));
+        auto value = valueAt(columnIndex, rowIndex);
+
+        if(value.isEmpty())
+            continue;
+
+        auto [it, inserted] = values.insert(value);
 
         if(!inserted)
             return true;
