@@ -23,6 +23,7 @@
 #include "shared/loading/dotfileparser.h"
 #include "shared/loading/graphmlparser.h"
 #include "shared/loading/adjacencymatrixfileparser.h"
+#include "shared/loading/pairwisecolumntype.h"
 #include "shared/loading/pairwisefileparser.h"
 #include "shared/loading/jsongraphparser.h"
 #include "shared/loading/cxparser.h"
