@@ -63,6 +63,8 @@ private:
         PairwiseColumnsConfiguration _columns;
     } _pairwiseParameters;
 
+    QStringList _additionalTransforms;
+    QStringList _additionalVisualisations;
     TabularData _preloadedTabularData;
 
     NodeAttributeTableModel _nodeAttributeTableModel;
@@ -74,6 +76,7 @@ public:
     std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName) override;
     void applyParameter(const QString& name, const QVariant& value) override;
     QStringList defaultTransforms() const override;
+    QStringList defaultVisualisations() const override;
 
 private:
     // The rows that are selected in the table view

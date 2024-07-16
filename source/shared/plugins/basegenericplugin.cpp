@@ -170,6 +170,10 @@ void BaseGenericPluginInstance::applyParameter(const QString& name, const QVaria
         _adjacencyMatrixParameters._filterEdges = (value == u"true"_s);
     else if(name == u"skipDuplicates"_s)
         _adjacencyMatrixParameters._skipDuplicates = (value == u"true"_s);
+    else if(name == u"additionalTransforms"_s)
+        _additionalTransforms = value.toStringList();
+    else if(name == u"additionalVisualisations"_s)
+        _additionalVisualisations = value.toStringList();
     else if(name == u"data"_s && value.canConvert<std::shared_ptr<TabularData>>())
         _preloadedTabularData = std::move(*value.value<std::shared_ptr<TabularData>>());
     else
@@ -187,7 +191,23 @@ QStringList BaseGenericPluginInstance::defaultTransforms() const
             .arg(_adjacencyMatrixParameters._initialAbsEdgeWeightThreshold));
     }
 
+    defaultTransforms.reserve(defaultTransforms.size() + _additionalTransforms.size());
+
+    for(const auto& additionalTransform : _additionalTransforms)
+        defaultTransforms.append(additionalTransform);
+
     return defaultTransforms;
+}
+
+QStringList BaseGenericPluginInstance::defaultVisualisations() const
+{
+    QStringList defaultVisualisations;
+    defaultVisualisations.reserve(_additionalVisualisations.size());
+
+    for(const auto& additionalVisualisation : _additionalVisualisations)
+        defaultVisualisations.append(additionalVisualisation);
+
+    return defaultVisualisations;
 }
 
 QString BaseGenericPluginInstance::selectedNodeNames() const
