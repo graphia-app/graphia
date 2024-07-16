@@ -28,8 +28,6 @@ qt_add_qml_module(websearch_qml
         ${GENERIC_PLUGIN_QML_MODULE_DIR}/table.svg
 )
 
-message(${GENERIC_PLUGIN_QML_MODULE_DIR})
-
 target_link_libraries(websearch_qml
     PRIVATE Qt6::Quick
 )
