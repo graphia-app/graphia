@@ -29,6 +29,11 @@
 #include <iostream>
 #include <cstdio>
 
+#ifdef Q_OS_WASM
+#include <emscripten.h>
+#include <emscripten/val.h>
+#endif
+
 using namespace Qt::Literals::StringLiterals;
 
 DownloadQueue::DownloadQueue()
@@ -52,13 +57,22 @@ DownloadQueue::~DownloadQueue()
 
 bool DownloadQueue::add(QUrl url)
 {
-    // If the environment variable CORS_PROXY is present then prepend
-    // it to the resource being downloaded, so that the WebAssembly
-    // build doesn't run into CORS related denials when accessing
-    // resources outside of its own domain
-    const QUrl corsUrl(qEnvironmentVariable("CORS_PROXY"));
-    if(corsUrl.isValid())
-        url = QUrl(u"%1/%2"_s.arg(corsUrl.toString(), url.toString()));
+#ifdef Q_OS_WASM
+    emscripten::val location = emscripten::val::global("location");
+    QUrl hostUrl(QString::fromStdString(location["href"].as<std::string>()));
+
+    // Cross origin measures are only necessary when actually going cross origin
+    if(hostUrl.host() != url.host())
+    {
+        // If the environment variable CORS_PROXY is present then prepend
+        // it to the resource being downloaded, so that the WebAssembly
+        // build doesn't run into CORS related denials when accessing
+        // resources outside of its own domain
+        const QUrl corsUrl(qEnvironmentVariable("CORS_PROXY"));
+        if(corsUrl.isValid())
+            url = QUrl(u"%1/%2"_s.arg(corsUrl.toString(), url.toString()));
+    }
+#endif
 
     // If idle, start downloading
     if(idle())
