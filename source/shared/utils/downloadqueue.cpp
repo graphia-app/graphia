@@ -55,7 +55,7 @@ DownloadQueue::~DownloadQueue()
     }
 }
 
-bool DownloadQueue::add(QUrl url)
+bool DownloadQueue::add(QUrl url) // NOLINT performance-unnecessary-value-param
 {
 #ifdef Q_OS_WASM
     emscripten::val location = emscripten::val::global("location");
