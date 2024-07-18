@@ -62,7 +62,7 @@ bool DownloadQueue::add(QUrl url)
     QUrl hostUrl(QString::fromStdString(location["href"].as<std::string>()));
 
     // Cross origin measures are only necessary when actually going cross origin
-    if(hostUrl.host() != url.host())
+    if(hostUrl.host() != url.host() && url.host() != u"localhost"_s && !url.isLocalFile())
     {
         // If the environment variable CORS_PROXY is present then prepend
         // it to the resource being downloaded, so that the WebAssembly
