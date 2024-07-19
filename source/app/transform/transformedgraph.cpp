@@ -131,7 +131,8 @@ void TransformedGraph::rebuild()
     if(!_autoRebuild)
         return;
 
-    _cancelled = false;
+    if(_cancelled)
+        return;
 
     emit graphWillChange(this);
 
@@ -241,6 +242,7 @@ void TransformedGraph::rebuild()
         emit attributeValuesChanged(changedAttributeNames);
 
     enableComponentManagement();
+    _cancelled = false;
 
     emit graphChanged(this, _changeSignalsEmitted);
 }
