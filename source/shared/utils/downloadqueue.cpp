@@ -29,11 +29,6 @@
 #include <iostream>
 #include <cstdio>
 
-#ifdef Q_OS_WASM
-#include <emscripten.h>
-#include <emscripten/val.h>
-#endif
-
 using namespace Qt::Literals::StringLiterals;
 
 DownloadQueue::DownloadQueue() :
