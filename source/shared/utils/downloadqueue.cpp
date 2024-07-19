@@ -221,27 +221,30 @@ void DownloadQueue::onReplyReceived(QNetworkReply* reply)
     else
         filename = _reply->url().fileName();
 
-    if(filename.isEmpty())
+    if(_temporaryFile != nullptr && _temporaryFile->isOpen())
     {
-        // Can't figure out an appropriate name from the reply,
-        // so resort to using the existing temp file name
-        filename = _temporaryFile->fileName();
-        _temporaryFile->close();
-    }
-    else
-    {
-        QTemporaryDir tempDir;
-        filename = tempDir.filePath(filename);
-        tempDir.setAutoRemove(false);
-
-        if(!_temporaryFile->rename(filename))
+        if(filename.isEmpty())
         {
-            qDebug() << "Failed to rename" << _temporaryFile->fileName() << "to" << filename;
-            return;
+            // Can't figure out an appropriate name from the reply,
+            // so resort to using the existing temp file name
+            filename = _temporaryFile->fileName();
+            _temporaryFile->close();
         }
+        else
+        {
+            QTemporaryDir tempDir;
+            filename = tempDir.filePath(filename);
+            tempDir.setAutoRemove(false);
 
-        _downloaded.erase(_temporaryFile->fileName());
-        _downloaded.emplace(tempDir.path(), IsDir::Yes);
+            if(!_temporaryFile->rename(filename))
+            {
+                qDebug() << "Failed to rename" << _temporaryFile->fileName() << "to" << filename;
+                return;
+            }
+
+            _downloaded.erase(_temporaryFile->fileName());
+            _downloaded.emplace(tempDir.path(), IsDir::Yes);
+        }
     }
 
     if(!filename.isEmpty())
