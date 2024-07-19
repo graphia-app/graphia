@@ -40,7 +40,7 @@ public:
     DownloadQueue();
     ~DownloadQueue() override;
 
-    bool add(QUrl url);
+    bool add(const QUrl& url);
     void cancel();
     bool resume();
 
@@ -58,6 +58,8 @@ private:
     std::unique_ptr<QTemporaryFile> _temporaryFile;
 
     std::queue<QUrl> _queue;
+
+    const QUrl _corsUrl;
 
     enum class IsDir
     {

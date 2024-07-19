@@ -36,7 +36,8 @@
 
 using namespace Qt::Literals::StringLiterals;
 
-DownloadQueue::DownloadQueue()
+DownloadQueue::DownloadQueue() :
+    _corsUrl(qEnvironmentVariable("CORS_PROXY"))
 {
     _networkManager.setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
     connect(&_networkManager, &QNetworkAccessManager::finished, this, &DownloadQueue::onReplyReceived);
@@ -55,25 +56,8 @@ DownloadQueue::~DownloadQueue()
     }
 }
 
-bool DownloadQueue::add(QUrl url) // NOLINT performance-unnecessary-value-param
+bool DownloadQueue::add(const QUrl& url)
 {
-#ifdef Q_OS_WASM
-    emscripten::val location = emscripten::val::global("location");
-    QUrl hostUrl(QString::fromStdString(location["href"].as<std::string>()));
-
-    // Cross origin measures are only necessary when actually going cross origin
-    if(hostUrl.host() != url.host() && url.host() != u"localhost"_s && !url.isLocalFile())
-    {
-        // If the environment variable CORS_PROXY is present then prepend
-        // it to the resource being downloaded, so that the WebAssembly
-        // build doesn't run into CORS related denials when accessing
-        // resources outside of its own domain
-        const QUrl corsUrl(qEnvironmentVariable("CORS_PROXY"));
-        if(corsUrl.isValid())
-            url = QUrl(u"%1/%2"_s.arg(corsUrl.toString(), url.toString()));
-    }
-#endif
-
     // If idle, start downloading
     if(idle())
     {
@@ -196,6 +180,19 @@ void DownloadQueue::onReplyReceived(QNetworkReply* reply)
             .arg(_reply->errorString())
             .arg(httpCode)
             .arg(networkErrorString);
+
+#ifdef Q_OS_WASM
+        // A CORS error is reported as a HTTP 339/ProtocolFailure (for now? forever?)
+        // Try again using a CORS proxy, if available
+        if(_corsUrl.isValid() &&
+           _reply->error() == QNetworkReply::NetworkError::ProtocolFailure &&
+           _reply->url().host() != _corsUrl.host()) // Prevent loops
+        {
+            _reply->deleteLater();
+            start(QUrl(u"%1/%2"_s.arg(_corsUrl.toString(), _reply->url().toString())));
+            return;
+        }
+#endif
 
         if(_reply->error() != QNetworkReply::NetworkError::OperationCanceledError)
             emit error(_reply->url(), errorString);
