@@ -247,7 +247,8 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
 
 #ifndef Q_OS_WASM
     auto dontUpdate = commandLineParser.isSet(u"dontUpdate"_s) ||
-        commandLineParser.isSet(u"parameters"_s);
+        commandLineParser.isSet(u"parameters"_s) ||
+        !commandLineParser.positionalArguments().isEmpty();
 
     if(!dontUpdate && Updater::updateAvailable())
     {
