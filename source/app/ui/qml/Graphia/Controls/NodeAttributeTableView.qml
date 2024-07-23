@@ -1019,6 +1019,15 @@ Item
                     id: proxyModel
                     columnNames: root.model.columnNames
                     sourceModel: root.model
+
+                    function refreshVisibleRows()
+                    {
+                        let allProxyRows = [...Array(proxyModel.rowCount()).keys()];
+                        let newVisibleRows = allProxyRows.map(row => proxyModel.mapToSourceRow(row));
+                        root.visibleRows = newVisibleRows;
+                    }
+
+                    onSortOrderChanged: { refreshVisibleRows(); }
                 }
 
                 columnWidthProvider: function(col)
@@ -1261,10 +1270,7 @@ Item
                     function onSelectionChanged()
                     {
                         proxyModel.reset();
-
-                        let allProxyRows = [...Array(proxyModel.rowCount()).keys()];
-                        let newVisibleRows = allProxyRows.map(row => proxyModel.mapToSourceRow(row));
-                        root.visibleRows = newVisibleRows;
+                        proxyModel.refreshVisibleRows();
 
                         let newSelectedRows = Utils.arrayIntersection(root.selectedRows, root.visibleRows);
                         root.clearAndSelectRows(newSelectedRows);
