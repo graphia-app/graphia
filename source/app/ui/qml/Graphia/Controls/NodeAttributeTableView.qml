@@ -1266,7 +1266,7 @@ Item
                         let newVisibleRows = allProxyRows.map(row => proxyModel.mapToSourceRow(row));
                         root.visibleRows = newVisibleRows;
 
-                        let newSelectedRows = root.selectedRows.filter(row => newVisibleRows.includes(row));
+                        let newSelectedRows = Utils.arrayIntersection(root.selectedRows, root.visibleRows);
                         root.clearAndSelectRows(newSelectedRows);
 
                         verticalTableViewScrollBar.position = 0;
