@@ -346,6 +346,30 @@ function arraysMatch(a, b)
     return true;
 }
 
+function* arrayIntersection(a, b)
+{
+    let as = a.slice();
+    let bs = b.slice();
+    as.sort((x, y) => x - y);
+    bs.sort((x, y) => x - y);
+
+    let i = 0, j = 0;
+
+    while(i < as.length && j < bs.length)
+    {
+        if(as[i] < bs[j])
+            i++;
+        else if(as[i] > bs[j])
+            j++;
+        else
+        {
+            yield as[i];
+            i++;
+            j++;
+        }
+    }
+}
+
 function floatCompare(a, b)
 {
     // Note the relatively large epsilon
