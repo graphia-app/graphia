@@ -8,6 +8,7 @@ qt_add_qml_module(sharedtypes_qml
     SOURCES
         attributeflag.h
         elementtype.h elementtype.cpp
+        graphsizeestimateplot.h graphsizeestimateplot.cpp
         pairwisecolumntype.h
         valuetype.h
 )
