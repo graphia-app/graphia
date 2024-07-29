@@ -25,6 +25,7 @@ import QtQuick.Window
 import Graphia.Controls
 import Graphia.Plugins
 import Graphia.Utils
+import Graphia.SharedTypes
 
 BaseParameterDialog
 {

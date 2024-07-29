@@ -26,6 +26,7 @@ import Graphia.Controls
 import Graphia.Plugins
 import Graphia.Utils
 import Graphia.Loading
+import Graphia.SharedTypes
 
 BaseParameterDialog
 {
