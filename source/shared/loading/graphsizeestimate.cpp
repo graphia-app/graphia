@@ -38,7 +38,9 @@ QVariantMap graphSizeEstimateThreshold(EdgeList edgeList,
     if(edgeList.empty())
         return {};
 
-    auto maxEdges = maxNodes * maxNodes;
+    auto maxEdges = maxNodes == std::numeric_limits<size_t>::max() ?
+        std::numeric_limits<size_t>::max() :
+        maxNodes * maxNodes;
     auto nodesScale = static_cast<double>(maxNodes) / static_cast<double>(numSampleNodes);
     auto edgesScale = nodesScale * nodesScale;
 
