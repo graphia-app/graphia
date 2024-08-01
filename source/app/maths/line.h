@@ -24,7 +24,7 @@
 
 #include <utility>
 
-template <typename Vector> class Line
+template<typename Vector> class Line
 {
 private:
     Vector _start;

@@ -6,20 +6,20 @@
 
 namespace u
 {
-template <typename... Containers>
+template<typename... Containers>
 class combine
 {
 private:
-    template <typename T>
+    template<typename T>
     using ContainerIterator = decltype(std::cbegin(std::declval<T&>()));
 
-    template <typename T>
+    template<typename T>
     using ContainerIteratorPair = std::pair<ContainerIterator<T>, ContainerIterator<T>>;
 
-    template <typename>
+    template<typename>
     struct iterator_pairs {};
 
-    template <typename... Ts>
+    template<typename... Ts>
     struct iterator_pairs<std::tuple<Ts...>>
     {
         using type = std::tuple<ContainerIteratorPair<Ts>...>;

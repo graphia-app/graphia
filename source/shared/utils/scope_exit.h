@@ -25,7 +25,7 @@
 
 // modeled slightly after Andrescu’s talk and article(s)
 namespace std::experimental{ // NOLINT cert-dcl58-cpp
-template <typename EF>
+template<typename EF>
 struct scope_exit {
     // construction
     explicit
@@ -53,7 +53,7 @@ private:
     EF exit_function;
     bool execute_on_destruction = false; // exposition only
 };
-template <typename EF>
+template<typename EF>
 auto make_scope_exit(EF &&exit_function) noexcept {
     return scope_exit<std::remove_reference_t<EF>>(std::forward<EF>(exit_function));
 }

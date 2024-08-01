@@ -21,7 +21,7 @@
 
 #include <cstddef>
 
-template <std::size_t N>
+template<std::size_t N>
 struct String
 {
     char _data[N] = {0};
@@ -34,7 +34,7 @@ struct String
     }
 };
 
-template <String string>
+template<String string>
 class NamedBool
 {
 private:
@@ -50,25 +50,25 @@ public:
     constexpr explicit operator bool() const { return _value; }
 };
 
-template <String string>
+template<String string>
 consteval auto operator""_true()
 {
     return NamedBool<string>(true);
 }
 
-template <String string>
+template<String string>
 consteval auto operator""_false()
 {
     return NamedBool<string>(false);
 }
 
-template <String string>
+template<String string>
 consteval auto operator""_yes()
 {
     return NamedBool<string>(true);
 }
 
-template <String string>
+template<String string>
 consteval auto operator""_no()
 {
     return NamedBool<string>(false);

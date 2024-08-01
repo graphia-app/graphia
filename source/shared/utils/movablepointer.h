@@ -27,7 +27,7 @@
 template<typename T> class MovablePointer : private std::unique_ptr<T>
 {
 public:
-    template <typename... Args> explicit MovablePointer(Args... args) :
+    template<typename... Args> explicit MovablePointer(Args... args) :
         std::unique_ptr<T>(std::make_unique<T>(std::forward<Args>(args)...))
     {}
 

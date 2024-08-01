@@ -24,13 +24,13 @@
 
 // http://stackoverflow.com/questions/7943525/
 
-template <typename T>
+template<typename T>
 struct function_traits
     : public function_traits<decltype(&T::operator())>
 {};
 // For generic types, directly use the result of the signature of its 'operator()'
 
-template <typename ReturnType, typename... Args>
+template<typename ReturnType, typename... Args>
 struct _function_traits
 // we specialize for pointers to member function
 {
@@ -39,7 +39,7 @@ struct _function_traits
 
     using result_type = ReturnType;
 
-    template <size_t i>
+    template<size_t i>
     struct arg
     {
         using type = typename std::tuple_element<i, std::tuple<Args...>>::type;
@@ -48,12 +48,12 @@ struct _function_traits
     };
 };
 
-template <typename ClassType, typename ReturnType, typename... Args>
+template<typename ClassType, typename ReturnType, typename... Args>
 struct function_traits<ReturnType(ClassType::*)(Args...) const> :
     public _function_traits<ReturnType, Args...>
 {};
 
-template <typename ClassType, typename ReturnType, typename... Args>
+template<typename ClassType, typename ReturnType, typename... Args>
 struct function_traits<ReturnType(ClassType::*)(Args...)> :
     public _function_traits<ReturnType, Args...>
 {};
