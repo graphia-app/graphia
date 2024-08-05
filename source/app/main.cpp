@@ -203,6 +203,14 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
     QQuickWindow::setDefaultAlphaBuffer(true);
     OpenGLFunctions::requestMinimumFormat();
 
+#ifdef Q_OS_WIN
+#if QT_VERSION == QT_VERSION_CHECK(6, 7, 0)
+    qputenv("QTWEBENGINE_CHROMIUM_FLAGS", "--disable-gpu");
+#else
+#pragma message("QTBUG-122947 workaround not necessary for this version")
+#endif
+#endif
+
 #ifdef QTWEBENGINEQUICK_VERSION
     QtWebEngineQuick::initialize();
 #endif
