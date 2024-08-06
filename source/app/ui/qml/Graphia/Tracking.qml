@@ -92,13 +92,12 @@ Rectangle
             Layout.fillWidth: true
             Layout.topMargin: 16
 
-            text: Utils.format(qsTr("We want to continue improving {0}, " +
-                "and one of the ways in which this is possible is " +
-                "through demonstrating its usage to funding bodies. Leaving us " +
-                "your valid institutional email address helps us do this. " +
-                "You may of course also choose to <a href=\"anonymous\" " +
-                "style=\"color: lightgrey; text-decoration:none\">" +
-                "use {0} anonymously</a>."), application.name)
+            text: Utils.format(qsTr("Please provide your email address. " +
+                "{0} does not track what analyses you perform or retain " +
+                "any data loaded into it - your privacy is assured. We " +
+                "ask for you email only so we know how often it is used " +
+                "and by whom. You can also choose to use {0} " +
+                "<a href=\"anonymous\">anonymously</a>, if you prefer."), application.name)
 
             color: "white"
             textFormat: Text.RichText
