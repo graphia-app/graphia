@@ -100,6 +100,7 @@ Window
         root._selectedType = ValueType.Unknown;
 
         editAttributeTableModel.resetAllEdits();
+        editAttributeTableModel.document = root.document;
         editAttributeTableModel.attributeName = root._attributeName;
         editAttributeTableModel.combineSharedValues = false;
 
@@ -138,7 +139,6 @@ Window
     EditAttributeTableModel
     {
         id: editAttributeTableModel
-        document: root.document
 
         onCombineSharedValuesChanged:
         {
