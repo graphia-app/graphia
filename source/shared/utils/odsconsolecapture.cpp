@@ -1,4 +1,5 @@
-/* Copyright © 2013-2022 Graphia Technologies Ltd.
+/* Copyright © 2013-2025 Tim Angus
+ * Copyright © 2013-2025 Tom Freeman
  *
  * This file is part of Graphia.
  *
