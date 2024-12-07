@@ -473,6 +473,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         repository: KDE/clazy
+        ref: d0b033ae1b297fce288df6a3d59c718b522f4259
         path: clazy
     - name: ccache
       uses: hendrikmuhs/ccache-action@main
