@@ -1,4 +1,5 @@
-/* Copyright © 2013-2024 Graphia Technologies Ltd.
+/* Copyright © 2013-2025 Tim Angus
+ * Copyright © 2013-2025 Tom Freeman
  *
  * This file is part of Graphia.
  *
@@ -65,7 +66,7 @@ Window
                     qsTr("{0} is a tool for the visualisation and analysis of graphs.<br><br>" +
                     "Version {1}.<br>{2}<br><br>" +
                     "<a href=\"LICENSE\">License</a>&nbsp;&nbsp;&nbsp;<a href=\"OSS\">Third Party Licenses</a>"),
-                    applicationRef.name, applicationRef.version, applicationRef.copyright)
+                    applicationRef.name, applicationRef.version, applicationRef.copyright.replace("\n", "<br>"))
 
                 PointingCursorOnHoverLink {}
                 onLinkActivated: function(link)

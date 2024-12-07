@@ -182,11 +182,11 @@ file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/build_defines.h "#define VERSION \"${Ver
 if (NOT "$ENV{PUBLISHER}" STREQUAL "")
     set(Publisher $ENV{PUBLISHER})
 else()
-    set(Publisher "Graphia Technologies Ltd.")
+    set(Publisher "Tim Angus")
 endif()
 
 string(TIMESTAMP CURRENT_YEAR "%Y")
-set(Copyright "\(c\) 2013-${CURRENT_YEAR} ${Publisher}")
+set(Copyright "\(c\) 2013-${CURRENT_YEAR} ${Publisher}\\n\(c\) 2013-${CURRENT_YEAR} Tom Freeman")
 file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/build_defines.h "#define COPYRIGHT \"${Copyright}\"\n \
     \n// NOLINTEND(cppcoreguidelines-macro-usage)\n")
 
