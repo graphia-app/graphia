@@ -84,14 +84,14 @@ jobs:
     - uses: ilammy/msvc-dev-cmd@v1
     - uses: seanmiddleditch/gha-setup-ninja@v3
     - name: Compile
-      shell: cmd
-      run: call scripts\windows-build.bat
+      shell: pwsh
+      run: . .\scripts\windows-build.ps1
       env:
         CC: cl.exe
         CXX: cl.exe
     - name: NSIS Installer
-      shell: cmd
-      run: call installers\windows\build.bat
+      shell: pwsh
+      run: .\installers\windows\build.ps1
       env:
         CRTDIRECTORY: ${{ env.VcToolsRedistDir }}\x64\Microsoft.VC142.CRT
         WINDOWS_SIGN_KEYSTORE_BASE64: ${{ secrets.WINDOWS_SIGN_KEYSTORE_BASE64 }}
@@ -318,14 +318,14 @@ jobs:
     - uses: ilammy/msvc-dev-cmd@v1
     - uses: seanmiddleditch/gha-setup-ninja@v3
     - name: Compile
-      shell: cmd
-      run: call scripts\windows-build.bat
+      shell: pwsh
+      run: . .\scripts\windows-build.ps1
       env:
         CC: clang-cl.exe
         CXX: clang-cl.exe
     - name: NSIS Installer
-      shell: cmd
-      run: call installers\windows\build.bat
+      shell: pwsh
+      run: .\installers\windows\build.ps1
       env:
         CRTDIRECTORY: ${{ env.VcToolsRedistDir }}\x64\Microsoft.VC142.CRT
         WINDOWS_SIGN_KEYSTORE_BASE64: ${{ secrets.WINDOWS_SIGN_KEYSTORE_BASE64 }}
