@@ -54,8 +54,9 @@ list(APPEND MISC
     ${CMAKE_CURRENT_LIST_DIR}/installers/linux/build.sh
     ${CMAKE_CURRENT_LIST_DIR}/installers/macos/build.sh
     ${CMAKE_CURRENT_LIST_DIR}/installers/wasm/build.sh
-    ${CMAKE_CURRENT_LIST_DIR}/installers/windows/build.ps1
     ${CMAKE_CURRENT_LIST_DIR}/installers/windows/installer.nsi
+    ${CMAKE_CURRENT_LIST_DIR}/installers/windows/make-installer.ps1
+    ${CMAKE_CURRENT_LIST_DIR}/installers/windows/prepare-installer.ps1
 )
 
 list(APPEND MISC
