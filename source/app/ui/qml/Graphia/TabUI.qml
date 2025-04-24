@@ -25,8 +25,6 @@ import QtQuick.Layouts
 import QtQuick.Window
 import QtQuick.Dialogs
 
-import Qt.labs.platform as Labs
-
 import Graphia
 import Graphia.Controls
 import Graphia.Plugins
@@ -316,7 +314,7 @@ Item
             saveAsNamedFile(root.savedFileUrl, savedFileSaver);
     }
 
-    Labs.MessageDialog
+    MessageDialog
     {
         id: saveConfirmDialog
 
@@ -325,31 +323,40 @@ Item
 
         title: qsTr("File Changed")
         text: Utils.format(qsTr("Do you want to save changes to '{0}'?"), baseFileName)
-        buttons: Labs.MessageDialog.Save | Labs.MessageDialog.Discard | Labs.MessageDialog.Cancel
+        buttons: MessageDialog.Save | MessageDialog.Discard | MessageDialog.Cancel
         modality: Qt.ApplicationModal
 
-        onSaveClicked:
+        onButtonClicked: function(button, role)
         {
-            // Capture onSaveConfirmedFunction so that it doesn't get overwritten before
-            // we use it (though in theory that can't happen)
-            let proxyFn = function(fn)
+            switch(button)
             {
-                return function()
+            case MessageDialog.Save:
+            {
+                // Capture onSaveConfirmedFunction so that it doesn't get overwritten before
+                // we use it (though in theory that can't happen)
+                let proxyFn = function(fn)
                 {
-                    _document.saveComplete.disconnect(proxyFn);
-                    fn();
-                };
-            }(onSaveConfirmedFunction);
-            onSaveConfirmedFunction = null;
+                    return function()
+                    {
+                        _document.saveComplete.disconnect(proxyFn);
+                        fn();
+                    };
+                }(onSaveConfirmedFunction);
+                onSaveConfirmedFunction = null;
 
-            _document.saveComplete.connect(proxyFn);
-            saveFile();
-        }
+                _document.saveComplete.connect(proxyFn);
+                saveFile();
+                break;
+            }
 
-        onDiscardClicked:
-        {
-            onSaveConfirmedFunction();
-            onSaveConfirmedFunction = null;
+            case MessageDialog.Discard:
+                onSaveConfirmedFunction();
+                onSaveConfirmedFunction = null;
+                break;
+
+            default:
+                break;
+            }
         }
     }
 
@@ -575,15 +582,15 @@ Item
         }
     }
 
-    Labs.ColorDialog
+    ColorDialog
     {
         id: backgroundColorDialog
         title: qsTr("Select a Colour")
         modality: Qt.ApplicationModal
 
-        onColorChanged:
+        onSelectedColorChanged:
         {
-            visuals.backgroundColor = color;
+            visuals.backgroundColor = selectedColor;
         }
     }
 
@@ -747,7 +754,7 @@ Item
                         text: qsTr("Change Background &Colour")
                         onTriggered:
                         {
-                            backgroundColorDialog.color = visuals.backgroundColor;
+                            backgroundColorDialog.selectedColor = visuals.backgroundColor;
                             backgroundColorDialog.open();
                         }
                     }
@@ -1606,7 +1613,7 @@ Item
         layoutSettings.toggle();
     }
 
-    Labs.MessageDialog
+    MessageDialog
     {
         id: errorSavingFileMessageDialog
         title: qsTr("Error Saving File")

@@ -23,8 +23,7 @@ import QtQuick.Layouts
 import QtQuick.Window
 import Qt.labs.qmlmodels
 import QtQuick.Shapes
-
-import Qt.labs.platform as Labs
+import QtQuick.Dialogs
 
 import Graphia.Controls
 import Graphia.SharedTypes
@@ -174,12 +173,12 @@ Window
         }
     }
 
-    Labs.MessageDialog
+    MessageDialog
     {
         id: confirmDiscard
         title: qsTr("Discard Edits")
         text: qsTr("Are you sure you want to discard existing edits?")
-        buttons: Labs.MessageDialog.Yes | Labs.MessageDialog.Cancel
+        buttons: MessageDialog.Yes | MessageDialog.Cancel
         modality: Qt.ApplicationModal
 
         property var _yesFn: null
@@ -192,16 +191,21 @@ Window
             this.close();
         }
 
-        onYesClicked:
+        onButtonClicked: function(button, role)
         {
-            this._yesFn();
-            resetAndClose();
-        }
+            switch(button)
+            {
+            case MessageDialog.Yes:
+                this._yesFn();
+                resetAndClose();
+                break;
 
-        onCancelClicked:
-        {
-            this._cancelFn();
-            resetAndClose();
+            default:
+            case MessageDialog.Cancel:
+                this._cancelFn();
+                resetAndClose();
+                break;
+            }
         }
 
         function confirm(yesFn, cancelFn)

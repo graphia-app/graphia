@@ -22,8 +22,6 @@ import QtQuick.Window
 import QtQuick.Layouts
 import QtQuick.Dialogs
 
-import Qt.labs.platform as Labs
-
 import Graphia.Controls
 
 Item
@@ -329,7 +327,7 @@ Item
                             if(mouse.button & Qt.LeftButton)
                             {
                                 picker.selected = marker;
-                                colorDialog.color = picker.selected.color;
+                                colorDialog.selectedColor = picker.selected.color;
                                 colorDialog.visible = true;
                                 toolTip.visible = false;
                             }
@@ -384,7 +382,7 @@ Item
         }
     }
 
-    Labs.ColorDialog
+    ColorDialog
     {
         id: colorDialog
         title: qsTr("Select a Colour")

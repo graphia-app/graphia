@@ -21,8 +21,7 @@ import QtQuick
 import QtQuick.Window
 import QtQuick.Controls
 import QtQuick.Layouts
-
-import Qt.labs.platform as Labs
+import QtQuick.Dialogs
 
 import Graphia.Utils
 
@@ -222,17 +221,20 @@ Window
                     enabled: gradientPresets.selectedIndex >= 0
                     text: qsTr("Delete Preset")
 
-                    Labs.MessageDialog
+                    MessageDialog
                     {
                         id: deleteDialog
                         visible: false
                         title: qsTr("Delete")
                         text: qsTr("Are you sure you want to delete this gradient preset?")
-                        buttons: Labs.MessageDialog.Yes | Labs.MessageDialog.No
+                        buttons: MessageDialog.Yes | MessageDialog.No
                         modality: Qt.ApplicationModal
 
-                        onYesClicked:
+                        onButtonClicked: function(button, role)
                         {
+                            if(button !== MessageDialog.Yes)
+                                return;
+
                             let defaultDeleted = compareGradients(visuals.defaultGradient,
                                 gradientEditor.configuration);
 

@@ -25,8 +25,6 @@ import QtQuick.Layouts
 import QtQuick.Window
 import QtQuick.Dialogs
 
-import Qt.labs.platform as Labs
-
 import Graphia
 import Graphia.Controls
 import Graphia.Plugins
@@ -76,7 +74,7 @@ ApplicationWindow
 
     Application { id: application }
 
-    Labs.MessageDialog
+    MessageDialog
     {
         id: noUpdatesMessageDialog
         title: qsTr("No Updates")
@@ -387,7 +385,7 @@ ApplicationWindow
         return currentTab.document.selectByAttributeValue(attributeName, value);
     }
 
-    Labs.MessageDialog
+    MessageDialog
     {
         id: errorOpeningFileMessageDialog
         title: qsTr("Error Opening File")
@@ -1851,7 +1849,7 @@ ApplicationWindow
         onTriggered: function(source) { mainWindow.restart(); }
     }
 
-    Labs.MessageDialog
+    MessageDialog
     {
         id: commandLineArgumentsMessageDialog
         title: qsTr("Command Line Arguments")

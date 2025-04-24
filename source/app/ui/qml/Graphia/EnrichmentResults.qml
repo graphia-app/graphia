@@ -27,8 +27,6 @@ import Graphia.Controls
 import Graphia.SharedTypes
 import Graphia.Utils
 
-import Qt.labs.platform as Labs
-
 ApplicationWindow
 {
     id: root
@@ -58,16 +56,19 @@ ApplicationWindow
     width: 1200
     height: 600
 
-    Labs.MessageDialog
+    MessageDialog
     {
         id: confirmDelete
         title: qsTr("Delete Enrichment Results?")
         text: qsTr("Are you sure you want to delete this enrichment result?")
-        buttons: Labs.MessageDialog.Yes | Labs.MessageDialog.Cancel
+        buttons: MessageDialog.Yes | MessageDialog.Cancel
         modality: Qt.ApplicationModal
 
-        onYesClicked:
+        onButtonClicked: function(button, role)
         {
+            if(button !== MessageDialog.Yes)
+                return;
+
             root.removeResults(tabBar.currentIndex);
         }
     }
