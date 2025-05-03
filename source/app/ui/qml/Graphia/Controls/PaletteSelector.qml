@@ -44,7 +44,7 @@ Window
     signal applyClicked(bool alreadyApplied)
 
     title: qsTr("Edit Palette")
-    modality: Qt.ApplicationModal
+    modality: Qt.WindowModal
     flags: Constants.defaultWindowFlags
     color: palette.window
 

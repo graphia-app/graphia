@@ -43,7 +43,7 @@ Window
     signal applyClicked(bool alreadyApplied)
 
     title: qsTr("Edit Gradient")
-    modality: Qt.ApplicationModal
+    modality: Qt.WindowModal
     flags: Constants.defaultWindowFlags
     color: palette.window
 
