@@ -65,6 +65,8 @@ jobs:
   windows:
     name: Windows
     runs-on: windows-2019
+    needs:
+      - check-is-release
     steps:
     - uses: actions/checkout@v4
       with:
@@ -91,6 +93,7 @@ jobs:
         CXX: cl.exe
     - name: Upload Executables for Signing
       id: unsigned-exes
+      if: needs.check-is-release.outputs.is-release == 'true'
       uses: actions/upload-artifact@v4
       with:
         name: windows-unsigned-exes
@@ -100,6 +103,7 @@ jobs:
           build/MessageBox.exe
           build/Updater.exe
     - name: Sign Executables
+      if: needs.check-is-release.outputs.is-release == 'true'
       uses: signpath/github-action-submit-signing-request@v1
       with:
         api-token: ${{ secrets.WINDOWS_SIGNPATH_API_TOKEN }}
@@ -117,11 +121,13 @@ jobs:
         CRTDIRECTORY: ${{ env.VcToolsRedistDir }}\x64\Microsoft.VC142.CRT
     - name: Upload Uninstaller for Signing
       id: unsigned-uninstaller
+      if: needs.check-is-release.outputs.is-release == 'true'
       uses: actions/upload-artifact@v4
       with:
         name: windows-unsigned-uninstaller
         path: installer/Uninstall.exe
     - name: Sign Uninstaller
+      if: needs.check-is-release.outputs.is-release == 'true'
       uses: signpath/github-action-submit-signing-request@v1
       with:
         api-token: ${{ secrets.WINDOWS_SIGNPATH_API_TOKEN }}
@@ -137,11 +143,13 @@ jobs:
       run: .\installers\windows\make-installer.ps1
     - name: Upload Installer for Signing
       id: unsigned-installer
+      if: needs.check-is-release.outputs.is-release == 'true'
       uses: actions/upload-artifact@v4
       with:
         name: windows-unsigned-installer
         path: installer/*-installer.exe
     - name: Sign Installer
+      if: needs.check-is-release.outputs.is-release == 'true'
       uses: signpath/github-action-submit-signing-request@v1
       with:
         api-token: ${{ secrets.WINDOWS_SIGNPATH_API_TOKEN }}
@@ -152,6 +160,10 @@ jobs:
         github-artifact-id: ${{ steps.unsigned-installer.outputs.artifact-id }}
         wait-for-completion: true
         output-artifact-directory: build
+    - name: Move Unsigned Installer
+      if: needs.check-is-release.outputs.is-release != 'true'
+      shell: pwsh
+      run: Move-Item installer/*-installer.exe build -Verbose
     - uses: actions/upload-artifact@v4
       if: github.event_name != 'pull_request'
       with:
@@ -353,6 +365,8 @@ jobs:
   windows-clang:
     name: Windows Clang
     runs-on: windows-2019
+    needs:
+      - check-is-release
     steps:
     - uses: actions/checkout@v4
       with:
@@ -379,6 +393,7 @@ jobs:
         CXX: clang-cl.exe
     - name: Upload Executables for Signing
       id: unsigned-exes
+      if: needs.check-is-release.outputs.is-release == 'true'
       uses: actions/upload-artifact@v4
       with:
         name: windows-clang-unsigned-exes
@@ -388,6 +403,7 @@ jobs:
           build/MessageBox.exe
           build/Updater.exe
     - name: Sign Executables
+      if: needs.check-is-release.outputs.is-release == 'true'
       uses: signpath/github-action-submit-signing-request@v1
       with:
         api-token: ${{ secrets.WINDOWS_SIGNPATH_API_TOKEN }}
@@ -405,11 +421,13 @@ jobs:
         CRTDIRECTORY: ${{ env.VcToolsRedistDir }}\x64\Microsoft.VC142.CRT
     - name: Upload Uninstaller for Signing
       id: unsigned-uninstaller
+      if: needs.check-is-release.outputs.is-release == 'true'
       uses: actions/upload-artifact@v4
       with:
         name: windows-clang-unsigned-uninstaller
         path: installer/Uninstall.exe
     - name: Sign Uninstaller
+      if: needs.check-is-release.outputs.is-release == 'true'
       uses: signpath/github-action-submit-signing-request@v1
       with:
         api-token: ${{ secrets.WINDOWS_SIGNPATH_API_TOKEN }}
@@ -425,11 +443,13 @@ jobs:
       run: .\installers\windows\make-installer.ps1
     - name: Upload Installer for Signing
       id: unsigned-installer
+      if: needs.check-is-release.outputs.is-release == 'true'
       uses: actions/upload-artifact@v4
       with:
         name: windows-clang-unsigned-installer
         path: installer/*-installer.exe
     - name: Sign Installer
+      if: needs.check-is-release.outputs.is-release == 'true'
       uses: signpath/github-action-submit-signing-request@v1
       with:
         api-token: ${{ secrets.WINDOWS_SIGNPATH_API_TOKEN }}
@@ -440,6 +460,10 @@ jobs:
         github-artifact-id: ${{ steps.unsigned-installer.outputs.artifact-id }}
         wait-for-completion: true
         output-artifact-directory: build
+    - name: Move Unsigned Installer
+      if: needs.check-is-release.outputs.is-release != 'true'
+      shell: pwsh
+      run: Move-Item installer/*-installer.exe build -Verbose
     - uses: actions/upload-artifact@v4
       if: github.event_name != 'pull_request'
       with:
