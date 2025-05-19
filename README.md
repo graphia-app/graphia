@@ -56,6 +56,7 @@ We would like to thank those who have helped us develop Graphia:
 * [The Roslin Institute](https://www.roslin.ed.ac.uk/)
 * [The University of Edinburgh](https://www.ed.ac.uk/)
 * [BBSRC](https://bbsrc.ukri.org/)
+* Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org)
 
 ## Pre-release Builds ##
 
