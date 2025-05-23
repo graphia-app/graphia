@@ -102,6 +102,7 @@ jobs:
           build/Graphia.exe
           build/MessageBox.exe
           build/Updater.exe
+          build/plugins/*.dll
     - name: Sign Executables
       if: needs.check-is-release.outputs.is-release == 'true'
       uses: signpath/github-action-submit-signing-request@v1
@@ -402,6 +403,7 @@ jobs:
           build/Graphia.exe
           build/MessageBox.exe
           build/Updater.exe
+          build/plugins/*.dll
     - name: Sign Executables
       if: needs.check-is-release.outputs.is-release == 'true'
       uses: signpath/github-action-submit-signing-request@v1
