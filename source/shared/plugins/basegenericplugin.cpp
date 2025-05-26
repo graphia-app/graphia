@@ -23,6 +23,7 @@
 #include "shared/loading/gmlfileparser.h"
 #include "shared/loading/dotfileparser.h"
 #include "shared/loading/graphmlparser.h"
+#include "shared/loading/xgmmlparser.h"
 #include "shared/loading/adjacencymatrixfileparser.h"
 #include "shared/loading/pairwisecolumntype.h"
 #include "shared/loading/pairwisefileparser.h"
@@ -63,6 +64,9 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
 
     if(urlTypeName == u"GraphML"_s)
         return std::make_unique<GraphMLParser>(userNodeData, userEdgeData);
+
+    if(urlTypeName == u"XGMML"_s)
+        return std::make_unique<XgmmlParser>(userNodeData, userEdgeData);
 
     if(urlTypeName == u"DOT"_s)
         return std::make_unique<DotFileParser>(userNodeData, userEdgeData);
@@ -262,6 +266,7 @@ BaseGenericPlugin::BaseGenericPlugin()
 {
     registerUrlType(u"GML"_s, QObject::tr("GML File"), QObject::tr("GML Files"), {"gml"});
     registerUrlType(u"GraphML"_s, QObject::tr("GraphML File"), QObject::tr("GraphML Files"), {"graphml"});
+    registerUrlType(u"XGMML"_s, QObject::tr("XGMML File"), QObject::tr("XGMML Files"), {"xgmml"});
     registerUrlType(u"DOT"_s, QObject::tr("DOT File"), QObject::tr("DOT Files"), {"dot"});
     registerUrlType(u"PairwiseCSV"_s, QObject::tr("Pairwise CSV File"), QObject::tr("Pairwise CSV Files"), {"csv"});
     registerUrlType(u"PairwiseSSV"_s, QObject::tr("Pairwise SSV File"), QObject::tr("Pairwise SSV Files"), {"ssv"});
@@ -297,6 +302,7 @@ QStringList BaseGenericPlugin::identifyUrl(const QUrl& url) const
         const bool canLoad =
             (urlType == u"GML"_s && GmlFileParser::canLoad(url)) ||
             (urlType == u"GraphML"_s && GraphMLParser::canLoad(url)) ||
+            (urlType == u"XGMML"_s && XgmmlParser::canLoad(url)) ||
             (urlType == u"DOT"_s && DotFileParser::canLoad(url)) ||
             (urlType == u"PairwiseCSV"_s && PairwiseCSVFileParser::canLoad(url)) ||
             (urlType == u"PairwiseSSV"_s && PairwiseSSVFileParser::canLoad(url)) ||

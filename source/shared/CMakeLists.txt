@@ -33,6 +33,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/loading/dotfileparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/gmlfileparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlparser.h
+    ${CMAKE_CURRENT_LIST_DIR}/loading/xgmmlparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphsizeestimate.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/iparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/iparserthread.h
@@ -133,6 +134,7 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/loading/dotfileparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/gmlfileparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlparser.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/loading/xgmmlparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphsizeestimate.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/jsonparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/jsongraphparser.cpp
