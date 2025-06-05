@@ -373,7 +373,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::Network
 )
 
-if(NOT EMSCRIPTEN)
+if(NOT EMSCRIPTEN AND Qt6_VERSION VERSION_LESS "6.8.0")
     find_package(Qt6 COMPONENTS REQUIRED WebEngineQuick)
     target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::WebEngineQuick)
 endif()
