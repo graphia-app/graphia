@@ -1214,7 +1214,7 @@ QSize GraphRendererCore::renderSdfTexture(const GlyphMap& glyphMap, GLuint textu
         }
 
         // Buffer the glyph texture from the source image
-        auto image = glyphMap.images().at(layer).mirrored().convertToFormat(QImage::Format_RGBA8888);
+        auto image = glyphMap.images().at(layer).flipped().convertToFormat(QImage::Format_RGBA8888);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width(), image.height(),
             0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
 
@@ -1227,7 +1227,7 @@ QSize GraphRendererCore::renderSdfTexture(const GlyphMap& glyphMap, GLuint textu
             std::vector<uchar> pixels(static_cast<size_t>(renderWidth * renderHeight * 4));
             glReadPixels(0, 0, renderWidth, renderHeight, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
             QImage sdfImage(pixels.data(), renderWidth, renderHeight, QImage::Format_RGBA8888);
-            sdfImage.mirror();
+            sdfImage.flip();
             sdfImage.save(u"%1/graphia-SDF%2.png"_s.arg(QDir::tempPath(), QString::number(layer)));
         }
     }
