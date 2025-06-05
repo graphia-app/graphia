@@ -345,7 +345,8 @@ signals:
     void pluginNameChanged();
     void pluginQmlModuleChanged(const QByteArray& pluginUiData, int pluginUiDataVersion); // clazy:exclude=qproperty-type-mismatch
 
-    void loadComplete(const QUrl& url, bool success); // clazy:exclude=qproperty-type-mismatch
+    void loadComplete();
+    void loadCompleted(const QUrl& url, bool success);
     void failureReasonChanged();
 
     void titleChanged();
@@ -583,7 +584,7 @@ public:
 private slots:
     void onLoadProgressChanged(int percentage);
     void onLoadPhaseChanged(const QString& phase);
-    void onLoadComplete(const QUrl& url, bool success);
+    void onLoadCompleted(const QUrl& url, bool success);
 
     void onBusyChanged() const;
 

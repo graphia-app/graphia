@@ -138,7 +138,7 @@ void Headless::processNext()
         std::cout.flush();
     });
 
-    connect(_->_document, &Document::loadComplete, [this](const QUrl& fileUrl, bool success)
+    connect(_->_document, &Document::loadCompleted, [this](const QUrl& fileUrl, bool success)
     {
         if(!success)
         {

@@ -560,7 +560,7 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
     {
         setFailureReason(tr("The plugin %1 could not be found.").arg(pluginName));
         emit failureReasonChanged();
-        emit loadComplete(url, false);
+        emit loadCompleted(url, false);
         return false;
     }
 
@@ -641,7 +641,7 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
                 .arg(pluginName, type));
 
             emit failureReasonChanged();
-            emit loadComplete(url, false);
+            emit loadCompleted(url, false);
             return false;
         }
     }
@@ -770,8 +770,8 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
 
     connect(_graphFileParserThread.get(), &ParserThread::progressChanged, this, &Document::onLoadProgressChanged);
     connect(_graphFileParserThread.get(), &ParserThread::phaseChanged, this, &Document::onLoadPhaseChanged);
-    connect(_graphFileParserThread.get(), &ParserThread::complete, this, &Document::onLoadComplete);
-    connect(_graphFileParserThread.get(), &ParserThread::complete, this, &Document::loadComplete);
+    connect(_graphFileParserThread.get(), &ParserThread::complete, this, &Document::onLoadCompleted);
+    connect(_graphFileParserThread.get(), &ParserThread::complete, this, &Document::loadCompleted);
     connect(_graphFileParserThread.get(), &ParserThread::cancelledChanged,
             this, &Document::commandIsCancellingChanged);
     _graphFileParserThread->start(std::move(parser));
@@ -841,7 +841,7 @@ void Document::onLoadPhaseChanged(const QString& phase)
     emit commandVerbChanged();
 }
 
-void Document::onLoadComplete(const QUrl&, bool success)
+void Document::onLoadCompleted(const QUrl&, bool success)
 {
     _graphFileParserThread->reset();
 
