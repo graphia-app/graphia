@@ -24,6 +24,8 @@
 
 #include <iostream>
 
+#include <QDir>
+
 using namespace Qt::Literals::StringLiterals;
 
 IConsoleCapture::IConsoleCapture(const QString &filename) :
@@ -93,7 +95,7 @@ void CStreamCapture::close()
 
 ConsoleOutputFiles captureConsoleOutput(const QString& path, const QString& prefix)
 {
-    if(isRunningInConsole() || u::isDebuggerPresent())
+    if(isRunningInConsole() || u::isDebuggerPresent() || !QDir(path).exists())
         return {};
 
     auto filename = [&](const char* basename)
