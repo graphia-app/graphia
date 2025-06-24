@@ -46,6 +46,20 @@ cmake --build . --target all 2>&1 | Tee-Object "compiler-${VERSION}.log"
 
 Pop-Location
 
+# VS2022 needs these registered manually for some reason
+try
+{
+    Write-Host "Registering 32-bit msdia140.dll..."
+    & regsvr32 /s "C:\Program Files\Microsoft Visual Studio\2022\Community\DIA SDK\bin\msdia140.dll"
+
+    Write-Host "Registering 64-bit msdia140.dll..."
+    & regsvr32 /s "C:\Program Files\Microsoft Visual Studio\2022\Community\DIA SDK\bin\amd64\msdia140.dll"
+}
+catch
+{
+    Write-Error "Registration failed: $_"
+}
+
 $dumpSyms = "source\thirdparty\breakpad\src\tools\windows\binaries\dump_syms.exe"
 
 & $dumpSyms "$BUILD_DIR\${PRODUCT_NAME}.exe" > "$BUILD_DIR\${PRODUCT_NAME}.sym"
