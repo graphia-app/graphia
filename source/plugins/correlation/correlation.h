@@ -412,6 +412,23 @@ private:
     template<typename F>
     using results_t = decltype(std::declval<F>().results());
 
+    struct Fraction
+    {
+        int _numerator = 0;
+        int _denominator = 0;
+
+        Fraction& operator+=(const Fraction& other)
+        {
+            _numerator += other._numerator;
+            _denominator += other._denominator;
+
+            return *this;
+        }
+
+        // NOLINTNEXTLINE google-explicit-constructor
+        operator double() const { return static_cast<double>(_numerator) / _denominator; }
+    };
+
     auto process(const TokenisedDataVectors& vectors, const QVariantMap& parameters,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const
     {
@@ -437,23 +454,6 @@ private:
 
             if(cancellable != nullptr && cancellable->cancelled())
                 return threadResults;
-
-            struct Fraction
-            {
-                int _numerator = 0;
-                int _denominator = 0;
-
-                Fraction& operator+=(const Fraction& other)
-                {
-                    _numerator += other._numerator;
-                    _denominator += other._denominator;
-
-                    return *this;
-                }
-
-                // NOLINTNEXTLINE google-explicit-constructor
-                operator double() const { return static_cast<double>(_numerator) / _denominator; }
-            };
 
             auto binary = [&](auto vectorAValue, auto vectorBValue) -> Fraction
             {
