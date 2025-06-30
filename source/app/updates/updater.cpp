@@ -331,8 +331,13 @@ void Updater::saveUpdate(QNetworkReply* reply)
         }
 
         QDir().mkpath(QFileInfo(_fileName).absolutePath());
-        tempFile.rename(_fileName);
-        tempFile.setAutoRemove(false);
+
+        if(!QFile::copy(tempFile.fileName(), _fileName))
+        {
+            std::cerr << "Failed to copy " << tempFile.fileName().toStdString() <<
+                " to destination: " << _fileName.toStdString() << "\n";
+            return false;
+        }
 
         return true;
     })
