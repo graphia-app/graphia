@@ -151,10 +151,10 @@ static QString hostBrowserName()
         let userAgent = navigator.userAgent;
         let browser = "Unknown";
 
-        if(/Chrome/.test(userAgent) && !/Chromium/.test(userAgent))
-            browser = "Chrome";
-        else if(/Edg/.test(userAgent))
+        if(/Edg/.test(userAgent))
             browser = "Edge";
+        else if(/Chrome/.test(userAgent) && !/Chromium/.test(userAgent))
+            browser = "Chrome";
         else if(/Firefox/.test(userAgent))
             browser = "Firefox";
         else if(/Safari/.test(userAgent))
