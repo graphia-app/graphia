@@ -138,14 +138,14 @@ then
 fi
 
 # Apple notarization
-echo "Creating NotarizaionProfile..."
+echo "Creating NotarizationProfile..."
 xcrun notarytool store-credentials --apple-id "${APPLE_NOTARIZATION_USERNAME}" \
   --password "${APPLE_NOTARIZATION_PASSWORD}" \
-  --team-id "${APPLE_TEAM_ID}" "NotarizaionProfile" || exit $?
+  --team-id "${APPLE_TEAM_ID}" "NotarizationProfile" || exit $?
 
 echo "Submitting notarization request..."
 xcrun notarytool submit "${PRODUCT_NAME}-${VERSION}.dmg" \
-  --keychain-profile "NotarizaionProfile" --wait || exit $?
+  --keychain-profile "NotarizationProfile" --wait || exit $?
 
 echo "Stapling..."
 xcrun stapler staple "${PRODUCT_NAME}-${VERSION}.dmg" || exit $?
