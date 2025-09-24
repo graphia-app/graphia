@@ -91,12 +91,12 @@ macdeployqt ${PRODUCT_NAME}.app \
   -executable=${PRODUCT_NAME}.app/Contents/MacOS/CrashReporter \
   -executable=${PRODUCT_NAME}.app/Contents/MacOS/MessageBox \
   -executable=${PRODUCT_NAME}.app/Contents/MacOS/Updater \
-  -codesign="${APPLE_SIGN_ID}"
+  -codesign="${APPLE_CERTIFICATE_ID}"
 
 if [ -n "${SIGNING_ENABLED}" ]
 then
   echo "Signing..."
-  codesign --verbose --deep --force --options runtime --sign "${APPLE_SIGN_ID}" \
+  codesign --verbose --deep --force --options runtime --sign "${APPLE_CERTIFICATE_ID}" \
     ${PRODUCT_NAME}.app || exit $?
 
   cat <<EOF > QtWebEngineProcess.entitlements
@@ -111,12 +111,12 @@ then
 EOF
 
   echo "Signing QtWebEngine..."
-  codesign --verbose --force --options runtime --sign "${APPLE_SIGN_ID}" \
+  codesign --verbose --force --options runtime --sign "${APPLE_CERTIFICATE_ID}" \
     --entitlements QtWebEngineProcess.entitlements \
     ${PRODUCT_NAME}.app/Contents/Frameworks/QtWebEngineCore.framework/Helpers/QtWebEngineProcess.app/Contents/MacOS/QtWebEngineProcess || exit $?
 
   echo "Resigning main executable..."
-  codesign --verbose --force --options runtime --sign "${APPLE_SIGN_ID}" \
+  codesign --verbose --force --options runtime --sign "${APPLE_CERTIFICATE_ID}" \
     ${PRODUCT_NAME}.app/Contents/MacOS/${PRODUCT_NAME} || exit $?
 
   echo "Verifying..."

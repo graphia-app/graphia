@@ -220,9 +220,9 @@ jobs:
       env:
         APPLE_CERTIFICATE_P12_BASE64: ${{ secrets.APPLE_CERTIFICATE_P12_BASE64 }}
         APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+        APPLE_CERTIFICATE_ID: ${{ secrets.APPLE_CERTIFICATE_ID }}
         APPLE_NOTARIZATION_PASSWORD: ${{ secrets.APPLE_NOTARIZATION_PASSWORD }}
         APPLE_NOTARIZATION_USERNAME: ${{ secrets.APPLE_NOTARIZATION_USERNAME }}
-        APPLE_SIGN_ID: ${{ secrets.APPLE_SIGN_ID }}
         APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
     - uses: actions/upload-artifact@v4
       if: github.event_name != 'pull_request'
