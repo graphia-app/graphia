@@ -72,3 +72,16 @@ Note however that you will usually also need Qt 6 to be installed and indicate t
 ```
 CMAKE_PREFIX_PATH=/example/path/to/Qt/6.5.0/gcc_64/ cmake -B build && cmake --build build --parallel
 ```
+
+### Debian Bullseye
+
+On Debian Bullseye the required dependencies can be installed with:
+```
+sudo apt install libqt5svg5-dev qtdeclarative5-dev qtbase5-dev \
+  qml-module-qtquick-layouts qml-module-qt-labs-platform qml-module-qtquick-controls qml-module-qtquick-dialogs \
+  qml-module-qtquick-controls2 qml-module-qtquick-shapes
+```
+Then build as above, with:
+```
+cmake -B build && cmake --build build --parallel
+```
