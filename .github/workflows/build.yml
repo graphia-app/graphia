@@ -210,7 +210,7 @@ jobs:
     - uses: seanmiddleditch/gha-setup-ninja@v3
     - uses: actions/setup-node@v4
       with:
-        node-version: '12'
+        node-version: '18'
     - name: Compile
       run: scripts/macos-build.sh
     - name: app and dmg
