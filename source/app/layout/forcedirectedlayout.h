@@ -22,10 +22,10 @@
 
 #include "layout.h"
 #include "app/graph/componentmanager.h"
-#include "shared/utils/circularbuffer.h"
 
 #include <QVector3D>
 
+#include <atomic>
 #include <vector>
 
 using namespace Qt::Literals::StringLiterals;
@@ -39,6 +39,9 @@ struct ForceDirectedDisplacement
     QVector3D _next;
     float _previousLength = 0.0f;
     float _nextLength = 0.0f;
+
+    QVector3D _stabilityDetectionStartPosition;
+    float _stabilityDetectionPathLength = 0.0f;
 
     void computeAndDamp();
 };
@@ -54,6 +57,12 @@ private:
 
     bool _hasBeenFlattened = false;
 
+    size_t _stabilityDetectionIteration = 0;
+    std::atomic_bool _startStabilityDetection = true;
+    std::atomic_bool _layoutIsStable = false;
+
+    void checkForStability();
+
 public:
     ForceDirectedLayout(const IGraphComponent& graphComponent,
                         ForceDirectedDisplacements& displacements,
@@ -67,7 +76,7 @@ public:
         _hasBeenFlattened(dimensionalityMode == Layout::Dimensionality::TwoDee)
     {}
 
-    bool finished() const override { return false; }
+    bool finished() const override { return _layoutIsStable; }
     void unfinish() override;
 
     void execute(bool firstIteration, Dimensionality dimensionality) override;

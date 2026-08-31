@@ -29,21 +29,13 @@
 #include "shared/utils/threadpool.h"
 #include "shared/utils/scopetimer.h"
 
+#include <QMatrix3x3>
+#include <QMatrix4x4>
+#include <QQuaternion>
+
 #include <cmath>
 
 using namespace Qt::Literals::StringLiterals;
-
-template<typename T> float meanWeightedAvgBuffer(size_t start, size_t end, const T& buffer)
-{
-    float average = 0.0f;
-    auto size = static_cast<float>(end - start);
-    const float gaussSum = (size * (size + 1)) / 2.0f;
-
-    for(size_t i = start; i < end; ++i)
-        average += buffer.at(i) * static_cast<float>((i - start) + 1) / gaussSum;
-
-    return average / std::abs(size);
-}
 
 static QVector3D normalized(const QVector3D& v)
 {
@@ -94,6 +86,8 @@ void ForceDirectedDisplacement::computeAndDamp()
 
     _previous = _next;
     _previousLength = _previous.length();
+
+    _stabilityDetectionPathLength += _previousLength;
 }
 
 // This is a fairly arbitrary function that was arrived at through experimentation. The parameters
@@ -116,6 +110,19 @@ void ForceDirectedLayout::execute(bool firstIteration, Dimensionality dimensiona
 
         for(const NodeId nodeId : nodeIds())
             _displacements->at(nodeId)._previous = {};
+    }
+
+    if(_startStabilityDetection.exchange(false))
+    {
+        for(auto nodeId : nodeIds())
+        {
+            auto& displacement = _displacements->at(nodeId);
+
+            displacement._stabilityDetectionStartPosition = positions().get(nodeId);
+            displacement._stabilityDetectionPathLength = 0.0f;
+        }
+
+        _stabilityDetectionIteration = 0;
     }
 
     std::unique_ptr<AbstractBarnesHutTree> barnesHutTree;
@@ -210,10 +217,152 @@ void ForceDirectedLayout::execute(bool firstIteration, Dimensionality dimensiona
     // Apply the forces
     for(auto nodeId : nodeIds())
         positions().set(nodeId, positions().get(nodeId) + _displacements->at(nodeId)._next);
+
+    checkForStability();
+}
+
+// A force directed layout never truly comes to rest; the nodes continue to move
+// in response to the forces around them, indefinitely. It is therefore not possible
+// to detect that it has converged as such, only that it has reached the point where
+// it is no longer making a difference to what the user sees. To that end the nodes'
+// net movement is sampled over a window of iterations, and there are two ways in
+// which it can indicate that nothing more is going to happen:
+//
+//  * it is small in comparison to the size of the component, meaning the layout is
+//    only being refined, by an ever decreasing amount; or
+//  * it is small in comparison to the distance the nodes actually travelled, meaning
+//    they are oscillating in place rather than going anywhere, which some graphs do
+//    forever, without the amount of movement ever diminishing
+//
+// Expressing both as ratios means the tests hold irrespective of the scale of the
+// layout, which varies enormously with the size of the graph and the settings in
+// play. Any movement of the component as a whole is discounted, as it has no
+// bearing on the layout.
+void ForceDirectedLayout::checkForStability()
+{
+    // The number of iterations over which node movement is sampled, in order
+    // to determine whether the layout is still making progress or not
+    const int STABILITY_WINDOW_SIZE = 250;
+
+    // When the mean net movement of the nodes over a window is less than this
+    // proportion of the radius of the component, the layout is deemed to have
+    // stopped making a difference to what the user sees
+    const float STABILITY_MOVEMENT_THRESHOLD = 0.04f;
+
+    // When the net movement of the nodes over a window is less than this proportion
+    // of the distance they actually travelled, they are going nowhere, i.e. the
+    // layout is oscillating in place, and will continue to do so indefinitely
+    const float STABILITY_OSCILLATION_THRESHOLD = 0.12f;
+
+    if(++_stabilityDetectionIteration < STABILITY_WINDOW_SIZE)
+        return;
+
+    _stabilityDetectionIteration = 0;
+
+    const auto numNodes = static_cast<float>(nodeIds().size());
+
+    QVector3D startCentre;
+    QVector3D centre;
+
+    for(auto nodeId : nodeIds())
+    {
+        startCentre += _displacements->at(nodeId)._stabilityDetectionStartPosition;
+        centre += positions().get(nodeId);
+    }
+
+    startCentre /= numNodes;
+    centre /= numNodes;
+
+    // Find the rotation that best maps the nodes' positions at the start of the
+    // window onto their current positions, using Horn's method
+    QMatrix3x3 c;
+    c.fill(0.0f);
+
+    for(auto nodeId : nodeIds())
+    {
+        const auto from = _displacements->at(nodeId)._stabilityDetectionStartPosition - startCentre;
+        const auto to = positions().get(nodeId) - centre;
+
+        for(int i = 0; i < 3; i++)
+            for(int j = 0; j < 3; j++)
+                c(i, j) += from[i] * to[j];
+    }
+
+    const auto x = c(0, 0);
+    const auto xy = c(0, 1) + c(1, 0);
+    const auto yz = c(1, 2) + c(2, 1);
+    const auto zx = c(2, 0) + c(0, 2);
+    const auto ax = c(1, 2) - c(2, 1);
+    const auto ay = c(2, 0) - c(0, 2);
+    const auto az = c(0, 1) - c(1, 0);
+    const auto yypzz = c(1, 1) + c(2, 2);
+    const auto yymzz = c(1, 1) - c(2, 2);
+
+    QMatrix4x4 n
+    {
+        x - yypzz,  xy,         zx,         ax,
+        xy,        -x + yymzz,  yz,         ay,
+        zx,         yz,        -x - yymzz,  az,
+        ax,         ay,         az,         x + yypzz
+    };
+
+    float shift = 0.0f;
+    for(int row = 0; row < 4; row++)
+    {
+        float absoluteSum = 0.0f;
+        for(int column = 0; column < 4; column++)
+            absoluteSum += std::abs(n(row, column));
+
+        shift = std::max(shift, absoluteSum);
+    }
+
+    for(int i = 0; i < 4; i++)
+        n(i, i) += shift;
+
+    QQuaternion rotation;
+    for(int i = 0; i < 64; i++)
+    {
+        const auto next = QQuaternion(n * rotation.toVector4D()).normalized();
+
+        if(next.isNull())
+            break;
+
+        rotation = next;
+    }
+
+    float movementTotal = 0.0f;
+    float pathTotal = 0.0f;
+    float radiusSquaredTotal = 0.0f;
+
+    for(auto nodeId : nodeIds())
+    {
+        auto& displacement = _displacements->at(nodeId);
+        const auto position = positions().get(nodeId);
+
+        // Where the node would be, had it only moved with the component as a whole
+        const auto from = displacement._stabilityDetectionStartPosition - startCentre;
+        const auto expected = centre + rotation.rotatedVector(from);
+
+        movementTotal += (position - expected).length();
+        pathTotal += displacement._stabilityDetectionPathLength;
+        radiusSquaredTotal += (position - centre).lengthSquared();
+
+        displacement._stabilityDetectionStartPosition = position;
+        displacement._stabilityDetectionPathLength = 0.0f;
+    }
+
+    const auto radius = std::sqrt(radiusSquaredTotal / numNodes);
+    const auto movement = radius > 0.0f ? ((movementTotal / numNodes) / radius) : 0.0f;
+    const auto progress = pathTotal > 0.0f ? (movementTotal / pathTotal) : 0.0f;
+
+    if(movement < STABILITY_MOVEMENT_THRESHOLD || progress < STABILITY_OSCILLATION_THRESHOLD)
+        _layoutIsStable = true;
 }
 
 void ForceDirectedLayout::unfinish()
 {
+    _layoutIsStable = false;
+    _startStabilityDetection = true;
 }
 
 ForceDirectedLayoutFactory::ForceDirectedLayoutFactory(GraphModel* graphModel) :
