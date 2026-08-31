@@ -33,15 +33,6 @@
 
 using namespace Qt::Literals::StringLiterals;
 
-static const float MINIMUM_STDDEV_THRESHOLD = 0.008f;
-static const float FINETUNE_STDDEV_DELTA = 0.000005f;
-static const float OSCILLATE_STDDEV_DELTA_PERCENT = 1.0f;
-static const float MAXIMUM_AVG_FORCE_FOR_STOP = 1.0f;
-static const size_t OSCILLATE_RUN_COUNT = 5;
-static const size_t STDDEV_INCREASES_BEFORE_SWITCH_TO_OSCILLATE = 500;
-static const size_t FINETUNE_SMOOTHING_SIZE = 10;
-static const size_t INITIAL_SMOOTHING_SIZE = 50;
-
 template<typename T> float meanWeightedAvgBuffer(size_t start, size_t end, const T& buffer)
 {
     float average = 0.0f;
@@ -219,157 +210,10 @@ void ForceDirectedLayout::execute(bool firstIteration, Dimensionality dimensiona
     // Apply the forces
     for(auto nodeId : nodeIds())
         positions().set(nodeId, positions().get(nodeId) + _displacements->at(nodeId)._next);
-
-    // There are three main phases which decide when to stop the layout.
-    // The phases operate primarily on the stddev of the forces within the graph
-    //
-    // Initial   - Initial phase, If the std dev drops below MINIMUM_STDDEV_THRESHOLD.
-    //             this will move the phase onto FineTune. If the std dev oscillates
-    //             enough, will move the phase onto Oscillate
-    // FineTune  - Allows the layout algorithm to further calculate small layout changes
-    //             until the change amount falls below FINETUNE_STDDEV_DELTA, where it moves
-    //             the phase to Finished
-    // Oscillate - Monitors the delta of Stddev over OSCILLATE_DELTA_SAMPLE_SIZE steps
-    //             OSCILLATE_RUN_COUNT times. If delta is less than OSCILLATE_STDDEV_DELTA_PERCENT
-    //             the layout finishes, if OSCILLATE_RUN_COUNT is reached, returns phase to initial.
-    // Finished  - Finish layout
-    //
-
-    // Calculate force averages
-    float deltaForceTotal = 0.0f;
-    for(auto nodeId : nodeIds())
-        deltaForceTotal += _displacements->at(nodeId)._nextLength;
-
-    _forceMean = deltaForceTotal / static_cast<float>(nodeIds().size());
-
-    // Calculate Standard Deviation
-    float variance = 0.0f;
-    for(auto nodeId : nodeIds())
-    {
-        const float d = _displacements->at(nodeId)._nextLength - _forceMean;
-        variance += (d * d);
-    }
-
-    _forceStdDeviation = std::sqrt(variance / static_cast<float>(nodeIds().size()));
-    switch(_changeDetectionPhase)
-    {
-        case ChangeDetectionPhase::Initial:
-            initialChangeDetection();
-            break;
-
-        case ChangeDetectionPhase::FineTune:
-            fineTuneChangeDetection();
-            break;
-
-        case ChangeDetectionPhase::Oscillate:
-            oscillateChangeDetection();
-            break;
-
-        case ChangeDetectionPhase::Finished:
-        default:
-            break;
-    }
-
-    _prevStdDevs.push_back(_forceStdDeviation);
-    _prevAvgForces.push_back(_forceMean);
-    _prevCaptureStdDevs.push_back(_forceStdDeviation);
-}
-
-// Initial phase. If the std dev drops below MINIMUM_STDDEV_THRESHOLD this will move the phase onto
-// FineTune. If the std dev oscillates enough, will move the phase onto Oscillate
-void ForceDirectedLayout::initialChangeDetection()
-{
-    if(_forceStdDeviation < MINIMUM_STDDEV_THRESHOLD && _forceMean < MAXIMUM_AVG_FORCE_FOR_STOP)
-        _changeDetectionPhase = ChangeDetectionPhase::FineTune;
-
-    if(_prevCaptureStdDevs.full())
-    {
-        const float currentSmoothedStdDev = meanWeightedAvgBuffer(
-            _prevCaptureStdDevs.size() - INITIAL_SMOOTHING_SIZE,
-            _prevCaptureStdDevs.size(),
-            _prevCaptureStdDevs);
-
-        const float previousSmoothedStdDev = meanWeightedAvgBuffer(
-            _prevCaptureStdDevs.size() - (2 * INITIAL_SMOOTHING_SIZE),
-            _prevCaptureStdDevs.size() - INITIAL_SMOOTHING_SIZE,
-            _prevCaptureStdDevs);
-
-        // Long step sample (For unstable graphs)
-        if(_increasingStdDevIterationCount >= STDDEV_INCREASES_BEFORE_SWITCH_TO_OSCILLATE)
-            _changeDetectionPhase = ChangeDetectionPhase::Oscillate;
-
-        if(currentSmoothedStdDev > previousSmoothedStdDev)
-            _increasingStdDevIterationCount++;
-    }
-}
-
-// Set change detection phase to Finished. Clear previous data
-void ForceDirectedLayout::finishChangeDetection()
-{
-    _changeDetectionPhase = ChangeDetectionPhase::Finished;
-    _increasingStdDevIterationCount = 0;
-    _unstableIterationCount = 0;
-    _prevCaptureStdDevs.clear();
-    _prevStdDevs.clear();
-    _prevAvgForces.clear();
 }
 
 void ForceDirectedLayout::unfinish()
 {
-    if(_changeDetectionPhase == ChangeDetectionPhase::Finished)
-        _changeDetectionPhase = ChangeDetectionPhase::Initial;
-}
-
-// Allows the layout algorithm to further calculate small layout changes until the change amount
-// falls below FINETUNE_STDDEV_DELTA, where it moves the phase to Finished
-void ForceDirectedLayout::fineTuneChangeDetection()
-{
-    if(_prevAvgForces.full() && _prevStdDevs.full())
-    {
-        const float prevAvgStdDev = meanWeightedAvgBuffer(
-            _prevStdDevs.size() - (2 * FINETUNE_SMOOTHING_SIZE),
-            _prevStdDevs.size() - FINETUNE_SMOOTHING_SIZE,
-            _prevStdDevs);
-
-        const float curAvgStdDev = meanWeightedAvgBuffer(
-            _prevStdDevs.size() - FINETUNE_SMOOTHING_SIZE,
-            _prevStdDevs.size(),
-            _prevStdDevs);
-
-        const float delta = (prevAvgStdDev - curAvgStdDev);
-        if(delta < FINETUNE_STDDEV_DELTA && delta >= 0.0f)
-            finishChangeDetection();
-    }
-}
-
-// Monitors the delta of Stddev over OSCILLATE_DELTA_SAMPLE_SIZE steps OSCILLATE_RUN_COUNT times.
-// If delta is less than OSCILLATE_STDDEV_DELTA_PERCENT the layout finishes, if OSCILLATE_RUN_COUNT
-// is reached, returns phase to initial.
-void ForceDirectedLayout::oscillateChangeDetection()
-{
-    if(_prevCaptureStdDevs.full())
-    {
-        const float averageCap = meanWeightedAvgBuffer(0, OSCILLATE_DELTA_SAMPLE_SIZE, _prevCaptureStdDevs);
-
-        auto deltaStdDev = _prevUnstableStdDev - averageCap;
-        auto percentDelta = OSCILLATE_STDDEV_DELTA_PERCENT;
-        if(_prevUnstableStdDev != 0.0f)
-            percentDelta = (deltaStdDev / _prevUnstableStdDev) * 100.0f;
-
-        if(std::abs(percentDelta) < OSCILLATE_STDDEV_DELTA_PERCENT)
-            finishChangeDetection();
-
-        _prevUnstableStdDev = averageCap;
-        _prevCaptureStdDevs.clear();
-        _unstableIterationCount++;
-
-        if(_unstableIterationCount >= OSCILLATE_RUN_COUNT)
-        {
-            _changeDetectionPhase = ChangeDetectionPhase::Initial;
-            _increasingStdDevIterationCount = 0;
-            _unstableIterationCount = 0;
-        }
-    }
 }
 
 ForceDirectedLayoutFactory::ForceDirectedLayoutFactory(GraphModel* graphModel) :

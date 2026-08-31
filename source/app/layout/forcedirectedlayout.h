@@ -49,33 +49,10 @@ class ForceDirectedLayout : public Layout
 {
     Q_OBJECT
 private:
-    static const size_t FINETUNE_DELTA_SAMPLE_SIZE = 50;
-    static const size_t OSCILLATE_DELTA_SAMPLE_SIZE = 500;
-
-    CircularBuffer<float, FINETUNE_DELTA_SAMPLE_SIZE> _prevStdDevs;
-    CircularBuffer<float, FINETUNE_DELTA_SAMPLE_SIZE> _prevAvgForces;
-    CircularBuffer<float, OSCILLATE_DELTA_SAMPLE_SIZE> _prevCaptureStdDevs;
-
-    enum class ChangeDetectionPhase { Initial, FineTune, Oscillate, Finished };
-
-    std::atomic<ChangeDetectionPhase> _changeDetectionPhase = ChangeDetectionPhase::Initial;
-
     ForceDirectedDisplacements* _displacements = nullptr;
     EdgeArray<QVector3D>* _attractiveForces = nullptr;
 
-    float _forceStdDeviation = 0;
-    float _forceMean = 0;
-    float _prevUnstableStdDev = 0;
-
-    size_t _unstableIterationCount = 0;
-    size_t _increasingStdDevIterationCount = 0;
-
     bool _hasBeenFlattened = false;
-
-    void fineTuneChangeDetection();
-    void oscillateChangeDetection();
-    void initialChangeDetection();
-    void finishChangeDetection();
 
 public:
     ForceDirectedLayout(const IGraphComponent& graphComponent,
@@ -90,7 +67,7 @@ public:
         _hasBeenFlattened(dimensionalityMode == Layout::Dimensionality::TwoDee)
     {}
 
-    bool finished() const override { return _changeDetectionPhase == ChangeDetectionPhase::Finished; }
+    bool finished() const override { return false; }
     void unfinish() override;
 
     void execute(bool firstIteration, Dimensionality dimensionality) override;
