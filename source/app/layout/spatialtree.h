@@ -235,33 +235,57 @@ private:
         std::vector<NewTree> newTrees;
         newTrees.emplace_back(this, nodeIds);
 
+        auto distribute = [&nodePositions](typename std::vector<NewTree>::iterator it)
+        {
+            auto* subTree = it->_tree;
+            const auto& nodeIdsToDistribute = it->_nodeIds;
+
+            subTree->distributeNodesOverSubVolumes(nodePositions, nodeIdsToDistribute);
+
+            std::vector<NewTree> newChildTrees;
+            for(size_t i = 0; i < subTree->_numInternalNodes; i++)
+            {
+                const auto* subVolume = subTree->_internalNodes.at(i);
+                newChildTrees.emplace_back(subVolume->_subTree.get(),
+                    std::move(subVolume->_nodeIds));
+            }
+
+            subTree->initialise(nodePositions, nodeIdsToDistribute);
+
+            return newChildTrees;
+        };
+
+        // Dispatching to the thread pool costs the same whether there is a lot
+        // of work to do or a little, and a tree is built one level of depth at
+        // a time, so a small tree can easily spend more time being distributed
+        // over threads than it does being built
+        const size_t MINIMUM_PARALLEL_TREE_NODES = 512;
+        const bool parallelise = nodeIds.size() >= MINIMUM_PARALLEL_TREE_NODES;
+
         while(!newTrees.empty())
         {
-            auto results = parallel_for(newTrees.begin(), newTrees.end(),
-            [&nodePositions](typename std::vector<NewTree>::iterator it)
+            std::vector<NewTree> nextTrees;
+
+            if(parallelise)
             {
-                auto* subTree = it->_tree;
-                const auto& nodeIdsToDistribute = it->_nodeIds;
+                auto results = parallel_for(newTrees.begin(), newTrees.end(), distribute);
 
-                subTree->distributeNodesOverSubVolumes(nodePositions, nodeIdsToDistribute);
-
-                std::vector<NewTree> newChildTrees;
-                for(size_t i = 0; i < subTree->_numInternalNodes; i++)
+                nextTrees.insert(nextTrees.end(), std::make_move_iterator(results.begin()),
+                    std::make_move_iterator(results.end()));
+            }
+            else
+            {
+                for(auto it = newTrees.begin(); it != newTrees.end(); ++it)
                 {
-                    const auto* subVolume = subTree->_internalNodes.at(i);
-                    newChildTrees.emplace_back(subVolume->_subTree.get(),
-                        std::move(subVolume->_nodeIds));
+                    auto results = distribute(it);
+
+                    nextTrees.insert(nextTrees.end(), std::make_move_iterator(results.begin()),
+                        std::make_move_iterator(results.end()));
                 }
+            }
 
-                subTree->initialise(nodePositions, nodeIdsToDistribute);
-
-                return newChildTrees;
-            });
-
-            // subTrees has now been processsed, but may have resulted in more subTrees
-            newTrees.clear();
-            newTrees.insert(newTrees.end(), std::make_move_iterator(results.begin()),
-                std::make_move_iterator(results.end()));
+            // newTrees has now been processsed, but may have resulted in more subTrees
+            newTrees = std::move(nextTrees);
         }
 
         std::stack<const SpatialTree*> stack;
