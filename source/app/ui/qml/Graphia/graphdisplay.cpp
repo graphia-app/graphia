@@ -260,7 +260,7 @@ QQuickFramebufferObject::Renderer* GraphDisplay::createRenderer() const
     connect(this, &GraphDisplay::commandsStarted, graphRenderer, &GraphRenderer::onCommandsStarted, Qt::DirectConnection);
     connect(this, &GraphDisplay::commandsFinished, graphRenderer, &GraphRenderer::onCommandsFinished, Qt::DirectConnection);
     connect(this, &GraphDisplay::commandsFinished, this, &GraphDisplay::updateRenderer, Qt::DirectConnection);
-    connect(this, &GraphDisplay::layoutChanged, graphRenderer, &GraphRenderer::onLayoutChanged);
+    connect(this, &GraphDisplay::layoutChanged, graphRenderer, &GraphRenderer::onLayoutChanged, Qt::DirectConnection);
     connect(this, &GraphDisplay::screenshotRequested, graphRenderer, &GraphRenderer::onScreenshotRequested);
     connect(this, &GraphDisplay::previewRequested, graphRenderer, &GraphRenderer::onPreviewRequested);
 
@@ -296,8 +296,8 @@ bool GraphDisplay::event(QEvent* e)
 
 void GraphDisplay::onLayoutChanged()
 {
-    update();
     emit layoutChanged();
+    update();
 }
 
 void GraphDisplay::onRendererInitialised()
