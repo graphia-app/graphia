@@ -53,7 +53,7 @@ static QString fetchPreview(QSize screenshotSize)
     const QImage screenTile(pixels.data(), screenshotSize.width(), screenshotSize.height(), QImage::Format_RGBA8888);
     QByteArray byteArray;
     QBuffer buffer(&byteArray);
-    screenTile.mirrored().save(&buffer, "PNG");
+    screenTile.flipped().save(&buffer, "PNG");
 
     // QML Can't load raw QImages so as a hack we just base64 encode a png
     return QString::fromLatin1(byteArray.toBase64().data());
@@ -67,8 +67,7 @@ static void fetchAndDrawTile(QPixmap& fullScreenshot, int tileX, int tileY, QPoi
     const QImage screenTile(pixelBytes.data(), TILE_SIZE, TILE_SIZE, QImage::Format_RGBA8888);
 
     QPainter painter(&fullScreenshot);
-    painter.drawImage((tileX * TILE_SIZE) + offset.x(), (tileY * TILE_SIZE) + offset.y(),
-        screenTile.mirrored(false, true));
+    painter.drawImage((tileX * TILE_SIZE) + offset.x(), (tileY * TILE_SIZE) + offset.y(), screenTile.flipped());
 }
 
 static QPoint renderOffsetForFill(int imageWidth, int imageHeight, float aspect)

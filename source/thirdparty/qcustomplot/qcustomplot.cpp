@@ -6520,6 +6520,24 @@ double QCPAxisTicker::cleanMantissa(double input) const
   (leap) years, have a look at QCPAxisTickerTime instead.
 */
 
+# if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+/*! \internal
+  
+  Qt 6.9 deprecated the Qt::TimeSpec overloads of QDateTime and QDate in favour of QTimeZone; this
+  maps the former onto the latter. Qt::TimeZone is handled by the callers, which have the actual
+  QTimeZone to hand, so it is treated as local time here.
+*/
+static QTimeZone qcpTimeZoneFromSpec(Qt::TimeSpec spec, int offsetSeconds = 0)
+{
+  switch (spec)
+  {
+    case Qt::UTC: return QTimeZone(QTimeZone::UTC);
+    case Qt::OffsetFromUTC: return QTimeZone::fromSecondsAheadOfUtc(offsetSeconds);
+    default: return QTimeZone(QTimeZone::LocalTime);
+  }
+}
+# endif
+
 /*!
   Constructs the ticker and sets reasonable default values. Axis tickers are commonly created
   managed by a QSharedPointer, which then can be passed to QCPAxis::setTicker.
@@ -6719,7 +6737,12 @@ QString QCPAxisTickerDateTime::getTickLabel(double tick, const QLocale &locale, 
 {
   Q_UNUSED(precision)
   Q_UNUSED(formatChar)
-# if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+# if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+  if (mDateTimeSpec == Qt::TimeZone)
+    return locale.toString(keyToDateTime(tick).toTimeZone(mTimeZone), mDateTimeFormat);
+  else
+    return locale.toString(keyToDateTime(tick).toTimeZone(qcpTimeZoneFromSpec(mDateTimeSpec)), mDateTimeFormat);
+# elif QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
   if (mDateTimeSpec == Qt::TimeZone)
     return locale.toString(keyToDateTime(tick).toTimeZone(mTimeZone), mDateTimeFormat);
   else
@@ -6827,8 +6850,10 @@ double QCPAxisTickerDateTime::dateTimeToKey(const QDate &date, Qt::TimeSpec time
   return QDateTime(date, QTime(0, 0), timeSpec).toTime_t();
 # elif QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
   return QDateTime(date, QTime(0, 0), timeSpec).toMSecsSinceEpoch()/1000.0;
-# else
+# elif QT_VERSION < QT_VERSION_CHECK(6, 5, 0)
   return date.startOfDay(timeSpec).toMSecsSinceEpoch()/1000.0;
+# else
+  return date.startOfDay(qcpTimeZoneFromSpec(timeSpec)).toMSecsSinceEpoch()/1000.0;
 # endif
 }
 /* end of 'src/axis/axistickerdatetime.cpp' */

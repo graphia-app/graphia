@@ -7,7 +7,7 @@ else()
 endif()
 
 find_package(Qt6 COMPONENTS REQUIRED Core)
-qt_standard_project_setup(REQUIRES 6.5)
+qt_standard_project_setup(REQUIRES 6.9)
 
 include_directories(source)
 

@@ -1,8 +1,11 @@
 name: Build
 on: [push, pull_request]
 env:
-  QT_VERSION: 6.7.0
+  QT_VERSION: 6.11.2
   QT_MODULES: qtwebengine qtwebchannel qtpositioning qtimageformats
+  # Qt 6.11 splits the Windows repository into per-compiler folders; support
+  # for this is not in an aqtinstall release yet, so pin to a commit that has it
+  AQT_SOURCE: git+https://github.com/miurahr/aqtinstall.git@7e5a5c3d95cf962cfc2f36c86ffa0d2c07f1a0d4
   GCC_VERSION: 13
   CLANG_VERSION: 17
 
@@ -25,7 +28,7 @@ jobs:
         sudo apt-get update
         sudo apt install libxcb-cursor0
     - name: Install Qt
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }} qtserialport
@@ -73,8 +76,9 @@ jobs:
         ref: ${{ github.ref }}
         fetch-depth: 0
     - name: Install Qt
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
+        aqtsource: ${{ env.AQT_SOURCE }}
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
         cache: true
@@ -197,7 +201,7 @@ jobs:
       with:
         python-version: '3.10'
     - name: Install Qt
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
@@ -257,9 +261,9 @@ jobs:
       with:
         version: ${{ env.EMSDK_VERSION }}
     - name: Install Qt
-      uses: timangus/install-qt-action@deployed
+      uses: jurplel/install-qt-action@v4
       with:
-        aqtsource: git+https://github.com/timangus/aqtinstall.git
+        aqtsource: ${{ env.AQT_SOURCE }}
         version: ${{ env.QT_VERSION }}
         host: all_os
         target: wasm
@@ -329,7 +333,7 @@ jobs:
         sudo apt-get install libc++-${{ env.CLANG_VERSION }}-dev libc++1-${{ env.CLANG_VERSION }} libc++abi-${{ env.CLANG_VERSION }}-dev libc++abi1-${{ env.CLANG_VERSION }}
         sudo apt-get install libunwind-${{ env.CLANG_VERSION }}-dev
     - name: Install Qt
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
@@ -376,8 +380,9 @@ jobs:
         ref: ${{ github.ref }}
         fetch-depth: 0
     - name: Install Qt
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
+        aqtsource: ${{ env.AQT_SOURCE }}
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
         cache: true
@@ -526,7 +531,7 @@ jobs:
         restore-keys: |
           ctcache-
     - name: Install Qt
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
@@ -568,7 +573,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install cppcheck
     - name: Install Qt
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
@@ -604,7 +609,7 @@ jobs:
         sudo apt install g++ cmake clang llvm-${{ env.CLANG_VERSION }}-dev git-core libclang-${{ env.CLANG_VERSION }}-dev
         sudo update-alternatives --install /usr/bin/llvm-config llvm-config /usr/bin/llvm-config-${{ env.CLANG_VERSION }} 100
     - name: Install Qt
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
@@ -651,7 +656,7 @@ jobs:
         ref: ${{ github.ref }}
         fetch-depth: 0
     - name: Install Qt
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
@@ -686,7 +691,7 @@ jobs:
         sudo apt install g++ cmake clang llvm-${{ env.CLANG_VERSION }}-dev git-core libclang-${{ env.CLANG_VERSION }}-dev
         sudo update-alternatives --install /usr/bin/llvm-config llvm-config /usr/bin/llvm-config-${{ env.CLANG_VERSION }} 100
     - name: Install Qt
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}

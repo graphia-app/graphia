@@ -300,7 +300,8 @@ void TableProxyModel::reset()
         return _columnNames.indexOf(sortColumnAndOrder.first) < 0;
     }), _sortColumnAndOrders.end());
 
-    QSortFilterProxyModel::invalidateFilter();
+    QSortFilterProxyModel::beginFilterChange();
+    QSortFilterProxyModel::endFilterChange();
 
     calculateOrderedProxySourceMapping();
     endResetModel();

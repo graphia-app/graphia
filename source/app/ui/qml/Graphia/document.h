@@ -89,7 +89,7 @@ class Document : public QObject, public IDocument, public FailureReason
     Q_PROPERTY(QString title MEMBER _title WRITE setTitle NOTIFY titleChanged)
     Q_PROPERTY(QString status MEMBER _status WRITE setStatus NOTIFY statusChanged)
     Q_PROPERTY(QString log MEMBER _log WRITE setLog NOTIFY logChanged)
-    Q_PROPERTY(bool loadComplete MEMBER _loadComplete NOTIFY loadComplete)
+    Q_PROPERTY(bool loadComplete READ isLoadComplete NOTIFY loadComplete)
     Q_PROPERTY(QString failureReason READ failureReason WRITE setFailureReason NOTIFY failureReasonChanged)
 
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
@@ -179,6 +179,8 @@ public: // IDocument
 
 public:
     static QColor contrastingColorForBackground();
+
+    bool isLoadComplete() const { return _loadComplete; }
 
     bool commandInProgress() const;
     bool busy() const;
