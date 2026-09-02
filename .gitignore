@@ -4,3 +4,4 @@ doxygen/*
 misc/__pycache__
 .deps
 build
+.qtcreator
