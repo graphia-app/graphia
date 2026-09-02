@@ -404,7 +404,7 @@ void CorrelationTabularDataParser::setDataRectangle(size_t column, size_t row)
         else
         {
             _appearsToBeContinuous = false;
-            _numericalMinMax = {};
+            _numericalMinMax = {0.0, 0.0};
         }
 
         _hasMissingValues = dataRectHasMissingValues(*_dataPtr, _dataRect, this);
