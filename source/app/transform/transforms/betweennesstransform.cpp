@@ -60,6 +60,9 @@ void BetweennessTransform::apply(TransformedGraph& target)
     parallel_for(nodeIds.begin(), nodeIds.end(),
     [&](NodeId nodeId, size_t threadIndex)
     {
+        if(cancelled())
+            return;
+
         auto& arrays = betweennessArrays.at(threadIndex);
         auto& _nodeBetweenness = arrays.nodeBetweenness;
         auto& _edgeBetweenness = arrays.edgeBetweenness;
@@ -121,9 +124,6 @@ void BetweennessTransform::apply(TransformedGraph& target)
 
         progress++;
         setProgress(progress.load() * 100 / static_cast<int>(target.numNodes()));
-
-        if(cancelled())
-            return;
     });
 
     setProgress(-1);
