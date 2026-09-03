@@ -70,7 +70,12 @@ QUrl WasmLocalFileAccess::save(const QString& filenameHint)
 {
     // Create a temporary file, and immediately delete it
     QTemporaryFile tempFile;
-    tempFile.open();
+    if(!tempFile.open())
+    {
+        qDebug() << "Couldn't create temporary file name";
+        return {};
+    }
+
     auto tempFilename = tempFile.fileName();
     tempFile.close();
     tempFile.remove();

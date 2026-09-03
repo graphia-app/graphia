@@ -32,6 +32,10 @@
 
 bool JSONGraphSaver::save()
 {
+    QFile file(_url.toLocalFile());
+    if(!file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text))
+        return false;
+
     json fileObject;
     fileObject["graph"] = graphAsJson(_graphModel->graph(), *this);
     setProgress(-1);
@@ -91,8 +95,6 @@ bool JSONGraphSaver::save()
         setProgress(static_cast<int>(runningCount * 100 / numElements));
     }
 
-    QFile file(_url.toLocalFile());
-    file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
     file.write(QByteArray::fromStdString(fileObject.dump()));
     file.close();
     return true;

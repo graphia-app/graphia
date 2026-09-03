@@ -192,8 +192,11 @@ static void uploadReport(const QString& email, const QString& text,
     dmpPart.setHeader(QNetworkRequest::ContentDispositionHeader,
                       QVariant(QStringLiteral(R"(form-data; name="upload_file_minidump"; filename="%1")")
                                .arg(QFileInfo(dmpFile).fileName())));
+
     auto* file = new QFile(dmpFile);
-    file->open(QIODevice::ReadOnly);
+    if(!file->open(QIODevice::ReadOnly))
+        return;
+
     dmpPart.setBodyDevice(file);
     file->setParent(multiPart);
     multiPart->append(dmpPart);
@@ -218,7 +221,10 @@ static void uploadReport(const QString& email, const QString& text,
                                      QVariant(QStringLiteral(R"(form-data; name="%1_%2"; filename="%2")")
                                         .arg(fingerPrint, fileInfo.fileName())));
             auto* attachment = new QFile(fileName);
-            attachment->open(QIODevice::ReadOnly);
+
+            if(!attachment->open(QIODevice::ReadOnly))
+                continue;
+
             attachmentPart.setBodyDevice(attachment);
             attachment->setParent(multiPart);
             multiPart->append(attachmentPart);

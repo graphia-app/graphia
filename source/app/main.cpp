@@ -499,10 +499,12 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
             QFile file(QDir(directory).filePath("state.txt"));
             std::cerr << "Writing " << file.fileName().toStdString() << "\n";
 
-            file.open(QIODevice::ReadWrite);
-            QTextStream stream(&file);
-            stream << state.toString();
-            file.close();
+            if(file.open(QIODevice::ReadWrite))
+            {
+                QTextStream stream(&file);
+                stream << state.toString();
+                file.close();
+            }
         }
         else
         {

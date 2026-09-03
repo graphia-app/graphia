@@ -30,7 +30,9 @@ using namespace Qt::Literals::StringLiterals;
 bool GMLSaver::save()
 {
     QFile file(_url.toLocalFile());
-    file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
+    if(!file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text))
+        return false;
+
     int level = 0;
 
     const size_t numElements = _graphModel->attributeNames().size() +

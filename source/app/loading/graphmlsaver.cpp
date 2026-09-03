@@ -41,7 +41,8 @@ bool GraphMLSaver::save()
         return false;
 
     QFile file(_url.toLocalFile());
-    file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
+    if(!file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text))
+        return false;
 
     const size_t numElements = _graphModel->attributeNames().size() +
         _graphModel->graph().numNodes() +

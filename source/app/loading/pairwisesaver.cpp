@@ -80,7 +80,8 @@ static QString findEdgeWeightAttributeName(const IGraphModel* graphModel)
 bool PairwiseSaver::save()
 {
     QFile file(_url.toLocalFile());
-    file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
+    if(!file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text))
+        return false;
 
     QTextStream stream(&file);
     const size_t edgeCount = _graphModel->graph().numEdges();
