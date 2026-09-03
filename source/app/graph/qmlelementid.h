@@ -22,11 +22,8 @@
 
 // This simply provides QML accessible version of the ElementId types
 
-#include "app/application.h"
-
 #include "shared/graph/elementid.h"
 
-#include <QObject>
 #include <QQmlEngine>
 
 #define QML_TYPE(Type) Qml ## Type /* NOLINT cppcoreguidelines-macro-usage */

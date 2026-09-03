@@ -25,7 +25,10 @@
 
 #include <QVector3D>
 
+#include <array>
+#include <cstddef>
 #include <functional>
+#include <vector>
 
 class AbstractBarnesHutTree : virtual public AbstractSpatialTree
 {

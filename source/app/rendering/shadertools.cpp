@@ -26,11 +26,11 @@
 #include <QOpenGLContext>
 #include <QSurfaceFormat>
 #include <QString>
-#include <QObject>
 #include <QFile>
 #include <QtGlobal>
 
 #include <iostream>
+#include <string>
 
 using namespace Qt::Literals::StringLiterals;
 

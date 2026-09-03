@@ -26,7 +26,6 @@
 #include "shared/utils/container.h"
 #include "componentmanager.h"
 
-#include <QtGlobal>
 #include <QMetaType>
 #include <QDebug>
 

@@ -24,14 +24,15 @@
 #include "shared/utils/statistics.h"
 #include "shared/utils/container.h"
 
+#include <QString>
+#include <QtGlobal>
+
+#include <cstddef>
+#include <cstdint>
 #include <vector>
-#include <limits>
-#include <iterator>
 #include <memory>
 #include <map>
 #include <type_traits>
-
-#include <QString>
 
 template<typename T>
 class CorrelationDataVector

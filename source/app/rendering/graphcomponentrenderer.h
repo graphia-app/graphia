@@ -35,10 +35,9 @@
 #include <QMatrix4x4>
 #include <QVector3D>
 #include <QQuaternion>
-#include <QColor>
 #include <QRect>
+#include <QVector4D>
 
-#include <memory>
 #include <vector>
 
 class GraphRenderer;

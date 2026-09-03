@@ -19,8 +19,6 @@
 
 #include "plane.h"
 
-#include <utility>
-
 Plane::Plane(const QVector3D& point, const QVector3D& normal) :
     _normal(normal)
 {

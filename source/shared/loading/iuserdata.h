@@ -23,6 +23,7 @@
 #include <QString>
 #include <QVariant>
 
+#include <cstddef>
 #include <vector>
 
 class IUserData

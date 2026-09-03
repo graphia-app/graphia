@@ -20,10 +20,12 @@
 #ifndef THREAD_H
 #define THREAD_H
 
-#include <thread>
-
 #include <QTextStream>
 #include <QString>
+
+#include <cstdint>
+#include <functional>
+#include <thread>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -199,7 +201,6 @@ QString u::parentProcessName()
 #elif defined(EMSCRIPTEN)
 #include <pthread.h>
 #include <emscripten/threading.h>
-
 #include <map>
 
 inline std::map<pthread_t, QString> emscriptenThreadNames;

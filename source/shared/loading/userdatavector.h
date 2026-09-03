@@ -20,17 +20,15 @@
 #ifndef USERDATAVECTOR_H
 #define USERDATAVECTOR_H
 
-#include <QString>
-
 #include "shared/utils/typeidentity.h"
 
 #include <json_helper.h>
 
-#include <vector>
-#include <limits>
-#include <utility>
-
+#include <QString>
 #include <QStringList>
+
+#include <cstddef>
+#include <vector>
 
 class UserDataVector : public TypeIdentity
 {

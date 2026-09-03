@@ -20,6 +20,7 @@
 #ifndef CIRCLE
 #define CIRCLE
 
+#include <QPointF>
 #include <QRectF>
 #include <cmath>
 

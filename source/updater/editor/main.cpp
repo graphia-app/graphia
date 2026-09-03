@@ -22,15 +22,15 @@
 #include "shared/utils/preferences.h"
 #include "shared/utils/static_block.h"
 
+#include <json_helper.h>
+
 #include <QApplication>
 #include <QQmlApplicationEngine>
-#include <QUrl>
 #include <QString>
 #include <QSettings>
 #include <QIcon>
 #include <QQuickStyle>
-
-#include <json_helper.h>
+#include <QtGlobal>
 
 using namespace Qt::Literals::StringLiterals;
 

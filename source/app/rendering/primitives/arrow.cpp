@@ -19,10 +19,10 @@
 
 #include "arrow.h"
 
+#include <QVector3D>
+
 #include <cmath>
 #include <numbers>
-
-#include <QOpenGLShaderProgram>
 
 namespace Primitive
 {

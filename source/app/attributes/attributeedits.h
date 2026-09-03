@@ -20,13 +20,10 @@
 #ifndef ATTRIBUTEEDITS_H
 #define ATTRIBUTEEDITS_H
 
-#include "shared/graph/elementid.h"
 #include "shared/graph/elementid_containers.h"
 
 #include <QQmlEngine>
 #include <QString>
-
-#include <map>
 
 class AttributeEdits
 {

@@ -28,16 +28,16 @@
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"
 
-#include "shared/loading/tabulardata.h"
 #include "shared/loading/xlsxtabulardataparser.h"
 
 #include "shared/utils/container.h"
 #include "shared/utils/string.h"
 
-#include <QRect>
+#include <QObject>
+#include <QtGlobal>
 
-#include <vector>
-#include <set>
+#include <algorithm>
+#include <cmath>
 #include <utility>
 #include <limits>
 #include <span>

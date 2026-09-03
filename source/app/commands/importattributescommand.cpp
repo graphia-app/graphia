@@ -27,6 +27,13 @@
 
 #include "../crashhandler.h"
 
+#include <QObject>
+#include <QtGlobal>
+
+#include <map>
+#include <type_traits>
+#include <utility>
+
 using namespace Qt::Literals::StringLiterals;
 
 ImportAttributesCommand::ImportAttributesCommand(GraphModel* graphModel, const QString& keyAttributeName,

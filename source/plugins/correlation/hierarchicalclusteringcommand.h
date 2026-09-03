@@ -23,6 +23,10 @@
 #include "shared/commands/icommand.h"
 
 #include <QObject>
+#include <QString>
+
+#include <cstddef>
+#include <vector>
 
 class CorrelationPluginInstance;
 

@@ -21,6 +21,8 @@
 
 #include "shared/utils/container.h"
 
+#include <QtGlobal>
+
 #include <algorithm>
 
 using namespace Qt::Literals::StringLiterals;

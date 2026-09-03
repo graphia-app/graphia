@@ -27,10 +27,7 @@
 #include "shared/utils/crypto.h"
 #include "shared/utils/utils.h"
 
-#include <json_helper.h>
-
-#include <QString>
-#include <QStringList>
+#include <QFile>
 #include <QStandardPaths>
 #include <QSysInfo>
 #include <QDir>
@@ -38,6 +35,7 @@
 
 #include <algorithm>
 #include <regex>
+#include <string>
 
 using namespace Qt::Literals::StringLiterals;
 

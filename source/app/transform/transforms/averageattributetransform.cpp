@@ -23,11 +23,11 @@
 
 #include "app/graph/graphmodel.h"
 
-#include <memory>
-#include <type_traits>
+#include <QtGlobal>
 
-#include <QObject>
-#include <QRegularExpression>
+#include <type_traits>
+#include <cstddef>
+#include <map>
 
 static Alert averageAttributeTransformConfigIsValid(const GraphModel& graphModel,
     const GraphTransformConfig& config)

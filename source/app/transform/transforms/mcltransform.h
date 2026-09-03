@@ -22,8 +22,12 @@
 
 #include "app/transform/graphtransform.h"
 
-#include "shared/utils/flags.h"
 #include "shared/utils/redirects.h"
+
+#include <QObject>
+#include <QString>
+
+#include <memory>
 
 class MCLTransform : public GraphTransform
 {

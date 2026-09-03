@@ -20,21 +20,15 @@
 #ifndef SAVER_H
 #define SAVER_H
 
-#include <utility>
-
 #include "isaver.h"
-#include "shared/utils/progressable.h"
 
-#include "app/graph/graphmodel.h"
-#include "app/graph/mutablegraph.h"
-#include "app/ui/document.h"
-
-#include <json_helper.h>
+#include "app/application.h"
 
 #include <QByteArray>
 #include <QString>
-#include <QStringList>
 #include <QUrl>
+
+#include <memory>
 
 class Document;
 class IGraph;

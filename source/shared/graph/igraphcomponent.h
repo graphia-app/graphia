@@ -23,6 +23,7 @@
 #include "elementid.h"
 #include "igraph.h"
 
+#include <cstddef>
 #include <vector>
 
 class IGraphComponent

@@ -20,17 +20,15 @@
 #include "graphcomponentrenderer.h"
 #include "graphrenderer.h"
 
-#include "camera.h"
-
 #include "app/graph/graph.h"
+#include "shared/graph/igraphcomponent.h"
+#include "shared/utils/utils.h"
 #include "app/graph/graphmodel.h"
-#include "app/graph/componentmanager.h"
 
 #include "app/layout/layout.h"
 #include "app/layout/collision.h"
 
 #include "app/maths/boundingsphere.h"
-#include "app/maths/frustum.h"
 #include "app/maths/plane.h"
 
 #include "app/ui/selectionmanager.h"
@@ -39,14 +37,18 @@
 #include "shared/graph/elementid_debug.h"
 #include "app/preferences.h"
 
+#include <QDebug>
 #include <QObject>
+#include <QtGlobal>
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QtMath>
 
 #include <cmath>
-#include <mutex>
 #include <algorithm>
+#include <cstddef>
+#include <iterator>
+#include <limits>
 
 void GraphComponentRenderer::initialise(GraphModel* graphModel, ComponentId componentId,
                                         SelectionManager* selectionManager,

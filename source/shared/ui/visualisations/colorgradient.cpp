@@ -26,6 +26,8 @@
 #include <QDebug>
 
 #include <algorithm>
+#include <cstddef>
+#include <string>
 
 ColorGradient::ColorGradient(const QString& descriptor)
 {

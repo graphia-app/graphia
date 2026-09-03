@@ -27,6 +27,7 @@
 
 #include <QString>
 
+#include <cstddef>
 #include <vector>
 #include <set>
 

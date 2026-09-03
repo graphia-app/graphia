@@ -31,11 +31,18 @@
 #include "shared/utils/progressable.h"
 #include "shared/utils/string.h"
 
-#include <map>
-#include <set>
-#include <memory>
-
 #include <QDebug>
+#include <QObject>
+#include <QString>
+#include <QVariant>
+#include <QVariantMap>
+
+#include <algorithm>
+#include <cstddef>
+#include <map>
+#include <memory>
+#include <utility>
+#include <vector>
 
 template<typename E>
 class UserElementData : public IUserElementData<E>, public UserData

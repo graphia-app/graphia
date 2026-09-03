@@ -19,9 +19,11 @@
 
 #ifndef ENRICHMENTCALCULATOR_H
 #define ENRICHMENTCALCULATOR_H
-#include <vector>
 
 #include "enrichmenttablemodel.h"
+
+#include <cstddef>
+#include <vector>
 
 class QString;
 class IGraphModel;

@@ -21,7 +21,6 @@
 
 #include <QtGlobal>
 #include <QFileInfo>
-#include <QDir>
 
 static QString appPath;
 

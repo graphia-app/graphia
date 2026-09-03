@@ -27,23 +27,26 @@
 #include "shared/utils/consolecapture.h"
 #include "shared/utils/static_block.h"
 
+#include <qtsingleapplication/qtsingleapplication.h>
+
 #include <QApplication>
+#include <QByteArray>
+#include <QFile>
+#include <QObject>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QIcon>
 #include <QProcess>
 #include <QFileInfo>
-#include <QDir>
+#include <QString>
+#include <QStringList>
 #include <QTemporaryDir>
 #include <QRegularExpression>
 #include <QQuickStyle>
 #include <QStandardPaths>
-
-#include <QDebug>
+#include <QtGlobal>
 
 #include <iostream>
-
-#include <qtsingleapplication/qtsingleapplication.h>
 
 using namespace Qt::Literals::StringLiterals;
 

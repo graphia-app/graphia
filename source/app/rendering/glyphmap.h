@@ -20,7 +20,6 @@
 #ifndef GLYPHMAP_H
 #define GLYPHMAP_H
 
-#include <QVector2D>
 #include <QString>
 #include <QImage>
 #include <QFont>
@@ -29,6 +28,7 @@
 
 #include <map>
 #include <mutex>
+#include <vector>
 
 class GlyphMap
 {

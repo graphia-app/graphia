@@ -26,7 +26,10 @@
 #include <cryptopp/modes.h>
 #include <cryptopp/osrng.h>
 
+#include <QByteArray>
 #include <QFile>
+#include <QString>
+#include <QtGlobal>
 
 u::AesKey u::generateAesKey()
 {

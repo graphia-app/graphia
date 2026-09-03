@@ -18,6 +18,7 @@
  */
 
 #include "sortfilterproxymodel.h"
+#include <QDebug>
 
 SortFilterProxyModel::SortFilterProxyModel(QObject* parent) : QSortFilterProxyModel(parent)
 {

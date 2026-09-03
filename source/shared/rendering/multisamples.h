@@ -22,6 +22,8 @@
 
 #include "shared/utils/preferences.h"
 
+#include <QString>
+
 using namespace Qt::Literals::StringLiterals;
 
 namespace

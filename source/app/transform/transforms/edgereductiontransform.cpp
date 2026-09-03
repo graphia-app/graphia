@@ -21,10 +21,11 @@
 
 #include "app/transform/transformedgraph.h"
 
-#include <memory>
 #include <random>
-
-#include <QObject>
+#include <algorithm>
+#include <cstddef>
+#include <cstdint>
+#include <variant>
 
 using namespace Qt::Literals::StringLiterals;
 

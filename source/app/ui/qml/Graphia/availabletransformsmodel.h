@@ -26,8 +26,9 @@
 #include <QQmlEngine>
 #include <QStringList>
 #include <QAbstractItemModel>
-#include <QList>
 #include <QVariant>
+#include <QByteArray>
+#include <QHash>
 
 class GraphModel;
 

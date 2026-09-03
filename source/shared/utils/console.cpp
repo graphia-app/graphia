@@ -19,12 +19,9 @@
 
 #include "console.h"
 
-#include <QtGlobal>
-
 #ifdef Q_OS_WIN
 #include <Windows.h>
 #include <io.h>
-
 #include <iostream>
 #else
 #include <unistd.h>

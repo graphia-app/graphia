@@ -18,6 +18,7 @@
  */
 
 #include "graphtransform.h"
+
 #include "transformedgraph.h"
 
 #include "app/graph/graph.h"
@@ -26,6 +27,12 @@
 #include "shared/commands/icommand.h"
 
 #include "shared/utils/container.h"
+
+#include <QMetaType>
+#include <QObject>
+#include <QStringList>
+
+#include <algorithm>
 
 using namespace Qt::Literals::StringLiterals;
 

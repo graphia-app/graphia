@@ -20,6 +20,7 @@
 #include "modelcompleter.h"
 
 #include <limits>
+#include <algorithm>
 
 ModelCompleter::ModelCompleter()
 {

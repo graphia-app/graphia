@@ -25,7 +25,11 @@
 
 #include "shared/utils/redirects.h"
 
-#include <vector>
+#include <QObject>
+#include <QString>
+#include <QStringList>
+
+#include <memory>
 
 class KNNTransform : public GraphTransform
 {

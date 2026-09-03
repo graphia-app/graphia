@@ -23,8 +23,10 @@
 #include "shared/plugins/nodeattributetablemodel.h"
 
 #include <QString>
-#include <QObject>
+#include <QStringList>
+#include <QVariant>
 
+#include <cstddef>
 #include <vector>
 #include <map>
 

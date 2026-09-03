@@ -19,6 +19,7 @@
 
 #include "utils.h"
 
+#include <cstdint>
 #include <numbers>
 
 int u::smallestPowerOf2GreaterThan(int x)

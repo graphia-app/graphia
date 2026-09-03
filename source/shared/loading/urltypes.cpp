@@ -22,6 +22,7 @@
 #include "shared/utils/container.h"
 
 #include <QFileInfo>
+#include <QtGlobal>
 #include <QUrl>
 
 void UrlTypes::registerUrlType(const QString& urlTypeName,

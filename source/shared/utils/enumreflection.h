@@ -21,6 +21,9 @@
 #define ENUMREFLECTION_H
 
 #include <QString>
+#include <QtGlobal>
+
+#include <cstddef>
 
 template<typename T> struct EnumStrings
 {

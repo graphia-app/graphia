@@ -23,7 +23,6 @@
 #include "layout.h"
 
 #include <vector>
-#include <memory>
 #include <algorithm>
 
 class SequenceLayout : public Layout

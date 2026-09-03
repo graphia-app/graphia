@@ -22,6 +22,10 @@
 
 #include "componentlayout.h"
 
+#include "shared/graph/elementid.h"
+
+#include <vector>
+
 class PowerOf2GridComponentLayout : public ComponentLayout
 {
 private:

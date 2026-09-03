@@ -23,7 +23,7 @@
 #include "shared/graph/elementid.h"
 #include "shared/graph/elementtype.h"
 
-#include "shared/attributes/iattribute.h"
+#include "shared/attributes/attributeflag.h"
 
 #include "shared/utils/flags.h"
 #include "shared/utils/cancellable.h"
@@ -38,6 +38,7 @@
 
 #include <vector>
 #include <memory>
+#include <utility>
 
 class GraphModel;
 class TransformedGraph;

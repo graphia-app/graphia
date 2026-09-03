@@ -21,7 +21,10 @@
 #define GRAPHCOMPONENT_H
 
 #include "shared/graph/igraphcomponent.h"
+#include "shared/graph/elementid.h"
 #include "graph.h"
+
+#include <vector>
 
 class GraphComponent : public IGraphComponent
 {

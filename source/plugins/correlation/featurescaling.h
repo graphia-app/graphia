@@ -22,8 +22,6 @@
 
 #include "normaliser.h"
 
-#include <vector>
-
 // https://en.wikipedia.org/wiki/Feature_scaling
 
 class MinMaxNormaliser : public Normaliser

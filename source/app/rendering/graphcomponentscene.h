@@ -23,8 +23,14 @@
 #include "scene.h"
 
 #include "app/graph/componentmanager.h"
+#include "shared/graph/elementid.h"
 #include "shared/graph/grapharray.h"
+#include "shared/utils/namedbool.h"
 #include "transition.h"
+
+#include <QPoint>
+
+#include <cstddef>
 
 class Graph;
 class GraphRenderer;

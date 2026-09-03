@@ -21,6 +21,8 @@
 
 #include <QtGlobal>
 
+#include <utility>
+
 CovarianceMatrix::CovarianceMatrix(size_t size) : _size(size)
 {
     auto square = size * size;

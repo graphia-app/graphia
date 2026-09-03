@@ -24,6 +24,7 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLBuffer>
 
+#include <cstddef>
 #include <vector>
 namespace Primitive
 {

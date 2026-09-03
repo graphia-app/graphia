@@ -23,7 +23,6 @@
 #include "condtionfnops.h"
 
 #include "shared/graph/elementid.h"
-#include "shared/graph/igraphcomponent.h"
 #include "shared/graph/elementid_containers.h"
 
 #include "app/graph/graphmodel.h"
@@ -32,11 +31,16 @@
 #include "app/transform/graphtransformconfigparser.h"
 #include "attribute.h"
 
+#include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/static_visitor.hpp>
-
 #include <algorithm>
+#include <type_traits>
+#include <utility>
+#include <variant>
 
 #include <QRegularExpression>
+#include <QString>
+#include <QtGlobal>
 
 class CreateConditionFnFor
 {

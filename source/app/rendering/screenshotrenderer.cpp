@@ -21,6 +21,8 @@
 
 #include "app/graph/graph.h"
 
+#include "graphrenderer.h"
+
 #include "graphcomponentscene.h"
 #include "graphoverviewscene.h"
 
@@ -30,8 +32,16 @@
 #include "app/ui/visualisations/elementvisual.h"
 
 #include <QBuffer>
-#include <QDir>
+#include <QByteArray>
+#include <QColor>
+#include <QDebug>
+#include <QPainter>
+#include <QPixmap>
 #include <QQuickOpenGLUtils>
+#include <QRect>
+
+#include <cmath>
+#include <cstddef>
 
 using namespace Qt::Literals::StringLiterals;
 

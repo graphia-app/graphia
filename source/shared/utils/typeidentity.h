@@ -22,9 +22,10 @@
 
 #include "shared/attributes/valuetype.h"
 
-#include <array>
+#include <QString>
 
-class QString;
+#include <array>
+#include <cstddef>
 
 class TypeIdentity
 {

@@ -22,15 +22,14 @@
 #include "app/attributes/conditionfncreator.h"
 
 #include "app/graph/graphmodel.h"
-#include "app/graph/graphcomponent.h"
 #include "app/graph/componentmanager.h"
+#include "app/graph/graphcomponent.h"
 
 #include "shared/utils/utils.h"
 #include "shared/utils/string.h"
 
-#include <algorithm>
-
-#include <QObject>
+#include <cstdint>
+#include <vector>
 
 void FilterTransform::apply(TransformedGraph& target)
 {

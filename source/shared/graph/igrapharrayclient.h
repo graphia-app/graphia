@@ -22,6 +22,8 @@
 
 #include "shared/graph/elementid.h"
 
+#include <cstddef>
+
 class IGraphArray;
 
 // Graph classes must implement this interface for a GraphArray

@@ -23,6 +23,7 @@
 #include <QQuickPaintedItem>
 #include <QIcon>
 #include <QString>
+#include <QQmlEngine>
 
 class NamedIcon : public QQuickPaintedItem
 {

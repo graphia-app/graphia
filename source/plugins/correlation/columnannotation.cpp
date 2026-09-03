@@ -22,6 +22,11 @@
 #include "shared/utils/container.h"
 #include "shared/utils/string.h"
 
+#include <QDebug>
+#include <QtGlobal>
+
+#include <algorithm>
+
 ColumnAnnotation::ColumnAnnotation(const QString& name, const std::vector<QString>& values) :
     _name(name), _values(values)
 {

@@ -22,7 +22,12 @@
 
 #include <QObject>
 #include <QAbstractTableModel>
+#include <QByteArray>
+#include <QHash>
+#include <QString>
+#include <QVariant>
 
+#include <cstddef>
 #include <vector>
 
 class EnrichmentTableModel : public QAbstractTableModel

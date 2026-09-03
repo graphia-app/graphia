@@ -28,15 +28,15 @@
 #include <QObject>
 #include <QString>
 
-#include <functional>
 #include <deque>
 #include <vector>
-#include <memory>
 #include <thread>
 #include <mutex>
 #include <atomic>
+#include <utility>
 
 class Graph;
+class QTimerEvent;
 
 class CommandManager : public QObject, public ICommandManager
 {

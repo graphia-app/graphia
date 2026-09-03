@@ -22,6 +22,9 @@
 
 #include "shared/ui/visualisations/ielementvisual.h"
 
+#include <QColor>
+#include <QString>
+
 struct ElementVisual : IElementVisual
 {
     float _size = -1.0f;

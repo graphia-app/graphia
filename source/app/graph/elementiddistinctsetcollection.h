@@ -22,6 +22,7 @@
 
 #include "shared/graph/elementid.h"
 
+#include <cstddef>
 #include <vector>
 #include <array>
 #include <type_traits>

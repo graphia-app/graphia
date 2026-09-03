@@ -20,6 +20,7 @@
 #ifndef SCOPE_EXIT_H
 #define SCOPE_EXIT_H
 
+#include <type_traits>
 #include <utility>
 
 // This is more or less directly lifted from N4189

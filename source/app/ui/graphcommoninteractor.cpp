@@ -41,10 +41,16 @@
 
 #include <QMouseEvent>
 #include <QKeyEvent>
+#include <QQuaternion>
+#include <QVector2D>
+#include <QVector3D>
+#include <QVector4D>
+#include <QtGlobal>
 #include <QtMath>
 
 #include <cmath>
 #include <algorithm>
+#include <limits>
 
 NodeIdSet nodeIdsInsideFrustum(const GraphModel& graphModel,
                                ComponentId componentId,

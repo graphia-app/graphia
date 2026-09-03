@@ -22,8 +22,11 @@
 #include "app/graph/graphmodel.h"
 #include "shared/utils/threadpool.h"
 
-#include <map>
 #include <queue>
+#include <algorithm>
+#include <atomic>
+#include <limits>
+#include <vector>
 
 using namespace Qt::Literals::StringLiterals;
 

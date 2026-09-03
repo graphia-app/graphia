@@ -21,7 +21,6 @@
 #define LOADER_H
 
 #include "shared/loading/iparser.h"
-#include "shared/plugins/iplugin.h"
 
 #include "shared/graph/elementid_containers.h"
 
@@ -33,9 +32,13 @@
 #include <QString>
 #include <QStringList>
 #include <QByteArray>
+#include <QUrl>
 
 #include <memory>
 #include <map>
+#include <vector>
+
+class IPluginInstance;
 
 class Loader : public IParser
 {

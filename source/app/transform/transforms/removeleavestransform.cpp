@@ -21,10 +21,10 @@
 
 #include "app/transform/transformedgraph.h"
 
-#include <memory>
 #include <vector>
-
-#include <QObject>
+#include <cstddef>
+#include <cstdint>
+#include <variant>
 
 using namespace Qt::Literals::StringLiterals;
 

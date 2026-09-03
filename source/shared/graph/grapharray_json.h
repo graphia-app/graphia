@@ -20,13 +20,15 @@
 #ifndef GRAPHARRAY_JSON_H
 #define GRAPHARRAY_JSON_H
 
-#include <json_helper.h>
-
 #include "shared/graph/grapharray.h"
 #include "shared/utils/progressable.h"
 #include "shared/utils/container.h"
 
+#include <json_helper.h>
+
 #include <QDebug>
+
+#include <cstdint>
 
 namespace u
 {

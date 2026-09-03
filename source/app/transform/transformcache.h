@@ -24,6 +24,11 @@
 #include "app/graph/mutablegraph.h"
 #include "app/attributes/attribute.h"
 
+#include <QString>
+
+#include <map>
+#include <memory>
+#include <utility>
 #include <vector>
 
 class TransformedGraph;

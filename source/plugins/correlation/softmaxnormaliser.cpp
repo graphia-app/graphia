@@ -22,7 +22,12 @@
 #include "shared/loading/iparser.h"
 #include "shared/utils/cancellable.h"
 
+#include <algorithm>
 #include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <limits>
+#include <vector>
 
 bool SoftmaxNormaliser::process(ContinuousDataVectors& dataRows, IParser* parser) const
 {

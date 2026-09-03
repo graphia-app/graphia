@@ -24,6 +24,8 @@
 
 #include <fstream>
 #include <cstdio>
+#include <memory>
+#include <vector>
 
 class IConsoleCapture
 {

@@ -21,8 +21,6 @@
 
 #include "shared/utils/source_location.h"
 
-#include <QUrl>
-
 struct MatLabMatrix
 {
     matvar_t* _var = nullptr;

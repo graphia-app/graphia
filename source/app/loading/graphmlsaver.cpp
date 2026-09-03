@@ -26,9 +26,12 @@
 #include "shared/graph/imutablegraph.h"
 
 #include <QFile>
-#include <QString>
-#include <QUrl>
+#include <QObject>
 #include <QXmlStreamWriter>
+#include <QtGlobal>
+
+#include <cstddef>
+#include <map>
 
 using namespace Qt::Literals::StringLiterals;
 

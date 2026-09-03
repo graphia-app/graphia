@@ -27,8 +27,13 @@
 
 #include "app/ui/selectionmanager.h"
 
+#include <QObject>
+#include <QString>
+#include <QtGlobal>
+
 #include <memory>
-#include <array>
+#include <utility>
+#include <vector>
 
 enum class SelectNodesClear
 {

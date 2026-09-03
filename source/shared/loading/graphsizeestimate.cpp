@@ -24,12 +24,15 @@
 #include "shared/graph/elementid_containers.h"
 #include "shared/graph/undirectededge.h"
 
+#include <QString>
+#include <QVariant>
 #include <QVector>
 
 #include <algorithm>
 #include <set>
 #include <cstdlib>
 #include <cmath>
+#include <vector>
 
 using namespace Qt::Literals::StringLiterals;
 

@@ -26,7 +26,6 @@
 #include <QVector3D>
 
 #include <vector>
-#include <memory>
 
 class GraphModel;
 

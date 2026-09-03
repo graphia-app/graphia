@@ -32,8 +32,9 @@
 
 #include <QDebug>
 #include <QCoreApplication>
+#include <QString>
+#include <QStringList>
 #include <QMessageBox>
-#include <QProcess>
 
 #include <iostream>
 

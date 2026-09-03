@@ -21,19 +21,22 @@
 #define COMPONENTMANAGER_H
 
 #include "shared/graph/grapharray.h"
+#include "shared/graph/elementid.h"
 #include "shared/graph/elementid_containers.h"
 
 #include "graphfilter.h"
 
+#include <QObject>
+#include <QtGlobal>
+
+#include <cstddef>
 #include <queue>
 #include <mutex>
 #include <vector>
-#include <functional>
+#include <unordered_set>
+#include <utility>
 #include <algorithm>
 #include <memory>
-
-#include <QObject>
-#include <QtGlobal>
 
 class Graph;
 class GraphComponent;

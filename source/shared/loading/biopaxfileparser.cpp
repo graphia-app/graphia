@@ -22,12 +22,18 @@
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"
 
+#include <QObject>
+#include <QString>
+#include <QStringList>
+#include <QtGlobal>
 #include <QXmlStreamReader>
 #include <QFile>
-#include <QUrl>
 
 #include <stack>
 #include <map>
+#include <tuple>
+#include <utility>
+#include <vector>
 
 using namespace Qt::Literals::StringLiterals;
 

@@ -29,7 +29,15 @@
 
 #include "shared/utils/is_detected.h"
 
-#include <type_traits>
+#include <QObject>
+#include <QString>
+#include <QUrl>
+
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <map>
+#include <utility>
 
 template<typename> class IUserElementData;
 using IUserNodeData = IUserElementData<NodeId>;

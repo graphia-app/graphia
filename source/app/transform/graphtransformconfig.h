@@ -28,7 +28,6 @@
 
 #include <vector>
 #include <variant>
-
 #include <boost/variant.hpp>
 #include <boost/variant/recursive_wrapper.hpp>
 

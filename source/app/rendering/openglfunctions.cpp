@@ -19,10 +19,14 @@
 
 #include "openglfunctions.h"
 
+#include <QByteArray>
+#include <QDebug>
 #include <QOpenGLExtraFunctions>
 #include <QOpenGLContext>
-#include <QSurfaceFormat>
 #include <QOffscreenSurface>
+#include <QtGlobal>
+
+#include <utility>
 
 using namespace Qt::Literals::StringLiterals;
 

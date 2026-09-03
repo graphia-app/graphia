@@ -19,11 +19,20 @@
 
 #include "gmlsaver.h"
 
+#include "shared/attributes/iattribute.h"
+#include "shared/graph/igraph.h"
+#include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"
 
 #include <QFile>
+#include <QObject>
 #include <QRegularExpression>
 #include <QTextStream>
+
+#include <cmath>
+#include <cstddef>
+#include <map>
+#include <vector>
 
 using namespace Qt::Literals::StringLiterals;
 

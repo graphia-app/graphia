@@ -31,13 +31,16 @@
 
 #include "app/attributes/attribute.h"
 
-#include <QObject>
 #include <QString>
 #include <QStringList>
 
-#include <functional>
 #include <atomic>
+#include <cstddef>
+#include <map>
+#include <memory>
 #include <mutex>
+#include <utility>
+#include <vector>
 
 class GraphModel;
 class ICommand;

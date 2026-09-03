@@ -24,9 +24,10 @@
 #include "shared/utils/cancellable.h"
 #include "shared/utils/failurereason.h"
 
+#include <QString>
+
 class QUrl;
 class IGraphModel;
-class QString;
 
 class IParser : virtual public Progressable, virtual public Cancellable, virtual public FailureReason
 {

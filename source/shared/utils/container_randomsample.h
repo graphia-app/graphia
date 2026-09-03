@@ -20,7 +20,9 @@
 #ifndef CONTAINER_RANDOMSAMPLE_H
 #define CONTAINER_RANDOMSAMPLE_H
 
+#include <cstddef>
 #include <random>
+#include <utility>
 
 namespace u
 {

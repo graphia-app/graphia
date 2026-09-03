@@ -22,9 +22,9 @@
 
 #include "shared/commands/icommand.h"
 
-#include <vector>
-
 #include <QString>
+
+#include <vector>
 
 class GraphModel;
 

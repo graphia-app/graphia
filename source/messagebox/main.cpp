@@ -24,6 +24,8 @@
 #include <QMessageBox>
 #include <QAbstractButton>
 #include <QCommandLineParser>
+#include <QObject>
+#include <QString>
 #include <QStringList>
 #include <QIcon>
 #include <QHash>

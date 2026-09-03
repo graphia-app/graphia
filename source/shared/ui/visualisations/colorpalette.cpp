@@ -28,7 +28,8 @@
 #include <QRegularExpression>
 #include <QDebug>
 
-#include <algorithm>
+#include <cstddef>
+#include <utility>
 
 using namespace Qt::Literals::StringLiterals;
 

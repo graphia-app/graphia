@@ -22,6 +22,8 @@
 #include "app/graph/graph.h"
 #include "app/graph/graphmodel.h"
 
+#include <QtGlobal>
+
 #include <algorithm>
 #include <utility>
 #include <array>

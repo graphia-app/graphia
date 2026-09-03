@@ -19,9 +19,9 @@
 
 #include "color.h"
 
-#include <cmath>
-
 #include <QCryptographicHash>
+
+#include <cmath>
 
 QColor u::contrastingColor(const QColor& color)
 {

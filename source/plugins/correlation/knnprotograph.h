@@ -23,12 +23,18 @@
 #include "correlationtype.h"
 #include "correlationdatavector.h"
 
+#include <QDebug>
+#include <QString>
+#include <QtGlobal>
+#include <QVariantMap>
+
+#include <algorithm>
 #include <cstddef>
+#include <functional>
+#include <iterator>
 #include <mutex>
 #include <vector>
 #include <compare>
-
-#include <QVariantMap>
 
 using namespace Qt::Literals::StringLiterals;
 

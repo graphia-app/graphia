@@ -22,10 +22,12 @@
 #include "shared/loading/iparser.h"
 #include "shared/utils/cancellable.h"
 
-#include <set>
-#include <algorithm>
-
 #include <QtGlobal>
+
+#include <algorithm>
+#include <cstddef>
+#include <iterator>
+#include <vector>
 
 bool QuantileNormaliser::process(ContinuousDataVectors& dataRows, IParser* parser) const
 {

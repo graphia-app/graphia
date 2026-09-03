@@ -24,10 +24,8 @@
 #include "app/graph/componentmanager.h"
 #include "app/graph/graphcomponent.h"
 
-#include <memory>
 #include <deque>
-
-#include <QObject>
+#include <cstdint>
 
 using namespace Qt::Literals::StringLiterals;
 

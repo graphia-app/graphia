@@ -36,19 +36,20 @@
 #include "correlationdatavector.h"
 #include "correlationnodeattributetablemodel.h"
 
-#include <vector>
-#include <map>
-#include <functional>
-#include <algorithm>
-#include <utility>
-
+#include <QByteArray>
 #include <QString>
 #include <QStringList>
 #include <QList>
-#include <QVariantList>
+#include <QUrl>
+#include <QVariant>
 #include <QVariantMap>
 #include <QColor>
 #include <QRect>
+
+#include <cstddef>
+#include <memory>
+#include <vector>
+#include <map>
 
 using namespace Qt::Literals::StringLiterals;
 

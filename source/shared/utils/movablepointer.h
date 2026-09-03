@@ -21,6 +21,7 @@
 #define MOVABLEPOINTER_H
 
 #include <memory>
+#include <utility>
 
 // Helper template that allows you to maintain a vector of
 // Ts without the hassle of writing a move constructor for T

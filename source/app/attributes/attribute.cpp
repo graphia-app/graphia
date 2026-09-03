@@ -19,8 +19,10 @@
 
 #include "attribute.h"
 
+#include "shared/graph/igraph.h"
 #include "shared/utils/container.h"
 
+#include <QObject>
 #include <QRegularExpression>
 #include <QDebug>
 

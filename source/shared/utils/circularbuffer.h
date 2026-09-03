@@ -20,10 +20,13 @@
 #ifndef CIRCULARBUFFER_H
 #define CIRCULARBUFFER_H
 
+#include <QtGlobal>
+
 #include <algorithm>
 #include <array>
-
-#include <QtGlobal>
+#include <cstddef>
+#include <type_traits>
+#include <utility>
 
 // Test if there is an operator* for T and Arg
 namespace Test

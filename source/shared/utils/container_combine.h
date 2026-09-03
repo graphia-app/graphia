@@ -1,8 +1,10 @@
 #ifndef CONTAINER_COMBINE_H
 #define CONTAINER_COMBINE_H
 
+#include <cstddef>
 #include <iterator>
 #include <tuple>
+#include <utility>
 
 namespace u
 {

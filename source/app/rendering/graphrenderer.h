@@ -40,8 +40,14 @@
 
 #include "app/preferences.h"
 
+#include <QColor>
 #include <QObject>
 #include <QElapsedTimer>
+#include <QEvent>
+#include <QRect>
+#include <QString>
+#include <QVariant>
+#include <QVector3D>
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLShaderProgram>
@@ -51,11 +57,12 @@
 #include <QPainter>
 #include <QSize>
 
+#include <cstddef>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <atomic>
 #include <vector>
-#include <array>
 #include <queue>
 
 class Graph;

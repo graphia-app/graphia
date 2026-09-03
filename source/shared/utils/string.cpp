@@ -20,13 +20,12 @@
 #include "string.h" //NOLINT
 
 #include <QStringView>
-#include <QStringList>
-#include <QRegularExpression>
 #include <QLocale>
+#include <QtGlobal>
 
-#include <vector>
+#include <algorithm>
+#include <iterator>
 #include <cmath>
-#include <sstream>
 #include <limits>
 
 using namespace Qt::Literals::StringLiterals;

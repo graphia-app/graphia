@@ -18,13 +18,17 @@
  */
 
 #include "tabulardata.h"
+
 #include "xlsxtabulardataparser.h"
 
 #include "shared/utils/progressable.h"
 
+#include <QtGlobal>
+
+#include <map>
 #include <set>
 #include <stack>
-#include <algorithm>
+#include <utility>
 
 using namespace Qt::Literals::StringLiterals;
 

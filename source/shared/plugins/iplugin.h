@@ -33,6 +33,7 @@
 #include <QString>
 #include <QStringList>
 #include <QByteArray>
+#include <QVariant>
 
 #include <memory>
 

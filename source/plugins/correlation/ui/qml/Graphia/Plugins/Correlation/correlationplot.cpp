@@ -19,32 +19,29 @@
 
 #include "correlationplot.h"
 
-#include "plugins/correlation/correlationplugin.h"
 #include "correlationplotsaveimagecommand.h"
-
-#include "qcpcolumnannotations.h"
 
 #include "shared/utils/scope_exit.h"
 #include "shared/utils/thread.h"
 #include "shared/utils/utils.h"
-#include "shared/utils/random.h"
-#include "shared/utils/color.h"
 #include "shared/utils/container.h"
 #include "shared/utils/string.h"
 #include "shared/utils/flags.h"
 #include "shared/utils/fatalerror.h"
 
 #include <QDesktopServices>
-#include <QSet>
 #include <QQuickWindow>
 #include <QDebug>
+#include <QRect>
+#include <QRegularExpression>
 #include <QtGlobal>
+#include <QVariant>
 
 #include <cmath>
 #include <algorithm>
+#include <iterator>
+#include <memory>
 #include <numeric>
-#include <vector>
-#include <map>
 
 using namespace Qt::Literals::StringLiterals;
 

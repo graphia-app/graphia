@@ -22,12 +22,11 @@
 #include "shared/updates/updates.h"
 #include "shared/utils/container.h"
 
+#include <json_helper.h>
+
 #include <QByteArray>
 #include <QFile>
 #include <QRegularExpression>
-#include <QQmlEngine>
-
-#include <json_helper.h>
 
 using namespace Qt::Literals::StringLiterals;
 

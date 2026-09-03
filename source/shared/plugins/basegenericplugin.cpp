@@ -24,16 +24,20 @@
 #include "shared/loading/dotfileparser.h"
 #include "shared/loading/graphmlparser.h"
 #include "shared/loading/adjacencymatrixfileparser.h"
-#include "shared/loading/pairwisecolumntype.h"
 #include "shared/loading/pairwisefileparser.h"
 #include "shared/loading/jsongraphparser.h"
 #include "shared/loading/cxparser.h"
 
-#include "shared/attributes/iattribute.h"
-
 #include "shared/utils/container.h"
 
 #include <json_helper.h>
+
+#include <QDebug>
+#include <QObject>
+#include <QtGlobal>
+
+#include <cstddef>
+#include <utility>
 
 using namespace Qt::Literals::StringLiterals;
 

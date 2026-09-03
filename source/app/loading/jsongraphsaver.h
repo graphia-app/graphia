@@ -22,9 +22,10 @@
 
 #include "saverfactory.h"
 
-#include <QString>
-
 #include <json_helper.h>
+
+#include <QString>
+#include <QUrl>
 
 using namespace Qt::Literals::StringLiterals;
 

@@ -20,16 +20,16 @@
 #ifndef DOWNLOADQUEUE_H
 #define DOWNLOADQUEUE_H
 
-#include <map>
-#include <queue>
-#include <memory>
-
 #include <QObject>
 #include <QUrl>
 #include <QString>
 #include <QTemporaryFile>
 #include <QTimer>
 #include <QNetworkAccessManager>
+
+#include <map>
+#include <queue>
+#include <memory>
 
 class QNetworkReply;
 

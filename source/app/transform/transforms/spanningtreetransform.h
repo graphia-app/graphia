@@ -21,11 +21,14 @@
 #define SPANNINGTREETRANSFORM_H
 
 #include "app/transform/graphtransform.h"
-#include "app/attributes/attribute.h"
 
 #include "shared/utils/redirects.h"
 
-#include <vector>
+#include <QObject>
+#include <QString>
+#include <QStringList>
+
+#include <memory>
 
 class SpanningTreeTransform : public GraphTransform
 {

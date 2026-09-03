@@ -24,6 +24,7 @@
 
 #include <QVariantMap>
 
+#include <cstddef>
 #include <limits>
 
 QVariantMap graphSizeEstimateThreshold(EdgeList edgeList,

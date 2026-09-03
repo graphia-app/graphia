@@ -19,17 +19,17 @@
 
 #include "graphrenderer.h"
 
-#include "glyphmap.h"
 #include "graphcomponentscene.h"
 #include "graphoverviewscene.h"
 
-#include "app/preferences.h"
 #include "app/layout/nodepositions.h"
 
 #include "shared/utils/container.h"
 #include "shared/utils/doasyncthen.h"
 
 #include "app/graph/graph.h"
+#include "shared/graph/igraphcomponent.h"
+#include "app/maths/boundingsphere.h"
 #include "app/graph/graphmodel.h"
 
 #include "app/ui/graphcomponentinteractor.h"
@@ -42,19 +42,25 @@
 #include "shadertools.h"
 #include "screenshotrenderer.h"
 
-#include <QObject>
 #include <QCoreApplication>
+#include <QDebug>
 #include <QOpenGLFramebufferObjectFormat>
 #include <QQuickOpenGLUtils>
 #include <QOpenGLDebugLogger>
-#include <QColor>
 #include <QQuickWindow>
-#include <QEvent>
 #include <QNativeGestureEvent>
 #include <QTextLayout>
 #include <QBuffer>
 #include <QFutureWatcher>
+#include <QMouseEvent>
+#include <QOpenGLFramebufferObject>
+#include <QWheelEvent>
+#include <QtGlobal>
 
+#include <algorithm>
+#include <array>
+#include <chrono>
+#include <limits>
 #include <utility>
 
 using namespace Qt::Literals::StringLiterals;

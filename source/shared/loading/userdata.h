@@ -26,13 +26,13 @@
 #include "shared/utils/pair_iterator.h"
 #include "shared/utils/progressable.h"
 
+#include <json_helper.h>
+
 #include <QObject>
 #include <QString>
 #include <QVariant>
-#include <QSet>
 
-#include <json_helper.h>
-
+#include <cstddef>
 #include <map>
 #include <vector>
 

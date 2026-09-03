@@ -19,11 +19,6 @@
 
 #include "gmlfileparser.h"
 
-#include <boost/spirit/home/x3.hpp>
-#include <boost/fusion/include/adapt_struct.hpp>
-#include <boost/spirit/home/support/iterators/istream_iterator.hpp>
-#include <boost/boost_spirit_qstring_adapter.h>
-
 #include "progress_iterator.h"
 
 #include "shared/graph/elementid.h"
@@ -32,13 +27,24 @@
 
 #include "shared/utils/container.h"
 
-#include <QUrl>
+#include <boost/spirit/home/x3.hpp>
+#include <boost/fusion/include/adapt_struct.hpp>
+#include <boost/spirit/home/support/iterators/istream_iterator.hpp>
+#include <boost/boost_spirit_qstring_adapter.h>
+
+#include <QObject>
+#include <QString>
+#include <QtGlobal>
 #include <QFileInfo>
 #include <QTextDocumentFragment>
 
+#include <algorithm>
+#include <cstddef>
+#include <cstdint>
 #include <fstream>
 #include <variant>
 #include <map>
+#include <vector>
 
 using namespace Qt::Literals::StringLiterals;
 

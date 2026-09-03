@@ -24,8 +24,7 @@
 #include "app/rendering/graphcomponentscene.h"
 
 #include <QPoint>
-
-#include <memory>
+#include <QRectF>
 
 class GraphModel;
 class CommandManager;

@@ -21,6 +21,7 @@
 #define VOID_CALLABLE_WRAPPER_H
 
 #include <memory>
+#include <utility>
 
 class void_callable_wrapper
 {

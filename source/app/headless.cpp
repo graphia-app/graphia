@@ -25,15 +25,18 @@
 #include "shared/utils/container.h"
 #include "shared/utils/console.h"
 
-#include <QString>
-#include <QStringList>
+#include <json_helper.h>
+
 #include <QVariantMap>
 #include <QFileInfo>
 #include <QDir>
+#include <QUrl>
+#include <QVariant>
 
 #include <algorithm>
-
-#include <json_helper.h>
+#include <cstddef>
+#include <iostream>
+#include <string>
 
 struct HeadlessState
 {

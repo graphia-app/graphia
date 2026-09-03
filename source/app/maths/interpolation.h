@@ -20,7 +20,6 @@
 #ifndef INTERPOLATION_H
 #define INTERPOLATION_H
 
-#include <cstdlib>
 #include <cmath>
 #include <numbers>
 

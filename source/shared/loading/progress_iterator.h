@@ -21,7 +21,7 @@
 #define PROGRESS_ITERATOR_H
 
 #include <boost/iterator/iterator_adaptor.hpp>
-
+#include <cstddef>
 #include <functional>
 
 template<typename BaseItType>

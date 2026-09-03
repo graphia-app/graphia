@@ -30,7 +30,11 @@
 #include <QElapsedTimer>
 #include <QDebug>
 
-#include <map>
+#include <cmath>
+#include <cstddef>
+#include <deque>
+#include <limits>
+#include <sstream>
 
 using namespace Qt::Literals::StringLiterals;
 

@@ -27,10 +27,15 @@
 #include "shared/loading/xlsxtabulardataparser.h"
 #include "shared/loading/pairwisecolumntype.h"
 
+#include <QObject>
 #include <QString>
+#include <QtGlobal>
+#include <QUrl>
 
+#include <cstddef>
 #include <map>
-#include <cmath>
+#include <utility>
+#include <vector>
 
 template<typename TabularDataParser>
 class PairwiseFileParser : public IParser

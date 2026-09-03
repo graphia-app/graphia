@@ -23,6 +23,8 @@
 #include "shared/loading/iparser.h"
 #include "shared/loading/iuserelementdata.h"
 
+#include <QUrl>
+
 class IGraphModel;
 
 class BiopaxFileParser : public IParser

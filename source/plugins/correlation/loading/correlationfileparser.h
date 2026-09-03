@@ -28,6 +28,10 @@
 
 #include <QString>
 #include <QRect>
+#include <QUrl>
+
+#include <cstddef>
+#include <vector>
 
 class CorrelationPluginInstance;
 

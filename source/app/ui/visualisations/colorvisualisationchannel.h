@@ -25,8 +25,10 @@
 #include "shared/ui/visualisations/colorgradient.h"
 #include "shared/ui/visualisations/colorpalette.h"
 
-#include <vector>
 #include <QString>
+#include <QVariantMap>
+
+#include <vector>
 
 class ColorVisualisationChannel : public VisualisationChannel
 {

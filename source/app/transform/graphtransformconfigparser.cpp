@@ -25,8 +25,9 @@
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/boost_spirit_qstring_adapter.h>
 
-#include <QRegularExpression>
 #include <QDebug>
+
+#include <string>
 
 BOOST_FUSION_ADAPT_STRUCT(
     GraphTransformConfig::TerminalCondition,

@@ -20,12 +20,19 @@
 #ifndef SCREENSHOTRENDERER_H
 #define SCREENSHOTRENDERER_H
 
-#include "app/graph/graphmodel.h"
-#include "graphrenderer.h"
 #include "graphrenderercore.h"
 #include "graphcomponentrenderer.h"
 
+#include <QImage>
 #include <QObject>
+#include <QPoint>
+#include <QSize>
+#include <QString>
+
+#include <vector>
+
+class GraphModel;
+class GraphRenderer;
 
 class ScreenshotRenderer : public QObject, public GraphRendererCore
 {

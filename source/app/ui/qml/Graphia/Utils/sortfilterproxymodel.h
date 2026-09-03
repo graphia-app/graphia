@@ -23,6 +23,9 @@
 #include <QSortFilterProxyModel>
 #include <QQmlEngine>
 #include <QJSValue>
+#include <QObject>
+#include <QString>
+#include <QVariant>
 
 class SortFilterProxyModel : public QSortFilterProxyModel
 {

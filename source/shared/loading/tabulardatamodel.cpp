@@ -19,6 +19,8 @@
 
 #include "tabulardatamodel.h"
 
+#include <cstddef>
+
 bool TabularDataModel::transposed() const
 {
     return _transposed;

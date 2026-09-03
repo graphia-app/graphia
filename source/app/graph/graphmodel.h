@@ -32,9 +32,11 @@
 
 #include "app/attributes/attribute.h"
 
+#include <QObject>
 #include <QSet>
 #include <QString>
 #include <QStringList>
+#include <QVariant>
 #include <QVariantMap>
 
 #include <memory>
@@ -52,6 +54,7 @@ class SearchManager;
 
 class ICommand;
 class IPlugin;
+class Progressable;
 
 struct ElementVisual;
 struct TextVisual;

@@ -29,6 +29,10 @@
 #include <QAbstractItemModel>
 #include <QList>
 #include <QVariant>
+#include <QByteArray>
+#include <QHash>
+#include <QString>
+#include <QStringList>
 
 #include <set>
 

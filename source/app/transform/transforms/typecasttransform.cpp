@@ -21,10 +21,6 @@
 
 #include "app/graph/graphmodel.h"
 
-#include <memory>
-
-#include <QObject>
-
 class TransformedGraph;
 
 using namespace Qt::Literals::StringLiterals;

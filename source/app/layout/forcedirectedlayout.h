@@ -21,12 +21,17 @@
 #define FORCEDIRECTEDLAYOUT_H
 
 #include "layout.h"
-#include "app/graph/componentmanager.h"
 
+#include "shared/graph/elementid.h"
+#include "shared/graph/grapharray.h"
+
+#include <QObject>
+#include <QString>
 #include <QVector3D>
 
 #include <atomic>
-#include <vector>
+#include <cstddef>
+#include <memory>
 
 using namespace Qt::Literals::StringLiterals;
 

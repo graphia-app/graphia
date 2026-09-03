@@ -49,10 +49,15 @@
 #include <QUrl>
 #include <QVariantMap>
 #include <QByteArray>
+#include <QColor>
+#include <QList>
+#include <QVariant>
+#include <QVariantList>
 
 #include <vector>
+#include <cstddef>
+#include <map>
 #include <memory>
-#include <mutex>
 #include <atomic>
 
 using namespace Qt::Literals::StringLiterals;

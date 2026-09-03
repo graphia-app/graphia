@@ -19,6 +19,8 @@
 
 #include "centreinglayout.h"
 
+#include <QVector3D>
+
 void CentreingLayout::execute(bool, Dimensionality)
 {
     const QVector3D centreOfMass = positions().centreOfMass(nodeIds());

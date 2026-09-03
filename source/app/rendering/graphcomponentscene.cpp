@@ -25,9 +25,17 @@
 #include "shared/utils/scope_exit.h"
 
 #include "app/graph/graph.h"
+#include "shared/graph/igraphcomponent.h"
 #include "app/graph/graphmodel.h"
 
 #include "app/layout/nodepositions.h"
+
+#include "app/maths/plane.h"
+
+#include <QRect>
+#include <QString>
+#include <QVector3D>
+#include <QtGlobal>
 
 using namespace Qt::Literals::StringLiterals;
 

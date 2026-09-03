@@ -22,6 +22,11 @@
 
 #include "app/transform/graphtransform.h"
 
+#include <QObject>
+#include <QString>
+
+#include <memory>
+
 class RemoveLeavesTransform : public GraphTransform
 {
 public:

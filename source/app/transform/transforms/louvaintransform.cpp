@@ -26,10 +26,18 @@
 
 #include "app/graph/graphmodel.h"
 
+#include <QtGlobal>
+
 #include <map>
 #include <vector>
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <iterator>
+#include <numeric>
+#include <utility>
+#include <variant>
 
 using namespace Qt::Literals::StringLiterals;
 

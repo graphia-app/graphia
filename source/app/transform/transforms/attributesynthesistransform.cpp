@@ -24,10 +24,9 @@
 
 #include "shared/utils/typeidentity.h"
 
-#include <memory>
-
-#include <QObject>
 #include <QRegularExpression>
+
+#include <type_traits>
 
 using namespace Qt::Literals::StringLiterals;
 

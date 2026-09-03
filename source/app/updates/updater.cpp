@@ -31,26 +31,26 @@
 #include "shared/utils/checksum.h"
 #include "shared/utils/doasyncthen.h"
 
-#include <QStringList>
+#include <json_helper.h>
+
+#include <QByteArray>
 #include <QProcess>
 #include <QFile>
 #include <QDir>
-#include <QTimer>
 #include <QTemporaryFile>
 #include <QStandardPaths>
 #include <QFutureWatcher>
-
 #include <QUrl>
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QHttpMultiPart>
 #include <QHttpPart>
+#include <QRegularExpression>
+#include <QtGlobal>
 
 #include <iostream>
 #include <vector>
 #include <utility>
-
-#include <json_helper.h>
 
 using namespace Qt::Literals::StringLiterals;
 

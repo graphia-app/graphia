@@ -21,7 +21,8 @@
 
 #include <QFuture>
 #include <QtConcurrentRun>
-#include <QQmlEngine>
+#include <QString>
+#include <cstddef>
 
 using namespace Qt::Literals::StringLiterals;
 

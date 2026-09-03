@@ -21,9 +21,12 @@
 
 #include "shared/rendering/multisamples.h"
 
-#include <QQmlEngine>
+#include <QColor>
+#include <QString>
 
-#include <cmath>
+#include <algorithm>
+#include <limits>
+#include <utility>
 
 using namespace Qt::Literals::StringLiterals;
 

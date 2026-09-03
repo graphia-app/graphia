@@ -33,13 +33,18 @@
 #include "shared/graph/edgelist.h"
 #include "shared/graph/covariancematrix.h"
 
-#include <vector>
-#include <iterator>
-#include <cmath>
-
 #include <QObject>
 #include <QString>
 #include <QVariantMap>
+
+#include <algorithm>
+#include <atomic>
+#include <cstddef>
+#include <cstdint>
+#include <iterator>
+#include <memory>
+#include <type_traits>
+#include <utility>
 
 using namespace Qt::Literals::StringLiterals;
 

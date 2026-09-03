@@ -29,8 +29,14 @@
 #include "shared/utils/container.h"
 #include "shared/utils/string.h"
 
+#include <QObject>
 #include <QSet>
 #include <QtGlobal>
+
+#include <algorithm>
+#include <functional>
+#include <iterator>
+#include <utility>
 
 void NodeAttributeTableModel::initialise(IDocument* document, IUserNodeData* userNodeData)
 {

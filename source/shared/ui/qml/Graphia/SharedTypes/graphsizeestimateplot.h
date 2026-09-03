@@ -22,9 +22,9 @@
 
 #include <qcustomplotquickitem.h>
 
-#include <QObject>
 #include <QQmlEngine>
 #include <QQuickPaintedItem>
+#include <QVariantMap>
 #include <QVector>
 
 class GraphSizeEstimatePlot : public QCustomPlotQuickItem

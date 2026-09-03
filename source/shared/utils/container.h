@@ -23,11 +23,12 @@
 #include "pair_iterator.h"
 
 #include <algorithm>
+#include <cstddef>
+#include <iterator>
+#include <type_traits>
 #include <vector>
 #include <numeric>
 #include <concepts>
-
-#include <QtGlobal>
 
 namespace u
 {

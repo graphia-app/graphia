@@ -23,6 +23,7 @@
 #include "icommand.h"
 
 #include <QString>
+#include <QtGlobal>
 
 #include <functional>
 #include <type_traits>

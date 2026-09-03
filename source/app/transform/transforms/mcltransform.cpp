@@ -26,11 +26,23 @@
 
 #include <QElapsedTimer>
 #include <QDebug>
+#include <QtGlobal>
 
 #include <map>
 #include <set>
 #include <thread>
 #include <algorithm>
+#include <atomic>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <iterator>
+#include <limits>
+#include <sstream>
+#include <string>
+#include <utility>
+#include <variant>
+#include <vector>
 
 using namespace Qt::Literals::StringLiterals;
 

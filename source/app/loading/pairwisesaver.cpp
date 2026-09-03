@@ -25,9 +25,11 @@
 #include "shared/graph/imutablegraph.h"
 
 #include <QFile>
-#include <QRegularExpression>
-#include <QString>
+#include <QObject>
 #include <QTextStream>
+
+#include <algorithm>
+#include <cstddef>
 
 using namespace Qt::Literals::StringLiterals;
 

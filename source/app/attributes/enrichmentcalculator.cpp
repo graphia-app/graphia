@@ -19,21 +19,23 @@
 
 #include "enrichmentcalculator.h"
 
-#include <cmath>
-#include <set>
-#include <vector>
-#include <map>
-#include <random>
-#include <array>
-
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/igraph.h"
-#include "shared/commands/icommandmanager.h"
+#include "shared/commands/icommand.h"
 
 #include "shared/utils/container.h"
 #include "shared/utils/msvcwarningsuppress.h"
 
 #include "shared/attributes/iattribute.h"
+
+#include <QString>
+
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <cstdint>
+#include <map>
+#include <random>
 
 using namespace Qt::Literals::StringLiterals;
 

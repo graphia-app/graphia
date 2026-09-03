@@ -20,10 +20,11 @@
 #include "graphconsistencychecker.h"
 #include "graph.h"
 #include "graphcomponent.h"
-#include "componentmanager.h"
 
 #include "shared/graph/elementid_debug.h"
 #include "shared/utils/container.h"
+
+#include <QDebug>
 
 GraphConsistencyChecker::GraphConsistencyChecker(const Graph& graph) :
     _graph(&graph)

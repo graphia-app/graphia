@@ -22,12 +22,12 @@
 #include "application.h"
 #include "crashtype.h"
 
-#include "../crashhandler.h"
 #include "app/tracking.h"
 #include "app/preferences.h"
 
 #include "shared/plugins/iplugin.h"
 #include "shared/utils/container_combine.h"
+#include "shared/utils/container.h"
 #include "shared/utils/fatalerror.h"
 #include "shared/utils/thread.h"
 #include "shared/utils/scopetimer.h"
@@ -47,24 +47,23 @@
 #include "app/transform/graphtransformconfigparser.h"
 #include "app/ui/visualisations/visualisationconfigparser.h"
 
-#include <QString>
-#include <QStringList>
+#include "../crashhandler.h"
+
 #include <QDir>
 #include <QStandardPaths>
 #include <QMessageBox>
 #include <QDebug>
+#include <QVariantMap>
 #include <QApplication>
 #include <QClipboard>
-#include <QQmlEngine>
 
-#include <cmath>
-#include <memory>
 #include <iostream>
 #include <thread>
 #include <mutex>
 #include <chrono>
 #include <algorithm>
 #include <map>
+#include <cstddef>
 
 using namespace Qt::Literals::StringLiterals;
 

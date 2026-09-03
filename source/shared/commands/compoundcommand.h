@@ -26,9 +26,10 @@
 #include "shared/utils/container.h"
 
 #include <QObject>
+#include <QString>
 
-#include <memory>
-#include <vector>
+#include <algorithm>
+#include <utility>
 
 using namespace Qt::Literals::StringLiterals;
 

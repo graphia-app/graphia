@@ -25,6 +25,11 @@
 
 #include "shared/utils/redirects.h"
 
+#include <QObject>
+#include <QString>
+
+#include <memory>
+
 class AttributeSynthesisTransform : public GraphTransform
 {
 public:

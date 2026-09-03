@@ -24,11 +24,12 @@
 #include "shared/utils/container.h"
 #include "shared/rendering/multisamples.h"
 
-#include <QQmlEngine>
 #include <QtGlobal>
-
+#include <QColor>
+#include <algorithm>
+#include <cmath>
+#include <vector>
 #include <set>
-#include <iterator>
 
 using namespace Qt::Literals::StringLiterals;
 

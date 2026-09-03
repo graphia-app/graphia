@@ -25,6 +25,8 @@
 
 #include "json_helper.h"
 
+#include <QUrl>
+
 class CxParser : public JsonParser
 {
 private:

@@ -23,6 +23,8 @@
 #include "shared/loading/iparser.h"
 #include "json_helper.h"
 
+#include <QUrl>
+
 class IGraphModel;
 
 class JsonParser : public IParser

@@ -27,8 +27,7 @@
 #include <QNetworkAccessManager>
 #include <QString>
 #include <QStringList>
-
-#include <atomic>
+#include <QVariant>
 
 class QByteArray;
 class QNetworkReply;

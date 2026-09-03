@@ -18,4 +18,3 @@
  */
 
 #include "app/ui/qml/Graphia/Utils/preferences.h"
-

@@ -22,15 +22,20 @@
 #include "shared/utils/container.h"
 #include "app/preferences.h"
 
+#include <QBrush>
 #include <QTextLayout>
+#include <QList>
 #include <QPainter>
 #include <QDebug>
 #include <QGuiApplication>
 #include <QDir>
 #include <QPainterPath>
+#include <QPointF>
+#include <QRawFont>
+#include <QtGlobal>
 
-#include <memory>
 #include <algorithm>
+#include <utility>
 
 using namespace Qt::Literals::StringLiterals;
 

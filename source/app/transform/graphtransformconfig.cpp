@@ -18,14 +18,22 @@
  */
 
 #include "graphtransformconfig.h"
+
 #include "graphtransformconfigparser.h"
 
 #include "app/attributes/attribute.h"
 
 #include "shared/utils/container.h"
 
+#include <boost/variant/apply_visitor.hpp>
+
 #include <QObject>
+#include <QStringList>
+#include <QtGlobal>
 #include <QVariantList>
+
+#include <algorithm>
+#include <map>
 
 using namespace Qt::Literals::StringLiterals;
 

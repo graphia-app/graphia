@@ -22,7 +22,6 @@
 #include "shared/utils/source_location.h"
 
 #include <QFile>
-#include <QUrl>
 #include <QByteArray>
 #include <QDataStream>
 

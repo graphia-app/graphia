@@ -18,9 +18,12 @@
  */
 
 #include "nativeloader.h"
+
 #include "nativesaver.h"
 
 #include "app/application.h"
+#include "app/graph/graphmodel.h"
+#include "app/graph/mutablegraph.h"
 
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"
@@ -36,17 +39,23 @@
 #include "shared/loading/progress_iterator.h"
 #include "shared/loading/jsongraphparser.h"
 
-#include <QString>
-#include <QDataStream>
-#include <QRegularExpression>
-
-#include <vector>
-#include <thread>
-#include <chrono>
-
 #include <json_helper.h>
-
 #include <zlib.h>
+
+#include <QDataStream>
+#include <QDebug>
+#include <QFile>
+#include <QObject>
+#include <QRegularExpression>
+#include <QVector3D>
+#include <QtGlobal>
+
+#include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <cstdint>
+#include <string>
+#include <thread>
 
 static bool isCompressed(const QString& filePath)
 {

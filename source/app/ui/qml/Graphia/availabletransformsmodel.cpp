@@ -21,11 +21,11 @@
 
 #include "app/application.h"
 #include "app/graph/graphmodel.h"
-#include "app/preferences.h"
 
 #include "app/transform/graphtransform.h"
 
 #include <json_helper.h>
+#include <QString>
 
 using namespace Qt::Literals::StringLiterals;
 

@@ -25,8 +25,8 @@
 #include "compoundcommand.h"
 
 #include <memory>
-#include <vector>
 #include <type_traits>
+#include <utility>
 
 class QString;
 

@@ -23,8 +23,12 @@
 
 #include "shared/loading/userelementdata.h"
 
+#include <QObject>
+#include <QtGlobal>
+
 #include <algorithm>
 #include <iterator>
+#include <utility>
 
 using namespace Qt::Literals::StringLiterals;
 

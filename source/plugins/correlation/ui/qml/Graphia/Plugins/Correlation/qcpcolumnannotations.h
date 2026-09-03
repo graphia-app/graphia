@@ -20,17 +20,20 @@
 #ifndef QCPCOLUMNANNOTATIONS_H
 #define QCPCOLUMNANNOTATIONS_H
 
-#include <qcustomplot.h>
-
 #include "plugins/correlation/columnannotation.h"
 
 #include "shared/ui/visualisations/colorgradient.h"
 #include "shared/ui/visualisations/colorpalette.h"
 
+#include <qcustomplot.h>
+
 #include <QColor>
+#include <QPoint>
 #include <QRect>
 #include <QString>
+#include <QVariant>
 
+#include <cstddef>
 #include <vector>
 #include <map>
 

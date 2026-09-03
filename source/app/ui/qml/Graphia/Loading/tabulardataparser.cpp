@@ -28,8 +28,9 @@
 #include <QFileInfo>
 #include <QFuture>
 #include <QtConcurrentRun>
-#include <QQmlEngine>
-
+#include <QtGlobal>
+#include <functional>
+#include <utility>
 #include <map>
 
 using namespace Qt::Literals::StringLiterals;

@@ -19,32 +19,8 @@
 
 #include "build_defines.h"
 
-#include <QApplication>
-#include <QQmlApplicationEngine>
-#include <QQmlContext>
-#include <QIcon>
-#include <QFileInfo>
-#include <QHttpMultiPart>
-#include <QNetworkReply>
-#include <QNetworkRequest>
-#include <QNetworkAccessManager>
-#include <QUrl>
-#include <QSysInfo>
-#include <QMessageBox>
-#include <QCryptographicHash>
-#include <QDebug>
-#include <QTimer>
-#include <QDirIterator>
-#include <QCommandLineParser>
-#include <QQuickStyle>
-
-#include <iostream>
-#include <map>
-#include <string>
-#include <regex>
-#include <chrono>
-
 #include "report.h"
+
 #include "app/rendering/openglfunctions.h"
 #include "shared/utils/preferences.h"
 #include "shared/utils/static_block.h"
@@ -55,6 +31,38 @@
 #include <google_breakpad/processor/call_stack.h>
 #include <google_breakpad/processor/stack_frame.h>
 #include <processor/pathname_stripper.h>
+
+#include <QApplication>
+#include <QFile>
+#include <QObject>
+#include <QQmlApplicationEngine>
+#include <QQmlContext>
+#include <QIcon>
+#include <QFileInfo>
+#include <QHttpMultiPart>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QNetworkAccessManager>
+#include <QString>
+#include <QtGlobal>
+#include <QUrl>
+#include <QSysInfo>
+#include <QMessageBox>
+#include <QCryptographicHash>
+#include <QTimer>
+#include <QDirIterator>
+#include <QCommandLineParser>
+#include <QQuickStyle>
+#include <QVariant>
+
+#include <algorithm>
+#include <chrono>
+#include <cstddef>
+#include <iostream>
+#include <map>
+#include <regex>
+#include <string>
+#include <vector>
 
 using namespace Qt::Literals::StringLiterals;
 using namespace std::chrono_literals;

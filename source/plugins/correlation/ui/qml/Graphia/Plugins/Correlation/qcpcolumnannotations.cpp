@@ -25,6 +25,9 @@
 #include "shared/ui/visualisations/defaultgradients.h"
 #include "shared/ui/visualisations/defaultpalettes.h"
 
+#include <algorithm>
+#include <utility>
+
 QCPColumnAnnotations::QCPColumnAnnotations(QCPAxis* keyAxis, QCPAxis* valueAxis) :
     QCPAbstractPlottable(keyAxis, valueAxis),
     _colorGradient(Defaults::GRADIENT),

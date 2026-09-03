@@ -19,9 +19,10 @@
 
 #include "layoutsettings.h"
 
-#include <cmath>
-
 #include <QDebug>
+
+#include <algorithm>
+#include <cmath>
 
 using namespace Qt::Literals::StringLiterals;
 

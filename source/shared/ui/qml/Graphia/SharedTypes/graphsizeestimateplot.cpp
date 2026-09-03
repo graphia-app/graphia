@@ -23,11 +23,15 @@
 #include "shared/utils/string.h"
 #include "shared/rendering/multisamples.h"
 
-#include <QVariantMap>
-#include <QVector>
+#include <QColor>
 #include <QGuiApplication>
+#include <QString>
 
 #include <algorithm>
+#include <cmath>
+#include <cstddef>
+#include <limits>
+#include <utility>
 
 using namespace Qt::Literals::StringLiterals;
 

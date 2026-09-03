@@ -25,7 +25,7 @@
 #include "shared/loading/tabulardata.h"
 
 #include <QVariantMap>
-#include <QPoint>
+#include <QQmlEngine>
 
 template<typename> class IUserElementData;
 using IUserNodeData = IUserElementData<NodeId>;

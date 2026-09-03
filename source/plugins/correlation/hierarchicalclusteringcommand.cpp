@@ -23,10 +23,13 @@
 #include "correlationdatavector.h"
 #include "correlation.h"
 
-#include <vector>
-#include <limits>
+#include <QtGlobal>
 
-#include <QObject>
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
+#include <numeric>
+#include <limits>
 
 class Unions
 {

@@ -21,6 +21,8 @@
 
 #include "shared/utils/container.h"
 
+#include <algorithm>
+
 QStringList UserDataVector::toStringList() const
 {
     QStringList list;

@@ -22,9 +22,7 @@
 
 #include "shared/commands/icommand.h"
 
-#include "shared/graph/elementid.h"
-#include "shared/graph/elementid_containers.h"
-
+#include <QString>
 #include <QStringList>
 
 class GraphModel;

@@ -23,7 +23,10 @@
 #include "app/transform/graphtransform.h"
 #include "app/attributes/attribute.h"
 
-#include <vector>
+#include <QObject>
+#include <QString>
+
+#include <memory>
 
 class ConditionalAttributeTransform : public GraphTransform
 {

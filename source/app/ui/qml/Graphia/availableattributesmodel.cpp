@@ -23,8 +23,9 @@
 
 #include "app/graph/graphmodel.h"
 
-#include "shared/graph/elementtype.h"
 #include "shared/utils/container.h"
+#include <QtGlobal>
+#include <utility>
 
 using namespace Qt::Literals::StringLiterals;
 

@@ -23,21 +23,29 @@
 #include "shared/graph/elementid.h"
 #include "shared/graph/elementtype.h"
 #include "shared/attributes/iattribute.h"
-#include "shared/graph/igraphcomponent.h"
 #include "shared/utils/flags.h"
 #include "shared/utils/statistics.h"
 #include "shared/utils/string.h"
 
 #include "shared/attributes/valuetype.h"
 
+#include <QString>
+#include <QStringList>
+#include <QVariantMap>
+#include <QtGlobal>
+
+#include <algorithm>
 #include <functional>
+#include <iterator>
 #include <limits>
 #include <vector>
 #include <tuple>
 #include <map>
+#include <type_traits>
+#include <variant>
 
-#include <QString>
-
+class IGraph;
+class IGraphComponent;
 class Attribute;
 
 template<typename T> class AttributeRange

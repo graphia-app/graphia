@@ -20,14 +20,16 @@
 #include "graphdisplay.h"
 
 #include "app/graph/graph.h"
+#include "shared/graph/igraphcomponent.h"
 #include "app/graph/graphmodel.h"
 
 #include "app/rendering/graphrenderer.h"
 
 #include "app/commands/commandmanager.h"
-
-#include <QQmlEngine>
 #include <QtGlobal>
+#include <QUrl>
+#include <algorithm>
+#include <iterator>
 
 GraphDisplay::GraphDisplay(QQuickItem* parent) :
     QQuickFramebufferObject(parent)

@@ -24,22 +24,18 @@
 
 #include "app/rendering/camera.h"
 #include "app/rendering/graphcomponentrenderer.h"
-#include "app/rendering/graphcomponentscene.h"
 #include "app/rendering/graphrenderer.h"
 
 #include "app/graph/graph.h"
 #include "app/graph/graphmodel.h"
 
-#include "app/maths/boundingsphere.h"
 #include "app/maths/frustum.h"
-#include "app/maths/plane.h"
 
 #include "app/layout/collision.h"
 
 #include <QMouseEvent>
 #include <QKeyEvent>
 #include <QtMath>
-#include <cmath>
 
 GraphComponentInteractor::GraphComponentInteractor(GraphModel* graphModel,
                                                    GraphComponentScene* graphComponentScene,

@@ -26,7 +26,6 @@
 #include "shared/graph/imutablegraph.h"
 
 #include "shared/loading/graphsizeestimate.h"
-#include "shared/loading/tabulardata.h"
 #include "shared/loading/xlsxtabulardataparser.h"
 
 #include "shared/utils/container.h"
@@ -34,11 +33,13 @@
 #include "shared/utils/string.h"
 #include "shared/utils/scope_exit.h"
 
-#include <QRect>
+#include <QDebug>
+#include <QtGlobal>
 
+#include <algorithm>
+#include <numeric>
 #include <vector>
 #include <set>
-#include <utility>
 #include <limits>
 #include <span>
 

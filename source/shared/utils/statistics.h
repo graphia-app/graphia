@@ -20,6 +20,9 @@
 #ifndef STATISTICS_H
 #define STATISTICS_H
 
+#include <cstddef>
+#include <iterator>
+#include <utility>
 #include <vector>
 #include <limits>
 #include <algorithm>

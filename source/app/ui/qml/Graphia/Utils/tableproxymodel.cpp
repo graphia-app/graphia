@@ -23,6 +23,10 @@
 
 #include "shared/utils/container.h"
 #include "shared/utils/string.h"
+#include <QList>
+#include <QMetaType>
+#include <QtGlobal>
+#include <algorithm>
 
 bool TableProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
 {

@@ -22,7 +22,11 @@
 
 #include "isaver.h"
 
+#include <QByteArray>
 #include <QString>
+#include <QUrl>
+
+#include <memory>
 
 class Document;
 class IGraphModel;

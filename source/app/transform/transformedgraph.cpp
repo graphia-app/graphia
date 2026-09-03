@@ -19,15 +19,12 @@
 
 #include "transformedgraph.h"
 
-#include "app/graph/componentmanager.h"
 #include "app/graph/graphmodel.h"
 
 #include "shared/commands/icommand.h"
 #include "shared/utils/container.h"
 #include "shared/utils/container_combine.h"
 #include "shared/utils/string.h"
-
-#include <functional>
 
 TransformedGraph::TransformedGraph(GraphModel& graphModel, const MutableGraph& source) :
     _graphModel(&graphModel),

@@ -24,9 +24,11 @@
 #include "shared/utils/container.h"
 
 #include <QObject>
+#include <QString>
 
-#include <memory>
+#include <cstddef>
 #include <mutex>
+#include <vector>
 
 class GraphModel;
 

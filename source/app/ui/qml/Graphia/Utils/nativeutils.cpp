@@ -30,17 +30,17 @@
 #include "shared/utils/showinfolder.h"
 #include "shared/attributes/iattribute.h"
 
-#include <QObject>
-#include <QUrl>
-#include <QDebug>
 #include <QFileInfo>
-#include <QByteArray>
 #include <QTemporaryDir>
 #include <QFile>
 #include <QDir>
 #include <QCryptographicHash>
 #include <QAbstractListModel>
 #include <QKeySequence>
+#include <QRegularExpression>
+#include <QtGlobal>
+#include <algorithm>
+#include <iterator>
 
 QString NativeUtils::baseFileNameForUrl(const QUrl& url) const
 {

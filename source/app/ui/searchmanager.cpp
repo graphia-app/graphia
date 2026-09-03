@@ -28,6 +28,8 @@
 #include <QRegularExpression>
 
 #include <algorithm>
+#include <utility>
+#include <vector>
 
 using namespace Qt::Literals::StringLiterals;
 

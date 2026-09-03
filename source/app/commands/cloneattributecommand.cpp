@@ -25,7 +25,11 @@
 #include "shared/utils/string.h"
 
 #include "shared/loading/userelementdata.h"
-#include "shared/loading/userdatavector.h"
+
+#include <QObject>
+#include <QtGlobal>
+
+#include <type_traits>
 
 using namespace Qt::Literals::StringLiterals;
 

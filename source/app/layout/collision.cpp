@@ -23,8 +23,11 @@
 #include "app/graph/graphmodel.h"
 #include "app/ui/visualisations/elementvisual.h"
 
-#include "app/maths/ray.h"
 #include "app/maths/plane.h"
+
+#include <QtGlobal>
+
+#include <limits>
 
 NodeId Collision::nodeClosestToLine(const std::vector<NodeId>& nodeIds, const QVector3D &point, const QVector3D &direction)
 {

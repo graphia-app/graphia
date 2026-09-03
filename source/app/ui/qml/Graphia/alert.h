@@ -26,7 +26,6 @@
 
 #include <vector>
 #include <map>
-#include <utility>
 
 DEFINE_QML_ENUM(AlertType,
     None,

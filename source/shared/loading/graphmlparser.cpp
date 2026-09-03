@@ -20,14 +20,15 @@
 #include "graphmlparser.h"
 
 #include "shared/graph/igraphmodel.h"
-#include "shared/graph/elementid_debug.h"
 #include "shared/graph/imutablegraph.h"
 #include "shared/utils/container.h"
 
+#include <QObject>
+#include <QString>
+#include <QtGlobal>
 #include <QXmlStreamReader>
 #include <QFile>
 #include <QDebug>
-#include <QUrl>
 
 #include <stack>
 #include <map>

@@ -20,9 +20,10 @@
 #ifndef BOUNDINGSPHERE_H
 #define BOUNDINGSPHERE_H
 
-#include <QVector3D>
-
 #include "line.h"
+
+#include <QVector3D>
+#include <QtGlobal>
 
 #include <vector>
 #include <numbers>

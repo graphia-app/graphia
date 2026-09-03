@@ -21,31 +21,26 @@
 #define LAYOUT_H
 
 #include "shared/graph/igraphcomponent.h"
+#include "shared/graph/elementid.h"
 #include "shared/graph/elementid_containers.h"
 #include "app/graph/componentmanager.h"
 #include "nodepositions.h"
 
 #include "shared/utils/performancecounter.h"
 #include "shared/utils/cancellable.h"
-#include "shared/utils/enumbitmask.h"
 
 #include "layoutsettings.h"
 
-#include <QVector2D>
-#include <QVector3D>
 #include <QObject>
+#include <QString>
+#include <QtGlobal>
 
+#include <cstddef>
 #include <memory>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
-#include <atomic>
-
-#include <algorithm>
-#include <limits>
-#include <cstdint>
-#include <set>
-#include <map>
+#include <vector>
 
 struct LayoutSettingKeyValue
 {

@@ -21,8 +21,6 @@
 
 #include "shared/utils/thread.h"
 
-#include <QtGlobal>
-
 using namespace Qt::Literals::StringLiterals;
 
 ThreadPool::ThreadPool(const QString& threadNamePrefix, unsigned int numThreads)

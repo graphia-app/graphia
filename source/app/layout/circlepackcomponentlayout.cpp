@@ -33,15 +33,15 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "circlepackcomponentlayout.h"
 
 #include "app/graph/graph.h"
-#include "app/graph/graphcomponent.h"
-#include "app/graph/componentmanager.h"
+#include "shared/graph/igraphcomponent.h"
 
 #include "app/preferences.h"
 
-#include <QVariant>
+#include <QString>
 
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
 
 using namespace Qt::Literals::StringLiterals;
 

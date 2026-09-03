@@ -22,6 +22,8 @@
 
 #include <QtGlobal>
 
+#include <cstddef>
+
 #ifdef Q_OS_WIN
 #include <Windows.h>
 #undef min

@@ -26,8 +26,10 @@
 #include "graph.h"
 #include "graphcomponent.h"
 
-#include <map>
-#include <queue>
+#include <QDebug>
+
+#include <chrono>
+#include <iterator>
 
 ComponentManager::ComponentManager(Graph& graph,
                                    const NodeConditionFn& nodeFilter,
@@ -522,8 +524,6 @@ void ComponentManager::onGraphChanged(const Graph* graph, bool changeOccurred)
     if(_enabled && changeOccurred)
         update(graph);
 }
-
-#include <chrono>
 
 template<typename T> class unique_lock_with_warning
 {

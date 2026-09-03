@@ -20,12 +20,10 @@
 #include "document.h"
 
 #include "app/application.h"
-#include "app/preferences.h"
 #include "app/limitconstants.h"
 
 #include "app/attributes/enrichmentcalculator.h"
 
-#include "shared/plugins/iplugin.h"
 #include "shared/utils/flags.h"
 #include "shared/utils/color.h"
 #include "shared/utils/string.h"
@@ -35,13 +33,11 @@
 #include "app/graph/mutablegraph.h"
 #include "app/graph/graphmodel.h"
 
-#include "app/loading/parserthread.h"
 #include "app/loading/nativeloader.h"
 #include "app/loading/nativesaver.h"
 #include "app/loading/isaver.h"
 
 #include "app/layout/forcedirectedlayout.h"
-#include "app/layout/layout.h"
 #include "app/layout/collision.h"
 
 #include "app/commands/applytransformscommand.h"
@@ -59,7 +55,6 @@
 #include "app/ui/visualisations/visualisationconfigparser.h"
 
 #include "app/attributes/conditionfncreator.h"
-#include "app/attributes/attributeedits.h"
 
 #include "app/ui/searchmanager.h"
 #include "app/ui/selectionmanager.h"
@@ -70,9 +65,6 @@
 #include "../crashhandler.h"
 
 #include <json_helper.h>
-#include <numeric>
-#include <thread>
-#include <chrono>
 
 #include <QQmlProperty>
 #include <QMetaObject>
@@ -81,11 +73,23 @@
 #include <QMessageBox>
 #include <QApplication>
 #include <QElapsedTimer>
-#include <QVariantList>
 #include <QVector>
 #include <QClipboard>
-#include <QQmlEngine>
 #include <QThread>
+#include <QDebug>
+#include <QMetaType>
+#include <QRegularExpression>
+#include <QVector3D>
+#include <QtGlobal>
+
+#include <thread>
+#include <chrono>
+#include <algorithm>
+#include <cstdint>
+#include <functional>
+#include <iterator>
+#include <set>
+#include <utility>
 
 using namespace Qt::Literals::StringLiterals;
 

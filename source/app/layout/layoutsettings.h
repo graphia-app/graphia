@@ -20,14 +20,10 @@
 #ifndef LAYOUTSETTINGS_H
 #define LAYOUTSETTINGS_H
 
-#include "shared/utils/utils.h"
-
 #include <QObject>
 #include <QString>
 
 #include <vector>
-#include <utility>
-#include <algorithm>
 
 enum class LayoutSettingScaleType { Linear, Log };
 

@@ -19,11 +19,11 @@
 
 #include "fastinitiallayout.h"
 
-#include <QMatrix4x4>
 #include <QVector4D>
 
 #include <cmath>
 #include <numbers>
+#include <queue>
 
 void FastInitialLayout::positionNode(QVector3D& offsetPosition, const QMatrix4x4& orientationMatrix,
                                      const QVector3D& parentNodePosition, NodeId childNodeId,

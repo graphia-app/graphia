@@ -24,7 +24,7 @@
 
 #include <QDebug>
 
-#include <thread>
+#include <cstddef>
 
 using namespace Qt::Literals::StringLiterals;
 

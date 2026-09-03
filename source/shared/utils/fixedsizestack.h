@@ -21,7 +21,7 @@
 #define FIXEDSIZESTACK_H
 
 #include <vector>
-
+#include <cstddef>
 #include <cstdlib>
 #include <cassert>
 

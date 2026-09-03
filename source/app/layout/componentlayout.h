@@ -20,10 +20,13 @@
 #ifndef COMPONENTLAYOUT_H
 #define COMPONENTLAYOUT_H
 
+#include "shared/graph/elementid.h"
 #include "shared/graph/grapharray.h"
 #include "app/maths/circle.h"
 
 #include <QRectF>
+
+#include <vector>
 
 using ComponentLayoutData = ComponentArray<Circle>;
 

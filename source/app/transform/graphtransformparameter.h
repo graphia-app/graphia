@@ -26,8 +26,7 @@
 #include <QVariant>
 
 #include <limits>
-#include <map>
-#include <utility>
+#include <vector>
 
 class GraphTransformParameter
 {

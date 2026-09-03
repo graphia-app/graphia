@@ -20,10 +20,9 @@
 #ifndef WASMLOCALFILEACCESS_H
 #define WASMLOCALFILEACCESS_H
 
-#include <QObject>
-#include <QQmlEngine>
 #include <QStringList>
 #include <QUrl>
+#include <QString>
 #include <QQuickItem>
 #include <QQmlEngine>
 

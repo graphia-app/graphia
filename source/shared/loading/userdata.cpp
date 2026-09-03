@@ -22,6 +22,12 @@
 #include "shared/utils/container.h"
 
 #include <QDebug>
+#include <QtGlobal>
+
+#include <algorithm>
+#include <cstdint>
+#include <string>
+#include <utility>
 
 QString UserData::firstVectorName() const
 {

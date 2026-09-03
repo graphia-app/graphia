@@ -25,8 +25,9 @@
 
 #include <QSettings>
 #include <QCoreApplication>
-#include <QtGlobal>
 #include <QRegularExpression>
+#include <QMetaType>
+#include <QtGlobal>
 
 using namespace Qt::Literals::StringLiterals;
 

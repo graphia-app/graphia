@@ -24,10 +24,13 @@
 
 #include "shared/utils/statistics.h"
 
+#include <QString>
+
 #include <vector>
 #include <limits>
-
-#include <QString>
+#include <cstddef>
+#include <map>
+#include <utility>
 
 class VisualisationInfo
 {

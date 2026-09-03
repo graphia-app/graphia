@@ -20,6 +20,9 @@
 #include "rectangle.h"
 
 #include <array>
+#include <cstddef>
+#include <iterator>
+#include <vector>
 
 namespace Primitive
 {

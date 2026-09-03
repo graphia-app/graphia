@@ -23,6 +23,8 @@
 #include "shared/loading/iparser.h"
 #include "shared/loading/iuserelementdata.h"
 
+#include <QUrl>
+
 class GmlFileParser : public IParser
 {
 private:

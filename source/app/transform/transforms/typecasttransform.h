@@ -23,6 +23,12 @@
 #include "app/transform/graphtransform.h"
 #include "app/attributes/attribute.h"
 
+#include <QObject>
+#include <QString>
+#include <QStringList>
+
+#include <memory>
+
 class TypeCastTransform : public GraphTransform
 {
 public:

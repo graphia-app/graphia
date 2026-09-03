@@ -19,12 +19,17 @@
 
 #include "correlationplot.h"
 
-#include "shared/utils/color.h"
-
 #include "shared/ui/visualisations/colorpalette.h"
 #include "shared/ui/visualisations/defaultpalettes.h"
 
+#include <QColor>
+#include <QString>
+
+#include <algorithm>
+#include <cstddef>
 #include <map>
+#include <utility>
+#include <vector>
 
 using namespace Qt::Literals::StringLiterals;
 

@@ -23,6 +23,7 @@
 #include "shared/graph/elementid.h"
 #include "igrapharrayclient.h"
 
+#include <cstddef>
 #include <vector>
 
 class QString;

@@ -27,9 +27,11 @@
 
 #include <QString>
 #include <QVariantMap>
+#include <QtGlobal>
 
 #include <vector>
 #include <map>
+#include <cstddef>
 
 class VisualisationInfo;
 class GraphModel;

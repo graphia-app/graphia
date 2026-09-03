@@ -20,8 +20,8 @@
 #ifndef HOVERMOUSEPASSTHROUGH_H
 #define HOVERMOUSEPASSTHROUGH_H
 
-#include <QObject>
 #include <QQuickItem>
+#include <QQmlEngine>
 
 class QHoverEvent;
 

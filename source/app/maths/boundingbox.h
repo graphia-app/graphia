@@ -24,6 +24,7 @@
 
 #include <QVector2D>
 #include <QVector3D>
+#include <QtGlobal>
 
 #include <vector>
 

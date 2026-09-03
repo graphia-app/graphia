@@ -20,8 +20,12 @@
 #ifndef GMLEXPORTER_H
 #define GMLEXPORTER_H
 
-#include "app/graph/graphmodel.h"
 #include "app/loading/saverfactory.h"
+
+#include <QString>
+#include <QUrl>
+
+class IGraphModel;
 
 using namespace Qt::Literals::StringLiterals;
 

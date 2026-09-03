@@ -24,6 +24,8 @@
 #include <QFileInfo>
 #include <QtGlobal>
 
+#include <iostream>
+
 using namespace Qt::Literals::StringLiterals;
 
 // This is quite complicated from a control flow/threading point of view and

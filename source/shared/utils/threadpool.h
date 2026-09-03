@@ -27,12 +27,14 @@
 #include "void_callable_wrapper.h"
 
 #include <QString>
+#include <QtGlobal>
 
 #include <algorithm>
-#include <atomic>
 #include <condition_variable>
+#include <cstddef>
+#include <cstdint>
 #include <future>
-#include <memory>
+#include <iterator>
 #include <mutex>
 #include <queue>
 #include <thread>

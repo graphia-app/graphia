@@ -21,8 +21,8 @@
 
 #include "ray.h"
 
+#include <algorithm>
 #include <cmath>
-#include <vector>
 #include <numeric>
 
 BoundingSphere::BoundingSphere(QVector3D centre, float radius) :

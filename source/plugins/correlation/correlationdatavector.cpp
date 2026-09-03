@@ -19,11 +19,6 @@
 
 #include "correlationdatavector.h"
 
-#include "shared/utils/container.h"
-
-#include <algorithm>
-#include <cmath>
-
 void ContinuousDataVector::update()
 {
     _statistics = u::findStatisticsFor(_data);

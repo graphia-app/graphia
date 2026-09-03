@@ -23,6 +23,8 @@
 
 #include <xlsxio/include/xlsxio_read.h>
 
+#include <QObject>
+
 XlsxTabularDataParser::XlsxTabularDataParser(IParser* parent)
 {
     if(parent != nullptr)

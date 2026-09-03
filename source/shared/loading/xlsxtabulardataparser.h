@@ -25,6 +25,8 @@
 
 #include <QUrl>
 
+#include <cstddef>
+
 class XlsxTabularDataParser : public IParser
 {
 private:

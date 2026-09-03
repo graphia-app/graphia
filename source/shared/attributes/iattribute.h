@@ -27,12 +27,14 @@
 #include "shared/graph/elementid.h"
 #include "shared/graph/elementtype.h"
 
+#include <QString>
+#include <QStringList>
+#include <QVariant>
+#include <QVariantMap>
+
 #include <functional>
 #include <vector>
 #include <variant>
-
-#include <QString>
-#include <QVariant>
 
 class IGraphComponent;
 

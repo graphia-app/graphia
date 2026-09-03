@@ -21,7 +21,9 @@
 #include "ray.h"
 
 #include <algorithm>
+#include <array>
 #include <cmath>
+#include <cstddef>
 #include <limits>
 
 BoundingBox2D::BoundingBox2D(const QVector2D& min, const QVector2D& max) :

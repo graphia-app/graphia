@@ -27,6 +27,7 @@
 #include <QObject>
 #include <QSet>
 #include <QRegularExpression>
+#include <QtGlobal>
 
 #include <utility>
 

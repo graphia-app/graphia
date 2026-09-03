@@ -25,7 +25,10 @@
 
 #include "shared/utils/redirects.h"
 
-#include <vector>
+#include <QObject>
+#include <QString>
+
+#include <memory>
 
 class ContractByAttributeTransform : public GraphTransform
 {

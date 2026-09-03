@@ -17,10 +17,11 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "failurereason.h"
-#include "source_location.h"
-
 #include "build_defines.h"
+
+#include "failurereason.h"
+
+#include "source_location.h"
 
 using namespace Qt::Literals::StringLiterals;
 

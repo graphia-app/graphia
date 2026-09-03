@@ -19,6 +19,10 @@
 
 #include "correlation.h"
 
+#include <cmath>
+#include <numeric>
+#include <vector>
+
 std::unique_ptr<ContinuousCorrelation> ContinuousCorrelation::create(CorrelationType correlationType,
     CorrelationFilterType correlationFilterType)
 {

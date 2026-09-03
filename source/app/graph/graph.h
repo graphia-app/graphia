@@ -27,12 +27,15 @@
 #include "graphconsistencychecker.h"
 
 #include <QObject>
+#include <QtGlobal>
 
+#include <cstddef>
 #include <vector>
 #include <unordered_set>
 #include <memory>
 #include <mutex>
 #include <algorithm>
+#include <iterator>
 
 class ComponentManager;
 class ComponentSplitSet;

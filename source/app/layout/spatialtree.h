@@ -21,20 +21,24 @@
 #define SPATIALTREE_H
 
 #include "shared/graph/igraphcomponent.h"
+#include "shared/graph/elementid.h"
 #include "app/maths/boundingbox.h"
 #include "nodepositions.h"
 #include "shared/utils/scopetimer.h"
 #include "shared/utils/threadpool.h"
 
 #include <QVector3D>
-#include <QColor>
+#include <QtGlobal>
 
-#include <functional>
+#include <algorithm>
+#include <cstddef>
+#include <iterator>
+#include <type_traits>
+#include <utility>
 #include <vector>
 #include <memory>
 #include <stack>
 #include <array>
-#include <cstdlib>
 
 class AbstractSpatialTree
 {

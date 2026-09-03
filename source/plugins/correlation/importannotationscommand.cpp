@@ -26,6 +26,11 @@
 
 #include "../crashhandler.h"
 
+#include <QObject>
+
+#include <map>
+#include <utility>
+
 using namespace Qt::Literals::StringLiterals;
 
 ImportAnnotationsCommand::ImportAnnotationsCommand(CorrelationPluginInstance* plugin,

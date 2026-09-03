@@ -26,6 +26,9 @@
 #include <QDebug>
 #include <QString>
 
+#include <utility>
+#include <vector>
+
 using namespace Qt::Literals::StringLiterals;
 
 template<typename T> QDebug operator<<(QDebug d, const ElementId<T>& id)

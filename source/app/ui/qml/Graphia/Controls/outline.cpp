@@ -21,6 +21,7 @@
 
 #include <QPainter>
 #include <QQuickWindow>
+#include <QRectF>
 #include <QtGlobal>
 
 Outline::Outline(QQuickItem* parent) : QQuickPaintedItem(parent)

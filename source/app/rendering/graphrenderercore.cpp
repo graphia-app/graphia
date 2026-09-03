@@ -27,9 +27,18 @@
 
 #include "app/ui/document.h"
 
+#include <QByteArray>
 #include <QColor>
+#include <QDebug>
 #include <QDir>
+#include <QImage>
 #include <QOpenGLContext>
+#include <QPoint>
+#include <QString>
+#include <QVector3D>
+#include <QtGlobal>
+
+#include <algorithm>
 
 using namespace Qt::Literals::StringLiterals;
 

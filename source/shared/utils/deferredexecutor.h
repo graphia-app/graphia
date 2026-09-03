@@ -20,15 +20,15 @@
 #ifndef DEFERREDEXECUTOR_H
 #define DEFERREDEXECUTOR_H
 
+#include <QString>
+
+#include <cstddef>
 #include <mutex>
-#include <atomic>
 #include <deque>
 #include <functional>
 #include <thread>
 #include <condition_variable>
 #include <map>
-
-#include <QString>
 
 class DeferredExecutor
 {

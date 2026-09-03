@@ -20,9 +20,9 @@
 #ifndef RAY_H
 #define RAY_H
 
-#include <QVector3D>
-
 #include "line.h"
+
+#include <QVector3D>
 
 #include <array>
 

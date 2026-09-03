@@ -25,11 +25,10 @@
 #include "shared/utils/scope_exit.h"
 #include "shared/utils/doasyncthen.h"
 
-#include <QString>
 #include <QFile>
 #include <QFutureWatcher>
-
-#include <iostream>
+#include <QStringList>
+#include <QtGlobal>
 
 using namespace Qt::Literals::StringLiterals;
 

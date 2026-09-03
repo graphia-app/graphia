@@ -23,9 +23,7 @@
 
 #include "app/graph/graphmodel.h"
 
-#include <algorithm>
-
-#include <QObject>
+#include <type_traits>
 
 using namespace Qt::Literals::StringLiterals;
 

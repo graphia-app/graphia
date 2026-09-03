@@ -22,7 +22,6 @@
 
 #include "correlationdatavector.h"
 
-#include <vector>
 #include <cstdlib>
 
 class Cancellable;

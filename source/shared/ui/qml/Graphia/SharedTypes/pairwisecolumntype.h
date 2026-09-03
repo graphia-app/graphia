@@ -22,6 +22,11 @@
 
 #include "shared/utils/qmlenum.h"
 
+#include <QString>
+
+#include <cstddef>
+#include <map>
+
 DEFINE_QML_ENUM(PairwiseColumnType,
     Unused,
     SourceNode,

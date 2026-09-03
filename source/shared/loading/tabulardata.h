@@ -35,8 +35,11 @@
 #include <QUrl>
 #include <QRect>
 
+#include <algorithm>
+#include <cstddef>
+#include <cstdint>
 #include <fstream>
-#include <iostream>
+#include <iterator>
 #include <string>
 #include <vector>
 #include <limits>

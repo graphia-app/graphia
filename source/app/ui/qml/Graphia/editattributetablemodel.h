@@ -25,11 +25,12 @@
 #include "shared/graph/elementid.h"
 #include "shared/attributes/iattribute.h"
 
-#include <QObject>
 #include <QQmlEngine>
 #include <QString>
 #include <QAbstractTableModel>
 #include <QVariant>
+#include <QByteArray>
+#include <QHash>
 
 #include <vector>
 #include <map>

@@ -26,7 +26,6 @@
 #include <QStringList>
 
 #include <map>
-#include <utility>
 
 class QUrl;
 

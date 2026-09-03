@@ -22,6 +22,9 @@
 #include "shared/utils/container.h"
 
 #include <QObject>
+#include <QVariantList>
+
+#include <map>
 
 using namespace Qt::Literals::StringLiterals;
 

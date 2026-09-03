@@ -27,6 +27,7 @@
 #include <QString>
 #include <QVariant>
 
+#include <cstddef>
 #include <vector>
 
 template<typename E>

@@ -18,6 +18,7 @@
  */
 
 #include "nativesaver.h"
+
 #include "jsongraphsaver.h"
 
 #include "shared/graph/grapharray_json.h"
@@ -28,16 +29,24 @@
 #include "shared/utils/string.h"
 #include "shared/loading/userelementdata.h"
 
+#include "app/attributes/enrichmenttablemodel.h"
 #include "app/graph/graphmodel.h"
 #include "app/graph/mutablegraph.h"
+#include "app/ui/document.h"
+
+#include <zlib.h>
 
 #include <QDataStream>
 #include <QFile>
-#include <QStringList>
+#include <QMetaType>
+#include <QObject>
+#include <QtGlobal>
 
+#include <algorithm>
+#include <cstddef>
+#include <cstdint>
+#include <iterator>
 #include <vector>
-
-#include <zlib.h>
 
 const int NativeSaver::Version = 8;
 const int NativeSaver::MaxHeaderSize = 1 << 12;

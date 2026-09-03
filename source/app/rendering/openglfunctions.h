@@ -27,8 +27,7 @@
 #endif
 
 #include <QString>
-
-#include <memory>
+#include <QSurfaceFormat>
 
 // MacOS's glext.h is rubbish
 #if !defined(GL_APIENTRY) && defined(APIENTRY)

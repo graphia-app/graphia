@@ -25,13 +25,15 @@
 #include "shared/loading/iuserelementdata.h"
 
 #include <QAbstractTableModel>
+#include <QByteArray>
+#include <QString>
 #include <QStringList>
 #include <QHash>
-#include <QObject>
+#include <QVariant>
 
+#include <cstddef>
 #include <vector>
 #include <mutex>
-#include <deque>
 
 class Graph;
 class IGraph;

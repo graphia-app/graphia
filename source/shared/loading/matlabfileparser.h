@@ -25,6 +25,13 @@
 
 #include <matio.h>
 
+#include <QString>
+#include <QtGlobal>
+#include <QUrl>
+
+#include <cstddef>
+#include <cstdint>
+
 class MatLabFileParser : public IParser
 {
 private:

@@ -24,6 +24,7 @@
 
 #include <QQmlEngine>
 #include <QQuickPaintedItem>
+#include <QColor>
 
 class Outline : public QQuickPaintedItem
 {

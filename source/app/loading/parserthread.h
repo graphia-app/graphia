@@ -25,8 +25,10 @@
 #include "shared/utils/failurereason.h"
 
 #include <QObject>
+#include <QString>
 #include <QUrl>
 
+#include <memory>
 #include <thread>
 
 class GraphModel;

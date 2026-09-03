@@ -27,7 +27,9 @@
 #include <QString>
 #include <QPoint>
 
-#include <map>
+#include <algorithm>
+#include <cstddef>
+#include <vector>
 
 namespace AdjacencyMatrixUtils
 {

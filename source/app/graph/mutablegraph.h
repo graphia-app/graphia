@@ -25,6 +25,7 @@
 #include "shared/graph/imutablegraph.h"
 #include "shared/graph/undirectededge.h"
 
+#include <cstddef>
 #include <deque>
 #include <mutex>
 #include <vector>

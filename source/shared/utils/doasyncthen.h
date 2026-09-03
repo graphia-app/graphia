@@ -20,11 +20,13 @@
 #ifndef DOASYNCTHEN_H
 #define DOASYNCTHEN_H
 
+#include <QObject>
 #include <QtConcurrentRun>
 #include <QFuture>
 #include <QFutureWatcher>
 
 #include <type_traits>
+#include <utility>
 
 namespace u
 {

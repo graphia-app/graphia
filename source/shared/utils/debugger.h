@@ -22,6 +22,7 @@
 
 #include "shared/utils/thread.h"
 
+#include <QString>
 #include <QtGlobal>
 
 #include <vector>

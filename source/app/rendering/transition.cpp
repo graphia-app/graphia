@@ -20,9 +20,6 @@
 #include "transition.h"
 
 #include "app/maths/interpolation.h"
-#include "shared/utils/utils.h"
-
-#include <QDebug>
 
 #include <algorithm>
 

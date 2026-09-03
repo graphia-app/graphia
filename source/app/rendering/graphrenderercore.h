@@ -33,9 +33,11 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
 #include <QRect>
+#include <QSize>
 #include <QMatrix4x4>
 
 #include <array>
+#include <cstddef>
 #include <vector>
 
 class ScreenshotRenderer;

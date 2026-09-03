@@ -23,6 +23,7 @@
 #include "shared/utils/flags.h"
 
 #include <QColor>
+#include <QString>
 
 enum class VisualFlags
 {

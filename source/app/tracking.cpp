@@ -37,9 +37,10 @@
 #include <QRegularExpression>
 #include <QSysInfo>
 #include <QEventLoop>
+#include <QtGlobal>
 #include <QTimer>
 #include <QString>
-#include <QStringList>
+#include <QVariant>
 #include <QObject>
 #include <QLocale>
 #include <QDebug>
@@ -142,7 +143,6 @@ static QString anonymousIdentity()
 
 #ifdef Q_OS_WASM
 #include <emscripten.h>
-
 #include <cstdlib>
 
 static QString hostBrowserName()

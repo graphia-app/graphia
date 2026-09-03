@@ -31,6 +31,10 @@
 #include "shared/graph/grapharray.h"
 
 #include <QList>
+#include <QString>
+#include <QStringList>
+#include <QUrl>
+#include <QVariant>
 
 #include <memory>
 

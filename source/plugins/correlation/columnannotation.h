@@ -22,6 +22,7 @@
 
 #include <QString>
 
+#include <cstddef>
 #include <vector>
 #include <map>
 #include <limits>

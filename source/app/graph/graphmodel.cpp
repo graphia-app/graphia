@@ -19,19 +19,17 @@
 
 #include "graphmodel.h"
 
+#include "shared/loading/userelementdata.h"
+
 #include "limitconstants.h"
-#include "preferences.h"
 
 #include "app/graph/mutablegraph.h"
-#include "shared/graph/grapharray.h"
 
 #include "app/layout/nodepositions.h"
 
 #include "app/ui/document.h"
 #include "app/ui/selectionmanager.h"
 #include "app/ui/searchmanager.h"
-
-#include "app/attributes/attribute.h"
 
 #include "app/transform/transformedgraph.h"
 #include "app/transform/transforminfo.h"
@@ -79,15 +77,18 @@
 #include "shared/utils/string.h"
 #include "shared/utils/scopetimer.h"
 
-#include "shared/loading/userelementdata.h"
-
+#include <QColor>
+#include <QDebug>
+#include <QList>
 #include <QRegularExpression>
-#include <QSet>
 #include <QMetaType>
+#include <QtGlobal>
 
+#include <algorithm>
+#include <cmath>
+#include <cstddef>
+#include <iterator>
 #include <set>
-#include <map>
-#include <vector>
 #include <utility>
 
 using namespace Qt::Literals::StringLiterals;

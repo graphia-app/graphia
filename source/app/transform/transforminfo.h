@@ -22,6 +22,8 @@
 
 #include "app/ui/alert.h"
 
+#include <map>
+#include <utility>
 #include <vector>
 
 class TransformInfo

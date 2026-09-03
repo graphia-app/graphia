@@ -25,6 +25,20 @@
 #include "shared/utils/statistics.h"
 #include "shared/utils/container_randomsample.h"
 
+#include <QColor>
+#include <QMap>
+#include <QObject>
+#include <QString>
+#include <QtGlobal>
+
+#include <algorithm>
+#include <cmath>
+#include <cstddef>
+#include <iterator>
+#include <limits>
+#include <numeric>
+#include <utility>
+
 using namespace Qt::Literals::StringLiterals;
 
 void CorrelationPlot::setContinousYAxisRange(double min, double max)

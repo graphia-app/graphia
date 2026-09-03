@@ -25,6 +25,7 @@
 #include "shared/graph/elementid_containers.h"
 
 #include <QPoint>
+#include <QRectF>
 #include <QNativeGestureEvent>
 
 class GraphModel;

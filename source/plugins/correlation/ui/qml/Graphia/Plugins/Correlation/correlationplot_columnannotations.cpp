@@ -23,6 +23,20 @@
 
 #include "shared/utils/container.h"
 
+#include <QColor>
+#include <QPoint>
+#include <QString>
+#include <QStringList>
+#include <QtGlobal>
+
+#include <algorithm>
+#include <cstddef>
+#include <iterator>
+#include <limits>
+#include <set>
+#include <utility>
+#include <vector>
+
 using namespace Qt::Literals::StringLiterals;
 
 QCPAxis* CorrelationPlot::configureColumnAnnotations(QCPAxisRect* axisRect)

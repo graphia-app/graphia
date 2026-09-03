@@ -20,10 +20,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include <cmath>
+#include <cstddef>
 #include <vector>
-
-#include <QString>
 
 namespace u
 {

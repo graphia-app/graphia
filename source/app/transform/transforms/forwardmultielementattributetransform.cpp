@@ -25,9 +25,9 @@
 #include "shared/utils/typeidentity.h"
 #include "shared/utils/msvcwarningsuppress.h"
 
-#include <memory>
+#include <QtGlobal>
 
-#include <QObject>
+#include <type_traits>
 
 static Alert forwardMultiElementAttributeTransformConfigIsValid(const GraphTransformConfig& config)
 {

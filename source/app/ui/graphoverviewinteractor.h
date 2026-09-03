@@ -23,8 +23,7 @@
 #include "graphcommoninteractor.h"
 
 #include <QPoint>
-
-#include <memory>
+#include <QRectF>
 
 class GraphModel;
 class GraphOverviewScene;

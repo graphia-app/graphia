@@ -19,7 +19,7 @@
 
 #include "typeidentity.h"
 
-#include <QString>
+#include <QtGlobal>
 
 static TypeIdentity::Type typeOf(const QString& value)
 {

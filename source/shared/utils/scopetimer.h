@@ -22,12 +22,13 @@
 
 #include "shared/utils/singleton.h"
 
+#include <QString>
+#include <QElapsedTimer>
+
+#include <cstddef>
 #include <map>
 #include <deque>
 #include <mutex>
-
-#include <QString>
-#include <QElapsedTimer>
 
 using namespace Qt::Literals::StringLiterals;
 

@@ -27,6 +27,8 @@
 
 #include <QDebug>
 
+#include <string>
+
 BOOST_FUSION_ADAPT_STRUCT(
     VisualisationConfig::Parameter,
     _name,

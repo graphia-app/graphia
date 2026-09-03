@@ -24,6 +24,13 @@
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"
 
+#include <QObject>
+#include <QString>
+
+#include <cstdint>
+#include <map>
+#include <string>
+
 bool JsonGraphParser::parseJson(const json& jsonObject, IGraphModel* graphModel)
 {
     if(jsonObject.is_null() || !jsonObject.is_object())

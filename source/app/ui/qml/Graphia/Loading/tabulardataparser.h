@@ -30,10 +30,18 @@
 #include <QObject>
 #include <QFutureWatcher>
 #include <QAbstractListModel>
+#include <QByteArray>
+#include <QHash>
+#include <QQmlEngine>
+#include <QString>
+#include <QStringList>
+#include <QUrl>
+#include <QVariant>
 
 #include <memory>
 #include <vector>
 #include <atomic>
+#include <cstddef>
 
 class TabularDataParser;
 class QAbstractTableModel;

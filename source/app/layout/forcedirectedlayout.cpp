@@ -33,6 +33,7 @@
 #include <QMatrix4x4>
 #include <QQuaternion>
 
+#include <algorithm>
 #include <cmath>
 
 using namespace Qt::Literals::StringLiterals;

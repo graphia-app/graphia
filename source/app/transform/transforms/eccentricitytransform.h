@@ -21,7 +21,11 @@
 #define ECCENTRICITYTRANSFORM_H
 
 #include "app/transform/graphtransform.h"
-#include "shared/utils/flags.h"
+
+#include <QObject>
+#include <QString>
+
+#include <memory>
 
 class EccentricityTransform : public GraphTransform
 {

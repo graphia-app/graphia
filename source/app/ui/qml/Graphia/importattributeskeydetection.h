@@ -28,6 +28,7 @@
 #include <QQmlEngine>
 #include <QFutureWatcher>
 #include <QVariantMap>
+#include <memory>
 
 class ImportAttributesKeyDetection : public QObject, public Cancellable
 {

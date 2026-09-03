@@ -23,12 +23,16 @@
 #include "app/ui/selectionmanager.h"
 
 #include "shared/graph/igraphmodel.h"
-#include "shared/attributes/iattribute.h"
 
 #include "shared/utils/container.h"
 #include "shared/utils/string.h"
-
-#include <QQmlEngine>
+#include <QDebug>
+#include <QMetaType>
+#include <algorithm>
+#include <cstddef>
+#include <numeric>
+#include <type_traits>
+#include <utility>
 
 template<typename ElementIds>
 static auto rowToElementIds(int row, const IAttribute* attribute,

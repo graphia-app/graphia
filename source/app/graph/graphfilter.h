@@ -20,10 +20,10 @@
 #ifndef GRAPHFILTER_H
 #define GRAPHFILTER_H
 
+#include "shared/graph/elementid.h"
 #include "shared/graph/elementid_containers.h"
 
 #include <vector>
-#include <functional>
 #include <algorithm>
 
 class GraphFilter

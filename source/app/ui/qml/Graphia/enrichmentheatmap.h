@@ -24,8 +24,13 @@
 
 #include <qcustomplotquickitem.h>
 
-#include <QObject>
 #include <QQmlEngine>
+#include <QPoint>
+#include <QString>
+#include <QStringList>
+#include <QUrl>
+#include <map>
+#include <utility>
 
 class EnrichmentHeatmap : public QCustomPlotQuickItem
 {

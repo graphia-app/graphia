@@ -23,7 +23,6 @@
 #include <QProcess>
 #include <QDir>
 #include <QFileInfo>
-
 #include <QDebug>
 
 using namespace Qt::Literals::StringLiterals;

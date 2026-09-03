@@ -20,15 +20,14 @@
 #include "powerof2gridcomponentlayout.h"
 
 #include "app/graph/graph.h"
-#include "app/graph/graphcomponent.h"
-#include "app/graph/componentmanager.h"
+#include "shared/graph/igraphcomponent.h"
 #include "shared/utils/utils.h"
 
-#include <stack>
-#include <vector>
-#include <algorithm>
-
 #include <QPointF>
+
+#include <cstddef>
+#include <stack>
+#include <algorithm>
 
 void PowerOf2GridComponentLayout::executeReal(const Graph& graph, const std::vector<ComponentId> &componentIds,
                                               ComponentLayoutData& componentLayoutData)

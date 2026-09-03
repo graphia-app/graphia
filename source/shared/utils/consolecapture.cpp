@@ -18,13 +18,15 @@
  */
 
 #include "consolecapture.h"
+
 #include "odsconsolecapture.h"
 #include "debugger.h"
 #include "console.h"
 
-#include <iostream>
-
 #include <QDir>
+#include <QtGlobal>
+
+#include <iostream>
 
 using namespace Qt::Literals::StringLiterals;
 

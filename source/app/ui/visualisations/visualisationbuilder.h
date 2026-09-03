@@ -31,11 +31,14 @@
 #include "shared/utils/container.h"
 #include "app/attributes/attribute.h"
 
+#include <QString>
+#include <QtGlobal>
+#include <QObject>
+
 #include <vector>
 #include <array>
+#include <cstddef>
 #include <type_traits>
-
-#include <QtGlobal>
 
 using namespace Qt::Literals::StringLiterals;
 

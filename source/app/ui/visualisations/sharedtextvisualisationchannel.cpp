@@ -31,6 +31,9 @@
 #include "app/attributes/conditionfncreator.h"
 
 #include <QObject>
+#include <QtGlobal>
+
+#include <cstddef>
 
 TextVisuals SharedTextVisualisationChannel::textVisuals(const QString& attributeName,
     const GraphModel& graphModel, const TransformedGraph& graph)

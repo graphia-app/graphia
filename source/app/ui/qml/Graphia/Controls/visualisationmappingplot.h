@@ -20,14 +20,15 @@
 #ifndef VISUALISATIONMAPPINGPLOT_H
 #define VISUALISATIONMAPPINGPLOT_H
 
-#include <qcustomplotquickitem.h>
-
 #include "shared/utils/statistics.h"
 
-#include <QObject>
+#include <qcustomplotquickitem.h>
+
 #include <QQmlEngine>
 #include <QQuickPaintedItem>
 #include <QList>
+
+#include <cmath>
 
 class VisualisationMappingPlot : public QCustomPlotQuickItem
 {

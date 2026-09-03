@@ -22,6 +22,8 @@
 
 // https://stackoverflow.com/questions/9407367
 
+#include <array>
+#include <cstddef>
 #include <deque>
 #include <forward_list>
 #include <list>
@@ -29,12 +31,9 @@
 #include <queue>
 #include <set>
 #include <stack>
-#include <string>
-#include <tuple>
 #include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
-#include <utility>
 #include <vector>
 
 // Specialize a type for all of the std containers

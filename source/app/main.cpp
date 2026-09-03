@@ -19,9 +19,34 @@
 
 #include "build_defines.h"
 
+#include "app/application.h"
+#include "preferences.h"
+#include "headless.h"
+#include "watchdog.h"
+
+#include "shared/utils/threadpool.h"
+#include "shared/utils/scopetimer.h"
+#include "shared/utils/macosfileopeneventfilter.h"
+#include "shared/utils/debugger.h"
+#include "shared/utils/apppathname.h"
+#include "shared/utils/static_block.h"
+#include "shared/utils/thread.h"
+#include "shared/utils/console.h"
+#include "shared/utils/consolecapture.h"
+#include "shared/utils/signalhandling.h"
+#include "shared/ui/visualisations/defaultgradients.h"
+#include "shared/ui/visualisations/defaultpalettes.h"
+
+#include "app/rendering/openglfunctions.h"
+#include "app/rendering/graphrenderer.h"
+
+#include "app/updates/updater.h"
+
+#include <qtsingleapplication/qtsingleapplication.h>
+#include <breakpad/crashhandler.h>
+
 #include <QObject>
 #include <QQmlComponent>
-#include <QQmlEngine>
 #include <QQmlApplicationEngine>
 #include <QQuickWindow>
 #include <QQuickStyle>
@@ -45,6 +70,10 @@
 #include <QNetworkProxy>
 #include <QQmlFileSelector>
 #include <QUrl>
+#include <QByteArray>
+#include <QString>
+#include <QStringList>
+#include <QVariant>
 
 #if __has_include(<QtWebEngineQuick>)
 #include <QtWebEngineQuick>
@@ -53,34 +82,9 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
-#include <memory>
-
-#include "app/application.h"
-#include "preferences.h"
-#include "headless.h"
-
-#include "shared/utils/threadpool.h"
-#include "shared/utils/scopetimer.h"
-#include "shared/utils/macosfileopeneventfilter.h"
-#include "shared/utils/debugger.h"
-#include "shared/utils/apppathname.h"
-#include "shared/utils/static_block.h"
-#include "shared/utils/thread.h"
-#include "shared/utils/console.h"
-#include "shared/utils/consolecapture.h"
-#include "shared/utils/signalhandling.h"
-#include "shared/ui/visualisations/defaultgradients.h"
-#include "shared/ui/visualisations/defaultpalettes.h"
-
-#include "app/rendering/openglfunctions.h"
-#include "app/rendering/graphrenderer.h"
-
-#include "app/updates/updater.h"
-
-#include <qtsingleapplication/qtsingleapplication.h>
-#include <breakpad/crashhandler.h>
-
-#include "watchdog.h"
+#include <cstddef>
+#include <string>
+#include <vector>
 
 #ifdef Q_OS_WASM
 #include <emscripten.h>

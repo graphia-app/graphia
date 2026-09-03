@@ -25,6 +25,8 @@
 #include <QString>
 #include <QUrl>
 
+class IGraphModel;
+
 using namespace Qt::Literals::StringLiterals;
 
 class PairwiseSaver : public ISaver

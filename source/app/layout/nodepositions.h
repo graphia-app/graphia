@@ -20,16 +20,18 @@
 #ifndef NODEPOSITIONS_H
 #define NODEPOSITIONS_H
 
+#include "shared/graph/elementid.h"
 #include "shared/graph/grapharray.h"
 #include "shared/utils/circularbuffer.h"
-#include "app/maths/boundingsphere.h"
 #include "app/maths/boundingbox.h"
 
-#include <array>
+#include <QVector3D>
+#include <QtGlobal>
+
+#include <cstddef>
 #include <mutex>
 #include <thread>
-
-#include <QVector3D>
+#include <vector>
 
 static const int MAX_SMOOTHING = 8;
 

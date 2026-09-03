@@ -24,10 +24,10 @@
 #include "shared/utils/container.h"
 
 #include <algorithm>
-#include <functional>
-#include <memory>
-
-#include <QObject>
+#include <cstddef>
+#include <cstdint>
+#include <iterator>
+#include <variant>
 
 using namespace Qt::Literals::StringLiterals;
 

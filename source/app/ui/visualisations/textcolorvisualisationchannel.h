@@ -22,6 +22,8 @@
 
 #include "colorvisualisationchannel.h"
 
+#include <QString>
+
 class TextColorVisualisationChannel : public ColorVisualisationChannel
 {
 public:

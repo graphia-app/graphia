@@ -24,20 +24,24 @@
 #include "transition.h"
 
 #include "app/graph/componentmanager.h"
+#include "shared/graph/elementid.h"
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/grapharray.h"
+#include "shared/utils/namedbool.h"
 
 #include "app/preferences.h"
 
 #include "app/layout/componentlayout.h"
 
+#include <QPointF>
+#include <QRect>
+#include <QSizeF>
+#include <QString>
+#include <QVariant>
+
 #include <vector>
-#include <mutex>
 #include <memory>
 #include <atomic>
-
-#include <QRect>
-#include <QPointF>
 
 class Graph;
 class GraphModel;

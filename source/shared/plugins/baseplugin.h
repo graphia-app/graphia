@@ -29,9 +29,14 @@
 #include "shared/loading/iparserthread.h"
 #include "shared/loading/urltypes.h"
 
-#include <memory>
-
+#include <QByteArray>
 #include <QObject>
+#include <QString>
+#include <QStringList>
+#include <QtGlobal>
+#include <QVariant>
+
+#include <memory>
 
 // The plugins never see these types; they only need to know they exist
 // for the purposes of signal connection

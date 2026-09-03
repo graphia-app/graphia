@@ -24,8 +24,6 @@
 
 #include "shared/utils/string.h"
 
-#include <QObject>
-
 using namespace Qt::Literals::StringLiterals;
 
 void SeparateByAttributeTransform::apply(TransformedGraph& target)

@@ -22,8 +22,6 @@
 #include <cmath>
 #include <numbers>
 
-#include <QOpenGLShaderProgram>
-
 namespace Primitive
 {
 // modernize-use-equals-default

@@ -30,7 +30,6 @@
 #include "shared/utils/threadpool.h"
 #include "shared/utils/iterator_range.h"
 #include "shared/utils/container.h"
-#include "shared/utils/random.h"
 #include "shared/utils/string.h"
 #include "shared/utils/redirects.h"
 #include "shared/utils/source_location.h"
@@ -44,9 +43,16 @@
 #include <json_helper.h>
 #include <qcustomplotcolorprovider.h>
 
-#include <QDir>
+#include <QDebug>
+#include <QObject>
+#include <QtGlobal>
 
-#include <map>
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
+#include <iterator>
+#include <set>
+#include <utility>
 
 using namespace Qt::Literals::StringLiterals;
 

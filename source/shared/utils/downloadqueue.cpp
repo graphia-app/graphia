@@ -19,15 +19,17 @@
 
 #include "downloadqueue.h"
 
+#include <QDebug>
+#include <QDir>
+#include <QFile>
 #include <QNetworkReply>
-#include <QTemporaryFile>
 #include <QTemporaryDir>
 #include <QFileInfo>
 #include <QRegularExpression>
 #include <QtGlobal>
+#include <QVariant>
 
 #include <algorithm>
-#include <iostream>
 #include <cstdio>
 
 using namespace Qt::Literals::StringLiterals;

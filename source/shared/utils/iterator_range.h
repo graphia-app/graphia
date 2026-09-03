@@ -22,7 +22,6 @@
 
 #include <iterator>
 #include <type_traits>
-#include <utility>
 
 template<typename Iterator>
 struct is_const_iterator

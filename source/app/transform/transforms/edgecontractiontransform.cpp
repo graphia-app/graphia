@@ -24,8 +24,6 @@
 
 #include "shared/utils/string.h"
 
-#include <QObject>
-
 void EdgeContractionTransform::apply(TransformedGraph& target)
 {
     setPhase(QObject::tr("Contracting"));

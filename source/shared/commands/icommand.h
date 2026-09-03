@@ -20,17 +20,16 @@
 #ifndef ICOMMAND_H
 #define ICOMMAND_H
 
+#include "shared/utils/progressable.h"
+#include "shared/utils/cancellable.h"
+
 #include <QString>
-#include <QDebug>
 #include <QtGlobal>
 
 #include <atomic>
 #include <cassert>
 #include <memory>
 #include <vector>
-
-#include "shared/utils/progressable.h"
-#include "shared/utils/cancellable.h"
 
 class ICommand : virtual public Progressable, virtual public Cancellable
 {

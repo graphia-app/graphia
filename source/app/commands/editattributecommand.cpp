@@ -20,9 +20,13 @@
 #include "editattributecommand.h"
 
 #include "app/graph/graphmodel.h"
-#include "shared/attributes/valuetype.h"
 
+#include "shared/loading/userdatavector.h"
+#include "shared/loading/userelementdata.h"
+
+#include <QObject>
 #include <QVariant>
+#include <QtGlobal>
 
 using namespace Qt::Literals::StringLiterals;
 

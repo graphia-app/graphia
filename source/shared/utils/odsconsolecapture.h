@@ -27,8 +27,9 @@
 
 #include "consolecapture.h"
 
-#include <atomic>
+#include <QString>
 
+#include <atomic>
 #include <windows.h>
 
 class ODSCapture : public IConsoleCapture

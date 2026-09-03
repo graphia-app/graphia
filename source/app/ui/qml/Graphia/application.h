@@ -30,19 +30,22 @@
 #include <QQmlEngine>
 #include <QString>
 #include <QStringList>
+#include <QtGlobal>
 #include <QUrl>
-#include <QRect>
-#include <QColor>
 #include <QAbstractListModel>
 #include <QPluginLoader>
 #include <QImage>
 #include <QCoreApplication>
 #include <QProcessEnvironment>
 #include <QStringListModel>
-#include <QtGlobal>
+#include <QByteArray>
+#include <QHash>
+#include <QVariant>
+#include <QVariantList>
 
 #include <vector>
 #include <memory>
+#include <utility>
 
 class GraphModel;
 class IParser;

@@ -22,9 +22,12 @@
 #include "shared/loading/iparser.h"
 #include "shared/utils/cancellable.h"
 
+#include <cstddef>
+#include <cstdint>
 #include <limits>
 #include <algorithm>
 #include <cmath>
+#include <vector>
 
 struct StandardNormalisationValues
 {

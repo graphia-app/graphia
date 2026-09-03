@@ -22,6 +22,8 @@
 
 #include "shared/plugins/basegenericplugin.h"
 
+#include <QString>
+
 using namespace Qt::Literals::StringLiterals;
 
 class WebSearchPluginInstance : public BaseGenericPluginInstance

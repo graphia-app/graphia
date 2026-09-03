@@ -19,10 +19,8 @@
 
 #include "camera.h"
 
-#include "app/maths/interpolation.h"
-
 #include <QOpenGLShaderProgram>
-#include <QDebug>
+#include <QVector4D>
 
 Camera::Camera()
 {

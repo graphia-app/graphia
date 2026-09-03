@@ -18,12 +18,15 @@
  */
 
 #include "enrichmenttablemodel.h"
-#include "enrichmentcalculator.h"
 
 #include "shared/utils/string.h"
 
-#include <QQmlEngine>
-#include <QDebug>
+#include <QMetaType>
+#include <QtGlobal>
+
+#include <algorithm>
+#include <numeric>
+#include <utility>
 
 using namespace Qt::Literals::StringLiterals;
 

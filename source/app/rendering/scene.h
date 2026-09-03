@@ -26,8 +26,6 @@
 
 #include <QObject>
 
-#include <memory>
-
 class Scene : public QObject
 {
     Q_OBJECT

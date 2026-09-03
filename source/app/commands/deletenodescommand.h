@@ -24,6 +24,8 @@
 
 #include "app/graph/graph.h"
 
+#include <QString>
+
 #include <vector>
 
 class GraphModel;

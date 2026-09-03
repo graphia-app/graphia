@@ -22,11 +22,15 @@
 
 #include <QQmlEngine>
 #include <QSortFilterProxyModel>
-#include <QTimer>
 #include <QItemSelectionRange>
 #include <QStandardItemModel>
 #include <QStringList>
-
+#include <QByteArray>
+#include <QHash>
+#include <QObject>
+#include <QString>
+#include <QVariant>
+#include <cstddef>
 #include <vector>
 #include <map>
 #include <unordered_set>

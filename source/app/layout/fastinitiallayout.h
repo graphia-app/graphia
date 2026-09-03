@@ -22,6 +22,12 @@
 
 #include "layout.h"
 
+#include "shared/graph/elementid.h"
+#include "shared/graph/grapharray.h"
+
+#include <QMatrix4x4>
+#include <QVector3D>
+
 class FastInitialLayout : public Layout
 {
     Q_OBJECT

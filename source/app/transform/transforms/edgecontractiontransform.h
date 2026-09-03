@@ -21,11 +21,13 @@
 #define EDGECONTRACTIONTRANSFORM_H
 
 #include "app/transform/graphtransform.h"
-#include "app/attributes/attribute.h"
 
 #include "shared/utils/redirects.h"
 
-#include <vector>
+#include <QObject>
+#include <QString>
+
+#include <memory>
 
 class EdgeContractionTransform : public GraphTransform
 {

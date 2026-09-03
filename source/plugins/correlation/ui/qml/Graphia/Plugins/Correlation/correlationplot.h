@@ -28,20 +28,27 @@
 #include <qcustomplot.h>
 #include <qcustomplotcolorprovider.h>
 
+#include <QColor>
 #include <QObject>
+#include <QPoint>
 #include <QQmlEngine>
 #include <QQuickPaintedItem>
+#include <QString>
+#include <QUrl>
 #include <QVector>
 #include <QList>
 #include <QMap>
 #include <QStringList>
-#include <QVariantList>
 #include <QVariantMap>
 #include <QElapsedTimer>
 #include <QThread>
 #include <QPixmap>
 #include <QOffscreenSurface>
 
+#include <cstddef>
+#include <limits>
+#include <thread>
+#include <utility>
 #include <vector>
 #include <set>
 #include <map>

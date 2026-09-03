@@ -23,8 +23,10 @@
 #include "shared/graph/elementid.h"
 #include "shared/graph/elementtype.h"
 
-#include <vector>
 #include <QString>
+#include <QtGlobal>
+
+#include <vector>
 
 class IGraph;
 class IMutableGraph;

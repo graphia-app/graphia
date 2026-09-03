@@ -24,6 +24,7 @@
 
 #include <QObject>
 #include <QSet>
+#include <QtGlobal>
 
 #include <algorithm>
 #include <utility>

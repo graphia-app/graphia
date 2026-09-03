@@ -28,8 +28,10 @@
 #include <cstdint>
 #include <stack>
 #include <queue>
-#include <map>
 #include <thread>
+#include <atomic>
+#include <cstddef>
+#include <vector>
 
 using namespace Qt::Literals::StringLiterals;
 

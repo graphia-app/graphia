@@ -25,10 +25,8 @@
 
 #include "shared/utils/namedbool.h"
 
-#include <QObject>
 #include <QQmlEngine>
 #include <QQuickFramebufferObject>
-#include <QTimer>
 #include <QString>
 #include <QEvent>
 #include <QImage>
@@ -37,6 +35,7 @@
 #include <vector>
 #include <queue>
 #include <memory>
+#include <cstddef>
 
 class GraphModel;
 class ICommand;

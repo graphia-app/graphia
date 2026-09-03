@@ -21,9 +21,11 @@
 #define TRANSITION_H
 
 #include <QObject>
+#include <QtGlobal>
 
 #include <functional>
 #include <limits>
+#include <vector>
 
 class Transition : public QObject
 {

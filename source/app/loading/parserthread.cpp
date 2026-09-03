@@ -24,9 +24,9 @@
 
 #include "shared/utils/thread.h"
 
-#include <atomic>
-
 #include <QDebug>
+
+#include <utility>
 
 using namespace Qt::Literals::StringLiterals;
 

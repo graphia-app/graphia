@@ -20,10 +20,12 @@
 #ifndef TABULARDATAMODEL_H
 #define TABULARDATAMODEL_H
 
-#include <QObject>
-#include <QAbstractTableModel>
-
 #include "shared/loading/tabulardata.h"
+
+#include <QAbstractTableModel>
+#include <QByteArray>
+#include <QHash>
+#include <QVariant>
 
 class TabularDataModel : public QAbstractTableModel
 {

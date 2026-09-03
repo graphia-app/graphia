@@ -18,14 +18,19 @@
  */
 
 #include "layout.h"
+
 #include "shared/utils/thread.h"
 #include "shared/utils/container.h"
+#include "shared/utils/enumbitmask.h"
 
 #include "app/graph/graph.h"
 #include "app/graph/graphmodel.h"
-#include "app/graph/componentmanager.h"
 
 #include <QDebug>
+
+#include <algorithm>
+#include <chrono>
+#include <utility>
 
 using namespace Qt::Literals::StringLiterals;
 

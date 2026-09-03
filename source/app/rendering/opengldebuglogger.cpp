@@ -19,9 +19,12 @@
 
 #include "opengldebuglogger.h"
 
+#include <QByteArray>
+#include <QList>
 #include <QOpenGLDebugLogger>
 #include <QOpenGLContext>
 #include <QDebug>
+#include <QtGlobal>
 
 OpenGLDebugLogger::OpenGLDebugLogger(QObject* parent) :
     QObject(parent), _debugLevel(qEnvironmentVariableIntValue("OPENGL_DEBUG"))

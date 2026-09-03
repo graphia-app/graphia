@@ -22,10 +22,10 @@
 #include "graphcomponentrenderer.h"
 
 #include "app/graph/graph.h"
+#include "shared/graph/igraphcomponent.h"
 #include "app/graph/graphmodel.h"
 
 #include "app/layout/nodepositions.h"
-#include "app/layout/powerof2gridcomponentlayout.h"
 #include "app/layout/circlepackcomponentlayout.h"
 
 #include "app/commands/commandmanager.h"
@@ -34,14 +34,14 @@
 #include "shared/utils/container.h"
 #include "shared/utils/scope_exit.h"
 #include "shared/utils/flags.h"
-#include "app/preferences.h"
 
 #include <QPoint>
+#include <QQuaternion>
+#include <QtGlobal>
 
-#include <stack>
 #include <algorithm>
-#include <functional>
-#include <vector>
+#include <iterator>
+#include <utility>
 
 using namespace Qt::Literals::StringLiterals;
 

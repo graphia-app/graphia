@@ -24,23 +24,24 @@
 #include "shared/loading/tabulardata.h"
 #include "shared/loading/tabulardatamodel.h"
 
-#include "shared/utils/qmlenum.h"
 #include "shared/utils/cancellable.h"
-
-#include "shared/graph/edgelist.h"
 
 #include "plugins/correlation/correlationtype.h"
 #include "plugins/correlation/correlationdatavector.h"
 
+#include <QObject>
 #include <QQmlEngine>
 #include <QString>
 #include <QRect>
+#include <QUrl>
 #include <QVariantMap>
 #include <QtConcurrentRun>
 #include <QFutureWatcher>
 
+#include <cstddef>
 #include <memory>
 #include <atomic>
+#include <utility>
 
 class CorrelationTabularDataParser : public QObject, public Cancellable, public Progressable
 {

@@ -20,15 +20,16 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include <QMatrix4x4>
-#include <QQuaternion>
-#include <QVector3D>
-#include <QSharedPointer>
-
 #include "app/maths/frustum.h"
 #include "app/maths/conicalfrustum.h"
 #include "app/maths/line.h"
 #include "app/maths/ray.h"
+
+#include <QMatrix4x4>
+#include <QQuaternion>
+#include <QVector3D>
+#include <QRectF>
+#include <QSharedPointer>
 
 class QOpenGLShaderProgram;
 using QOpenGLShaderProgramPtr = QSharedPointer<QOpenGLShaderProgram>;

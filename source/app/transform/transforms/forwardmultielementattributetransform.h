@@ -23,6 +23,11 @@
 #include "app/transform/graphtransform.h"
 #include "app/attributes/attribute.h"
 
+#include <QObject>
+#include <QString>
+
+#include <memory>
+
 class ForwardMultiElementAttributeTransform : public GraphTransform
 {
 public:

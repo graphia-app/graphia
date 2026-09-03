@@ -19,6 +19,8 @@
 
 #include "performancecounter.h"
 
+#include <cstddef>
+
 PerformanceCounter::PerformanceCounter(std::chrono::seconds interval) :
     _interval(interval)
 {}

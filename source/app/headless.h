@@ -21,7 +21,8 @@
 #define HEADLESS_H
 
 #include <QObject>
-
+#include <QString>
+#include <QStringList>
 
 #include <memory>
 

@@ -23,6 +23,8 @@
 #include "shared/graph/igrapharray.h"
 #include "shared/graph/igrapharrayclient.h"
 
+#include <cstddef>
+#include <utility>
 #include <vector>
 #include <mutex>
 #include <type_traits>

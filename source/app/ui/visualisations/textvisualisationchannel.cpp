@@ -20,9 +20,9 @@
 #include "textvisualisationchannel.h"
 #include "visualisationinfo.h"
 
-#include "shared/utils/string.h"
+#include "app/rendering/graphrenderertypes.h"
 
-#include "app/rendering/graphrenderer.h"
+#include "shared/utils/string.h"
 
 #include "app/preferences.h"
 

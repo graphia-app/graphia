@@ -25,7 +25,12 @@
 #include "shared/graph/elementid.h"
 #include "shared/graph/imutablegraph.h"
 
+#include <QObject>
+#include <QString>
+
+#include <algorithm>
 #include <map>
+#include <string>
 #include <type_traits>
 
 using namespace Qt::Literals::StringLiterals;

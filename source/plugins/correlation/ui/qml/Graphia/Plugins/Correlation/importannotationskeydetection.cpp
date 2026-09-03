@@ -19,11 +19,12 @@
 
 #include "importannotationskeydetection.h"
 
-#include "plugins/correlation/correlationplugin.h"
-
 #include <QFuture>
+#include <QString>
+#include <QStringList>
 #include <QtConcurrentRun>
-#include <QQmlEngine>
+
+#include <cstddef>
 
 using namespace Qt::Literals::StringLiterals;
 

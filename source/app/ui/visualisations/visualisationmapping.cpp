@@ -25,10 +25,11 @@
 
 #include <json_helper.h>
 
+#include <QDebug>
+#include <QString>
+
 #include <algorithm>
 #include <cmath>
-
-#include <QDebug>
 
 using namespace Qt::Literals::StringLiterals;
 

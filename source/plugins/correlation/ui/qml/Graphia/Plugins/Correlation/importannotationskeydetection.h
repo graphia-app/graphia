@@ -30,6 +30,8 @@
 #include <QFutureWatcher>
 #include <QVariantMap>
 
+#include <memory>
+
 class ImportAnnotationsKeyDetection : public QObject, public Cancellable
 {
     Q_OBJECT

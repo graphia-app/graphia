@@ -22,6 +22,8 @@
 
 #include "visualisationchannel.h"
 
+#include <QString>
+
 class TextSizeVisualisationChannel : public VisualisationChannel
 {
 public:

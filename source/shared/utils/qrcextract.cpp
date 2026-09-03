@@ -19,7 +19,6 @@
 
 #include "qrcextract.h"
 
-#include <QString>
 #include <QDir>
 #include <QFile>
 #include <QDebug>
