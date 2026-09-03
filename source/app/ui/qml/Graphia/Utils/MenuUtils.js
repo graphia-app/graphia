@@ -1,3 +1,5 @@
+.pragma library
+
 /*
  * Copyright © 2013-2025 Tim Angus
  * Copyright © 2013-2025 Tom Freeman

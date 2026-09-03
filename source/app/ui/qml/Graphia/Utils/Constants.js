@@ -1,3 +1,5 @@
+.pragma library
+
 /*
  * Copyright © 2013-2025 Tim Angus
  * Copyright © 2013-2025 Tom Freeman
@@ -17,8 +19,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-.pragma library
 
 let margin = 8;
 let spacing = 8;
