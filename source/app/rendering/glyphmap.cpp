@@ -221,6 +221,10 @@ void GlyphMap::renderImages(const QFont &font)
         {
             QPainter painter(&image);
 
+            // The SDF generation uses the coverage of partially filled pixels to
+            // resolve the glyph edge to sub-pixel precision, so it must be antialiased
+            painter.setRenderHint(QPainter::Antialiasing);
+
             painter.setFont(font);
             painter.setPen(Qt::white);
             path.setFillRule(Qt::FillRule::WindingFill);
