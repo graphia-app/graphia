@@ -438,7 +438,7 @@ function createWindow(parent, component, properties = {}, immediatelyShow = true
     else
     {
         // Window already exists
-        window = windowInstanceMap.get(component);
+        window = parent.windowInstanceMap.get(component);
 
         Object.keys(properties).forEach(function(key)
         {
