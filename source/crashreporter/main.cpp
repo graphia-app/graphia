@@ -158,6 +158,13 @@ static void uploadReport(const QString& email, const QString& text,
     bool inVideoDriver, const QString& module,
     const QString& dmpFile, const QString& attachmentDir)
 {
+    auto* file = new QFile(dmpFile);
+    if(!file->open(QIODevice::ReadOnly))
+    {
+        delete file;
+        return;
+    }
+
     auto *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
     std::map<const char*, QString> const fields =
@@ -192,10 +199,6 @@ static void uploadReport(const QString& email, const QString& text,
     dmpPart.setHeader(QNetworkRequest::ContentDispositionHeader,
                       QVariant(QStringLiteral(R"(form-data; name="upload_file_minidump"; filename="%1")")
                                .arg(QFileInfo(dmpFile).fileName())));
-
-    auto* file = new QFile(dmpFile);
-    if(!file->open(QIODevice::ReadOnly))
-        return;
 
     dmpPart.setBodyDevice(file);
     file->setParent(multiPart);
