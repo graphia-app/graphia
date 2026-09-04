@@ -20,6 +20,7 @@
 #include "graphmodel.h"
 
 #include "shared/loading/userelementdata.h"
+#include "app/preferences.h"
 
 #include "limitconstants.h"
 
@@ -149,6 +150,8 @@ private:
 
     UserNodeData _userNodeData;
     UserEdgeData _userEdgeData;
+
+    PreferencesWatcher _preferencesWatcher;
 
     std::map<QString, Attribute> _attributes;
 
@@ -280,7 +283,7 @@ GraphModel::GraphModel(const QString& name, IPlugin* plugin) :
 
     connect(this, &GraphModel::attributesChanged, this, &GraphModel::onAttributesChanged, Qt::DirectConnection);
 
-    connect(&_preferencesWatcher, &PreferencesWatcher::preferenceChanged,
+    connect(&_->_preferencesWatcher, &PreferencesWatcher::preferenceChanged,
         this, &GraphModel::onPreferenceChanged);
 
     // NOLINTNEXTLINE clang-analyzer-optin.cplusplus.VirtualCall

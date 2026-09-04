@@ -28,8 +28,6 @@
 
 #include "shared/utils/namedbool.h"
 
-#include "app/preferences.h"
-
 #include "app/attributes/attribute.h"
 
 #include <QObject>
@@ -86,8 +84,6 @@ private:
     std::atomic_bool _graphTransformsAreChanging;
     QString _name;
     IPlugin* _plugin;
-
-    PreferencesWatcher _preferencesWatcher;
 
     void removeDynamicAttributes();
     QString normalisedAttributeName(QString attribute) const;
