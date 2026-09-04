@@ -100,6 +100,8 @@ appendLicenseFromUrl HDF5 https://support.hdfgroup.org/ftp/HDF5/releases/COPYING
 
 appendLicenseFromUrl json https://raw.githubusercontent.com/nlohmann/json/develop/LICENSE.MIT
 
+appendLicenseFromFile lexy ../../../thirdparty/lexy/LICENSE
+
 appendLicenseFromUrl Matio https://raw.githubusercontent.com/tbeu/matio/master/COPYING
 
 appendOpenSSLLicense
