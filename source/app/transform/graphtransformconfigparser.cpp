@@ -19,196 +19,278 @@
 
 #include "graphtransformconfigparser.h"
 
-#define BOOST_SPIRIT_X3_UNICODE
+#include "app/configgrammar.h"
 
-#include <boost/spirit/home/x3.hpp>
-#include <boost/fusion/include/adapt_struct.hpp>
-#include <boost/boost_spirit_qstring_adapter.h>
+#include "shared/utils/recursivevalue.h"
 
+#include <lexy_utils.h>
+
+#include <lexy/action/parse.hpp>
+#include <lexy/callback.hpp>
+#include <lexy/dsl.hpp>
+#include <lexy/input/string_input.hpp>
+
+#include <QByteArray>
 #include <QDebug>
 
-#include <string>
+#include <utility>
+#include <vector>
 
-BOOST_FUSION_ADAPT_STRUCT(
-    GraphTransformConfig::TerminalCondition,
-    _lhs,
-    _op,
-    _rhs
-)
-
-BOOST_FUSION_ADAPT_STRUCT(
-    GraphTransformConfig::UnaryCondition,
-    _lhs,
-    _op
-)
-
-BOOST_FUSION_ADAPT_STRUCT(
-    GraphTransformConfig::CompoundCondition,
-    _lhs,
-    _op,
-    _rhs
-)
-
-BOOST_FUSION_ADAPT_STRUCT(
-    GraphTransformConfig::Parameter,
-    _name,
-    _value
-)
-
-BOOST_FUSION_ADAPT_STRUCT(
-    GraphTransformConfig,
-    _flags,
-    _action,
-    _attributes,
-    _parameters,
-    _condition
-)
-
-namespace SpiritGraphTranformConfigParser
+namespace LexyGraphTransformParser
 {
-namespace x3 = boost::spirit::x3;
-namespace unicode = boost::spirit::x3::unicode;
+namespace dsl = lexy::dsl;
 
-using x3::lit;
-// Only parse strict doubles (i.e. not integers)
-x3::real_parser<double, x3::strict_real_policies<double>> const double_ = {};
-using x3::int_;
-using x3::lexeme;
-using unicode::char_;
+using lexyutils::QuotedString;
 
-const x3::rule<class QuotedString, QString> quotedString = "quotedString";
-const auto escapedQuote = lit('\\') >> char_('"');
-const auto quotedString_def = lexeme['"' >> *(escapedQuote | ~char_('"')) >> '"'];
+using LexyConfigGrammar::AttributeParameters;
+using LexyConfigGrammar::Flags;
+using LexyConfigGrammar::idPattern;
+using LexyConfigGrammar::Name;
 
-const x3::rule<class Identifier, QString> identifier = "identifier";
-const auto identifier_def = lexeme[char_("a-zA-Z_") >> *char_("a-zA-Z0-9_")];
+constexpr auto equalityOps = lexy::symbol_table<ConditionFnOp::Equality>
+    .map<LEXY_SYMBOL("==")>(ConditionFnOp::Equality::Equal)
+    .map<LEXY_SYMBOL("!=")>(ConditionFnOp::Equality::NotEqual);
 
-const x3::rule<class AttributeParameter, QString> attributeParameter = "attributeParameter";
-const auto attributeParameter_def = lexeme[char_('.') >> (quotedString | identifier)];
+constexpr auto numericalOps = lexy::symbol_table<ConditionFnOp::Numerical>
+    .map<LEXY_SYMBOL("<")>(ConditionFnOp::Numerical::LessThan)
+    .map<LEXY_SYMBOL(">")>(ConditionFnOp::Numerical::GreaterThan)
+    .map<LEXY_SYMBOL("<=")>(ConditionFnOp::Numerical::LessThanOrEqual)
+    .map<LEXY_SYMBOL(">=")>(ConditionFnOp::Numerical::GreaterThanOrEqual);
 
-const x3::rule<class AttributeName, QString> attributeName = "attributeName";
-const auto attributeName_def = lexeme[char_('$') >> (quotedString | identifier) >> *attributeParameter];
+constexpr auto stringOps = lexy::symbol_table<ConditionFnOp::String>
+    .map<LEXY_SYMBOL("includes")>(ConditionFnOp::String::Includes)
+    .map<LEXY_SYMBOL("excludes")>(ConditionFnOp::String::Excludes)
+    .map<LEXY_SYMBOL("starts")>(ConditionFnOp::String::Starts)
+    .map<LEXY_SYMBOL("ends")>(ConditionFnOp::String::Ends)
+    .map<LEXY_SYMBOL("matches")>(ConditionFnOp::String::MatchesRegex)
+    .map<LEXY_SYMBOL("matchesCaseInsensitive")>(ConditionFnOp::String::MatchesRegexCaseInsensitive);
 
-struct equality_op_ : x3::symbols<ConditionFnOp::Equality>
+constexpr auto logicalOps = lexy::symbol_table<ConditionFnOp::Logical>
+    .map<LEXY_SYMBOL("or")>(ConditionFnOp::Logical::Or)
+    .map<LEXY_SYMBOL("||")>(ConditionFnOp::Logical::Or)
+    .map<LEXY_SYMBOL("and")>(ConditionFnOp::Logical::And)
+    .map<LEXY_SYMBOL("&&")>(ConditionFnOp::Logical::And);
+
+constexpr auto unaryOps = lexy::symbol_table<ConditionFnOp::Unary>
+    .map<LEXY_SYMBOL("hasValue")>(ConditionFnOp::Unary::HasValue);
+
+constexpr auto keywordUsing = LEXY_KEYWORD("using", idPattern);
+constexpr auto keywordWith = LEXY_KEYWORD("with", idPattern);
+constexpr auto keywordWhere = LEXY_KEYWORD("where", idPattern);
+
+// Note the attribute name productions are token productions, so that no
+// whitespace is skipped between the name and any of its parameters
+
+struct AttributeNameNoDollar : lexy::token_production
 {
-    equality_op_() noexcept
+    static constexpr auto rule = dsl::lit_c<'$'> >>
+        (dsl::p<Name> + dsl::p<AttributeParameters>);
+
+    static constexpr auto value = LexyConfigGrammar::asAttributeName;
+};
+
+struct AttributeName : lexy::token_production
+{
+    static constexpr auto rule = dsl::p<AttributeNameNoDollar>;
+
+    static constexpr auto value = lexy::callback<QString>(
+        [](const QString& name) { return "$" + name; });
+};
+
+struct Number
+{
+    static constexpr auto rule = dsl::capture(lexyutils::number);
+    static constexpr auto value = lexyutils::asNumber<GraphTransformConfig::TerminalValue>;
+};
+
+struct ValueOperand
+{
+    static constexpr auto rule = dsl::p<AttributeName> | dsl::p<Number> | dsl::p<QuotedString>;
+    static constexpr auto value = lexy::construct<GraphTransformConfig::TerminalValue>;
+};
+
+struct TerminalOp
+{
+    static constexpr auto rule =
+        dsl::symbol<equalityOps> | dsl::symbol<numericalOps> | dsl::symbol<stringOps>;
+
+    static constexpr auto value = lexy::construct<GraphTransformConfig::TerminalOp>;
+};
+
+struct UnaryOp
+{
+    static constexpr auto rule = dsl::symbol<unaryOps>;
+    static constexpr auto value = lexy::forward<ConditionFnOp::Unary>;
+};
+
+struct LogicalOp
+{
+    static constexpr auto rule = dsl::symbol<logicalOps>;
+    static constexpr auto value = lexy::forward<ConditionFnOp::Logical>;
+};
+
+// Both terminal and unary conditions start with a value operand,
+// so they're only distinguishable by the operator that follows
+struct TerminalOrUnaryCondition
+{
+    static constexpr auto rule = dsl::p<ValueOperand> >>
+        ((dsl::p<TerminalOp> >> dsl::p<ValueOperand>) | dsl::p<UnaryOp>);
+
+    static constexpr auto value = lexy::callback<GraphTransformConfig::Condition>(
+        [](GraphTransformConfig::TerminalValue&& lhs,
+           GraphTransformConfig::TerminalOp op,
+           GraphTransformConfig::TerminalValue&& rhs)
+        {
+            return GraphTransformConfig::Condition(GraphTransformConfig::TerminalCondition{
+                std::move(lhs), op, std::move(rhs)});
+        },
+        [](GraphTransformConfig::TerminalValue&& lhs, ConditionFnOp::Unary op)
+        {
+            return GraphTransformConfig::Condition(
+                GraphTransformConfig::UnaryCondition{std::move(lhs), op});
+        });
+};
+
+struct Condition;
+
+struct Operand
+{
+    static constexpr auto rule =
+        (dsl::lit_c<'('> >> (dsl::recurse<Condition> + dsl::lit_c<')'>)) |
+        dsl::p<TerminalOrUnaryCondition>;
+
+    static constexpr auto value = lexy::forward<GraphTransformConfig::Condition>;
+};
+
+struct Condition
+{
+    static constexpr auto rule = dsl::p<Operand> >>
+        dsl::opt(dsl::p<LogicalOp> >> dsl::p<Operand>);
+
+    static constexpr auto value = lexy::callback<GraphTransformConfig::Condition>(
+        [](GraphTransformConfig::Condition&& condition, lexy::nullopt)
+        {
+            return std::move(condition);
+        },
+        [](GraphTransformConfig::Condition&& lhs, ConditionFnOp::Logical op,
+            GraphTransformConfig::Condition&& rhs)
+        {
+            return GraphTransformConfig::Condition(
+                RecursiveValue<GraphTransformConfig::CompoundCondition>(
+                GraphTransformConfig::CompoundCondition{std::move(lhs), op, std::move(rhs)}));
+        });
+};
+
+struct Parameter
+{
+    // A parameter is only committed to once its = has been seen, otherwise a
+    // trailing where clause would be mistaken for the start of another parameter
+    static constexpr auto rule =
+        dsl::peek(dsl::p<Name> + dsl::while_(dsl::ascii::space) + dsl::lit_c<'='>) >>
+        (dsl::p<Name> + dsl::lit_c<'='> + (dsl::p<Number> | dsl::p<QuotedString>));
+
+    static constexpr auto value = lexy::construct<GraphTransformConfig::Parameter>;
+};
+
+struct Attributes
+{
+    static constexpr auto rule =
+        dsl::opt(keywordUsing >> dsl::list(dsl::p<AttributeNameNoDollar>));
+
+    static constexpr auto value = lexy::as_list<std::vector<QString>>;
+};
+
+struct Parameters
+{
+    static constexpr auto rule = dsl::opt(keywordWith >> dsl::list(dsl::p<Parameter>));
+    static constexpr auto value = lexy::as_list<std::vector<GraphTransformConfig::Parameter>>;
+};
+
+struct OptionalCondition
+{
+    static constexpr auto rule = dsl::opt(keywordWhere >> dsl::p<Condition>);
+
+    static constexpr auto value = lexy::bind(
+        lexy::forward<GraphTransformConfig::Condition>,
+        lexy::_1 || GraphTransformConfig::NoCondition{});
+};
+
+struct Transform
+{
+    static constexpr auto whitespace = dsl::ascii::space;
+
+    static constexpr auto rule = dsl::p<Flags> + dsl::p<Name> + dsl::p<Attributes> +
+        dsl::p<Parameters> + dsl::p<OptionalCondition> + dsl::eof;
+
+    static constexpr auto value = lexy::construct<GraphTransformConfig>;
+};
+
+template<typename Table>
+void appendOps(QStringList& list, const Table& table)
+{
+    for(const auto& op : table)
+        list.append(QString::fromUtf8(op.symbol));
+}
+
+template<typename Table, typename Op>
+QString opAsString(const Table& table, Op op)
+{
+    for(const auto& entry : table)
     {
-        add
-        ("==", ConditionFnOp::Equality::Equal)
-        ("!=", ConditionFnOp::Equality::NotEqual)
-        ;
+        if(entry.value == op)
+            return QString::fromUtf8(entry.symbol);
     }
-} equality_op;
 
-struct numerical_op_ : x3::symbols<ConditionFnOp::Numerical>
+    return {};
+}
+
+template<typename Table>
+const typename Table::mapped_type* findOp(const Table& table, const QString& s)
 {
-    numerical_op_() noexcept
-    {
-        add
-        ("<",  ConditionFnOp::Numerical::LessThan)
-        (">",  ConditionFnOp::Numerical::GreaterThan)
-        ("<=", ConditionFnOp::Numerical::LessThanOrEqual)
-        (">=", ConditionFnOp::Numerical::GreaterThanOrEqual)
-        ;
-    }
-} numerical_op;
+    const auto bytes = s.toUtf8();
+    const auto input = lexy::string_input<lexy::default_encoding>(
+        bytes.constData(), bytes.constData() + bytes.size());
 
-struct string_op_ : x3::symbols<ConditionFnOp::String>
-{
-    string_op_() noexcept
-    {
-        add
-        ("includes",                ConditionFnOp::String::Includes)
-        ("excludes",                ConditionFnOp::String::Excludes)
-        ("starts",                  ConditionFnOp::String::Starts)
-        ("ends",                    ConditionFnOp::String::Ends)
-        ("matches",                 ConditionFnOp::String::MatchesRegex)
-        ("matchesCaseInsensitive",  ConditionFnOp::String::MatchesRegexCaseInsensitive)
-        ;
-    }
-} string_op;
+    const auto index = table.parse(input);
 
-struct unary_op_ : x3::symbols<ConditionFnOp::Unary>
-{
-    unary_op_() noexcept
-    {
-        add
-        ("hasValue", ConditionFnOp::Unary::HasValue)
-        ;
-    }
-} unary_op;
+    if(!index)
+        return nullptr;
 
-const auto terminalBinaryOperator = equality_op | numerical_op | string_op;
-const auto valueOperand = (attributeName | double_ | int_ | quotedString);
-
-const x3::rule<class TerminalCondition, GraphTransformConfig::TerminalCondition> terminalCondition = "terminalCondition";
-const auto terminalCondition_def = valueOperand >> terminalBinaryOperator >> valueOperand;
-
-const x3::rule<class UnaryCondition, GraphTransformConfig::UnaryCondition> unaryCondition = "unaryCondition";
-const auto unaryCondition_def = valueOperand >> unary_op;
-
-struct logical_op_ : x3::symbols<ConditionFnOp::Logical>
-{
-    logical_op_() noexcept
-    {
-        add
-        ("or",  ConditionFnOp::Logical::Or)
-        ("and", ConditionFnOp::Logical::And)
-        ("||",  ConditionFnOp::Logical::Or)
-        ("&&",  ConditionFnOp::Logical::And)
-        ;
-    }
-} logical_op;
-
-const x3::rule<class Condition, GraphTransformConfig::Condition> condition = "condition";
-
-// Note operand and compoundCondition are given explicit attribute types so that
-// x3 doesn't have to infer how to compose them into Condition
-const x3::rule<class Operand, GraphTransformConfig::Condition> operand = "operand";
-const auto operand_def = terminalCondition | unaryCondition | (lit('(') >> condition >> lit(')'));
-
-const x3::rule<class CompoundCondition, GraphTransformConfig::CompoundCondition>
-    compoundCondition = "compoundCondition";
-const auto compoundCondition_def = operand >> logical_op >> operand;
-
-const auto condition_def = compoundCondition | operand;
-
-const auto attributeNameNoDollarCapture = lexeme[lit('$') >> (quotedString | identifier) >> *attributeParameter];
-
-const x3::rule<class Parameter, GraphTransformConfig::Parameter> parameter = "parameter";
-const auto parameterName = quotedString | identifier;
-const auto parameter_def = parameterName >> lit('=') >> (double_ | int_ | quotedString);
-
-const auto identifierList = identifier % lit(',');
-const auto flags = lit('[') >> -identifierList >> lit(']');
-
-const x3::rule<class Transform, GraphTransformConfig> transform = "transform";
-const auto transformName = quotedString | identifier;
-const auto transform_def =
-    -flags >>
-    transformName >>
-    -(lit("using") >> +attributeNameNoDollarCapture) >>
-    -(lit("with") >> +parameter) >>
-    -(lit("where") >> condition);
-
-BOOST_SPIRIT_DEFINE(quotedString, identifier, attributeParameter, attributeName,
-    transform, parameter, condition, operand, compoundCondition,
-    terminalCondition, unaryCondition)
-} // namespace SpiritGraphTranformConfigParser
+    return &table[index];
+}
+} // namespace LexyGraphTransformParser
 
 bool GraphTransformConfigParser::parse(const QString& text, bool warnOnFailure)
 {
-    QStringSpiritUnicodeConstIterator begin(text.begin());
-    const QStringSpiritUnicodeConstIterator end(text.end());
-    _result = {};
-    _success = SpiritGraphTranformConfigParser::x3::phrase_parse(begin, end,
-                    SpiritGraphTranformConfigParser::transform,
-                    SpiritGraphTranformConfigParser::unicode::space, _result);
+    const auto bytes = text.toUtf8();
+    const auto* const begin = bytes.constData();
+    const auto* const end = begin + bytes.size();
 
-    if(begin != end)
+    const auto input = lexy::string_input<lexy::default_encoding>(begin, end);
+
+    _result = {};
+    _failedInput.clear();
+
+    const char* failurePosition = nullptr;
+    const auto onError = lexy::callback<void>([&failurePosition](const auto&, const auto& error)
     {
-        _success = false;
-        _failedInput = QString::fromStdString(std::string(begin, end));
+        // Only the first (i.e. earliest) failure is of interest
+        if(failurePosition == nullptr)
+            failurePosition = error.position();
+    });
+
+    auto result = lexy::parse<LexyGraphTransformParser::Transform>(input, onError);
+    _success = result.is_success();
+
+    if(_success)
+        _result = result.value();
+    else
+    {
+        if(failurePosition == nullptr)
+            failurePosition = begin;
+
+        _failedInput = QString::fromUtf8(failurePosition,
+            static_cast<qsizetype>(end - failurePosition));
 
         if(warnOnFailure)
             qWarning() << "Failed to parse" << _failedInput;
@@ -221,17 +303,17 @@ QStringList GraphTransformConfigParser::ops(ValueType valueType)
 {
     QStringList list;
 
-    SpiritGraphTranformConfigParser::equality_op.for_each([&list](auto& v, auto) { list.append(QString::fromStdString(v)); });
+    LexyGraphTransformParser::appendOps(list, LexyGraphTransformParser::equalityOps);
 
     switch(valueType)
     {
     case ValueType::Float:
     case ValueType::Int:
-        SpiritGraphTranformConfigParser::numerical_op.for_each([&list](auto& v, auto) { list.append(QString::fromStdString(v)); });
+        LexyGraphTransformParser::appendOps(list, LexyGraphTransformParser::numericalOps);
         break;
 
     case ValueType::String:
-        SpiritGraphTranformConfigParser::string_op.for_each([&list](auto& v, auto) { list.append(QString::fromStdString(v)); });
+        LexyGraphTransformParser::appendOps(list, LexyGraphTransformParser::stringOps);
         break;
 
     default: break;
@@ -242,80 +324,43 @@ QStringList GraphTransformConfigParser::ops(ValueType valueType)
 
 QString GraphTransformConfigParser::opToString(ConditionFnOp::Equality op)
 {
-    QString result;
-
-    SpiritGraphTranformConfigParser::equality_op.for_each([&](auto& v, auto)
-    {
-        if(SpiritGraphTranformConfigParser::equality_op.at(v) == op)
-            result = QString::fromStdString(v);
-    });
-
-    return result;
+    return LexyGraphTransformParser::opAsString(LexyGraphTransformParser::equalityOps, op);
 }
 
 QString GraphTransformConfigParser::opToString(ConditionFnOp::Numerical op)
 {
-    QString result;
-
-    SpiritGraphTranformConfigParser::numerical_op.for_each([&](auto& v, auto)
-    {
-        if(SpiritGraphTranformConfigParser::numerical_op.at(v) == op)
-            result = QString::fromStdString(v);
-    });
-
-    return result;
+    return LexyGraphTransformParser::opAsString(LexyGraphTransformParser::numericalOps, op);
 }
 
 QString GraphTransformConfigParser::opToString(ConditionFnOp::String op)
 {
-    QString result;
-
-    SpiritGraphTranformConfigParser::string_op.for_each([&](auto& v, auto)
-    {
-        if(SpiritGraphTranformConfigParser::string_op.at(v) == op)
-            result = QString::fromStdString(v);
-    });
-
-    return result;
+    return LexyGraphTransformParser::opAsString(LexyGraphTransformParser::stringOps, op);
 }
 
 QString GraphTransformConfigParser::opToString(ConditionFnOp::Logical op)
 {
-    QString result;
-
-    SpiritGraphTranformConfigParser::logical_op.for_each([&](auto& v, auto)
-    {
-        if(SpiritGraphTranformConfigParser::logical_op.at(v) == op)
-            result = QString::fromStdString(v);
-    });
-
-    return result;
+    return LexyGraphTransformParser::opAsString(LexyGraphTransformParser::logicalOps, op);
 }
 
 QString GraphTransformConfigParser::opToString(ConditionFnOp::Unary op)
 {
-    QString result;
-
-    SpiritGraphTranformConfigParser::unary_op.for_each([&](auto& v, auto)
-    {
-        if(SpiritGraphTranformConfigParser::unary_op.at(v) == op)
-            result = QString::fromStdString(v);
-    });
-
-    return result;
+    return LexyGraphTransformParser::opAsString(LexyGraphTransformParser::unaryOps, op);
 }
 
 GraphTransformConfig::TerminalOp GraphTransformConfigParser::stringToOp(const QString& s)
 {
-    auto* equalityOp = SpiritGraphTranformConfigParser::equality_op.find(s.toStdString());
+    const auto* equalityOp = LexyGraphTransformParser::findOp(
+        LexyGraphTransformParser::equalityOps, s);
     if(equalityOp != nullptr)
         return *equalityOp;
 
-    auto* numericalOp = SpiritGraphTranformConfigParser::numerical_op.find(s.toStdString());
+    const auto* numericalOp = LexyGraphTransformParser::findOp(
+        LexyGraphTransformParser::numericalOps, s);
     if(numericalOp != nullptr)
         return *numericalOp;
 
-    auto* stringOp = SpiritGraphTranformConfigParser::string_op.find(s.toStdString());
+    const auto* stringOp = LexyGraphTransformParser::findOp(
+        LexyGraphTransformParser::stringOps, s);
     if(stringOp != nullptr)
         return *stringOp;
 
@@ -324,7 +369,7 @@ GraphTransformConfig::TerminalOp GraphTransformConfigParser::stringToOp(const QS
 
 bool GraphTransformConfigParser::opIsUnary(const QString& op)
 {
-    return SpiritGraphTranformConfigParser::unary_op.find(op.toStdString()) != nullptr;
+    return LexyGraphTransformParser::findOp(LexyGraphTransformParser::unaryOps, op) != nullptr;
 }
 
 bool GraphTransformConfigParser::isAttributeName(const QString& variable)

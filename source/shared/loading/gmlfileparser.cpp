@@ -19,19 +19,21 @@
 
 #include "gmlfileparser.h"
 
-#include "progress_iterator.h"
-
 #include "shared/graph/elementid.h"
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"
 
 #include "shared/utils/container.h"
+#include "shared/utils/recursivevalue.h"
 
-#include <boost/spirit/home/x3.hpp>
-#include <boost/fusion/include/adapt_struct.hpp>
-#include <boost/spirit/home/support/iterators/istream_iterator.hpp>
-#include <boost/boost_spirit_qstring_adapter.h>
+#include <lexy_utils.h>
 
+#include <lexy/action/parse.hpp>
+#include <lexy/callback.hpp>
+#include <lexy/dsl.hpp>
+
+#include <QByteArray>
+#include <QFile>
 #include <QObject>
 #include <QString>
 #include <QtGlobal>
@@ -41,7 +43,6 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <fstream>
 #include <variant>
 #include <map>
 #include <vector>
@@ -50,10 +51,10 @@ using namespace Qt::Literals::StringLiterals;
 
 // https://www.google.com/search?q=gml-technical-report.pdf
 
-namespace SpiritGmlParser
+namespace LexyGmlParser
 {
 struct KeyValue;
-using List = std::vector<boost::recursive_wrapper<KeyValue>>;
+using List = std::vector<RecursiveValue<KeyValue>>;
 
 using Value = std::variant<double, int, QString, List>;
 struct KeyValue
@@ -61,43 +62,65 @@ struct KeyValue
     QString _key;
     Value _value;
 };
-} // namespace SpiritGmlParser
 
-BOOST_FUSION_ADAPT_STRUCT(
-    SpiritGmlParser::KeyValue,
-    _key,
-    _value
-)
-
-namespace SpiritGmlParser
+namespace grammar
 {
-namespace x3 = boost::spirit::x3;
-namespace ascii = boost::spirit::x3::ascii;
+namespace dsl = lexy::dsl;
 
-using x3::lit;
-// Only parse strict doubles (i.e. not integers)
-x3::real_parser<double, x3::strict_real_policies<double>> const double_ = {};
-using x3::int_;
-using x3::lexeme;
-using ascii::char_;
+using lexyutils::anyByte;
+using lexyutils::asQString;
 
-const x3::rule<class L, List> gmlList = "list";
+struct Key
+{
+    static constexpr auto rule = dsl::identifier(dsl::ascii::alpha, dsl::ascii::alpha_digit);
+    static constexpr auto value = asQString;
+};
 
-const x3::rule<class NoQuotesString, QString> noQuotesString = "noQuotesString";
-const auto noQuotesString_def = lexeme[lit('"') >> *(~char_('"')) >> lit('"')];
+// Note there is no escaping mechanism; the string simply ends at the next quote
+struct QuotedString : lexy::token_production
+{
+    static constexpr auto rule = dsl::lit_c<'"'> >>
+        (dsl::capture(dsl::token(dsl::while_(anyByte - dsl::lit_c<'"'>))) + dsl::lit_c<'"'>);
 
-const x3::rule<class V, Value> gmlValue = "value";
-const auto gmlValue_def = double_ | int_ | noQuotesString | (lit('[') >> gmlList >> lit(']'));
+    static constexpr auto value = asQString;
+};
 
-const x3::rule<class K, QString> gmlKey = "key";
-const auto gmlKey_def = lexeme[char_("a-zA-Z") >> *char_("a-zA-Z0-9")];
+struct Number
+{
+    static constexpr auto rule = dsl::capture(lexyutils::number);
+    static constexpr auto value = lexyutils::asNumber<LexyGmlParser::Value>;
+};
 
-const x3::rule<class KV, KeyValue> gmlKeyValue = "keyValue";
-const auto gmlKeyValue_def = gmlKey >> gmlValue;
+struct List;
 
-const auto gmlList_def = *gmlKeyValue;
+struct Value
+{
+    static constexpr auto rule = dsl::p<Number> | dsl::p<QuotedString> |
+        (dsl::lit_c<'['> >> (dsl::recurse<List> + dsl::lit_c<']'>));
 
-BOOST_SPIRIT_DEFINE(gmlList, noQuotesString, gmlKey, gmlValue, gmlKeyValue)
+    static constexpr auto value = lexy::construct<LexyGmlParser::Value>;
+};
+
+struct KeyValue
+{
+    static constexpr auto rule = dsl::p<Key> >> dsl::p<Value>;
+    static constexpr auto value = lexy::construct<LexyGmlParser::KeyValue>;
+};
+
+struct List
+{
+    static constexpr auto rule = dsl::opt(dsl::list(dsl::p<KeyValue>));
+    static constexpr auto value = lexy::as_list<LexyGmlParser::List>;
+};
+
+struct Gml
+{
+    static constexpr auto whitespace = dsl::ascii::space;
+
+    static constexpr auto rule = dsl::p<List> + dsl::eof;
+    static constexpr auto value = lexy::forward<LexyGmlParser::List>;
+};
+} // namespace grammar
 
 struct Attribute
 {
@@ -282,12 +305,14 @@ bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphModel,
             if(!processEdge(*edge) || parser.cancelled())
                 return false;
         }
+
+        edges.clear();
     }
 
     return true;
 }
 
-} // namespace SpiritGmlParser
+} // namespace LexyGmlParser
 
 GmlFileParser::GmlFileParser(IUserNodeData* userNodeData, IUserEdgeData* userEdgeData) :
     _userNodeData(userNodeData), _userEdgeData(userEdgeData)
@@ -308,8 +333,7 @@ bool GmlFileParser::parse(const QUrl& url, IGraphModel* graphModel)
     if(!fileInfo.exists())
         return false;
 
-    auto fileSize = fileInfo.size();
-    if(fileSize == 0)
+    if(fileInfo.size() == 0)
     {
         setFailureReason(QObject::tr("File is empty."));
         return false;
@@ -317,39 +341,37 @@ bool GmlFileParser::parse(const QUrl& url, IGraphModel* graphModel)
 
     setProgress(-1);
 
-    std::ifstream stream(localFile.toStdString());
-
-    if(!stream)
+    QFile file(localFile);
+    if(!file.open(QIODevice::ReadOnly))
         return false;
 
-    stream.unsetf(std::ios::skipws);
+    const auto contents = file.readAll();
+    file.close();
 
-    boost::spirit::istream_iterator istreamIt(stream); // NOLINT misc-const-correctness
-    using GmlIterator = progress_iterator<decltype(istreamIt)>;
-    GmlIterator it(istreamIt);
-    const GmlIterator end;
+    if(contents.isEmpty())
+        return false;
 
-    it.onPositionChanged(
-    [this, &fileSize](size_t position)
+    const auto size = static_cast<size_t>(contents.size());
+    lexyutils::progress_input input(contents.constData(), size);
+
+    input.onPositionChanged([this, size](size_t position)
     {
-        setProgress(static_cast<int>((position * 100) / static_cast<size_t>(fileSize)));
+        setProgress(static_cast<int>((position * 100) / size));
     });
 
     auto cancelledFn = [this] { return cancelled(); };
-    it.setCancelledFn(cancelledFn);
+    input.setCancelledFn(cancelledFn);
 
     setPhase(QObject::tr("Parsing"));
 
-    SpiritGmlParser::List gml;
-    const bool success = SpiritGmlParser::x3::phrase_parse(it, end,
-        SpiritGmlParser::gmlList, SpiritGmlParser::ascii::space, gml);
+    auto result = lexy::parse<LexyGmlParser::grammar::Gml>(input, lexy::noop);
 
-    if(cancelled() || !success || it != end)
+    if(cancelled() || !result.is_success())
         return false;
 
     setPhase(QObject::tr("Building Graph"));
     setProgress(-1);
 
-    return SpiritGmlParser::build(*this, gml, *graphModel,
+    return LexyGmlParser::build(*this, result.value(), *graphModel,
         *_userNodeData, *_userEdgeData);
 }
