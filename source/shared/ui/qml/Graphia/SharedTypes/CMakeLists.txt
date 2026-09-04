@@ -14,5 +14,5 @@ qt_add_qml_module(sharedtypes_qml
 )
 
 target_link_libraries(sharedtypes_qml
-    PRIVATE Qt6::Quick
+    PRIVATE Qt6::Quick thirdparty
 )

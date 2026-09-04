@@ -74,5 +74,5 @@ qt_add_qml_module(controls_qml
 )
 
 target_link_libraries(controls_qml
-    PRIVATE Qt6::Quick
+    PRIVATE Qt6::Quick thirdparty
 )

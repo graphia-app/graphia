@@ -71,5 +71,5 @@ qt_add_qml_module(main_qml
 )
 
 target_link_libraries(main_qml
-    PRIVATE Qt6::Quick Qt6::Concurrent Qt6::Widgets
+    PRIVATE Qt6::Quick Qt6::Concurrent Qt6::Widgets thirdparty
 )
