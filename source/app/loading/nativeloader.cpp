@@ -36,7 +36,6 @@
 #include "shared/utils/source_location.h"
 
 #include "shared/loading/userelementdata.h"
-#include "shared/loading/progress_iterator.h"
 #include "shared/loading/jsongraphparser.h"
 
 #include <json_helper.h>
