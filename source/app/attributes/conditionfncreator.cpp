@@ -22,15 +22,14 @@
 #include "attribute.h"
 #include "condtionfnops.h"
 
+#include "shared/utils/recursivevalue.h"
+
 #include "shared/graph/elementid.h"
 #include "shared/graph/elementid_containers.h"
 #include "shared/graph/igraphcomponent.h"
 
 #include "app/graph/graphmodel.h"
 #include "app/transform/graphtransformconfigparser.h"
-
-#include <boost/variant/apply_visitor.hpp>
-#include <boost/variant/static_visitor.hpp>
 
 #include <QRegularExpression>
 #include <QString>
@@ -103,7 +102,7 @@ public:
 };
 
 template<typename E>
-struct AttributesOpVistor : public boost::static_visitor<ElementConditionFn<E>>
+struct AttributesOpVistor
 {
     Attribute _lhs;
     Attribute _rhs;
@@ -226,7 +225,7 @@ struct AttributesOpVistor : public boost::static_visitor<ElementConditionFn<E>>
 };
 
 template<typename E>
-struct AttributeValueOpVistor : public boost::static_visitor<ElementConditionFn<E>>
+struct AttributeValueOpVistor
 {
     Attribute _lhs;
     TerminalValueWrapper _rhs;
@@ -453,7 +452,7 @@ struct ValuesOpVistor
 };
 
 template<typename E>
-struct ConditionVisitor : public boost::static_visitor<ElementConditionFn<E>>
+struct ConditionVisitor
 {
     ElementType _elementType;
     const GraphModel* _graphModel;
@@ -632,10 +631,11 @@ struct ConditionVisitor : public boost::static_visitor<ElementConditionFn<E>>
         return nullptr;
     }
 
-    ElementConditionFn<E> operator()(const GraphTransformConfig::CompoundCondition& compoundCondition) const
+    ElementConditionFn<E> operator()(const RecursiveValue<GraphTransformConfig::CompoundCondition>& wrapper) const
     {
-        auto lhs = boost::apply_visitor(ConditionVisitor<E>(_elementType, *_graphModel), compoundCondition._lhs);
-        auto rhs = boost::apply_visitor(ConditionVisitor<E>(_elementType, *_graphModel), compoundCondition._rhs);
+        const auto& compoundCondition = *wrapper;
+        auto lhs = std::visit(ConditionVisitor<E>(_elementType, *_graphModel), compoundCondition._lhs);
+        auto rhs = std::visit(ConditionVisitor<E>(_elementType, *_graphModel), compoundCondition._rhs);
 
         if(lhs == nullptr || rhs == nullptr)
             return nullptr;
@@ -660,19 +660,19 @@ struct ConditionVisitor : public boost::static_visitor<ElementConditionFn<E>>
 NodeConditionFn CreateConditionFnFor::node(const GraphModel& graphModel,
     const GraphTransformConfig::Condition& condition)
 {
-    return boost::apply_visitor(ConditionVisitor<NodeId>(ElementType::Node, graphModel), condition);
+    return std::visit(ConditionVisitor<NodeId>(ElementType::Node, graphModel), condition);
 }
 
 EdgeConditionFn CreateConditionFnFor::edge(const GraphModel& graphModel,
     const GraphTransformConfig::Condition& condition)
 {
-    return boost::apply_visitor(ConditionVisitor<EdgeId>(ElementType::Edge, graphModel), condition);
+    return std::visit(ConditionVisitor<EdgeId>(ElementType::Edge, graphModel), condition);
 }
 
 ComponentConditionFn CreateConditionFnFor::component(const GraphModel& graphModel,
     const GraphTransformConfig::Condition& condition)
 {
-    return boost::apply_visitor(ConditionVisitor<const IGraphComponent&>(
+    return std::visit(ConditionVisitor<const IGraphComponent&>(
         ElementType::Component, graphModel), condition);
 }
 

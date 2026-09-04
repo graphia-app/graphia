@@ -25,8 +25,6 @@
 
 #include "shared/utils/container.h"
 
-#include <boost/variant/apply_visitor.hpp>
-
 #include <QObject>
 #include <QStringList>
 #include <QtGlobal>
@@ -163,10 +161,10 @@ bool GraphTransformConfig::hasCondition() const
         bool operator()(GraphTransformConfig::NoCondition) const { return false; }
         bool operator()(const TerminalCondition&) const { return true; }
         bool operator()(const UnaryCondition&) const { return true; }
-        bool operator()(const CompoundCondition&) const { return true; }
+        bool operator()(const RecursiveValue<CompoundCondition>&) const { return true; }
     };
 
-    return boost::apply_visitor(ConditionVisitor(), _condition);
+    return std::visit(ConditionVisitor(), _condition);
 }
 
 QVariantMap GraphTransformConfig::conditionAsVariantMap() const
@@ -207,11 +205,12 @@ QVariantMap GraphTransformConfig::conditionAsVariantMap() const
             return map;
         }
 
-        QVariantMap operator()(const CompoundCondition& compoundCondition) const
+        QVariantMap operator()(const RecursiveValue<CompoundCondition>& wrapper) const
         {
+            const auto& compoundCondition = *wrapper;
             QVariantMap map;
-            auto lhs = boost::apply_visitor(ConditionVisitor(), compoundCondition._lhs);
-            auto rhs = boost::apply_visitor(ConditionVisitor(), compoundCondition._rhs);
+            auto lhs = std::visit(ConditionVisitor(), compoundCondition._lhs);
+            auto rhs = std::visit(ConditionVisitor(), compoundCondition._rhs);
 
             map.insert(u"lhs"_s, lhs);
             map.insert(u"op"_s, compoundCondition.opAsString());
@@ -221,7 +220,7 @@ QVariantMap GraphTransformConfig::conditionAsVariantMap() const
         }
     };
 
-    return boost::apply_visitor(ConditionVisitor(), _condition);
+    return std::visit(ConditionVisitor(), _condition);
 }
 
 QString GraphTransformConfig::conditionAsString(bool forDisplay) const
@@ -319,16 +318,17 @@ QString GraphTransformConfig::conditionAsString(bool forDisplay) const
                 prettifyOp(unaryCondition.opAsString()));
         }
 
-        QString operator()(const CompoundCondition& compoundCondition) const
+        QString operator()(const RecursiveValue<CompoundCondition>& wrapper) const
         {
-            auto lhs = boost::apply_visitor(ConditionVisitor(_forDisplay), compoundCondition._lhs);
-            auto rhs = boost::apply_visitor(ConditionVisitor(_forDisplay), compoundCondition._rhs);
+            const auto& compoundCondition = *wrapper;
+            auto lhs = std::visit(ConditionVisitor(_forDisplay), compoundCondition._lhs);
+            auto rhs = std::visit(ConditionVisitor(_forDisplay), compoundCondition._rhs);
 
             return u"%1 %2 %3"_s.arg(lhs, prettifyOp(compoundCondition.opAsString()), rhs);
         }
     };
 
-    return boost::apply_visitor(ConditionVisitor(forDisplay), _condition);
+    return std::visit(ConditionVisitor(forDisplay), _condition);
 }
 
 QVariantMap GraphTransformConfig::asVariantMap() const
@@ -469,14 +469,15 @@ std::vector<QString> GraphTransformConfig::referencedAttributeNames() const
                 _names->emplace_back(lhs);
         }
 
-        void operator()(const CompoundCondition& compoundCondition) const
+        void operator()(const RecursiveValue<CompoundCondition>& wrapper) const
         {
-            boost::apply_visitor(ConditionVisitor(_names), compoundCondition._lhs);
-            boost::apply_visitor(ConditionVisitor(_names), compoundCondition._rhs);
+            const auto& compoundCondition = *wrapper;
+            std::visit(ConditionVisitor(_names), compoundCondition._lhs);
+            std::visit(ConditionVisitor(_names), compoundCondition._rhs);
         }
     };
 
-    boost::apply_visitor(ConditionVisitor(&names), _condition);
+    std::visit(ConditionVisitor(&names), _condition);
 
     return names;
 }

@@ -161,8 +161,17 @@ struct logical_op_ : x3::symbols<ConditionFnOp::Logical>
 } logical_op;
 
 const x3::rule<class Condition, GraphTransformConfig::Condition> condition = "condition";
-const auto operand = terminalCondition | unaryCondition | (lit('(') >> condition >> lit(')'));
-const auto condition_def = (operand >> logical_op >> operand) | operand;
+
+// Note operand and compoundCondition are given explicit attribute types so that
+// x3 doesn't have to infer how to compose them into Condition
+const x3::rule<class Operand, GraphTransformConfig::Condition> operand = "operand";
+const auto operand_def = terminalCondition | unaryCondition | (lit('(') >> condition >> lit(')'));
+
+const x3::rule<class CompoundCondition, GraphTransformConfig::CompoundCondition>
+    compoundCondition = "compoundCondition";
+const auto compoundCondition_def = operand >> logical_op >> operand;
+
+const auto condition_def = compoundCondition | operand;
 
 const auto attributeNameNoDollarCapture = lexeme[lit('$') >> (quotedString | identifier) >> *attributeParameter];
 
@@ -183,7 +192,8 @@ const auto transform_def =
     -(lit("where") >> condition);
 
 BOOST_SPIRIT_DEFINE(quotedString, identifier, attributeParameter, attributeName,
-    transform, parameter, condition, terminalCondition, unaryCondition)
+    transform, parameter, condition, operand, compoundCondition,
+    terminalCondition, unaryCondition)
 } // namespace SpiritGraphTranformConfigParser
 
 bool GraphTransformConfigParser::parse(const QString& text, bool warnOnFailure)

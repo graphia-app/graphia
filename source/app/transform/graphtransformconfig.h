@@ -22,14 +22,13 @@
 
 #include "app/attributes/condtionfnops.h"
 #include "shared/attributes/valuetype.h"
+#include "shared/utils/recursivevalue.h"
 
 #include <QString>
 #include <QVariantMap>
 
 #include <vector>
 #include <variant>
-#include <boost/variant.hpp>
-#include <boost/variant/recursive_wrapper.hpp>
 
 struct GraphTransformConfig
 {
@@ -57,11 +56,11 @@ struct GraphTransformConfig
 
     struct NoCondition { bool operator==(const NoCondition) const { return true; } };
     struct CompoundCondition;
-    using Condition = boost::variant<
+    using Condition = std::variant<
         NoCondition,
         TerminalCondition,
         UnaryCondition,
-        boost::recursive_wrapper<CompoundCondition>>;
+        RecursiveValue<CompoundCondition>>;
 
     struct CompoundCondition
     {
