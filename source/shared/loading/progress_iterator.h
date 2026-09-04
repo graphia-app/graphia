@@ -20,25 +20,47 @@
 #ifndef PROGRESS_ITERATOR_H
 #define PROGRESS_ITERATOR_H
 
-#include <boost/iterator/iterator_adaptor.hpp>
 #include <cstddef>
 #include <functional>
+#include <iterator>
 
+// A forward iterator that wraps another iterator, periodically reporting how far
+// it has advanced, and which can be made to appear as if it has reached the end,
+// thereby terminating whatever is consuming it
+//
+// Note this is deliberately only a forward iterator; were it to model a random
+// access iterator, std::advance and friends would bypass the increment operator,
+// and no progress would ever be reported
 template<typename BaseItType>
-class progress_iterator :
-        public boost::iterator_adaptor<progress_iterator<BaseItType>, BaseItType>
+class progress_iterator
 {
+public:
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = typename std::iterator_traits<BaseItType>::value_type;
+    using difference_type = typename std::iterator_traits<BaseItType>::difference_type;
+    using pointer = typename std::iterator_traits<BaseItType>::pointer;
+    using reference = typename std::iterator_traits<BaseItType>::reference;
+
 private:
+    // Number of increments between successive polls; calling out on every single
+    // one of them is needlessly expensive, given that neither the progress
+    // indication nor the response to cancellation need be especially fine grained
+    static constexpr size_t POLL_INTERVAL = 4096;
+
+    BaseItType _it = {};
+
     std::function<void(size_t position)> _onPositionChangedFn;
     std::function<bool()> _cancelledFn;
 
     size_t _position = 0;
+    size_t _poll = POLL_INTERVAL;
+    bool _cancelled = false;
 
 public:
     progress_iterator() = default;
 
     explicit progress_iterator(const BaseItType& iterator) :
-        progress_iterator<BaseItType>::iterator_adaptor_(iterator)
+        _it(iterator)
     {}
 
     template<typename OnPositionChangedFn>
@@ -53,22 +75,46 @@ public:
         _cancelledFn = cancelledFn;
     }
 
-private:
-    friend class boost::iterator_core_access;
+    reference operator*() const { return *_it; }
+    pointer operator->() const { return &(*_it); }
 
+    progress_iterator& operator++()
+    {
+        increment();
+        return *this;
+    }
+
+    progress_iterator operator++(int)
+    {
+        auto previous = *this;
+        increment();
+        return previous;
+    }
+
+    bool operator==(const progress_iterator& other) const
+    {
+        // Once cancelled, appear to be at the end, whatever the end may be
+        return _cancelled || other._cancelled || _it == other._it;
+    }
+
+    bool operator!=(const progress_iterator& other) const { return !(*this == other); }
+
+private:
     void increment()
     {
-        this->base_reference()++;
+        _it++;
         _position++;
+
+        if(_position < _poll)
+            return;
+
+        _poll = _position + POLL_INTERVAL;
 
         if(_onPositionChangedFn != nullptr)
             _onPositionChangedFn(_position);
 
         if(_cancelledFn != nullptr && _cancelledFn())
-        {
-            // Reset the underlying iterator, effectively making it eof
-            this->base_reference() = BaseItType();
-        }
+            _cancelled = true;
     }
 };
 

@@ -85,8 +85,6 @@ function appendLicense
 appendLicenseFromHeader Blaze ../../../thirdparty/blaze/blaze/Blaze.h \
   "^.*Copyright.*" ".*DAMAGE\.$" 2
 
-appendLicenseFromUrl Boost https://www.boost.org/LICENSE_1_0.txt
-
 appendLicenseFromFile Breakpad ../../../thirdparty/breakpad/LICENSE
 
 appendLicenseFromFile Crypto++ ../../../thirdparty/cryptopp/License.txt
