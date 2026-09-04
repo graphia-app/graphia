@@ -20,9 +20,6 @@
 #ifndef QMLENUM_H
 #define QMLENUM_H
 
-#include <QObject>
-#include <QQmlEngine>
-
 /*
 Defining an enumeration that's available in both C++ and QML
 is awkward, so here is a macro to make it easier. Example:
@@ -33,20 +30,26 @@ DEFINE_QML_ENUM(Enumeration,
     Third)
 */
 
-// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+// Cheapen the header by only including the bare minimum
+#include <QtCore/qtmetamacros.h>
+#include <QtQmlIntegration/qqmlintegration.h>
+
+QT_BEGIN_NAMESPACE
+struct QMetaObject;
+QT_END_NAMESPACE
+
+// NOLINTBEGIN(cppcoreguidelines-macro-usage, bugprone-macro-parentheses)
 
 #define _REFLECTOR(x) x ## _reflector
 #define QML_ENUM_PROPERTY(x) _REFLECTOR(x)::Enum
 
 #define DEFINE_QML_ENUM(ENUM_NAME, ...) \
-    class _REFLECTOR(ENUM_NAME) : public QObject \
+    namespace _REFLECTOR(ENUM_NAME) \
     { \
-        Q_OBJECT \
+        Q_NAMESPACE \
         QML_NAMED_ELEMENT(ENUM_NAME) \
-        QML_UNCREATABLE("") \
-        public: \
-        enum Enum {__VA_ARGS__, Max}; Q_ENUM(Enum) \
-    }; \
+        enum Enum {__VA_ARGS__, Max}; Q_ENUM_NS(Enum) \
+    } \
     inline bool operator&(QML_ENUM_PROPERTY(ENUM_NAME) lhs, \
         QML_ENUM_PROPERTY(ENUM_NAME) rhs) \
     { \
@@ -71,7 +74,7 @@ QmlEnumType normaliseQmlEnum(auto v)
     return cast;
 }
 
-// NOLINTEND(cppcoreguidelines-macro-usage)
+// NOLINTEND(cppcoreguidelines-macro-usage, bugprone-macro-parentheses)
 
 #endif // QMLENUM_H
 
