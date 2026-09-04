@@ -103,6 +103,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/utils/preferences.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/progressable.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/qmlenum.h
+    ${CMAKE_CURRENT_LIST_DIR}/utils/qmlenumfor.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/qrcextract.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/random.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/redirects.h

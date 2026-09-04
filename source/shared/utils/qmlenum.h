@@ -22,7 +22,6 @@
 
 #include <QObject>
 #include <QQmlEngine>
-#include <QVariant>
 
 /*
 Defining an enumeration that's available in both C++ and QML
@@ -70,25 +69,6 @@ QmlEnumType normaliseQmlEnum(auto v)
         return zero;
 
     return cast;
-}
-
-template<typename QmlEnumType>
-QmlEnumType qmlEnumFor(const QVariant& v)
-{
-    bool success;
-    int i = v.toInt(&success);
-
-    if(!success)
-    {
-        auto s = v.toString();
-        if(!s.isEmpty())
-        {
-            auto metaEnum = QMetaEnum::fromType<QmlEnumType>();
-            i = metaEnum.keyToValue(s.toUtf8().constData());
-        }
-    }
-
-    return normaliseQmlEnum<QmlEnumType>(i);
 }
 
 // NOLINTEND(cppcoreguidelines-macro-usage)

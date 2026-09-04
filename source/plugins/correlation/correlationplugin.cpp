@@ -33,6 +33,7 @@
 #include "shared/utils/string.h"
 #include "shared/utils/redirects.h"
 #include "shared/utils/source_location.h"
+#include "shared/utils/qmlenumfor.h"
 
 #include "shared/attributes/iattribute.h"
 
