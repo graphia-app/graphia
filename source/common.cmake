@@ -60,12 +60,6 @@ if(APPLE)
     add_definitions(-D_LIBCPP_DISABLE_AVAILABILITY)
 endif()
 
-# C++17 notionally removed std::unary_function
-# Boost 1.67 depends on std::unary_function
-# Contemporary Boost removes that dependency but needs changes to boost_spirit_qstring_adapter.h
-# Recent versions of libcpp *actually* remove std::unary_function ...unless this define is added
-add_definitions(-D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION)
-
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     # GCC
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wlogical-op -Wstrict-null-sentinel \
@@ -83,9 +77,6 @@ if(MSVC)
 
     # MSVC is picky with UTF8 files recognition so force it on
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8")
-
-    # Disable large numbers of encoding warnings for boost with utf8 encoding on
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4828")
 
     # Disable inherits via dominance
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4250")
