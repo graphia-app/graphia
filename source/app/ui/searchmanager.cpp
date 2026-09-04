@@ -22,6 +22,7 @@
 #include "app/graph/graph.h"
 #include "app/graph/graphmodel.h"
 #include "app/attributes/conditionfncreator.h"
+#include "app/attributes/condtionfnops.h"
 
 #include "shared/utils/container.h"
 

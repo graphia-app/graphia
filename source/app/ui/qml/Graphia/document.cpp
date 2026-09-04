@@ -55,6 +55,7 @@
 #include "app/ui/visualisations/visualisationconfigparser.h"
 
 #include "app/attributes/conditionfncreator.h"
+#include "app/attributes/condtionfnops.h"
 
 #include "app/ui/searchmanager.h"
 #include "app/ui/selectionmanager.h"
