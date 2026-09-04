@@ -19,28 +19,29 @@
 
 #include "dotfileparser.h"
 
-#include "progress_iterator.h"
-
 #include "shared/graph/elementid.h"
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"
 
 #include "shared/utils/container.h"
+#include "shared/utils/recursivevalue.h"
 #include "shared/utils/visitor.h"
 
-#include <boost/spirit/home/x3.hpp>
-#include <boost/fusion/include/adapt_struct.hpp>
-#include <boost/spirit/home/support/iterators/istream_iterator.hpp>
-#include <boost/boost_spirit_qstring_adapter.h>
+#include <lexy_utils.h>
 
+#include <lexy/action/parse.hpp>
+#include <lexy/action/scan.hpp>
+#include <lexy/callback.hpp>
+#include <lexy/dsl.hpp>
+
+#include <QByteArray>
+#include <QFile>
 #include <QObject>
 #include <QString>
 #include <QtGlobal>
 #include <QFileInfo>
 
 #include <cstddef>
-#include <fstream>
-#include <string>
 #include <utility>
 #include <variant>
 #include <functional>
@@ -49,7 +50,7 @@
 
 // https://www.graphviz.org/doc/info/lang.html
 
-namespace SpiritDotParser
+namespace LexyDotParser
 {
 struct DotSubGraph;
 
@@ -78,9 +79,8 @@ struct NodeStatement
     AttributeList _attributeList;
 };
 
-using EdgeEnd = std::variant<DotNode, boost::recursive_wrapper<DotSubGraph>>;
+using EdgeEnd = std::variant<DotNode, RecursiveValue<DotSubGraph>>;
 
-// NOLINTNEXTLINE bugprone-exception-escape
 struct EdgeStatement
 {
     EdgeEnd _edgeEnd;
@@ -88,13 +88,15 @@ struct EdgeStatement
     AttributeList _attributeList;
 };
 
+enum class AttributeStatementType { Graph, Node, Edge };
+
 struct AttributeStatement
 {
-    std::string _type;
+    AttributeStatementType _type;
     AttributeList _attributeList;
 };
 
-using Statement = std::variant<boost::recursive_wrapper<DotSubGraph>, KeyValue,
+using Statement = std::variant<RecursiveValue<DotSubGraph>, KeyValue,
     AttributeStatement, EdgeStatement, NodeStatement>;
 using StatementList = std::vector<Statement>;
 
@@ -110,139 +112,295 @@ struct DotGraph
     StatementList _statementList;
 };
 
-} // namespace SpiritDotParser
-
-BOOST_FUSION_ADAPT_STRUCT(
-    SpiritDotParser::KeyValue,
-    _key,
-    _value
-)
-
-BOOST_FUSION_ADAPT_STRUCT(
-    SpiritDotParser::DotNode,
-    _text,
-    _ignore1,
-    _ignore2
-)
-
-BOOST_FUSION_ADAPT_STRUCT(
-    SpiritDotParser::NodeStatement,
-    _node,
-    _attributeList
-)
-
-BOOST_FUSION_ADAPT_STRUCT(
-    SpiritDotParser::EdgeStatement,
-    _edgeEnd,
-    _edgeEnds,
-    _attributeList
-)
-
-BOOST_FUSION_ADAPT_STRUCT(
-    SpiritDotParser::AttributeStatement,
-    _type,
-    _attributeList
-)
-
-BOOST_FUSION_ADAPT_STRUCT(
-    SpiritDotParser::DotSubGraph,
-    _id,
-    _statementList
-)
-
-BOOST_FUSION_ADAPT_STRUCT(
-    SpiritDotParser::DotGraph,
-    _id,
-    _statementList
-)
-
-namespace SpiritDotParser
+namespace grammar
 {
-namespace x3 = boost::spirit::x3;
-namespace ascii = boost::spirit::x3::ascii;
+namespace dsl = lexy::dsl;
 
-using x3::lit;
-using x3::string;
-// Only parse strict doubles (i.e. not integers)
-x3::real_parser<double, x3::strict_real_policies<double>> const double_ = {};
-using x3::lexeme;
-using ascii::char_;
+using lexyutils::anyByte;
+using lexyutils::asQString;
+using lexyutils::nonAsciiByte;
+using lexyutils::QuotedString;
 
-const x3::rule<class DSG, DotSubGraph> dotSubGraph = "dotSubGraph";
+// char_("a-zA-Z\200-\377_") and char_("a-zA-Z0-9\200-\377_") respectively
+constexpr auto idLead = dsl::ascii::alpha_underscore / nonAsciiByte;
+constexpr auto idTrailing = dsl::ascii::alpha_digit_underscore / nonAsciiByte;
+constexpr auto idPattern = dsl::identifier(idLead, idTrailing);
 
-const x3::rule<class ANI, QString> alphaNumericId = "alphaNumericId";
-const auto alphaNumericId_def = lexeme[char_("a-zA-Z\200-\377_") >> *char_("a-zA-Z\200-\3770-9_")];
+constexpr auto keywordStrict = LEXY_KEYWORD("strict", idPattern);
+constexpr auto keywordGraph = LEXY_KEYWORD("graph", idPattern);
+constexpr auto keywordDigraph = LEXY_KEYWORD("digraph", idPattern);
+constexpr auto keywordSubgraph = LEXY_KEYWORD("subgraph", idPattern);
 
-const x3::rule<class N, QString> numeral = "numeral";
-const auto numeral_def = lexeme[(-char_('-') >> char_('.') >> +char_("0-9")) |
-    (-char_('-') >> +char_("0-9") >> -(char_('.') >> *char_("0-9")))];
+constexpr auto edgeOperator = LEXY_LIT("--") | LEXY_LIT("->");
 
-const x3::rule<class QS, QString> quotedString = "quotedString";
-const auto escapedQuote = lit('\\') >> char_('"');
-const auto quotedString_def = lit('"') >> lexeme[*(escapedQuote | ~char_('"'))] >> lit('"');
+constexpr auto comment =
+    (LEXY_LIT("//") >> dsl::until(dsl::ascii::newline).or_eof()) |
+    (LEXY_LIT("/*") >> dsl::until(LEXY_LIT("*/")));
 
-const x3::rule<class NX, QString> nonXml = "nonXml";
-const auto nonXml_def = *(~char_("[<>]"));
+constexpr auto skipper = dsl::ascii::space | comment;
 
-const x3::rule<class XT, QString> xmlTag = "xmlTag";
-const auto xmlTag_def = char_('<') >> +(~char_('>')) >> char_('>');
+struct AlphaNumericId : lexy::token_production
+{
+    static constexpr auto rule = idPattern;
+    static constexpr auto value = asQString;
+};
 
-const x3::rule<class HS, QString> htmlString = "htmlString";
-const auto htmlString_def = lit('<') >> lexeme[*(nonXml >> xmlTag >> nonXml)] >> lit('>');
+struct Numeral : lexy::token_production
+{
+    static constexpr auto rule = dsl::capture(dsl::token(
+        dsl::if_(dsl::lit_c<'-'>) +
+        ((dsl::lit_c<'.'> >> dsl::digits<>) |
+        (dsl::digits<> >> dsl::if_(dsl::lit_c<'.'> >> dsl::if_(dsl::digits<>))))));
 
-const x3::rule<class ID, QString> identifier = "identifier";
-const auto identifier_def = htmlString | quotedString | numeral | alphaNumericId;
+    static constexpr auto value = asQString;
+};
 
-const x3::rule<class KV, KeyValue> keyValue = "keyValue";
-const auto keyValue_def = identifier >> lit('=') >> identifier;
+struct HtmlString : lexy::token_production
+{
+    static constexpr auto nonXml = anyByte -
+        (dsl::lit_c<'['> / dsl::lit_c<'<'> / dsl::lit_c<'>'>);
+    static constexpr auto xmlTag = dsl::lit_c<'<'> >>
+        (dsl::while_one(anyByte - dsl::lit_c<'>'>) + dsl::lit_c<'>'>);
 
-const x3::rule<class AL, AttributeList> keyValueList = "keyValueList";
-const auto keyValueList_def = lit('[') >> *(keyValue >> -(lit(';') | lit(','))) >> lit(']');
+    // Note the whitespace skip; the content of the string itself is verbatim,
+    // but any whitespace immediately following the opening < is not part of it
+    static constexpr auto rule = dsl::lit_c<'<'> >>
+        (dsl::whitespace(skipper) +
+        dsl::capture(dsl::token(dsl::while_(nonXml | xmlTag))) + dsl::lit_c<'>'>);
 
-const x3::rule<class DNI, DotNode> dotNode = "Node";
-const auto dotNode_def = identifier >>
+    static constexpr auto value = asQString;
+};
+
+struct Identifier
+{
+    static constexpr auto rule = dsl::p<HtmlString> | dsl::p<QuotedString> |
+        dsl::p<Numeral> | dsl::p<AlphaNumericId>;
+
+    static constexpr auto value = lexy::forward<QString>;
+};
+
+// An identifier that need not be present, in which case it yields an empty string
+struct OptionalIdentifier
+{
+    static constexpr auto rule = dsl::opt(dsl::p<Identifier>);
+    static constexpr auto value = lexy::bind(lexy::forward<QString>, lexy::_1.or_default());
+};
+
+struct NodePort
+{
+    static constexpr auto rule = dsl::opt(dsl::lit_c<':'> >> dsl::p<Identifier>);
+    static constexpr auto value = lexy::bind(lexy::forward<QString>, lexy::_1.or_default());
+};
+
+struct KeyValue
+{
+    static constexpr auto rule = dsl::p<Identifier> >>
+        (dsl::lit_c<'='> + dsl::p<Identifier>);
+
+    static constexpr auto value = lexy::construct<LexyDotParser::KeyValue>;
+};
+
+struct KeyValueList
+{
+    static constexpr auto rule = dsl::lit_c<'['> >>
+        (dsl::opt(dsl::list(dsl::p<KeyValue> >>
+            dsl::if_(dsl::lit_c<';'> / dsl::lit_c<','>))) + dsl::lit_c<']'>);
+
+    static constexpr auto value = lexy::as_list<LexyDotParser::AttributeList>;
+};
+
+struct DotNode
+{
     // This isn't strictly the correct grammar, but we're never going to
-    // be using the result anyway so it doesn't really matter
-    -(lit(':') >> identifier) >> -(lit(':') >> identifier);
+    // be using the port or compass point anyway so it doesn't really matter
+    static constexpr auto rule = dsl::p<Identifier> >>
+        (dsl::p<NodePort> + dsl::p<NodePort>);
 
-const x3::rule<class NS, NodeStatement> nodeStatement = "nodeStatement";
-const auto nodeStatement_def = dotNode >> -keyValueList;
+    static constexpr auto value = lexy::construct<LexyDotParser::DotNode>;
+};
 
-const x3::rule<class DE, EdgeEnd> edgeEnd = "edgeEnd";
-const auto edgeEnd_def = dotNode | dotSubGraph;
+struct StatementList;
 
-const x3::rule<class ES, EdgeStatement> edgeStatement = "edgeStatement";
-const auto edgeStatement_def = edgeEnd >> +((lit("--") | lit("->")) >> edgeEnd) >> -keyValueList;
+struct SubGraphBody
+{
+    static constexpr auto rule = dsl::curly_bracketed(dsl::recurse<StatementList>);
+    static constexpr auto value = lexy::forward<LexyDotParser::StatementList>;
+};
 
-const x3::rule<class AS, AttributeStatement> attributeStatement = "attributeStatement";
-const auto attributeStatement_def = (string("graph") | string("node") | string("edge")) >> keyValueList;
+struct SubGraph
+{
+    static constexpr auto rule = dsl::peek(keywordSubgraph | dsl::lit_c<'{'>) >>
+        (dsl::if_(keywordSubgraph) + dsl::p<OptionalIdentifier> + dsl::p<SubGraphBody>);
 
-const x3::rule<class S, Statement> statement = "statement";
-const auto statement_def = dotSubGraph | keyValue | attributeStatement | edgeStatement | nodeStatement;
+    static constexpr auto value = lexy::construct<LexyDotParser::DotSubGraph>;
+};
 
-const x3::rule<class SL, StatementList> statementList = "list";
-const auto statementList_def = *(statement >> -lit(";"));
+struct EdgeEnd
+{
+    static constexpr auto rule = dsl::p<SubGraph> | dsl::p<DotNode>;
 
-const auto dotSubGraph_def = -(lit("subgraph") >> -identifier) >>
-    lit("{") >> statementList >> lit("}");
+    static constexpr auto value = lexy::construct<LexyDotParser::EdgeEnd>;
+};
 
-const x3::rule<class DG, DotGraph> dotGraph = "dotGraph";
-const auto dotGraph_def = -lit("strict") >> (lit("graph") | lit("digraph")) >> -identifier >>
-    lit("{") >> statementList >> lit("}");
+constexpr auto attributeTypes = lexy::symbol_table<LexyDotParser::AttributeStatementType>
+    .map<LEXY_SYMBOL("graph")>(LexyDotParser::AttributeStatementType::Graph)
+    .map<LEXY_SYMBOL("node")>(LexyDotParser::AttributeStatementType::Node)
+    .map<LEXY_SYMBOL("edge")>(LexyDotParser::AttributeStatementType::Edge);
 
-BOOST_SPIRIT_DEFINE(dotGraph, dotSubGraph, keyValue, keyValueList,
-    dotNode, edgeEnd,
-    nodeStatement, edgeStatement, attributeStatement,
-    statement, statementList,
-    alphaNumericId, numeral, quotedString,
-    xmlTag, nonXml, htmlString,
-    identifier)
+struct AttributeStatement
+{
+    struct Type
+    {
+        static constexpr auto rule = dsl::symbol<attributeTypes>(idPattern);
+        static constexpr auto value = lexy::forward<LexyDotParser::AttributeStatementType>;
+    };
 
-const auto comment = lexeme[
-    "/*" >> *(char_ - "*/") >> "*/" |
-    "//" >> *~char_("\r\n") >> x3::eol];
+    static constexpr auto rule = dsl::p<Type> >> dsl::p<KeyValueList>;
+    static constexpr auto value = lexy::construct<LexyDotParser::AttributeStatement>;
+};
 
-const auto skipper = comment | ascii::space;
+// The various kinds of statement can't be distinguished by their leading
+// tokens alone, so the statement is scanned manually instead
+struct Statement
+{
+    using scan_result = lexy::scan_result<LexyDotParser::Statement>;
+
+    static constexpr auto lead = dsl::peek(idLead / dsl::ascii::digit /
+        dsl::lit_c<'-'> / dsl::lit_c<'.'> / dsl::lit_c<'"'> /
+        dsl::lit_c<'<'> / dsl::lit_c<'{'>);
+
+    static constexpr auto rule = lead >> dsl::scan;
+    static constexpr auto value = lexy::forward<LexyDotParser::Statement>;
+
+    template<typename Context, typename Reader>
+    static scan_result scan(lexy::rule_scanner<Context, Reader>& scanner)
+    {
+        LexyDotParser::EdgeEnd edgeEnd;
+
+        // graph/node/edge, followed by an attribute list
+        lexy::scan_result<LexyDotParser::AttributeStatement> attributeStatement;
+        if(scanner.branch(attributeStatement, AttributeStatement{}))
+        {
+            if(!scanner)
+                return lexy::scan_failed;
+
+            return LexyDotParser::Statement(std::move(attributeStatement).value());
+        }
+
+        lexy::scan_result<LexyDotParser::DotSubGraph> subGraph;
+        if(scanner.branch(subGraph, SubGraph{}))
+        {
+            if(!scanner)
+                return lexy::scan_failed;
+
+            RecursiveValue<LexyDotParser::DotSubGraph> subGraphValue(std::move(subGraph).value());
+
+            if(!scanner.peek(edgeOperator))
+                return LexyDotParser::Statement(std::move(subGraphValue));
+
+            edgeEnd = LexyDotParser::EdgeEnd(std::move(subGraphValue));
+        }
+        else
+        {
+            auto id = scanner.parse(Identifier{});
+            if(!scanner)
+                return lexy::scan_failed;
+
+            // A bare identifier followed by = is an attribute assignment
+            if(scanner.branch(dsl::lit_c<'='>))
+            {
+                auto assignment = scanner.parse(Identifier{});
+                if(!scanner)
+                    return lexy::scan_failed;
+
+                return LexyDotParser::Statement(LexyDotParser::KeyValue{
+                    std::move(id).value(), std::move(assignment).value()});
+            }
+
+            LexyDotParser::DotNode node{std::move(id).value(), {}, {}};
+
+            if(scanner.branch(dsl::lit_c<':'>))
+            {
+                auto port = scanner.parse(Identifier{});
+                if(!scanner)
+                    return lexy::scan_failed;
+
+                node._ignore1 = std::move(port).value();
+
+                if(scanner.branch(dsl::lit_c<':'>))
+                {
+                    auto compassPoint = scanner.parse(Identifier{});
+                    if(!scanner)
+                        return lexy::scan_failed;
+
+                    node._ignore2 = std::move(compassPoint).value();
+                }
+            }
+
+            if(!scanner.peek(edgeOperator))
+            {
+                // Not an edge statement, so it must be a node statement
+                LexyDotParser::NodeStatement nodeStatement{std::move(node), {}};
+
+                lexy::scan_result<LexyDotParser::AttributeList> attributeList;
+                if(scanner.branch(attributeList, KeyValueList{}))
+                {
+                    if(!scanner)
+                        return lexy::scan_failed;
+
+                    nodeStatement._attributeList = std::move(attributeList).value();
+                }
+
+                return LexyDotParser::Statement(std::move(nodeStatement));
+            }
+
+            edgeEnd = LexyDotParser::EdgeEnd(std::move(node));
+        }
+
+        LexyDotParser::EdgeStatement edgeStatement;
+        edgeStatement._edgeEnd = std::move(edgeEnd);
+
+        while(scanner.branch(edgeOperator))
+        {
+            auto end = scanner.parse(EdgeEnd{});
+            if(!scanner)
+                return lexy::scan_failed;
+
+            edgeStatement._edgeEnds.emplace_back(std::move(end).value());
+        }
+
+        lexy::scan_result<LexyDotParser::AttributeList> attributeList;
+        if(scanner.branch(attributeList, KeyValueList{}))
+        {
+            if(!scanner)
+                return lexy::scan_failed;
+
+            edgeStatement._attributeList = std::move(attributeList).value();
+        }
+
+        return LexyDotParser::Statement(std::move(edgeStatement));
+    }
+};
+
+struct StatementList
+{
+    static constexpr auto rule =
+        dsl::opt(dsl::list(dsl::p<Statement> >> dsl::if_(dsl::lit_c<';'>)));
+
+    static constexpr auto value = lexy::as_list<LexyDotParser::StatementList>;
+};
+
+struct DotGraph
+{
+    static constexpr auto whitespace = skipper;
+
+    static constexpr auto rule =
+        dsl::if_(keywordStrict) + (keywordGraph | keywordDigraph) + dsl::p<OptionalIdentifier> +
+        dsl::curly_bracketed(dsl::p<StatementList>) + dsl::eof;
+
+    static constexpr auto value = lexy::construct<LexyDotParser::DotGraph>;
+};
+} // namespace grammar
 
 bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graphModel,
     IUserNodeData& userNodeData, IUserEdgeData& userEdgeData)
@@ -289,7 +447,7 @@ bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graphModel,
     {
         return std::visit(Visitor
         {
-            [&processStatementList](const boost::recursive_wrapper<DotSubGraph>& subGraph)
+            [&processStatementList](const RecursiveValue<DotSubGraph>& subGraph)
                 { return processStatementList(subGraph.get()._statementList); },
             [](const DotNode& node)
                 { return std::vector<QString>({node._text}); }
@@ -300,7 +458,7 @@ bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graphModel,
     {
         return std::visit(Visitor
         {
-            [&](const boost::recursive_wrapper<DotSubGraph>& subGraph)
+            [&](const RecursiveValue<DotSubGraph>& subGraph)
                 { return processStatementList(subGraph.get()._statementList); },
             [&](const AttributeStatement& attribute)
             {
@@ -376,7 +534,7 @@ bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graphModel,
 
     for(const auto& s : attributeStatements)
     {
-        if(s._type == "node")
+        if(s._type == AttributeStatementType::Node)
         {
             for(const auto& attribute : s._attributeList)
             {
@@ -387,7 +545,7 @@ bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graphModel,
                 }
             }
         }
-        else if(s._type == "edge")
+        else if(s._type == AttributeStatementType::Edge)
         {
             for(const auto& attribute : s._attributeList)
             {
@@ -403,7 +561,7 @@ bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graphModel,
     return true;
 }
 
-} // namespace SpiritDotParser
+} // namespace LexyDotParser
 
 DotFileParser::DotFileParser(IUserNodeData* userNodeData, IUserEdgeData* userEdgeData) :
     _userNodeData(userNodeData), _userEdgeData(userEdgeData)
@@ -424,8 +582,7 @@ bool DotFileParser::parse(const QUrl& url, IGraphModel* graphModel)
     if(!fileInfo.exists())
         return false;
 
-    auto fileSize = fileInfo.size();
-    if(fileSize == 0)
+    if(fileInfo.size() == 0)
     {
         setFailureReason(QObject::tr("File is empty."));
         return false;
@@ -433,35 +590,37 @@ bool DotFileParser::parse(const QUrl& url, IGraphModel* graphModel)
 
     setProgress(-1);
 
-    std::ifstream stream(localFile.toStdString());
-    stream.unsetf(std::ios::skipws);
+    QFile file(localFile);
+    if(!file.open(QIODevice::ReadOnly))
+        return false;
 
-    boost::spirit::istream_iterator istreamIt(stream); // NOLINT misc-const-correctness
-    using DotIterator = progress_iterator<decltype(istreamIt)>;
-    DotIterator it(istreamIt);
-    const DotIterator end;
+    const auto contents = file.readAll();
+    file.close();
 
-    it.onPositionChanged(
-    [this, &fileSize](size_t position)
+    if(contents.isEmpty())
+        return false;
+
+    const auto size = static_cast<size_t>(contents.size());
+    lexyutils::progress_input input(contents.constData(), size);
+
+    input.onPositionChanged([this, size](size_t position)
     {
-        setProgress(static_cast<int>((position * 100) / static_cast<size_t>(fileSize)));
+        setProgress(static_cast<int>((position * 100) / size));
     });
 
     auto cancelledFn = [this] { return cancelled(); };
-    it.setCancelledFn(cancelledFn);
+    input.setCancelledFn(cancelledFn);
 
     setPhase(QObject::tr("Parsing"));
 
-    SpiritDotParser::DotGraph dot;
-    const bool success = SpiritDotParser::x3::phrase_parse(it, end,
-        SpiritDotParser::dotGraph, SpiritDotParser::skipper, dot);
+    auto result = lexy::parse<LexyDotParser::grammar::DotGraph>(input, lexy::noop);
 
-    if(cancelled() || !success || it != end)
+    if(cancelled() || !result.is_success())
         return false;
 
     setPhase(QObject::tr("Building Graph"));
     setProgress(-1);
 
-    return SpiritDotParser::build(*this, dot, *graphModel,
+    return LexyDotParser::build(*this, result.value(), *graphModel,
         *_userNodeData, *_userEdgeData);
 }

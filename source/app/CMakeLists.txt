@@ -31,6 +31,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/commands/importattributescommand.h
     ${CMAKE_CURRENT_LIST_DIR}/commands/removeattributescommand.h
     ${CMAKE_CURRENT_LIST_DIR}/commands/selectnodescommand.h
+    ${CMAKE_CURRENT_LIST_DIR}/configgrammar.h
     ${CMAKE_CURRENT_LIST_DIR}/graph/componentmanager.h
     ${CMAKE_CURRENT_LIST_DIR}/graph/elementiddistinctsetcollection_debug.h
     ${CMAKE_CURRENT_LIST_DIR}/graph/elementiddistinctsetcollection.h

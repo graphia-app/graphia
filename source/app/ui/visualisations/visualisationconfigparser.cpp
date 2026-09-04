@@ -19,84 +19,103 @@
 
 #include "visualisationconfigparser.h"
 
-#define BOOST_SPIRIT_X3_UNICODE
+#include "app/configgrammar.h"
 
-#include <boost/spirit/home/x3.hpp>
-#include <boost/fusion/include/adapt_struct.hpp>
-#include <boost/boost_spirit_qstring_adapter.h>
+#include <lexy_utils.h>
 
+#include <lexy/action/parse.hpp>
+#include <lexy/callback.hpp>
+#include <lexy/dsl.hpp>
+#include <lexy/input/string_input.hpp>
+
+#include <QByteArray>
 #include <QDebug>
 
-#include <string>
+#include <vector>
 
-BOOST_FUSION_ADAPT_STRUCT(
-    VisualisationConfig::Parameter,
-    _name,
-    _value
-)
-
-BOOST_FUSION_ADAPT_STRUCT(
-    VisualisationConfig,
-    _flags,
-    _attributeName,
-    _channelName,
-    _parameters
-)
-
-namespace SpiritVisualisationParser
+namespace LexyVisualisationParser
 {
-namespace x3 = boost::spirit::x3;
-namespace unicode = boost::spirit::x3::unicode;
+namespace dsl = lexy::dsl;
 
-using x3::lit;
-// Only parse strict doubles (i.e. not integers)
-x3::real_parser<double, x3::strict_real_policies<double>> const double_ = {};
-using x3::lexeme;
-using unicode::char_;
+using lexyutils::asDouble;
+using lexyutils::QuotedString;
 
-const x3::rule<class QuotedString, QString> quotedString = "quotedString";
-const auto escapedQuote = lit('\\') >> char_('"');
-const auto quotedString_def = lexeme['"' >> *(escapedQuote | ~char_('"')) >> '"'];
+using LexyConfigGrammar::AttributeParameters;
+using LexyConfigGrammar::Flags;
+using LexyConfigGrammar::Name;
 
-const x3::rule<class Identifier, QString> identifier = "identifier";
-const auto identifier_def = lexeme[char_("a-zA-Z_") >> *char_("a-zA-Z0-9_")];
+constexpr auto keywordWith = LEXY_KEYWORD("with", LexyConfigGrammar::idPattern);
 
-const x3::rule<class Parameter, VisualisationConfig::Parameter> parameter = "parameter";
-const auto parameterName = quotedString | identifier;
-const auto parameter_def = parameterName >> lit('=') >> (double_ | quotedString);
+struct Double
+{
+    static constexpr auto rule = dsl::capture(lexyutils::real);
+    static constexpr auto value = asDouble;
+};
 
-const auto identifierList = identifier % lit(',');
-const auto flags = lit('[') >> -identifierList >> lit(']');
+struct Parameter
+{
+    static constexpr auto rule = dsl::p<Name> >>
+        (dsl::lit_c<'='> + (dsl::p<Double> | dsl::p<QuotedString>));
 
-const x3::rule<class AttributeParameter, QString> attributeParameter = "attributeParameter";
-const auto attributeParameter_def = lexeme[char_('.') >> (quotedString | identifier)];
+    static constexpr auto value = lexy::construct<VisualisationConfig::Parameter>;
+};
 
-const x3::rule<class AttributeName, QString> attributeName = "attributeName";
-const auto attributeName_def = lexeme[(quotedString | identifier) >> *attributeParameter];
+struct Parameters
+{
+    static constexpr auto rule = dsl::opt(keywordWith >> dsl::list(dsl::p<Parameter>));
+    static constexpr auto value = lexy::as_list<std::vector<VisualisationConfig::Parameter>>;
+};
 
-const x3::rule<class Visualisation, VisualisationConfig> visualisation = "visualisation";
-const auto channelName = quotedString | identifier;
-const auto visualisation_def =
-    -flags >>
-    attributeName >> channelName >>
-    -(lit("with") >> +parameter);
+// Note this is a token production, so that no whitespace is
+// skipped between the attribute name and its parameters
+struct AttributeName : lexy::token_production
+{
+    static constexpr auto rule = dsl::p<Name> >> dsl::p<AttributeParameters>;
+    static constexpr auto value = LexyConfigGrammar::asAttributeName;
+};
 
-BOOST_SPIRIT_DEFINE(quotedString, identifier, attributeParameter, attributeName, visualisation, parameter)
-} // namespace SpiritVisualisationParser
+struct Visualisation
+{
+    static constexpr auto whitespace = dsl::ascii::space;
+
+    static constexpr auto rule = dsl::p<Flags> + dsl::p<AttributeName> +
+        dsl::p<Name> + dsl::p<Parameters> + dsl::eof;
+
+    static constexpr auto value = lexy::construct<VisualisationConfig>;
+};
+} // namespace LexyVisualisationParser
 
 bool VisualisationConfigParser::parse(const QString& text, bool warnOnFailure)
 {
-    QStringSpiritUnicodeConstIterator begin(text.begin());
-    const QStringSpiritUnicodeConstIterator end(text.end());
-    _result = {};
-    _success = SpiritVisualisationParser::x3::phrase_parse(begin, end,
-                    SpiritVisualisationParser::visualisation,
-                    SpiritVisualisationParser::unicode::space, _result);
+    const auto bytes = text.toUtf8();
+    const auto* const begin = bytes.constData();
+    const auto* const end = begin + bytes.size();
 
-    if(begin != end)
+    const auto input = lexy::string_input<lexy::default_encoding>(begin, end);
+
+    _result = {};
+    _failedInput.clear();
+
+    const char* failurePosition = nullptr;
+    const auto onError = lexy::callback<void>([&failurePosition](const auto&, const auto& error)
     {
-        _success = false;
-        _failedInput = QString::fromStdString(std::string(begin, end));
+        // Only the first (i.e. earliest) failure is of interest
+        if(failurePosition == nullptr)
+            failurePosition = error.position();
+    });
+
+    auto result = lexy::parse<LexyVisualisationParser::Visualisation>(input, onError);
+    _success = result.is_success();
+
+    if(_success)
+        _result = result.value();
+    else
+    {
+        if(failurePosition == nullptr)
+            failurePosition = begin;
+
+        _failedInput = QString::fromUtf8(failurePosition,
+            static_cast<qsizetype>(end - failurePosition));
 
         if(warnOnFailure)
             qWarning() << "Failed to parse" << _failedInput;

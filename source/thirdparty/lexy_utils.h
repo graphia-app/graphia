@@ -23,6 +23,7 @@
 #include <lexy/callback.hpp>
 #include <lexy/dsl.hpp>
 #include <lexy/encoding.hpp>
+#include <lexy/grammar.hpp>
 #include <lexy/lexeme.hpp>
 
 #include <QByteArray>
@@ -30,34 +31,23 @@
 
 #include <cstddef>
 #include <functional>
-#include <optional>
-#include <utility>
 
-// Helpers shared by the various lexy based grammars
 namespace lexyutils
 {
 namespace dsl = lexy::dsl;
 
-namespace detail
-{
-template<unsigned char... Offsets>
-constexpr auto makeNonAsciiByte(std::integer_sequence<unsigned char, Offsets...>)
-{
-    return (dsl::lit_b<static_cast<unsigned char>(0x80u + Offsets)> / ...);
-}
-} // namespace detail
+// The grammars are all byte oriented, i.e. they use lexy::default_encoding, so lexy's
+// Unicode aware character classes can't be applied to them wholesale; in particular
+// the complement operator is only available for classes that are known not to be
+// Unicode, which is only the case for those built from dsl::lit_b. These are the byte
+// oriented equivalents, from which "any byte except x" is expressed as anyByte - x
 
-// The grammars are all byte oriented, i.e. they use lexy::default_encoding, which
-// means that lexy's Unicode aware character classes (and in particular the
-// complement operator) can't be used with them; these are the byte oriented
-// equivalents, from which "any byte except x" is expressed as anyByte - x
+// Matches any single byte; the lit_b makes the class a non-Unicode one, so that it
+// can be complemented, and the byte it excludes is then unioned back in
+inline constexpr auto anyByte = -dsl::lit_b<0x80> / dsl::lit_b<0x80>;
 
 // Matches any single non-ASCII byte, i.e. anything in the range 0x80 to 0xFF
-inline constexpr auto nonAsciiByte =
-    detail::makeNonAsciiByte(std::make_integer_sequence<unsigned char, 128>{});
-
-// Matches any single byte
-inline constexpr auto anyByte = dsl::ascii::character / nonAsciiByte;
+inline constexpr auto nonAsciiByte = anyByte - dsl::ascii::character;
 
 inline constexpr auto sign = dsl::lit_c<'+'> / dsl::lit_c<'-'>;
 inline constexpr auto exponent =
@@ -84,24 +74,10 @@ QByteArray byteArrayFrom(const Lexeme& lexeme)
     return {lexeme.data(), static_cast<qsizetype>(lexeme.size())};
 }
 
-// Any lexeme the grammars produce is a sequence of (presumed to be) UTF-8 encoded bytes
 template<typename Lexeme>
 QString qStringFrom(const Lexeme& lexeme)
 {
     return QString::fromUtf8(lexeme.data(), static_cast<qsizetype>(lexeme.size()));
-}
-
-// Yields a value only if the lexeme is an integer that's representable as an int
-template<typename Lexeme>
-std::optional<int> intFrom(const Lexeme& lexeme)
-{
-    bool success = false;
-    const auto value = byteArrayFrom(lexeme).toInt(&success);
-
-    if(!success)
-        return std::nullopt;
-
-    return value;
 }
 
 template<typename Lexeme>
@@ -110,17 +86,40 @@ double doubleFrom(const Lexeme& lexeme)
     return byteArrayFrom(lexeme).toDouble();
 }
 
-// lexy callback that converts a captured lexeme into a QString
 inline constexpr auto asQString = lexy::callback<QString>(
     [](const auto& lexeme) { return qStringFrom(lexeme); });
 
-// lexy callback that converts a captured real lexeme into a double
 inline constexpr auto asDouble = lexy::callback<double>(
     [](const auto& lexeme) { return doubleFrom(lexeme); });
 
-// A lexy Input over a contiguous block of bytes that periodically reports how far
-// through it the parser has progressed, and which can be made to appear as if it
-// has reached EOF, thereby terminating any parse that is in progress
+template<typename Value>
+inline constexpr auto asNumber = lexy::callback<Value>([](const auto& lexeme) -> Value
+{
+    const auto bytes = byteArrayFrom(lexeme);
+
+    bool isInt = false;
+    const auto integer = bytes.toInt(&isInt);
+
+    if(isInt)
+        return integer;
+
+    return bytes.toDouble();
+});
+
+struct QuotedString : lexy::token_production
+{
+    static constexpr auto rule = dsl::lit_c<'"'> >>
+        (dsl::capture(dsl::token(dsl::while_(
+            LEXY_LIT("\\\"") | (anyByte - dsl::lit_c<'"'>)))) + dsl::lit_c<'"'>);
+
+    static constexpr auto value = lexy::callback<QString>([](const auto& lexeme)
+    {
+        auto text = qStringFrom(lexeme);
+        text.replace("\\\"", "\"");
+        return text;
+    });
+};
+
 class progress_input
 {
 public:
@@ -128,27 +127,24 @@ public:
     using char_type = encoding::char_type;
 
 private:
-    // Number of bytes consumed between successive polls; the parser bumps its
-    // position one byte at a time, and calling out on every one of these is
-    // needlessly expensive, given that neither the progress indication nor the
-    // response to cancellation need be especially fine grained
     static constexpr size_t POLL_INTERVAL = 4096;
 
     struct State
     {
         const char_type* _begin = nullptr;
         const char_type* _end = nullptr;
-        const char_type* _poll = nullptr;
+
+        size_t _poll = POLL_INTERVAL;
 
         std::function<void(size_t position)> _onPositionChangedFn;
         std::function<bool()> _cancelledFn;
 
-        void poll(const char_type* position)
+        void poll(size_t position)
         {
             _poll = position + POLL_INTERVAL;
 
             if(_onPositionChangedFn != nullptr)
-                _onPositionChangedFn(static_cast<size_t>(position - _begin));
+                _onPositionChangedFn(position);
 
             if(_cancelledFn != nullptr && _cancelledFn())
             {
@@ -191,8 +187,9 @@ public:
         {
             _cur++;
 
-            if(_cur >= _state->_poll)
-                _state->poll(_cur);
+            const auto position = static_cast<size_t>(_cur - _state->_begin);
+            if(position >= _state->_poll)
+                _state->poll(position);
         }
 
         iterator position() const noexcept { return _cur; }
@@ -209,7 +206,6 @@ public:
     {
         _state._begin = data;
         _state._end = data + size;
-        _state._poll = data + POLL_INTERVAL;
     }
 
     template<typename OnPositionChangedFn>
