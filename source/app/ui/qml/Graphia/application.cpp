@@ -947,7 +947,7 @@ void Application::updateLoadingCapabilities()
     {
         auto urlTypeNames = loadedPlugin._interface->loadableUrlTypeNames();
 
-        for(const auto& urlTypeName : urlTypeNames)
+        for(const auto& urlTypeName : std::as_const(urlTypeNames))
             urlTypePluginCounts[urlTypeName]++;
     }
 
