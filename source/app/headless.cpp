@@ -24,8 +24,7 @@
 
 #include "shared/utils/container.h"
 #include "shared/utils/console.h"
-
-#include <json_helper.h>
+#include "shared/utils/json.h"
 
 #include <QVariantMap>
 #include <QFileInfo>

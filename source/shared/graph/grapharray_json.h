@@ -23,8 +23,7 @@
 #include "shared/graph/grapharray.h"
 #include "shared/utils/progressable.h"
 #include "shared/utils/container.h"
-
-#include <json_helper.h>
+#include "shared/utils/json.h"
 
 #include <QDebug>
 

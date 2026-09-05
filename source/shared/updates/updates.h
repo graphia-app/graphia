@@ -20,7 +20,7 @@
 #ifndef UPDATES_H
 #define UPDATES_H
 
-#include <json_helper.h>
+#include "shared/utils/json_fwd.h"
 
 #include <QString>
 

@@ -20,6 +20,7 @@
 #include "cxparser.h"
 
 #include "shared/utils/container.h"
+#include "shared/utils/json.h"
 
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/elementid.h"

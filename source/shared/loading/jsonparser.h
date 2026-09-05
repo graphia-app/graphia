@@ -21,7 +21,7 @@
 #define JSONPARSER_H
 
 #include "shared/loading/iparser.h"
-#include "json_helper.h"
+#include "shared/utils/json_fwd.h"
 
 #include <QUrl>
 

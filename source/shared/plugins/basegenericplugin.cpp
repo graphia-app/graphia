@@ -29,8 +29,7 @@
 #include "shared/loading/cxparser.h"
 
 #include "shared/utils/container.h"
-
-#include <json_helper.h>
+#include "shared/utils/json.h"
 
 #include <QDebug>
 #include <QObject>

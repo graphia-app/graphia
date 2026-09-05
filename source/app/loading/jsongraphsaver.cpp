@@ -24,6 +24,7 @@
 #include "shared/graph/igraph.h"
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"
+#include "shared/utils/json.h"
 
 #include <QByteArray>
 #include <QFile>

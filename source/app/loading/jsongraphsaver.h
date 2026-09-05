@@ -22,7 +22,7 @@
 
 #include "saverfactory.h"
 
-#include <json_helper.h>
+#include "shared/utils/json_fwd.h"
 
 #include <QString>
 #include <QUrl>

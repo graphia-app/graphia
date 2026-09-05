@@ -24,7 +24,8 @@
 
 #include "app/transform/graphtransform.h"
 
-#include <json_helper.h>
+#include "shared/utils/json.h"
+
 #include <QString>
 
 using namespace Qt::Literals::StringLiterals;

@@ -23,6 +23,7 @@
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"
 #include "shared/utils/container.h"
+#include "shared/utils/json.h"
 #include "shared/utils/string.h"
 
 #include <QDebug>
@@ -32,8 +33,6 @@
 #include <algorithm>
 #include <memory>
 #include <utility>
-
-#include <json_helper.h>
 
 template<typename E>
 void UserElementData<E>::generateElementIdMapping(E elementId)

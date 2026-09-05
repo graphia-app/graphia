@@ -23,6 +23,7 @@
 
 #include "shared/utils/container.h"
 #include "shared/utils/checksum.h"
+#include "shared/utils/json.h"
 #include "shared/utils/string.h"
 #include "shared/utils/crypto.h"
 #include "shared/utils/utils.h"

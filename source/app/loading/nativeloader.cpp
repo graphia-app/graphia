@@ -34,12 +34,12 @@
 #include "shared/utils/scope_exit.h"
 #include "shared/utils/container.h"
 #include "shared/utils/source_location.h"
+#include "shared/utils/json.h"
 
 #include "shared/loading/userelementdata.h"
 #include "shared/loading/progress_iterator.h"
 #include "shared/loading/jsongraphparser.h"
 
-#include <json_helper.h>
 #include <zlib.h>
 
 #include <QDataStream>

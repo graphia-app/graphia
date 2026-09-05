@@ -35,6 +35,7 @@
 #include "shared/utils/redirects.h"
 #include "shared/utils/source_location.h"
 #include "shared/utils/qmlenumfor.h"
+#include "shared/utils/json.h"
 
 #include "shared/attributes/iattribute.h"
 
@@ -42,7 +43,6 @@
 
 #include "shared/loading/xlsxtabulardataparser.h"
 
-#include <json_helper.h>
 #include <qcustomplotcolorprovider.h>
 
 #include <QDebug>

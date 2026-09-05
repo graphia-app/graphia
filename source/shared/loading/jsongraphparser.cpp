@@ -20,6 +20,7 @@
 #include "jsongraphparser.h"
 
 #include "shared/utils/container.h"
+#include "shared/utils/json.h"
 #include "shared/utils/string.h"
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"

@@ -21,8 +21,7 @@
 #define USERDATAVECTOR_H
 
 #include "shared/utils/typeidentity.h"
-
-#include <json_helper.h>
+#include "shared/utils/json_fwd.h"
 
 #include <QString>
 #include <QStringList>

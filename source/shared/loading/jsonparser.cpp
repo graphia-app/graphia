@@ -20,6 +20,7 @@
 #include "jsonparser.h"
 
 #include "shared/utils/source_location.h"
+#include "shared/utils/json.h"
 
 #include <QFile>
 #include <QByteArray>

@@ -20,6 +20,7 @@
 #include "userdata.h"
 
 #include "shared/utils/container.h"
+#include "shared/utils/json.h"
 
 #include <QDebug>
 #include <QtGlobal>

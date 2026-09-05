@@ -20,10 +20,9 @@
 #include "visualisationmapping.h"
 
 #include "shared/utils/container.h"
+#include "shared/utils/json.h"
 #include "shared/utils/statistics.h"
 #include "shared/utils/utils.h"
-
-#include <json_helper.h>
 
 #include <QDebug>
 #include <QString>

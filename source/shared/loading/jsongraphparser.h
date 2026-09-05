@@ -22,8 +22,7 @@
 
 #include "shared/loading/jsonparser.h"
 #include "shared/loading/iuserelementdata.h"
-
-#include "json_helper.h"
+#include "shared/utils/json_fwd.h"
 
 #include <QUrl>
 

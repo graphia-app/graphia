@@ -27,6 +27,7 @@
 #include "shared/utils/flags.h"
 #include "shared/utils/color.h"
 #include "shared/utils/string.h"
+#include "shared/utils/json.h"
 #include "shared/loading/tabulardata.h"
 #include "shared/loading/userelementdata.h"
 
@@ -64,8 +65,6 @@
 #include "availabletransformsmodel.h"
 
 #include "../crashhandler.h"
-
-#include <json_helper.h>
 
 #include <QQmlProperty>
 #include <QMetaObject>

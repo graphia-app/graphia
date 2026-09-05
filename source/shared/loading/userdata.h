@@ -25,8 +25,7 @@
 
 #include "shared/utils/pair_iterator.h"
 #include "shared/utils/progressable.h"
-
-#include <json_helper.h>
+#include "shared/utils/json_fwd.h"
 
 #include <QObject>
 #include <QString>

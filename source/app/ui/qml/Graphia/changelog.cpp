@@ -21,8 +21,7 @@
 
 #include "shared/updates/updates.h"
 #include "shared/utils/container.h"
-
-#include <json_helper.h>
+#include "shared/utils/json.h"
 
 #include <QByteArray>
 #include <QFile>

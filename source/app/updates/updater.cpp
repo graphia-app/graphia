@@ -30,8 +30,7 @@
 #include "shared/utils/string.h"
 #include "shared/utils/checksum.h"
 #include "shared/utils/doasyncthen.h"
-
-#include <json_helper.h>
+#include "shared/utils/json.h"
 
 #include <QByteArray>
 #include <QProcess>

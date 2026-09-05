@@ -20,7 +20,7 @@
 #ifndef INSTALLER_H
 #define INSTALLER_H
 
-#include <json_helper.h>
+#include "shared/utils/json.h"
 
 #include <QObject>
 #include <QString>

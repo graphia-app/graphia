@@ -20,8 +20,7 @@
 #include "colorgradient.h"
 
 #include "shared/utils/utils.h"
-
-#include <json_helper.h>
+#include "shared/utils/json.h"
 
 #include <QDebug>
 
