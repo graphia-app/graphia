@@ -24,7 +24,6 @@
 #include "correlationdatavector.h"
 
 #include <QDebug>
-#include <QString>
 #include <QtGlobal>
 #include <QVariantMap>
 

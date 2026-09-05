@@ -26,7 +26,6 @@
 #include <QtGlobal>
 
 #include <algorithm>
-#include <cmath>
 #include <cstdint>
 #include <numeric>
 #include <limits>
@@ -69,31 +68,6 @@ struct Link
     size_t _pi;
 };
 
-class EuclideanDistanceAlgorithm
-{
-public:
-    double evaluate(size_t size, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB) const
-    {
-        double sum = 0.0;
-
-        for(size_t i = 0; i < size; i++)
-        {
-            auto diff = vectorA->valueAt(i) - vectorB->valueAt(i);
-            auto diffSq = diff * diff;
-            sum += diffSq;
-        }
-
-        return sum != 0.0 ? std::sqrt(sum) : 0.0;
-    }
-
-    static QString name() { return {}; }
-    static QString description() { return {}; }
-    static QString attributeName() { return {}; }
-    static QString attributeDescription() { return {}; }
-};
-
-class EuclideanDistanceCorrelation : public CovarianceCorrelation<EuclideanDistanceAlgorithm, ThresholdFilter> {};
-
 HierarchicalClusteringCommand::HierarchicalClusteringCommand(const std::vector<double>& data,
     size_t numColumns, size_t numRows, CorrelationPluginInstance& correlationPluginInstance) :
     _data(&data), _numColumns(numColumns), _numRows(numRows),
@@ -112,10 +86,10 @@ bool HierarchicalClusteringCommand::execute()
     for(auto& dataColumn : dataColumns)
         dataColumn.update();
 
-    const EuclideanDistanceCorrelation correlation;
+    auto correlation = ContinuousCorrelation::createEuclideanDistance();
 
     setPhase(QObject::tr("Correlating"));
-    auto matrix = correlation.matrix(dataColumns, {}, this, this);
+    auto matrix = correlation->matrix(dataColumns, {}, this, this);
 
     if(cancelled())
         return false;
