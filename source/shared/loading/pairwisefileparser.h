@@ -27,23 +27,15 @@
 #include "shared/loading/xlsxtabulardataparser.h"
 #include "shared/loading/pairwisecolumntype.h"
 
-#include <QObject>
-#include <QString>
-#include <QtGlobal>
 #include <QUrl>
 
-#include <cstddef>
-#include <map>
 #include <utility>
-#include <vector>
 
-template<typename TabularDataParser>
-class PairwiseFileParser : public IParser
+class PairwiseParser : public IParser
 {
 private:
     IUserNodeData* _userNodeData = nullptr;
     IUserEdgeData* _userEdgeData = nullptr;
-    TabularData _tabularData;
 
     bool _firstRowIsHeader = false;
     PairwiseColumnsConfiguration _columnsConfiguration =
@@ -52,130 +44,45 @@ private:
         {1, {PairwiseColumnType::TargetNode, {}}},
     };
 
+protected:
+    TabularData _tabularData;
+
+    virtual bool parseTabularData(const QUrl& url, IGraphModel* graphModel) = 0;
+
 public:
+    PairwiseParser(IUserNodeData* userNodeData, IUserEdgeData* userEdgeData,
+        TabularData* tabularData = nullptr);
+
     void setFirstRowIsHeader(bool firstRowIsHeader) { _firstRowIsHeader = firstRowIsHeader; }
     void setColumnsConfiguration(const PairwiseColumnsConfiguration& columnsConfiguration)
     {
         _columnsConfiguration = columnsConfiguration;
     }
 
-    PairwiseFileParser(IUserNodeData* userNodeData, IUserEdgeData* userEdgeData,
-        TabularData* tabularData = nullptr) :
-        _userNodeData(userNodeData), _userEdgeData(userEdgeData)
+    bool parse(const QUrl& url, IGraphModel* graphModel) override;
+};
+
+template<typename TabularDataParser>
+class PairwiseFileParser : public PairwiseParser
+{
+private:
+    bool parseTabularData(const QUrl& url, IGraphModel* graphModel) override
     {
-        if(tabularData != nullptr)
-            _tabularData = std::move(*tabularData);
+        TabularDataParser parser(this);
 
-        // Add this up front, so that it appears first in the attribute table
-        userNodeData->add(QObject::tr("Node Name"));
-    }
-
-    bool parse(const QUrl& url, IGraphModel* graphModel) override
-    {
-        if(_tabularData.empty())
+        if(!parser.parse(url, graphModel))
         {
-            TabularDataParser parser(this);
-
-            if(!parser.parse(url, graphModel))
-            {
-                setFailureReason(parser.failureReason());
-                return false;
-            }
-
-            _tabularData = std::move(parser.tabularData());
+            setFailureReason(parser.failureReason());
+            return false;
         }
 
-        setProgress(-1);
-
-        size_t sourceNodeColumn = 0;
-        size_t targetNodeColumn = 0;
-
-        struct AttributeColumn
-        {
-            size_t _column;
-            PairwiseColumnType _type;
-            QString _name;
-        };
-
-        std::vector<AttributeColumn> _attributeColumns;
-
-        for(const auto& [column, configuration] : _columnsConfiguration)
-        {
-            Q_ASSERT(column < _tabularData.numColumns());
-
-            switch(configuration._type)
-            {
-            case PairwiseColumnType::Unused: break;
-            case PairwiseColumnType::SourceNode: sourceNodeColumn = column; break;
-            case PairwiseColumnType::TargetNode: targetNodeColumn = column; break;
-            default:
-                _attributeColumns.emplace_back(AttributeColumn{column, configuration._type, configuration._name});
-                break;
-            }
-        }
-
-        std::map<QString, NodeId> nodeIdMap;
-
-        for(size_t rowIndex = _firstRowIsHeader ? 1 : 0; rowIndex < _tabularData.numRows(); rowIndex++)
-        {
-            auto source = _tabularData.valueAt(sourceNodeColumn, rowIndex);
-            auto target = _tabularData.valueAt(targetNodeColumn, rowIndex);
-
-            NodeId sourceNodeId;
-            NodeId targetNodeId;
-
-            if(!u::contains(nodeIdMap, source))
-            {
-                sourceNodeId = graphModel->mutableGraph().addNode();
-                nodeIdMap.emplace(source, sourceNodeId);
-
-                if(_userNodeData != nullptr)
-                {
-                    _userNodeData->setValueBy(sourceNodeId, QObject::tr("Node Name"), source);
-                    graphModel->setNodeName(sourceNodeId, source);
-                }
-            }
-            else
-                sourceNodeId = nodeIdMap[source];
-
-            if(!u::contains(nodeIdMap, target))
-            {
-                targetNodeId = graphModel->mutableGraph().addNode();
-                nodeIdMap.emplace(target, targetNodeId);
-
-                if(_userNodeData != nullptr)
-                {
-                    _userNodeData->setValueBy(targetNodeId, QObject::tr("Node Name"), target);
-                    graphModel->setNodeName(targetNodeId, target);
-                }
-            }
-            else
-                targetNodeId = nodeIdMap[target];
-
-            auto edgeId = graphModel->mutableGraph().addEdge(sourceNodeId, targetNodeId);
-
-            for(const auto& attributeColumn : _attributeColumns)
-            {
-                auto value = _tabularData.valueAt(attributeColumn._column, rowIndex);
-
-                switch(attributeColumn._type)
-                {
-                case PairwiseColumnType::EdgeAttribute:
-                    _userEdgeData->setValueBy(edgeId, attributeColumn._name, value); break;
-                case PairwiseColumnType::SourceNodeAttribute:
-                    _userNodeData->setValueBy(sourceNodeId, attributeColumn._name, value); break;
-                case PairwiseColumnType::TargetNodeAttribute:
-                    _userNodeData->setValueBy(targetNodeId, attributeColumn._name, value); break;
-
-                default: break;
-                }
-            }
-
-            setProgress(static_cast<int>((rowIndex * 100) / _tabularData.numRows()));
-        }
+        _tabularData = std::move(parser.tabularData());
 
         return true;
     }
+
+public:
+    using PairwiseParser::PairwiseParser;
 
     static bool canLoad(const QUrl& url)
     {

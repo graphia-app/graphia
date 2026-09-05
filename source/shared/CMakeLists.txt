@@ -131,6 +131,7 @@ list(APPEND HEADERS
 
 list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/graph/covariancematrix.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/loading/adjacencymatrixfileparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/biopaxfileparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/cxparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/matlabfileparser.cpp
@@ -139,6 +140,7 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphsizeestimate.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/jsonparser.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/loading/pairwisefileparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/jsongraphparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/xlsxtabulardataparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/tabulardata.cpp
