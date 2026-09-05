@@ -1,5 +1,6 @@
 Checks: >
     *,
+    -abseil-*,
     -altera-*,
     -android-*,
     -bugprone-branch-clone,
