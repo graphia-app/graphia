@@ -93,6 +93,8 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/utils/iterator_range.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/is_detected.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/is_std_container.h
+    ${CMAKE_CURRENT_LIST_DIR}/utils/json.h
+    ${CMAKE_CURRENT_LIST_DIR}/utils/json_fwd.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/macosfileopeneventfilter.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/movablepointer.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/msvcwarningsuppress.h
@@ -159,6 +161,7 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/utils/deferredexecutor.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/downloadqueue.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/failurereason.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/utils/json.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/macosfileopeneventfilter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/performancecounter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/qrcextract.cpp
