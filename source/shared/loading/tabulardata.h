@@ -20,29 +20,18 @@
 #ifndef TABULARDATA_H
 #define TABULARDATA_H
 
-#include "shared/graph/igraphmodel.h"
-#include "shared/graph/imutablegraph.h"
 #include "shared/loading/iparser.h"
-#include "shared/utils/string.h"
 #include "shared/utils/typeidentity.h"
-#include "shared/utils/source_location.h"
 
-#include <utf8.h>
-
-#include <QObject>
 #include <QString>
 #include <QStringList>
 #include <QUrl>
 #include <QRect>
 
-#include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <fstream>
-#include <iterator>
 #include <string>
 #include <vector>
-#include <limits>
 
 class Progressable;
 
@@ -112,170 +101,57 @@ public:
 
 enum class EmptyCellPolicy { Keep, Skip };
 
-template<EmptyCellPolicy ECP, const char... Delimiters>
 class TextDelimitedTabularDataParser : public IParser
 {
-    static_assert(((Delimiters != '"') && ...), "Delimiter cannot be a quotemark");
-
 private:
     size_t _rowLimit = 0;
     TabularData _tabularData;
 
+    EmptyCellPolicy _emptyCellPolicy = EmptyCellPolicy::Keep;
+    std::string _delimiters;
+
+    bool isDelimiter(uint32_t codePoint) const;
+
+protected:
+    TextDelimitedTabularDataParser(EmptyCellPolicy emptyCellPolicy,
+        std::string delimiters, IParser* parent);
+
+    bool canLoadFrom(const QUrl& url);
+
 public:
-    explicit TextDelimitedTabularDataParser(IParser* parent = nullptr)
-    {
-        if(parent != nullptr)
-            setProgressFn([parent](int percent) { parent->setProgress(percent); });
-    }
-
-    bool parse(const QUrl& url, IGraphModel* = nullptr) override
-    {
-        setPhase(QObject::tr("Parsing"));
-
-        size_t columnIndex = 0;
-        size_t rowIndex = 0;
-
-        std::ifstream file(url.toLocalFile().toStdString());
-
-        if(!file)
-        {
-            setGenericFailureReason(CURRENT_SOURCE_LOCATION);
-            return false;
-        }
-
-        auto fileSize = file.tellg();
-        file.seekg(0, std::ios::end);
-        fileSize = file.tellg() - fileSize;
-        file.seekg(0, std::ios::beg);
-
-        if(fileSize == 0)
-        {
-            setFailureReason(QObject::tr("File is empty."));
-            return false;
-        }
-
-        int progress = 0;
-        std::string line;
-        std::string token;
-
-        auto setCurrentCellToToken = [&]
-        {
-            _tabularData.setValueAt(columnIndex, rowIndex,
-                QString::fromStdString(token), progress);
-
-            token.clear();
-            columnIndex++;
-        };
-
-        file.seekg(0, std::ios::beg);
-        while(!u::getline(file, line).eof())
-        {
-            bool inQuotes = false;
-            bool delimiter = false;
-
-            std::string validatedLine;
-            utf8::replace_invalid(line.begin(), line.end(), std::back_inserter(validatedLine));
-            auto it = validatedLine.begin();
-            auto end = validatedLine.end();
-            while(it < end)
-            {
-                const uint32_t codePoint = utf8::next(it, end);
-
-                if(codePoint == '"')
-                {
-                    if(inQuotes)
-                        setCurrentCellToToken();
-
-                    inQuotes = !inQuotes;
-                    delimiter = false;
-                }
-                else
-                {
-                    auto previousTokenWasDelimiter = delimiter || columnIndex == 0;
-                    delimiter = ((Delimiters == codePoint) || ...);
-
-                    if(!delimiter || inQuotes)
-                        utf8::unchecked::append(codePoint, std::back_inserter(token));
-                    else if(!token.empty() || (previousTokenWasDelimiter && ECP == EmptyCellPolicy::Keep))
-                        setCurrentCellToToken();
-                }
-            }
-
-            if(!token.empty())
-                setCurrentCellToToken();
-
-            progress = file.eof() ? 100 :
-                static_cast<int>(file.tellg() * 100 / fileSize);
-            setProgress(progress);
-
-            rowIndex++;
-            columnIndex = 0;
-
-            if(_rowLimit > 0 && rowIndex > _rowLimit)
-                break;
-
-            if(cancelled())
-                return false;
-        }
-
-        // Free up any over-allocation
-        _tabularData.shrinkToFit();
-
-        return true;
-    }
+    bool parse(const QUrl& url, IGraphModel* = nullptr) override;
 
     void setRowLimit(size_t rowLimit) { _rowLimit = rowLimit; }
 
     TabularData& tabularData() { return _tabularData; }
-
-    static bool canLoad(const QUrl& url)
-    {
-        TextDelimitedTabularDataParser<ECP, Delimiters...> testParser;
-
-        testParser.setRowLimit(5);
-        if(!testParser.parse(url))
-            return false;
-
-        const auto& tabularData = testParser.tabularData();
-        size_t minColumns = std::numeric_limits<size_t>::max();
-        size_t maxColumns = std::numeric_limits<size_t>::min();
-
-        for(size_t row = 0; row < tabularData.numRows(); row++)
-        {
-            size_t numColumns = 0;
-
-            for(size_t column = 0; column < tabularData.numColumns(); column++)
-            {
-                if(!tabularData.valueAt(column, row).isEmpty())
-                    numColumns = column + 1;
-            }
-
-            minColumns = std::min(numColumns, minColumns);
-            maxColumns = std::max(numColumns, maxColumns);
-        }
-
-        if(minColumns > maxColumns)
-            return false;
-
-        // Where only a single column has been found, it's highly unlikely that
-        // this parser's delimiter is correct for the file in question
-        if(maxColumns < 2)
-            return false;
-
-        auto delta = maxColumns - minColumns;
-        const size_t maxAllowedColumnCountDelta = 3;
-
-        // If the column counts vary too much, refuse to load the file
-        if(delta > maxAllowedColumnCountDelta)
-            return false;
-
-        return true;
-    }
 };
 
-using CsvFileParser = TextDelimitedTabularDataParser<EmptyCellPolicy::Keep, ','>;
-using TsvFileParser = TextDelimitedTabularDataParser<EmptyCellPolicy::Keep, '\t'>;
-using TxtFileParser = TextDelimitedTabularDataParser<EmptyCellPolicy::Skip, ' ', '\t'>;
-using SsvFileParser = TextDelimitedTabularDataParser<EmptyCellPolicy::Keep, ';'>;
+class CsvFileParser : public TextDelimitedTabularDataParser
+{
+public:
+    explicit CsvFileParser(IParser* parent = nullptr);
+    static bool canLoad(const QUrl& url);
+};
+
+class TsvFileParser : public TextDelimitedTabularDataParser
+{
+public:
+    explicit TsvFileParser(IParser* parent = nullptr);
+    static bool canLoad(const QUrl& url);
+};
+
+class TxtFileParser : public TextDelimitedTabularDataParser
+{
+public:
+    explicit TxtFileParser(IParser* parent = nullptr);
+    static bool canLoad(const QUrl& url);
+};
+
+class SsvFileParser : public TextDelimitedTabularDataParser
+{
+public:
+    explicit SsvFileParser(IParser* parent = nullptr);
+    static bool canLoad(const QUrl& url);
+};
 
 #endif // TABULARDATA_H
