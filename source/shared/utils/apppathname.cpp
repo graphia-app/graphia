@@ -20,6 +20,7 @@
 #include "apppathname.h"
 
 #include <QtGlobal>
+#include <QDir>
 #include <QFileInfo>
 
 static QString appPath;

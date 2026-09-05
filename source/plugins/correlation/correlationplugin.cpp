@@ -26,6 +26,7 @@
 #include "hierarchicalclusteringcommand.h"
 
 #include "shared/graph/grapharray_json.h"
+#include "shared/graph/imutablegraph.h"
 
 #include "shared/utils/threadpool.h"
 #include "shared/utils/iterator_range.h"

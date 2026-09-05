@@ -20,6 +20,7 @@
 #ifndef ADJACENCYMATRIXTABULARDATAPARSER_H
 #define ADJACENCYMATRIXTABULARDATAPARSER_H
 
+#include "shared/graph/elementid.h"
 #include "tabulardataparser.h"
 
 #include "shared/loading/tabulardata.h"

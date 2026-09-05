@@ -23,6 +23,7 @@
 #include "qcpcolumnannotations.h"
 
 #include "shared/utils/statistics.h"
+#include "shared/utils/string.h"
 #include "shared/utils/container_randomsample.h"
 
 #include <QColor>
