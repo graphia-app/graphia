@@ -144,6 +144,7 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/loading/urltypes.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/userdata.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/userdatavector.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/loading/userelementdata.cpp
     ${CMAKE_CURRENT_LIST_DIR}/plugins/baseplugin.cpp
     ${CMAKE_CURRENT_LIST_DIR}/plugins/basegenericplugin.cpp
     ${CMAKE_CURRENT_LIST_DIR}/plugins/nodeattributetablemodel.cpp
