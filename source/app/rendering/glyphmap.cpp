@@ -53,8 +53,7 @@ void GlyphMap::addText(const QString& text)
     {
         _results._layouts[text]._initialised = false;
 
-        if(_updateTypeRequired < UpdateType::Layout)
-            _updateTypeRequired = UpdateType::Layout;
+        _updateTypeRequired = std::max(_updateTypeRequired, UpdateType::Layout);
     }
 }
 

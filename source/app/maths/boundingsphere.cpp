@@ -37,8 +37,7 @@ static float maxDistanceFromCentre(const QVector3D& centre, const std::vector<QV
     for(const auto& point : points)
     {
         const float lengthSquared = (centre - point).lengthSquared();
-        if(lengthSquared > radius)
-            radius = lengthSquared;
+        radius = std::max(lengthSquared, radius);
     }
 
     return std::sqrt(radius);

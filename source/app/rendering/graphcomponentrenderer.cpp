@@ -208,8 +208,7 @@ float GraphComponentRenderer::maxNodeDistanceFromPoint(const GraphModel& graphMo
         const auto& nodeVisual = nodeVisuals.at(i);
         const float distance = (centre - nodePosition).length() + nodeVisual._size;
 
-        if(distance > maxDistance)
-            maxDistance = distance;
+        maxDistance = std::max(distance, maxDistance);
     }
 
     // HACK: allow single node components to be zoomed out beyond their natural maximum

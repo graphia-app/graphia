@@ -140,8 +140,8 @@ static void expandAndPruneRow(MatrixType& mclMatrix, size_t columnId,
                 rowData.indices[nonzeros] = relem->index();
                 ++nonzeros;
 
-                if(relem->index() < minIndex) minIndex = relem->index();
-                if(relem->index() > maxIndex) maxIndex = relem->index();
+                minIndex = std::min(relem->index(), minIndex);
+                maxIndex = std::max(relem->index(), maxIndex);
             }
             else
                 rowData.values[relem->index()] += mult;

@@ -232,8 +232,7 @@ QString u::formatNumberScientific(double value, int minDecimalPlaces, int maxDec
     if(maxDecimalPlaces == 0)
         maxDecimalPlaces = maxDecimalPlacesFor(value);
 
-    if(maxDecimalPlaces < minDecimalPlaces)
-        maxDecimalPlaces = minDecimalPlaces;
+    maxDecimalPlaces = std::max(maxDecimalPlaces, minDecimalPlaces);
 
     if(std::isfinite(value) && (absValue >= largeThreshold || (absValue < smallThreshold && value != 0.0)))
     {

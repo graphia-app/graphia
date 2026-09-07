@@ -195,8 +195,7 @@ void CorrelationPlotWorker::pan(QCPAxis* axis, double delta)
 
 void CorrelationPlotWorker::updatePixmap(CorrelationPlotUpdateType updateType)
 {
-    if(updateType > _updateType)
-        _updateType = updateType;
+    _updateType = std::max(updateType, _updateType);
 
     // Avoid queueing up multiple redundant updates
     if(_updateQueued)
