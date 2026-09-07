@@ -17,6 +17,7 @@
 # along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
 
 $ErrorActionPreference = 'Stop'
+$PSNativeCommandUseErrorActionPreference = $true
 
 $BUILD_DIR = "build"
 $INSTALLER_DIR = "installer"
@@ -50,17 +51,20 @@ Get-ChildItem -Recurse -Directory | ForEach-Object {
 $WINDEPLOYQT_ARGS = @("--no-compiler-runtime", "--no-opengl-sw")
 
 Write-Host "------ windeployqt"
-& windeployqt @QML_DIRS @WINDEPLOYQT_ARGS --dir $INSTALLER_DIR "$INSTALLER_DIR\${PRODUCT_NAME}.exe"
-& windeployqt @WINDEPLOYQT_ARGS --dir $INSTALLER_DIR "$INSTALLER_DIR\thirdparty.dll"
+& {
+    $PSNativeCommandUseErrorActionPreference = $false
 
-Get-ChildItem "$INSTALLER_DIR\plugins\*.dll" | ForEach-Object {
-    & windeployqt @WINDEPLOYQT_ARGS --dir $INSTALLER_DIR $_.FullName
+    & windeployqt @QML_DIRS @WINDEPLOYQT_ARGS --dir $INSTALLER_DIR "$INSTALLER_DIR\${PRODUCT_NAME}.exe"
+    & windeployqt @WINDEPLOYQT_ARGS --dir $INSTALLER_DIR "$INSTALLER_DIR\thirdparty.dll"
+
+    Get-ChildItem "$INSTALLER_DIR\plugins\*.dll" | ForEach-Object {
+        & windeployqt @WINDEPLOYQT_ARGS --dir $INSTALLER_DIR $_.FullName
+    }
+
+    $QML_DIR = "source\crashreporter"
+    & windeployqt --qmldir $QML_DIR @WINDEPLOYQT_ARGS "$INSTALLER_DIR\CrashReporter.exe"
+    & windeployqt @WINDEPLOYQT_ARGS "$INSTALLER_DIR\MessageBox.exe"
 }
-
-$QML_DIR = "source\crashreporter"
-if(!(Test-Path $QML_DIR)) { exit 1 }
-& windeployqt --qmldir $QML_DIR @WINDEPLOYQT_ARGS "$INSTALLER_DIR\CrashReporter.exe"
-& windeployqt @WINDEPLOYQT_ARGS "$INSTALLER_DIR\MessageBox.exe"
 
 Write-Host "------ copying runtime + extras"
 Copy-Item "${Env:CRTDIRECTORY}\*.*" $INSTALLER_DIR -Recurse -Verbose
@@ -72,10 +76,13 @@ $UPDATER_DIR = "$INSTALLER_DIR\Updater"
 New-Item -ItemType Directory -Path $UPDATER_DIR | Out-Null
 Copy-Item "$BUILD_DIR\Updater.exe", "$BUILD_DIR\thirdparty.dll" $UPDATER_DIR -Verbose
 
-$QML_DIR = "source\updater"
-if(!(Test-Path $QML_DIR)) { exit 1 }
-& windeployqt --qmldir $QML_DIR @WINDEPLOYQT_ARGS "$UPDATER_DIR\Updater.exe"
-& windeployqt @WINDEPLOYQT_ARGS --dir $UPDATER_DIR "$UPDATER_DIR\thirdparty.dll"
+& {
+    $PSNativeCommandUseErrorActionPreference = $false
+
+    $QML_DIR = "source\updater"
+    & windeployqt --qmldir $QML_DIR @WINDEPLOYQT_ARGS "$UPDATER_DIR\Updater.exe"
+    & windeployqt @WINDEPLOYQT_ARGS --dir $UPDATER_DIR "$UPDATER_DIR\thirdparty.dll"
+}
 
 Copy-Item "${Env:CRTDIRECTORY}\*.*", "${Env:WindowsSdkDir}\redist\ucrt\DLLs\x64\*.*" $UPDATER_DIR -Recurse -Verbose
 

@@ -17,6 +17,7 @@
 # along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
 
 $ErrorActionPreference = 'Stop'
+$PSNativeCommandUseErrorActionPreference = $true
 
 $BUILD_DIR = "build"
 $INSTALLER_DIR = "installer"

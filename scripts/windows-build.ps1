@@ -17,6 +17,7 @@
 # along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
 
 $ErrorActionPreference = 'Stop'
+$PSNativeCommandUseErrorActionPreference = $true
 
 . .\scripts\defaults.ps1
 
@@ -30,21 +31,26 @@ New-Item -ItemType Directory -Path $BUILD_DIR | Out-Null
 
 Push-Location $BUILD_DIR
 
-cmake --version
+try
+{
+    cmake --version
 
-cmake -DCMAKE_UNITY_BUILD="$Env:UNITY_BUILD" `
-    -DCMAKE_BUILD_TYPE="$Env:BUILD_TYPE" `
-    -GNinja `
-    -DCMAKE_C_COMPILER="$Env:CC" `
-    -DCMAKE_CXX_COMPILER="$Env:CXX" `
-    ..
+    cmake -DCMAKE_UNITY_BUILD="$Env:UNITY_BUILD" `
+        -DCMAKE_BUILD_TYPE="$Env:BUILD_TYPE" `
+        -GNinja `
+        -DCMAKE_C_COMPILER="$Env:CC" `
+        -DCMAKE_CXX_COMPILER="$Env:CXX" `
+        ..
 
-Get-Content .\variables.ps1
-. .\variables.ps1
+    Get-Content .\variables.ps1
+    . .\variables.ps1
 
-cmake --build . --target all 2>&1 | Tee-Object "compiler-${VERSION}.log"
-
-Pop-Location
+    cmake --build . --target all 2>&1 | Tee-Object "compiler-${VERSION}.log"
+}
+finally
+{
+    Pop-Location
+}
 
 $dumpSyms = "source\thirdparty\breakpad\src\tools\windows\binaries\dump_syms.exe"
 
