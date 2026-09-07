@@ -118,7 +118,7 @@ BoundingBox3D::BoundingBox3D(const std::vector<QVector3D>& points) :
 
 float BoundingBox3D::maxLength() const
 {
-    return std::max(std::max(xLength(), yLength()), zLength());
+    return std::max({xLength(), yLength(), zLength()});
 }
 
 void BoundingBox3D::scale(float s)
