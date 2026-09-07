@@ -49,8 +49,13 @@ public:
     explicit operator int() const { return _value; }
     explicit operator size_t() const { assert(_value >= 0); return static_cast<size_t>(_value); }
 
+private:
     ElementId(const ElementId<T>& other) = default;
     ElementId(ElementId<T>&& other) noexcept = default;
+
+    friend T;
+
+public:
     ElementId& operator=(const ElementId<T>& other) = default;
     ElementId& operator=(ElementId<T>&& other) noexcept = default;
 

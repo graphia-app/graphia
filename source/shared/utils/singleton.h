@@ -24,20 +24,23 @@
 
 template<typename T> class Singleton
 {
-public:
+private:
   Singleton()
   {
     Q_ASSERT(_singletonPtr == nullptr);
     _singletonPtr = this;
   }
 
+  friend T;
+
+public:
   virtual ~Singleton()
   {
     Q_ASSERT(_singletonPtr != nullptr);
     _singletonPtr = nullptr;
   }
 
-  Singleton(const Singleton&) = delete;
+  Singleton(const Singleton&) = delete; // NOLINT bugprone-crtp-constructor-accessibility
   Singleton& operator=(const Singleton&) = delete;
 
   static T* instance()

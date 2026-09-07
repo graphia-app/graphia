@@ -97,6 +97,10 @@ template<typename TreeType, size_t NumDimensions, typename SubVolumeType = SubVo
 class SpatialTree : virtual public AbstractSpatialTree
 {
 private:
+    SpatialTree() = default;
+
+    friend TreeType;
+
     static constexpr size_t NumSubVolumes()
     {
         size_t v = 1;
