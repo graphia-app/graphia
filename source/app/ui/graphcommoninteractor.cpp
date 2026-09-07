@@ -51,6 +51,7 @@
 #include <cmath>
 #include <algorithm>
 #include <limits>
+#include <numbers>
 
 NodeIdSet nodeIdsInsideFrustum(const GraphModel& graphModel,
                                ComponentId componentId,
@@ -265,7 +266,7 @@ static QVector3D virtualTrackballVector(int width, int height, const QPoint& cur
     const float y = static_cast<float>(height - 2 * cursor.y()) / minDimension;
     const float d = std::sqrt(x * x + y * y);
     const float RADIUS = 0.9f; // Radius of trackball
-    const float ROOT2 = std::sqrt(2.0f);
+    const float ROOT2 = std::numbers::sqrt2_v<float>;
     const float CUTOFF = ROOT2 / 2.0f;
 
     float z = 0.0f;
