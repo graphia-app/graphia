@@ -191,6 +191,7 @@ void GraphTransformFactory::setMissingParametersToDefault(GraphTransformConfig& 
                 break;
 
             case QMetaType::QStringList:
+                // NOLINTNEXTLINE detaching-temporary
                 graphTransformConfig.setParameterValue(parameter.name(), v.toStringList().first());
                 break;
 
