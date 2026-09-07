@@ -330,12 +330,12 @@ private:
         };
 
         template<typename T = ResultsVectorOrVoid>
-        typename std::enable_if_t<!std::is_void_v<T>, iterator>
-        begin() { return iterator(this, false); }
+        requires (!std::is_void_v<T>)
+        iterator begin() { return iterator(this, false); }
 
         template<typename T = ResultsVectorOrVoid>
-        typename std::enable_if_t<!std::is_void_v<T>, iterator>
-        end() { return iterator(this, true); }
+        requires (!std::is_void_v<T>)
+        iterator end() { return iterator(this, true); }
     };
 
     template<typename Fn> using FirstArgumentType =

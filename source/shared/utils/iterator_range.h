@@ -43,17 +43,17 @@ public:
     BeginIt& begin() { return _begin; }
     EndIt& end() { return _end; }
 
-    template<typename T = BeginIt> typename std::enable_if_t<is_const_iterator_v<T>, const T&>
-    begin() const { return _begin; }
+    template<typename T = BeginIt> requires is_const_iterator_v<T>
+    const T& begin() const { return _begin; }
 
-    template<typename T = BeginIt> typename std::enable_if_t<is_const_iterator_v<T>, const T&>
-    end() const { return _end; }
+    template<typename T = BeginIt> requires is_const_iterator_v<T>
+    const T& end() const { return _end; }
 
-    template<typename T = BeginIt> typename std::enable_if_t<is_const_iterator_v<T>, const T&>
-    cbegin() const { return _begin; }
+    template<typename T = BeginIt> requires is_const_iterator_v<T>
+    const T& cbegin() const { return _begin; }
 
-    template<typename T = BeginIt> typename std::enable_if_t<is_const_iterator_v<T>, const T&>
-    cend() const { return _end; }
+    template<typename T = BeginIt> requires is_const_iterator_v<T>
+    const T& cend() const { return _end; }
 
     auto size() const { return std::distance(begin(), end()); }
 
