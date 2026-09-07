@@ -43,7 +43,7 @@ Installer::Installer(const json& details, const QString& version,
     _details(details), _version(version),
     _existingInstallation(existingInstallation)
 {
-    connect(&_process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+    connect(&_process, &QProcess::finished,
     [this](int exitCode, QProcess::ExitStatus exitStatus)
     {
         auto allStdOut = _process.readAllStandardOutput();

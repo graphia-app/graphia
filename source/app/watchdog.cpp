@@ -86,9 +86,9 @@ void WatchdogWorker::showWarning()
     // Remove the warning if we recover in the mean time
     connect(this, &WatchdogWorker::reset, warningProcess, &QProcess::kill);
 
-    connect(warningProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+    connect(warningProcess, &QProcess::finished,
         this, &WatchdogWorker::onWarningProcessFinished);
-    connect(warningProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+    connect(warningProcess, &QProcess::finished,
         warningProcess, &WatchdogWorker::deleteLater);
 
     std::cerr << "Starting " << messageBoxExe.toStdString() << "\n";
