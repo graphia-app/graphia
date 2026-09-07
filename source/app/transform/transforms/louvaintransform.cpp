@@ -326,9 +326,8 @@ void LouvainTransform::apply(TransformedGraph& target)
     for(auto nodeId : target.nodeIds())
         communityHistogram[communities[nodeId]]++;
     std::vector<std::pair<CommunityId, size_t>> sortedCommunityHistogram;
-    std::copy(communityHistogram.begin(), communityHistogram.end(),
-        std::back_inserter(sortedCommunityHistogram));
-    std::sort(sortedCommunityHistogram.begin(), sortedCommunityHistogram.end(),
+    std::ranges::copy(communityHistogram, std::back_inserter(sortedCommunityHistogram));
+    std::ranges::sort(sortedCommunityHistogram,
     [](const auto& a, const auto& b)
     {
         if(a.second == b.second)

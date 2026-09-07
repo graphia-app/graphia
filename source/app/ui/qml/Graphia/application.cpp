@@ -110,13 +110,13 @@ static std::vector<UrlType> urlTypesForPlugins(const std::vector<LoadedPlugin>& 
     }
 
     // Sort by collective description
-    std::sort(fileTypes.begin(), fileTypes.end(),
+    std::ranges::sort(fileTypes,
     [](const auto& a, const auto& b)
     {
         return a._collectiveDescription.compare(b._collectiveDescription, Qt::CaseInsensitive) < 0;
     });
 
-    fileTypes.erase(std::unique(fileTypes.begin(), fileTypes.end()), fileTypes.end());
+    fileTypes.erase(std::ranges::unique(fileTypes).begin(), fileTypes.end());
 
     return fileTypes;
 }
@@ -160,7 +160,7 @@ Application::~Application() = default;
 
 IPlugin* Application::pluginForName(const QString& pluginName) const
 {
-    auto pluginIt = std::find_if(_loadedPlugins.begin(), _loadedPlugins.end(),
+    auto pluginIt = std::ranges::find_if(_loadedPlugins,
     [&pluginName](const auto& loadedPlugin)
     {
         return loadedPlugin._interface->name().compare(pluginName) == 0;
@@ -219,7 +219,7 @@ bool Application::canOpen(const QString& urlTypeName) const
     if(urlTypeName == NativeFileType)
         return true;
 
-    return std::any_of(_loadedPlugins.begin(), _loadedPlugins.end(),
+    return std::ranges::any_of(_loadedPlugins,
     [&urlTypeName](const auto& loadedPlugin)
     {
         return loadedPlugin._interface->loadableUrlTypeNames().contains(urlTypeName);
@@ -228,7 +228,7 @@ bool Application::canOpen(const QString& urlTypeName) const
 
 bool Application::canOpenAnyOf(const QStringList& urlTypeNames) const
 {
-    return std::any_of(urlTypeNames.begin(), urlTypeNames.end(),
+    return std::ranges::any_of(urlTypeNames,
     [this](const QString& urlTypeName)
     {
         return canOpen(urlTypeName);
@@ -284,11 +284,11 @@ QString Application::urlTypeFor(const QString& description, const QStringList& e
 {
     auto pluginFileTypes = urlTypesForPlugins(_loadedPlugins);
 
-    pluginFileTypes.erase(std::remove_if(pluginFileTypes.begin(), pluginFileTypes.end(),
+    pluginFileTypes.erase(std::ranges::remove_if(pluginFileTypes,
     [&](const auto& type)
     {
         return type._collectiveDescription != description || type._extensions != extensions;
-    }), pluginFileTypes.end());
+    }).begin(), pluginFileTypes.end());
 
     if(pluginFileTypes.size() == 1)
         return pluginFileTypes.at(0)._name;
@@ -344,7 +344,7 @@ void Application::registerSaverFactory(std::unique_ptr<ISaverFactory> saver)
 
 ISaverFactory* Application::saverFactoryByName(const QString& name)
 {
-    auto factoryIt = std::find_if(_factories.begin(), _factories.end(),
+    auto factoryIt = std::ranges::find_if(_factories,
     [&name](const auto& factory)
     {
         return factory->name() == name;
@@ -386,7 +386,7 @@ QStringList Application::pluginNames(const QString& urlTypeName) const
     for(const auto& loadedPlugin : _loadedPlugins)
     {
         auto urlTypeNames = loadedPlugin._interface->loadableUrlTypeNames();
-        const bool willLoad = std::any_of(urlTypeNames.begin(), urlTypeNames.end(),
+        const bool willLoad = std::ranges::any_of(urlTypeNames,
         [&urlTypeName](const QString& loadableUrlTypeName)
         {
             return loadableUrlTypeName.compare(urlTypeName) == 0;
@@ -469,7 +469,7 @@ bool Application::isResourceFile(const QString& path) const
 
     const auto& dirs = resourceDirectories();
 
-    return std::any_of(dirs.begin(), dirs.end(), [&canonicalPath](const auto& resourceDirectory)
+    return std::ranges::any_of(dirs, [&canonicalPath](const auto& resourceDirectory)
     {
         const QString canonicalResourceDirectory = QFileInfo(resourceDirectory).canonicalPath();
         return canonicalPath.startsWith(canonicalResourceDirectory);
@@ -515,13 +515,13 @@ QStringList Application::linkArgumentsFor(const QUrl& url) const
     auto path = url.path(QUrl::FullyEncoded);
     auto arguments = path.split('/');
 
-    arguments.erase(std::remove_if(arguments.begin(), arguments.end(), // clazy:exclude=strict-iterators
+    arguments.erase(std::ranges::remove_if(arguments, // clazy:exclude=strict-iterators
     [](const auto& argument)
     {
         return argument.isEmpty();
-    }), arguments.end()); // clazy:exclude=strict-iterators
+    }).begin(), arguments.end()); // clazy:exclude=strict-iterators
 
-    std::transform(arguments.begin(), arguments.end(), arguments.begin(),
+    std::ranges::transform(arguments, arguments.begin(),
     [](const auto& argument)
     {
         return QUrl::fromPercentEncoding(argument.toUtf8());
@@ -827,7 +827,7 @@ bool Application::initialisePlugin(IPlugin* plugin, std::unique_ptr<QPluginLoade
         QFileInfo(pluginLoader->fileName()).fileName() :
         QString(u"Static"_s);
 
-    const bool pluginNameAlreadyUsed = std::any_of(_loadedPlugins.begin(), _loadedPlugins.end(),
+    const bool pluginNameAlreadyUsed = std::ranges::any_of(_loadedPlugins,
     [&pluginName](const auto& loadedPlugin)
     {
         return loadedPlugin._interface->name().compare(pluginName, Qt::CaseInsensitive) == 0;

@@ -84,7 +84,7 @@ json updateStringToJson(const QString& updateString, QString* status)
         return {};
 
     // Remove updates that don't apply to the running version
-    updates.erase(std::remove_if(updates.begin(), updates.end(),
+    updates.erase(std::ranges::remove_if(updates,
     [](const auto& update)
     {
         // Retain if it matches the running version, so that the changelog can be grabbed
@@ -97,10 +97,10 @@ json updateStringToJson(const QString& updateString, QString* status)
         const std::string targetVersionRegex = update["targetVersionRegex"];
 
         return !std::regex_match(VERSION, std::regex{targetVersionRegex});
-    }), updates.end());
+    }).begin(), updates.end());
 
     // Remove updates that don't have a payload for the running OS
-    updates.erase(std::remove_if(updates.begin(), updates.end(),
+    updates.erase(std::ranges::remove_if(updates,
     [](const auto& update)
     {
         if(!u::contains(update, "payloads"))
@@ -109,10 +109,10 @@ json updateStringToJson(const QString& updateString, QString* status)
         const auto& payloads = update["payloads"];
 
         return payloads.find(QSysInfo::kernelType().toStdString()) == payloads.end();
-    }), updates.end());
+    }).begin(), updates.end());
 
     // Remove updates that are older than the running version
-    updates.erase(std::remove_if(updates.begin(), updates.end(),
+    updates.erase(std::ranges::remove_if(updates,
     [](const auto& update)
     {
         // Don't discard updates on the basis of version number if they are forced
@@ -120,11 +120,12 @@ json updateStringToJson(const QString& updateString, QString* status)
             return false;
 
         return u::numericCompare(update["version"], VERSION) < 0;
-    }), updates.end());
+    }).begin(), updates.end());
 
     if(updates.empty())
         return {};
 
+    // NOLINTNEXTLINE modernize-use-ranges
     std::sort(updates.begin(), updates.end(),
     [](const auto& a, const auto& b)
     {

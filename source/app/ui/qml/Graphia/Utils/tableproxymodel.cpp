@@ -96,7 +96,7 @@ QItemSelection TableProxyModel::buildRowSelection(const std::vector<int>& rows)
     selection.reserve(static_cast<qsizetype>(rows.size()));
 
     auto sortedRows = rows;
-    std::sort(sortedRows.begin(), sortedRows.end());
+    std::ranges::sort(sortedRows);
     auto first = sortedRows.front();
     auto last = first;
 
@@ -249,7 +249,7 @@ void TableProxyModel::setSortColumn(const QString& newSortColumn)
 
     auto currentSortOrder = Qt::AscendingOrder;
 
-    auto existing = std::find_if(_sortColumnAndOrders.begin(), _sortColumnAndOrders.end(),
+    auto existing = std::ranges::find_if(_sortColumnAndOrders,
     [newSortColumn](const auto& value)
     {
         return value.first == newSortColumn;
@@ -298,11 +298,11 @@ void TableProxyModel::reset()
     beginResetModel();
 
     // Remove any sorting criteria that might not exist any more
-    _sortColumnAndOrders.erase(std::remove_if(_sortColumnAndOrders.begin(), _sortColumnAndOrders.end(),
+    _sortColumnAndOrders.erase(std::ranges::remove_if(_sortColumnAndOrders,
     [this](const auto& sortColumnAndOrder)
     {
         return _columnNames.indexOf(sortColumnAndOrder.first) < 0;
-    }), _sortColumnAndOrders.end());
+    }).begin(), _sortColumnAndOrders.end());
 
     QSortFilterProxyModel::endFilterChange(QSortFilterProxyModel::Direction::Both);
 

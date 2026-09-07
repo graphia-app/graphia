@@ -73,7 +73,7 @@ void ScopeTimerManager::reportToQDebug() const
         {
             auto sum = std::accumulate(samples.begin(), samples.end(), 0LL);
             double mean = static_cast<double>(sum) / static_cast<double>(samples.size());
-            auto minMax = std::minmax_element(samples.begin(), samples.end());
+            auto minMax = std::ranges::minmax_element(samples);
 
             double stdDev = std::accumulate(samples.begin(), samples.end(), 0.0,
             [mean](auto partial, double value)
@@ -85,8 +85,8 @@ void ScopeTimerManager::reportToQDebug() const
             stdDev = std::sqrt(stdDev);
 
             mean /= 1000000.0;
-            auto min = static_cast<double>(*minMax.first) / 1000000.0;
-            auto max = static_cast<double>(*minMax.second) / 1000000.0;
+            auto min = static_cast<double>(*minMax.min) / 1000000.0;
+            auto max = static_cast<double>(*minMax.max) / 1000000.0;
             stdDev /= 1000000.0;
 
             auto last = static_cast<double>(samples.back()) / 1000000.0;

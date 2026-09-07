@@ -427,7 +427,7 @@ void EditAttributeTableModel::updateSortMap()
     if(_sortColumn < 0)
         return;
 
-    std::sort(_sortMap.begin(), _sortMap.end(), [this](int rowA, int rowB)
+    std::ranges::sort(_sortMap, [this](int rowA, int rowB)
     {
         if(!_ascendingSortOrder)
             std::swap(rowA, rowB);
@@ -458,7 +458,7 @@ void EditAttributeTableModel::onSelectionChanged()
 
         _selectedNodes.insert(_selectedNodes.begin(),
             selectedNodes.begin(), selectedNodes.end());
-        std::sort(_selectedNodes.begin(), _selectedNodes.end());
+        std::ranges::sort(_selectedNodes);
     }
 
     endResetModel();

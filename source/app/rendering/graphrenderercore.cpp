@@ -908,7 +908,7 @@ std::vector<size_t> GraphRendererCore::gpuGraphDataRenderOrder() const
     for(size_t i = 0; i < _gpuGraphData.size(); i++)
         renderOrder.push_back(i);
 
-    std::sort(renderOrder.begin(), renderOrder.end(), [this](auto a, auto b)
+    std::ranges::sort(renderOrder, [this](auto a, auto b)
     {
         const auto& ggda = _gpuGraphData.at(a);
         const auto& ggdb = _gpuGraphData.at(b);
@@ -923,11 +923,11 @@ std::vector<size_t> GraphRendererCore::gpuGraphDataRenderOrder() const
     });
 
     // Filter out any invisible layers
-    renderOrder.erase(std::remove_if(renderOrder.begin(), renderOrder.end(),
+    renderOrder.erase(std::ranges::remove_if(renderOrder,
     [this](auto index)
     {
         return _gpuGraphData.at(index).invisible();
-    }), renderOrder.end());
+    }).begin(), renderOrder.end());
 
     return renderOrder;
 }

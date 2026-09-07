@@ -123,8 +123,7 @@ static json bookmarksAsJson(const Document& document)
         json nodeIds;
 
         auto bookmarkedNodeIds = document.nodeIdsForBookmark(bookmark);
-        std::copy(bookmarkedNodeIds.begin(), bookmarkedNodeIds.end(),
-            std::back_inserter(nodeIds));
+        std::ranges::copy(bookmarkedNodeIds, std::back_inserter(nodeIds));
 
         auto byteArray = bookmark.toUtf8();
         const auto* bookmarkName = byteArray.constData();

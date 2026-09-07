@@ -632,7 +632,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target)
     }
 
     // Sort clusters descending by size
-    std::sort(clusters.begin(), clusters.end(),
+    std::ranges::sort(clusters,
     [](const auto& a, const auto& b)
     {
         if(a.size() == b.size())

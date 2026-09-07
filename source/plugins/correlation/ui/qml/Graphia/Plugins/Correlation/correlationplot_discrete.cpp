@@ -80,7 +80,7 @@ void CorrelationPlot::configureDiscreteAxisRect()
         }
     }
 
-    auto maxY = static_cast<double>(*std::max_element(columnTotals.begin(), columnTotals.end()));
+    auto maxY = static_cast<double>(*std::ranges::max_element(columnTotals));
 
     ColorPalette colorPalette(Defaults::PALETTE);
 

@@ -40,7 +40,7 @@ ApplyTransformsCommand::ApplyTransformsCommand(GraphModel* graphModel,
     _previousTransformations(std::move(previousTransformations)),
     _transformations(std::move(transformations))
 {
-    const bool transformsValid = std::all_of(_transformations.begin(), _transformations.end(), // clazy:exclude=detaching-member
+    const bool transformsValid = std::ranges::all_of(_transformations, // clazy:exclude=detaching-member
     [graphModel](const auto& transform)
     {
         return graphModel->graphTransformIsValid(transform);

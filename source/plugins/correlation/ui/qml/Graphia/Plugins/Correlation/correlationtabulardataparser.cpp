@@ -426,7 +426,7 @@ static std::vector<size_t> randomRowIndices(size_t first, size_t numRows, size_t
     std::vector<size_t> rowIndices(numRows - first);
     std::iota(rowIndices.begin(), rowIndices.end(), first);
     rowIndices = u::randomSample(rowIndices, numSamples);
-    std::sort(rowIndices.begin(), rowIndices.end());
+    std::ranges::sort(rowIndices);
 
     return rowIndices;
 }
@@ -488,7 +488,7 @@ ContinuousDataVectors CorrelationTabularDataParser::sampledContinuousDataRows(
         static_cast<size_t>(_dataRect.width()), rowData);
 
     auto epsilon = CorrelationFileParser::epsilonFor(rowData);
-    std::transform(rowData.begin(), rowData.end(), rowData.begin(),
+    std::ranges::transform(rowData, rowData.begin(),
     [scalingType, epsilon](double value)
     {
         return CorrelationFileParser::scaleValue(scalingType, value, epsilon);

@@ -112,7 +112,7 @@ public:
 
     bool cancellable() const override
     {
-        return std::any_of(_commands.begin(), _commands.end(),
+        return std::ranges::any_of(_commands,
         [](const auto& command)
         {
             return command->cancellable();

@@ -244,7 +244,7 @@ QVector<double> CorrelationPlot::meanAverageData(double& min, double& max, const
     {
         QVector<double> values;
 
-        std::transform(rows.begin(), rows.end(), std::back_inserter(values),
+        std::ranges::transform(rows, std::back_inserter(values),
         [this, column](auto row)
         {
             return _pluginInstance->continuousDataAt(static_cast<size_t>(row), _sortMap.at(column));
@@ -358,7 +358,7 @@ void CorrelationPlot::populateMedianLinePlot()
         {
             QVector<double> values;
 
-            std::transform(rows.begin(), rows.end(), std::back_inserter(values),
+            std::ranges::transform(rows, std::back_inserter(values),
             [this, column](auto row)
             {
                 return _pluginInstance->continuousDataAt(static_cast<size_t>(row), _sortMap.at(column));
@@ -528,9 +528,9 @@ std::pair<double, double> CorrelationPlot::addIQRBoxPlotTo(QCPAxis* keyAxis, QCP
 
     outliers.shrink_to_fit();
 
-    auto minmax = std::minmax_element(outliers.begin(), outliers.end());
-    auto minOutlier = !outliers.empty() ? *minmax.first : minValue;
-    auto maxOutlier = !outliers.empty() ? *minmax.second : maxValue;
+    auto minmax = std::ranges::minmax_element(outliers);
+    auto minOutlier = !outliers.empty() ? *minmax.min : minValue;
+    auto maxOutlier = !outliers.empty() ? *minmax.max : maxValue;
 
     const size_t maxOutliers = 100;
     if(static_cast<size_t>(outliers.size()) > maxOutliers)
@@ -563,7 +563,7 @@ void CorrelationPlot::populateIQRPlot()
         QVector<double> values;
 
         const auto& selectedRows = std::as_const(_selectedRows);
-        std::transform(selectedRows.begin(), selectedRows.end(), std::back_inserter(values),
+        std::ranges::transform(selectedRows, std::back_inserter(values),
         [this, column](auto row)
         {
             return _pluginInstance->continuousDataAt(static_cast<size_t>(row), _sortMap.at(column));

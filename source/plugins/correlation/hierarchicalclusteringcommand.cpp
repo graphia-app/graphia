@@ -147,7 +147,7 @@ bool HierarchicalClusteringCommand::execute()
     std::vector<size_t> sortedIndices(dataColumns.size());
     std::iota(sortedIndices.begin(), sortedIndices.end(), 0);
 
-    std::sort(sortedIndices.begin(), sortedIndices.end(),
+    std::ranges::sort(sortedIndices,
         [&ls](auto a, auto b) { return ls.at(a) < ls.at(b); });
 
     std::vector<Link> links;

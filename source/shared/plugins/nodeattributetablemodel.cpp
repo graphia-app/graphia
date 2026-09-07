@@ -347,8 +347,8 @@ void NodeAttributeTableModel::onAttributesChanged(QStringList added, QStringList
     };
 
     // Ignore any non-node attributes, or attributes with parameters
-    added.erase(std::remove_if(added.begin(), added.end(), attributeIneligible), added.end()); // clazy:exclude=strict-iterators
-    changed.erase(std::remove_if(changed.begin(), changed.end(), attributeIneligible), changed.end()); // clazy:exclude=strict-iterators
+    added.erase(std::ranges::remove_if(added, attributeIneligible).begin(), added.end()); // clazy:exclude=strict-iterators
+    changed.erase(std::ranges::remove_if(changed, attributeIneligible).begin(), changed.end()); // clazy:exclude=strict-iterators
     // (We don't do any filtering on removed as the attributes don't exist to be queried)
 
     QSet<QString> addedSet(added.begin(), added.end());

@@ -28,6 +28,7 @@
 #include <QColor>
 #include <algorithm>
 #include <cmath>
+#include <ranges>
 #include <vector>
 #include <set>
 
@@ -211,8 +212,8 @@ void EnrichmentHeatmap::buildPlot()
     auto compare = [](const auto& a, const auto& b) { return u::numericCompare(a, b) < 0; };
     std::vector<QString> sortAttributeValueSetA(attributeValueSetA.begin(), attributeValueSetA.end());
     std::vector<QString> sortAttributeValueSetB(attributeValueSetB.begin(), attributeValueSetB.end());
-    std::sort(sortAttributeValueSetA.begin(), sortAttributeValueSetA.end(), compare);
-    std::sort(sortAttributeValueSetB.rbegin(), sortAttributeValueSetB.rend(), compare);
+    std::ranges::sort(sortAttributeValueSetA, compare);
+    std::ranges::sort(std::ranges::reverse_view(sortAttributeValueSetB), compare);
 
     const QFontMetrics metrics(_defaultFont9Pt);
 

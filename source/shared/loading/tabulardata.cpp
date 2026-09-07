@@ -358,8 +358,8 @@ int TabularData::columnMatchPercentage(size_t columnIndex, const QStringList& re
     for(size_t row = 1; row < numRows(); row++)
         columnValues.insert(valueAt(columnIndex, row));
 
-    std::set_intersection(referenceSet.begin(), referenceSet.end(),
-        columnValues.begin(), columnValues.end(),
+    std::ranges::set_intersection(referenceSet,
+        columnValues,
         std::inserter(intersection, intersection.begin()));
 
     auto percent = static_cast<int>((intersection.size() * 100) /
@@ -383,8 +383,8 @@ int TabularData::rowMatchPercentage(size_t rowIndex, const QStringList& referenc
     for(size_t column = 1; column < numColumns(); column++)
         rowValues.insert(valueAt(column, rowIndex));
 
-    std::set_intersection(referenceSet.begin(), referenceSet.end(),
-        rowValues.begin(), rowValues.end(),
+    std::ranges::set_intersection(referenceSet,
+        rowValues,
         std::inserter(intersection, intersection.begin()));
 
     auto percent = static_cast<int>((intersection.size() * 100) /
@@ -547,7 +547,7 @@ QString TabularData::contentIdentityOf(const QUrl& url)
 
     if(!counts.empty())
     {
-        auto maxCount = std::max_element(counts.begin(), counts.end(),
+        auto maxCount = std::ranges::max_element(counts,
             [](const auto& a, const auto& b) { return a.second < b.second; });
 
         auto character = maxCount->first;

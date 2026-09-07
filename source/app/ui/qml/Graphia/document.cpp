@@ -480,7 +480,7 @@ QStringList Document::bookmarks() const
     for(const auto& name : u::keysFor(_bookmarks))
         list.append(name);
 
-    std::sort(list.begin(), list.end(),
+    std::ranges::sort(list,
     [](const auto& a, const auto& b)
     {
         return u::numericCompareCaseInsensitive(a, b) < 0;
@@ -508,7 +508,7 @@ static bool transformIsPinned(const QString& transform)
 static QStringList sortedTransforms(QStringList transforms)
 {
     // Sort so that the pinned transforms go last
-    std::stable_sort(transforms.begin(), transforms.end(),
+    std::ranges::stable_sort(transforms,
     [](const QString& a, const QString& b)
     {
         const bool aPinned = transformIsPinned(a);
@@ -1415,7 +1415,7 @@ void Document::gotoPrevComponent()
 
     if(!focusedComponentId.isNull())
     {
-        auto it = std::find(componentIds.begin(), componentIds.end(), focusedComponentId);
+        auto it = std::ranges::find(componentIds, focusedComponentId);
 
         if(it != componentIds.begin())
             --it;
@@ -1438,7 +1438,7 @@ void Document::gotoNextComponent()
 
     if(!focusedComponentId.isNull())
     {
-        auto it = std::find(componentIds.begin(), componentIds.end(), focusedComponentId);
+        auto it = std::ranges::find(componentIds, focusedComponentId);
 
         if(std::next(it) != componentIds.end())
             ++it;
@@ -1679,7 +1679,7 @@ void Document::updateFoundIndex(bool reselectIfInvalidated)
     if(selectedHeadNodes.size() == 1)
     {
         auto nodeId = *selectedHeadNodes.begin();
-        auto foundIt = std::find(_foundNodeIds.begin(), _foundNodeIds.end(), nodeId);
+        auto foundIt = std::ranges::find(_foundNodeIds, nodeId);
 
         if(reselectIfInvalidated && foundIt == _foundNodeIds.end())
         {
@@ -1781,7 +1781,7 @@ void Document::onFoundNodeIdsChanged(const SearchManager* searchManager)
     _selectionManager->setNodesMask(searchManager->foundNodeIds(), false);
     _foundNodeIds = u::vectorFrom(searchManager->foundNodeIds());
 
-    std::sort(_foundNodeIds.begin(), _foundNodeIds.end(), [this](auto a, auto b)
+    std::ranges::sort(_foundNodeIds, [this](auto a, auto b)
     {
         auto componentIdA = _graphModel->graph().componentIdOfNode(a);
         auto componentIdB = _graphModel->graph().componentIdOfNode(b);
@@ -2048,7 +2048,7 @@ QVariantMap Document::transformInfoAtIndex(int index) const
     if(alerts.empty())
         return map;
 
-    std::sort(alerts.begin(), alerts.end(),
+    std::ranges::sort(alerts,
     [](auto& a, auto& b)
     {
         return a._type > b._type;
@@ -2282,7 +2282,7 @@ bool Document::graphTransformsAreValid(const QStringList& transforms) const
     if(_graphModel == nullptr)
         return false;
 
-    return std::all_of(transforms.begin(), transforms.end(),
+    return std::ranges::all_of(transforms,
         [this](const auto& transform)
         {
             return _graphModel->graphTransformIsValid(transform);
@@ -2424,7 +2424,7 @@ QVariantMap Document::visualisationInfoAtIndex(int index) const
     if(alerts.empty())
         return map;
 
-    std::sort(alerts.begin(), alerts.end(),
+    std::ranges::sort(alerts,
     [](auto& a, auto& b)
     {
         return a._type > b._type;
@@ -2464,7 +2464,7 @@ bool Document::visualisationsAreValid(const QStringList& visualisations) const
     if(_graphModel == nullptr)
         return false;
 
-    return std::all_of(visualisations.begin(), visualisations.end(),
+    return std::ranges::all_of(visualisations,
         [this](const auto& visualisation)
         {
             return _graphModel->visualisationIsValid(visualisation);
@@ -3088,7 +3088,7 @@ void Document::loadNodePositionsFromFile(const QUrl& fileUrl)
         if(jsonArray.is_null() || !jsonArray.is_array())
             return false;
 
-        auto allObjects = std::all_of(jsonArray.begin(), jsonArray.end(),
+        auto allObjects = std::ranges::all_of(jsonArray,
             [](const auto& i) { return i.is_object(); });
 
         if(!allObjects)

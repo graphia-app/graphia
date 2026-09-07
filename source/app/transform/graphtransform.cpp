@@ -56,8 +56,7 @@ static bool hasUnknownAttributes(const std::vector<QString>& attributeNames,
 static bool hasInvalidAttributes(const std::vector<QString>& attributeNames,
     const GraphModel& graphModel, const GraphTransform& transform)
 {
-    const bool invalidAttributes =
-    std::any_of(attributeNames.begin(), attributeNames.end(),
+    const bool invalidAttributes = std::ranges::any_of(attributeNames,
     [&graphModel](const auto& attributeName)
     {
         return !graphModel.attributeIsValid(attributeName);
@@ -142,7 +141,7 @@ QString GraphTransformFactory::image() const
 GraphTransformAttributeParameter GraphTransformFactory::attributeParameter(const QString& parameterName) const
 {
     const auto& p = attributeParameters();
-    auto it = std::find_if(p.begin(), p.end(),
+    auto it = std::ranges::find_if(p,
     [&parameterName](const auto& attributeParameter)
     {
         return attributeParameter.name() == parameterName;
@@ -157,7 +156,7 @@ GraphTransformAttributeParameter GraphTransformFactory::attributeParameter(const
 GraphTransformParameter GraphTransformFactory::parameter(const QString& parameterName) const
 {
     const auto& p = parameters();
-    auto it = std::find_if(p.begin(), p.end(),
+    auto it = std::ranges::find_if(p,
     [&parameterName](const auto& parameter)
     {
         return parameter.name() == parameterName;

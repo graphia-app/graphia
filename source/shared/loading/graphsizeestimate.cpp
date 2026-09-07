@@ -48,7 +48,7 @@ QVariantMap graphSizeEstimateThreshold(EdgeList edgeList,
     auto nodesScale = static_cast<double>(maxNodes) / static_cast<double>(numSampleNodes);
     auto edgesScale = nodesScale * nodesScale;
 
-    std::sort(edgeList.begin(), edgeList.end(),
+    std::ranges::sort(edgeList,
         [](const auto& a, const auto& b) { return std::abs(a._weight) > std::abs(b._weight); });
 
     const auto smallestWeight = std::abs(edgeList.back()._weight);
@@ -100,10 +100,10 @@ QVariantMap graphSizeEstimateThreshold(EdgeList edgeList,
 
     append(std::min(weight, smallestWeight), nonSingletonNodes.size(), numEdges, numUniqueEdges);
 
-    std::reverse(keys.begin(), keys.end());
-    std::reverse(estimatedNumNodes.begin(), estimatedNumNodes.end());
-    std::reverse(estimatedNumEdges.begin(), estimatedNumEdges.end());
-    std::reverse(estimatedNumUniqueEdges.begin(), estimatedNumUniqueEdges.end());
+    std::ranges::reverse(keys);
+    std::ranges::reverse(estimatedNumNodes);
+    std::ranges::reverse(estimatedNumEdges);
+    std::ranges::reverse(estimatedNumUniqueEdges);
 
     keys.shrink_to_fit();
     estimatedNumNodes.shrink_to_fit();
@@ -127,7 +127,7 @@ QVariantMap graphSizeEstimateKnn(EdgeList edgeList, size_t maximumK,
     auto maxEdges = maxNodes * maxNodes;
     auto scale = static_cast<double>(maxNodes) / static_cast<double>(numSampleNodes);
 
-    std::sort(edgeList.begin(), edgeList.end(),
+    std::ranges::sort(edgeList,
         [](const auto& a, const auto& b) { return std::abs(a._weight) > std::abs(b._weight); });
 
     auto numEstimateSamples = std::min(static_cast<size_t>(100), maximumK);
@@ -193,10 +193,10 @@ QVariantMap graphSizeEstimateKnn(EdgeList edgeList, size_t maximumK,
         sampleIntervals.pop_back();
     }
 
-    std::reverse(keys.begin(), keys.end());
-    std::reverse(estimatedNumNodes.begin(), estimatedNumNodes.end());
-    std::reverse(estimatedNumEdges.begin(), estimatedNumEdges.end());
-    std::reverse(estimatedNumUniqueEdges.begin(), estimatedNumUniqueEdges.end());
+    std::ranges::reverse(keys);
+    std::ranges::reverse(estimatedNumNodes);
+    std::ranges::reverse(estimatedNumEdges);
+    std::ranges::reverse(estimatedNumUniqueEdges);
 
     keys.shrink_to_fit();
     estimatedNumNodes.shrink_to_fit();

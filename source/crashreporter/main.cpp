@@ -141,7 +141,7 @@ static std::string crashedModule(const QString& dmpFile)
             module.clear();
 
         std::smatch match;
-        const bool skip = std::any_of(skipModules.begin(), skipModules.end(),
+        const bool skip = std::ranges::any_of(skipModules,
         [&module, &match](const auto& skipModuleRe)
         {
             return std::regex_match(module, match, std::regex(skipModuleRe));

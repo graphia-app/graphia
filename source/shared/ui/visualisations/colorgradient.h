@@ -23,6 +23,7 @@
 #include <QString>
 #include <QColor>
 
+#include <compare>
 #include <vector>
 
 class ColorGradient
@@ -33,15 +34,17 @@ private:
         double _value;
         QColor _color;
 
-        bool operator<(const Stop& other) const
+        bool operator==(const Stop& other) const
         {
-            if(_value < other._value)
-                return true;
+            return _value == other._value && _color.rgb() == other._color.rgb();
+        }
 
-            if(_value == other._value)
-                return _color.rgb() < other._color.rgb();
+        std::partial_ordering operator<=>(const Stop& other) const
+        {
+            if(auto comparison = _value <=> other._value; comparison != 0)
+                return comparison;
 
-            return false;
+            return _color.rgb() <=> other._color.rgb();
         }
     };
 

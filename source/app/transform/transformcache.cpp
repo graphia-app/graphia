@@ -124,7 +124,7 @@ TransformCache::Result TransformCache::apply(int index, const GraphTransformConf
 
     auto& resultSet = _cache.front();
 
-    auto it = std::find_if(resultSet.begin(), resultSet.end(),
+    auto it = std::ranges::find_if(resultSet,
     [index, &config](const auto& cachedResult)
     {
         return cachedResult._index == index && cachedResult._config.equals(config);
@@ -169,7 +169,7 @@ const MutableGraph* TransformCache::graph() const
     for(const auto& resultSet : make_iterator_range(_cache.rbegin(), _cache.rend()))
     {
         const auto& cachedResults = make_iterator_range(resultSet.rbegin(), resultSet.rend());
-        auto it = std::find_if(cachedResults.begin(), cachedResults.end(),
+        auto it = std::ranges::find_if(cachedResults,
         [](const auto& cachedResult)
         {
             return cachedResult._graph != nullptr;

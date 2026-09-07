@@ -50,8 +50,8 @@ void PowerOf2GridComponentLayout::executeReal(const Graph& graph, const std::vec
     }
 
     auto sortedComponentIds = componentIds;
-    std::stable_sort(sortedComponentIds.begin(), sortedComponentIds.end(),
-              [&renderSizeDivisors](const ComponentId& a, const ComponentId& b)
+    std::ranges::stable_sort(sortedComponentIds,
+    [&renderSizeDivisors](const ComponentId& a, const ComponentId& b)
     {
         return renderSizeDivisors[a] < renderSizeDivisors[b];
     });

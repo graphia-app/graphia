@@ -52,7 +52,7 @@ ColorGradient::ColorGradient(const QString& descriptor)
         _stops.emplace_back(Stop{._value = value, ._color = colorString});
     }
 
-    std::sort(_stops.begin(), _stops.end());
+    std::ranges::sort(_stops);
 }
 
 QColor ColorGradient::get(double value) const

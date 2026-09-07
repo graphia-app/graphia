@@ -490,11 +490,11 @@ void CorrelationPlot::onClickColumnAnnotation(const QCPAxisRect* axisRect, const
     if(_plotMode != PlotMode::ColumnAnnotationSelection)
     {
         // Remove any annotations not currently visible, so that looking up by index works
-        columnAnnotations.erase(std::remove_if(columnAnnotations.begin(), columnAnnotations.end(),
+        columnAnnotations.erase(std::ranges::remove_if(columnAnnotations,
         [this](const auto* v)
         {
             return !u::contains(_visibleColumnAnnotationNames, v->name());
-        }), columnAnnotations.end());
+        }).begin(), columnAnnotations.end());
     }
 
     auto pos = event->pos() - axisRect->topLeft();
@@ -565,7 +565,7 @@ void CorrelationPlot::onClickColumnAnnotation(const QCPAxisRect* axisRect, const
                 indices.push_back(_sortMap.at(i));
         }
 
-        const bool selected = std::all_of(indices.begin(), indices.end(),
+        const bool selected = std::ranges::all_of(indices,
             [this](size_t index) { return _selectedColumns.contains(index); });
 
         for(auto index : indices)

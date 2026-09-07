@@ -1130,11 +1130,11 @@ GraphRenderer::Mode GraphRenderer::bestFocusParameters(GraphDisplay* graphDispla
     auto nodeIds = graphDisplay->desiredFocusNodeIds();
 
     // Tail nodes aren't visible, so they can't be focused
-    nodeIds.erase(std::remove_if(nodeIds.begin(), nodeIds.end(),
+    nodeIds.erase(std::ranges::remove_if(nodeIds,
     [this](auto nodeId)
     {
         return _graphModel->graph().typeOf(nodeId) == MultiElementType::Tail;
-    }), nodeIds.end());
+    }).begin(), nodeIds.end());
 
     if(nodeIds.empty())
         return mode();
@@ -1157,11 +1157,11 @@ GraphRenderer::Mode GraphRenderer::bestFocusParameters(GraphDisplay* graphDispla
             // Prune the nodeIds we consider for focus down to only those in the focused component
             auto focusedComponentId = _graphComponentScene->componentId();
 
-            nodeIds.erase(std::remove_if(nodeIds.begin(), nodeIds.end(),
+            nodeIds.erase(std::ranges::remove_if(nodeIds,
             [this, focusedComponentId](auto nodeId)
             {
                 return _graphModel->graph().componentIdOfNode(nodeId) != focusedComponentId;
-            }), nodeIds.end());
+            }).begin(), nodeIds.end());
         }
         else
             return Mode::Overview;

@@ -138,7 +138,7 @@ void GraphComponentRenderer::synchronise()
         _savedViewData.reset();
 
     const auto& edgeIds = component->edgeIds();
-    std::transform(edgeIds.begin(), edgeIds.end(), std::back_inserter(_edges),
+    std::ranges::transform(edgeIds, std::back_inserter(_edges),
     [this](auto edgeId)
     {
         return &_graphModel->graph().edgeById(edgeId);

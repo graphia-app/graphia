@@ -806,7 +806,7 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
             {
                 // Sort in natural order so that e.g. "Thing 1" is always
                 // assigned a visualisation before "Thing 2"
-                std::sort(sharedValues.begin(), sharedValues.end(),
+                std::ranges::sort(sharedValues,
                 [](const auto& a, const auto& b)
                 {
                     return u::numericCompare(a._value, b._value) < 0;
@@ -818,7 +818,7 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
                 // but resort anyway as in that case it'll be cheap and
                 // if it's not sorted (for whatever reason), we need it
                 // to be sorted
-                std::sort(sharedValues.begin(), sharedValues.end(),
+                std::ranges::sort(sharedValues,
                 [](const auto& a, const auto& b)
                 {
                     if(a._count == b._count)
@@ -1487,19 +1487,19 @@ void GraphModel::onTransformedGraphChanged(const Graph*, bool changeOccurred)
 
     auto identityToName = [](const auto& identity) { return identity._name; };
 
-    std::transform(removedAttributeIdentities.begin(), removedAttributeIdentities.end(),
+    std::ranges::transform(removedAttributeIdentities,
         std::back_inserter(removedAttributeNames), identityToName);
-    std::transform(addedAttributeIdentities.begin(), addedAttributeIdentities.end(),
+    std::ranges::transform(addedAttributeIdentities,
         std::back_inserter(addedAttributeNames), identityToName);
 
     QStringList changedAttributeNames(std::move(_->_changedDynamicAttributeNames));
 
-    changedAttributeNames.erase(std::remove_if(changedAttributeNames.begin(), changedAttributeNames.end(), // clazy:exclude=strict-iterators
+    changedAttributeNames.erase(std::ranges::remove_if(changedAttributeNames, // clazy:exclude=strict-iterators
     [&removedAttributeNames, &addedAttributeNames](const auto& dynamicAttributeName)
     {
         return u::contains(removedAttributeNames, dynamicAttributeName) ||
             u::contains(addedAttributeNames, dynamicAttributeName);
-    }), changedAttributeNames.end()); // clazy:exclude=strict-iterators
+    }).begin(), changedAttributeNames.end()); // clazy:exclude=strict-iterators
 
     // When the graph changes, every attribute's range and shared values also potentially change
     for(auto& [name, attribute] : _->_attributes)

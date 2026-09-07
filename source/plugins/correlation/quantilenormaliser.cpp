@@ -50,7 +50,7 @@ bool QuantileNormaliser::process(ContinuousDataVectors& dataRows, IParser* parse
         columnValues.reserve(dataRows.size());
 
         // Get column values
-        std::transform(dataRows.begin(), dataRows.end(), std::back_inserter(columnValues),
+        std::ranges::transform(dataRows, std::back_inserter(columnValues),
         [column](const auto& dataRow)
         {
             return dataRow.valueAt(column);
@@ -58,9 +58,9 @@ bool QuantileNormaliser::process(ContinuousDataVectors& dataRows, IParser* parse
 
         // Sort
         auto sortedValues = columnValues;
-        std::sort(sortedValues.begin(), sortedValues.end());
+        std::ranges::sort(sortedValues);
         auto uniqueSortedValues = sortedValues;
-        uniqueSortedValues.erase(std::unique(uniqueSortedValues.begin(), uniqueSortedValues.end()),
+        uniqueSortedValues.erase(std::ranges::unique(uniqueSortedValues).begin(),
             uniqueSortedValues.end());
 
         row = 0;

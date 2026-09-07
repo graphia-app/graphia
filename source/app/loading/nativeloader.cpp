@@ -327,7 +327,7 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
         return false;
     }
 
-    auto allObjects = std::all_of(jsonArray.begin(), jsonArray.end(),
+    auto allObjects = std::ranges::all_of(jsonArray,
     [](const auto& i)
     {
        return i.is_object();

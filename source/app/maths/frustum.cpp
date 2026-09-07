@@ -36,7 +36,7 @@ Frustum::Frustum(const Line3D& line1, const Line3D& line2, const Line3D& line3, 
 
 bool Frustum::containsPoint(const QVector3D& point) const
 {
-    return std::all_of(_planes.begin(), _planes.end(), [&point](const auto& plane)
+    return std::ranges::all_of(_planes, [&point](const auto& plane)
     {
         return plane.sideForPoint(point) == Plane::Side::Back;
     });

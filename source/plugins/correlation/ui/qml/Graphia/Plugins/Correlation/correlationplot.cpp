@@ -78,7 +78,7 @@ bool CorrelationPlotWorker::zoomed() const
 
 void CorrelationPlotWorker::updateZoomed()
 {
-    auto zoomed = std::any_of(_axisParameters.begin(), _axisParameters.end(), [](const auto& v)
+    auto zoomed = std::ranges::any_of(_axisParameters, [](const auto& v)
     {
         return v.second.zoomed();
     });
@@ -902,9 +902,9 @@ void CorrelationPlot::configureLegend()
 
     std::vector<QCPAbstractPlottable*> plottables;
 
-    std::transform(plottablesMap.begin(), plottablesMap.end(), std::back_inserter(plottables),
+    std::ranges::transform(plottablesMap, std::back_inserter(plottables),
         [](auto& pair){ return pair.second; });
-    std::sort(plottables.begin(), plottables.end(),
+    std::ranges::sort(plottables,
         [](const auto& a, const auto& b) { return a->name() < b->name(); });
 
     size_t numTruncated = 0;
@@ -1306,7 +1306,7 @@ bool CorrelationPlot::updateSortMap()
     if(_columnDataValueSortOrder.empty())
         _columnDataValueSortOrder.resize(numColumns());
 
-    if(!_columnSortOrderPinned && std::any_of(columnSortOrders.begin(), columnSortOrders.end(),
+    if(!_columnSortOrderPinned && std::ranges::any_of(columnSortOrders,
         [](const auto& cso) { return cso._type == PlotColumnSortType::DataValue; }))
     {
         std::vector<double> columnValues;
@@ -1373,7 +1373,7 @@ bool CorrelationPlot::updateSortMap()
 
         std::vector<size_t> inverseDataValueOrdering(numColumns());
         std::iota(inverseDataValueOrdering.begin(), inverseDataValueOrdering.end(), 0);
-        std::sort(inverseDataValueOrdering.begin(), inverseDataValueOrdering.end(),
+        std::ranges::sort(inverseDataValueOrdering,
         [&columnValues](size_t a, size_t b)
         {
             return columnValues.at(a) < columnValues.at(b);
@@ -1383,7 +1383,7 @@ bool CorrelationPlot::updateSortMap()
             _columnDataValueSortOrder[inverseDataValueOrdering.at(i)] = i;
     }
 
-    std::sort(_sortMap.begin(), _sortMap.end(),
+    std::ranges::sort(_sortMap,
     [this, &columnSortOrders](size_t a, size_t b)
     {
         for(const auto& columnSortOrder : columnSortOrders)
@@ -1491,7 +1491,7 @@ void CorrelationPlot::sortBy(int type, const QString& text)
 
     auto order = Qt::AscendingOrder;
 
-    auto existing = std::find_if(_columnSortOrders.cbegin(), _columnSortOrders.cend(),
+    auto existing = std::ranges::find_if(_columnSortOrders,
     [type, &text, typeIsColumnAnnotation](const auto& value)
     {
         const bool sameType = (value[u"type"_s].toInt() == type);
@@ -1519,12 +1519,12 @@ void CorrelationPlot::sortBy(int type, const QString& text)
 
     if(!typeIsColumnAnnotation)
     {
-        _columnSortOrders.erase(std::remove_if(_columnSortOrders.begin(), _columnSortOrders.end(),  // clazy:exclude=strict-iterators,detaching-member
+        _columnSortOrders.erase(std::ranges::remove_if(_columnSortOrders,  // clazy:exclude=strict-iterators,detaching-member
         [](const auto& value)
         {
             return static_cast<PlotColumnSortType>(value[u"type"_s].toInt()) !=
                 PlotColumnSortType::ColumnAnnotation;
-        }), _columnSortOrders.end());  // clazy:exclude=strict-iterators,detaching-member
+        }).begin(), _columnSortOrders.end());  // clazy:exclude=strict-iterators,detaching-member
     }
 
     QVariantMap newSortOrder;
@@ -1564,7 +1564,7 @@ void CorrelationPlot::setColumnSortOrders(const QVector<QVariantMap>& columnSort
 
 bool CorrelationPlot::columnSortOrderCanBePinned() const
 {
-    return std::any_of(_columnSortOrders.cbegin(), _columnSortOrders.cend(), [](const auto& value)
+    return std::ranges::any_of(_columnSortOrders, [](const auto& value)
     {
         return static_cast<PlotColumnSortType>(value[u"type"_s].toInt()) ==
             PlotColumnSortType::DataValue;

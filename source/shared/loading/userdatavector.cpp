@@ -38,9 +38,9 @@ QStringList UserDataVector::toStringList() const
 size_t UserDataVector::numUniqueValues() const
 {
     auto v = _values;
-    std::sort(v.begin(), v.end());
-    auto last = std::unique(v.begin(), v.end());
-    v.erase(last, v.end());
+    std::ranges::sort(v);
+    auto last = std::ranges::unique(v);
+    v.erase(last.begin(), v.end());
 
     return v.size();
 }

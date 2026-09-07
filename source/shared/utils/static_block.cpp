@@ -27,7 +27,7 @@ void execute_static_blocks()
 {
     // Sort the map so that the static_blocks are executed in a deterministic order
     std::vector<std::pair<std::string, void(*)()>> v(_static_blocks.begin(), _static_blocks.end());
-    std::sort(v.begin(), v.end());
+    std::ranges::sort(v);
 
     for(const auto& [n, f] : v)
         f();

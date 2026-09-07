@@ -91,13 +91,13 @@ const std::vector<QString>& GraphTransformConfig::attributeNames() const
 
 bool GraphTransformConfig::hasParameter(const QString& name) const
 {
-    return std::find_if(_parameters.begin(), _parameters.end(),
+    return std::ranges::find_if(_parameters,
     [&name](const auto& parameter) { return name == parameter._name; }) != _parameters.end();
 }
 
 const GraphTransformConfig::Parameter* GraphTransformConfig::parameterByName(const QString &name) const
 {
-    auto it = std::find_if(_parameters.begin(), _parameters.end(),
+    auto it = std::ranges::find_if(_parameters,
         [&name](const auto& parameter) { return name == parameter._name; });
 
     if(it != _parameters.end())
@@ -118,7 +118,7 @@ bool GraphTransformConfig::parameterHasValue(const QString& name, const QString&
 void GraphTransformConfig::setParameterValue(const QString& name,
     const GraphTransformConfig::ParameterValue& value)
 {
-    auto it = std::find_if(_parameters.begin(), _parameters.end(),
+    auto it = std::ranges::find_if(_parameters,
         [&name](const auto& parameter) { return name == parameter._name; });
 
     if(it != _parameters.end())

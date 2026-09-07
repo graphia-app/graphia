@@ -108,7 +108,10 @@ std::vector<EdgeId> MutableGraph::edgeIdsBetween(NodeId nodeIdA, NodeId nodeIdB)
     if(u::contains(_e._connections, undirectedEdge))
     {
         const auto& edgeIdDistinctSet = _e._connections.at(undirectedEdge);
-        std::copy(edgeIdDistinctSet.begin(), edgeIdDistinctSet.end(), std::back_inserter(edgeIds));
+
+        // NOLINTNEXTLINE modernize-use-ranges
+        std::copy(edgeIdDistinctSet.begin(), edgeIdDistinctSet.end(),
+            std::back_inserter(edgeIds));
     }
 
     return edgeIds;
@@ -357,7 +360,7 @@ EdgeId MutableGraph::mergeEdges(EdgeId edgeIdA, EdgeId edgeIdB)
 
 NodeId MutableGraph::mergeNodes(const std::vector<NodeId>& nodeIds)
 {
-    auto setId = *std::min_element(nodeIds.begin(), nodeIds.end());
+    auto setId = *std::ranges::min_element(nodeIds);
 
     for(auto nodeId : nodeIds)
         _n._mergedNodeIds.add(setId, nodeId);
@@ -367,7 +370,7 @@ NodeId MutableGraph::mergeNodes(const std::vector<NodeId>& nodeIds)
 
 EdgeId MutableGraph::mergeEdges(const std::vector<EdgeId>& edgeIds)
 {
-    auto setId = *std::min_element(edgeIds.begin(), edgeIds.end());
+    auto setId = *std::ranges::min_element(edgeIds);
 
     for(auto edgeId : edgeIds)
         _e._mergedEdgeIds.add(setId, edgeId);
@@ -519,7 +522,7 @@ void MutableGraph::contractEdges(const EdgeIdSet& edgeIds)
             continue;
 
         const auto& nodeIds = component->nodeIds();
-        auto nodeId = *std::min_element(nodeIds.begin(), nodeIds.end());
+        auto nodeId = *std::ranges::min_element(nodeIds);
 
         moveEdgesTo(*this, nodeId,
             inEdgeIdsForNodeIds(nodeIds).copy(),
@@ -662,7 +665,7 @@ bool MutableGraph::update()
 
     _nodeIds.clear();
     _unusedNodeIds.clear();
-    std::fill(_n._multiplicities.begin(), _n._multiplicities.end(), 0);
+    std::ranges::fill(_n._multiplicities, 0);
     for(NodeId nodeId(0); nodeId < nextNodeId(); ++nodeId)
     {
         if(containsNodeId(nodeId))
@@ -685,7 +688,7 @@ bool MutableGraph::update()
 
     _edgeIds.clear();
     _unusedEdgeIds.clear();
-    std::fill(_e._multiplicities.begin(), _e._multiplicities.end(), 0);
+    std::ranges::fill(_e._multiplicities, 0);
     for(EdgeId edgeId(0); edgeId < nextEdgeId(); ++edgeId)
     {
         if(containsEdgeId(edgeId))

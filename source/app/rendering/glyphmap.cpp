@@ -183,7 +183,7 @@ bool GlyphMap::stringsAreRenderable(const QFont &font) const
 
     // If there are zero glyphs whose paths are non-empty, this
     // is not something we want to use to render with
-    return std::any_of(_results._glyphs.begin(), _results._glyphs.end(), [&](const auto& glyphPair)
+    return std::ranges::any_of(_results._glyphs, [&](const auto& glyphPair)
     {
         auto glyph = glyphPair.first;
         auto path = rawFont.pathForGlyph(glyph);

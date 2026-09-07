@@ -28,6 +28,7 @@
 
 #include <QMetaType>
 #include <QDebug>
+#include <algorithm>
 
 static void registerQtTypes()
 {
@@ -49,6 +50,7 @@ std::vector<EdgeId> Node::inEdgeIds() const
 {
     std::vector<EdgeId> edgeIds;
     edgeIds.reserve(static_cast<size_t>(inDegree()));
+    // NOLINTNEXTLINE modernize-use-ranges
     std::copy(_inEdgeIds.begin(), _inEdgeIds.end(), std::back_inserter(edgeIds));
     return edgeIds;
 }
@@ -57,6 +59,7 @@ std::vector<EdgeId> Node::outEdgeIds() const
 {
     std::vector<EdgeId> edgeIds;
     edgeIds.reserve(static_cast<size_t>(outDegree()));
+    // NOLINTNEXTLINE modernize-use-ranges
     std::copy(_outEdgeIds.begin(), _outEdgeIds.end(), std::back_inserter(edgeIds));
     return edgeIds;
 }
@@ -65,7 +68,9 @@ std::vector<EdgeId> Node::edgeIds() const
 {
     std::vector<EdgeId> edgeIds;
     edgeIds.reserve(static_cast<size_t>(degree()));
+    // NOLINTNEXTLINE modernize-use-ranges
     std::copy(_inEdgeIds.begin(), _inEdgeIds.end(), std::back_inserter(edgeIds));
+    // NOLINTNEXTLINE modernize-use-ranges
     std::copy(_outEdgeIds.begin(), _outEdgeIds.end(), std::back_inserter(edgeIds));
     return edgeIds;
 }

@@ -135,7 +135,7 @@ void SearchManager::findNodes(QString term, Flags<FindOptions> options,
 
             if(!match)
             {
-                match = std::any_of(conditionFns.begin(), conditionFns.end(),
+                match = std::ranges::any_of(conditionFns,
                 [&mergedNodeIds](const auto& conditionFn)
                 {
                     // ...but we still match against the tails... (cont.)

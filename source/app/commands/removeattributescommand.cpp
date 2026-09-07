@@ -35,7 +35,7 @@ using namespace Qt::Literals::StringLiterals;
 RemoveAttributesCommand::RemoveAttributesCommand(GraphModel* graphModel, const QStringList& attributeNames) :
     _graphModel(graphModel)
 {
-    std::transform(attributeNames.cbegin(), attributeNames.cend(),
+    std::ranges::transform(attributeNames,
         std::back_inserter(_attributeNames),
     [](const auto& attributeName)
     {

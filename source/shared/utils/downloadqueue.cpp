@@ -101,7 +101,7 @@ bool DownloadQueue::downloaded(const QUrl& url) const
     auto filename = fileinfo.canonicalFilePath();
     auto dirname = fileinfo.canonicalPath();
 
-    return std::any_of(_downloaded.begin(), _downloaded.end(), [&](const auto& deletee)
+    return std::ranges::any_of(_downloaded, [&](const auto& deletee)
     {
         auto downloadedFilename =
             QFileInfo(deletee.first).canonicalFilePath();

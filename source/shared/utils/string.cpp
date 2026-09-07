@@ -108,7 +108,7 @@ std::vector<QString> u::toQStringVector(const QStringList& stringList)
 {
     std::vector<QString> v;
     v.reserve(static_cast<size_t>(stringList.size()));
-    std::copy(stringList.begin(), stringList.end(), std::back_inserter(v));
+    std::ranges::copy(stringList, std::back_inserter(v));
     return v;
 }
 

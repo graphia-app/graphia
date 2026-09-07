@@ -52,8 +52,8 @@ public:
         _oldComponentId(oldComponentId), _splitters(std::move(splitters))
     {
         Q_ASSERT(!oldComponentId.isNull());
-        Q_ASSERT(!std::any_of(_splitters.begin(), _splitters.end(),
-                 [](const auto& splitter) { return splitter.isNull(); }));
+        Q_ASSERT(!std::ranges::any_of(_splitters,
+            [](const auto& splitter) { return splitter.isNull(); }));
     }
 
     ComponentId oldComponentId() const { return _oldComponentId; }
@@ -71,8 +71,8 @@ public:
         _mergers(std::move(mergers)), _newComponentId(newComponentId)
     {
         Q_ASSERT(!newComponentId.isNull());
-        Q_ASSERT(!std::any_of(_mergers.begin(), _mergers.end(),
-                 [](const auto& merger) { return merger.isNull(); }));
+        Q_ASSERT(!std::ranges::any_of(_mergers,
+            [](const auto& merger) { return merger.isNull(); }));
     }
 
     const ComponentIdSet& mergers() const { return _mergers; }
@@ -86,8 +86,8 @@ class ComponentManager : public QObject, public GraphFilter
     Q_OBJECT
 public:
     explicit ComponentManager(Graph& graph,
-                     const NodeConditionFn& nodeFilter = nullptr,
-                     const EdgeConditionFn& edgeFilter = nullptr);
+        const NodeConditionFn& nodeFilter = nullptr,
+        const EdgeConditionFn& edgeFilter = nullptr);
     ~ComponentManager() override;
 
 private:
@@ -121,8 +121,7 @@ private:
     void update(const Graph* graph);
     size_t componentArrayCapacity() const { return static_cast<size_t>(_nextComponentId); }
     ComponentIdSet assignConnectedElementsComponentId(const Graph* graph, NodeId rootId, ComponentId componentId,
-                                                      NodeArray<ComponentId>& nodesComponentId,
-                                                      EdgeArray<ComponentId>& edgesComponentId);
+        NodeArray<ComponentId>& nodesComponentId, EdgeArray<ComponentId>& edgesComponentId);
 
     void insertComponentArray(IGraphArray* componentArray);
     void eraseComponentArray(IGraphArray* componentArray);

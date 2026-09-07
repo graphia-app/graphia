@@ -65,7 +65,7 @@ bool NativeUtils::urlIsDownloadable(const QUrl& url) const
 {
     auto validSchemes = {"http", "https", "ftp"};
 
-    return url.isValid() && std::any_of(std::begin(validSchemes), std::end(validSchemes),
+    return url.isValid() && std::ranges::any_of(validSchemes,
     [&url](const auto& scheme)
     {
         return url.scheme() == scheme;
@@ -120,7 +120,7 @@ bool NativeUtils::urlStringIsValid(const QString& urlString) const
     QUrl url = QUrl(urlString, QUrl::ParsingMode::StrictMode);
     auto validSchemes = {"http", "https", "ftp", "file"};
 
-    return url.isValid() && std::any_of(std::begin(validSchemes), std::end(validSchemes),
+    return url.isValid() && std::ranges::any_of(validSchemes,
     [&url](const auto& scheme)
     {
         return url.scheme() == scheme;

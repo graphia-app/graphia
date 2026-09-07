@@ -82,7 +82,7 @@ bool UserData::setValue(size_t index, const QString& name, const QString& value)
     // Make sure the vector exists first
     add(normalisedName);
 
-    auto it = std::find_if(_userDataVectors.begin(), _userDataVectors.end(),
+    auto it = std::ranges::find_if(_userDataVectors,
         [&normalisedName](const auto& it2) { return it2.first == normalisedName; });
 
     Q_ASSERT(it != _userDataVectors.end());
@@ -101,7 +101,7 @@ bool UserData::setValue(size_t index, const QString& name, const QString& value)
 QVariant UserData::value(size_t index, const QString& name) const
 {
     QString normalisedName = normalise(name);
-    auto it = std::find_if(_userDataVectors.begin(), _userDataVectors.end(),
+    auto it = std::ranges::find_if(_userDataVectors,
         [&normalisedName](const auto& it2) { return it2.first == normalisedName; });
 
     if(it != _userDataVectors.end())
@@ -130,7 +130,7 @@ QVariant UserData::value(size_t index, const QString& name) const
 UserDataVector* UserData::vector(const QString& name)
 {
     QString normalisedName = normalise(name);
-    auto it = std::find_if(_userDataVectors.begin(), _userDataVectors.end(),
+    auto it = std::ranges::find_if(_userDataVectors,
     [&normalisedName](const auto& pair)
     {
         return pair.first == normalisedName;

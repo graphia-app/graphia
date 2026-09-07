@@ -28,6 +28,7 @@
 
 #include <QDebug>
 
+#include <algorithm>
 #include <chrono>
 #include <iterator>
 
@@ -198,11 +199,9 @@ void ComponentManager::update(const Graph* graph)
     ComponentIdSet componentIdsToBeAdded;
     ComponentIdSet componentIdsToBeRemoved;
 
-    std::set_difference(componentIds.begin(), componentIds.end(),
-        _componentIdsSet.begin(), _componentIdsSet.end(),
+    std::ranges::set_difference(componentIds, _componentIdsSet,
         std::inserter(componentIdsToBeAdded, componentIdsToBeAdded.begin()));
-    std::set_difference(_componentIdsSet.begin(), _componentIdsSet.end(),
-        componentIds.begin(), componentIds.end(),
+    std::ranges::set_difference(_componentIdsSet, componentIds,
         std::inserter(componentIdsToBeRemoved, componentIdsToBeRemoved.begin()));
 
     // Find nodes and edges that have been added or removed
@@ -301,8 +300,7 @@ void ComponentManager::update(const Graph* graph)
     }
 
     _componentIds.clear();
-    std::copy(_componentIdsSet.begin(), _componentIdsSet.end(),
-        std::back_inserter(_componentIds));
+    std::ranges::copy(_componentIdsSet, std::back_inserter(_componentIds));
 
     shrinkComponentsArrayToFit();
 
@@ -313,12 +311,10 @@ void ComponentManager::update(const Graph* graph)
 
     _updatesRequired.clear();
 
-    std::copy(componentIdsToBeAdded.begin(), componentIdsToBeAdded.end(),
-        std::back_inserter(_componentIds));
-    std::copy(componentIdsToBeAdded.begin(), componentIdsToBeAdded.end(),
-        std::inserter(_componentIdsSet, _componentIdsSet.begin()));
+    std::ranges::copy(componentIdsToBeAdded, std::back_inserter(_componentIds));
+    std::ranges::copy(componentIdsToBeAdded, std::inserter(_componentIdsSet, _componentIdsSet.begin()));
 
-    std::stable_sort(_componentIds.begin(), _componentIds.end(),
+    std::ranges::stable_sort(_componentIds,
     [this](auto a, auto b)
     {
         auto componentA = this->componentById(a);

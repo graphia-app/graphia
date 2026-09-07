@@ -47,8 +47,7 @@ inline bool isDebuggerPresent()
     {
         std::vector<QString> debuggers = {"qtcreator", "gdb", "debugserver"};
 
-        return std::any_of(debuggers.begin(), debuggers.end(),
-                           [&parentProcessName](const auto& debugger)
+        return std::ranges::any_of(debuggers, [&parentProcessName](const auto& debugger)
         {
             return parentProcessName.contains(debugger, Qt::CaseInsensitive);
         });

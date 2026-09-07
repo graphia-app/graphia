@@ -61,8 +61,8 @@ public:
 
     bool finished() const
     {
-        return std::any_of(_subLayouts.begin(), _subLayouts.end(),
-                           [](Layout* layout) { return layout->finished(); });
+        return std::ranges::any_of(_subLayouts,
+            [](Layout* layout) { return layout->finished(); });
     }
 
     void unfinish()
@@ -73,19 +73,19 @@ public:
 
     bool iterative() const
     {
-        return std::any_of(_subLayouts.begin(), _subLayouts.end(),
-                           [](Layout* layout) { return layout->iterative(); });
+        return std::ranges::any_of(_subLayouts,
+            [](Layout* layout) { return layout->iterative(); });
     }
 
     Dimensionality dimensionality() const
     {
-        if(std::any_of(_subLayouts.begin(), _subLayouts.end(),
+        if(std::ranges::any_of(_subLayouts,
             [](Layout* layout) { return layout->dimensionality() == Dimensionality::TwoDee; }))
         {
             return Dimensionality::TwoDee;
         }
 
-        if(std::any_of(_subLayouts.begin(), _subLayouts.end(),
+        if(std::ranges::any_of(_subLayouts,
             [](Layout* layout) { return layout->dimensionality() == Dimensionality::TwoOrThreeDee; }))
         {
             return Dimensionality::TwoOrThreeDee;

@@ -206,7 +206,7 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
         static_cast<size_t>(dataRect.width()), _continuousData);
 
     _continuousEpsilon = CorrelationFileParser::epsilonFor(_continuousData);
-    std::transform(_continuousData.begin(), _continuousData.end(), _continuousData.begin(),
+    std::ranges::transform(_continuousData, _continuousData.begin(),
     [this](double value)
     {
         return CorrelationFileParser::scaleValue(_scalingType, value, _continuousEpsilon);
@@ -614,8 +614,8 @@ void CorrelationPluginInstance::buildDiscreteDataValueIndex(Progressable& progre
 
         std::vector<QString> sortedValues;
         sortedValues.reserve(values.size());
-        std::copy(values.begin(), values.end(), std::back_inserter(sortedValues));
-        std::sort(sortedValues.begin(), sortedValues.end());
+        std::ranges::copy(values, std::back_inserter(sortedValues));
+        std::ranges::sort(sortedValues);
 
         for(const auto& sortedValue : sortedValues)
         {
@@ -851,7 +851,7 @@ QColor CorrelationPluginInstance::nodeColorForRows(const std::vector<size_t>& ro
 
     auto color = nodeColorForRow(rows.at(0));
 
-    auto colorsInconsistent = std::any_of(rows.begin(), rows.end(),
+    auto colorsInconsistent = std::ranges::any_of(rows,
     [this, &color](auto row)
     {
         return nodeColorForRow(row) != color;
@@ -868,7 +868,7 @@ QColor CorrelationPluginInstance::nodeColorForRows(const std::vector<size_t>& ro
 
 const ColumnAnnotation* CorrelationPluginInstance::columnAnnotationByName(const QString& name) const
 {
-    auto it = std::find_if(_columnAnnotations.begin(), _columnAnnotations.end(),
+    auto it = std::ranges::find_if(_columnAnnotations,
         [&name](const auto& v) { return v.name() == name; });
 
     if(it != _columnAnnotations.end())
@@ -961,7 +961,7 @@ std::vector<int> CorrelationPluginInstance::rowsOfInterestByColumns(const std::v
         rowScores.push_back(rowScore);
     }
 
-    std::sort(rowScores.begin(), rowScores.end(), [](const auto& a, const auto& b)
+    std::ranges::sort(rowScores, [](const auto& a, const auto& b)
     {
         return a._value > b._value;
     });
@@ -997,7 +997,7 @@ QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, Progressable& p
         for(const auto& nodeId : graph.nodeIds())
         {
             const auto& dataRow = continuousDataRowForNodeId(nodeId);
-            std::copy(dataRow.begin(), dataRow.end(), std::back_inserter(array));
+            std::ranges::copy(dataRow, std::back_inserter(array));
 
             progressable.setProgress(static_cast<int>((i++) * 100 / graph.nodeIds().size()));
         }
@@ -1016,7 +1016,7 @@ QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, Progressable& p
         for(const auto& nodeId : graph.nodeIds())
         {
             const auto& dataRow = discreteDataRowForNodeId(nodeId);
-            std::copy(dataRow.begin(), dataRow.end(), std::back_inserter(array));
+            std::ranges::copy(dataRow, std::back_inserter(array));
 
             progressable.setProgress(static_cast<int>((i++) * 100 / graph.nodeIds().size()));
         }
@@ -1119,7 +1119,7 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
     }
 
     const auto& dataColumnNames = jsonObject["dataColumnNames"];
-    std::transform(dataColumnNames.begin(), dataColumnNames.end(), std::back_inserter(_dataColumnNames),
+    std::ranges::transform(dataColumnNames, std::back_inserter(_dataColumnNames),
     [](const auto& dataColumnName)
     {
         return QString::fromStdString(dataColumnName);

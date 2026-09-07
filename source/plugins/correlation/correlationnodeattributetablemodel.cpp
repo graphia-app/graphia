@@ -44,7 +44,7 @@ void CorrelationNodeAttributeTableModel::addDataColumnNames(const std::vector<QS
 
     // Since these columns are appearing in the attribute table, we need to assign them
     // names that don't conflict with attribute names
-    std::transform(_dataColumnNames.begin(), _dataColumnNames.end(), _dataColumnNames.begin(),
+    std::ranges::transform(_dataColumnNames, _dataColumnNames.begin(),
     [](const auto& columnName)
     {
         return u"Data Value › %1"_s.arg(columnName);

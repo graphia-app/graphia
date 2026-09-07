@@ -174,7 +174,7 @@ static bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphMode
 {
     auto findIntValue = [](const List& list, const QString& key) -> const int*
     {
-        auto keyValue = std::find_if(list.begin(), list.end(), [&key](auto& item)
+        auto keyValue = std::ranges::find_if(list, [&key](auto& item)
         {
            return item.get()._key == key;
         });

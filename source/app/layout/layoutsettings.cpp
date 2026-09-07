@@ -82,7 +82,7 @@ const LayoutSetting* LayoutSettings::setting(const QString& name) const
 
 LayoutSetting* LayoutSettings::setting(const QString& name)
 {
-    auto setting = std::find_if(_settings.begin(), _settings.end(),
+    auto setting = std::ranges::find_if(_settings,
     [name](const auto& v)
     {
         return v.name() == name;

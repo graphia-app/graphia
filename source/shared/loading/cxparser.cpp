@@ -412,7 +412,7 @@ bool CxParser::parseJson(const json& jsonArray, IGraphModel* graphModel)
         return false;
     }
 
-    auto arrayContainsNonObjects = std::any_of(jsonArray.begin(), jsonArray.end(), [](const auto& j)
+    auto arrayContainsNonObjects = std::ranges::any_of(jsonArray, [](const auto& j)
     {
         return !j.is_object();
     });

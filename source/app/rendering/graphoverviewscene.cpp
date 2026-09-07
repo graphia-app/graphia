@@ -493,10 +493,9 @@ Transition& GraphOverviewScene::startTransition(float duration, Transition::Type
 
         // Subtract the removed ComponentIds, as we no longer need to render them
         std::vector<ComponentId> postTransitionComponentIds;
-        std::sort(_componentIds.begin(), _componentIds.end());
-        std::sort(_removedComponentIds.begin(), _removedComponentIds.end());
-        std::set_difference(_componentIds.begin(), _componentIds.end(),
-            _removedComponentIds.begin(), _removedComponentIds.end(),
+        std::ranges::sort(_componentIds);
+        std::ranges::sort(_removedComponentIds);
+        std::ranges::set_difference(_componentIds, _removedComponentIds,
             std::inserter(postTransitionComponentIds, postTransitionComponentIds.begin()));
 
         _componentIds = std::move(postTransitionComponentIds);

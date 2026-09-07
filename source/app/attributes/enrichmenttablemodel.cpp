@@ -186,7 +186,7 @@ void EnrichmentTableModel::updateSortFilterMap()
 
     if(_sortColumn >= 0)
     {
-        std::sort(_sortFilterMap.begin(), _sortFilterMap.end(), [this](size_t rowA, size_t rowB)
+        std::ranges::sort(_sortFilterMap, [this](size_t rowA, size_t rowB)
         {
             if(!_ascendingSortOrder)
                 std::swap(rowA, rowB);

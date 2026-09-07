@@ -178,7 +178,7 @@ bool LayoutThread::finished() const
 
 bool LayoutThread::iterative() const
 {
-    return std::any_of(_layouts.begin(), _layouts.end(),
+    return std::ranges::any_of(_layouts,
     [](const auto& layout)
     {
         return layout.second->iterative();
@@ -199,7 +199,7 @@ void LayoutThread::unfinish()
 
 bool LayoutThread::allLayoutsFinished() const
 {
-    return std::all_of(_layouts.begin(), _layouts.end(),
+    return std::ranges::all_of(_layouts,
     [](const auto& layout)
     {
         return layoutIsFinished(*layout.second);
@@ -240,7 +240,7 @@ void LayoutThread::run()
             _graphModel->nodePositions().update(_nodeLayoutPositions);
 
             const bool requiresFlattening = _dimensionalityMode == Layout::Dimensionality::TwoDee &&
-                std::any_of(_layouts.begin(), _layouts.end(), [](const auto& layout)
+                std::ranges::any_of(_layouts, [](const auto& layout)
                 {
                     return layout.second->dimensionality() == Layout::Dimensionality::ThreeDee;
                 });
