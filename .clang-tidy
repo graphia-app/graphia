@@ -3,6 +3,7 @@ Checks: >
     -abseil-*,
     -altera-*,
     -android-*,
+    -boost-*,
     -bugprone-branch-clone,
     -bugprone-easily-swappable-parameters,
     -bugprone-reserved-identifier,
