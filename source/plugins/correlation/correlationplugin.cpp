@@ -1491,7 +1491,7 @@ QString CorrelationPlugin::failureReason(const QUrl& url) const
     if(urlTypes.isEmpty())
         return {};
 
-    auto extensionIdentity = urlTypes.first();
+    const auto& extensionIdentity = urlTypes.first();
     auto contentIdentity = TabularData::contentIdentityOf(url);
 
     if(contentIdentity.isEmpty())
