@@ -129,7 +129,7 @@ static QString anonymousIdentity()
         hostName = ipAddress;
 
     auto homePath = QStandardPaths::standardLocations(QStandardPaths::HomeLocation);
-    if(homePath.length() > 0)
+    if(!homePath.isEmpty())
     {
         QCryptographicHash hash(QCryptographicHash::Algorithm::Md5);
         hash.addData(homePath.first().toUtf8());
