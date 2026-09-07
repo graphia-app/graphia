@@ -34,8 +34,8 @@ public:
     {
         Unknown = -1,
         Int = 0,
-        Float,
-        String
+        Float = 1,
+        String = 2
     };
 
 private:
