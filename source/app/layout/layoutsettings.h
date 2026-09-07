@@ -23,6 +23,7 @@
 #include <QObject>
 #include <QString>
 
+#include <utility>
 #include <vector>
 
 struct LayoutSettingKeyValue
@@ -95,9 +96,9 @@ public:
     std::vector<LayoutSetting>& vector() { return _settings; }
 
     template<typename... Args>
-    void registerSetting(Args... args)
+    void registerSetting(Args&&... args)
     {
-        _settings.emplace_back(args...);
+        _settings.emplace_back(std::forward<Args>(args)...);
     }
 
 signals:

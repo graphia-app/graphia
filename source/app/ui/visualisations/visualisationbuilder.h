@@ -70,7 +70,7 @@ private:
     std::array<std::vector<Applied>, NumChannels> _applications;
 
     template<typename T>
-    void apply(T value, const VisualisationChannel& channel,
+    void apply(const T& value, const VisualisationChannel& channel,
                ElementId elementId, size_t index);
 
     template<typename G>

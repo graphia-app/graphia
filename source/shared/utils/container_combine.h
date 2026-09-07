@@ -53,7 +53,7 @@ public:
     private:
         combine::ContainerIteratorPairs _its;
 
-        iterator(combine::ContainerIteratorPairs its, bool end) : _its(its)
+        iterator(combine::ContainerIteratorPairs its, bool end) : _its(std::move(its))
         {
             if(end)
                 std::apply([](auto&&... it) { ((it.first = it.second), ...); }, _its);

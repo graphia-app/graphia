@@ -238,7 +238,7 @@ struct AttributeValueOpVistor
 
     ElementConditionFn<E> operator()(ConditionFnOp::Equality op) const
     {
-        auto comparisonFn = [op](const Attribute& attribute, auto valueOfFn, auto value) -> ElementConditionFn<E>
+        auto comparisonFn = [op](const Attribute& attribute, auto valueOfFn, const auto& value) -> ElementConditionFn<E>
         {
             switch(op)
             {

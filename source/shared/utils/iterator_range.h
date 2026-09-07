@@ -37,7 +37,7 @@ inline constexpr bool is_const_iterator_v = is_const_iterator<Iterator>::value;
 template<typename BeginIt, typename EndIt> class iterator_range
 {
 public:
-    iterator_range(BeginIt begin_, EndIt end_) :
+    iterator_range(const BeginIt& begin_, const EndIt& end_) :
         _begin(begin_), _end(end_) {}
 
     BeginIt& begin() { return _begin; }
@@ -63,7 +63,7 @@ private:
 };
 
 template<typename BeginIt, typename EndIt>
-auto make_iterator_range(BeginIt begin, EndIt end)
+auto make_iterator_range(const BeginIt& begin, const EndIt& end)
 {
     return iterator_range<BeginIt, EndIt>(begin, end);
 }

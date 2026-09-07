@@ -42,7 +42,7 @@ using namespace Qt::Literals::StringLiterals;
 
 template<typename ElementId>
 template<typename T>
-void VisualisationsBuilder<ElementId>::apply(T value, const VisualisationChannel& channel,
+void VisualisationsBuilder<ElementId>::apply(const T& value, const VisualisationChannel& channel,
     ElementId elementId, size_t index)
 {
     auto& visual = (*_visuals)[elementId];

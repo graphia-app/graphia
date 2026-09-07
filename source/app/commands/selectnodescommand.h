@@ -119,7 +119,7 @@ public:
 };
 
 template<typename C>
-auto makeSelectNodesCommand(SelectionManager* selectionManager, C nodeIds,
+auto makeSelectNodesCommand(SelectionManager* selectionManager, const C& nodeIds,
     Flags<SelectNodesClear> clearType = SelectNodesClear::Selection)
 {
     return std::make_unique<SelectNodesCommand<C>>(selectionManager, nodeIds, clearType);

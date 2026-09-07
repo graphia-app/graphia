@@ -63,7 +63,7 @@ QT_END_NAMESPACE
     using ENUM_NAME = QML_ENUM_PROPERTY(ENUM_NAME)
 
 template<typename QmlEnumType>
-QmlEnumType normaliseQmlEnum(auto v)
+QmlEnumType normaliseQmlEnum(const auto& v)
 {
     auto zero = static_cast<QmlEnumType>(0);
     auto cast = static_cast<QmlEnumType>(v);

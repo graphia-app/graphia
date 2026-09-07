@@ -45,15 +45,15 @@ public:
 
 private:
     template<typename T>
-    ICommandPtr makeCommand(T command)
+    ICommandPtr makeCommand(T&& command)
     {
-        if constexpr(std::is_convertible_v<T, ICommandPtr>)
+        if constexpr(std::is_convertible_v<std::decay_t<T>, ICommandPtr>)
         {
             // Already is a command
-            return command;
+            return std::forward<T>(command);
         }
         else
-            return std::make_unique<Command>(Command::CommandDescription(), command);
+            return std::make_unique<Command>(Command::CommandDescription(), std::forward<T>(command));
     }
 
     void makeCommandsVector(ICommandPtrsVector&) {}
