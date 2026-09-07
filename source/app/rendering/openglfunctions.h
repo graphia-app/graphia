@@ -55,7 +55,7 @@ public:
     void resolveOpenGLFunctions();
 
     bool hasSampleShading() const { return _glMinSampleShadingARBFnPtr != nullptr; }
-    inline void glMinSampleShading(GLfloat value)
+    void glMinSampleShading(GLfloat value)
     {
         if(hasSampleShading())
             _glMinSampleShadingARBFnPtr(value);
