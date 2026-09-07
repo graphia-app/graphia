@@ -2060,7 +2060,7 @@ QVariantMap Document::transformInfoAtIndex(int index) const
 
 bool Document::opIsUnary(const QString& op) const
 {
-    return _graphModel != nullptr ? _graphModel->opIsUnary(op) : false;
+    return GraphModel::opIsUnary(op);
 }
 
 QVariantMap Document::transformParameter(const QString& transformName, const QString& parameterName) const
