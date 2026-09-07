@@ -86,7 +86,7 @@ public:
         const float dx = other._x - _x;
         const float dy = other._y - _y;
 
-        return dx * dx + dy * dy;
+        return (dx * dx) + (dy * dy);
     }
 
     float distanceToSq(const Circle& other) const

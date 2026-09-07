@@ -23,9 +23,9 @@ Plane::Plane(const QVector3D& point, const QVector3D& normal) :
     _normal(normal)
 {
     const float negDistance =
-            _normal.x() * point.x() +
-            _normal.y() * point.y() +
-            _normal.z() * point.z();
+            (_normal.x() * point.x()) +
+            (_normal.y() * point.y()) +
+            (_normal.z() * point.z());
 
     _distance = -negDistance;
 }
@@ -42,9 +42,9 @@ Plane::Plane(const QVector3D& pointA, const QVector3D& pointB, const QVector3D& 
 Plane::Side Plane::sideForPoint(const QVector3D& point) const
 {
     const float result =
-            _normal.x() * point.x() +
-            _normal.y() * point.y() +
-            _normal.z() * point.z() + _distance;
+            (_normal.x() * point.x()) +
+            (_normal.y() * point.y()) +
+            (_normal.z() * point.z()) + _distance;
 
     if(result >= 0.0f)
         return Plane::Side::Front;
@@ -64,9 +64,9 @@ QVector3D Plane::rayIntersection(const Ray& ray) const
 float Plane::distanceToPoint(const QVector3D& point) const
 {
     const float n =
-            _normal.x() * point.x() +
-            _normal.y() * point.y() +
-            _normal.z() * point.z() + _distance;
+            (_normal.x() * point.x()) +
+            (_normal.y() * point.y()) +
+            (_normal.z() * point.z()) + _distance;
 
     return -n / _normal.length();
 }

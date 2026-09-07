@@ -194,11 +194,11 @@ bool Camera::unproject(int x, int y, int z, QVector3D& result) const
     auto invertedY = static_cast<float>(_viewport.height()) - static_cast<float>(y);
 
     QVector4D normalisedCoordinates;
-    normalisedCoordinates.setX((static_cast<float>(x) /
-        static_cast<float>(_viewport.width())) * 2.0f - 1.0f);
-    normalisedCoordinates.setY((invertedY /
-        static_cast<float>(_viewport.height())) * 2.0f - 1.0f);
-    normalisedCoordinates.setZ(2.0f * static_cast<float>(z) - 1.0f);
+    normalisedCoordinates.setX(((static_cast<float>(x) /
+        static_cast<float>(_viewport.width())) * 2.0f) - 1.0f);
+    normalisedCoordinates.setY(((invertedY /
+        static_cast<float>(_viewport.height())) * 2.0f) - 1.0f);
+    normalisedCoordinates.setZ((2.0f * static_cast<float>(z)) - 1.0f);
     normalisedCoordinates.setW(1.0f);
 
     QVector4D o = m * normalisedCoordinates;

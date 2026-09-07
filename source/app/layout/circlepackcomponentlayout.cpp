@@ -75,18 +75,18 @@ static void placeThirdCircleTangentially(const Circle& a, const Circle& b, Circl
     if(db != 0.0f && (dx != 0.0f || dy != 0.0f))
     {
         float da = b.radius() + c.radius();
-        const float dc = dx * dx + dy * dy;
+        const float dc = (dx * dx) + (dy * dy);
 
         da *= da;
         db *= db;
 
-        const float x = 0.5f + (db - da) / (2.0f * dc);
+        const float x = 0.5f + ((db - da) / (2.0f * dc));
         const float value = (2 * da * (db + dc)) - ((db - dc) * (db - dc)) - (da * da);
 
         const float y = std::sqrt(std::max(0.0f, value)) / (2.0f * dc);
 
-        c.setX(a.x() + x * dx + y * dy);
-        c.setY(a.y() + x * dy - y * dx);
+        c.setX(a.x() + (x * dx) + (y * dy));
+        c.setY(a.y() + (x * dy) - (y * dx));
     }
     else
     {

@@ -28,9 +28,9 @@ QColor u::contrastingColor(const QColor& color)
     if(color.alpha() == 0)
         return Qt::black;
 
-    auto brightness = 0.299f * color.redF() +
-                      0.587f * color.greenF() +
-                      0.114f * color.blueF();
+    auto brightness = (0.299f * color.redF()) +
+                      (0.587f * color.greenF()) +
+                      (0.114f * color.blueF());
     auto blackDiff = std::abs(brightness - 0.0f);
     auto whiteDiff = std::abs(brightness - 1.0f);
 

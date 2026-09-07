@@ -262,9 +262,9 @@ void GraphCommonInteractor::mouseDoubleClickEvent(const QPoint&, Qt::KeyboardMod
 static QVector3D virtualTrackballVector(int width, int height, const QPoint& cursor)
 {
     const auto minDimension = static_cast<float>(std::min(width, height));
-    const float x = static_cast<float>(2 * cursor.x() - width) / minDimension;
-    const float y = static_cast<float>(height - 2 * cursor.y()) / minDimension;
-    const float d = std::sqrt(x * x + y * y);
+    const float x = static_cast<float>((2 * cursor.x()) - width) / minDimension;
+    const float y = static_cast<float>(height - (2 * cursor.y())) / minDimension;
+    const float d = std::sqrt((x * x) + (y * y));
     const float RADIUS = 0.9f; // Radius of trackball
     const float ROOT2 = std::numbers::sqrt2_v<float>;
     const float CUTOFF = ROOT2 / 2.0f;
@@ -274,7 +274,7 @@ static QVector3D virtualTrackballVector(int width, int height, const QPoint& cur
     if(d < (RADIUS * CUTOFF))
     {
         // Sphere
-        z = std::sqrt(RADIUS * RADIUS - d * d);
+        z = std::sqrt((RADIUS * RADIUS) - (d * d));
     }
     else
     {

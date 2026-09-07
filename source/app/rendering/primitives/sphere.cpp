@@ -108,7 +108,7 @@ void Sphere::generateVertexData(std::vector<float>& vertices, std::vector<float>
                                 std::vector<float>& texCoords, std::vector<float>& tangents,
                                 std::vector<unsigned int>& indices) const
 {
-    auto faces = (_slices - 2) * _rings + // Number of "rectangular" faces
+    auto faces = ((_slices - 2) * _rings) + // Number of "rectangular" faces
             (_rings * 2); // and one ring for the top and bottom caps
     auto numVerts  = (_slices + 1) *(_rings + 1); // One extra line of latitude
 
@@ -128,10 +128,10 @@ void Sphere::generateVertexData(std::vector<float>& vertices, std::vector<float>
     size_t index = 0, texCoordIndex = 0, tangentIndex = 0;
     for(size_t lat = 0U; lat < _rings + 1; ++lat)
     {
-        const float phi = std::numbers::pi_v<float> / 2.0f - static_cast<float>(lat) * dPhi;
+        const float phi = (std::numbers::pi_v<float> / 2.0f) - (static_cast<float>(lat) * dPhi);
         const float cosPhi = std::cos(phi);
         const float sinPhi = std::sin(phi);
-        const float v = 1.0f - static_cast<float>(lat) * dv;
+        const float v = 1.0f - (static_cast<float>(lat) * dv);
 
         // Iterate over longitudes (slices)
         for(size_t lon = 0U; lon < _slices + 1; ++lon)

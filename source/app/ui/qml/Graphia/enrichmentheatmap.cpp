@@ -79,7 +79,7 @@ EnrichmentHeatmap::EnrichmentHeatmap(QQuickItem* parent) :
     auto significantColor = QColor(Qt::red);
     gradient.setColorStopAt(0, verySignificantColor);
     gradient.setColorStopAt(5.0 / 6.0, significantColor);
-    gradient.setColorStopAt(5.0 / 6.0 + 0.001, insignificantColor);
+    gradient.setColorStopAt((5.0 / 6.0) + 0.001, insignificantColor);
     gradient.setColorStopAt(1.0, insignificantColor);
 
     _colorMap->setInterpolate(false);
