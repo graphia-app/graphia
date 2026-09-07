@@ -209,13 +209,17 @@ void Document::maybeEmitBusyChanged()
             timer.restart();
         }
 
+        const char* busyChange = "  ";
+        if(busy() != _previousBusy)
+            busyChange = busy() ? " +" : " -";
+
         qDebug().noquote() << u"busy %1%2%3%4%5%6"_s.arg(
             (commandInProgress() ?                  "C" : "."),
             (graphChanging() ?                      "G" : "."),
             (_graphDisplay->updating() ?            "U" : "."),
             (_graphDisplay->interacting() ?         "I" : "."),
             (_graphDisplay->transitioning() ?       "T" : "."),
-            (busy() != _previousBusy ? (busy() ?    " +" : " -") : "  "));
+            busyChange);
     }
 
     if(busy() != _previousBusy)

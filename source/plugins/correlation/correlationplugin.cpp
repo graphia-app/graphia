@@ -1266,10 +1266,12 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
 
     parser.setProgress(-1);
 
-    const char* correlationThresholdKey =
-        dataVersion >= 14 ? "minimumThreshold" :
-        dataVersion >= 12 ? "threshold" :
-        "minimumCorrelationValue";
+    const char* correlationThresholdKey = "minimumCorrelationValue";
+
+    if(dataVersion >= 14)
+        correlationThresholdKey = "minimumThreshold";
+    else if(dataVersion >= 12)
+        correlationThresholdKey = "threshold";
 
     if(!u::containsAllOf(jsonObject, {correlationThresholdKey, "transpose", "scaling",
         "normalisation", "missingDataType", "missingDataReplacementValue"}))
