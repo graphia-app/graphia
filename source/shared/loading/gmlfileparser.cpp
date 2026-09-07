@@ -134,7 +134,7 @@ struct Attribute
 
 using AttributeVector = std::vector<Attribute>;
 
-AttributeVector processAttribute(const KeyValue& attribute)
+static AttributeVector processAttribute(const KeyValue& attribute)
 {
     struct Visitor
     {
@@ -169,7 +169,7 @@ AttributeVector processAttribute(const KeyValue& attribute)
     return std::visit(Visitor(attribute._key), attribute._value);
 }
 
-bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphModel,
+static bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphModel,
     IUserNodeData& userNodeData, IUserEdgeData& userEdgeData)
 {
     auto findIntValue = [](const List& list, const QString& key) -> const int*

@@ -69,7 +69,7 @@ static QString existingInstallation(const QString& exe)
 #endif
 }
 
-QStringList showUpdater(int argc, char *argv[])
+static QStringList showUpdater(int argc, char *argv[])
 {
     const SharedTools::QtSingleApplication app(QStringLiteral(PRODUCT_NAME), argc, argv);
 

@@ -402,7 +402,7 @@ struct DotGraph
 };
 } // namespace grammar
 
-bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graphModel,
+static bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graphModel,
     IUserNodeData& userNodeData, IUserEdgeData& userEdgeData)
 {
     std::vector<NodeId> nodeIds;

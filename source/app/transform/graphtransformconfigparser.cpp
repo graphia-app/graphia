@@ -228,14 +228,14 @@ struct Transform
 };
 
 template<typename Table>
-void appendOps(QStringList& list, const Table& table)
+static void appendOps(QStringList& list, const Table& table)
 {
     for(const auto& op : table)
         list.append(QString::fromUtf8(op.symbol));
 }
 
 template<typename Table, typename Op>
-QString opAsString(const Table& table, Op op)
+static QString opAsString(const Table& table, Op op)
 {
     for(const auto& entry : table)
     {
@@ -247,7 +247,7 @@ QString opAsString(const Table& table, Op op)
 }
 
 template<typename Table>
-const typename Table::mapped_type* findOp(const Table& table, const QString& s)
+static const typename Table::mapped_type* findOp(const Table& table, const QString& s)
 {
     const auto bytes = s.toUtf8();
     const auto input = lexy::string_input<lexy::default_encoding>(

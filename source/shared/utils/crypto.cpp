@@ -100,7 +100,7 @@ static QByteArray decodeFromPem(const QByteArray& source)
 }
 
 template<typename Key>
-Key loadKey(const std::string& fileName)
+static Key loadKey(const std::string& fileName)
 {
     QFile file(QString::fromStdString(fileName));
     if(!file.open(QIODevice::ReadOnly))

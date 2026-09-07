@@ -268,7 +268,7 @@ QVector<double> CorrelationPlot::meanAverageData(double& min, double& max, const
 }
 
 template<typename Fn>
-void addPlotPerAttributeValue(const CorrelationPluginInstance* pluginInstance,
+static void addPlotPerAttributeValue(const CorrelationPluginInstance* pluginInstance,
     const QString& nameTemplate, const QString& attributeName,
     const QVector<int>& selectedRows, const Fn& addPlotFn)
 {

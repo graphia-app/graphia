@@ -79,7 +79,7 @@ NodeIdSet SelectionManager::unselectedNodes() const
 }
 
 //FIXME http://en.cppreference.com/w/cpp/container/unordered_set/merge will be useful here
-template<typename C> bool _selectNodes(const GraphModel& graphModel, NodeIdSet& selectedNodeIds,
+template<typename C> static bool _selectNodes(const GraphModel& graphModel, NodeIdSet& selectedNodeIds,
     NodeIdSet& mask, const C& nodeIds, bool selectMergedNodes = true)
 {
     NodeIdSet newSelectedNodeIds;
@@ -139,7 +139,7 @@ bool SelectionManager::selectNode(NodeId nodeId)
 }
 
 
-template<typename C> bool _deselectNodes(const GraphModel& graphModel, NodeIdSet& selectedNodeIds,
+template<typename C> static bool _deselectNodes(const GraphModel& graphModel, NodeIdSet& selectedNodeIds,
     const C& nodeIds, bool deselectMergedNodes = true)
 {
     bool selectionWillChange = false;
@@ -190,7 +190,7 @@ bool SelectionManager::deselectNodes(const std::vector<NodeId>& nodeIds)
     });
 }
 
-template<typename C> void _toggleNodes(NodeIdSet& selectedNodeIds, NodeIdSet& mask, const C& nodeIds)
+template<typename C> static void _toggleNodes(NodeIdSet& selectedNodeIds, NodeIdSet& mask, const C& nodeIds)
 {
     NodeIdSet difference;
     for(auto nodeId : nodeIds)

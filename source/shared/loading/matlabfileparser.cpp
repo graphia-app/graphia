@@ -33,7 +33,7 @@ struct MatLabMatrix
     }
 };
 
-MatLabMatrix findBiggestMatrix(matvar_t* v, MatLabMatrix& m)
+static MatLabMatrix findBiggestMatrix(matvar_t* v, MatLabMatrix& m)
 {
     switch(v->class_type)
     {
@@ -83,7 +83,7 @@ MatLabMatrix findBiggestMatrix(matvar_t* v, MatLabMatrix& m)
     return m;
 }
 
-MatLabMatrix findBiggestMatrix(matvar_t* v)
+static MatLabMatrix findBiggestMatrix(matvar_t* v)
 {
     MatLabMatrix m;
     return findBiggestMatrix(v, m);

@@ -57,8 +57,8 @@ void GraphConsistencyChecker::disable()
     }
 }
 
-template<typename G, typename C> bool check(const G& graph, const C& component,
-                                            ComponentId thisComponentId = ComponentId());
+template<typename G, typename C> static bool check(const G& graph, const C& component,
+    ComponentId thisComponentId = ComponentId());
 
 static bool checkComponents(const Graph& graph)
 {
@@ -75,8 +75,8 @@ static bool checkComponents(const Graph& graph)
 
 static bool checkComponents(const IGraphComponent&) { return true; }
 
-template<typename G, typename C> bool check(const G& graph, const C& component,
-                                            ComponentId thisComponentId)
+template<typename G, typename C> static bool check(const G& graph, const C& component,
+    ComponentId thisComponentId)
 {
     bool consistent = true;
 
