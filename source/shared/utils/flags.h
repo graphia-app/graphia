@@ -20,19 +20,29 @@
 #ifndef FLAGS_H
 #define FLAGS_H
 
+#include <type_traits>
 #include <utility>
 
 template<typename Enum>
 class Flags
 {
 private:
-    Enum _value = static_cast<Enum>(0);
+    // The value is stored using the underlying type so that bitwise
+    // combinations never result in an out of range enumerator value
+    using Underlying = std::underlying_type_t<Enum>;
+
+    Underlying _value = {};
+
+    static constexpr Underlying underlyingValueOf(Enum value)
+    {
+        return static_cast<Underlying>(value);
+    }
 
 public:
     Flags() = default;
     // cppcheck-suppress noExplicitConstructor
     Flags(Enum value) : // NOLINT google-explicit-constructor
-        _value(value)
+        _value(underlyingValueOf(value))
     {}
 
     template<typename... Tail>
@@ -44,7 +54,7 @@ public:
 
     void set(Enum value)
     {
-        _value = static_cast<Enum>(static_cast<int>(_value) | static_cast<int>(value));
+        _value = static_cast<Underlying>(_value | underlyingValueOf(value));
     }
 
     template<typename... Tail>
@@ -56,7 +66,7 @@ public:
 
     void reset(Enum value)
     {
-        _value = static_cast<Enum>(static_cast<int>(_value) & ~static_cast<int>(value));
+        _value = static_cast<Underlying>(_value & ~underlyingValueOf(value));
     }
 
     template<typename... Tail>
@@ -76,7 +86,7 @@ public:
 
     bool test(Enum value) const
     {
-        return (static_cast<int>(_value) & static_cast<int>(value)) != 0;
+        return (_value & underlyingValueOf(value)) != 0;
     }
 
     bool operator!=(const Flags& other) const
@@ -98,7 +108,8 @@ public:
         return allOf(value) && allOf(values...);
     }
 
-    Enum operator*() const { return _value; }
+    // NOLINTNEXTLINE clang-analyzer-optin.core.EnumCastOutOfRange
+    Enum operator*() const { return static_cast<Enum>(_value); }
 
     //FIXME: Should be able to replace this with a C++17 template deduction constructor
     template<typename... Args>
