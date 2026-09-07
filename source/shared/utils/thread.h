@@ -81,7 +81,7 @@ QString u::parentProcessName()
 
 void u::setCurrentThreadName(const QString& name)
 {
-    prctl(PR_SET_NAME, static_cast<const char*>(name.toUtf8().constData()));
+    prctl(PR_SET_NAME, name.toUtf8().constData());
 }
 
 QString u::currentThreadName()

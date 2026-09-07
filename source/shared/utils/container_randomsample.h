@@ -43,8 +43,7 @@ C<T, Args...> randomSample(const C<T, Args...>& container, size_t numSamples)
     {
         const int high = static_cast<int>(sample.size() - i) - 1;
         std::uniform_int_distribution uid(0, high);
-        std::swap(sample[static_cast<size_type>(i)],
-            sample[static_cast<size_type>(i) + static_cast<size_type>(uid(dre))]);
+        std::swap(sample[i], sample[i + static_cast<size_type>(uid(dre))]);
     }
 
     sample.resize(static_cast<size_type>(numSamples));

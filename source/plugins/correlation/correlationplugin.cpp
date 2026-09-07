@@ -831,7 +831,7 @@ QString CorrelationPluginInstance::rowName(size_t row) const
 
 QString CorrelationPluginInstance::columnName(size_t column) const
 {
-    return _dataColumnNames.at(static_cast<size_t>(column));
+    return _dataColumnNames.at(column);
 }
 
 QColor CorrelationPluginInstance::nodeColorForRow(size_t row) const

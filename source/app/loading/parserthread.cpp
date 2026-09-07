@@ -88,7 +88,7 @@ void ParserThread::run()
 
     _graphModel->mutableGraph().performTransaction([this, &result](IMutableGraph& graph)
     {
-        _parser->setProgressFn([this, percentage = int(-1)](int newPercentage) mutable
+        _parser->setProgressFn([this, percentage = -1](int newPercentage) mutable
         {
 #ifdef _DEBUG
             if(newPercentage < -1 || newPercentage > 100)
