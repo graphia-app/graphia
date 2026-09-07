@@ -184,7 +184,7 @@ QStringList Application::resourceDirectories()
     {
         Application::_appDir,
         QStandardPaths::writableLocation(
-            QStandardPaths::StandardLocation::AppDataLocation) + "/resources"
+            QStandardPaths::StandardLocation::AppDataLocation) + u"/resources"_s
     };
 
 #ifdef APP_SOURCE_DIR
@@ -208,7 +208,7 @@ QStringList Application::resourceDirectories()
     QDir usrDir(Application::_appDir);
     usrDir.cdUp();
 
-    resourceDirs.append(usrDir.absolutePath() + "/share/" + name());
+    resourceDirs.append(usrDir.absolutePath() + u"/share/"_s + name());
 #endif
 
     return resourceDirs;
@@ -723,9 +723,9 @@ void Application::loadPlugins()
 {
     std::vector<QString> pluginsDirs =
     {
-        Application::_appDir + "/plugins",
+        Application::_appDir + u"/plugins"_s,
         QStandardPaths::writableLocation(
-            QStandardPaths::StandardLocation::AppDataLocation) + "/plugins"
+            QStandardPaths::StandardLocation::AppDataLocation) + u"/plugins"_s
     };
 
 #if defined(Q_OS_MACOS)
@@ -744,7 +744,7 @@ void Application::loadPlugins()
     QDir usrDir(Application::_appDir);
     usrDir.cdUp();
 
-    pluginsDirs.emplace_back(usrDir.absolutePath() + "/lib/" + name() + "/plugins");
+    pluginsDirs.emplace_back(usrDir.absolutePath() + u"/lib/"_s + name() + u"/plugins"_s);
 #endif
 
     for(const auto& pluginsDir : pluginsDirs)
@@ -881,7 +881,7 @@ void Application::updateLoadingCapabilities()
             else
                 second = true;
 
-            description += "*." + extension;
+            description += u"*."_s + extension;
         }
     }
 
@@ -892,7 +892,7 @@ void Application::updateLoadingCapabilities()
 
     for(const auto& fileType : fileTypes)
     {
-        description = fileType._collectiveDescription + " (";
+        description = fileType._collectiveDescription + u" ("_s;
         second = false;
 
         for(const auto& extension : fileType._extensions)
@@ -902,7 +902,7 @@ void Application::updateLoadingCapabilities()
             else
                 second = true;
 
-            description += "*." + extension;
+            description += u"*."_s + extension;
         }
 
         description += u")"_s;

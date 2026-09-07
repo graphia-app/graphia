@@ -34,6 +34,8 @@
 // Grammar common to the transform and visualisation configuration languages
 namespace LexyConfigGrammar
 {
+using namespace Qt::Literals::StringLiterals;
+
 namespace dsl = lexy::dsl;
 
 constexpr auto idPattern =
@@ -55,7 +57,7 @@ struct AttributeParameter
 {
     static constexpr auto rule = dsl::lit_c<'.'> >> dsl::p<Name>;
     static constexpr auto value = lexy::callback<QString>(
-        [](const QString& name) { return "." + name; });
+        [](const QString& name) { return u"."_s + name; });
 };
 
 struct AttributeParameters

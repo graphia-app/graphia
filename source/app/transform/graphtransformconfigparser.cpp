@@ -38,6 +38,8 @@
 
 namespace LexyGraphTransformParser
 {
+using namespace Qt::Literals::StringLiterals;
+
 namespace dsl = lexy::dsl;
 
 using lexyutils::QuotedString;
@@ -94,7 +96,7 @@ struct AttributeName : lexy::token_production
     static constexpr auto rule = dsl::p<AttributeNameNoDollar>;
 
     static constexpr auto value = lexy::callback<QString>(
-        [](const QString& name) { return "$" + name; });
+        [](const QString& name) { return u"$"_s + name; });
 };
 
 struct Number

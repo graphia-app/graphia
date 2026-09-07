@@ -204,7 +204,7 @@ void CommandManager::undoReal(NamedBool<"rollback"> rollback)
     {
         const std::unique_lock<std::recursive_mutex> lock(_mutex);
 
-        u::setCurrentThreadName("(u) " + command->description());
+        u::setCurrentThreadName(u"(u) "_s + command->description());
         auto description = QObject::tr("Undo %1").arg(command->description());
 
         command->undo();
@@ -239,7 +239,7 @@ void CommandManager::redoReal()
     {
         const std::unique_lock<std::recursive_mutex> lock(_mutex);
 
-        u::setCurrentThreadName("(r) " + command->description());
+        u::setCurrentThreadName(u"(r) "_s + command->description());
         auto description = QObject::tr("Redo %1").arg(command->description());
 
         command->execute();

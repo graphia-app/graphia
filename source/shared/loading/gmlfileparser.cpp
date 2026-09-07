@@ -157,7 +157,7 @@ AttributeVector processAttribute(const KeyValue& attribute)
 
                 for(const auto& childAttribute : childAttributes)
                 {
-                    const QString subName = _name + "." + childAttribute._name;
+                    const QString subName = _name + u"."_s + childAttribute._name;
                     result.emplace_back(subName, childAttribute._value);
                 }
             }
