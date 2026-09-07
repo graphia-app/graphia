@@ -47,14 +47,17 @@ function createTransformParameter(document, parent, parameterData, onParameterCh
     return object;
 }
 
-function addLabelTo(text, parent)
+function addLabelTo(text, parent, transformItem)
 {
     text = text.trim();
-    Qt.createQmlObject("import QtQuick\n" +
+
+    let label = Qt.createQmlObject("import QtQuick\n" +
         "import QtQuick.Controls\n" +
         "Label { text: \"" +
         GraphiaUtils.Utils.normaliseWhitespace(text) +
-        "\"; color: root.textColor }", parent);
+        "\" }", parent);
+
+    label.color = Qt.binding(function() { return transformItem.textColor; });
 }
 
 function sanitiseOp(text)
@@ -85,9 +88,10 @@ function sanitiseOp(text)
     return text;
 }
 
-function Create(transformIndex, transform)
+function Create(transformIndex, document, transformString)
 {
     let parameterIndex = 1;
+    let transform = document.parseGraphTransform(transformString);
 
     this.action = transform.action;
     this.flags = transform.flags;
@@ -216,13 +220,13 @@ function Create(transformIndex, transform)
     }
 
     this.toComponents =
-    function(document, parent, locked, onParameterChanged)
+    function(document, parent, transformItem, locked, onParameterChanged)
     {
         let labelText = "";
 
         function addLabel()
         {
-            addLabelTo(labelText, parent);
+            addLabelTo(labelText, parent, transformItem);
             labelText = "";
         }
 

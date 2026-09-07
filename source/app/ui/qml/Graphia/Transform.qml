@@ -298,11 +298,12 @@ Item
                     setAlertIcon(transformInfo);
                 }
 
-                let transformConfig = new TransformConfig.Create(index, document.parseGraphTransform(value));
+                let transformConfig = new TransformConfig.Create(index, document, value);
                 flags = transformConfig.flags;
                 template = transformConfig.template;
 
-                transformConfig.toComponents(document, expression, isFlagSet("locked"), updateExpression);
+                transformConfig.toComponents(document, expression, root,
+                    isFlagSet("locked"), updateExpression);
                 _parameterComponents = transformConfig.parameters;
             }
             else
@@ -324,7 +325,7 @@ Item
 
                 TransformConfig.addLabelTo(
                     (detail.length > 0 ? detail + ": " : "Invalid Expression: ") +
-                    Utils.addSlashes(value), expression);
+                    Utils.addSlashes(value), expression, root);
             }
 
             enabledMenuItem.checked = !isFlagSet("disabled");
