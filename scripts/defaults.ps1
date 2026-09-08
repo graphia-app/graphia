@@ -16,6 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
 
-if (-not $PRODUCT_NAME)     { $RODUCT_NAME = "Graphia" }
+if (-not $PRODUCT_NAME)     { $PRODUCT_NAME = "Graphia" }
 if (-not $Env:BUILD_TYPE)   { $Env:BUILD_TYPE = "Release" }
 if (-not $Env:UNITY_BUILD)  { $Env:UNITY_BUILD = "ON" }
