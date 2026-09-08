@@ -38,7 +38,7 @@ bool u::isNumeric(const std::string& string)
     std::stringstream ss;
     ss << string;
 
-    long double value = 0.0;
+    long double value = 0.0L;
     ss >> value;
 
     return ss.eof();
