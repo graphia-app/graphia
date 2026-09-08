@@ -156,6 +156,7 @@ public slots:
     void onScreenshotRequested(int width, int height, const QString& path, int dpi, bool fillSize);
     void onCommandsStarted();
     void onCommandsFinished();
+    void onLayoutFirstIterDone();
     void onLayoutChanged();
     void onPreferenceChanged(const QString& key, const QVariant& value);
     void onComponentAlphaChanged(ComponentId componentId);
@@ -239,6 +240,7 @@ private:
     int _sceneUpdateDisabled = 1;
     mutable std::recursive_mutex _sceneUpdateMutex;
 
+    std::atomic_bool _layoutFirstIterDone = false;
     std::atomic_bool _layoutChanged;
     bool _synchronousLayoutChanged = false;
 

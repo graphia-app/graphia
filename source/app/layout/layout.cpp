@@ -254,6 +254,12 @@ void LayoutThread::run()
 
         _performanceCounter.tick();
 
+        if(!_firstIterDone)
+        {
+            _firstIterDone = true;
+            emit firstIterDone();
+        }
+
         std::unique_lock<std::mutex> lock(_mutex);
 
         _layoutPotentiallyRequired = false;

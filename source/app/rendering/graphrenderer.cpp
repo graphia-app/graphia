@@ -155,6 +155,11 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel, CommandManager* commandMana
 
         updateText();
 
+        // Wait for the layout to have iterated at least once, so that what is
+        // first displayed is a (partially) laid out graph, rather than every node
+        // drawn on top of itself
+        _layoutFirstIterDone.wait(false);
+
     }).then([this]
     {
         emit initialised();
@@ -902,6 +907,12 @@ void GraphRenderer::onCommandsFinished()
 {
     enableSceneUpdate();
     update();
+}
+
+void GraphRenderer::onLayoutFirstIterDone()
+{
+    _layoutFirstIterDone = true;
+    _layoutFirstIterDone.notify_one();
 }
 
 void GraphRenderer::onLayoutChanged()

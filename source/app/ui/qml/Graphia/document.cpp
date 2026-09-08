@@ -916,6 +916,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
     connect(_layoutThread.get(), &LayoutThread::settingChanged, [this] { _layoutRequired = true; });
     connect(_layoutThread.get(), &LayoutThread::settingChanged, this, &Document::updateLayoutState);
     connect(_layoutThread.get(), &LayoutThread::settingChanged, this, &Document::layoutSettingChanged);
+    connect(_layoutThread.get(), &LayoutThread::firstIterDone, _graphDisplay, &GraphDisplay::onLayoutFirstIterDone);
     _layoutThread->addAllComponents();
     initialiseLayoutSettingsModel();
     _layoutThread->start();

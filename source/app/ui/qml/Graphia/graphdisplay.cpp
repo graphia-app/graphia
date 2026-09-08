@@ -49,6 +49,8 @@ void GraphDisplay::initialise(GraphModel* graphModel, CommandManager* commandMan
 
     setFlag(Flag::ItemHasContents, true);
 
+    connect(this, &GraphDisplay::rendererCreated, this, &GraphDisplay::onRendererCreated);
+
     connect(&_graphModel->graph(), &Graph::graphChanged, this, &GraphDisplay::graphChanged);
     connect(&_graphModel->graph(), &Graph::graphChanged, [this] { updateVisibleComponentIndex(); });
 
@@ -262,6 +264,7 @@ QQuickFramebufferObject::Renderer* GraphDisplay::createRenderer() const
     connect(this, &GraphDisplay::commandsStarted, graphRenderer, &GraphRenderer::onCommandsStarted, Qt::DirectConnection);
     connect(this, &GraphDisplay::commandsFinished, graphRenderer, &GraphRenderer::onCommandsFinished, Qt::DirectConnection);
     connect(this, &GraphDisplay::commandsFinished, this, &GraphDisplay::updateRenderer, Qt::DirectConnection);
+    connect(this, &GraphDisplay::layoutFirstIterDone, graphRenderer, &GraphRenderer::onLayoutFirstIterDone, Qt::DirectConnection);
     connect(this, &GraphDisplay::layoutChanged, graphRenderer, &GraphRenderer::onLayoutChanged, Qt::DirectConnection);
     connect(this, &GraphDisplay::screenshotRequested, graphRenderer, &GraphRenderer::onScreenshotRequested);
     connect(this, &GraphDisplay::previewRequested, graphRenderer, &GraphRenderer::onPreviewRequested);
@@ -282,6 +285,7 @@ QQuickFramebufferObject::Renderer* GraphDisplay::createRenderer() const
 
     connect(graphRenderer, &GraphRenderer::fpsChanged, this, &GraphDisplay::onFPSChanged);
 
+    emit rendererCreated();
     return graphRenderer;
 }
 
@@ -294,6 +298,14 @@ bool GraphDisplay::event(QEvent* e)
     }
 
     return QQuickItem::event(e);
+}
+
+void GraphDisplay::onLayoutFirstIterDone()
+{
+    if(_rendererCreated)
+        emit layoutFirstIterDone();
+
+    _layoutFirstIterDone = true;
 }
 
 void GraphDisplay::onLayoutChanged()
@@ -362,6 +374,14 @@ void GraphDisplay::onScreenshotComplete(const QImage& screenshot, const QString&
         QDesktopServices::openUrl(QUrl(path).toLocalFile());
 #endif
     }, {tr("Save Screenshot"), tr("Saving Screenshot"), tr("Screenshot Saved")});
+}
+
+void GraphDisplay::onRendererCreated()
+{
+    if(_layoutFirstIterDone)
+        emit layoutFirstIterDone();
+
+    _rendererCreated = true;
 }
 
 void GraphDisplay::mousePressEvent(QMouseEvent* e)

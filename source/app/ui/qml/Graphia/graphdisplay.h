@@ -154,6 +154,9 @@ private:
     int _visibleComponentIndex = -1;
     bool _updating = false;
 
+    bool _rendererCreated = false;
+    bool _layoutFirstIterDone = false;
+
     std::queue<std::unique_ptr<QEvent>> _eventQueue;
 
     mutable float _fps = 0.0f;
@@ -179,6 +182,7 @@ private:
 
 public slots:
     void updateRenderer();
+    void onLayoutFirstIterDone();
     void onLayoutChanged();
 
 private slots:
@@ -190,6 +194,7 @@ private slots:
     void onTransitionStarted() const;
     void onTransitionFinished();
     void onScreenshotComplete(const QImage& screenshot, const QString& path);
+    void onRendererCreated();
 
 signals:
     void initialisedChanged();
@@ -206,6 +211,7 @@ signals:
     void commandsStarted();
     void commandsFinished();
 
+    void layoutFirstIterDone();
     void layoutChanged();
 
     void screenshotRequested(int width, int height, QString path, int dpi, bool fillSize);
@@ -216,6 +222,8 @@ signals:
     void metricsChanged();
 
     void fpsChanged();
+
+    void rendererCreated() const;
 
     void clicked(int button, int modifiers, QmlNodeId nodeId);
 };
