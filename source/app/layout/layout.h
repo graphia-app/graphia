@@ -174,9 +174,8 @@ private:
     GraphModel* _graphModel = nullptr;
     mutable std::mutex _mutex;
     std::thread _thread;
-    bool _started = false;
     bool _pause = false;
-    bool _paused = true;
+    bool _paused = false;
     bool _stop = false;
     bool _repeating = false;
     std::condition_variable _waitForPause;
@@ -202,13 +201,7 @@ public:
                  std::unique_ptr<LayoutFactory>&& layoutFactory,
                  bool repeating = false);
 
-    ~LayoutThread() override
-    {
-        stop();
-
-        if(_thread.joinable())
-            _thread.join();
-    }
+    ~LayoutThread() override;
 
     void pause();
     void pauseAndWait();

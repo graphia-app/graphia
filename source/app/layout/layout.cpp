@@ -57,7 +57,7 @@ LayoutThread::LayoutThread(GraphModel& graphModel,
         if(_debug > 1)
         {
             auto activeLayouts = std::count_if(_layouts.begin(), _layouts.end(),
-                                               [](auto& layout) { return !layoutIsFinished(*layout.second); });
+                [](auto& layout) { return !layoutIsFinished(*layout.second); });
             qDebug() << activeLayouts << "layouts\t" << ticksPerSecond << "ips";
         }
     });
@@ -85,6 +85,14 @@ LayoutThread::LayoutThread(GraphModel& graphModel,
 
     connect(&_layoutFactory->settings(), &LayoutSettings::settingChanged,
         this, &LayoutThread::settingChanged);
+}
+
+LayoutThread::~LayoutThread()
+{
+    stop();
+
+    if(_thread.joinable())
+        _thread.join();
 }
 
 void LayoutThread::pause()
@@ -125,12 +133,6 @@ bool LayoutThread::paused() const
 
 void LayoutThread::resume()
 {
-    if(!_started)
-    {
-        start();
-        return;
-    }
-
     std::unique_lock<std::mutex> lock(_mutex);
     if(!_paused)
         return;
@@ -150,9 +152,6 @@ void LayoutThread::resume()
 
 void LayoutThread::start()
 {
-    _started = true;
-    _paused = false;
-
     if(_thread.joinable())
         _thread.join();
 
@@ -242,11 +241,9 @@ void LayoutThread::run()
             _graphModel->nodePositions().update(_nodeLayoutPositions);
 
             const bool requiresFlattening = _dimensionalityMode == Layout::Dimensionality::TwoDee &&
-                std::any_of(_layouts.begin(), _layouts.end(),
-                [](const auto& layout)
+                std::any_of(_layouts.begin(), _layouts.end(), [](const auto& layout)
                 {
-                    return layout.second->dimensionality() ==
-                        Layout::Dimensionality::ThreeDee;
+                    return layout.second->dimensionality() == Layout::Dimensionality::ThreeDee;
                 });
 
             if(requiresFlattening)
@@ -294,7 +291,6 @@ void LayoutThread::run()
 
     const std::unique_lock<std::mutex> lock(_mutex);
     _layouts.clear();
-    _started = false;
     _paused = true;
     _waitForPause.notify_all();
 

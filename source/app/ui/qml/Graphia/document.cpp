@@ -918,10 +918,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
     connect(_layoutThread.get(), &LayoutThread::settingChanged, this, &Document::layoutSettingChanged);
     _layoutThread->addAllComponents();
     initialiseLayoutSettingsModel();
-
-    // Force a layout in the unlikely event that nothing else does
-    _layoutRequired = true;
-    updateLayoutState();
+    _layoutThread->start();
 
     emit layoutNameChanged();
     emit layoutDisplayNameChanged();
