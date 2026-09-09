@@ -267,6 +267,7 @@ bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphModel,
     for(const auto& keyValue : gml)
     {
         const auto& key = keyValue.get()._key;
+        uint64_t i = 0;
 
         if(key == u"graph"_s)
         {
@@ -275,7 +276,6 @@ bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphModel,
             if(graph == nullptr)
                 return false;
 
-            uint64_t i = 0;
             for(const auto& element : *graph)
             {
                 parser.setProgress(static_cast<int>((i++ * 100) / graph->size()));
@@ -298,10 +298,16 @@ bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphModel,
             }
         }
 
+        parser.setProgress(-1);
+        i = 0;
+        parser.setPhase(QObject::tr("Edges"));
+
         // It's possible to define edges before nodes, so we save
         // processing edges until all the nodes have been visited
         for(const auto* edge : edges)
         {
+            parser.setProgress(static_cast<int>((i++ * 100) / edges.size()));
+
             if(!processEdge(*edge) || parser.cancelled())
                 return false;
         }
