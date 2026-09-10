@@ -245,16 +245,21 @@ void GraphRenderer::updateGPUDataIfRequired()
 
     _gpuDataRequiresUpdate = false;
 
-    const std::unique_lock<NodePositions> nodePositionsLock(_graphModel->nodePositions());
     const std::unique_lock<std::recursive_mutex> glyphMapLock(_glyphMap->mutex());
 
     int componentIndex = 0;
 
-    auto& nodePositions = _graphModel->nodePositions();
-
     resetGPUGraphData();
 
+    // Lock the positions for as short a time as possible
     NodeArray<QVector3D> scaledAndSmoothedNodePositions(_graphModel->graph());
+    {
+        auto& nodePositions = _graphModel->nodePositions();
+        const std::unique_lock<NodePositions> nodePositionsLock(nodePositions);
+
+        for(auto nodeId : _graphModel->graph().nodeIds())
+            scaledAndSmoothedNodePositions[nodeId] = nodePositions.get(nodeId);
+    }
 
     const float textScale = u::pref(u"visuals/textSize"_s).toFloat();
     auto textAlignment = normaliseQmlEnum<TextAlignment>(u::pref(u"visuals/textAlignment"_s).toInt());
@@ -279,8 +284,7 @@ void GraphRenderer::updateGPUDataIfRequired()
             if(_hiddenNodes.get(nodeId))
                 continue;
 
-            const QVector3D nodePosition = nodePositions.get(nodeId);
-            scaledAndSmoothedNodePositions[nodeId] = nodePosition;
+            const QVector3D nodePosition = scaledAndSmoothedNodePositions[nodeId];
 
             const auto& nodeVisual = _graphModel->nodeVisual(nodeId);
 
