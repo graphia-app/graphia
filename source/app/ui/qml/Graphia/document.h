@@ -27,7 +27,7 @@
 #include "app/attributes/attributeedits.h"
 #include "app/commands/commandmanager.h"
 #include "app/graph/qmlelementid.h"
-#include "app/layout/layout.h"
+#include "app/layout/layoutthread.h"
 #include "app/loading/parserthread.h"
 #include "app/rendering/graphrenderertypes.h"
 #include "app/preferences.h"

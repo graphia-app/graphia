@@ -25,14 +25,20 @@
 
 #include <vector>
 
+struct LayoutSettingKeyValue
+{
+    QString _name;
+    float _value;
+};
+
 enum class LayoutSettingScaleType { Linear, Log };
 
 class LayoutSetting
 {
 public:
     LayoutSetting(const QString& name, const QString& displayName, const QString& description,
-                  float minimumValue, float maximumValue, float defaultValue,
-                  LayoutSettingScaleType scaleType = LayoutSettingScaleType::Linear) :
+        float minimumValue, float maximumValue, float defaultValue,
+        LayoutSettingScaleType scaleType = LayoutSettingScaleType::Linear) :
         _name(name),
         _displayName(displayName),
         _description(description),

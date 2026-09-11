@@ -23,30 +23,16 @@
 #include "shared/graph/igraphcomponent.h"
 #include "shared/graph/elementid.h"
 #include "shared/graph/elementid_containers.h"
-#include "app/graph/componentmanager.h"
-#include "nodepositions.h"
 
-#include "shared/utils/performancecounter.h"
 #include "shared/utils/cancellable.h"
 
+#include "nodepositions.h"
 #include "layoutsettings.h"
 
 #include <QObject>
-#include <QString>
-#include <QtGlobal>
 
 #include <cstddef>
-#include <memory>
-#include <thread>
-#include <mutex>
-#include <condition_variable>
 #include <vector>
-
-struct LayoutSettingKeyValue
-{
-    QString _name;
-    float _value;
-};
 
 class Layout : public QObject, public Cancellable
 {
@@ -81,12 +67,12 @@ protected:
 
 public:
     Layout(const IGraphComponent& graphComponent,
-           NodeLayoutPositions& positions,
-           const LayoutSettings* settings = nullptr,
-           Iterative iterative = Iterative::No,
-           Dimensionality dimensionality = Dimensionality::TwoOrThreeDee,
-           float scaling = 1.0f,
-           size_t smoothing = 1) :
+        NodeLayoutPositions& positions,
+        const LayoutSettings* settings = nullptr,
+        Iterative iterative = Iterative::No,
+        Dimensionality dimensionality = Dimensionality::TwoOrThreeDee,
+        float scaling = 1.0f,
+        size_t smoothing = 1) :
         _iterative(iterative),
         _dimensionality(dimensionality),
         _scaling(scaling),
@@ -116,143 +102,6 @@ public:
 
 signals:
     void progress(int percentage);
-};
-
-class GraphModel;
-
-class LayoutFactory
-{
-protected:
-    GraphModel* _graphModel = nullptr;
-    LayoutSettings _layoutSettings;
-
-public:
-    explicit LayoutFactory(GraphModel* graphModel) :
-        _graphModel(graphModel)
-    {}
-
-    virtual ~LayoutFactory() = default;
-
-    LayoutSettings& settings()
-    {
-        return _layoutSettings;
-    }
-
-    const LayoutSetting* setting(const QString& name) const
-    {
-        return _layoutSettings.setting(name);
-    }
-
-    void setSettingValue(const QString& name, float value)
-    {
-        _layoutSettings.setValue(name, value);
-    }
-
-    void setSettingNormalisedValue(const QString& name, float normalisedValue)
-    {
-        _layoutSettings.setNormalisedValue(name, normalisedValue);
-    }
-
-    void resetSettingValue(const QString& name)
-    {
-        _layoutSettings.resetValue(name);
-    }
-
-    virtual QString name() const = 0;
-    virtual QString displayName() const = 0;
-    virtual std::unique_ptr<Layout> create(ComponentId componentId,
-        NodeLayoutPositions& results, Layout::Dimensionality dimensionalityMode) = 0;
-};
-
-class LayoutThread : public QObject
-{
-    Q_OBJECT
-
-    Q_PROPERTY(bool firstIterDone MEMBER _firstIterDone NOTIFY firstIterDone)
-    Q_PROPERTY(bool paused READ paused NOTIFY pausedChanged)
-
-private:
-    GraphModel* _graphModel = nullptr;
-    mutable std::mutex _mutex;
-    std::thread _thread;
-    bool _pause = false;
-    bool _paused = false;
-    bool _stop = false;
-    bool _repeating = false;
-    std::condition_variable _waitForPause;
-    std::condition_variable _waitForResume;
-
-    std::unique_ptr<LayoutFactory> _layoutFactory;
-    ComponentIdMap<std::unique_ptr<Layout>> _layouts;
-    ComponentArray<bool> _executedAtLeastOnce;
-    std::atomic_bool _firstIterDone = false;
-
-    Layout::Dimensionality _dimensionalityMode =
-        Layout::Dimensionality::ThreeDee;
-
-    NodeLayoutPositions _nodeLayoutPositions;
-
-    PerformanceCounter _performanceCounter;
-
-    bool _layoutPotentiallyRequired = false;
-
-    int _debug = 0;
-
-public:
-    LayoutThread(GraphModel& graphModel,
-                 std::unique_ptr<LayoutFactory>&& layoutFactory,
-                 bool repeating = false);
-
-    ~LayoutThread() override;
-
-    void pause();
-    void pauseAndWait();
-    bool paused() const;
-    void resume();
-
-    void start();
-    void stop();
-
-    bool finished() const;
-
-    void addAllComponents();
-
-    void setNodePositions(const ExactNodePositions& nodePositions);
-
-    Layout::Dimensionality dimensionalityMode();
-    void setDimensionalityMode(Layout::Dimensionality dimensionalityMode);
-
-    QString layoutName() const;
-    QString layoutDisplayName() const;
-
-    std::vector<LayoutSetting>& settings();
-    const LayoutSetting* setting(const QString& name) const;
-
-    void setSettingValue(const QString& name, float value);
-    void setSettingNormalisedValue(const QString& name, float normalisedValue);
-    void resetSettingValue(const QString& name);
-
-private:
-    bool iterative() const;
-    bool allLayoutsFinished() const;
-    bool workToDo() const;
-    void uncancel();
-    void unfinish();
-    void run();
-
-    void addComponent(ComponentId componentId);
-    void removeComponent(ComponentId componentId);
-
-private slots:
-    void onComponentSplit(const Graph*, const ComponentSplitSet& componentSplitSet);
-    void onComponentAdded(const Graph*, ComponentId componentId, bool);
-    void onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool);
-
-signals:
-    void firstIterDone();
-    void executed();
-    void pausedChanged();
-    void settingChanged(const QString& name, float value);
 };
 
 #endif // LAYOUT_H

@@ -17,7 +17,7 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "layout.h"
+#include "layoutthread.h"
 
 #include "shared/utils/thread.h"
 #include "shared/utils/container.h"
@@ -25,6 +25,7 @@
 
 #include "app/graph/graph.h"
 #include "app/graph/graphmodel.h"
+#include "app/graph/componentmanager.h"
 
 #include <QDebug>
 
@@ -42,8 +43,8 @@ static bool layoutIsFinished(const Layout& layout)
 }
 
 LayoutThread::LayoutThread(GraphModel& graphModel,
-                           std::unique_ptr<LayoutFactory>&& layoutFactory,
-                           bool repeating) :
+    std::unique_ptr<LayoutFactory>&& layoutFactory,
+    bool repeating) :
     _graphModel(&graphModel),
     _repeating(repeating),
     _layoutFactory(std::move(layoutFactory)),
@@ -57,13 +58,12 @@ LayoutThread::LayoutThread(GraphModel& graphModel,
         if(_debug > 1)
         {
             auto activeLayouts = std::count_if(_layouts.begin(), _layouts.end(),
-                [](auto& layout) { return !layoutIsFinished(*layout.second); });
+                                               [](auto& layout) { return !layoutIsFinished(*layout.second); });
             qDebug() << activeLayouts << "layouts\t" << ticksPerSecond << "ips";
         }
     });
 
-    connect(&graphModel.graph(), &Graph::graphChanged,
-    [this]
+    connect(&graphModel.graph(), &Graph::graphChanged, [this]
     {
         const std::unique_lock<std::mutex> lock(_mutex);
         _layoutPotentiallyRequired = true;
@@ -74,8 +74,7 @@ LayoutThread::LayoutThread(GraphModel& graphModel,
     connect(&graphModel.graph(), &Graph::componentWillBeRemoved, this, &LayoutThread::onComponentWillBeRemoved, Qt::DirectConnection);
     connect(this, &LayoutThread::executed, &graphModel, &GraphModel::onLayoutChanged, Qt::DirectConnection);
 
-    connect(&_layoutFactory->settings(), &LayoutSettings::settingChanged,
-    [this]
+    connect(&_layoutFactory->settings(), &LayoutSettings::settingChanged, [this]
     {
         const std::unique_lock<std::mutex> lock(_mutex);
 
@@ -182,7 +181,7 @@ bool LayoutThread::iterative() const
     return std::any_of(_layouts.begin(), _layouts.end(),
     [](const auto& layout)
     {
-       return layout.second->iterative();
+        return layout.second->iterative();
     });
 }
 
@@ -203,7 +202,7 @@ bool LayoutThread::allLayoutsFinished() const
     return std::all_of(_layouts.begin(), _layouts.end(),
     [](const auto& layout)
     {
-       return layoutIsFinished(*layout.second);
+        return layoutIsFinished(*layout.second);
     });
 }
 
@@ -275,8 +274,8 @@ void LayoutThread::run()
             if(_debug != 0)
             {
                 const auto* reason = _pause ? "manually" :
-                    allLayoutsFinished() ? "because all layouts finished" :
-                    "";
+                                         allLayoutsFinished() ? "because all layouts finished" :
+                                         "";
                 qDebug() << "Layout paused" << reason;
             }
 

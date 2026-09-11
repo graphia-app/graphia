@@ -21,6 +21,7 @@
 #define FORCEDIRECTEDLAYOUT_H
 
 #include "layout.h"
+#include "layoutfactory.h"
 
 #include "shared/graph/elementid.h"
 #include "shared/graph/grapharray.h"

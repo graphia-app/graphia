@@ -24,7 +24,7 @@
 
 #include "shared/graph/elementid_containers.h"
 
-#include "app/layout/layout.h"
+#include "app/layout/layoutsettings.h"
 #include "app/layout/nodepositions.h"
 #include "app/rendering/graphrenderertypes.h"
 #include "app/attributes/enrichmenttablemodel.h"

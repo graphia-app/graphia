@@ -51,6 +51,8 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/layout/fastinitiallayout.h
     ${CMAKE_CURRENT_LIST_DIR}/layout/forcedirectedlayout.h
     ${CMAKE_CURRENT_LIST_DIR}/layout/layout.h
+    ${CMAKE_CURRENT_LIST_DIR}/layout/layoutfactory.h
+    ${CMAKE_CURRENT_LIST_DIR}/layout/layoutthread.h
     ${CMAKE_CURRENT_LIST_DIR}/layout/layoutsettings.h
     ${CMAKE_CURRENT_LIST_DIR}/layout/nodepositions.h
     ${CMAKE_CURRENT_LIST_DIR}/layout/powerof2gridcomponentlayout.h
@@ -176,7 +178,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/layout/componentlayout.cpp
     ${CMAKE_CURRENT_LIST_DIR}/layout/fastinitiallayout.cpp
     ${CMAKE_CURRENT_LIST_DIR}/layout/forcedirectedlayout.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/layout/layout.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/layout/layoutthread.cpp
     ${CMAKE_CURRENT_LIST_DIR}/layout/layoutsettings.cpp
     ${CMAKE_CURRENT_LIST_DIR}/layout/nodepositions.cpp
     ${CMAKE_CURRENT_LIST_DIR}/layout/powerof2gridcomponentlayout.cpp
