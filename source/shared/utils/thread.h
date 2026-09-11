@@ -195,9 +195,6 @@ QString u::parentProcessName()
     return {};
 }
 
-// Sigh... windows.h
-#undef min
-#undef max
 #elif defined(EMSCRIPTEN)
 #include <pthread.h>
 #include <emscripten/threading.h>
