@@ -37,7 +37,7 @@ namespace Test
     template<typename T, typename Arg = T>
     struct MultiplyExists
     {
-        enum { value = !std::is_same_v<decltype(std::declval<T>() * std::declval<Arg>()), NotFound> };
+        enum : unsigned char { value = !std::is_same_v<decltype(std::declval<T>() * std::declval<Arg>()), NotFound> };
     };
 } // namespace Test
 

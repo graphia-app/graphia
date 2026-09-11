@@ -171,7 +171,7 @@ bool MinMaxNormaliser::process(ContinuousDataVectors& dataRows,
     std::vector<double> maxs;
     std::vector<double> ranges;
 
-    if(!calcStandardValues(dataRows, {&mins, &maxs, &ranges}, parser))
+    if(!calcStandardValues(dataRows, {.mins = &mins, .maxs = &maxs, .ranges = &ranges}, parser))
         return false;
 
     return normalise(dataRows, mins, ranges, parser);
@@ -187,7 +187,8 @@ bool MeanNormaliser::process(ContinuousDataVectors& dataRows, IParser* parser) c
     std::vector<double> ranges;
     std::vector<double> means;
 
-    if(!calcStandardValues(dataRows, {&mins, &maxs, &ranges, &means}, parser))
+    if(!calcStandardValues(dataRows, {.mins = &mins, .maxs = &maxs, .ranges = &ranges,
+        .means = &means}, parser))
         return false;
 
     return normalise(dataRows, means, ranges, parser);
@@ -204,7 +205,8 @@ bool StandardisationNormaliser::process(ContinuousDataVectors& dataRows, IParser
     std::vector<double> means;
     std::vector<double> stddevs;
 
-    if(!calcStandardValues(dataRows, {&mins, &maxs, &ranges, &means, &stddevs}, parser))
+    if(!calcStandardValues(dataRows, {.mins = &mins, .maxs = &maxs, .ranges = &ranges,
+        .means = &means, .stddevs = &stddevs}, parser))
         return false;
 
     return normalise(dataRows, means, stddevs, parser);

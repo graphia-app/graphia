@@ -44,7 +44,7 @@ static MatrixTypeResult isAdjacencyMatrix(const TabularData& tabularData, QPoint
     bool firstRowAllDouble = true;
 
     if(tabularData.numColumns() < 2)
-        return {false, QObject::tr("Matrix must have at least 2 rows/columns.")};
+        return {._isMatrix = false, ._reason = QObject::tr("Matrix must have at least 2 rows/columns.")};
 
     for(size_t rowIndex = 0; rowIndex < std::min(tabularData.numRows(), maxRows); rowIndex++)
     {
@@ -81,7 +81,7 @@ static MatrixTypeResult isAdjacencyMatrix(const TabularData& tabularData, QPoint
                 // This will prevent loading obviously non-matrix files
                 // We could handle non-double matrix symbols in future (X, -, I, O etc)
                 if(!u::isNumeric(value) && !value.isEmpty())
-                    return {false, QObject::tr("Matrix has non-numeric values.")};
+                    return {._isMatrix = false, ._reason = QObject::tr("Matrix has non-numeric values.")};
             }
         }
     }
@@ -91,7 +91,7 @@ static MatrixTypeResult isAdjacencyMatrix(const TabularData& tabularData, QPoint
 
     // Note we can't test for equality as we may not be seeing all the rows (due to a row limit)
     if(numDataColumns < numDataRows)
-        return {false, QObject::tr("Matrix is not square.")};
+        return {._isMatrix = false, ._reason = QObject::tr("Matrix is not square.")};
 
     if(topLeft != nullptr)
     {
@@ -100,30 +100,30 @@ static MatrixTypeResult isAdjacencyMatrix(const TabularData& tabularData, QPoint
     }
 
     if(headerMatch || firstColumnAllDouble || firstRowAllDouble)
-        return {true, {}};
+        return {._isMatrix = true, ._reason = {}};
 
-    return {false, !headerMatch ? QObject::tr("Matrix headers don't match.") :
+    return {._isMatrix = false, ._reason = !headerMatch ? QObject::tr("Matrix headers don't match.") :
         QObject::tr("Matrix doesn't have numeric first row or column.")};
 }
 
 static MatrixTypeResult isEdgeList(const TabularData& tabularData, size_t maxRows = 5)
 {
     if(tabularData.numColumns() != 3)
-        return {false, QObject::tr("Edge list doesn't have 3 columns.")};
+        return {._isMatrix = false, ._reason = QObject::tr("Edge list doesn't have 3 columns.")};
 
     for(size_t rowIndex = 0; rowIndex < std::min(tabularData.numRows(), maxRows); rowIndex++)
     {
         if(!u::isInteger(tabularData.valueAt(0, rowIndex)))
-            return {false, QObject::tr("1st edge list column has a non-integral value.")};
+            return {._isMatrix = false, ._reason = QObject::tr("1st edge list column has a non-integral value.")};
 
         if(!u::isInteger(tabularData.valueAt(1, rowIndex)))
-            return {false, QObject::tr("2nd edge list column has a non-integral value.")};
+            return {._isMatrix = false, ._reason = QObject::tr("2nd edge list column has a non-integral value.")};
 
         if(!u::isNumeric(tabularData.valueAt(2, rowIndex)))
-            return {false, QObject::tr("3rd edge list column has a non-numeric value.")};
+            return {._isMatrix = false, ._reason = QObject::tr("3rd edge list column has a non-numeric value.")};
     }
 
-    return {true, {}};
+    return {._isMatrix = true, ._reason = {}};
 }
 
 } // namespace AdjacencyMatrixUtils

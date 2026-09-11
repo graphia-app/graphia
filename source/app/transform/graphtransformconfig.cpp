@@ -124,7 +124,7 @@ void GraphTransformConfig::setParameterValue(const QString& name,
     if(it != _parameters.end())
         it->_value = value;
     else
-        _parameters.emplace_back(Parameter{name, value});
+        _parameters.emplace_back(Parameter{._name = name, ._value = value});
 }
 
 QString GraphTransformConfig::Parameter::valueAsString(bool addQuotes) const

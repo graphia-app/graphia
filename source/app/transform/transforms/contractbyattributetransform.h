@@ -74,8 +74,14 @@ public:
     {
         return
         {
-            {"Node Multiplicity", ElementType::Node, ValueType::Int, {}, QObject::tr("Size")},
-            {"Edge Multiplicity", ElementType::Edge, ValueType::Int, {}, QObject::tr("Size")}
+            {
+                ._attributeName = "Node Multiplicity", ._elementType = ElementType::Node,
+                ._attributeValueType = ValueType::Int, ._attributeFlags = {}, ._channel = QObject::tr("Size")
+            },
+            {
+                ._attributeName = "Edge Multiplicity", ._elementType = ElementType::Edge,
+                ._attributeValueType = ValueType::Int, ._attributeFlags = {}, ._channel = QObject::tr("Size")
+            }
         };
     }
 

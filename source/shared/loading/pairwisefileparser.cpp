@@ -72,7 +72,12 @@ bool PairwiseParser::parse(const QUrl& url, IGraphModel* graphModel)
         case PairwiseColumnType::SourceNode: sourceNodeColumn = column; break;
         case PairwiseColumnType::TargetNode: targetNodeColumn = column; break;
         default:
-            _attributeColumns.emplace_back(AttributeColumn{column, configuration._type, configuration._name});
+            _attributeColumns.emplace_back(AttributeColumn
+            {
+                ._column = column,
+                ._type = configuration._type,
+                ._name = configuration._name
+            });
             break;
         }
     }

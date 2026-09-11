@@ -277,9 +277,9 @@ QString u::formatNumberSIPostfix(double value)
 
     const std::vector<Postfix> postfixes =
     {
-        {1e9, 1e9, 'B'},
-        {1e6, 1e6, 'M'},
-        {1e4, 1e3, 'k'},
+        {._threshold = 1e9, ._divider = 1e9, ._symbol = 'B'},
+        {._threshold = 1e6, ._divider = 1e6, ._symbol = 'M'},
+        {._threshold = 1e4, ._divider = 1e3, ._symbol = 'k'},
     };
 
     for(const auto& postfix : postfixes)

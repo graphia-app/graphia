@@ -40,8 +40,8 @@ private:
     bool _firstRowIsHeader = false;
     PairwiseColumnsConfiguration _columnsConfiguration =
     {
-        {0, {PairwiseColumnType::SourceNode, {}}},
-        {1, {PairwiseColumnType::TargetNode, {}}},
+        {0, {._type = PairwiseColumnType::SourceNode, ._name = {}}},
+        {1, {._type = PairwiseColumnType::TargetNode, ._name = {}}},
     };
 
 protected:

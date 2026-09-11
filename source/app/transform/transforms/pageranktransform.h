@@ -62,7 +62,14 @@ public:
     ElementType elementType() const override { return ElementType::None; }
     DefaultVisualisations defaultVisualisations() const override
     {
-        return {{"Node PageRank", ElementType::Node, ValueType::Float, {AttributeFlag::VisualiseByComponent}, QObject::tr("Colour")}};
+        return
+        {
+            {
+                ._attributeName = "Node PageRank", ._elementType = ElementType::Node,
+                ._attributeValueType = ValueType::Float, ._attributeFlags = {AttributeFlag::VisualiseByComponent},
+                ._channel = QObject::tr("Colour")
+            }
+        };
     }
 
     std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;

@@ -49,9 +49,9 @@ TextVisuals SharedTextVisualisationChannel::textVisuals(const QString& attribute
 
     GraphTransformConfig::TerminalCondition condition
     {
-        u"$source.%1"_s.arg(attributeName), //FIXME needs parsed name?
-        ConditionFnOp::Equality::Equal,
-        u"$target.%1"_s.arg(attributeName),
+        ._lhs = u"$source.%1"_s.arg(attributeName), //FIXME needs parsed name?
+        ._op = ConditionFnOp::Equality::Equal,
+        ._rhs = u"$target.%1"_s.arg(attributeName),
     };
 
     auto conditionFn = CreateConditionFnFor::edge(graphModel, condition);

@@ -72,7 +72,14 @@ public:
 
     DefaultVisualisations defaultVisualisations() const override
     {
-        return {{"Louvain Cluster", ElementType::Node, ValueType::String, {}, QObject::tr("Colour")}};
+        return
+        {
+            {
+                ._attributeName = "Louvain Cluster", ._elementType = ElementType::Node,
+                ._attributeValueType = ValueType::String, ._attributeFlags = {},
+                ._channel = QObject::tr("Colour")
+            }
+        };
     }
 
     std::unique_ptr<GraphTransform> create(const GraphTransformConfig&) const override
@@ -100,7 +107,14 @@ public:
 
     DefaultVisualisations defaultVisualisations() const override
     {
-        return {{"Weighted Louvain Cluster", ElementType::Node, ValueType::String, {}, QObject::tr("Colour")}};
+        return
+        {
+            {
+                ._attributeName = "Weighted Louvain Cluster", ._elementType = ElementType::Node,
+                ._attributeValueType = ValueType::String, ._attributeFlags = {},
+                ._channel = QObject::tr("Colour")
+            }
+        };
     }
 
     std::unique_ptr<GraphTransform> create(const GraphTransformConfig&) const override

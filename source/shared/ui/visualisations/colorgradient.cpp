@@ -49,7 +49,7 @@ ColorGradient::ColorGradient(const QString& descriptor)
         auto value = std::stod(i.key());
         auto colorString = QString::fromStdString(i.value());
 
-        _stops.emplace_back(Stop{value, colorString});
+        _stops.emplace_back(Stop{._value = value, ._color = colorString});
     }
 
     std::sort(_stops.begin(), _stops.end());

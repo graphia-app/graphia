@@ -40,9 +40,9 @@ void SeparateByAttributeTransform::apply(TransformedGraph& target)
 
     GraphTransformConfig::TerminalCondition condition
     {
-        u"$source.%1"_s.arg(attributeName),
-        ConditionFnOp::Equality::NotEqual,
-        u"$target.%1"_s.arg(attributeName),
+        ._lhs = u"$source.%1"_s.arg(attributeName),
+        ._op = ConditionFnOp::Equality::NotEqual,
+        ._rhs = u"$target.%1"_s.arg(attributeName),
     };
 
     auto conditionFn = CreateConditionFnFor::edge(*_graphModel, condition);

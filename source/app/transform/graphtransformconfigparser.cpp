@@ -144,12 +144,12 @@ struct TerminalOrUnaryCondition
            GraphTransformConfig::TerminalValue&& rhs)
         {
             return GraphTransformConfig::Condition(GraphTransformConfig::TerminalCondition{
-                std::move(lhs), op, std::move(rhs)});
+                ._lhs = std::move(lhs), ._op = op, ._rhs = std::move(rhs)});
         },
         [](GraphTransformConfig::TerminalValue&& lhs, ConditionFnOp::Unary op)
         {
             return GraphTransformConfig::Condition(
-                GraphTransformConfig::UnaryCondition{std::move(lhs), op});
+                GraphTransformConfig::UnaryCondition{._lhs = std::move(lhs), ._op = op});
         });
 };
 
@@ -179,7 +179,8 @@ struct Condition
         {
             return GraphTransformConfig::Condition(
                 RecursiveValue<GraphTransformConfig::CompoundCondition>(
-                GraphTransformConfig::CompoundCondition{std::move(lhs), op, std::move(rhs)}));
+                GraphTransformConfig::CompoundCondition{
+                ._lhs = std::move(lhs), ._op = op, ._rhs = std::move(rhs)}));
         });
 };
 

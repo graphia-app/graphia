@@ -77,7 +77,14 @@ public:
 
     DefaultVisualisations defaultVisualisations() const override
     {
-        return {{"Name", _elementType, ValueType::String, {}, QObject::tr("Colour")}};
+        return
+        {
+            {
+                ._attributeName = "Name", ._elementType = _elementType,
+                ._attributeValueType = ValueType::String, ._attributeFlags = {},
+                ._channel = QObject::tr("Colour")
+            }
+        };
     }
 
     bool configIsValid(const GraphTransformConfig& graphTransformConfig) const override;

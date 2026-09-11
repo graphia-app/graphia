@@ -441,7 +441,7 @@ Attribute::Name Attribute::parseAttributeName(QString name)
     name.replace(u"\""_s, ""_L1);
     parameter.replace(u"\""_s, ""_L1);
 
-    return {type, name, parameter};
+    return {._type = type, ._name = name, ._parameter = parameter};
 }
 
 QString Attribute::enquoteAttributeName(const QString& name)

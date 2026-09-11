@@ -954,8 +954,8 @@ std::vector<int> CorrelationPluginInstance::rowsOfInterestByColumns(const std::v
 
         const RowScore rowScore
         {
-            row,
-            (columnsSum * positiveWeight) - (otherColumnsSum * negativeWeight)
+            ._row = row,
+            ._value = (columnsSum * positiveWeight) - (otherColumnsSum * negativeWeight)
         };
 
         rowScores.push_back(rowScore);

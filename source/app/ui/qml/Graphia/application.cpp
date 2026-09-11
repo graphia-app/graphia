@@ -99,10 +99,10 @@ static std::vector<UrlType> urlTypesForPlugins(const std::vector<LoadedPlugin>& 
 
             const UrlType fileType =
             {
-                urlTypeName,
-                plugin._interface->individualDescriptionForUrlTypeName(urlTypeName),
-                plugin._interface->collectiveDescriptionForUrlTypeName(urlTypeName),
-                plugin._interface->extensionsForUrlTypeName(urlTypeName)
+                ._name = urlTypeName,
+                ._individualDescription = plugin._interface->individualDescriptionForUrlTypeName(urlTypeName),
+                ._collectiveDescription = plugin._interface->collectiveDescriptionForUrlTypeName(urlTypeName),
+                ._extensions = plugin._interface->extensionsForUrlTypeName(urlTypeName)
             };
 
             fileTypes.emplace_back(fileType);
@@ -863,8 +863,15 @@ bool Application::initialisePlugin(IPlugin* plugin, std::unique_ptr<QPluginLoade
 void Application::updateLoadingCapabilities()
 {
     // Initialise with native file type
-    std::vector<UrlType> nativeFileTypes{{NativeFileType, QString("%1 File").arg(name()),
-        QString("%1 Files").arg(name()), {nativeExtension()}}};
+    std::vector<UrlType> nativeFileTypes
+    {
+        {
+            ._name = NativeFileType,
+            ._individualDescription = QString("%1 File").arg(name()),
+            ._collectiveDescription = QString("%1 Files").arg(name()),
+            ._extensions = {nativeExtension()}
+        }
+    };
 
     auto pluginFileTypes = urlTypesForPlugins(_loadedPlugins);
     auto fileTypes = u::combine(nativeFileTypes, pluginFileTypes);

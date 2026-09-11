@@ -155,7 +155,7 @@ static auto pairwiseColumns(const QVariant& value)
             static_cast<PairwiseColumnType>(info.value(u"type"_s).toInt()) : PairwiseColumnType::Unused;
         auto name = u::contains(info, "name") ? info.value(u"name"_s).toString() : QString();
 
-        columns[column] = {type, name};
+        columns[column] = {._type = type, ._name = name};
     }
 
     return columns;

@@ -62,7 +62,7 @@ static MatLabMatrix findBiggestMatrix(matvar_t* v, MatLabMatrix& m)
         if(v->rank != 2)
             break;
 
-        const MatLabMatrix candidate{v, v->dims[0], v->dims[1]};
+        const MatLabMatrix candidate{._var = v, ._numColumns = v->dims[0], ._numRows = v->dims[1]};
         if(candidate > m)
             m = candidate;
 

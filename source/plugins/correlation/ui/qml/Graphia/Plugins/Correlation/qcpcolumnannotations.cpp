@@ -55,7 +55,8 @@ QCPRange QCPColumnAnnotations::getValueRange(bool& foundRange, QCP::SignDomain, 
 void QCPColumnAnnotations::setData(size_t y, std::vector<size_t> indices,
     bool selected, size_t offset, const ColumnAnnotation* columnAnnotation)
 {
-    _rows.emplace(y, Row{std::move(indices), selected, offset, columnAnnotation});
+    _rows.emplace(y, Row{._indices = std::move(indices), ._selected = selected,
+        ._offset = offset, ._columnAnnotation = columnAnnotation});
 }
 
 void QCPColumnAnnotations::resolveRects()
@@ -98,7 +99,12 @@ void QCPColumnAnnotations::resolveRects()
 
             if(value != currentValue)
             {
-                _rects[row._columnAnnotation->name()].emplace_back(Rect{left, y, width, currentValue, currentColor, row._selected});
+                _rects[row._columnAnnotation->name()].emplace_back(Rect
+                {
+                    ._x = left, ._y = y, ._width = width,
+                    ._value = currentValue, ._color = currentColor,
+                    ._selected = row._selected
+                });
 
                 left = right;
                 currentValue = value;
@@ -109,7 +115,12 @@ void QCPColumnAnnotations::resolveRects()
             width = right - left;
         }
 
-        _rects[row._columnAnnotation->name()].emplace_back(Rect{left, y, width, currentValue, currentColor, row._selected});
+        _rects[row._columnAnnotation->name()].emplace_back(Rect
+        {
+            ._x = left, ._y = y, ._width = width,
+            ._value = currentValue, ._color = currentColor,
+            ._selected = row._selected
+        });
     }
 }
 

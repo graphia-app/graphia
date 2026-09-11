@@ -48,7 +48,7 @@ MatrixTypeResult AdjacencyMatrixTabularDataParser::onParseComplete()
             const NodeId source = data.valueAt(0, rowIndex).toInt();
             const NodeId target = data.valueAt(1, rowIndex).toInt();
             const double weight = data.valueAt(2, rowIndex).toDouble();
-            const EdgeListEdge edge{source, target, weight};
+            const EdgeListEdge edge{._source = source, ._target = target, ._weight = weight};
 
             edgeList.emplace_back(edge);
 
@@ -66,7 +66,8 @@ MatrixTypeResult AdjacencyMatrixTabularDataParser::onParseComplete()
                 if(weight == 0.0)
                     continue;
 
-                edgeList.emplace_back(EdgeListEdge{NodeId(rowIndex), NodeId(columnIndex), weight});
+                edgeList.emplace_back(EdgeListEdge{._source = NodeId(rowIndex),
+                    ._target = NodeId(columnIndex), ._weight = weight});
             }
 
             setProgress(static_cast<int>((rowIndex * 100) / data.numRows()));

@@ -340,7 +340,7 @@ struct Statement
             if(!scanner.peek(edgeOperator))
             {
                 // Not an edge statement, so it must be a node statement
-                LexyDotParser::NodeStatement nodeStatement{std::move(node), {}};
+                LexyDotParser::NodeStatement nodeStatement{._node = std::move(node), ._attributeList = {}};
 
                 lexy::scan_result<LexyDotParser::AttributeList> attributeList;
                 if(scanner.branch(attributeList, KeyValueList{}))

@@ -797,7 +797,7 @@ void CorrelationPlot::populateLinePlot()
 
             graph->setData(xData, yData, true);
 
-            _lineGraphCache.insert(row, {graph, rowMinY, rowMaxY});
+            _lineGraphCache.insert(row, {._graph = graph, ._minY = rowMinY, ._maxY = rowMaxY});
         }
         else
         {
