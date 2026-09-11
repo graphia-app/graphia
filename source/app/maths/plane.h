@@ -42,7 +42,7 @@ public:
     float distance() const { return _distance; }
     const QVector3D& normal() const { return _normal; }
 
-    enum class Side
+    enum class Side : unsigned char
     {
         Front,
         Back

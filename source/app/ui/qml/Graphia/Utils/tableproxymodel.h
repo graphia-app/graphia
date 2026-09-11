@@ -30,6 +30,7 @@
 #include <QObject>
 #include <QString>
 #include <QVariant>
+
 #include <cstddef>
 #include <vector>
 #include <map>
@@ -75,7 +76,7 @@ private:
     std::deque<std::pair<QString, Qt::SortOrder>> _sortColumnAndOrders;
     std::map<size_t, size_t> _rowOrderMap;
 
-    enum Roles
+    enum Roles // NOLINT performance-enum-size
     {
         SubSelectedRole = Qt::UserRole + 999
     };

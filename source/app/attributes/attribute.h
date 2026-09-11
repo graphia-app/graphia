@@ -219,7 +219,7 @@ private:
     QString valueOf(Helper<QString>, EdgeId edgeId) const;
     QString valueOf(Helper<QString>, const IGraphComponent& component) const;
 
-    enum class Type
+    enum class Type : unsigned char
     {
         Unknown,
         IntNode,
@@ -569,7 +569,7 @@ public:
     QStringList validParameterValues() const override;
     IAttribute& setValidParameterValues(const QStringList& values) override;
 
-    enum class EdgeNodeType { None, Source, Target };
+    enum class EdgeNodeType : unsigned char { None, Source, Target };
     struct Name
     {
         EdgeNodeType _type;

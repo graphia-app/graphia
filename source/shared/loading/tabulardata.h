@@ -99,7 +99,7 @@ public:
     static QString contentIdentityOf(const QUrl& url);
 };
 
-enum class EmptyCellPolicy { Keep, Skip };
+enum class EmptyCellPolicy : unsigned char { Keep, Skip };
 
 class TextDelimitedTabularDataParser : public IParser
 {

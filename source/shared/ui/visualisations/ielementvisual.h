@@ -25,7 +25,7 @@
 #include <QColor>
 #include <QString>
 
-enum class VisualFlags
+enum class VisualFlags : unsigned char
 {
     None          = 0x0,
     Selected      = 0x1,

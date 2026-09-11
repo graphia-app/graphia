@@ -37,7 +37,7 @@ template<typename> class IUserElementData;
 using IUserNodeData = IUserElementData<NodeId>;
 using IUserEdgeData = IUserElementData<EdgeId>;
 
-enum class VisualChangeFlags
+enum class VisualChangeFlags : unsigned char
 {
     None        = 0x00,
     Size        = 0x01,

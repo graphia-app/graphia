@@ -30,7 +30,7 @@
 #include <algorithm>
 #include <cassert>
 
-enum class MultiElementType
+enum class MultiElementType : unsigned char
 {
     Not,
     Head,

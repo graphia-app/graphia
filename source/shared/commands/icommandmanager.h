@@ -30,7 +30,7 @@
 
 class QString;
 
-enum class ExecutePolicy
+enum class ExecutePolicy : unsigned char
 {
     Add,        // Add to the execution stack
     Replace,    // Replace the top of the execution stack

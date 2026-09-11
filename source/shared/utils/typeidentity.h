@@ -30,7 +30,7 @@
 class TypeIdentity
 {
 public:
-    enum class Type
+    enum class Type : char
     {
         Unknown = -1,
         Int = 0,

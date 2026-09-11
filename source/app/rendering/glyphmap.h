@@ -71,7 +71,7 @@ private:
     Results _results;
     QString _fontName;
 
-    enum class UpdateType
+    enum class UpdateType : unsigned char
     {
         None,
         Layout,

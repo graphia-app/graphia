@@ -62,7 +62,7 @@ private:
 
     const QUrl _corsUrl;
 
-    enum class IsDir
+    enum class IsDir : unsigned char
     {
         No,
         Yes

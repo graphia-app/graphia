@@ -456,7 +456,7 @@ public:
     template<typename It, typename Fn> using Results =
         ResultsType<typename Executor<It, Fn>::ResultsVectorOrVoid>;
 
-    enum ResultsPolicy
+    enum ResultsPolicy : unsigned char
     {
         Blocking,
         NonBlocking

@@ -64,7 +64,7 @@ private:
     QString _updateString;
     int _progress = -1;
 
-    enum class State
+    enum class State : unsigned char
     {
         Idle,
         Update,

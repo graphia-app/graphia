@@ -22,19 +22,19 @@
 
 namespace ConditionFnOp
 {
-    enum class Logical
+    enum class Logical : unsigned char
     {
         Or,
         And
     };
 
-    enum class Equality
+    enum class Equality : unsigned char
     {
         Equal,
         NotEqual
     };
 
-    enum class Numerical
+    enum class Numerical : unsigned char
     {
         LessThan,
         GreaterThan,
@@ -42,7 +42,7 @@ namespace ConditionFnOp
         GreaterThanOrEqual
     };
 
-    enum class String
+    enum class String : unsigned char
     {
         Includes,
         Excludes,
@@ -52,7 +52,7 @@ namespace ConditionFnOp
         MatchesRegexCaseInsensitive,
     };
 
-    enum class Unary
+    enum class Unary : unsigned char
     {
         HasValue
     };

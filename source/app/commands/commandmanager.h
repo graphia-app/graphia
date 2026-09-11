@@ -134,7 +134,7 @@ private:
     bool canRedoNoLocking() const;
     const ICommand* lastExecutedCommand() const;
 
-    enum class CommandAction
+    enum class CommandAction : unsigned char
     {
         Execute,
         ExecuteReplace,

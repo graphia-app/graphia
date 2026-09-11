@@ -35,7 +35,7 @@
 #include <utility>
 #include <vector>
 
-enum class SelectNodesClear
+enum class SelectNodesClear : unsigned char
 {
     None        = 0x0,
     Selection   = 0x1,

@@ -78,7 +78,7 @@ private slots:
     void onGraphChanged(const Graph*, bool);
 
 public:
-    enum Roles
+    enum Roles // NOLINT performance-enum-size
     {
         NodeIdRole = Qt::UserRole + 1,
         NodeSelectedRole,

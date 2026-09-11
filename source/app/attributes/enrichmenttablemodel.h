@@ -42,7 +42,7 @@ class EnrichmentTableModel : public QAbstractTableModel
     Q_PROPERTY(bool ascendingSortOrder MEMBER _ascendingSortOrder NOTIFY ascendingSortOrderChanged)
 
 public:
-    enum Results
+    enum Results : unsigned char
     {
         SelectionA,
         SelectionB,
@@ -55,7 +55,7 @@ public:
     };
     Q_ENUM(Results)
 
-    enum Roles
+    enum Roles // NOLINT performance-enum-size
     {
         EnrichedRole = Qt::UserRole + 1
     };

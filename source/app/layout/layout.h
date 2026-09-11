@@ -39,13 +39,13 @@ class Layout : public QObject, public Cancellable
     Q_OBJECT
 
 public:
-    enum class Iterative
+    enum class Iterative : unsigned char
     {
         Yes,
         No
     };
 
-    enum class Dimensionality
+    enum class Dimensionality : unsigned char
     {
         ThreeDee        = 0x1,
         TwoDee          = 0x2,

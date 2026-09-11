@@ -64,7 +64,7 @@ private:
 
     void buildPlot() override;
 
-    enum class DragType
+    enum class DragType : unsigned char
     {
         None,
         Min,

@@ -31,7 +31,7 @@ class Transition : public QObject
 {
     Q_OBJECT
 public:
-    enum class Type
+    enum class Type : unsigned char
     {
         None,
         Linear,

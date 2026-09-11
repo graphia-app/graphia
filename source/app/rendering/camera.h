@@ -41,7 +41,7 @@ public:
     Camera(const Camera& other);
     Camera& operator=(const Camera& other) = default;
 
-    enum ProjectionType
+    enum ProjectionType : unsigned char
     {
         OrthogonalProjection,
         PerspectiveProjection

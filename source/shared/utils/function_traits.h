@@ -35,7 +35,7 @@ template<typename ReturnType, typename... Args>
 struct _function_traits
 // we specialize for pointers to member function
 {
-    enum { arity = sizeof...(Args) };
+    enum : unsigned char { arity = sizeof...(Args) };
     // arity is the number of arguments.
 
     using result_type = ReturnType;

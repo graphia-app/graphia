@@ -88,7 +88,7 @@ struct EdgeStatement
     AttributeList _attributeList;
 };
 
-enum class AttributeStatementType { Graph, Node, Edge };
+enum class AttributeStatementType : unsigned char { Graph, Node, Edge };
 
 struct AttributeStatement
 {

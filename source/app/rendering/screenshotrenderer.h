@@ -38,7 +38,7 @@ class ScreenshotRenderer : public QObject, public GraphRendererCore
 {
     Q_OBJECT
 
-    enum class ScreenshotType { Preview, Tile };
+    enum class ScreenshotType : unsigned char { Preview, Tile };
 
 public:
     ScreenshotRenderer();

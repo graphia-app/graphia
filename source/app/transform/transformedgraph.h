@@ -126,7 +126,7 @@ private:
     class State
     {
     private:
-        enum class Value { Removed, Unchanged, Added };
+        enum class Value : unsigned char { Removed, Unchanged, Added };
         Value state = Value::Unchanged;
 
     public:

@@ -191,7 +191,7 @@ private:
 
     std::queue<std::unique_ptr<QEvent>> _eventQueue;
 
-    enum class Mode
+    enum class Mode : unsigned char
     {
         Overview,
         Component
@@ -262,7 +262,7 @@ private:
     void clearHiddenElements();
 
     void updateGPUDataIfRequired();
-    enum class When { Later, Now };
+    enum class When : unsigned char { Later, Now };
     void updateGPUData(When when);
     void updateComponentGPUData();
 

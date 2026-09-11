@@ -236,7 +236,7 @@ protected:
     void renderGraph();
     void render2D(QRect selectionRect = {});
 
-    enum class Type
+    enum class Type : unsigned char
     {
         None        = 0x0,
         Color       = 0x1,

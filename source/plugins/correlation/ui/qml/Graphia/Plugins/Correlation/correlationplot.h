@@ -95,7 +95,7 @@ DEFINE_QML_ENUM(PlotMode,
     ColumnAnnotationSelection,
     RowsOfInterestColumnSelection);
 
-enum class CorrelationPlotUpdateType
+enum class CorrelationPlotUpdateType : unsigned char
 {
     None,
     Render,
@@ -280,14 +280,14 @@ protected:
     void hoverLeaveEvent(QHoverEvent* event) override;
     void wheelEvent(QWheelEvent* event) override;
 
-    enum class InvalidateCache { No, Yes };
+    enum class InvalidateCache : unsigned char { No, Yes };
 
     void rebuildPlot(InvalidateCache invalidateCache = InvalidateCache::No);
 
 private:
     bool _debug = false;
 
-    enum class RebuildRequired
+    enum class RebuildRequired : unsigned char
     {
         None,
         Partial,

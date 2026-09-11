@@ -46,7 +46,7 @@
 class TabularDataParser;
 class QAbstractTableModel;
 
-enum class HeaderModelType { Rows, Columns };
+enum class HeaderModelType : unsigned char { Rows, Columns };
 
 class TabularDataHeaderModel : public QAbstractListModel
 {
@@ -58,7 +58,7 @@ public:
         ValueType valueTypes = ValueType::All, const QStringList& skip = {},
         HeaderModelType headerModelType = HeaderModelType::Rows);
 
-    enum Roles
+    enum Roles // NOLINT performance-enum-size
     {
         Index = Qt::UserRole + 1,
     };

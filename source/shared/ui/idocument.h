@@ -32,7 +32,7 @@ class ICommandManager;
 class QString;
 
 // These values shadow the QMessageBox ones
-enum class MessageBoxIcon
+enum class MessageBoxIcon : unsigned char
 {
     NoIcon      = 0,
     Question    = 4,

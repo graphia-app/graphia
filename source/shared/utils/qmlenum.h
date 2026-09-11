@@ -38,7 +38,7 @@ QT_BEGIN_NAMESPACE
 struct QMetaObject;
 QT_END_NAMESPACE
 
-// NOLINTBEGIN(cppcoreguidelines-macro-usage, bugprone-macro-parentheses)
+// NOLINTBEGIN(cppcoreguidelines-macro-usage, bugprone-macro-parentheses, performance-enum-size)
 
 #define _REFLECTOR(x) x ## _reflector
 #define QML_ENUM_PROPERTY(x) _REFLECTOR(x)::Enum
@@ -74,7 +74,7 @@ QmlEnumType normaliseQmlEnum(const auto& v)
     return cast;
 }
 
-// NOLINTEND(cppcoreguidelines-macro-usage, bugprone-macro-parentheses)
+// NOLINTEND(cppcoreguidelines-macro-usage, bugprone-macro-parentheses, performance-enum-size)
 
 #endif // QMLENUM_H
 

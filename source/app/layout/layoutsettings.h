@@ -32,7 +32,7 @@ struct LayoutSettingKeyValue
     float _value;
 };
 
-enum class LayoutSettingScaleType { Linear, Log };
+enum class LayoutSettingScaleType : unsigned char { Linear, Log };
 
 class LayoutSetting
 {
