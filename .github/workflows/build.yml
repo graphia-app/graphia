@@ -14,7 +14,7 @@ jobs:
     name: Linux
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
@@ -49,12 +49,12 @@ jobs:
       env:
         CC: gcc-${{ env.GCC_VERSION }}
         CXX: g++-${{ env.GCC_VERSION }}
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       if: github.event_name != 'pull_request'
       with:
         name: linux-appimage
         path: build/gcc/Graphia-*.tar.gz
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: linux-logs
         path: build/gcc/*.log
@@ -71,7 +71,7 @@ jobs:
     needs:
       - check-is-release
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
@@ -101,7 +101,7 @@ jobs:
     - name: Upload Executables for Signing
       id: unsigned-exes
       if: needs.check-is-release.outputs.is-release == 'true'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: windows-unsigned-exes
         path: |
@@ -130,7 +130,7 @@ jobs:
     - name: Upload Uninstaller for Signing
       id: unsigned-uninstaller
       if: needs.check-is-release.outputs.is-release == 'true'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: windows-unsigned-uninstaller
         path: installer/Uninstall.exe
@@ -152,7 +152,7 @@ jobs:
     - name: Upload Installer for Signing
       id: unsigned-installer
       if: needs.check-is-release.outputs.is-release == 'true'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: windows-unsigned-installer
         path: installer/*-installer.exe
@@ -172,12 +172,12 @@ jobs:
       if: needs.check-is-release.outputs.is-release != 'true'
       shell: pwsh
       run: Move-Item installer/*-installer.exe build -Verbose
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       if: github.event_name != 'pull_request'
       with:
         name: windows-installer
         path: build/Graphia-*-installer.exe
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: windows-logs
         path: build/*.log
@@ -192,7 +192,7 @@ jobs:
     name: macOS
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
@@ -228,12 +228,12 @@ jobs:
         APPLE_NOTARIZATION_PASSWORD: ${{ secrets.APPLE_NOTARIZATION_PASSWORD }}
         APPLE_NOTARIZATION_USERNAME: ${{ secrets.APPLE_NOTARIZATION_USERNAME }}
         APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       if: github.event_name != 'pull_request'
       with:
         name: macos-disk-image
         path: build/Graphia-*.dmg
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: macos-logs
         path: build/*.log
@@ -248,7 +248,7 @@ jobs:
     name: WebAssembly
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
@@ -283,12 +283,12 @@ jobs:
     - name: Archive
       run: |
         installers/wasm/build.sh
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       if: github.event_name != 'pull_request'
       with:
         name: webassembly
         path: build/wasm/Graphia-WebAssembly-*
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: webassembly-logs
         path: build/wasm/*.log
@@ -301,16 +301,16 @@ jobs:
       - check-is-release
       - wasm
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         repository: graphia-app/web
         ssh-key: ${{ secrets.WASM_SSH_PRIVATE_KEY }}
         path: web
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: webassembly
         path: build
@@ -321,7 +321,7 @@ jobs:
     name: Clang Debug
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
@@ -352,11 +352,11 @@ jobs:
         UNITY_BUILD: OFF
         CC: clang-${{ env.CLANG_VERSION }}
         CXX: clang++-${{ env.CLANG_VERSION }}
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: static-analysis-logs-clang
         path: build/clang/*.log
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: static-analysis-build
         path: |
@@ -375,7 +375,7 @@ jobs:
     needs:
       - check-is-release
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
@@ -405,7 +405,7 @@ jobs:
     - name: Upload Executables for Signing
       id: unsigned-exes
       if: needs.check-is-release.outputs.is-release == 'true'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: windows-clang-unsigned-exes
         path: |
@@ -434,7 +434,7 @@ jobs:
     - name: Upload Uninstaller for Signing
       id: unsigned-uninstaller
       if: needs.check-is-release.outputs.is-release == 'true'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: windows-clang-unsigned-uninstaller
         path: installer/Uninstall.exe
@@ -456,7 +456,7 @@ jobs:
     - name: Upload Installer for Signing
       id: unsigned-installer
       if: needs.check-is-release.outputs.is-release == 'true'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: windows-clang-unsigned-installer
         path: installer/*-installer.exe
@@ -476,12 +476,12 @@ jobs:
       if: needs.check-is-release.outputs.is-release != 'true'
       shell: pwsh
       run: Move-Item installer/*-installer.exe build -Verbose
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       if: github.event_name != 'pull_request'
       with:
         name: windows-clang-installer
         path: build/Graphia-*-installer.exe
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: windows-clang-logs
         path: build/*.log
@@ -498,7 +498,7 @@ jobs:
     needs:
       - clang-debug
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
@@ -511,7 +511,7 @@ jobs:
         sudo apt-get install libunwind-${{ env.CLANG_VERSION }}-dev
         sudo apt-get install clang-tidy-${{ env.CLANG_VERSION }}
     - name: Checkout ctcache
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
       with:
         repository: matus-chochlik/ctcache
         path: ctcache
@@ -536,7 +536,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
         cache: true
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: static-analysis-build
         path: build/clang/
@@ -548,7 +548,7 @@ jobs:
         CTCACHE_CLANG_TIDY: clang-tidy-${{ env.CLANG_VERSION }}
         CTCACHE_SAVE_OUTPUT: 1
         BUILD_DIR: build/clang/
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: static-analysis-logs-clang-tidy
         path: build/clang/*.log
@@ -559,7 +559,7 @@ jobs:
     needs:
       - clang-debug
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
@@ -578,7 +578,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
         cache: true
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: static-analysis-build
         path: build/clang/
@@ -587,7 +587,7 @@ jobs:
       env:
         CPPCHECK: cppcheck
         BUILD_DIR: build/clang/
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: static-analysis-logs-cppcheck
         path: build/clang/*.log
@@ -598,7 +598,7 @@ jobs:
     needs:
       - clang-debug
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
@@ -613,7 +613,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
         cache: true
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         repository: KDE/clazy
         ref: c4fc43ea5443a0281b1dc01277b6165b6f5df8b4
@@ -631,7 +631,7 @@ jobs:
           -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -G Ninja
         cmake --build .
         sudo cmake --build . --target install
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: static-analysis-build
         path: build/clang/
@@ -640,7 +640,7 @@ jobs:
       env:
         CLAZY: /usr/bin/clazy
         BUILD_DIR: build/clang/
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: static-analysis-logs-clazy
         path: build/clang/*.log
@@ -651,7 +651,7 @@ jobs:
     needs:
       - clang-debug
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
@@ -661,7 +661,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
         cache: true
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: static-analysis-build
         path: build/clang/
@@ -669,7 +669,7 @@ jobs:
       run: scripts/qmllint.sh
       env:
         BUILD_DIR: build/clang/
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: static-analysis-logs-qmllint
         path: build/clang/*.log
@@ -680,7 +680,7 @@ jobs:
     needs:
       - clang-debug
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
@@ -695,7 +695,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
         cache: true
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         repository: include-what-you-use/include-what-you-use
         ref: clang_${{ env.CLANG_VERSION }}
@@ -711,7 +711,7 @@ jobs:
         cmake -DCMAKE_PREFIX_PATH=/usr/lib/llvm-${{ env.CLANG_VERSION }} -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -G Ninja
         cmake --build .
         sudo cmake --build . --target install
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: static-analysis-build
         path: build/clang/
@@ -720,7 +720,7 @@ jobs:
       env:
         BUILD_DIR: build/clang/
         IWYU_SOURCE: ${{ github.workspace }}/iwyu
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: static-analysis-logs-iwyu
         path: build/clang/*.log
@@ -732,7 +732,7 @@ jobs:
     outputs:
       is-release: ${{ steps.is-release-test.outputs.result }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
@@ -765,19 +765,19 @@ jobs:
       - macos
       - wasm
     steps:
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: linux-appimage
         path: release/Linux AppImage
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: macos-disk-image
         path: release/macOS Disk Image
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: windows-installer
         path: release/Windows Installer
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: webassembly
         path: release/WebAssembly
@@ -832,43 +832,43 @@ jobs:
       - wasm
       - windows-clang
     steps:
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: linux-appimage
         path: prerelease/Linux AppImage
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: linux-logs
         path: prerelease/Linux Logs
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: macos-disk-image
         path: prerelease/macOS Disk Image
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: macos-logs
         path: prerelease/macOS Logs
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: windows-installer
         path: prerelease/Windows Installer
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: windows-logs
         path: prerelease/Windows Logs
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: windows-clang-installer
         path: prerelease/Windows Clang Installer
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: windows-clang-logs
         path: prerelease/Windows Clang Logs
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: webassembly
         path: prerelease/WebAssembly
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: webassembly-logs
         path: prerelease/WebAssembly Logs
@@ -892,7 +892,7 @@ jobs:
       - iwyu
       - qmllint
     steps:
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         pattern: static-analysis-logs-*
         merge-multiple: true
@@ -921,31 +921,31 @@ jobs:
       - clazy
       - qmllint
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: linux-logs
         path: logs/linux
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: macos-logs
         path: logs/macos
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: windows-logs
         path: logs/windows
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: windows-clang-logs
         path: logs/windows-clang
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         name: webassembly-logs
         path: logs/wasm
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
       with:
         pattern: static-analysis-logs-*
         merge-multiple: true
@@ -956,7 +956,7 @@ jobs:
         install: |
           Text::Table::CSV
           Text::Table::Tiny
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         repository: graphia-app/defects
         ssh-key: ${{ secrets.DEFECTS_SSH_PRIVATE_KEY }}
