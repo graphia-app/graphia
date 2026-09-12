@@ -47,6 +47,7 @@ list(APPEND MISC
     ${CMAKE_CURRENT_LIST_DIR}/scripts/iwyu.sh
     ${CMAKE_CURRENT_LIST_DIR}/scripts/parse-compile_commands-json.sh
     ${CMAKE_CURRENT_LIST_DIR}/scripts/qmllint.sh
+    ${CMAKE_CURRENT_LIST_DIR}/scripts/tidy-headers.sh
     ${CMAKE_CURRENT_LIST_DIR}/scripts/upload-symbols.sh
 )
 
