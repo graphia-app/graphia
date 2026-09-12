@@ -104,10 +104,12 @@ public:
     public:
         using self_type = iterator;
         using value_type = CorrelationDataVectorRelation<DataVectors>;
-        using reference = value_type&;
+        using reference = value_type;
         using pointer = value_type*;
         using iterator_category = std::forward_iterator_tag;
-        using difference_type = size_t;
+        using difference_type = ptrdiff_t;
+
+        iterator() = default;
 
         iterator(const KnnProtoGraph* protoGraph, bool end) :
             _protoGraph(protoGraph)
@@ -137,10 +139,8 @@ public:
             }
         }
 
-        self_type operator++()
+        self_type& operator++()
         {
-            self_type i = *this;
-
             do
             {
                 if(_protoEdgeIt != _protoNodeIt->_protoEdges.end())
@@ -150,7 +150,7 @@ public:
                 {
                     _protoNodeIt++;
                     if(_protoNodeIt == _protoGraph->_protoNodes.end())
-                        return i;
+                        return *this;
 
                     _protoEdgeIt = _protoNodeIt->_protoEdges.begin();
                 }
@@ -158,6 +158,13 @@ public:
             // Skip edges we've already iterated over (in the other direction)
             while((**this)._a > (**this)._b);
 
+            return *this;
+        }
+
+        self_type operator++(int)
+        {
+            self_type i = *this;
+            ++(*this);
             return i;
         }
 

@@ -34,15 +34,16 @@ public:
     using pointer = T*;
     using reference = T&;
 
+    pair_iterator() = default;
     explicit pair_iterator(Iterator it) : _it(std::move(it)) {}
-    auto& operator++() { return _it.operator++(); }
-    auto operator++(int i) { return operator++(i); }
-    auto& operator--() { return _it.operator--(); }
-    auto operator--(int i) { return operator--(i); }
+    pair_iterator& operator++() { ++_it; return *this; }
+    pair_iterator operator++(int) { auto i = *this; ++_it; return i; }
+    pair_iterator& operator--() { --_it; return *this; }
+    pair_iterator operator--(int) { auto i = *this; --_it; return i; }
     bool operator==(const pair_iterator& other) const { return _it == other._it; }
     bool operator!=(const pair_iterator& other) const { return _it != other._it; }
-    auto& operator*() { return (*_it).*member; }
-    auto operator->() { return &((*_it).*member); }
+    auto& operator*() const { return (*_it).*member; }
+    auto operator->() const { return &((*_it).*member); }
 
 private:
     Iterator _it;

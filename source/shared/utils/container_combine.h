@@ -65,17 +65,24 @@ public:
         using reference = value_type&;
         using pointer = value_type*;
         using iterator_category = std::forward_iterator_tag;
-        using difference_type = size_t;
+        using difference_type = ptrdiff_t;
 
-        self_type operator++()
+        iterator() = default;
+
+        self_type& operator++()
         {
-            self_type i = *this;
-
             std::apply([](auto&&... it)
             {
                 (void)((it.first != it.second ? it.first++, true : false) || ...);
             }, _its);
 
+            return *this;
+        }
+
+        self_type operator++(int)
+        {
+            self_type i = *this;
+            ++(*this);
             return i;
         }
 
