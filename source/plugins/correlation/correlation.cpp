@@ -207,7 +207,7 @@ public:
             return {};
 
         EdgeList edges;
-        edges.reserve(std::distance(results.begin(), results.end()));
+        edges.reserve(static_cast<size_t>(std::distance(results.begin(), results.end())));
 
         std::transform(results.begin(), results.end(), std::back_inserter(edges),
         [](const auto& result)
@@ -503,7 +503,7 @@ public:
             return {};
 
         EdgeList edges;
-        edges.reserve(std::distance(results.begin(), results.end()));
+        edges.reserve(static_cast<size_t>(std::distance(results.begin(), results.end())));
 
         std::transform(results.begin(), results.end(), std::back_inserter(edges),
         [](const auto& result)
