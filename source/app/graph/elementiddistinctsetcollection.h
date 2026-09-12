@@ -373,10 +373,10 @@ public:
             _size--;
     }
 
-    class iterator_base
+    template<typename Derived> class iterator_base
     {
     public:
-        using self_type = iterator_base;
+        using self_type = Derived;
         using value_type = T;
         using reference = T;
         using pointer = T;
@@ -411,9 +411,15 @@ public:
             _p = _set->_head;
         }
 
-        self_type operator++()
+        self_type& operator++()
         {
-            self_type i = *this;
+            incrementPointer();
+            return static_cast<self_type&>(*this);
+        }
+
+        self_type operator++(int)
+        {
+            self_type i = static_cast<self_type&>(*this);
             incrementPointer();
             return i;
         }
@@ -422,18 +428,18 @@ public:
         bool operator==(const self_type& other) const { return _p == other._p; }
     };
 
-    class iterator : public iterator_base
+    class iterator : public iterator_base<iterator>
     {
     public:
-        using iterator_base::iterator_base;
-        typename iterator_base::reference operator*() const { return this->_p; }
+        using iterator_base<iterator>::iterator_base;
+        typename iterator_base<iterator>::reference operator*() const { return this->_p; }
     };
 
-    class const_iterator : public iterator_base
+    class const_iterator : public iterator_base<const_iterator>
     {
     public:
-        using iterator_base::iterator_base;
-        typename iterator_base::reference operator*() const { return this->_p; }
+        using iterator_base<const_iterator>::iterator_base;
+        typename iterator_base<const_iterator>::reference operator*() const { return this->_p; }
     };
 
     iterator begin() { return iterator(this); }
@@ -511,13 +517,13 @@ public:
         _size += set._size;
     }
 
-    class iterator_base
+    template<typename Derived> class iterator_base
     {
     public:
-        using self_type = iterator_base;
-        using value_type = typename T::iterator_base::value_type;
-        using reference = typename T::iterator_base::reference;
-        using pointer = typename T::iterator_base::pointer;
+        using self_type = Derived;
+        using value_type = typename T::value_type;
+        using reference = value_type;
+        using pointer = value_type;
         using iterator_category = std::forward_iterator_tag;
         using difference_type = int;
 
@@ -567,9 +573,15 @@ public:
             _sets(sets), _p(nextHead())
         {}
 
-        self_type operator++()
+        self_type& operator++()
         {
-            self_type i = *this;
+            incrementPointer();
+            return static_cast<self_type&>(*this);
+        }
+
+        self_type operator++(int)
+        {
+            self_type i = static_cast<self_type&>(*this);
             incrementPointer();
             return i;
         }
@@ -578,18 +590,18 @@ public:
         bool operator==(const self_type& other) const { return _p == other._p; }
     };
 
-    class iterator : public iterator_base
+    class iterator : public iterator_base<iterator>
     {
     public:
-        using iterator_base::iterator_base;
-        typename iterator_base::reference operator*() const { return this->_p; }
+        using iterator_base<iterator>::iterator_base;
+        typename iterator_base<iterator>::reference operator*() const { return this->_p; }
     };
 
-    class const_iterator : public iterator_base
+    class const_iterator : public iterator_base<const_iterator>
     {
     public:
-        using iterator_base::iterator_base;
-        typename iterator_base::reference operator*() const { return this->_p; }
+        using iterator_base<const_iterator>::iterator_base;
+        typename iterator_base<const_iterator>::reference operator*() const { return this->_p; }
     };
 
     iterator begin() { return iterator(this); }

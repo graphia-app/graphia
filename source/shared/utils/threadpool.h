@@ -304,13 +304,19 @@ private:
             using reference = value_type&;
             using pointer = value_type*;
             using iterator_category = std::forward_iterator_tag;
-            using difference_type = size_t;
+            using difference_type = std::ptrdiff_t;
 
             iterator(ResultsType* results, bool end) :
                 _impl(results->_values, end)
             {}
 
-            self_type operator++()
+            self_type& operator++()
+            {
+                _impl.increment();
+                return *this;
+            }
+
+            self_type operator++(int)
             {
                 self_type i = *this;
                 _impl.increment();
