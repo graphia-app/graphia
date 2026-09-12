@@ -109,9 +109,7 @@ std::vector<EdgeId> MutableGraph::edgeIdsBetween(NodeId nodeIdA, NodeId nodeIdB)
     {
         const auto& edgeIdDistinctSet = _e._connections.at(undirectedEdge);
 
-        // NOLINTNEXTLINE modernize-use-ranges
-        std::copy(edgeIdDistinctSet.begin(), edgeIdDistinctSet.end(),
-            std::back_inserter(edgeIds));
+        std::ranges::copy(edgeIdDistinctSet, std::back_inserter(edgeIds));
     }
 
     return edgeIds;
