@@ -211,11 +211,18 @@ namespace u
     template<typename T>
     reversing_wrapper<T> reverse(T& container) { return {container}; }
 
+    // std::ranges::iota isn't available in libc++ until version 21
+    template<typename C, typename T> void iota(C& container, T value)
+    {
+        // NOLINTNEXTLINE modernize-use-ranges
+        std::iota(std::begin(container), std::end(container), value);
+    }
+
     template<Container C>
     std::vector<size_t> sortedIndicesOf(const C& container)
     {
         std::vector<size_t> index(container.size());
-        std::iota(std::begin(index), std::end(index), 0);
+        iota(index, 0);
 
         std::sort(std::begin(index), std::end(index),
         [&container](size_t a, size_t b)

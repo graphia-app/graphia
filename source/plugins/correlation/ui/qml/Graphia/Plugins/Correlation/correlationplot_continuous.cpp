@@ -22,6 +22,7 @@
 #include "plugins/correlation/correlationplugin.h"
 #include "qcpcolumnannotations.h"
 
+#include "shared/utils/container.h"
 #include "shared/utils/statistics.h"
 #include "shared/utils/string.h"
 #include "shared/utils/container_randomsample.h"
@@ -306,7 +307,7 @@ void CorrelationPlot::populateMeanLinePlot()
 
         QVector<double> xData(static_cast<int>(_pluginInstance->numContinuousColumns()));
         // xData is just the column indices
-        std::iota(std::begin(xData), std::end(xData), 0);
+        u::iota(xData, 0);
 
         // Use Average Calculation and set min / max
         QVector<double> yDataAvg = meanAverageData(minY, maxY, rows);
@@ -350,7 +351,7 @@ void CorrelationPlot::populateMedianLinePlot()
 
         QVector<double> xData(static_cast<int>(_pluginInstance->numContinuousColumns()));
         // xData is just the column indices
-        std::iota(std::begin(xData), std::end(xData), 0);
+        u::iota(xData, 0);
 
         QVector<double> yDataAvg(static_cast<int>(_pluginInstance->numContinuousColumns()));
 
@@ -405,7 +406,7 @@ void CorrelationPlot::populateMeanHistogramPlot()
     {
         QVector<double> xData(static_cast<int>(_pluginInstance->numContinuousColumns()));
         // xData is just the column indices
-        std::iota(std::begin(xData), std::end(xData), 0);
+        u::iota(xData, 0);
 
         // Use Average Calculation and set min / max
         QVector<double> yDataAvg = meanAverageData(minY, maxY, rows);
@@ -626,7 +627,7 @@ void CorrelationPlot::plotDispersion(QCPAbstractPlottable* meanPlot,
 
         // xData is just the column indices
         QVector<double> xData(static_cast<int>(_pluginInstance->numContinuousColumns()));
-        std::iota(std::begin(xData), std::end(xData), 0);
+        u::iota(xData, 0);
 
         devTop->setData(xData, topErr);
         devBottom->setData(xData, bottomErr);

@@ -1268,7 +1268,7 @@ bool CorrelationPlot::updateSortMap()
     auto previousSortmap = _sortMap;
 
     _sortMap.resize(numColumns());
-    std::iota(_sortMap.begin(), _sortMap.end(), 0);
+    u::iota(_sortMap, 0);
 
     // Convert the javascript/QML object array into something
     // efficient to access from inside the sort lambda function
@@ -1372,7 +1372,7 @@ bool CorrelationPlot::updateSortMap()
         }
 
         std::vector<size_t> inverseDataValueOrdering(numColumns());
-        std::iota(inverseDataValueOrdering.begin(), inverseDataValueOrdering.end(), 0);
+        u::iota(inverseDataValueOrdering, 0);
         std::ranges::sort(inverseDataValueOrdering,
         [&columnValues](size_t a, size_t b)
         {
