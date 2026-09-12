@@ -326,10 +326,10 @@ public:
     {
     public:
         using value_type = size_t;
-        using reference = value_type&;
+        using reference = value_type;
         using pointer = value_type*;
         using iterator_category = std::input_iterator_tag;
-        using difference_type = size_t;
+        using difference_type = ptrdiff_t;
 
     private:
         size_t _num = 0;
