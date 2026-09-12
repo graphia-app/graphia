@@ -422,7 +422,7 @@ void EditAttributeTableModel::setAttributeName(const QString& attributeName)
 void EditAttributeTableModel::updateSortMap()
 {
     _sortMap.resize(static_cast<size_t>(rowCount()));
-    std::iota(_sortMap.begin(), _sortMap.end(), 0);
+    u::iota(_sortMap, 0);
 
     if(_sortColumn < 0)
         return;

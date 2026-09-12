@@ -19,6 +19,7 @@
 
 #include "enrichmenttablemodel.h"
 
+#include "shared/utils/container.h"
 #include "shared/utils/string.h"
 
 #include <QMetaType>
@@ -181,7 +182,7 @@ void EnrichmentTableModel::updateSortFilterMap()
     else
     {
         _sortFilterMap.resize(_data.size());
-        std::iota(_sortFilterMap.begin(), _sortFilterMap.end(), 0);
+        u::iota(_sortFilterMap, 0);
     }
 
     if(_sortColumn >= 0)

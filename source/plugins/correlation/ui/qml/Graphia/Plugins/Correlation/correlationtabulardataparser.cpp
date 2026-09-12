@@ -424,7 +424,7 @@ void CorrelationTabularDataParser::clearData()
 static std::vector<size_t> randomRowIndices(size_t first, size_t numRows, size_t numSamples)
 {
     std::vector<size_t> rowIndices(numRows - first);
-    std::iota(rowIndices.begin(), rowIndices.end(), first);
+    u::iota(rowIndices, first);
     rowIndices = u::randomSample(rowIndices, numSamples);
     std::ranges::sort(rowIndices);
 

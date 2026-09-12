@@ -23,6 +23,8 @@
 #include "correlationdatavector.h"
 #include "correlation.h"
 
+#include "shared/utils/container.h"
+
 #include <QtGlobal>
 
 #include <algorithm>
@@ -38,7 +40,7 @@ private:
 public:
     explicit Unions(size_t size) : _unions(size)
     {
-        std::iota(_unions.begin(), _unions.end(), 0);
+        u::iota(_unions, 0);
     }
 
     size_t find(size_t i)
@@ -145,7 +147,7 @@ bool HierarchicalClusteringCommand::execute()
     setProgress(-1);
 
     std::vector<size_t> sortedIndices(dataColumns.size());
-    std::iota(sortedIndices.begin(), sortedIndices.end(), 0);
+    u::iota(sortedIndices, 0);
 
     std::ranges::sort(sortedIndices,
         [&ls](auto a, auto b) { return ls.at(a) < ls.at(b); });
