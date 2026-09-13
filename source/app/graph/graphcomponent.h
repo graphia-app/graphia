@@ -20,7 +20,7 @@
 #ifndef GRAPHCOMPONENT_H
 #define GRAPHCOMPONENT_H
 
-#include "shared/graph/igraphcomponent.h"
+#include "shared/graph/igraphcomponent.h" // IWYU pragma: export
 #include "shared/graph/elementid.h"
 #include "graph.h"
 
