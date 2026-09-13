@@ -20,7 +20,8 @@
 #ifndef JSON_H
 #define JSON_H
 
-#include "json_fwd.h"
-#include <json.hpp>
+#include "json_fwd.h" // IWYU pragma: keep
+#include <json.hpp> // IWYU pragma: export
+using json = nlohmann::json;
 
 #endif // JSON_H
