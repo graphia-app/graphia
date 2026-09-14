@@ -36,7 +36,7 @@ public:
     void setScale(float scale) { _scale = scale; }
     float scale() const { return _scale; }
 
-    void execute(bool, Dimensionality) override;
+    bool execute(bool, Dimensionality) override;
 };
 
 #endif // SCALINGLAYOUT_H

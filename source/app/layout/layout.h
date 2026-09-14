@@ -95,7 +95,7 @@ public:
     const std::vector<NodeId>& nodeIds() const { return _graphComponent->nodeIds(); }
     const std::vector<EdgeId>& edgeIds() const { return _graphComponent->edgeIds(); }
 
-    virtual void execute(bool firstIteration, Dimensionality dimensionalityMode) = 0;
+    virtual bool execute(bool firstIteration, Dimensionality dimensionalityMode) = 0;
 
     // Indicates that the algorithm is doing no useful work
     virtual bool finished() const { return false; }

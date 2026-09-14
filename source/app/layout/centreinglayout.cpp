@@ -21,10 +21,12 @@
 
 #include <QVector3D>
 
-void CentreingLayout::execute(bool, Dimensionality)
+bool CentreingLayout::execute(bool, Dimensionality)
 {
     const QVector3D centreOfMass = positions().centreOfMass(nodeIds());
 
     for(auto nodeId : nodeIds())
         positions().set(nodeId, positions().get(nodeId) - centreOfMass);
+
+    return true;
 }

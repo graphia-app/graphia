@@ -41,7 +41,7 @@ public:
         : Layout(graphComponent, positions)
     {}
 
-    void execute(bool, Dimensionality dimensionality) override;
+    bool execute(bool, Dimensionality dimensionality) override;
 };
 
 #endif // FASTINITIALLAYOUT_H

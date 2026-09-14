@@ -34,7 +34,7 @@ public:
     {}
 
     void setSpread(float spread) { _spread = spread; }
-    void execute(bool, Dimensionality) override;
+    bool execute(bool, Dimensionality) override;
 };
 
 #endif // RANDOMLAYOUT_H
