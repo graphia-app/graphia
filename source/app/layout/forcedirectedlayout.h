@@ -99,8 +99,8 @@ public:
 
     QString name() const override { return u"ForceDirected"_s; }
     QString displayName() const override { return QObject::tr("Force Directed"); }
-    std::unique_ptr<Layout> create(ComponentId componentId, NodeLayoutPositions& nodePositions,
-        Layout::Dimensionality dimensionalityMode) override;
+    std::unique_ptr<Layout> create(ComponentId componentId,
+        NodeLayoutPositions& nodePositions, Layout::Dimensionality dimensionalityMode) override;
 };
 
 #endif // FORCEDIRECTEDLAYOUT_H

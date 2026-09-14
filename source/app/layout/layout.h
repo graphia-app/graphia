@@ -34,8 +34,12 @@
 #include <cstddef>
 #include <vector>
 
+class MetaLayout;
+
 class Layout : public QObject, public Cancellable
 {
+    friend class LayoutThread;
+
     Q_OBJECT
 
 public:
@@ -59,11 +63,13 @@ private:
     size_t _smoothing;
     const IGraphComponent* _graphComponent;
     NodeLayoutPositions* _positions;
+    MetaLayout* _metaLayout = nullptr;
 
 protected:
     const LayoutSettings* _settings;
 
     NodeLayoutPositions& positions() { return *_positions; }
+    MetaLayout* metaLayout() { return _metaLayout; }
 
 public:
     Layout(const IGraphComponent& graphComponent,
@@ -102,6 +108,14 @@ public:
 
 signals:
     void progress(int percentage);
+};
+
+class MetaLayout
+{
+public:
+    virtual ~MetaLayout() = default;
+
+    virtual void execute(Layout::Dimensionality dimensionality) = 0;
 };
 
 #endif // LAYOUT_H
