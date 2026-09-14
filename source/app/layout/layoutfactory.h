@@ -72,6 +72,8 @@ public:
     virtual QString displayName() const = 0;
     virtual std::unique_ptr<Layout> create(ComponentId componentId,
         NodeLayoutPositions& results, Layout::Dimensionality dimensionalityMode) = 0;
+
+    virtual std::unique_ptr<MetaLayout> createMeta() { return nullptr; }
 };
 
 #endif // LAYOUTFACTORY_H

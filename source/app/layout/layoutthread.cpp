@@ -235,6 +235,9 @@ void LayoutThread::run()
             _executedAtLeastOnce.set(componentId, true);
         }
 
+        if(_metaLayout != nullptr)
+            _metaLayout->execute(_dimensionalityMode);
+
         {
             const std::unique_lock<NodePositions> lock(_graphModel->nodePositions());
             _graphModel->nodePositions().update(_nodeLayoutPositions);
@@ -300,6 +303,7 @@ void LayoutThread::run()
 
     const std::unique_lock<std::mutex> lock(_mutex);
     _layouts.clear();
+    _metaLayout.reset();
     _paused = true;
     _waitForPause.notify_all();
 
@@ -314,6 +318,7 @@ void LayoutThread::addComponent(ComponentId componentId)
 
         auto layout = _layoutFactory->create(componentId,
             _nodeLayoutPositions, _dimensionalityMode);
+        layout->_metaLayout = _metaLayout.get();
 
         _graphModel->nodePositions().setScale(layout->scaling());
         _graphModel->nodePositions().setSmoothing(layout->smoothing());
@@ -321,8 +326,10 @@ void LayoutThread::addComponent(ComponentId componentId)
     }
 }
 
-void LayoutThread::addAllComponents()
+void LayoutThread::initialise()
 {
+    _metaLayout = _layoutFactory->createMeta();
+
     for(const ComponentId componentId : _graphModel->graph().componentIds())
         addComponent(componentId);
 }
