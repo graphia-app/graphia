@@ -31,7 +31,7 @@ public:
         Layout(graphComponent, positions)
     {}
 
-    void execute(bool, Dimensionality) override;
+    bool execute(bool, Dimensionality) override;
 };
 
 

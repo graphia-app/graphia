@@ -85,7 +85,7 @@ public:
     bool finished() const override { return _layoutIsStable; }
     void unfinish() override;
 
-    void execute(bool firstIteration, Dimensionality dimensionality) override;
+    bool execute(bool firstIteration, Dimensionality dimensionality) override;
 };
 
 class ForceDirectedLayoutFactory : public LayoutFactory

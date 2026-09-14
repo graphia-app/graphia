@@ -94,10 +94,17 @@ public:
         return Dimensionality::ThreeDee;
     }
 
-    void execute(bool firstIteration, Dimensionality dimensionality)
+    bool execute(bool firstIteration, Dimensionality dimensionality)
     {
+        bool moved = false;
+
         for(auto subLayout : _subLayouts)
-            subLayout->execute(firstIteration, dimensionality);
+        {
+            if(subLayout->execute(firstIteration, dimensionality))
+                moved = true;
+        }
+
+        return moved;
     }
 };
 

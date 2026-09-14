@@ -100,7 +100,7 @@ static float repulse(float distanceSq, float shortRange, float longRange)
         ((distanceSq * distanceSq * distanceSq) + 0.0001f);
 }
 
-void ForceDirectedLayout::execute(bool firstIteration, Dimensionality dimensionality)
+bool ForceDirectedLayout::execute(bool firstIteration, Dimensionality dimensionality)
 {
     SCOPE_TIMER_MULTISAMPLES(50)
 
@@ -200,7 +200,7 @@ void ForceDirectedLayout::execute(bool firstIteration, Dimensionality dimensiona
     attractiveResults.wait();
 
     if(cancelled())
-        return;
+        return false;
 
     for(auto edgeId : edgeIds())
     {
@@ -220,6 +220,8 @@ void ForceDirectedLayout::execute(bool firstIteration, Dimensionality dimensiona
         positions().set(nodeId, positions().get(nodeId) + _displacements->at(nodeId)._next);
 
     checkForStability();
+
+    return true;
 }
 
 // A force directed layout never truly comes to rest; the nodes continue to move
