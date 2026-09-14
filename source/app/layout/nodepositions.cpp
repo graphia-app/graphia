@@ -38,6 +38,15 @@ void NodePositions::lock() const
     _threadId = std::this_thread::get_id();
 }
 
+bool NodePositions::try_lock() const
+{
+    if(!_mutex.try_lock())
+        return false;
+
+    _threadId = std::this_thread::get_id();
+    return true;
+}
+
 void NodePositions::unlock() const
 {
     _threadId = {};
