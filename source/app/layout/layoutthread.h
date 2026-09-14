@@ -32,6 +32,7 @@
 #include <QString>
 #include <QtGlobal>
 
+#include <chrono>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
@@ -73,6 +74,8 @@ private:
     PerformanceCounter _performanceCounter;
 
     bool _layoutPotentiallyRequired = false;
+
+    std::chrono::steady_clock::time_point _lastPublished;
 
     int _debug = 0;
 
@@ -120,6 +123,8 @@ private:
 
     void addComponent(ComponentId componentId);
     void removeComponent(ComponentId componentId);
+
+    void publishNodePositions(int maxUpdatesPerSecond, bool force = false);
 
 private slots:
     void onComponentSplit(const Graph*, const ComponentSplitSet& componentSplitSet);

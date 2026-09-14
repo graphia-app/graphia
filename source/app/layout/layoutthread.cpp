@@ -231,28 +231,21 @@ void LayoutThread::run()
                 _nodeLayoutPositions.flatten();
             }
 
-            layout->execute(!_executedAtLeastOnce.get(componentId), _dimensionalityMode);
+            if(layout->execute(!_executedAtLeastOnce.get(componentId), _dimensionalityMode))
+            {
+                // Publish inbetween components to keep the user feedback rate up, but
+                // not too often or the act of publishing costs too much performance
+                publishNodePositions(20);
+            }
+
             _executedAtLeastOnce.set(componentId, true);
         }
 
         if(_metaLayout != nullptr)
             _metaLayout->execute(_dimensionalityMode);
 
-        {
-            const std::unique_lock<NodePositions> lock(_graphModel->nodePositions());
-            _graphModel->nodePositions().update(_nodeLayoutPositions);
-
-            const bool requiresFlattening = _dimensionalityMode == Layout::Dimensionality::TwoDee &&
-                std::ranges::any_of(_layouts, [](const auto& layout)
-                {
-                    return layout.second->dimensionality() == Layout::Dimensionality::ThreeDee;
-                });
-
-            if(requiresFlattening)
-                _graphModel->nodePositions().flatten();
-
-            emit executed();
-        }
+        // Once all the layouts have been executed, publish at less restrictive rate
+        publishNodePositions(60, allLayoutsFinished());
 
         _performanceCounter.tick();
 
@@ -341,6 +334,44 @@ void LayoutThread::setNodePositions(const ExactNodePositions& nodePositions)
 
     // Stop the layouts throwing away our newly set positions
     _executedAtLeastOnce.fill(true);
+}
+
+void LayoutThread::publishNodePositions(int maxUpdatesPerSecond, bool force)
+{
+    const auto now = std::chrono::steady_clock::now();
+
+    if(!force)
+    {
+        const double minInterval = 1.0 / static_cast<double>(maxUpdatesPerSecond);
+        const auto timeSincePublished = std::chrono::duration<double>(
+            now - _lastPublished).count();
+
+        // Not too often
+        if(timeSincePublished < minInterval)
+            return;
+    }
+
+    std::unique_lock<NodePositions> lock(_graphModel->nodePositions(), std::defer_lock);
+
+    if(force)
+        lock.lock();
+    else if(!lock.try_lock())
+        return;
+
+    _graphModel->nodePositions().update(_nodeLayoutPositions);
+
+    const bool requiresFlattening = _dimensionalityMode == Layout::Dimensionality::TwoDee &&
+        std::ranges::any_of(_layouts, [](const auto& layout)
+        {
+            return layout.second->dimensionality() == Layout::Dimensionality::ThreeDee;
+        });
+
+    if(requiresFlattening)
+        _graphModel->nodePositions().flatten();
+
+    emit executed();
+
+    _lastPublished = now;
 }
 
 Layout::Dimensionality LayoutThread::dimensionalityMode()
