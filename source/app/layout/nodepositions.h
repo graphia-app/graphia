@@ -56,6 +56,7 @@ public:
     using NodeArray::NodeArray;
 
     void lock() const;
+    bool try_lock() const;
     void unlock() const;
     bool unlocked() const;
 
