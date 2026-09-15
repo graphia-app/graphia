@@ -79,7 +79,7 @@ LayoutThread::LayoutThread(GraphModel& graphModel,
         const std::unique_lock<std::mutex> lock(_mutex);
 
         _layoutPotentiallyRequired = true;
-        unfinish();
+        _settingChanged = true;
     });
 
     connect(&_layoutFactory->settings(), &LayoutSettings::settingChanged,
@@ -269,6 +269,9 @@ void LayoutThread::run()
         std::unique_lock<std::mutex> lock(_mutex);
 
         _layoutPotentiallyRequired = false;
+
+        if(std::exchange(_settingChanged, false))
+            unfinish();
 
         if(_stop)
             break;

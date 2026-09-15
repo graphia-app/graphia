@@ -76,6 +76,7 @@ private:
     PerformanceCounter _performanceCounter;
 
     bool _layoutPotentiallyRequired = false;
+    bool _settingChanged = false;
 
     std::chrono::steady_clock::time_point _lastPublished;
 
