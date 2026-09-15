@@ -70,6 +70,7 @@ public:
     std::vector<QVector3D> get(const std::vector<NodeId>& nodeIds) const;
 
     void flatten();
+    void flatten(const std::vector<NodeId>& nodeIds);
 
     void update(const NodePositions& other);
 
