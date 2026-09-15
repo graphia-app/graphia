@@ -90,6 +90,7 @@ public:
     void pauseAndWait();
     bool paused() const;
     void resume();
+    void invalidate();
 
     void start();
     void stop();

@@ -97,6 +97,10 @@ public:
 
     virtual bool execute(bool firstIteration, Dimensionality dimensionalityMode) = 0;
 
+    // Called when paused after the underlying graph changed, in case
+    // any cached/structural data needs to be invalidated/rebuilt
+    virtual void invalidate() {}
+
     // Indicates that the algorithm is doing no useful work
     virtual bool finished() const { return false; }
 
