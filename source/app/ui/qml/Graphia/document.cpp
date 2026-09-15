@@ -1057,6 +1057,10 @@ void Document::onLoadComplete(const QUrl&, bool success)
             emit graphChangingChanged();
 
         _layoutRequired = changeOccurred || _layoutRequired;
+
+        if(changeOccurred)
+            _layoutThread->invalidate();
+
         maybeEmitBusyChanged();
 
         // If the graph has changed outside of a Command, then our new state is

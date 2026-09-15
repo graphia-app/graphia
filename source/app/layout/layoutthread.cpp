@@ -149,6 +149,17 @@ void LayoutThread::resume()
     lock.unlock();
 }
 
+void LayoutThread::invalidate()
+{
+    if(_debug != 0 && !paused())
+        qDebug() << "LayoutThread::invalidate() called when not paused";
+
+    pauseAndWait();
+
+    for(auto& layout : _layouts)
+        layout.second->invalidate();
+}
+
 void LayoutThread::start()
 {
     if(_thread.joinable())
