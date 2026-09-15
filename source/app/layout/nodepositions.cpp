@@ -93,6 +93,19 @@ void NodePositions::flatten()
     });
 }
 
+void NodePositions::flatten(const std::vector<NodeId>& nodeIds)
+{
+    const std::unique_lock<std::recursive_mutex> lock(_mutex);
+
+    for(auto nodeId : nodeIds)
+    {
+        auto& positions = elementFor(nodeId);
+
+        for(size_t i = 0; i < positions.size(); i++)
+            positions.at(i).setZ(0.0f);
+    }
+}
+
 void NodePositions::update(const NodePositions& other)
 {
     const std::unique_lock<const NodePositions> lock(*this);
