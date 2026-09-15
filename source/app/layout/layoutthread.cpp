@@ -301,11 +301,14 @@ void LayoutThread::run()
             if(_debug != 0) qDebug() << "Layout resumed";
         }
 
+        _layoutsToBeRemoved.clear();
+
         std::this_thread::yield();
     }
     while(iterative() || _repeating || allLayoutsFinished());
 
     const std::unique_lock<std::mutex> lock(_mutex);
+    _layoutsToBeRemoved.clear();
     _layouts.clear();
     _metaLayout.reset();
     _paused = true;
@@ -424,6 +427,8 @@ void LayoutThread::removeComponent(ComponentId componentId)
     if(u::contains(_layouts, componentId))
     {
         const std::unique_lock<std::mutex> lock(_mutex);
+
+        _layoutsToBeRemoved.emplace_back(std::move(_layouts.at(componentId)));
         _layouts.erase(componentId);
     }
 

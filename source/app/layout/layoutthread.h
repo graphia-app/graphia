@@ -62,6 +62,8 @@ private:
 
     std::unique_ptr<LayoutFactory> _layoutFactory;
     ComponentIdMap<std::unique_ptr<Layout>> _layouts;
+    std::vector<std::unique_ptr<Layout>> _layoutsToBeRemoved;
+
     std::unique_ptr<MetaLayout> _metaLayout;
     ComponentArray<bool> _executedAtLeastOnce;
     std::atomic_bool _firstIterDone = false;
