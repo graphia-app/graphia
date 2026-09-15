@@ -225,26 +225,26 @@ void LayoutThread::run()
 
     emit pausedChanged();
 
+    std::unique_lock<std::mutex> lock(_mutex);
+
     do
     {
         u::setCurrentThreadName(u"Layout >"_s);
 
+        for(const ComponentId componentId : _componentsToBeAdded)
         {
-            const std::unique_lock<std::mutex> lock(_mutex);
+            auto layout = _layoutFactory->create(componentId,
+                _nodeLayoutPositions, _dimensionalityMode);
+            layout->_metaLayout = _metaLayout.get();
 
-            for(const ComponentId componentId : _componentsToBeAdded)
-            {
-                auto layout = _layoutFactory->create(componentId,
-                    _nodeLayoutPositions, _dimensionalityMode);
-                layout->_metaLayout = _metaLayout.get();
-
-                _graphModel->nodePositions().setScale(layout->scaling());
-                _graphModel->nodePositions().setSmoothing(layout->smoothing());
-                _layouts.emplace(componentId, std::move(layout));
-            }
-
-            _componentsToBeAdded.clear();
+            _graphModel->nodePositions().setScale(layout->scaling());
+            _graphModel->nodePositions().setSmoothing(layout->smoothing());
+            _layouts.emplace(componentId, std::move(layout));
         }
+
+        _componentsToBeAdded.clear();
+
+        lock.unlock();
 
         for(auto& [componentId, layout] : _layouts)
         {
@@ -282,7 +282,7 @@ void LayoutThread::run()
             emit firstIterDone();
         }
 
-        std::unique_lock<std::mutex> lock(_mutex);
+        lock.lock();
 
         _layoutPotentiallyRequired = false;
 
@@ -321,12 +321,9 @@ void LayoutThread::run()
         }
 
         _layoutsToBeRemoved.clear();
-
-        std::this_thread::yield();
     }
     while(iterative() || allLayoutsFinished());
 
-    const std::unique_lock<std::mutex> lock(_mutex);
     _layoutsToBeRemoved.clear();
     _layouts.clear();
     _metaLayout.reset();
