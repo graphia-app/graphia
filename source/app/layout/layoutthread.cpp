@@ -219,16 +219,38 @@ bool LayoutThread::allLayoutsFinished() const
 
 bool LayoutThread::workToDo() const
 {
-    return _layoutPotentiallyRequired || !allLayoutsFinished();
+    return _layoutPotentiallyRequired || !_componentsToBeAdded.empty() || !allLayoutsFinished();
 }
 
 void LayoutThread::run()
 {
+    _metaLayout = _layoutFactory->createMeta();
+
+    for(const ComponentId componentId : _graphModel->graph().componentIds())
+        addComponent(componentId);
+
     emit pausedChanged();
 
     do
     {
         u::setCurrentThreadName(u"Layout >"_s);
+
+        {
+            const std::unique_lock<std::mutex> lock(_mutex);
+
+            for(const ComponentId componentId : _componentsToBeAdded)
+            {
+                auto layout = _layoutFactory->create(componentId,
+                    _nodeLayoutPositions, _dimensionalityMode);
+                layout->_metaLayout = _metaLayout.get();
+
+                _graphModel->nodePositions().setScale(layout->scaling());
+                _graphModel->nodePositions().setSmoothing(layout->smoothing());
+                _layouts.emplace(componentId, std::move(layout));
+            }
+
+            _componentsToBeAdded.clear();
+        }
 
         for(auto& [componentId, layout] : _layouts)
         {
@@ -322,26 +344,10 @@ void LayoutThread::run()
 
 void LayoutThread::addComponent(ComponentId componentId)
 {
-    if(!u::contains(_layouts, componentId))
-    {
-        const std::unique_lock<std::mutex> lock(_mutex);
+    const std::unique_lock<std::mutex> lock(_mutex);
 
-        auto layout = _layoutFactory->create(componentId,
-            _nodeLayoutPositions, _dimensionalityMode);
-        layout->_metaLayout = _metaLayout.get();
-
-        _graphModel->nodePositions().setScale(layout->scaling());
-        _graphModel->nodePositions().setSmoothing(layout->smoothing());
-        _layouts.emplace(componentId, std::move(layout));
-    }
-}
-
-void LayoutThread::initialise()
-{
-    _metaLayout = _layoutFactory->createMeta();
-
-    for(const ComponentId componentId : _graphModel->graph().componentIds())
-        addComponent(componentId);
+    if(!u::contains(_componentsToBeAdded, componentId))
+        _componentsToBeAdded.emplace_back(componentId);
 }
 
 void LayoutThread::setNodePositions(const ExactNodePositions& nodePositions)
@@ -427,13 +433,19 @@ void LayoutThread::removeComponent(ComponentId componentId)
         resumeAfterRemoval = true;
     }
 
+    std::unique_lock<std::mutex> lock(_mutex);
+
+    // There's a slim chance that the component has just been added
+    // Most of the time this is a no-op
+    std::erase(_componentsToBeAdded, componentId);
+
     if(u::contains(_layouts, componentId))
     {
-        const std::unique_lock<std::mutex> lock(_mutex);
-
         _layoutsToBeRemoved.emplace_back(std::move(_layouts.at(componentId)));
         _layouts.erase(componentId);
     }
+
+    lock.unlock();
 
     if(resumeAfterRemoval)
         resume();

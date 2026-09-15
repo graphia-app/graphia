@@ -62,6 +62,8 @@ private:
 
     std::unique_ptr<LayoutFactory> _layoutFactory;
     ComponentIdMap<std::unique_ptr<Layout>> _layouts;
+
+    std::vector<ComponentId> _componentsToBeAdded;
     std::vector<std::unique_ptr<Layout>> _layoutsToBeRemoved;
 
     std::unique_ptr<MetaLayout> _metaLayout;
@@ -99,8 +101,6 @@ public:
     void stop();
 
     bool finished() const;
-
-    void initialise();
 
     void setNodePositions(const ExactNodePositions& nodePositions);
 
