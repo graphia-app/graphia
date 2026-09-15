@@ -118,8 +118,6 @@ void LayoutThread::pauseAndWait()
         layout.second->cancel();
 
     _waitForPause.wait(lock);
-
-    lock.unlock();
 }
 
 bool LayoutThread::paused() const
@@ -130,7 +128,7 @@ bool LayoutThread::paused() const
 
 void LayoutThread::resume()
 {
-    std::unique_lock<std::mutex> lock(_mutex);
+    const std::unique_lock<std::mutex> lock(_mutex);
     if(!_paused)
         return;
 
@@ -143,8 +141,6 @@ void LayoutThread::resume()
     _pause = false;
 
     _waitForResume.notify_all();
-
-    lock.unlock();
 }
 
 void LayoutThread::invalidate()
