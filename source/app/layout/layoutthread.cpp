@@ -228,7 +228,7 @@ void LayoutThread::run()
                (layout->dimensionality() & _dimensionalityMode))
             {
                 // If we're in 2D mode and the layout can handle it, flatten the positions
-                _nodeLayoutPositions.flatten();
+                _nodeLayoutPositions.flatten(layout->nodeIds());
             }
 
             if(layout->execute(!_executedAtLeastOnce.get(componentId), _dimensionalityMode))
