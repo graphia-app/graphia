@@ -43,10 +43,8 @@ static bool layoutIsFinished(const Layout& layout)
 }
 
 LayoutThread::LayoutThread(GraphModel& graphModel,
-    std::unique_ptr<LayoutFactory>&& layoutFactory,
-    bool repeating) :
+    std::unique_ptr<LayoutFactory>&& layoutFactory) :
     _graphModel(&graphModel),
-    _repeating(repeating),
     _layoutFactory(std::move(layoutFactory)),
     _executedAtLeastOnce(graphModel.graph()),
     _nodeLayoutPositions(graphModel.graph()),
@@ -298,7 +296,7 @@ void LayoutThread::run()
         if(_stop)
             break;
 
-        if(_pause || allLayoutsFinished() || (!iterative() && _repeating))
+        if(_pause || allLayoutsFinished() || !iterative())
         {
             _paused = true;
             emit pausedChanged();
@@ -330,7 +328,7 @@ void LayoutThread::run()
 
         std::this_thread::yield();
     }
-    while(iterative() || _repeating || allLayoutsFinished());
+    while(iterative() || allLayoutsFinished());
 
     const std::unique_lock<std::mutex> lock(_mutex);
     _layoutsToBeRemoved.clear();

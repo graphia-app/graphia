@@ -56,7 +56,6 @@ private:
     bool _pause = false;
     bool _paused = false;
     bool _stop = false;
-    bool _repeating = false;
     std::condition_variable _waitForPause;
     std::condition_variable _waitForResume;
 
@@ -86,8 +85,7 @@ private:
 
 public:
     LayoutThread(GraphModel& graphModel,
-        std::unique_ptr<LayoutFactory>&& layoutFactory,
-        bool repeating = false);
+        std::unique_ptr<LayoutFactory>&& layoutFactory);
 
     ~LayoutThread() override;
 
