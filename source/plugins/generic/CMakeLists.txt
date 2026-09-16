@@ -8,7 +8,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt6 COMPONENTS REQUIRED Core Concurrent Qml Quick QuickControls2 OpenGL Svg Widgets Xml)
+find_package(Qt6 REQUIRED COMPONENTS Core Concurrent Qml Quick QuickControls2 OpenGL Svg Widgets Xml)
 
 list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/genericplugin.h

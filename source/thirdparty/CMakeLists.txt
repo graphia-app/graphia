@@ -77,7 +77,7 @@ else()
     set_target_properties(thirdparty_static PROPERTIES COMPILE_FLAGS "-w")
 endif()
 
-find_package(Qt6 COMPONENTS REQUIRED Core Qml Quick QuickControls2 Network Widgets PrintSupport)
+find_package(Qt6 REQUIRED COMPONENTS Core Qml Quick QuickControls2 Network Widgets PrintSupport)
 target_link_libraries(thirdparty PRIVATE
     Qt6::Core
     Qt6::Qml

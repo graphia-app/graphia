@@ -6,7 +6,7 @@ else()
     project("Graphia" LANGUAGES C CXX ASM)
 endif()
 
-find_package(Qt6 COMPONENTS REQUIRED Core)
+find_package(Qt6 REQUIRED COMPONENTS Core)
 qt_standard_project_setup(REQUIRES 6.9)
 
 include_directories(source)

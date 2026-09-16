@@ -1,6 +1,6 @@
 include(${CMAKE_SOURCE_DIR}/source/common.cmake)
 
-find_package(Qt6 COMPONENTS REQUIRED Quick)
+find_package(Qt6 REQUIRED COMPONENTS Quick)
 
 qt_add_qml_module(plugins_qml
     URI Graphia.Plugins

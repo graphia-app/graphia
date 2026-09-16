@@ -6,7 +6,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt6 COMPONENTS REQUIRED Concurrent Qml Quick QuickControls2 Xml Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Concurrent Qml Quick QuickControls2 Xml Widgets)
 
 list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/../shared/utils/preferences.h

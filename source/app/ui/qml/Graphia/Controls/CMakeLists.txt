@@ -1,6 +1,6 @@
 include(${CMAKE_SOURCE_DIR}/source/common.cmake)
 
-find_package(Qt6 COMPONENTS REQUIRED Quick)
+find_package(Qt6 REQUIRED COMPONENTS Quick)
 
 set_source_files_properties(FontPointSize.qml PROPERTIES
     QT_QML_SINGLETON_TYPE TRUE

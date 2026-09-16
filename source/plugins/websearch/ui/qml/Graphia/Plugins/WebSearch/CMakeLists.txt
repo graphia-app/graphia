@@ -1,6 +1,6 @@
 include(${CMAKE_SOURCE_DIR}/source/common.cmake)
 
-find_package(Qt6 COMPONENTS REQUIRED Quick)
+find_package(Qt6 REQUIRED COMPONENTS Quick)
 
 set_source_files_properties(${GENERIC_PLUGIN_QML_MODULE_DIR}/MatrixParameters.qml PROPERTIES
     QT_RESOURCE_ALIAS MatrixParameters.qml

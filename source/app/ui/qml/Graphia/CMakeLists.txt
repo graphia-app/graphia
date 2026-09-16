@@ -5,7 +5,7 @@ add_subdirectory(Loading)
 add_subdirectory(Plugins)
 add_subdirectory(Utils)
 
-find_package(Qt6 COMPONENTS REQUIRED Quick Concurrent Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Quick Concurrent Widgets)
 
 qt_add_qml_module(main_qml
     URI Graphia

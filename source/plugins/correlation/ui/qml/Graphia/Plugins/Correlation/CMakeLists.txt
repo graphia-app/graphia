@@ -1,6 +1,6 @@
 include(${CMAKE_SOURCE_DIR}/source/common.cmake)
 
-find_package(Qt6 COMPONENTS REQUIRED Quick Concurrent)
+find_package(Qt6 REQUIRED COMPONENTS Quick Concurrent)
 
 qt_add_qml_module(correlation_qml
     URI Graphia.Plugins.Correlation

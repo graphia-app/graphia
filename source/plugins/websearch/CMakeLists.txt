@@ -8,7 +8,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt6 COMPONENTS REQUIRED Core Concurrent Qml Quick QuickControls2 OpenGL Svg Widgets Xml)
+find_package(Qt6 REQUIRED COMPONENTS Core Concurrent Qml Quick QuickControls2 OpenGL Svg Widgets Xml)
 
 list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/websearchplugin.h
@@ -42,6 +42,6 @@ target_link_libraries(${PluginName} PRIVATE
 )
 
 if(NOT EMSCRIPTEN)
-    find_package(Qt6 COMPONENTS REQUIRED WebEngineQuick)
+    find_package(Qt6 REQUIRED COMPONENTS WebEngineQuick)
     target_link_libraries(${PluginName} PRIVATE Qt6::WebEngineQuick)
 endif()

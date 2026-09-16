@@ -1,6 +1,6 @@
 include(${CMAKE_SOURCE_DIR}/source/common.cmake)
 
-find_package(Qt6 COMPONENTS REQUIRED Concurrent Quick Widgets Xml)
+find_package(Qt6 REQUIRED COMPONENTS Concurrent Quick Widgets Xml)
 
 if(EMSCRIPTEN)
     set(WASM_SOURCES wasmlocalfileaccess.h wasmlocalfileaccess.cpp)
