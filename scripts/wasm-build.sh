@@ -51,7 +51,7 @@ mkdir -p ${BUILD_DIR}
   . variables.sh
   cmake --build . 2>&1 | tee compiler-${VERSION}.log
   [[ "${PIPESTATUS[0]}" -eq 0 ]] || exit ${PIPESTATUS[0]}
-)
+) || exit $?
 
 # Apply branding changes -- this will almost certainly break in future
 cp misc/wasm-extras/* ${BUILD_DIR}
