@@ -20,7 +20,6 @@
 #include "correlationplot.h"
 
 #include "plugins/correlation/correlationplugin.h"
-#include "qcpcolumnannotations.h"
 
 #include "shared/utils/container.h"
 #include "shared/utils/statistics.h"

@@ -26,7 +26,6 @@
 #include <QtGlobal>
 
 #include <algorithm>
-#include <numeric>
 #include <utility>
 
 using namespace Qt::Literals::StringLiterals;

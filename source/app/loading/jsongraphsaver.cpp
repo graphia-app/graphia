@@ -23,7 +23,6 @@
 #include "shared/attributes/iattribute.h"
 #include "shared/graph/igraph.h"
 #include "shared/graph/igraphmodel.h"
-#include "shared/graph/imutablegraph.h"
 #include "shared/utils/json.h"
 
 #include <QByteArray>

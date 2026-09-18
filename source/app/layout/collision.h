@@ -21,7 +21,6 @@
 #define COLLISION_H
 
 #include "shared/graph/elementid.h"
-#include "layout.h"
 
 #include <QVector3D>
 

@@ -28,11 +28,7 @@
 #include "shared/utils/visitor.h"
 
 #include <lexy_utils.h>
-
 #include <lexy/action/parse.hpp>
-#include <lexy/action/scan.hpp>
-#include <lexy/callback.hpp>
-#include <lexy/dsl.hpp>
 
 #include <QByteArray>
 #include <QFile>

@@ -19,8 +19,6 @@
 
 #include "scopetimer.h"
 
-#include "shared/utils/container.h"
-
 #include <QDebug>
 
 #include <algorithm>

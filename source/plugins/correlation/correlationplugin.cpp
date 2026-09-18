@@ -28,8 +28,6 @@
 #include "shared/graph/grapharray_json.h"
 #include "shared/graph/imutablegraph.h"
 
-#include "shared/utils/threadpool.h"
-#include "shared/utils/iterator_range.h"
 #include "shared/utils/container.h"
 #include "shared/utils/string.h"
 #include "shared/utils/redirects.h"
@@ -40,8 +38,6 @@
 #include "shared/attributes/iattribute.h"
 
 #include "shared/ui/visualisations/ielementvisual.h"
-
-#include "shared/loading/xlsxtabulardataparser.h"
 
 #include <qcustomplotcolorprovider.h>
 

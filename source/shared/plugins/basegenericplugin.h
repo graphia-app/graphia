@@ -28,8 +28,6 @@
 
 #include "shared/plugins/nodeattributetablemodel.h"
 
-#include "shared/graph/grapharray.h"
-
 #include <QList>
 #include <QString>
 #include <QStringList>

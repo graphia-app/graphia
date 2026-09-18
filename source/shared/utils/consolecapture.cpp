@@ -19,7 +19,6 @@
 
 #include "consolecapture.h"
 
-#include "odsconsolecapture.h"
 #include "debugger.h"
 #include "console.h"
 
@@ -27,6 +26,10 @@
 #include <QtGlobal>
 
 #include <iostream>
+
+#ifdef Q_OS_WIN
+#include "odsconsolecapture.h"
+#endif
 
 using namespace Qt::Literals::StringLiterals;
 

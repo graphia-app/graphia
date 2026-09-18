@@ -24,10 +24,7 @@
 #include "transition.h"
 #include "graphrenderertypes.h"
 
-#include "app/maths/boundingbox.h"
-
 #include "shared/graph/igraph.h"
-#include "shared/graph/grapharray.h"
 #include "shared/utils/namedbool.h"
 
 #include "limitconstants.h"

@@ -36,8 +36,11 @@
 #include "app/maths/frustum.h"
 
 #include "app/layout/collision.h"
+#include "app/layout/nodepositions.h"
 
 #include "app/ui/visualisations/elementvisual.h"
+
+#include "shared/graph/igraphcomponent.h"
 
 #include <QMouseEvent>
 #include <QKeyEvent>

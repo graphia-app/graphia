@@ -25,7 +25,6 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <variant>
 
 using namespace Qt::Literals::StringLiterals;
 

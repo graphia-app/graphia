@@ -23,7 +23,6 @@
 #include "app/graph/mutablegraph.h"
 
 #include "shared/utils/string.h"
-#include "shared/loading/userelementdata.h"
 
 #include "../crashhandler.h"
 

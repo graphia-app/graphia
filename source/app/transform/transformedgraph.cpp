@@ -21,9 +21,7 @@
 
 #include "app/graph/graphmodel.h"
 
-#include "shared/commands/icommand.h"
 #include "shared/utils/container.h"
-#include "shared/utils/container_combine.h"
 #include "shared/utils/string.h"
 
 TransformedGraph::TransformedGraph(GraphModel& graphModel, const MutableGraph& source) :

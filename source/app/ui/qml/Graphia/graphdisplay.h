@@ -23,8 +23,6 @@
 #include "app/graph/qmlelementid.h"
 #include "app/rendering/graphrenderertypes.h"
 
-#include "shared/utils/namedbool.h"
-
 #include <QQmlEngine>
 #include <QQuickFramebufferObject>
 #include <QString>

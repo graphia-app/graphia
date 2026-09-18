@@ -25,12 +25,10 @@
 #include "softmaxnormaliser.h"
 
 #include "shared/graph/igraphmodel.h"
-#include "shared/graph/imutablegraph.h"
 
 #include "shared/loading/xlsxtabulardataparser.h"
 
 #include "shared/utils/container.h"
-#include "shared/utils/string.h"
 
 #include <QObject>
 #include <QtGlobal>

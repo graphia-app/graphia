@@ -75,7 +75,6 @@ QString u::parentProcessName()
 #elif defined(__linux__)
 #include <sys/prctl.h>
 #include <unistd.h>
-#include <sys/syscall.h>
 
 #include <QFile>
 

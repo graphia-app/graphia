@@ -23,9 +23,6 @@
 
 #include "shared/loading/graphsizeestimate.h"
 #include "shared/loading/adjacencymatrixutils.h"
-#include "shared/loading/userelementdata.h"
-
-#include "shared/utils/string.h"
 
 #include <QPoint>
 

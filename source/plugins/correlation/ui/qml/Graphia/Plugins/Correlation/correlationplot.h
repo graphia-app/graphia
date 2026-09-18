@@ -21,7 +21,6 @@
 #define CORRELATIONPLOT_H
 
 #include "plugins/correlation/correlationplugin.h"
-#include "plugins/correlation/columnannotation.h"
 
 #include "shared/utils/qmlenum.h"
 

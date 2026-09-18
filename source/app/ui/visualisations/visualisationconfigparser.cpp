@@ -22,10 +22,7 @@
 #include "app/configgrammar.h"
 
 #include <lexy_utils.h>
-
 #include <lexy/action/parse.hpp>
-#include <lexy/callback.hpp>
-#include <lexy/dsl.hpp>
 #include <lexy/input/string_input.hpp>
 
 #include <QByteArray>

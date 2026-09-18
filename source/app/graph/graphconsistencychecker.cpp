@@ -19,9 +19,9 @@
 
 #include "graphconsistencychecker.h"
 #include "graph.h"
-#include "graphcomponent.h"
 
 #include "shared/graph/elementid_debug.h"
+#include "shared/graph/igraphcomponent.h"
 #include "shared/utils/container.h"
 
 #include <QDebug>

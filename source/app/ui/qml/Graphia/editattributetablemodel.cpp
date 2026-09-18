@@ -26,11 +26,12 @@
 
 #include "shared/utils/container.h"
 #include "shared/utils/string.h"
+
 #include <QDebug>
 #include <QMetaType>
+
 #include <algorithm>
 #include <cstddef>
-#include <numeric>
 #include <type_traits>
 #include <utility>
 

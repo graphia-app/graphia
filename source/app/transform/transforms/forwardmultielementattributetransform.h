@@ -21,7 +21,6 @@
 #define FORWARDMULTIELEMENTATTRIBUTETRANSFORM_H
 
 #include "app/transform/graphtransform.h"
-#include "app/attributes/attribute.h"
 
 #include <QObject>
 #include <QString>

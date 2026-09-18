@@ -21,13 +21,11 @@
 
 #include "app/transform/transformedgraph.h"
 #include "app/graph/graphmodel.h"
-#include "shared/utils/container.h"
 
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
-#include <variant>
 
 using namespace Qt::Literals::StringLiterals;
 

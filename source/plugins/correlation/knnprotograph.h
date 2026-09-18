@@ -33,7 +33,6 @@
 #include <iterator>
 #include <mutex>
 #include <vector>
-#include <compare>
 
 using namespace Qt::Literals::StringLiterals;
 

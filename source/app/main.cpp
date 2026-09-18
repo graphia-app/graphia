@@ -38,12 +38,15 @@
 #include "shared/ui/visualisations/defaultpalettes.h"
 
 #include "app/rendering/openglfunctions.h"
-#include "app/rendering/graphrenderer.h"
+#include "app/rendering/graphrenderertypes.h"
 
 #include "app/updates/updater.h"
 
 #include <qtsingleapplication/qtsingleapplication.h>
+
+#ifndef _DEBUG
 #include <breakpad/crashhandler.h>
+#endif
 
 #include <QObject>
 #include <QQmlComponent>
@@ -80,17 +83,17 @@
 #endif
 
 #include <iostream>
-#include <fstream>
 #include <chrono>
 #include <cstddef>
-#include <string>
-#include <vector>
 
 #ifdef Q_OS_WASM
 #include <emscripten.h>
 #include <emscripten/val.h>
 
 #include <QUrlQuery>
+
+#include <string>
+#include <vector>
 #endif
 
 using namespace Qt::Literals::StringLiterals;

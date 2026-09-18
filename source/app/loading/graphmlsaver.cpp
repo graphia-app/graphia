@@ -19,11 +19,10 @@
 
 #include "graphmlsaver.h"
 
-#include "app/graph/graph.h"
 #include "app/graph/graphmodel.h"
 #include "app/layout/nodepositions.h"
+#include "shared/graph/igraph.h"
 #include "shared/attributes/iattribute.h"
-#include "shared/graph/imutablegraph.h"
 
 #include <QFile>
 #include <QObject>

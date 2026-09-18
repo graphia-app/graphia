@@ -22,9 +22,6 @@
 #include "correlationplugin.h"
 
 #include "shared/utils/string.h"
-#include "shared/loading/userelementdata.h"
-
-#include "../crashhandler.h"
 
 #include <QObject>
 

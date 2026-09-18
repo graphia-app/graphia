@@ -21,7 +21,8 @@
 #define TYPECASTTRANSFORM_H
 
 #include "app/transform/graphtransform.h"
-#include "app/attributes/attribute.h"
+
+#include "shared/attributes/iattribute.h"
 
 #include <QObject>
 #include <QString>

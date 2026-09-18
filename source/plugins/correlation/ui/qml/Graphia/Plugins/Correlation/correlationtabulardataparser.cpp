@@ -20,10 +20,7 @@
 #include "correlationtabulardataparser.h"
 
 #include "plugins/correlation/correlation.h"
-#include "plugins/correlation/correlationplugin.h"
-
-#include "shared/graph/igraphmodel.h"
-#include "shared/graph/imutablegraph.h"
+#include "plugins/correlation/loading/correlationfileparser.h"
 
 #include "shared/loading/graphsizeestimate.h"
 #include "shared/loading/xlsxtabulardataparser.h"
@@ -37,11 +34,9 @@
 #include <QtGlobal>
 
 #include <algorithm>
-#include <numeric>
 #include <vector>
 #include <set>
 #include <limits>
-#include <span>
 
 using namespace Qt::Literals::StringLiterals;
 

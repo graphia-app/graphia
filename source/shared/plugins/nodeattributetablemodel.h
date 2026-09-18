@@ -20,7 +20,6 @@
 #ifndef NODEATTRIBUTETABLEMODEL_H
 #define NODEATTRIBUTETABLEMODEL_H
 
-#include "shared/graph/elementid.h"
 #include "shared/ui/idocument.h"
 #include "shared/loading/iuserelementdata.h"
 

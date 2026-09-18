@@ -20,7 +20,6 @@
 #ifndef GRAPHARRAY_JSON_H
 #define GRAPHARRAY_JSON_H
 
-#include "shared/graph/grapharray.h"
 #include "shared/utils/progressable.h"
 #include "shared/utils/container.h"
 #include "shared/utils/json.h"

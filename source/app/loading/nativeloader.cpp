@@ -26,7 +26,6 @@
 #include "app/graph/mutablegraph.h"
 
 #include "shared/graph/igraphmodel.h"
-#include "shared/graph/imutablegraph.h"
 #include "shared/graph/grapharray_json.h"
 
 #include "shared/plugins/iplugin.h"
@@ -50,7 +49,6 @@
 #include <QtGlobal>
 
 #include <algorithm>
-#include <chrono>
 #include <cmath>
 #include <cstdint>
 #include <string>

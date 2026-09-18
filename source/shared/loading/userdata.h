@@ -23,7 +23,6 @@
 #include "shared/loading/iuserdata.h"
 #include "shared/loading/userdatavector.h"
 
-#include "shared/utils/pair_iterator.h"
 #include "shared/utils/progressable.h"
 #include "shared/utils/json_fwd.h"
 

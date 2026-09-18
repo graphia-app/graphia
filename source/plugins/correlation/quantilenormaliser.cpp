@@ -20,7 +20,6 @@
 #include "quantilenormaliser.h"
 
 #include "shared/loading/iparser.h"
-#include "shared/utils/cancellable.h"
 
 #include <QtGlobal>
 

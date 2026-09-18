@@ -22,7 +22,10 @@
 #include "application.h"
 #include "crashtype.h"
 
+#ifndef _DEBUG
 #include "app/tracking.h"
+#endif
+
 #include "app/preferences.h"
 
 #include "shared/plugins/iplugin.h"
@@ -33,7 +36,6 @@
 #include "shared/utils/scopetimer.h"
 #include "shared/utils/msvcwarningsuppress.h"
 #include "shared/utils/static_block.h"
-#include "shared/utils/qrcextract.h"
 
 #include "app/loading/graphmlsaver.h"
 #include "app/loading/jsongraphsaver.h"
@@ -60,10 +62,13 @@
 #include <iostream>
 #include <thread>
 #include <mutex>
-#include <chrono>
 #include <algorithm>
 #include <map>
 #include <cstddef>
+
+#ifdef Q_OS_WASM
+#include "shared/utils/qrcextract.h"
+#endif
 
 using namespace Qt::Literals::StringLiterals;
 
