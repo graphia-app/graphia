@@ -69,7 +69,6 @@
 #include "app/ui/visualisations/textvisual.h"
 
 #include "shared/plugins/iplugin.h"
-#include "shared/commands/icommand.h"
 
 #include "shared/utils/container_combine.h"
 #include "shared/utils/utils.h"

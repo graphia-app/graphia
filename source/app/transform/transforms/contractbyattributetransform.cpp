@@ -22,8 +22,6 @@
 #include "app/attributes/conditionfncreator.h"
 #include "app/graph/graphmodel.h"
 
-#include "shared/utils/string.h"
-
 using namespace Qt::Literals::StringLiterals;
 
 void ContractByAttributeTransform::apply(TransformedGraph& target)

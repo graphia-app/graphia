@@ -21,7 +21,6 @@
 #define SELECTIONMANAGER_H
 
 #include "shared/ui/iselectionmanager.h"
-#include "shared/utils/container.h"
 
 #include <QObject>
 #include <QString>

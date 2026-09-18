@@ -18,12 +18,14 @@
  */
 
 #include "collision.h"
+#include "nodepositions.h"
 
 #include "app/graph/graph.h"
 #include "app/graph/graphmodel.h"
 #include "app/ui/visualisations/elementvisual.h"
-
 #include "app/maths/plane.h"
+
+#include "shared/graph/igraphcomponent.h"
 
 #include <QtGlobal>
 

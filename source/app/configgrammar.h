@@ -21,9 +21,6 @@
 #define CONFIGGRAMMAR_H
 
 #include <lexy_utils.h>
-
-#include <lexy/callback.hpp>
-#include <lexy/dsl.hpp>
 #include <lexy/grammar.hpp>
 
 #include <QString>

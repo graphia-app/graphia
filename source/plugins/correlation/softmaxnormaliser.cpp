@@ -20,7 +20,6 @@
 #include "softmaxnormaliser.h"
 
 #include "shared/loading/iparser.h"
-#include "shared/utils/cancellable.h"
 
 #include <algorithm>
 #include <cmath>

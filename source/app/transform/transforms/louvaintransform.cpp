@@ -37,7 +37,6 @@
 #include <iterator>
 #include <numeric>
 #include <utility>
-#include <variant>
 
 using namespace Qt::Literals::StringLiterals;
 

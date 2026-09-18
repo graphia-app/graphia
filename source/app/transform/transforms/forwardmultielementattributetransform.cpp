@@ -22,7 +22,6 @@
 #include "app/transform/transformedgraph.h"
 #include "app/graph/graphmodel.h"
 
-#include "shared/utils/typeidentity.h"
 #include "shared/utils/msvcwarningsuppress.h"
 
 #include <QtGlobal>

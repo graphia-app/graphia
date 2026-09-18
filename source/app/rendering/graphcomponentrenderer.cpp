@@ -21,12 +21,10 @@
 #include "graphrenderer.h"
 
 #include "app/graph/graph.h"
-#include "shared/graph/igraphcomponent.h"
-#include "shared/utils/utils.h"
 #include "app/graph/graphmodel.h"
 
-#include "app/layout/layout.h"
 #include "app/layout/collision.h"
+#include "app/layout/nodepositions.h"
 
 #include "app/maths/boundingsphere.h"
 #include "app/maths/plane.h"
@@ -34,8 +32,11 @@
 #include "app/ui/selectionmanager.h"
 #include "app/ui/visualisations/elementvisual.h"
 
-#include "shared/graph/elementid_debug.h"
 #include "app/preferences.h"
+
+#include "shared/graph/elementid_debug.h"
+#include "shared/graph/igraphcomponent.h"
+#include "shared/utils/utils.h"
 
 #include <QDebug>
 #include <QObject>

@@ -27,6 +27,7 @@
 #include "shared/utils/statistics.h"
 #include "shared/utils/string.h"
 
+#include "shared/attributes/attributeflag.h"
 #include "shared/attributes/valuetype.h"
 
 #include <QString>

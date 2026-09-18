@@ -26,7 +26,6 @@
 #include "app/rendering/graphcomponentrenderer.h"
 #include "app/rendering/graphrenderer.h"
 
-#include "app/graph/graph.h"
 #include "app/graph/graphmodel.h"
 
 #include "app/maths/frustum.h"

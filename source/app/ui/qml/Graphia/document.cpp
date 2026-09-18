@@ -83,7 +83,6 @@
 #include <QtGlobal>
 
 #include <thread>
-#include <chrono>
 #include <algorithm>
 #include <cstdint>
 #include <functional>

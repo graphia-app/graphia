@@ -20,7 +20,6 @@
 #include "nativeutils.h"
 
 #include "shared/utils/thread.h"
-#include "shared/utils/utils.h"
 #include "shared/utils/string.h"
 #include "shared/utils/color.h"
 #include "shared/utils/crypto.h"
@@ -39,8 +38,8 @@
 #include <QKeySequence>
 #include <QRegularExpression>
 #include <QtGlobal>
+
 #include <algorithm>
-#include <iterator>
 
 QString NativeUtils::baseFileNameForUrl(const QUrl& url) const
 {

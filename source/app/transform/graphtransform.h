@@ -20,7 +20,6 @@
 #ifndef GRAPHTRANSFORM_H
 #define GRAPHTRANSFORM_H
 
-#include "shared/graph/elementid.h"
 #include "shared/graph/elementtype.h"
 
 #include "shared/attributes/attributeflag.h"

@@ -19,7 +19,6 @@
 
 #include "enrichmentheatmap.h"
 
-#include "shared/utils/utils.h"
 #include "shared/utils/string.h"
 #include "shared/utils/container.h"
 #include "shared/rendering/multisamples.h"

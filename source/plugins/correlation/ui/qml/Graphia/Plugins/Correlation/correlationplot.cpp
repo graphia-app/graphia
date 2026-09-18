@@ -23,7 +23,6 @@
 
 #include "shared/utils/scope_exit.h"
 #include "shared/utils/thread.h"
-#include "shared/utils/utils.h"
 #include "shared/utils/container.h"
 #include "shared/utils/string.h"
 #include "shared/utils/flags.h"
@@ -41,7 +40,6 @@
 #include <algorithm>
 #include <iterator>
 #include <memory>
-#include <numeric>
 
 using namespace Qt::Literals::StringLiterals;
 

@@ -21,12 +21,7 @@
 
 #include "transformedgraph.h"
 
-#include "app/graph/graph.h"
 #include "app/graph/graphmodel.h"
-
-#include "shared/commands/icommand.h"
-
-#include "shared/utils/container.h"
 
 #include <QMetaType>
 #include <QObject>

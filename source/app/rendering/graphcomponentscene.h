@@ -24,7 +24,6 @@
 
 #include "app/graph/componentmanager.h"
 #include "shared/graph/elementid.h"
-#include "shared/graph/grapharray.h"
 #include "shared/utils/namedbool.h"
 #include "transition.h"
 

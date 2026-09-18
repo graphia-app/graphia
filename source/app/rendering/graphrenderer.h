@@ -21,7 +21,6 @@
 #define GRAPHRENDERER_H
 
 #include "opengldebuglogger.h"
-#include "openglfunctions.h"
 #include "graphrenderercore.h"
 #include "graphrenderertypes.h"
 #include "graphcomponentrenderer.h"

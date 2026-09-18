@@ -21,7 +21,7 @@
 #define AVAILABLEATTRIBUTESMODEL_H
 
 #include "shared/graph/elementtype.h"
-#include "shared/attributes/iattribute.h"
+#include "shared/attributes/attributeflag.h"
 #include "shared/attributes/valuetype.h"
 
 #include <QObject>

@@ -19,7 +19,6 @@
 
 #include "colorpalette.h"
 
-#include "shared/utils/utils.h"
 #include "shared/utils/container.h"
 #include "shared/utils/color.h"
 #include "shared/utils/json.h"

@@ -29,7 +29,6 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <numeric>
 #include <limits>
 
 class Unions

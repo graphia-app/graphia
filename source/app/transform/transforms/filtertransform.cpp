@@ -26,7 +26,6 @@
 #include "app/graph/graphcomponent.h"
 
 #include "shared/utils/utils.h"
-#include "shared/utils/string.h"
 
 #include <cstdint>
 #include <vector>

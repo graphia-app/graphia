@@ -21,7 +21,6 @@
 
 #include "shared/utils/preferences.h"
 #include "shared/utils/static_block.h"
-#include "shared/utils/json.h"
 
 #include <QApplication>
 #include <QQmlApplicationEngine>

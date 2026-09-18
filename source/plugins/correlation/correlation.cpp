@@ -27,7 +27,6 @@
 #include "shared/utils/is_detected.h"
 #include "shared/utils/progressable.h"
 #include "shared/utils/redirects.h"
-#include "shared/utils/threadpool.h"
 
 #include "shared/graph/covariancematrix.h"
 #include "shared/graph/edgelist.h"

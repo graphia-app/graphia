@@ -24,7 +24,6 @@
 
 #include <QtGlobal>
 
-#include <algorithm>
 #include <utility>
 #include <array>
 

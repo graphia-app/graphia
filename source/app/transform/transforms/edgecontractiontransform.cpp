@@ -22,8 +22,6 @@
 #include "app/attributes/conditionfncreator.h"
 #include "app/graph/graphmodel.h"
 
-#include "shared/utils/string.h"
-
 void EdgeContractionTransform::apply(TransformedGraph& target)
 {
     setPhase(QObject::tr("Contracting"));

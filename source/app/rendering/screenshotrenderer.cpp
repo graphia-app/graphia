@@ -19,8 +19,6 @@
 
 #include "screenshotrenderer.h"
 
-#include "app/graph/graph.h"
-
 #include "graphrenderer.h"
 
 #include "graphcomponentscene.h"
@@ -29,7 +27,6 @@
 #include "app/preferences.h"
 
 #include "app/ui/document.h"
-#include "app/ui/visualisations/elementvisual.h"
 
 #include <QBuffer>
 #include <QByteArray>

@@ -22,7 +22,7 @@
 
 #include "msvcwarningsuppress.h"
 
-#include <iostream>
+#include <iostream> // NOLINT misc-include-cleaner
 
 #if defined(_MSC_VER)
 #define NOINLINE __declspec(noinline)
