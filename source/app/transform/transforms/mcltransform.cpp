@@ -22,7 +22,7 @@
 #include "app/graph/graphmodel.h"
 #include "shared/utils/threadpool.h"
 
-#include <blaze/Blaze.h>
+#include <blaze/Blaze.h> // NOLINT misc-include-cleaner
 
 #include <QElapsedTimer>
 #include <QDebug>
