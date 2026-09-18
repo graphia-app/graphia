@@ -27,7 +27,7 @@
 #include "app/graph/graph.h"
 #include "app/ui/visualisations/elementvisual.h"
 
-#include "shared/graph/igraphcomponent.h"
+#include "shared/graph/igraphcomponent.h" // NOLINT misc-include-cleaner
 
 #include "shared/utils/container.h"
 #include "shared/utils/statistics.h"
