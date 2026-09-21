@@ -221,7 +221,7 @@ signals:
 
     void fpsChanged();
 
-    void rendererCreated() const;
+    void rendererCreated() const; // clazy:exclude=const-signal-or-slot
 
     void clicked(int button, int modifiers, QmlNodeId nodeId);
 };
