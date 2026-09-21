@@ -543,7 +543,7 @@ jobs:
     - name: Analyse
       run: scripts/clang-tidy.sh
       env:
-        CLANGTIDY: /opt/ctcache/clang-tidy
+        CLANG_TIDY: /opt/ctcache/clang-tidy
         CTCACHE_DIR: /tmp/clang-tidy-cache
         CTCACHE_CLANG_TIDY: clang-tidy-${{ env.CLANG_VERSION }}
         CTCACHE_SAVE_OUTPUT: 1

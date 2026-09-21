@@ -67,6 +67,7 @@ CONFIG='{
 }'
 
 CLANG_TIDY=$(compgen -c clang-tidy | grep -E '^[^0-9]+[0-9]+$' | sort -V | tail -1)
+CLANG_TIDY=${CLANG_TIDY:-clang-tidy}
 
 if command -v "$CLANG_TIDY" >/dev/null 2>&1 && "$CLANG_TIDY" --version >/dev/null 2>&1; then
     echo "Using $CLANG_TIDY"

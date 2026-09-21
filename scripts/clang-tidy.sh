@@ -29,14 +29,15 @@ cd ${BUILD_DIR}
 
 . variables.sh
 
-if [ -z ${CLANGTIDY} ]
+if [ -z ${CLANG_TIDY} ]
 then
-    CLANGTIDY="clang-tidy"
+    CLANG_TIDY=$(compgen -c clang-tidy | grep -E '^[^0-9]+[0-9]+$' | sort -V | tail -1)
+    CLANG_TIDY=${CLANG_TIDY:-clang-tidy}
 fi
 
-${CLANGTIDY} --version
-${CLANGTIDY} -dump-config
+${CLANG_TIDY} --version
+${CLANG_TIDY} --dump-config
 
 parallel -k -n1 -P$(nproc --all) \
-  "echo [{#}/{= \$_=total_jobs() =}] && ${CLANGTIDY} -quiet -p . {}" \
+  "echo [{#}/{= \$_=total_jobs() =}] && ${CLANG_TIDY} -quiet -p . {}" \
   ::: ${CPP_FILES} 2>&1 | tee clang-tidy-${VERSION}.log
