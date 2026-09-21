@@ -615,7 +615,8 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
     if(pluginInstanceQObject != nullptr)
     {
         auto signature = QMetaObject::normalizedSignature("saveRequired()");
-        const bool hasSignal = pluginInstanceQObject->metaObject()->indexOfSignal(signature) >= 0;
+        const bool hasSignal = pluginInstanceQObject->metaObject()->indexOfSignal(
+            signature.constData()) >= 0;
 
         if(hasSignal)
         {

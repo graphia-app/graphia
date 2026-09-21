@@ -200,7 +200,7 @@ QMetaProperty Preferences::propertyByName(const QString& propertyName) const
 {
     if(!propertyName.isEmpty())
     {
-        auto index = metaObject()->indexOfProperty(propertyName.toLatin1());
+        auto index = metaObject()->indexOfProperty(propertyName.toLatin1().constData());
         if(index >= 0)
             return metaObject()->property(index);
     }
