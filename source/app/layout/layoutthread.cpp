@@ -216,6 +216,30 @@ bool LayoutThread::workToDo() const
     return _layoutPotentiallyRequired || !_componentsToBeAdded.empty() || !allLayoutsFinished();
 }
 
+void LayoutThread::emitFirstIterDone()
+{
+    if(_firstIterDone)
+        return;
+
+    _firstIterDone = true;
+    emit firstIterDone();
+}
+
+void LayoutThread::maybeEmitFirstIterDone()
+{
+    if(_firstIterDone)
+        return;
+
+    const bool allExecutedAtLeastOnce = std::ranges::all_of(_layouts,
+        [this](const auto& layout)
+        {
+            return _executedAtLeastOnce.get(layout.first);
+        });
+
+    if(allExecutedAtLeastOnce)
+        emitFirstIterDone();
+}
+
 void LayoutThread::run()
 {
     _metaLayout = _layoutFactory->createMeta();
@@ -279,11 +303,7 @@ void LayoutThread::run()
 
         _performanceCounter.tick();
 
-        if(!_firstIterDone)
-        {
-            _firstIterDone = true;
-            emit firstIterDone();
-        }
+        maybeEmitFirstIterDone();
 
         lock.lock();
 

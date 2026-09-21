@@ -119,6 +119,8 @@ private:
     bool iterative() const;
     bool allLayoutsFinished() const;
     bool workToDo() const;
+    void emitFirstIterDone();
+    void maybeEmitFirstIterDone();
     void uncancel();
     void unfinish();
     void run();
