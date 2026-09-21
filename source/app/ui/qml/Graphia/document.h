@@ -575,7 +575,7 @@ public:
 
     Q_INVOKABLE void cloneAttribute(const QString& sourceAttributeName, const QString& newAttributeName);
     Q_INVOKABLE void editAttribute(const QString& attributeName, const AttributeEdits& edits,
-        ValueType newType, const QString& newDescription);
+        ValueType newType, const QString& newDescription); // clazy:exclude=fully-qualified-moc-types
     Q_INVOKABLE void removeAttributes(const QStringList& attributeNames);
 
     Q_INVOKABLE void importAttributesFromTable(const QString& keyAttributeName,
