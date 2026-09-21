@@ -158,7 +158,7 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel, CommandManager* commandMana
         // Wait for the layout to have iterated at least once, so that what is
         // first displayed is a (partially) laid out graph, rather than every node
         // drawn on top of itself
-        _layoutFirstIterDone.wait(false);
+        _layoutInitialised.wait(false);
 
     }).then([this]
     {
@@ -172,8 +172,8 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel, CommandManager* commandMana
 
 GraphRenderer::~GraphRenderer()
 {
-    _layoutFirstIterDone = true;
-    _layoutFirstIterDone.notify_all();
+    _layoutInitialised = true;
+    _layoutInitialised.notify_all();
 
     const std::unique_lock<std::mutex> lock(_initialisationMutex);
 
@@ -916,10 +916,10 @@ void GraphRenderer::onCommandsFinished()
     update();
 }
 
-void GraphRenderer::onLayoutFirstIterDone()
+void GraphRenderer::onLayoutInitialised()
 {
-    _layoutFirstIterDone = true;
-    _layoutFirstIterDone.notify_one();
+    _layoutInitialised = true;
+    _layoutInitialised.notify_one();
 }
 
 void GraphRenderer::onLayoutChanged()

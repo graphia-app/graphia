@@ -264,7 +264,7 @@ QQuickFramebufferObject::Renderer* GraphDisplay::createRenderer() const
     connect(this, &GraphDisplay::commandsStarted, graphRenderer, &GraphRenderer::onCommandsStarted, Qt::DirectConnection);
     connect(this, &GraphDisplay::commandsFinished, graphRenderer, &GraphRenderer::onCommandsFinished, Qt::DirectConnection);
     connect(this, &GraphDisplay::commandsFinished, this, &GraphDisplay::updateRenderer, Qt::DirectConnection);
-    connect(this, &GraphDisplay::layoutFirstIterDone, graphRenderer, &GraphRenderer::onLayoutFirstIterDone, Qt::DirectConnection);
+    connect(this, &GraphDisplay::layoutInitialised, graphRenderer, &GraphRenderer::onLayoutInitialised, Qt::DirectConnection);
     connect(this, &GraphDisplay::layoutChanged, graphRenderer, &GraphRenderer::onLayoutChanged, Qt::DirectConnection);
     connect(this, &GraphDisplay::screenshotRequested, graphRenderer, &GraphRenderer::onScreenshotRequested);
     connect(this, &GraphDisplay::previewRequested, graphRenderer, &GraphRenderer::onPreviewRequested);
@@ -300,12 +300,12 @@ bool GraphDisplay::event(QEvent* e)
     return QQuickItem::event(e);
 }
 
-void GraphDisplay::onLayoutFirstIterDone()
+void GraphDisplay::onLayoutInitialised()
 {
     if(_rendererCreated)
-        emit layoutFirstIterDone();
+        emit layoutInitialised();
 
-    _layoutFirstIterDone = true;
+    _layoutInitialised = true;
 }
 
 void GraphDisplay::onLayoutChanged()
@@ -378,8 +378,8 @@ void GraphDisplay::onScreenshotComplete(const QImage& screenshot, const QString&
 
 void GraphDisplay::onRendererCreated()
 {
-    if(_layoutFirstIterDone)
-        emit layoutFirstIterDone();
+    if(_layoutInitialised)
+        emit layoutInitialised();
 
     _rendererCreated = true;
 }

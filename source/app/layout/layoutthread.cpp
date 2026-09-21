@@ -218,18 +218,18 @@ bool LayoutThread::workToDo() const
     return _layoutPotentiallyRequired || !_componentsToBeAdded.empty() || !allLayoutsFinished();
 }
 
-void LayoutThread::emitFirstIterDone()
+void LayoutThread::emitInitialised()
 {
-    if(_firstIterDone)
+    if(_initialised)
         return;
 
-    _firstIterDone = true;
-    emit firstIterDone();
+    _initialised = true;
+    emit initialised();
 }
 
-void LayoutThread::maybeEmitFirstIterDone()
+void LayoutThread::maybeEmitInitialised()
 {
-    if(_firstIterDone)
+    if(_initialised)
         return;
 
     const bool allExecutedAtLeastOnce = std::ranges::all_of(_layouts,
@@ -239,7 +239,7 @@ void LayoutThread::maybeEmitFirstIterDone()
         });
 
     if(allExecutedAtLeastOnce)
-        emitFirstIterDone();
+        emitInitialised();
 }
 
 void LayoutThread::run()
@@ -267,7 +267,7 @@ void LayoutThread::run()
         }
 
         _componentsToBeAdded.clear();
-        maybeEmitFirstIterDone();
+        maybeEmitInitialised();
         _layoutPotentiallyRequired = false;
 
         if(std::exchange(_settingChanged, false))
@@ -280,7 +280,7 @@ void LayoutThread::run()
         {
             _paused = true;
             emit pausedChanged();
-            emitFirstIterDone();
+            emitInitialised();
 
             if(_debug != 0)
             {
@@ -350,7 +350,7 @@ void LayoutThread::run()
     _layouts.clear();
     _metaLayout.reset();
     _paused = true;
-    emitFirstIterDone();
+    emitInitialised();
     _waitForPause.notify_all();
 
     if(_debug != 0) qDebug() << "Layout stopped";

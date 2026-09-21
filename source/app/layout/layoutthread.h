@@ -46,7 +46,7 @@ class LayoutThread : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY(bool firstIterDone MEMBER _firstIterDone NOTIFY firstIterDone)
+    Q_PROPERTY(bool initialised MEMBER _initialised NOTIFY initialised)
     Q_PROPERTY(bool paused READ paused NOTIFY pausedChanged)
 
 private:
@@ -67,7 +67,7 @@ private:
 
     std::unique_ptr<MetaLayout> _metaLayout;
     ComponentArray<bool> _executedAtLeastOnce;
-    std::atomic_bool _firstIterDone = false;
+    std::atomic_bool _initialised = false;
 
     Layout::Dimensionality _dimensionalityMode =
         Layout::Dimensionality::ThreeDee;
@@ -119,8 +119,8 @@ private:
     bool iterative() const;
     bool allLayoutsFinished() const;
     bool workToDo() const;
-    void emitFirstIterDone();
-    void maybeEmitFirstIterDone();
+    void emitInitialised();
+    void maybeEmitInitialised();
     void uncancel();
     void unfinish();
     void run();
@@ -136,7 +136,7 @@ private slots:
     void onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool);
 
 signals:
-    void firstIterDone();
+    void initialised();
     void executed();
     void pausedChanged();
     void settingChanged(const QString& name, float value);

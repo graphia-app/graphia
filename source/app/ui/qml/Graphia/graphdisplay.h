@@ -155,7 +155,7 @@ private:
     bool _updating = false;
 
     bool _rendererCreated = false;
-    bool _layoutFirstIterDone = false;
+    bool _layoutInitialised = false;
 
     std::queue<std::unique_ptr<QEvent>> _eventQueue;
 
@@ -182,7 +182,7 @@ private:
 
 public slots:
     void updateRenderer();
-    void onLayoutFirstIterDone();
+    void onLayoutInitialised();
     void onLayoutChanged();
 
 private slots:
@@ -211,7 +211,7 @@ signals:
     void commandsStarted();
     void commandsFinished();
 
-    void layoutFirstIterDone();
+    void layoutInitialised();
     void layoutChanged();
 
     void screenshotRequested(int width, int height, QString path, int dpi, bool fillSize);
