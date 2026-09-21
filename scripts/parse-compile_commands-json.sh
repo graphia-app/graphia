@@ -71,4 +71,8 @@ echo -e "export INCLUDE_DIRS=\"${INCLUDE_DIRS}\"\n" >> ${BUILD_DIR}/variables.sh
 echo -e "export SYSTEM_INCLUDE_DIRS=\"${SYSTEM_INCLUDE_DIRS}\"\n" >> ${BUILD_DIR}/variables.sh
 echo -e "export DEFINES=\"${DEFINES}\"\n" >> ${BUILD_DIR}/variables.sh
 
+# The autogen include directories are always empty, and empty directories can't
+# be part of a GitHub artifact, so leave a file in each so that they survive
+find ${BUILD_DIR} -type d -path '*_autogen/include' -exec touch {}/keep.h \;
+
 cat ${BUILD_DIR}/variables.sh
