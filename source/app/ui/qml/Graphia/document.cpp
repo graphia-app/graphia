@@ -727,7 +727,7 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
             auto parserLog = completedParser->log();
 
             if(!parserLog.isEmpty())
-                setLog(log() + "\n\n" + parserLog);
+                setLog(log() + u"\n\n"_s + parserLog);
 
             const auto& graph = _graphModel->mutableGraph();
             setLog(log() + u"\n\nNodes: %1 Edges: %2"_s
