@@ -1,9 +1,11 @@
 ---
 Language: Cpp
+Standard: c++20
+
 IndentWidth: 4
 TabWidth: 4
 UseTab: Never
-Standard: Cpp11
+ColumnLimit: 120
 
 BreakBeforeBraces: Custom
 BraceWrapping:
@@ -16,25 +18,43 @@ BraceWrapping:
   AfterUnion: true
   BeforeCatch: true
   BeforeElse: true
+  BeforeLambdaBody: true
   SplitEmptyFunction: false
   SplitEmptyRecord: false
   SplitEmptyNamespace: false
+LambdaBodyIndentation: OuterScope
 
-ColumnLimit: 110
+AlignAfterOpenBracket: DontAlign
+AlignOperands: DontAlign
+ContinuationIndentWidth: 4
+BinPackArguments: true
+BinPackParameters: true
+
+BreakBeforeBinaryOperators: None
+BreakBeforeTernaryOperators: false
+
 BreakConstructorInitializers: AfterColon
+PackConstructorInitializers: Never
+
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortCaseLabelsOnASingleLine: true
+
+SortIncludes: Never
+SortUsingDeclarations: true
+
+ReflowComments: false
+AlignTrailingComments: Leave
+
+AccessModifierOffset: -4
+NamespaceIndentation: None
+FixNamespaceComments: true
 PointerAlignment: Left
 SpaceBeforeParens: Never
 SpaceInEmptyParentheses: false
-AlignAfterOpenBracket: Align
-BreakBeforeBinaryOperators: None
-AccessModifierOffset: -4
-AllowShortCaseLabelsOnASingleLine: true
 SpaceAfterTemplateKeyword: false
-BinPackArguments: true
-BinPackParameters: true
-AlwaysBreakTemplateDeclarations: true
+BreakTemplateDeclarations: Leave
 AlignEscapedNewlines: Right
-FixNamespaceComments: true
-NamespaceIndentation: All
-SortUsingDeclarations: true
+
+PenaltyBreakOpenParenthesis: 500
+PenaltyBreakAssignment: 500
 ...
