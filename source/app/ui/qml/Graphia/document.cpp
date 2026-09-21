@@ -922,7 +922,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
     connect(_layoutThread.get(), &LayoutThread::settingChanged, this, &Document::layoutSettingChanged);
     connect(_layoutThread.get(), &LayoutThread::firstIterDone, _graphDisplay, &GraphDisplay::onLayoutFirstIterDone);
     initialiseLayoutSettingsModel();
-    _layoutThread->start();
+    _layoutThread->start(_userLayoutPaused);
 
     emit layoutNameChanged();
     emit layoutDisplayNameChanged();

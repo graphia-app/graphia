@@ -53,7 +53,7 @@ private:
     GraphModel* _graphModel = nullptr;
     mutable std::mutex _mutex;
     std::thread _thread;
-    bool _pause = false;
+    bool _pause = true;
     bool _paused = false;
     bool _stop = false;
     std::condition_variable _waitForPause;
@@ -95,7 +95,7 @@ public:
     void resume();
     void invalidate();
 
-    void start();
+    void start(bool paused);
     void stop();
 
     bool finished() const;

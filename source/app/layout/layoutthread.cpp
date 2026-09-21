@@ -154,11 +154,13 @@ void LayoutThread::invalidate()
         layout.second->invalidate();
 }
 
-void LayoutThread::start()
+void LayoutThread::start(bool paused)
 {
     if(_thread.joinable())
         _thread.join();
 
+    const std::unique_lock<std::mutex> lock(_mutex);
+    _pause = _paused = paused;
     _thread = std::thread(&LayoutThread::run, this);
 }
 
