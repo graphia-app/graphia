@@ -692,9 +692,10 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
 
             const auto* nodePositions = completedLoader->nodePositions();
             if(nodePositions != nullptr)
+            {
                 _startingNodePositions = std::make_unique<ExactNodePositions>(*nodePositions);
-
-            _userLayoutPaused = completedLoader->layoutPaused();
+                _userLayoutPaused = completedLoader->layoutPaused();
+            }
 
             setProjection(static_cast<int>(completedLoader->projection()));
             setShading3D(static_cast<int>(completedLoader->shading()));
