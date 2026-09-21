@@ -236,7 +236,7 @@ void Preferences::setProperty(QMetaProperty property, const QVariant& value)
     if((previousValue != value && QMetaType::canConvert(value.metaType(), previousValue.metaType())) ||
        !previousValue.isValid())
     {
-        property.write(this, value);
+        property.write(this, value); // clazy:exclude=unused-result-check
     }
 }
 

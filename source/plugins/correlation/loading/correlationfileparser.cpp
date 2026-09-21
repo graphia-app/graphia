@@ -203,6 +203,7 @@ double CorrelationFileParser::scaleValue(ScalingType scalingType, double value, 
     return value;
 }
 
+// NOLINTBEGIN(unused-result-check)
 void CorrelationFileParser::normalise(NormaliseType normaliseType,
     ContinuousDataVectors& dataRows, IParser* parser)
 {
@@ -254,6 +255,7 @@ void CorrelationFileParser::normalise(NormaliseType normaliseType,
             dataRow.update();
     }
 }
+// NOLINTEND(unused-result-check)
 
 double CorrelationFileParser::epsilonFor(const std::vector<double>& data)
 {

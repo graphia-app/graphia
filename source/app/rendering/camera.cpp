@@ -246,8 +246,8 @@ Line3D Camera::lineForViewportCoordinates(int x, int y) const
     QVector3D start;
     QVector3D end;
 
-    unproject(x, y, 0.0, start);
-    unproject(x, y, 1.0, end);
+    unproject(x, y, 0.0, start); // clazy:exclude=unused-result-check
+    unproject(x, y, 1.0, end); // clazy:exclude=unused-result-check
 
     return {start, end};
 }

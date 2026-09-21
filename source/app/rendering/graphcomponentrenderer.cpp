@@ -98,7 +98,7 @@ void GraphComponentRenderer::cleanup()
         return;
     }
 
-    _zoomTransition.disconnect();
+    _zoomTransition.disconnect(); // clazy:exclude=unused-result-check
 
     _graphRenderer->onComponentCleanup(_componentId);
 

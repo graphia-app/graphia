@@ -182,7 +182,7 @@ void Headless::processNext()
 
     connect(_->_document, &Document::saveComplete, this, [this](bool success, const QUrl& fileUrl, const QString&)
     {
-        _->_document->disconnect();
+        _->_document->disconnect(); // clazy:exclude=unused-result-check
         _->_document->deleteLater();
         _->_document = nullptr;
 
@@ -283,7 +283,7 @@ void Headless::cancel()
     if(_->_document != nullptr)
     {
         // The Document destructor cancels and waits for any in progress activity
-        _->_document->disconnect();
+        _->_document->disconnect(); // clazy:exclude=unused-result-check
         _->_document->deleteLater();
         _->_document = nullptr;
     }

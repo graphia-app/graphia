@@ -48,7 +48,7 @@ bool u::isNumeric(const QString& string)
 {
     bool success = false;
 
-    string.toDouble(&success);
+    string.toDouble(&success); // clazy:exclude=unused-result-check
 
     return success;
 }
@@ -71,7 +71,7 @@ bool u::isInteger(const QString& string)
 {
     bool success = false;
 
-    string.toInt(&success);
+    string.toInt(&success); // clazy:exclude=unused-result-check
 
     return success;
 }
