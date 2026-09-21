@@ -57,36 +57,37 @@ no-rule-of-three\
 
 MANUAL="\
 assert-with-side-effects,\
+compare-member-check,\
 container-inside-loop,\
 detaching-member,\
 heap-allocated-small-trivial-type,\
 ifndef-define-typo,\
 isempty-vs-count,\
 jni-signatures,\
+qbytearray-conversion-to-c-style,\
 qhash-with-char-pointer-key,\
 qproperty-type-mismatch,\
 qrequiredresult-candidates,\
 qstring-varargs,\
-qt6-fwd-fixes,\
-qt6-header-fixes,\
-qt6-qhash-signature,\
 qvariant-template-instantiation,\
 raw-environment-function,\
 reserve-candidates,\
+sanitize-inline-keyword,\
 signal-with-return-value,\
 thread-with-slots,\
 tr-non-literal,\
 unexpected-flag-enumerator-value,\
 unneeded-cast,\
+unused-result-check,\
 use-arrow-operator-instead-of-data,\
-use-chrono-in-qtimer\
+use-chrono-in-qtimer,\
+used-qunused-variable\
 "
 
 # Not enabled manual checks
+#qstring-ref,\
+#qt-keyword-emit,\
 #qt-keywords,\
-#qt4-qstring-from-array,\
-#qt6-deprecated-api-fixes,\
-#qt6-qlatin1stringchar-to-u,\
 
 export CLAZY_EXTRA_OPTIONS="unneeded-cast-prefer-dynamic-cast-over-qobject"
 
