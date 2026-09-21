@@ -249,11 +249,9 @@ void LayoutThread::run()
 
     emit pausedChanged();
 
-    std::unique_lock<std::mutex> lock(_mutex);
-
     do
     {
-        u::setCurrentThreadName(u"Layout >"_s);
+        std::unique_lock<std::mutex> lock(_mutex);
 
         for(const ComponentId componentId : _componentsToBeAdded)
         {
@@ -267,8 +265,48 @@ void LayoutThread::run()
         }
 
         _componentsToBeAdded.clear();
+        maybeEmitFirstIterDone();
+        _layoutPotentiallyRequired = false;
+
+        if(std::exchange(_settingChanged, false))
+            unfinish();
+
+        if(_stop)
+            break;
+
+        if(_pause || allLayoutsFinished() || !iterative())
+        {
+            _paused = true;
+            emit pausedChanged();
+            emitFirstIterDone();
+
+            if(_debug != 0)
+            {
+                const char* reason = "";
+
+                if(_pause)
+                    reason = "manually";
+                else if(allLayoutsFinished())
+                    reason = "because all layouts finished";
+
+                qDebug() << "Layout paused" << reason;
+            }
+
+            u::setCurrentThreadName(u"Layout ||"_s);
+            uncancel();
+            _waitForPause.notify_all();
+            _waitForResume.wait(lock);
+
+            _paused = false;
+            emit pausedChanged();
+
+            if(_debug != 0) qDebug() << "Layout resumed";
+        }
+
+        _layoutsToBeRemoved.clear();
 
         lock.unlock();
+        u::setCurrentThreadName(u"Layout >"_s);
 
         for(auto& [componentId, layout] : _layouts)
         {
@@ -298,55 +336,14 @@ void LayoutThread::run()
         if(_metaLayout != nullptr)
             _metaLayout->execute(_dimensionalityMode);
 
-        // Once all the layouts have been executed, publish at less restrictive rate
+        // Once all the layouts have been executed, publish at a less restrictive rate
         publishNodePositions(60, allLayoutsFinished());
 
         _performanceCounter.tick();
-
-        maybeEmitFirstIterDone();
-
-        lock.lock();
-
-        _layoutPotentiallyRequired = false;
-
-        if(std::exchange(_settingChanged, false))
-            unfinish();
-
-        if(_stop)
-            break;
-
-        if(_pause || allLayoutsFinished() || !iterative())
-        {
-            _paused = true;
-            emit pausedChanged();
-
-            if(_debug != 0)
-            {
-                const char* reason = "";
-
-                if(_pause)
-                    reason = "manually";
-                else if(allLayoutsFinished())
-                    reason = "because all layouts finished";
-
-                qDebug() << "Layout paused" << reason;
-            }
-
-            u::setCurrentThreadName(u"Layout ||"_s);
-            uncancel();
-            _waitForPause.notify_all();
-            _waitForResume.wait(lock);
-
-            _paused = false;
-            emit pausedChanged();
-
-            if(_debug != 0) qDebug() << "Layout resumed";
-        }
-
-        _layoutsToBeRemoved.clear();
     }
     while(true);
 
+    const std::unique_lock<std::mutex> lock(_mutex);
     _layoutsToBeRemoved.clear();
     _layouts.clear();
     _metaLayout.reset();
