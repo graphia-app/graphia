@@ -249,7 +249,10 @@ void LayoutThread::run()
         for(auto& [componentId, layout] : _layouts)
         {
             if(layoutIsFinished(*layout))
+            {
+                _executedAtLeastOnce.set(componentId, true);
                 continue;
+            }
 
             if(_dimensionalityMode == Layout::Dimensionality::TwoDee &&
                (layout->dimensionality() & _dimensionalityMode))
