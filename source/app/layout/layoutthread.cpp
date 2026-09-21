@@ -348,6 +348,7 @@ void LayoutThread::run()
     _layouts.clear();
     _metaLayout.reset();
     _paused = true;
+    emitFirstIterDone();
     _waitForPause.notify_all();
 
     if(_debug != 0) qDebug() << "Layout stopped";
