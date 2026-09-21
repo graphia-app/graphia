@@ -616,7 +616,8 @@ jobs:
     - uses: actions/checkout@v7
       with:
         repository: KDE/clazy
-        ref: c4fc43ea5443a0281b1dc01277b6165b6f5df8b4
+        # v1.17.1 crashes on compare-member-check; the fix is not in any release yet
+        ref: 4100430ff3a0cb9fe75f8b2ff6b282843e6c004b
         path: clazy
     - name: ccache
       uses: hendrikmuhs/ccache-action@main
