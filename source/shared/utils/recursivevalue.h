@@ -69,7 +69,7 @@ public:
     T* operator->() { return _value.get(); }
     const T* operator->() const { return _value.get(); }
 
-    bool operator==(const RecursiveValue& other) const { return *_value == *other._value; }
+    bool operator==(const RecursiveValue& other) const { return *_value == *other._value; } // clazy:exclude=compare-member-check
 };
 
 #endif // RECURSIVEVALUE_H

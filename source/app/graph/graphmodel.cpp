@@ -1085,7 +1085,7 @@ void GraphModel::calculateAttributeRange(Attribute& attribute)
 static void calculateAttributeRanges(const Graph* graph,
     std::map<QString, Attribute>& attributes)
 {
-    for(auto& attribute : make_value_wrapper(attributes))
+    for(auto& attribute : make_value_wrapper(attributes)) // clazy:exclude=compare-member-check
         GraphModel::calculateAttributeRange(graph, attribute);
 }
 
@@ -1096,7 +1096,7 @@ void GraphModel::initialiseAttributeRanges()
 
 void GraphModel::initialiseSharedAttributeValues()
 {
-    for(auto& attribute : make_value_wrapper(_->_attributes))
+    for(auto& attribute : make_value_wrapper(_->_attributes)) // clazy:exclude=compare-member-check
         _->updateSharedAttributeValues(attribute);
 }
 
@@ -1355,7 +1355,7 @@ void GraphModel::updateVisuals(bool force)
 
             if(!change.test(VisualChangeFlags::State))
             {
-                change.set(previous[elementId]._state != current[elementId]._state ?
+                change.set(previous[elementId]._state != current[elementId]._state ? // clazy:exclude=compare-member-check
                     VisualChangeFlags::State : VisualChangeFlags::None);
             }
         }

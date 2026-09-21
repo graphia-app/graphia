@@ -596,9 +596,9 @@ bool TextDelimitedTabularDataParser::parse(const QUrl& url, IGraphModel*)
         return false;
     }
 
-    auto fileSize = file.tellg();
+    const auto startPosition = static_cast<std::streamoff>(file.tellg());
     file.seekg(0, std::ios::end);
-    fileSize = file.tellg() - fileSize;
+    const auto fileSize = static_cast<std::streamoff>(file.tellg()) - startPosition;
     file.seekg(0, std::ios::beg);
 
     if(fileSize == 0)

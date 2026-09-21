@@ -97,8 +97,6 @@ public:
         return _cancelled || other._cancelled || _it == other._it;
     }
 
-    bool operator!=(const progress_iterator& other) const { return !(*this == other); }
-
 private:
     void increment()
     {

@@ -24,12 +24,14 @@
 struct MatLabMatrix
 {
     matvar_t* _var = nullptr;
-    size_t _numColumns = 0;
-    size_t _numRows = 0;
 
     bool operator>(const MatLabMatrix& other) const
     {
-        return (_numColumns * _numRows) > (other._numColumns * other._numRows);
+        if(_var == nullptr || other._var == nullptr)
+            return false;
+
+        return (_var->dims[0] * _var->dims[1]) >
+            (other._var->dims[0] * other._var->dims[1]);
     }
 };
 
@@ -62,7 +64,7 @@ static MatLabMatrix findBiggestMatrix(matvar_t* v, MatLabMatrix& m)
         if(v->rank != 2)
             break;
 
-        const MatLabMatrix candidate{._var = v, ._numColumns = v->dims[0], ._numRows = v->dims[1]};
+        const MatLabMatrix candidate{._var = v};
         if(candidate > m)
             m = candidate;
 
