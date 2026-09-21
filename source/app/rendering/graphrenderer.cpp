@@ -172,6 +172,9 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel, CommandManager* commandMana
 
 GraphRenderer::~GraphRenderer()
 {
+    _layoutFirstIterDone = true;
+    _layoutFirstIterDone.notify_all();
+
     const std::unique_lock<std::mutex> lock(_initialisationMutex);
 
     // Force event processing in case the above .then(...) is still to run (due to a slow init)
