@@ -325,7 +325,7 @@ void LayoutThread::run()
 
         _layoutsToBeRemoved.clear();
     }
-    while(iterative() || allLayoutsFinished());
+    while(true);
 
     _layoutsToBeRemoved.clear();
     _layouts.clear();
