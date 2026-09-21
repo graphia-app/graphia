@@ -66,7 +66,6 @@ isempty-vs-count,\
 jni-signatures,\
 qbytearray-conversion-to-c-style,\
 qhash-with-char-pointer-key,\
-qproperty-type-mismatch,\
 qrequiredresult-candidates,\
 qstring-varargs,\
 qvariant-template-instantiation,\
@@ -85,6 +84,7 @@ used-qunused-variable\
 "
 
 # Not enabled manual checks
+#qproperty-type-mismatch,\ # This crashes clazy via qmlelementid.h
 #qstring-ref,\
 #qt-keyword-emit,\
 #qt-keywords,\
