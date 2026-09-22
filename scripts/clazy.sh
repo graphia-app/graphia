@@ -96,7 +96,6 @@ CHECKS="-checks=\"${LEVEL0},${LEVEL1},${LEVEL2},${MANUAL}\""
 ${CLAZY} --version
 
 parallel -k -n1 -P$(nproc --all) \
-  ${CLAZY} --standalone -p compile_commands.json \
-  --ignore-dirs="\"(\/usr|thirdparty|\/Qt\/[0-9])\"" \
-  ${CHECKS} {} \
+  "echo [{#}/{= \$_=total_jobs() =}] {} && ${CLAZY} --standalone -p compile_commands.json \
+  --ignore-dirs='(\/usr|thirdparty|\/Qt\/[0-9])' ${CHECKS} {}" \
   ::: ${CPP_FILES} 2>&1 | tee clazy-${VERSION}.log
