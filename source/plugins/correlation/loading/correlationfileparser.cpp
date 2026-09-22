@@ -203,59 +203,64 @@ double CorrelationFileParser::scaleValue(ScalingType scalingType, double value, 
     return value;
 }
 
-// NOLINTBEGIN(unused-result-check)
-void CorrelationFileParser::normalise(NormaliseType normaliseType,
+bool CorrelationFileParser::normalise(NormaliseType normaliseType,
     ContinuousDataVectors& dataRows, IParser* parser)
 {
+    bool success = true;
+
     switch(normaliseType)
     {
     case NormaliseType::MinMax:
     {
         const MinMaxNormaliser normaliser;
-        normaliser.process(dataRows, parser);
+        success = normaliser.process(dataRows, parser);
         break;
     }
     case NormaliseType::Mean:
     {
         const MeanNormaliser normaliser;
-        normaliser.process(dataRows, parser);
+        success = normaliser.process(dataRows, parser);
         break;
     }
     case NormaliseType::Standarisation:
     {
         const StandardisationNormaliser normaliser;
-        normaliser.process(dataRows, parser);
+        success = normaliser.process(dataRows, parser);
         break;
     }
     case NormaliseType::UnitScaling:
     {
         const UnitScalingNormaliser normaliser;
-        normaliser.process(dataRows, parser);
+        success = normaliser.process(dataRows, parser);
         break;
     }
     case NormaliseType::Quantile:
     {
         const QuantileNormaliser normaliser;
-        normaliser.process(dataRows, parser);
+        success = normaliser.process(dataRows, parser);
         break;
     }
     case NormaliseType::Softmax:
     {
         const SoftmaxNormaliser normaliser;
-        normaliser.process(dataRows, parser);
+        success = normaliser.process(dataRows, parser);
         break;
     }
     default:
         break;
     }
 
+    if(!success)
+        return false;
+
     if(normaliseType != NormaliseType::None)
     {
         for(auto& dataRow : dataRows)
             dataRow.update();
     }
+
+    return true;
 }
-// NOLINTEND(unused-result-check)
 
 double CorrelationFileParser::epsilonFor(const std::vector<double>& data)
 {
@@ -362,7 +367,8 @@ bool CorrelationFileParser::parse(const QUrl& fileUrl, IGraphModel*)
     if(_plugin->requiresNormalisation())
     {
         setPhase(QObject::tr("Normalisation"));
-        _plugin->normalise(this);
+        if(!_plugin->normalise(this))
+            return false;
     }
 
     if(cancelled())

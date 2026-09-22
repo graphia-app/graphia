@@ -158,7 +158,7 @@ public:
     void setDimensions(size_t numContinuousColumns, size_t numDiscreteColumns, size_t numRows);
     bool loadUserData(const TabularData& tabularData, const QRect& dataRect, IParser& parser);
     bool requiresNormalisation() const { return _normaliseType != NormaliseType::None; }
-    void normalise(IParser* parser);
+    bool normalise(IParser* parser);
     void finishDataRows();
     void createAttributes();
 

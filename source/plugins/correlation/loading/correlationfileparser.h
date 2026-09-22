@@ -52,7 +52,7 @@ public:
     static void clipValues(ClippingType clippingType, double clippingValue, size_t width, std::vector<double>& data);
     static double scaleValue(ScalingType scalingType, double value,
         double epsilon = std::nextafter(0.0, 1.0));
-    static void normalise(NormaliseType normaliseType,
+    static bool normalise(NormaliseType normaliseType,
         ContinuousDataVectors& dataRows,
         IParser* parser = nullptr);
 

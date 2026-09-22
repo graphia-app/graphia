@@ -215,15 +215,18 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
     return true;
 }
 
-void CorrelationPluginInstance::normalise(IParser* parser)
+bool CorrelationPluginInstance::normalise(IParser* parser)
 {
-    CorrelationFileParser::normalise(_normaliseType, _continuousDataRows, parser);
+    if(!CorrelationFileParser::normalise(_normaliseType, _continuousDataRows, parser))
+        return false;
 
     // Normalising obviously changes all the values in _continuousDataRows, so we
     // must sync _data up so that it matches
     _continuousData.clear();
     for(const auto& dataRow : _continuousDataRows)
         _continuousData.insert(_continuousData.end(), dataRow.begin(), dataRow.end());
+
+    return true;
 }
 
 void CorrelationPluginInstance::finishDataRows()
