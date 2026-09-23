@@ -236,7 +236,7 @@ bool NativeSaver::save()
         content["enrichmentTables"].push_back(enrichmentTableModelAsJson(*table));
     }
 
-    auto uiDataJson = json::parse(_uiData.begin(), _uiData.end(), nullptr, false);
+    auto uiDataJson = json::parse(_uiData.cbegin(), _uiData.cend(), nullptr, false);
 
     if(uiDataJson.is_object() || uiDataJson.is_array())
         content["ui"] = uiDataJson;
@@ -255,7 +255,7 @@ bool NativeSaver::save()
     else
         content["pluginData"] = QString(pluginData.toHex());
 
-    auto pluginUiDataJson = json::parse(_pluginUiData.begin(), _pluginUiData.end(), nullptr, false);
+    auto pluginUiDataJson = json::parse(_pluginUiData.cbegin(), _pluginUiData.cend(), nullptr, false);
 
     if(!pluginUiDataJson.is_discarded() && (pluginUiDataJson.is_object() || pluginUiDataJson.is_array()))
         content["pluginUiData"] = pluginUiDataJson;
