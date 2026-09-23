@@ -1033,6 +1033,7 @@ Item
                 item: Find
                 {
                     id: find
+                    enabled: !_document.graphChanging
 
                     document: _document
 
@@ -1056,6 +1057,7 @@ Item
                 item: AddBookmark
                 {
                     id: addBookmark
+                    enabled: !_document.busy
 
                     document: _document
 
@@ -1079,6 +1081,7 @@ Item
                 item: LayoutSettings
                 {
                     id: layoutSettings
+                    enabled: !_document.busy
 
                     document: _document
 
