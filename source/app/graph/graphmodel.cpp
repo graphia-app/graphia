@@ -1139,8 +1139,11 @@ void GraphModel::enableVisualUpdates()
     updateVisuals();
 }
 
-static float mappedSize(float min, float max, float user, float mapped)
+static float mappedSize(float min, float max, float user, float mapped = -1.0f)
 {
+    if(mapped < 0.0f)
+        return user;
+
     // The fraction of the mapped value that contributes to the final value
     const float mappedRange = 0.75f;
 
@@ -1196,119 +1199,113 @@ void GraphModel::updateVisuals(bool force)
     auto textColor      = Document::contrastingColorForBackground();
     auto meIndicators   = u::pref(u"visuals/showMultiElementIndicators"_s).toBool();
 
-    auto newNodeVisuals = _->_nodeVisuals;
-    auto newEdgeVisuals = _->_edgeVisuals;
+    auto& nodeVisuals = _->_nodeVisuals;
+    auto& edgeVisuals = _->_edgeVisuals;
 
-    // Clear all edge flags as we can't know what to
-    // change unless we have the previous state to hand
+    Flags<VisualChangeFlags> nodeChanges;
+    Flags<VisualChangeFlags> edgeChanges;
+
+    bool changing = false;
+    auto beginChanging = [this, &changing]
+    {
+        if(changing)
+            return;
+
+        changing = true;
+        emit visualsWillChange();
+    };
+
+    auto setIfChanged = [&beginChanging](auto& destination, const auto& value,
+        Flags<VisualChangeFlags>& changes, VisualChangeFlags change)
+    {
+        if(destination != value) // clazy:exclude=compare-member-check
+        {
+            beginChanging();
+            destination = value;
+            changes.set(change);
+        }
+    };
+
+    if(force)
+        beginChanging();
+
+    // An edge's state is accumulated from the nodes it joins, so it is staged here and
+    // written back once complete, rather than being cleared and rebuilt where it lives
+    EdgeArray<Flags<VisualFlags>> newEdgeStates(graph());
+
     for(auto edgeId : graph().edgeIds())
-        newEdgeVisuals[edgeId]._state.reset(VisualFlags::Selected, VisualFlags::Unhighlighted);
+    {
+        newEdgeStates[edgeId] = edgeVisuals[edgeId]._state;
+        newEdgeStates[edgeId].reset(VisualFlags::Selected, VisualFlags::Unhighlighted);
+    }
+
+    auto setElementVisual = [&](auto elementId, auto& visual, const auto& mapped,
+        float size, const QColor& color, const QString& text,
+        Flags<VisualChangeFlags>& changes)
+    {
+        setIfChanged(visual._size, size, changes, VisualChangeFlags::Size);
+
+        setIfChanged(visual._outerColor, mapped._outerColor.isValid() ?
+            mapped._outerColor : color, changes, VisualChangeFlags::Color);
+
+        setIfChanged(visual._innerColor,
+            !meIndicators || graph().typeOf(elementId) == MultiElementType::Not ?
+            visual._outerColor : multiColor, changes, VisualChangeFlags::Color);
+
+        setIfChanged(visual._text, !mapped._text.isEmpty() ?
+            mapped._text : text, changes, VisualChangeFlags::Text);
+
+        setIfChanged(visual._textSize, mappedTextSize(_->_textSize, mapped._textSize),
+            changes, VisualChangeFlags::TextSize);
+
+        setIfChanged(visual._textColor, mapped._textColor.isValid() ?
+            mapped._textColor : textColor, changes, VisualChangeFlags::TextColor);
+    };
 
     for(auto nodeId : graph().nodeIds())
     {
-        // Size
-        if(_->_mappedNodeVisuals[nodeId]._size >= 0.0f)
-        {
-            newNodeVisuals[nodeId]._size = mappedSize(
-                LimitConstants::minimumNodeSize(), LimitConstants::maximumNodeSize(),
-                nodeSize, _->_mappedNodeVisuals[nodeId]._size);
-        }
-        else
-            newNodeVisuals[nodeId]._size = nodeSize;
+        auto& visual = nodeVisuals[nodeId];
+        const auto& mapped = _->_mappedNodeVisuals[nodeId];
 
-        // Color
-        if(_->_mappedNodeVisuals[nodeId]._outerColor.isValid())
-            newNodeVisuals[nodeId]._outerColor = _->_mappedNodeVisuals[nodeId]._outerColor;
-        else
-            newNodeVisuals[nodeId]._outerColor = nodeColor;
-
-        newNodeVisuals[nodeId]._innerColor = !meIndicators || graph().typeOf(nodeId) == MultiElementType::Not ?
-            newNodeVisuals[nodeId]._outerColor : multiColor;
-
-        // Text
-        if(!_->_mappedNodeVisuals[nodeId]._text.isEmpty())
-            newNodeVisuals[nodeId]._text = _->_mappedNodeVisuals[nodeId]._text;
-        else
-            newNodeVisuals[nodeId]._text = nodeName(nodeId);
-
-        // Text Size
-        if(_->_mappedNodeVisuals[nodeId]._textSize >= 0.0f)
-            newNodeVisuals[nodeId]._textSize = mappedTextSize(_->_textSize, _->_mappedNodeVisuals[nodeId]._textSize);
-        else
-            newNodeVisuals[nodeId]._textSize = textSize;
-
-        // Text Color
-        if(_->_mappedNodeVisuals[nodeId]._textColor.isValid())
-            newNodeVisuals[nodeId]._textColor = _->_mappedNodeVisuals[nodeId]._textColor;
-        else
-            newNodeVisuals[nodeId]._textColor = textColor;
-
+        setElementVisual(nodeId, visual, mapped,
+            mappedSize(LimitConstants::minimumNodeSize(), LimitConstants::maximumNodeSize(),
+            nodeSize, mapped._size), nodeColor, nodeName(nodeId), nodeChanges);
 
         auto nodeIsSelected = u::contains(_->_selectedNodeIds, nodeId);
+        auto nodeUnhighlighted = nodeIsUnhighlighted(nodeId, nodeIsSelected);
 
-        newNodeVisuals[nodeId]._state.setState(VisualFlags::Selected, nodeIsSelected);
+        auto state = visual._state;
+        state.setState(VisualFlags::Selected, nodeIsSelected);
+        state.setState(VisualFlags::Unhighlighted, nodeUnhighlighted);
+        setIfChanged(visual._state, state, nodeChanges, VisualChangeFlags::State);
 
         if(nodeIsSelected)
         {
             for(auto edgeId : graph().edgeIdsForNodeId(nodeId))
-                newEdgeVisuals[edgeId]._state.setState(VisualFlags::Selected, nodeIsSelected);
+                newEdgeStates[edgeId].set(VisualFlags::Selected);
         }
-
-        auto nodeUnhighlighted = nodeIsUnhighlighted(nodeId, nodeIsSelected);
-
-        newNodeVisuals[nodeId]._state.setState(VisualFlags::Unhighlighted, nodeUnhighlighted);
 
         if(nodeUnhighlighted)
         {
             for(auto edgeId : graph().edgeIdsForNodeId(nodeId))
-                newEdgeVisuals[edgeId]._state.set(VisualFlags::Unhighlighted);
+                newEdgeStates[edgeId].set(VisualFlags::Unhighlighted);
         }
     }
 
     for(auto edgeId : graph().edgeIds())
     {
-        // Size
-        if(_->_mappedEdgeVisuals[edgeId]._size >= 0.0f)
-        {
-            newEdgeVisuals[edgeId]._size = mappedSize(
-                LimitConstants::minimumEdgeSize(), LimitConstants::maximumEdgeSize(),
-                edgeSize, _->_mappedEdgeVisuals[edgeId]._size);
-        }
-        else
-            newEdgeVisuals[edgeId]._size = edgeSize;
+        auto& visual = edgeVisuals[edgeId];
+        const auto& mapped = _->_mappedEdgeVisuals[edgeId];
 
-        // Restrict edgeSize to be no larger than the source or target size
+        // An edge is never drawn thicker than either of the nodes it joins
         const auto& edge = graph().edgeById(edgeId);
-        auto minEdgeNodesSize = std::min(newNodeVisuals[edge.sourceId()]._size,
-            newNodeVisuals[edge.targetId()]._size);
-        newEdgeVisuals[edgeId]._size = std::min(newEdgeVisuals[edgeId]._size, minEdgeNodesSize);
+        auto size = std::min({mappedSize(LimitConstants::minimumEdgeSize(),
+            LimitConstants::maximumEdgeSize(), edgeSize, mapped._size),
+            nodeVisuals[edge.sourceId()]._size, nodeVisuals[edge.targetId()]._size});
 
-        // Color
-        if(_->_mappedEdgeVisuals[edgeId]._outerColor.isValid())
-            newEdgeVisuals[edgeId]._outerColor = _->_mappedEdgeVisuals[edgeId]._outerColor;
-        else
-            newEdgeVisuals[edgeId]._outerColor = edgeColor;
+        setElementVisual(edgeId, visual, mapped, size, edgeColor, {}, edgeChanges);
 
-        newEdgeVisuals[edgeId]._innerColor = !meIndicators || graph().typeOf(edgeId) == MultiElementType::Not ?
-            newEdgeVisuals[edgeId]._outerColor : multiColor;
-
-        // Text
-        if(!_->_mappedEdgeVisuals[edgeId]._text.isEmpty())
-            newEdgeVisuals[edgeId]._text = _->_mappedEdgeVisuals[edgeId]._text;
-        else
-            newEdgeVisuals[edgeId]._text.clear();
-
-        // Text Size
-        if(_->_mappedEdgeVisuals[edgeId]._textSize >= 0.0f)
-            newEdgeVisuals[edgeId]._textSize = mappedTextSize(_->_textSize, _->_mappedEdgeVisuals[edgeId]._textSize);
-        else
-            newEdgeVisuals[edgeId]._textSize = textSize;
-
-        // Text Color
-        if(_->_mappedEdgeVisuals[edgeId]._textColor.isValid())
-            newEdgeVisuals[edgeId]._textColor = _->_mappedEdgeVisuals[edgeId]._textColor;
-        else
-            newEdgeVisuals[edgeId]._textColor = textColor;
+        setIfChanged(visual._state, newEdgeStates[edgeId], edgeChanges, VisualChangeFlags::State);
     }
 
     for(auto& [componentId, textVisuals] : _->_newTextVisuals)
@@ -1321,55 +1318,6 @@ void GraphModel::updateVisuals(bool force)
             textVisual._color = textColor;
         }
     }
-
-    auto findChange = [](const auto& elementIds, const auto& previous, const auto& current)
-    {
-        Flags<VisualChangeFlags> change;
-
-        for(auto elementId : elementIds)
-        {
-            if(!change.test(VisualChangeFlags::Size))
-            {
-                change.set(previous[elementId]._size != current[elementId]._size ?
-                    VisualChangeFlags::Size : VisualChangeFlags::None);
-            }
-
-            if(!change.test(VisualChangeFlags::Color))
-            {
-                change.set(previous[elementId]._innerColor != current[elementId]._innerColor ?
-                    VisualChangeFlags::Color : VisualChangeFlags::None);
-
-                change.set(previous[elementId]._outerColor != current[elementId]._outerColor ?
-                    VisualChangeFlags::Color : VisualChangeFlags::None);
-            }
-
-            if(!change.test(VisualChangeFlags::Text))
-            {
-                change.set(previous[elementId]._text != current[elementId]._text ?
-                    VisualChangeFlags::Text : VisualChangeFlags::None);
-            }
-
-            if(!change.test(VisualChangeFlags::TextColor))
-            {
-                change.set(previous[elementId]._textColor != current[elementId]._textColor ?
-                    VisualChangeFlags::TextColor : VisualChangeFlags::None);
-            }
-
-            if(!change.test(VisualChangeFlags::TextSize))
-            {
-                change.set(previous[elementId]._textSize != current[elementId]._textSize ?
-                    VisualChangeFlags::TextSize : VisualChangeFlags::None);
-            }
-
-            if(!change.test(VisualChangeFlags::State))
-            {
-                change.set(previous[elementId]._state != current[elementId]._state ? // clazy:exclude=compare-member-check
-                    VisualChangeFlags::State : VisualChangeFlags::None);
-            }
-        }
-
-        return *change;
-    };
 
     auto findTextVisualsChange = [](const TextVisuals& previous, const TextVisuals& current)
     {
@@ -1411,20 +1359,17 @@ void GraphModel::updateVisuals(bool force)
         return *change;
     };
 
-    const VisualChangeFlags nodeChange = findChange(graph().nodeIds(), _->_nodeVisuals, newNodeVisuals);
-    const VisualChangeFlags edgeChange = findChange(graph().edgeIds(), _->_edgeVisuals, newEdgeVisuals);
     const VisualChangeFlags textChange = findTextVisualsChange(_->_textVisuals, _->_newTextVisuals);
 
-    if(force || nodeChange != VisualChangeFlags::None || edgeChange != VisualChangeFlags::None || textChange != VisualChangeFlags::None)
-    {
-        emit visualsWillChange();
+    if(textChange != VisualChangeFlags::None)
+        beginChanging();
 
-        _->_nodeVisuals = newNodeVisuals;
-        _->_edgeVisuals = newEdgeVisuals;
-        _->_textVisuals = _->_newTextVisuals;
+    if(!changing)
+        return;
 
-        emit visualsChanged(nodeChange, edgeChange, textChange);
-    }
+    _->_textVisuals = _->_newTextVisuals;
+
+    emit visualsChanged(*nodeChanges, *edgeChanges, textChange);
 }
 
 // When the selection changes, only update the selection visuals
