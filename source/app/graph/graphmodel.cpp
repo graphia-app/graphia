@@ -85,6 +85,7 @@
 #include <QtGlobal>
 
 #include <algorithm>
+#include <atomic>
 #include <cmath>
 #include <cstddef>
 #include <iterator>
@@ -226,8 +227,8 @@ private:
 
     std::set<AttributeChangesTracker*> _attributeChangesTrackers;
 
-    bool _visualUpdateRequired = false;
-    bool _graphChangedSinceVisualUpdate = true;
+    std::atomic_bool _visualUpdateRequired = false;
+    std::atomic_bool _graphChangedSinceVisualUpdate = true;
 };
 
 GraphModel::GraphModel(const QString& name, IPlugin* plugin) :

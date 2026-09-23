@@ -79,7 +79,7 @@ private:
 
     // While loading there may be lots of initial changes, and
     // we don't want to do many visual updates, so disable them
-    bool _visualUpdatesEnabled = false;
+    std::atomic_bool _visualUpdatesEnabled = false;
 
     std::atomic_bool _graphTransformsAreChanging;
     QString _name;
