@@ -130,8 +130,13 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel, CommandManager* commandMana
             return Flags<VisualChangeFlags>(change).test(VisualChangeFlags::Text);
         };
 
+        // Changing the font forces a visual update, and it is here that the glyphs are
+        // rebuilt in the new font, since updateText reads every element's text, and so
+        // must not happen alongside another visual update
+        _glyphMap->setFontName(u::pref(u"visuals/textFont"_s).toString());
+
         if(textChanged(nodeChange) || textChanged(edgeChange) ||
-            textChange != VisualChangeFlags::None)
+            textChange != VisualChangeFlags::None || _glyphMap->updateRequired())
         {
             updateText();
         }
@@ -904,14 +909,9 @@ void GraphRenderer::onComponentWillBeRemoved(const Graph*, ComponentId component
     }, u"GraphRenderer::onComponentWillBeRemoved (cleanup) component %1"_s.arg(static_cast<int>(componentId)));
 }
 
-void GraphRenderer::onPreferenceChanged(const QString& key, const QVariant& value)
+void GraphRenderer::onPreferenceChanged(const QString& key, const QVariant&)
 {
-    if(key == u"visuals/textFont"_s)
-    {
-        _glyphMap->setFontName(value.toString());
-        u::doAsync([this] { updateText(); });
-    }
-    else if(key == u"visuals/backgroundColor"_s)
+    if(key == u"visuals/backgroundColor"_s)
         update();
 }
 

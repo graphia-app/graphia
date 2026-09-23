@@ -48,6 +48,7 @@
 
 #include <cstddef>
 #include <memory>
+#include <mutex>
 #include <vector>
 #include <map>
 
@@ -75,6 +76,9 @@ public:
 
 private:
     IGraphModel* _graphModel = nullptr;
+
+    mutable std::mutex _nodeColorsMutex;
+    std::vector<QColor> _nodeColors;
 
     size_t _numContinuousColumns = 0;
     size_t _numDiscreteColumns = 0;
@@ -184,6 +188,11 @@ public:
 
     QString rowName(size_t row) const;
     QString columnName(size_t column) const;
+private:
+    void copyNodeColors();
+    QColor nodeColorForRowNoLocking(size_t row) const;
+
+public:
     QColor nodeColorForRow(size_t row) const;
     QColor nodeColorForRows(const std::vector<size_t>& rows) const;
 

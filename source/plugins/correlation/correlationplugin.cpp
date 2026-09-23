@@ -34,6 +34,7 @@
 #include "shared/utils/source_location.h"
 #include "shared/utils/qmlenumfor.h"
 #include "shared/utils/json.h"
+#include "shared/utils/flags.h"
 
 #include "shared/attributes/iattribute.h"
 
@@ -75,6 +76,15 @@ void CorrelationPluginInstance::initialise(const IPlugin* plugin, IDocument* doc
         this, &CorrelationPluginInstance::sharedValuesAttributeNamesChanged);
     connect(this, &BasePluginInstance::attributesChanged,
         this, &CorrelationPluginInstance::numericalAttributeNamesChanged);
+
+    // This runs on the thread that changed the visuals, straight after it has, and
+    // before anything can change them again
+    connect(this, &BasePluginInstance::visualsChanged, this,
+    [this](VisualChangeFlags nodeChange, VisualChangeFlags, VisualChangeFlags)
+    {
+        if(::Flags<VisualChangeFlags>(nodeChange).test(VisualChangeFlags::Color))
+            copyNodeColors();
+    }, Qt::DirectConnection);
 }
 
 bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
@@ -833,14 +843,35 @@ QString CorrelationPluginInstance::columnName(size_t column) const
     return _dataColumnNames.at(column);
 }
 
-QColor CorrelationPluginInstance::nodeColorForRow(size_t row) const
+void CorrelationPluginInstance::copyNodeColors()
 {
-    auto nodeId = _graphModel->userNodeData().elementIdForIndex(row);
+    const auto& userNodeData = _graphModel->userNodeData();
+    std::vector<QColor> nodeColors(userNodeData.numValues());
 
-    if(nodeId.isNull())
+    for(size_t row = 0; row < nodeColors.size(); row++)
+    {
+        auto nodeId = userNodeData.elementIdForIndex(row);
+
+        if(!nodeId.isNull())
+            nodeColors[row] = graphModel()->nodeVisual(nodeId).outerColor();
+    }
+
+    const std::unique_lock<std::mutex> lock(_nodeColorsMutex);
+    _nodeColors = std::move(nodeColors);
+}
+
+QColor CorrelationPluginInstance::nodeColorForRowNoLocking(size_t row) const
+{
+    if(row >= _nodeColors.size())
         return {};
 
-    return graphModel()->nodeVisual(nodeId).outerColor();
+    return _nodeColors.at(row);
+}
+
+QColor CorrelationPluginInstance::nodeColorForRow(size_t row) const
+{
+    const std::unique_lock<std::mutex> lock(_nodeColorsMutex);
+    return nodeColorForRowNoLocking(row);
 }
 
 QColor CorrelationPluginInstance::nodeColorForRows(const std::vector<size_t>& rows) const
@@ -848,12 +879,14 @@ QColor CorrelationPluginInstance::nodeColorForRows(const std::vector<size_t>& ro
     if(rows.empty())
         return {};
 
-    auto color = nodeColorForRow(rows.at(0));
+    const std::unique_lock<std::mutex> lock(_nodeColorsMutex);
+
+    auto color = nodeColorForRowNoLocking(rows.at(0));
 
     auto colorsInconsistent = std::ranges::any_of(rows,
     [this, &color](auto row)
     {
-        return nodeColorForRow(row) != color;
+        return nodeColorForRowNoLocking(row) != color;
     });
 
     if(colorsInconsistent)
