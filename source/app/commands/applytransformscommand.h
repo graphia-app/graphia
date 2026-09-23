@@ -48,7 +48,8 @@ public:
                            QStringList previousTransformations,
                            QStringList transformations);
 
-    // Applies the Document's transforms as they are when the command executes
+    // Reapplies the Document's transforms as they are when the command executes;
+    // if something has rebuilt the transforms since it was queued, it does nothing
     ApplyTransformsCommand(GraphModel* graphModel, Document* document);
 
     QString description() const override;

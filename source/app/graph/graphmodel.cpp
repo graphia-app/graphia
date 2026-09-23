@@ -236,6 +236,9 @@ private:
     // corresponding visualisation
     bool _hasValidEdgeTextVisualisation = false;
 
+    std::atomic_bool _transformRebuildRequired = false;
+    std::atomic_bool _visualisationRebuildRequired = false;
+
     NodeIdSet _selectedNodeIds;
     NodeIdSet _foundNodeIds;
     NodeIdSet _highlightedNodeIds;
@@ -785,6 +788,8 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
 {
     SCOPE_TIMER_MULTISAMPLES(50)
 
+    _->_visualisationRebuildRequired = false;
+
     _->_mappedNodeVisuals.resetElements();
     _->_mappedEdgeVisuals.resetElements();
     _->_newTextVisuals.clear();
@@ -921,6 +926,9 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
     _->requestFullVisualUpdate();
     scheduleVisualUpdate();
 }
+
+bool GraphModel::transformRebuildRequired() const { return _->_transformRebuildRequired; }
+bool GraphModel::visualisationRebuildRequired() const { return _->_visualisationRebuildRequired; }
 
 bool GraphModel::hasValidEdgeTextVisualisation() const
 {
@@ -1198,6 +1206,10 @@ void GraphModel::highlightNodes(const NodeIdSet& nodeIds)
 
 void GraphModel::enableVisualUpdates()
 {
+    // Loading has only just built the transforms and visualisations from scratch
+    _->_transformRebuildRequired = false;
+    _->_visualisationRebuildRequired = false;
+
     _visualUpdatesEnabled = true;
     _->requestFullVisualUpdate();
 
@@ -1633,6 +1645,9 @@ void GraphModel::onTransformedGraphWillChange(const Graph*)
     // update, so whatever next asks for an update must get a full one
     _->requestFullVisualUpdate();
 
+    // Rebuilding applies the transforms to the attribute values as they now are
+    _->_transformRebuildRequired = false;
+
     // Store previous attributes for comparison
     _->_previousAttributeIdentities = _->currentAttributeIdentities();
 
@@ -1718,8 +1733,15 @@ void GraphModel::onAttributesChanged(const QStringList& addedNames, const QStrin
         static_cast<const QList<QString>&>(_->_visualisedAttributeNames),
         static_cast<const QList<QString>&>(changed)).empty();
 
+    if(transformRebuildRequired)
+        _->_transformRebuildRequired = true;
+
+    if(visualisationRebuildRequired)
+        _->_visualisationRebuildRequired = true;
+
+    // The rebuilds happen alongside the next visual update
     if(transformRebuildRequired || visualisationRebuildRequired)
-        emit rebuildRequired(transformRebuildRequired, visualisationRebuildRequired);
+        scheduleVisualUpdate();
 }
 
 AttributeChangesTracker::AttributeChangesTracker(GraphModel* graphModel,

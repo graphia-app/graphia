@@ -96,7 +96,8 @@ bool ApplyTransformsCommand::execute()
 {
     if(_deferred)
     {
-        _document->clearPendingTransformRebuild();
+        if(!_graphModel->transformRebuildRequired())
+            return true;
 
         _document->executeOnMainThreadAndWait([this]
         {

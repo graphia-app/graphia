@@ -41,8 +41,6 @@ private:
     // this is an index with which the GraphModel can be interrogated
     int _transformIndex = -1;
 
-    bool _deferred = false;
-
     void apply(const QStringList& visualisations,
                const QStringList& previousVisualisations);
 
@@ -54,9 +52,6 @@ public:
                                QStringList previousVisualisations,
                                QStringList visualisations,
                                int transformIndex = -1);
-
-    // Applies the Document's visualisations as they are when the command executes
-    ApplyVisualisationsCommand(GraphModel* graphModel, Document* document);
 
     QString description() const override;
     QString verb() const override;

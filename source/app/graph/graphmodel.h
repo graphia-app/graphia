@@ -162,6 +162,11 @@ public:
     void buildVisualisations(const QStringList& visualisations);
     bool hasValidEdgeTextVisualisation() const;
 
+    // Whether changes to attribute values, or to the graph, have left the transforms or
+    // the visualisations out of date; each is cleared by rebuilding what it refers to
+    bool transformRebuildRequired() const;
+    bool visualisationRebuildRequired() const;
+
     QStringList availableVisualisationChannelNames(ElementType elementType, ValueType valueType) const;
     bool visualisationChannelAllowsMapping(const QString& channelName) const;
 
@@ -225,8 +230,6 @@ signals:
     void visualsChanged(VisualChangeFlags nodeChange, VisualChangeFlags edgeChange, VisualChangeFlags textChange);
     void attributesChanged(const QStringList& addedNames, const QStringList& removedNames,
         const QStringList& changedValuesNames, bool graphChanged);
-
-    void rebuildRequired(bool transforms, bool visualisations);
 
     void visualUpdateRequested();
 };

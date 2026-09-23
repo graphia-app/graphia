@@ -1005,26 +1005,6 @@ void Document::onLoadComplete(const QUrl&, bool success)
     connect(_layoutThread.get(), &LayoutThread::executed, _graphDisplay, &GraphDisplay::onLayoutChanged);
 
     connect(_graphModel.get(), &GraphModel::visualsChanged, this, &Document::hasValidEdgeTextVisualisationChanged); // clazy:exclude=connect-non-signal
-    connect(_graphModel.get(), &GraphModel::rebuildRequired, // clazy:exclude=connect-non-signal
-    [this](bool transforms, bool visualisations)
-    {
-        ICommandPtrsVector commands;
-
-        if(transforms && !_transformRebuildPending.exchange(true))
-            commands.emplace_back(std::make_unique<ApplyTransformsCommand>(_graphModel.get(), this));
-
-        if(visualisations && !_visualisationRebuildPending.exchange(true))
-            commands.emplace_back(std::make_unique<ApplyVisualisationsCommand>(_graphModel.get(), this));
-
-        if(!commands.empty())
-        {
-            _commandManager.execute(ExecutePolicy::OnceMutate, std::move(commands),
-                {
-                    tr("Apply Transforms and Visualisations"),
-                    tr("Applying Transforms and Visualisations")
-                });
-        }
-    });
 
     connect(&_graphModel->graph(), &Graph::graphWillChange, this, &Document::graphWillChange);
     connect(&_graphModel->graph(), &Graph::graphChanged, this, &Document::graphChanged);
@@ -1087,7 +1067,29 @@ void Document::onLoadComplete(const QUrl&, bool success)
 
     // A visual update can take a while and as such it can't run on the main thread, so
     // instead we perform them after commands have completed
-    _commandManager.setPostCommandFunction([this] { _graphModel->applyPendingVisualUpdates(); });
+    _commandManager.setPostCommandFunction([this]
+    {
+        // Changes to attribute values, or to the graph, can leave the transforms or the
+        // visualisations out of date. Rebuilding the transforms can take a long time and
+        // change the graph, so it gets a command of its own, which will also see to the
+        // visualisations once it's done; they alone can simply be rebuilt here
+        if(_graphModel->transformRebuildRequired())
+        {
+            _commandManager.execute(ExecutePolicy::OnceMutate,
+                std::make_unique<ApplyTransformsCommand>(_graphModel.get(), this));
+        }
+        else if(_graphModel->visualisationRebuildRequired())
+        {
+            _graphModel->buildVisualisations(_visualisations);
+
+            // Refresh the visualisations' alerts in the UI
+            executeOnMainThread([this] { setVisualisations(_visualisations); },
+                u"Document rebuilt visualisations"_s);
+        }
+
+        _graphModel->applyPendingVisualUpdates();
+    });
+
     connect(_graphModel.get(), &GraphModel::visualUpdateRequested,
         &_commandManager, &CommandManager::schedulePostCommandFunction, Qt::DirectConnection);
 
