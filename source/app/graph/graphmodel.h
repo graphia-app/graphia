@@ -96,7 +96,7 @@ private:
     const IElementVisual& nodeVisualImpl(NodeId nodeId) const override;
     const IElementVisual& edgeVisualImpl(EdgeId edgeId) const override;
 
-    void applyPendingVisualUpdates();
+    void scheduleVisualUpdate();
     void updateVisuals(bool force);
 
     bool nodeIsUnhighlighted(NodeId nodeId, bool nodeIsSelected) const;
@@ -201,6 +201,11 @@ public:
 
     void enableVisualUpdates();
 
+    // Brings the visuals up to date with every change requested since this last ran;
+    // the requests are announced by visualUpdateRequested, and this must never be
+    // called concurrently with itself, nor while a command might be changing the graph
+    void applyPendingVisualUpdates();
+
 public slots:
     void onSelectionChanged(const SelectionManager* selectionManager);
     void onFoundNodeIdsChanged(const SearchManager* searchManager);
@@ -222,6 +227,8 @@ signals:
         const QStringList& changedValuesNames, bool graphChanged);
 
     void rebuildRequired(bool transforms, bool visualisations);
+
+    void visualUpdateRequested();
 };
 
 class AttributeChangesTracker

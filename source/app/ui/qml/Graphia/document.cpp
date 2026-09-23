@@ -117,6 +117,7 @@ Document::~Document()
 
     // Wait for any executing commands to complete
     _commandManager.wait();
+    _commandManager.clearPostCommandFunction();
 
     // Execute anything pending (primarily to avoid deadlock)
     executeDeferred();
@@ -989,7 +990,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
 
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::onSelectionChanged);
     connect(_selectionManager.get(), &SelectionManager::selectionChanged,
-            _graphModel.get(), &GraphModel::onSelectionChanged);
+            _graphModel.get(), &GraphModel::onSelectionChanged, Qt::DirectConnection);
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::numNodesSelectedChanged);
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::numHeadNodesSelectedChanged);
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::numInvisibleNodesSelectedChanged);
@@ -999,7 +1000,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
 
     connect(_searchManager.get(), &SearchManager::foundNodeIdsChanged, this, &Document::onFoundNodeIdsChanged);
     connect(_searchManager.get(), &SearchManager::foundNodeIdsChanged,
-            _graphModel.get(), &GraphModel::onFoundNodeIdsChanged);
+            _graphModel.get(), &GraphModel::onFoundNodeIdsChanged, Qt::DirectConnection);
 
     connect(_layoutThread.get(), &LayoutThread::executed, _graphDisplay, &GraphDisplay::onLayoutChanged);
 
@@ -1083,6 +1084,12 @@ void Document::onLoadComplete(const QUrl&, bool success)
     });
 
     connect(this, &Document::enrichmentTableModelsChanged, this, &Document::setSaveRequired);
+
+    // A visual update can take a while and as such it can't run on the main thread, so
+    // instead we perform them after commands have completed
+    _commandManager.setPostCommandFunction([this] { _graphModel->applyPendingVisualUpdates(); });
+    connect(_graphModel.get(), &GraphModel::visualUpdateRequested,
+        &_commandManager, &CommandManager::schedulePostCommandFunction, Qt::DirectConnection);
 
     _graphModel->enableVisualUpdates();
 

@@ -118,6 +118,7 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel, CommandManager* commandMana
 
     connect(_graphModel, &GraphModel::visualsWillChange, [this]
     {
+        _visualsChanging = true;
         disableSceneUpdate();
     });
 
@@ -141,7 +142,8 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel, CommandManager* commandMana
             update(); // QQuickFramebufferObject::Renderer::update
         }, u"GraphRenderer::visualsChanged"_s);
 
-        enableSceneUpdate();
+        if(_visualsChanging.exchange(false))
+            enableSceneUpdate();
     });
 
     _performanceCounter.setReportFn([this](float ticksPerSecond)

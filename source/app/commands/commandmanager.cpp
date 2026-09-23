@@ -33,6 +33,8 @@ CommandManager::CommandManager() :
 {
     connect(this, &CommandManager::commandQueued, this, &CommandManager::update);
     connect(this, &CommandManager::commandCompleted, this, &CommandManager::onCommandCompleted);
+    connect(this, &CommandManager::postCommandFunctionScheduled, this, &CommandManager::update);
+    connect(this, &CommandManager::postCommandFunctionCompleted, this, &CommandManager::onPostCommandFunctionCompleted);
 }
 
 CommandManager::~CommandManager()
@@ -175,6 +177,7 @@ void CommandManager::executeReal(ICommandPtr command, CommandAction action)
             }
         }
 
+        runPostCommandFunction();
         clearCurrentCommand();
 
         emit commandCompleted(success, description, pastParticiple);
@@ -210,6 +213,7 @@ void CommandManager::undoReal(NamedBool<"rollback"> rollback)
         command->undo();
         _lastExecutedIndex--;
 
+        runPostCommandFunction();
         clearCurrentCommand();
 
         if(rollback)
@@ -244,6 +248,7 @@ void CommandManager::redoReal()
 
         command->execute();
 
+        runPostCommandFunction();
         clearCurrentCommand();
 
         emit commandCompleted(true, description, command->pastParticiple());
@@ -341,6 +346,58 @@ QString CommandManager::nextRedoAction() const
 bool CommandManager::busy() const
 {
     return _busy;
+}
+
+void CommandManager::setPostCommandFunction(std::function<void()> task)
+{
+    // The task is read by the command thread, which only ever starts after this
+    Q_ASSERT(!_threadActive);
+
+    _postCommandFunction = std::move(task);
+}
+
+void CommandManager::clearPostCommandFunction()
+{
+    setPostCommandFunction({});
+}
+
+void CommandManager::schedulePostCommandFunction()
+{
+    // Only the first request since the task last ran needs to do anything; this
+    // is called from any thread, and possibly very often
+    if(!_postCommandFunctionScheduled.exchange(true))
+        emit postCommandFunctionScheduled();
+}
+
+void CommandManager::runPostCommandFunction()
+{
+    // Anything requested from here on needs another run, so clear this first
+    _postCommandFunctionScheduled = false;
+
+    if(_postCommandFunction)
+        _postCommandFunction();
+}
+
+void CommandManager::runPostCommandFunctionAsync()
+{
+    // If the command thread is still joinable, we shouldn't be here
+    Q_ASSERT(!_thread.joinable());
+
+    if(_debug > 1)
+        qDebug() << "Post command task started";
+
+    _threadActive = true;
+    _thread = std::thread([this]
+    {
+        runPostCommandFunction();
+        emit postCommandFunctionCompleted();
+    });
+}
+
+void CommandManager::onPostCommandFunctionCompleted()
+{
+    joinThread();
+    update();
 }
 
 void CommandManager::clearCommandStack()
@@ -532,13 +589,25 @@ void CommandManager::onCommandCompleted(bool success, const QString& description
             qDebug() << "CommandManager finished";
 
         emit commandIsCancellableChanged();
+
+        // The post command task may have been requested again since it last ran
+        update();
     }
 }
 
 void CommandManager::update()
 {
-    if(_threadActive || !commandsArePending())
+    if(_threadActive)
         return;
+
+    if(!commandsArePending())
+    {
+        // Commands take precedence; each of them runs the task anyway once it's done
+        if(_postCommandFunctionScheduled && _postCommandFunction)
+            runPostCommandFunctionAsync();
+
+        return;
+    }
 
     auto pendingCommand = nextPendingCommand();
     switch(pendingCommand._action)

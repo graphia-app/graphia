@@ -237,6 +237,10 @@ private:
     QElapsedTimer _time;
     float _lastTime = 0.0f;
     int _sceneUpdateDisabled = 1;
+
+    // Whether the scene update was disabled by visualsWillChange, so that visualsChanged
+    // only enables what was disabled; the two can straddle this renderer's creation
+    std::atomic_bool _visualsChanging = false;
     mutable std::recursive_mutex _sceneUpdateMutex;
 
     std::atomic_bool _layoutInitialised = false;

@@ -29,6 +29,7 @@
 #include <QString>
 
 #include <deque>
+#include <functional>
 #include <vector>
 #include <thread>
 #include <mutex>
@@ -82,6 +83,14 @@ public:
 
     bool busy() const;
 
+    // Work that must never run alongside a command, but is not one itself: it runs on
+    // the command thread after every command, and when requested while no command is
+    // running, without making the manager busy; requests made while it cannot run yet
+    // are coalesced into one run
+    void setPostCommandFunction(std::function<void()> task);
+    void clearPostCommandFunction();
+    void schedulePostCommandFunction();
+
     void clearCommandStack();
 
     void cancel();
@@ -127,6 +136,9 @@ private:
     void joinThread();
 
     void clearCurrentCommand();
+
+    void runPostCommandFunction();
+    void runPostCommandFunctionAsync();
 
     void timerEvent(QTimerEvent *event) override;
 
@@ -188,6 +200,9 @@ private:
     bool _busy = false;
     std::atomic_bool _graphChanged;
 
+    std::function<void()> _postCommandFunction;
+    std::atomic_bool _postCommandFunctionScheduled = false;
+
     mutable std::recursive_mutex _currentCommandMutex;
     ICommand* _currentCommand = nullptr;
     int _commandProgressTimerId = -1;
@@ -200,6 +215,7 @@ private:
 
 private slots:
     void onCommandCompleted(bool success, const QString& description, const QString& pastParticiple);
+    void onPostCommandFunctionCompleted();
     void update();
 
 public slots:
@@ -216,6 +232,9 @@ signals:
     void commandQueued();
     void commandCompleted(bool success, const QString& description, const QString& pastParticiple);
     void commandStackCleared();
+
+    void postCommandFunctionScheduled();
+    void postCommandFunctionCompleted();
 
     void finished();
 };

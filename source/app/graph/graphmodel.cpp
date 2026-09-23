@@ -281,7 +281,7 @@ GraphModel::GraphModel(const QString& name, IPlugin* plugin) :
     connect(&_->_graph, &MutableGraph::transactionEnded, this, [this]
     {
         if(_->_visualUpdateDeferred)
-            applyPendingVisualUpdates();
+            scheduleVisualUpdate();
     });
 
     connect(&_->_transformedGraph, &Graph::graphWillChange, this, &GraphModel::onTransformedGraphWillChange, Qt::DirectConnection);
@@ -459,21 +459,21 @@ void GraphModel::setNodeSize(float nodeSize)
 {
     _->_nodeSize = nodeSize;
     _->requestFullVisualUpdate();
-    applyPendingVisualUpdates();
+    scheduleVisualUpdate();
 }
 
 void GraphModel::setEdgeSize(float edgeSize)
 {
     _->_edgeSize = edgeSize;
     _->requestFullVisualUpdate();
-    applyPendingVisualUpdates();
+    scheduleVisualUpdate();
 }
 
 void GraphModel::setTextSize(float textSize)
 {
     _->_textSize = textSize;
     _->requestFullVisualUpdate();
-    applyPendingVisualUpdates();
+    scheduleVisualUpdate();
 }
 
 float GraphModel::nodeSize() const { return _->_nodeSize; }
@@ -538,7 +538,7 @@ void GraphModel::setNodeName(NodeId nodeId, const QString& name)
 {
     _->_nodeNames[nodeId] = name;
     _->requestFullVisualUpdate();
-    applyPendingVisualUpdates();
+    scheduleVisualUpdate();
 }
 
 bool GraphModel::editable() const { return _plugin->editable(); }
@@ -919,7 +919,7 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
     edgeVisualisationsBuilder.findOverrideAlerts(_->_visualisationInfos);
 
     _->requestFullVisualUpdate();
-    applyPendingVisualUpdates();
+    scheduleVisualUpdate();
 }
 
 bool GraphModel::hasValidEdgeTextVisualisation() const
@@ -1193,13 +1193,19 @@ void GraphModel::highlightNodes(const NodeIdSet& nodeIds)
     });
 
     if(requested)
-        applyPendingVisualUpdates();
+        scheduleVisualUpdate();
 }
 
 void GraphModel::enableVisualUpdates()
 {
     _visualUpdatesEnabled = true;
     _->requestFullVisualUpdate();
+
+    // This is the one update made on the main thread, and it is made here deliberately.
+    // Loading has finished, so there is no command to overlap, and the renderer is only
+    // ever created while the main thread is blocked, so it cannot appear part way through
+    // this update, and then read the visuals while they are being written, or see the
+    // end of the change without having seen its beginning
     applyPendingVisualUpdates();
 }
 
@@ -1235,6 +1241,14 @@ bool GraphModel::nodeIsUnhighlighted(NodeId nodeId, bool nodeIsSelected) const
         !u::contains(_->_highlightedNodeIds, nodeId);
 
     return (isNotFound && _->_nodesMaskActive) || isNotHighlighted;
+}
+
+void GraphModel::scheduleVisualUpdate()
+{
+    // Before visual updates are enabled requests only accumulate, and
+    // enabling them schedules the update that takes account of them all
+    if(_visualUpdatesEnabled)
+        emit visualUpdateRequested();
 }
 
 void GraphModel::applyPendingVisualUpdates()
@@ -1561,7 +1575,7 @@ void GraphModel::onSelectionChanged(const SelectionManager* selectionManager)
         pending._nodesMaskActive = nodesMaskActive;
     });
 
-    applyPendingVisualUpdates();
+    scheduleVisualUpdate();
 }
 
 void GraphModel::onFoundNodeIdsChanged(const SearchManager* searchManager)
@@ -1574,7 +1588,7 @@ void GraphModel::onFoundNodeIdsChanged(const SearchManager* searchManager)
         pending._full = true;
     });
 
-    applyPendingVisualUpdates();
+    scheduleVisualUpdate();
 }
 
 void GraphModel::onPreferenceChanged(const QString& name, const QVariant&)
@@ -1598,7 +1612,7 @@ void GraphModel::onPreferenceChanged(const QString& name, const QVariant&)
         pending._force = pending._force || force;
     });
 
-    applyPendingVisualUpdates();
+    scheduleVisualUpdate();
 }
 
 void GraphModel::onLayoutChanged()
