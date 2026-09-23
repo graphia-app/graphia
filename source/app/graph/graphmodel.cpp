@@ -246,7 +246,6 @@ private:
 
     std::mutex _pendingVisualUpdateMutex;
     PendingVisualUpdate _pendingVisualUpdate;
-    std::atomic_bool _visualUpdateDeferred = false;
 
     template<typename Fn>
     void requestVisualUpdate(Fn&& fn)
@@ -281,11 +280,6 @@ GraphModel::GraphModel(const QString& name, IPlugin* plugin) :
     });
 
     connect(&_->_graph, &Graph::graphChanged, this, &GraphModel::onMutableGraphChanged, Qt::DirectConnection);
-    connect(&_->_graph, &MutableGraph::transactionEnded, this, [this]
-    {
-        if(_->_visualUpdateDeferred)
-            scheduleVisualUpdate();
-    });
 
     connect(&_->_transformedGraph, &Graph::graphWillChange, this, &GraphModel::onTransformedGraphWillChange, Qt::DirectConnection);
     connect(&_->_transformedGraph, &Graph::graphChanged, this, &GraphModel::onTransformedGraphChanged, Qt::DirectConnection);
@@ -1265,19 +1259,11 @@ void GraphModel::scheduleVisualUpdate()
 
 void GraphModel::applyPendingVisualUpdates()
 {
-    // Prevent any changes to the graph while we read from it
-    auto lock = mutableGraph().tryLock();
-    if(!lock.owns_lock())
-    {
-        // Delay the update until we can get exclusive access to the graph
-        _->_visualUpdateDeferred = true;
-        return;
-    }
-
     if(!_visualUpdatesEnabled)
         return;
 
-    _->_visualUpdateDeferred = false;
+    // Nothing locks the graph while it is read here: after loading it only ever changes
+    // in commands, and this only ever runs between them, or at the end of one
 
     PendingVisualUpdate pending;
     NodeIdSet previousSelectedNodeIds;

@@ -211,8 +211,6 @@ public:
 
     bool update() override;
 
-    std::unique_lock<std::mutex> tryLock();
-
 private:
     int _graphChangeDepth = 0;
     bool _graphChangeOccurred = false;
@@ -223,7 +221,6 @@ private:
 
 signals:
     void transactionWillBegin(const MutableGraph*);
-    void transactionEnded(const MutableGraph*);
 };
 
 #endif // MUTABLEGRAPH_H

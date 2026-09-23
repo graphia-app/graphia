@@ -650,7 +650,6 @@ void MutableGraph::endTransaction(bool graphChangeOccurred)
         update();
         emit graphChanged(this, _graphChangeOccurred);
         _mutex.unlock();
-        emit transactionEnded(this);
     }
 }
 
@@ -710,7 +709,3 @@ bool MutableGraph::update()
     return true;
 }
 
-std::unique_lock<std::mutex> MutableGraph::tryLock()
-{
-    return {_mutex, std::try_to_lock};
-}
