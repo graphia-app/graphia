@@ -121,9 +121,19 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel, CommandManager* commandMana
         disableSceneUpdate();
     });
 
-    connect(_graphModel, &GraphModel::visualsChanged, [this]
+    connect(_graphModel, &GraphModel::visualsChanged, [this](
+        VisualChangeFlags nodeChange, VisualChangeFlags edgeChange, VisualChangeFlags textChange)
     {
-        updateText();
+        auto textChanged = [](VisualChangeFlags change)
+        {
+            return Flags<VisualChangeFlags>(change).test(VisualChangeFlags::Text);
+        };
+
+        if(textChanged(nodeChange) || textChanged(edgeChange) ||
+            textChange != VisualChangeFlags::None)
+        {
+            updateText();
+        }
 
         executeOnRendererThread([this]
         {
