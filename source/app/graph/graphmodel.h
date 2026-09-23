@@ -96,7 +96,8 @@ private:
     const IElementVisual& nodeVisualImpl(NodeId nodeId) const override;
     const IElementVisual& edgeVisualImpl(EdgeId edgeId) const override;
 
-    void updateVisuals(bool force = false);
+    void applyPendingVisualUpdates();
+    void updateVisuals(bool force);
 
     bool nodeIsUnhighlighted(NodeId nodeId, bool nodeIsSelected) const;
     void updateSelectionVisuals(const NodeIdSet& previousSelectedNodeIds);

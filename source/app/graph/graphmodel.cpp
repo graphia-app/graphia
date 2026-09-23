@@ -90,6 +90,7 @@
 #include <cstddef>
 #include <iterator>
 #include <mutex>
+#include <optional>
 #include <set>
 #include <utility>
 #include <vector>
@@ -111,6 +112,17 @@ static void updateTextVisualPositions(TextVisuals& textVisuals, const NodePositi
             textVisual.updatePositions(nodePositions);
     }
 }
+
+struct PendingVisualUpdate
+{
+    bool _full = false; // Something that every element's visual depends on has changed
+    bool _force = false;
+
+    std::optional<NodeIdSet> _selectedNodeIds;
+    std::optional<bool> _nodesMaskActive;
+    std::optional<NodeIdSet> _foundNodeIds;
+    std::optional<NodeIdSet> _highlightedNodeIds;
+};
 
 class GraphModelImpl
 {
@@ -137,9 +149,9 @@ private:
     TransformInfosMap _transformInfos;
     NodePositions _nodePositions;
 
-    float _nodeSize = u::pref(u"visuals/defaultNormalNodeSize"_s).toFloat();
-    float _edgeSize = u::pref(u"visuals/defaultNormalEdgeSize"_s).toFloat();
-    float _textSize = LimitConstants::defaultTextSize();
+    std::atomic<float> _nodeSize = u::pref(u"visuals/defaultNormalNodeSize"_s).toFloat();
+    std::atomic<float> _edgeSize = u::pref(u"visuals/defaultNormalEdgeSize"_s).toFloat();
+    std::atomic<float> _textSize = LimitConstants::defaultTextSize();
 
     NodeVisuals _nodeVisuals;
     EdgeVisuals _edgeVisuals;
@@ -227,13 +239,25 @@ private:
     NodeIdSet _selectedNodeIds;
     NodeIdSet _foundNodeIds;
     NodeIdSet _highlightedNodeIds;
-
     bool _nodesMaskActive = false;
 
-    std::set<AttributeChangesTracker*> _attributeChangesTrackers;
+    std::mutex _pendingVisualUpdateMutex;
+    PendingVisualUpdate _pendingVisualUpdate;
+    std::atomic_bool _visualUpdateDeferred = false;
 
-    std::atomic_bool _visualUpdateRequired = false;
-    std::atomic_bool _graphChangedSinceVisualUpdate = true;
+    template<typename Fn>
+    void requestVisualUpdate(Fn&& fn)
+    {
+        const std::unique_lock<std::mutex> lock(_pendingVisualUpdateMutex);
+        fn(_pendingVisualUpdate);
+    }
+
+    void requestFullVisualUpdate()
+    {
+        requestVisualUpdate([](auto& pending) { pending._full = true; });
+    }
+
+    std::set<AttributeChangesTracker*> _attributeChangesTrackers;
 };
 
 GraphModel::GraphModel(const QString& name, IPlugin* plugin) :
@@ -256,8 +280,8 @@ GraphModel::GraphModel(const QString& name, IPlugin* plugin) :
     connect(&_->_graph, &Graph::graphChanged, this, &GraphModel::onMutableGraphChanged, Qt::DirectConnection);
     connect(&_->_graph, &MutableGraph::transactionEnded, this, [this]
     {
-        if(_->_visualUpdateRequired)
-            updateVisuals();
+        if(_->_visualUpdateDeferred)
+            applyPendingVisualUpdates();
     });
 
     connect(&_->_transformedGraph, &Graph::graphWillChange, this, &GraphModel::onTransformedGraphWillChange, Qt::DirectConnection);
@@ -434,19 +458,22 @@ const Graph& GraphModel::graph() const { return _->_transformedGraph; }
 void GraphModel::setNodeSize(float nodeSize)
 {
     _->_nodeSize = nodeSize;
-    updateVisuals();
+    _->requestFullVisualUpdate();
+    applyPendingVisualUpdates();
 }
 
 void GraphModel::setEdgeSize(float edgeSize)
 {
     _->_edgeSize = edgeSize;
-    updateVisuals();
+    _->requestFullVisualUpdate();
+    applyPendingVisualUpdates();
 }
 
 void GraphModel::setTextSize(float textSize)
 {
     _->_textSize = textSize;
-    updateVisuals();
+    _->requestFullVisualUpdate();
+    applyPendingVisualUpdates();
 }
 
 float GraphModel::nodeSize() const { return _->_nodeSize; }
@@ -510,7 +537,8 @@ QString GraphModel::nodeName(NodeId nodeId) const { return _->_nodeNames[nodeId]
 void GraphModel::setNodeName(NodeId nodeId, const QString& name)
 {
     _->_nodeNames[nodeId] = name;
-    updateVisuals();
+    _->requestFullVisualUpdate();
+    applyPendingVisualUpdates();
 }
 
 bool GraphModel::editable() const { return _plugin->editable(); }
@@ -890,7 +918,8 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
     nodeVisualisationsBuilder.findOverrideAlerts(_->_visualisationInfos);
     edgeVisualisationsBuilder.findOverrideAlerts(_->_visualisationInfos);
 
-    updateVisuals();
+    _->requestFullVisualUpdate();
+    applyPendingVisualUpdates();
 }
 
 bool GraphModel::hasValidEdgeTextVisualisation() const
@@ -1143,26 +1172,35 @@ UserEdgeData& GraphModel::userEdgeData() { return _->_userEdgeData; }
 
 void GraphModel::clearHighlightedNodes()
 {
-    if(_->_highlightedNodeIds.empty())
-        return;
-
-    _->_highlightedNodeIds.clear();
-    updateVisuals();
+    highlightNodes({});
 }
 
 void GraphModel::highlightNodes(const NodeIdSet& nodeIds)
 {
-    if(_->_highlightedNodeIds.empty() && nodeIds.empty())
-        return;
+    bool requested = false;
 
-    _->_highlightedNodeIds = nodeIds;
-    updateVisuals();
+    _->requestVisualUpdate([this, &nodeIds, &requested](auto& pending)
+    {
+        const auto& latestHighlightedNodeIds = pending._highlightedNodeIds ?
+            *pending._highlightedNodeIds : _->_highlightedNodeIds;
+
+        if(latestHighlightedNodeIds.empty() && nodeIds.empty())
+            return;
+
+        pending._highlightedNodeIds = nodeIds;
+        pending._full = true;
+        requested = true;
+    });
+
+    if(requested)
+        applyPendingVisualUpdates();
 }
 
 void GraphModel::enableVisualUpdates()
 {
     _visualUpdatesEnabled = true;
-    updateVisuals();
+    _->requestFullVisualUpdate();
+    applyPendingVisualUpdates();
 }
 
 static float mappedSize(float min, float max, float user, float mapped = -1.0f)
@@ -1199,29 +1237,69 @@ bool GraphModel::nodeIsUnhighlighted(NodeId nodeId, bool nodeIsSelected) const
     return (isNotFound && _->_nodesMaskActive) || isNotHighlighted;
 }
 
-void GraphModel::updateVisuals(bool force)
+void GraphModel::applyPendingVisualUpdates()
 {
     // Prevent any changes to the graph while we read from it
     auto lock = mutableGraph().tryLock();
     if(!lock.owns_lock())
     {
         // Delay the update until we can get exclusive access to the graph
-        _->_visualUpdateRequired = true;
+        _->_visualUpdateDeferred = true;
         return;
     }
 
     if(!_visualUpdatesEnabled)
         return;
 
-    _->_visualUpdateRequired = false;
-    _->_graphChangedSinceVisualUpdate = false;
+    _->_visualUpdateDeferred = false;
+
+    PendingVisualUpdate pending;
+    NodeIdSet previousSelectedNodeIds;
+    bool maskChanged = false;
+
+    {
+        const std::unique_lock<std::mutex> pendingLock(_->_pendingVisualUpdateMutex);
+        pending = std::exchange(_->_pendingVisualUpdate, {});
+
+        if(pending._selectedNodeIds)
+        {
+            previousSelectedNodeIds = std::exchange(_->_selectedNodeIds,
+                std::move(*pending._selectedNodeIds));
+        }
+
+        if(pending._nodesMaskActive)
+        {
+            maskChanged = std::exchange(_->_nodesMaskActive,
+                *pending._nodesMaskActive) != *pending._nodesMaskActive;
+        }
+
+        if(pending._foundNodeIds)
+            _->_foundNodeIds = std::move(*pending._foundNodeIds);
+
+        if(pending._highlightedNodeIds)
+            _->_highlightedNodeIds = std::move(*pending._highlightedNodeIds);
+    }
+
+    // Whether a mask is in place affects the highlight state of every node, not
+    // just the ones whose selected state changed, so there is no shortcut here
+    if(pending._full || maskChanged)
+        updateVisuals(pending._force);
+    else if(pending._selectedNodeIds)
+        updateSelectionVisuals(previousSelectedNodeIds);
+}
+
+void GraphModel::updateVisuals(bool force)
+{
+    const float userNodeSize = _->_nodeSize;
+    const float userEdgeSize = _->_edgeSize;
+    const float userTextSize = _->_textSize;
 
     auto nodeColor      = u::pref(u"visuals/defaultNodeColor"_s).value<QColor>();
     auto edgeColor      = u::pref(u"visuals/defaultEdgeColor"_s).value<QColor>();
     auto multiColor     = u::pref(u"visuals/multiElementColor"_s).value<QColor>();
-    auto nodeSize       = u::interpolate(LimitConstants::minimumNodeSize(), LimitConstants::maximumNodeSize(), _->_nodeSize);
-    auto edgeSize       = u::interpolate(LimitConstants::minimumEdgeSize(), LimitConstants::maximumEdgeSize(), _->_edgeSize);
-    auto textSize       = mappedTextSize(_->_textSize);
+    auto nodeSize       = u::interpolate(LimitConstants::minimumNodeSize(), LimitConstants::maximumNodeSize(), userNodeSize);
+    auto edgeSize       = u::interpolate(LimitConstants::minimumEdgeSize(), LimitConstants::maximumEdgeSize(), userEdgeSize);
+    auto textSize       = mappedTextSize(userTextSize);
     auto textColor      = Document::contrastingColorForBackground();
     auto meIndicators   = u::pref(u"visuals/showMultiElementIndicators"_s).toBool();
 
@@ -1281,7 +1359,7 @@ void GraphModel::updateVisuals(bool force)
         setIfChanged(visual._text, !mapped._text.isEmpty() ?
             mapped._text : text, changes, VisualChangeFlags::Text);
 
-        setIfChanged(visual._textSize, mappedTextSize(_->_textSize, mapped._textSize),
+        setIfChanged(visual._textSize, mappedTextSize(userTextSize, mapped._textSize),
             changes, VisualChangeFlags::TextSize);
 
         setIfChanged(visual._textColor, mapped._textColor.isValid() ?
@@ -1406,18 +1484,6 @@ void GraphModel::updateVisuals(bool force)
 // When the selection changes, only update the selection visuals
 void GraphModel::updateSelectionVisuals(const NodeIdSet& previousSelectedNodeIds)
 {
-    // Prevent any changes to the graph while we read from it
-    auto lock = mutableGraph().tryLock();
-    if(!lock.owns_lock())
-    {
-        // Delay the update until we can get exclusive access to the graph
-        _->_visualUpdateRequired = true;
-        return;
-    }
-
-    if(!_visualUpdatesEnabled)
-        return;
-
     std::vector<NodeId> changedNodeIds;
 
     for(auto nodeId : _->_selectedNodeIds)
@@ -1486,26 +1552,29 @@ void GraphModel::updateSelectionVisuals(const NodeIdSet& previousSelectedNodeIds
 
 void GraphModel::onSelectionChanged(const SelectionManager* selectionManager)
 {
+    auto selectedNodeIds = selectionManager->selectedNodes();
     auto nodesMaskActive = selectionManager->nodesMaskActive();
 
-    // Whether a mask is in place affects the highlight state of every node, not
-    // just the ones whose selected state changed, so there is no shortcut here
-    auto maskChanged = nodesMaskActive != _->_nodesMaskActive;
+    _->requestVisualUpdate([&selectedNodeIds, nodesMaskActive](auto& pending)
+    {
+        pending._selectedNodeIds = std::move(selectedNodeIds);
+        pending._nodesMaskActive = nodesMaskActive;
+    });
 
-    auto previousSelectedNodeIds = std::exchange(_->_selectedNodeIds,
-        selectionManager->selectedNodes());
-    _->_nodesMaskActive = nodesMaskActive;
-
-    if(maskChanged || _->_graphChangedSinceVisualUpdate || _->_visualUpdateRequired)
-        updateVisuals();
-    else
-        updateSelectionVisuals(previousSelectedNodeIds);
+    applyPendingVisualUpdates();
 }
 
 void GraphModel::onFoundNodeIdsChanged(const SearchManager* searchManager)
 {
-    _->_foundNodeIds = searchManager->foundNodeIds();
-    updateVisuals();
+    auto foundNodeIds = searchManager->foundNodeIds();
+
+    _->requestVisualUpdate([&foundNodeIds](auto& pending)
+    {
+        pending._foundNodeIds = std::move(foundNodeIds);
+        pending._full = true;
+    });
+
+    applyPendingVisualUpdates();
 }
 
 void GraphModel::onPreferenceChanged(const QString& name, const QVariant&)
@@ -1523,7 +1592,13 @@ void GraphModel::onPreferenceChanged(const QString& name, const QVariant&)
         name.endsWith(u"textSize"_s) ||
         name.endsWith(u"textAlignment"_s);
 
-    updateVisuals(force);
+    _->requestVisualUpdate([force](auto& pending)
+    {
+        pending._full = true;
+        pending._force = pending._force || force;
+    });
+
+    applyPendingVisualUpdates();
 }
 
 void GraphModel::onLayoutChanged()
@@ -1540,7 +1615,9 @@ void GraphModel::onMutableGraphChanged(const Graph* graph)
 
 void GraphModel::onTransformedGraphWillChange(const Graph*)
 {
-    _->_graphChangedSinceVisualUpdate = true;
+    // The graph may gain elements that have never been through a full visual
+    // update, so whatever next asks for an update must get a full one
+    _->requestFullVisualUpdate();
 
     // Store previous attributes for comparison
     _->_previousAttributeIdentities = _->currentAttributeIdentities();
