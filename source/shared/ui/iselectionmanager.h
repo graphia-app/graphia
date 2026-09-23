@@ -23,6 +23,8 @@
 #include "shared/graph/elementid.h"
 #include "shared/graph/elementid_containers.h"
 
+#include <cstddef>
+
 class ISelectionManager
 {
 public:
@@ -30,6 +32,7 @@ public:
 
     virtual NodeIdSet selectedNodes() const = 0;
     virtual NodeIdSet unselectedNodes() const = 0;
+    virtual size_t numNodesSelected() const = 0;
 
     virtual bool selectNode(NodeId nodeId) = 0;
     virtual bool selectNodes(const NodeIdSet& nodeIds) = 0;
@@ -38,6 +41,7 @@ public:
     virtual bool deselectNodes(const NodeIdSet& nodeIds) = 0;
 
     virtual bool nodeIsSelected(NodeId nodeId) const = 0;
+    virtual bool nodesAreSelected() const = 0;
 
     virtual bool selectAllNodes() = 0;
     virtual bool clearNodeSelection() = 0;

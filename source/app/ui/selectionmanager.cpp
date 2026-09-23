@@ -77,6 +77,13 @@ NodeIdSet SelectionManager::unselectedNodes() const
     return unselectedNodeIds;
 }
 
+size_t SelectionManager::numNodesSelected() const
+{
+    const std::unique_lock<std::recursive_mutex> lock(_mutex);
+
+    return _selectedNodeIds.size();
+}
+
 //FIXME http://en.cppreference.com/w/cpp/container/unordered_set/merge will be useful here
 template<typename C> static bool _selectNodes(const GraphModel& graphModel, NodeIdSet& selectedNodeIds,
     NodeIdSet& mask, const C& nodeIds, bool selectMergedNodes = true)
@@ -226,6 +233,13 @@ bool SelectionManager::nodeIsSelected(NodeId nodeId) const
     return u::contains(_selectedNodeIds, nodeId);
 }
 
+bool SelectionManager::nodesAreSelected() const
+{
+    const std::unique_lock<std::recursive_mutex> lock(_mutex);
+
+    return !_selectedNodeIds.empty();
+}
+
 bool SelectionManager::selectAllNodes()
 {
     return callFnAndMaybeEmit([this]
@@ -297,11 +311,13 @@ void SelectionManager::setNodesMask(const std::vector<NodeId>& nodeIds, bool app
 
 QString SelectionManager::numNodesSelectedAsString() const
 {
-    const int selectionSize = static_cast<int>(selectedNodes().size());
+    const std::unique_lock<std::recursive_mutex> lock(_mutex);
+
+    const int selectionSize = static_cast<int>(_selectedNodeIds.size());
 
     if(selectionSize == 1)
     {
-        auto nodeId = *selectedNodes().begin();
+        auto nodeId = *_selectedNodeIds.begin();
         const auto& nodeName = _graphModel->nodeNames()[nodeId];
 
         if(!nodeName.isEmpty())

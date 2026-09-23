@@ -73,6 +73,8 @@
 #include <QMessageBox>
 #include <QApplication>
 #include <QElapsedTimer>
+#include <QTimer>
+#include <cstdio>
 #include <QVector>
 #include <QClipboard>
 #include <QThread>
@@ -1151,7 +1153,7 @@ void Document::selectNone()
     if(busy() || _selectionManager == nullptr)
         return;
 
-    if(!_selectionManager->selectedNodes().empty())
+    if(_selectionManager->nodesAreSelected())
     {
         _commandManager.executeOnce(
             [this](Command&) { return _selectionManager->clearNodeSelection(); },
@@ -1336,7 +1338,7 @@ void Document::deleteSelectedNodes()
     if(busy())
         return;
 
-    if(_selectionManager->selectedNodes().empty())
+    if(!_selectionManager->nodesAreSelected())
         return;
 
     _commandManager.execute(ExecutePolicy::Add,
@@ -1579,11 +1581,13 @@ size_t Document::numHeadNodesSelected() const
 
     if(_selectionManager != nullptr)
     {
-        for(auto nodeId : _selectionManager->selectedNodes())
+        _selectionManager->forEachSelectedNode([this, &numNodes](NodeId nodeId)
         {
             if(_graphModel->graph().typeOf(nodeId) != MultiElementType::Tail)
                 numNodes++;
-        }
+
+            return true;
+        });
     }
 
     return numNodes;
@@ -1591,23 +1595,20 @@ size_t Document::numHeadNodesSelected() const
 
 size_t Document::numInvisibleNodesSelected() const
 {
+    size_t numNodes = 0;
+
     if(_selectionManager != nullptr)
     {
-        auto selectedNodes = _selectionManager->selectedNodes();
-
-        for(auto it = selectedNodes.begin(); it != selectedNodes.end(); /*NO OP*/)
+        _selectionManager->forEachSelectedNode([this, &numNodes](NodeId nodeId)
         {
-            auto componentIdOfNode = _graphModel->graph().componentIdOfNode(*it);
-            if(_graphDisplay->focusedComponentId() == componentIdOfNode)
-                it = selectedNodes.erase(it);
-            else
-                ++it;
-        }
+            if(_graphDisplay->focusedComponentId() != _graphModel->graph().componentIdOfNode(nodeId))
+                numNodes++;
 
-        return selectedNodes.size();
+            return true;
+        });
     }
 
-    return 0;
+    return numNodes;
 }
 
 QVariantList Document::selectedNodeIds() const
@@ -1616,11 +1617,13 @@ QVariantList Document::selectedNodeIds() const
 
     if(_selectionManager != nullptr)
     {
-        const auto& selectedNodes = _selectionManager->selectedNodes();
-        nodes.reserve(static_cast<int>(selectedNodes.size()));
+        nodes.reserve(static_cast<int>(_selectionManager->numNodesSelected()));
 
-        for(auto nodeId : selectedNodes)
+        _selectionManager->forEachSelectedNode([&nodes](NodeId nodeId)
+        {
             nodes.append(QVariant::fromValue<QmlNodeId>(nodeId));
+            return true;
+        });
     }
 
     return nodes;
@@ -1632,11 +1635,13 @@ QVariantList Document::selectedHeadNodeIds() const
 
     if(_selectionManager != nullptr)
     {
-        for(auto nodeId : _selectionManager->selectedNodes())
+        _selectionManager->forEachSelectedNode([this, &nodes](NodeId nodeId)
         {
             if(_graphModel->graph().typeOf(nodeId) != MultiElementType::Tail)
                 nodes.append(QVariant::fromValue<QmlNodeId>(nodeId));
-        }
+
+            return true;
+        });
     }
 
     return nodes;
@@ -1661,18 +1666,25 @@ void Document::selectPrevFound()
 
 void Document::updateFoundIndex(bool reselectIfInvalidated)
 {
-    // For the purposes of updating the found index, we only care
-    // about the heads of merged node sets, so find them
-    std::vector<NodeId> selectedHeadNodes;
-    for(auto selectedNodeId : _selectionManager->selectedNodes())
-    {
-        if(_graphModel->graph().typeOf(selectedNodeId) != MultiElementType::Tail)
-            selectedHeadNodes.emplace_back(selectedNodeId);
-    }
+    // For the purposes of updating the found index, we only care about the heads
+    // of merged node sets, and then only if precisely one of them is selected
+    NodeId selectedHeadNodeId;
+    size_t numHeadNodes = 0;
 
-    if(selectedHeadNodes.size() == 1)
+    _selectionManager->forEachSelectedNode([this, &selectedHeadNodeId, &numHeadNodes](NodeId nodeId)
     {
-        auto nodeId = *selectedHeadNodes.begin();
+        if(_graphModel->graph().typeOf(nodeId) == MultiElementType::Tail)
+            return true;
+
+        selectedHeadNodeId = nodeId;
+        numHeadNodes++;
+
+        return numHeadNodes < 2;
+    });
+
+    if(numHeadNodes == 1)
+    {
+        auto nodeId = selectedHeadNodeId;
         auto foundIt = std::ranges::find(_foundNodeIds, nodeId);
 
         if(reselectIfInvalidated && foundIt == _foundNodeIds.end())
@@ -1792,7 +1804,7 @@ void Document::onFoundNodeIdsChanged(const SearchManager* searchManager)
 
     if(_searchManager->selectStyle() == FindSelectStyle::All)
         selectAndFocusNodes(u::vectorFrom(_searchManager->foundNodeIds()));
-    else if(_selectionManager->selectedNodes().empty())
+    else if(!_selectionManager->nodesAreSelected())
         selectFirstFound();
     else
         updateFoundIndex(true);

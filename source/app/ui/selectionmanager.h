@@ -39,6 +39,7 @@ public:
 
     NodeIdSet selectedNodes() const override;
     NodeIdSet unselectedNodes() const override;
+    size_t numNodesSelected() const override;
 
     bool selectNode(NodeId nodeId) override;
     bool selectNodes(const NodeIdSet& nodeIds) override;
@@ -51,6 +52,7 @@ public:
     bool toggleNode(NodeId nodeId);
 
     bool nodeIsSelected(NodeId nodeId) const override;
+    bool nodesAreSelected() const override;
 
     bool selectAllNodes() override;
     bool clearNodeSelection() override;
@@ -61,8 +63,20 @@ public:
     void clearNodesMask() { _nodeIdsMask.clear(); emit nodesMaskChanged(); }
     bool nodesMaskActive() const { return !_nodeIdsMask.empty(); }
 
-    size_t numNodesSelected() const { return _selectedNodeIds.size(); }
     QString numNodesSelectedAsString() const;
+
+    // Fn returning false is analogous to break
+    template<typename Fn>
+    void forEachSelectedNode(const Fn& fn) const
+    {
+        const std::unique_lock<std::recursive_mutex> lock(_mutex);
+
+        for(auto nodeId : _selectedNodeIds)
+        {
+            if(!fn(nodeId))
+                return;
+        }
+    }
 
     void suppressSignals();
 
