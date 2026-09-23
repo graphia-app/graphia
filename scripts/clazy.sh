@@ -19,6 +19,8 @@
 # along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+set -o pipefail
+
 if [ -z ${BUILD_DIR} ]
 then
     echo "BUILD_DIR not set"
