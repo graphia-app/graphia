@@ -329,7 +329,7 @@ void LayoutThread::run()
             {
                 // Publish inbetween components to keep the user feedback rate up, but
                 // not too often or the act of publishing costs too much performance
-                publishNodePositions(20);
+                publishNodePositions();
             }
 
             _executedAtLeastOnce.set(componentId, true);
@@ -338,8 +338,9 @@ void LayoutThread::run()
         if(_metaLayout != nullptr)
             _metaLayout->execute(_dimensionalityMode);
 
-        // Once all the layouts have been executed, publish at a less restrictive rate
-        publishNodePositions(60, allLayoutsFinished());
+        // Once all the layouts have been executed, publish whatever the pass
+        // arrived at that the publishes in between the components did not
+        publishNodePositions(allLayoutsFinished());
 
         _performanceCounter.tick();
     }
@@ -373,13 +374,14 @@ void LayoutThread::setNodePositions(const ExactNodePositions& nodePositions)
     _executedAtLeastOnce.fill(true);
 }
 
-void LayoutThread::publishNodePositions(int maxUpdatesPerSecond, bool force)
+void LayoutThread::publishNodePositions(bool force)
 {
+    constexpr double MAXIMUM_UPDATES_PER_SECOND = 60.0;
     const auto now = std::chrono::steady_clock::now();
 
     if(!force)
     {
-        const double minInterval = 1.0 / static_cast<double>(maxUpdatesPerSecond);
+        const double minInterval = 1.0 / MAXIMUM_UPDATES_PER_SECOND;
         const auto timeSincePublished = std::chrono::duration<double>(
             now - _lastPublished).count();
 
@@ -388,12 +390,7 @@ void LayoutThread::publishNodePositions(int maxUpdatesPerSecond, bool force)
             return;
     }
 
-    std::unique_lock<NodePositions> lock(_graphModel->nodePositions(), std::defer_lock);
-
-    if(force)
-        lock.lock();
-    else if(!lock.try_lock())
-        return;
+    const std::unique_lock<NodePositions> lock(_graphModel->nodePositions());
 
     _graphModel->nodePositions().update(_nodeLayoutPositions);
 
@@ -408,7 +405,7 @@ void LayoutThread::publishNodePositions(int maxUpdatesPerSecond, bool force)
 
     emit executed();
 
-    _lastPublished = now;
+    _lastPublished = std::chrono::steady_clock::now();
 }
 
 Layout::Dimensionality LayoutThread::dimensionalityMode()

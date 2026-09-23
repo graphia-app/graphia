@@ -128,7 +128,7 @@ private:
     void addComponent(ComponentId componentId);
     void removeComponent(ComponentId componentId);
 
-    void publishNodePositions(int maxUpdatesPerSecond, bool force = false);
+    void publishNodePositions(bool force = false);
 
 private slots:
     void onComponentSplit(const Graph*, const ComponentSplitSet& componentSplitSet);
