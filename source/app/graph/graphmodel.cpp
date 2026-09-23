@@ -90,6 +90,7 @@
 #include <iterator>
 #include <set>
 #include <utility>
+#include <vector>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -226,6 +227,7 @@ private:
     std::set<AttributeChangesTracker*> _attributeChangesTrackers;
 
     bool _visualUpdateRequired = false;
+    bool _graphChangedSinceVisualUpdate = true;
 };
 
 GraphModel::GraphModel(const QString& name, IPlugin* plugin) :
@@ -1159,6 +1161,15 @@ static float mappedTextSize(float user, float mapped = -1.0f)
         u::interpolate(1.0f, LimitConstants::maximumTextSize(), (value - 0.5f) / 0.5f);
 }
 
+bool GraphModel::nodeIsUnhighlighted(NodeId nodeId, bool nodeIsSelected) const
+{
+    auto isNotFound = !_->_foundNodeIds.empty() && !u::contains(_->_foundNodeIds, nodeId);
+    auto isNotHighlighted = !_->_highlightedNodeIds.empty() && nodeIsSelected &&
+        !u::contains(_->_highlightedNodeIds, nodeId);
+
+    return (isNotFound && _->_nodesMaskActive) || isNotHighlighted;
+}
+
 void GraphModel::updateVisuals(bool force)
 {
     // Prevent any changes to the graph while we read from it
@@ -1174,6 +1185,7 @@ void GraphModel::updateVisuals(bool force)
         return;
 
     _->_visualUpdateRequired = false;
+    _->_graphChangedSinceVisualUpdate = false;
 
     auto nodeColor      = u::pref(u"visuals/defaultNodeColor"_s).value<QColor>();
     auto edgeColor      = u::pref(u"visuals/defaultEdgeColor"_s).value<QColor>();
@@ -1242,11 +1254,7 @@ void GraphModel::updateVisuals(bool force)
                 newEdgeVisuals[edgeId]._state.setState(VisualFlags::Selected, nodeIsSelected);
         }
 
-        auto isNotFound = !_->_foundNodeIds.empty() && !u::contains(_->_foundNodeIds, nodeId);
-        auto isNotHighlighted = !_->_highlightedNodeIds.empty() && nodeIsSelected &&
-            !u::contains(_->_highlightedNodeIds, nodeId);
-
-        auto nodeUnhighlighted = (isNotFound && _->_nodesMaskActive) || isNotHighlighted;
+        auto nodeUnhighlighted = nodeIsUnhighlighted(nodeId, nodeIsSelected);
 
         newNodeVisuals[nodeId]._state.setState(VisualFlags::Unhighlighted, nodeUnhighlighted);
 
@@ -1419,11 +1427,103 @@ void GraphModel::updateVisuals(bool force)
     }
 }
 
+// When the selection changes, only update the selection visuals
+void GraphModel::updateSelectionVisuals(const NodeIdSet& previousSelectedNodeIds)
+{
+    // Prevent any changes to the graph while we read from it
+    auto lock = mutableGraph().tryLock();
+    if(!lock.owns_lock())
+    {
+        // Delay the update until we can get exclusive access to the graph
+        _->_visualUpdateRequired = true;
+        return;
+    }
+
+    if(!_visualUpdatesEnabled)
+        return;
+
+    std::vector<NodeId> changedNodeIds;
+
+    for(auto nodeId : _->_selectedNodeIds)
+    {
+        if(!u::contains(previousSelectedNodeIds, nodeId))
+            changedNodeIds.emplace_back(nodeId);
+    }
+
+    for(auto nodeId : previousSelectedNodeIds)
+    {
+        if(!u::contains(_->_selectedNodeIds, nodeId))
+            changedNodeIds.emplace_back(nodeId);
+    }
+
+    if(changedNodeIds.empty())
+        return;
+
+    emit visualsWillChange();
+
+    Flags<VisualChangeFlags> nodeChange;
+    Flags<VisualChangeFlags> edgeChange;
+
+    for(auto nodeId : changedNodeIds)
+    {
+        auto& nodeVisual = _->_nodeVisuals[nodeId];
+        const auto previousState = nodeVisual._state;
+
+        auto nodeIsSelected = u::contains(_->_selectedNodeIds, nodeId);
+
+        nodeVisual._state.setState(VisualFlags::Selected, nodeIsSelected);
+        nodeVisual._state.setState(VisualFlags::Unhighlighted,
+            nodeIsUnhighlighted(nodeId, nodeIsSelected));
+
+        if(nodeVisual._state != previousState) // clazy:exclude=compare-member-check
+            nodeChange.set(VisualChangeFlags::State);
+    }
+
+    for(auto nodeId : changedNodeIds)
+    {
+        for(auto edgeId : graph().edgeIdsForNodeId(nodeId))
+        {
+            auto& edgeVisual = _->_edgeVisuals[edgeId];
+            const auto previousState = edgeVisual._state;
+
+            // An edge is selected or unhighlighted if either of the nodes it joins is;
+            // those are precisely the nodes whose edgeIdsForNodeId contains it
+            const auto& edge = graph().edgeById(edgeId);
+            const auto sourceState = _->_nodeVisuals[edge.sourceId()]._state;
+            const auto targetState = _->_nodeVisuals[edge.targetId()]._state;
+
+            edgeVisual._state.setState(VisualFlags::Selected,
+                sourceState.test(VisualFlags::Selected) ||
+                targetState.test(VisualFlags::Selected));
+
+            edgeVisual._state.setState(VisualFlags::Unhighlighted,
+                sourceState.test(VisualFlags::Unhighlighted) ||
+                targetState.test(VisualFlags::Unhighlighted));
+
+            if(edgeVisual._state != previousState) // clazy:exclude=compare-member-check
+                edgeChange.set(VisualChangeFlags::State);
+        }
+    }
+
+    emit visualsChanged(*nodeChange, *edgeChange, VisualChangeFlags::None);
+}
+
 void GraphModel::onSelectionChanged(const SelectionManager* selectionManager)
 {
-    _->_selectedNodeIds = selectionManager->selectedNodes();
-    _->_nodesMaskActive = selectionManager->nodesMaskActive();
-    updateVisuals();
+    auto nodesMaskActive = selectionManager->nodesMaskActive();
+
+    // Whether a mask is in place affects the highlight state of every node, not
+    // just the ones whose selected state changed, so there is no shortcut here
+    auto maskChanged = nodesMaskActive != _->_nodesMaskActive;
+
+    auto previousSelectedNodeIds = std::exchange(_->_selectedNodeIds,
+        selectionManager->selectedNodes());
+    _->_nodesMaskActive = nodesMaskActive;
+
+    if(maskChanged || _->_graphChangedSinceVisualUpdate || _->_visualUpdateRequired)
+        updateVisuals();
+    else
+        updateSelectionVisuals(previousSelectedNodeIds);
 }
 
 void GraphModel::onFoundNodeIdsChanged(const SearchManager* searchManager)
@@ -1463,6 +1563,8 @@ void GraphModel::onMutableGraphChanged(const Graph* graph)
 
 void GraphModel::onTransformedGraphWillChange(const Graph*)
 {
+    _->_graphChangedSinceVisualUpdate = true;
+
     // Store previous attributes for comparison
     _->_previousAttributeIdentities = _->currentAttributeIdentities();
 

@@ -97,6 +97,9 @@ private:
 
     void updateVisuals(bool force = false);
 
+    bool nodeIsUnhighlighted(NodeId nodeId, bool nodeIsSelected) const;
+    void updateSelectionVisuals(const NodeIdSet& previousSelectedNodeIds);
+
 public:
     MutableGraph& mutableGraph();
     const MutableGraph& mutableGraph() const;
