@@ -35,9 +35,9 @@ Item
     property var model
     property int defaultColumnWidth: 120
     property var selectedRows: []
-    property var visibleRows: []
+    readonly property alias visibleRows: proxyModel.sourceRowsInProxyOrder
 
-    property int rowCount: visibleRows.length
+    property int rowCount: 0
     property alias sortIndicatorColumn: proxyModel.sortColumn
     property alias sortIndicatorOrder: proxyModel.sortOrder
     property string exportBaseFileName: "attributes"
@@ -242,7 +242,7 @@ Item
 
     onSelectedRowsChanged:
     {
-        if(root.selectedRows.length < root.visibleRows.length)
+        if(root.selectedRows.length < root.rowCount)
             root.autoFocusSelection();
     }
 
@@ -500,7 +500,7 @@ Item
 
         function _updateSelectedRowsProperty()
         {
-            let newSelectedRows = selectionModel.selectedRows(0).map(index => proxyModel.mapToSourceRow(index.row));
+            let newSelectedRows = proxyModel.sourceRowsOf(selectionModel.selection);
             if(!Utils.arraysMatch(root.selectedRows, newSelectedRows))
                 root.selectedRows = newSelectedRows;
         }
@@ -517,18 +517,10 @@ Item
 
         function selectSourceRows(sourceRows, action)
         {
-            let rows = [];
-            for(const sourceRow of sourceRows)
-            {
-                let proxyRow = proxyModel.mapFromSourceRow(sourceRow);
-                if(proxyRow >= 0)
-                    rows.push(proxyRow);
-            }
-
             if(action === undefined)
                 action = ItemSelectionModel.NoUpdate;
 
-            let selection = proxyModel.buildRowSelection(rows);
+            let selection = proxyModel.selectionFor([...sourceRows]);
             selectionModel.select(selection, ItemSelectionModel.Rows | ItemSelectionModel.Select | action);
             selectionModel._updateSelectedRowsProperty();
         }
@@ -1023,9 +1015,8 @@ Item
 
                     function refreshVisibleRows()
                     {
-                        let allProxyRows = [...Array(proxyModel.rowCount()).keys()];
-                        let newVisibleRows = allProxyRows.map(row => proxyModel.mapToSourceRow(row));
-                        root.visibleRows = newVisibleRows;
+                        root.rowCount = proxyModel.rowCount();
+                        proxyModel.sourceRowsInProxyOrderChanged();
                     }
 
                     onSortOrderChanged: { refreshVisibleRows(); }
@@ -1273,7 +1264,8 @@ Item
                         proxyModel.reset();
                         proxyModel.refreshVisibleRows();
 
-                        let newSelectedRows = Utils.arrayIntersection(root.selectedRows, root.visibleRows);
+                        let newSelectedRows = root.selectedRows.length > 0 ?
+                            Utils.arrayIntersection(root.selectedRows, root.visibleRows) : [];
                         root.clearAndSelectRows(newSelectedRows);
 
                         verticalTableViewScrollBar.position = 0;

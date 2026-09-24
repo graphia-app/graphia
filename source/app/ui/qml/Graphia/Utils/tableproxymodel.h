@@ -62,6 +62,7 @@ class TableProxyModel : public QSortFilterProxyModel
     Q_PROPERTY(QString sortColumn READ sortColumn_ WRITE setSortColumn NOTIFY sortColumnChanged)
     Q_PROPERTY(Qt::SortOrder sortOrder READ sortOrder_ WRITE setSortOrder NOTIFY sortOrderChanged)
     Q_PROPERTY(bool isRowOrderSet READ isRowOrderSet NOTIFY isRowOrderSetChanged)
+    Q_PROPERTY(QVariantList sourceRowsInProxyOrder READ sourceRowsInProxyOrder NOTIFY sourceRowsInProxyOrderChanged)
 
 private:
     QStandardItemModel _headerModel;
@@ -109,7 +110,7 @@ public:
     explicit TableProxyModel(QObject* parent = nullptr);
     Q_INVOKABLE void setSubSelection(const QItemSelection& subSelection, const QItemSelection& subDeselection);
     Q_INVOKABLE int mapToSourceRow(int proxyRow) const;
-    Q_INVOKABLE QVariantList sourceRowsInProxyOrder() const;
+    QVariantList sourceRowsInProxyOrder() const;
     Q_INVOKABLE int mapFromSourceRow(int sourceRow) const;
     Q_INVOKABLE int mapOrderedToSourceColumn(int proxyColumn) const;
     Q_INVOKABLE QItemSelectionRange buildRowSelectionRange(int topRow, int bottomRow);
@@ -137,6 +138,7 @@ signals:
     void sortColumnChanged(const QString& sortColumn);
     void sortOrderChanged(Qt::SortOrder sortOrder);
     void isRowOrderSetChanged();
+    void sourceRowsInProxyOrderChanged();
 
     void filterRoleNameChanged();
     void filterPatternSyntaxChanged();
