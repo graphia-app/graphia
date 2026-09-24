@@ -122,6 +122,9 @@ void NodeAttributeTableModel::updateColumn(int role, NodeAttributeTableModel::Co
 {
     column.resize(static_cast<size_t>(rowCount()));
 
+    const auto selectedNodeIds = role == Roles::NodeSelectedRole ?
+        _document->selectionManager()->selectedNodes() : NodeIdSet();
+
     for(size_t row = 0; row < static_cast<size_t>(rowCount()); row++)
     {
         const NodeId nodeId = _userNodeData->elementIdForIndex(row);
@@ -135,7 +138,7 @@ void NodeAttributeTableModel::updateColumn(int role, NodeAttributeTableModel::Co
         else if(role == Roles::NodeIdRole)
             column[row] = static_cast<int>(nodeId);
         else if(role == Roles::NodeSelectedRole)
-            column[row] = _document->selectionManager()->nodeIsSelected(nodeId);
+            column[row] = u::contains(selectedNodeIds, nodeId);
         else
             column[row] = dataValue(row, columnName);
     }
