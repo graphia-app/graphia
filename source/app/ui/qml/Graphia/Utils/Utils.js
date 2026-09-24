@@ -351,6 +351,9 @@ function arraysMatch(a, b)
 
 function* arrayIntersection(a, b)
 {
+    if(a.length === 0 || b.length === 0)
+        return;
+
     let as = a.slice();
     let bs = b.slice();
     as.sort((x, y) => x - y);
