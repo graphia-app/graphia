@@ -157,8 +157,9 @@ private:
     NodeVisuals _nodeVisuals;
     EdgeVisuals _edgeVisuals;
 
-    // Held exclusively while anything writes to the visuals, and shared by plugins that
-    // read them; the renderer relies on the scene update being disabled instead
+    // Held exclusively while anything writes to the visuals, and shared by plugins that read
+    // them, and by the renderer as it starts; after that it relies on the scene update being
+    // disabled instead
     mutable std::shared_mutex _visualsMutex;
     NodeVisuals _mappedNodeVisuals;
     EdgeVisuals _mappedEdgeVisuals;
@@ -484,6 +485,12 @@ float GraphModel::textSize() const { return _->_textSize; }
 
 const ElementVisual& GraphModel::nodeVisual(NodeId nodeId) const { return _->_nodeVisuals.at(nodeId); }
 const ElementVisual& GraphModel::edgeVisual(EdgeId edgeId) const { return _->_edgeVisuals.at(edgeId); }
+
+void GraphModel::readVisuals(const std::function<void()>& fn) const
+{
+    const std::shared_lock<std::shared_mutex> lock(_->_visualsMutex);
+    fn();
+}
 
 void GraphModel::readNodeVisuals(const std::vector<NodeId>& nodeIds,
     const std::function<void(NodeId, const IElementVisual&)>& fn) const

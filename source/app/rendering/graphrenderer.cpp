@@ -160,17 +160,22 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel, CommandManager* commandMana
     {
         const std::unique_lock<std::mutex> lock(_initialisationMutex);
 
-        initialiseFromGraph(graph, *this);
-        initialiseFromGraph(graph, *_graphOverviewScene);
-        initialiseFromGraph(graph, *_graphComponentScene);
+        // This reads the visuals, so it keeps visual updates out; not with the scene update
+        // lock, as the frame takes that too, and it would wait here for the whole of this
+        _graphModel->readVisuals([this, graph]
+        {
+            initialiseFromGraph(graph, *this);
+            initialiseFromGraph(graph, *_graphOverviewScene);
+            initialiseFromGraph(graph, *_graphComponentScene);
 
-        // If the graph is a single component or empty, use component mode by default
-        if(graph->numComponents() <= 1)
-            switchToComponentMode("doTransition"_no);
-        else
-            switchToOverviewMode("doTransition"_no);
+            // If the graph is a single component or empty, use component mode by default
+            if(graph->numComponents() <= 1)
+                switchToComponentMode("doTransition"_no);
+            else
+                switchToOverviewMode("doTransition"_no);
 
-        updateText();
+            updateText();
+        });
 
         // Wait for the layout to have iterated at least once, so that what is
         // first displayed is a (partially) laid out graph, rather than every node

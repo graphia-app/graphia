@@ -113,10 +113,13 @@ public:
     float edgeSize() const;
     float textSize() const;
 
-    // Unguarded; the renderer reads these under the scene update lock, which keeps
-    // visual updates out, and plugins read them with readNodeVisuals and readEdgeVisuals
+    // Unguarded; the renderer reads these under the scene update lock, or within readVisuals
+    // as it starts, both of which keep visual updates out, and plugins read them with
+    // readNodeVisuals and readEdgeVisuals
     const ElementVisual& nodeVisual(NodeId nodeId) const;
     const ElementVisual& edgeVisual(EdgeId edgeId) const;
+
+    void readVisuals(const std::function<void()>& fn) const;
 
     void readNodeVisuals(const std::vector<NodeId>& nodeIds,
         const std::function<void(NodeId, const IElementVisual&)>& fn) const override;
