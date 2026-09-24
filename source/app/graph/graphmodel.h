@@ -118,7 +118,6 @@ public:
     const ElementVisual& edgeVisual(EdgeId edgeId) const;
     std::vector<ElementVisual> nodeVisuals(const std::vector<NodeId>& nodeIds) const;
     std::vector<ElementVisual> edgeVisuals(const std::vector<EdgeId>& edgeIds) const;
-    const TextVisuals& textVisuals() const;
     void forEachTextVisual(const std::function<void(const TextVisual&)>& fn) const;
     void forEachTextVisual(ComponentId componentId,
         const std::function<void(const TextVisual&)>& fn) const;

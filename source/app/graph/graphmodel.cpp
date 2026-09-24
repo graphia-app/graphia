@@ -101,7 +101,10 @@ using EdgeVisuals = EdgeArray<ElementVisual>;
 
 static void updateTextVisualPositions(TextVisuals& textVisuals, const NodePositions& nodePositions)
 {
-    // This must be called when the layout is paused or otherwise locked
+    // Hold the positions still so that every text visual is placed
+    // from the same iteration of the layout
+    const std::unique_lock<const NodePositions> lock(nodePositions);
+
     for(auto& [componentId, textVisuals_] : textVisuals)
     {
         for(auto& textVisual : textVisuals_)
@@ -474,8 +477,6 @@ std::vector<ElementVisual> GraphModel::edgeVisuals(const std::vector<EdgeId>& ed
 
     return visuals;
 }
-
-const TextVisuals& GraphModel::textVisuals() const { return _->_textVisuals; }
 
 void GraphModel::forEachTextVisual(const std::function<void(const TextVisual&)>& fn) const
 {
@@ -889,7 +890,6 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
     nodeVisualisationsBuilder.findOverrideAlerts(_->_visualisationInfos);
     edgeVisualisationsBuilder.findOverrideAlerts(_->_visualisationInfos);
 
-    updateTextVisualPositions(_->_newTextVisuals, _->_nodePositions);
     updateVisuals();
 }
 
@@ -1162,7 +1162,6 @@ void GraphModel::highlightNodes(const NodeIdSet& nodeIds)
 void GraphModel::enableVisualUpdates()
 {
     _visualUpdatesEnabled = true;
-    updateTextVisualPositions(_->_newTextVisuals, _->_nodePositions);
     updateVisuals();
 }
 
@@ -1394,7 +1393,12 @@ void GraphModel::updateVisuals(bool force)
     if(!changing)
         return;
 
-    _->_textVisuals = _->_newTextVisuals;
+    {
+        const std::unique_lock<std::mutex> textVisualsLock(_->_textVisualsMutex);
+
+        _->_textVisuals = _->_newTextVisuals;
+        updateTextVisualPositions(_->_textVisuals, _->_nodePositions);
+    }
 
     emit visualsChanged(*nodeChanges, *edgeChanges, textChange);
 }
@@ -1525,6 +1529,7 @@ void GraphModel::onPreferenceChanged(const QString& name, const QVariant&)
 void GraphModel::onLayoutChanged()
 {
     // This occurs on the layout thread
+    const std::unique_lock<std::mutex> lock(_->_textVisualsMutex);
     updateTextVisualPositions(_->_textVisuals, _->_nodePositions);
 }
 

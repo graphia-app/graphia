@@ -430,17 +430,15 @@ void GraphRenderer::updateGPUDataIfRequired()
             }
         }
 
-        if(_graphModel->textVisuals().contains(componentRenderer->componentId()))
+        _graphModel->forEachTextVisual(componentRenderer->componentId(),
+        [&](const TextVisual& textVisual)
         {
-            for(const auto& textVisual : _graphModel->textVisuals().at(componentRenderer->componentId()))
-            {
-                createGPUGlyphData(textVisual._text,
-                    textVisual._color, textAlignment,
-                    textScale * textVisual._size,
-                    textVisual._radius, textVisual._centre, componentIndex,
-                    gpuGraphDataForOverlay(componentRenderer->alpha()));
-            }
-        }
+            createGPUGlyphData(textVisual._text,
+                textVisual._color, textAlignment,
+                textScale * textVisual._size,
+                textVisual._radius, textVisual._centre, componentIndex,
+                gpuGraphDataForOverlay(componentRenderer->alpha()));
+        });
 
         componentIndex++;
     }
@@ -972,11 +970,10 @@ void GraphRenderer::updateText()
     for(auto edgeId : _graphModel->graph().edgeIds())
         _glyphMap->addText(_graphModel->edgeVisual(edgeId)._text);
 
-    for(const auto& [componentId, textVisuals] : _graphModel->textVisuals())
+    _graphModel->forEachTextVisual([this](const TextVisual& textVisual)
     {
-        for(const auto& textVisual : textVisuals)
-            _glyphMap->addText(textVisual._text);
-    }
+        _glyphMap->addText(textVisual._text);
+    });
 
     if(_glyphMap->updateRequired())
     {
