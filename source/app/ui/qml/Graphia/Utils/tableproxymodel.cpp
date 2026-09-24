@@ -19,6 +19,10 @@
 
 #include "tableproxymodel.h"
 
+#include <QVariantList>
+
+#include <set>
+
 #include "shared/plugins/nodeattributetablemodel.h"
 
 #include "shared/utils/container.h"
@@ -116,6 +120,40 @@ QItemSelection TableProxyModel::buildRowSelection(const std::vector<int>& rows)
     return selection;
 }
 
+QItemSelection TableProxyModel::selectionFor(const QVariantList& sourceRows)
+{
+    std::vector<int> rows;
+    rows.reserve(static_cast<size_t>(sourceRows.size()));
+
+    for(const auto& sourceRow : sourceRows)
+    {
+        auto proxyRow = mapFromSourceRow(sourceRow.toInt());
+        if(proxyRow >= 0)
+            rows.emplace_back(proxyRow);
+    }
+
+    return buildRowSelection(rows);
+}
+
+QVariantList TableProxyModel::sourceRowsOf(const QItemSelection& selection) const
+{
+    QVariantList sourceRows;
+    std::set<int> seen;
+
+    for(const auto& range : selection)
+    {
+        for(int proxyRow = range.top(); proxyRow <= range.bottom(); proxyRow++)
+        {
+            const QModelIndex sourceIndex = mapToSource(index(proxyRow, 0));
+
+            if(sourceIndex.isValid() && seen.insert(proxyRow).second)
+                sourceRows.append(sourceIndex.row());
+        }
+    }
+
+    return sourceRows;
+}
+
 void TableProxyModel::setRowOrder(const std::vector<int>& rows)
 {
     _rowOrderMap.clear();
@@ -135,6 +173,22 @@ int TableProxyModel::mapToSourceRow(int proxyRow) const
     const QModelIndex proxyIndex = index(proxyRow, 0);
     const QModelIndex sourceIndex = mapToSource(proxyIndex);
     return sourceIndex.isValid() ? sourceIndex.row() : -1;
+}
+
+QVariantList TableProxyModel::sourceRowsInProxyOrder() const
+{
+    const auto numRows = rowCount();
+
+    QVariantList sourceRows;
+    sourceRows.reserve(numRows);
+
+    for(int proxyRow = 0; proxyRow < numRows; proxyRow++)
+    {
+        const QModelIndex sourceIndex = mapToSource(index(proxyRow, 0));
+        sourceRows.append(sourceIndex.isValid() ? sourceIndex.row() : -1);
+    }
+
+    return sourceRows;
 }
 
 int TableProxyModel::mapFromSourceRow(int sourceRow) const

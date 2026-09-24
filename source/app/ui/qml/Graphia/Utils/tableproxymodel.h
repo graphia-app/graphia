@@ -109,10 +109,13 @@ public:
     explicit TableProxyModel(QObject* parent = nullptr);
     Q_INVOKABLE void setSubSelection(const QItemSelection& subSelection, const QItemSelection& subDeselection);
     Q_INVOKABLE int mapToSourceRow(int proxyRow) const;
+    Q_INVOKABLE QVariantList sourceRowsInProxyOrder() const;
     Q_INVOKABLE int mapFromSourceRow(int sourceRow) const;
     Q_INVOKABLE int mapOrderedToSourceColumn(int proxyColumn) const;
     Q_INVOKABLE QItemSelectionRange buildRowSelectionRange(int topRow, int bottomRow);
     Q_INVOKABLE QItemSelection buildRowSelection(const std::vector<int>& rows);
+    Q_INVOKABLE QItemSelection selectionFor(const QVariantList& sourceRows);
+    Q_INVOKABLE QVariantList sourceRowsOf(const QItemSelection& selection) const;
 
     Q_INVOKABLE void setRowOrder(const std::vector<int>& rows);
 
