@@ -89,6 +89,7 @@
 #include <cmath>
 #include <cstddef>
 #include <iterator>
+#include <mutex>
 #include <set>
 #include <utility>
 #include <vector>
@@ -146,6 +147,7 @@ private:
 
     TextVisuals _newTextVisuals;
     TextVisuals _textVisuals;
+    mutable std::mutex _textVisualsMutex;
 
     NodeArray<QString> _nodeNames;
 
@@ -474,6 +476,30 @@ std::vector<ElementVisual> GraphModel::edgeVisuals(const std::vector<EdgeId>& ed
 }
 
 const TextVisuals& GraphModel::textVisuals() const { return _->_textVisuals; }
+
+void GraphModel::forEachTextVisual(const std::function<void(const TextVisual&)>& fn) const
+{
+    const std::unique_lock<std::mutex> lock(_->_textVisualsMutex);
+
+    for(const auto& [componentId, textVisuals] : _->_textVisuals)
+    {
+        for(const auto& textVisual : textVisuals)
+            fn(textVisual);
+    }
+}
+
+void GraphModel::forEachTextVisual(ComponentId componentId,
+    const std::function<void(const TextVisual&)>& fn) const
+{
+    const std::unique_lock<std::mutex> lock(_->_textVisualsMutex);
+
+    auto it = _->_textVisuals.find(componentId);
+    if(it == _->_textVisuals.end())
+        return;
+
+    for(const auto& textVisual : it->second)
+        fn(textVisual);
+}
 
 NodePositions& GraphModel::nodePositions() { return _->_nodePositions; }
 const NodePositions& GraphModel::nodePositions() const { return _->_nodePositions; }

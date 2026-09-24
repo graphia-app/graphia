@@ -37,6 +37,7 @@
 #include <QVariant>
 #include <QVariantMap>
 
+#include <functional>
 #include <memory>
 #include <map>
 #include <vector>
@@ -118,6 +119,9 @@ public:
     std::vector<ElementVisual> nodeVisuals(const std::vector<NodeId>& nodeIds) const;
     std::vector<ElementVisual> edgeVisuals(const std::vector<EdgeId>& edgeIds) const;
     const TextVisuals& textVisuals() const;
+    void forEachTextVisual(const std::function<void(const TextVisual&)>& fn) const;
+    void forEachTextVisual(ComponentId componentId,
+        const std::function<void(const TextVisual&)>& fn) const;
 
     NodePositions& nodePositions();
     const NodePositions& nodePositions() const;
