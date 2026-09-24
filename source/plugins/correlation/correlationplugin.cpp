@@ -848,13 +848,17 @@ void CorrelationPluginInstance::copyNodeColors()
     const auto& userNodeData = _graphModel->userNodeData();
     std::vector<QColor> nodeColors(userNodeData.numValues());
 
-    for(size_t row = 0; row < nodeColors.size(); row++)
-    {
-        auto nodeId = userNodeData.elementIdForIndex(row);
+    std::vector<NodeId> nodeIds;
+    nodeIds.reserve(nodeColors.size());
 
-        if(!nodeId.isNull())
-            nodeColors[row] = graphModel()->nodeVisual(nodeId).outerColor();
-    }
+    for(size_t row = 0; row < nodeColors.size(); row++)
+        nodeIds.push_back(userNodeData.elementIdForIndex(row));
+
+    _graphModel->readNodeVisuals(nodeIds,
+    [&userNodeData, &nodeColors](NodeId nodeId, const IElementVisual& visual)
+    {
+        nodeColors[userNodeData.indexFor(nodeId)] = visual.outerColor();
+    });
 
     const std::unique_lock<std::mutex> lock(_nodeColorsMutex);
     _nodeColors = std::move(nodeColors);

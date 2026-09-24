@@ -26,6 +26,7 @@
 #include <QString>
 #include <QtGlobal>
 
+#include <functional>
 #include <vector>
 
 class IGraph;
@@ -58,16 +59,15 @@ protected:
     virtual const IMutableGraph& mutableGraphImpl() const = 0;
     virtual const IGraph& graphImpl() const = 0;
 
-    virtual const IElementVisual& nodeVisualImpl(NodeId nodeId) const = 0;
-    virtual const IElementVisual& edgeVisualImpl(EdgeId edgeId) const = 0;
-
 public:
     IMutableGraph& mutableGraph() { return mutableGraphImpl(); }
     const IMutableGraph& mutableGraph() const { return mutableGraphImpl(); }
     const IGraph& graph() const { return graphImpl(); }
 
-    const IElementVisual& nodeVisual(NodeId nodeId) const { return nodeVisualImpl(nodeId); }
-    const IElementVisual& edgeVisual(EdgeId edgeId) const { return edgeVisualImpl(edgeId); }
+    virtual void readNodeVisuals(const std::vector<NodeId>& nodeIds,
+        const std::function<void(NodeId, const IElementVisual&)>& fn) const = 0;
+    virtual void readEdgeVisuals(const std::vector<EdgeId>& edgeIds,
+        const std::function<void(EdgeId, const IElementVisual&)>& fn) const = 0;
 
     virtual QString nodeName(NodeId nodeId) const = 0;
     virtual void setNodeName(NodeId nodeId, const QString& name) = 0;

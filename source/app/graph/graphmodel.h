@@ -93,8 +93,6 @@ private:
     const IMutableGraph& mutableGraphImpl() const override;
     const IGraph& graphImpl() const override;
 
-    const IElementVisual& nodeVisualImpl(NodeId nodeId) const override;
-    const IElementVisual& edgeVisualImpl(EdgeId edgeId) const override;
 
     void scheduleVisualUpdate();
     void updateVisuals(bool force);
@@ -115,8 +113,15 @@ public:
     float edgeSize() const;
     float textSize() const;
 
+    // Unguarded; the renderer reads these under the scene update lock, which keeps
+    // visual updates out, and plugins read them with readNodeVisuals and readEdgeVisuals
     const ElementVisual& nodeVisual(NodeId nodeId) const;
     const ElementVisual& edgeVisual(EdgeId edgeId) const;
+
+    void readNodeVisuals(const std::vector<NodeId>& nodeIds,
+        const std::function<void(NodeId, const IElementVisual&)>& fn) const override;
+    void readEdgeVisuals(const std::vector<EdgeId>& edgeIds,
+        const std::function<void(EdgeId, const IElementVisual&)>& fn) const override;
     std::vector<ElementVisual> nodeVisuals(const std::vector<NodeId>& nodeIds) const;
     std::vector<ElementVisual> edgeVisuals(const std::vector<EdgeId>& edgeIds) const;
     void forEachTextVisual(const std::function<void(const TextVisual&)>& fn) const;

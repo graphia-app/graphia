@@ -92,6 +92,7 @@
 #include <mutex>
 #include <optional>
 #include <set>
+#include <shared_mutex>
 #include <utility>
 #include <vector>
 
@@ -155,6 +156,10 @@ private:
 
     NodeVisuals _nodeVisuals;
     EdgeVisuals _edgeVisuals;
+
+    // Held exclusively while anything writes to the visuals, and shared by plugins that
+    // read them; the renderer relies on the scene update being disabled instead
+    mutable std::shared_mutex _visualsMutex;
     NodeVisuals _mappedNodeVisuals;
     EdgeVisuals _mappedEdgeVisuals;
     QStringList _visualisedAttributeNames;
@@ -272,11 +277,13 @@ GraphModel::GraphModel(const QString& name, IPlugin* plugin) :
 
     connect(&_->_transformedGraph, &Graph::nodeRemoved, [this](const Graph*, NodeId nodeId)
     {
-       _->_nodeVisuals[nodeId]._state = VisualFlags::None;
+        const std::unique_lock<std::shared_mutex> lock(_->_visualsMutex);
+        _->_nodeVisuals[nodeId]._state = VisualFlags::None;
     });
     connect(&_->_transformedGraph, &Graph::edgeRemoved, [this](const Graph*, EdgeId edgeId)
     {
-       _->_edgeVisuals[edgeId]._state = VisualFlags::None;
+        const std::unique_lock<std::shared_mutex> lock(_->_visualsMutex);
+        _->_edgeVisuals[edgeId]._state = VisualFlags::None;
     });
 
     connect(&_->_graph, &Graph::graphChanged, this, &GraphModel::onMutableGraphChanged, Qt::DirectConnection);
@@ -445,8 +452,6 @@ IMutableGraph& GraphModel::mutableGraphImpl() { return mutableGraph(); }
 const IMutableGraph& GraphModel::mutableGraphImpl() const { return mutableGraph(); }
 const IGraph& GraphModel::graphImpl() const { return graph(); }
 
-const IElementVisual& GraphModel::nodeVisualImpl(NodeId nodeId) const { return nodeVisual(nodeId); }
-const IElementVisual& GraphModel::edgeVisualImpl(EdgeId edgeId) const { return edgeVisual(edgeId); }
 
 MutableGraph& GraphModel::mutableGraph() { return _->_graph; }
 const MutableGraph& GraphModel::mutableGraph() const { return _->_graph; }
@@ -479,6 +484,30 @@ float GraphModel::textSize() const { return _->_textSize; }
 
 const ElementVisual& GraphModel::nodeVisual(NodeId nodeId) const { return _->_nodeVisuals.at(nodeId); }
 const ElementVisual& GraphModel::edgeVisual(EdgeId edgeId) const { return _->_edgeVisuals.at(edgeId); }
+
+void GraphModel::readNodeVisuals(const std::vector<NodeId>& nodeIds,
+    const std::function<void(NodeId, const IElementVisual&)>& fn) const
+{
+    const std::shared_lock<std::shared_mutex> lock(_->_visualsMutex);
+
+    for(auto nodeId : nodeIds)
+    {
+        if(!nodeId.isNull())
+            fn(nodeId, _->_nodeVisuals.at(nodeId));
+    }
+}
+
+void GraphModel::readEdgeVisuals(const std::vector<EdgeId>& edgeIds,
+    const std::function<void(EdgeId, const IElementVisual&)>& fn) const
+{
+    const std::shared_lock<std::shared_mutex> lock(_->_visualsMutex);
+
+    for(auto edgeId : edgeIds)
+    {
+        if(!edgeId.isNull())
+            fn(edgeId, _->_edgeVisuals.at(edgeId));
+    }
+}
 
 std::vector<ElementVisual> GraphModel::nodeVisuals(const std::vector<NodeId>& nodeIds) const
 {
@@ -1302,6 +1331,8 @@ void GraphModel::applyPendingVisualUpdates()
 
 void GraphModel::updateVisuals(bool force)
 {
+    std::unique_lock<std::shared_mutex> visualsLock(_->_visualsMutex);
+
     const float userNodeSize = _->_nodeSize;
     const float userEdgeSize = _->_edgeSize;
     const float userTextSize = _->_textSize;
@@ -1490,6 +1521,7 @@ void GraphModel::updateVisuals(bool force)
         updateTextVisualPositions(_->_textVisuals, _->_nodePositions);
     }
 
+    visualsLock.unlock();
     emit visualsChanged(*nodeChanges, *edgeChanges, textChange);
 }
 
@@ -1512,6 +1544,8 @@ void GraphModel::updateSelectionVisuals(const NodeIdSet& previousSelectedNodeIds
 
     if(changedNodeIds.empty())
         return;
+
+    std::unique_lock<std::shared_mutex> visualsLock(_->_visualsMutex);
 
     emit visualsWillChange();
 
@@ -1559,6 +1593,7 @@ void GraphModel::updateSelectionVisuals(const NodeIdSet& previousSelectedNodeIds
         }
     }
 
+    visualsLock.unlock();
     emit visualsChanged(*nodeChange, *edgeChange, VisualChangeFlags::None);
 }
 
