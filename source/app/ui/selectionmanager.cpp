@@ -286,22 +286,42 @@ void SelectionManager::invertNodeSelection()
 
 void SelectionManager::setNodesMask(const NodeIdSet& nodeIds, bool applyMask)
 {
-    _nodeIdsMask = nodeIds;
-
-    if(applyMask)
     {
-        std::vector<NodeId> nodeIdsToDeselect;
+        const std::unique_lock<std::recursive_mutex> lock(_mutex);
 
-        for(const auto& selectedNodeId : _selectedNodeIds)
+        _nodeIdsMask = nodeIds;
+
+        if(applyMask)
         {
-            if(!u::contains(_nodeIdsMask, selectedNodeId))
-                nodeIdsToDeselect.emplace_back(selectedNodeId);
-        }
+            std::vector<NodeId> nodeIdsToDeselect;
 
-        deselectNodes(nodeIdsToDeselect);
+            for(const auto& selectedNodeId : _selectedNodeIds)
+            {
+                if(!u::contains(_nodeIdsMask, selectedNodeId))
+                    nodeIdsToDeselect.emplace_back(selectedNodeId);
+            }
+
+            deselectNodes(nodeIdsToDeselect);
+        }
     }
 
     emit nodesMaskChanged();
+}
+
+void SelectionManager::clearNodesMask()
+{
+    {
+        const std::unique_lock<std::recursive_mutex> lock(_mutex);
+        _nodeIdsMask.clear();
+    }
+
+    emit nodesMaskChanged();
+}
+
+bool SelectionManager::nodesMaskActive() const
+{
+    const std::unique_lock<std::recursive_mutex> lock(_mutex);
+    return !_nodeIdsMask.empty();
 }
 
 void SelectionManager::setNodesMask(const std::vector<NodeId>& nodeIds, bool applyMask)
@@ -339,7 +359,5 @@ void SelectionManager::suppressSignals()
 
 bool SelectionManager::signalsSuppressed()
 {
-    const bool suppressSignals = _suppressSignals;
-    _suppressSignals = false;
-    return suppressSignals;
+    return _suppressSignals.exchange(false);
 }

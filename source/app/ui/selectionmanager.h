@@ -26,6 +26,7 @@
 #include <QString>
 
 #include <cstddef>
+#include <atomic>
 #include <mutex>
 #include <vector>
 
@@ -60,8 +61,8 @@ public:
 
     void setNodesMask(const NodeIdSet& nodeIds, bool applyMask = true);
     void setNodesMask(const std::vector<NodeId>& nodeIds, bool applyMask = true);
-    void clearNodesMask() { _nodeIdsMask.clear(); emit nodesMaskChanged(); }
-    bool nodesMaskActive() const { return !_nodeIdsMask.empty(); }
+    void clearNodesMask();
+    bool nodesMaskActive() const;
 
     QString numNodesSelectedAsString() const;
 
@@ -91,7 +92,7 @@ private:
 
     NodeIdSet _nodeIdsMask;
 
-    bool _suppressSignals = false;
+    std::atomic_bool _suppressSignals = false;
 
     bool signalsSuppressed();
 
