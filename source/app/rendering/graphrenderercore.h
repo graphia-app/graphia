@@ -31,6 +31,7 @@
 
 #include "shared/utils/flags.h"
 
+#include <QColor>
 #include <QOpenGLBuffer>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
@@ -40,6 +41,7 @@
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <vector>
 
 class ScreenshotRenderer;
@@ -92,12 +94,16 @@ struct GPUGraphData : OpenGLFunctions
 
     bool hasGraphElements() const;
 
+    // Eight bits a channel, as a QColor holds it and as it is drawn
+    using Color = std::array<uint8_t, 4>;
+    static Color colorFrom(const QColor& color);
+
     struct NodeData
     {
         int _nodeIndex = -1;
         int _component = -1;
-        float _outerColor[3] = {0.0f, 0.0f, 0.0f};
-        float _innerColor[3] = {0.0f, 0.0f, 0.0f};
+        Color _outerColor = {};
+        Color _innerColor = {};
         float _selected = 0.0f;
     };
 
@@ -108,8 +114,8 @@ struct GPUGraphData : OpenGLFunctions
         int _edgeType = -1;
         int _component = -1;
         float _size = -1.0f;
-        float _outerColor[3] = {0.0f, 0.0f, 0.0f};
-        float _innerColor[3] = {0.0f, 0.0f, 0.0f};
+        Color _outerColor = {};
+        Color _innerColor = {};
         float _selected = 0.0f;
     };
 
