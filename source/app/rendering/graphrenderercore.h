@@ -22,6 +22,7 @@
 
 #include "openglfunctions.h"
 #include "graphrenderertypes.h"
+#include "texelbuffer.h"
 
 #include "primitives/arrow.h"
 #include "primitives/rectangle.h"
@@ -182,11 +183,16 @@ private:
 
     GLuint _depthTexture = 0;
 
-    GLuint _componentDataTBO = 0;
-    GLuint _componentDataTexture = 0;
-    GLint _componentDataMaxTextureSize = 0;
-    std::vector<GLfloat> _componentData;
-    size_t _componentDataElementSize = 0;
+    struct ComponentData
+    {
+        QMatrix4x4 _modelViewMatrix;
+        QMatrix4x4 _projectionMatrix;
+        float _distance = 0.0f;
+        float _lightScale = 0.0f;
+    };
+
+    std::vector<ComponentData> _componentData;
+    TexelBuffer _componentDataTexels;
 
     Shading _shading = Shading::Smooth;
 
@@ -197,7 +203,6 @@ private:
     QOpenGLVertexArrayObject _screenQuadVAO;
     QOpenGLBuffer _screenQuadDataBuffer;
 
-    void prepareComponentDataTexture();
     void prepareSelectionMarkerVAO();
     void prepareScreenQuad();
 
