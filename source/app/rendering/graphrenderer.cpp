@@ -375,12 +375,8 @@ void GraphRenderer::updateGPUDataIfRequired()
             GPUGraphData::NodeData nodeData;
             nodeData._nodeIndex = static_cast<int>(nodeId);
             nodeData._component = componentIndex;
-            nodeData._outerColor[0] = nodeVisual._outerColor.redF();
-            nodeData._outerColor[1] = nodeVisual._outerColor.greenF();
-            nodeData._outerColor[2] = nodeVisual._outerColor.blueF();
-            nodeData._innerColor[0] = nodeVisual._innerColor.redF();
-            nodeData._innerColor[1] = nodeVisual._innerColor.greenF();
-            nodeData._innerColor[2] = nodeVisual._innerColor.blueF();
+            nodeData._outerColor = GPUGraphData::colorFrom(nodeVisual._outerColor);
+            nodeData._innerColor = GPUGraphData::colorFrom(nodeVisual._innerColor);
             nodeData._selected = nodeVisual._state.test(VisualFlags::Selected) ? 1.0f : 0.0f;
 
             auto* gpuGraphData = layerFor(nodeVisual);
@@ -425,12 +421,8 @@ void GraphRenderer::updateGPUDataIfRequired()
             edgeData._edgeType = static_cast<int>(edgeVisualType);
             edgeData._component = componentIndex;
             edgeData._size = edgeVisual._size;
-            edgeData._outerColor[0] = edgeVisual._outerColor.redF();
-            edgeData._outerColor[1] = edgeVisual._outerColor.greenF();
-            edgeData._outerColor[2] = edgeVisual._outerColor.blueF();
-            edgeData._innerColor[0] = edgeVisual._innerColor.redF();
-            edgeData._innerColor[1] = edgeVisual._innerColor.greenF();
-            edgeData._innerColor[2] = edgeVisual._innerColor.blueF();
+            edgeData._outerColor = GPUGraphData::colorFrom(edgeVisual._outerColor);
+            edgeData._innerColor = GPUGraphData::colorFrom(edgeVisual._innerColor);
             edgeData._selected = 0.0f;
 
             auto* gpuGraphData = layerFor(edgeVisual);

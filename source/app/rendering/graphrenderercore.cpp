@@ -228,8 +228,10 @@ void GPUGraphData::prepareNodeVAO(QOpenGLShaderProgram& shader)
                           reinterpret_cast<const void*>(offsetof(NodeData, _nodeIndex))); // NOLINT(performance-no-int-to-ptr)
     glVertexAttribIPointer(static_cast<GLuint>(shader.attributeLocation("component")),      1, GL_INT,  sizeof(NodeData),
                           reinterpret_cast<const void*>(offsetof(NodeData, _component))); // NOLINT(performance-no-int-to-ptr)
-    shader.setAttributeBuffer("outerColor",   GL_FLOAT, offsetof(NodeData, _outerColor),    3,          sizeof(NodeData));
-    shader.setAttributeBuffer("innerColor",   GL_FLOAT, offsetof(NodeData, _innerColor),    3,          sizeof(NodeData));
+    glVertexAttribPointer(static_cast<GLuint>(shader.attributeLocation("outerColor")),      4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(NodeData),
+                          reinterpret_cast<const void*>(offsetof(NodeData, _outerColor))); // NOLINT(performance-no-int-to-ptr)
+    glVertexAttribPointer(static_cast<GLuint>(shader.attributeLocation("innerColor")),      4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(NodeData),
+                          reinterpret_cast<const void*>(offsetof(NodeData, _innerColor))); // NOLINT(performance-no-int-to-ptr)
     shader.setAttributeBuffer("selected",     GL_FLOAT, offsetof(NodeData, _selected),      1,          sizeof(NodeData));
     glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("nodeIndex")),       1);
     glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("component")),       1);
@@ -265,8 +267,10 @@ void GPUGraphData::prepareEdgeVAO(QOpenGLShaderProgram& shader)
     glVertexAttribIPointer(static_cast<GLuint>(shader.attributeLocation("component")),          1, GL_INT,  sizeof(EdgeData),
                            reinterpret_cast<const void*>(offsetof(EdgeData, _component))); // NOLINT(performance-no-int-to-ptr)
     shader.setAttributeBuffer("size",           GL_FLOAT, offsetof(EdgeData, _size),            1,          sizeof(EdgeData));
-    shader.setAttributeBuffer("outerColor",     GL_FLOAT, offsetof(EdgeData, _outerColor),      3,          sizeof(EdgeData));
-    shader.setAttributeBuffer("innerColor",     GL_FLOAT, offsetof(EdgeData, _innerColor),      3,          sizeof(EdgeData));
+    glVertexAttribPointer(static_cast<GLuint>(shader.attributeLocation("outerColor")),          4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(EdgeData),
+                            reinterpret_cast<const void*>(offsetof(EdgeData, _outerColor))); // NOLINT(performance-no-int-to-ptr)
+    glVertexAttribPointer(static_cast<GLuint>(shader.attributeLocation("innerColor")),          4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(EdgeData),
+                            reinterpret_cast<const void*>(offsetof(EdgeData, _innerColor))); // NOLINT(performance-no-int-to-ptr)
     shader.setAttributeBuffer("selected",       GL_FLOAT, offsetof(EdgeData, _selected),        1,          sizeof(EdgeData));
     glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("sourceIndex")),         1);
     glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("targetIndex")),         1);
@@ -418,6 +422,12 @@ bool GPUGraphData::invisible() const
 bool GPUGraphData::hasGraphElements() const
 {
     return !_nodeData.empty() || !_edgeData.empty();
+}
+
+GPUGraphData::Color GPUGraphData::colorFrom(const QColor& color)
+{
+    return {static_cast<uint8_t>(color.red()), static_cast<uint8_t>(color.green()),
+        static_cast<uint8_t>(color.blue()), static_cast<uint8_t>(color.alpha())};
 }
 
 void GPUGraphData::copyState(const GPUGraphData& gpuGraphData,
