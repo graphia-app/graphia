@@ -17,44 +17,30 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// Each component's matrices and lighting parameters, one after another
+// Each component's model view matrix, projection matrix and lighting parameters,
+// in that order, as laid out by GraphRendererCore::uploadGPUComponentData
 
-#ifdef GL_ES
-uniform sampler2D componentData;
-#else
-uniform samplerBuffer componentData;
-#endif
+#include "texelbuffer.glsl"
 
-uniform int componentDataElementSize;
-uniform int componentDataTextureMaxDimension;
+uniform TexelBuffer componentData;
 
-float floatFromComponentData(int component, int offset)
+vec4 componentDataTexel(int component, int texel)
 {
-    int index = (component * componentDataElementSize) + offset;
-#ifdef GL_ES
-    int y = index / componentDataTextureMaxDimension;
-    int x = index % componentDataTextureMaxDimension;
-    ivec2 coord = ivec2(x, y);
-
-    return texelFetch(componentData, coord, 0).r;
-#else
-    return texelFetch(componentData, index).r;
-#endif
+    const int texelsPerComponent = 9;
+    return texelAt(componentData, (component * texelsPerComponent) + texel);
 }
 
-mat4 mat4FromComponentData(int component, int offset)
+mat4 componentModelViewMatrix(int component)
 {
-    mat4 m;
-    int index = offset;
-
-    for(int j = 0; j < 4; j++)
-        for(int i = 0; i < 4; i++)
-            m[j][i] = floatFromComponentData(component, index++);
-
-    return m;
+    return mat4(componentDataTexel(component, 0), componentDataTexel(component, 1),
+        componentDataTexel(component, 2), componentDataTexel(component, 3));
 }
 
-mat4 componentModelViewMatrix(int component)    { return mat4FromComponentData(component, 0); }
-mat4 componentProjectionMatrix(int component)   { return mat4FromComponentData(component, 16); }
-float componentLightOffset(int component)       { return floatFromComponentData(component, 32); }
-float componentLightScale(int component)        { return floatFromComponentData(component, 33); }
+mat4 componentProjectionMatrix(int component)
+{
+    return mat4(componentDataTexel(component, 4), componentDataTexel(component, 5),
+        componentDataTexel(component, 6), componentDataTexel(component, 7));
+}
+
+float componentLightOffset(int component)   { return componentDataTexel(component, 8).x; }
+float componentLightScale(int component)    { return componentDataTexel(component, 8).y; }
