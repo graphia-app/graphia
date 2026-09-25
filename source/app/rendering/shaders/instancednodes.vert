@@ -23,11 +23,10 @@ layout (location = 0) in vec3 vertexPosition;
 layout (location = 1) in vec3 vertexNormal;
 layout (location = 2) in vec2 vertexTexCoord;
 
-layout (location = 3) in vec3  nodePosition; // The position of the node
+layout (location = 3) in int   nodeIndex; // Indexes the node geometry
 
 layout (location = 4) in int   component; // The component index
 
-layout (location = 5) in float size; // The size of the node
 layout (location = 6) in vec3  outerColor; // The outside color of the node
 layout (location = 7) in vec3  innerColor; // The inside color of the node
 layout (location = 8) in float selected;
@@ -44,6 +43,7 @@ out float lightScale;
 out float projectionScale;
 
 #include "componentdata.glsl"
+#include "nodegeometry.glsl"
 
 mat4 makeOrientationMatrix(vec3 forward)
 {
@@ -72,6 +72,9 @@ void main()
 {
     element = float(gl_InstanceID + 1);
 
+    vec3 position = nodePosition(nodeIndex);
+    float size = nodeSize(nodeIndex);
+
     mat4 modelViewMatrix = componentModelViewMatrix(component);
     mat4 projectionMatrix = componentProjectionMatrix(component);
     lightOffset = componentLightOffset(component);
@@ -84,7 +87,7 @@ void main()
     innerVColor = innerColor;
     vSelected = selected;
 
-    vec3 nodeVertexPosition = nodePosition + (vertexPosition * size);
+    vec3 nodeVertexPosition = position + (vertexPosition * size);
     vec3 nodeVertexPositionViewSpace = vPosition =
         (modelViewMatrix * vec4(nodeVertexPosition, 1.0)).xyz;
     gl_Position = projectionMatrix * vec4(nodeVertexPositionViewSpace, 1.0);
@@ -97,7 +100,7 @@ void main()
     // Map 2D UVs to node Hemisphere
     // Create orientation matrix based on vector from view space nodePosition
     // This keeps the node "facing" the camera
-    vec3 nodePositionViewSpace = (modelViewMatrix * vec4(nodePosition, 1.0)).xyz;
+    vec3 nodePositionViewSpace = (modelViewMatrix * vec4(position, 1.0)).xyz;
     vec3 nodeToCameraDir = mix(normalize(-nodePositionViewSpace), vec3(0.0, 0.0, 1.0), proj33);
     mat4 orientationMatrix = makeOrientationMatrix(nodeToCameraDir);
     vec4 eyeNodeNormal = orientationMatrix * vec4(vNormal, 1.0);

@@ -56,6 +56,7 @@
 #include <QPainter>
 #include <QSize>
 
+#include <array>
 #include <cstddef>
 #include <functional>
 #include <memory>
@@ -264,6 +265,8 @@ private:
 
     void clearHiddenElements();
 
+    void updateGPUNodePositions();
+    void updateGPUNodeSizes();
     void updateGPUDataIfRequired();
     enum class When : unsigned char { Later, Now };
     void updateGPUData(When when);
@@ -306,8 +309,20 @@ private:
     void moveFocusToComponent(ComponentId componentId);
     void moveFocusToComponents(const std::vector<ComponentId>& componentIds);
 
+    // Text sits midway between two nodes, which for a node's own text are the
+    // same node, or at a position of its own when it belongs to neither
+    struct TextAnchor
+    {
+        explicit TextAnchor(NodeId nodeId) : _nodeIds{nodeId, nodeId} {}
+        TextAnchor(NodeId from, NodeId to) : _nodeIds{from, to} {}
+        explicit TextAnchor(const QVector3D& position) : _position(position) {}
+
+        std::array<NodeId, 2> _nodeIds;
+        QVector3D _position;
+    };
+
     void createGPUGlyphData(const QString& text, const QColor& textColor, const TextAlignment& textAlignment,
-                         float textScale, float elementSize, const QVector3D& elementPosition,
+                         float textScale, float elementSize, const TextAnchor& anchor,
                          int componentIndex, GPUGraphData* gpuGraphData);
 
 signals:
