@@ -60,6 +60,7 @@
 #include <algorithm>
 #include <array>
 #include <chrono>
+#include <functional>
 #include <limits>
 #include <utility>
 
@@ -296,6 +297,26 @@ void GraphRenderer::updateGPUDataIfRequired()
     if(!_graphModel->directed())
         edgeVisualType = EdgeVisualType::Cylinder;
 
+    class Layer
+    {
+    public:
+        explicit Layer(std::function<GPUGraphData*()> claimFn) :
+            _claimFn(std::move(claimFn))
+        {}
+
+        GPUGraphData* get()
+        {
+            if(_layer == nullptr)
+                _layer = _claimFn();
+
+            return _layer;
+        }
+
+    private:
+        std::function<GPUGraphData*()> _claimFn;
+        GPUGraphData* _layer = nullptr;
+    };
+
     for(const auto& componentRendererRef : _componentRenderers)
     {
         GraphComponentRenderer* componentRenderer = componentRendererRef;
@@ -303,6 +324,20 @@ void GraphRenderer::updateGPUDataIfRequired()
             continue;
 
         const float UnhighlightedAlpha = 0.22f;
+        const float componentAlpha = componentRenderer->alpha();
+
+        Layer highlightedLayer([this, componentAlpha]
+            { return gpuGraphDataForAlpha(componentAlpha, 1.0f); });
+        Layer unhighlightedLayer([this, componentAlpha, UnhighlightedAlpha]
+            { return gpuGraphDataForAlpha(componentAlpha, UnhighlightedAlpha); });
+        Layer textLayer([this, componentAlpha]
+            { return gpuGraphDataForOverlay(componentAlpha); });
+
+        auto layerFor = [&](const ElementVisual& visual)
+        {
+            return visual._state.test(VisualFlags::Unhighlighted) ?
+                unhighlightedLayer.get() : highlightedLayer.get();
+        };
 
         for(auto nodeId : componentRenderer->nodeIds())
         {
@@ -328,8 +363,7 @@ void GraphRenderer::updateGPUDataIfRequired()
             nodeData._innerColor[2] = nodeVisual._innerColor.blueF();
             nodeData._selected = nodeVisual._state.test(VisualFlags::Selected) ? 1.0f : 0.0f;
 
-            auto* gpuGraphData = gpuGraphDataForAlpha(componentRenderer->alpha(),
-                nodeVisual._state.test(VisualFlags::Unhighlighted) ? UnhighlightedAlpha : 1.0f);
+            auto* gpuGraphData = layerFor(nodeVisual);
 
             if(gpuGraphData != nullptr)
             {
@@ -354,7 +388,7 @@ void GraphRenderer::updateGPUDataIfRequired()
                     nodeVisual._textColor, textAlignment,
                     textScale * nodeVisual._textSize,
                     nodeVisual._size, nodePosition, componentIndex,
-                    gpuGraphDataForOverlay(componentRenderer->alpha()));
+                    textLayer.get());
             }
         }
 
@@ -401,8 +435,8 @@ void GraphRenderer::updateGPUDataIfRequired()
             edgeData._targetPosition[0] = targetPosition.x();
             edgeData._targetPosition[1] = targetPosition.y();
             edgeData._targetPosition[2] = targetPosition.z();
-            edgeData._sourceSize = _graphModel->nodeVisual(edge->sourceId())._size;
-            edgeData._targetSize = _graphModel->nodeVisual(edge->targetId())._size;
+            edgeData._sourceSize = sourceNodeVisual._size;
+            edgeData._targetSize = targetNodeVisual._size;
             edgeData._edgeType = static_cast<int>(edgeVisualType);
             edgeData._component = componentIndex;
             edgeData._size = edgeVisual._size;
@@ -414,8 +448,7 @@ void GraphRenderer::updateGPUDataIfRequired()
             edgeData._innerColor[2] = edgeVisual._innerColor.blueF();
             edgeData._selected = 0.0f;
 
-            auto* gpuGraphData = gpuGraphDataForAlpha(componentRenderer->alpha(),
-                edgeVisual._state.test(VisualFlags::Unhighlighted) ? UnhighlightedAlpha : 1.0f);
+            auto* gpuGraphData = layerFor(edgeVisual);
 
             if(gpuGraphData != nullptr)
             {
@@ -438,7 +471,7 @@ void GraphRenderer::updateGPUDataIfRequired()
                     edgeVisual._textColor, textAlignment,
                     textScale * edgeVisual._textSize,
                     edgeVisual._size, midPoint, componentIndex,
-                    gpuGraphDataForOverlay(componentRenderer->alpha()));
+                    textLayer.get());
             }
         }
 
@@ -449,7 +482,7 @@ void GraphRenderer::updateGPUDataIfRequired()
                 textVisual._color, textAlignment,
                 textScale * textVisual._size,
                 textVisual._radius, textVisual._centre, componentIndex,
-                gpuGraphDataForOverlay(componentRenderer->alpha()));
+                textLayer.get());
         });
 
         componentIndex++;
