@@ -32,14 +32,7 @@ layout (location = 8) in vec2 glyphSize;
 layout (location = 9) in float glyphScale;
 layout (location = 10) in vec3 color;
 
-#ifdef GL_ES
-uniform sampler2D componentData;
-#else
-uniform samplerBuffer componentData;
-#endif
-
-uniform int componentDataElementSize;
-uniform int componentDataTextureMaxDimension;
+#include "componentdata.glsl"
 
 uniform mediump sampler2DArray tex;
 
@@ -47,36 +40,10 @@ out vec2 texCoord;
 flat out int texLayer;
 out vec3 textColor;
 
-float floatFromComponentData(int offset)
-{
-    int index = (component * componentDataElementSize) + offset;
-#ifdef GL_ES
-    int y = index / componentDataTextureMaxDimension;
-    int x = index % componentDataTextureMaxDimension;
-    ivec2 coord = ivec2(x, y);
-
-    return texelFetch(componentData, coord, 0).r;
-#else
-    return texelFetch(componentData, index).r;
-#endif
-}
-
-mat4 mat4FromComponentData(int offset)
-{
-    mat4 m;
-    int index = offset;
-
-    for(int j = 0; j < 4; j++)
-        for(int i = 0; i < 4; i++)
-            m[j][i] = floatFromComponentData(index++);
-
-    return m;
-}
-
 void main()
 {
-   mat4 modelViewMatrix = mat4FromComponentData(0);
-   mat4 projectionMatrix = mat4FromComponentData(16);
+   mat4 modelViewMatrix = componentModelViewMatrix(component);
+   mat4 projectionMatrix = componentProjectionMatrix(component);
 
   vec3 cameraUp =    normalize(vec3(modelViewMatrix[0].y, modelViewMatrix[1].y, modelViewMatrix[2].y));
   vec3 cameraRight = normalize(vec3(modelViewMatrix[0].x, modelViewMatrix[1].x, modelViewMatrix[2].x));
