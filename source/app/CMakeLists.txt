@@ -92,6 +92,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/rendering/graphrenderercore.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/graphrenderertypes.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/opengldebuglogger.h
+    ${CMAKE_CURRENT_LIST_DIR}/rendering/nodegeometry.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/openglfunctions.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/arrow.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/rectangle.h
@@ -216,6 +217,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/rendering/graphrenderer.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/graphrenderercore.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/opengldebuglogger.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/rendering/nodegeometry.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/openglfunctions.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/arrow.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/rectangle.cpp

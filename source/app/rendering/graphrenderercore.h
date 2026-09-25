@@ -22,6 +22,7 @@
 
 #include "openglfunctions.h"
 #include "graphrenderertypes.h"
+#include "nodegeometry.h"
 #include "texelbuffer.h"
 
 #include "primitives/arrow.h"
@@ -93,9 +94,8 @@ struct GPUGraphData : OpenGLFunctions
 
     struct NodeData
     {
-        float _position[3] = {0.0f, 0.0f, 0.0f};
+        int _nodeIndex = -1;
         int _component = -1;
-        float _size = -1.0f;
         float _outerColor[3] = {0.0f, 0.0f, 0.0f};
         float _innerColor[3] = {0.0f, 0.0f, 0.0f};
         float _selected = 0.0f;
@@ -103,10 +103,8 @@ struct GPUGraphData : OpenGLFunctions
 
     struct EdgeData
     {
-        float _sourcePosition[3] = {0.0f, 0.0f, 0.0f};
-        float _targetPosition[3] = {0.0f, 0.0f, 0.0f};
-        float _sourceSize = 0.0f;
-        float _targetSize = 0.0f;
+        int _sourceIndex = -1;
+        int _targetIndex = -1;
         int _edgeType = -1;
         int _component = -1;
         float _size = -1.0f;
@@ -120,6 +118,7 @@ struct GPUGraphData : OpenGLFunctions
         int _component = -1;
         float _textureCoord[2] = {0.0f, 0.0f};
         int _textureLayer = -1;
+        int _anchorNodes[2] = {-1, -1};
         float _basePosition[3] = {0.0f, 0.0f, 0.0f};
         float _glyphOffset[2] = {0.0f, 0.0f};
         float _glyphSize[2] = {0.0f, 0.0f};
@@ -194,6 +193,8 @@ private:
     std::vector<ComponentData> _componentData;
     TexelBuffer _componentDataTexels;
 
+    NodeGeometry _nodeGeometry;
+
     Shading _shading = Shading::Smooth;
 
     QOpenGLShaderProgram _selectionMarkerShader;
@@ -209,6 +210,7 @@ private:
     std::vector<size_t> gpuGraphDataRenderOrder() const;
 
     void bindComponentDataTexture(GLenum textureUnit, QOpenGLShaderProgram& shader);
+    void bindNodeGeometryTexture(GLenum textureUnit, QOpenGLShaderProgram& shader);
 
     void prepare();
 
@@ -231,6 +233,8 @@ protected:
         const QMatrix4x4& projectionMatrix,
         float distance, float lightScale);
     void uploadGPUComponentData();
+
+    NodeGeometry& nodeGeometry() { return _nodeGeometry; }
 
     Shading shading() const;
     void setShading(Shading shading);

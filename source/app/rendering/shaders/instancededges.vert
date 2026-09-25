@@ -21,10 +21,8 @@ layout (location = 0) in vec3   vertexPosition;
 layout (location = 1) in vec3   vertexNormal;
 layout (location = 2) in vec2   vertexTexCoord;
 
-layout (location = 3) in vec3   sourcePosition; // The position of the source node
-layout (location = 4) in vec3   targetPosition; // The position of the target node
-layout (location = 5) in float  sourceSize; // The size of the source node
-layout (location = 6) in float  targetSize; // The size of the target node
+layout (location = 3) in int    sourceIndex; // Indexes the source node's geometry
+layout (location = 4) in int    targetIndex; // Indexes the target node's geometry
 layout (location = 7) in int    edgeType; // The type of the edge
 
 layout (location = 8) in int    component; // The component index
@@ -46,6 +44,7 @@ out float lightScale;
 out float projectionScale;
 
 #include "componentdata.glsl"
+#include "nodegeometry.glsl"
 
 const float ARROW_HEAD_CUTOFF_Y = 0.24;
 const float MAX_ARROW_HEAD_LENGTH = 0.25;
@@ -81,10 +80,40 @@ float approxProjectionScaleFor(vec3 position, float extent, mat4 p)
     return abs((a.x / a.w) - (b.x / b.w)) / 2.0;
 }
 
+// Whether the edge lies wholly within the lens where its two nodes intersect
+bool hiddenByNodes(float edgeLengthSq, float sourceSize, float targetSize)
+{
+    float nodeRadiusSum = sourceSize + targetSize;
+
+    if(edgeLengthSq <= 0.0 || edgeLengthSq >= nodeRadiusSum * nodeRadiusSum)
+        return false;
+
+    float sourceRadiusSq = sourceSize * sourceSize;
+    float targetRadiusSq = targetSize * targetSize;
+
+    float n = edgeLengthSq - sourceRadiusSq + targetRadiusSq;
+    float lensRadiusSq = targetRadiusSq - ((n * n) / (4.0 * edgeLengthSq));
+
+    return (size * size) < lensRadiusSq;
+}
+
 void main()
 {
     // Make the index negative so that it doesn't overlap with the node indices
     element = float(-(gl_InstanceID + 1));
+
+    vec3 sourcePosition = nodePosition(sourceIndex);
+    vec3 targetPosition = nodePosition(targetIndex);
+    float sourceSize = nodeSize(sourceIndex);
+    float targetSize = nodeSize(targetIndex);
+
+    vec3 sourceToTarget = targetPosition - sourcePosition;
+
+    if(hiddenByNodes(dot(sourceToTarget, sourceToTarget), sourceSize, targetSize))
+    {
+        gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
+        return;
+    }
 
     float edgeLength = distance(sourcePosition, targetPosition);
     float edgeLengthMinusNodeRadii = edgeLength - (sourceSize + targetSize);

@@ -258,6 +258,8 @@ bool ScreenshotRenderer::copyState(const GraphRenderer& renderer)
     for(size_t i = 0; i < renderer._gpuGraphData.size(); ++i)
         _gpuGraphData.at(i).copyState(renderer._gpuGraphData.at(i), _nodesShader, _edgesShader, _textShader, 4);
 
+    _nodeGeometry.copyFrom(renderer._nodeGeometry);
+
     for(const auto& componentRendererRef : renderer.componentRenderers())
     {
         const GraphComponentRenderer* componentRenderer = componentRendererRef;
@@ -315,6 +317,7 @@ bool ScreenshotRenderer::copyState(const GraphRenderer& renderer)
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
     glReadBuffer(GL_BACK);
 
+    _nodeGeometry.upload();
     uploadGPUGraphData();
 
     return true;

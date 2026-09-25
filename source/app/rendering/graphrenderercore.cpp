@@ -179,6 +179,7 @@ void GPUGraphData::prepareTextVAO(QOpenGLShaderProgram& shader)
     shader.enableAttributeArray("component");
     shader.enableAttributeArray("textureCoord");
     shader.enableAttributeArray("textureLayer");
+    shader.enableAttributeArray("anchorNodes");
     shader.enableAttributeArray("basePosition");
     shader.enableAttributeArray("glyphOffset");
     shader.enableAttributeArray("glyphSize");
@@ -190,6 +191,8 @@ void GPUGraphData::prepareTextVAO(QOpenGLShaderProgram& shader)
     shader.setAttributeBuffer("textureCoord",    GL_FLOAT, offsetof(GlyphData, _textureCoord),      2,          sizeof(GlyphData));
     glVertexAttribIPointer(static_cast<GLuint>(shader.attributeLocation("textureLayer")),           1, GL_INT,  sizeof(GlyphData),
                              reinterpret_cast<const void*>(offsetof(GlyphData, _textureLayer))); // NOLINT(performance-no-int-to-ptr)
+    glVertexAttribIPointer(static_cast<GLuint>(shader.attributeLocation("anchorNodes")),            2, GL_INT,  sizeof(GlyphData),
+                             reinterpret_cast<const void*>(offsetof(GlyphData, _anchorNodes))); // NOLINT(performance-no-int-to-ptr)
     shader.setAttributeBuffer("basePosition",    GL_FLOAT, offsetof(GlyphData, _basePosition),      3,          sizeof(GlyphData));
     shader.setAttributeBuffer("glyphOffset",     GL_FLOAT, offsetof(GlyphData, _glyphOffset),       2,          sizeof(GlyphData));
     shader.setAttributeBuffer("glyphSize",       GL_FLOAT, offsetof(GlyphData, _glyphSize),         2,          sizeof(GlyphData));
@@ -198,6 +201,7 @@ void GPUGraphData::prepareTextVAO(QOpenGLShaderProgram& shader)
     glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("component")),               1);
     glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("textureCoord")),            1);
     glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("textureLayer")),            1);
+    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("anchorNodes")),             1);
     glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("basePosition")),            1);
     glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("glyphOffset")),             1);
     glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("glyphSize")),               1);
@@ -215,22 +219,20 @@ void GPUGraphData::prepareNodeVAO(QOpenGLShaderProgram& shader)
     shader.bind();
 
     _nodeVBO.bind();
-    shader.enableAttributeArray("nodePosition");
+    shader.enableAttributeArray("nodeIndex");
     shader.enableAttributeArray("component");
-    shader.enableAttributeArray("size");
     shader.enableAttributeArray("outerColor");
     shader.enableAttributeArray("innerColor");
     shader.enableAttributeArray("selected");
-    shader.setAttributeBuffer("nodePosition", GL_FLOAT, offsetof(NodeData, _position),      3,          sizeof(NodeData));
+    glVertexAttribIPointer(static_cast<GLuint>(shader.attributeLocation("nodeIndex")),      1, GL_INT,  sizeof(NodeData),
+                          reinterpret_cast<const void*>(offsetof(NodeData, _nodeIndex))); // NOLINT(performance-no-int-to-ptr)
     glVertexAttribIPointer(static_cast<GLuint>(shader.attributeLocation("component")),      1, GL_INT,  sizeof(NodeData),
                           reinterpret_cast<const void*>(offsetof(NodeData, _component))); // NOLINT(performance-no-int-to-ptr)
-    shader.setAttributeBuffer("size",         GL_FLOAT, offsetof(NodeData, _size),          1,          sizeof(NodeData));
     shader.setAttributeBuffer("outerColor",   GL_FLOAT, offsetof(NodeData, _outerColor),    3,          sizeof(NodeData));
     shader.setAttributeBuffer("innerColor",   GL_FLOAT, offsetof(NodeData, _innerColor),    3,          sizeof(NodeData));
     shader.setAttributeBuffer("selected",     GL_FLOAT, offsetof(NodeData, _selected),      1,          sizeof(NodeData));
-    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("nodePosition")),    1);
+    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("nodeIndex")),       1);
     glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("component")),       1);
-    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("size")),            1);
     glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("innerColor")),      1);
     glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("outerColor")),      1);
     glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("selected")),        1);
@@ -246,20 +248,18 @@ void GPUGraphData::prepareEdgeVAO(QOpenGLShaderProgram& shader)
     shader.bind();
 
     _edgeVBO.bind();
-    shader.enableAttributeArray("sourcePosition");
-    shader.enableAttributeArray("targetPosition");
-    shader.enableAttributeArray("sourceSize");
-    shader.enableAttributeArray("targetSize");
+    shader.enableAttributeArray("sourceIndex");
+    shader.enableAttributeArray("targetIndex");
     shader.enableAttributeArray("edgeType");
     shader.enableAttributeArray("component");
     shader.enableAttributeArray("size");
     shader.enableAttributeArray("outerColor");
     shader.enableAttributeArray("innerColor");
     shader.enableAttributeArray("selected");
-    shader.setAttributeBuffer("sourcePosition", GL_FLOAT, offsetof(EdgeData, _sourcePosition),  3,          sizeof(EdgeData));
-    shader.setAttributeBuffer("targetPosition", GL_FLOAT, offsetof(EdgeData, _targetPosition),  3,          sizeof(EdgeData));
-    shader.setAttributeBuffer("sourceSize",     GL_FLOAT, offsetof(EdgeData, _sourceSize),      1,          sizeof(EdgeData));
-    shader.setAttributeBuffer("targetSize",     GL_FLOAT, offsetof(EdgeData, _targetSize),      1,          sizeof(EdgeData));
+    glVertexAttribIPointer(static_cast<GLuint>(shader.attributeLocation("sourceIndex")),        1, GL_INT,  sizeof(EdgeData),
+                            reinterpret_cast<const void*>(offsetof(EdgeData, _sourceIndex))); // NOLINT(performance-no-int-to-ptr)
+    glVertexAttribIPointer(static_cast<GLuint>(shader.attributeLocation("targetIndex")),        1, GL_INT,  sizeof(EdgeData),
+                            reinterpret_cast<const void*>(offsetof(EdgeData, _targetIndex))); // NOLINT(performance-no-int-to-ptr)
     glVertexAttribIPointer(static_cast<GLuint>(shader.attributeLocation("edgeType")),           1, GL_INT,  sizeof(EdgeData),
                             reinterpret_cast<const void*>(offsetof(EdgeData, _edgeType))); // NOLINT(performance-no-int-to-ptr)
     glVertexAttribIPointer(static_cast<GLuint>(shader.attributeLocation("component")),          1, GL_INT,  sizeof(EdgeData),
@@ -268,10 +268,8 @@ void GPUGraphData::prepareEdgeVAO(QOpenGLShaderProgram& shader)
     shader.setAttributeBuffer("outerColor",     GL_FLOAT, offsetof(EdgeData, _outerColor),      3,          sizeof(EdgeData));
     shader.setAttributeBuffer("innerColor",     GL_FLOAT, offsetof(EdgeData, _innerColor),      3,          sizeof(EdgeData));
     shader.setAttributeBuffer("selected",       GL_FLOAT, offsetof(EdgeData, _selected),        1,          sizeof(EdgeData));
-    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("sourcePosition")),      1);
-    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("targetPosition")),      1);
-    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("sourceSize")),          1);
-    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("targetSize")),          1);
+    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("sourceIndex")),         1);
+    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("targetIndex")),         1);
     glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("edgeType")),            1);
     glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("component")),           1);
     glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("size")),                1);
@@ -539,6 +537,12 @@ void GraphRendererCore::bindComponentDataTexture(GLenum textureUnit, QOpenGLShad
     shader.setUniformValue("componentData", textureUnit - GL_TEXTURE0);
 }
 
+void GraphRendererCore::bindNodeGeometryTexture(GLenum textureUnit, QOpenGLShaderProgram& shader)
+{
+    _nodeGeometry.bind(textureUnit);
+    shader.setUniformValue("nodeGeometry", textureUnit - GL_TEXTURE0);
+}
+
 bool GraphRendererCore::makeContextCurrent()
 {
     return _context->makeCurrent(_context->surface());
@@ -555,6 +559,7 @@ void GraphRendererCore::renderNodes(GPUGraphData& gpuGraphData)
     gpuGraphData._nodeVBO.bind();
 
     bindComponentDataTexture(GL_TEXTURE0, _nodesShader);
+    bindNodeGeometryTexture(GL_TEXTURE0 + 1, _nodesShader);
 
     _nodesShader.setUniformValue("flatness", shading() == Shading::Flat ? 1.0f : 0.0f);
 
@@ -563,6 +568,7 @@ void GraphRendererCore::renderNodes(GPUGraphData& gpuGraphData)
         GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(gpuGraphData.numNodes()));
     gpuGraphData._sphere.vertexArrayObject()->release();
 
+    _nodeGeometry.release(GL_TEXTURE0 + 1);
     _componentDataTexels.release(GL_TEXTURE0);
     gpuGraphData._nodeVBO.release();
     _nodesShader.release();
@@ -579,6 +585,7 @@ void GraphRendererCore::renderEdges(GPUGraphData& gpuGraphData)
     gpuGraphData._edgeVBO.bind();
 
     bindComponentDataTexture(GL_TEXTURE0, _edgesShader);
+    bindNodeGeometryTexture(GL_TEXTURE0 + 1, _edgesShader);
 
     _edgesShader.setUniformValue("flatness", shading() == Shading::Flat ? 1.0f : 0.0f);
 
@@ -587,6 +594,7 @@ void GraphRendererCore::renderEdges(GPUGraphData& gpuGraphData)
         GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(gpuGraphData.numEdges()));
     gpuGraphData._arrow.vertexArrayObject()->release();
 
+    _nodeGeometry.release(GL_TEXTURE0 + 1);
     _componentDataTexels.release(GL_TEXTURE0);
     gpuGraphData._edgeVBO.release();
     _edgesShader.release();
@@ -615,12 +623,14 @@ void GraphRendererCore::renderText(GPUGraphData& gpuGraphData)
     _textShader.setUniformValue("tex", 0);
 
     bindComponentDataTexture(GL_TEXTURE0 + 1, _textShader);
+    bindNodeGeometryTexture(GL_TEXTURE0 + 2, _textShader);
 
     gpuGraphData._rectangle.vertexArrayObject()->bind();
     glDrawElementsInstanced(GL_TRIANGLES, Primitive::Rectangle::glIndexCount(),
         GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(gpuGraphData.numGlyphs()));
     gpuGraphData._rectangle.vertexArrayObject()->release();
 
+    _nodeGeometry.release(GL_TEXTURE0 + 2);
     _componentDataTexels.release(GL_TEXTURE0 + 1);
 
     gpuGraphData._textVBO.release();

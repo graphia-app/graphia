@@ -207,7 +207,7 @@ GraphRenderer::~GraphRenderer()
 }
 
 void GraphRenderer::createGPUGlyphData(const QString& text, const QColor& textColor, const TextAlignment& textAlignment,
-                                    float textScale, float elementSize, const QVector3D& elementPosition,
+                                    float textScale, float elementSize, const TextAnchor& anchor,
                                     int componentIndex, GPUGraphData* gpuGraphData)
 {
     Q_ASSERT(gpuGraphData != nullptr);
@@ -252,9 +252,12 @@ void GraphRenderer::createGPUGlyphData(const QString& text, const QColor& textCo
         glyphData._textureCoord[1] = textureGlyph._v;
         glyphData._textureLayer = textureGlyph._layer;
 
-        glyphData._basePosition[0] = elementPosition.x();
-        glyphData._basePosition[1] = elementPosition.y();
-        glyphData._basePosition[2] = elementPosition.z();
+        glyphData._anchorNodes[0] = static_cast<int>(anchor._nodeIds[0]);
+        glyphData._anchorNodes[1] = static_cast<int>(anchor._nodeIds[1]);
+
+        glyphData._basePosition[0] = anchor._position.x();
+        glyphData._basePosition[1] = anchor._position.y();
+        glyphData._basePosition[2] = anchor._position.z();
 
         glyphData._color[0] = textColor.redF();
         glyphData._color[1] = textColor.greenF();
@@ -262,6 +265,26 @@ void GraphRenderer::createGPUGlyphData(const QString& text, const QColor& textCo
 
         gpuGraphData->_glyphData.push_back(glyphData);
     }
+}
+
+void GraphRenderer::updateGPUNodePositions()
+{
+    auto& geometry = nodeGeometry();
+    auto& nodePositions = _graphModel->nodePositions();
+    const std::unique_lock<NodePositions> nodePositionsLock(nodePositions);
+
+    geometry.resize(nodePositions.size());
+
+    for(auto nodeId : _graphModel->graph().nodeIds())
+        geometry.setPosition(nodeId, nodePositions.get(nodeId));
+}
+
+void GraphRenderer::updateGPUNodeSizes()
+{
+    auto& geometry = nodeGeometry();
+
+    for(auto nodeId : _graphModel->graph().nodeIds())
+        geometry.setSize(nodeId, _graphModel->nodeVisual(nodeId)._size);
 }
 
 void GraphRenderer::updateGPUDataIfRequired()
@@ -277,15 +300,8 @@ void GraphRenderer::updateGPUDataIfRequired()
 
     resetGPUGraphData();
 
-    // Lock the positions for as short a time as possible
-    NodeArray<QVector3D> scaledAndSmoothedNodePositions(_graphModel->graph());
-    {
-        auto& nodePositions = _graphModel->nodePositions();
-        const std::unique_lock<NodePositions> nodePositionsLock(nodePositions);
-
-        for(auto nodeId : _graphModel->graph().nodeIds())
-            scaledAndSmoothedNodePositions[nodeId] = nodePositions.get(nodeId);
-    }
+    updateGPUNodePositions();
+    updateGPUNodeSizes();
 
     const float textScale = u::pref(u"visuals/textSize"_s).toFloat();
     auto textAlignment = normaliseQmlEnum<TextAlignment>(u::pref(u"visuals/textAlignment"_s).toInt());
@@ -344,17 +360,12 @@ void GraphRenderer::updateGPUDataIfRequired()
             if(_hiddenNodes.get(nodeId))
                 continue;
 
-            const QVector3D nodePosition = scaledAndSmoothedNodePositions[nodeId];
-
             const auto& nodeVisual = _graphModel->nodeVisual(nodeId);
 
             // Create and add NodeData
             GPUGraphData::NodeData nodeData;
-            nodeData._position[0] = nodePosition.x();
-            nodeData._position[1] = nodePosition.y();
-            nodeData._position[2] = nodePosition.z();
+            nodeData._nodeIndex = static_cast<int>(nodeId);
             nodeData._component = componentIndex;
-            nodeData._size = nodeVisual._size;
             nodeData._outerColor[0] = nodeVisual._outerColor.redF();
             nodeData._outerColor[1] = nodeVisual._outerColor.greenF();
             nodeData._outerColor[2] = nodeVisual._outerColor.blueF();
@@ -387,7 +398,7 @@ void GraphRenderer::updateGPUDataIfRequired()
                 createGPUGlyphData(nodeVisual._text,
                     nodeVisual._textColor, textAlignment,
                     textScale * nodeVisual._textSize,
-                    nodeVisual._size, nodePosition, componentIndex,
+                    nodeVisual._size, TextAnchor(nodeId), componentIndex,
                     textLayer.get());
             }
         }
@@ -397,46 +408,11 @@ void GraphRenderer::updateGPUDataIfRequired()
             if(_hiddenEdges.get(edge->id()) || _hiddenNodes.get(edge->sourceId()) || _hiddenNodes.get(edge->targetId()))
                 continue;
 
-            const QVector3D& sourcePosition = scaledAndSmoothedNodePositions[edge->sourceId()];
-            const QVector3D& targetPosition = scaledAndSmoothedNodePositions[edge->targetId()];
-
             const auto& edgeVisual = _graphModel->edgeVisual(edge->id());
-            const auto& sourceNodeVisual = _graphModel->nodeVisual(edge->sourceId());
-            const auto& targetNodeVisual = _graphModel->nodeVisual(edge->targetId());
-
-            auto nodeRadiusSumSq = sourceNodeVisual._size + targetNodeVisual._size;
-            nodeRadiusSumSq *= nodeRadiusSumSq;
-            const auto edgeLengthSq = (targetPosition - sourcePosition).lengthSquared();
-
-            if(edgeLengthSq < nodeRadiusSumSq)
-            {
-                // The edge's nodes are intersecting. Their overlap defines a lens of a
-                // certain radius. If this is greater than the edge radius, the edge is
-                // entirely enclosed within the nodes and we can safely skip rendering
-                // it altogether since it is entirely occluded.
-
-                const auto sourceRadiusSq = sourceNodeVisual._size * sourceNodeVisual._size;
-                const auto targetRadiusSq = targetNodeVisual._size * targetNodeVisual._size;
-
-                const auto n = edgeLengthSq - sourceRadiusSq + targetRadiusSq;
-                const auto d = 4.0f * edgeLengthSq;
-                const auto intersectionLensRadiusSq = targetRadiusSq - ((n * n) / d);
-
-                const auto edgeRadiusSq = edgeVisual._size * edgeVisual._size;
-
-                if(edgeRadiusSq < intersectionLensRadiusSq)
-                    continue;
-            }
 
             GPUGraphData::EdgeData edgeData;
-            edgeData._sourcePosition[0] = sourcePosition.x();
-            edgeData._sourcePosition[1] = sourcePosition.y();
-            edgeData._sourcePosition[2] = sourcePosition.z();
-            edgeData._targetPosition[0] = targetPosition.x();
-            edgeData._targetPosition[1] = targetPosition.y();
-            edgeData._targetPosition[2] = targetPosition.z();
-            edgeData._sourceSize = sourceNodeVisual._size;
-            edgeData._targetSize = targetNodeVisual._size;
+            edgeData._sourceIndex = static_cast<int>(edge->sourceId());
+            edgeData._targetIndex = static_cast<int>(edge->targetId());
             edgeData._edgeType = static_cast<int>(edgeVisualType);
             edgeData._component = componentIndex;
             edgeData._size = edgeVisual._size;
@@ -466,11 +442,10 @@ void GraphRenderer::updateGPUDataIfRequired()
                 if(showEdgeText == TextState::Selected && !edgeVisual._state.test(VisualFlags::Selected))
                     continue;
 
-                const QVector3D midPoint = (sourcePosition + targetPosition) * 0.5f;
                 createGPUGlyphData(edgeVisual._text,
                     edgeVisual._textColor, textAlignment,
                     textScale * edgeVisual._textSize,
-                    edgeVisual._size, midPoint, componentIndex,
+                    edgeVisual._size, TextAnchor(edge->sourceId(), edge->targetId()), componentIndex,
                     textLayer.get());
             }
         }
@@ -481,13 +456,14 @@ void GraphRenderer::updateGPUDataIfRequired()
             createGPUGlyphData(textVisual._text,
                 textVisual._color, textAlignment,
                 textScale * textVisual._size,
-                textVisual._radius, textVisual._centre, componentIndex,
+                textVisual._radius, TextAnchor(textVisual._centre), componentIndex,
                 textLayer.get());
         });
 
         componentIndex++;
     }
 
+    nodeGeometry().upload();
     uploadGPUGraphData();
 }
 

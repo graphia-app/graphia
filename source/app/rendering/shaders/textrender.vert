@@ -32,13 +32,26 @@ layout (location = 8) in vec2 glyphSize;
 layout (location = 9) in float glyphScale;
 layout (location = 10) in vec3 color;
 
+// Text belonging to a node or an edge sits midway between these two nodes, which
+// for a node's text are the same node; other text has none, and uses basePosition
+layout (location = 11) in ivec2 anchorNodes;
+
 #include "componentdata.glsl"
+#include "nodegeometry.glsl"
 
 uniform mediump sampler2DArray tex;
 
 out vec2 texCoord;
 flat out int texLayer;
 out vec3 textColor;
+
+vec3 anchorPosition()
+{
+    if(anchorNodes.x < 0)
+        return basePosition;
+
+    return mix(nodePosition(anchorNodes.x), nodePosition(anchorNodes.y), 0.5);
+}
 
 void main()
 {
@@ -52,7 +65,7 @@ void main()
   vec3 billboardPosition = (cameraRight * vertexPosition.x * scaledGlyphSize.x) +
                            (cameraUp *    vertexPosition.y * scaledGlyphSize.y);
   vec3 billboardOffset = (cameraRight * glyphOffset.x) + (cameraUp * glyphOffset.y);
-  vec3 position = basePosition + billboardPosition + billboardOffset;
+  vec3 position = anchorPosition() + billboardPosition + billboardOffset;
 
   gl_Position = projectionMatrix * vec4((modelViewMatrix * vec4(position, 1.0)).xyz, 1.0);
 
