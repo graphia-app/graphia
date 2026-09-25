@@ -71,7 +71,8 @@
 #include <QProcess>
 #include <QSettings>
 #include <QNetworkProxy>
-#include <QQmlFileSelector>
+#include <QQmlAbstractUrlInterceptor>
+#include <QFileSelector>
 #include <QUrl>
 #include <QByteArray>
 #include <QString>
@@ -188,6 +189,31 @@ static void configureProxy()
 
     QNetworkProxy::setApplicationProxy(proxy);
 }
+
+namespace
+{
+// Like QQmlFileSelector, but only for QML files, as they're the only files with variants
+// This is essentially a workaround for QTBUG-150971
+class QmlFileSelector : public QQmlAbstractUrlInterceptor
+{
+private:
+    QFileSelector _fileSelector;
+
+public:
+    explicit QmlFileSelector(const QStringList& extraSelectors)
+    {
+        _fileSelector.setExtraSelectors(extraSelectors);
+    }
+
+    QUrl intercept(const QUrl& url, DataType type) override
+    {
+        if(type != DataType::QmlFile && type != DataType::JavaScriptFile)
+            return url;
+
+        return _fileSelector.select(url);
+    }
+};
+} // namespace
 
 static QString qmlError;
 
@@ -425,9 +451,9 @@ static int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
     selectors += u"nativemenu"_s;
 #endif
 
+    QmlFileSelector qmlFileSelector(selectors);
     QQmlApplicationEngine engine;
-    auto* qmlFileSelector = new QQmlFileSelector(&engine);
-    qmlFileSelector->setExtraSelectors(selectors);
+    engine.setExtraFileSelectors(selectors);
 
     // Temporary message handler to capture any error output so that
     // it can be shown to the user using a graphical message box
@@ -438,6 +464,12 @@ static int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
     });
 
     engine.loadFromModule(u"Graphia"_s, u"Main"_s);
+
+    // Remove default file selector
+    for(auto* urlInterceptor : engine.urlInterceptors())
+        engine.removeUrlInterceptor(urlInterceptor);
+
+    engine.addUrlInterceptor(&qmlFileSelector);
 
     qInstallMessageHandler(nullptr);
 
