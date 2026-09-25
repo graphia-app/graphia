@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/">
+        <file>shaders/componentdata.glsl</file>
+        <file>shaders/lighting.glsl</file>
         <file>shaders/instancednodes.vert</file>
         <file>shaders/instancededges.vert</file>
         <file>shaders/marker.frag</file>

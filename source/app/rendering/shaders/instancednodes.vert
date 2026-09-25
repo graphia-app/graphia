@@ -43,14 +43,7 @@ out float lightOffset;
 out float lightScale;
 out float projectionScale;
 
-#ifdef GL_ES
-uniform sampler2D componentData;
-#else
-uniform samplerBuffer componentData;
-#endif
-
-uniform int componentDataElementSize;
-uniform int componentDataTextureMaxDimension;
+#include "componentdata.glsl"
 
 mat4 makeOrientationMatrix(vec3 forward)
 {
@@ -67,32 +60,6 @@ mat4 makeOrientationMatrix(vec3 forward)
     return mat4(m);
 }
 
-float floatFromComponentData(int offset)
-{
-    int index = (component * componentDataElementSize) + offset;
-#ifdef GL_ES
-    int y = index / componentDataTextureMaxDimension;
-    int x = index % componentDataTextureMaxDimension;
-    ivec2 coord = ivec2(x, y);
-
-    return texelFetch(componentData, coord, 0).r;
-#else
-    return texelFetch(componentData, index).r;
-#endif
-}
-
-mat4 mat4FromComponentData(int offset)
-{
-    mat4 m;
-    int index = offset;
-
-    for(int j = 0; j < 4; j++)
-        for(int i = 0; i < 4; i++)
-            m[j][i] = floatFromComponentData(index++);
-
-    return m;
-}
-
 float approxProjectionScaleFor(vec3 position, float extent, mat4 p)
 {
     vec4 a = p * vec4(position.x + extent, position.y, position.z, 1.0);
@@ -105,10 +72,10 @@ void main()
 {
     element = float(gl_InstanceID + 1);
 
-    mat4 modelViewMatrix = mat4FromComponentData(0);
-    mat4 projectionMatrix = mat4FromComponentData(16);
-    lightOffset = floatFromComponentData(32);
-    lightScale = floatFromComponentData(33);
+    mat4 modelViewMatrix = componentModelViewMatrix(component);
+    mat4 projectionMatrix = componentProjectionMatrix(component);
+    lightOffset = componentLightOffset(component);
+    lightScale = componentLightScale(component);
 
     mat3 normalMatrix = transpose(inverse(mat3(modelViewMatrix)));
 

@@ -27,6 +27,8 @@
 #include <QSurfaceFormat>
 #include <QString>
 #include <QFile>
+#include <QFileInfo>
+#include <QRegularExpression>
 #include <QtGlobal>
 
 #include <iostream>
@@ -34,13 +36,10 @@
 
 using namespace Qt::Literals::StringLiterals;
 
-static QString shaderStringFromFile(const QString& filename)
+// Replaces each #include "file" line with the contents of that file,
+// which is found relative to the one including it
+static QString sourceFromFile(const QString& filename)
 {
-    const QSurfaceFormat minimumFormat = OpenGLFunctions::minimumFormat();
-    const int shaderVersionNumber = (minimumFormat.majorVersion() * 100) +
-        (minimumFormat.minorVersion() * 10);
-
-
     QFile file(filename);
     if(!file.open(QFile::ReadOnly))
     {
@@ -48,7 +47,30 @@ static QString shaderStringFromFile(const QString& filename)
         return {};
     }
 
-    const QString contents = file.readAll();
+    static const QRegularExpression includeDirective(uR"re(^\s*#include\s+"([^"]+)")re"_s);
+    const auto directory = QFileInfo(filename).path();
+
+    QString source;
+
+    const auto lines = QString::fromUtf8(file.readAll()).split(u'\n');
+
+    for(const auto& line : lines)
+    {
+        const auto match = includeDirective.match(line);
+        source += match.hasMatch() ? sourceFromFile(u"%1/%2"_s.arg(directory, match.captured(1))) : line;
+        source += u'\n';
+    }
+
+    return source;
+}
+
+static QString shaderStringFromFile(const QString& filename)
+{
+    const QSurfaceFormat minimumFormat = OpenGLFunctions::minimumFormat();
+    const int shaderVersionNumber = (minimumFormat.majorVersion() * 100) +
+        (minimumFormat.minorVersion() * 10);
+
+    const QString contents = sourceFromFile(filename);
 
     const QSurfaceFormat currentSurfaceFormat = QOpenGLContext::currentContext()->format();
     const QString version = currentSurfaceFormat.renderableType() == QSurfaceFormat::OpenGLES ?
