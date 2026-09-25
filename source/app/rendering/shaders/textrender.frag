@@ -20,6 +20,7 @@
 in vec2 texCoord;
 flat in int texLayer;
 in vec3 textColor;
+flat in float legibility;
 
 layout (location = 0) out vec4  outColor;
 layout (location = 1) out vec2  outElement;
@@ -38,7 +39,7 @@ void main()
     if(firstData.r < 0.5 - smoothing)
         discard;
 
-    outColor = vec4(textColor.rgb, alpha);
+    outColor = vec4(textColor.rgb, alpha * legibility);
     outElement = vec2(0.0, 0.0);
     outSelection = vec4(0, 0, 0, 0);
 }

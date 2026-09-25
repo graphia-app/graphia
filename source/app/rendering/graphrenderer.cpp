@@ -247,6 +247,7 @@ void GraphRenderer::createGPUGlyphData(const QString& text, const QColor& textCo
         glyphData._glyphSize[0] = textureGlyph._width;
         glyphData._glyphSize[1] = textureGlyph._height;
         glyphData._glyphScale = textScale;
+        glyphData._textHeight = textLayout._xHeight * textScale;
 
         glyphData._textureCoord[0] = textureGlyph._u;
         glyphData._textureCoord[1] = textureGlyph._v;
@@ -263,20 +264,16 @@ void GraphRenderer::createGPUGlyphData(const QString& text, const QColor& textCo
         glyphData._color[1] = textColor.greenF();
         glyphData._color[2] = textColor.blueF();
 
-        gpuGraphData->_glyphData.push_back(glyphData);
+        gpuGraphData->addGlyph(glyphData);
     }
 }
 
 void GraphRenderer::updateGPUNodePositions()
 {
-    auto& geometry = nodeGeometry();
     auto& nodePositions = _graphModel->nodePositions();
     const std::unique_lock<NodePositions> nodePositionsLock(nodePositions);
 
-    geometry.resize(nodePositions.size());
-
-    for(auto nodeId : _graphModel->graph().nodeIds())
-        geometry.setPosition(nodeId, nodePositions.get(nodeId));
+    nodeGeometry().setPositions(_graphModel->graph().nodeIds(), nodePositions);
 }
 
 void GraphRenderer::updateGPUNodeSizes()

@@ -22,6 +22,7 @@
 
 #include "texelbuffer.h"
 
+#include "app/maths/boundingbox.h"
 #include "shared/graph/elementid.h"
 
 #include <QVector3D>
@@ -29,15 +30,17 @@
 #include <cstddef>
 #include <vector>
 
+class NodePositions;
+
 // Where each node is and how big it is, indexed by NodeId, for anything drawn
 // that is positioned by the nodes; read in a shader through nodegeometry.glsl
 class NodeGeometry
 {
 public:
-    void resize(size_t numNodes);
-
-    void setPosition(NodeId nodeId, const QVector3D& position);
+    void setPositions(const std::vector<NodeId>& nodeIds, const NodePositions& nodePositions);
     void setSize(NodeId nodeId, float size);
+
+    const BoundingBox3D& bounds() const { return _bounds; }
 
     void copyFrom(const NodeGeometry& other);
     void upload();
@@ -47,6 +50,7 @@ public:
 
 private:
     std::vector<GLfloat> _geometry;
+    BoundingBox3D _bounds;
     TexelBuffer _texels;
 
     GLfloat* texelFor(NodeId nodeId);

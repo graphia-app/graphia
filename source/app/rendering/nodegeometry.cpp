@@ -19,18 +19,29 @@
 
 #include "nodegeometry.h"
 
-void NodeGeometry::resize(size_t numNodes)
-{
-    _geometry.resize(numNodes * 4);
-}
+#include "app/layout/nodepositions.h"
 
-void NodeGeometry::setPosition(NodeId nodeId, const QVector3D& position)
+void NodeGeometry::setPositions(const std::vector<NodeId>& nodeIds, const NodePositions& nodePositions)
 {
-    auto* texel = texelFor(nodeId);
+    _geometry.resize(nodePositions.size() * 4);
 
-    texel[0] = position.x();
-    texel[1] = position.y();
-    texel[2] = position.z();
+    if(!nodeIds.empty())
+    {
+        const auto position = nodePositions.get(nodeIds.front());
+        _bounds.set(position, position);
+    }
+
+    for(auto nodeId : nodeIds)
+    {
+        const auto position = nodePositions.get(nodeId);
+        auto* texel = texelFor(nodeId);
+
+        texel[0] = position.x();
+        texel[1] = position.y();
+        texel[2] = position.z();
+
+        _bounds.expandToInclude(position);
+    }
 }
 
 void NodeGeometry::setSize(NodeId nodeId, float size)
@@ -41,6 +52,7 @@ void NodeGeometry::setSize(NodeId nodeId, float size)
 void NodeGeometry::copyFrom(const NodeGeometry& other)
 {
     _geometry = other._geometry;
+    _bounds = other._bounds;
 }
 
 void NodeGeometry::upload()
