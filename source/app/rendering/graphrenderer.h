@@ -231,7 +231,9 @@ private:
     NodeArray<bool> _hiddenNodes;
     EdgeArray<bool> _hiddenEdges;
 
-    bool _gpuDataRequiresUpdate = false;
+    // In order of how much of the GPU data is rebuilt
+    enum class GPUDataUpdate : unsigned char { None, NodePositions, Everything };
+    GPUDataUpdate _pendingGPUDataUpdate = GPUDataUpdate::Everything;
 
     QRect _selectionRect;
 
@@ -269,7 +271,7 @@ private:
     void updateGPUNodeSizes();
     void updateGPUDataIfRequired();
     enum class When : unsigned char { Later, Now };
-    void updateGPUData(When when);
+    void updateGPUData(When when, GPUDataUpdate update = GPUDataUpdate::Everything);
     void updateComponentGPUData();
 
     // For high DPI displays (mostly MacOS "Retina" display)

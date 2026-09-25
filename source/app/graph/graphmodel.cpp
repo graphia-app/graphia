@@ -498,6 +498,12 @@ std::vector<ElementVisual> GraphModel::edgeVisuals(const std::vector<EdgeId>& ed
     return visuals;
 }
 
+bool GraphModel::hasTextVisuals() const
+{
+    const std::unique_lock<std::mutex> lock(_->_textVisualsMutex);
+    return !_->_textVisuals.empty();
+}
+
 void GraphModel::forEachTextVisual(const std::function<void(const TextVisual&)>& fn) const
 {
     const std::unique_lock<std::mutex> lock(_->_textVisualsMutex);
