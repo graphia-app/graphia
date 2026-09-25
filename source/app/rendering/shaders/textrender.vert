@@ -36,14 +36,22 @@ layout (location = 10) in vec3 color;
 // for a node's text are the same node; other text has none, and uses basePosition
 layout (location = 11) in ivec2 anchorNodes;
 
+layout (location = 12) in float textHeight;
+
 #include "componentdata.glsl"
 #include "nodegeometry.glsl"
 
 uniform mediump sampler2DArray tex;
 
+uniform float viewportHeight;
+
+uniform float illegibleTextPixels;
+uniform float legibleTextPixels;
+
 out vec2 texCoord;
 flat out int texLayer;
 out vec3 textColor;
+flat out float legibility;
 
 vec3 anchorPosition()
 {
@@ -55,17 +63,30 @@ vec3 anchorPosition()
 
 void main()
 {
-   mat4 modelViewMatrix = componentModelViewMatrix(component);
-   mat4 projectionMatrix = componentProjectionMatrix(component);
+  mat4 modelViewMatrix = componentModelViewMatrix(component);
+  mat4 projectionMatrix = componentProjectionMatrix(component);
+
+  vec3 anchor = anchorPosition();
+  vec2 scaledGlyphSize = glyphSize * glyphScale;
+
+  float anchorW = (projectionMatrix * modelViewMatrix * vec4(anchor, 1.0)).w;
+  float textPixels = (textHeight * projectionMatrix[1][1] * viewportHeight * 0.5) / anchorW;
+  legibility = smoothstep(illegibleTextPixels, legibleTextPixels, textPixels);
+
+  if(legibility <= 0.0)
+  {
+      // Degenerate, so nothing is drawn
+      gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
+      return;
+  }
 
   vec3 cameraUp =    normalize(vec3(modelViewMatrix[0].y, modelViewMatrix[1].y, modelViewMatrix[2].y));
   vec3 cameraRight = normalize(vec3(modelViewMatrix[0].x, modelViewMatrix[1].x, modelViewMatrix[2].x));
 
-  vec2 scaledGlyphSize = glyphSize * glyphScale;
   vec3 billboardPosition = (cameraRight * vertexPosition.x * scaledGlyphSize.x) +
                            (cameraUp *    vertexPosition.y * scaledGlyphSize.y);
   vec3 billboardOffset = (cameraRight * glyphOffset.x) + (cameraUp * glyphOffset.y);
-  vec3 position = anchorPosition() + billboardPosition + billboardOffset;
+  vec3 position = anchor + billboardPosition + billboardOffset;
 
   gl_Position = projectionMatrix * vec4((modelViewMatrix * vec4(position, 1.0)).xyz, 1.0);
 

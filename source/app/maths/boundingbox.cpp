@@ -229,6 +229,17 @@ QVector3D BoundingBox3D::centre() const
     return (_min + _max) / 2.0f;
 }
 
+std::array<QVector3D, 8> BoundingBox3D::corners() const
+{
+    return
+    {{
+        {_min.x(), _min.y(), _min.z()}, {_max.x(), _min.y(), _min.z()},
+        {_min.x(), _max.y(), _min.z()}, {_max.x(), _max.y(), _min.z()},
+        {_min.x(), _min.y(), _max.z()}, {_max.x(), _min.y(), _max.z()},
+        {_min.x(), _max.y(), _max.z()}, {_max.x(), _max.y(), _max.z()},
+    }};
+}
+
 bool BoundingBox3D::valid() const
 {
     return

@@ -36,9 +36,11 @@
 #include <QPoint>
 #include <QString>
 #include <QVector3D>
+#include <QVector4D>
 #include <QtGlobal>
 
 #include <algorithm>
+#include <limits>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -184,6 +186,7 @@ void GPUGraphData::prepareTextVAO(QOpenGLShaderProgram& shader)
     shader.enableAttributeArray("glyphOffset");
     shader.enableAttributeArray("glyphSize");
     shader.enableAttributeArray("glyphScale");
+    shader.enableAttributeArray("textHeight");
     shader.enableAttributeArray("color");
 
     glVertexAttribIPointer(static_cast<GLuint>(shader.attributeLocation("component")),              1, GL_INT,  sizeof(GlyphData),
@@ -197,6 +200,7 @@ void GPUGraphData::prepareTextVAO(QOpenGLShaderProgram& shader)
     shader.setAttributeBuffer("glyphOffset",     GL_FLOAT, offsetof(GlyphData, _glyphOffset),       2,          sizeof(GlyphData));
     shader.setAttributeBuffer("glyphSize",       GL_FLOAT, offsetof(GlyphData, _glyphSize),         2,          sizeof(GlyphData));
     shader.setAttributeBuffer("glyphScale",      GL_FLOAT, offsetof(GlyphData, _glyphScale),        1,          sizeof(GlyphData));
+    shader.setAttributeBuffer("textHeight",      GL_FLOAT, offsetof(GlyphData, _textHeight),        1,          sizeof(GlyphData));
     shader.setAttributeBuffer("color",           GL_FLOAT, offsetof(GlyphData, _color),             3,          sizeof(GlyphData));
     glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("component")),               1);
     glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("textureCoord")),            1);
@@ -206,6 +210,7 @@ void GPUGraphData::prepareTextVAO(QOpenGLShaderProgram& shader)
     glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("glyphOffset")),             1);
     glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("glyphSize")),               1);
     glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("glyphScale")),              1);
+    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("textHeight")),              1);
     glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("color")),                   1);
 
     _textVBO.release();
@@ -318,6 +323,7 @@ void GPUGraphData::reset()
     _nodeData.clear();
     _edgeData.clear();
     _glyphData.clear();
+    _tallestTextHeight = 0.0f;
 }
 
 void GPUGraphData::clearFramebuffer(GLbitfield buffers)
@@ -377,6 +383,12 @@ size_t GPUGraphData::numNodes() const
 size_t GPUGraphData::numEdges() const
 {
     return _edgeData.size();
+}
+
+void GPUGraphData::addGlyph(const GlyphData& glyphData)
+{
+    _glyphData.push_back(glyphData);
+    _tallestTextHeight = std::max(_tallestTextHeight, glyphData._textHeight);
 }
 
 size_t GPUGraphData::numGlyphs() const
@@ -441,6 +453,7 @@ void GPUGraphData::copyState(const GPUGraphData& gpuGraphData,
     _isOverlay = gpuGraphData._isOverlay;
     _nodeData = gpuGraphData._nodeData;
     _glyphData = gpuGraphData._glyphData;
+    _tallestTextHeight = gpuGraphData._tallestTextHeight;
     _edgeData = gpuGraphData._edgeData;
     _elementsSelected = gpuGraphData._elementsSelected;
 
@@ -610,9 +623,18 @@ void GraphRendererCore::renderEdges(GPUGraphData& gpuGraphData)
     _edgesShader.release();
 }
 
-void GraphRendererCore::renderText(GPUGraphData& gpuGraphData)
+void GraphRendererCore::renderText(GPUGraphData& gpuGraphData, const PixelScaleRange& pixelScale)
 {
+    // Text whose x-height is shorter than this on screen can't be read, so isn't drawn...
+    constexpr float IllegibleTextPixels = 3.5f;
+
+    // ...and it fades in until it is this tall, rather than popping in
+    constexpr float LegibleTextPixels = 4.0f;
+
     if(gpuGraphData.numGlyphs() == 0)
+        return;
+
+    if(gpuGraphData._tallestTextHeight * pixelScale._maximum <= IllegibleTextPixels)
         return;
 
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -634,6 +656,10 @@ void GraphRendererCore::renderText(GPUGraphData& gpuGraphData)
 
     bindComponentDataTexture(GL_TEXTURE0 + 1, _textShader);
     bindNodeGeometryTexture(GL_TEXTURE0 + 2, _textShader);
+
+    _textShader.setUniformValue("viewportHeight", static_cast<float>(_height));
+    _textShader.setUniformValue("illegibleTextPixels", IllegibleTextPixels);
+    _textShader.setUniformValue("legibleTextPixels", LegibleTextPixels);
 
     gpuGraphData._rectangle.vertexArrayObject()->bind();
     glDrawElementsInstanced(GL_TRIANGLES, Primitive::Rectangle::glIndexCount(),
@@ -863,6 +889,34 @@ void GraphRendererCore::prepareScreenQuad()
     _screenQuadVAO.release();
 }
 
+GraphRendererCore::PixelScaleRange GraphRendererCore::pixelScaleRange() const
+{
+    PixelScaleRange range{._minimum = std::numeric_limits<float>::max(), ._maximum = 0.0f};
+    const auto halfHeight = static_cast<float>(_height) * 0.5f;
+
+    for(const auto& componentData : _componentData)
+    {
+        const auto& projectionMatrix = componentData._projectionMatrix;
+        const auto modelViewProjectionMatrix = projectionMatrix * componentData._modelViewMatrix;
+        const auto focalLengthPixels = projectionMatrix(1, 1) * halfHeight;
+
+        // Clip w is linear in position, so over a box it is at its extremes at the corners
+        for(const auto& corner : _nodeGeometry.bounds().corners())
+        {
+            const auto w = (modelViewProjectionMatrix * QVector4D(corner, 1.0f)).w();
+
+            // At or behind the eye, where something can be any size at all
+            if(w <= 0.0f)
+                return {._minimum = 0.0f, ._maximum = std::numeric_limits<float>::infinity()};
+
+            range._minimum = std::min(range._minimum, focalLengthPixels / w);
+            range._maximum = std::max(range._maximum, focalLengthPixels / w);
+        }
+    }
+
+    return range;
+}
+
 std::vector<size_t> GraphRendererCore::gpuGraphDataRenderOrder() const
 {
     std::vector<size_t> renderOrder;
@@ -916,6 +970,8 @@ void GraphRendererCore::renderGraph()
     for(auto& gpuGraphData : _gpuGraphData)
         gpuGraphData.clearFramebuffer();
 
+    const auto pixelScale = pixelScaleRange();
+
     for(auto i : gpuGraphDataRenderOrder())
     {
         auto& gpuGraphData = _gpuGraphData.at(i);
@@ -940,7 +996,7 @@ void GraphRendererCore::renderGraph()
         if(u::pref(u"visuals/showEdges"_s).toBool())
             renderEdges(gpuGraphData);
 
-        renderText(gpuGraphData);
+        renderText(gpuGraphData, pixelScale);
     }
 
     if(hasSampleShading())

@@ -26,6 +26,7 @@
 #include <QVector3D>
 #include <QtGlobal>
 
+#include <array>
 #include <vector>
 
 class BoundingBox2D
@@ -106,6 +107,7 @@ public:
     bool intersects(const Ray& ray) const;
 
     QVector3D centre() const;
+    std::array<QVector3D, 8> corners() const;
 
     bool valid() const;
 

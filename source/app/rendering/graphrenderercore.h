@@ -74,6 +74,10 @@ struct GPUGraphData : OpenGLFunctions
 
     void upload();
 
+    struct GlyphData;
+
+    void addGlyph(const GlyphData& glyphData);
+
     size_t numNodes() const;
     size_t numEdges() const;
     size_t numGlyphs() const;
@@ -129,6 +133,7 @@ struct GPUGraphData : OpenGLFunctions
         float _glyphOffset[2] = {0.0f, 0.0f};
         float _glyphSize[2] = {0.0f, 0.0f};
         float _glyphScale = 0.0f;
+        float _textHeight = 0.0f;
         float _color[3] = {0.0f, 0.0f, 0.0f};
     };
 
@@ -145,6 +150,7 @@ struct GPUGraphData : OpenGLFunctions
     QOpenGLBuffer _nodeVBO;
 
     std::vector<GlyphData> _glyphData;
+    float _tallestTextHeight = 0.0f;
     QOpenGLBuffer _textVBO;
 
     std::vector<EdgeData> _edgeData;
@@ -218,6 +224,14 @@ private:
     void bindComponentDataTexture(GLenum textureUnit, QOpenGLShaderProgram& shader);
     void bindNodeGeometryTexture(GLenum textureUnit, QOpenGLShaderProgram& shader);
 
+    struct PixelScaleRange
+    {
+        float _minimum = 0.0f;
+        float _maximum = 0.0f;
+    };
+
+    PixelScaleRange pixelScaleRange() const;
+
     void prepare();
 
 protected:
@@ -247,7 +261,7 @@ protected:
 
     void renderNodes(GPUGraphData& gpuGraphData);
     void renderEdges(GPUGraphData& gpuGraphData);
-    void renderText(GPUGraphData& gpuGraphData);
+    void renderText(GPUGraphData& gpuGraphData, const PixelScaleRange& pixelScale);
     void renderGraph();
     void render2D(QRect selectionRect = {});
 
