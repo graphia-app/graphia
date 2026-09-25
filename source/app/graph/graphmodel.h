@@ -126,6 +126,7 @@ public:
         const std::function<void(EdgeId, const IElementVisual&)>& fn) const override;
     std::vector<ElementVisual> nodeVisuals(const std::vector<NodeId>& nodeIds) const;
     std::vector<ElementVisual> edgeVisuals(const std::vector<EdgeId>& edgeIds) const;
+    bool hasTextVisuals() const;
     void forEachTextVisual(const std::function<void(const TextVisual&)>& fn) const;
     void forEachTextVisual(ComponentId componentId,
         const std::function<void(const TextVisual&)>& fn) const;

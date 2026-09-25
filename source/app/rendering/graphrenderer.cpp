@@ -289,10 +289,19 @@ void GraphRenderer::updateGPUNodeSizes()
 
 void GraphRenderer::updateGPUDataIfRequired()
 {
-    if(!_gpuDataRequiresUpdate)
+    const auto update = std::exchange(_pendingGPUDataUpdate, GPUDataUpdate::None);
+
+    if(update == GPUDataUpdate::None)
         return;
 
-    _gpuDataRequiresUpdate = false;
+    // Everything else follows the nodes, except shared text, which is placed
+    // where it is created
+    if(update == GPUDataUpdate::NodePositions && !_graphModel->hasTextVisuals())
+    {
+        updateGPUNodePositions();
+        nodeGeometry().upload();
+        return;
+    }
 
     const std::unique_lock<std::recursive_mutex> glyphMapLock(_glyphMap->mutex());
 
@@ -467,9 +476,9 @@ void GraphRenderer::updateGPUDataIfRequired()
     uploadGPUGraphData();
 }
 
-void GraphRenderer::updateGPUData(GraphRenderer::When when)
+void GraphRenderer::updateGPUData(GraphRenderer::When when, GPUDataUpdate update)
 {
-    _gpuDataRequiresUpdate = true;
+    _pendingGPUDataUpdate = std::max(_pendingGPUDataUpdate, update);
 
     if(when == When::Now)
         updateGPUDataIfRequired();
@@ -1147,7 +1156,7 @@ void GraphRenderer::updateScene()
         _scene->update(dTime);
 
         if(layoutChanged())
-            updateGPUData(When::Later);
+            updateGPUData(When::Later, GPUDataUpdate::NodePositions);
 
         updateGPUDataIfRequired();
         updateComponentGPUData();
