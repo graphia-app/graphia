@@ -114,7 +114,7 @@ signals:
     void progress(int percentage);
 };
 
-class MetaLayout
+class MetaLayout : public Cancellable
 {
 public:
     virtual ~MetaLayout() = default;

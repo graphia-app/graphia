@@ -99,9 +99,7 @@ void LayoutThread::pause()
         return;
 
     _pause = true;
-
-    for(auto& layout : _layouts)
-        layout.second->cancel();
+    cancel();
 
     lock.unlock();
 }
@@ -113,9 +111,7 @@ void LayoutThread::pauseAndWait()
         return;
 
     _pause = true;
-
-    for(auto& layout : _layouts)
-        layout.second->cancel();
+    cancel();
 
     _waitForPause.wait(lock);
 }
@@ -169,9 +165,7 @@ void LayoutThread::stop()
     const std::unique_lock<std::mutex> lock(_mutex);
     _stop = true;
     _pause = false;
-
-    for(auto& layout : _layouts)
-        layout.second->cancel();
+    cancel();
 
     _waitForResume.notify_all();
 }
@@ -192,10 +186,22 @@ bool LayoutThread::iterative() const
     });
 }
 
+void LayoutThread::cancel()
+{
+    for(auto& layout : _layouts)
+        layout.second->cancel();
+
+    if(_metaLayout != nullptr)
+        _metaLayout->cancel();
+}
+
 void LayoutThread::uncancel()
 {
     for(auto& layout : _layouts)
         layout.second->uncancel();
+
+    if(_metaLayout != nullptr)
+        _metaLayout->uncancel();
 }
 
 void LayoutThread::unfinish()
@@ -244,7 +250,10 @@ void LayoutThread::maybeEmitInitialised()
 
 void LayoutThread::run()
 {
-    _metaLayout = _layoutFactory->createMeta();
+    {
+        const std::unique_lock<std::mutex> lock(_mutex);
+        _metaLayout = _layoutFactory->createMeta();
+    }
 
     for(const ComponentId componentId : _graphModel->graph().componentIds())
         addComponent(componentId);

@@ -121,6 +121,7 @@ private:
     bool workToDo() const;
     void emitInitialised();
     void maybeEmitInitialised();
+    void cancel();
     void uncancel();
     void unfinish();
     void run();
