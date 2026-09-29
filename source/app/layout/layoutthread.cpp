@@ -372,6 +372,9 @@ void LayoutThread::setNodePositions(const ExactNodePositions& nodePositions)
 
     // Stop the layouts throwing away our newly set positions
     _executedAtLeastOnce.fill(true);
+
+    for(auto& layout : _layouts)
+        layout.second->invalidate();
 }
 
 void LayoutThread::publishNodePositions(bool force)
