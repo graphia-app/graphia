@@ -219,10 +219,12 @@ public:
     QStringList transforms() const { return _graphTransforms; }
     QStringList graphTransformConfigurationsFromUI() const;
     void setTransforms(const QStringList& transforms);
+    bool clearPendingTransformRebuild() { return _transformRebuildPending.exchange(false); }
 
     QStringList visualisations() const { return _visualisations; }
     QStringList visualisationsFromUI() const { return _visualisationsFromUI; }
     void setVisualisations(const QStringList& visualisations);
+    bool clearPendingVisualisationRebuild() { return _visualisationRebuildPending.exchange(false); }
     void refreshVisualisations();
 
     const QVariantList& enrichmentTableModels() { return _enrichmentTableModels; }
@@ -296,6 +298,9 @@ private:
 
     QStringList _visualisationsFromUI;
     QStringList _visualisations;
+
+    std::atomic_bool _transformRebuildPending = false;
+    std::atomic_bool _visualisationRebuildPending = false;
 
     QVariantList _enrichmentTableModels;
 

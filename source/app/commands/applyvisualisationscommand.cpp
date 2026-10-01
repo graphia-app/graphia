@@ -77,6 +77,7 @@ QString ApplyVisualisationsCommand::debugDescription() const
 void ApplyVisualisationsCommand::apply(const QStringList& visualisations,
                                        const QStringList& previousVisualisations)
 {
+    _document->clearPendingVisualisationRebuild();
     _graphModel->buildVisualisations(visualisations);
 
     _document->executeOnMainThreadAndWait(
@@ -144,6 +145,9 @@ bool ApplyVisualisationsCommand::execute()
 {
     if(_deferred)
     {
+        if(!_document->clearPendingVisualisationRebuild())
+            return true;
+
         _document->executeOnMainThreadAndWait([this]
         {
             _previousVisualisations = _document->visualisations();

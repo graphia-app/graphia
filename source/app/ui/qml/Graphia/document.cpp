@@ -1007,10 +1007,10 @@ void Document::onLoadComplete(const QUrl&, bool success)
     {
         ICommandPtrsVector commands;
 
-        if(transforms)
+        if(transforms && !_transformRebuildPending.exchange(true))
             commands.emplace_back(std::make_unique<ApplyTransformsCommand>(_graphModel.get(), this));
 
-        if(visualisations)
+        if(visualisations && !_visualisationRebuildPending.exchange(true))
             commands.emplace_back(std::make_unique<ApplyVisualisationsCommand>(_graphModel.get(), this));
 
         if(!commands.empty())

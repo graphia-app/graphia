@@ -96,6 +96,8 @@ bool ApplyTransformsCommand::execute()
 {
     if(_deferred)
     {
+        _document->clearPendingTransformRebuild();
+
         _document->executeOnMainThreadAndWait([this]
         {
             _previousTransformations = _document->transforms();
