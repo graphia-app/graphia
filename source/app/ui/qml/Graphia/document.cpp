@@ -2540,7 +2540,8 @@ void Document::moveVisualisation(int from, int to)
         _visualisations, newVisualisations));
 }
 
-void Document::apply(const QStringList& graphTransforms, const QStringList& visualisations, bool replaceLatestCommand)
+void Document::apply(const QStringList& graphTransforms, const QStringList& visualisations,
+    bool replaceLatestCommand, int newGraphTransformIndex)
 {
     if(_graphModel == nullptr)
         return;
@@ -2548,19 +2549,12 @@ void Document::apply(const QStringList& graphTransforms, const QStringList& visu
     ICommandPtrsVector commands;
 
     const bool transformsValid = graphTransformsAreValid(graphTransforms);
-    int newGraphTransformIndex = -1;
 
     if(transformsValid && transformsDiffer(_graphTransforms, graphTransforms, true))
     {
         commands.emplace_back(std::make_unique<ApplyTransformsCommand>(
             _graphModel.get(), this,
             _graphTransforms, graphTransforms));
-
-        // This is necessary for the visualisation patching in ApplyVisualisationsCommand,
-        // see the comments in there for more information
-        auto difference = u::setDifference(graphTransforms, _graphTransforms);
-        if(difference.size() == 1)
-            newGraphTransformIndex = u::indexOf(graphTransforms, difference.at(0));
     }
     else if(transformsValid && transformsDiffer(_graphTransforms, graphTransforms, false))
     {
@@ -2607,6 +2601,7 @@ void Document::apply(const QStringList& graphTransforms, const QStringList& visu
 void Document::update(const QStringList& newGraphTransforms, const QStringList& newVisualisations, bool replaceLatestCommand)
 {
     auto graphTransforms = graphTransformConfigurationsFromUI();
+    int newGraphTransformIndex = -1;
 
     for(const auto& newGraphTransform : std::as_const(newGraphTransforms))
     {
@@ -2618,15 +2613,20 @@ void Document::update(const QStringList& newGraphTransforms, const QStringList& 
                 index++;
 
             graphTransforms.insert(index, newGraphTransform);
+            newGraphTransformIndex = index;
         }
         else
+        {
             graphTransforms.append(newGraphTransform);
+            newGraphTransformIndex = static_cast<int>(graphTransforms.size()) - 1;
+        }
     }
 
     auto visualisations = _visualisationsFromUI;
     visualisations.append(newVisualisations);
 
-    apply(graphTransforms, visualisations, replaceLatestCommand);
+    apply(graphTransforms, visualisations, replaceLatestCommand,
+        newGraphTransforms.size() == 1 ? newGraphTransformIndex : -1);
 }
 
 QVariantMap Document::layoutSetting(const QString& name) const

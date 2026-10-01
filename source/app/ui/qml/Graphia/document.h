@@ -536,7 +536,8 @@ public:
     // Execute commands to apply transform and/or visualisation changes
     Q_INVOKABLE void apply(const QStringList& graphTransforms = {},
         const QStringList& visualisations = {},
-        bool replaceLatestCommand = false);
+        bool replaceLatestCommand = false,
+        int newGraphTransformIndex = -1);
 
     Q_INVOKABLE void update(const QStringList& newGraphTransforms = {},
         const QStringList& newVisualisations = {},
