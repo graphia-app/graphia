@@ -44,6 +44,12 @@ ApplyVisualisationsCommand::ApplyVisualisationsCommand(GraphModel* graphModel,
     _transformIndex(transformIndex)
 {}
 
+ApplyVisualisationsCommand::ApplyVisualisationsCommand(GraphModel* graphModel, Document* document) :
+    _graphModel(graphModel),
+    _document(document),
+    _deferred(true)
+{}
+
 QString ApplyVisualisationsCommand::description() const
 {
     return QObject::tr("Apply Visualisations");
@@ -136,6 +142,15 @@ QStringList ApplyVisualisationsCommand::patchedVisualisations() const
 
 bool ApplyVisualisationsCommand::execute()
 {
+    if(_deferred)
+    {
+        _document->executeOnMainThreadAndWait([this]
+        {
+            _previousVisualisations = _document->visualisations();
+            _visualisations = _document->visualisationsFromUI();
+        }, u"ApplyVisualisationsCommand read visualisations"_s);
+    }
+
     apply(patchedVisualisations(), _previousVisualisations);
     return true;
 }

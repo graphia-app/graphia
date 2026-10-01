@@ -217,9 +217,11 @@ public:
     void setStatus(const QString& status);
 
     QStringList transforms() const { return _graphTransforms; }
+    QStringList graphTransformConfigurationsFromUI() const;
     void setTransforms(const QStringList& transforms);
 
     QStringList visualisations() const { return _visualisations; }
+    QStringList visualisationsFromUI() const { return _visualisationsFromUI; }
     void setVisualisations(const QStringList& visualisations);
     void refreshVisualisations();
 
@@ -311,8 +313,6 @@ private:
     bool _previousBusy = true;
 
     std::map<QString, NodeIdSet> _bookmarks;
-
-    QStringList graphTransformConfigurationsFromUI() const;
 
     bool hasValidEdgeTextVisualisation() const;
 

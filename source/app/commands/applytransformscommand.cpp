@@ -31,6 +31,14 @@
 
 using namespace Qt::Literals::StringLiterals;
 
+[[maybe_unused]] static bool transformsValid(const GraphModel& graphModel, const QStringList& transforms)
+{
+    return std::ranges::all_of(transforms, [&graphModel](const auto& transform)
+    {
+        return graphModel.graphTransformIsValid(transform);
+    });
+}
+
 ApplyTransformsCommand::ApplyTransformsCommand(GraphModel* graphModel,
                                                Document* document,
                                                QStringList previousTransformations,
@@ -40,14 +48,14 @@ ApplyTransformsCommand::ApplyTransformsCommand(GraphModel* graphModel,
     _previousTransformations(std::move(previousTransformations)),
     _transformations(std::move(transformations))
 {
-    const bool transformsValid = std::ranges::all_of(_transformations, // clazy:exclude=detaching-member
-    [graphModel](const auto& transform)
-    {
-        return graphModel->graphTransformIsValid(transform);
-    });
-
-    Q_ASSERT(transformsValid);
+    Q_ASSERT(transformsValid(*_graphModel, _transformations));
 }
+
+ApplyTransformsCommand::ApplyTransformsCommand(GraphModel* graphModel, Document* document) :
+    _graphModel(graphModel),
+    _document(document),
+    _deferred(true)
+{}
 
 QString ApplyTransformsCommand::description() const
 {
@@ -86,6 +94,17 @@ void ApplyTransformsCommand::doTransform(const QStringList& transformations, con
 
 bool ApplyTransformsCommand::execute()
 {
+    if(_deferred)
+    {
+        _document->executeOnMainThreadAndWait([this]
+        {
+            _previousTransformations = _document->transforms();
+            _transformations = _document->graphTransformConfigurationsFromUI();
+        }, u"ApplyTransformsCommand read transforms"_s);
+
+        Q_ASSERT(transformsValid(*_graphModel, _transformations));
+    }
+
     doTransform(_transformations, _previousTransformations);
     return true;
 }

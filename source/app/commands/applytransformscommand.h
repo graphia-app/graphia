@@ -37,6 +37,8 @@ private:
     QStringList _previousTransformations;
     QStringList _transformations;
 
+    bool _deferred = false;
+
     void doTransform(const QStringList& transformations,
                      const QStringList& previousTransformations);
 
@@ -45,6 +47,9 @@ public:
                            Document* document,
                            QStringList previousTransformations,
                            QStringList transformations);
+
+    // Applies the Document's transforms as they are when the command executes
+    ApplyTransformsCommand(GraphModel* graphModel, Document* document);
 
     QString description() const override;
     QString verb() const override;

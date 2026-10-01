@@ -1008,20 +1008,10 @@ void Document::onLoadComplete(const QUrl&, bool success)
         ICommandPtrsVector commands;
 
         if(transforms)
-        {
-            commands.emplace_back(
-                std::make_unique<ApplyTransformsCommand>(
-                _graphModel.get(), this,
-                _graphTransforms, graphTransformConfigurationsFromUI()));
-        }
+            commands.emplace_back(std::make_unique<ApplyTransformsCommand>(_graphModel.get(), this));
 
         if(visualisations)
-        {
-            commands.emplace_back(
-                std::make_unique<ApplyVisualisationsCommand>(
-                _graphModel.get(), this,
-                _visualisations, _visualisationsFromUI));
-        }
+            commands.emplace_back(std::make_unique<ApplyVisualisationsCommand>(_graphModel.get(), this));
 
         if(!commands.empty())
         {
