@@ -284,6 +284,23 @@ Item
         }
     }
 
+    function refreshTransformInfo()
+    {
+        if(!document.graphTransformIsValid(value))
+            return;
+
+        if(document.hasTransformInfo() && index >= 0)
+            setAlertIcon(document.transformInfoAtIndex(index));
+        else
+            setAlertIcon({"alertType": AlertType.None});
+    }
+
+    Connections
+    {
+        target: document
+        function onTransformsChanged() { if(ready) refreshTransformInfo(); }
+    }
+
     property int index: -1
     property string value
     onValueChanged:
@@ -292,11 +309,7 @@ Item
         {
             if(document.graphTransformIsValid(value))
             {
-                if(document.hasTransformInfo() && index >= 0)
-                {
-                    let transformInfo = document.transformInfoAtIndex(index);
-                    setAlertIcon(transformInfo);
-                }
+                refreshTransformInfo();
 
                 let transformConfig = new TransformConfig.Create(index, document, value);
                 flags = transformConfig.flags;

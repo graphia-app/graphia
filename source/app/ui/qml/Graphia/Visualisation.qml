@@ -482,6 +482,7 @@ Item
     {
         target: document
         function onAttributesChanged() { updateSimilarAttributes(); }
+        function onVisualisationsChanged() { if(ready) refreshVisualisationInfo(); }
     }
 
     property var attributeValueType:
@@ -534,6 +535,17 @@ Item
     }
 
     property var _visualisationInfo: ({})
+
+    function refreshVisualisationInfo()
+    {
+        if(document.hasVisualisationInfo() && index >= 0)
+            root._visualisationInfo = document.visualisationInfoAtIndex(index);
+        else
+            root._visualisationInfo = {};
+
+        setVisualisationInfo(root._visualisationInfo);
+        _error = root._visualisationInfo.alertType === AlertType.Error;
+    }
 
     function setVisualisationInfo(visualisationInfo)
     {
@@ -625,14 +637,7 @@ Item
             channel = visualisationConfig.channel;
             parameters = visualisationConfig.parameters;
 
-            _error = false;
-            if(document.hasVisualisationInfo() && index >= 0)
-            {
-                root._visualisationInfo = document.visualisationInfoAtIndex(index);
-                setVisualisationInfo(root._visualisationInfo);
-
-                _error = root._visualisationInfo.alertType === AlertType.Error;
-            }
+            refreshVisualisationInfo();
 
             _valid = document.visualisationIsValid(value);
 
