@@ -304,7 +304,7 @@ private:
 
     QVariantList _enrichmentTableModels;
 
-    std::atomic_bool _saveRequired{false};
+    std::atomic_bool _saveRequired = false;
 
     QByteArray _uiData;
 
