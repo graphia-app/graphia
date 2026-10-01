@@ -117,8 +117,6 @@ signals:
 class MetaLayout : public Cancellable
 {
 public:
-    virtual ~MetaLayout() = default;
-
     virtual void execute(Layout::Dimensionality dimensionality) = 0;
 };
 

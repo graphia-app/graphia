@@ -466,7 +466,7 @@ static int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
     engine.loadFromModule(u"Graphia"_s, u"Main"_s);
 
     // Remove default file selector
-    for(auto* urlInterceptor : engine.urlInterceptors())
+    for(auto* urlInterceptor : engine.urlInterceptors()) // clazy:exclude=range-loop-detach
         engine.removeUrlInterceptor(urlInterceptor);
 
     engine.addUrlInterceptor(&qmlFileSelector);
