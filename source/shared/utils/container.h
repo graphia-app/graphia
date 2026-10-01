@@ -128,6 +128,27 @@ namespace u
     }
 
     template<Container C1, Container C2>
+    std::vector<typename C1::value_type> multisetDifference(const C1& a, const C2& b)
+    {
+        static_assert(std::is_same_v<typename C1::value_type, typename C2::value_type>);
+
+        std::vector<typename C1::value_type> remaining(b.begin(), b.end());
+        std::vector<typename C1::value_type> result;
+
+        for (const auto& value : a)
+        {
+            auto it = std::find(remaining.begin(), remaining.end(), value);
+
+            if (it != remaining.end())
+                remaining.erase(it);
+            else
+                result.push_back(value);
+        }
+
+        return result;
+    }
+
+    template<Container C1, Container C2>
     bool setsDiffer(const C1& a, const C2& b)
     {
         static_assert(std::is_same_v<typename C1::value_type, typename C2::value_type>);
