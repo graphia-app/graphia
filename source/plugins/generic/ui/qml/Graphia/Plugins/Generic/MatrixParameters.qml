@@ -36,7 +36,12 @@ BaseParameterDialog
     title: qsTr("Matrix Parameters")
 
     minimumWidth: tabularDataParser.binaryMatrix ? 480 : 640
-    minimumHeight: tabularDataParser.binaryMatrix ? 240 : 520
+    minimumHeight:
+    {
+        let height = tabularDataParser.binaryMatrix ? 240 : 520;
+        if(tabularDataParser.warning) height += 40;
+        return height;
+    }
 
     onMinimumWidthChanged:
     {
@@ -75,6 +80,30 @@ BaseParameterDialog
 
             return estimate;
         }
+
+        property int numNodes:
+        {
+            if(!root._graphEstimatePerformed)
+                return 0;
+
+            return adjustedGraphSizeEstimate.numNodes[0];
+        }
+
+        property int numEdges:
+        {
+            if(!root._graphEstimatePerformed)
+                return 0;
+
+            return ignoreDuplicateEdgesCheckbox.checked ?
+                tabularDataParser.adjustedGraphSizeEstimate.numUniqueEdges[0] :
+                tabularDataParser.adjustedGraphSizeEstimate.numEdges[0];
+        }
+
+        readonly property int _warningThreshold: 5e6
+
+        property bool nodesWarning: numNodes > _warningThreshold
+        property bool edgesWarning: numEdges > _warningThreshold
+        property bool warning: nodesWarning || edgesWarning
 
         onDataLoaded: { parameters.data = tabularDataParser.data; }
     }
@@ -410,25 +439,14 @@ BaseParameterDialog
                         else
                             summaryString += qsTr("Estimated Graph Size: ");
 
-                        let warningThreshold = 5e6;
-
-                        let numNodes = tabularDataParser.adjustedGraphSizeEstimate.numNodes[0];
-                        let numEdges = ignoreDuplicateEdgesCheckbox.checked ?
-                            tabularDataParser.adjustedGraphSizeEstimate.numUniqueEdges[0] :
-                            tabularDataParser.adjustedGraphSizeEstimate.numEdges[0];
-
-                        let nodesFont = normalFont;
-                        if(numNodes > warningThreshold)
-                            nodesFont = warningFont;
-
-                        let edgesFont = normalFont;
-                        if(numEdges > warningThreshold)
-                            edgesFont = warningFont;
+                        let nodesFont = tabularDataParser.nodesWarning ? warningFont : normalFont;
+                        let edgesFont = tabularDataParser.edgesWarning ? warningFont : normalFont;
 
                         summaryString += Utils.format(qsTr("{0}{3} Nodes{2}, {1}{4} Edges{2}"), nodesFont, edgesFont, "</font>",
-                            NativeUtils.formatNumberSIPostfix(numNodes), NativeUtils.formatNumberSIPostfix(numEdges));
+                            NativeUtils.formatNumberSIPostfix(tabularDataParser.numNodes),
+                            NativeUtils.formatNumberSIPostfix(tabularDataParser.numEdges));
 
-                        if(numNodes > warningThreshold || numEdges > warningThreshold)
+                        if(tabularDataParser.warning)
                         {
                             summaryString += Utils.format(qsTr("<br><br>{0}" +
                                 "WARNING: This is a very large graph which has the potential " +
