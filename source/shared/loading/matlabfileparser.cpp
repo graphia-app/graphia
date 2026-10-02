@@ -27,11 +27,10 @@ struct MatLabMatrix
 
     bool operator>(const MatLabMatrix& other) const
     {
-        if(_var == nullptr || other._var == nullptr)
-            return false;
+        auto area = _var != nullptr ? _var->dims[0] * _var->dims[1] : 0;
+        auto otherArea = other._var != nullptr ? other._var->dims[0] * other._var->dims[1] : 0;
 
-        return (_var->dims[0] * _var->dims[1]) >
-            (other._var->dims[0] * other._var->dims[1]);
+        return area > otherArea;
     }
 };
 
