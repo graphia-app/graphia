@@ -280,7 +280,16 @@ ApplicationWindow
         if(Qt.platform.os === "wasm")
             mainWindow.showFullScreen();
         else if(windowPreferences.maximised !== undefined && Utils.castToBool(windowPreferences.maximised))
-            mainWindow.showMaximized();
+        {
+            if(Qt.platform.os === "linux")
+            {
+                // Workaround for https://gitlab.gnome.org/GNOME/mutter/-/work_items/3385
+                mainWindow.show();
+                Qt.callLater(mainWindow.showMaximized);
+            }
+            else
+                mainWindow.showMaximized();
+        }
         else
             mainWindow.showNormal();
 
