@@ -248,7 +248,16 @@ void Headless::run()
         return;
     }
 
-    _->_type = QString::fromStdString(parameters["type"]);
+    auto type = parameters["type"];
+
+    if(type == Application::NativeFileType)
+    {
+        std::cerr << "Parameters file 'type' cannot be " << type << ".\n";
+        emit done();
+        return;
+    }
+
+    _->_type = QString::fromStdString(type);
     _->_pluginName = QString::fromStdString(plugin["name"]);
     _->_destination = u::contains(parameters, "destination") ?
         QString::fromStdString(parameters["destination"]) : QString();
