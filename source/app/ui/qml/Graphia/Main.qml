@@ -632,7 +632,8 @@ ApplicationWindow
         if(mainWindow.recentFiles === undefined)
             mainWindow.recentFiles = [];
 
-        let localRecentFiles = mainWindow.recentFiles;
+        // Copy the array
+        let localRecentFiles = mainWindow.recentFiles.slice();
 
         // Remove any duplicates
         for(let i = 0; i < localRecentFiles.length; i++)
