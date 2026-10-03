@@ -2562,10 +2562,9 @@ void Document::apply(const QStringList& graphTransforms, const QStringList& visu
     else
         setTransforms(_graphTransforms);
 
-    _graphModel->clearVisualisationInfos();
-
     if(visualisationsDiffer(_visualisations, visualisations))
     {
+        _graphModel->clearVisualisationInfos();
         commands.emplace_back(std::make_unique<ApplyVisualisationsCommand>(
             _graphModel.get(), this,
             _visualisations, visualisations, newGraphTransformIndex));
