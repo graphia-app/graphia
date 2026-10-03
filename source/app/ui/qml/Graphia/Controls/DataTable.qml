@@ -307,6 +307,10 @@ Rectangle
             id: headerView
             Layout.fillWidth: true
 
+            // Without this, (presumably) TableView/the QML engine decides that the item
+            // won't be visible, so doesn't bother loading any delegates
+            Layout.minimumHeight: 1
+
             model: tableView.model
 
             interactive: false
