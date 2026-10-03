@@ -550,6 +550,7 @@ Item
 
         setVisualisationInfo(root._visualisationInfo);
         _error = root._visualisationInfo.alertType === AlertType.Error;
+        _valid = document.visualisationIsValid(value);
     }
 
     function setVisualisationInfo(visualisationInfo)
@@ -643,8 +644,6 @@ Item
             parameters = visualisationConfig.parameters;
 
             refreshVisualisationInfo();
-
-            _valid = document.visualisationIsValid(value);
 
             parseParameters();
 
