@@ -35,8 +35,7 @@ Rectangle
     property bool useFirstRowAsHeader: true
     onUseFirstRowAsHeaderChanged:
     {
-        //FIXME ideally this would reposition to show the first row when it was unhidden,
-        // but it's really hard to get TableView to do this, at least it is with 5.14
+        tableView.positionViewAtRow(0, TableView.AlignLeft|TableView.AlignTop);
         root.forceLayout();
     }
 
