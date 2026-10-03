@@ -373,7 +373,7 @@ static int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
     u::definePref(u"visuals/defaultNodeColor"_s,                "#0000FF");
     u::definePref(u"visuals/defaultEdgeColor"_s,                "#FFFFFF");
     u::definePref(u"visuals/multiElementColor"_s,               "#FF0000");
-    u::definePref(u"visuals/backgroundColor"_s,                 "#C0C0C0");
+    u::definePref(u"visuals/backgroundColor"_s,                 "#DDDDDD");
     u::definePref(u"visuals/highlightColor"_s,                  "#FFFFFF");
 
     u::definePref(u"visuals/defaultNormalNodeSize"_s,           0.333);
