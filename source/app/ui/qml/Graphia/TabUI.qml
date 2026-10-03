@@ -813,6 +813,13 @@ Item
                     height: width
 
                     visible: !graph.initialised && plugin.loaded
+
+                    Component.onCompleted:
+                    {
+                        // Hack the spinner to give it the correct colour for the background
+                        if(contentItem.hasOwnProperty("color"))
+                            contentItem.color = Qt.binding(() => _document.contrastingColor);
+                    }
                 }
             }
 
