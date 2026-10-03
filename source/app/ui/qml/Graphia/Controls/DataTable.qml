@@ -80,15 +80,46 @@ Rectangle
 
     function rowIsVisible(row)
     {
-        return row >= _topLoadedRow && row <= _bottomLoadedRow;
+        return row >= _topLoadedRow && row < _bottomLoadedRow;
     }
 
-    function positionViewAt(row)
+    function columnIsVisible(column)
+    {
+        return column >= _leftLoadedColumn && column < _rightLoadedColumn;
+    }
+
+    function positionViewAtRow(row)
     {
         if(rowIsVisible(row))
             return;
 
-        tableView.contentY = Math.max(0, (row - 2) * _cellDelegateHeight);
+        tableView.positionViewAtRow(Math.max(row, 0),
+            TableView.AlignTop|TableView.Contain);
+    }
+
+    function positionViewAtColumn(column)
+    {
+        if(columnIsVisible(column))
+            return;
+
+        tableView.positionViewAtColumn(Math.max(column, 0),
+            TableView.AlignLeft|TableView.Contain);
+    }
+
+    function positionViewAtRowColumn(row, column)
+    {
+        if(rowIsVisible(row) && columnIsVisible(column))
+            return;
+
+        if(rowIsVisible(row))
+            positionViewAtColumn(column);
+        else if(columnIsVisible(column))
+            positionViewAtRow(row);
+        else
+        {
+            tableView.positionViewAtCell(Qt.point(Math.max(column, 0), Math.max(row, 0)),
+                TableView.AlignLeft|TableView.AlignTop|TableView.Contain);
+        }
     }
 
     readonly property int _padding: 4

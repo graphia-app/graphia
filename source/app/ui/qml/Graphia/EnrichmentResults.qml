@@ -96,7 +96,7 @@ ApplicationWindow
                         table.model.enrichedOnly = checked;
 
                     table.clearSelection();
-                    table.positionViewAt(0);
+                    table.positionViewAtRow(0);
                 }
             }
 
@@ -303,7 +303,7 @@ ApplicationWindow
                     onPlotValueClicked: function(row)
                     {
                         table.selectRow(row);
-                        table.positionViewAt(row);
+                        table.positionViewAtRow(row);
                     }
 
                     onRightClick: { plotContextMenu.popup(); }
