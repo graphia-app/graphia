@@ -67,9 +67,6 @@ class CorrelationPluginInstance : public BasePluginInstance
     Q_PROPERTY(QStringList numericalAttributeNames READ numericalAttributeNames
         NOTIFY numericalAttributeNamesChanged)
 
-    Q_PROPERTY(QList<int> highlightedRows MEMBER _highlightedRows
-        WRITE setHighlightedRows NOTIFY highlightedRowsChanged)
-
     Q_PROPERTY(size_t numContinuousColumns MEMBER _numContinuousColumns NOTIFY numColumnsChanged)
     Q_PROPERTY(size_t numDiscreteColumns MEMBER _numDiscreteColumns NOTIFY numColumnsChanged)
 
@@ -149,12 +146,12 @@ private:
     const ContinuousDataVector& continuousDataRowForNodeId(NodeId nodeId) const;
     const DiscreteDataVector& discreteDataRowForNodeId(NodeId nodeId) const;
 
-    void setHighlightedRows(const QList<int>& highlightedRows);
-
     QStringList sharedValuesAttributeNames() const;
     QStringList numericalAttributeNames() const;
 
 public:
+    Q_INVOKABLE void setHighlightedRows(const QList<int>& highlightedRows);
+
     void setDimensions(size_t numContinuousColumns, size_t numDiscreteColumns, size_t numRows);
     bool loadUserData(const TabularData& tabularData, const QRect& dataRect, IParser& parser);
     bool requiresNormalisation() const { return _normaliseType != NormaliseType::None; }

@@ -189,7 +189,7 @@ class CorrelationPlot : public QQuickPaintedItem, protected QCustomPlotColorProv
     Q_PROPERTY(double horizontalScrollPosition MEMBER _horizontalScrollPosition
         WRITE setHorizontalScrollPosition NOTIFY horizontalScrollPositionChanged)
     Q_PROPERTY(double visibleHorizontalFraction READ visibleHorizontalFraction NOTIFY visibleHorizontalFractionChanged)
-    Q_PROPERTY(QList<int> selectedRows MEMBER _selectedRows WRITE setSelectedRows NOTIFY selectedRowsChanged)
+    Q_PROPERTY(QList<int> selectedRows READ selectedRows NOTIFY selectedRowsChanged)
 
     Q_PROPERTY(QStringList visibleColumnAnnotationNames READ visibleColumnAnnotationNames
         WRITE setVisibleColumnAnnotationNames NOTIFY visibleColumnAnnotationNamesChanged)
@@ -251,7 +251,8 @@ public:
     Q_INVOKABLE void hideColumnAnnotations(const QStringList& annotations);
     Q_INVOKABLE void refreshColumnAnnotations();
 
-    void setSelectedRows(const QList<int>& selectedRows);
+    QList<int> selectedRows() const { return _selectedRows; }
+    Q_INVOKABLE void setSelectedRows(const QList<int>& selectedRows);
     void setScaleType(int scaleType);
     void setScaleByAttributeName(const QString& attributeName);
     void setDispersionType(int dispersionType);

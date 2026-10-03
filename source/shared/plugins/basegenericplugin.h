@@ -46,9 +46,6 @@ class BaseGenericPluginInstance : public BasePluginInstance
     Q_PROPERTY(QString selectedNodeNames READ selectedNodeNames NOTIFY selectedNodeNamesChanged)
     Q_PROPERTY(QAbstractTableModel* nodeAttributeTableModel READ nodeAttributeTableModel CONSTANT)
 
-    Q_PROPERTY(QList<int> highlightedRows MEMBER _highlightedRows
-        WRITE setHighlightedRows NOTIFY highlightedRowsChanged)
-
 private:
     IGraphModel* _graphModel = nullptr;
 
@@ -81,6 +78,8 @@ public:
     QStringList defaultTransforms() const override;
     QStringList defaultVisualisations() const override;
 
+    Q_INVOKABLE void setHighlightedRows(const QList<int>& highlightedRows);
+
 private:
     // The rows that are selected in the table view
     QList<int> _highlightedRows;
@@ -89,7 +88,6 @@ private:
                     const IParserThread* parserThread) override;
 
     QString selectedNodeNames() const;
-    void setHighlightedRows(const QList<int>& highlightedRows);
 
 private slots:
     void onLoadSuccess();

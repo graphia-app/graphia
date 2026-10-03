@@ -528,6 +528,8 @@ public:
     Q_INVOKABLE QStringList visualisationDescription(const QString& attributeName, const QStringList& channelNames) const;
     Q_INVOKABLE bool hasVisualisationInfo() const;
     Q_INVOKABLE QVariantMap visualisationInfoAtIndex(int index) const;
+    Q_INVOKABLE QList<double> visualisationNumericValuesAtIndex(int index) const;
+    Q_INVOKABLE QStringList visualisationStringValuesAtIndex(int index) const;
 
     Q_INVOKABLE QVariantMap parseVisualisation(const QString& visualisation) const;
     Q_INVOKABLE QVariantMap visualisationDefaultParameters(int valueType, const QString& channelName) const;

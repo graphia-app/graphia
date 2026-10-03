@@ -89,8 +89,17 @@ Window
 
     onValuesChanged:
     {
-        _minimumValue = Math.min.apply(null, values);
-        _maximumValue = Math.max.apply(null, values);
+        // Not Math.min.apply, which throws a RangeError for large arrays (courtesy QTBUG-151133)
+        let minimum = Infinity;
+        let maximum = -Infinity;
+        for(const value of values)
+        {
+            minimum = Math.min(minimum, value);
+            maximum = Math.max(maximum, value);
+        }
+
+        _minimumValue = minimum;
+        _maximumValue = maximum;
 
         mappingPlot.minimum = Math.max(mappingPlot.minimum, root._minimumValue);
         mappingPlot.maximum = Math.min(mappingPlot.maximum, root._maximumValue);

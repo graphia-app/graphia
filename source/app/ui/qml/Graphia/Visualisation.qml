@@ -181,8 +181,7 @@ Item
         {
             let paletteSelector = visualisations.createPaletteSelector(index);
             Utils.centreWindow(paletteSelector);
-            paletteSelector.open(paletteKey.configuration,
-                root._visualisationInfo.stringValues);
+            paletteSelector.open(paletteKey.configuration, root._stringValues);
         }
 
         PaletteKey
@@ -194,8 +193,7 @@ Item
             textColor: root.textColor
             hoverColor: root.hoverColor
 
-            stringValues: root._visualisationInfo.stringValues !== undefined ?
-                root._visualisationInfo.stringValues : []
+            stringValues: root._stringValues
 
             onClicked: function(mouse)
             {
@@ -330,7 +328,7 @@ Item
                     {
                         let mappingSelector = visualisations.createMappingSelector(index);
                         Utils.centreWindow(mappingSelector);
-                        mappingSelector.values = root._visualisationInfo.numericValues;
+                        mappingSelector.values = document.visualisationNumericValuesAtIndex(index);
                         mappingSelector.invert = isFlagSet("invert");
 
                         if(parameters.mapping !== undefined)
@@ -535,13 +533,20 @@ Item
     }
 
     property var _visualisationInfo: ({})
+    property var _stringValues: []
 
     function refreshVisualisationInfo()
     {
         if(document.hasVisualisationInfo() && index >= 0)
+        {
             root._visualisationInfo = document.visualisationInfoAtIndex(index);
+            root._stringValues = document.visualisationStringValuesAtIndex(index);
+        }
         else
+        {
             root._visualisationInfo = {};
+            root._stringValues = [];
+        }
 
         setVisualisationInfo(root._visualisationInfo);
         _error = root._visualisationInfo.alertType === AlertType.Error;

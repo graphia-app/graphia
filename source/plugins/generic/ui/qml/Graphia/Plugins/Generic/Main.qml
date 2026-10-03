@@ -79,8 +79,8 @@ PluginContent
             {
                 // If the tableView's selection is less than complete, highlight
                 // the corresponding nodes in the graph, otherwise highlight nothing
-                plugin.model.highlightedRows = tableView.selectedRows.length < rowCount ?
-                    tableView.selectedRows : [];
+                plugin.model.setHighlightedRows(tableView.selectedRows.length < rowCount ?
+                    tableView.selectedRows : []);
             }
 
             onSortIndicatorColumnChanged: { root.saveRequired = true; }

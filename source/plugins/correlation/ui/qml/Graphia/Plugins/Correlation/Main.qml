@@ -953,8 +953,9 @@ PluginContent
             {
                 // If the tableView's selection is less than complete, highlight
                 // the corresponding nodes in the graph, otherwise highlight nothing
-                plugin.model.highlightedRows = tableView.selectedRows.length < tableView.visibleRows.length ?
-                    tableView.selectedRows : [];
+                plugin.model.setHighlightedRows(tableView.selectedRows.length < tableView.visibleRows.length ?
+                    tableView.selectedRows : []);
+                plot.setSelectedRows(tableView.selectedRows);
             }
 
             onAboutToCrop: { root.setPlotMode(PlotMode.Normal); }
@@ -1026,7 +1027,6 @@ PluginContent
                     bottomPadding: plotFlickable.horizontalScrollBarHeight
 
                     model: plugin.model
-                    selectedRows: tableView.selectedRows
 
                     onPlotOptionsChanged:
                     {

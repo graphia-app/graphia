@@ -2373,8 +2373,6 @@ bool Document::hasVisualisationInfo() const
 QVariantMap Document::visualisationInfoAtIndex(int index) const
 {
     QVariantMap map;
-    QVariantList numericValues;
-    QVariantList stringValues;
 
     map.insert(u"alertType"_s, static_cast<int>(AlertType::None));
     map.insert(u"alertText"_s, "");
@@ -2383,8 +2381,6 @@ QVariantMap Document::visualisationInfoAtIndex(int index) const
     map.insert(u"mappedMinimumNumericValue"_s, 0.0);
     map.insert(u"mappedMaximumNumericValue"_s, 1.0);
     map.insert(u"hasNumericRange"_s, true);
-    map.insert(u"numericValues"_s, numericValues);
-    map.insert(u"stringValues"_s, stringValues);
     map.insert(u"numApplications"_s, 1);
 
     if(_graphModel == nullptr)
@@ -2398,20 +2394,6 @@ QVariantMap Document::visualisationInfoAtIndex(int index) const
     map.insert(u"mappedMaximumNumericValue"_s, visualisationInfo.mappedMaximum());
     map.insert(u"hasNumericRange"_s, visualisationInfo.statistics()._range > 0.0);
     map.insert(u"numApplications"_s, static_cast<int>(visualisationInfo.numApplications()));
-
-    const auto& numericValuesVector = visualisationInfo.statistics()._values;
-    numericValues.reserve(static_cast<int>(numericValuesVector.size()));
-    for(auto value : numericValuesVector)
-        numericValues.append(value);
-
-    map.insert(u"numericValues"_s, numericValues);
-
-    const auto& stringValuesVector = visualisationInfo.stringValues();
-    stringValues.reserve(static_cast<int>(stringValuesVector.size()));
-    for(const auto& stringValue : stringValuesVector)
-        stringValues.append(stringValue);
-
-    map.insert(u"stringValues"_s, stringValues);
 
     auto alerts = visualisationInfo.alerts();
 
@@ -2430,6 +2412,24 @@ QVariantMap Document::visualisationInfoAtIndex(int index) const
     map.insert(u"alertText"_s, alert._text);
 
     return map;
+}
+
+QList<double> Document::visualisationNumericValuesAtIndex(int index) const
+{
+    if(_graphModel == nullptr)
+        return {};
+
+    const auto& values = _graphModel->visualisationInfoAtIndex(index).statistics()._values;
+    return {values.begin(), values.end()};
+}
+
+QStringList Document::visualisationStringValuesAtIndex(int index) const
+{
+    if(_graphModel == nullptr)
+        return {};
+
+    const auto& values = _graphModel->visualisationInfoAtIndex(index).stringValues();
+    return {values.begin(), values.end()};
 }
 
 QVariantMap Document::parseVisualisation(const QString& visualisation) const
