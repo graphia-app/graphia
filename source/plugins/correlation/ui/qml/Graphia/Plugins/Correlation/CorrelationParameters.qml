@@ -430,6 +430,11 @@ BaseParameterDialog
                     highlightedProvider: (column, row) => isInsideRect(column, row, tabularDataParser.dataRect)
                     onClicked: function(column, row, mouse) { tabularDataParser.setDataRectangle(column, row); }
 
+                    function positionViewAtSelectedCell()
+                    {
+                        dataTable.positionViewAtRowColumn(tabularDataParser.dataRect.y - 1, tabularDataParser.dataRect.x - 1);
+                    }
+
                     ProgressBar
                     {
                         anchors.centerIn: parent
@@ -438,32 +443,36 @@ BaseParameterDialog
                         indeterminate: tabularDataParser.progress < 0.0
                     }
 
-                    NamedIcon
+                    FloatingButton
                     {
                         visible: tabularDataParser.dataRect.x < dataTable.leftColumn
                         anchors { verticalCenter: parent.verticalCenter; left: parent.left; margins: Constants.margin }
-                        iconName: "go-previous"
+                        icon.name: "go-previous"
+                        onClicked: { dataTable.positionViewAtSelectedCell(); }
                     }
 
-                    NamedIcon
+                    FloatingButton
                     {
                         visible: tabularDataParser.dataRect.x > dataTable.rightColumn
                         anchors { verticalCenter: parent.verticalCenter; right: parent.right; margins: Constants.margin }
-                        iconName: "go-next"
+                        icon.name: "go-next"
+                        onClicked: { dataTable.positionViewAtSelectedCell(); }
                     }
 
-                    NamedIcon
+                    FloatingButton
                     {
                         visible: tabularDataParser.dataRect.y < dataTable.topRow
                         anchors { horizontalCenter: parent.horizontalCenter; top: parent.top; margins: Constants.margin + parent.headerHeight }
-                        iconName: "go-up"
+                        icon.name: "go-up"
+                        onClicked: { dataTable.positionViewAtSelectedCell(); }
                     }
 
-                    NamedIcon
+                    FloatingButton
                     {
                         visible: tabularDataParser.dataRect.y > dataTable.bottomRow
                         anchors { horizontalCenter: parent.horizontalCenter; bottom: parent.bottom; margins: Constants.margin }
-                        iconName: "go-down"
+                        icon.name: "go-down"
+                        onClicked: { dataTable.positionViewAtSelectedCell(); }
                     }
                 }
 
