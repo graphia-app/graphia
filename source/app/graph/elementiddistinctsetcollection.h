@@ -514,7 +514,8 @@ public:
             _numSets++;
         }
 
-        _size += set._size;
+        // An unknown size makes the total unknown too
+        _size = (_size < 0 || set._size < 0) ? -1 : _size + set._size;
     }
 
     template<typename Derived> class iterator_base
