@@ -96,7 +96,7 @@ Rectangle
             text: Utils.format(qsTr("Please provide your email address. " +
                 "{0} does not track what analyses you perform or retain " +
                 "any data loaded into it - your privacy is assured. We " +
-                "ask for you email only so we know how often it is used " +
+                "ask for your email only so we know how often it is used " +
                 "and by whom. You can also choose to use {0} " +
                 "<a href=\"anonymous\">anonymously</a>, if you prefer."), application.name)
 

@@ -109,12 +109,12 @@ void VisualisationsBuilder<ElementId>::findOverrideAlerts(VisualisationInfosMap&
                     if(bothSet != sourceSet)
                     {
                         infos[iv._index].addAlert(AlertType::Warning,
-                            QObject::tr("Partially overriden by subsequent visualisations"));
+                            QObject::tr("Partially overridden by subsequent visualisations"));
                     }
                     else
                     {
                         infos[iv._index].addAlert(AlertType::Error,
-                            QObject::tr("Overriden by subsequent visualisations"));
+                            QObject::tr("Overridden by subsequent visualisations"));
                     }
                 }
             }

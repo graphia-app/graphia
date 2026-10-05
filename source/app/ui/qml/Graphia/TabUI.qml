@@ -2108,7 +2108,7 @@ Item
                     }
                     Text
                     {
-                        text: qsTr("An clustering transform with a colour<br>visualisation applied")
+                        text: qsTr("A clustering transform with a colour<br>visualisation applied")
                     }
                 }
                 Text

@@ -248,7 +248,7 @@ ColumnLayout
                         return false;
                     }
 
-                    text: qsTr("<i>(overriden by fixed assignment)</i>")
+                    text: qsTr("<i>(overridden by fixed assignment)</i>")
                 }
 
                 ColorPickButton
