@@ -92,11 +92,11 @@ Item
     {
         reset();
 
-        for(let i = 0; i < hubbles.length; i++)
+        for(const hubble of hubbles)
         {
-            hubbles[i].parent = parent;
-            hubbles[i].opacity = 0.0;
-            hubbles[i].visible = false;
+            hubble.parent = parent;
+            hubble.opacity = 0.0;
+            hubble.visible = false;
         }
     }
 

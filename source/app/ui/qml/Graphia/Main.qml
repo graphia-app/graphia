@@ -454,21 +454,7 @@ ApplicationWindow
         }
     }
 
-    readonly property string environment:
-    {
-        let s = "";
-        let environment = application.environment;
-
-        for(let i = 0; i < environment.length; i++)
-        {
-            if(s.length !== 0)
-                s += "\n";
-
-            s += environment[i];
-        }
-
-        return s;
-    }
+    readonly property string environment: application.environment.join("\n")
 
     Component
     {
