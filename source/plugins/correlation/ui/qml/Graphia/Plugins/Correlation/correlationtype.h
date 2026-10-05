@@ -60,7 +60,7 @@ DEFINE_QML_ENUM(NormaliseType,
     MinMax,
     Quantile,
     Mean,
-    Standarisation,
+    Standardisation,
     UnitScaling,
     Softmax);
 

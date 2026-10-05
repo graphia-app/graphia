@@ -1067,7 +1067,7 @@ BaseParameterDialog
                                     ListElement { text: qsTr("None");               value: NormaliseType.None }
                                     ListElement { text: qsTr("Min/Max");            value: NormaliseType.MinMax }
                                     ListElement { text: qsTr("Mean");               value: NormaliseType.Mean }
-                                    ListElement { text: qsTr("Standardisation");    value: NormaliseType.Standarisation }
+                                    ListElement { text: qsTr("Standardisation");    value: NormaliseType.Standardisation }
                                     ListElement { text: qsTr("Unit Scaling");       value: NormaliseType.UnitScaling }
                                     ListElement { text: qsTr("Quantile");           value: NormaliseType.Quantile }
                                     ListElement { text: qsTr("Softmax");            value: NormaliseType.Softmax }

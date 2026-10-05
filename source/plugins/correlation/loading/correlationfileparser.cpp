@@ -222,7 +222,7 @@ bool CorrelationFileParser::normalise(NormaliseType normaliseType,
         success = normaliser.process(dataRows, parser);
         break;
     }
-    case NormaliseType::Standarisation:
+    case NormaliseType::Standardisation:
     {
         const StandardisationNormaliser normaliser;
         success = normaliser.process(dataRows, parser);
