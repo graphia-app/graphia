@@ -254,7 +254,7 @@ private:
     PendingVisualUpdate _pendingVisualUpdate;
 
     template<typename Fn>
-    void requestVisualUpdate(Fn&& fn)
+    void requestVisualUpdate(const Fn& fn)
     {
         const std::unique_lock<std::mutex> lock(_pendingVisualUpdateMutex);
         fn(_pendingVisualUpdate);
