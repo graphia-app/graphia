@@ -372,7 +372,7 @@ void CorrelationPluginInstance::createAttributes()
     {
     case CorrelationPolarity::Negative:
     case CorrelationPolarity::Both:
-        _correlationAbsAttributeName = tr("Absolute ") + _correlationAttributeName;
+        _correlationAbsAttributeName = tr("Absolute %1").arg(_correlationAttributeName);
 
         graphModel()->createAttribute(_correlationAbsAttributeName)
             .setFloatValueFn([this](EdgeId edgeId) { return std::abs(_correlationValues->get(edgeId)); })
