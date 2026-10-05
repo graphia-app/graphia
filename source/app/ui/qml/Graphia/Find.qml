@@ -391,6 +391,7 @@ Rectangle
                     Layout.fillHeight: true
                     Layout.preferredWidth: 192
                     Layout.margins: Constants.margin
+                    implicitHeight: findField.implicitHeight
                     clip: true
 
                     TextInput
@@ -398,7 +399,6 @@ Rectangle
                         id: findField
 
                         anchors.fill: parent
-                        anchors.verticalCenter: parent.verticalCenter
 
                         font.strikeout: root._interrupted
                         selectByMouse: true

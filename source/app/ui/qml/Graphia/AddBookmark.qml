@@ -89,6 +89,7 @@ Rectangle
                 Layout.fillHeight: true
                 Layout.preferredWidth: 192
                 Layout.margins: Constants.margin
+                implicitHeight: nameField.implicitHeight
                 clip: true
 
                 TextInput
@@ -96,7 +97,6 @@ Rectangle
                     id: nameField
 
                     anchors.fill: parent
-                    anchors.verticalCenter: parent.verticalCenter
 
                     selectByMouse: true
                     color: palette.text
