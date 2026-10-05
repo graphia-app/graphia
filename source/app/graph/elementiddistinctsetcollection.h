@@ -464,7 +464,7 @@ public:
     std::vector<T> copy() const
     {
         std::vector<T> v;
-        v.reserve(static_cast<size_t>(_size));
+        v.reserve(static_cast<size_t>(size()));
 
         std::copy(begin(), end(), std::back_inserter(v));
 
@@ -626,7 +626,7 @@ public:
     std::vector<typename T::value_type> copy() const
     {
         std::vector<typename T::value_type> v;
-        v.reserve(static_cast<size_t>(_size));
+        v.reserve(static_cast<size_t>(size()));
 
         std::copy(begin(), end(), std::back_inserter(v));
 
