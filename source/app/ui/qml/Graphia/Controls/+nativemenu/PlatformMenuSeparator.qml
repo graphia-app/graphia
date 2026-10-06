@@ -21,7 +21,7 @@ import QtQuick
 
 import Qt.labs.platform as Labs
 
-Labs.MenuSeparator
+Labs.MenuSeparator // qmllint disable import
 {
     property bool hidden: false
     visible: !hidden

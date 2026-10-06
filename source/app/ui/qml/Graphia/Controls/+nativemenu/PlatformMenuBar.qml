@@ -21,7 +21,7 @@ import QtQuick
 
 import Qt.labs.platform as Labs
 
-Labs.MenuBar
+Labs.MenuBar // qmllint disable import
 {
     property bool visible: true
 }

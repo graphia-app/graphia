@@ -21,7 +21,7 @@ import QtQuick
 import QtQuick.Controls
 
 
-Menu
+Menu // qmllint disable import
 {
     property bool hidden: false
 

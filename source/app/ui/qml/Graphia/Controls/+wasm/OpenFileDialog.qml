@@ -21,11 +21,11 @@ import QtQuick
 
 import Graphia.Utils // qmllint disable unused-imports
 
-Item
+Item // qmllint disable import
 {
     id: root
 
-    WasmLocalFileAccess
+    WasmLocalFileAccess // qmllint disable import
     {
         id: wasmLocalFileAccess
 

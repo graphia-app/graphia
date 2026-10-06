@@ -21,11 +21,11 @@ import QtQuick
 
 import Graphia.Utils
 
-Item
+Item // qmllint disable import
 {
     id: root
 
-    WasmLocalFileAccess { id: wasmLocalFileAccess }
+    WasmLocalFileAccess { id: wasmLocalFileAccess } // qmllint disable import
 
     // Dummy properties to satisfy user expectations
     property string title

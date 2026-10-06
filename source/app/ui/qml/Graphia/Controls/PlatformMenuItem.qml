@@ -22,7 +22,7 @@ import QtQuick.Controls
 
 import Graphia.Utils
 
-MenuItem
+MenuItem // qmllint disable import
 {
     id: root
 

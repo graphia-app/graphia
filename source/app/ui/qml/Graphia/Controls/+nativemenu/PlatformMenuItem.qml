@@ -22,7 +22,7 @@ import QtQuick.Controls
 
 import Qt.labs.platform as Labs
 
-Labs.MenuItem
+Labs.MenuItem // qmllint disable import
 {
     id: menuItem
 

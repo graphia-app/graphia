@@ -20,7 +20,7 @@
 import QtQuick
 import QtQuick.Controls
 
-MenuBar
+MenuBar // qmllint disable import
 {
     Component.onCompleted:
     {

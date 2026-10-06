@@ -21,7 +21,7 @@ import QtQuick
 
 import Qt.labs.platform as Labs
 
-Labs.Menu
+Labs.Menu // qmllint disable import
 {
     id: menu
 

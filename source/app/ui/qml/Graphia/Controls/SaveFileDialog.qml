@@ -20,7 +20,7 @@
 import QtQuick
 import QtQuick.Dialogs
 
-FileDialog
+FileDialog // qmllint disable import
 {
     fileMode: FileDialog.SaveFile
     defaultSuffix: selectedNameFilter.extensions[0]

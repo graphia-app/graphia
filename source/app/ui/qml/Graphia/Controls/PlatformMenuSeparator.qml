@@ -20,7 +20,7 @@
 import QtQuick
 import QtQuick.Controls
 
-MenuSeparator
+MenuSeparator // qmllint disable import
 {
     property bool hidden: false
 
