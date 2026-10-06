@@ -102,7 +102,7 @@ RowLayout
 
     FloatingButton
     {
-        implicitHeight: progressBar.implicitHeight
+        implicitHeight: downloadProgressBar.implicitHeight
         implicitWidth: implicitHeight
 
         icon.name: "process-stop"
