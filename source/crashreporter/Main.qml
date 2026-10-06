@@ -42,6 +42,11 @@ ApplicationWindow
 
     property bool enabled: true
 
+    required property var report
+    required property string glVendor
+    required property bool inVideoDriver
+    required property string emailAddress
+
     GridLayout
     {
         id: grid
@@ -84,10 +89,10 @@ ApplicationWindow
                    "If we need more information, we may use your email address " +
                    "to contact you. Thanks."), Qt.application.name);
 
-                if(inVideoDriver)
+                if(window.inVideoDriver)
                 {
                     let vendorLink = Utils.format(
-                        "https://www.google.com/search?q={0}+video+driver+download&btnI", glVendor);
+                        "https://www.google.com/search?q={0}+video+driver+download&btnI", window.glVendor);
 
                     let videoDriverCrash = Utils.format(qsTr(
                         "<font color=\"red\"><b>Please note:</b></font> this crash " +
@@ -115,7 +120,7 @@ ApplicationWindow
         {
             id: email
             enabled: window.enabled
-            text: emailAddress
+            text: window.emailAddress
             selectByMouse: true
             placeholderText: qsTr("Email address (optional)")
             validator: RegularExpressionValidator { regularExpression: /\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/ }

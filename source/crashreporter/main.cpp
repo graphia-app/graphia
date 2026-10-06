@@ -36,7 +36,6 @@
 #include <QFile>
 #include <QObject>
 #include <QQmlApplicationEngine>
-#include <QQmlContext>
 #include <QIcon>
 #include <QFileInfo>
 #include <QHttpMultiPart>
@@ -390,10 +389,13 @@ int main(int argc, char *argv[])
 
         QQmlApplicationEngine engine;
 
-        engine.rootContext()->setContextProperty(u"report"_s, &report);
-        engine.rootContext()->setContextProperty(u"glVendor"_s, OpenGLFunctions::vendor());
-        engine.rootContext()->setContextProperty(u"inVideoDriver"_s, inVideoDriver);
-        engine.rootContext()->setContextProperty(u"emailAddress"_s, emailAddress);
+        engine.setInitialProperties(
+        {
+            {u"report"_s, QVariant::fromValue(&report)},
+            {u"glVendor"_s, OpenGLFunctions::vendor()},
+            {u"inVideoDriver"_s, inVideoDriver},
+            {u"emailAddress"_s, emailAddress}
+        });
 
         engine.loadFromModule(u"Graphia.CrashReporter"_s, u"Main"_s);
         Q_ASSERT(!engine.rootObjects().empty());

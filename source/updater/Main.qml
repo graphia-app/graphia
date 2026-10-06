@@ -29,6 +29,11 @@ ApplicationWindow
 {
     id: root
     visible: true
+
+    required property var installer
+    required property string version
+    required property string changeLog
+    required property string imagesLocation
     flags: Constants.defaultWindowFlags
     color: palette.window
 
@@ -59,7 +64,7 @@ ApplicationWindow
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            visible: installer !== null && !installer.busy && !installer.complete
+            visible: root.installer !== null && !root.installer.busy && !root.installer.complete
 
             Text
             {
@@ -68,7 +73,7 @@ ApplicationWindow
                     "{0} version {1} is available. You are currently using version {2}. " +
                     "Would you like to update now?<br>" +
                     "<br>" +
-                    "<b>Release Notes:</b>"), Qt.application.name, version, Qt.application.version)
+                    "<b>Release Notes:</b>"), Qt.application.name, root.version, Qt.application.version)
                 wrapMode: Text.WordWrap
                 Layout.fillWidth: true
                 color: palette.buttonText
@@ -85,8 +90,8 @@ ApplicationWindow
                 textFormat: TextEdit.MarkdownText
                 text:
                 {
-                    let prefix = "file:///" + imagesLocation + "/";
-                    let adjustedChangeLog = changeLog;
+                    let prefix = "file:///" + root.imagesLocation + "/";
+                    let adjustedChangeLog = root.changeLog;
 
                     adjustedChangeLog = adjustedChangeLog.replace(
                         /(?:!\[(.*?)\]\(file:(.*?)\))/g,
@@ -106,7 +111,7 @@ ApplicationWindow
 
                     onClicked: function(mouse)
                     {
-                        installer.setStatus("skipped");
+                        root.installer.setStatus("skipped");
                         root.close();
                     }
                 }
@@ -122,7 +127,7 @@ ApplicationWindow
                 Button
                 {
                     text: qsTr("Update Now")
-                    onClicked: function(mouse) { installer.start(); }
+                    onClicked: function(mouse) { root.installer.start(); }
                 }
             }
         }
@@ -131,7 +136,7 @@ ApplicationWindow
     // Update in progess
     ColumnLayout
     {
-        visible: installer !== null && installer.busy && !installer.complete
+        visible: root.installer !== null && root.installer.busy && !root.installer.complete
 
         anchors.centerIn: parent
         spacing: Constants.spacing * 3
@@ -139,7 +144,7 @@ ApplicationWindow
         Text
         {
             Layout.alignment: Qt.AlignHCenter
-            text: Utils.format(qsTr("Updating to Version {0}…"), version)
+            text: Utils.format(qsTr("Updating to Version {0}…"), root.version)
             font.pointSize: 16
             font.bold: true
             color: palette.buttonText
@@ -157,7 +162,7 @@ ApplicationWindow
     // Update complete
     ColumnLayout
     {
-        visible: installer !== null && installer.complete
+        visible: root.installer !== null && root.installer.complete
 
         anchors.centerIn: parent
         spacing: Constants.spacing * 3
@@ -166,7 +171,7 @@ ApplicationWindow
         {
             Layout.alignment: Qt.AlignHCenter
 
-            text: (installer !== null && installer.success) ?
+            text: (root.installer !== null && root.installer.success) ?
                 qsTr("Update Complete!") : qsTr("Update Failed:")
             font.pointSize: 16
             font.bold: true
@@ -175,14 +180,14 @@ ApplicationWindow
 
         TextArea
         {
-            visible: installer !== null && !installer.success
+            visible: root.installer !== null && !root.installer.success
             Layout.alignment: Qt.AlignHCenter
             Layout.preferredWidth: 400
             readOnly: true
             wrapMode: TextArea.Wrap
             selectByMouse: true
 
-            text: installer !== null && installer.error
+            text: root.installer !== null && root.installer.error
             font.family: "monospace"
             font.pointSize: 8
             color: palette.buttonText
@@ -194,10 +199,10 @@ ApplicationWindow
 
             Button
             {
-                visible: installer !== null && !installer.success
+                visible: root.installer !== null && !root.installer.success
                 text: qsTr("Retry");
 
-                onClicked: function(mouse) { installer.retry(); }
+                onClicked: function(mouse) { root.installer.retry(); }
             }
 
             Button
@@ -210,11 +215,11 @@ ApplicationWindow
 
     Connections
     {
-        target: installer
+        target: root.installer
         function onCompleteChanged()
         {
-            if(installer.complete)
-                installer.setStatus(installer.success ? "installed" : "failed");
+            if(root.installer.complete)
+                root.installer.setStatus(root.installer.success ? "installed" : "failed");
         }
     }
 }

@@ -34,7 +34,7 @@
 #include <QFile>
 #include <QObject>
 #include <QQmlApplicationEngine>
-#include <QQmlContext>
+#include <QVariant>
 #include <QIcon>
 #include <QProcess>
 #include <QFileInfo>
@@ -111,8 +111,6 @@ static QStringList showUpdater(int argc, char *argv[])
             QObject::tr("No release notes available.");
 
         const QTemporaryDir imagesDir;
-        engine.rootContext()->setContextProperty(
-            u"imagesLocation"_s, imagesDir.path());
 
         if(u::contains(update, "images") && imagesDir.isValid())
         {
@@ -133,18 +131,15 @@ static QStringList showUpdater(int argc, char *argv[])
             }
         }
 
-        engine.rootContext()->setContextProperty(
-            u"updatesLocation"_s, updatesLocation());
-
-        engine.rootContext()->setContextProperty(
-            u"version"_s, version);
-
-        engine.rootContext()->setContextProperty(
-            u"changeLog"_s, changeLog);
-
         Installer installer(update, version, existingInstallation(exe));
-        engine.rootContext()->setContextProperty(
-            u"installer"_s, &installer);
+
+        engine.setInitialProperties(
+        {
+            {u"imagesLocation"_s, imagesDir.path()},
+            {u"version"_s, version},
+            {u"changeLog"_s, changeLog},
+            {u"installer"_s, QVariant::fromValue(&installer)}
+        });
 
         engine.loadFromModule(u"Graphia.Updater"_s, u"Main"_s);
         Q_ASSERT(!engine.rootObjects().empty());
