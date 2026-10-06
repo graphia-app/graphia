@@ -2988,7 +2988,7 @@ ApplicationWindow
                 Layout.fillWidth: true
                 visible: tabBar.count > 1
 
-                height: 1
+                implicitHeight: 1
                 color: ControlColors.mid
             }
 

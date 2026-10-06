@@ -66,16 +66,16 @@ Item
 
         NamedIcon
         {
-            width: 16
-            height: 16
+            implicitWidth: 16
+            implicitHeight: 16
             iconName: "pin"
             visible: root.pinned
         }
 
         NamedIcon
         {
-            width: 16
-            height: 16
+            implicitWidth: 16
+            implicitHeight: 16
             iconName: "view-refresh"
             visible: root.repeating
         }
@@ -88,15 +88,15 @@ Item
             // Hack to force the row to always be at least the height of a TextField
             // (so that when the Transform is locked, it doesn't change height)
             TextField { id: dummyField; visible: false }
-            Rectangle { height: dummyField.height }
+            Rectangle { implicitHeight: dummyField.height }
         }
 
         Hamburger
         {
             id: hamburger
 
-            width: 20
-            height: 15
+            implicitWidth: 20
+            implicitHeight: 15
             color: disabledTextColor
             hoverColor: enabledTextColor
             propogatePresses: true

@@ -68,7 +68,6 @@ Item
 
         RowLayout
         {
-            anchors.margins: Constants.margin
             Layout.fillHeight: true
             spacing: Constants.spacing
 

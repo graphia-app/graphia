@@ -208,8 +208,8 @@ Item
         {
             id: hamburger
 
-            width: 20
-            height: 15
+            implicitWidth: 20
+            implicitHeight: 15
             color: root.disabledTextColor
             hoverColor: root.enabledTextColor
             propogatePresses: true

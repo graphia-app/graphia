@@ -116,7 +116,7 @@ Item
             id: treeBoxSearch
 
             Layout.fillWidth: true
-            height: _treeBoxSearch.height
+            implicitHeight: _treeBoxSearch.height
 
             visible: false
 

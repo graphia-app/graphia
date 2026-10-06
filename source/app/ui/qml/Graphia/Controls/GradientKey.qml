@@ -149,7 +149,7 @@ Item
             // rotated Rectangle something to fill
             id: item
 
-            width: root.keyWidth !== 0 ? root.keyWidth : 0
+            implicitWidth: root.keyWidth
             Layout.fillWidth: root.keyWidth === 0
             Layout.fillHeight: true
 

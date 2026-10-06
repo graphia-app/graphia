@@ -273,8 +273,8 @@ Window
                             NamedIcon
                             {
                                 id: nodeSizeIcon
-                                width: channelIndicator._elementSize
-                                height: channelIndicator._elementSize
+                                implicitWidth: channelIndicator._elementSize
+                                implicitHeight: channelIndicator._elementSize
 
                                 iconName: "node-size"
                             }
@@ -282,8 +282,8 @@ Window
                             NamedIcon
                             {
                                 id: edgeSizeIcon
-                                width: channelIndicator._elementSize
-                                height: channelIndicator._elementSize
+                                implicitWidth: channelIndicator._elementSize
+                                implicitHeight: channelIndicator._elementSize
 
                                 iconName: "edge-size"
                             }
@@ -291,8 +291,8 @@ Window
                             NamedIcon
                             {
                                 id: textSizeIcon
-                                width: channelIndicator._elementSize
-                                height: channelIndicator._elementSize
+                                implicitWidth: channelIndicator._elementSize
+                                implicitHeight: channelIndicator._elementSize
 
                                 iconName: "text-size"
                             }
@@ -300,8 +300,8 @@ Window
                             NamedIcon
                             {
                                 id: textColorIcon
-                                width: channelIndicator._elementSize
-                                height: channelIndicator._elementSize
+                                implicitWidth: channelIndicator._elementSize
+                                implicitHeight: channelIndicator._elementSize
 
                                 iconName: "text-color"
                             }
@@ -309,8 +309,8 @@ Window
                             NamedIcon
                             {
                                 id: textIcon
-                                width: channelIndicator._elementSize
-                                height: channelIndicator._elementSize
+                                implicitWidth: channelIndicator._elementSize
+                                implicitHeight: channelIndicator._elementSize
 
                                 iconName: "format-text-bold"
                             }
@@ -318,8 +318,8 @@ Window
                             NamedIcon
                             {
                                 id: sharedTextIcon
-                                width: channelIndicator._elementSize
-                                height: channelIndicator._elementSize
+                                implicitWidth: channelIndicator._elementSize
+                                implicitHeight: channelIndicator._elementSize
 
                                 iconName: "shared-text"
                             }

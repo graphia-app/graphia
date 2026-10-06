@@ -630,7 +630,7 @@ Rectangle
 
             visible: root._type === Find.Advanced
 
-            Rectangle { width: Constants.padding }
+            Rectangle { implicitWidth: Constants.padding }
 
             CheckBox
             {

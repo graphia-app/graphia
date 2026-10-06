@@ -68,8 +68,8 @@ BaseParameterDialog
                 property int _padding: 5
                 property int pipSize: 5
                 property int spacing: 20
-                width: (root.listPages.length * spacing) + (_padding * 2)
-                height: pipSize + (_padding  * 2)
+                implicitWidth: (root.listPages.length * spacing) + (_padding * 2)
+                implicitHeight: pipSize + (_padding  * 2)
 
                 onPaint: function(rect)
                 {
