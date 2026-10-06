@@ -539,7 +539,7 @@ Item
         id: nodePositionFileImportDialog
 
         title: qsTr("Import From File…")
-        nameFilters: "Graphia Node Positions (*.json)"
+        nameFilters: ["Graphia Node Positions (*.json)"]
 
         onAccepted:
         {
@@ -788,11 +788,7 @@ Item
                     {
                         name: "showing"
                         when: plugin.loaded && graph.numNodes <= 0
-                        PropertyChanges
-                        {
-                            target: emptyGraphLabel
-                            opacity: 1.0
-                        }
+                        PropertyChanges { emptyGraphLabel.opacity: 1.0 }
                     }
 
                     transitions: Transition

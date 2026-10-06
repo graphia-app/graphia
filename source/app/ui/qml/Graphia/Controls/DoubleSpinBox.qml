@@ -100,14 +100,14 @@ Control
                 (contentItem as TextInput).selectAll();
         }
 
-        property QtObject _doubleValidator: DoubleValidator
+        property DoubleValidator _doubleValidator: DoubleValidator
         {
             locale: spinBox.locale.name
             decimals: root.decimals
             notation: DoubleValidator.StandardNotation
         }
 
-        property QtObject _intValidator: IntValidator
+        property IntValidator _intValidator: IntValidator
         {
             locale: spinBox.locale.name
         }

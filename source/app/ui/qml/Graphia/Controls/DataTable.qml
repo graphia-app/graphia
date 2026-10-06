@@ -549,7 +549,7 @@ Rectangle
                     return root._cellDelegateHeight ? root._cellDelegateHeight : -1;
                 }
 
-                columnWidthProvider: headerView.columnWidthProvider
+                columnWidthProvider: function(column) { return headerView.columnWidthProvider(column); }
 
                 delegate: Item
                 {

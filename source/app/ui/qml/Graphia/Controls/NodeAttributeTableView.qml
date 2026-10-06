@@ -563,7 +563,7 @@ Item
                 {
                     return row > 0 ? 0 : -1;
                 }
-                columnWidthProvider: tableView.columnWidthProvider;
+                columnWidthProvider: function(column) { return tableView.columnWidthProvider(column); }
                 visible: tableView.columns !== 0
                 boundsBehavior: Flickable.StopAtBounds
 

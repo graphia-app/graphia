@@ -90,7 +90,7 @@ Window
                                     anchors.verticalCenter: parent.verticalCenter
                                     anchors.left: parent.left
                                     anchors.leftMargin: 4
-                                    text: colorRectangle.color
+                                    text: colorRectangle.color.toString()
                                     color: NativeUtils.contrastingColor(colorRectangle.color)
                                 }
                             }
