@@ -18,9 +18,7 @@
  */
 
 import QtQuick
-import QtQuick.Controls
 import QtQml
-import QtQuick.Dialogs
 
 import Qt.labs.platform as Labs
 

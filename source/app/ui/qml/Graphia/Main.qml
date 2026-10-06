@@ -23,7 +23,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Window
-import QtQuick.Dialogs
 
 import Qt.labs.platform as Labs
 

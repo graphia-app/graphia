@@ -21,8 +21,6 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Window
-import QtQuick.Layouts
-import QtQuick.Dialogs
 
 import Qt.labs.platform as Labs
 

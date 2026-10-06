@@ -19,7 +19,6 @@
 
 import QtQuick
 import QtQuick.Controls
-import QtQml.Models
 
 import Graphia.Utils
 

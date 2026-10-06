@@ -21,10 +21,8 @@ import QtQuick
 import QtQuick.Window
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtQuick.Dialogs
 
 import Graphia.Controls
-import Graphia.SharedTypes
 import Graphia.Utils
 
 import Qt.labs.platform as Labs

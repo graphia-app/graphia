@@ -20,7 +20,6 @@
 import QtQuick
 import QtQuick.Window
 import QtQuick.Controls
-import QtQuick.Dialogs
 import QtQuick.Layouts
 
 import Graphia.Controls

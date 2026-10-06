@@ -19,7 +19,7 @@
 
 import QtQuick
 
-import Graphia.Utils
+import Graphia.Utils // qmllint disable unused-imports
 
 Item
 {
