@@ -151,7 +151,9 @@ if(GIT)
     if("${GIT_COMMIT_COUNT}" EQUAL 0 OR "${GIT_BRANCH}" MATCHES "^master|HEAD$")
         set(GIT_VERSION "${GIT_DESCRIBE}")
     else()
-        set(GIT_VERSION "${GIT_DESCRIBE}-${GIT_BRANCH}")
+        # Branch names containing slashes cause problems if they end up in file names
+        string(REPLACE "/" "-" GIT_BRANCH_IN_VERSION "${GIT_BRANCH}")
+        set(GIT_VERSION "${GIT_DESCRIBE}-${GIT_BRANCH_IN_VERSION}")
     endif()
 endif()
 
