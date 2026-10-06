@@ -2368,13 +2368,7 @@ ApplicationWindow
                             currentTab.document.visualisationsAreValid(template.visualisations);
                     }
 
-                    onTriggered: function(source)
-                    {
-                        if(source && source.menu)
-                            source.menu.dismiss();
-
-                        currentTab.applyTemplate(templateMenuItem.text);
-                    }
+                    onTriggered: function() { currentTab.applyTemplate(templateMenuItem.text); }
                 }
 
                 onObjectAdded: function(index, object) { templatesMenu.insertItem(3/* first menu items */ + index, object); }
