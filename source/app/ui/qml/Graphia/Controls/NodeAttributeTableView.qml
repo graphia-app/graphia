@@ -1242,7 +1242,7 @@ Item
                                 return model.display;
                             }
 
-                            onLinkHovered: { tableView.hoveredLink = link; }
+                            onLinkHovered: function(link) { tableView.hoveredLink = link; }
                             onLinkActivated: function(link) { Qt.openUrlExternally(link); }
                         }
                     }
