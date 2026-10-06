@@ -223,7 +223,7 @@ Rectangle
         icon.name: "go-previous"
         shortcut: root._visible ? "Ctrl+Shift+G" : ""
         enabled: root._type === Find.ByAttribute || root.document.numNodesFound > 0
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(root._type === Find.ByAttribute)
                 valueComboBox.currentIndex = ((valueComboBox.currentIndex - 1) + valueComboBox.count) % valueComboBox.count;
@@ -239,7 +239,7 @@ Rectangle
         icon.name: "go-next"
         shortcut: root._visible ? "Ctrl+G" : ""
         enabled: root._type === Find.ByAttribute || root.document.numNodesFound > 0
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(root._type === Find.ByAttribute)
                 valueComboBox.currentIndex = (valueComboBox.currentIndex + 1) % valueComboBox.count;
@@ -307,7 +307,7 @@ Rectangle
         text: qsTr("Close")
         icon.name: "emblem-unreadable"
 
-        onTriggered: function(source)
+        onTriggered: function()
         {
             findField.focus = false;
             findField.text = "";

@@ -34,7 +34,7 @@ Item
     {
         id: restartAction
         text: qsTr("Restart")
-        onTriggered: function(source)
+        onTriggered: function()
         {
             root.visible = false;
             root.restartClicked();
@@ -45,7 +45,7 @@ Item
     {
         id: closeAction
         text: qsTr("Not Now")
-        onTriggered: function(source)
+        onTriggered: function()
         {
             root.visible = false;
         }

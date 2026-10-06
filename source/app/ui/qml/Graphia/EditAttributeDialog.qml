@@ -855,7 +855,7 @@ Window
                 enabled: root._selectedAttribute &&
                     (editAttributeTableModel.hasEdits || dataTypeComboBox.hasChanged || descriptionTextField.hasChanged)
 
-                onClicked: function(mouse)
+                onClicked: function()
                 {
                     root.document.editAttribute(root._attributeName,
                         editAttributeTableModel.edits, root._selectedType,
@@ -867,7 +867,7 @@ Window
             Button
             {
                 text: qsTr("Cancel")
-                onClicked: function(mouse) { root.close(); }
+                onClicked: function() { root.close(); }
             }
         }
     }

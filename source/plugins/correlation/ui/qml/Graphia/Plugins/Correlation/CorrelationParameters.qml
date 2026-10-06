@@ -153,7 +153,7 @@ BaseParameterDialog
             Button
             {
                 text: tabularDataParser.failed ? qsTr("Close") : qsTr("Cancel")
-                onClicked: function(mouse)
+                onClicked: function()
                 {
                     if(!tabularDataParser.failed)
                         tabularDataParser.cancelParse();

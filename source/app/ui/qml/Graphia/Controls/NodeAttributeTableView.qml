@@ -279,7 +279,7 @@ Item
         id: resizeColumnsToContentsAction
         text: qsTr("&Resize Columns To Contents")
         icon.name: "auto-column-resize"
-        onTriggered: function(source)
+        onTriggered: function()
         {
             root.resizeColumnsToContents();
         }
@@ -307,7 +307,7 @@ Item
         text: qsTr("Export…")
         icon.name: "document-save"
 
-        onTriggered: function(source)
+        onTriggered: function()
         {
             let folder = misc.fileSaveInitialFolder !== undefined ? misc.fileSaveInitialFolder : "";
             let path = Utils.format("{0}/{1}", NativeUtils.fileNameForUrl(folder), root.exportBaseFileName);
@@ -404,7 +404,7 @@ Item
         enabled: root.rowCount > 0
         text: qsTr("Copy Column To Clipboard")
         icon.name: "document-save"
-        onTriggered: function(source)
+        onTriggered: function()
         {
             root.pluginContent.copyTableModelColumnToClipboard(root.model, root.lastClickedColumn, root.visibleRows);
         }
@@ -423,7 +423,7 @@ Item
         id: sortAscendingAction
         text: qsTr("Sort Column Ascending")
         checkable: true
-        onTriggered: function(source)
+        onTriggered: function()
         {
             selectionModel.clear();
             root.selectedRows = [];
@@ -439,7 +439,7 @@ Item
         id: sortDescendingAction
         text: qsTr("Sort Column Descending")
         checkable: true
-        onTriggered: function(source)
+        onTriggered: function()
         {
             selectionModel.clear();
             root.selectedRows = [];
@@ -984,7 +984,7 @@ Item
                     minimumSize: 0.1
                     visible: size < 1.0 // So that it's invisible to mouse clicks
 
-                    onPositionChanged: function(mouse)
+                    onPositionChanged: function()
                     {
                         // Sometimes syncViews don't actually sync visibleAreas
                         // however contentX and contentWidth are synced.
@@ -1339,31 +1339,31 @@ Item
                             Button
                             {
                                 text: qsTr("Show All")
-                                onClicked: function(mouse) { root.showAllColumns(); }
+                                onClicked: function() { root.showAllColumns(); }
                             }
 
                             Button
                             {
                                 text: qsTr("Hide All")
-                                onClicked: function(mouse) { root.hideAllColumns(); }
+                                onClicked: function() { root.hideAllColumns(); }
                             }
 
                             Button
                             {
                                 text: qsTr("Show Calculated")
-                                onClicked: function(mouse) { root.showAllCalculatedColumns(); }
+                                onClicked: function() { root.showAllCalculatedColumns(); }
                             }
 
                             Button
                             {
                                 text: qsTr("Hide Calculated")
-                                onClicked: function(mouse) { root.hideAllCalculatedColumns(); }
+                                onClicked: function() { root.hideAllCalculatedColumns(); }
                             }
 
                             FloatingButton
                             {
                                 icon.name: "emblem-unreadable"
-                                onClicked: function(mouse) { root.columnSelectionMode = false; }
+                                onClicked: function() { root.columnSelectionMode = false; }
                             }
                         }
                     }

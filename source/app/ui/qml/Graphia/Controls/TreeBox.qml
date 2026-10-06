@@ -584,7 +584,7 @@ Item
                 hoverOpacity: 0.7
                 checkable: true
 
-                onClicked: function(mouse) { root.toggleSearch(); }
+                onClicked: function() { root.toggleSearch(); }
             }
 
             Rectangle
@@ -668,7 +668,7 @@ Item
                     return false;
                 }
 
-                onTriggered: function(source)
+                onTriggered: function()
                 {
                     if(!root.showParentGuide)
                         return;

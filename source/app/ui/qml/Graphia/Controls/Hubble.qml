@@ -157,21 +157,21 @@ Item
             {
                 visible: root.displayPrevious
                 text: qsTr("Previous")
-                onClicked: function(mouse) { root.previousClicked(); }
+                onClicked: function() { root.previousClicked(); }
             }
 
             Button
             {
                 visible: root.displayNext
                 text: qsTr("Next")
-                onClicked: function(mouse) { root.nextClicked(); }
+                onClicked: function() { root.nextClicked(); }
             }
 
             Button
             {
                 visible: root.displayClose
                 text: qsTr("Close")
-                onClicked: function(mouse) { root.closeClicked(); }
+                onClicked: function() { root.closeClicked(); }
             }
         }
     }

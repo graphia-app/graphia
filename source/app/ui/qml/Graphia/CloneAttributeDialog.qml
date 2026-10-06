@@ -177,7 +177,7 @@ Window
                 text: qsTr("OK")
                 enabled: root.selectedAttributeName.length > 0 && newAttributeName.text.length > 0
 
-                onClicked: function(mouse)
+                onClicked: function()
                 {
                     root.document.cloneAttribute(root.selectedAttributeName, newAttributeName.text);
                     root.close();
@@ -187,7 +187,7 @@ Window
             Button
             {
                 text: qsTr("Cancel")
-                onClicked: function(mouse) { root.close(); }
+                onClicked: function() { root.close(); }
             }
         }
     }

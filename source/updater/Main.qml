@@ -109,7 +109,7 @@ ApplicationWindow
                 {
                     text: qsTr("Skip This Version")
 
-                    onClicked: function(mouse)
+                    onClicked: function()
                     {
                         root.installer.setStatus("skipped");
                         root.close();
@@ -121,13 +121,13 @@ ApplicationWindow
                 Button
                 {
                     text: qsTr("Remind Me Later")
-                    onClicked: function(mouse) { root.close(); }
+                    onClicked: function() { root.close(); }
                 }
 
                 Button
                 {
                     text: qsTr("Update Now")
-                    onClicked: function(mouse) { root.installer.start(); }
+                    onClicked: function() { root.installer.start(); }
                 }
             }
         }
@@ -202,13 +202,13 @@ ApplicationWindow
                 visible: root.installer !== null && !root.installer.success
                 text: qsTr("Retry");
 
-                onClicked: function(mouse) { root.installer.retry(); }
+                onClicked: function() { root.installer.retry(); }
             }
 
             Button
             {
                 text: qsTr("Open " + Qt.application.name);
-                onClicked: function(mouse) { root.close(); }
+                onClicked: function() { root.close(); }
             }
         }
     }

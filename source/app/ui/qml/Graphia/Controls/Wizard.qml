@@ -138,7 +138,7 @@ BaseParameterDialog
             {
                 id: previousButton
                 text: qsTr("Previous")
-                onClicked: function(mouse) { root.previous(); }
+                onClicked: function() { root.previous(); }
                 enabled: root.currentIndex > 0
             }
 
@@ -146,7 +146,7 @@ BaseParameterDialog
             {
                 id: nextButton
                 text: qsTr("Next")
-                onClicked: function(mouse) { root.next(); }
+                onClicked: function() { root.next(); }
                 enabled: (root.currentIndex < root.listPages.length - 1) ? root.nextEnabled : false
             }
 
@@ -154,14 +154,14 @@ BaseParameterDialog
             {
                 id: finishButton
                 text: qsTr("Finish")
-                onClicked: function(mouse) { root.accepted(); }
+                onClicked: function() { root.accepted(); }
                 enabled: (root.currentIndex >= root.enableFinishAtIndex) ? root.finishEnabled : false
             }
 
             Button
             {
                 text: qsTr("Cancel")
-                onClicked: function(mouse) { root.close(); }
+                onClicked: function() { root.close(); }
             }
         }
     }

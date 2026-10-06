@@ -47,7 +47,7 @@ Rectangle
         id: doneAction
         text: qsTr("Done")
         enabled: nameField.text.length > 0
-        onTriggered: function(source)
+        onTriggered: function()
         {
             root.document.addBookmark(nameField.text);
             closeAction.trigger();
@@ -59,7 +59,7 @@ Rectangle
         id: closeAction
         icon.name: "emblem-unreadable"
 
-        onTriggered: function(source)
+        onTriggered: function()
         {
             root._visible = false;
             root.hidden();

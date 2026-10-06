@@ -386,13 +386,13 @@ Window
             {
                 text: qsTr("OK")
                 enabled: root.visualisationExpressionsValid
-                onClicked: function(mouse) { root.accept(); }
+                onClicked: function() { root.accept(); }
             }
 
             Button
             {
                 text: qsTr("Cancel")
-                onClicked: function(mouse) { root.reject(); }
+                onClicked: function() { root.reject(); }
             }
         }
 

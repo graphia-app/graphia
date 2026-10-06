@@ -152,7 +152,7 @@ ApplicationWindow
             text: qsTr("Send Report")
             Layout.columnSpan: 2
             Layout.alignment: Qt.AlignRight
-            onClicked: function(mouse)
+            onClicked: function()
             {
                 if(email.text.length === 0 || email.acceptableInput)
                 {

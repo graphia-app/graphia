@@ -958,7 +958,7 @@ ApplicationWindow
         icon.name: "document-open"
         text: qsTr("&Open…")
         shortcut: "Ctrl+O"
-        onTriggered: function(source)
+        onTriggered: function()
         {
             fileOpenDialog.title = qsTr("Open File…");
             fileOpenDialog.inTab = false;
@@ -977,7 +977,7 @@ ApplicationWindow
         icon.name: "tab-new"
         text: qsTr("Open In New &Tab…")
         shortcut: "Ctrl+T"
-        onTriggered: function(source)
+        onTriggered: function()
         {
             fileOpenDialog.title = qsTr("Open File In New Tab…");
             fileOpenDialog.inTab = true;
@@ -995,7 +995,7 @@ ApplicationWindow
         id: urlOpenAction
         icon.name: "network-server"
         text: qsTr("Open &URL…")
-        onTriggered: function(source) { Utils.createWindow(mainWindow, openUrlDialog); }
+        onTriggered: function() { Utils.createWindow(mainWindow, openUrlDialog); }
     }
 
     Action
@@ -1005,7 +1005,7 @@ ApplicationWindow
         text: qsTr("&Save")
         shortcut: "Ctrl+S"
         enabled: currentTab && !currentTab.document.busy
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab === null)
                 return;
@@ -1023,7 +1023,7 @@ ApplicationWindow
         icon.name: "document-save-as"
         text: qsTr("&Save As…")
         enabled: currentTab && !currentTab.document.busy
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab === null)
                 return;
@@ -1039,7 +1039,7 @@ ApplicationWindow
         text: qsTr("&Close Tab")
         shortcut: "Ctrl+W"
         enabled: currentTab !== null
-        onTriggered: function(source) { tabBar.closeTab(tabBar.currentIndex); }
+        onTriggered: function() { tabBar.closeTab(tabBar.currentIndex); }
     }
 
     Action
@@ -1049,7 +1049,7 @@ ApplicationWindow
         text: qsTr("Close &All Tabs")
         shortcut: "Ctrl+Shift+W"
         enabled: currentTab !== null
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(tabBar.count > 0)
             {
@@ -1070,7 +1070,7 @@ ApplicationWindow
         icon.name: "application-exit"
         text: qsTr("&Quit")
         shortcut: "Ctrl+Q"
-        onTriggered: function(source) { mainWindow.close(); }
+        onTriggered: function() { mainWindow.close(); }
     }
 
     Action
@@ -1080,7 +1080,7 @@ ApplicationWindow
         text: currentTab ? currentTab.document.nextUndoAction : qsTr("&Undo")
         shortcut: "Ctrl+Z"
         enabled: currentTab ? currentTab.document.canUndo : false
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab)
                 currentTab.document.undo();
@@ -1094,7 +1094,7 @@ ApplicationWindow
         text: currentTab ? currentTab.document.nextRedoAction : qsTr("&Redo")
         shortcut: "Ctrl+Shift+Z"
         enabled: currentTab ? currentTab.document.canRedo : false
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab)
                 currentTab.document.redo();
@@ -1110,7 +1110,7 @@ ApplicationWindow
         property bool visible: currentTab ?
             currentTab.document.canDeleteSelection : false
         enabled: currentTab ? !currentTab.document.busy && visible : false
-        onTriggered: function(source) { currentTab.document.deleteSelectedNodes(); }
+        onTriggered: function() { currentTab.document.deleteSelectedNodes(); }
     }
 
     Action
@@ -1120,7 +1120,7 @@ ApplicationWindow
         text: qsTr("Select &All")
         shortcut: "Ctrl+Shift+A"
         enabled: currentTab ? !currentTab.document.busy : false
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab)
                 currentTab.document.selectAll();
@@ -1134,7 +1134,7 @@ ApplicationWindow
         text: qsTr("Select All &Visible")
         shortcut: "Ctrl+A"
         enabled: currentTab ? !currentTab.document.busy : false
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab)
                 currentTab.document.selectAllVisible();
@@ -1147,7 +1147,7 @@ ApplicationWindow
         text: qsTr("Select &None")
         shortcut: "Ctrl+N"
         enabled: currentTab ? !currentTab.document.busy : false
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab)
                 currentTab.document.selectNone();
@@ -1161,7 +1161,7 @@ ApplicationWindow
         property bool visible: currentTab ?
             currentTab.document.directed && !currentTab.document.nodeSelectionEmpty : false
         enabled: currentTab ? !currentTab.document.busy && visible : false
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab)
                 currentTab.selectSources();
@@ -1175,7 +1175,7 @@ ApplicationWindow
         property bool visible: currentTab ?
             currentTab.document.directed && !currentTab.document.nodeSelectionEmpty : false
         enabled: currentTab ? !currentTab.document.busy && visible : false
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab)
                 currentTab.selectTargets();
@@ -1190,7 +1190,7 @@ ApplicationWindow
         property bool visible: currentTab ?
             !currentTab.document.nodeSelectionEmpty : false
         enabled: currentTab ? !currentTab.document.busy && visible : false
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab)
                 currentTab.selectNeighbours();
@@ -1205,7 +1205,7 @@ ApplicationWindow
 
         shortcut: "Ctrl+R"
         enabled: currentTab && currentTab.canRepeatLastSelection
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab)
                 currentTab.repeatLastSelection();
@@ -1218,7 +1218,7 @@ ApplicationWindow
         text: qsTr("&Invert Selection")
         shortcut: "Ctrl+I"
         enabled: currentTab ? !currentTab.document.busy : false
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab)
                 currentTab.document.invertSelection();
@@ -1232,7 +1232,7 @@ ApplicationWindow
         text: qsTr("&Find")
         shortcut: "Ctrl+F"
         enabled: currentTab ? !currentTab.document.busy : false
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab)
                 currentTab.showFind(Find.Simple);
@@ -1246,7 +1246,7 @@ ApplicationWindow
         text: qsTr("Advanced Find")
         shortcut: "Ctrl+Shift+F"
         enabled: currentTab ? !currentTab.document.busy : false
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab)
                 currentTab.showFind(Find.Advanced);
@@ -1267,7 +1267,7 @@ ApplicationWindow
             return false;
         }
 
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab)
                 currentTab.showFind(Find.ByAttribute);
@@ -1280,7 +1280,7 @@ ApplicationWindow
         text: qsTr("Goto &Previous Component")
         shortcut: "PgUp"
         enabled: currentTab ? currentTab.document.canChangeComponent : false
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab)
                 currentTab.document.gotoPrevComponent();
@@ -1293,7 +1293,7 @@ ApplicationWindow
         text: qsTr("Goto &Next Component")
         shortcut: "PgDown"
         enabled: currentTab ? currentTab.document.canChangeComponent : false
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab)
                 currentTab.document.gotoNextComponent();
@@ -1306,7 +1306,7 @@ ApplicationWindow
         enabled: !mainWindow._anyDocumentsBusy && !tracking.visible
         icon.name: "applications-system"
         text: qsTr("&Options…")
-        onTriggered: function(source) { Utils.createWindow(mainWindow, optionsDialog); }
+        onTriggered: function() { Utils.createWindow(mainWindow, optionsDialog); }
     }
 
     Action
@@ -1314,7 +1314,7 @@ ApplicationWindow
         id: enrichmentAction
         text: qsTr("Enrichment…")
         enabled: currentTab !== null && !currentTab.document.busy
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab !== null)
             {
@@ -1351,7 +1351,7 @@ ApplicationWindow
         }
 
         enabled: currentTab !== null && _selectedNodeId !== null
-        onTriggered: function(source)
+        onTriggered: function()
         {
             currentTab.searchWebForNode(_selectedNodeId);
         }
@@ -1404,7 +1404,7 @@ ApplicationWindow
         id: cloneAttributeAction
         text: qsTr("Clone Attribute…")
         enabled: currentTab !== null && !currentTab.document.busy
-        onTriggered: function(source) { Utils.createWindow(mainWindow, cloneAttributeDialog); }
+        onTriggered: function() { Utils.createWindow(mainWindow, cloneAttributeDialog); }
     }
 
     function cloneAttribute(attributeName)
@@ -1426,7 +1426,7 @@ ApplicationWindow
         id: editAttributeAction
         text: qsTr("Edit Attribute…")
         enabled: currentTab !== null && !currentTab.document.busy
-        onTriggered: function(source) { Utils.createWindow(mainWindow, editAttributeDialog); }
+        onTriggered: function() { Utils.createWindow(mainWindow, editAttributeDialog); }
     }
 
     function editAttribute(targetAttributeName)
@@ -1448,7 +1448,7 @@ ApplicationWindow
         id: removeAttributesAction
         text: qsTr("Remove Attributes…")
         enabled: currentTab !== null && !currentTab.document.busy
-        onTriggered: function(source) { Utils.createWindow(mainWindow, removeAttributesDialog); }
+        onTriggered: function() { Utils.createWindow(mainWindow, removeAttributesDialog); }
     }
 
     function removeAttributes(attributeNames)
@@ -1464,7 +1464,7 @@ ApplicationWindow
         id: importAttributesAction
         text: qsTr("Import Attributes From Table…")
         enabled: currentTab !== null && !currentTab.document.busy
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(misc.fileOpenInitialFolder !== undefined)
                 importAttributesFileOpenDialog.currentFolder = misc.fileOpenInitialFolder;
@@ -1493,7 +1493,7 @@ ApplicationWindow
                   qsTr("&Resume Layout") : qsTr("&Pause Layout")
         shortcut: "Pause"
         enabled: currentTab ? !currentTab.document.busy : false
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab)
                 currentTab.document.toggleLayout();
@@ -1508,7 +1508,7 @@ ApplicationWindow
         shortcut: "Ctrl+L"
         enabled: currentTab && !currentTab.document.busy
 
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab)
                 currentTab.showLayoutSettings();
@@ -1522,7 +1522,7 @@ ApplicationWindow
         text: qsTr("Export To File…")
         enabled: currentTab && !currentTab.document.busy
 
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab)
                 currentTab.exportNodePositions();
@@ -1536,7 +1536,7 @@ ApplicationWindow
         text: qsTr("Import From File…")
         enabled: currentTab && !currentTab.document.busy
 
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab)
                 currentTab.importNodePositions();
@@ -1549,7 +1549,7 @@ ApplicationWindow
         icon.name: "view-fullscreen"
         text: qsTr("&Overview Mode")
         enabled: currentTab ? currentTab.document.canEnterOverviewMode : false
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab)
                 currentTab.document.switchToOverviewMode();
@@ -1562,7 +1562,7 @@ ApplicationWindow
         icon.name: "view-refresh"
         text: qsTr("&Reset View")
         enabled: currentTab ? currentTab.document.canResetView : false
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab)
                 currentTab.document.resetView();
@@ -1595,7 +1595,7 @@ ApplicationWindow
         text: qsTr("Add Bookmark…")
         shortcut: "Ctrl+D"
         enabled: currentTab ? !currentTab.document.busy && currentTab.document.numNodesSelected > 0 : false
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab !== null)
                 currentTab.showAddBookmark();
@@ -1620,7 +1620,7 @@ ApplicationWindow
         id: manageBookmarksAction
         text: qsTr("Manage Bookmarks…")
         enabled: currentTab ? !currentTab.document.busy && currentTab.document.bookmarks.length > 0 : false
-        onTriggered: function(source) { Utils.createWindow(mainWindow, manageBookmarksDialog); }
+        onTriggered: function() { Utils.createWindow(mainWindow, manageBookmarksDialog); }
     }
 
     Action
@@ -1628,7 +1628,7 @@ ApplicationWindow
         id: activateAllBookmarksAction
         text: qsTr("Activate All Bookmarks")
         enabled: currentTab ? !currentTab.document.busy && currentTab.document.bookmarks.length > 1 : false
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab !== null)
                 currentTab.gotoAllBookmarks();
@@ -1657,7 +1657,7 @@ ApplicationWindow
         enabled: currentTab ? !currentTab.document.busy &&
             (currentTab.document.transforms.length > 0 ||
             currentTab.document.visualisations.length > 0) : false
-        onTriggered: function(source) { Utils.createWindow(mainWindow, addTemplateDialog); }
+        onTriggered: function() { Utils.createWindow(mainWindow, addTemplateDialog); }
     }
 
     Component
@@ -1678,7 +1678,7 @@ ApplicationWindow
         id: manageTemplatesAction
         text: qsTr("Manage Templates…")
         enabled: { return templates.namesAsArray().length > 0; }
-        onTriggered: function(source) { Utils.createWindow(mainWindow, manageTemplatesDialog); }
+        onTriggered: function() { Utils.createWindow(mainWindow, manageTemplatesDialog); }
     }
 
     ActionGroup
@@ -1841,7 +1841,7 @@ ApplicationWindow
         id: dumpCommandStackAction
         text: qsTr("Dump command stack to qDebug")
         enabled: application.debugEnabled
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab)
                 console.log(currentTab.document.commandStackSummary());
@@ -1852,14 +1852,14 @@ ApplicationWindow
     {
         id: reportScopeTimersAction
         text: qsTr("Report Scope Timers")
-        onTriggered: function(source) { application.reportScopeTimers(); }
+        onTriggered: function() { application.reportScopeTimers(); }
     }
 
     Action
     {
         id: restartAction
         text: qsTr("Restart")
-        onTriggered: function(source) { mainWindow.restart(); }
+        onTriggered: function() { mainWindow.restart(); }
     }
 
     Labs.MessageDialog
@@ -1873,7 +1873,7 @@ ApplicationWindow
     {
         id: showCommandLineArgumentsAction
         text: qsTr("Show Command Line Arguments")
-        onTriggered: function(source)
+        onTriggered: function()
         {
             commandLineArgumentsMessageDialog.text = "Arguments:\n\n" +
                 JSON.stringify(mainWindow._processedArguments, null, 4);
@@ -1886,28 +1886,28 @@ ApplicationWindow
     {
         id: showEnvironmentAction
         text: qsTr("Show Environment")
-        onTriggered: function(source) { Utils.createWindow(mainWindow, environmentDialog); }
+        onTriggered: function() { Utils.createWindow(mainWindow, environmentDialog); }
     }
 
     Action
     {
         id: showOpenGLInfoAction
         text: qsTr("Show OpenGL Info")
-        onTriggered: function(source) { Utils.createWindow(mainWindow, openGLInfoDialog); }
+        onTriggered: function() { Utils.createWindow(mainWindow, openGLInfoDialog); }
     }
 
     Action
     {
         id: showPaletteAction
         text: qsTr("Show Palette")
-        onTriggered: function(source) { Utils.createWindow(mainWindow, showPaletteDialog); }
+        onTriggered: function() { Utils.createWindow(mainWindow, showPaletteDialog); }
     }
 
     Action
     {
         id: testCommandAction
         text: qsTr("Test Command")
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab)
                 currentTab.document.startTestCommand();
@@ -1934,7 +1934,7 @@ ApplicationWindow
         icon.name: "camera-photo"
         text: qsTr("Save As Image…")
         enabled: currentTab && !currentTab.document.busy
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab)
                 currentTab.screenshot();
@@ -1964,7 +1964,7 @@ ApplicationWindow
             currentTab.document.pluginName) : ""
         enabled: currentTab && currentTab.document.hasPluginUI && !currentTab.pluginPoppedOut
 
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab)
                 currentTab.toggleMinimise();
@@ -1994,7 +1994,7 @@ ApplicationWindow
         checkable: true
         checked: currentTab && currentTab.pluginPoppedOut
         enabled: currentTab && currentTab.document.hasPluginUI && !mainWindow._anyDocumentsBusy && Qt.platform.os !== "wasm"
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab)
                 currentTab.togglePop();
@@ -2006,7 +2006,7 @@ ApplicationWindow
         id: showProvenanceLogAction
         text: qsTr("Show Provenance Log…")
         enabled: currentTab !== null && !currentTab.document.busy
-        onTriggered: function(source) { Utils.createWindow(mainWindow, provenanceLogDialog); }
+        onTriggered: function() { Utils.createWindow(mainWindow, provenanceLogDialog); }
     }
 
     Action
@@ -2014,7 +2014,7 @@ ApplicationWindow
         id: aboutPluginsAction
         // Don't ask...
         text: Qt.platform.os === "osx" ? qsTr("Plugins…") : qsTr("About Plugins…")
-        onTriggered: function(source)
+        onTriggered: function()
         {
             Utils.createWindow(mainWindow, aboutPluginsDialog, {pluginDetails: application.pluginDetailsModel()});
         }
@@ -2024,14 +2024,14 @@ ApplicationWindow
     {
         id: aboutAction
         text: qsTr("About " + application.name + "…")
-        onTriggered: function(source) { Utils.createWindow(mainWindow, aboutDialog); }
+        onTriggered: function() { Utils.createWindow(mainWindow, aboutDialog); }
     }
 
     Action
     {
         id: aboutQtAction
         text: Qt.platform.os === "osx" ? qsTr("Qt…") : qsTr("About Qt…")
-        onTriggered: function(source)
+        onTriggered: function(source) // qmllint disable signal-handler-parameters
         {
             // For some reason calling aboutQt prevents the
             // menu from closing, so do it in advance
@@ -2051,7 +2051,7 @@ ApplicationWindow
 
         property bool active: false
 
-        onTriggered: function(source)
+        onTriggered: function()
         {
             active = true;
             application.checkForUpdates();
@@ -2066,7 +2066,7 @@ ApplicationWindow
 
         text: qsTr("Latest Changes…")
 
-        onTriggered: function(source) { Utils.createWindow(mainWindow, latestChangesDialog); }
+        onTriggered: function() { Utils.createWindow(mainWindow, latestChangesDialog); }
     }
 
     Action
@@ -2075,7 +2075,7 @@ ApplicationWindow
         text: qsTr("Copy Viewport To Clipboard")
         shortcut: "Ctrl+C"
         enabled: currentTab
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(currentTab)
                 currentTab.copyImageToClipboard();
@@ -2087,14 +2087,14 @@ ApplicationWindow
         id: onlineHelpAction
         text: qsTr("Online Help")
         shortcut: "F1"
-        onTriggered: function(source) { Qt.openUrlExternally(NativeUtils.redirectUrl("help")); }
+        onTriggered: function() { Qt.openUrlExternally(NativeUtils.redirectUrl("help")); }
     }
 
     Action
     {
         id: exampleDataSetsAction
         text: qsTr("Example Datasets")
-        onTriggered: function(source) { Qt.openUrlExternally(NativeUtils.redirectUrl("example_datasets")); }
+        onTriggered: function() { Qt.openUrlExternally(NativeUtils.redirectUrl("example_datasets")); }
     }
 
     property bool debugMenuUnhidden: false
@@ -2320,7 +2320,7 @@ ApplicationWindow
                             return "";
                         }
 
-                        onTriggered: function(source)
+                        onTriggered: function(source) // qmllint disable signal-handler-parameters
                         {
                             if(source && source.menu)
                                 source.menu.dismiss();
@@ -3123,7 +3123,7 @@ ApplicationWindow
                     currentTab.document.commandIsCancellable &&
                     !currentTab.document.commandIsCancelling : false
 
-                onClicked: function(mouse)
+                onClicked: function()
                 {
                     currentTab.document.cancelCommand();
                 }

@@ -60,7 +60,7 @@ Rectangle
         id: closeAction
         icon.name: "emblem-unreadable"
 
-        onTriggered: function(source) { root.closed(); }
+        onTriggered: function() { root.closed(); }
     }
 
     RowLayout
@@ -78,13 +78,13 @@ Rectangle
             Button
             {
                 text: qsTr("Show All Annotations")
-                onClicked: function(mouse) { root.plot.showAllColumnAnnotations(); }
+                onClicked: function() { root.plot.showAllColumnAnnotations(); }
             }
 
             Button
             {
                 text: qsTr("Hide All Annotations")
-                onClicked: function(mouse) { root.plot.hideAllColumnAnnotations(); }
+                onClicked: function() { root.plot.hideAllColumnAnnotations(); }
             }
         }
 

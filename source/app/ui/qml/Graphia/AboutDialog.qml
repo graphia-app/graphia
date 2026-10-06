@@ -104,7 +104,7 @@ Window
             {
                 text: qsTr("Close")
                 Layout.alignment: Qt.AlignRight
-                onClicked: function(mouse) { root.close(); }
+                onClicked: function() { root.close(); }
             }
         }
     }

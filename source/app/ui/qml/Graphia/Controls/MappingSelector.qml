@@ -301,7 +301,7 @@ Window
             {
                 Layout.alignment: Qt.AlignRight
                 text: qsTr("OK")
-                onClicked: function(mouse)
+                onClicked: function()
                 {
                     root.accepted();
                     root.close();
@@ -312,7 +312,7 @@ Window
             {
                 Layout.alignment: Qt.AlignRight
                 text: qsTr("Cancel")
-                onClicked: function(mouse)
+                onClicked: function()
                 {
                     root.rejected();
                     root.close();
@@ -323,7 +323,7 @@ Window
             {
                 Layout.alignment: Qt.AlignRight
                 text: qsTr("Apply")
-                onClicked: function(mouse)
+                onClicked: function()
                 {
                     root.applyClicked(root.applied);
                     root.applied = true;

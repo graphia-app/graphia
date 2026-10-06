@@ -218,7 +218,7 @@ Window
                     enabled: palettePresets.selectedIndex < 0
                     text: qsTr("Save As New Preset")
 
-                    onClicked: function(mouse)
+                    onClicked: function()
                     {
                         palettePresets.addPreset(paletteEditor.configuration);
                     }
@@ -256,7 +256,7 @@ Window
                         }
                     }
 
-                    onClicked: function(mouse)
+                    onClicked: function()
                     {
                         deleteDialog.visible = true;
                     }
@@ -274,7 +274,7 @@ Window
 
                     text: qsTr("Set As Default")
 
-                    onClicked: function(mouse)
+                    onClicked: function()
                     {
                         // Add a preset too, if it doesn't exist already
                         if(palettePresets.selectedIndex < 0)
@@ -350,7 +350,7 @@ Window
             {
                 Layout.alignment: Qt.AlignRight
                 text: qsTr("OK")
-                onClicked: function(mouse)
+                onClicked: function()
                 {
                     root.accepted();
                     root.close();
@@ -361,7 +361,7 @@ Window
             {
                 Layout.alignment: Qt.AlignRight
                 text: qsTr("Cancel")
-                onClicked: function(mouse)
+                onClicked: function()
                 {
                     root.rejected();
                     root.close();
@@ -372,7 +372,7 @@ Window
             {
                 Layout.alignment: Qt.AlignRight
                 text: qsTr("Apply")
-                onClicked: function(mouse)
+                onClicked: function()
                 {
                     root.applyClicked(root.applied);
                     root.applied = true;

@@ -197,7 +197,7 @@ Item
                 icon.name: panel.hidden ? "go-top" : "go-bottom"
                 text: panel.hidden ? qsTr("Show") : qsTr("Hide")
 
-                onClicked: function(mouse)
+                onClicked: function()
                 {
                     if(panel.hidden)
                         panel.show();

@@ -157,14 +157,14 @@ Window
             {
                 text: qsTr("Rename")
                 enabled: listBox.selectedIndex >= 0
-                onClicked: function(mouse) { listBox.edit(listBox.selectedIndex); }
+                onClicked: function() { listBox.edit(listBox.selectedIndex); }
             }
 
             Button
             {
                 text: qsTr("Remove")
                 enabled: listBox.selectedIndex >= 0
-                onClicked: function(mouse)
+                onClicked: function()
                 {
                     let names = [];
                     for(const index of listBox.selectedIndices)

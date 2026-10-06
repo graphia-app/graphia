@@ -214,7 +214,7 @@ Window
                     enabled: gradientPresets.selectedIndex < 0
                     text: qsTr("Save As New Preset")
 
-                    onClicked: function(mouse)
+                    onClicked: function()
                     {
                         gradientPresets.addPreset(gradientEditor.configuration);
                     }
@@ -252,7 +252,7 @@ Window
                         }
                     }
 
-                    onClicked: function(mouse)
+                    onClicked: function()
                     {
                         deleteDialog.visible = true;
                     }
@@ -270,7 +270,7 @@ Window
 
                     text: qsTr("Set As Default")
 
-                    onClicked: function(mouse)
+                    onClicked: function()
                     {
                         // Add a preset too, if it doesn't exist already
                         if(gradientPresets.selectedIndex < 0)
@@ -305,7 +305,7 @@ Window
                     Button
                     {
                         text: "Invert"
-                        onClicked: function(mouse) { gradientEditor.invert(); }
+                        onClicked: function() { gradientEditor.invert(); }
                     }
                 }
 
@@ -332,7 +332,7 @@ Window
             {
                 Layout.alignment: Qt.AlignRight
                 text: qsTr("OK")
-                onClicked: function(mouse)
+                onClicked: function()
                 {
                     root.accepted();
                     root.close();
@@ -343,7 +343,7 @@ Window
             {
                 Layout.alignment: Qt.AlignRight
                 text: qsTr("Cancel")
-                onClicked: function(mouse)
+                onClicked: function()
                 {
                     root.rejected();
                     root.close();
@@ -354,7 +354,7 @@ Window
             {
                 Layout.alignment: Qt.AlignRight
                 text: qsTr("Apply")
-                onClicked: function(mouse)
+                onClicked: function()
                 {
                     root.applyClicked(root.applied);
                     root.applied = true;

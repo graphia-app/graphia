@@ -60,7 +60,7 @@ PluginContent
         checkable: true
         checked: plot.showColumnNames
 
-        onTriggered: function(source)
+        onTriggered: function()
         {
             plot.showAllColumns = false;
             plot.showColumnNames = !plot.showColumnNames;
@@ -77,7 +77,7 @@ PluginContent
 
         checkable: true
 
-        onTriggered: function(source)
+        onTriggered: function()
         {
             root.togglePlotMode(PlotMode.RowsOfInterestColumnSelection);
         }
@@ -93,7 +93,7 @@ PluginContent
 
         checkable: true
 
-        onTriggered: function(source)
+        onTriggered: function()
         {
             root.togglePlotMode(PlotMode.ColumnAnnotationSelection);
         }
@@ -193,7 +193,7 @@ PluginContent
         checkable: true
         checked: plot.showAllColumns
 
-        onTriggered: function(source)
+        onTriggered: function()
         {
             plot.showColumnNames = false;
             plot.showAllColumns = !plot.showAllColumns;
@@ -369,7 +369,7 @@ PluginContent
         checkable: true
         checked: plot.groupByAnnotation
 
-        onTriggered: function(source)
+        onTriggered: function()
         {
             plot.groupByAnnotation = !plot.groupByAnnotation;
 
@@ -415,7 +415,7 @@ PluginContent
     {
         id: importAnnotationsAction
         text: qsTr("Import Annotations From Table…")
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(misc.fileOpenInitialFolder !== undefined)
                 importAnnotationsFileOpenDialog.currentFolder = misc.fileOpenInitialFolder;

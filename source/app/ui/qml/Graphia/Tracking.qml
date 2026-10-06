@@ -80,7 +80,7 @@ Rectangle
                 text: qsTr("Submit")
                 enabled: emailField.acceptableInput
 
-                onClicked: function(mouse)
+                onClicked: function()
                 {
                     preferences.permission = "given";
                     root.trackingDataEntered();

@@ -213,7 +213,7 @@ Window
                     text: misc.transformIsFavourite(transformsList.selectedValue) ?
                         qsTr("Remove Favourite") : qsTr("Add Favourite")
 
-                    onClicked: function(mouse)
+                    onClicked: function()
                     {
                         let index = transformsList.currentIndex;
                         if(index !== null)
@@ -877,14 +877,14 @@ Window
                         Layout.alignment: Qt.AlignBottom
                         text: qsTr("OK")
                         enabled: { return document.graphTransformIsValid(transformExpression); }
-                        onClicked: function(mouse) { root.accept(); }
+                        onClicked: function() { root.accept(); }
                     }
 
                     Button
                     {
                         Layout.alignment: Qt.AlignBottom
                         text: qsTr("Cancel")
-                        onClicked: function(mouse) { root.reject(); }
+                        onClicked: function() { root.reject(); }
                     }
                 }
             }

@@ -843,7 +843,7 @@ Item
                 icon.name: "go-previous"
                 text: qsTr("Goto Previous Component");
 
-                onClicked: function(mouse) { _document.gotoPrevComponent(); }
+                onClicked: function() { _document.gotoPrevComponent(); }
             }
 
             FloatingButton
@@ -861,7 +861,7 @@ Item
                 icon.name: "go-next"
                 text: qsTr("Goto Next Component");
 
-                onClicked: function(mouse) { _document.gotoNextComponent(); }
+                onClicked: function() { _document.gotoNextComponent(); }
             }
 
             RowLayout
@@ -876,7 +876,7 @@ Item
                 {
                     icon.name: "edit-undo"
                     text: qsTr("Return to Overview Mode")
-                    onClicked: function(mouse) { _document.switchToOverviewMode(); }
+                    onClicked: function() { _document.switchToOverviewMode(); }
                 }
 
                 ColumnLayout
@@ -1852,8 +1852,6 @@ Item
             root.loadComplete(url, success);
         }
 
-        onGraphChanged: function(graph, changeOccurred) { root._refreshAttributesWithSharedValues(); }
-
         property var _comandProgressSamples: []
         property int commandSecondsRemaining
 
@@ -1905,6 +1903,13 @@ Item
                 root.commandComplete();
             }
         }
+    }
+
+    // Document's graphChanged has a Graph parameter, unknown to QML
+    Connections
+    {
+        target: _document
+        function onGraphChanged() { root._refreshAttributesWithSharedValues(); }
     }
 
     signal loadComplete(url url, bool success)

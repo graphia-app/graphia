@@ -370,7 +370,7 @@ ApplicationWindow
             enabled: root._resultsAvailable && heatmap.visible
             text: qsTr("Save As Image…")
             icon.name: "camera-photo"
-            onTriggered: function(source)
+            onTriggered: function()
             {
                 let folder = screenshot.path !== undefined ? screenshot.path : "";
                 let path = root.saveFileName(folder);
@@ -391,7 +391,7 @@ ApplicationWindow
             enabled: root._resultsAvailable && table.rowCount > 1 // rowCount includes header
             text: qsTr("Export Table…")
             icon.name: "document-save"
-            onTriggered: function(source)
+            onTriggered: function()
             {
                 let folder = misc.fileSaveInitialFolder !== undefined ? misc.fileSaveInitialFolder : "";
                 let path = root.saveFileName(folder);

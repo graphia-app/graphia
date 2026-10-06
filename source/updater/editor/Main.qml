@@ -580,7 +580,7 @@ ApplicationWindow
 
         enabled: !root.busy
 
-        onTriggered: function(source)
+        onTriggered: function()
         {
             if(settings.defaultOpenFolder !== undefined)
                 openDialog.currentFolder = settings.defaultOpenFolder;
@@ -656,7 +656,7 @@ ApplicationWindow
 
         enabled: root.canSave
 
-        onTriggered: function(source)
+        onTriggered: function()
         {
             root.save();
         }
@@ -669,7 +669,7 @@ ApplicationWindow
 
         enabled: root.canSave
 
-        onTriggered: function(source)
+        onTriggered: function()
         {
             root.lastUsedFilename = "";
             root.save();
@@ -824,7 +824,7 @@ ApplicationWindow
                             Button
                             {
                                 text: qsTr("Add Image")
-                                onClicked: function(mouse)
+                                onClicked: function()
                                 {
                                     if(settings.defaultImageOpenFolder !== undefined)
                                         imageFileDialog.currentFolder = settings.defaultImageOpenFolder;
@@ -902,7 +902,7 @@ ApplicationWindow
                                 enabled: customCommands.checked
                                 text: qsTr("Custom Commands")
 
-                                onClicked: function(mouse)
+                                onClicked: function()
                                 {
                                     if(customCommandsDialog.operatingSystems.length === 0)
                                         customCommandsDialog.operatingSystems = JSON.parse(settings.operatingSystems);
@@ -1151,7 +1151,7 @@ ApplicationWindow
                 enabled: !root.busy
 
                 text: qsTr("Add Upgrade")
-                onClicked: function(mouse) { tabBar.createTab(); }
+                onClicked: function() { tabBar.createTab(); }
             }
 
             Button
@@ -1159,7 +1159,7 @@ ApplicationWindow
                 enabled: !root.busy
 
                 text: qsTr("Remove Upgrade")
-                onClicked: function(mouse)
+                onClicked: function()
                 {
                     tabBar.removeTab(tabBar.currentIndex);
                 }

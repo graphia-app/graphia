@@ -207,7 +207,7 @@ Item
                 Button
                 {
                     text: visuals.textFont + " " + visuals.textSize + "pt";
-                    onClicked: function(mouse)
+                    onClicked: function()
                     {
                         fontDialog.currentFont.family = visuals.textFont;
                         fontDialog.currentFont.pointSize = visuals.textSize;
