@@ -284,12 +284,12 @@ function setAdd(set, value)
         return;
     }
 
-    let found = setContains(set, value);
+    if(setContains(set, value))
+        return set;
 
-    if(!found)
-        set.push(value);
-
-    return set;
+    // Return a new array; assigning a changed array back to the property it
+    // came from doesn't count as a change
+    return [...set, value];
 }
 
 function setRemove(set, value)
@@ -300,12 +300,8 @@ function setRemove(set, value)
         return;
     }
 
-    let index = set.indexOf(value);
-
-    if(index > -1)
-        set.splice(index, 1);
-
-    return set;
+    // As with setAdd, return a new array
+    return set.filter(v => v !== value);
 }
 
 function setIntersection(a, b)

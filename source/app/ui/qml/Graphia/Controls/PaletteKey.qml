@@ -104,7 +104,7 @@ Item
                 colors.push(palette.autoColors[i]);
 
                 if(i < stringValues.length)
-                    Utils.setAdd(assignedValues, stringValues[i]);
+                    assignedValues = Utils.setAdd(assignedValues, stringValues[i]);
             }
         }
 
@@ -133,7 +133,7 @@ Item
                     colors[colorIndex] = color;
                 }
 
-                Utils.setAdd(assignedValues, stringValue);
+                assignedValues = Utils.setAdd(assignedValues, stringValue);
                 fixedColors.push({"index": colorIndex, "stringValue": stringValue});
             }
 

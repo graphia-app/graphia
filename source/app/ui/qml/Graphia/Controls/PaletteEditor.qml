@@ -40,15 +40,15 @@ ColumnLayout
     {
         let palette = JSON.parse(configuration);
 
-        paletteAutoColorListRepeater.model = root._autoColors = [];
+        let autoColors = [];
 
         if(palette.autoColors !== undefined)
         {
             for(let key = 0; key < palette.autoColors.length; key++)
-                root._autoColors.push(palette.autoColors[key]);
+                autoColors.push(palette.autoColors[key]);
         }
 
-        paletteAutoColorListRepeater.model = root._autoColors;
+        paletteAutoColorListRepeater.model = root._autoColors = autoColors;
 
         if(palette.defaultColor !== undefined)
         {
@@ -61,7 +61,7 @@ ColumnLayout
             generateColorsRadioButton.checked = true;
         }
 
-        paletteFixedColorListRepeater.model = root._fixedColors = [];
+        let fixedColors = [];
 
         if(palette.fixedColors !== undefined)
         {
@@ -73,11 +73,11 @@ ColumnLayout
                     "color": palette.fixedColors[stringValue]
                 };
 
-                root._fixedColors.push(o);
+                fixedColors.push(o);
             }
         }
 
-        paletteFixedColorListRepeater.model = root._fixedColors;
+        paletteFixedColorListRepeater.model = root._fixedColors = fixedColors;
     }
 
     function updateRadioButtons()
@@ -178,7 +178,7 @@ ColumnLayout
 
                 onClicked: function(mouse)
                 {
-                    let colors = root._autoColors;
+                    let colors = root._autoColors.slice();
 
                     let newColor = root.stringValues.length > 0 ?
                         NativeUtils.colorForString(root.stringValues[0]) : "red";
@@ -257,7 +257,7 @@ ColumnLayout
 
                     onColorChanged:
                     {
-                        let colors = root._autoColors;
+                        let colors = root._autoColors.slice();
                         colors[index] = color;
                         root._autoColors = colors;
                     }
@@ -273,7 +273,7 @@ ColumnLayout
 
                     onClicked: function(mouse)
                     {
-                        let colors = root._autoColors;
+                        let colors = root._autoColors.slice();
                         colors.splice(index, 1);
                         root._autoColors = colors;
                         root.updateRadioButtons();
@@ -447,7 +447,7 @@ ColumnLayout
                         initialValue = root.stringValues[0];
                     }
 
-                    let colors = root._fixedColors;
+                    let colors = root._fixedColors.slice();
 
                     let newColor = initialValue.length > 0 ?
                         NativeUtils.colorForString(initialValue) : "red";
@@ -505,14 +505,14 @@ ColumnLayout
 
                     onCurrentTextChanged:
                     {
-                        let colors = root._fixedColors;
+                        let colors = root._fixedColors.slice();
                         colors[index].stringValue = currentText;
                         root._fixedColors = colors;
                     }
 
                     onEditTextChanged:
                     {
-                        let colors = root._fixedColors;
+                        let colors = root._fixedColors.slice();
                         colors[index].stringValue = editText;
                         root._fixedColors = colors;
                     }
@@ -539,7 +539,7 @@ ColumnLayout
 
                     onColorChanged:
                     {
-                        let colors = root._fixedColors;
+                        let colors = root._fixedColors.slice();
                         colors[index].color = color;
                         root._fixedColors = colors;
                     }
@@ -555,7 +555,7 @@ ColumnLayout
 
                     onClicked: function(mouse)
                     {
-                        let colors = root._fixedColors;
+                        let colors = root._fixedColors.slice();
                         colors.splice(index, 1);
                         root._fixedColors = colors;
                         root.updateRadioButtons();

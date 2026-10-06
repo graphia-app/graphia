@@ -264,7 +264,7 @@ Item
                     let min = Math.min(row, treeView.lastSelectedRow);
                     let max = Math.max(row, treeView.lastSelectedRow);
 
-                    let newSelectedRows = treeView.selectedRows;
+                    let newSelectedRows = treeView.selectedRows.slice();
 
                     for(let i = min; i <= max; i++)
                     {
@@ -277,7 +277,7 @@ Item
 
                 function selectionWithIndividualAddedRow(row)
                 {
-                    let newSelectedRows = treeView.selectedRows;
+                    let newSelectedRows = treeView.selectedRows.slice();
                     let metaIndex = newSelectedRows.indexOf(row);
 
                     if(metaIndex < 0)

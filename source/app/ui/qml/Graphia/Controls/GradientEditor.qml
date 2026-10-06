@@ -49,9 +49,11 @@ Item
         markerRepeater.model = root._markers = markers;
     }
 
+    // The markers are always copied before being changed; assigning a changed
+    // array back to the property it came from doesn't count as a change
     function addMarker(value, color)
     {
-        let markers = root._markers;
+        let markers = root._markers.slice();
 
         let newMarker = {};
         newMarker.value = value;
@@ -63,7 +65,7 @@ Item
 
     function removeMarker(index)
     {
-        let markers = root._markers;
+        let markers = root._markers.slice();
         markers.splice(index, 1);
 
         markerRepeater.model = root._markers = markers;
@@ -71,9 +73,7 @@ Item
 
     function alterMarker(index, value, color)
     {
-        let markers = root._markers;
-        markers.splice(index, 1);
-
+        root._markers = root._markers.filter((marker, i) => i !== index);
         addMarker(value, color);
     }
 
