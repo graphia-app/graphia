@@ -147,8 +147,8 @@ Window
     ImportAnnotationsKeyDetection
     {
         id: importAnnotationsKeyDetection
-        tabularData: tabularDataParser.data
-        plugin: root.pluginModel
+        tabularData: tabularDataParser.data // qmllint disable missing-type unresolved-type
+        plugin: root.pluginModel // qmllint disable missing-type
 
         property bool _performedAtLeastOnce: false
 
@@ -510,7 +510,7 @@ Window
             }
 
             root.pluginModel.importAnnotationsFromTable(
-                tabularDataParser.data,
+                tabularDataParser.data, // qmllint disable unresolved-type
                 keyRowIndex, annotationRowIndices,
                 replaceCheckbox.checked);
 

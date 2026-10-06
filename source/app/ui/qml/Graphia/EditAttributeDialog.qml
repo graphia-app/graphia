@@ -858,7 +858,7 @@ Window
                 onClicked: function()
                 {
                     root.document.editAttribute(root._attributeName,
-                        editAttributeTableModel.edits, root._selectedType,
+                        editAttributeTableModel.edits, root._selectedType, // qmllint disable unresolved-type
                         descriptionTextField.text);
                     root.close();
                 }

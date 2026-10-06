@@ -48,7 +48,7 @@ BaseParameterDialog
 
         onDataLoaded:
         {
-            root.parameters.data = tabularDataParser.data;
+            root.parameters.data = tabularDataParser.data; // qmllint disable unresolved-type
 
             // If the third column is numerical, assume it's an edge weight
             if(model.columnCount() > 2 && model.columnIsNumerical(2))

@@ -1025,7 +1025,7 @@ PluginContent
                     rightPadding: plotFlickable.verticalScrollBarWidth
                     bottomPadding: plotFlickable.horizontalScrollBarHeight
 
-                    model: root.pluginModel
+                    model: root.pluginModel // qmllint disable missing-type
 
                     onPlotOptionsChanged:
                     {

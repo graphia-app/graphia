@@ -105,7 +105,7 @@ BaseParameterDialog
         property bool edgesWarning: numEdges > _warningThreshold
         property bool warning: nodesWarning || edgesWarning
 
-        onDataLoaded: { root.parameters.data = tabularDataParser.data; }
+        onDataLoaded: { root.parameters.data = tabularDataParser.data; } // qmllint disable unresolved-type
     }
 
     ColumnLayout

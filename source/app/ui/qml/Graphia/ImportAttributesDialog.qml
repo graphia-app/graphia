@@ -160,7 +160,7 @@ Window
     ImportAttributesKeyDetection
     {
         id: importAttributesKeyDetection
-        tabularData: tabularDataParser.data
+        tabularData: tabularDataParser.data // qmllint disable missing-type unresolved-type
         document: root.document
 
         property bool _performedAtLeastOnce: false
@@ -589,7 +589,7 @@ Window
             }
 
             root.document.importAttributesFromTable(
-                keyAttributeName, tabularDataParser.data,
+                keyAttributeName, tabularDataParser.data, // qmllint disable unresolved-type
                 keyColumnIndex, attributeColumnIndices,
                 replaceCheckbox.checked);
 
