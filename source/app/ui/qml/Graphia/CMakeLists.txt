@@ -61,6 +61,7 @@ qt_add_qml_module(main_qml
         document.h document.cpp
         editattributetablemodel.h editattributetablemodel.cpp
         enrichmentheatmap.h enrichmentheatmap.cpp
+        enrichmenttablemodel.h enrichmenttablemodel.cpp
         findtypes.h
         graphdisplay.h graphdisplay.cpp
         graphrenderertypes.h

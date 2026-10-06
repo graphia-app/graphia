@@ -157,7 +157,6 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/attributes/attribute.cpp
     ${CMAKE_CURRENT_LIST_DIR}/attributes/conditionfncreator.cpp
     ${CMAKE_CURRENT_LIST_DIR}/attributes/enrichmentcalculator.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/attributes/enrichmenttablemodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/commands/applytransformscommand.cpp
     ${CMAKE_CURRENT_LIST_DIR}/commands/applyvisualisationscommand.cpp
     ${CMAKE_CURRENT_LIST_DIR}/commands/cloneattributecommand.cpp
