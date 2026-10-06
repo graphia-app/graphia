@@ -51,7 +51,7 @@ class CorrelationTabularDataParser : public QObject, public Cancellable, public 
     Q_PROPERTY(QVariantMap dataRect READ dataRect NOTIFY dataRectChanged)
     Q_PROPERTY(bool dataHasNumericalRect MEMBER _dataHasNumericalRect NOTIFY dataHasNumericalRectChanged)
     Q_PROPERTY(std::shared_ptr<TabularData> data MEMBER _dataPtr NOTIFY dataChanged)
-    Q_PROPERTY(QAbstractTableModel* model READ tableModel NOTIFY dataRectChanged)
+    Q_PROPERTY(TabularDataModel* model READ tableModel NOTIFY dataRectChanged)
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
     Q_PROPERTY(bool transposed READ transposed WRITE setTransposed NOTIFY transposedChanged)
 
@@ -109,7 +109,7 @@ public:
     Q_INVOKABLE void estimateGraphSize(const QVariantMap& parameters);
     bool graphSizeEstimateInProgress() const { return _graphSizeEstimateFutureWatcher.isRunning(); }
 
-    QAbstractTableModel* tableModel();
+    TabularDataModel* tableModel();
     bool busy() const { return _dataRectangleFutureWatcher.isRunning() || _dataParserWatcher.isRunning(); }
 
     bool transposed() const;

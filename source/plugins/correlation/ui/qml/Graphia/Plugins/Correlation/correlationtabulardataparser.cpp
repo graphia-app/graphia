@@ -637,7 +637,7 @@ void CorrelationTabularDataParser::onDataLoaded()
     emit completeChanged();
 }
 
-QAbstractTableModel* CorrelationTabularDataParser::tableModel()
+TabularDataModel* CorrelationTabularDataParser::tableModel()
 {
     return &_model;
 }

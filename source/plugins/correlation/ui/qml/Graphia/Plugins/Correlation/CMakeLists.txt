@@ -5,6 +5,7 @@ find_package(Qt6 REQUIRED COMPONENTS Quick Concurrent)
 qt_add_qml_module(correlation_qml
     URI Graphia.Plugins.Correlation
     STATIC
+    DEPENDENCIES Graphia.SharedTypes
     QML_FILES
         CorrelationParameters.qml
         ImportAnnotationsDialog.qml

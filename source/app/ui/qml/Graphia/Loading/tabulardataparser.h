@@ -44,7 +44,6 @@
 #include <cstddef>
 
 class TabularDataParser;
-class QAbstractTableModel;
 
 enum class HeaderModelType : unsigned char { Rows, Columns };
 
@@ -84,7 +83,7 @@ class TabularDataParser : public QObject, virtual public Cancellable, virtual pu
     QML_ELEMENT
 
     Q_PROPERTY(std::shared_ptr<TabularData> data MEMBER _dataPtr NOTIFY dataChanged)
-    Q_PROPERTY(QAbstractTableModel* model READ tableModel NOTIFY dataLoaded)
+    Q_PROPERTY(TabularDataModel* model READ tableModel NOTIFY dataLoaded)
 
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
     Q_PROPERTY(int progress MEMBER _progress WRITE setProgress NOTIFY progressChanged)
@@ -138,7 +137,7 @@ public:
 
     bool busy() const { return _dataParserWatcher.isRunning(); }
 
-    QAbstractTableModel* tableModel() { return &_model; }
+    TabularDataModel* tableModel() { return &_model; }
 
 signals:
     void dataChanged();

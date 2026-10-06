@@ -5,6 +5,7 @@ find_package(Qt6 REQUIRED COMPONENTS Quick Concurrent)
 qt_add_qml_module(loading_qml
     URI Graphia.Loading
     STATIC
+    DEPENDENCIES Graphia.SharedTypes
     SOURCES
         adjacencymatrixtabulardataparser.h adjacencymatrixtabulardataparser.cpp
         tabulardataparser.h tabulardataparser.cpp
