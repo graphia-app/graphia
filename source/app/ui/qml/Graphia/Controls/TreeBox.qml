@@ -483,10 +483,10 @@ Item
                                 contentItem.textFormat = Text.StyledText;
                             }
 
-                            if(contentItem.text)
+                            if(contentItem.text) // qmllint disable missing-property
                                 contentItem.text = Qt.binding(() => root.itemTextDelegateFunction(model));
 
-                            if(indicator.color)
+                            if(indicator.color) // qmllint disable missing-property
                                 indicator.color = contrastBinding;
 
                             for(let i = 0; i < indicator.children.length; i++)

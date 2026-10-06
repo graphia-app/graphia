@@ -41,7 +41,7 @@ MouseArea
 
         while(p)
         {
-            if(p.hoveredLink !== undefined)
+            if(p.hoveredLink !== undefined) // qmllint disable missing-property
             {
                 root._parentWithHoveredLinkProperty = p;
                 return;

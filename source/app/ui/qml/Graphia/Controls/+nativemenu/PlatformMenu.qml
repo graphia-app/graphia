@@ -26,7 +26,7 @@ Labs.Menu
     id: menu
 
     property bool hidden: false
-    visible: !hidden && (menuBar ? menuBar.visible : true)
+    visible: !hidden && (menuBar ? menuBar.visible : true) // qmllint disable missing-property
 
     readonly property int count: items.length
 

@@ -35,6 +35,11 @@ Item
 
     signal clicked()
 
+    component Marker: Item
+    {
+        property color color
+    }
+
     property var _markers : []
 
     function setup(configuration)
@@ -182,7 +187,7 @@ Item
                     // Find suitable left + right marker (also find the closest marker)
                     for(let i = 0; i < markerRepeater.count; i++)
                     {
-                        let modelObj = markerRepeater.itemAt(i);
+                        let modelObj = markerRepeater.itemAt(i) as Marker;
                         if(modelObj.x < findValue)
                         {
                             if(leftItem === null || modelObj.x > leftItem.x)
@@ -227,7 +232,7 @@ Item
             {
                 id: markerRepeater
 
-                delegate: Item
+                delegate: Marker
                 {
                     id: marker
 
@@ -239,7 +244,7 @@ Item
                     width: picker._markerWidth
                     height: picker.height
 
-                    property alias color: canvas.fillColor
+                    color: modelData.color
 
                     function setColor(color)
                     {
@@ -251,7 +256,7 @@ Item
                     {
                         id: canvas
 
-                        property color fillColor: marker.modelData.color
+                        property color fillColor: marker.color
                         property color borderColor: ControlColors.dark
 
                         property bool highlighted: picker.selected === marker

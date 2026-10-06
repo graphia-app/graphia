@@ -29,6 +29,7 @@ Rectangle
     id: root
 
     property CorrelationPlot plot: null
+    property bool selectedRowsDifferFromRowsOfInterest: false
 
     readonly property alias roiPercentile: percentileSlider.value
     readonly property alias roiWeight: weightSlider.value
@@ -109,7 +110,7 @@ Rectangle
                 to: 29
                 stepSize: 0.2
 
-                onValueChanged: { root.plot.selectRowsOfInterest(); }
+                onValueChanged: { root.rowsOfInterestRequested(); }
             }
 
             Text
@@ -175,7 +176,7 @@ Rectangle
                 to: 1
                 stepSize: 1
 
-                onValueChanged: { root.plot.selectRowsOfInterest(); }
+                onValueChanged: { root.rowsOfInterestRequested(); }
             }
 
             HelpTooltip
@@ -192,9 +193,9 @@ Rectangle
 
             Button
             {
-                visible: root.plot.selectedRowsDifferFromRowsOfInterest
+                visible: root.selectedRowsDifferFromRowsOfInterest
                 text: qsTr("Reselect")
-                onClicked: { root.plot.selectRowsOfInterest(); }
+                onClicked: { root.rowsOfInterestRequested(); }
             }
         }
 
@@ -216,4 +217,5 @@ Rectangle
     signal shown();
     signal hidden();
     signal closed();
+    signal rowsOfInterestRequested();
 }

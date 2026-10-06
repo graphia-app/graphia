@@ -45,6 +45,12 @@ Window
 
     property var operatingSystems: []
 
+    component OsCommandColumn: ColumnLayout
+    {
+        property string name
+        property string command
+    }
+
     ColumnLayout
     {
         anchors.fill: parent
@@ -56,7 +62,7 @@ Window
 
             model: root.operatingSystems
 
-            delegate: ColumnLayout
+            delegate: OsCommandColumn
             {
                 id: osColumn
 
@@ -64,8 +70,8 @@ Window
 
                 Layout.fillWidth: true
 
-                property alias name: osLabel.text
-                property alias command: commandTextArea.text
+                name: osLabel.text
+                command: commandTextArea.text
 
                 Label
                 {
@@ -107,7 +113,7 @@ Window
 
                     for(let i = 0; i < osControls.count; i++)
                     {
-                        let item = osControls.itemAt(i);
+                        let item = osControls.itemAt(i) as OsCommandColumn;
 
                         osCommands.push({"name": item.name, "command": item.command});
                     }

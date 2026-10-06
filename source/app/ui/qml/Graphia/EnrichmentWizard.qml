@@ -34,6 +34,11 @@ Wizard
     minimumWidth: 640
     minimumHeight: 400
 
+    component AttributeRadioButton: RadioButton
+    {
+        property var attributeName
+    }
+
     // Must be set before opening
     property var attributeGroups: null
     property var document: null
@@ -197,13 +202,13 @@ Wizard
                             {
                                 if(checkedButton !== null && root.visible)
                                 {
-                                    root.selectedAttributeGroupA = checkedButton.attributeName;
+                                    root.selectedAttributeGroupA = (checkedButton as AttributeRadioButton).attributeName;
 
                                     // Disable analysis on selected
                                     for(let i = 0; i < attributeSelectBRepeater.count; i++)
                                     {
-                                        let radioBtn = attributeSelectBRepeater.itemAt(i);
-                                        radioBtn.enabled = radioBtn.attributeName !== checkedButton.attributeName;
+                                        let radioBtn = attributeSelectBRepeater.itemAt(i) as AttributeRadioButton;
+                                        radioBtn.enabled = radioBtn.attributeName !== (checkedButton as AttributeRadioButton).attributeName;
                                     }
                                 }
                             }
@@ -214,13 +219,13 @@ Wizard
                             id: attributeSelectARepeater
                             model: proxyModel
 
-                            RadioButton
+                            AttributeRadioButton
                             {
                                 required property var model
 
                                 rightPadding: scrollViewA.scrollBarWidth
 
-                                property var attributeName: model.display
+                                attributeName: model.display
 
                                 text:
                                 {
@@ -289,7 +294,7 @@ Wizard
                             onCheckedButtonChanged:
                             {
                                 if(checkedButton !== null && root.visible)
-                                    root.selectedAttributeGroupB = checkedButton.attributeName;
+                                    root.selectedAttributeGroupB = (checkedButton as AttributeRadioButton).attributeName;
                             }
                         }
 
@@ -298,13 +303,13 @@ Wizard
                             id: attributeSelectBRepeater
                             model: proxyModel
 
-                            RadioButton
+                            AttributeRadioButton
                             {
                                 required property var model
 
                                 rightPadding: scrollViewB.scrollBarWidth
 
-                                property var attributeName: model.display
+                                attributeName: model.display
 
                                 text:
                                 {

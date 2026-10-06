@@ -337,9 +337,9 @@ Window
                 Component.onCompleted:
                 {
                     // Indicate edits by bold text, if the underlying contentItem has font.bold
-                    if(dataTypeComboBox.contentItem.font.bold !== undefined)
+                    if(dataTypeComboBox.contentItem.font.bold !== undefined) // qmllint disable missing-property
                     {
-                        dataTypeComboBox.contentItem.font.bold =
+                        dataTypeComboBox.contentItem.font.bold = // qmllint disable missing-property
                             Qt.binding(() => dataTypeComboBox.hasChanged);
                     }
                 }

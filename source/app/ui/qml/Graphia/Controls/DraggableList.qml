@@ -35,16 +35,21 @@ Item
 
     signal itemMoved(int from, int to)
 
+    component DragArea: MouseArea
+    {
+        property var item
+    }
+
     implicitWidth: column.width
     implicitHeight: column.height
 
-    function itemAt(index) { return repeater.itemAt(index).item; }
+    function itemAt(index) { return (repeater.itemAt(index) as DragArea).item; }
 
     Component
     {
         id: dragDelegate
 
-        MouseArea
+        DragArea
         {
             id: dragArea
 
@@ -59,7 +64,7 @@ Item
             drag.maximumY: drag.minimumY + ((repeater.count - 1) * content.height)
 
             property int index: DelegateModel.itemsIndex
-            property alias item: loader.item
+            item: loader.item
             property real hotspotY: content.y + (content.height * 0.5)
 
             property bool held

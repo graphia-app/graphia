@@ -323,7 +323,7 @@ Rectangle
         maximumLineCount: 1
         text: { return root.cellValueProvider(value); }
 
-        background: Rectangle { color: parent.backgroundColor }
+        background: Rectangle { color: defaultCellDelegate.backgroundColor }
 
         property var backgroundColor:
         {
@@ -427,8 +427,9 @@ Rectangle
                         root._bindDelegateProperties(headerDelegateLoader,
                             ["value", "modelColumn", "showSortIndicator", "sortIndicatorOrder"]);
 
+                        let loadedItem = item as Item;
                         headerView.implicitHeight = Math.max(headerView.implicitHeight,
-                            Math.max(item.implicitHeight, item.height));
+                            Math.max(loadedItem.implicitHeight, loadedItem.height));
                         root._headerItems.set(headerViewDelegate.model.column, headerDelegateLoader);
                     }
                 }
@@ -473,16 +474,16 @@ Rectangle
                 {
                     root._headerItems.set(model.column, headerDelegateLoader);
 
-                    if(typeof(headerDelegateLoader.item.onReused) === "function")
-                        headerDelegateLoader.item.onReused();
+                    if(typeof(headerDelegateLoader.item.onReused) === "function") // qmllint disable missing-property
+                        headerDelegateLoader.item.onReused(); // qmllint disable missing-property
                 }
 
                 TableView.onPooled:
                 {
                     root._headerItems.delete(model.column);
 
-                    if(typeof(headerDelegateLoader.item.onPooled) === "function")
-                        headerDelegateLoader.item.onPooled();
+                    if(typeof(headerDelegateLoader.item.onPooled) === "function") // qmllint disable missing-property
+                        headerDelegateLoader.item.onPooled(); // qmllint disable missing-property
                 }
             }
         }
@@ -575,10 +576,11 @@ Rectangle
                         {
                             root._bindDelegateProperties(cellDelegateLoader, ["value", "modelColumn", "modelRow"]);
 
-                            if(item.implicitHeight !== 0)
-                                root._cellDelegateHeight = Math.max(root._cellDelegateHeight, item.implicitHeight);
+                            let loadedItem = item as Item;
+                            if(loadedItem.implicitHeight !== 0)
+                                root._cellDelegateHeight = Math.max(root._cellDelegateHeight, loadedItem.implicitHeight);
 
-                            root._cellWidths.set(tableViewDelegate.model.column + "," + tableViewDelegate.model.row, Math.max(1, item.implicitWidth));
+                            root._cellWidths.set(tableViewDelegate.model.column + "," + tableViewDelegate.model.row, Math.max(1, loadedItem.implicitWidth));
                         }
                     }
 
@@ -591,10 +593,10 @@ Rectangle
                     TableView.onReused:
                     {
                         root._loadedCells.add({x: model.column, y: model.row});
-                        root._cellWidths.set(model.column + "," + model.row, Math.max(1, cellDelegateLoader.item.implicitWidth));
+                        root._cellWidths.set(model.column + "," + model.row, Math.max(1, (cellDelegateLoader.item as Item).implicitWidth));
 
-                        if(typeof(cellDelegateLoader.item.onReused) === "function")
-                            cellDelegateLoader.item.onReused();
+                        if(typeof(cellDelegateLoader.item.onReused) === "function") // qmllint disable missing-property
+                            cellDelegateLoader.item.onReused(); // qmllint disable missing-property
 
                         Qt.callLater(root._updateCellExtents);
                     }
@@ -609,8 +611,8 @@ Rectangle
 
                         root._cellWidths.delete(model.column + "," + model.row);
 
-                        if(typeof(cellDelegateLoader.item.onPooled) === "function")
-                            cellDelegateLoader.item.onPooled();
+                        if(typeof(cellDelegateLoader.item.onPooled) === "function") // qmllint disable missing-property
+                            cellDelegateLoader.item.onPooled(); // qmllint disable missing-property
 
                         Qt.callLater(root._updateCellExtents);
                     }

@@ -18,6 +18,7 @@
  */
 
 import QtQuick
+import QtQuick.Controls
 
 import Graphia.Utils
 import Graphia.Controls
@@ -29,7 +30,7 @@ Rectangle
     implicitWidth: 7
     implicitHeight: 7
 
-    readonly property int orientation: parent.orientation
+    readonly property int orientation: (parent as SplitView).orientation
 
     Canvas
     {

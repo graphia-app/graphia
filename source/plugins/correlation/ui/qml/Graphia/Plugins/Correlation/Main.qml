@@ -1168,10 +1168,12 @@ PluginContent
                             id: modalControls
 
                             plot: plot
+                            selectedRowsDifferFromRowsOfInterest: plot.selectedRowsDifferFromRowsOfInterest
 
                             onShown: { modalControlsPanel.show(); }
                             onHidden: { modalControlsPanel.hide(); }
                             onClosed: { root.setPlotMode(PlotMode.Normal); }
+                            onRowsOfInterestRequested: { plot.selectRowsOfInterest(); }
                         }
                     }
 

@@ -32,6 +32,11 @@ FramedScrollView
     property var model: null
     property var textProvider: (modelData) => modelData
 
+    component ValueCheckBox: CheckBox
+    {
+        property string value
+    }
+
     ColumnLayout
     {
         spacing: 0
@@ -42,15 +47,14 @@ FramedScrollView
 
             model: root.model ? root.model : []
 
-            CheckBox
+            ValueCheckBox
             {
                 required property var modelData
 
                 rightPadding: root.scrollBarWidth
                 checked: true
                 text: root.textProvider(modelData)
-
-                property string value: modelData
+                value: modelData
             }
         }
     }
@@ -61,7 +65,7 @@ FramedScrollView
 
         for(let i = 0; i < repeater.count; i++)
         {
-            let item = repeater.itemAt(i);
+            let item = repeater.itemAt(i) as ValueCheckBox;
 
             if(item.checked)
                 a.push(item.value);
@@ -74,7 +78,7 @@ FramedScrollView
     {
         for(let i = 0; i < repeater.count; i++)
         {
-            let item = repeater.itemAt(i);
+            let item = repeater.itemAt(i) as ValueCheckBox;
             item.checked = true;
         }
     }

@@ -35,6 +35,16 @@ Item
     property bool _storingPreference: false
     property bool _constructed: false
 
+    component ExtensionComboBox: ComboBox
+    {
+        property string extension
+    }
+
+    component UrlTypeComboBox: ComboBox
+    {
+        property string urlType
+    }
+
     Preferences
     {
         id: defaults
@@ -92,7 +102,7 @@ Item
 
         for(let i = 0; i < urlTypeSelectors.count; i++)
         {
-            let comboBox = urlTypeSelectors.itemAt(i);
+            let comboBox = urlTypeSelectors.itemAt(i) as ExtensionComboBox;
             let urlType = extensionsObject[comboBox.extension];
 
             if(urlType !== undefined)
@@ -109,7 +119,7 @@ Item
 
         for(let j = 0; j < pluginSelectors.count; j++)
         {
-            let comboBox = pluginSelectors.itemAt(j);
+            let comboBox = pluginSelectors.itemAt(j) as UrlTypeComboBox;
             let plugin = pluginsObject[comboBox.urlType];
 
             if(plugin !== undefined)
@@ -248,7 +258,7 @@ Item
                                 id: urlTypeSelectors
                                 model: root.application.ambiguousExtensions
 
-                                ComboBox
+                                ExtensionComboBox
                                 {
                                     required property string display
                                     required property int index
@@ -260,7 +270,7 @@ Item
                                     model: [qsTr("Always Ask…"), ...urlTypes.map(
                                         urlType => root.application.descriptionForUrlType(urlType))]
 
-                                    property string extension: /*model.*/display
+                                    extension: /*model.*/display
                                     property var urlTypes: { return root.application.urlTypesFor(extension); }
 
                                     onCurrentIndexChanged:
@@ -320,7 +330,7 @@ Item
                                 id: pluginSelectors
                                 model: root.application.ambiguousUrlTypes
 
-                                ComboBox
+                                UrlTypeComboBox
                                 {
                                     required property string display
                                     required property int index
@@ -331,7 +341,7 @@ Item
 
                                     model: [qsTr("Always Ask…"), ...applicablePlugins]
 
-                                    property string urlType: /*model.*/display
+                                    urlType: /*model.*/display
                                     property var applicablePlugins: { return root.application.pluginNames(urlType); }
 
                                     onCurrentIndexChanged:

@@ -97,7 +97,7 @@ Control
         onActiveFocusChanged:
         {
             if(activeFocus)
-                contentItem.selectAll();
+                (contentItem as TextInput).selectAll();
         }
 
         property QtObject _doubleValidator: DoubleValidator

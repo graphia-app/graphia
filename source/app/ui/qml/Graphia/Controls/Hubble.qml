@@ -44,7 +44,7 @@ Item
     property bool displayNext: false
     property bool displayClose: false
     property bool tooltipMode: false
-    property Item _mouseCapture
+    property HoverMousePassthrough _mouseCapture
 
     height: backRectangle.height
     width: backRectangle.width

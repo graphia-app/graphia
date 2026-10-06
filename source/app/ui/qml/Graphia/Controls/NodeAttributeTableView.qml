@@ -34,6 +34,19 @@ Item
 {
     id: root
 
+    component HeaderDelegate: DropArea
+    {
+        property var modelColumn
+        property int sourceColumn
+    }
+
+    component CellDelegate: Item
+    {
+        // For access from the outside
+        property int modelColumn
+        property int modelRow
+    }
+
     property var model
     property int defaultColumnWidth: 120
     property var selectedRows: []
@@ -576,7 +589,7 @@ Item
                     color: palette.window
                 }
 
-                delegate: DropArea
+                delegate: HeaderDelegate
                 {
                     id: headerItem
 
@@ -595,8 +608,8 @@ Item
 
                     implicitWidth: tableView.columnWidthProvider(model.column);
                     implicitHeight: headerLabel.height
-                    property var modelColumn: model.column
-                    property int sourceColumn: proxyModel.mapOrderedToSourceColumn(model.column);
+                    modelColumn: model.column
+                    sourceColumn: proxyModel.mapOrderedToSourceColumn(model.column);
 
                     Binding { target: headerContent; property: "sourceColumn"; value: headerItem.sourceColumn }
                     Binding { target: headerContent; property: "modelColumn"; value: headerItem.modelColumn }
@@ -1059,8 +1072,8 @@ Item
                     if(!item)
                         return -1;
 
-                    let headerDropAreaItem = item.childAt(mouseX + headerView.contentX, headerView.contentY);
-                    if(!headerDropAreaItem || headerDropAreaItem.modelColumn === undefined)
+                    let headerDropAreaItem = item.childAt(mouseX + headerView.contentX, headerView.contentY) as HeaderDelegate;
+                    if(!headerDropAreaItem)
                         return -1;
 
                     return headerDropAreaItem.sourceColumn;
@@ -1076,8 +1089,8 @@ Item
                     if(!hoverItem)
                         return -1;
 
-                    let tableItem = hoverItem.childAt(tableView.contentX, mouseY + tableView.contentY);
-                    if(!tableItem || tableItem.modelRow === undefined)
+                    let tableItem = hoverItem.childAt(tableView.contentX, mouseY + tableView.contentY) as CellDelegate;
+                    if(!tableItem)
                         return -1;
 
                     return tableItem.modelRow;
@@ -1118,7 +1131,7 @@ Item
 
                 FontMetrics { id: fontMetrics }
 
-                delegate: Item
+                delegate: CellDelegate
                 {
                     id: cellItem
 
@@ -1130,9 +1143,8 @@ Item
 
                     clip: false
 
-                    // For access from the outside
-                    property int modelColumn: model.column
-                    property int modelRow: model.row
+                    modelColumn: model.column
+                    modelRow: model.row
 
                     TableView.onReused:
                     {

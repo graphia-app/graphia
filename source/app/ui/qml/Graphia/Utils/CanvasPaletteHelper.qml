@@ -37,6 +37,6 @@ Item
             return;
         }
 
-        parent.requestPaint();
+        (parent as Canvas).requestPaint();
     }
 }
