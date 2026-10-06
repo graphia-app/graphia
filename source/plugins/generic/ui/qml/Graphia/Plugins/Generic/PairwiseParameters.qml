@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+pragma ComponentBehavior: Bound
+
 import QtQuick.Controls
 import QtQuick
 import QtQml
@@ -89,7 +91,7 @@ BaseParameterDialog
             {
                 if(tabularDataParser.failed)
                 {
-                    let failureMessage = Utils.format(qsTr("Failed to Load {0}"), NativeUtils.baseFileNameForUrl(url));
+                    let failureMessage = Utils.format(qsTr("Failed to Load {0}"), NativeUtils.baseFileNameForUrl(root.url));
 
                     if(tabularDataParser.failureReason.length > 0)
                         failureMessage += Utils.format(qsTr(":\n\n{0}"), tabularDataParser.failureReason);
@@ -99,7 +101,7 @@ BaseParameterDialog
                     return failureMessage;
                 }
 
-                return Utils.format(qsTr("Loading {0}…"), NativeUtils.baseFileNameForUrl(url));
+                return Utils.format(qsTr("Loading {0}…"), NativeUtils.baseFileNameForUrl(root.url));
             }
         }
 
@@ -219,6 +221,10 @@ BaseParameterDialog
 
             headerDelegate: RowLayout
             {
+                id: columnHeader
+
+                property int modelColumn: -1
+
                 height: editButton.implicitHeight
 
                 function onReused()
@@ -240,10 +246,10 @@ BaseParameterDialog
 
                     text:
                     {
-                        if(typeof(modelColumn) === "undefined")
+                        if(columnHeader.modelColumn < 0)
                             return;
 
-                        let column = root.parameters.columns[modelColumn];
+                        let column = root.parameters.columns[columnHeader.modelColumn];
                         if(column === undefined || column.type === undefined)
                             return qsTr("⨯ <i>Unused</i>");
 
@@ -316,34 +322,34 @@ BaseParameterDialog
                             }
 
                             if(selectedType === PairwiseColumnType.Unused)
-                                delete newParameters.columns[modelColumn];
+                                delete newParameters.columns[columnHeader.modelColumn];
                             else
                             {
-                                if(!newParameters.columns.hasOwnProperty(modelColumn))
-                                    newParameters.columns[modelColumn] = { "type": selectedType, "name": "" };
+                                if(!newParameters.columns.hasOwnProperty(columnHeader.modelColumn))
+                                    newParameters.columns[columnHeader.modelColumn] = { "type": selectedType, "name": "" };
                                 else
-                                    newParameters.columns[modelColumn].type = selectedType;
+                                    newParameters.columns[columnHeader.modelColumn].type = selectedType;
 
                                 if(root.columnTypeRequiresName(selectedType))
                                 {
-                                    if(newParameters.columns[modelColumn].name.length === 0 && newParameters.firstRowIsHeader)
+                                    if(newParameters.columns[columnHeader.modelColumn].name.length === 0 && newParameters.firstRowIsHeader)
                                     {
-                                        let headerIndex = tabularDataParser.model.index(0, modelColumn);
+                                        let headerIndex = tabularDataParser.model.index(0, columnHeader.modelColumn);
                                         let headerText = tabularDataParser.model.data(headerIndex);
                                         attributeNameTextField.text = headerText;
                                     }
                                     else
-                                        attributeNameTextField.text = newParameters.columns[modelColumn].name;
+                                        attributeNameTextField.text = newParameters.columns[columnHeader.modelColumn].name;
 
                                     attributeNameTextField.activate();
                                 }
                                 else
-                                    newParameters.columns[modelColumn].name = "";
+                                    newParameters.columns[columnHeader.modelColumn].name = "";
                             }
 
                             root.parameters = newParameters;
 
-                            dataTable.resizeColumnToHeader(modelColumn);
+                            dataTable.resizeColumnToHeader(columnHeader.modelColumn);
                         }
                     }
 
@@ -382,11 +388,11 @@ BaseParameterDialog
                             text = NativeUtils.sanitiseAttributeName(text);
 
                             let newParameters = Object.assign({}, root.parameters);
-                            newParameters.columns[modelColumn].name = text;
+                            newParameters.columns[columnHeader.modelColumn].name = text;
                             root.parameters = newParameters;
 
                             attributeNameTextField.visible = false;
-                            dataTable.resizeColumnToHeader(modelColumn);
+                            dataTable.resizeColumnToHeader(columnHeader.modelColumn);
                         }
                     }
                 }
@@ -399,7 +405,7 @@ BaseParameterDialog
 
                     visible:
                     {
-                        let column = root.parameters.columns[modelColumn];
+                        let column = root.parameters.columns[columnHeader.modelColumn];
                         if(column === undefined || column.type === undefined)
                             return false;
 
@@ -423,7 +429,7 @@ BaseParameterDialog
                             return;
                         }
 
-                        attributeNameTextField.text = root.parameters.columns[modelColumn].name;
+                        attributeNameTextField.text = root.parameters.columns[columnHeader.modelColumn].name;
                         attributeNameTextField.activate();
                     }
                 }
@@ -442,7 +448,7 @@ BaseParameterDialog
                 enabled: root.parametersAreValid
                 onClicked: function(mouse)
                 {
-                    accepted();
+                    root.accepted();
                     root.close();
                 }
             }
@@ -453,7 +459,7 @@ BaseParameterDialog
                 text: qsTr("Cancel")
                 onClicked: function(mouse)
                 {
-                    rejected();
+                    root.rejected();
                     root.close();
                 }
             }

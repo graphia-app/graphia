@@ -81,7 +81,7 @@ Item
 
                 onSelectedIndexChanged:
                 {
-                    goToTab(selectedIndex);
+                    root.goToTab(selectedIndex);
                 }
             }
 
@@ -112,7 +112,7 @@ Item
                 id: previousButton
                 text: qsTr("Previous")
                 onClicked: function(mouse) { root.goToPrevious(); }
-                enabled: _currentIndex > 0 && root.controlsEnabled
+                enabled: root._currentIndex > 0 && root.controlsEnabled
             }
 
             Button
@@ -120,7 +120,7 @@ Item
                 id: nextButton
                 text: qsTr("Next")
                 onClicked: function(mouse) { root.goToNext(); }
-                enabled: (_currentIndex < listTabs.length - 1) ?
+                enabled: (root._currentIndex < root.listTabs.length - 1) ?
                     root.nextEnabled && root.controlsEnabled : false
             }
 
@@ -128,7 +128,7 @@ Item
             {
                 id: finishButton
 
-                property bool _onFinishPage: _currentIndex === listTabs.length - 1
+                property bool _onFinishPage: root._currentIndex === root.listTabs.length - 1
 
                 text:
                 {
@@ -140,8 +140,8 @@ Item
 
                 onClicked: function(mouse)
                 {
-                    if(_currentIndex !== (listTabs.length - 1))
-                        goToTab(listTabs.length - 1);
+                    if(root._currentIndex !== (root.listTabs.length - 1))
+                        root.goToTab(root.listTabs.length - 1);
                     else
                         root.accepted();
                 }
@@ -152,7 +152,7 @@ Item
                         return false;
 
                     if(_onFinishPage)
-                        return finishEnabled;
+                        return root.finishEnabled;
 
                     return true;
                 }
@@ -235,7 +235,7 @@ Item
         id: numberAnimation
         target: content
         properties: "x"
-        to: _currentIndex * -(contentContainer.width)
+        to: root._currentIndex * -(contentContainer.width)
         easing.type: Easing.OutQuad
 
         onStarted: { root.animationStarted(); }

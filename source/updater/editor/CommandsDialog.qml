@@ -58,6 +58,10 @@ Window
 
             delegate: ColumnLayout
             {
+                id: osColumn
+
+                required property var modelData
+
                 Layout.fillWidth: true
 
                 property alias name: osLabel.text
@@ -70,7 +74,7 @@ Window
                     font.bold: true
                     font.pointSize: 12
 
-                    text: modelData.name
+                    text: osColumn.modelData.name
                 }
 
                 ScrollableTextArea
@@ -85,7 +89,7 @@ Window
                     font.family: "monospace"
                     font.pointSize: 9
 
-                    text: modelData.command
+                    text: osColumn.modelData.command
                 }
             }
         }

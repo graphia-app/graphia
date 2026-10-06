@@ -48,7 +48,7 @@ Window
             Layout.alignment: Qt.AlignTop
             source: "qrc:///icon/Icon128x128.png"
 
-            HiddenSwitch { onActivated: hiddenSwitchActivated(); }
+            HiddenSwitch { onActivated: root.hiddenSwitchActivated(); }
         }
 
         ColumnLayout
@@ -66,7 +66,7 @@ Window
                     qsTr("{0} is a tool for the visualisation and analysis of graphs.<br><br>" +
                     "Version {1}.<br>{2}<br><br>" +
                     "<a href=\"LICENSE\">License</a>&nbsp;&nbsp;&nbsp;<a href=\"OSS\">Third Party Licenses</a>"),
-                    applicationRef.name, applicationRef.version, applicationRef.copyright.replace("\n", "<br>"))
+                    root.applicationRef.name, root.applicationRef.version, root.applicationRef.copyright.replace("\n", "<br>"))
 
                 PointingCursorOnHoverLink {}
                 onLinkActivated: function(link)

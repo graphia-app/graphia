@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls
 
@@ -91,6 +93,12 @@ Rectangle
 
     property Component delegate: Label
     {
+        id: listBoxDelegate
+
+        required property var model
+        required property var modelData
+        required property int index
+
         anchors.left: parent ? parent.left : undefined
         anchors.right: parent ? parent.right : undefined
         anchors.leftMargin: -leftInset
@@ -100,7 +108,7 @@ Rectangle
 
         background: Rectangle
         {
-            visible: root.highlightedProvider(index)
+            visible: root.highlightedProvider(listBoxDelegate.index)
             color: palette.highlight
         }
 

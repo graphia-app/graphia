@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -226,14 +228,14 @@ Rectangle
 
         onTriggered: function(source)
         {
-            _visible = false;
-            hidden();
+            root._visible = false;
+            root.hidden();
         }
     }
 
     Shortcut
     {
-        enabled: _visible
+        enabled: root._visible
         sequence: "Esc"
         onActivated: { closeAction.trigger(); }
     }
@@ -406,12 +408,15 @@ Rectangle
 
         Repeater
         {
-            model: document.layoutSettingNames
+            model: root.document.layoutSettingNames
 
             LayoutSetting
             {
                 id: layoutSetting
-                Layout.leftMargin: _buttonMenuOffset
+
+                required property string modelData
+
+                Layout.leftMargin: root._buttonMenuOffset
 
                 onValueChanged:
                 {
@@ -440,7 +445,7 @@ Rectangle
 
                     function onLayoutSettingChanged(name, value)
                     {
-                        if(name !== modelData)
+                        if(name !== layoutSetting.modelData)
                             return;
 
                         let setting = root.document.layoutSetting(name);
@@ -453,7 +458,7 @@ Rectangle
         ToolBarSeparator
         {
             Layout.fillWidth: true
-            Layout.leftMargin: _buttonMenuOffset + Constants.margin
+            Layout.leftMargin: root._buttonMenuOffset + Constants.margin
             Layout.rightMargin: Constants.margin
             orientation: Qt.Horizontal
             visible: root.document.layoutSettingNames.length > 0
@@ -462,7 +467,7 @@ Rectangle
         LayoutSetting
         {
             id: nodeSizeSetting
-            Layout.leftMargin: _buttonMenuOffset
+            Layout.leftMargin: root._buttonMenuOffset
             name: qsTr("Nodes")
             description: qsTr("Node Size")
 
@@ -474,7 +479,7 @@ Rectangle
         {
             id: edgeSizeSetting
             enabled: visuals.showEdges
-            Layout.leftMargin: _buttonMenuOffset
+            Layout.leftMargin: root._buttonMenuOffset
             name: qsTr("Edges")
             description: qsTr("Edge Size")
 
@@ -485,7 +490,7 @@ Rectangle
         LayoutSetting
         {
             id: textSizeSetting
-            Layout.leftMargin: _buttonMenuOffset
+            Layout.leftMargin: root._buttonMenuOffset
             name: qsTr("Text")
             description: qsTr("Text Size")
 

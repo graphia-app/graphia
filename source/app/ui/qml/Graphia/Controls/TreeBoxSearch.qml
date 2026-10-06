@@ -50,7 +50,7 @@ TextField
     ModelCompleter
     {
         id: modelCompleter
-        model: treeBox && treeBox.model ? treeBox.model : null
+        model: root.treeBox && root.treeBox.model ? root.treeBox.model : null
     }
 
     validator: RegularExpressionValidator
@@ -153,20 +153,20 @@ TextField
 
     Connections
     {
-        target: treeBox
+        target: root.treeBox
 
         function onCurrentIndexChanged()
         {
-            if(!treeBox.currentIndexIsValid ||
-                modelCompleter.candidates.indexOf(treeBox.currentIndex) === -1)
+            if(!root.treeBox.currentIndexIsValid ||
+                modelCompleter.candidates.indexOf(root.treeBox.currentIndex) === -1)
             {
-                _disableCompletion();
+                root._disableCompletion();
             }
 
-            if(!treeBox.currentIndexIsValid)
+            if(!root.treeBox.currentIndexIsValid)
                 return;
 
-            root._setTextByIndex(treeBox.currentIndex);
+            root._setTextByIndex(root.treeBox.currentIndex);
         }
     }
 

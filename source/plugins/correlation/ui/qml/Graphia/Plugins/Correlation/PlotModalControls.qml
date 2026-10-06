@@ -60,7 +60,7 @@ Rectangle
         id: closeAction
         icon.name: "emblem-unreadable"
 
-        onTriggered: function(source) { closed(); }
+        onTriggered: function(source) { root.closed(); }
     }
 
     RowLayout
@@ -78,20 +78,20 @@ Rectangle
             Button
             {
                 text: qsTr("Show All Annotations")
-                onClicked: function(mouse) { plot.showAllColumnAnnotations(); }
+                onClicked: function(mouse) { root.plot.showAllColumnAnnotations(); }
             }
 
             Button
             {
                 text: qsTr("Hide All Annotations")
-                onClicked: function(mouse) { plot.hideAllColumnAnnotations(); }
+                onClicked: function(mouse) { root.plot.hideAllColumnAnnotations(); }
             }
         }
 
         RowLayout
         {
             id: rowsOfInterestColumnSelectionControls
-            enabled: plot.selectedColumns.length > 0
+            enabled: root.plot.selectedColumns.length > 0
 
             Text
             {
@@ -109,7 +109,7 @@ Rectangle
                 to: 29
                 stepSize: 0.2
 
-                onValueChanged: { plot.selectRowsOfInterest(); }
+                onValueChanged: { root.plot.selectRowsOfInterest(); }
             }
 
             Text
@@ -175,7 +175,7 @@ Rectangle
                 to: 1
                 stepSize: 1
 
-                onValueChanged: { plot.selectRowsOfInterest(); }
+                onValueChanged: { root.plot.selectRowsOfInterest(); }
             }
 
             HelpTooltip
@@ -192,9 +192,9 @@ Rectangle
 
             Button
             {
-                visible: plot.selectedRowsDifferFromRowsOfInterest
+                visible: root.plot.selectedRowsDifferFromRowsOfInterest
                 text: qsTr("Reselect")
-                onClicked: { plot.selectRowsOfInterest(); }
+                onClicked: { root.plot.selectRowsOfInterest(); }
             }
         }
 

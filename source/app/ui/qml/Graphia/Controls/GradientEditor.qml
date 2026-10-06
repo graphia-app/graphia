@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Window
 import QtQuick.Layouts
@@ -111,9 +113,9 @@ Item
             {
                 let o = {};
 
-                for(let i = 0; i < _markers.length; i++)
+                for(let i = 0; i < root._markers.length; i++)
                 {
-                    let marker = _markers[i];
+                    let marker = root._markers[i];
 
                     let normalisedPos = marker.value;
                     let color = marker.color;
@@ -231,6 +233,9 @@ Item
                 {
                     id: marker
 
+                    required property var modelData
+                    required property int index
+
                     x: picker.valueToMarkerPosition(modelData.value)
                     y: 0
                     width: picker._markerWidth
@@ -248,7 +253,7 @@ Item
                     {
                         id: canvas
 
-                        property color fillColor: modelData.color
+                        property color fillColor: marker.modelData.color
                         property color borderColor: ControlColors.dark
 
                         property bool highlighted: picker.selected === marker
@@ -321,7 +326,7 @@ Item
 
                             toolTip.visible = false;
 
-                            root.alterMarker(index, picker.markerToValue(marker), modelData.color);
+                            root.alterMarker(marker.index, picker.markerToValue(marker), marker.modelData.color);
                         }
 
                         onDoubleClicked: function(mouse)
@@ -349,7 +354,7 @@ Item
                         onClicked: function(mouse)
                         {
                             if(mouse.button & Qt.RightButton && root._markers.length > 2)
-                                root.removeMarker(index);
+                                root.removeMarker(marker.index);
                         }
                     }
                 }

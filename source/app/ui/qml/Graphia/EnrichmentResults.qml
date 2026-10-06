@@ -142,7 +142,11 @@ ApplicationWindow
             Repeater
             {
                 model: root.models
-                TabBarButton { text: Utils.format(qsTr("Results {0}"), index + 1) }
+                TabBarButton
+                {
+                    required property int index
+                    text: Utils.format(qsTr("Results {0}"), index + 1)
+                }
             }
         }
 

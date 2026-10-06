@@ -110,9 +110,9 @@ Item
         radius: 2
         color:
         {
-            if(root.enabled && mouseArea.containsMouse && hoverEnabled)
+            if(root.enabled && mouseArea.containsMouse && root.hoverEnabled)
                 return root.hoverColor;
-            else if(selected)
+            else if(root.selected)
                 return palette.highlight;
 
             return "transparent";
@@ -125,8 +125,8 @@ Item
 
         anchors.centerIn: parent
 
-        width: root.width !== undefined ? root.width - _padding : undefined
-        height: root.height !== undefined ? root.height - _padding : undefined
+        width: root.width !== undefined ? root.width - root._padding : undefined
+        height: root.height !== undefined ? root.height - root._padding : undefined
 
         Text
         {
@@ -135,7 +135,7 @@ Item
             visible: root.showLabels
             text:
             {
-                if(mappedMinimum > minimum)
+                if(root.mappedMinimum > root.minimum)
                     return "≤ " + NativeUtils.formatNumberScientific(root.mappedMinimum);
 
                 return NativeUtils.formatNumberScientific(root.minimum);
@@ -177,7 +177,7 @@ Item
             visible: root.showLabels
             text:
             {
-                if(mappedMaximum < maximum)
+                if(root.mappedMaximum < root.maximum)
                     return "≥ " + NativeUtils.formatNumberScientific(root.mappedMaximum);
 
                 return NativeUtils.formatNumberScientific(root.maximum);

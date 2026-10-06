@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Window
 import QtQuick.Controls
@@ -62,6 +64,9 @@ Window
 
                     RowLayout
                     {
+                        id: paletteRow
+
+                        required property string modelData
                         property string colorName: modelData
 
                         Repeater
@@ -71,9 +76,12 @@ Window
                             Rectangle
                             {
                                 id: colorRectangle
+
+                                required property string modelData
+
                                 width: 128
                                 height: 28
-                                color: palette[modelData][colorName]
+                                color: palette[modelData][paletteRow.colorName]
                                 border.color: NativeUtils.contrastingColor(color)
                                 border.width: 1
 
@@ -90,7 +98,7 @@ Window
 
                         Label
                         {
-                            text: modelData
+                            text: paletteRow.modelData
                             color: palette.windowText
                         }
                     }

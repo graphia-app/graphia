@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+pragma ComponentBehavior: Bound
+
 import QtQml
 import QtQml.Models
 import QtQuick
@@ -38,6 +40,7 @@ Item
     id: root
 
     property Application application
+    property var mainWindow: null
 
     property url url
     property url savedFileUrl
@@ -275,7 +278,7 @@ Item
         nameFilters:
         {
             let filters = [];
-            let saverTypes = application ? application.saverFileTypes() : [];
+            let saverTypes = root.application ? root.application.saverFileTypes() : [];
             for(let i = 0; i < saverTypes.length; i++)
                 filters.push(Utils.format(qsTr("{0} files (*.{1})"), saverTypes[i].name, saverTypes[i].extension));
 
@@ -286,16 +289,16 @@ Item
         onAccepted:
         {
             let saverName = "";
-            let saverTypes = application.saverFileTypes();
+            let saverTypes = root.application.saverFileTypes();
 
             // If no saver is found fall back to default saver (All Files filter will do this)
             if(selectedNameFilter.index < saverTypes.length)
                 saverName = saverTypes[selectedNameFilter.index].name;
             else
-                saverName = appName;
+                saverName = root.appName;
 
             misc.fileSaveInitialFolder = currentFolder.toString();
-            saveAsNamedFile(selectedFile, saverName);
+            root.saveAsNamedFile(selectedFile, saverName);
         }
     }
 
@@ -324,7 +327,7 @@ Item
         property var onSaveConfirmedFunction
 
         title: qsTr("File Changed")
-        text: Utils.format(qsTr("Do you want to save changes to '{0}'?"), baseFileName)
+        text: Utils.format(qsTr("Do you want to save changes to '{0}'?"), root.baseFileName)
         buttons: Labs.MessageDialog.Save | Labs.MessageDialog.Discard | Labs.MessageDialog.Cancel
         modality: Qt.ApplicationModal
 
@@ -343,7 +346,7 @@ Item
             onSaveConfirmedFunction = null;
 
             _document.saveComplete.connect(proxyFn);
-            saveFile();
+            root.saveFile();
         }
 
         onDiscardClicked:
@@ -603,7 +606,7 @@ Item
         text: Utils.format(qsTr("Select Sources of '{0}'"), contextMenu.clickedNodeName)
         property bool visible: _document.directed && contextMenu.nodeWasClicked
         enabled: !_document.busy && visible
-        onTriggered: { selectSources(contextMenu.clickedNodeId, false); }
+        onTriggered: { root.selectSources(contextMenu.clickedNodeId, false); }
     }
 
     Action
@@ -612,7 +615,7 @@ Item
         text: Utils.format(qsTr("Select Targets of '{0}'"), contextMenu.clickedNodeName)
         property bool visible: _document.directed && contextMenu.nodeWasClicked
         enabled: !_document.busy && visible
-        onTriggered: { selectTargets(contextMenu.clickedNodeId, false); }
+        onTriggered: { root.selectTargets(contextMenu.clickedNodeId, false); }
     }
 
     Action
@@ -621,7 +624,7 @@ Item
         text: Utils.format(qsTr("Select Neigh&bours of '{0}'"), contextMenu.clickedNodeName)
         property bool visible: contextMenu.nodeWasClicked
         enabled: !_document.busy && visible
-        onTriggered: { selectNeighbours(contextMenu.clickedNodeId, false); }
+        onTriggered: { root.selectNeighbours(contextMenu.clickedNodeId, false); }
     }
 
     SplitView
@@ -673,13 +676,13 @@ Item
                     }
 
                     PlatformMenuItem { id: delete1; hidden: !deleteNodeAction.visible; action: deleteNodeAction }
-                    PlatformMenuItem { id: delete2; hidden: !deleteAction.visible || contextMenu.clickedNodeIsSameAsSelection; action: deleteAction }
+                    PlatformMenuItem { id: delete2; hidden: !root.mainWindow.deleteAction.visible || contextMenu.clickedNodeIsSameAsSelection; action: root.mainWindow.deleteAction }
                     PlatformMenuSeparator { hidden: delete1.hidden && delete2.hidden }
 
-                    PlatformMenuItem { hidden: _document.numNodesSelected === graph.numNodes; action: selectAllAction }
-                    PlatformMenuItem { hidden: _document.numNodesSelected === graph.numNodes || graph.inOverviewMode; action: selectAllVisibleAction }
-                    PlatformMenuItem { hidden: _document.nodeSelectionEmpty; action: selectNoneAction }
-                    PlatformMenuItem { hidden: _document.nodeSelectionEmpty; action: invertSelectionAction }
+                    PlatformMenuItem { hidden: _document.numNodesSelected === graph.numNodes; action: root.mainWindow.selectAllAction }
+                    PlatformMenuItem { hidden: _document.numNodesSelected === graph.numNodes || graph.inOverviewMode; action: root.mainWindow.selectAllVisibleAction }
+                    PlatformMenuItem { hidden: _document.nodeSelectionEmpty; action: root.mainWindow.selectNoneAction }
+                    PlatformMenuItem { hidden: _document.nodeSelectionEmpty; action: root.mainWindow.invertSelectionAction }
 
                     PlatformMenuItem { hidden: !selectSourcesOfNodeAction.visible; action: selectSourcesOfNodeAction }
                     PlatformMenuItem { hidden: !selectTargetsOfNodeAction.visible; action: selectTargetsOfNodeAction }
@@ -688,15 +691,16 @@ Item
                     {
                         id: sharedValuesOfNodeContextMenu
                         enabled: !_document.busy && !hidden
-                        hidden: numAttributesWithSharedValues === 0 || !contextMenu.nodeWasClicked
+                        hidden: root.numAttributesWithSharedValues === 0 || !contextMenu.nodeWasClicked
                         title: Utils.format(qsTr("Select Shared Values of '{0}'"), contextMenu.clickedNodeName)
                         Instantiator
                         {
-                            model: sharedValuesAttributeNames
+                            model: root.sharedValuesAttributeNames
                             PlatformMenuItem
                             {
+                                required property string modelData
                                 text: modelData
-                                onTriggered: { selectBySharedAttributeValue(text, contextMenu.clickedNodeId); }
+                                onTriggered: { root.selectBySharedAttributeValue(text, contextMenu.clickedNodeId); }
                             }
                             onObjectAdded: function(index, object) { sharedValuesOfNodeContextMenu.insertItem(index, object); }
                             onObjectRemoved: function(index, object) { sharedValuesOfNodeContextMenu.removeItem(object); }
@@ -704,31 +708,32 @@ Item
                     }
 
                     PlatformMenuItem { hidden: _document.nodeSelectionEmpty || contextMenu.clickedNodeIsSameAsSelection ||
-                        !selectSourcesAction.visible; action: selectSourcesAction }
+                        !root.mainWindow.selectSourcesAction.visible; action: root.mainWindow.selectSourcesAction }
                     PlatformMenuItem { hidden: _document.nodeSelectionEmpty || contextMenu.clickedNodeIsSameAsSelection ||
-                        !selectTargetsAction.visible; action: selectTargetsAction }
+                        !root.mainWindow.selectTargetsAction.visible; action: root.mainWindow.selectTargetsAction }
                     PlatformMenuItem { hidden: _document.nodeSelectionEmpty || contextMenu.clickedNodeIsSameAsSelection ||
-                        !selectNeighboursAction.visible; action: selectNeighboursAction }
+                        !root.mainWindow.selectNeighboursAction.visible; action: root.mainWindow.selectNeighboursAction }
                     PlatformMenu
                     {
                         id: sharedValuesSelectionContextMenu
                         enabled: !_document.busy && !hidden
-                        hidden: numAttributesWithSharedValues === 0 || _document.nodeSelectionEmpty ||
+                        hidden: root.numAttributesWithSharedValues === 0 || _document.nodeSelectionEmpty ||
                             contextMenu.clickedNodeIsSameAsSelection
                         title: qsTr('Select Shared Values of Selection')
                         Instantiator
                         {
-                            model: sharedValuesAttributeNames
+                            model: root.sharedValuesAttributeNames
                             PlatformMenuItem
                             {
+                                required property string modelData
                                 text: modelData
-                                onTriggered: { selectBySharedAttributeValue(text); }
+                                onTriggered: { root.selectBySharedAttributeValue(text); }
                             }
                             onObjectAdded: function(index, object) { sharedValuesSelectionContextMenu.insertItem(index, object); }
                             onObjectRemoved: function(index, object) { sharedValuesSelectionContextMenu.removeItem(object); }
                         }
                     }
-                    PlatformMenuItem { hidden: !repeatLastSelectionAction.enabled; action: repeatLastSelectionAction }
+                    PlatformMenuItem { hidden: !root.mainWindow.repeatLastSelectionAction.enabled; action: root.mainWindow.repeatLastSelectionAction }
 
                     PlatformMenuSeparator { hidden: searchWebMenuItem.hidden }
                     PlatformMenuItem
@@ -915,7 +920,7 @@ Item
                 anchors.top: parent.top
                 anchors.margins: Constants.margin
 
-                visible: toggleFpsMeterAction.checked
+                visible: root.mainWindow.toggleFpsMeterAction.checked
 
                 color: _document.contrastingColor
 
@@ -931,7 +936,7 @@ Item
 
                 GridLayout
                 {
-                    visible: plugin.loaded && toggleGraphMetricsAction.checked
+                    visible: plugin.loaded && root.mainWindow.toggleGraphMetricsAction.checked
                     anchors.left: parent.left
 
                     columns: 2
@@ -1095,6 +1100,7 @@ Item
             Transforms
             {
                 id: transforms
+                mainWindow: root.mainWindow
                 visible: plugin.loaded
                 enabled: !_document.busy
 
@@ -1111,6 +1117,7 @@ Item
             Visualisations
             {
                 id: visualisations
+                mainWindow: root.mainWindow
                 visible: plugin.loaded
                 enabled: !_document.busy
 
@@ -1762,8 +1769,8 @@ Item
                     return;
                 }
 
-                plugin.content = pluginComponent.createObject(plugin);
-                plugin.content._mainWindow = mainWindow;
+                plugin.content = pluginComponent.createObject(plugin, {"pluginModel": Qt.binding(() => plugin.model)});
+                plugin.content._mainWindow = root.mainWindow;
                 plugin.content.baseFileName = root.baseFileName;
                 plugin.content.baseFileNameNoExtension = root.baseFileNameNoExtension;
 
@@ -1804,7 +1811,7 @@ Item
             {
                 savedFileUrl = fileUrl;
                 savedFileSaver = saverName;
-                mainWindow.addToRecentFiles(fileUrl);
+                root.mainWindow.addToRecentFiles(fileUrl);
             }
         }
 
@@ -1929,6 +1936,7 @@ Item
 
         Hubble
         {
+            mainWindow: root.mainWindow
             title: qsTr("Introduction")
             x: 10
             y: 10
@@ -1962,6 +1970,7 @@ Item
 
         Hubble
         {
+            mainWindow: root.mainWindow
             title: qsTr("Nodes and Edges")
             x: (root.width * 0.5) - childrenRect.width * 0.5
             y: 10
@@ -2028,6 +2037,7 @@ Item
 
         Hubble
         {
+            mainWindow: root.mainWindow
             title: qsTr("Overview Mode")
             x: (root.width * 0.5) - childrenRect.width * 0.5;
             y: 10
@@ -2066,6 +2076,7 @@ Item
         Hubble
         {
             id: pluginHubble
+            mainWindow: root.mainWindow
             title: qsTr("Node Attributes")
             x: 10
             y: graph.height - height - 10
@@ -2089,6 +2100,7 @@ Item
 
         Hubble
         {
+            mainWindow: root.mainWindow
             title: qsTr("Transforms")
             target: transforms
             alignment: Qt.AlignRight | Qt.AlignBottom
@@ -2128,6 +2140,7 @@ Item
 
         Hubble
         {
+            mainWindow: root.mainWindow
             title: qsTr("Visualisations")
             target: visualisations
             alignment: Qt.AlignRight | Qt.AlignTop
@@ -2164,6 +2177,7 @@ Item
 
         Hubble
         {
+            mainWindow: root.mainWindow
             title: qsTr("Search Graph")
             x: 10
             y: !findPanel.hidden ? find.y + find.height + 10 : 10
@@ -2186,6 +2200,7 @@ Item
 
         Hubble
         {
+            mainWindow: root.mainWindow
             title: qsTr("Find By Attribute Value")
             x: 10
             y: !findPanel.hidden ? find.y + find.height + 10 : 10
@@ -2208,6 +2223,7 @@ Item
 
         Hubble
         {
+            mainWindow: root.mainWindow
             title: qsTr("Conclusion")
             x: (root.width * 0.5) - childrenRect.width * 0.5;
             y: 10

@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+pragma ComponentBehavior: Bound
+
 import QtQml
 import QtQml.Models
 import QtQuick
@@ -66,7 +68,9 @@ Item
             id: instantiator
             delegate: PlatformMenuItem
             {
-                text: index >= 0 && !_modelIsUnset ? instantiator.model[index] : ""
+                required property int index
+
+                text: index >= 0 && !root._modelIsUnset ? instantiator.model[index] : ""
 
                 onTriggered: { root.selectedValue = text; }
             }
@@ -116,13 +120,13 @@ Item
         anchors.fill: parent
         onClicked: function(mouse)
         {
-            if(mouse.button === Qt.LeftButton && menu && !_modelIsUnset)
+            if(mouse.button === Qt.LeftButton && menu && !root._modelIsUnset)
                 menu.popup(parent, 0, parent.height + 8/*padding*/);
 
             root.clicked(mouse);
         }
 
-        onPressed: function(mouse) { mouse.accepted = !propogatePresses; }
+        onPressed: function(mouse) { mouse.accepted = !root.propogatePresses; }
 
         onPressAndHold: function(mouse) { root.held(mouse); }
     }

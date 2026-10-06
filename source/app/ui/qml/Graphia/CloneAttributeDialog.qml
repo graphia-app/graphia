@@ -179,7 +179,7 @@ Window
 
                 onClicked: function(mouse)
                 {
-                    document.cloneAttribute(root.selectedAttributeName, newAttributeName.text);
+                    root.document.cloneAttribute(root.selectedAttributeName, newAttributeName.text);
                     root.close();
                 }
             }

@@ -159,7 +159,7 @@ Window
 
                 onCurrentIndexChanged:
                 {
-                    loadPreset(currentIndex);
+                    root.loadPreset(currentIndex);
                 }
             }
         }
@@ -192,12 +192,12 @@ Window
                     property real w: parent.width - (Constants.margin * 2)
                     property real h: parent.height - (Constants.margin * 2)
 
-                    width:  { return Math.min(h * aspectRatio, w); }
-                    height: { return Math.min(w / aspectRatio, h); }
+                    width:  { return Math.min(h * root.aspectRatio, w); }
+                    height: { return Math.min(w / root.aspectRatio, h); }
 
                     fillMode: Image.PreserveAspectFit
-                    onWidthChanged: { requestPreviewDelayed(); }
-                    onHeightChanged: { requestPreviewDelayed(); }
+                    onWidthChanged: { root.requestPreviewDelayed(); }
+                    onHeightChanged: { root.requestPreviewDelayed(); }
                 }
 
                 Rectangle
@@ -355,7 +355,7 @@ Window
                         Layout.columnSpan: 2
 
                         checked: true
-                        onCheckedChanged: { requestPreview(); }
+                        onCheckedChanged: { root.requestPreview(); }
                     }
 
                     RadioButton
@@ -386,7 +386,7 @@ Window
                 onClicked: function(mouse)
                 {
                     let path = Utils.format(qsTr("{0}/{1}-capture-{2}"),
-                        NativeUtils.fileNameForUrl(screenshot.path), application.name,
+                        NativeUtils.fileNameForUrl(screenshot.path), root.application.name,
                         new Date().toLocaleString(Qt.locale(), "yyyy-MM-dd-hhmmss"));
 
                     fileDialog.currentFolder = screenshot.path;
@@ -466,7 +466,7 @@ Window
         {
             root.close();
             screenshot.path = fileDialog.currentFolder.toString();
-            graphView.captureScreenshot(pixelWidthSpin.value, pixelHeightSpin.value,
+            root.graphView.captureScreenshot(pixelWidthSpin.value, pixelHeightSpin.value,
                 fileDialog.selectedFile, dpiSpin.value, fillSize.checked);
         }
     }
@@ -494,14 +494,14 @@ Window
 
     Connections
     {
-        target: graphView
+        target: root.graphView
 
         function onWidthChanged()
         {
             if(root.visible)
                 presetsListModel.update();
 
-            loadPreset(presets.currentIndex);
+            root.loadPreset(presets.currentIndex);
         }
 
         function onHeightChanged()
@@ -509,7 +509,7 @@ Window
             if(root.visible)
                 presetsListModel.update();
 
-            loadPreset(presets.currentIndex);
+            root.loadPreset(presets.currentIndex);
         }
 
         function onPreviewComplete(previewBase64)
@@ -533,7 +533,7 @@ Window
     {
         id: refreshTimer
         interval: 300
-        onTriggered: { requestPreview(); }
+        onTriggered: { root.requestPreview(); }
     }
 
     function requestPreviewDelayed()

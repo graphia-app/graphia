@@ -63,7 +63,7 @@ NamedIcon
         {
             if(containsMouse)
             {
-                tooltip.x = root.mapToGlobal(root.width, 0).x + _offset;
+                tooltip.x = root.mapToGlobal(root.width, 0).x + root._offset;
                 tooltip.y = root.mapToGlobal(0, 0).y - (wrapperLayout.implicitHeight * 0.5);
 
                 hoverTimer.start();
@@ -80,8 +80,8 @@ NamedIcon
     {
         id: tooltip
 
-        width: wrapperLayout.width + _padding
-        height: wrapperLayout.height + _padding
+        width: wrapperLayout.width + root._padding
+        height: wrapperLayout.height + root._padding
 
         // Magic flags: No shadows, transparent, no focus snatching, no border
         flags: Qt.ToolTip | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Popup

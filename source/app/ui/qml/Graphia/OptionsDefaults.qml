@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -149,7 +151,7 @@ Item
                 "When opening a file of such a type you will be prompted to " +
                 "choose how to proceed, when it is necessary to do so. " +
                 "Alternatively, you can avoid these prompts by selecting " +
-                "default actions, here:"), application.name)
+                "default actions, here:"), root.application.name)
         }
 
         Item
@@ -230,6 +232,9 @@ Item
 
                                 Label
                                 {
+                                    required property var model
+                                    required property int index
+
                                     Layout.row: index
                                     Layout.column: 0
 
@@ -245,15 +250,18 @@ Item
 
                                 ComboBox
                                 {
+                                    required property string display
+                                    required property int index
+
                                     Layout.fillWidth: true
                                     Layout.row: index
                                     Layout.column: 1
 
                                     model: [qsTr("Always Ask…"), ...urlTypes.map(
-                                        urlType => application.descriptionForUrlType(urlType))]
+                                        urlType => root.application.descriptionForUrlType(urlType))]
 
                                     property string extension: /*model.*/display
-                                    property var urlTypes: { return application.urlTypesFor(extension); }
+                                    property var urlTypes: { return root.application.urlTypesFor(extension); }
 
                                     onCurrentIndexChanged:
                                     {
@@ -296,6 +304,9 @@ Item
 
                                 Label
                                 {
+                                    required property var model
+                                    required property int index
+
                                     Layout.row: index
                                     Layout.column: 0
 
@@ -311,6 +322,9 @@ Item
 
                                 ComboBox
                                 {
+                                    required property string display
+                                    required property int index
+
                                     Layout.fillWidth: true
                                     Layout.row: index
                                     Layout.column: 1
@@ -318,7 +332,7 @@ Item
                                     model: [qsTr("Always Ask…"), ...applicablePlugins]
 
                                     property string urlType: /*model.*/display
-                                    property var applicablePlugins: { return application.pluginNames(urlType); }
+                                    property var applicablePlugins: { return root.application.pluginNames(urlType); }
 
                                     onCurrentIndexChanged:
                                     {

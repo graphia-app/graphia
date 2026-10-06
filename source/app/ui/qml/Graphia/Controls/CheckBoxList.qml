@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -42,6 +44,8 @@ FramedScrollView
 
             CheckBox
             {
+                required property var modelData
+
                 rightPadding: root.scrollBarWidth
                 checked: true
                 text: root.textProvider(modelData)

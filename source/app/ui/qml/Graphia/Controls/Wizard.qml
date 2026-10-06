@@ -68,7 +68,7 @@ BaseParameterDialog
                 property int _padding: 5
                 property int pipSize: 5
                 property int spacing: 20
-                width: (listPages.length * spacing) + (_padding * 2)
+                width: (root.listPages.length * spacing) + (_padding * 2)
                 height: pipSize + (_padding  * 2)
 
                 onPaint: function(rect)
@@ -89,7 +89,7 @@ BaseParameterDialog
 
                     // Draw lines between pips
                     //let pipNum = 0;
-                    for(let pipNum = 1; pipNum < listPages.length; pipNum++)
+                    for(let pipNum = 1; pipNum < root.listPages.length; pipNum++)
                     {
                         ctx.beginPath();
                         ctx.moveTo(_padding + ((pipNum - 1) * spacing) + pipSize, topPip + (pipSize * 0.5));
@@ -98,7 +98,7 @@ BaseParameterDialog
                     }
 
                     // Draw pips
-                    for(let pipNum = 0; pipNum < listPages.length; pipNum++)
+                    for(let pipNum = 0; pipNum < root.listPages.length; pipNum++)
                     {
                         ctx.strokeStyle = ControlColors.dark;
                         ctx.fillStyle = ControlColors.dark;
@@ -107,7 +107,7 @@ BaseParameterDialog
                         let top = topPip;
 
                         // Current Pip
-                        if(pipNum == currentIndex)
+                        if(pipNum == root.currentIndex)
                         {
                             ctx.strokeStyle = palette.highlight;
                             ctx.fillStyle = palette.highlight;
@@ -125,7 +125,7 @@ BaseParameterDialog
                             context.strokeRect(left, top, pipSize, pipSize);
 
                             // Fill previous pips
-                            if(pipNum < currentIndex)
+                            if(pipNum < root.currentIndex)
                                 context.fillRect(left, top, pipSize, pipSize);
                         }
                     }
@@ -139,7 +139,7 @@ BaseParameterDialog
                 id: previousButton
                 text: qsTr("Previous")
                 onClicked: function(mouse) { root.previous(); }
-                enabled: currentIndex > 0
+                enabled: root.currentIndex > 0
             }
 
             Button
@@ -147,7 +147,7 @@ BaseParameterDialog
                 id: nextButton
                 text: qsTr("Next")
                 onClicked: function(mouse) { root.next(); }
-                enabled: (currentIndex < listPages.length - 1) ? nextEnabled : false
+                enabled: (root.currentIndex < root.listPages.length - 1) ? root.nextEnabled : false
             }
 
             Button
@@ -155,7 +155,7 @@ BaseParameterDialog
                 id: finishButton
                 text: qsTr("Finish")
                 onClicked: function(mouse) { root.accepted(); }
-                enabled: (currentIndex >= enableFinishAtIndex) ? finishEnabled : false
+                enabled: (root.currentIndex >= root.enableFinishAtIndex) ? root.finishEnabled : false
             }
 
             Button
@@ -201,7 +201,7 @@ BaseParameterDialog
         id: numberAnimation
         target: content
         properties: "x"
-        to: currentIndex * -root.width
+        to: root.currentIndex * -root.width
         duration: 200
         easing.type: Easing.OutQuad
     }

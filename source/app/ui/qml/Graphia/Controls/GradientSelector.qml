@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Window
 import QtQuick.Controls
@@ -91,7 +93,7 @@ Window
 
                         function initialise()
                         {
-                            let savedGradients = savedGradientsFromPreferences();
+                            let savedGradients = root.savedGradientsFromPreferences();
 
                             gradientListModel.clear();
                             for(let i = 0; i < savedGradients.length; i++)
@@ -103,7 +105,7 @@ Window
                             if(index < 0)
                                 return;
 
-                            let savedGradients = savedGradientsFromPreferences();
+                            let savedGradients = root.savedGradientsFromPreferences();
                             savedGradients.splice(index, 1);
                             visuals.savedGradients = JSON.stringify(savedGradients);
 
@@ -112,7 +114,7 @@ Window
 
                         function addPreset(configuration)
                         {
-                            let savedGradients = savedGradientsFromPreferences();
+                            let savedGradients = root.savedGradientsFromPreferences();
                             savedGradients.unshift(JSON.parse(configuration));
                             visuals.savedGradients = JSON.stringify(savedGradients);
 
@@ -121,7 +123,7 @@ Window
 
                         property int selectedIndex:
                         {
-                            let savedGradients = savedGradientsFromPreferences();
+                            let savedGradients = root.savedGradientsFromPreferences();
 
                             for(let i = 0; i < savedGradients.length; i++)
                             {
@@ -139,6 +141,9 @@ Window
                             delegate: Rectangle
                             {
                                 id: highlightMarker
+
+                                required property int index
+                                required property string gradientConfiguration
 
                                 property bool checked:
                                 {
@@ -193,7 +198,7 @@ Window
 
                                         Component.onCompleted:
                                         {
-                                            gradientKey.configuration = gradientConfiguration;
+                                            gradientKey.configuration = highlightMarker.gradientConfiguration;
                                         }
                                     }
                                 }
@@ -233,14 +238,14 @@ Window
 
                         onYesClicked:
                         {
-                            let defaultDeleted = compareGradients(visuals.defaultGradient,
+                            let defaultDeleted = root.compareGradients(visuals.defaultGradient,
                                 gradientEditor.configuration);
 
                             gradientPresets.remove(gradientPresets.selectedIndex);
 
                             if(defaultDeleted)
                             {
-                                let savedGradients = savedGradientsFromPreferences();
+                                let savedGradients = root.savedGradientsFromPreferences();
                                 if(savedGradients.length > 0)
                                     visuals.defaultGradient = JSON.stringify(savedGradients[0]);
                             }
@@ -259,7 +264,7 @@ Window
 
                     enabled:
                     {
-                        return !compareGradients(visuals.defaultGradient,
+                        return !root.compareGradients(visuals.defaultGradient,
                             gradientEditor.configuration);
                     }
 
@@ -329,7 +334,7 @@ Window
                 text: qsTr("OK")
                 onClicked: function(mouse)
                 {
-                    accepted();
+                    root.accepted();
                     root.close();
                 }
             }
@@ -340,7 +345,7 @@ Window
                 text: qsTr("Cancel")
                 onClicked: function(mouse)
                 {
-                    rejected();
+                    root.rejected();
                     root.close();
                 }
             }
@@ -351,7 +356,7 @@ Window
                 text: qsTr("Apply")
                 onClicked: function(mouse)
                 {
-                    applyClicked(root.applied);
+                    root.applyClicked(root.applied);
                     root.applied = true;
                 }
             }

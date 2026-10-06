@@ -48,10 +48,10 @@ Item
     property bool menuDropped: false
     Connections
     {
-        target: menu
+        target: root.menu
 
-        function onAboutToShow() { menuDropped = true; }
-        function onAboutToHide() { menuDropped = false; }
+        function onAboutToShow() { root.menuDropped = true; }
+        function onAboutToHide() { root.menuDropped = false; }
     }
 
     Rectangle
@@ -59,7 +59,7 @@ Item
         x: 0
         y: 0
         width: parent.width
-        height: _barHeight
+        height: root._barHeight
         radius: parent.radius
         color: parent._displayColor
     }
@@ -67,9 +67,9 @@ Item
     Rectangle
     {
         x: 0
-        y: _barHeight + _spaceHeight
+        y: root._barHeight + root._spaceHeight
         width: parent.width
-        height: _barHeight
+        height: root._barHeight
         radius: parent.radius
         color: parent._displayColor
     }
@@ -77,9 +77,9 @@ Item
     Rectangle
     {
         x: 0
-        y: parent.height - _barHeight
+        y: parent.height - root._barHeight
         width: parent.width
-        height: _barHeight
+        height: root._barHeight
         radius: parent.radius
         color: parent._displayColor
     }
@@ -106,8 +106,8 @@ Item
                 return;
             }
 
-            if(menu)
-                menu.popup(parent, 0, parent.height + 8/*padding*/);
+            if(root.menu)
+                root.menu.popup(parent, 0, parent.height + 8/*padding*/);
         }
 
         onPressed: function(mouse)
@@ -115,7 +115,7 @@ Item
             if(root.menu instanceof Menu && root.menuDropped)
                 mouseArea._ignoreClick = true;
 
-            mouse.accepted = !propogatePresses;
+            mouse.accepted = !root.propogatePresses;
         }
     }
 }

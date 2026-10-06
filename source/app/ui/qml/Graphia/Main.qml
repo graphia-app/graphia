@@ -49,6 +49,19 @@ ApplicationWindow
 
     property bool directed: currentTab ? currentTab.document.directed : false
 
+    // Actions the tabs use
+    readonly property alias deleteAction: deleteAction
+    readonly property alias selectAllAction: selectAllAction
+    readonly property alias selectAllVisibleAction: selectAllVisibleAction
+    readonly property alias selectNoneAction: selectNoneAction
+    readonly property alias invertSelectionAction: invertSelectionAction
+    readonly property alias selectSourcesAction: selectSourcesAction
+    readonly property alias selectTargetsAction: selectTargetsAction
+    readonly property alias selectNeighboursAction: selectNeighboursAction
+    readonly property alias repeatLastSelectionAction: repeatLastSelectionAction
+    readonly property alias toggleFpsMeterAction: toggleFpsMeterAction
+    readonly property alias toggleGraphMetricsAction: toggleGraphMetricsAction
+
     property var recentFiles: []
 
     property bool _anyTabsBusy:
@@ -141,6 +154,8 @@ ApplicationWindow
     Tracking
     {
         id: tracking
+
+        applicationRef: application
 
         anchors.fill: parent
 
@@ -2819,7 +2834,7 @@ ApplicationWindow
 
                 function insertTabAtIndex(index)
                 {
-                    let tab = tabComponent.createObject(null);
+                    let tab = tabComponent.createObject(null, {"mainWindow": mainWindow});
                     tabLayout.insert(index, tab);
 
                     let button = tabButtonComponent.createObject(tabBar, {"tab": tab});
@@ -3149,6 +3164,7 @@ ApplicationWindow
 
     Hubble
     {
+        mainWindow: mainWindow
         title: qsTr("Resume/Pause Layout")
         alignment: Qt.AlignBottom | Qt.AlignLeft
         edges: Qt.LeftEdge | Qt.TopEdge

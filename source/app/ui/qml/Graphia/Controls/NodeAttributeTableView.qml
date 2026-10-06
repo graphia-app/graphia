@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQml
 import QtQuick.Controls
@@ -265,7 +267,7 @@ Item
         onAccepted:
         {
             misc.fileSaveInitialFolder = exportTableFileDialog.currentFolder.toString();
-            pluginContent.writeTableModelToFile(tableView.model, exportTableFileDialog.selectedFile,
+            root.pluginContent.writeTableModelToFile(tableView.model, exportTableFileDialog.selectedFile,
                 exportTableFileDialog.selectedNameFilter.extensions[0], tableView.visibleColumnNames());
         }
     }
@@ -404,7 +406,7 @@ Item
         icon.name: "document-save"
         onTriggered: function(source)
         {
-            pluginContent.copyTableModelColumnToClipboard(root.model, lastClickedColumn, root.visibleRows);
+            root.pluginContent.copyTableModelColumnToClipboard(root.model, root.lastClickedColumn, root.visibleRows);
         }
     }
 
@@ -452,21 +454,21 @@ Item
     {
         id: cloneSpecificAttributeAction
         text: qsTr("Clone…")
-        onTriggered: { pluginContent.cloneAttribute(root.lastClickedColumnName); }
+        onTriggered: { root.pluginContent.cloneAttribute(root.lastClickedColumnName); }
     }
 
     Action
     {
         id: editSpecificAttributeAction
         text: qsTr("Edit…")
-        onTriggered: { pluginContent.editAttribute(root.lastClickedColumnName); }
+        onTriggered: { root.pluginContent.editAttribute(root.lastClickedColumnName); }
     }
 
     Action
     {
         id: removeSpecificAttributeAction
         text: qsTr("Remove")
-        onTriggered: { pluginContent.removeAttributes([root.lastClickedColumnName]); }
+        onTriggered: { root.pluginContent.removeAttributes([root.lastClickedColumnName]); }
     }
 
     function selectRows(startRowInclusive, endRowInclusive)
@@ -577,6 +579,9 @@ Item
                 delegate: DropArea
                 {
                     id: headerItem
+
+                    required property var model
+
                     TableView.onReused:
                     {
                         refreshState();
@@ -593,8 +598,8 @@ Item
                     property var modelColumn: model.column
                     property int sourceColumn: proxyModel.mapOrderedToSourceColumn(model.column);
 
-                    Binding { target: headerContent; property: "sourceColumn"; value: sourceColumn }
-                    Binding { target: headerContent; property: "modelColumn"; value: modelColumn }
+                    Binding { target: headerContent; property: "sourceColumn"; value: headerItem.sourceColumn }
+                    Binding { target: headerContent; property: "modelColumn"; value: headerItem.modelColumn }
 
                     property string text:
                     {
@@ -611,7 +616,7 @@ Item
                         target: proxyModel
                         function onColumnOrderChanged()
                         {
-                            refreshState();
+                            headerItem.refreshState();
                         }
                     }
 
@@ -678,7 +683,7 @@ Item
                             {
                                 anchors.verticalCenter: parent.verticalCenter
 
-                                visible: columnSelectionMode
+                                visible: root.columnSelectionMode
                                 text: headerLabel.text
                                 height: headerLabel.height
 
@@ -703,7 +708,7 @@ Item
                         Label
                         {
                             id: headerLabel
-                            visible: !columnSelectionMode
+                            visible: !root.columnSelectionMode
                             clip: true
                             elide: Text.ElideRight
                             maximumLineCount: 1
@@ -722,7 +727,7 @@ Item
                             antialiasing: false
                             width: headerView.sortIndicatorWidth
                             height: headerView.sortIndicatorHeight
-                            visible: proxyModel.sortColumn === headerItem.text && !proxyModel.isRowOrderSet && !columnSelectionMode
+                            visible: proxyModel.sortColumn === headerItem.text && !proxyModel.isRowOrderSet && !root.columnSelectionMode
                             transform: Rotation
                             {
                                 origin.x: sortIndicator.width * 0.5
@@ -765,7 +770,7 @@ Item
                                         root.model.columnNameFor(sourceColumn));
                                     let targetIndex = newColumnOrder.indexOf(
                                         root.model.columnNameFor(headerContent.target));
-                                    array_move(newColumnOrder, currentIndex, targetIndex);
+                                    root.array_move(newColumnOrder, currentIndex, targetIndex);
                                     headerContent.target = -1;
 
                                     proxyModel.columnOrder = newColumnOrder;
@@ -778,7 +783,7 @@ Item
                         MouseArea
                         {
                             id: headerMouseArea
-                            enabled: !columnSelectionMode
+                            enabled: !root.columnSelectionMode
                             anchors.fill: headerContent
                             hoverEnabled: true
                             acceptedButtons: Qt.LeftButton|Qt.RightButton
@@ -829,7 +834,7 @@ Item
                                 {
                                     if(drag.active)
                                     {
-                                        let sourceColumn = proxyModel.mapOrderedToSourceColumn(model.column);
+                                        let sourceColumn = proxyModel.mapOrderedToSourceColumn(headerItem.model.column);
                                         let userWidth = Math.max(30, headerItem.implicitWidth + mouseX);
                                         tableView.userColumnWidths[sourceColumn] = userWidth;
                                         headerItem.refreshState();
@@ -1085,11 +1090,11 @@ Item
                     if(headerActualWidth === null)
                     {
                         console.log("Null CMCW", headerView.columns, col);
-                        return defaultColumnWidth;
+                        return root.defaultColumnWidth;
                     }
 
                     if(delegateWidth === undefined)
-                        return Math.max(defaultColumnWidth, headerActualWidth);
+                        return Math.max(root.defaultColumnWidth, headerActualWidth);
                     else
                         return Math.max(delegateWidth, headerActualWidth);
                 }
@@ -1115,6 +1120,10 @@ Item
 
                 delegate: Item
                 {
+                    id: cellItem
+
+                    required property var model
+
                     // Based on Qt source for BaseTableView delegate
                     implicitHeight: tableView.rowHeight
                     implicitWidth: label.implicitWidth + 16
@@ -1176,7 +1185,7 @@ Item
                         height: parent.height
 
                         color: palette.highlight;
-                        visible: (model.column === (proxyModel.columnCount() - 1)) && model.subSelected
+                        visible: (cellItem.model.column === (proxyModel.columnCount() - 1)) && cellItem.model.subSelected
                     }
 
                     Rectangle
@@ -1185,10 +1194,10 @@ Item
 
                         color:
                         {
-                            if(model.subSelected)
+                            if(cellItem.model.subSelected)
                                 return palette.highlight;
 
-                            return model.row % 2 ? ControlColors.tableRow1 : ControlColors.tableRow2;
+                            return cellItem.model.row % 2 ? ControlColors.tableRow1 : ControlColors.tableRow2;
                         }
 
                         // Ripped more or less verbatim from qtquickcontrols/src/controls/Styles/Desktop/TableViewStyle.qml
@@ -1209,12 +1218,12 @@ Item
 
                             text:
                             {
-                                let sourceColumn = proxyModel.mapOrderedToSourceColumn(model.column);
+                                let sourceColumn = proxyModel.mapOrderedToSourceColumn(cellItem.model.column);
 
                                 // This can happen during column removal
                                 if(sourceColumn === undefined || sourceColumn < 0)
                                 {
-                                    console.log("Model Column Unable to map", model.row, model.column);
+                                    console.log("Model Column Unable to map", cellItem.model.row, cellItem.model.column);
                                     return "";
                                 }
 
@@ -1222,24 +1231,24 @@ Item
                                 // but TableView2 delgates cast them to undefined js objects.
                                 // It's difficult to tell if the model is corrupted or accessing
                                 // invalid data now as they both return undefined.
-                                if(model.display === undefined)
+                                if(cellItem.model.display === undefined)
                                     return "";
 
                                 let columnName = root.model.columnNameFor(sourceColumn);
                                 if(root.model.columnIsNumerical(columnName))
-                                    return NativeUtils.formatNumberScientific(model.display);
+                                    return NativeUtils.formatNumberScientific(cellItem.model.display);
 
-                                if(typeof(model.display) === "string")
+                                if(typeof(cellItem.model.display) === "string")
                                 {
                                     let linkifyRe = /(?![^<]*>|[^<>]*<\/)((https?:)\/\/[a-z0-9&#=.\/\-?_]+)/gi;
                                     let stripNewlinesRe = /[\r\n]+/g;
 
-                                    return model.display
+                                    return cellItem.model.display
                                         .replace(linkifyRe, "<a href=\"$1\">$1</a>")
                                         .replace(stripNewlinesRe, " ");
                                 }
 
-                                return model.display;
+                                return cellItem.model.display;
                             }
 
                             onLinkHovered: function(link) { tableView.hoveredLink = link; }
@@ -1253,7 +1262,7 @@ Item
                     if(root.columnSelectionMode)
                         proxyModel.hiddenColumns = [];
                     else
-                        proxyModel.hiddenColumns = hiddenColumns;
+                        proxyModel.hiddenColumns = root.hiddenColumns;
                 }
 
                 Connections
@@ -1274,7 +1283,7 @@ Item
 
                 Component.onCompleted:
                 {
-                    populateTableMenu(tableView._tableMenu);
+                    root.populateTableMenu(tableView._tableMenu);
 
                     root.resizeColumnsToContents();
                     tableView._updateColumnVisibility();
@@ -1354,7 +1363,7 @@ Item
                             FloatingButton
                             {
                                 icon.name: "emblem-unreadable"
-                                onClicked: function(mouse) { columnSelectionMode = false; }
+                                onClicked: function(mouse) { root.columnSelectionMode = false; }
                             }
                         }
                     }
@@ -1374,7 +1383,7 @@ Item
                 anchors.bottomMargin: horizontalTableViewScrollBar.size < 1.0 ? horizontalTableViewScrollBar.height : 0
                 anchors.rightMargin: verticalTableViewScrollBar.size < 1.0 ? verticalTableViewScrollBar.width : 0
 
-                visible: !columnSelectionMode
+                visible: !root.columnSelectionMode
 
                 cursorShape: tableView.hoveredLink.length > 0 ?
                     Qt.PointingHandCursor : Qt.ArrowCursor;
@@ -1422,11 +1431,11 @@ Item
 
                     if((mouse.modifiers & Qt.ShiftModifier) && endRow !== -1)
                     {
-                        selectRows(endRow, clickedRow);
+                        root.selectRows(endRow, clickedRow);
                     }
                     else if((mouse.modifiers & Qt.ControlModifier) && rowIsSelected)
                     {
-                        deselectRows(clickedRow, clickedRow);
+                        root.deselectRows(clickedRow, clickedRow);
                         deselectDrag = true;
                     }
                     else
@@ -1434,7 +1443,7 @@ Item
                         if(!(mouse.modifiers & Qt.ControlModifier))
                             selectionModel.clear();
 
-                        selectRows(clickedRow, clickedRow);
+                        root.selectRows(clickedRow, clickedRow);
                     }
 
                     previousRow = startRow = endRow = clickedRow;
@@ -1452,9 +1461,9 @@ Item
                     if(rowUnderCursor !== previousRow)
                     {
                         if(deselectDrag)
-                            deselectRows(startRow, rowUnderCursor);
+                            root.deselectRows(startRow, rowUnderCursor);
                         else
-                            selectRows(startRow, rowUnderCursor);
+                            root.selectRows(startRow, rowUnderCursor);
 
                         previousRow = endRow = rowUnderCursor;
                     }
@@ -1505,12 +1514,12 @@ Item
                         if(startRow == -1)
                             startRow = endRow;
 
-                        selectRows(startRow, endRow);
+                        root.selectRows(startRow, endRow);
                     }
                     else
                     {
                         startRow = endRow;
-                        selectRows(endRow, endRow);
+                        root.selectRows(endRow, endRow);
                     }
                 }
             }

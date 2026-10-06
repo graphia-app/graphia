@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 
 import Graphia.Utils
@@ -198,6 +200,9 @@ Item
             Rectangle
             {
                 id: key
+
+                required property var modelData
+                required property int index
 
                 property bool _isLastColor: root._lastColorIsDefault &&
                     index === (root._numKeys - 1)

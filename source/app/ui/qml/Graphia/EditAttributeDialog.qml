@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+pragma ComponentBehavior: Bound
+
 import QtQuick.Controls
 import QtQuick
 import QtQuick.Layouts
@@ -122,7 +124,7 @@ Window
 
     Connections
     {
-        target: document
+        target: root.document
         function onLoadComplete() { root.initialise(); }
     }
 
@@ -519,6 +521,8 @@ Window
                     {
                         id: headerItem
 
+                        required property var model
+
                         implicitHeight: headerLabel.height + (headerView.labelPadding * 2)
 
                         Item
@@ -547,7 +551,7 @@ Window
                                 elide: Text.ElideRight
                                 wrapMode: Text.NoWrap
                                 color: headerMouseArea.containsMouse ? palette.highlightedText : palette.buttonText
-                                text: model.display
+                                text: headerItem.model.display
                             }
 
                             Shape
@@ -559,7 +563,7 @@ Window
                                 antialiasing: false
                                 width: headerView.sortIndicatorWidth
                                 height: headerView.sortIndicatorHeight
-                                visible: editAttributeTableModel.sortColumn === model.column
+                                visible: editAttributeTableModel.sortColumn === headerItem.model.column
                                 transform: Rotation
                                 {
                                     origin.x: sortIndicator.width * 0.5
@@ -581,7 +585,7 @@ Window
 
                             Rectangle
                             {
-                                visible: model.column === 0
+                                visible: headerItem.model.column === 0
 
                                 anchors.right: parent.right
                                 width: 1
@@ -609,10 +613,10 @@ Window
                                     let atLeft = mouseX <= halfWidth;
                                     let atRight = mouseX >= (width - halfWidth);
 
-                                    if(atLeft && model.column === 0)
+                                    if(atLeft && headerItem.model.column === 0)
                                         return false;
 
-                                    if(atRight && model.column === (headerView.model.columnCount - 1))
+                                    if(atRight && headerItem.model.column === (headerView.model.columnCount - 1))
                                         return false;
 
                                     return atLeft || atRight;
@@ -627,10 +631,10 @@ Window
                                 {
                                     if(!mouseOverResizeHandle && mouse.button === Qt.LeftButton)
                                     {
-                                        if(editAttributeTableModel.sortColumn === model.column)
+                                        if(editAttributeTableModel.sortColumn === headerItem.model.column)
                                             editAttributeTableModel.ascendingSortOrder = !editAttributeTableModel.ascendingSortOrder;
                                         else
-                                            editAttributeTableModel.sortColumn = model.column;
+                                            editAttributeTableModel.sortColumn = headerItem.model.column;
                                     }
                                 }
 
@@ -638,7 +642,7 @@ Window
                                 {
                                     if(mouseOverResizeHandle)
                                     {
-                                        headerView.columnDivisorPosition = _defaultColumnDivisor;
+                                        headerView.columnDivisorPosition = root._defaultColumnDivisor;
                                         headerView.forceLayout();
                                     }
                                 }
@@ -703,6 +707,10 @@ Window
 
                     delegate: Item
                     {
+                        id: cellItem
+
+                        required property var model
+
                         // Based on Qt source for BaseTableView delegate
                         implicitHeight: editField.implicitHeight + 1
                         implicitWidth: label.implicitWidth + 16
@@ -713,7 +721,7 @@ Window
                         {
                             anchors.fill: parent
 
-                            color: model.row % 2 ? palette.window : palette.alternateBase
+                            color: cellItem.model.row % 2 ? palette.window : palette.alternateBase
 
                             Text
                             {
@@ -729,9 +737,9 @@ Window
                                 elide: Text.ElideRight
                                 wrapMode: Text.NoWrap
                                 color: NativeUtils.contrastingColor(parent.color)
-                                font.bold: model.edited
+                                font.bold: cellItem.model.edited
 
-                                text: model.display
+                                text: cellItem.model.display
 
                                 MouseArea
                                 {
@@ -743,7 +751,7 @@ Window
                                     {
                                         if(mouse.button === Qt.RightButton)
                                         {
-                                            contextMenu.resetRow = model.index % editAttributeTableModel.rowCount();
+                                            contextMenu.resetRow = cellItem.model.index % editAttributeTableModel.rowCount();
                                             contextMenu.popup();
                                         }
 
@@ -753,7 +761,7 @@ Window
 
                                     onDoubleClicked: function(mouse)
                                     {
-                                        if(model.column !== 1)
+                                        if(cellItem.model.column !== 1)
                                             return;
 
                                         if(mouse.button === Qt.LeftButton)
@@ -770,7 +778,7 @@ Window
 
                                 function cancel()
                                 {
-                                    text = model.display;
+                                    text = cellItem.model.display;
                                     visible = false;
                                 }
 
@@ -779,7 +787,7 @@ Window
                                 {
                                     if(visible)
                                     {
-                                        text = model.display;
+                                        text = cellItem.model.display;
                                         selectAll();
                                         forceActiveFocus();
 
@@ -793,7 +801,7 @@ Window
                                 {
                                     if(visible)
                                     {
-                                        let row = model.index % editAttributeTableModel.rowCount();
+                                        let row = cellItem.model.index % editAttributeTableModel.rowCount();
                                         editAttributeTableModel.editValue(row, text);
                                         visible = false;
                                     }
@@ -849,7 +857,7 @@ Window
 
                 onClicked: function(mouse)
                 {
-                    document.editAttribute(root._attributeName,
+                    root.document.editAttribute(root._attributeName,
                         editAttributeTableModel.edits, root._selectedType,
                         descriptionTextField.text);
                     root.close();

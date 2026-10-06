@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+pragma ComponentBehavior: Bound
+
 import QtQml.Models
 import QtQuick
 import QtQuick.Layouts
@@ -380,6 +382,8 @@ Item
 
                 delegate: Rectangle
                 {
+                    id: treeBoxDelegate
+
                     implicitWidth: treeViewDelegate.implicitWidth
                     implicitHeight: treeViewDelegate.implicitHeight * (hasSectionRow ? 2 : 1)
 
@@ -423,12 +427,12 @@ Item
                         verticalAlignment: Text.AlignVCenter
                         leftPadding: 4
 
-                        visible: hasSectionRow
+                        visible: treeBoxDelegate.hasSectionRow
                         font.bold: true
                         font.italic: true
                         color: root.palette.text
 
-                        text: { return hasSectionRow ? treeView.sectionTextFor(model.row) : ""; }
+                        text: { return treeBoxDelegate.hasSectionRow ? treeView.sectionTextFor(treeBoxDelegate.model.row) : ""; }
                     }
 
                     color: ControlColors.background
@@ -436,7 +440,7 @@ Item
                     Rectangle
                     {
                         anchors.fill: treeViewDelegate
-                        visible: selected
+                        visible: treeBoxDelegate.selected
                         color: root.palette.highlight
                     }
 
@@ -446,7 +450,7 @@ Item
 
                         implicitWidth: root.width
                         rightPadding: treeView.scrollBarWidth
-                        y: hasSectionRow ? implicitHeight : 0
+                        y: treeBoxDelegate.hasSectionRow ? implicitHeight : 0
 
                         current: parent.current
                         depth: parent.depth

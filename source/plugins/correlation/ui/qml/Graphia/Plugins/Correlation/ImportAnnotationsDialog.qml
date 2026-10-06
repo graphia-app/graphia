@@ -509,7 +509,7 @@ Window
                 annotationRowIndices.push(rowIndex);
             }
 
-            pluginModel.importAnnotationsFromTable(
+            root.pluginModel.importAnnotationsFromTable(
                 tabularDataParser.data,
                 keyRowIndex, annotationRowIndices,
                 replaceCheckbox.checked);

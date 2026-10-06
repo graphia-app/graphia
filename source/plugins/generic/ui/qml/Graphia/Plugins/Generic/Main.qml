@@ -69,7 +69,7 @@ PluginContent
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            model: plugin.model.nodeAttributeTableModel
+            model: root.pluginModel.nodeAttributeTableModel
             pluginContent: root
 
             exportBaseFileName: root.baseFileNameNoExtension + "-attributes"
@@ -79,7 +79,7 @@ PluginContent
             {
                 // If the tableView's selection is less than complete, highlight
                 // the corresponding nodes in the graph, otherwise highlight nothing
-                plugin.model.setHighlightedRows(tableView.selectedRows.length < rowCount ?
+                root.pluginModel.setHighlightedRows(tableView.selectedRows.length < rowCount ?
                     tableView.selectedRows : []);
             }
 

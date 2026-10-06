@@ -28,6 +28,8 @@ Rectangle
 {
     id: root
 
+    property var applicationRef: null
+
     property bool validValues: preferences.permission !== "unresolved"
 
     Image
@@ -81,7 +83,7 @@ Rectangle
                 onClicked: function(mouse)
                 {
                     preferences.permission = "given";
-                    trackingDataEntered();
+                    root.trackingDataEntered();
                 }
             }
         }
@@ -98,7 +100,8 @@ Rectangle
                 "any data loaded into it - your privacy is assured. We " +
                 "ask for your email only so we know how often it is used " +
                 "and by whom. You can also choose to use {0} " +
-                "<a href=\"anonymous\">anonymously</a>, if you prefer."), application.name)
+                "<a href=\"anonymous\">anonymously</a>, if you prefer."),
+                root.applicationRef ? root.applicationRef.name : "")
 
             color: "white"
             textFormat: Text.RichText
@@ -111,7 +114,7 @@ Rectangle
             {
                 preferences.emailAddress = "";
                 preferences.permission = "anonymous";
-                trackingDataEntered();
+                root.trackingDataEntered();
             }
         }
 
@@ -126,7 +129,7 @@ Rectangle
             case Qt.Key_Return:
                 event.accepted = true;
                 preferences.permission = "given";
-                trackingDataEntered();
+                root.trackingDataEntered();
                 break;
 
             default:

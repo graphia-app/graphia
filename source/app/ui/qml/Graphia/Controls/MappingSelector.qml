@@ -303,7 +303,7 @@ Window
                 text: qsTr("OK")
                 onClicked: function(mouse)
                 {
-                    accepted();
+                    root.accepted();
                     root.close();
                 }
             }
@@ -314,7 +314,7 @@ Window
                 text: qsTr("Cancel")
                 onClicked: function(mouse)
                 {
-                    rejected();
+                    root.rejected();
                     root.close();
                 }
             }
@@ -325,7 +325,7 @@ Window
                 text: qsTr("Apply")
                 onClicked: function(mouse)
                 {
-                    applyClicked(root.applied);
+                    root.applyClicked(root.applied);
                     root.applied = true;
                 }
             }

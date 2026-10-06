@@ -71,19 +71,19 @@ Window
         {
             id: pluginNamesList
 
-            Layout.rowSpan: pluginImageSource.length > 0 ? 3 : 2
+            Layout.rowSpan: pluginsWindow.pluginImageSource.length > 0 ? 3 : 2
             Layout.fillHeight: true
 
             displayRole: "name"
 
-            model: pluginDetails
+            model: pluginsWindow.pluginDetails
         }
 
         Image
         {
             Layout.margins: Constants.margin
-            visible: pluginImageSource.length > 0
-            source: pluginImageSource
+            visible: pluginsWindow.pluginImageSource.length > 0
+            source: pluginsWindow.pluginImageSource
             sourceSize.width: 96
             sourceSize.height: 96
         }
@@ -96,7 +96,7 @@ Window
             wrapMode: Text.WordWrap
             color: palette.buttonText
 
-            text: pluginDescription
+            text: pluginsWindow.pluginDescription
         }
 
         Button

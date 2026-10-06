@@ -64,7 +64,7 @@ Window
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignTop
 
-            text: explanationText
+            text: root.explanationText
             wrapMode: Text.WordWrap
             color: palette.buttonText
         }

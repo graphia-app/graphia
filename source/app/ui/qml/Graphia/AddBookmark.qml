@@ -49,7 +49,7 @@ Rectangle
         enabled: nameField.text.length > 0
         onTriggered: function(source)
         {
-            document.addBookmark(nameField.text);
+            root.document.addBookmark(nameField.text);
             closeAction.trigger();
         }
     }
@@ -61,14 +61,14 @@ Rectangle
 
         onTriggered: function(source)
         {
-            _visible = false;
-            hidden();
+            root._visible = false;
+            root.hidden();
         }
     }
 
     Shortcut
     {
-        enabled: _visible
+        enabled: root._visible
         sequence: "Esc"
         onActivated: { closeAction.trigger(); }
     }

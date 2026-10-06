@@ -279,9 +279,9 @@ Window
 
                         property string elementType:
                         {
-                            if(document)
+                            if(root.document)
                             {
-                                let attribute = document.attribute(keyAttributeList.selectedValue);
+                                let attribute = root.document.attribute(keyAttributeList.selectedValue);
                                 switch(attribute.elementType)
                                 {
                                 case ElementType.Node: return qsTr("Node");
@@ -588,7 +588,7 @@ Window
                 attributeColumnIndices.push(columnIndex);
             }
 
-            document.importAttributesFromTable(
+            root.document.importAttributesFromTable(
                 keyAttributeName, tabularDataParser.data,
                 keyColumnIndex, attributeColumnIndices,
                 replaceCheckbox.checked);

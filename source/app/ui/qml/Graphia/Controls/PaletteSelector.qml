@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Window
 import QtQuick.Controls
@@ -95,7 +97,7 @@ Window
 
                         function initialise()
                         {
-                            let savedPalettes = savedPalettesFromPreferences();
+                            let savedPalettes = root.savedPalettesFromPreferences();
 
                             paletteListModel.clear();
                             for(let i = 0; i < savedPalettes.length; i++)
@@ -107,7 +109,7 @@ Window
                             if(index < 0)
                                 return;
 
-                            let savedPalettes = savedPalettesFromPreferences();
+                            let savedPalettes = root.savedPalettesFromPreferences();
                             savedPalettes.splice(index, 1);
                             visuals.savedPalettes = JSON.stringify(savedPalettes);
 
@@ -116,7 +118,7 @@ Window
 
                         function addPreset(configuration)
                         {
-                            let savedPalettes = savedPalettesFromPreferences();
+                            let savedPalettes = root.savedPalettesFromPreferences();
                             savedPalettes.unshift(JSON.parse(configuration));
                             visuals.savedPalettes = JSON.stringify(savedPalettes);
 
@@ -125,7 +127,7 @@ Window
 
                         property int selectedIndex:
                         {
-                            let savedPalettes = savedPalettesFromPreferences();
+                            let savedPalettes = root.savedPalettesFromPreferences();
 
                             for(let i = 0; i < savedPalettes.length; i++)
                             {
@@ -143,6 +145,9 @@ Window
                             delegate: Rectangle
                             {
                                 id: highlightMarker
+
+                                required property int index
+                                required property string paletteConfiguration
 
                                 property bool checked:
                                 {
@@ -197,7 +202,7 @@ Window
 
                                         Component.onCompleted:
                                         {
-                                            paletteKey.configuration = paletteConfiguration;
+                                            paletteKey.configuration = highlightMarker.paletteConfiguration;
                                         }
                                     }
                                 }
@@ -237,14 +242,14 @@ Window
 
                         onYesClicked:
                         {
-                            let defaultDeleted = comparePalettes(visuals.defaultPalette,
+                            let defaultDeleted = root.comparePalettes(visuals.defaultPalette,
                                 paletteEditor.configuration);
 
                             palettePresets.remove(palettePresets.selectedIndex);
 
                             if(defaultDeleted)
                             {
-                                let savedPalettes = savedPalettesFromPreferences();
+                                let savedPalettes = root.savedPalettesFromPreferences();
                                 if(savedPalettes.length > 0)
                                     visuals.defaultPalette = JSON.stringify(savedPalettes[0]);
                             }
@@ -263,7 +268,7 @@ Window
 
                     enabled:
                     {
-                        return !comparePalettes(visuals.defaultPalette,
+                        return !root.comparePalettes(visuals.defaultPalette,
                             paletteEditor.configuration);
                     }
 
@@ -347,7 +352,7 @@ Window
                 text: qsTr("OK")
                 onClicked: function(mouse)
                 {
-                    accepted();
+                    root.accepted();
                     root.close();
                 }
             }
@@ -358,7 +363,7 @@ Window
                 text: qsTr("Cancel")
                 onClicked: function(mouse)
                 {
-                    rejected();
+                    root.rejected();
                     root.close();
                 }
             }
@@ -369,7 +374,7 @@ Window
                 text: qsTr("Apply")
                 onClicked: function(mouse)
                 {
-                    applyClicked(root.applied);
+                    root.applyClicked(root.applied);
                     root.applied = true;
                 }
             }

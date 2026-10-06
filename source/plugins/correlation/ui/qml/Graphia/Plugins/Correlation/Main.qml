@@ -73,7 +73,7 @@ PluginContent
         text: qsTr("Find Rows Of Interest")
         icon.name: "edit-find"
 
-        enabled: plugin.model.numContinuousColumns > 0
+        enabled: root.pluginModel.numContinuousColumns > 0
 
         checkable: true
 
@@ -89,7 +89,7 @@ PluginContent
         text: qsTr("Select Visible Column Annotations")
         icon.name: "column-annotations"
 
-        enabled: plugin.model.columnAnnotationNames.length > 0
+        enabled: root.pluginModel.columnAnnotationNames.length > 0
 
         checkable: true
 
@@ -387,7 +387,7 @@ PluginContent
     Component
     {
         id: importAnnotationsDialog
-        ImportAnnotationsDialog { pluginModel: plugin.model }
+        ImportAnnotationsDialog { pluginModel: root.pluginModel }
     }
 
     OpenFileDialog
@@ -530,10 +530,10 @@ PluginContent
 
     Connections
     {
-        target: plugin.model
+        target: root.pluginModel
         function onSharedValuesAttributeNamesChanged()
         {
-            if(!plugin.model.sharedValuesAttributeNames.includes(
+            if(!root.pluginModel.sharedValuesAttributeNames.includes(
                 plot.averagingAttributeName))
             {
                 // The averaging attribute doesn't exist any more, so unset it
@@ -543,7 +543,7 @@ PluginContent
 
         function onNumericalAttributeNamesChanged()
         {
-            if(!plugin.model.numericalAttributeNames.includes(
+            if(!root.pluginModel.numericalAttributeNames.includes(
                 plot.scaleByAttributeName))
             {
                 // The scaling attribute doesn't exist any more, so unset it
@@ -597,10 +597,10 @@ PluginContent
             let showAllColumnsMenuItem = MenuUtils.addActionTo(menu, toggleShowAllColumns);
             showAllColumnsMenuItem.hidden = Qt.binding(() => !plot.isWide);
 
-            if(plugin.model.numContinuousColumns > 0)
+            if(root.pluginModel.numContinuousColumns > 0)
                 MenuUtils.addActionTo(menu, findRowsOfInterestAction);
 
-            if(plugin.model.columnAnnotationNames.length > 0)
+            if(root.pluginModel.columnAnnotationNames.length > 0)
                 MenuUtils.addActionTo(menu, selectColumnAnnotationsAction);
 
             MenuUtils.addActionTo(menu, toggleGridLines);
@@ -611,7 +611,7 @@ PluginContent
             MenuUtils.addActionTo(axisLabelsMenu, setYAxisLabelAction);
             MenuUtils.addSeparatorTo(menu);
 
-            if(plugin.model.numContinuousColumns > 0)
+            if(root.pluginModel.numContinuousColumns > 0)
             {
                 let scalingMenu = MenuUtils.addSubMenuTo(menu, qsTr("Scaling"));
                 MenuUtils.addActionTo(scalingMenu, rawScaling);
@@ -625,7 +625,7 @@ PluginContent
 
                 let scaleByAttributeMenu = MenuUtils.addSubMenuTo(scalingMenu, qsTr("By Attribute"));
                 scaleByAttributeMenu.enabled = Qt.binding(() => plot.complexScalingEnabled);
-                plugin.model.numericalAttributeNames.forEach(function(attributeName)
+                root.pluginModel.numericalAttributeNames.forEach(function(attributeName)
                 {
                     let attributeMenuItem = MenuUtils.addItemTo(scaleByAttributeMenu, attributeName);
 
@@ -667,7 +667,7 @@ PluginContent
 
                 MenuUtils.addSeparatorTo(sharedValuesAttributesMenu);
 
-                plugin.model.sharedValuesAttributeNames.forEach(function(attributeName)
+                root.pluginModel.sharedValuesAttributeNames.forEach(function(attributeName)
                 {
                     let attributeMenuItem = MenuUtils.addItemTo(sharedValuesAttributesMenu, attributeName);
 
@@ -754,16 +754,16 @@ PluginContent
                         // in case the clustering is cancelled by the user
                         root.updatePlotMenuState();
 
-                        plugin.model.computeHierarchicalClustering();
+                        root.pluginModel.computeHierarchicalClustering();
                     });
 
-                    plugin.model.hierarchicalClusteringComplete.connect(sortFn);
+                    root.pluginModel.hierarchicalClusteringComplete.connect(sortFn);
                 }
                 else
                     sortByMenuItem.triggered.connect(sortFn);
             });
 
-            if(plugin.model.columnAnnotationNames.length > 0)
+            if(root.pluginModel.columnAnnotationNames.length > 0)
             {
                 MenuUtils.addActionTo(menu, groupByAnnotationAction);
 
@@ -812,10 +812,10 @@ PluginContent
                 });
             });
 
-            if(plugin.model.sharedValuesAttributeNames.length > 0)
+            if(root.pluginModel.sharedValuesAttributeNames.length > 0)
             {
                 MenuUtils.addSeparatorTo(savePlotImageAttributeMenu);
-                plugin.model.sharedValuesAttributeNames.forEach(function(attributeName)
+                root.pluginModel.sharedValuesAttributeNames.forEach(function(attributeName)
                 {
                     let savePlotImageByAttributeMenuItem = MenuUtils.addItemTo(savePlotImageAttributeMenu, attributeName);
 
@@ -843,7 +843,7 @@ PluginContent
     {
         let list = [];
 
-        plugin.model.columnAnnotationNames.forEach(function(columnAnnotationName)
+        root.pluginModel.columnAnnotationNames.forEach(function(columnAnnotationName)
         {
             list.push(columnAnnotationName);
         });
@@ -865,7 +865,7 @@ PluginContent
             {type: PlotColumnSortType.HierarchicalClustering, text: qsTr("Hierarchical Clustering")}
         ];
 
-        if(plugin.model.numContinuousColumns > 0)
+        if(root.pluginModel.numContinuousColumns > 0)
             options = options.concat(continuousOptions);
 
         root._availableColumnAnnotationNames.forEach(function(columnAnnotationName)
@@ -936,7 +936,7 @@ PluginContent
             SplitView.minimumHeight: splitView.orientation === Qt.Vertical ? 100 : -1
             SplitView.minimumWidth: splitView.orientation === Qt.Horizontal ? 400 : -1
 
-            model: plugin.model.nodeAttributeTableModel
+            model: root.pluginModel.nodeAttributeTableModel
             pluginContent: root
 
             exportBaseFileName: root.baseFileNameNoExtension + "-attributes"
@@ -953,7 +953,7 @@ PluginContent
             {
                 // If the tableView's selection is less than complete, highlight
                 // the corresponding nodes in the graph, otherwise highlight nothing
-                plugin.model.setHighlightedRows(tableView.selectedRows.length < tableView.rowCount ?
+                root.pluginModel.setHighlightedRows(tableView.selectedRows.length < tableView.rowCount ?
                     tableView.selectedRows : []);
                 plot.setSelectedRows(tableView.selectedRows);
             }
@@ -1026,7 +1026,7 @@ PluginContent
                     rightPadding: plotFlickable.verticalScrollBarWidth
                     bottomPadding: plotFlickable.horizontalScrollBarHeight
 
-                    model: plugin.model
+                    model: root.pluginModel
 
                     onPlotOptionsChanged:
                     {
@@ -1081,7 +1081,7 @@ PluginContent
                         if(plot.plotMode !== PlotMode.RowsOfInterestColumnSelection || plot.selectedColumns.length === 0)
                             return;
 
-                        let rows = plugin.model.rowsOfInterestByColumns(plot.selectedColumns,
+                        let rows = root.pluginModel.rowsOfInterestByColumns(plot.selectedColumns,
                             tableView.visibleRows, modalControls.roiPercentile, modalControls.roiWeight);
 
                         tableView.setRowOrder(rows);

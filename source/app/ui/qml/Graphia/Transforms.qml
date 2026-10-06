@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -31,6 +33,7 @@ Item
     height: layout.height
 
     property var document
+    property var mainWindow: null
 
     property color enabledTextColor
     property color disabledTextColor
@@ -68,12 +71,12 @@ Item
                     }
                 }
 
-                model: document.transforms
+                model: root.document.transforms
                 heldColor: root.heldColor
 
                 alignment: Qt.AlignRight
 
-                onItemMoved: function(from, to) { document.moveGraphTransform(from, to); }
+                onItemMoved: function(from, to) { root.document.moveGraphTransform(from, to); }
             }
         }
 
@@ -86,7 +89,7 @@ Item
             {
                 id: transformSummaryText
 
-                color: enabled ? enabledTextColor : disabledTextColor
+                color: enabled ? root.enabledTextColor : root.disabledTextColor
                 visible: panel.hidden && list.count > 0
                 text:
                 {
@@ -104,8 +107,8 @@ Item
                 text: qsTr("Add Transform")
                 font.bold: true
 
-                textColor: enabled ? enabledTextColor : disabledTextColor
-                hoverColor: heldColor
+                textColor: enabled ? root.enabledTextColor : root.disabledTextColor
+                hoverColor: root.heldColor
 
                 onClicked: function(mouse) { Utils.createWindow(root, createTransformDialog); }
             }
@@ -129,6 +132,7 @@ Item
 
     Hubble
     {
+        mainWindow: root.mainWindow
         title: qsTr("Add Transform")
         alignment: Qt.AlignRight | Qt.AlignBottom
         edges: Qt.RightEdge | Qt.TopEdge

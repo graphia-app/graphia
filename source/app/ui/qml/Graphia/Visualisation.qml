@@ -72,7 +72,7 @@ Item
 
             implicitWidth: 180
             model: root.similarAttributes
-            enabled: !isFlagSet("disabled") && root._valid
+            enabled: !root.isFlagSet("disabled") && root._valid
             placeholderText: root.attributeName
 
             onSelectedValueChanged:
@@ -97,30 +97,30 @@ Item
             enabled: enabledMenuItem.checked
             iconName:
             {
-                if(!root._valid || channel.length === 0)
+                if(!root._valid || root.channel.length === 0)
                     return "applications-other";
 
-                if(channel === "Shared Text")
+                if(root.channel === "Shared Text")
                     return "shared-text";
 
-                if(channel === "Text")
+                if(root.channel === "Text")
                     return "format-text-bold";
 
-                if(channel === "Size")
+                if(root.channel === "Size")
                 {
-                    if(attributeElementType === ElementType.Node)
+                    if(root.attributeElementType === ElementType.Node)
                         return "node-size";
-                    else if(attributeElementType === ElementType.Edge)
+                    else if(root.attributeElementType === ElementType.Edge)
                         return "edge-size";
 
                     // Element type not known (probably because the visualisation is erroring)
                     return "view-fullscreen";
                 }
 
-                if(channel === "Text Colour")
+                if(root.channel === "Text Colour")
                     return "text-color";
 
-                if(channel === "Text Size")
+                if(root.channel === "Text Size")
                     return "text-size";
 
                 return "";
@@ -129,7 +129,7 @@ Item
 
         function showGradientSelector()
         {
-            let gradientSelector = visualisations.createGradientSelector(index);
+            let gradientSelector = root.visualisations.createGradientSelector(root.index);
             Utils.centreWindow(gradientSelector);
             gradientSelector.open(gradientKey.configuration);
         }
@@ -145,7 +145,7 @@ Item
             textColor: root.textColor
             hoverColor: root.hoverColor
 
-            invert: isFlagSet("invert");
+            invert: root.isFlagSet("invert");
 
             minimum: root._visualisationInfo.minimumNumericValue !== undefined ?
                 root._visualisationInfo.minimumNumericValue : 0.0
@@ -179,7 +179,7 @@ Item
 
         function showPaletteSelector()
         {
-            let paletteSelector = visualisations.createPaletteSelector(index);
+            let paletteSelector = root.visualisations.createPaletteSelector(root.index);
             Utils.centreWindow(paletteSelector);
             paletteSelector.open(paletteKey.configuration, root._stringValues);
         }
@@ -210,8 +210,8 @@ Item
 
             width: 20
             height: 15
-            color: disabledTextColor
-            hoverColor: enabledTextColor
+            color: root.disabledTextColor
+            hoverColor: root.enabledTextColor
             propogatePresses: true
 
             menu: PlatformMenu
@@ -227,7 +227,7 @@ Item
 
                     onCheckedChanged:
                     {
-                        setFlag("disabled", !checked);
+                        root.setFlag("disabled", !checked);
                         root.updateExpression();
                     }
                 }
@@ -249,7 +249,7 @@ Item
 
                 property bool _showMappingOptions:
                 {
-                    return document.visualisationChannelAllowsMapping(root.channel) &&
+                    return root.document.visualisationChannelAllowsMapping(root.channel) &&
                         root.attributeValueType === ValueType.Numerical;
                 }
 
@@ -267,7 +267,7 @@ Item
 
                     onCheckedChanged:
                     {
-                        setFlag("invert", checked);
+                        root.setFlag("invert", checked);
                         root.updateExpression();
                     }
                 }
@@ -281,7 +281,7 @@ Item
                     enabled: visible && enabledMenuItem.checked && !root._error
 
                     // This is the default when there is no mapping
-                    checked: parameters.mapping === undefined
+                    checked: root.parameters.mapping === undefined
 
                     checkable: true
 
@@ -289,7 +289,7 @@ Item
 
                     onTriggered:
                     {
-                        parameters["mapping"] = "\"{\\\"type\\\":\\\"minmax\\\",\\\"exponent\\\":1}\"";
+                        root.parameters["mapping"] = "\"{\\\"type\\\":\\\"minmax\\\",\\\"exponent\\\":1}\"";
                         root.updateExpression();
                     }
                 }
@@ -306,7 +306,7 @@ Item
 
                     onTriggered:
                     {
-                        parameters["mapping"] = "\"{\\\"type\\\":\\\"stddev\\\",\\\"exponent\\\":1}\"";
+                        root.parameters["mapping"] = "\"{\\\"type\\\":\\\"stddev\\\",\\\"exponent\\\":1}\"";
                         root.updateExpression();
                     }
                 }
@@ -326,13 +326,13 @@ Item
 
                     onTriggered:
                     {
-                        let mappingSelector = visualisations.createMappingSelector(index);
+                        let mappingSelector = root.visualisations.createMappingSelector(root.index);
                         Utils.centreWindow(mappingSelector);
-                        mappingSelector.values = document.visualisationNumericValuesAtIndex(index);
-                        mappingSelector.invert = isFlagSet("invert");
+                        mappingSelector.values = root.document.visualisationNumericValuesAtIndex(root.index);
+                        mappingSelector.invert = root.isFlagSet("invert");
 
-                        if(parameters.mapping !== undefined)
-                            mappingSelector.initialise(Utils.unescapeQuotes(parameters["mapping"]));
+                        if(root.parameters.mapping !== undefined)
+                            mappingSelector.initialise(Utils.unescapeQuotes(root.parameters["mapping"]));
                         else
                             mappingSelector.reset();
 
@@ -355,7 +355,7 @@ Item
 
                     onCheckedChanged:
                     {
-                        setFlag("component", checked);
+                        root.setFlag("component", checked);
                         root.updateExpression();
                     }
                 }
@@ -395,7 +395,7 @@ Item
 
                     onCheckedChanged:
                     {
-                        setFlag("assignByQuantity", checked);
+                        root.setFlag("assignByQuantity", checked);
                         root.updateExpression();
                     }
                 }
@@ -409,8 +409,8 @@ Item
 
                     onTriggered:
                     {
-                        document.removeVisualisation(index);
-                        document.update();
+                        root.document.removeVisualisation(root.index);
+                        root.document.update();
                     }
                 }
             }
@@ -478,9 +478,9 @@ Item
     onAttributeNameChanged: { updateSimilarAttributes(); }
     Connections
     {
-        target: document
-        function onAttributesChanged() { updateSimilarAttributes(); }
-        function onVisualisationsChanged() { if(ready) refreshVisualisationInfo(); }
+        target: root.document
+        function onAttributesChanged() { root.updateSimilarAttributes(); }
+        function onVisualisationsChanged() { if(root.ready) root.refreshVisualisationInfo(); }
     }
 
     property var attributeValueType:

@@ -27,6 +27,8 @@ import Graphia.Utils
 
 Item
 {
+    id: root
+
     property var application: null
 
     Preferences
@@ -176,7 +178,7 @@ Item
                 text: Utils.format(qsTr("Particularly on older hardware, further performance may " +
                     "be gained by running the application in Low Resolution: <a href=\"dummy\">Locate {0} " +
                     "in Finder</a> and choose <b>Get Info</b> from its context menu, " +
-                    "then select <b>Open In Low Resolution</b>. Restart {0}."), application.name)
+                    "then select <b>Open In Low Resolution</b>. Restart {0}."), root.application.name)
 
                 PointingCursorOnHoverLink {}
                 onLinkActivated: function(link) { NativeUtils.showAppInFileManager(); }

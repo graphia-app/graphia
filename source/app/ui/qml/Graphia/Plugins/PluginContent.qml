@@ -26,6 +26,7 @@ Item
 
     property string baseFileName: ""
     property string baseFileNameNoExtension: ""
+    property var pluginModel: null
 
     // Don't use this directly, that is naughty
     property var _mainWindow: null

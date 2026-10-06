@@ -95,7 +95,7 @@ AbstractButton
             Layout.preferredHeight: namedIcon.height
         }
 
-        ToolTip.visible: namedIcon.valid && _cleansedText.length > 0 && hovered
+        ToolTip.visible: namedIcon.valid && _cleansedText.length > 0 && root.hovered
         ToolTip.delay: Constants.toolTipDelay
         ToolTip.text: namedIcon.valid ? _cleansedText : ""
     }

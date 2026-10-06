@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -80,8 +82,8 @@ Wizard
             {
                 let leftAttributeName = model.data(left);
                 let rightAttributeName = model.data(right);
-                let leftCount = document.attribute(leftAttributeName).sharedValues.length;
-                let rightCount = document.attribute(rightAttributeName).sharedValues.length;
+                let leftCount = root.document.attribute(leftAttributeName).sharedValues.length;
+                let rightCount = root.document.attribute(rightAttributeName).sharedValues.length;
                 return leftCount < rightCount;
             }
 
@@ -196,7 +198,7 @@ Wizard
                             {
                                 if(checkedButton !== null && root.visible)
                                 {
-                                    selectedAttributeGroupA = checkedButton.attributeName;
+                                    root.selectedAttributeGroupA = checkedButton.attributeName;
 
                                     // Disable analysis on selected
                                     for(let i = 0; i < attributeSelectBRepeater.count; i++)
@@ -215,16 +217,18 @@ Wizard
 
                             RadioButton
                             {
+                                required property var model
+
                                 rightPadding: scrollViewA.scrollBarWidth
 
                                 property var attributeName: model.display
 
                                 text:
                                 {
-                                    if(document && model.display && model.display.length > 0)
+                                    if(root.document && model.display && model.display.length > 0)
                                     {
                                         return Utils.format(qsTr("{0} ({1} entries)"), model.display,
-                                            document.attribute(model.display).sharedValues.length);
+                                            root.document.attribute(model.display).sharedValues.length);
                                     }
 
                                     return "";
@@ -286,7 +290,7 @@ Wizard
                             onCheckedButtonChanged:
                             {
                                 if(checkedButton !== null && root.visible)
-                                    selectedAttributeGroupB = checkedButton.attributeName;
+                                    root.selectedAttributeGroupB = checkedButton.attributeName;
                             }
                         }
 
@@ -297,16 +301,18 @@ Wizard
 
                             RadioButton
                             {
+                                required property var model
+
                                 rightPadding: scrollViewB.scrollBarWidth
 
                                 property var attributeName: model.display
 
                                 text:
                                 {
-                                    if(document && model.display && model.display.length > 0)
+                                    if(root.document && model.display && model.display.length > 0)
                                     {
                                         return Utils.format(qsTr("{0} ({1} entries)"), model.display,
-                                            document.attribute(model.display).sharedValues.length);
+                                            root.document.attribute(model.display).sharedValues.length);
                                     }
 
                                     return "";

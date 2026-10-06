@@ -35,6 +35,7 @@ Item
 
     property string title: ""
     property var target
+    property var mainWindow: null
 
     property int alignment: Qt.AlignLeft | Qt.AlignTop
     property int edges: Qt.LeftEdge | Qt.TopEdge
@@ -110,8 +111,8 @@ Item
     {
         id: backRectangle
         color: Qt.rgba(0.96, 0.96, 0.96, 0.9)
-        width: mainLayout.width + _padding
-        height: mainLayout.height + _padding
+        width: mainLayout.width + root._padding
+        height: mainLayout.height + root._padding
         radius: 3
     }
 
@@ -126,7 +127,7 @@ Item
 
             Text
             {
-                text: title
+                text: root.title
                 font.pointSize: FontPointSize.h2
             }
         }
@@ -135,18 +136,18 @@ Item
         {
             Layout.preferredWidth: containerLayout.width
 
-            visible: displayPrevious || displayNext || displayClose
+            visible: root.displayPrevious || root.displayNext || root.displayClose
 
             Text
             {
-                visible: !displayClose
+                visible: !root.displayClose
                 text: qsTr("Skip")
                 font.underline: true
                 MouseArea
                 {
                     cursorShape: Qt.PointingHandCursor
                     anchors.fill: parent
-                    onClicked: function(mouse) { skipClicked(); }
+                    onClicked: function(mouse) { root.skipClicked(); }
                 }
             }
 
@@ -154,23 +155,23 @@ Item
 
             Button
             {
-                visible: displayPrevious
+                visible: root.displayPrevious
                 text: qsTr("Previous")
-                onClicked: function(mouse) { previousClicked(); }
+                onClicked: function(mouse) { root.previousClicked(); }
             }
 
             Button
             {
-                visible: displayNext
+                visible: root.displayNext
                 text: qsTr("Next")
-                onClicked: function(mouse) { nextClicked(); }
+                onClicked: function(mouse) { root.nextClicked(); }
             }
 
             Button
             {
-                visible: displayClose
+                visible: root.displayClose
                 text: qsTr("Close")
-                onClicked: function(mouse) { closeClicked(); }
+                onClicked: function(mouse) { root.closeClicked(); }
             }
         }
     }
@@ -301,7 +302,7 @@ Item
             }
             else
             {
-                root.parent = mainWindow.header;
+                root.parent = root.mainWindow.header;
                 positionBubble();
             }
         }
@@ -313,7 +314,7 @@ Item
         if(hoverTarget.hovered)
         {
             hoverTimer.start();
-            root.parent = mainWindow.header;
+            root.parent = root.mainWindow.header;
             positionBubble();
         }
         else

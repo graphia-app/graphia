@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQml
 import QtQuick.Controls
@@ -191,6 +193,20 @@ Rectangle
         root._columnWidths = new Array(root.model.columnCount()).fill(undefined);
     }
 
+    // Delegates declare whichever of the loader's properties they use
+    function _bindDelegateProperties(loader, names)
+    {
+        for(const name of names)
+        {
+            if(name in loader.item)
+                loader.item[name] = Qt.binding(() => loader[name]);
+        }
+
+        // The item is measured as soon as it's loaded, but layouts don't
+        // recalculate their implicit size for the new values until polished
+        loader.item.ensurePolished();
+    }
+
     function _onModelChanged()
     {
         root._resetColumnWidths();
@@ -204,11 +220,17 @@ Rectangle
         target: root.model
 
         // If the underlying data model has been reset, the column widths also need to be reset
-        function onModelReset() { _onModelChanged(); }
+        function onModelReset() { root._onModelChanged(); }
     }
 
     property Component headerDelegate: RowLayout
     {
+        id: defaultHeaderDelegate
+
+        property string value
+        property int modelColumn
+        property bool showSortIndicator
+
         spacing: 0
 
         Label
@@ -218,7 +240,7 @@ Rectangle
             Layout.fillWidth: true
 
             maximumLineCount: 1
-            text: value
+            text: defaultHeaderDelegate.value
 
             background: Rectangle { color: palette.button }
             color: palette.buttonText
@@ -229,8 +251,8 @@ Rectangle
             {
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 anchors.fill: parent
-                onClicked: function(mouse) { root.headerClicked(modelColumn, mouse); }
-                onDoubleClicked: function(mouse) { root.headerDoubleClicked(modelColumn, mouse); }
+                onClicked: function(mouse) { root.headerClicked(defaultHeaderDelegate.modelColumn, mouse); }
+                onDoubleClicked: function(mouse) { root.headerDoubleClicked(defaultHeaderDelegate.modelColumn, mouse); }
             }
         }
 
@@ -251,13 +273,13 @@ Rectangle
                 antialiasing: false
                 width: 7
                 height: 4
-                visible: showSortIndicator
+                visible: defaultHeaderDelegate.showSortIndicator
 
                 transform: Rotation
                 {
                     origin.x: sortIndicator.width * 0.5
                     origin.y: sortIndicator.height * 0.5
-                    angle: sortIndicatorOrder === Qt.DescendingOrder ? 0 : 180
+                    angle: root.sortIndicatorOrder === Qt.DescendingOrder ? 0 : 180
                 }
 
                 ShapePath
@@ -276,8 +298,8 @@ Rectangle
             {
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 anchors.fill: parent
-                onClicked: function(mouse) { root.headerClicked(modelColumn, mouse); }
-                onDoubleClicked: function(mouse) { root.headerDoubleClicked(modelColumn, mouse); }
+                onClicked: function(mouse) { root.headerClicked(defaultHeaderDelegate.modelColumn, mouse); }
+                onDoubleClicked: function(mouse) { root.headerDoubleClicked(defaultHeaderDelegate.modelColumn, mouse); }
             }
         }
     }
@@ -292,6 +314,12 @@ Rectangle
 
     property Component cellDelegate: Label
     {
+        id: defaultCellDelegate
+
+        property string value
+        property int modelColumn
+        property int modelRow
+
         maximumLineCount: 1
         text: { return root.cellValueProvider(value); }
 
@@ -316,8 +344,8 @@ Rectangle
         {
             acceptedButtons: Qt.LeftButton | Qt.RightButton
             anchors.fill: parent
-            onClicked: function(mouse) { root.clicked(modelColumn, modelRow, mouse); }
-            onDoubleClicked: function(mouse) { root.doubleClicked(modelColumn, modelRow, mouse); }
+            onClicked: function(mouse) { root.clicked(defaultCellDelegate.modelColumn, defaultCellDelegate.modelRow, mouse); }
+            onDoubleClicked: function(mouse) { root.doubleClicked(defaultCellDelegate.modelColumn, defaultCellDelegate.modelRow, mouse); }
         }
     }
 
@@ -372,6 +400,10 @@ Rectangle
 
             delegate: Item
             {
+                id: headerViewDelegate
+
+                required property var model
+
                 implicitWidth: Math.max(1, headerDelegateLoader.implicitWidth)
                 implicitHeight: Math.max(1, headerDelegateLoader.implicitHeight)
 
@@ -383,18 +415,21 @@ Rectangle
                     clip: true
 
                     sourceComponent: root.headerDelegate
-                    readonly property string value: model[root.cellDisplayRole]
-                    readonly property int modelColumn: model.column
-                    readonly property bool showSortIndicator: _forceSortIndicator || model.column === root.sortIndicatorColumn
+                    readonly property string value: headerViewDelegate.model[root.cellDisplayRole]
+                    readonly property int modelColumn: headerViewDelegate.model.column
+                    readonly property bool showSortIndicator: _forceSortIndicator || headerViewDelegate.model.column === root.sortIndicatorColumn
                     readonly property int sortIndicatorOrder: root.sortIndicatorOrder
 
                     property bool _forceSortIndicator: false
 
                     onLoaded:
                     {
+                        root._bindDelegateProperties(headerDelegateLoader,
+                            ["value", "modelColumn", "showSortIndicator", "sortIndicatorOrder"]);
+
                         headerView.implicitHeight = Math.max(headerView.implicitHeight,
                             Math.max(item.implicitHeight, item.height));
-                        root._headerItems.set(model.column, headerDelegateLoader);
+                        root._headerItems.set(headerViewDelegate.model.column, headerDelegateLoader);
                     }
                 }
 
@@ -420,17 +455,17 @@ Rectangle
                         {
                             if(drag.active)
                             {
-                                let currentColumnWidth = root._columnWidths[model.column];
+                                let currentColumnWidth = root._columnWidths[headerViewDelegate.model.column];
                                 if(currentColumnWidth === undefined)
                                     currentColumnWidth = parent.width;
 
-                                root._columnWidths[model.column] =
+                                root._columnWidths[headerViewDelegate.model.column] =
                                     Math.max(root._minimumColumnWidth, currentColumnWidth + (mouseX - width));
                                 root.forceLayout();
                             }
                         }
 
-                        onDoubleClicked: function(mouse) { root.resizeColumnToContents(model.column); }
+                        onDoubleClicked: function(mouse) { root.resizeColumnToContents(headerViewDelegate.model.column); }
                     }
                 }
 
@@ -517,6 +552,10 @@ Rectangle
 
                 delegate: Item
                 {
+                    id: tableViewDelegate
+
+                    required property var model
+
                     clip: true
 
                     implicitWidth: Math.max(1, cellDelegateLoader.implicitWidth)
@@ -528,16 +567,18 @@ Rectangle
                         anchors.fill: parent
 
                         sourceComponent: root.cellDelegate
-                        readonly property string value: model[root.cellDisplayRole]
-                        readonly property int modelColumn: model.column
-                        readonly property int modelRow: model.row
+                        readonly property string value: tableViewDelegate.model[root.cellDisplayRole]
+                        readonly property int modelColumn: tableViewDelegate.model.column
+                        readonly property int modelRow: tableViewDelegate.model.row
 
                         onLoaded:
                         {
+                            root._bindDelegateProperties(cellDelegateLoader, ["value", "modelColumn", "modelRow"]);
+
                             if(item.implicitHeight !== 0)
                                 root._cellDelegateHeight = Math.max(root._cellDelegateHeight, item.implicitHeight);
 
-                            root._cellWidths.set(model.column + "," + model.row, Math.max(1, item.implicitWidth));
+                            root._cellWidths.set(tableViewDelegate.model.column + "," + tableViewDelegate.model.row, Math.max(1, item.implicitWidth));
                         }
                     }
 

@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -31,6 +33,7 @@ Item
     height: layout.height
 
     property var document
+    property var mainWindow: null
 
     property color enabledTextColor
     property color disabledTextColor
@@ -60,7 +63,7 @@ Item
             onRejected:
             {
                 if(applied)
-                    document.rollback();
+                    root.document.rollback();
             }
 
             onApplyClicked: function(alreadyApplied)
@@ -95,7 +98,7 @@ Item
             onRejected:
             {
                 if(applied)
-                    document.rollback();
+                    root.document.rollback();
             }
 
             onApplyClicked: function(alreadyApplied)
@@ -130,7 +133,7 @@ Item
             onRejected:
             {
                 if(applied)
-                    document.rollback();
+                    root.document.rollback();
 
                 let visualisation = list.itemAt(visualisationIndex);
                 visualisation.setupMappingMenuItems();
@@ -164,7 +167,7 @@ Item
             {
                 id: visualisationSummaryText
 
-                color: enabled ? enabledTextColor : disabledTextColor
+                color: enabled ? root.enabledTextColor : root.disabledTextColor
                 visible: panel.hidden && list.count > 0
                 text:
                 {
@@ -182,8 +185,8 @@ Item
                 text: qsTr("Add Visualisation")
                 font.bold: true
 
-                textColor: enabled ? enabledTextColor : disabledTextColor
-                hoverColor: heldColor
+                textColor: enabled ? root.enabledTextColor : root.disabledTextColor
+                hoverColor: root.heldColor
 
                 onClicked: function(mouse) { Utils.createWindow(root, createVisualisationDialog); }
             }
@@ -227,18 +230,19 @@ Item
                     }
                 }
 
-                model: document.visualisations
+                model: root.document.visualisations
                 heldColor: root.heldColor
 
                 alignment: Qt.AlignRight
 
-                onItemMoved: function(from, to) { document.moveVisualisation(from, to); }
+                onItemMoved: function(from, to) { root.document.moveVisualisation(from, to); }
             }
         }
     }
 
     Hubble
     {
+        mainWindow: root.mainWindow
         title: qsTr("Add Visualisation")
         alignment: Qt.AlignRight | Qt.AlignTop
         edges: Qt.RightEdge | Qt.BottomEdge

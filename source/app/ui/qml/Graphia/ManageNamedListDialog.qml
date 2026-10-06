@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Window
 import QtQuick.Controls
@@ -60,6 +62,11 @@ Window
 
             delegate: Item
             {
+                id: namedListDelegate
+
+                required property var modelData
+                required property int index
+
                 anchors.left: parent.left
                 anchors.right: parent.right
 
@@ -78,13 +85,13 @@ Window
 
                     background: Rectangle
                     {
-                        visible: listBox.highlightedProvider(index)
+                        visible: listBox.highlightedProvider(namedListDelegate.index)
                         color: palette.highlight
                     }
 
-                    text: modelData
+                    text: namedListDelegate.modelData
 
-                    color: listBox.highlightedProvider(index) ?
+                    color: listBox.highlightedProvider(namedListDelegate.index) ?
                         palette.highlightedText : palette.windowText
                     elide: Text.ElideRight
                 }

@@ -62,15 +62,15 @@ BaseParameterDialog
 
         function updateGraphSizeEstimate()
         {
-            if(_suppressAutoUpdates)
+            if(root._suppressAutoUpdates)
                 return;
 
-            estimateGraphSize(parameters);
+            estimateGraphSize(root.parameters);
         }
 
         onDataRectChanged:
         {
-            parameters.dataRect = dataRect.asQRect;
+            root.parameters.dataRect = dataRect.asQRect;
 
             if(dataRect.hasDiscreteValues)
                 dataTypeComboBox.setDiscrete();
@@ -79,15 +79,15 @@ BaseParameterDialog
 
             clippingValueText.text = NativeUtils.formatNumber(dataRect.maxValue);
 
-            estimateGraphSize(parameters);
+            estimateGraphSize(root.parameters);
         }
 
         onDataLoaded:
         {
             tabularDataParser.autoDetectDataRectangle();
-            parameters.data = tabularDataParser.data;
+            root.parameters.data = tabularDataParser.data;
 
-            estimateGraphSize(parameters);
+            estimateGraphSize(root.parameters);
         }
 
         onGraphSizeEstimateChanged:
@@ -136,7 +136,7 @@ BaseParameterDialog
 
             text: Utils.format(tabularDataParser.failed ?
                 qsTr("Failed to Load {0}.") : qsTr("Loading {0}…"),
-                NativeUtils.baseFileNameForUrl(url))
+                NativeUtils.baseFileNameForUrl(root.url))
         }
 
         RowLayout
@@ -267,7 +267,7 @@ BaseParameterDialog
                         enabled: !dataRectPage._busy
                         onCheckedChanged:
                         {
-                            parameters.transpose = checked;
+                            root.parameters.transpose = checked;
                             tabularDataParser.transposed = checked;
                         }
                     }
@@ -307,7 +307,7 @@ BaseParameterDialog
                         property bool _setting: false
                         onCurrentIndexChanged:
                         {
-                            parameters.correlationDataType = model.get(currentIndex).value;
+                            root.parameters.correlationDataType = model.get(currentIndex).value;
                             tabularDataParser.updateGraphSizeEstimate();
 
                             if(_setting)
@@ -398,7 +398,7 @@ BaseParameterDialog
 
                         onCheckedChanged:
                         {
-                            parameters.treatAsBinary = checked;
+                            root.parameters.treatAsBinary = checked;
                             tabularDataParser.updateGraphSizeEstimate();
                         }
                     }
@@ -427,7 +427,7 @@ BaseParameterDialog
 
                     model: tabularDataParser.model
 
-                    highlightedProvider: (column, row) => isInsideRect(column, row, tabularDataParser.dataRect)
+                    highlightedProvider: (column, row) => root.isInsideRect(column, row, tabularDataParser.dataRect)
                     onClicked: function(column, row, mouse) { tabularDataParser.setDataRectangle(column, row); }
 
                     function positionViewAtSelectedCell()
@@ -601,7 +601,7 @@ BaseParameterDialog
 
                                 onCurrentIndexChanged:
                                 {
-                                    parameters.discreteCorrelationType = model.get(currentIndex).value;
+                                    root.parameters.discreteCorrelationType = model.get(currentIndex).value;
                                     tabularDataParser.updateGraphSizeEstimate();
                                 }
 
@@ -647,7 +647,7 @@ BaseParameterDialog
 
                                 onCurrentIndexChanged:
                                 {
-                                    parameters.continuousCorrelationType = model.get(currentIndex).value;
+                                    root.parameters.continuousCorrelationType = model.get(currentIndex).value;
                                     tabularDataParser.updateGraphSizeEstimate();
                                 }
 
@@ -691,7 +691,7 @@ BaseParameterDialog
 
                                 onCurrentIndexChanged:
                                 {
-                                    parameters.correlationPolarity = model.get(currentIndex).value;
+                                    root.parameters.correlationPolarity = model.get(currentIndex).value;
                                     tabularDataParser.updateGraphSizeEstimate();
                                 }
 
@@ -739,7 +739,7 @@ BaseParameterDialog
 
                                 onCurrentIndexChanged:
                                 {
-                                    parameters.missingDataType = model.get(currentIndex).value;
+                                    root.parameters.missingDataType = model.get(currentIndex).value;
                                     tabularDataParser.updateGraphSizeEstimate();
                                 }
 
@@ -764,7 +764,7 @@ BaseParameterDialog
                                     {
                                         if(text.length > 0)
                                         {
-                                            parameters.missingDataValue = text;
+                                            root.parameters.missingDataValue = text;
                                             tabularDataParser.updateGraphSizeEstimate();
                                         }
                                     }
@@ -851,7 +851,7 @@ BaseParameterDialog
 
                                 onCurrentIndexChanged:
                                 {
-                                    parameters.clippingType = model.get(currentIndex).value;
+                                    root.parameters.clippingType = model.get(currentIndex).value;
                                     tabularDataParser.updateGraphSizeEstimate();
                                 }
 
@@ -878,7 +878,7 @@ BaseParameterDialog
                                     {
                                         if(visible && text.length > 0)
                                         {
-                                            parameters.clippingValue = parseFloat(text);
+                                            root.parameters.clippingValue = parseFloat(text);
                                             tabularDataParser.updateGraphSizeEstimate();
                                         }
                                     }
@@ -906,7 +906,7 @@ BaseParameterDialog
                                     {
                                         if(visible)
                                         {
-                                            parameters.clippingValue = value;
+                                            root.parameters.clippingValue = value;
                                             tabularDataParser.updateGraphSizeEstimate();
                                         }
                                     }
@@ -985,7 +985,7 @@ BaseParameterDialog
 
                                 onCurrentIndexChanged:
                                 {
-                                    parameters.scaling = model.get(currentIndex).value;
+                                    root.parameters.scaling = model.get(currentIndex).value;
                                     tabularDataParser.updateGraphSizeEstimate();
                                 }
 
@@ -1076,7 +1076,7 @@ BaseParameterDialog
 
                                 onCurrentIndexChanged:
                                 {
-                                    parameters.normalise = model.get(currentIndex).value;
+                                    root.parameters.normalise = model.get(currentIndex).value;
                                     tabularDataParser.updateGraphSizeEstimate();
                                 }
 
@@ -1209,9 +1209,9 @@ BaseParameterDialog
 
                                 onValueChanged:
                                 {
-                                    parameters.correlationFilterType = value;
+                                    root.parameters.correlationFilterType = value;
 
-                                    resetFilterControls();
+                                    root.resetFilterControls();
                                     tabularDataParser.updateGraphSizeEstimate();
                                 }
                             }
@@ -1281,7 +1281,7 @@ BaseParameterDialog
 
                             onValueChanged:
                             {
-                                parameters.minimumThreshold = value;
+                                root.parameters.minimumThreshold = value;
                                 tabularDataParser.updateGraphSizeEstimate();
 
                                 if(root._suppressAutoUpdates)
@@ -1342,7 +1342,7 @@ BaseParameterDialog
                                 if(filterTypeComboBox.value !== CorrelationFilterType.Knn)
                                     return;
 
-                                parameters.maximumK = value;
+                                root.parameters.maximumK = value;
                                 tabularDataParser.updateGraphSizeEstimate();
 
                                 if(root._suppressAutoUpdates)
@@ -1456,7 +1456,7 @@ BaseParameterDialog
                                 if(filterTypeComboBox.value !== CorrelationFilterType.Threshold)
                                     return;
 
-                                parameters.initialThreshold = value;
+                                root.parameters.initialThreshold = value;
 
                                 if(root._suppressAutoUpdates)
                                     return;
@@ -1491,7 +1491,7 @@ BaseParameterDialog
                                 if(filterTypeComboBox.value !== CorrelationFilterType.Knn)
                                     return;
 
-                                parameters.initialK = value;
+                                root.parameters.initialK = value;
 
                                 if(root._suppressAutoUpdates)
                                     return;
@@ -1627,9 +1627,9 @@ BaseParameterDialog
                             }
 
                             property var transforms: value && value.transforms ? value.transforms : []
-                            onTransformsChanged: { parameters.additionalTransforms = transforms; }
+                            onTransformsChanged: { root.parameters.additionalTransforms = transforms; }
                             property var visualisations: value && value.visualisations ? value.visualisations : []
-                            onVisualisationsChanged: { parameters.additionalVisualisations = visualisations; }
+                            onVisualisationsChanged: { root.parameters.additionalVisualisations = visualisations; }
                         }
 
                         Button

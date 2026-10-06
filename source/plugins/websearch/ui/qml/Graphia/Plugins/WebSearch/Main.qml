@@ -85,7 +85,7 @@ PluginContent
             url:
             {
                 return urlTemplate.editText.indexOf("%1") >= 0 ?
-                    urlTemplate.editText.arg(plugin.model.selectedNodeNames) : "";
+                    urlTemplate.editText.arg(root.pluginModel.selectedNodeNames) : "";
             }
         }
     }

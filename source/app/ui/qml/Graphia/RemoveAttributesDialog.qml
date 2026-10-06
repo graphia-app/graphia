@@ -125,7 +125,7 @@ Window
 
                 onClicked: function(mouse)
                 {
-                    document.removeAttributes(attributeList.selectedValues);
+                    root.document.removeAttributes(attributeList.selectedValues);
                     root.close();
                 }
             }

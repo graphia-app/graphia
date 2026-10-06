@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -210,8 +212,8 @@ Rectangle
         id: selectAllAction
         text: qsTr("Select All")
         icon.name: "edit-select-all"
-        enabled: document.numNodesFound > 0
-        onTriggered: { document.selectAllFound(); }
+        enabled: root.document.numNodesFound > 0
+        onTriggered: { root.document.selectAllFound(); }
     }
 
     Action
@@ -219,14 +221,14 @@ Rectangle
         id: _previousAction
         text: qsTr("Find Previous")
         icon.name: "go-previous"
-        shortcut: _visible ? "Ctrl+Shift+G" : ""
-        enabled: _type === Find.ByAttribute || document.numNodesFound > 0
+        shortcut: root._visible ? "Ctrl+Shift+G" : ""
+        enabled: root._type === Find.ByAttribute || root.document.numNodesFound > 0
         onTriggered: function(source)
         {
-            if(_type === Find.ByAttribute)
+            if(root._type === Find.ByAttribute)
                 valueComboBox.currentIndex = ((valueComboBox.currentIndex - 1) + valueComboBox.count) % valueComboBox.count;
             else
-                document.selectPrevFound();
+                root.document.selectPrevFound();
         }
     }
 
@@ -235,14 +237,14 @@ Rectangle
         id: _nextAction
         text: qsTr("Find Next")
         icon.name: "go-next"
-        shortcut: _visible ? "Ctrl+G" : ""
-        enabled: _type === Find.ByAttribute || document.numNodesFound > 0
+        shortcut: root._visible ? "Ctrl+G" : ""
+        enabled: root._type === Find.ByAttribute || root.document.numNodesFound > 0
         onTriggered: function(source)
         {
-            if(_type === Find.ByAttribute)
+            if(root._type === Find.ByAttribute)
                 valueComboBox.currentIndex = (valueComboBox.currentIndex + 1) % valueComboBox.count;
             else
-                document.selectNextFound();
+                root.document.selectNextFound();
         }
     }
 
@@ -280,11 +282,11 @@ Rectangle
         onCheckedChanged: function(checked)
         {
             if(checked && valueComboBox.value.length > 0)
-                _attributeValues = [valueComboBox.value];
+                root._attributeValues = [valueComboBox.value];
             else
-                _attributeValues = [];
+                root._attributeValues = [];
 
-            _doFind();
+            root._doFind();
         }
     }
 
@@ -295,7 +297,7 @@ Rectangle
         icon.name: "edit-select-all"
         checkable: true
 
-        onCheckedChanged: function(checked) { _doFind(); }
+        onCheckedChanged: function(checked) { root._doFind(); }
     }
 
     property bool _closing: false
@@ -309,19 +311,19 @@ Rectangle
         {
             findField.focus = false;
             findField.text = "";
-            _closing = true;
+            root._closing = true;
 
             // Will reset find state
-            _doFind();
+            root._doFind();
 
-            _visible = false;
-            hidden();
+            root._visible = false;
+            root.hidden();
         }
     }
 
     Shortcut
     {
-        enabled: _visible
+        enabled: root._visible
         sequence: "Esc"
         onActivated: { closeAction.trigger(); }
     }
@@ -340,7 +342,7 @@ Rectangle
             let searchable = sourceModel.data(sourceModel.index(row, 0), proxyModel.role("searchable"));
             let hasSharedValues = sourceModel.data(sourceModel.index(row, 0), proxyModel.role("hasSharedValues"));
 
-            switch(_type)
+            switch(root._type)
             {
             default:
             case Find.Simple:       return true;
@@ -384,7 +386,7 @@ Rectangle
         {
             RowLayout
             {
-                visible: _type === Find.Simple || _type === Find.Advanced
+                visible: root._type === Find.Simple || root._type === Find.Advanced
 
                 Item
                 {
@@ -430,12 +432,12 @@ Rectangle
                         visible: findField.length > 0
                         text:
                         {
-                            let index = document.foundIndex + 1;
+                            let index = root.document.foundIndex + 1;
 
                             if(index > 0)
-                                return Utils.format(qsTr("{0} of {1}"), index, document.numNodesFound);
-                            else if(document.numNodesFound > 0)
-                                return Utils.format(qsTr("{0} found"), document.numNodesFound);
+                                return Utils.format(qsTr("{0} of {1}"), index, root.document.numNodesFound);
+                            else if(root.document.numNodesFound > 0)
+                                return Utils.format(qsTr("{0} found"), root.document.numNodesFound);
                             else
                                 return qsTr("Not Found");
                         }
@@ -454,7 +456,7 @@ Rectangle
             {
                 id: findByAttributeRow
 
-                visible: _type === Find.ByAttribute
+                visible: root._type === Find.ByAttribute
 
                 ComboBox
                 {
@@ -473,16 +475,16 @@ Rectangle
                         if(proxyModel._sourceChanging)
                             return;
 
-                        if(_visible && findByAttributeRow.visible)
-                            lastFindByAttributeName = currentText;
+                        if(root._visible && findByAttributeRow.visible)
+                            root.lastFindByAttributeName = currentText;
 
                         valueComboBox.refresh();
-                        _attributeValues = [];
+                        root._attributeValues = [];
                     }
 
                     function refresh()
                     {
-                        let rowIndex = proxyModel.rowIndexForAttributeName(lastFindByAttributeName);
+                        let rowIndex = proxyModel.rowIndexForAttributeName(root.lastFindByAttributeName);
 
                         if(rowIndex >= 0)
                         {
@@ -492,7 +494,7 @@ Rectangle
                         else if(count > 0)
                         {
                             currentIndex = 0;
-                            lastFindByAttributeName = currentText;
+                            root.lastFindByAttributeName = currentText;
                         }
                         else
                             currentIndex = -1;
@@ -506,7 +508,7 @@ Rectangle
                     id: valueComboBox
                     Layout.preferredWidth: 175
 
-                    visible: !_selectMultipleMode
+                    visible: !root._selectMultipleMode
                     enabled: valueComboBox.count > 0
 
                     property bool _modelChanging: false
@@ -526,7 +528,7 @@ Rectangle
                         // Try to keep the same value selected
                         let preUpdateText = currentText;
 
-                        let attribute = document.attribute(selectAttributeComboBox.currentText);
+                        let attribute = root.document.attribute(selectAttributeComboBox.currentText);
 
                         if(preferences.findByAttributeSortLexically)
                             attribute.sharedValues.sort(NativeUtils.compareStrings);
@@ -549,16 +551,16 @@ Rectangle
                 }
             }
 
-            FloatingButton { action: _previousAction; visible: !_selectMultipleMode }
-            FloatingButton { action: _nextAction; visible: !_selectMultipleMode }
+            FloatingButton { action: _previousAction; visible: !root._selectMultipleMode }
+            FloatingButton { action: _nextAction; visible: !root._selectMultipleMode }
             FloatingButton
             {
-                visible: _type === Find.Simple || _type === Find.Advanced
+                visible: root._type === Find.Simple || root._type === Find.Advanced
                 action: selectAllAction
             }
             FloatingButton
             {
-                visible: _type === Find.ByAttribute
+                visible: root._type === Find.ByAttribute
                 action: selectOnlyAction
             }
             FloatingButton { action: closeAction }
@@ -571,7 +573,7 @@ Rectangle
             Layout.fillWidth: true
             Layout.preferredHeight: 128
 
-            visible: _selectMultipleMode
+            visible: root._selectMultipleMode
 
             ListView
             {
@@ -583,15 +585,19 @@ Rectangle
                 model: valueComboBox.model
                 delegate: Loader
                 {
+                    id: attributeValueDelegate
+
+                    required property var modelData
+
                     sourceComponent: CheckBox
                     {
-                        text: modelData
+                        text: attributeValueDelegate.modelData
 
                         rightPadding: scrollView.scrollBarWidth
 
                         function isChecked()
                         {
-                            return Utils.setContains(_attributeValues, modelData);
+                            return Utils.setContains(root._attributeValues, attributeValueDelegate.modelData);
                         }
 
                         checked: { return isChecked(); }
@@ -602,9 +608,9 @@ Rectangle
                             checked = checked;
 
                             if(checked)
-                                _attributeValues = Utils.setAdd(_attributeValues, modelData);
+                                root._attributeValues = Utils.setAdd(root._attributeValues, attributeValueDelegate.modelData);
                             else
-                                _attributeValues = Utils.setRemove(_attributeValues, modelData);
+                                root._attributeValues = Utils.setRemove(root._attributeValues, attributeValueDelegate.modelData);
 
                             // Rebind so that the delegate doesn't hold the state
                             checked = Qt.binding(isChecked);
@@ -612,7 +618,7 @@ Rectangle
 
                         ToolTip.visible: hovered
                         ToolTip.delay: Constants.toolTipDelay
-                        ToolTip.text: modelData
+                        ToolTip.text: attributeValueDelegate.modelData
                     }
                 }
             }
@@ -622,7 +628,7 @@ Rectangle
         {
             id: advancedRow
 
-            visible: _type === Find.Advanced
+            visible: root._type === Find.Advanced
 
             Rectangle { width: Constants.padding }
 
@@ -644,8 +650,8 @@ Rectangle
 
                 onEnabledChanged:
                 {
-                    if(_visible && advancedRow.visible)
-                        lastAdvancedFindAttributeName = enabled ? currentText: "";
+                    if(root._visible && advancedRow.visible)
+                        root.lastAdvancedFindAttributeName = enabled ? currentText: "";
                 }
 
                 onCurrentTextChanged:
@@ -654,13 +660,13 @@ Rectangle
                     if(proxyModel._sourceChanging)
                         return;
 
-                    if(_visible && advancedRow.visible && enabled)
-                        lastAdvancedFindAttributeName = currentText;
+                    if(root._visible && advancedRow.visible && enabled)
+                        root.lastAdvancedFindAttributeName = currentText;
                 }
 
                 function refresh()
                 {
-                    let rowIndex = proxyModel.rowIndexForAttributeName(lastAdvancedFindAttributeName);
+                    let rowIndex = proxyModel.rowIndexForAttributeName(root.lastAdvancedFindAttributeName);
 
                     if(rowIndex >= 0)
                     {
@@ -688,22 +694,22 @@ Rectangle
 
     Connections
     {
-        target: document
+        target: root.document
 
         function onCommandsFinished()
         {
-            _finding = false;
+            root._finding = false;
 
-            if(_pendingFind)
+            if(root._pendingFind)
             {
-                _doFind();
-                _pendingFind = false;
+                root._doFind();
+                root._pendingFind = false;
             }
         }
 
         function onGraphChanged(graph, changeOccurred)
         {
-            refresh();
+            root.refresh();
         }
     }
 

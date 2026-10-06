@@ -88,12 +88,12 @@ GridLayout
         id: spinBox
         Layout.fillWidth: root.fillWidth
         Layout.preferredWidth: root._preferredWidth
-        visible: (valueType === ValueType.Int || valueType === ValueType.Float)
+        visible: (root.valueType === ValueType.Int || root.valueType === ValueType.Float)
         editable: true
 
         decimals:
         {
-            if(valueType === ValueType.Int)
+            if(root.valueType === ValueType.Int)
                 return 0;
 
             return root.hasRange ? Utils.decimalPointsForRange(root.minimumValue, root.maximumValue) : 3;
@@ -101,10 +101,10 @@ GridLayout
 
         stepSize:
         {
-            if(hasRange)
+            if(root.hasRange)
             {
                 let incrementSize = Utils.incrementForRange(root.minimumValue, root.maximumValue);
-                return valueType === ValueType.Int ? Math.round(Math.max(incrementSize, 1.0)) : incrementSize;
+                return root.valueType === ValueType.Int ? Math.round(Math.max(incrementSize, 1.0)) : incrementSize;
             }
 
             return 1.0;
@@ -112,7 +112,7 @@ GridLayout
 
         function updateValue()
         {
-            let v = typedValue(value);
+            let v = root.typedValue(value);
 
             if(slider.visible)
                 slider.value = Utils.normalise(root.minimumValue, root.maximumValue, v);
@@ -124,7 +124,7 @@ GridLayout
 
         onValueChanged:
         {
-            if(updateValueImmediately && !slider.pressed)
+            if(root.updateValueImmediately && !slider.pressed)
                 updateValue();
 
             ignoreEdits = false;
@@ -147,7 +147,7 @@ GridLayout
         id: slider
         Layout.fillWidth: root.fillWidth
         Layout.preferredWidth: root._preferredWidth
-        visible: ((valueType === ValueType.Int || valueType === ValueType.Float) && hasRange)
+        visible: ((root.valueType === ValueType.Int || root.valueType === ValueType.Float) && root.hasRange)
 
         stepSize: Utils.incrementForRange(root.minimumValue, root.maximumValue) / (root.maximumValue - root.minimumValue);
 
@@ -155,7 +155,7 @@ GridLayout
         {
             if(pressed)
             {
-                spinBox.value = typedValue(Utils.lerp(root.minimumValue, root.maximumValue, value));
+                spinBox.value = root.typedValue(Utils.lerp(root.minimumValue, root.maximumValue, value));
                 spinBox.ignoreEdits = true;
             }
         }
@@ -163,7 +163,7 @@ GridLayout
         onPressedChanged:
         {
             if(!pressed)
-                root.value = typedValue(Utils.lerp(root.minimumValue, root.maximumValue, value));
+                root.value = root.typedValue(Utils.lerp(root.minimumValue, root.maximumValue, value));
         }
     }
 
@@ -172,8 +172,8 @@ GridLayout
         id: textField
         Layout.fillWidth: root.fillWidth
         Layout.preferredWidth: root._preferredWidth
-        visible: (valueType === ValueType.String || valueType === ValueType.Unknown)
-        enabled: valueType !== ValueType.Unknown
+        visible: (root.valueType === ValueType.String || root.valueType === ValueType.Unknown)
+        enabled: root.valueType !== ValueType.Unknown
         selectByMouse: true
 
         validator: RegularExpressionValidator { id: textFieldValidator }
@@ -185,7 +185,7 @@ GridLayout
 
         onTextChanged:
         {
-            if(updateValueImmediately)
+            if(root.updateValueImmediately)
                 updateValue();
         }
 
@@ -203,8 +203,8 @@ GridLayout
         id: comboBox
         Layout.fillWidth: root.fillWidth
         Layout.preferredWidth: root._preferredWidth
-        visible: valueType === ValueType.StringList
-        enabled: valueType !== ValueType.Unknown
+        visible: root.valueType === ValueType.StringList
+        enabled: root.valueType !== ValueType.Unknown
 
         function updateValue()
         {
@@ -219,8 +219,8 @@ GridLayout
         id: attributeList
         Layout.fillWidth: root.fillWidth
         Layout.preferredWidth: root._preferredWidth
-        visible: valueType === ValueType.Attribute
-        enabled: valueType !== ValueType.Unknown && currentIndexIsValid
+        visible: root.valueType === ValueType.Attribute
+        enabled: root.valueType !== ValueType.Unknown && currentIndexIsValid
 
         prettifyFunction: AttributeUtils.prettify
 

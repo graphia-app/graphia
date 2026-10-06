@@ -54,7 +54,7 @@ MenuItem
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
 
-        text: action && action.shortcut ? NativeUtils.nativeShortcutSequence(action.shortcut) : ""
+        text: root.action && root.action.shortcut ? NativeUtils.nativeShortcutSequence(root.action.shortcut) : ""
         color: root._textColor
     }
 

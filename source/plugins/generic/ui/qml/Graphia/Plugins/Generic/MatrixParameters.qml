@@ -105,7 +105,7 @@ BaseParameterDialog
         property bool edgesWarning: numEdges > _warningThreshold
         property bool warning: nodesWarning || edgesWarning
 
-        onDataLoaded: { parameters.data = tabularDataParser.data; }
+        onDataLoaded: { root.parameters.data = tabularDataParser.data; }
     }
 
     ColumnLayout
@@ -129,7 +129,7 @@ BaseParameterDialog
             {
                 if(tabularDataParser.failed)
                 {
-                    let failureMessage = Utils.format(qsTr("Failed to Load {0}"), NativeUtils.baseFileNameForUrl(url));
+                    let failureMessage = Utils.format(qsTr("Failed to Load {0}"), NativeUtils.baseFileNameForUrl(root.url));
 
                     if(tabularDataParser.failureReason.length > 0)
                         failureMessage += Utils.format(qsTr(":\n\n{0}"), tabularDataParser.failureReason);
@@ -139,7 +139,7 @@ BaseParameterDialog
                     return failureMessage;
                 }
 
-                return Utils.format(qsTr("Loading {0}…"), NativeUtils.baseFileNameForUrl(url));
+                return Utils.format(qsTr("Loading {0}…"), NativeUtils.baseFileNameForUrl(root.url));
             }
         }
 
@@ -272,7 +272,7 @@ BaseParameterDialog
 
                         onValueChanged:
                         {
-                            parameters.minimumThreshold = value;
+                            root.parameters.minimumThreshold = value;
 
                             // When the minimum value is increased beyond the initial
                             // value, the latter can get (visually) lost against the extreme
@@ -353,7 +353,7 @@ BaseParameterDialog
 
                         onValueChanged:
                         {
-                            parameters.initialThreshold = value;
+                            root.parameters.initialThreshold = value;
                             graphSizeEstimatePlot.threshold = value;
                         }
                     }
@@ -393,7 +393,7 @@ BaseParameterDialog
                 {
                     id: ignoreDuplicateEdgesCheckbox
                     text: qsTr("Ignore Duplicate Edges")
-                    onCheckedChanged: { parameters.skipDuplicates = checked; }
+                    onCheckedChanged: { root.parameters.skipDuplicates = checked; }
                 }
 
                 HelpTooltip
@@ -480,9 +480,9 @@ BaseParameterDialog
                 text: qsTr("OK")
                 onClicked: function(mouse)
                 {
-                    parameters.filterEdges = filterEdgesCheckbox.checked && !tabularDataParser.binaryMatrix;
+                    root.parameters.filterEdges = filterEdgesCheckbox.checked && !tabularDataParser.binaryMatrix;
 
-                    accepted();
+                    root.accepted();
                     root.close();
                 }
             }
@@ -493,7 +493,7 @@ BaseParameterDialog
                 text: qsTr("Cancel")
                 onClicked: function(mouse)
                 {
-                    rejected();
+                    root.rejected();
                     root.close();
                 }
             }

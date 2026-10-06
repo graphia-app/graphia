@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -213,6 +215,11 @@ ColumnLayout
 
             RowLayout
             {
+                id: autoColorRow
+
+                required property var modelData
+                required property int index
+
                 onXChanged: { root._itemPositionChanged(this); }
                 onYChanged: { root._itemPositionChanged(this); }
 
@@ -224,10 +231,10 @@ ColumnLayout
 
                     text:
                     {
-                        if(index >= root.stringValues.length)
+                        if(autoColorRow.index >= root.stringValues.length)
                             return qsTr("<i>[Not Assigned]</i>");
 
-                        return root.stringValues[index];
+                        return root.stringValues[autoColorRow.index];
                     }
                 }
 
@@ -237,7 +244,7 @@ ColumnLayout
 
                     visible:
                     {
-                        let v = root.stringValues[index];
+                        let v = root.stringValues[autoColorRow.index];
 
                         for(let i = 0; i < root._fixedColors.length; i++)
                         {
@@ -253,12 +260,12 @@ ColumnLayout
 
                 ColorPickButton
                 {
-                    color: modelData
+                    color: autoColorRow.modelData
 
                     onColorChanged:
                     {
                         let colors = root._autoColors.slice();
-                        colors[index] = color;
+                        colors[autoColorRow.index] = color;
                         root._autoColors = colors;
                     }
                 }
@@ -274,7 +281,7 @@ ColumnLayout
                     onClicked: function(mouse)
                     {
                         let colors = root._autoColors.slice();
-                        colors.splice(index, 1);
+                        colors.splice(autoColorRow.index, 1);
                         root._autoColors = colors;
                         root.updateRadioButtons();
 
@@ -492,6 +499,11 @@ ColumnLayout
 
             RowLayout
             {
+                id: fixedColorRow
+
+                required property var modelData
+                required property int index
+
                 onXChanged: { root._itemPositionChanged(this); }
                 onYChanged: { root._itemPositionChanged(this); }
 
@@ -506,25 +518,25 @@ ColumnLayout
                     onCurrentTextChanged:
                     {
                         let colors = root._fixedColors.slice();
-                        colors[index].stringValue = currentText;
+                        colors[fixedColorRow.index].stringValue = currentText;
                         root._fixedColors = colors;
                     }
 
                     onEditTextChanged:
                     {
                         let colors = root._fixedColors.slice();
-                        colors[index].stringValue = editText;
+                        colors[fixedColorRow.index].stringValue = editText;
                         root._fixedColors = colors;
                     }
 
                     Component.onCompleted:
                     {
-                        let stringValueIndex = root.stringValues.indexOf(modelData.stringValue);
+                        let stringValueIndex = root.stringValues.indexOf(fixedColorRow.modelData.stringValue);
 
                         if(stringValueIndex < 0)
                         {
                             currentIndex = -1;
-                            editText = modelData.stringValue;
+                            editText = fixedColorRow.modelData.stringValue;
                         }
                         else
                             currentIndex = stringValueIndex;
@@ -535,12 +547,12 @@ ColumnLayout
 
                 ColorPickButton
                 {
-                    color: modelData.color
+                    color: fixedColorRow.modelData.color
 
                     onColorChanged:
                     {
                         let colors = root._fixedColors.slice();
-                        colors[index].color = color;
+                        colors[fixedColorRow.index].color = color;
                         root._fixedColors = colors;
                     }
                 }
@@ -556,7 +568,7 @@ ColumnLayout
                     onClicked: function(mouse)
                     {
                         let colors = root._fixedColors.slice();
-                        colors.splice(index, 1);
+                        colors.splice(fixedColorRow.index, 1);
                         root._fixedColors = colors;
                         root.updateRadioButtons();
 
