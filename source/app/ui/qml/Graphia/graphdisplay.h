@@ -54,11 +54,11 @@ class GraphDisplay : public QQuickFramebufferObject
     Q_PROPERTY(bool canEnterOverviewMode MEMBER _canEnterOverviewMode NOTIFY canEnterOverviewModeChanged)
     Q_PROPERTY(bool inOverviewMode MEMBER _inOverviewMode NOTIFY inOverviewModeChanged)
 
-    Q_PROPERTY(size_t numNodes READ numNodes NOTIFY metricsChanged)
-    Q_PROPERTY(size_t numVisibleNodes READ numVisibleNodes NOTIFY metricsChanged)
-    Q_PROPERTY(size_t numEdges READ numEdges NOTIFY metricsChanged)
-    Q_PROPERTY(size_t numVisibleEdges READ numVisibleEdges NOTIFY metricsChanged)
-    Q_PROPERTY(size_t numComponents READ numComponents NOTIFY metricsChanged)
+    Q_PROPERTY(qsizetype numNodes READ numNodes NOTIFY metricsChanged)
+    Q_PROPERTY(qsizetype numVisibleNodes READ numVisibleNodes NOTIFY metricsChanged)
+    Q_PROPERTY(qsizetype numEdges READ numEdges NOTIFY metricsChanged)
+    Q_PROPERTY(qsizetype numVisibleEdges READ numVisibleEdges NOTIFY metricsChanged)
+    Q_PROPERTY(qsizetype numComponents READ numComponents NOTIFY metricsChanged)
 
     Q_PROPERTY(int visibleComponentIndex MEMBER _visibleComponentIndex NOTIFY visibleComponentIndexChanged)
 
@@ -170,11 +170,11 @@ private:
 
     const IGraphComponent* focusedComponent() const;
 
-    size_t numNodes() const;
-    size_t numVisibleNodes() const;
-    size_t numEdges() const;
-    size_t numVisibleEdges() const;
-    size_t numComponents() const;
+    qsizetype numNodes() const;
+    qsizetype numVisibleNodes() const;
+    qsizetype numEdges() const;
+    qsizetype numVisibleEdges() const;
+    qsizetype numComponents() const;
 
     void updateVisibleComponentIndex();
 

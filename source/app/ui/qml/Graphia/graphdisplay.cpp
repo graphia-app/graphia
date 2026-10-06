@@ -404,21 +404,21 @@ const IGraphComponent* GraphDisplay::focusedComponent() const
         _graphModel->graph().componentById(_focusedComponentId) : nullptr;
 }
 
-size_t GraphDisplay::numNodes() const
+qsizetype GraphDisplay::numNodes() const
 {
     if(_graphModel != nullptr)
-        return focusedComponent() != nullptr ? focusedComponent()->numNodes() : _graphModel->graph().numNodes();
+        return static_cast<qsizetype>(focusedComponent() != nullptr ? focusedComponent()->numNodes() : _graphModel->graph().numNodes());
 
     return 0;
 }
 
-size_t GraphDisplay::numVisibleNodes() const
+qsizetype GraphDisplay::numVisibleNodes() const
 {
     if(_graphModel != nullptr)
     {
         const auto& nodeIds = focusedComponent() != nullptr ? focusedComponent()->nodeIds() : _graphModel->graph().nodeIds();
 
-        return static_cast<size_t>(std::count_if(nodeIds.begin(), nodeIds.end(),
+        return static_cast<qsizetype>(std::count_if(nodeIds.begin(), nodeIds.end(),
         [this](NodeId nodeId)
         {
             return _graphModel->graph().typeOf(nodeId) != MultiElementType::Tail;
@@ -428,21 +428,21 @@ size_t GraphDisplay::numVisibleNodes() const
     return 0;
 }
 
-size_t GraphDisplay::numEdges() const
+qsizetype GraphDisplay::numEdges() const
 {
     if(_graphModel != nullptr)
-        return focusedComponent() != nullptr ? focusedComponent()->numEdges() : _graphModel->graph().numEdges();
+        return static_cast<qsizetype>(focusedComponent() != nullptr ? focusedComponent()->numEdges() : _graphModel->graph().numEdges());
 
     return 0;
 }
 
-size_t GraphDisplay::numVisibleEdges() const
+qsizetype GraphDisplay::numVisibleEdges() const
 {
     if(_graphModel != nullptr)
     {
         const auto& edgeIds = focusedComponent() != nullptr ? focusedComponent()->edgeIds() : _graphModel->graph().edgeIds();
 
-        return static_cast<size_t>(std::count_if(edgeIds.begin(), edgeIds.end(),
+        return static_cast<qsizetype>(std::count_if(edgeIds.begin(), edgeIds.end(),
         [this](EdgeId edgeId)
         {
             return _graphModel->graph().typeOf(edgeId) != MultiElementType::Tail;
@@ -452,10 +452,10 @@ size_t GraphDisplay::numVisibleEdges() const
     return 0;
 }
 
-size_t GraphDisplay::numComponents() const
+qsizetype GraphDisplay::numComponents() const
 {
     if(_graphModel != nullptr)
-        return _graphModel->graph().numComponents();
+        return static_cast<qsizetype>(_graphModel->graph().numComponents());
 
     return 0;
 }

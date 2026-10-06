@@ -1576,17 +1576,17 @@ void Document::setSaveRequired()
     emit saveRequiredChanged();
 }
 
-size_t Document::numNodesSelected() const
+qsizetype Document::numNodesSelected() const
 {
     if(_selectionManager != nullptr)
-        return _selectionManager->numNodesSelected();
+        return static_cast<qsizetype>(_selectionManager->numNodesSelected());
 
     return 0;
 }
 
-size_t Document::numHeadNodesSelected() const
+qsizetype Document::numHeadNodesSelected() const
 {
-    size_t numNodes = 0;
+    qsizetype numNodes = 0;
 
     if(_selectionManager != nullptr)
     {
@@ -1602,9 +1602,9 @@ size_t Document::numHeadNodesSelected() const
     return numNodes;
 }
 
-size_t Document::numInvisibleNodesSelected() const
+qsizetype Document::numInvisibleNodesSelected() const
 {
-    size_t numNodes = 0;
+    qsizetype numNodes = 0;
 
     if(_selectionManager != nullptr)
     {
@@ -1837,10 +1837,10 @@ int Document::foundIndex() const
     return -1;
 }
 
-size_t Document::numNodesFound() const
+qsizetype Document::numNodesFound() const
 {
     if(_searchManager != nullptr)
-        return _searchManager->foundNodeIds().size();
+        return static_cast<qsizetype>(_searchManager->foundNodeIds().size());
 
     return 0;
 }
