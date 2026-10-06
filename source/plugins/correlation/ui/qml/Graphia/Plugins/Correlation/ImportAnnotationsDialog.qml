@@ -563,7 +563,7 @@ Window
                 text: qsTr("Cancel")
 
                 enabled: importAnnotationsKeyDetection.busy
-                onClicked: function(mouse) { importAttributesKeyDetection.cancel(); }
+                onClicked: function(mouse) { importAnnotationsKeyDetection.cancel(); }
             }
         }
     }
