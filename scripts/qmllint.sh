@@ -25,15 +25,9 @@ then
     exit 1
 fi
 
-SOURCE_DIR=$(pwd)
 cd ${BUILD_DIR}
 
 . variables.sh
-
-INCLUDE_DIRS=$(find ${SOURCE_DIR}/source -type d -name "qml" | \
-    xargs -n1 | sed -e 's/\(.*\)/-I \1/')
-QML_DIRS=$(find ${SOURCE_DIR}/source -type f -name "qmldir" | \
-    xargs dirname | sed -e 's/\(.*\)/--qmldirs \1/')
 
 if [ -z ${QMLLINT} ]
 then
@@ -42,17 +36,36 @@ fi
 
 ${QMLLINT} --version
 
-# Generate a list of commands separately to avoid the problem where xargs stops
-# if the thing it is executing crashes (which qmllint has a tendency to do)
-COMMANDS=$(find \
-    ${SOURCE_DIR}/source/app \
-    ${SOURCE_DIR}/source/crashreporter \
-    ${SOURCE_DIR}/source/messagebox \
-    ${SOURCE_DIR}/source/plugins \
-    ${SOURCE_DIR}/source/shared \
-    ${SOURCE_DIR}/source/updater \
-    -type f -iname "*.qml" | \
-    xargs -n1 echo ${QMLLINT} ${INCLUDE_DIRS} ${QML_DIRS})
+# Some modules use others without declaring them as dependencies (e.g. plugins
+# use the app's modules, which are only available together at runtime), so add
+# the import path of every module in the build
+IMPORT_DIRS=$(find $(pwd) -name qmldir -not -path "*/+*" | while read QMLDIR
+do
+    MODULE_PATH=$(sed -n 's/^module //p' ${QMLDIR} | tr '.' '/')
+    dirname ${QMLDIR} | sed -e "s|/${MODULE_PATH}$||"
+done | sort -u)
 
-echo ${COMMANDS} | /bin/bash 2>&1 | tee qmllint-${VERSION}.log
+# qt_add_qml_module writes the arguments qmllint needs for each module (import
+# paths, resources and the module's files) to .rcc/qmllint/<target>.rsp; lint
+# each file separately, so that if qmllint crashes (which it has a tendency to
+# do) the remaining files are still linted
+OPTIONS_DIR=$(mktemp -d)
 
+for RSP in $(find . -path "*/.rcc/qmllint/*.rsp" \
+    -not -name "*_json.rsp" -not -name "*_module.rsp" | sort)
+do
+    OPTIONS="${OPTIONS_DIR}/$(basename ${RSP})"
+    grep -v '\.qml$' ${RSP} > ${OPTIONS}
+
+    for IMPORT_DIR in ${IMPORT_DIRS}
+    do
+        echo -e "-I\n${IMPORT_DIR}" >> ${OPTIONS}
+    done
+
+    for QML_FILE in $(grep '\.qml$' ${RSP})
+    do
+        ${QMLLINT} @${OPTIONS} ${QML_FILE}
+    done
+done 2>&1 | tee qmllint-${VERSION}.log
+
+rm -rf ${OPTIONS_DIR}
