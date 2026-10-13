@@ -264,12 +264,6 @@ QString NodeAttributeTableModel::descriptionFor(const QString& columnName) const
     return {};
 }
 
-bool NodeAttributeTableModel::rowVisible(size_t row) const
-{
-    Q_ASSERT(row < _nodeSelectedColumn.size());
-    return _nodeSelectedColumn[row].toBool();
-}
-
 QString NodeAttributeTableModel::columnNameFor(size_t column) const
 {
     Q_ASSERT(column < static_cast<size_t>(_columnNames.size()));
