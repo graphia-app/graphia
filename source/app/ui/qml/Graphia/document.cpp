@@ -1658,17 +1658,26 @@ QVariantList Document::selectedHeadNodeIds() const
 
 void Document::selectFirstFound()
 {
+    if(_foundNodeIds.empty())
+        return;
+
     selectAndFocusNode(*_foundNodeIds.begin());
 }
 
 void Document::selectNextFound()
 {
+    if(_foundNodeIds.empty())
+        return;
+
     _selectionManager->setNodesMask(_searchManager->foundNodeIds());
     selectAndFocusNode(incrementFoundIt());
 }
 
 void Document::selectPrevFound()
 {
+    if(_foundNodeIds.empty())
+        return;
+
     _selectionManager->setNodesMask(_searchManager->foundNodeIds());
     selectAndFocusNode(decrementFoundIt());
 }
