@@ -32,7 +32,7 @@ function createTransformParameter(document, parent, parameterData, onParameterCh
         return null;
     }
 
-    let object = component.createObject(parent);
+    let object = component.createObject(parent, {"document": document});
     if(object === null)
     {
         console.log("Failed to create parameterObject");
@@ -246,7 +246,7 @@ function Create(transformIndex, document, transformString)
                     function addOperand(operand, opposite)
                     {
                         if(operand[0] === '$')
-                            labelText += GraphiaUtils.AttributeUtils.prettify(operand);
+                            labelText += document.attributeDisplayName(operand);
                         else
                         {
                             let parameterData = {};
@@ -317,7 +317,7 @@ function Create(transformIndex, document, transformString)
                     // The element is an attribute
 
                     if(locked)
-                        labelText += GraphiaUtils.AttributeUtils.prettify(parameter.attributeName);
+                        labelText += document.attributeDisplayName(parameter.attributeName);
 
                     addLabel();
 

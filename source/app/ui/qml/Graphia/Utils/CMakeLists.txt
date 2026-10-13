@@ -10,7 +10,6 @@ qt_add_qml_module(utils_qml
     URI Graphia.Utils
     STATIC
     QML_FILES
-        AttributeUtils.js
         Constants.js
         CanvasPaletteHelper.qml
         MenuUtils.js

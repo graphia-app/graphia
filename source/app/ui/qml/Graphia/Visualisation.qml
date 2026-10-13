@@ -81,7 +81,7 @@ Item
                     root.updateExpression();
             }
 
-            prettifyFunction: AttributeUtils.prettify
+            prettifyFunction: (name) => root.document.attributeDisplayName(name)
 
             Preferences
             {

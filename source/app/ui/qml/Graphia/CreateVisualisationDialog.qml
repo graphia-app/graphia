@@ -88,7 +88,7 @@ Window
                 showSearch: true
                 showParentGuide: true
                 sortRoleName: "elementType"
-                prettifyFunction: AttributeUtils.prettify
+                prettifyFunction: (name) => root.document.attributeDisplayName(name)
 
                 onSelectedValueChanged:
                 {

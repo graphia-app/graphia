@@ -43,6 +43,8 @@ GridLayout
     property int initialIndex
     property string initialAttributeName
 
+    property var document: null
+
     property string value
 
     property bool updateValueImmediately: false
@@ -222,7 +224,7 @@ GridLayout
         visible: root.valueType === ValueType.Attribute
         enabled: root.valueType !== ValueType.Unknown && currentIndexIsValid
 
-        prettifyFunction: AttributeUtils.prettify
+        prettifyFunction: (name) => root.document !== null ? root.document.attributeDisplayName(name) : name
 
         onSelectedValueChanged: { root.value = selectedValue ? selectedValue : ""; }
 

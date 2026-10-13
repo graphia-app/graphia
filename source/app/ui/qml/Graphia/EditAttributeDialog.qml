@@ -264,7 +264,7 @@ Window
 
             showSections: sortRoleName !== "display"
             sortRoleName: "elementType"
-            prettifyFunction: AttributeUtils.prettify
+            prettifyFunction: (name) => root.document.attributeDisplayName(name)
 
             filterRoleName: "editable"
             filterRegularExpression: /true/

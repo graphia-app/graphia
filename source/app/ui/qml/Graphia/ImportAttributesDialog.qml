@@ -275,7 +275,7 @@ Window
 
                         showSections: true
                         sortRoleName: "elementType"
-                        prettifyFunction: AttributeUtils.prettify
+                        prettifyFunction: (name) => root.document.attributeDisplayName(name)
 
                         property string elementType:
                         {

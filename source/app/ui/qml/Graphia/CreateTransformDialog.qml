@@ -368,7 +368,7 @@ Window
                                             showSearch: true
                                             showParentGuide: true
                                             sortRoleName: "userDefined"
-                                            prettifyFunction: AttributeUtils.prettify
+                                            prettifyFunction: (name) => root.document.attributeDisplayName(name)
 
                                             onSelectedValueChanged:
                                             {
@@ -460,6 +460,8 @@ Window
                                                 id: valueParameter
                                                 Layout.fillWidth: true
 
+                                                document: root.document
+
                                                 enabled: valueRadioButton.checked
                                                 updateValueImmediately: true
                                                 direction: Qt.Vertical
@@ -483,7 +485,7 @@ Window
                                                 showSearch: true
                                                 showParentGuide: true
                                                 sortRoleName: lhsAttributeList.sortRoleName
-                                                prettifyFunction: AttributeUtils.prettify
+                                                prettifyFunction: (name) => root.document.attributeDisplayName(name)
 
                                                 enabled: attributeRadioButton.checked
                                                 onSelectedValueChanged:
@@ -623,7 +625,7 @@ Window
                                                 showSearch: true
                                                 showParentGuide: true
                                                 sortRoleName: "userDefined"
-                                                prettifyFunction: AttributeUtils.prettify
+                                                prettifyFunction: (name) => root.document.attributeDisplayName(name)
 
                                                 onSelectedValueChanged:
                                                 {
@@ -795,7 +797,7 @@ Window
                                                     font.italic: attributeName.length === 0
                                                     color: palette.buttonText
                                                     text: attributeName.length > 0 ?
-                                                        AttributeUtils.prettify(attributeName) :
+                                                        root.document.attributeDisplayName(attributeName) :
                                                         qsTr("Invalid Attribute Name")
                                                 }
 

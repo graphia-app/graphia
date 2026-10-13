@@ -128,7 +128,7 @@ Window
             showSearch: true
             showParentGuide: true
             sortRoleName: "elementType"
-            prettifyFunction: AttributeUtils.prettify
+            prettifyFunction: (name) => root.document.attributeDisplayName(name)
 
             filterRoleName: "elementType"
             filterRegularExpression: { return new RegExp(qsTr("Node") + "|" + qsTr("Edge")); }
@@ -153,7 +153,7 @@ Window
 
             function setDefaultName(attributeName)
             {
-                text = Utils.format(qsTr("Clone of {0}"), AttributeUtils.prettify(attributeName));
+                text = Utils.format(qsTr("Clone of {0}"), root.document.attributeDisplayName(attributeName));
             }
 
             property bool manuallyChanged: false
