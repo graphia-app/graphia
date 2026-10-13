@@ -71,7 +71,7 @@ public:
         return
         {
             {
-                "Ranked Attribute",
+                QObject::tr("Ranked Attribute"),
                 ElementType::Edge, ValueType::Numerical,
                 QObject::tr("The attribute whose value is used to rank edges.")
             }
@@ -83,18 +83,21 @@ public:
         return
         {
             GraphTransformParameter::create("Percent")
+                .setDisplayName(QObject::tr("Percent"))
                 .setType(ValueType::Int)
                 .setDescription(QObject::tr("The percentage of edges to rank and retain, per node."))
                 .setInitialValue(10)
                 .setRange(0, 100),
 
             GraphTransformParameter::create("Minimum")
+                .setDisplayName(QObject::tr("Minimum"))
                 .setType(ValueType::Int)
                 .setDescription(QObject::tr("The minimum number of edges to retain, per node."))
                 .setInitialValue(5)
                 .setMin(1),
 
             GraphTransformParameter::create("Rank Order")
+                .setDisplayName(QObject::tr("Rank Order"))
                 .setType(ValueType::StringList)
                 .setDescription(QObject::tr("Whether or not larger or smaller values are ranked higher."))
                 .setInitialValue(QStringList{"Descending", "Ascending"})

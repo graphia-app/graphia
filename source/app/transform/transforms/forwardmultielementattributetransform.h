@@ -62,7 +62,7 @@ public:
         return
         {
             {
-                "Attribute",
+                QObject::tr("Attribute"),
                 ElementType::NodeAndEdge, ValueType::All,
                 QObject::tr("The attribute whose values are forwarded.")
             }

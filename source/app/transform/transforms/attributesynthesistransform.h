@@ -64,7 +64,7 @@ public:
         return
         {
             {
-                "Source Attribute",
+                QObject::tr("Source Attribute"),
                 ElementType::NodeAndEdge, ValueType::All,
                 QObject::tr("The source attribute from which the new attribute is created.")
             }
@@ -76,18 +76,21 @@ public:
         return
         {
             GraphTransformParameter::create("Name")
+                .setDisplayName(QObject::tr("Name"))
                 .setType(ValueType::String)
                 .setDescription(QObject::tr("The name of the new attribute."))
                 .setInitialValue(QObject::tr("New Attribute"))
                 .setValidatorRegex(IAttribute::ValidNameRegex),
 
             GraphTransformParameter::create("Regular Expression")
+                .setDisplayName(QObject::tr("Regular Expression"))
                 .setType(ValueType::String)
                 .setDescription(QObject::tr("A %1 that is matched against the source attribute values.")
                     .arg(u::redirectLink("regex", QObject::tr("regular expression"))))
                 .setInitialValue("(^.*$)"),
 
             GraphTransformParameter::create("Attribute Value")
+                .setDisplayName(QObject::tr("Attribute Value"))
                 .setType(ValueType::String)
                 .setDescription(QObject::tr("The value to assign to the attribute. Capture groups are referenced using \\n "
                     "syntax, where n is the index of the regex capture group."))

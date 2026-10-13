@@ -246,7 +246,16 @@ function Create(transformIndex, document, transformString)
                     function addOperand(operand, opposite)
                     {
                         if(operand[0] === '$')
-                            labelText += document.attributeDisplayName(operand);
+                        {
+                            if(parameter.type === "parameter")
+                            {
+                                let parameterName = operand.substring(1);
+                                let displayName = document.transformParameter(that.action, parameterName).displayName;
+                                labelText += displayName !== undefined ? displayName : parameterName;
+                            }
+                            else
+                                labelText += document.attributeDisplayName(operand);
+                        }
                         else
                         {
                             let parameterData = {};

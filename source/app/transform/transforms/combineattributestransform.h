@@ -63,12 +63,12 @@ public:
         return
         {
             {
-                "First Attribute",
+                QObject::tr("First Attribute"),
                 ElementType::NodeAndEdge, ValueType::All,
                 QObject::tr("The first attribute from which the new attribute is created.")
             },
             {
-                "Second Attribute",
+                QObject::tr("Second Attribute"),
                 ElementType::NodeAndEdge, ValueType::All,
                 QObject::tr("The second attribute from which the new attribute is created.")
             }
@@ -80,12 +80,14 @@ public:
         return
         {
             GraphTransformParameter::create("Name")
+                .setDisplayName(QObject::tr("Name"))
                 .setType(ValueType::String)
                 .setDescription(QObject::tr("The name of the new attribute."))
                 .setInitialValue(QObject::tr("New Attribute"))
                 .setValidatorRegex(IAttribute::ValidNameRegex),
 
             GraphTransformParameter::create("Attribute Value")
+                .setDisplayName(QObject::tr("Attribute Value"))
                 .setType(ValueType::String)
                 .setDescription(QObject::tr("The value to assign to the attribute. \\1 and \\2 will be substituted "
                     "by the first and second attributes, respectively."))

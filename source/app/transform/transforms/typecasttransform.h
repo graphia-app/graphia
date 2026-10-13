@@ -64,7 +64,7 @@ public:
         return
         {
             {
-                "Attribute",
+                QObject::tr("Attribute"),
                 ElementType::NodeAndEdge, ValueType::All,
                 QObject::tr("The attribute whose type is to be changed.")
             }
@@ -76,11 +76,13 @@ public:
         return
         {
             GraphTransformParameter::create("Type")
+                .setDisplayName(QObject::tr("Type"))
                 .setType(ValueType::StringList)
                 .setDescription(QObject::tr("The type conversion to apply."))
                 .setInitialValue(QStringList{"Integer", "Float", "String"}),
 
             GraphTransformParameter::create("Name")
+                .setDisplayName(QObject::tr("Name"))
                 .setType(ValueType::String)
                 .setDescription(QObject::tr("The name of the new attribute."))
                 .setInitialValue(QObject::tr("New Attribute"))

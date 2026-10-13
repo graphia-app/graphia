@@ -2116,6 +2116,7 @@ QVariantMap Document::transformParameter(const QString& transformName, const QSt
     if(!parameter.name().isEmpty())
     {
         map.insert(u"name"_s, parameter.name());
+        map.insert(u"displayName"_s, parameter.displayName());
         map.insert(u"valueType"_s, static_cast<int>(parameter.type()));
 
         map.insert(u"hasRange"_s, parameter.hasRange());

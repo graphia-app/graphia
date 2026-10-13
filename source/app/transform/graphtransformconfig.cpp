@@ -442,8 +442,14 @@ QString GraphTransformConfig::asString(bool forDisplay, const GraphTransformFact
 
         for(const auto& parameter : _parameters)
         {
-            s += parameterTemplate.arg(parameter._name,
-                parameter.valueAsString(!forDisplay));
+            auto name = forDisplay && factory != nullptr ?
+                factory->parameter(parameter._name).displayName() :
+                QString();
+
+            if(name.isEmpty())
+                name = parameter._name;
+
+            s += parameterTemplate.arg(name, parameter.valueAsString(!forDisplay));
         }
     }
 

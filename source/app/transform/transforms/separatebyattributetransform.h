@@ -60,7 +60,7 @@ public:
         return
         {
             {
-                "Node Attribute", ElementType::Node, ValueType::String,
+                QObject::tr("Node Attribute"), ElementType::Node, ValueType::String,
                 QObject::tr("Each edge's source and target nodes have the selected attribute's value compared. "
                     "If they differ, the edge is removed. This has the effect of grouping similar nodes into components.")
             }

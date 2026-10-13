@@ -63,7 +63,7 @@ public:
         return
         {
             {
-                "Node Attribute", ElementType::Node, ValueType::String,
+                QObject::tr("Node Attribute"), ElementType::Node, ValueType::String,
                 QObject::tr("Each edge's source and target nodes have the selected attribute's value compared. "
                     "If they match, the edge is contracted, meaning it is hidden and its nodes merged.")
             }

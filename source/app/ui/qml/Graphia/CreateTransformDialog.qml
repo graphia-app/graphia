@@ -678,7 +678,7 @@ Window
                                                     font.italic: true
                                                     font.bold: true
                                                     color: palette.buttonText
-                                                    text: modelData
+                                                    text: parameterData.displayName
                                                 }
 
                                                 Text

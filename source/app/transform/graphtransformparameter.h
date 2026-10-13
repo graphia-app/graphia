@@ -35,10 +35,12 @@ public:
     explicit GraphTransformParameter(const QString& name) : _name(name) {}
 
     QString name() const { return _name; }
+    QString displayName() const { return !_displayName.isEmpty() ? _displayName : _name; }
     ValueType type() const { return _type; }
     QString description() const { return _description; }
 
     GraphTransformParameter& setName(const QString& name) { _name = name; return *this; }
+    GraphTransformParameter& setDisplayName(const QString& displayName) { _displayName = displayName; return *this; }
     GraphTransformParameter& setType(ValueType type) { _type = type; return *this; }
     GraphTransformParameter& setDescription(const QString& description) { _description = description; return *this; }
 
@@ -63,6 +65,7 @@ public:
 
 private:
     QString _name;
+    QString _displayName;
     ValueType _type = ValueType::Unknown;
     QString _description;
     QVariant _initialValue;

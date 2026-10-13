@@ -79,6 +79,7 @@ public:
         return
         {
             GraphTransformParameter::create("Granularity")
+                .setDisplayName(QObject::tr("Granularity"))
                 .setType(ValueType::Float)
                 .setDescription(QObject::tr("The size of the resultant clusters. "
                     "A larger granularity value results in smaller clusters."))
@@ -118,7 +119,7 @@ public:
         return
         {
             {
-                "Weighting Attribute",
+                QObject::tr("Weighting Attribute"),
                 ElementType::Edge, ValueType::Numerical,
                 QObject::tr("The attribute whose value is used to weight edges.")
             }

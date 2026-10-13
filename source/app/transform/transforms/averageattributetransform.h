@@ -63,12 +63,12 @@ public:
         return
         {
             {
-                "Categorical Attribute",
+                QObject::tr("Categorical Attribute"),
                 ElementType::NodeAndEdge, ValueType::String,
                 QObject::tr("The attribute whose shared values are used to guide the averaging.")
             },
             {
-                "Numerical Attribute",
+                QObject::tr("Numerical Attribute"),
                 ElementType::NodeAndEdge, ValueType::Numerical,
                 QObject::tr("The attribute whose values are averaged.")
             }

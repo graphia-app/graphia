@@ -76,6 +76,7 @@ public:
         return
         {
             GraphTransformParameter::create("Granularity")
+                .setDisplayName(QObject::tr("Granularity"))
                 .setType(ValueType::Float)
                 .setDescription(QObject::tr("The size of the resultant clusters. "
                     "A larger granularity value results in smaller clusters."))
