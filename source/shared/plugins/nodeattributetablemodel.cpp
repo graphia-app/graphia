@@ -40,7 +40,6 @@
 
 void NodeAttributeTableModel::initialise(IDocument* document, IUserNodeData* userNodeData)
 {
-    _roleNames.insert(Roles::NodeIdRole, "nodeId");
     _roleNames.insert(Roles::NodeSelectedRole, "nodeSelected");
     _roleNames.insert(Qt::DisplayRole, "display");
 
@@ -133,8 +132,6 @@ void NodeAttributeTableModel::updateColumn(int role, NodeAttributeTableModel::Co
             // it may have been transformed, leaving empty rows
             column[row] = {};
         }
-        else if(role == Roles::NodeIdRole)
-            column[row] = static_cast<int>(nodeId);
         else if(role == Roles::NodeSelectedRole)
             column[row] = u::contains(selectedNodeIds, nodeId);
         else
@@ -163,7 +160,6 @@ void NodeAttributeTableModel::update()
     _pendingData.clear();
 
     _pendingNodeSelectedColumn = makeColumn(Roles::NodeSelectedRole, {}, _pendingNodeSelectedColumn);
-    updateColumn(Roles::NodeIdRole, _nodeIdColumn);
 
     for(const auto& columnName : std::as_const(_pendingColumnNames))
     {

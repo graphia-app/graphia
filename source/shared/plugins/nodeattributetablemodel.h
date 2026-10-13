@@ -61,7 +61,6 @@ private:
     // are shared between the two, so they're replaced rather than changed
     ColumnPtr _nodeSelectedColumn;
     ColumnPtr _pendingNodeSelectedColumn;
-    Column _nodeIdColumn;
 
     Table _pendingData;
     Table _data;
@@ -87,8 +86,7 @@ private slots:
 public:
     enum Roles // NOLINT performance-enum-size
     {
-        NodeIdRole = Qt::UserRole + 1,
-        NodeSelectedRole,
+        NodeSelectedRole = Qt::UserRole + 1,
         FirstAttributeRole
     };
 
