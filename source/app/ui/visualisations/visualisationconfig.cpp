@@ -82,7 +82,8 @@ QVariantMap VisualisationConfig::asVariantMap() const
     return map;
 }
 
-QString VisualisationConfig::asString(bool forDisplay, const VisualisationChannelFactory* factory) const
+QString VisualisationConfig::asString(bool forDisplay, const VisualisationChannelFactory* factory,
+    const AttributeDisplayNameFn& attributeDisplayName) const
 {
     QString s;
 
@@ -101,7 +102,8 @@ QString VisualisationConfig::asString(bool forDisplay, const VisualisationChanne
 
     auto assignmentTemplate = forDisplay ? QObject::tr("%1 using %2") : u"\"%1\" \"%2\""_s;
 
-    s += assignmentTemplate.arg(_attributeName,
+    s += assignmentTemplate.arg(forDisplay && attributeDisplayName ?
+        attributeDisplayName(_attributeName) : _attributeName,
         forDisplay && factory != nullptr ? factory->displayName() : _channelName);
 
     if(!forDisplay && !_parameters.empty())

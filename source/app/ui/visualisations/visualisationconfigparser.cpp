@@ -123,7 +123,8 @@ bool VisualisationConfigParser::parse(const QString& text, bool warnOnFailure)
     return _success;
 }
 
-QString VisualisationConfigParser::parseForDisplay(const QString& text, const VisualisationChannelFactories& factories)
+QString VisualisationConfigParser::parseForDisplay(const QString& text, const VisualisationChannelFactories& factories,
+    const VisualisationConfig::AttributeDisplayNameFn& attributeDisplayName)
 {
     VisualisationConfigParser parser;
 
@@ -133,7 +134,7 @@ QString VisualisationConfigParser::parseForDisplay(const QString& text, const Vi
         const auto* factory = u::contains(factories, result._channelName) ?
             factories.at(result._channelName).get() : nullptr;
 
-        return result.asString(true, factory);
+        return result.asString(true, factory, attributeDisplayName);
     }
 
     return {};

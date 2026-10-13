@@ -39,7 +39,8 @@ public:
     bool success() const { return _success; }
     const QString& failedInput() const { return _failedInput; }
 
-    static QString parseForDisplay(const QString& text, const VisualisationChannelFactories& factories);
+    static QString parseForDisplay(const QString& text, const VisualisationChannelFactories& factories,
+        const VisualisationConfig::AttributeDisplayNameFn& attributeDisplayName = {});
 };
 
 #endif // VISUALISATIONCONFIGPARSER_H

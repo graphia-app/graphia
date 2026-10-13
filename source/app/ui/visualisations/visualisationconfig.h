@@ -23,6 +23,7 @@
 #include <QString>
 #include <QVariantMap>
 
+#include <functional>
 #include <vector>
 #include <variant>
 
@@ -30,6 +31,7 @@ class VisualisationChannelFactory;
 
 struct VisualisationConfig
 {
+    using AttributeDisplayNameFn = std::function<QString(const QString&)>;
     using ParameterValue = std::variant<double, QString>;
     struct Parameter
     {
@@ -46,7 +48,9 @@ struct VisualisationConfig
     std::vector<Parameter> _parameters;
 
     QVariantMap asVariantMap() const;
-    QString asString(bool forDisplay = false, const VisualisationChannelFactory* factory = nullptr) const;
+    // When forDisplay, attributeDisplayName gives the name to show for the attribute, if supplied
+    QString asString(bool forDisplay = false, const VisualisationChannelFactory* factory = nullptr,
+        const AttributeDisplayNameFn& attributeDisplayName = {}) const;
 
     QString parameterValue(const QString& name) const;
 

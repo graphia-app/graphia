@@ -2339,7 +2339,8 @@ bool Document::graphTransformsAreValid(const QStringList& transforms) const
 
 QString Document::displayTextForGraphTransform(const QString& transform) const
 {
-    return GraphTransformConfigParser::parseForDisplay(transform, _application->transformFactories());
+    return GraphTransformConfigParser::parseForDisplay(transform, _application->transformFactories(),
+        [this](const QString& attributeName) { return attributeDisplayName(attributeName); });
 }
 
 void Document::setGraphTransform(int index, const QString& transform)
@@ -2527,7 +2528,8 @@ bool Document::visualisationsAreValid(const QStringList& visualisations) const
 
 QString Document::displayTextForVisualisation(const QString& visualisation) const
 {
-    return VisualisationConfigParser::parseForDisplay(visualisation, _application->visualisationChannelFactories());
+    return VisualisationConfigParser::parseForDisplay(visualisation, _application->visualisationChannelFactories(),
+        [this](const QString& attributeName) { return attributeDisplayName(attributeName); });
 }
 
 void Document::setVisualisation(int index, const QString& visualisation)

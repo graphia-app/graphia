@@ -378,7 +378,8 @@ bool GraphTransformConfigParser::isAttributeName(const QString& variable)
     return !variable.isEmpty() && variable[0] == '$';
 }
 
-QString GraphTransformConfigParser::parseForDisplay(const QString& text, const GraphTransformFactories& factories)
+QString GraphTransformConfigParser::parseForDisplay(const QString& text, const GraphTransformFactories& factories,
+    const GraphTransformConfig::AttributeDisplayNameFn& attributeDisplayName)
 {
     GraphTransformConfigParser parser;
 
@@ -388,7 +389,7 @@ QString GraphTransformConfigParser::parseForDisplay(const QString& text, const G
         const auto* factory = u::contains(factories, result._action) ?
             factories.at(result._action).get() : nullptr;
 
-        return result.asString(true, factory);
+        return result.asString(true, factory, attributeDisplayName);
     }
 
     return {};
