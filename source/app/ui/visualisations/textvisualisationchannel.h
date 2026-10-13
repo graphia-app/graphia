@@ -44,6 +44,7 @@ public:
     QString name() const override { return u"Text"_s; }
     QString displayName() const override { return QObject::tr("Text"); }
 
+    bool showsValuesAsText() const override { return true; }
     bool supports(ValueType valueType) const override { return valueType != ValueType::Unknown; }
     bool requiresRange() const override { return false; }
     bool allowsMapping() const override { return false; }

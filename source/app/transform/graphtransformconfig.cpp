@@ -237,15 +237,19 @@ QVariantMap GraphTransformConfig::conditionAsVariantMap() const
     return std::visit(ConditionVisitor(), _condition);
 }
 
-QString GraphTransformConfig::conditionAsString(bool forDisplay, const AttributeDisplayNameFn& attributeDisplayName) const
+QString GraphTransformConfig::conditionAsString(bool forDisplay, const AttributeDisplayNameFn& attributeDisplayName,
+    const AttributeDisplayValueFn& attributeDisplayValue) const
 {
     struct ConditionVisitor
     {
-        ConditionVisitor(bool forDisplay, const AttributeDisplayNameFn& attributeDisplayName) :
-            _forDisplay(forDisplay), _attributeDisplayName(attributeDisplayName) {}
+        ConditionVisitor(bool forDisplay, const AttributeDisplayNameFn& attributeDisplayName,
+            const AttributeDisplayValueFn& attributeDisplayValue) :
+            _forDisplay(forDisplay), _attributeDisplayName(attributeDisplayName),
+            _attributeDisplayValue(attributeDisplayValue) {}
 
         bool _forDisplay;
         AttributeDisplayNameFn _attributeDisplayName;
+        AttributeDisplayValueFn _attributeDisplayValue;
 
         QString terminalValueAsString(const GraphTransformConfig::TerminalValue& terminalValue) const
         {
@@ -324,10 +328,24 @@ QString GraphTransformConfig::conditionAsString(bool forDisplay, const Attribute
         QString operator()(GraphTransformConfig::NoCondition) const { return {}; }
         QString operator()(const TerminalCondition& terminalCondition) const
         {
+            auto rhs = terminalValueAsString(terminalCondition._rhs);
+
+            if(_forDisplay && _attributeDisplayValue)
+            {
+                const auto* attributeName = std::get_if<QString>(&terminalCondition._lhs);
+                const auto* value = std::get_if<QString>(&terminalCondition._rhs);
+
+                if(attributeName != nullptr && value != nullptr &&
+                    GraphTransformConfigParser::isAttributeName(*attributeName) &&
+                    !GraphTransformConfigParser::isAttributeName(*value))
+                {
+                    rhs = _attributeDisplayValue(*attributeName, *value);
+                }
+            }
+
             return u"%1 %2 %3"_s.arg(
                 terminalValueAsString(terminalCondition._lhs),
-                prettifyOp(terminalCondition.opAsString()),
-                terminalValueAsString(terminalCondition._rhs));
+                prettifyOp(terminalCondition.opAsString()), rhs);
         }
 
         QString operator()(const UnaryCondition& unaryCondition) const
@@ -343,7 +361,7 @@ QString GraphTransformConfig::conditionAsString(bool forDisplay, const Attribute
 
             auto operandAsString = [this](const Condition& operand)
             {
-                auto s = std::visit(ConditionVisitor(_forDisplay, _attributeDisplayName), operand);
+                auto s = std::visit(ConditionVisitor(_forDisplay, _attributeDisplayName, _attributeDisplayValue), operand);
 
                 if(std::holds_alternative<RecursiveValue<CompoundCondition>>(operand))
                     return u"(%1)"_s.arg(s);
@@ -358,7 +376,7 @@ QString GraphTransformConfig::conditionAsString(bool forDisplay, const Attribute
         }
     };
 
-    return std::visit(ConditionVisitor(forDisplay, attributeDisplayName), _condition);
+    return std::visit(ConditionVisitor(forDisplay, attributeDisplayName, attributeDisplayValue), _condition);
 }
 
 QVariantMap GraphTransformConfig::asVariantMap(const GraphTransformFactory* factory) const
@@ -397,7 +415,7 @@ QVariantMap GraphTransformConfig::asVariantMap(const GraphTransformFactory* fact
 }
 
 QString GraphTransformConfig::asString(bool forDisplay, const GraphTransformFactory* factory,
-    const AttributeDisplayNameFn& attributeDisplayName) const
+    const AttributeDisplayNameFn& attributeDisplayName, const AttributeDisplayValueFn& attributeDisplayValue) const
 {
     QString s;
 
@@ -461,7 +479,7 @@ QString GraphTransformConfig::asString(bool forDisplay, const GraphTransformFact
     if(hasCondition())
     {
         s += forDisplay ? QObject::tr(" where ") : u" where "_s;
-        s += conditionAsString(forDisplay, attributeDisplayName);
+        s += conditionAsString(forDisplay, attributeDisplayName, attributeDisplayValue);
     }
 
     return s;

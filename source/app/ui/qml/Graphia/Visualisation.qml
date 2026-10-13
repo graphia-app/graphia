@@ -181,7 +181,8 @@ Item
         {
             let paletteSelector = root.visualisations.createPaletteSelector(root.index);
             Utils.centreWindow(paletteSelector);
-            paletteSelector.open(paletteKey.configuration, root._stringValues);
+            paletteSelector.open(paletteKey.configuration, root._stringValues,
+                (value) => root.document.attributeDisplayValue(root.attributeName, value));
         }
 
         PaletteKey
@@ -194,6 +195,7 @@ Item
             hoverColor: root.hoverColor
 
             stringValues: root._stringValues
+            valueDisplayFunction: (value) => root.document.attributeDisplayValue(root.attributeName, value)
 
             onClicked: function(mouse)
             {

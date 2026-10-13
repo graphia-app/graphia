@@ -259,6 +259,7 @@ function Create(transformIndex, document, transformString)
                         else
                         {
                             let parameterData = {};
+                            let displayOperand = operand;
 
                             if(opposite !== undefined && opposite.length > 0 && opposite[0] === '$')
                             {
@@ -267,7 +268,10 @@ function Create(transformIndex, document, transformString)
                                 if(parameter.type === "parameter")
                                     parameterData = document.transformParameter(that.action, parameterName);
                                 else if(parameter.type === "condition")
+                                {
                                     parameterData = document.attribute(parameterName);
+                                    displayOperand = document.attributeDisplayValue(parameterName, operand);
+                                }
                                 else
                                     console.log("Transform element parameter type unknown: " + parameter.type);
                             }
@@ -292,7 +296,7 @@ function Create(transformIndex, document, transformString)
                                 {
                                 default:
                                 case GraphiaSharedTypes.ValueType.String:
-                                    labelText += "\\\"" + GraphiaUtils.Utils.addSlashes(operand) + "\\\"";
+                                    labelText += "\\\"" + GraphiaUtils.Utils.addSlashes(displayOperand) + "\\\"";
                                     break;
                                 case GraphiaSharedTypes.ValueType.StringList:
                                 {

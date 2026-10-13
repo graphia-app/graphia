@@ -72,7 +72,7 @@ TextVisuals SharedTextVisualisationChannel::textVisuals(const QString& attribute
     for(const NodeId nodeId : contractedGraph.nodeIds())
     {
         TextVisual textVisual;
-        textVisual._text = attribute->stringValueOf(nodeId);
+        textVisual._text = attribute->displayValue(attribute->stringValueOf(nodeId));
 
         switch(contractedGraph.typeOf(nodeId))
         {

@@ -33,6 +33,7 @@ ColumnLayout
     spacing: Constants.spacing
 
     property var stringValues: []
+    property var valueDisplayFunction: (value) => value
 
     readonly property int _removeButtonSize: 24
     readonly property int _maxAutoColors: 16
@@ -234,7 +235,7 @@ ColumnLayout
                         if(autoColorRow.index >= root.stringValues.length)
                             return qsTr("<i>[Not Assigned]</i>");
 
-                        return root.stringValues[autoColorRow.index];
+                        return root.valueDisplayFunction(root.stringValues[autoColorRow.index]);
                     }
                 }
 
@@ -512,19 +513,30 @@ ColumnLayout
 
                     editable: true
 
-                    model: root.stringValues
+                    model: root.stringValues.map(stringValue => ({value: stringValue,
+                        displayValue: root.valueDisplayFunction(stringValue)}))
+                    textRole: "displayValue"
+                    valueRole: "value"
+
+                    function valueFor(text)
+                    {
+                        let index = root.stringValues.findIndex(stringValue =>
+                            root.valueDisplayFunction(stringValue) === text);
+
+                        return index >= 0 ? root.stringValues[index] : text;
+                    }
 
                     onCurrentTextChanged:
                     {
                         let colors = root._fixedColors.slice();
-                        colors[fixedColorRow.index].stringValue = currentText;
+                        colors[fixedColorRow.index].stringValue = valueFor(currentText);
                         root._fixedColors = colors;
                     }
 
                     onEditTextChanged:
                     {
                         let colors = root._fixedColors.slice();
-                        colors[fixedColorRow.index].stringValue = editText;
+                        colors[fixedColorRow.index].stringValue = valueFor(editText);
                         root._fixedColors = colors;
                     }
 
@@ -534,6 +546,7 @@ ColumnLayout
 
                         if(stringValueIndex < 0)
                         {
+                            // Not one of the values, so shown as it's stored
                             currentIndex = -1;
                             editText = fixedColorRow.modelData.stringValue;
                         }

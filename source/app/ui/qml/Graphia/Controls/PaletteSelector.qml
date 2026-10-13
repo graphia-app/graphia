@@ -34,6 +34,7 @@ Window
 
     property string configuration
     property var stringValues: []
+    property var valueDisplayFunction: (value) => value
     property bool applied: false
 
     // The window is shared between visualisations so
@@ -55,10 +56,11 @@ Window
 
     ButtonGroup { id: selectedGroup }
 
-    function open(configuration, stringValues)
+    function open(configuration, stringValues, valueDisplayFunction = (value) => value)
     {
         root.applied = false;
         root.stringValues = paletteEditor.stringValues = stringValues;
+        root.valueDisplayFunction = paletteEditor.valueDisplayFunction = valueDisplayFunction;
         paletteEditor.setup(configuration);
         show();
     }

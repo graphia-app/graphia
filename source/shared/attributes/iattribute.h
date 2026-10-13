@@ -144,6 +144,10 @@ public:
     virtual QString displayName() const = 0;
     virtual IAttribute& setDisplayName(const QString& displayName) = 0;
 
+    using DisplayValueFn = std::function<QString(const QString&)>;
+    virtual QString displayValue(const QString& value) const = 0;
+    virtual IAttribute& setDisplayValueFn(DisplayValueFn displayValueFn) = 0;
+
     virtual bool isValid() const = 0;
 
     virtual QString parameterValue() const = 0;

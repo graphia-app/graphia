@@ -99,7 +99,14 @@ QVariant NodeAttributeTableModel::dataValue(size_t row, const QString& columnNam
 
         auto nodeId = _userNodeData->elementIdForIndex(row);
         if(!attribute->valueMissingOf(nodeId))
-            return attribute->valueOf(nodeId);
+        {
+            auto value = attribute->valueOf(nodeId);
+
+            if(value.typeId() == QMetaType::QString)
+                return attribute->displayValue(value.toString());
+
+            return value;
+        }
     }
 
     return {};

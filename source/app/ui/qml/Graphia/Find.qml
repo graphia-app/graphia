@@ -515,30 +515,36 @@ Rectangle
                     property bool _modelChanging: false
                     property string value: ""
 
-                    onCurrentTextChanged:
+                    textRole: "displayValue"
+                    valueRole: "value"
+
+                    onCurrentValueChanged:
                     {
-                        // Prevent spurious changes to currentText
+                        // Prevent spurious changes to currentValue
                         if(_modelChanging)
                             return;
 
-                        value = currentText;
+                        value = currentValue !== undefined ? currentValue : "";
                     }
 
                     function refresh()
                     {
                         // Try to keep the same value selected
-                        let preUpdateText = currentText;
+                        let preUpdateValue = currentValue;
 
-                        let attribute = root.document.attribute(selectAttributeComboBox.currentValue);
+                        let attributeName = selectAttributeComboBox.currentValue;
+                        let attribute = root.document.attribute(attributeName);
+                        let values = attribute.sharedValues.map(sharedValue => ({value: sharedValue,
+                            displayValue: root.document.attributeDisplayValue(attributeName, sharedValue)}));
 
                         if(preferences.findByAttributeSortLexically)
-                            attribute.sharedValues.sort(NativeUtils.compareStrings);
+                            values.sort((a, b) => NativeUtils.compareStrings(a.displayValue, b.displayValue));
 
                         _modelChanging = true;
-                        model = attribute.sharedValues;
+                        model = values;
                         _modelChanging = false;
 
-                        let rowIndex = find(preUpdateText);
+                        let rowIndex = indexOfValue(preUpdateValue);
 
                         if(rowIndex >= 0)
                             currentIndex = rowIndex;
@@ -547,7 +553,7 @@ Rectangle
                         else
                             currentIndex = -1;
 
-                        value = currentText;
+                        value = currentValue !== undefined ? currentValue : "";
                     }
                 }
             }
@@ -592,13 +598,13 @@ Rectangle
 
                     sourceComponent: CheckBox
                     {
-                        text: attributeValueDelegate.modelData
+                        text: attributeValueDelegate.modelData.displayValue
 
                         rightPadding: scrollView.scrollBarWidth
 
                         function isChecked()
                         {
-                            return Utils.setContains(root._attributeValues, attributeValueDelegate.modelData);
+                            return Utils.setContains(root._attributeValues, attributeValueDelegate.modelData.value);
                         }
 
                         checked: { return isChecked(); }
@@ -609,9 +615,9 @@ Rectangle
                             checked = checked;
 
                             if(checked)
-                                root._attributeValues = Utils.setAdd(root._attributeValues, attributeValueDelegate.modelData);
+                                root._attributeValues = Utils.setAdd(root._attributeValues, attributeValueDelegate.modelData.value);
                             else
-                                root._attributeValues = Utils.setRemove(root._attributeValues, attributeValueDelegate.modelData);
+                                root._attributeValues = Utils.setRemove(root._attributeValues, attributeValueDelegate.modelData.value);
 
                             // Rebind so that the delegate doesn't hold the state
                             checked = Qt.binding(isChecked);
@@ -619,7 +625,7 @@ Rectangle
 
                         ToolTip.visible: hovered
                         ToolTip.delay: Constants.toolTipDelay
-                        ToolTip.text: attributeValueDelegate.modelData
+                        ToolTip.text: attributeValueDelegate.modelData.displayValue
                     }
                 }
             }

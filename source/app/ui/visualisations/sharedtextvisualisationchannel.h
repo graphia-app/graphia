@@ -47,6 +47,7 @@ public:
     QString displayName() const override { return QObject::tr("Shared Text"); }
 
     bool appliesTo(ElementType elementType) const override { return elementType & ElementType::Node; }
+    bool showsValuesAsText() const override { return true; }
     bool supports(ValueType valueType) const override { return valueType == ValueType::String; }
     bool requiresRange() const override { return false; }
     bool allowsMapping() const override { return false; }

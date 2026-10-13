@@ -211,6 +211,10 @@ void VisualisationsBuilder<ElementId>::build(const Attribute& attribute,
         for(auto elementId : elementIds())
         {
             auto stringValue = attribute.stringValueOf(elementId);
+
+            if(channelFactory.showsValuesAsText())
+                stringValue = attribute.displayValue(stringValue);
+
             apply(stringValue, channel, elementId, _numAppliedVisualisations);
         }
 

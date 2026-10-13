@@ -155,7 +155,7 @@ static json enrichmentTableModelAsJson(const EnrichmentTableModel& table)
     {
         for(int column = 0; column < table.columnCount(); column++)
         {
-            const auto& v = table.data(row, static_cast<EnrichmentTableModel::Results>(column));
+            const auto& v = table.storedData(row, static_cast<EnrichmentTableModel::Results>(column));
 
             if(v.typeId() == QMetaType::QString)
                 jsonObject["data"][static_cast<size_t>(row - 1)].push_back(v.toString().toStdString());

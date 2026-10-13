@@ -28,6 +28,7 @@
 #include <QString>
 #include <QVariant>
 
+#include <functional>
 #include <cstddef>
 #include <vector>
 
@@ -82,12 +83,18 @@ public:
 
     void setSelectionDisplayNames(const QString& selectionA, const QString& selectionB);
 
+    using AttributeDisplayValueFn = std::function<QString(const QString& attributeName, const QString& value)>;
+    void setAttributeDisplayValueFn(AttributeDisplayValueFn attributeDisplayValueFn);
+
+    QVariant storedData(int row, Results result) const;
+
 private:
     Table _data;
     QString _selectionA;
     QString _selectionB;
     QString _selectionADisplayName;
     QString _selectionBDisplayName;
+    AttributeDisplayValueFn _attributeDisplayValueFn;
 
     std::vector<size_t> _sortFilterMap;
     bool _enrichedOnly = true;

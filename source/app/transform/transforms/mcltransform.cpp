@@ -648,7 +648,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target)
         for(auto index : cluster)
         {
             auto nodeId = indexToNodeMap.at(index);
-            auto clusterName = QString(QObject::tr("Cluster %1")).arg(QString::number(clusterNumber));
+            auto clusterName = u"Cluster %1"_s.arg(QString::number(clusterNumber));
 
             clusterNames[nodeId] = clusterName;
             clusterSizes[nodeId] = static_cast<int>(cluster.size());
@@ -660,6 +660,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target)
     _graphModel->createAttribute(MCLTransformFactory::clusterAttribute())
         .setDescription(QObject::tr("The MCL cluster in which the node resides."))
         .setStringValueFn([clusterNames](NodeId nodeId) { return clusterNames[nodeId]; })
+        .setDisplayValueFn(Attribute::numberedDisplayValueFn(u"Cluster "_s, QObject::tr("Cluster %1")))
         .setValueMissingFn([clusterNames](NodeId nodeId) { return clusterNames[nodeId].isEmpty(); })
         .setFlag(AttributeFlag::FindShared)
         .setFlag(AttributeFlag::Searchable);

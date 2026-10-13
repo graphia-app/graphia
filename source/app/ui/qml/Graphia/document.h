@@ -505,6 +505,7 @@ public:
     Q_INVOKABLE bool attributeExists(const QString& attributeName) const;
     Q_INVOKABLE QVariantMap attribute(const QString& attributeName) const;
     Q_INVOKABLE QString attributeDisplayName(const QString& attributeName) const;
+    Q_INVOKABLE QString attributeDisplayValue(const QString& attributeName, const QString& value) const;
     Q_INVOKABLE AvailableAttributesModel* attributesSimilarTo(const QString& attributeName,
         int skipFlags = static_cast<int>(AttributeFlag::None)) const;
     Q_INVOKABLE QStringList allAttributeValues(const QString& attributeName) const;

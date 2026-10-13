@@ -354,13 +354,14 @@ void LouvainTransform::apply(TransformedGraph& target)
             continue;
 
         clusterNumber = clusterNumbers[communityId];
-        clusterNames[nodeId] = QObject::tr("Cluster %1").arg(clusterNumber);
+        clusterNames[nodeId] = u"Cluster %1"_s.arg(clusterNumber);
         clusterSizes[nodeId] = static_cast<int>(communityHistogram.at(communityId));
     }
 
     _graphModel->createAttribute(LouvainTransformFactory::clusterAttribute(_weighted))
         .setDescription(QObject::tr("The Louvain cluster in which the node resides."))
         .setStringValueFn([clusterNames](NodeId nodeId) { return clusterNames[nodeId]; })
+        .setDisplayValueFn(Attribute::numberedDisplayValueFn(u"Cluster "_s, QObject::tr("Cluster %1")))
         .setValueMissingFn([clusterNames](NodeId nodeId) { return clusterNames[nodeId].isEmpty(); })
         .setFlag(AttributeFlag::FindShared)
         .setFlag(AttributeFlag::Searchable);

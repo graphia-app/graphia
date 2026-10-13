@@ -722,6 +722,8 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
                     tableModel->setTableData(data._table, data._selectionA, data._selectionB);
                     tableModel->setSelectionDisplayNames(attributeDisplayName(data._selectionA),
                         attributeDisplayName(data._selectionB));
+                    tableModel->setAttributeDisplayValueFn([this](const QString& attributeName, const QString& value)
+                        { return attributeDisplayValue(attributeName, value); });
                     _enrichmentTableModels.append(QVariant::fromValue(tableModel));
                 }
 
@@ -2175,6 +2177,11 @@ QString Document::attributeDisplayName(const QString& attributeName) const
     return _graphModel->attributeDisplayName(attributeName);
 }
 
+QString Document::attributeDisplayValue(const QString& attributeName, const QString& value) const
+{
+    return _graphModel != nullptr ? _graphModel->attributeDisplayValue(attributeName, value) : value;
+}
+
 QVariantMap Document::attribute(const QString& attributeName) const
 {
     QVariantMap map;
@@ -2347,7 +2354,8 @@ bool Document::graphTransformsAreValid(const QStringList& transforms) const
 QString Document::displayTextForGraphTransform(const QString& transform) const
 {
     return GraphTransformConfigParser::parseForDisplay(transform, _application->transformFactories(),
-        [this](const QString& attributeName) { return attributeDisplayName(attributeName); });
+        [this](const QString& attributeName) { return attributeDisplayName(attributeName); },
+        [this](const QString& attributeName, const QString& value) { return attributeDisplayValue(attributeName, value); });
 }
 
 void Document::setGraphTransform(int index, const QString& transform)
@@ -3062,6 +3070,8 @@ void Document::performEnrichment(const QString& selectedAttributeA, const QStrin
         tableModel->setTableData(result, selectedAttributeA, selectedAttributeB);
         tableModel->setSelectionDisplayNames(attributeDisplayName(selectedAttributeA),
             attributeDisplayName(selectedAttributeB));
+        tableModel->setAttributeDisplayValueFn([this](const QString& attributeName, const QString& value)
+            { return attributeDisplayValue(attributeName, value); });
 
         executeOnMainThreadAndWait([this, tableModel]
         {

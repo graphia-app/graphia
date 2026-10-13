@@ -64,12 +64,22 @@ void ConditionalAttributeTransform::apply(TransformedGraph& target)
         }
 
         for(auto elementId : elementIds)
-            newValues[elementId] = conditionFn(elementId) ? QObject::tr("True") : QObject::tr("False");
+            newValues[elementId] = conditionFn(elementId) ? u"True"_s : u"False"_s;
 
         auto& attribute = _graphModel->createAttribute(newAttributeName)
             .setDescription(QObject::tr("An attribute synthesised by the Boolean Attribute transform."));
 
         attribute.setStringValueFn([newValues](E elementId) { return newValues[elementId]; })
+            .setDisplayValueFn([](const QString& value)
+            {
+                if(value == u"True"_s)
+                    return QObject::tr("True");
+
+                if(value == u"False"_s)
+                    return QObject::tr("False");
+
+                return value;
+            })
             .setFlag(AttributeFlag::FindShared)
             .setFlag(AttributeFlag::Searchable);
     };

@@ -55,7 +55,8 @@ public:
     static bool isAttributeName(const QString& variable);
 
     static QString parseForDisplay(const QString& text, const GraphTransformFactories& factories,
-        const GraphTransformConfig::AttributeDisplayNameFn& attributeDisplayName = {});
+        const GraphTransformConfig::AttributeDisplayNameFn& attributeDisplayName = {},
+        const GraphTransformConfig::AttributeDisplayValueFn& attributeDisplayValue = {});
 };
 
 #endif // GRAPHTRANSFORMCONFIGPARSER_H

@@ -104,13 +104,30 @@ QVariant EnrichmentTableModel::data(const QModelIndex& index, int role) const
         }
     }
 
-    return _data.at(sortedFilteredRow).at(column);
+    const auto& value = _data.at(sortedFilteredRow).at(column);
+
+    if(role == Qt::DisplayRole && _attributeDisplayValueFn && value.typeId() == QMetaType::QString)
+    {
+        if(static_cast<Results>(column) == Results::SelectionA)
+            return _attributeDisplayValueFn(_selectionA, value.toString());
+
+        if(static_cast<Results>(column) == Results::SelectionB)
+            return _attributeDisplayValueFn(_selectionB, value.toString());
+    }
+
+    return value;
 }
 
 QVariant EnrichmentTableModel::data(int row, Results result) const
 {
     auto column = static_cast<int>(result);
     return data(index(row, column), Qt::DisplayRole);
+}
+
+QVariant EnrichmentTableModel::storedData(int row, Results result) const
+{
+    auto column = static_cast<int>(result);
+    return data(index(row, column), Qt::EditRole);
 }
 
 int EnrichmentTableModel::rowFromAttributeSets(const QString& attributeA, const QString& attributeB) const
@@ -162,6 +179,11 @@ void EnrichmentTableModel::setTableData(EnrichmentTableModel::Table data, QStrin
     _selectionB = std::move(selectionB);
     updateSortFilterMap();
     endResetModel();
+}
+
+void EnrichmentTableModel::setAttributeDisplayValueFn(AttributeDisplayValueFn attributeDisplayValueFn)
+{
+    _attributeDisplayValueFn = std::move(attributeDisplayValueFn);
 }
 
 void EnrichmentTableModel::setSelectionDisplayNames(const QString& selectionA, const QString& selectionB)

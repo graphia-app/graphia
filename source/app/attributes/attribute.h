@@ -164,6 +164,7 @@ private:
 
         QString description;
         QString displayName;
+        DisplayValueFn displayValueFn;
     } _;
 
     AttributeRange<int> _intRange;
@@ -565,6 +566,9 @@ public:
     QString displayName() const override { return _.displayName; }
     Attribute& setDisplayName(const QString& displayName) override { _.displayName = displayName; return *this; }
 
+    QString displayValue(const QString& value) const override { return _.displayValueFn ? _.displayValueFn(value) : value; }
+    Attribute& setDisplayValueFn(DisplayValueFn displayValueFn) override { _.displayValueFn = std::move(displayValueFn); return *this; }
+
     bool isValid() const override;
 
     QString parameterValue() const override;
@@ -588,6 +592,9 @@ public:
         const Attribute& nodeAttribute, EdgeNodeType edgeNodeType);
 
     static QString prettify(QString name);
+
+    // For values stored as e.g. "Cluster 3", where prefix is "Cluster ", shows them using displayTemplate, e.g. tr("Cluster %1")
+    static DisplayValueFn numberedDisplayValueFn(const QString& prefix, const QString& displayTemplate);
 
     // Takes a fully qualified internal attribute name and converts it to a
     // display name, where displayNameOf operates on the attribute name itself

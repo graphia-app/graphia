@@ -62,6 +62,7 @@ Item
     }
 
     property var stringValues: []
+    property var valueDisplayFunction: (value) => value
 
     property double _minimumKeySize: 10
     property double keyHeight: 20
@@ -271,7 +272,7 @@ Item
                     visible: parent._hovered
 
                     color: NativeUtils.contrastingColor(key.color)
-                    text: parent.stringValue
+                    text: root.valueDisplayFunction(parent.stringValue)
                 }
 
                 Canvas

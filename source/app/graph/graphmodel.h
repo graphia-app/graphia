@@ -197,6 +197,7 @@ public:
     Attribute* attributeByName(const QString& name) override;
     bool attributeExists(const QString& name) const override;
     QString attributeDisplayName(const QString& name) const override;
+    QString attributeDisplayValue(const QString& name, const QString& value) const override;
     bool attributeIsDeclared(const QString& name) const override;
     bool attributeIsValid(const QString& name) const;
     Attribute attributeValueByName(const QString& name) const;

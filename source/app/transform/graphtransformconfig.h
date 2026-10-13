@@ -39,6 +39,7 @@ class GraphTransformFactory;
 struct GraphTransformConfig
 {
     using AttributeDisplayNameFn = std::function<QString(const QString&)>;
+    using AttributeDisplayValueFn = std::function<QString(const QString& attributeName, const QString& value)>;
     using TerminalValue = std::variant<double, int, QString>;
     using TerminalOp = std::variant<ConditionFnOp::Equality, ConditionFnOp::Numerical, ConditionFnOp::String>;
 
@@ -104,12 +105,15 @@ struct GraphTransformConfig
     bool hasCondition() const;
 
     QVariantMap conditionAsVariantMap() const;
-    QString conditionAsString(bool forDisplay = false, const AttributeDisplayNameFn& attributeDisplayName = {}) const;
+    QString conditionAsString(bool forDisplay = false, const AttributeDisplayNameFn& attributeDisplayName = {},
+        const AttributeDisplayValueFn& attributeDisplayValue = {}) const;
 
     QVariantMap asVariantMap(const GraphTransformFactory* factory) const;
-    // When forDisplay, attributeDisplayName gives the name to show for each attribute, if supplied
+    // When forDisplay, attributeDisplayName gives the name to show for each attribute, and
+    // attributeDisplayValue the value to show where one is compared with an attribute, if supplied
     QString asString(bool forDisplay = false, const GraphTransformFactory* factory = nullptr,
-        const AttributeDisplayNameFn& attributeDisplayName = {}) const;
+        const AttributeDisplayNameFn& attributeDisplayName = {},
+        const AttributeDisplayValueFn& attributeDisplayValue = {}) const;
 
     std::vector<QString> referencedAttributeNames() const;
 

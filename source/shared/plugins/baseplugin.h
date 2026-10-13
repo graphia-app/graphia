@@ -128,6 +128,10 @@ public:
     ICommandManager* commandManager() { return _commandManager; }
 
     Q_INVOKABLE QString attributeDisplayName(const QString& name) const { return _graphModel->attributeDisplayName(name); }
+    Q_INVOKABLE QString attributeDisplayValue(const QString& name, const QString& value) const
+    {
+        return _graphModel->attributeDisplayValue(name, value);
+    }
 
 private slots:
     void onNodeAdded(const Graph*, NodeId nodeId)       { emit nodeAdded(nodeId); }

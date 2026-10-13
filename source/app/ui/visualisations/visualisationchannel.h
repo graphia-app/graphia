@@ -68,6 +68,7 @@ public:
     virtual QString displayName() const = 0;
 
     virtual bool appliesTo(ElementType) const { return true; }
+    virtual bool showsValuesAsText() const { return false; }
     virtual bool supports(ValueType) const = 0;
     virtual bool requiresRange() const { return true; }
     virtual bool allowsMapping() const { return true; }

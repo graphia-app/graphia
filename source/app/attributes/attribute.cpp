@@ -529,6 +529,20 @@ QString Attribute::prettify(QString name)
     return name;
 }
 
+Attribute::DisplayValueFn Attribute::numberedDisplayValueFn(const QString& prefix, const QString& displayTemplate)
+{
+    return [prefix, displayTemplate](const QString& value)
+    {
+        if(!value.startsWith(prefix))
+            return value;
+
+        bool isNumber = false;
+        auto number = value.mid(prefix.size()).toInt(&isNumber);
+
+        return isNumber ? displayTemplate.arg(number) : value;
+    };
+}
+
 QString Attribute::fullyQualifiedDisplayName(const QString& name,
     const std::function<QString(const QString&)>& displayNameOf)
 {
