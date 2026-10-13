@@ -56,13 +56,13 @@ void NodeAttributeTableDisplayModel::setSourceModel(QAbstractItemModel* sourceMo
 
     if(_sourceModel != nullptr)
     {
-        connect(_sourceModel, &QAbstractItemModel::modelReset, this, &NodeAttributeTableDisplayModel::reset);
+        connect(_sourceModel, &QAbstractItemModel::modelReset, this, &NodeAttributeTableDisplayModel::onSourceModelReset);
         connect(_sourceModel, &QAbstractItemModel::layoutChanged, this, &NodeAttributeTableDisplayModel::reset);
+        connect(_sourceModel, &QAbstractItemModel::dataChanged, this, &NodeAttributeTableDisplayModel::onSourceDataChanged);
         connect(_sourceModel, &NodeAttributeTableModel::selectionChanged, this, &NodeAttributeTableDisplayModel::onSourceSelectionChanged);
-        connect(_sourceModel, &NodeAttributeTableModel::columnNamesChanged, this, &NodeAttributeTableDisplayModel::onSourceColumnNamesChanged);
     }
 
-    onSourceColumnNamesChanged();
+    onSourceModelReset();
     emit sourceModelChanged();
 }
 
@@ -572,7 +572,39 @@ void NodeAttributeTableDisplayModel::onSourceSelectionChanged()
     emit rowsReplaced();
 }
 
-void NodeAttributeTableDisplayModel::onSourceColumnNamesChanged()
+void NodeAttributeTableDisplayModel::onSourceDataChanged(const QModelIndex& topLeft,
+    const QModelIndex& bottomRight, const QList<int>& roles)
+{
+    // Any data row can be in any row here, so the change is taken to be to whole columns
+    auto firstSourceColumn = topLeft.column();
+    auto lastSourceColumn = bottomRight.column();
+
+    auto sortColumnChanged = std::ranges::any_of(_sortColumnAndOrders,
+    [&](const auto& sortColumnAndOrder)
+    {
+        auto sourceColumn = _columnNames.indexOf(sortColumnAndOrder.first);
+        return sourceColumn >= firstSourceColumn && sourceColumn <= lastSourceColumn;
+    });
+
+    if(sortColumnChanged)
+    {
+        resort();
+        return;
+    }
+
+    if(rowCount() == 0)
+        return;
+
+    for(int column = 0; column < columnCount(); column++)
+    {
+        auto sourceColumn = sourceColumnFor(column);
+        if(sourceColumn >= firstSourceColumn && sourceColumn <= lastSourceColumn)
+            emit dataChanged(index(0, column), index(rowCount() - 1, column), roles);
+    }
+}
+
+// The source's column names only change when it resets
+void NodeAttributeTableDisplayModel::onSourceModelReset()
 {
     _columnNames.clear();
 

@@ -97,7 +97,8 @@ private:
     void resort();
 
     void onSourceSelectionChanged();
-    void onSourceColumnNamesChanged();
+    void onSourceDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QList<int>& roles);
+    void onSourceModelReset();
 
     bool isRowOrderSet() const;
 

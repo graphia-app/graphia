@@ -86,7 +86,7 @@ QStringList NodeAttributeTableModel::columnNames() const
 
 int NodeAttributeTableModel::indexForColumnName(const QString& columnName)
 {
-    auto index = _columnNames.indexOf(columnName);
+    auto index = _pendingColumnNames.indexOf(columnName);
     Q_ASSERT(index >= 0);
     return static_cast<int>(index);
 }
@@ -108,13 +108,11 @@ QVariant NodeAttributeTableModel::dataValue(size_t row, const QString& columnNam
 
 void NodeAttributeTableModel::updateColumnNames()
 {
-    auto newColumnNames = columnNames();
-    if(newColumnNames != _columnNames)
-    {
-        _columnNames = columnNames();
-        Q_ASSERT(u::hasUniqueValues(u::toQStringVector(_columnNames)));
-        emit columnNamesChanged();
-    }
+    const std::unique_lock<std::recursive_mutex> lock(_updateMutex);
+
+    // These reach the main thread when data with these columns is published
+    _pendingColumnNames = columnNames();
+    Q_ASSERT(u::hasUniqueValues(u::toQStringVector(_pendingColumnNames)));
 }
 
 void NodeAttributeTableModel::updateColumn(int role, NodeAttributeTableModel::Column& column,
@@ -144,38 +142,95 @@ void NodeAttributeTableModel::updateColumn(int role, NodeAttributeTableModel::Co
     }
 }
 
+NodeAttributeTableModel::ColumnPtr NodeAttributeTableModel::makeColumn(int role,
+    const QString& columnName, const ColumnPtr& previous)
+{
+    Column column;
+    updateColumn(role, column, columnName);
+
+    // Keep the previous column if it's the same, so that it doesn't look changed
+    if(previous != nullptr && *previous == column)
+        return previous;
+
+    return std::make_shared<const Column>(std::move(column));
+}
+
 void NodeAttributeTableModel::update()
 {
     const std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
+    auto previousData = std::move(_pendingData);
     _pendingData.clear();
 
-    updateColumn(Roles::NodeSelectedRole, _nodeSelectedColumn);
+    _pendingNodeSelectedColumn = makeColumn(Roles::NodeSelectedRole, {}, _pendingNodeSelectedColumn);
     updateColumn(Roles::NodeIdRole, _nodeIdColumn);
 
-    for(const auto& columnName : std::as_const(_columnNames))
+    for(const auto& columnName : std::as_const(_pendingColumnNames))
     {
-        _pendingData.emplace_back(rowCount());
-        updateColumn(Qt::DisplayRole, _pendingData.back(), columnName);
+        auto index = _pendingData.size();
+        _pendingData.emplace_back(makeColumn(Qt::DisplayRole, columnName,
+            index < previousData.size() ? previousData.at(index) : nullptr));
     }
 
-    QMetaObject::invokeMethod(this, "onUpdateComplete");
+    publish();
 }
 
-void NodeAttributeTableModel::onUpdateComplete()
+void NodeAttributeTableModel::publish()
 {
     const std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
-    //FIXME this could probably be made more targetted; in the general case only
-    // a subset of _data will actually be updated, in which case we don't need
-    // to reset the entire model
-    beginResetModel();
-    _data = _pendingData;
-    endResetModel();
+    QMetaObject::invokeMethod(this, [this, data = _pendingData, columnNames = _pendingColumnNames,
+        nodeSelectedColumn = _pendingNodeSelectedColumn]() mutable
+    {
+        onUpdateComplete(std::move(data), std::move(columnNames), std::move(nodeSelectedColumn));
+    });
+}
 
-    //FIXME is this actually necessary, in addition to
-    // the emit in NodeAttributeTableModel::updateColumnNames()?
-    emit columnNamesChanged();
+void NodeAttributeTableModel::onUpdateComplete(Table data, QStringList columnNames, ColumnPtr nodeSelectedColumn)
+{
+    auto namesChanged = columnNames != _columnNames;
+
+    if(namesChanged)
+    {
+        beginResetModel();
+        _data = std::move(data);
+        _columnNames = std::move(columnNames);
+        _nodeSelectedColumn = std::move(nodeSelectedColumn);
+        endResetModel();
+    }
+    else
+    {
+        Q_ASSERT(data.size() == _data.size());
+
+        std::vector<bool> columnChanged(data.size());
+        for(size_t column = 0; column < data.size(); column++)
+            columnChanged[column] = data.at(column) != _data.at(column);
+
+        _data = std::move(data);
+        _nodeSelectedColumn = std::move(nodeSelectedColumn);
+
+        // Each run of adjacent changed columns
+        if(rowCount() > 0)
+        {
+            for(size_t first = 0; first < columnChanged.size(); first++)
+            {
+                if(!columnChanged.at(first))
+                    continue;
+
+                auto last = first;
+                while(last + 1 < columnChanged.size() && columnChanged.at(last + 1))
+                    last++;
+
+                emit dataChanged(index(0, static_cast<int>(first)),
+                    index(rowCount() - 1, static_cast<int>(last)), {Qt::DisplayRole});
+
+                first = last;
+            }
+        }
+    }
+
+    if(namesChanged)
+        emit columnNamesChanged();
 
     //FIXME indicating a node selection change so that NATV refreshes its
     // idea of row selection, otherwise it can get out of sync with itself
@@ -362,10 +417,10 @@ void NodeAttributeTableModel::onAttributesChanged(QStringList added, QStringList
     changedSet.unite(addedAndRemovedSet);
 
     // Assert that either no attributes are being added, or the ones that are are not in the table already
-    Q_ASSERT(addedSet.isEmpty() || !addedSet.intersects({_columnNames.begin(), _columnNames.end()}));
+    Q_ASSERT(addedSet.isEmpty() || !addedSet.intersects({_pendingColumnNames.begin(), _pendingColumnNames.end()}));
 
     // Ignore attribute names that aren't in the table
-    removedSet.intersect({_columnNames.cbegin(), _columnNames.cend()});
+    removedSet.intersect({_pendingColumnNames.cbegin(), _pendingColumnNames.cend()});
 
     auto indicesForColumnNames = [this](const auto& names, auto compare)
     {
@@ -379,9 +434,9 @@ void NodeAttributeTableModel::onAttributesChanged(QStringList added, QStringList
     const std::vector<size_t> changedIndices = indicesForColumnNames(changedSet, std::less<>());
     for(const size_t index : changedIndices)
     {
-        const auto& columnName = _columnNames.at(static_cast<int>(index));
+        const auto& columnName = _pendingColumnNames.at(static_cast<int>(index));
         auto& column = _pendingData.at(index);
-        updateColumn(Qt::DisplayRole, column, columnName);
+        column = makeColumn(Qt::DisplayRole, columnName, column);
     }
 
     const std::vector<size_t> removedIndices = indicesForColumnNames(removedSet, std::greater<>());
@@ -396,19 +451,20 @@ void NodeAttributeTableModel::onAttributesChanged(QStringList added, QStringList
     const std::vector<size_t> addedIndices = indicesForColumnNames(addedSet, std::less<>());
     for(const size_t index : addedIndices)
     {
-        const auto& columnName = _columnNames.at(static_cast<int>(index));
+        const auto& columnName = _pendingColumnNames.at(static_cast<int>(index));
+        auto column = makeColumn(Qt::DisplayRole, columnName);
 
         if(index < _pendingData.size())
-            _pendingData.insert(_pendingData.begin() + static_cast<int>(index), {{}});
+            _pendingData.insert(_pendingData.begin() + static_cast<int>(index), std::move(column));
         else
+        {
             _pendingData.resize(index + 1);
-
-        auto& column = _pendingData.at(index);
-        updateColumn(Qt::DisplayRole, column, columnName);
+            _pendingData.at(index) = std::move(column);
+        }
     }
 
     if(!graphChanged && (!addedIndices.empty() || !removedIndices.empty() || !changedIndices.empty()))
-        QMetaObject::invokeMethod(this, "onUpdateComplete");
+        publish();
 }
 
 int NodeAttributeTableModel::rowCount(const QModelIndex&) const
@@ -426,29 +482,40 @@ QVariant NodeAttributeTableModel::data(const QModelIndex& index, int role) const
     auto column = static_cast<size_t>(index.column());
     if(role == Qt::DisplayRole)
     {
-        if(column >= _data.size())
+        if(column >= _data.size() || _data.at(column) == nullptr)
             return {};
 
-        const auto& dataColumn = _data.at(column);
+        const auto& dataColumn = *_data.at(column);
 
         auto row = static_cast<size_t>(index.row());
         if(row >= dataColumn.size())
             return {};
 
-        auto cachedValue = dataColumn.at(row);
-        return cachedValue;
+        return dataColumn.at(row);
     }
 
-    if(role == Roles::NodeSelectedRole && !_nodeSelectedColumn.empty())
+    if(role == Roles::NodeSelectedRole && _nodeSelectedColumn != nullptr)
     {
         auto row = static_cast<size_t>(index.row());
-        return _nodeSelectedColumn.at(row);
+        if(row < _nodeSelectedColumn->size())
+            return _nodeSelectedColumn->at(row);
     }
     return {};
 }
 
 void NodeAttributeTableModel::onSelectionChanged()
 {
-    updateColumn(Roles::NodeSelectedRole, _nodeSelectedColumn);
-    emit selectionChanged();
+    auto nodeSelectedColumn = makeColumn(Roles::NodeSelectedRole);
+
+    {
+        // publish takes the selection from here, so it must be the latest
+        const std::unique_lock<std::recursive_mutex> lock(_updateMutex);
+        _pendingNodeSelectedColumn = nodeSelectedColumn;
+    }
+
+    QMetaObject::invokeMethod(this, [this, nodeSelectedColumn = std::move(nodeSelectedColumn)]() mutable
+    {
+        _nodeSelectedColumn = std::move(nodeSelectedColumn);
+        emit selectionChanged();
+    });
 }

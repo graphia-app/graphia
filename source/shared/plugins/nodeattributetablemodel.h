@@ -32,6 +32,7 @@
 
 #include <cstddef>
 #include <vector>
+#include <memory>
 #include <mutex>
 
 class Graph;
@@ -52,28 +53,35 @@ private:
     std::recursive_mutex _updateMutex;
 
     using Column = std::vector<QVariant>;
-    using Table = std::vector<Column>;
+    using ColumnPtr = std::shared_ptr<const Column>;
+    using Table = std::vector<ColumnPtr>;
 
-    Column _nodeSelectedColumn;
+    // What the view reads is only ever written on the main thread; updates are made
+    // on other threads, to the pending versions guarded by _updateMutex, and columns
+    // are shared between the two, so they're replaced rather than changed
+    ColumnPtr _nodeSelectedColumn;
+    ColumnPtr _pendingNodeSelectedColumn;
     Column _nodeIdColumn;
 
-    Table _pendingData; // Update actually occurs here, before being copied to _data on the UI thread
+    Table _pendingData;
     Table _data;
 
+    QStringList _pendingColumnNames;
     QStringList _columnNames;
 
 protected:
     virtual QStringList columnNames() const;
     virtual QVariant dataValue(size_t row, const QString& columnName) const;
 
-    int indexForColumnName(const QString& columnName);
-
 private:
+    int indexForColumnName(const QString& columnName);
     void updateColumn(int role, Column& column, const QString& columnName = {});
+    ColumnPtr makeColumn(int role, const QString& columnName = {}, const ColumnPtr& previous = {});
     void update();
+    void publish();
+    void onUpdateComplete(Table data, QStringList columnNames, ColumnPtr nodeSelectedColumn);
 
 private slots:
-    void onUpdateComplete();
     void onGraphChanged(const Graph*, bool);
 
 public:
