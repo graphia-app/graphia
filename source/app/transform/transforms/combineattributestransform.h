@@ -86,7 +86,7 @@ public:
                 .setInitialValue(QObject::tr("New Attribute"))
                 .setValidatorRegex(IAttribute::ValidNameRegex),
 
-            GraphTransformParameter::create("Attribute Value")
+            GraphTransformParameter::create("AttributeValue")
                 .setDisplayName(QObject::tr("Attribute Value"))
                 .setType(ValueType::String)
                 .setDescription(QObject::tr("The value to assign to the attribute. \\1 and \\2 will be substituted "

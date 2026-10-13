@@ -42,7 +42,7 @@ void KNNTransform::apply(TransformedGraph& target)
     auto attribute = _graphModel->attributeValueByName(config().attributeNames().front());
 
     auto k = static_cast<size_t>(std::get<int>(config().parameterByName(u"k"_s)->_value));
-    const bool ascending = config().parameterHasValue(u"Rank Order"_s, u"Ascending"_s);
+    const bool ascending = config().parameterHasValue(u"RankOrder"_s, u"Ascending"_s);
 
     struct KnnRank
     {

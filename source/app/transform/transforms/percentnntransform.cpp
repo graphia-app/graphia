@@ -43,7 +43,7 @@ void PercentNNTransform::apply(TransformedGraph& target)
     auto minimum = static_cast<size_t>(std::get<int>(config().parameterByName(u"Minimum"_s)->_value));
 
     auto attribute = _graphModel->attributeValueByName(config().attributeNames().front());
-    const bool ascending = config().parameterHasValue(u"Rank Order"_s, u"Ascending"_s);
+    const bool ascending = config().parameterHasValue(u"RankOrder"_s, u"Ascending"_s);
 
     struct PercentNNRank
     {

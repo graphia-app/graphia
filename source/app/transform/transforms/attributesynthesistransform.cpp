@@ -39,7 +39,7 @@ static Alert attributeSynthesisTransformConfigIsValid(const GraphTransformConfig
     if(!GraphModel::attributeNameIsValid(newAttributeName))
         return {AlertType::Error, QObject::tr("Invalid Attribute Name: '%1'").arg(newAttributeName)};
 
-    const QRegularExpression regex(config.parameterByName(u"Regular Expression"_s)->valueAsString());
+    const QRegularExpression regex(config.parameterByName(u"RegularExpression"_s)->valueAsString());
     if(!regex.isValid())
         return {AlertType::Error, QObject::tr("Invalid Regular Expression: %1").arg(regex.errorString())};
 
@@ -60,8 +60,8 @@ void AttributeSynthesisTransform::apply(TransformedGraph& target)
     auto sourceAttribute = _graphModel->attributeValueByName(config().attributeNames().front());
 
     auto newAttributeName = config().parameterByName(u"Name"_s)->valueAsString();
-    QRegularExpression regex(config().parameterByName(u"Regular Expression"_s)->valueAsString());
-    auto attributeValue = config().parameterByName(u"Attribute Value"_s)->valueAsString();
+    QRegularExpression regex(config().parameterByName(u"RegularExpression"_s)->valueAsString());
+    auto attributeValue = config().parameterByName(u"AttributeValue"_s)->valueAsString();
 
     auto synthesise =
     [&](const auto& elementIds)

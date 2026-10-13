@@ -96,7 +96,7 @@ public:
                 .setInitialValue(5)
                 .setMin(1),
 
-            GraphTransformParameter::create("Rank Order")
+            GraphTransformParameter::create("RankOrder")
                 .setDisplayName(QObject::tr("Rank Order"))
                 .setType(ValueType::StringList)
                 .setDescription(QObject::tr("Whether or not larger or smaller values are ranked higher."))

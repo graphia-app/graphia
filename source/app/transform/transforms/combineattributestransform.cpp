@@ -68,7 +68,7 @@ void CombineAttributesTransform::apply(TransformedGraph& target)
     auto secondAttribute = _graphModel->attributeValueByName(attributeNames.at(1));
 
     auto newAttributeName = config().parameterByName(u"Name"_s)->valueAsString();
-    auto attributeValue = config().parameterByName(u"Attribute Value"_s)->valueAsString();
+    auto attributeValue = config().parameterByName(u"AttributeValue"_s)->valueAsString();
 
     auto combine =
     [&](const auto& elementIds)

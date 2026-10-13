@@ -82,14 +82,14 @@ public:
                 .setInitialValue(QObject::tr("New Attribute"))
                 .setValidatorRegex(IAttribute::ValidNameRegex),
 
-            GraphTransformParameter::create("Regular Expression")
+            GraphTransformParameter::create("RegularExpression")
                 .setDisplayName(QObject::tr("Regular Expression"))
                 .setType(ValueType::String)
                 .setDescription(QObject::tr("A %1 that is matched against the source attribute values.")
                     .arg(u::redirectLink("regex", QObject::tr("regular expression"))))
                 .setInitialValue("(^.*$)"),
 
-            GraphTransformParameter::create("Attribute Value")
+            GraphTransformParameter::create("AttributeValue")
                 .setDisplayName(QObject::tr("Attribute Value"))
                 .setType(ValueType::String)
                 .setDescription(QObject::tr("The value to assign to the attribute. Capture groups are referenced using \\n "
