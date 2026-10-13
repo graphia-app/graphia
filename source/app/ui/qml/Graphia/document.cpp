@@ -76,6 +76,7 @@
 #include <QTimer>
 #include <cstdio>
 #include <QVector>
+#include <QVariant>
 #include <QClipboard>
 #include <QThread>
 #include <QDebug>
@@ -91,6 +92,7 @@
 #include <iterator>
 #include <set>
 #include <utility>
+#include <vector>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -2790,8 +2792,27 @@ void Document::writeTableModelToFile(QAbstractItemModel* model, const QUrl& file
         return;
     }
 
+    // It's quite unlikely, but the model may change while the file is being
+    // written, so its values are copied here and moved to the writing thread
+    std::vector<QVariant> values;
+    size_t numRows = 0;
+    size_t numColumns = 0;
+
+    if(model != nullptr)
+    {
+        numRows = static_cast<size_t>(model->rowCount());
+        numColumns = static_cast<size_t>(model->columnCount());
+        values.reserve(numRows * numColumns);
+
+        for(size_t row = 0; row < numRows; row++)
+        {
+            for(size_t column = 0; column < numColumns; column++)
+                values.push_back(model->data(model->index(static_cast<int>(row), static_cast<int>(column))));
+        }
+    }
+
     _commandManager.executeOnce(
-    [=](Command&)
+    [=, values = std::move(values)](Command&)
     {
         QFile file(localFileName);
 
@@ -2852,28 +2873,25 @@ void Document::writeTableModelToFile(QAbstractItemModel* model, const QUrl& file
             stream << rowString << "\r\n";
         }
 
-        if(model != nullptr)
+        for(size_t row = 0; row < numRows; row++)
         {
-            for(int row = 0; row < model->rowCount(); row++)
+            rowString.clear();
+            for(size_t column = 0; column < numColumns; column++)
             {
-                rowString.clear();
-                for(int column = 0; column < model->columnCount(); column++)
-                {
-                    if(!rowString.isEmpty())
-                        rowString.append(separator);
+                if(!rowString.isEmpty())
+                    rowString.append(separator);
 
-                    auto value = model->data(model->index(row, column));
+                const auto& value = values.at((row * numColumns) + column);
 
-                    auto valueString = value.toString();
+                auto valueString = value.toString();
 
-                    if(value.typeId() == QMetaType::QString)
-                        rowString.append(escapedString(valueString));
-                    else
-                        rowString.append(valueString);
-                }
-
-                stream << rowString << "\r\n";
+                if(value.typeId() == QMetaType::QString)
+                    rowString.append(escapedString(valueString));
+                else
+                    rowString.append(valueString);
             }
+
+            stream << rowString << "\r\n";
         }
     }, {tr("Export Table"), tr("Exporting Table"), tr("Exported Table")});
 }
