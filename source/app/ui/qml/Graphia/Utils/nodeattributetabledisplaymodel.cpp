@@ -475,7 +475,7 @@ void NodeAttributeTableDisplayModel::sortSourceRows()
 
     // _sourceRows is in ascending order, which stable_sort retains where rows compare equal
     std::vector<size_t> order(_sourceRows.size());
-    std::iota(order.begin(), order.end(), 0);
+    u::iota(order, 0);
     std::ranges::stable_sort(order, lessThan);
 
     std::vector<int> sortedSourceRows;
