@@ -292,9 +292,17 @@ function Create(transformIndex, document, transformString)
                                 {
                                 default:
                                 case GraphiaSharedTypes.ValueType.String:
-                                case GraphiaSharedTypes.ValueType.StringList:
                                     labelText += "\\\"" + GraphiaUtils.Utils.addSlashes(operand) + "\\\"";
                                     break;
+                                case GraphiaSharedTypes.ValueType.StringList:
+                                {
+                                    // A choice from a list, shown by its display text
+                                    let index = parameterData.initialValue.indexOf(operand);
+                                    let displayValues = parameterData.displayValues;
+                                    labelText += GraphiaUtils.Utils.addSlashes(displayValues !== undefined &&
+                                        index >= 0 && index < displayValues.length ? displayValues[index] : operand);
+                                    break;
+                                }
                                 case GraphiaSharedTypes.ValueType.Int:
                                 case GraphiaSharedTypes.ValueType.Float:
                                     labelText += GraphiaUtils.NativeUtils.formatNumberScientific(operand);

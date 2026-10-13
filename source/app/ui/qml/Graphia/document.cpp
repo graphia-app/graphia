@@ -2129,6 +2129,9 @@ QVariantMap Document::transformParameter(const QString& transformName, const QSt
         map.insert(u"description"_s, parameter.description());
         map.insert(u"initialValue"_s, parameter.initialValue());
 
+        if(!parameter.displayValues().isEmpty())
+            map.insert(u"displayValues"_s, parameter.displayValues());
+
         if(!parameter.validatorRegex().isEmpty())
             map.insert(u"validatorRegex"_s, parameter.validatorRegex());
 

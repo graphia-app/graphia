@@ -41,6 +41,9 @@ GridLayout
     // for variant, so give initialValue some other (arbitrary) value
     property variant initialValue: ({})
     property int initialIndex
+
+    // For a choice from a list, the text shown for each of the values in initialValue
+    property var displayValues: []
     property string initialAttributeName
 
     property var document: null
@@ -208,12 +211,15 @@ GridLayout
         visible: root.valueType === ValueType.StringList
         enabled: root.valueType !== ValueType.Unknown
 
+        textRole: "displayValue"
+        valueRole: "value"
+
         function updateValue()
         {
-            root.value = "\"" + currentText + "\"";
+            root.value = "\"" + currentValue + "\"";
         }
 
-        onCurrentTextChanged: { updateValue(); }
+        onCurrentValueChanged: { updateValue(); }
     }
 
     TreeComboBox
@@ -315,10 +321,11 @@ GridLayout
             break;
 
         case ValueType.StringList:
-            comboBox.model = initialValue;
+            comboBox.model = initialValue.map((choice, index) => ({value: choice,
+                displayValue: index < root.displayValues.length ? root.displayValues[index] : choice}));
             comboBox.currentIndex = initialIndex;
 
-            value = "\"" + Utils.escapeQuotes(comboBox.currentText) + "\"";
+            value = "\"" + Utils.escapeQuotes(comboBox.currentValue) + "\"";
             break;
 
         case ValueType.Attribute:
@@ -348,7 +355,8 @@ GridLayout
                    hasMaximumValue: false,
                    validatorRegex: "",
                    initialValue: "",
-                   initialIndex: -1});
+                   initialIndex: -1,
+                   displayValues: []});
     }
 
     Component.onCompleted: { reset(); }

@@ -23,6 +23,7 @@
 #include "shared/attributes/valuetype.h"
 
 #include <QString>
+#include <QStringList>
 #include <QVariant>
 
 #include <limits>
@@ -47,6 +48,16 @@ public:
     QVariant initialValue() const { return _initialValue; }
     GraphTransformParameter& setInitialValue(const QVariant& initialValue) { _initialValue = initialValue; return *this; }
 
+    // For a choice from a list, the text shown for each of the values in the initial value
+    QStringList displayValues() const { return _displayValues; }
+    GraphTransformParameter& setDisplayValues(const QStringList& displayValues) { _displayValues = displayValues; return *this; }
+
+    QString displayValue(const QString& value) const
+    {
+        auto index = _initialValue.toStringList().indexOf(value);
+        return index >= 0 && index < _displayValues.size() ? _displayValues.at(index) : value;
+    }
+
     double min() const { return _min; }
     double max() const { return _max; }
 
@@ -69,6 +80,7 @@ private:
     ValueType _type = ValueType::Unknown;
     QString _description;
     QVariant _initialValue;
+    QStringList _displayValues;
     double _min = std::numeric_limits<double>::max();
     double _max = std::numeric_limits<double>::lowest();
     QString _validatorRegex;

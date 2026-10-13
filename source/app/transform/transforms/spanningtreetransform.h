@@ -60,7 +60,8 @@ public:
                 .setDisplayName(QObject::tr("Traversal Order"))
                 .setType(ValueType::StringList)
                 .setDescription(QObject::tr("Whether to visit nodes level by level, or by maximising depth."))
-                .setInitialValue(QStringList{"Breadth First", "Depth First"})
+                .setInitialValue(QStringList{"BreadthFirst", "DepthFirst"})
+                .setDisplayValues({QObject::tr("Breadth First"), QObject::tr("Depth First")})
         };
     }
 

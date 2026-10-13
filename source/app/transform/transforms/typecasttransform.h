@@ -79,7 +79,8 @@ public:
                 .setDisplayName(QObject::tr("Type"))
                 .setType(ValueType::StringList)
                 .setDescription(QObject::tr("The type conversion to apply."))
-                .setInitialValue(QStringList{"Integer", "Float", "String"}),
+                .setInitialValue(QStringList{"Integer", "Float", "String"})
+                .setDisplayValues({QObject::tr("Integer"), QObject::tr("Float"), QObject::tr("String")}),
 
             GraphTransformParameter::create("Name")
                 .setDisplayName(QObject::tr("Name"))

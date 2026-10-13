@@ -101,6 +101,7 @@ public:
                 .setType(ValueType::StringList)
                 .setDescription(QObject::tr("Whether or not larger or smaller values are ranked higher."))
                 .setInitialValue(QStringList{"Descending", "Ascending"})
+                .setDisplayValues({QObject::tr("Descending"), QObject::tr("Ascending")})
         };
     }
 
