@@ -18,6 +18,7 @@
  */
 
 #include "visualisationconfig.h"
+#include "visualisationchannel.h"
 
 #include "shared/utils/container.h"
 
@@ -81,7 +82,7 @@ QVariantMap VisualisationConfig::asVariantMap() const
     return map;
 }
 
-QString VisualisationConfig::asString(bool forDisplay) const
+QString VisualisationConfig::asString(bool forDisplay, const VisualisationChannelFactory* factory) const
 {
     QString s;
 
@@ -100,7 +101,8 @@ QString VisualisationConfig::asString(bool forDisplay) const
 
     auto assignmentTemplate = forDisplay ? QObject::tr("%1 using %2") : u"\"%1\" \"%2\""_s;
 
-    s += assignmentTemplate.arg(_attributeName, _channelName);
+    s += assignmentTemplate.arg(_attributeName,
+        forDisplay && factory != nullptr ? factory->displayName() : _channelName);
 
     if(!forDisplay && !_parameters.empty())
     {

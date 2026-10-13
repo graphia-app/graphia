@@ -519,6 +519,7 @@ public:
 
     Q_INVOKABLE QStringList availableVisualisationChannelNames(int elementType, int valueType) const;
     Q_INVOKABLE bool visualisationChannelAllowsMapping(const QString& channelName) const;
+    Q_INVOKABLE QString visualisationChannelDisplayName(const QString& channelName) const;
 
     Q_INVOKABLE QStringList visualisationDescription(const QString& attributeName, const QStringList& channelNames) const;
     Q_INVOKABLE bool hasVisualisationInfo() const;

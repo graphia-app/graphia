@@ -21,6 +21,7 @@
 #define APPLICATION_H
 
 #include "app/transform/graphtransform.h"
+#include "app/ui/visualisations/visualisationchannel.h"
 #include "app/updates/updater.h"
 
 #include "shared/iapplication.h"
@@ -50,7 +51,6 @@
 #include <utility>
 
 class GraphModel;
-class VisualisationChannelFactory;
 class IParser;
 class ISaverFactory;
 class IPlugin;
@@ -203,7 +203,6 @@ public:
     const GraphTransformFactories& transformFactories() const { return _graphTransformFactories; }
     const GraphTransformFactory* transformFactory(const QString& transformName) const;
 
-    using VisualisationChannelFactories = std::map<QString, std::unique_ptr<VisualisationChannelFactory>>;
     const VisualisationChannelFactories& visualisationChannelFactories() const { return _visualisationChannelFactories; }
     const VisualisationChannelFactory* visualisationChannelFactory(const QString& channelName) const;
 

@@ -81,4 +81,6 @@ public:
     virtual std::unique_ptr<VisualisationChannel> create(const VisualisationConfig& visualisationConfig) const = 0;
 };
 
+using VisualisationChannelFactories = std::map<QString, std::unique_ptr<VisualisationChannelFactory>>;
+
 #endif // VISUALISATIONCHANNEL_H

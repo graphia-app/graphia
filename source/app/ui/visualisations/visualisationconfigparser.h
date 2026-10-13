@@ -20,6 +20,7 @@
 #ifndef VISUALISATIONCONFIGPARSER_H
 #define VISUALISATIONCONFIGPARSER_H
 
+#include "visualisationchannel.h"
 #include "visualisationconfig.h"
 
 #include <QString>
@@ -38,7 +39,7 @@ public:
     bool success() const { return _success; }
     const QString& failedInput() const { return _failedInput; }
 
-    static QString parseForDisplay(const QString& text);
+    static QString parseForDisplay(const QString& text, const VisualisationChannelFactories& factories);
 };
 
 #endif // VISUALISATIONCONFIGPARSER_H

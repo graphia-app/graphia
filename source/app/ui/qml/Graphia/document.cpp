@@ -53,6 +53,7 @@
 
 #include "app/transform/graphtransform.h"
 #include "app/transform/graphtransformconfigparser.h"
+#include "app/ui/visualisations/visualisationchannel.h"
 #include "app/ui/visualisations/visualisationinfo.h"
 #include "app/ui/visualisations/visualisationconfigparser.h"
 
@@ -2399,6 +2400,12 @@ QStringList Document::availableVisualisationChannelNames(int elementType, int va
         static_cast<ElementType>(elementType), static_cast<ValueType>(valueType)) : QStringList();
 }
 
+QString Document::visualisationChannelDisplayName(const QString& channelName) const
+{
+    const auto* factory = _application->visualisationChannelFactory(channelName);
+    return factory != nullptr ? factory->displayName() : channelName;
+}
+
 bool Document::visualisationChannelAllowsMapping(const QString& channelName) const
 {
     return _graphModel != nullptr ? _graphModel->visualisationChannelAllowsMapping(channelName) : false;
@@ -2511,7 +2518,7 @@ bool Document::visualisationsAreValid(const QStringList& visualisations) const
 
 QString Document::displayTextForVisualisation(const QString& visualisation) const
 {
-    return VisualisationConfigParser::parseForDisplay(visualisation);
+    return VisualisationConfigParser::parseForDisplay(visualisation, _application->visualisationChannelFactories());
 }
 
 void Document::setVisualisation(int index, const QString& visualisation)

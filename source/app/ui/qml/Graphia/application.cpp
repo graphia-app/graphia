@@ -777,7 +777,7 @@ QString Application::displayTextForTransform(const QString& transform) const
 
 QString Application::displayTextForVisualisation(const QString& visualisation) const
 {
-    return VisualisationConfigParser::parseForDisplay(visualisation);
+    return VisualisationConfigParser::parseForDisplay(visualisation, _visualisationChannelFactories);
 }
 
 QString Application::resolvedExe(const QString& exe)

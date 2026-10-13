@@ -804,18 +804,15 @@ Window
                                                     id: visualisationsComboBox
                                                     enabled: attributeName.length > 0
                                                     editable: false
+                                                    textRole: "displayName"
+                                                    valueRole: "name"
                                                 }
 
                                                 Item { Layout.fillWidth: true }
                                             }
 
-                                            property string value:
-                                            {
-                                                if(visualisationsComboBox.currentText === "None")
-                                                    return "";
-
-                                                return visualisationsComboBox.currentText;
-                                            }
+                                            // Empty for no visualisation
+                                            property string value: visualisationsComboBox.currentValue ?? ""
 
                                             onValueChanged: { visualisations.update(); }
 
@@ -823,8 +820,10 @@ Window
                                             {
                                                 let visualisationChannelNames = document.availableVisualisationChannelNames(
                                                     visualisation.elementType, visualisation.valueType);
-                                                visualisationsComboBox.model = ["None"].concat(visualisationChannelNames);
-                                                visualisationsComboBox.currentIndex = visualisationsComboBox.model.indexOf(visualisation.channelName);
+                                                visualisationsComboBox.model = [{name: "", displayName: qsTr("None")}].concat(
+                                                    visualisationChannelNames.map(channelName => ({name: channelName,
+                                                    displayName: document.visualisationChannelDisplayName(channelName)})));
+                                                visualisationsComboBox.currentIndex = visualisationsComboBox.indexOfValue(visualisation.channelName);
                                             }
                                         }
                                     }

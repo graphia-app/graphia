@@ -83,6 +83,7 @@ Rectangle
 
     property var model: null
     property string displayRole: "display"
+    property var prettifyFunction: (value) => value
 
     property var highlightedProvider: function(index)
     {
@@ -112,8 +113,8 @@ Rectangle
             color: palette.highlight
         }
 
-        text: model[root.displayRole] ?
-            model[root.displayRole] : modelData
+        text: root.prettifyFunction(model[root.displayRole] ?
+            model[root.displayRole] : modelData)
 
         color: root.highlightedProvider(index) ?
             palette.highlightedText : palette.text

@@ -26,6 +26,8 @@
 #include <vector>
 #include <variant>
 
+class VisualisationChannelFactory;
+
 struct VisualisationConfig
 {
     using ParameterValue = std::variant<double, QString>;
@@ -44,7 +46,7 @@ struct VisualisationConfig
     std::vector<Parameter> _parameters;
 
     QVariantMap asVariantMap() const;
-    QString asString(bool forDisplay = false) const;
+    QString asString(bool forDisplay = false, const VisualisationChannelFactory* factory = nullptr) const;
 
     QString parameterValue(const QString& name) const;
 

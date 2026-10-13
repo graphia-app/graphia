@@ -21,6 +21,8 @@
 
 #include "app/configgrammar.h"
 
+#include "shared/utils/container.h"
+
 #include <lexy_utils.h>
 #include <lexy/action/parse.hpp>
 #include <lexy/input/string_input.hpp>
@@ -121,12 +123,18 @@ bool VisualisationConfigParser::parse(const QString& text, bool warnOnFailure)
     return _success;
 }
 
-QString VisualisationConfigParser::parseForDisplay(const QString& text)
+QString VisualisationConfigParser::parseForDisplay(const QString& text, const VisualisationChannelFactories& factories)
 {
     VisualisationConfigParser parser;
 
     if(parser.parse(text))
-        return parser.result().asString(true);
+    {
+        const auto& result = parser.result();
+        const auto* factory = u::contains(factories, result._channelName) ?
+            factories.at(result._channelName).get() : nullptr;
+
+        return result.asString(true, factory);
+    }
 
     return {};
 }

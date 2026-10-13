@@ -117,6 +117,7 @@ Window
                 Layout.fillHeight: true
 
                 allowMultipleSelection: true
+                prettifyFunction: (name) => root.document.visualisationChannelDisplayName(name)
 
                 onSelectedValuesChanged:
                 {
