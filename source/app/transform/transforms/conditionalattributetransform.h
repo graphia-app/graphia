@@ -109,7 +109,7 @@ public:
             {
                 ._attributeName = "Name", ._elementType = _elementType,
                 ._attributeValueType = ValueType::String, ._attributeFlags = {},
-                ._channel = QObject::tr("Colour")
+                ._channel = "Colour"
             }
         };
     }

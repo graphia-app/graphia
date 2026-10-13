@@ -100,7 +100,7 @@ Item
                 if(!root._valid || root.channel.length === 0)
                     return "applications-other";
 
-                if(root.channel === "Shared Text")
+                if(root.channel === "SharedText")
                     return "shared-text";
 
                 if(root.channel === "Text")
@@ -117,10 +117,10 @@ Item
                     return "view-fullscreen";
                 }
 
-                if(root.channel === "Text Colour")
+                if(root.channel === "TextColour")
                     return "text-color";
 
-                if(root.channel === "Text Size")
+                if(root.channel === "TextSize")
                     return "text-size";
 
                 return "";

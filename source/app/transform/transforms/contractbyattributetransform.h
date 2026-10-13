@@ -76,11 +76,11 @@ public:
         {
             {
                 ._attributeName = "Node Multiplicity", ._elementType = ElementType::Node,
-                ._attributeValueType = ValueType::Int, ._attributeFlags = {}, ._channel = QObject::tr("Size")
+                ._attributeValueType = ValueType::Int, ._attributeFlags = {}, ._channel = "Size"
             },
             {
                 ._attributeName = "Edge Multiplicity", ._elementType = ElementType::Edge,
-                ._attributeValueType = ValueType::Int, ._attributeFlags = {}, ._channel = QObject::tr("Size")
+                ._attributeValueType = ValueType::Int, ._attributeFlags = {}, ._channel = "Size"
             }
         };
     }

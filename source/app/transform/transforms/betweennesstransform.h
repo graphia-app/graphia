@@ -63,12 +63,12 @@ public:
             {
                 ._attributeName = "Node Betweenness", ._elementType = ElementType::Node,
                 ._attributeValueType = ValueType::Float, ._attributeFlags = {AttributeFlag::VisualiseByComponent},
-                ._channel = QObject::tr("Colour")
+                ._channel = "Colour"
             },
             {
                 ._attributeName = "Edge Betweenness", ._elementType = ElementType::Edge,
                 ._attributeValueType = ValueType::Float, ._attributeFlags = {AttributeFlag::VisualiseByComponent},
-                ._channel = QObject::tr("Colour")
+                ._channel = "Colour"
             }
         };
     }

@@ -62,7 +62,7 @@ public:
             {
                 ._attributeName = "Node Eccentricity", ._elementType = ElementType::Node,
                 ._attributeValueType = ValueType::Float, ._attributeFlags = {AttributeFlag::VisualiseByComponent},
-                ._channel = QObject::tr("Colour")
+                ._channel = "Colour"
             }
         };
     }

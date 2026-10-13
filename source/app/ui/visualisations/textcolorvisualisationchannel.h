@@ -42,7 +42,7 @@ public:
 class TextColorVisualisationChannelFactory : public ColorVisualisationChannelFactory
 {
 public:
-    QString name() const override { return u"Text Colour"_s; }
+    QString name() const override { return u"TextColour"_s; }
     QString displayName() const override { return QObject::tr("Text Colour"); }
 
     QString description(ElementType, ValueType) const override;

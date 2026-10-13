@@ -40,7 +40,7 @@ public:
 class TextSizeVisualisationChannelFactory : public VisualisationChannelFactory
 {
 public:
-    QString name() const override { return u"Text Size"_s; }
+    QString name() const override { return u"TextSize"_s; }
     QString displayName() const override { return QObject::tr("Text Size"); }
 
     bool supports(ValueType type) const override { return type == ValueType::Int || type == ValueType::Float; }

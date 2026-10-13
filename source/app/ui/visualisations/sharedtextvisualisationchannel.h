@@ -43,7 +43,7 @@ public:
 class SharedTextVisualisationChannelFactory : public VisualisationChannelFactory
 {
 public:
-    QString name() const override { return u"Shared Text"_s; }
+    QString name() const override { return u"SharedText"_s; }
     QString displayName() const override { return QObject::tr("Shared Text"); }
 
     bool appliesTo(ElementType elementType) const override { return elementType & ElementType::Node; }

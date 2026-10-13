@@ -87,7 +87,7 @@ public:
             {
                 ._attributeName = "MCL Cluster", ._elementType = ElementType::Node,
                 ._attributeValueType = ValueType::String, ._attributeFlags = {},
-                ._channel = QObject::tr("Colour")
+                ._channel = "Colour"
             }
         };
     }
