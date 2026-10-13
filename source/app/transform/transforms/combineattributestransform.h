@@ -29,6 +29,8 @@
 
 #include <memory>
 
+using namespace Qt::Literals::StringLiterals;
+
 class CombineAttributesTransform : public GraphTransform
 {
 public:
@@ -48,6 +50,9 @@ public:
     explicit CombineAttributesTransformFactory(GraphModel* graphModel) :
         GraphTransformFactory(graphModel)
     {}
+
+    QString name() const override { return u"Combine Attributes"_s; }
+    QString displayName() const override { return QObject::tr("Combine Attributes"); }
 
     QString description() const override
     {

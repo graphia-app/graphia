@@ -30,6 +30,8 @@
 
 #include <memory>
 
+using namespace Qt::Literals::StringLiterals;
+
 class TypeCastTransform : public GraphTransform
 {
 public:
@@ -49,6 +51,9 @@ public:
     explicit TypeCastTransformFactory(GraphModel* graphModel) :
         GraphTransformFactory(graphModel)
     {}
+
+    QString name() const override { return u"Type Cast"_s; }
+    QString displayName() const override { return QObject::tr("Type Cast"); }
 
     QString description() const override
     {

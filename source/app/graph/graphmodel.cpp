@@ -381,34 +381,40 @@ GraphModel::GraphModel(Application* application, IPlugin* plugin) :
         .setDescription(tr("An edge's component identifier indicates which component it is part of."))
         .setFlag(AttributeFlag::DisableDuringTransform);
 
-    _->_graphTransformFactories.emplace(tr("Remove Nodes"),             std::make_unique<FilterTransformFactory>(this, ElementType::Node, false));
-    _->_graphTransformFactories.emplace(tr("Remove Edges"),             std::make_unique<FilterTransformFactory>(this, ElementType::Edge, false));
-    _->_graphTransformFactories.emplace(tr("Remove Components"),        std::make_unique<FilterTransformFactory>(this, ElementType::Component, false));
-    _->_graphTransformFactories.emplace(tr("Keep Nodes"),               std::make_unique<FilterTransformFactory>(this, ElementType::Node, true));
-    _->_graphTransformFactories.emplace(tr("Keep Edges"),               std::make_unique<FilterTransformFactory>(this, ElementType::Edge, true));
-    _->_graphTransformFactories.emplace(tr("Keep Components"),          std::make_unique<FilterTransformFactory>(this, ElementType::Component, true));
-    _->_graphTransformFactories.emplace(tr("Contract Edges"),           std::make_unique<EdgeContractionTransformFactory>(this));
-    _->_graphTransformFactories.emplace(tr("MCL Cluster"),              std::make_unique<MCLTransformFactory>(this));
-    _->_graphTransformFactories.emplace(tr("Louvain Cluster"),          std::make_unique<LouvainTransformFactory>(this));
-    _->_graphTransformFactories.emplace(tr("Weighted Louvain Cluster"), std::make_unique<WeightedLouvainTransformFactory>(this));
-    _->_graphTransformFactories.emplace(tr("PageRank"),                 std::make_unique<PageRankTransformFactory>(this));
-    _->_graphTransformFactories.emplace(tr("Eccentricity"),             std::make_unique<EccentricityTransformFactory>(this));
-    _->_graphTransformFactories.emplace(tr("Betweenness"),              std::make_unique<BetweennessTransformFactory>(this));
-    _->_graphTransformFactories.emplace(tr("Contract By Attribute"),    std::make_unique<ContractByAttributeTransformFactory>(this));
-    _->_graphTransformFactories.emplace(tr("Separate By Attribute"),    std::make_unique<SeparateByAttributeTransformFactory>(this));
-    _->_graphTransformFactories.emplace(tr("Boolean Node Attribute"),   std::make_unique<ConditionalAttributeTransformFactory>(this, ElementType::Node));
-    _->_graphTransformFactories.emplace(tr("Boolean Edge Attribute"),   std::make_unique<ConditionalAttributeTransformFactory>(this, ElementType::Edge));
-    _->_graphTransformFactories.emplace(tr("k-NN"),                     std::make_unique<KNNTransformFactory>(this));
-    _->_graphTransformFactories.emplace(tr("%-NN"),                     std::make_unique<PercentNNTransformFactory>(this));
-    _->_graphTransformFactories.emplace(tr("Edge Reduction"),           std::make_unique<EdgeReductionTransformFactory>(this));
-    _->_graphTransformFactories.emplace(tr("Spanning Forest"),          std::make_unique<SpanningTreeTransformFactory>(this));
-    _->_graphTransformFactories.emplace(tr("Attribute Synthesis"),      std::make_unique<AttributeSynthesisTransformFactory>(this));
-    _->_graphTransformFactories.emplace(tr("Combine Attributes"),       std::make_unique<CombineAttributesTransformFactory>(this));
-    _->_graphTransformFactories.emplace(tr("Forward Attribute"),        std::make_unique<ForwardMultiElementAttributeTransformFactory>(this));
-    _->_graphTransformFactories.emplace(tr("Average Attribute"),        std::make_unique<AverageAttributeTransformFactory>(this));
-    _->_graphTransformFactories.emplace(tr("Type Cast"),                std::make_unique<TypeCastTransformFactory>(this));
-    _->_graphTransformFactories.emplace(tr("Remove Leaves"),            std::make_unique<RemoveLeavesTransformFactory>(this));
-    _->_graphTransformFactories.emplace(tr("Remove Branches"),          std::make_unique<RemoveBranchesTransformFactory>(this));
+    auto addTransformFactory = [this](std::unique_ptr<GraphTransformFactory> factory)
+    {
+        auto transformName = factory->name();
+        _->_graphTransformFactories.emplace(transformName, std::move(factory));
+    };
+
+    addTransformFactory(std::make_unique<FilterTransformFactory>(this, ElementType::Node, false));
+    addTransformFactory(std::make_unique<FilterTransformFactory>(this, ElementType::Edge, false));
+    addTransformFactory(std::make_unique<FilterTransformFactory>(this, ElementType::Component, false));
+    addTransformFactory(std::make_unique<FilterTransformFactory>(this, ElementType::Node, true));
+    addTransformFactory(std::make_unique<FilterTransformFactory>(this, ElementType::Edge, true));
+    addTransformFactory(std::make_unique<FilterTransformFactory>(this, ElementType::Component, true));
+    addTransformFactory(std::make_unique<EdgeContractionTransformFactory>(this));
+    addTransformFactory(std::make_unique<MCLTransformFactory>(this));
+    addTransformFactory(std::make_unique<LouvainTransformFactory>(this));
+    addTransformFactory(std::make_unique<WeightedLouvainTransformFactory>(this));
+    addTransformFactory(std::make_unique<PageRankTransformFactory>(this));
+    addTransformFactory(std::make_unique<EccentricityTransformFactory>(this));
+    addTransformFactory(std::make_unique<BetweennessTransformFactory>(this));
+    addTransformFactory(std::make_unique<ContractByAttributeTransformFactory>(this));
+    addTransformFactory(std::make_unique<SeparateByAttributeTransformFactory>(this));
+    addTransformFactory(std::make_unique<ConditionalAttributeTransformFactory>(this, ElementType::Node));
+    addTransformFactory(std::make_unique<ConditionalAttributeTransformFactory>(this, ElementType::Edge));
+    addTransformFactory(std::make_unique<KNNTransformFactory>(this));
+    addTransformFactory(std::make_unique<PercentNNTransformFactory>(this));
+    addTransformFactory(std::make_unique<EdgeReductionTransformFactory>(this));
+    addTransformFactory(std::make_unique<SpanningTreeTransformFactory>(this));
+    addTransformFactory(std::make_unique<AttributeSynthesisTransformFactory>(this));
+    addTransformFactory(std::make_unique<CombineAttributesTransformFactory>(this));
+    addTransformFactory(std::make_unique<ForwardMultiElementAttributeTransformFactory>(this));
+    addTransformFactory(std::make_unique<AverageAttributeTransformFactory>(this));
+    addTransformFactory(std::make_unique<TypeCastTransformFactory>(this));
+    addTransformFactory(std::make_unique<RemoveLeavesTransformFactory>(this));
+    addTransformFactory(std::make_unique<RemoveBranchesTransformFactory>(this));
 
     _->_visualisationChannels.emplace(tr("Colour"), std::make_unique<ColorVisualisationChannel>());
     _->_visualisationChannels.emplace(tr("Size"), std::make_unique<SizeVisualisationChannel>());

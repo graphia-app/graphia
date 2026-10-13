@@ -30,6 +30,8 @@
 
 #include <memory>
 
+using namespace Qt::Literals::StringLiterals;
+
 class KNNTransform : public GraphTransform
 {
 public:
@@ -49,6 +51,9 @@ public:
     explicit KNNTransformFactory(GraphModel* graphModel) :
         GraphTransformFactory(graphModel)
     {}
+
+    QString name() const override { return u"k-NN"_s; }
+    QString displayName() const override { return QObject::tr("k-NN"); }
 
     QString description() const override
     {

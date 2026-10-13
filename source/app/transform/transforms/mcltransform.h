@@ -29,6 +29,8 @@
 
 #include <memory>
 
+using namespace Qt::Literals::StringLiterals;
+
 class MCLTransform : public GraphTransform
 {
 public:
@@ -57,6 +59,9 @@ public:
     explicit MCLTransformFactory(GraphModel* graphModel) :
         GraphTransformFactory(graphModel)
     {}
+
+    QString name() const override { return u"MCL Cluster"_s; }
+    QString displayName() const override { return QObject::tr("MCL Cluster"); }
 
     QString description() const override
     {

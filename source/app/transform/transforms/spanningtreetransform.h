@@ -30,6 +30,8 @@
 
 #include <memory>
 
+using namespace Qt::Literals::StringLiterals;
+
 class SpanningTreeTransform : public GraphTransform
 {
 public:
@@ -42,6 +44,9 @@ public:
     explicit SpanningTreeTransformFactory(GraphModel* graphModel) :
         GraphTransformFactory(graphModel)
     {}
+
+    QString name() const override { return u"Spanning Forest"_s; }
+    QString displayName() const override { return QObject::tr("Spanning Forest"); }
 
     QString description() const override
     {

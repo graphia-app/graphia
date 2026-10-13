@@ -29,6 +29,8 @@
 
 #include <memory>
 
+using namespace Qt::Literals::StringLiterals;
+
 class PageRankTransform : public GraphTransform
 {
 public:
@@ -51,6 +53,9 @@ public:
     explicit PageRankTransformFactory(GraphModel* graphModel) :
         GraphTransformFactory(graphModel)
     {}
+
+    QString name() const override { return u"PageRank"_s; }
+    QString displayName() const override { return QObject::tr("PageRank"); }
 
     QString description() const override
     {

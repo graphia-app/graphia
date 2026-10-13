@@ -29,6 +29,8 @@
 
 #include <memory>
 
+using namespace Qt::Literals::StringLiterals;
+
 class ContractByAttributeTransform : public GraphTransform
 {
 public:
@@ -48,6 +50,9 @@ public:
     explicit ContractByAttributeTransformFactory(GraphModel* graphModel) :
         GraphTransformFactory(graphModel)
     {}
+
+    QString name() const override { return u"Contract By Attribute"_s; }
+    QString displayName() const override { return QObject::tr("Contract By Attribute"); }
 
     QString description() const override
     {

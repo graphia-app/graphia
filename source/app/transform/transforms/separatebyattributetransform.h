@@ -27,6 +27,8 @@
 
 #include <memory>
 
+using namespace Qt::Literals::StringLiterals;
+
 class SeparateByAttributeTransform : public GraphTransform
 {
 public:
@@ -46,6 +48,9 @@ public:
     explicit SeparateByAttributeTransformFactory(GraphModel* graphModel) :
         GraphTransformFactory(graphModel)
     {}
+
+    QString name() const override { return u"Separate By Attribute"_s; }
+    QString displayName() const override { return QObject::tr("Separate By Attribute"); }
 
     QString description() const override
     {

@@ -27,6 +27,8 @@
 
 #include <memory>
 
+using namespace Qt::Literals::StringLiterals;
+
 class EccentricityTransform : public GraphTransform
 {
 public:
@@ -44,6 +46,9 @@ public:
     explicit EccentricityTransformFactory(GraphModel* graphModel) :
         GraphTransformFactory(graphModel)
     {}
+
+    QString name() const override { return u"Eccentricity"_s; }
+    QString displayName() const override { return QObject::tr("Eccentricity"); }
 
     QString description() const override
     {

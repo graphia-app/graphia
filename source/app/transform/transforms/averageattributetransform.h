@@ -27,6 +27,8 @@
 
 #include <memory>
 
+using namespace Qt::Literals::StringLiterals;
+
 class AverageAttributeTransform : public GraphTransform
 {
 public:
@@ -46,6 +48,9 @@ public:
     explicit AverageAttributeTransformFactory(GraphModel* graphModel) :
         GraphTransformFactory(graphModel)
     {}
+
+    QString name() const override { return u"Average Attribute"_s; }
+    QString displayName() const override { return QObject::tr("Average Attribute"); }
 
     QString description() const override
     {

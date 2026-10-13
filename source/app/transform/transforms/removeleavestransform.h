@@ -27,6 +27,8 @@
 
 #include <memory>
 
+using namespace Qt::Literals::StringLiterals;
+
 class RemoveLeavesTransform : public GraphTransform
 {
 public:
@@ -45,6 +47,9 @@ public:
     explicit RemoveLeavesTransformFactory(GraphModel* graphModel) :
         GraphTransformFactory(graphModel)
     {}
+
+    QString name() const override { return u"Remove Leaves"_s; }
+    QString displayName() const override { return QObject::tr("Remove Leaves"); }
 
     QString description() const override
     {
@@ -74,6 +79,9 @@ public:
     explicit RemoveBranchesTransformFactory(GraphModel* graphModel) :
         GraphTransformFactory(graphModel)
     {}
+
+    QString name() const override { return u"Remove Branches"_s; }
+    QString displayName() const override { return QObject::tr("Remove Branches"); }
 
     QString description() const override
     {

@@ -29,6 +29,8 @@
 
 #include <memory>
 
+using namespace Qt::Literals::StringLiterals;
+
 class EdgeContractionTransform : public GraphTransform
 {
 public:
@@ -48,6 +50,9 @@ public:
     explicit EdgeContractionTransformFactory(GraphModel* graphModel) :
         GraphTransformFactory(graphModel)
     {}
+
+    QString name() const override { return u"Contract Edges"_s; }
+    QString displayName() const override { return QObject::tr("Contract Edges"); }
 
     QString description() const override
     {

@@ -27,6 +27,8 @@
 
 #include <memory>
 
+using namespace Qt::Literals::StringLiterals;
+
 class ForwardMultiElementAttributeTransform : public GraphTransform
 {
 public:
@@ -46,6 +48,9 @@ public:
     explicit ForwardMultiElementAttributeTransformFactory(GraphModel* graphModel) :
         GraphTransformFactory(graphModel)
     {}
+
+    QString name() const override { return u"Forward Attribute"_s; }
+    QString displayName() const override { return QObject::tr("Forward Attribute"); }
 
     QString description() const override
     {

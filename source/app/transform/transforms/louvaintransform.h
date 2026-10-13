@@ -29,6 +29,8 @@
 
 #include <memory>
 
+using namespace Qt::Literals::StringLiterals;
+
 class LouvainTransform : public GraphTransform
 {
 public:
@@ -47,6 +49,9 @@ public:
     explicit LouvainTransformFactory(GraphModel* graphModel) :
         GraphTransformFactory(graphModel)
     {}
+
+    QString name() const override { return u"Louvain Cluster"_s; }
+    QString displayName() const override { return QObject::tr("Louvain Cluster"); }
 
     QString description() const override
     {
@@ -92,6 +97,9 @@ class WeightedLouvainTransformFactory : public LouvainTransformFactory
 {
 public:
     using LouvainTransformFactory::LouvainTransformFactory;
+
+    QString name() const override { return u"Weighted Louvain Cluster"_s; }
+    QString displayName() const override { return QObject::tr("Weighted Louvain Cluster"); }
 
     GraphTransformAttributeParameters attributeParameters() const override
     {

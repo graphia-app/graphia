@@ -29,6 +29,8 @@
 
 #include <memory>
 
+using namespace Qt::Literals::StringLiterals;
+
 class ConditionalAttributeTransform : public GraphTransform
 {
 public:
@@ -54,6 +56,30 @@ public:
     ConditionalAttributeTransformFactory(GraphModel* graphModel, ElementType elementType) :
         GraphTransformFactory(graphModel), _elementType(elementType)
     {}
+
+    QString name() const override
+    {
+        switch(_elementType)
+        {
+        case ElementType::Node: return u"Boolean Node Attribute"_s;
+        case ElementType::Edge: return u"Boolean Edge Attribute"_s;
+        default: break;
+        }
+
+        return {};
+    }
+
+    QString displayName() const override
+    {
+        switch(_elementType)
+        {
+        case ElementType::Node: return QObject::tr("Boolean Node Attribute");
+        case ElementType::Edge: return QObject::tr("Boolean Edge Attribute");
+        default: break;
+        }
+
+        return {};
+    }
 
     QString description() const override
     {

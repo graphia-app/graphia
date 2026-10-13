@@ -30,6 +30,8 @@
 
 #include <memory>
 
+using namespace Qt::Literals::StringLiterals;
+
 class AttributeSynthesisTransform : public GraphTransform
 {
 public:
@@ -49,6 +51,9 @@ public:
     explicit AttributeSynthesisTransformFactory(GraphModel* graphModel) :
         GraphTransformFactory(graphModel)
     {}
+
+    QString name() const override { return u"Attribute Synthesis"_s; }
+    QString displayName() const override { return QObject::tr("Attribute Synthesis"); }
 
     QString description() const override
     {

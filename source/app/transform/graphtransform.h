@@ -114,6 +114,8 @@ public:
 
     virtual ~GraphTransformFactory() = default;
 
+    virtual QString name() const = 0;
+    virtual QString displayName() const = 0;
     virtual QString description() const = 0;
     virtual QString image() const;
     virtual QString category() const { return {}; }

@@ -27,6 +27,8 @@
 
 #include <memory>
 
+using namespace Qt::Literals::StringLiterals;
+
 class EdgeReductionTransform : public GraphTransform
 {
 public:
@@ -39,6 +41,9 @@ public:
     explicit EdgeReductionTransformFactory(GraphModel* graphModel) :
         GraphTransformFactory(graphModel)
     {}
+
+    QString name() const override { return u"Edge Reduction"_s; }
+    QString displayName() const override { return QObject::tr("Edge Reduction"); }
 
     QString description() const override
     {

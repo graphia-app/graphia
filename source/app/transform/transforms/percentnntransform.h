@@ -30,6 +30,8 @@
 
 #include <memory>
 
+using namespace Qt::Literals::StringLiterals;
+
 class PercentNNTransform : public GraphTransform
 {
 public:
@@ -49,6 +51,9 @@ public:
     explicit PercentNNTransformFactory(GraphModel* graphModel) :
         GraphTransformFactory(graphModel)
     {}
+
+    QString name() const override { return u"%-NN"_s; }
+    QString displayName() const override { return QObject::tr("%-NN"); }
 
     QString description() const override
     {

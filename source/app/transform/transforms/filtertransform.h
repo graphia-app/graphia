@@ -27,6 +27,8 @@
 
 #include <memory>
 
+using namespace Qt::Literals::StringLiterals;
+
 class FilterTransform : public GraphTransform
 {
 public:
@@ -57,6 +59,32 @@ public:
         GraphTransformFactory(graphModel),
         _elementType(elementType), _invert(invert)
     {}
+
+    QString name() const override
+    {
+        switch(_elementType)
+        {
+        case ElementType::Node:         return _invert ? u"Keep Nodes"_s : u"Remove Nodes"_s;
+        case ElementType::Edge:         return _invert ? u"Keep Edges"_s : u"Remove Edges"_s;
+        case ElementType::Component:    return _invert ? u"Keep Components"_s : u"Remove Components"_s;
+        default: break;
+        }
+
+        return {};
+    }
+
+    QString displayName() const override
+    {
+        switch(_elementType)
+        {
+        case ElementType::Node:         return _invert ? QObject::tr("Keep Nodes") : QObject::tr("Remove Nodes");
+        case ElementType::Edge:         return _invert ? QObject::tr("Keep Edges") : QObject::tr("Remove Edges");
+        case ElementType::Component:    return _invert ? QObject::tr("Keep Components") : QObject::tr("Remove Components");
+        default: break;
+        }
+
+        return {};
+    }
 
     QString description() const override
     {

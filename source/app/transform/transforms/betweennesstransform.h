@@ -29,6 +29,8 @@
 
 #include <memory>
 
+using namespace Qt::Literals::StringLiterals;
+
 class BetweennessTransform : public GraphTransform
 {
 public:
@@ -45,6 +47,9 @@ public:
     explicit BetweennessTransformFactory(GraphModel* graphModel) :
         GraphTransformFactory(graphModel)
     {}
+
+    QString name() const override { return u"Betweenness"_s; }
+    QString displayName() const override { return QObject::tr("Betweenness"); }
 
     QString description() const override
     {
