@@ -30,7 +30,6 @@
 
 #include <algorithm>
 #include <limits>
-#include <numeric>
 
 NodeAttributeTableDisplayModel::NodeAttributeTableDisplayModel(QObject* parent) :
     QAbstractTableModel(parent)
