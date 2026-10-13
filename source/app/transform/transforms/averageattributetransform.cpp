@@ -45,6 +45,19 @@ static Alert averageAttributeTransformConfigIsValid(const GraphModel& graphModel
     return {AlertType::None, {}};
 }
 
+QString AverageAttributeTransform::meanAttributeName(const QString& sourceAttributeName,
+    const QString& sharedValuesAttributeName)
+{
+    auto compact = [](const QString& attributeName)
+    {
+        auto name = Attribute::prettify(attributeName);
+        name.removeIf([](QChar c) { return c.isSpace() || c == u'›'; });
+        return name;
+    };
+
+    return u"Mean%1Of%2"_s.arg(compact(sourceAttributeName), compact(sharedValuesAttributeName));
+}
+
 void AverageAttributeTransform::apply(TransformedGraph& target)
 {
     setPhase(QObject::tr("Averaging Attribute"));
@@ -62,15 +75,14 @@ void AverageAttributeTransform::apply(TransformedGraph& target)
     auto sharedValuesAttribute = _graphModel->attributeValueByName(sharedValuesAttributeName);
     auto sourceAttribute = _graphModel->attributeValueByName(sourceAttributeName);
 
-    sourceAttributeName = Attribute::prettify(sourceAttributeName);
-    sharedValuesAttributeName = Attribute::prettify(sharedValuesAttributeName);
+    auto sourceAttributeDisplayName = _graphModel->attributeDisplayName(sourceAttributeName);
+    auto sharedValuesAttributeDisplayName = _graphModel->attributeDisplayName(sharedValuesAttributeName);
 
-    auto meanAttributeName = QObject::tr("Mean %1 of %2")
-        .arg(sourceAttributeName, sharedValuesAttributeName);
-
-    auto& meanAttribute = _graphModel->createAttribute(meanAttributeName)
+    auto& meanAttribute = _graphModel->createAttribute(meanAttributeName(sourceAttributeName, sharedValuesAttributeName))
+        .setDisplayName(QObject::tr("Mean %1 of %2")
+        .arg(sourceAttributeDisplayName, sharedValuesAttributeDisplayName))
         .setDescription(QObject::tr("The mean of %1 for each value of %2.")
-        .arg(sourceAttributeName, sharedValuesAttributeName))
+        .arg(sourceAttributeDisplayName, sharedValuesAttributeDisplayName))
         .setFlag(AttributeFlag::AutoRange);
 
     auto setAverageFunction = [&](const auto& elementIds)

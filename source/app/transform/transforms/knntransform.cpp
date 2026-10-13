@@ -113,17 +113,17 @@ void KNNTransform::apply(TransformedGraph& target)
 
     setProgress(-1);
 
-    _graphModel->createAttribute(QObject::tr("k-NN Source Rank"))
+    _graphModel->createAttribute(KNNTransformFactory::sourceRankAttribute())
         .setDescription(QObject::tr("The ranking given by k-NN, relative to its source node."))
         .setIntValueFn([ranks](EdgeId edgeId) { return static_cast<int>(ranks[edgeId]._source); })
         .setFlag(AttributeFlag::AutoRange);
 
-    _graphModel->createAttribute(QObject::tr("k-NN Target Rank"))
+    _graphModel->createAttribute(KNNTransformFactory::targetRankAttribute())
         .setDescription(QObject::tr("The ranking given by k-NN, relative to its target node."))
         .setIntValueFn([ranks](EdgeId edgeId) { return static_cast<int>(ranks[edgeId]._target); })
         .setFlag(AttributeFlag::AutoRange);
 
-    _graphModel->createAttribute(QObject::tr("k-NN Mean Rank"))
+    _graphModel->createAttribute(KNNTransformFactory::meanRankAttribute())
         .setDescription(QObject::tr("The mean ranking given by k-NN."))
         .setFloatValueFn([ranks](EdgeId edgeId) { return ranks[edgeId]._mean; })
         .setFlag(AttributeFlag::AutoRange);

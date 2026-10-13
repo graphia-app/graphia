@@ -251,6 +251,23 @@ void CorrelationPluginInstance::finishDataRows()
         discreteDataRow.update();
 }
 
+namespace
+{
+AttributeDeclaration dataValueAttributeName()           { return {._name = u"DataValue"_s,              ._displayName = QObject::tr("Data Value")}; }
+AttributeDeclaration strongestDataColumnAttribute()     { return {._name = u"StrongestDataColumn"_s,    ._displayName = QObject::tr("Strongest Data Column")}; }
+AttributeDeclaration meanDataValueAttribute()           { return {._name = u"MeanDataValue"_s,          ._displayName = QObject::tr("Mean Data Value")}; }
+AttributeDeclaration minimumDataValueAttribute()        { return {._name = u"MinimumDataValue"_s,       ._displayName = QObject::tr("Minimum Data Value")}; }
+AttributeDeclaration maximumDataValueAttribute()        { return {._name = u"MaximumDataValue"_s,       ._displayName = QObject::tr("Maximum Data Value")}; }
+AttributeDeclaration varianceAttribute()                { return {._name = u"Variance"_s,               ._displayName = QObject::tr("Variance")}; }
+AttributeDeclaration standardDeviationAttribute()       { return {._name = u"StandardDeviation"_s,      ._displayName = QObject::tr("Standard Deviation")}; }
+AttributeDeclaration coefficientOfVariationAttribute()  { return {._name = u"CoefficientOfVariation"_s, ._displayName = QObject::tr("Coefficient of Variation")}; }
+
+AttributeDeclaration absoluteAttribute(const AttributeDeclaration& attribute)
+{
+    return {._name = u"Absolute%1"_s.arg(attribute._name), ._displayName = QObject::tr("Absolute %1").arg(attribute._displayName)};
+}
+} // namespace
+
 void CorrelationPluginInstance::createAttributes()
 {
     size_t columnIndex = 0;
@@ -259,12 +276,13 @@ void CorrelationPluginInstance::createAttributes()
     for(const auto& dataColumnName : _dataColumnNames)
         dataValueAttributeColumn[dataColumnName] = columnIndex++;
 
-    auto& dataValueAttribute = graphModel()->createAttribute(tr("Data Value"))
+    auto& dataValueAttribute = graphModel()->createAttribute(dataValueAttributeName())
         .setUserDefined(true)
         .setDescription(tr("The Data Value is a parameterised attribute that permits referencing "
             "a specific column in the correlated data."))
         .setValidParameterValues(u::toQStringList(_dataColumnNames));
 
+    QString correlationAttributeDisplayName;
     QString correlationAttributeDescription;
 
     auto correlationDataType = normaliseQmlEnum<CorrelationDataType>(_correlationDataType);
@@ -285,7 +303,7 @@ void CorrelationPluginInstance::createAttributes()
             })
             .setFlag(AttributeFlag::AutoRange);
 
-        graphModel()->createAttribute(tr("Strongest Data Column"))
+        graphModel()->createAttribute(strongestDataColumnAttribute())
             .setStringValueFn([this](NodeId nodeId)
             {
                 const auto& dataRow = continuousDataRowForNodeId(nodeId);
@@ -296,39 +314,39 @@ void CorrelationPluginInstance::createAttributes()
             .setDescription(tr("The name of the data column which has the largest absolute value for "
                 "the data row associated with the node."));
 
-        graphModel()->createAttribute(tr("Mean Data Value"))
+        graphModel()->createAttribute(meanDataValueAttribute())
             .setFloatValueFn([this](NodeId nodeId) { return continuousDataRowForNodeId(nodeId).mean(); })
             .setFlag(AttributeFlag::AutoRange)
             .setDescription(tr("The Mean Data Value is the mean of the values associated "
                 "with the node."));
 
-        graphModel()->createAttribute(tr("Minimum Data Value"))
+        graphModel()->createAttribute(minimumDataValueAttribute())
             .setFloatValueFn([this](NodeId nodeId) { return continuousDataRowForNodeId(nodeId).minValue(); })
             .setFlag(AttributeFlag::AutoRange)
             .setDescription(tr("The Minimum Data Value is the minimum value associated "
                 "with the node."));
 
-        graphModel()->createAttribute(tr("Maximum Data Value"))
+        graphModel()->createAttribute(maximumDataValueAttribute())
             .setFloatValueFn([this](NodeId nodeId) { return continuousDataRowForNodeId(nodeId).maxValue(); })
             .setFlag(AttributeFlag::AutoRange)
             .setDescription(tr("The Maximum Data Value is the maximum value associated "
                 "with the node."));
 
-        graphModel()->createAttribute(tr("Variance"))
+        graphModel()->createAttribute(varianceAttribute())
             .setFloatValueFn([this](NodeId nodeId) { return continuousDataRowForNodeId(nodeId).variance(); })
             .setFlag(AttributeFlag::AutoRange)
             .setDescription(tr("The %1 is a measure of the spread of the values associated with the node. "
                 "It is defined as ∑(<i>x</i>-µ)², where <i>x</i> is the value and µ is the mean.")
                 .arg(u::redirectLink("variance", tr("Variance"))));
 
-        graphModel()->createAttribute(tr("Standard Deviation"))
+        graphModel()->createAttribute(standardDeviationAttribute())
             .setFloatValueFn([this](NodeId nodeId) { return continuousDataRowForNodeId(nodeId).stddev(); })
             .setFlag(AttributeFlag::AutoRange)
             .setDescription(tr("The %1 is a measure of the spread of the values associated "
                 "with the node. It is defined as √∑(<i>x</i>-µ)², where <i>x</i> is the value "
                 "and µ is the mean.").arg(u::redirectLink("stddev", tr("Standard Deviation"))));
 
-        graphModel()->createAttribute(tr("Coefficient of Variation"))
+        graphModel()->createAttribute(coefficientOfVariationAttribute())
             .setFloatValueFn([this](NodeId nodeId) { return continuousDataRowForNodeId(nodeId).coefVar(); })
             .setValueMissingFn([this](NodeId nodeId) { return std::isnan(continuousDataRowForNodeId(nodeId).coefVar()); })
             .setFlag(AttributeFlag::AutoRange)
@@ -338,6 +356,7 @@ void CorrelationPluginInstance::createAttributes()
 
         auto continuousCorrelation = ContinuousCorrelation::create(_continuousCorrelationType, _correlationFilterType);
         _correlationAttributeName = continuousCorrelation->attributeName();
+        correlationAttributeDisplayName = continuousCorrelation->attributeDisplayName();
         correlationAttributeDescription = continuousCorrelation->attributeDescription();
         break;
     }
@@ -357,12 +376,19 @@ void CorrelationPluginInstance::createAttributes()
 
         auto discreteCorrelation = DiscreteCorrelation::create(_discreteCorrelationType, _correlationFilterType);
         _correlationAttributeName = discreteCorrelation->attributeName();
+        correlationAttributeDisplayName = discreteCorrelation->attributeDisplayName();
         correlationAttributeDescription = discreteCorrelation->attributeDescription();
         break;
     }
     }
 
-    graphModel()->createAttribute(_correlationAttributeName)
+    const AttributeDeclaration correlationAttribute
+    {
+        ._name = _correlationAttributeName,
+        ._displayName = correlationAttributeDisplayName
+    };
+
+    graphModel()->createAttribute(correlationAttribute)
         .setFloatValueFn([this](EdgeId edgeId) { return _correlationValues->get(edgeId); })
         .setFlag(AttributeFlag::AutoRange)
         .setDescription(correlationAttributeDescription);
@@ -372,13 +398,16 @@ void CorrelationPluginInstance::createAttributes()
     {
     case CorrelationPolarity::Negative:
     case CorrelationPolarity::Both:
-        _correlationAbsAttributeName = tr("Absolute %1").arg(_correlationAttributeName);
+    {
+        auto absoluteCorrelationAttribute = absoluteAttribute(correlationAttribute);
+        _correlationAbsAttributeName = absoluteCorrelationAttribute._name;
 
-        graphModel()->createAttribute(_correlationAbsAttributeName)
+        graphModel()->createAttribute(absoluteCorrelationAttribute)
             .setFloatValueFn([this](EdgeId edgeId) { return std::abs(_correlationValues->get(edgeId)); })
             .setFlag(AttributeFlag::AutoRange)
             .setDescription(correlationAttributeDescription);
         break;
+    }
 
     default:
         break;
@@ -736,7 +765,7 @@ QStringList CorrelationPluginInstance::defaultTransforms() const
 {
     QStringList defaultTransforms =
     {
-        R"([pinned] "RemoveComponents" where $"Component Size" <= 1)"
+        R"([pinned] "RemoveComponents" where $"ComponentSize" <= 1)"
     };
 
     auto correlationFilterType = normaliseQmlEnum<CorrelationFilterType>(_correlationFilterType);
@@ -1488,6 +1517,40 @@ CorrelationPlugin::CorrelationPlugin()
     registerUrlType(u"CorrelationTSV"_s, QObject::tr("Correlation TSV File"), QObject::tr("Correlation TSV Files"), {"tsv"});
     registerUrlType(u"CorrelationSSV"_s, QObject::tr("Correlation SSV File"), QObject::tr("Correlation SSV Files"), {"ssv"});
     registerUrlType(u"CorrelationXLSX"_s, QObject::tr("Correlation Excel File"), QObject::tr("Correlation Excel Files"), {"xlsx"});
+}
+
+AttributeDeclarations CorrelationPlugin::attributeDeclarations() const
+{
+    AttributeDeclarations declarations =
+    {
+        dataValueAttributeName(),
+        strongestDataColumnAttribute(),
+        meanDataValueAttribute(),
+        minimumDataValueAttribute(),
+        maximumDataValueAttribute(),
+        varianceAttribute(),
+        standardDeviationAttribute(),
+        coefficientOfVariationAttribute(),
+    };
+
+    auto addCorrelation = [&declarations](const ICorrelationInfo* correlation)
+    {
+        if(correlation == nullptr || correlation->attributeName().isEmpty())
+            return;
+
+        const AttributeDeclaration correlationAttribute{._name = correlation->attributeName(), ._displayName = correlation->attributeDisplayName()};
+        declarations.push_back(correlationAttribute);
+        declarations.push_back(absoluteAttribute(correlationAttribute));
+    };
+
+    for(int type = 0; type < static_cast<int>(CorrelationType::Max); type++)
+    {
+        auto correlationType = static_cast<CorrelationType>(type);
+        addCorrelation(ContinuousCorrelation::create(correlationType, CorrelationFilterType::Threshold).get());
+        addCorrelation(DiscreteCorrelation::create(correlationType, CorrelationFilterType::Threshold).get());
+    }
+
+    return declarations;
 }
 
 QVariantMap CorrelationPlugin::correlationInfoFor(int correlationType) const

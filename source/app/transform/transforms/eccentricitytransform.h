@@ -46,6 +46,9 @@ public:
     QString name() const override { return u"Eccentricity"_s; }
     QString displayName() const override { return QObject::tr("Eccentricity"); }
 
+    static AttributeDeclaration nodeEccentricityAttribute() { return {._name = u"NodeEccentricity"_s, ._displayName = QObject::tr("Node Eccentricity")}; }
+    AttributeDeclarations attributeDeclarations() const override { return {nodeEccentricityAttribute()}; }
+
     QString description() const override
     {
         return QObject::tr(
@@ -60,7 +63,7 @@ public:
         return
         {
             {
-                ._attributeName = "Node Eccentricity", ._elementType = ElementType::Node,
+                ._attributeName = nodeEccentricityAttribute()._name, ._elementType = ElementType::Node,
                 ._attributeValueType = ValueType::Float, ._attributeFlags = {AttributeFlag::VisualiseByComponent},
                 ._channel = "Colour"
             }

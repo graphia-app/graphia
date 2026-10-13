@@ -173,7 +173,7 @@ void PageRankTransform::calculatePageRank(TransformedGraph& target)
         }
     }
 
-    _graphModel->createAttribute(QObject::tr("Node PageRank"))
+    _graphModel->createAttribute(PageRankTransformFactory::nodePageRankAttribute())
         .setDescription(QObject::tr("A node's PageRank is a measure of relative importance in the graph."))
         .floatRange().setMin(0.0f)
         .floatRange().setMax(1.0f)

@@ -2046,6 +2046,7 @@ QVariantMap Document::transform(const QString& transformName) const
             QVariantMap defaultVisualisationMap;
             auto attributeName = Attribute::enquoteAttributeName(defaultVisualisation._attributeName);
             defaultVisualisationMap.insert(u"name"_s, attributeName);
+            defaultVisualisationMap.insert(u"displayName"_s, _graphModel->attributeDisplayName(defaultVisualisation._attributeName));
             defaultVisualisationMap.insert(u"flags"_s, static_cast<int>(*defaultVisualisation._attributeFlags));
             defaultVisualisationMap.insert(u"elementType"_s, static_cast<int>(defaultVisualisation._elementType));
             defaultVisualisationMap.insert(u"valueType"_s, static_cast<int>(defaultVisualisation._attributeValueType));

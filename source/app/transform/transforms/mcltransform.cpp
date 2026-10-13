@@ -657,14 +657,14 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target)
         clusterNumber++;
     }
 
-    _graphModel->createAttribute(QObject::tr("MCL Cluster"))
+    _graphModel->createAttribute(MCLTransformFactory::clusterAttribute())
         .setDescription(QObject::tr("The MCL cluster in which the node resides."))
         .setStringValueFn([clusterNames](NodeId nodeId) { return clusterNames[nodeId]; })
         .setValueMissingFn([clusterNames](NodeId nodeId) { return clusterNames[nodeId].isEmpty(); })
         .setFlag(AttributeFlag::FindShared)
         .setFlag(AttributeFlag::Searchable);
 
-    _graphModel->createAttribute(QObject::tr("MCL Cluster Size"))
+    _graphModel->createAttribute(MCLTransformFactory::clusterSizeAttribute())
         .setDescription(QObject::tr("The size of the MCL cluster in which the node resides."))
         .setIntValueFn([clusterSizes](NodeId nodeId) { return clusterSizes[nodeId]; })
         .setFlag(AttributeFlag::AutoRange);

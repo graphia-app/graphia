@@ -51,6 +51,11 @@ public:
     QString name() const override { return u"KNN"_s; }
     QString displayName() const override { return QObject::tr("k-NN"); }
 
+    static AttributeDeclaration sourceRankAttribute()   { return {._name = u"KNNSourceRank"_s,  ._displayName = QObject::tr("k-NN Source Rank")}; }
+    static AttributeDeclaration targetRankAttribute()   { return {._name = u"KNNTargetRank"_s,  ._displayName = QObject::tr("k-NN Target Rank")}; }
+    static AttributeDeclaration meanRankAttribute()     { return {._name = u"KNNMeanRank"_s,    ._displayName = QObject::tr("k-NN Mean Rank")}; }
+    AttributeDeclarations attributeDeclarations() const override { return {sourceRankAttribute(), targetRankAttribute(), meanRankAttribute()}; }
+
     QString description() const override
     {
         return QObject::tr("Reduce the number of edges in the graph using the %1 algorithm.")

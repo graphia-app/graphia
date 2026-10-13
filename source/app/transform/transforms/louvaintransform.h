@@ -49,6 +49,22 @@ public:
     QString name() const override { return u"LouvainCluster"_s; }
     QString displayName() const override { return QObject::tr("Louvain Cluster"); }
 
+    static AttributeDeclaration clusterAttribute(bool weighted)
+    {
+        return weighted ?
+            AttributeDeclaration{._name = u"WeightedLouvainCluster"_s,      ._displayName = QObject::tr("Weighted Louvain Cluster")} :
+            AttributeDeclaration{._name = u"LouvainCluster"_s,              ._displayName = QObject::tr("Louvain Cluster")};
+    }
+
+    static AttributeDeclaration clusterSizeAttribute(bool weighted)
+    {
+        return weighted ?
+            AttributeDeclaration{._name = u"WeightedLouvainClusterSize"_s,  ._displayName = QObject::tr("Weighted Louvain Cluster Size")} :
+            AttributeDeclaration{._name = u"LouvainClusterSize"_s,          ._displayName = QObject::tr("Louvain Cluster Size")};
+    }
+
+    AttributeDeclarations attributeDeclarations() const override { return {clusterAttribute(false), clusterSizeAttribute(false)}; }
+
     QString description() const override
     {
         return QObject::tr("%1 is a method for finding clusters by measuring edge "
@@ -76,7 +92,7 @@ public:
         return
         {
             {
-                ._attributeName = "Louvain Cluster", ._elementType = ElementType::Node,
+                ._attributeName = clusterAttribute(false)._name, ._elementType = ElementType::Node,
                 ._attributeValueType = ValueType::String, ._attributeFlags = {},
                 ._channel = "Colour"
             }
@@ -95,6 +111,8 @@ public:
     QString name() const override { return u"WeightedLouvainCluster"_s; }
     QString displayName() const override { return QObject::tr("Weighted Louvain Cluster"); }
 
+    AttributeDeclarations attributeDeclarations() const override { return {clusterAttribute(true), clusterSizeAttribute(true)}; }
+
     GraphTransformAttributeParameters attributeParameters() const override
     {
         return
@@ -112,7 +130,7 @@ public:
         return
         {
             {
-                ._attributeName = "Weighted Louvain Cluster", ._elementType = ElementType::Node,
+                ._attributeName = clusterAttribute(true)._name, ._elementType = ElementType::Node,
                 ._attributeValueType = ValueType::String, ._attributeFlags = {},
                 ._channel = "Colour"
             }

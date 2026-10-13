@@ -44,6 +44,7 @@ public:
     virtual QString name() const = 0;
     virtual QString description() const = 0;
     virtual QString attributeName() const = 0;
+    virtual QString attributeDisplayName() const = 0;
     virtual QString attributeDescription() const = 0;
 };
 

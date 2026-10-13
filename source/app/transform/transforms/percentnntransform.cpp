@@ -116,17 +116,17 @@ void PercentNNTransform::apply(TransformedGraph& target)
 
     setProgress(-1);
 
-    _graphModel->createAttribute(QObject::tr("%-NN Source Rank"))
+    _graphModel->createAttribute(PercentNNTransformFactory::sourceRankAttribute())
         .setDescription(QObject::tr("The ranking given by k-NN, relative to its source node."))
         .setIntValueFn([ranks](EdgeId edgeId) { return static_cast<int>(ranks[edgeId]._source); })
         .setFlag(AttributeFlag::AutoRange);
 
-    _graphModel->createAttribute(QObject::tr("%-NN Target Rank"))
+    _graphModel->createAttribute(PercentNNTransformFactory::targetRankAttribute())
         .setDescription(QObject::tr("The ranking given by k-NN, relative to its target node."))
         .setIntValueFn([ranks](EdgeId edgeId) { return static_cast<int>(ranks[edgeId]._target); })
         .setFlag(AttributeFlag::AutoRange);
 
-    _graphModel->createAttribute(QObject::tr("%-NN Mean Rank"))
+    _graphModel->createAttribute(PercentNNTransformFactory::meanRankAttribute())
         .setDescription(QObject::tr("The mean ranking given by k-NN."))
         .setFloatValueFn([ranks](EdgeId edgeId) { return ranks[edgeId]._mean; })
         .setFlag(AttributeFlag::AutoRange);

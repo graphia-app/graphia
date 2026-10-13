@@ -246,6 +246,33 @@ private:
     std::set<AttributeChangesTracker*> _attributeChangesTrackers;
 };
 
+namespace
+{
+AttributeDeclaration nodeDegreeAttribute()              { return {._name = u"NodeDegree"_s,                 ._displayName = QObject::tr("Node Degree")}; }
+AttributeDeclaration nodeInDegreeAttribute()            { return {._name = u"NodeInDegree"_s,               ._displayName = QObject::tr("Node In Degree")}; }
+AttributeDeclaration nodeOutDegreeAttribute()           { return {._name = u"NodeOutDegree"_s,              ._displayName = QObject::tr("Node Out Degree")}; }
+AttributeDeclaration nodeMultiplicityAttribute()        { return {._name = u"NodeMultiplicity"_s,           ._displayName = QObject::tr("Node Multiplicity")}; }
+AttributeDeclaration edgeMultiplicityAttribute()        { return {._name = u"EdgeMultiplicity"_s,           ._displayName = QObject::tr("Edge Multiplicity")}; }
+AttributeDeclaration componentSizeAttribute()           { return {._name = u"ComponentSize"_s,              ._displayName = QObject::tr("Component Size")}; }
+AttributeDeclaration nodeComponentIdentifierAttribute() { return {._name = u"NodeComponentIdentifier"_s,    ._displayName = QObject::tr("Node Component Identifier")}; }
+AttributeDeclaration edgeComponentIdentifierAttribute() { return {._name = u"EdgeComponentIdentifier"_s,    ._displayName = QObject::tr("Edge Component Identifier")}; }
+} // namespace
+
+AttributeDeclarations GraphModel::attributeDeclarations()
+{
+    return
+    {
+        nodeDegreeAttribute(),
+        nodeInDegreeAttribute(),
+        nodeOutDegreeAttribute(),
+        nodeMultiplicityAttribute(),
+        edgeMultiplicityAttribute(),
+        componentSizeAttribute(),
+        nodeComponentIdentifierAttribute(),
+        edgeComponentIdentifierAttribute()
+    };
+}
+
 GraphModel::GraphModel(Application* application, IPlugin* plugin) :
     _(std::make_unique<GraphModelImpl>(*this, application)),
     _graphTransformsAreChanging(false),
@@ -300,7 +327,7 @@ GraphModel::GraphModel(Application* application, IPlugin* plugin) :
         this, &GraphModel::onPreferenceChanged);
 
     // NOLINTNEXTLINE clang-analyzer-optin.cplusplus.VirtualCall
-    createAttribute(tr("Node Degree"))
+    createAttribute(nodeDegreeAttribute())
         .setIntValueFn([this](NodeId nodeId) { return _->_transformedGraph.nodeById(nodeId).degree(); })
         .intRange().setMin(0)
         .setDescription(tr("A node's degree is its number of incident edges."));
@@ -308,38 +335,38 @@ GraphModel::GraphModel(Application* application, IPlugin* plugin) :
     if(directed())
     {
         // NOLINTNEXTLINE clang-analyzer-optin.cplusplus.VirtualCall
-        createAttribute(tr("Node In Degree"))
+        createAttribute(nodeInDegreeAttribute())
             .setIntValueFn([this](NodeId nodeId) { return _->_transformedGraph.nodeById(nodeId).inDegree(); })
             .intRange().setMin(0)
             .setDescription(tr("A node's in degree is its number of inbound edges."));
 
         // NOLINTNEXTLINE clang-analyzer-optin.cplusplus.VirtualCall
-        createAttribute(tr("Node Out Degree"))
+        createAttribute(nodeOutDegreeAttribute())
             .setIntValueFn([this](NodeId nodeId) { return _->_transformedGraph.nodeById(nodeId).outDegree(); })
             .intRange().setMin(0)
             .setDescription(tr("A node's out degree is its number of outbound edges."));
     }
 
     // NOLINTNEXTLINE clang-analyzer-optin.cplusplus.VirtualCall
-    createAttribute(tr("Node Multiplicity"))
+    createAttribute(nodeMultiplicityAttribute())
         .setIntValueFn([this](NodeId nodeId) { return _->_transformedGraph.multiplicityOf(nodeId); })
         .intRange().setMin(0)
         .setDescription(tr("A node's multiplicity is how many nodes it represents."));
 
     // NOLINTNEXTLINE clang-analyzer-optin.cplusplus.VirtualCall
-    createAttribute(tr("Edge Multiplicity"))
+    createAttribute(edgeMultiplicityAttribute())
         .setIntValueFn([this](EdgeId edgeId) { return _->_transformedGraph.multiplicityOf(edgeId); })
         .intRange().setMin(0)
         .setDescription(tr("An edge's multiplicity is how many edges it represents."));
 
     // NOLINTNEXTLINE clang-analyzer-optin.cplusplus.VirtualCall
-    createAttribute(tr("Component Size"))
+    createAttribute(componentSizeAttribute())
         .setIntValueFn([](const IGraphComponent& component) { return static_cast<int>(component.numNodes()); })
         .intRange().setMin(1)
         .setDescription(tr("Component Size refers to the number of nodes the component contains."));
 
     // NOLINTNEXTLINE clang-analyzer-optin.cplusplus.VirtualCall
-    createAttribute(tr("Node Component Identifier"))
+    createAttribute(nodeComponentIdentifierAttribute())
         .setStringValueFn([this](NodeId nodeId)
         {
             return u"Component %1"_s.arg(static_cast<int>(_->_transformedGraph.componentIdOfNode(nodeId) + 1));
@@ -348,7 +375,7 @@ GraphModel::GraphModel(Application* application, IPlugin* plugin) :
         .setFlag(AttributeFlag::DisableDuringTransform);
 
     // NOLINTNEXTLINE clang-analyzer-optin.cplusplus.VirtualCall
-    createAttribute(tr("Edge Component Identifier"))
+    createAttribute(edgeComponentIdentifierAttribute())
         .setStringValueFn([this](EdgeId edgeId)
         {
             return u"Component %1"_s.arg(static_cast<int>(_->_transformedGraph.componentIdOfEdge(edgeId) + 1));
@@ -995,6 +1022,11 @@ std::vector<QString> GraphModel::attributeNames(ElementType elementType) const
     }
 
     return attributeNames;
+}
+
+Attribute& GraphModel::createAttribute(const AttributeDeclaration& declaration)
+{
+    return GraphModel::createAttribute(declaration._name).setDisplayName(declaration._displayName);
 }
 
 Attribute& GraphModel::createAttribute(QString name, QString* assignedName)

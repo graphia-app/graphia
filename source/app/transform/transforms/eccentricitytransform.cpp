@@ -113,7 +113,7 @@ void EccentricityTransform::calculateDistances(TransformedGraph& target)
     if(cancelled())
         return;
 
-    _graphModel->createAttribute(QObject::tr("Node Eccentricity"))
+    _graphModel->createAttribute(EccentricityTransformFactory::nodeEccentricityAttribute())
         .setDescription(QObject::tr("A node's eccentricity is the length of the shortest path to the furthest node."))
         .setIntValueFn([maxDistances](NodeId nodeId) { return maxDistances[nodeId]; })
         .setFlag(AttributeFlag::AutoRange)

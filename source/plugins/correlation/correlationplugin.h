@@ -262,6 +262,7 @@ public:
 
     QString parametersQmlType(const QString&) const override { return u"CorrelationParameters"_s; }
     QString qmlModule() const override { return u"Graphia.Plugins.Correlation"_s; }
+    AttributeDeclarations attributeDeclarations() const override;
 
     Q_INVOKABLE QVariantMap correlationInfoFor(int correlationType) const;
 };

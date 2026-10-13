@@ -74,6 +74,7 @@ public:
     virtual void setNodeName(NodeId nodeId, const QString& name) = 0;
 
     virtual IAttribute& createAttribute(QString name, QString* assignedName = nullptr) = 0;
+    virtual IAttribute& createAttribute(const AttributeDeclaration& declaration) = 0;
     virtual const IAttribute* attributeByName(const QString& name) const = 0;
     virtual IAttribute* attributeByName(const QString& name) = 0;
     virtual bool attributeExists(const QString& name) const = 0;

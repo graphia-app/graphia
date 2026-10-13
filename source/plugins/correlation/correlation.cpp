@@ -244,6 +244,7 @@ public:
     QString description() const override            { return Algorithm::description(); }
 
     QString attributeName() const override          { return Algorithm::attributeName(); }
+    QString attributeDisplayName() const override   { return Algorithm::attributeDisplayName(); }
     QString attributeDescription() const override   { return Algorithm::attributeDescription(); }
 };
 
@@ -259,7 +260,8 @@ public:
             "of the linear correlation between two variables.");
     }
 
-    static QString attributeName() { return QObject::tr("Pearson Correlation Value"); }
+    static QString attributeName() { return u"PearsonCorrelationValue"_s; }
+    static QString attributeDisplayName() { return QObject::tr("Pearson Correlation Value"); }
     static QString attributeDescription()
     {
         return QObject::tr("The %1 is an indication of "
@@ -284,7 +286,8 @@ public:
             "monotonic function.");
     }
 
-    static QString attributeName() { return QObject::tr("Spearman Rank Correlation Value"); }
+    static QString attributeName() { return u"SpearmanRankCorrelationValue"_s; }
+    static QString attributeDisplayName() { return QObject::tr("Spearman Rank Correlation Value"); }
     static QString attributeDescription()
     {
         return QObject::tr("The %1 is an indication of "
@@ -308,7 +311,8 @@ public:
             "of the Euclidean distance between two vectors.");
     }
 
-    static QString attributeName() { return QObject::tr("Euclidean Similarity"); }
+    static QString attributeName() { return u"EuclideanSimilarity"_s; }
+    static QString attributeDisplayName() { return QObject::tr("Euclidean Similarity"); }
     static QString attributeDescription()
     {
         return QObject::tr("%1 is essentially the inverse "
@@ -334,7 +338,8 @@ public:
             "inner product of the same vectors normalized to both have length 1.");
     }
 
-    static QString attributeName() { return QObject::tr("Cosine Similarity"); }
+    static QString attributeName() { return u"CosineSimilarity"_s; }
+    static QString attributeDisplayName() { return QObject::tr("Cosine Similarity"); }
     static QString attributeDescription()
     {
         return QObject::tr("%1 is a measure of similarity between two "
@@ -364,7 +369,8 @@ public:
             "than mean-based, thus is less sensitive to outliers.");
     }
 
-    static QString attributeName() { return QObject::tr("Bicor Correlation Value"); }
+    static QString attributeName() { return u"BicorCorrelationValue"_s; }
+    static QString attributeDisplayName() { return QObject::tr("Bicor Correlation Value"); }
     static QString attributeDescription()
     {
         return QObject::tr("%1 is a median-based measure of similarity between samples.")
@@ -541,6 +547,7 @@ public:
     QString description() const override            { return AlgorithmInfo::description(); }
 
     QString attributeName() const override          { return AlgorithmInfo::attributeName(); }
+    QString attributeDisplayName() const override   { return AlgorithmInfo::attributeDisplayName(); }
     QString attributeDescription() const override   { return AlgorithmInfo::attributeDescription(); }
 };
 
@@ -553,7 +560,8 @@ struct JaccardCorrelationInfo
             "gauging the similarity and diversity of sample sets.");
     }
 
-    static QString attributeName() { return QObject::tr("Jaccard Correlation Value"); }
+    static QString attributeName() { return u"JaccardCorrelationValue"_s; }
+    static QString attributeDisplayName() { return QObject::tr("Jaccard Correlation Value"); }
     static QString attributeDescription()
     {
         return QObject::tr("The %1 is a statistic used for gauging "
@@ -575,7 +583,8 @@ struct SMCCorrelationInfo
             "to Jaccard, except that it counts mutual absence.");
     }
 
-    static QString attributeName() { return QObject::tr("Simple Matching Coefficient"); }
+    static QString attributeName() { return u"SimpleMatchingCoefficient"_s; }
+    static QString attributeDisplayName() { return QObject::tr("Simple Matching Coefficient"); }
     static QString attributeDescription()
     {
         return QObject::tr("The %1 is a statistic used for gauging "
@@ -595,6 +604,7 @@ public:
     static QString name() { return {}; }
     static QString description() { return {}; }
     static QString attributeName() { return {}; }
+    static QString attributeDisplayName() { return {}; }
     static QString attributeDescription() { return {}; }
 };
 

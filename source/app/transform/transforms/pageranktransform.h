@@ -53,6 +53,9 @@ public:
     QString name() const override { return u"PageRank"_s; }
     QString displayName() const override { return QObject::tr("PageRank"); }
 
+    static AttributeDeclaration nodePageRankAttribute() { return {._name = u"NodePageRank"_s, ._displayName = QObject::tr("Node PageRank")}; }
+    AttributeDeclarations attributeDeclarations() const override { return {nodePageRankAttribute()}; }
+
     QString description() const override
     {
         return QObject::tr("Calculate a %1 centrality measurement for each node. This can be viewed as "
@@ -66,7 +69,7 @@ public:
         return
         {
             {
-                ._attributeName = "Node PageRank", ._elementType = ElementType::Node,
+                ._attributeName = nodePageRankAttribute()._name, ._elementType = ElementType::Node,
                 ._attributeValueType = ValueType::Float, ._attributeFlags = {AttributeFlag::VisualiseByComponent},
                 ._channel = "Colour"
             }

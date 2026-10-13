@@ -38,6 +38,8 @@ public:
 
     void apply(TransformedGraph& target) override;
 
+    static QString meanAttributeName(const QString& sourceAttributeName, const QString& sharedValuesAttributeName);
+
 private:
     GraphModel* _graphModel = nullptr;
 };

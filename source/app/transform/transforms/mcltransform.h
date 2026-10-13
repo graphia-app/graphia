@@ -59,6 +59,10 @@ public:
     QString name() const override { return u"MCLCluster"_s; }
     QString displayName() const override { return QObject::tr("MCL Cluster"); }
 
+    static AttributeDeclaration clusterAttribute()      { return {._name = u"MCLCluster"_s,     ._displayName = QObject::tr("MCL Cluster")}; }
+    static AttributeDeclaration clusterSizeAttribute()  { return {._name = u"MCLClusterSize"_s, ._displayName = QObject::tr("MCL Cluster Size")}; }
+    AttributeDeclarations attributeDeclarations() const override { return {clusterAttribute(), clusterSizeAttribute()}; }
+
     QString description() const override
     {
         return QObject::tr("%1 finds discrete groups (clusters) of nodes based on a flow simulation model.")
@@ -85,7 +89,7 @@ public:
         return
         {
             {
-                ._attributeName = "MCL Cluster", ._elementType = ElementType::Node,
+                ._attributeName = clusterAttribute()._name, ._elementType = ElementType::Node,
                 ._attributeValueType = ValueType::String, ._attributeFlags = {},
                 ._channel = "Colour"
             }

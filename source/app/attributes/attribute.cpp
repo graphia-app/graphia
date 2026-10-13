@@ -522,8 +522,8 @@ QString Attribute::prettify(QString name)
 
     name = name.replace(u"$"_s, u""_s);
     name = name.replace(u"\""_s, u""_s);
-    name = name.replace(sourceRe, QObject::tr("Source"));
-    name = name.replace(targetRe, QObject::tr("Target"));
+    name = name.replace(sourceRe, u"Source"_s);
+    name = name.replace(targetRe, u"Target"_s);
     name = name.replace(u"."_s, u" › "_s);
 
     return name;

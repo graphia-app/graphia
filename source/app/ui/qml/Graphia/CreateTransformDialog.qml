@@ -796,9 +796,17 @@ Window
                                                 {
                                                     font.italic: attributeName.length === 0
                                                     color: palette.buttonText
-                                                    text: attributeName.length > 0 ?
-                                                        root.document.attributeDisplayName(attributeName) :
-                                                        qsTr("Invalid Attribute Name")
+                                                    text:
+                                                    {
+                                                        if(attributeName.length === 0)
+                                                            return qsTr("Invalid Attribute Name");
+
+                                                        // Not named by a parameter, so it's the transform's own attribute
+                                                        if(attributeName === modelData && visualisation !== undefined)
+                                                            return visualisation.displayName;
+
+                                                        return document.attributeDisplayName(attributeName);
+                                                    }
                                                 }
 
                                                 ComboBox

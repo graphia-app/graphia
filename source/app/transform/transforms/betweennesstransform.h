@@ -47,6 +47,10 @@ public:
     QString name() const override { return u"Betweenness"_s; }
     QString displayName() const override { return QObject::tr("Betweenness"); }
 
+    static AttributeDeclaration nodeBetweennessAttribute() { return {._name = u"NodeBetweenness"_s, ._displayName = QObject::tr("Node Betweenness")}; }
+    static AttributeDeclaration edgeBetweennessAttribute() { return {._name = u"EdgeBetweenness"_s, ._displayName = QObject::tr("Edge Betweenness")}; }
+    AttributeDeclarations attributeDeclarations() const override { return {nodeBetweennessAttribute(), edgeBetweennessAttribute()}; }
+
     QString description() const override
     {
         return QObject::tr(
@@ -61,12 +65,12 @@ public:
         return
         {
             {
-                ._attributeName = "Node Betweenness", ._elementType = ElementType::Node,
+                ._attributeName = nodeBetweennessAttribute()._name, ._elementType = ElementType::Node,
                 ._attributeValueType = ValueType::Float, ._attributeFlags = {AttributeFlag::VisualiseByComponent},
                 ._channel = "Colour"
             },
             {
-                ._attributeName = "Edge Betweenness", ._elementType = ElementType::Edge,
+                ._attributeName = edgeBetweennessAttribute()._name, ._elementType = ElementType::Edge,
                 ._attributeValueType = ValueType::Float, ._attributeFlags = {AttributeFlag::VisualiseByComponent},
                 ._channel = "Colour"
             }

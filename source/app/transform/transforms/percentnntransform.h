@@ -51,6 +51,11 @@ public:
     QString name() const override { return u"PercentNN"_s; }
     QString displayName() const override { return QObject::tr("%-NN"); }
 
+    static AttributeDeclaration sourceRankAttribute()   { return {._name = u"PercentNNSourceRank"_s, ._displayName = QObject::tr("%-NN Source Rank")}; }
+    static AttributeDeclaration targetRankAttribute()   { return {._name = u"PercentNNTargetRank"_s, ._displayName = QObject::tr("%-NN Target Rank")}; }
+    static AttributeDeclaration meanRankAttribute()     { return {._name = u"PercentNNMeanRank"_s,   ._displayName = QObject::tr("%-NN Mean Rank")}; }
+    AttributeDeclarations attributeDeclarations() const override { return {sourceRankAttribute(), targetRankAttribute(), meanRankAttribute()}; }
+
     QString description() const override
     {
         return QObject::tr("Reduce the number of edges in the graph using a variation of the %1 "
