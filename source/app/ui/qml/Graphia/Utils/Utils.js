@@ -326,16 +326,18 @@ function regexEscape(text)
 // This is only a shallow value comparison
 function arraysMatch(a, b)
 {
-    if(!Array.isArray(a) || !Array.isArray(b))
+    let isList = (value) => value !== null && value !== undefined && value.length !== undefined;
+    if(!isList(a) || !isList(b))
         return false;
 
     if(a.length !== b.length)
         return false;
 
-    let as = a.sort((x, y) => x - y);
-    let bs = b.sort((x, y) => x - y);
+    // Copy so the arguments aren't changed, and C++ lists become arrays
+    let as = Array.from(a).sort();
+    let bs = Array.from(b).sort();
 
-    let i = a.length;
+    let i = as.length;
     while(i--)
     {
         if(as[i] != bs[i]) // Deliberate type coercion
