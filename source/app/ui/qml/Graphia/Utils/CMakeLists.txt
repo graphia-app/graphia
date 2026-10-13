@@ -21,7 +21,6 @@ qt_add_qml_module(utils_qml
         nodeattributetabledisplaymodel.h nodeattributetabledisplaymodel.cpp
         preferences.h preferences.cpp
         sortfilterproxymodel.h sortfilterproxymodel.cpp
-        tableproxymodel.h tableproxymodel.cpp
         ${WASM_SOURCES}
 )
 
