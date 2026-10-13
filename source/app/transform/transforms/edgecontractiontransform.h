@@ -47,7 +47,7 @@ private:
 class EdgeContractionTransformFactory : public GraphTransformFactory
 {
 public:
-    QString name() const override { return u"Contract Edges"_s; }
+    QString name() const override { return u"ContractEdges"_s; }
     QString displayName() const override { return QObject::tr("Contract Edges"); }
 
     QString description() const override

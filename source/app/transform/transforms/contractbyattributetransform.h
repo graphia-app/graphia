@@ -47,7 +47,7 @@ private:
 class ContractByAttributeTransformFactory : public GraphTransformFactory
 {
 public:
-    QString name() const override { return u"Contract By Attribute"_s; }
+    QString name() const override { return u"ContractByAttribute"_s; }
     QString displayName() const override { return QObject::tr("Contract By Attribute"); }
 
     QString description() const override

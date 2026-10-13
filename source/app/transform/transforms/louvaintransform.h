@@ -46,7 +46,7 @@ private:
 class LouvainTransformFactory : public GraphTransformFactory
 {
 public:
-    QString name() const override { return u"Louvain Cluster"_s; }
+    QString name() const override { return u"LouvainCluster"_s; }
     QString displayName() const override { return QObject::tr("Louvain Cluster"); }
 
     QString description() const override
@@ -92,7 +92,7 @@ public:
 class WeightedLouvainTransformFactory : public LouvainTransformFactory
 {
 public:
-    QString name() const override { return u"Weighted Louvain Cluster"_s; }
+    QString name() const override { return u"WeightedLouvainCluster"_s; }
     QString displayName() const override { return QObject::tr("Weighted Louvain Cluster"); }
 
     GraphTransformAttributeParameters attributeParameters() const override

@@ -61,8 +61,8 @@ public:
     {
         switch(_elementType)
         {
-        case ElementType::Node: return u"Boolean Node Attribute"_s;
-        case ElementType::Edge: return u"Boolean Edge Attribute"_s;
+        case ElementType::Node: return u"BooleanNodeAttribute"_s;
+        case ElementType::Edge: return u"BooleanEdgeAttribute"_s;
         default: break;
         }
 

@@ -45,7 +45,7 @@ private:
 class SeparateByAttributeTransformFactory : public GraphTransformFactory
 {
 public:
-    QString name() const override { return u"Separate By Attribute"_s; }
+    QString name() const override { return u"SeparateByAttribute"_s; }
     QString displayName() const override { return QObject::tr("Separate By Attribute"); }
 
     QString description() const override

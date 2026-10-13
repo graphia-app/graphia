@@ -45,7 +45,7 @@ private:
 class ForwardMultiElementAttributeTransformFactory : public GraphTransformFactory
 {
 public:
-    QString name() const override { return u"Forward Attribute"_s; }
+    QString name() const override { return u"ForwardAttribute"_s; }
     QString displayName() const override { return QObject::tr("Forward Attribute"); }
 
     QString description() const override

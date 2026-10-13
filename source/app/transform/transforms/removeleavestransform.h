@@ -44,7 +44,7 @@ public:
 class RemoveLeavesTransformFactory : public GraphTransformFactory
 {
 public:
-    QString name() const override { return u"Remove Leaves"_s; }
+    QString name() const override { return u"RemoveLeaves"_s; }
     QString displayName() const override { return QObject::tr("Remove Leaves"); }
 
     QString description() const override
@@ -72,7 +72,7 @@ public:
 class RemoveBranchesTransformFactory : public GraphTransformFactory
 {
 public:
-    QString name() const override { return u"Remove Branches"_s; }
+    QString name() const override { return u"RemoveBranches"_s; }
     QString displayName() const override { return QObject::tr("Remove Branches"); }
 
     QString description() const override

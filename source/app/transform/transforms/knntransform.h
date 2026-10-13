@@ -48,7 +48,7 @@ private:
 class KNNTransformFactory : public GraphTransformFactory
 {
 public:
-    QString name() const override { return u"k-NN"_s; }
+    QString name() const override { return u"KNN"_s; }
     QString displayName() const override { return QObject::tr("k-NN"); }
 
     QString description() const override

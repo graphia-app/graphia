@@ -48,7 +48,7 @@ private:
 class TypeCastTransformFactory : public GraphTransformFactory
 {
 public:
-    QString name() const override { return u"Type Cast"_s; }
+    QString name() const override { return u"TypeCast"_s; }
     QString displayName() const override { return QObject::tr("Type Cast"); }
 
     QString description() const override

@@ -48,7 +48,7 @@ private:
 class PercentNNTransformFactory : public GraphTransformFactory
 {
 public:
-    QString name() const override { return u"%-NN"_s; }
+    QString name() const override { return u"PercentNN"_s; }
     QString displayName() const override { return QObject::tr("%-NN"); }
 
     QString description() const override

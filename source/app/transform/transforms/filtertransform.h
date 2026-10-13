@@ -63,9 +63,9 @@ public:
     {
         switch(_elementType)
         {
-        case ElementType::Node:         return _invert ? u"Keep Nodes"_s : u"Remove Nodes"_s;
-        case ElementType::Edge:         return _invert ? u"Keep Edges"_s : u"Remove Edges"_s;
-        case ElementType::Component:    return _invert ? u"Keep Components"_s : u"Remove Components"_s;
+        case ElementType::Node:         return _invert ? u"KeepNodes"_s : u"RemoveNodes"_s;
+        case ElementType::Edge:         return _invert ? u"KeepEdges"_s : u"RemoveEdges"_s;
+        case ElementType::Component:    return _invert ? u"KeepComponents"_s : u"RemoveComponents"_s;
         default: break;
         }
 

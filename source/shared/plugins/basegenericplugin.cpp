@@ -191,7 +191,7 @@ QStringList BaseGenericPluginInstance::defaultTransforms() const
     if(_adjacencyMatrixParameters._filterEdges)
     {
         defaultTransforms.append(
-            QStringLiteral(R"("Remove Edges" where $"Absolute Edge Weight" < %2)")
+            QStringLiteral(R"("RemoveEdges" where $"Absolute Edge Weight" < %2)")
             .arg(_adjacencyMatrixParameters._initialAbsEdgeWeightThreshold));
     }
 

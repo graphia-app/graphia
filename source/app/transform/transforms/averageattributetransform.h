@@ -45,7 +45,7 @@ private:
 class AverageAttributeTransformFactory : public GraphTransformFactory
 {
 public:
-    QString name() const override { return u"Average Attribute"_s; }
+    QString name() const override { return u"AverageAttribute"_s; }
     QString displayName() const override { return QObject::tr("Average Attribute"); }
 
     QString description() const override

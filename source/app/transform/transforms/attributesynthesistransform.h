@@ -48,7 +48,7 @@ private:
 class AttributeSynthesisTransformFactory : public GraphTransformFactory
 {
 public:
-    QString name() const override { return u"Attribute Synthesis"_s; }
+    QString name() const override { return u"AttributeSynthesis"_s; }
     QString displayName() const override { return QObject::tr("Attribute Synthesis"); }
 
     QString description() const override

@@ -38,7 +38,7 @@ public:
 class EdgeReductionTransformFactory : public GraphTransformFactory
 {
 public:
-    QString name() const override { return u"Edge Reduction"_s; }
+    QString name() const override { return u"EdgeReduction"_s; }
     QString displayName() const override { return QObject::tr("Edge Reduction"); }
 
     QString description() const override

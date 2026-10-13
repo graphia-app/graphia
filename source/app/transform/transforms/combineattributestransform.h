@@ -47,7 +47,7 @@ private:
 class CombineAttributesTransformFactory : public GraphTransformFactory
 {
 public:
-    QString name() const override { return u"Combine Attributes"_s; }
+    QString name() const override { return u"CombineAttributes"_s; }
     QString displayName() const override { return QObject::tr("Combine Attributes"); }
 
     QString description() const override

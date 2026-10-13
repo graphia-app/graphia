@@ -56,7 +56,7 @@ private:
 class MCLTransformFactory : public GraphTransformFactory
 {
 public:
-    QString name() const override { return u"MCL Cluster"_s; }
+    QString name() const override { return u"MCLCluster"_s; }
     QString displayName() const override { return QObject::tr("MCL Cluster"); }
 
     QString description() const override

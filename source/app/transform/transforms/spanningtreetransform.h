@@ -41,7 +41,7 @@ public:
 class SpanningTreeTransformFactory : public GraphTransformFactory
 {
 public:
-    QString name() const override { return u"Spanning Forest"_s; }
+    QString name() const override { return u"SpanningForest"_s; }
     QString displayName() const override { return QObject::tr("Spanning Forest"); }
 
     QString description() const override
