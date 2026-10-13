@@ -944,8 +944,6 @@ PluginContent
             {
                 if(plot.plotMode === PlotMode.RowsOfInterestColumnSelection && plot.selectedColumns.length > 0)
                     plot.selectRowsOfInterest();
-                else
-                    tableView.selectAll();
             }
 
             onSelectedRowsChanged:

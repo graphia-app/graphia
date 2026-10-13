@@ -23,7 +23,6 @@ import QtQuick
 import QtQml
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtQml.Models
 import QtQuick.Shapes
 
 import Graphia.Controls
@@ -49,12 +48,12 @@ Item
 
     property var model
     property int defaultColumnWidth: 120
-    property var selectedRows: []
-    readonly property alias visibleRows: proxyModel.sourceRowsInProxyOrder
+    readonly property alias selectedRows: displayModel.selectedRows
+    readonly property alias visibleRows: displayModel.sourceRows
 
-    property int rowCount: 0
-    property alias sortIndicatorColumn: proxyModel.sortColumn
-    property alias sortIndicatorOrder: proxyModel.sortOrder
+    readonly property alias rowCount: displayModel.numRows
+    property alias sortIndicatorColumn: displayModel.sortColumn
+    property alias sortIndicatorOrder: displayModel.sortOrder
     property string exportBaseFileName: "attributes"
 
     property PluginContent pluginContent: null
@@ -115,7 +114,7 @@ Item
         tableView._updateColumnVisibility();
     }
 
-    property alias columnOrder: proxyModel.columnOrder
+    property alias columnOrder: displayModel.columnOrder
 
     property bool columnSelectionMode: false
     onColumnSelectionModeChanged:
@@ -129,9 +128,6 @@ Item
 
         // Reset the scroll position in case the new visible columns are no longer in view
         horizontalTableViewScrollBar.position = 0;
-
-        selectionModel.clear();
-        root.selectedRows = [];
 
         tableView._updateColumnVisibility();
         tableView.forceLayoutSafe();
@@ -230,11 +226,11 @@ Item
         removeSpecificAttributeMenuItem.hidden = Qt.binding(() => !pluginContent.attributeIsEditable(root.lastClickedColumnName));
     }
 
-    function selectAll() { if(proxyModel.rowCount() > 0) selectRows(0, proxyModel.rowCount() - 1); }
+    function selectAll() { if(displayModel.rowCount() > 0) selectRows(0, displayModel.rowCount() - 1); }
 
-    function selectSources()    { selectionModel.selectSourceRows(root.model.sourcesOf(root.selectedRows)); }
-    function selectTargets()    { selectionModel.selectSourceRows(root.model.targetsOf(root.selectedRows)); }
-    function selectNeighbours() { selectionModel.selectSourceRows(root.model.neighboursOf(root.selectedRows)); }
+    function selectSources()    { displayModel.selectSourceRows(root.model.sourcesOf(root.selectedRows)); }
+    function selectTargets()    { displayModel.selectSourceRows(root.model.targetsOf(root.selectedRows)); }
+    function selectNeighbours() { displayModel.selectSourceRows(root.model.neighboursOf(root.selectedRows)); }
 
     signal aboutToCrop();
 
@@ -425,10 +421,10 @@ Item
 
     function updateSortActionChecked()
     {
-        sortAscendingAction.checked = proxyModel.sortColumn === root.lastClickedColumnName &&
-            proxyModel.sortOrder === Qt.AscendingOrder;
-        sortDescendingAction.checked = proxyModel.sortColumn === root.lastClickedColumnName &&
-            proxyModel.sortOrder === Qt.DescendingOrder;
+        sortAscendingAction.checked = displayModel.sortColumn === root.lastClickedColumnName &&
+            displayModel.sortOrder === Qt.AscendingOrder;
+        sortDescendingAction.checked = displayModel.sortColumn === root.lastClickedColumnName &&
+            displayModel.sortOrder === Qt.DescendingOrder;
     }
 
     Action
@@ -438,11 +434,8 @@ Item
         checkable: true
         onTriggered: function()
         {
-            selectionModel.clear();
-            root.selectedRows = [];
-
-            proxyModel.sortColumn = root.lastClickedColumnName;
-            proxyModel.sortOrder = Qt.AscendingOrder;
+            displayModel.sortColumn = root.lastClickedColumnName;
+            displayModel.sortOrder = Qt.AscendingOrder;
             root.updateSortActionChecked();
         }
     }
@@ -454,11 +447,8 @@ Item
         checkable: true
         onTriggered: function()
         {
-            selectionModel.clear();
-            root.selectedRows = [];
-
-            proxyModel.sortColumn = root.lastClickedColumnName;
-            proxyModel.sortOrder = Qt.DescendingOrder;
+            displayModel.sortColumn = root.lastClickedColumnName;
+            displayModel.sortOrder = Qt.DescendingOrder;
             root.updateSortActionChecked();
         }
     }
@@ -484,61 +474,24 @@ Item
         onTriggered: { root.pluginContent.removeAttributes([root.lastClickedColumnName]); }
     }
 
-    function selectRows(startRowInclusive, endRowInclusive)
+    function selectRows(startRowInclusive, endRowInclusive, clearFirst = false)
     {
-        selectionModel.change(startRowInclusive, endRowInclusive, ItemSelectionModel.Select);
+        displayModel.selectRows(startRowInclusive, endRowInclusive, clearFirst);
     }
 
     function deselectRows(startRowInclusive, endRowInclusive)
     {
-        selectionModel.change(startRowInclusive, endRowInclusive, ItemSelectionModel.Deselect);
+        displayModel.deselectRows(startRowInclusive, endRowInclusive);
     }
 
     function clearAndSelectRows(rows)
     {
-        selectionModel.selectSourceRows(rows, ItemSelectionModel.Clear);
+        displayModel.selectSourceRows(rows, true);
     }
 
     function setRowOrder(rows)
     {
-        proxyModel.setRowOrder(rows);
-    }
-
-    ItemSelectionModel
-    {
-        id: selectionModel
-        model: proxyModel
-        onSelectionChanged: function(selected, deselected)
-        {
-            proxyModel.setSubSelection(selectionModel.selection, deselected);
-        }
-
-        function _updateSelectedRowsProperty()
-        {
-            let newSelectedRows = proxyModel.sourceRowsOf(selectionModel.selection);
-            if(!Utils.arraysMatch(root.selectedRows, newSelectedRows))
-                root.selectedRows = newSelectedRows;
-        }
-
-        function change(startRowInclusive, endRowInclusive, action)
-        {
-            let less = Math.min(startRowInclusive, endRowInclusive);
-            let max = Math.max(startRowInclusive, endRowInclusive);
-
-            let range = proxyModel.buildRowSelectionRange(less, max);
-            selectionModel.select([range], ItemSelectionModel.Rows | action);
-            selectionModel._updateSelectedRowsProperty();
-        }
-
-        function selectSourceRows(sourceRows, action)
-        {
-            if(action === undefined)
-                action = ItemSelectionModel.NoUpdate;
-
-            let selection = proxyModel.selectionFor([...sourceRows]);
-            selectionModel.select(selection, ItemSelectionModel.Rows | ItemSelectionModel.Select | action);
-            selectionModel._updateSelectedRowsProperty();
-        }
+        displayModel.setRowOrder(rows);
     }
 
     ColumnLayout
@@ -554,7 +507,7 @@ Item
             TableView
             {
                 id: headerView
-                model: proxyModel.headerModel
+                model: displayModel.headerModel
                 width: parent.width
                 height: parent.height
                 interactive: false
@@ -602,14 +555,14 @@ Item
 
                     function refreshState()
                     {
-                        sourceColumn = Qt.binding(() => proxyModel.mapOrderedToSourceColumn(model.column));
+                        sourceColumn = Qt.binding(() => displayModel.sourceColumnFor(model.column));
                         implicitWidth =  Qt.binding(() => tableView.columnWidthProvider(model.column));
                     }
 
                     implicitWidth: tableView.columnWidthProvider(model.column);
                     implicitHeight: headerLabel.height
                     modelColumn: model.column
-                    sourceColumn: proxyModel.mapOrderedToSourceColumn(model.column);
+                    sourceColumn: displayModel.sourceColumnFor(model.column);
 
                     Binding { target: headerContent; property: "sourceColumn"; value: headerItem.sourceColumn }
                     Binding { target: headerContent; property: "modelColumn"; value: headerItem.modelColumn }
@@ -626,7 +579,7 @@ Item
 
                     Connections
                     {
-                        target: proxyModel
+                        target: displayModel
                         function onColumnOrderChanged()
                         {
                             headerItem.refreshState();
@@ -635,7 +588,7 @@ Item
 
                     onEntered: function(drag)
                     {
-                        drag.source.target = proxyModel.mapOrderedToSourceColumn(model.column);
+                        drag.source.target = displayModel.sourceColumnFor(model.column);
                         tableView.forceLayoutSafe();
                     }
 
@@ -740,12 +693,12 @@ Item
                             antialiasing: false
                             width: headerView.sortIndicatorWidth
                             height: headerView.sortIndicatorHeight
-                            visible: proxyModel.sortColumn === headerItem.text && !proxyModel.isRowOrderSet && !root.columnSelectionMode
+                            visible: displayModel.sortColumn === headerItem.text && !displayModel.isRowOrderSet && !root.columnSelectionMode
                             transform: Rotation
                             {
                                 origin.x: sortIndicator.width * 0.5
                                 origin.y: sortIndicator.height * 0.5
-                                angle: proxyModel.sortOrder === Qt.DescendingOrder ? 0 : 180
+                                angle: displayModel.sortOrder === Qt.DescendingOrder ? 0 : 180
                             }
 
                             ShapePath
@@ -777,7 +730,7 @@ Item
                             {
                                 if(headerContent.target > -1)
                                 {
-                                    let newColumnOrder = Array.from(proxyModel.columnOrder);
+                                    let newColumnOrder = Array.from(displayModel.columnOrder);
 
                                     let currentIndex = newColumnOrder.indexOf(
                                         root.model.columnNameFor(sourceColumn));
@@ -786,7 +739,7 @@ Item
                                     root.array_move(newColumnOrder, currentIndex, targetIndex);
                                     headerContent.target = -1;
 
-                                    proxyModel.columnOrder = newColumnOrder;
+                                    displayModel.columnOrder = newColumnOrder;
                                 }
 
                                 tableView.forceLayoutSafe();
@@ -807,16 +760,13 @@ Item
 
                                 if(mouse.button === Qt.LeftButton)
                                 {
-                                    selectionModel.clear();
-                                    root.selectedRows = [];
-
-                                    if(proxyModel.sortColumn === headerItem.text)
+                                    if(displayModel.sortColumn === headerItem.text)
                                     {
-                                        proxyModel.sortOrder = proxyModel.sortOrder === Qt.DescendingOrder ?
+                                        displayModel.sortOrder = displayModel.sortOrder === Qt.DescendingOrder ?
                                             Qt.AscendingOrder : Qt.DescendingOrder;
                                     }
                                     else
-                                        proxyModel.sortColumn = headerItem.text;
+                                        displayModel.sortColumn = headerItem.text;
                                 }
                                 else if(mouse.button === Qt.RightButton)
                                     contextMenu.show();
@@ -847,7 +797,7 @@ Item
                                 {
                                     if(drag.active)
                                     {
-                                        let sourceColumn = proxyModel.mapOrderedToSourceColumn(headerItem.model.column);
+                                        let sourceColumn = displayModel.sourceColumnFor(headerItem.model.column);
                                         let userWidth = Math.max(30, headerItem.implicitWidth + mouseX);
                                         tableView.userColumnWidths[sourceColumn] = userWidth;
                                         headerItem.refreshState();
@@ -939,7 +889,7 @@ Item
 
                     for(let i = 0; i < tableView.columns; i++)
                     {
-                        let sourceIndex = proxyModel.mapOrderedToSourceColumn(i);
+                        let sourceIndex = displayModel.sourceColumnFor(i);
                         columnNames.push(root.model.columnNames[sourceIndex])
                     }
 
@@ -1025,25 +975,18 @@ Item
                     visible: size < 1.0 // So that it's invisible to mouse clicks
                 }
 
-                model: TableProxyModel
+                model: NodeAttributeTableDisplayModel
                 {
-                    id: proxyModel
-                    columnNames: root.model.columnNames
+                    id: displayModel
                     sourceModel: root.model
 
-                    function refreshVisibleRows()
-                    {
-                        root.rowCount = proxyModel.rowCount();
-                        proxyModel.sourceRowsInProxyOrderChanged();
-                    }
-
-                    onSortOrderChanged: { refreshVisibleRows(); }
+                    onRowsReplaced: { verticalTableViewScrollBar.position = 0; }
                 }
 
                 columnWidthProvider: function(col)
                 {
                     let calculatedWidth = 0;
-                    let userWidth = userColumnWidths[proxyModel.mapOrderedToSourceColumn(col)];
+                    let userWidth = userColumnWidths[displayModel.sourceColumnFor(col)];
 
                     // Use the user specified column width if available
                     if(userWidth !== undefined)
@@ -1114,7 +1057,7 @@ Item
 
                 function headerFullWidth(column)
                 {
-                    let sourceColumn = proxyModel.mapOrderedToSourceColumn(column);
+                    let sourceColumn = displayModel.sourceColumnFor(column);
                     let sortIndicatorSpacing = ((headerView.delegatePadding + headerView.sortIndicatorMargin) * 2.0) +
                         headerView.sortIndicatorWidth;
 
@@ -1197,7 +1140,7 @@ Item
                         height: parent.height
 
                         color: palette.highlight;
-                        visible: (cellItem.model.column === (proxyModel.columnCount() - 1)) && cellItem.model.subSelected
+                        visible: (cellItem.model.column === (displayModel.columnCount() - 1)) && cellItem.model.subSelected
                     }
 
                     Rectangle
@@ -1230,7 +1173,7 @@ Item
 
                             text:
                             {
-                                let sourceColumn = proxyModel.mapOrderedToSourceColumn(cellItem.model.column);
+                                let sourceColumn = displayModel.sourceColumnFor(cellItem.model.column);
 
                                 // This can happen during column removal
                                 if(sourceColumn === undefined || sourceColumn < 0)
@@ -1272,25 +1215,9 @@ Item
                 function _updateColumnVisibility()
                 {
                     if(root.columnSelectionMode)
-                        proxyModel.hiddenColumns = [];
+                        displayModel.hiddenColumns = [];
                     else
-                        proxyModel.hiddenColumns = root.hiddenColumns;
-                }
-
-                Connections
-                {
-                    target: root.model
-                    function onSelectionChanged()
-                    {
-                        proxyModel.reset();
-                        proxyModel.refreshVisibleRows();
-
-                        let newSelectedRows = root.selectedRows.length > 0 ?
-                            Utils.arrayIntersection(root.selectedRows, root.visibleRows) : [];
-                        root.clearAndSelectRows(newSelectedRows);
-
-                        verticalTableViewScrollBar.position = 0;
-                    }
+                        displayModel.hiddenColumns = root.hiddenColumns;
                 }
 
                 Component.onCompleted:
@@ -1409,7 +1336,7 @@ Item
                     if(clickedRow < 0)
                         return;
 
-                    let mappedRow = proxyModel.mapToSourceRow(clickedRow);
+                    let mappedRow = displayModel.sourceRowFor(clickedRow);
                     root.model.moveFocusToNodeForRowIndex(mappedRow);
                 }
 
@@ -1437,9 +1364,7 @@ Item
                     if(clickedRow < 0)
                         return;
 
-                    let selectionChanged = false;
-                    let rowIsSelected = selectionModel.isSelected(
-                        proxyModel.index(clickedRow, 0));
+                    let rowIsSelected = displayModel.isRowSelected(clickedRow);
 
                     if((mouse.modifiers & Qt.ShiftModifier) && endRow !== -1)
                     {
@@ -1451,12 +1376,7 @@ Item
                         deselectDrag = true;
                     }
                     else
-                    {
-                        if(!(mouse.modifiers & Qt.ControlModifier))
-                            selectionModel.clear();
-
-                        root.selectRows(clickedRow, clickedRow);
-                    }
+                        root.selectRows(clickedRow, clickedRow, !(mouse.modifiers & Qt.ControlModifier));
 
                     previousRow = startRow = endRow = clickedRow;
                 }
@@ -1520,18 +1440,17 @@ Item
                         verticalTableViewScrollBar.position,
                         0, 1.0 - verticalTableViewScrollBar.size);
 
-                    selectionModel.clear();
                     if(modifier & Qt.ShiftModifier)
                     {
                         if(startRow == -1)
                             startRow = endRow;
 
-                        root.selectRows(startRow, endRow);
+                        root.selectRows(startRow, endRow, true);
                     }
                     else
                     {
                         startRow = endRow;
-                        root.selectRows(endRow, endRow);
+                        root.selectRows(endRow, endRow, true);
                     }
                 }
             }
