@@ -2009,6 +2009,7 @@ QVariantMap Document::transform(const QString& transformName) const
 
         map.insert(u"elementType"_s, static_cast<int>(elementType));
         map.insert(u"name"_s, transformName);
+        map.insert(u"displayName"_s, transformFactory->displayName());
         map.insert(u"description"_s, transformFactory->description());
         map.insert(u"image"_s, transformFactory->image());
         map.insert(u"requiresCondition"_s, transformFactory->requiresCondition());
@@ -2294,7 +2295,7 @@ QVariantMap Document::parseGraphTransform(const QString& transform) const
 {
     GraphTransformConfigParser p;
     if(p.parse(transform))
-        return p.result().asVariantMap();
+        return p.result().asVariantMap(_application->transformFactory(p.result()._action));
 
     return {};
 }
@@ -2328,7 +2329,7 @@ bool Document::graphTransformsAreValid(const QStringList& transforms) const
 
 QString Document::displayTextForGraphTransform(const QString& transform) const
 {
-    return GraphTransformConfigParser::parseForDisplay(transform);
+    return GraphTransformConfigParser::parseForDisplay(transform, _application->transformFactories());
 }
 
 void Document::setGraphTransform(int index, const QString& transform)

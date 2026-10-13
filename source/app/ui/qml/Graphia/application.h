@@ -20,6 +20,7 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
+#include "app/transform/graphtransform.h"
 #include "app/updates/updater.h"
 
 #include "shared/iapplication.h"
@@ -49,7 +50,6 @@
 #include <utility>
 
 class GraphModel;
-class GraphTransformFactory;
 class IParser;
 class ISaverFactory;
 class IPlugin;
@@ -199,7 +199,6 @@ public:
     ISaverFactory* saverFactoryByName(const QString& name);
     Q_INVOKABLE QVariantList saverFileTypes();
 
-    using GraphTransformFactories = std::map<QString, std::unique_ptr<GraphTransformFactory>>;
     const GraphTransformFactories& transformFactories() const { return _graphTransformFactories; }
     const GraphTransformFactory* transformFactory(const QString& transformName) const;
 

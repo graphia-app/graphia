@@ -745,7 +745,7 @@ void Application::submitTrackingData() const
 
 QString Application::displayTextForTransform(const QString& transform) const
 {
-    return GraphTransformConfigParser::parseForDisplay(transform);
+    return GraphTransformConfigParser::parseForDisplay(transform, _graphTransformFactories);
 }
 
 QString Application::displayTextForVisualisation(const QString& visualisation) const

@@ -19,6 +19,7 @@
 
 #include "graphtransformconfig.h"
 
+#include "graphtransform.h"
 #include "graphtransformconfigparser.h"
 
 #include "app/attributes/attribute.h"
@@ -355,7 +356,7 @@ QString GraphTransformConfig::conditionAsString(bool forDisplay) const
     return std::visit(ConditionVisitor(forDisplay), _condition);
 }
 
-QVariantMap GraphTransformConfig::asVariantMap() const
+QVariantMap GraphTransformConfig::asVariantMap(const GraphTransformFactory* factory) const
 {
     QVariantMap map;
 
@@ -366,6 +367,7 @@ QVariantMap GraphTransformConfig::asVariantMap() const
     map.insert(u"flags"_s, flags);
 
     map.insert(u"action"_s, _action);
+    map.insert(u"displayName"_s, factory != nullptr ? factory->displayName() : _action);
 
     QStringList attributes;
     attributes.reserve(static_cast<int>(_attributes.size()));
@@ -389,7 +391,7 @@ QVariantMap GraphTransformConfig::asVariantMap() const
     return map;
 }
 
-QString GraphTransformConfig::asString(bool forDisplay) const
+QString GraphTransformConfig::asString(bool forDisplay, const GraphTransformFactory* factory) const
 {
     QString s;
 
@@ -415,7 +417,7 @@ QString GraphTransformConfig::asString(bool forDisplay) const
     const auto attributeTemplate = forDisplay ? QObject::tr(" %1") : u" $\"%1\""_s;
     const auto parameterTemplate = forDisplay ?  QObject::tr(" %1 = %2") : u" \"%1\" = %2"_s;
 
-    s += actionTemplate.arg(_action);
+    s += actionTemplate.arg(forDisplay && factory != nullptr ? factory->displayName() : _action);
 
     if(!_attributes.empty())
     {

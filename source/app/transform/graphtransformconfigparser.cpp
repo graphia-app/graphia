@@ -21,6 +21,7 @@
 
 #include "app/configgrammar.h"
 
+#include "shared/utils/container.h"
 #include "shared/utils/recursivevalue.h"
 
 #include <lexy_utils.h>
@@ -377,12 +378,18 @@ bool GraphTransformConfigParser::isAttributeName(const QString& variable)
     return !variable.isEmpty() && variable[0] == '$';
 }
 
-QString GraphTransformConfigParser::parseForDisplay(const QString& text)
+QString GraphTransformConfigParser::parseForDisplay(const QString& text, const GraphTransformFactories& factories)
 {
     GraphTransformConfigParser parser;
 
     if(parser.parse(text))
-        return parser.result().asString(true);
+    {
+        const auto& result = parser.result();
+        const auto* factory = u::contains(factories, result._action) ?
+            factories.at(result._action).get() : nullptr;
+
+        return result.asString(true, factory);
+    }
 
     return {};
 }

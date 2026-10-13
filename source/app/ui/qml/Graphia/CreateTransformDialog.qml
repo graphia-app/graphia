@@ -128,7 +128,7 @@ Window
 
                     itemTextDelegateFunction: function(model)
                     {
-                        let value = model.display;
+                        let value = model.displayName;
 
                         if(model.isFavourite)
                             value = "<font color=\"#F1C40F\">★</font> " + value;
@@ -156,7 +156,10 @@ Window
                         let rightCategory = model.data(right, modelRole("category"));
 
                         if(transformsList.sortRoleName !== "category" || leftCategory === rightCategory)
-                            return model.data(left) < model.data(right);
+                        {
+                            return model.data(left, modelRole("displayName")) <
+                                model.data(right, modelRole("displayName"));
+                        }
 
                         return leftCategory < rightCategory;
                     }
@@ -249,7 +252,7 @@ Window
                         onLinkActivated: function(link) { Qt.openUrlExternally(link); }
 
                         text: _transform !== undefined ?
-                            "<h3>" + _transform.name + "</h3>" + _transform.description : ""
+                            "<h3>" + _transform.displayName + "</h3>" + _transform.description : ""
                     }
 
                     Image

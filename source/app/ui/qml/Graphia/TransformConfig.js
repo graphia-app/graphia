@@ -162,7 +162,7 @@ function Create(transformIndex, document, transformString)
     }
 
     // Action
-    appendToElements(this._elements, transform.action);
+    appendToElements(this._elements, transform.displayName);
 
     // Attribute Parameters
     if(transform.attributes.length > 0)

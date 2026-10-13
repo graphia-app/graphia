@@ -35,6 +35,7 @@
 
 #include <QString>
 
+#include <map>
 #include <vector>
 #include <memory>
 #include <utility>
@@ -126,6 +127,7 @@ public:
         const GraphTransformConfig& graphTransformConfig) const = 0;
 };
 
+using GraphTransformFactories = std::map<QString, std::unique_ptr<GraphTransformFactory>>;
 using IdentityTransform = GraphTransform;
 
 #endif // GRAPHTRANSFORM_H

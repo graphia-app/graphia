@@ -83,6 +83,9 @@ QVariant AvailableTransformsModel::data(const QModelIndex& index, int role) cons
 
         switch(role)
         {
+        case Roles::TransformDisplayNameRole:
+            return transform->displayName();
+
         case Roles::TransformCategoryRole:
         {
             if(u::contains(_favouriteTransforms, transformName))
@@ -120,6 +123,7 @@ QHash<int, QByteArray> AvailableTransformsModel::roleNames() const
 {
     auto names = QAbstractItemModel::roleNames();
 
+    names[Roles::TransformDisplayNameRole] = "displayName";
     names[Roles::TransformCategoryRole] = "category";
     names[Roles::TransformFavouriteRole] = "isFavourite";
 

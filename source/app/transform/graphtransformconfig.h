@@ -33,6 +33,8 @@
 #include <vector>
 #include <variant>
 
+class GraphTransformFactory;
+
 struct GraphTransformConfig
 {
     using TerminalValue = std::variant<double, int, QString>;
@@ -102,8 +104,8 @@ struct GraphTransformConfig
     QVariantMap conditionAsVariantMap() const;
     QString conditionAsString(bool forDisplay = false) const;
 
-    QVariantMap asVariantMap() const;
-    QString asString(bool forDisplay = false) const;
+    QVariantMap asVariantMap(const GraphTransformFactory* factory) const;
+    QString asString(bool forDisplay = false, const GraphTransformFactory* factory = nullptr) const;
 
     std::vector<QString> referencedAttributeNames() const;
 

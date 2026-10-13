@@ -20,6 +20,7 @@
 #ifndef GRAPHTRANSFORMCONFIGPARSER_H
 #define GRAPHTRANSFORMCONFIGPARSER_H
 
+#include "graphtransform.h"
 #include "graphtransformconfig.h"
 #include "shared/attributes/valuetype.h"
 
@@ -53,7 +54,7 @@ public:
 
     static bool isAttributeName(const QString& variable);
 
-    static QString parseForDisplay(const QString& text);
+    static QString parseForDisplay(const QString& text, const GraphTransformFactories& factories);
 };
 
 #endif // GRAPHTRANSFORMCONFIGPARSER_H
