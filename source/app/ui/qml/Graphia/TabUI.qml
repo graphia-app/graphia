@@ -444,7 +444,7 @@ Item
             if(_lastSharedValueAttributeName.length > 0)
             {
                 return Utils.format(qsTr("Repeat Last Selection ({0} Value)"),
-                    _lastSharedValueAttributeName);
+                    _document.attributeDisplayName(_lastSharedValueAttributeName));
             }
             break;
         }
@@ -698,8 +698,8 @@ Item
                             PlatformMenuItem
                             {
                                 required property string modelData
-                                text: modelData
-                                onTriggered: { root.selectBySharedAttributeValue(text, contextMenu.clickedNodeId); }
+                                text: root.document.attributeDisplayName(modelData)
+                                onTriggered: { root.selectBySharedAttributeValue(modelData, contextMenu.clickedNodeId); }
                             }
                             onObjectAdded: function(index, object) { sharedValuesOfNodeContextMenu.insertItem(index, object); }
                             onObjectRemoved: function(index, object) { sharedValuesOfNodeContextMenu.removeItem(object); }
@@ -725,8 +725,8 @@ Item
                             PlatformMenuItem
                             {
                                 required property string modelData
-                                text: modelData
-                                onTriggered: { root.selectBySharedAttributeValue(text); }
+                                text: root.document.attributeDisplayName(modelData)
+                                onTriggered: { root.selectBySharedAttributeValue(modelData); }
                             }
                             onObjectAdded: function(index, object) { sharedValuesSelectionContextMenu.insertItem(index, object); }
                             onObjectRemoved: function(index, object) { sharedValuesSelectionContextMenu.removeItem(object); }

@@ -720,6 +720,8 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
                 {
                     auto* tableModel = new EnrichmentTableModel(this);
                     tableModel->setTableData(data._table, data._selectionA, data._selectionB);
+                    tableModel->setSelectionDisplayNames(attributeDisplayName(data._selectionA),
+                        attributeDisplayName(data._selectionB));
                     _enrichmentTableModels.append(QVariant::fromValue(tableModel));
                 }
 
@@ -3053,6 +3055,8 @@ void Document::performEnrichment(const QString& selectedAttributeA, const QStrin
             selectedAttributeA, selectedAttributeB, graphModel(), command);
 
         tableModel->setTableData(result, selectedAttributeA, selectedAttributeB);
+        tableModel->setSelectionDisplayNames(attributeDisplayName(selectedAttributeA),
+            attributeDisplayName(selectedAttributeB));
 
         executeOnMainThreadAndWait([this, tableModel]
         {

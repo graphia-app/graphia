@@ -63,7 +63,7 @@ void TypeCastTransform::apply(TransformedGraph&)
 
     auto& attribute = _graphModel->createAttribute(newAttributeName)
         .setDescription(QObject::tr("A copy of the attribute '%1' with its type converted to '%2'.")
-        .arg(sourceAttributeName, type));
+        .arg(_graphModel->attributeDisplayName(sourceAttributeName), type));
 
     auto cast = [&]<typename E>
     {

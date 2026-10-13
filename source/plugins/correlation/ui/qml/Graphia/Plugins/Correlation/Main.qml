@@ -626,7 +626,8 @@ PluginContent
                 scaleByAttributeMenu.enabled = Qt.binding(() => plot.complexScalingEnabled);
                 root.pluginModel.numericalAttributeNames.forEach(function(attributeName)
                 {
-                    let attributeMenuItem = MenuUtils.addItemTo(scaleByAttributeMenu, attributeName);
+                    let attributeMenuItem = MenuUtils.addItemTo(scaleByAttributeMenu,
+                        root.pluginModel.attributeDisplayName(attributeName));
 
                     attributeMenuItem.checkable = true;
                     root.addCheckedStateFnFor(attributeMenuItem, () =>
@@ -668,7 +669,8 @@ PluginContent
 
                 root.pluginModel.sharedValuesAttributeNames.forEach(function(attributeName)
                 {
-                    let attributeMenuItem = MenuUtils.addItemTo(sharedValuesAttributesMenu, attributeName);
+                    let attributeMenuItem = MenuUtils.addItemTo(sharedValuesAttributesMenu,
+                        root.pluginModel.attributeDisplayName(attributeName));
 
                     attributeMenuItem.checkable = true;
                     root.addCheckedStateFnFor(attributeMenuItem, () =>

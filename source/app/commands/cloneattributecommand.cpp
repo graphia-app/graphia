@@ -50,7 +50,7 @@ QString CloneAttributeCommand::verb() const
 
 QString CloneAttributeCommand::pastParticiple() const
 {
-    return QObject::tr("Attribute %1 Cloned").arg(Attribute::prettify(_sourceAttributeName));
+    return QObject::tr("Attribute %1 Cloned").arg(_graphModel->attributeDisplayName(_sourceAttributeName));
 }
 
 QString CloneAttributeCommand::debugDescription() const

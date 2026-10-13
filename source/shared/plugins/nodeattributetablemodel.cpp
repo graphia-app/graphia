@@ -298,6 +298,21 @@ bool NodeAttributeTableModel::columnIsNumerical(const QString& columnName) const
     return false;
 }
 
+QString NodeAttributeTableModel::displayNameFor(const QString& columnName) const
+{
+    const auto* graphModel = _document->graphModel();
+
+    if(columnName.isEmpty() || !graphModel->attributeExists(columnName))
+        return columnName;
+
+    const auto* attribute = graphModel->attributeByName(columnName);
+
+    if(attribute != nullptr && !attribute->displayName().isEmpty())
+        return attribute->displayName();
+
+    return columnName;
+}
+
 QString NodeAttributeTableModel::descriptionFor(const QString& columnName) const
 {
     const auto* graphModel = _document->graphModel();

@@ -47,7 +47,7 @@ QString EditAttributeCommand::verb() const
 
 QString EditAttributeCommand::pastParticiple() const
 {
-    return QObject::tr("Attribute %1 Edited").arg(Attribute::prettify(_attributeName));
+    return QObject::tr("Attribute %1 Edited").arg(_graphModel->attributeDisplayName(_attributeName));
 }
 
 QString EditAttributeCommand::debugDescription() const

@@ -277,7 +277,8 @@ Item
         {
             misc.fileSaveInitialFolder = exportTableFileDialog.currentFolder.toString();
             root.pluginContent.writeTableModelToFile(tableView.model, exportTableFileDialog.selectedFile,
-                exportTableFileDialog.selectedNameFilter.extensions[0], tableView.visibleColumnNames());
+                exportTableFileDialog.selectedNameFilter.extensions[0],
+                tableView.visibleColumnNames().map(columnName => root.model.displayNameFor(columnName)));
         }
     }
 
@@ -679,7 +680,7 @@ Item
                             elide: Text.ElideRight
                             maximumLineCount: 1
                             width: parent.width - (headerView.sortIndicatorMargin + headerView.sortIndicatorWidth)
-                            text: headerItem.text
+                            text: root.model.displayNameFor(headerItem.text)
                             color: headerMouseArea.containsMouse ? palette.highlightedText : palette.buttonText
                             padding: headerView.delegatePadding
                         }
@@ -1063,7 +1064,7 @@ Item
 
                     if(sourceColumn > -1)
                     {
-                        let headerName = root.model.columnNameFor(sourceColumn);
+                        let headerName = root.model.displayNameFor(root.model.columnNameFor(sourceColumn));
                         let width = fontMetrics.advanceWidth(headerName);
                         width += sortIndicatorSpacing;
                         return width;

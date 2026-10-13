@@ -285,7 +285,7 @@ static void addPlotPerAttributeValue(const CorrelationPluginInstance* pluginInst
         const auto& rows = map.value(value);
         auto color = pluginInstance->nodeColorForRows({rows.begin(), rows.end()});
 
-        addPlotFn(color, nameTemplate.arg(attributeName, value), rows);
+        addPlotFn(color, nameTemplate.arg(pluginInstance->attributeDisplayName(attributeName), value), rows);
     }
 }
 

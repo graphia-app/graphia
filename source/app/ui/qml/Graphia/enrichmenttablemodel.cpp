@@ -92,8 +92,8 @@ QVariant EnrichmentTableModel::data(const QModelIndex& index, int role) const
     {
         switch(static_cast<Results>(column))
         {
-        case Results::SelectionA:           return _selectionA.isEmpty() ? tr("Selection A") : _selectionA;
-        case Results::SelectionB:           return _selectionB.isEmpty() ? tr("Selection B") : _selectionB;
+        case Results::SelectionA:           return _selectionADisplayName.isEmpty() ? tr("Selection A") : _selectionADisplayName;
+        case Results::SelectionB:           return _selectionBDisplayName.isEmpty() ? tr("Selection B") : _selectionBDisplayName;
         case Results::Observed:             return tr("Observed");
         case Results::ExpectedTrial:        return tr("Expected");
         case Results::OverRep:              return tr("Representation");
@@ -162,6 +162,12 @@ void EnrichmentTableModel::setTableData(EnrichmentTableModel::Table data, QStrin
     _selectionB = std::move(selectionB);
     updateSortFilterMap();
     endResetModel();
+}
+
+void EnrichmentTableModel::setSelectionDisplayNames(const QString& selectionA, const QString& selectionB)
+{
+    _selectionADisplayName = selectionA;
+    _selectionBDisplayName = selectionB;
 }
 
 void EnrichmentTableModel::updateSortFilterMap()

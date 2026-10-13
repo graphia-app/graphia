@@ -299,8 +299,8 @@ ApplicationWindow
 
                     model: root._currentModel
                     elideLabelWidth: 100
-                    xAxisLabel: model ? model.selectionA : ""
-                    yAxisLabel: model ? model.selectionB : ""
+                    xAxisLabel: model ? root.document.attributeDisplayName(model.selectionA) : ""
+                    yAxisLabel: model ? root.document.attributeDisplayName(model.selectionB) : ""
 
                     onPlotValueClicked: function(row)
                     {
@@ -410,8 +410,8 @@ ApplicationWindow
 
         let baseName = root.document.title.replace(/\.[^\.]+$/, "");
         let attributes = Utils.format(qsTr("{0}-vs-{1}"),
-            sanitiseAttributeName(root._currentModel.selectionA),
-            sanitiseAttributeName(root._currentModel.selectionB));
+            sanitiseAttributeName(root.document.attributeDisplayName(root._currentModel.selectionA)),
+            sanitiseAttributeName(root.document.attributeDisplayName(root._currentModel.selectionB)));
         let path = Utils.format(qsTr("{0}/{1}-enrichment-{2}"),
             NativeUtils.fileNameForUrl(folderUrl), baseName, attributes);
 

@@ -80,10 +80,14 @@ public:
 
     void setTableData(Table data, QString selectionA, QString selectionB);
 
+    void setSelectionDisplayNames(const QString& selectionA, const QString& selectionB);
+
 private:
     Table _data;
     QString _selectionA;
     QString _selectionB;
+    QString _selectionADisplayName;
+    QString _selectionBDisplayName;
 
     std::vector<size_t> _sortFilterMap;
     bool _enrichedOnly = true;

@@ -108,6 +108,7 @@ public:
     Q_INVOKABLE virtual bool columnIsFloatingPoint(const QString& columnName) const;
     Q_INVOKABLE virtual bool columnIsNumerical(const QString& columnName) const;
     Q_INVOKABLE QString descriptionFor(const QString& columnName) const;
+    Q_INVOKABLE QString displayNameFor(const QString& columnName) const;
     Q_INVOKABLE QString columnNameFor(size_t column) const;
     Q_INVOKABLE std::vector<int> sourcesOf(const std::vector<int>& rows) const;
     Q_INVOKABLE std::vector<int> targetsOf(const std::vector<int>& rows) const;

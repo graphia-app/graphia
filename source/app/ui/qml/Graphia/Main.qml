@@ -2167,8 +2167,8 @@ ApplicationWindow
                     model: currentTab !== null ? currentTab.sharedValuesAttributeNames : []
                     PlatformMenuItem
                     {
-                        text: modelData
-                        onTriggered: { currentTab.selectBySharedAttributeValue(text); }
+                        text: currentTab.document.attributeDisplayName(modelData)
+                        onTriggered: { currentTab.selectBySharedAttributeValue(modelData); }
                     }
                     onObjectAdded: function(index, object) { sharedValuesMenu.insertItem(index, object); }
                     onObjectRemoved: function(index, object) { sharedValuesMenu.removeItem(object); }
