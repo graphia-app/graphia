@@ -18,6 +18,7 @@ qt_add_qml_module(utils_qml
     SOURCES
         modelcompleter.h modelcompleter.cpp
         nativeutils.h nativeutils.cpp
+        nodeattributetabledisplaymodel.h nodeattributetabledisplaymodel.cpp
         preferences.h preferences.cpp
         sortfilterproxymodel.h sortfilterproxymodel.cpp
         tableproxymodel.h tableproxymodel.cpp
