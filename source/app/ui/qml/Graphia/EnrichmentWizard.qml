@@ -84,8 +84,8 @@ Wizard
 
             sortExpression: function(left, right)
             {
-                let leftAttributeName = model.data(left);
-                let rightAttributeName = model.data(right);
+                let leftAttributeName = model.data(left, role("name"));
+                let rightAttributeName = model.data(right, role("name"));
                 let leftCount = root.document.attribute(leftAttributeName).sharedValues.length;
                 let rightCount = root.document.attribute(rightAttributeName).sharedValues.length;
                 return leftCount < rightCount;
@@ -95,7 +95,7 @@ Wizard
             {
                 for(let i = 0; i < rowCount(); i++)
                 {
-                    if(data(index(i, 0)) === attributeName)
+                    if(data(index(i, 0), role("name")) === attributeName)
                         return i;
                 }
             }
@@ -225,14 +225,14 @@ Wizard
 
                                 rightPadding: scrollViewA.scrollBarWidth
 
-                                attributeName: model.display
+                                attributeName: model.name
 
                                 text:
                                 {
                                     if(root.document && model.display && model.display.length > 0)
                                     {
                                         return Utils.format(qsTr("{0} ({1} entries)"), model.display,
-                                            root.document.attribute(model.display).sharedValues.length);
+                                            root.document.attribute(model.name).sharedValues.length);
                                     }
 
                                     return "";
@@ -309,14 +309,14 @@ Wizard
 
                                 rightPadding: scrollViewB.scrollBarWidth
 
-                                attributeName: model.display
+                                attributeName: model.name
 
                                 text:
                                 {
                                     if(root.document && model.display && model.display.length > 0)
                                     {
                                         return Utils.format(qsTr("{0} ({1} entries)"), model.display,
-                                            root.document.attribute(model.display).sharedValues.length);
+                                            root.document.attribute(model.name).sharedValues.length);
                                     }
 
                                     return "";

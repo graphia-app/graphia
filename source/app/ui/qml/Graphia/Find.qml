@@ -128,10 +128,10 @@ Rectangle
     property var _findAttributes:
     {
         if(_type === Find.ByAttribute)
-            return [selectAttributeComboBox.currentText];
+            return [selectAttributeComboBox.currentValue];
 
         if(_type === Find.Advanced && attributeCheckBox.checked)
-            return [attributeComboBox.currentText];
+            return [attributeComboBox.currentValue];
 
         return [];
     }
@@ -167,7 +167,7 @@ Rectangle
             else if(_type === Find.ByAttribute && selectOnlyAction.checked)
             {
                 document.resetFind();
-                document.selectByAttributeValue(selectAttributeComboBox.currentText, _findText);
+                document.selectByAttributeValue(selectAttributeComboBox.currentValue, _findText);
             }
             else if(_findText.length > 0)
                 document.find(_findText, _options, _findAttributes, _findSelectStyle);
@@ -355,7 +355,7 @@ Rectangle
         {
             for(let i = 0; i < rowCount(); i++)
             {
-                if(data(index(i, 0)) === attributeName)
+                if(data(index(i, 0), role("name")) === attributeName)
                     return i;
             }
         }
@@ -466,17 +466,18 @@ Rectangle
                     enabled: selectAttributeComboBox.count > 0
 
                     textRole: "display"
+                    valueRole: "name"
 
                     model: proxyModel
 
-                    onCurrentTextChanged:
+                    onCurrentValueChanged:
                     {
-                        // Prevent spurious changes to currentText
+                        // Prevent spurious changes to currentValue
                         if(proxyModel._sourceChanging)
                             return;
 
                         if(root._visible && findByAttributeRow.visible)
-                            root.lastFindByAttributeName = currentText;
+                            root.lastFindByAttributeName = currentValue;
 
                         valueComboBox.refresh();
                         root._attributeValues = [];
@@ -494,7 +495,7 @@ Rectangle
                         else if(count > 0)
                         {
                             currentIndex = 0;
-                            root.lastFindByAttributeName = currentText;
+                            root.lastFindByAttributeName = currentValue;
                         }
                         else
                             currentIndex = -1;
@@ -528,7 +529,7 @@ Rectangle
                         // Try to keep the same value selected
                         let preUpdateText = currentText;
 
-                        let attribute = root.document.attribute(selectAttributeComboBox.currentText);
+                        let attribute = root.document.attribute(selectAttributeComboBox.currentValue);
 
                         if(preferences.findByAttributeSortLexically)
                             attribute.sharedValues.sort(NativeUtils.compareStrings);
@@ -645,23 +646,24 @@ Rectangle
 
                 enabled: attributeCheckBox.checked && attributeComboBox.count > 0
                 textRole: "display"
+                valueRole: "name"
 
                 model: proxyModel
 
                 onEnabledChanged:
                 {
                     if(root._visible && advancedRow.visible)
-                        root.lastAdvancedFindAttributeName = enabled ? currentText: "";
+                        root.lastAdvancedFindAttributeName = enabled ? currentValue : "";
                 }
 
-                onCurrentTextChanged:
+                onCurrentValueChanged:
                 {
-                    // Prevent spurious changes to currentText
+                    // Prevent spurious changes to currentValue
                     if(proxyModel._sourceChanging)
                         return;
 
                     if(root._visible && advancedRow.visible && enabled)
-                        root.lastAdvancedFindAttributeName = currentText;
+                        root.lastAdvancedFindAttributeName = currentValue;
                 }
 
                 function refresh()

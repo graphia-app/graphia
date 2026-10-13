@@ -145,7 +145,7 @@ Item
         let attributeNames = [];
 
         for(let i = 0; i < sharedValuesProxyModel.count; i++)
-            attributeNames.push(sharedValuesProxyModel.get(i));
+            attributeNames.push(sharedValuesProxyModel.get(i, "name"));
 
         return attributeNames;
     }

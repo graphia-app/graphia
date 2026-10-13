@@ -85,7 +85,8 @@ private:
 
     enum Roles // NOLINT performance-enum-size
     {
-        ElementTypeRole = Qt::UserRole + 1,
+        NameRole = Qt::UserRole + 1,
+        ElementTypeRole,
         ValueTypeRole,
         HasSharedValuesRole,
         SearchableRole,
