@@ -170,7 +170,12 @@ QVariant AvailableAttributesModel::data(const QModelIndex& index, int role) cons
     const auto& itemValue = item->value();
 
     if(role == Qt::DisplayRole)
-        return itemValue;
+    {
+        if(item->attributeName().isEmpty() || item->parent()->attributeName() == item->attributeName())
+            return itemValue;
+
+        return _graphModel->attributeDisplayName(item->attributeName());
+    }
 
     // Specifically when querying element type, report any descendent of the
     // source or target node items as edge types; bit of a hack
