@@ -94,14 +94,21 @@ public:
 
     bool execute() override
     {
+        bool selectionCleared = false;
+
         if(_clearType.test(SelectNodesClear::Selection))
         {
-            _selectionManager->suppressSignals();
-            _selectionManager->clearNodeSelection();
+            if(!_nodeIds.empty())
+                _selectionManager->suppressSignals();
+
+            selectionCleared = _selectionManager->clearNodeSelection();
         }
 
         if(_clearType.test(SelectNodesClear::Mask))
             _selectionManager->clearNodesMask();
+
+        if(_nodeIds.empty())
+            return selectionCleared;
 
         if(_nodeIds.size() > 1)
         {
