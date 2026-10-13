@@ -376,7 +376,7 @@ Item
     {
         id: cropToSelectionAction
         text: qsTr("Crop To Selection")
-        enabled: root.rowCount > 0
+        enabled: root.selectedRows.length > 0
 
         onTriggered: { root.cropToSelection(); }
     }
