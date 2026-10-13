@@ -999,7 +999,10 @@ std::vector<int> CorrelationPluginInstance::rowsOfInterestByColumns(const std::v
 
     std::ranges::sort(rowScores, [](const auto& a, const auto& b)
     {
-        return a._value > b._value;
+        if(a._value != b._value)
+            return a._value > b._value;
+
+        return a._row < b._row;
     });
 
     auto rowsPercentile = std::max(static_cast<size_t>(1),
