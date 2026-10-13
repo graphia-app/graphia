@@ -189,6 +189,7 @@ void NodeAttributeTableModel::publish()
 void NodeAttributeTableModel::onUpdateComplete(Table data, QStringList columnNames, ColumnPtr nodeSelectedColumn)
 {
     auto namesChanged = columnNames != _columnNames;
+    auto nodeSelectionChanged = nodeSelectedColumn != _nodeSelectedColumn;
 
     if(namesChanged)
     {
@@ -232,11 +233,8 @@ void NodeAttributeTableModel::onUpdateComplete(Table data, QStringList columnNam
     if(namesChanged)
         emit columnNamesChanged();
 
-    //FIXME indicating a node selection change so that NATV refreshes its
-    // idea of row selection, otherwise it can get out of sync with itself
-    // Ideally this wouldn't be required, but as we all know NATM/NATV is
-    // a total catastrophe and needs a rewrite
-    emit selectionChanged();
+    if(nodeSelectionChanged)
+        emit selectionChanged();
 }
 
 void NodeAttributeTableModel::onGraphChanged(const Graph*, bool changeOccurred)
@@ -505,7 +503,16 @@ QVariant NodeAttributeTableModel::data(const QModelIndex& index, int role) const
 
 void NodeAttributeTableModel::onSelectionChanged()
 {
-    auto nodeSelectedColumn = makeColumn(Roles::NodeSelectedRole);
+    ColumnPtr previousNodeSelectedColumn;
+
+    {
+        const std::unique_lock<std::recursive_mutex> lock(_updateMutex);
+        previousNodeSelectedColumn = _pendingNodeSelectedColumn;
+    }
+
+    // Reselecting the same nodes still counts, so this is always passed on; keeping
+    // the same column lets onUpdateComplete see that the selection hasn't changed
+    auto nodeSelectedColumn = makeColumn(Roles::NodeSelectedRole, {}, previousNodeSelectedColumn);
 
     {
         // publish takes the selection from here, so it must be the latest
