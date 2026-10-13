@@ -2160,6 +2160,14 @@ QVariantMap Document::transformAttributeParameter(const QString& transformName, 
     return map;
 }
 
+QString Document::attributeDisplayName(const QString& attributeName) const
+{
+    if(_graphModel == nullptr)
+        return Attribute::prettify(attributeName);
+
+    return _graphModel->attributeDisplayName(attributeName);
+}
+
 QVariantMap Document::attribute(const QString& attributeName) const
 {
     QVariantMap map;

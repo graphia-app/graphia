@@ -1062,6 +1062,34 @@ bool GraphModel::attributeExists(const QString& name) const
     return u::contains(_->_attributes, attributeName._name);
 }
 
+QString GraphModel::attributeDisplayName(const QString& name) const
+{
+    if(name.isEmpty())
+        return {};
+
+    auto displayNameOf = [this](const QString& attributeName)
+    {
+        const auto* attribute = u::contains(_->_attributes, attributeName) ?
+            &_->_attributes.at(attributeName) : nullptr;
+
+        if(attribute != nullptr)
+        {
+            if(!attribute->displayName().isEmpty())
+                return attribute->displayName();
+
+            return attributeName;
+        }
+
+        // It doesn't exist, so there's no name to show for it
+        return QObject::tr("Unknown Attribute");
+    };
+
+    if(u::contains(_->_attributes, name))
+        return displayNameOf(name);
+
+    return Attribute::fullyQualifiedDisplayName(name, displayNameOf);
+}
+
 bool GraphModel::attributeIsValid(const QString& name) const
 {
     if(!attributeExists(name))

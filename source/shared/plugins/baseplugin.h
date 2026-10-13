@@ -127,6 +127,8 @@ public:
     const ISelectionManager* selectionManager() const { return _selectionManager; }
     ICommandManager* commandManager() { return _commandManager; }
 
+    Q_INVOKABLE QString attributeDisplayName(const QString& name) const { return _graphModel->attributeDisplayName(name); }
+
 private slots:
     void onNodeAdded(const Graph*, NodeId nodeId)       { emit nodeAdded(nodeId); }
     void onNodeRemoved(const Graph*, NodeId nodeId)     { emit nodeRemoved(nodeId); }

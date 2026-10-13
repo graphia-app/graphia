@@ -528,3 +528,22 @@ QString Attribute::prettify(QString name)
 
     return name;
 }
+
+QString Attribute::fullyQualifiedDisplayName(const QString& name,
+    const std::function<QString(const QString&)>& displayNameOf)
+{
+    auto attributeName = parseAttributeName(name);
+    auto displayName = displayNameOf(attributeName._name);
+
+    if(!attributeName._parameter.isEmpty())
+        displayName = QObject::tr("%1 › %2").arg(displayName, attributeName._parameter);
+
+    switch(attributeName._type)
+    {
+    case EdgeNodeType::Source: return QObject::tr("Source › %1").arg(displayName);
+    case EdgeNodeType::Target: return QObject::tr("Target › %1").arg(displayName);
+    default: break;
+    }
+
+    return displayName;
+}

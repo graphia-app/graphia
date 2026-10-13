@@ -141,6 +141,9 @@ public:
     virtual QString description() const = 0;
     virtual IAttribute& setDescription(const QString& description) = 0;
 
+    virtual QString displayName() const = 0;
+    virtual IAttribute& setDisplayName(const QString& displayName) = 0;
+
     virtual bool isValid() const = 0;
 
     virtual QString parameterValue() const = 0;

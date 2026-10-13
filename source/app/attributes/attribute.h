@@ -163,6 +163,7 @@ private:
         QStringList validParameterValues;
 
         QString description;
+        QString displayName;
     } _;
 
     AttributeRange<int> _intRange;
@@ -561,6 +562,9 @@ public:
     QString description() const override { return _.description; }
     Attribute& setDescription(const QString& description) override { _.description = description; return *this; }
 
+    QString displayName() const override { return _.displayName; }
+    Attribute& setDisplayName(const QString& displayName) override { _.displayName = displayName; return *this; }
+
     bool isValid() const override;
 
     QString parameterValue() const override;
@@ -584,6 +588,11 @@ public:
         const Attribute& nodeAttribute, EdgeNodeType edgeNodeType);
 
     static QString prettify(QString name);
+
+    // Takes a fully qualified internal attribute name and converts it to a
+    // display name, where displayNameOf operates on the attribute name itself
+    static QString fullyQualifiedDisplayName(const QString& name,
+        const std::function<QString(const QString&)>& displayNameOf);
 };
 
 #endif // ATTRIBUTE_H
