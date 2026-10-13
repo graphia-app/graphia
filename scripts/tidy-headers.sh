@@ -76,17 +76,19 @@ else
     exit 1
 fi
 
-SOURCE_DIR="${SOURCE_FILES[0]%/*}"
+if [ "$#" -eq 0 ]; then
+    SOURCE_DIR="${SOURCE_FILES[0]%/*}"
 
-for FILE in "${SOURCE_FILES[@]}"; do
-    while [[ "$FILE" != "${SOURCE_DIR}"/* ]]; do
-        SOURCE_DIR="${SOURCE_DIR%/*}"
+    for FILE in "${SOURCE_FILES[@]}"; do
+        while [[ "$FILE" != "${SOURCE_DIR}"/* ]]; do
+            SOURCE_DIR="${SOURCE_DIR%/*}"
+        done
     done
-done
 
-# Find all the headers too
-mapfile -t -O "${#SOURCE_FILES[@]}" SOURCE_FILES < <( \
-    find $SOURCE_DIR -type f -iname "*.h" ! -path "${SOURCE_DIR}/thirdparty/*")
+    # Find all the headers too
+    mapfile -t -O "${#SOURCE_FILES[@]}" SOURCE_FILES < <( \
+        find $SOURCE_DIR -type f -iname "*.h" ! -path "${SOURCE_DIR}/thirdparty/*")
+fi
 
 for FILE in "${SOURCE_FILES[@]}"; do
     echo ${FILE}
