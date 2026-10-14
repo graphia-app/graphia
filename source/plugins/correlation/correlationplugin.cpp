@@ -584,11 +584,13 @@ void CorrelationPluginInstance::setNodeAttributeTableModelDataColumns()
     {
     default:
     case CorrelationDataType::Continuous:
-        _nodeAttributeTableModel.addContinuousDataColumns(_dataColumnNames, &_continuousData);
+        _nodeAttributeTableModel.addContinuousDataColumns(u"DataValue"_s,
+            _dataColumnNames, &_continuousData);
         break;
 
     case CorrelationDataType::Discrete:
-        _nodeAttributeTableModel.addDiscreteDataColumns(_dataColumnNames, &_discreteData);
+        _nodeAttributeTableModel.addDiscreteDataColumns(u"DataValue"_s,
+            _dataColumnNames, &_discreteData);
         break;
     }
 }

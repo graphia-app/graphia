@@ -38,16 +38,18 @@ QStringList CorrelationNodeAttributeTableModel::columnNames() const
     return list;
 }
 
-void CorrelationNodeAttributeTableModel::addDataColumnNames(const std::vector<QString>& dataColumnNames)
+void CorrelationNodeAttributeTableModel::addDataColumnNames(const QString& attributeName,
+    const std::vector<QString>& dataColumnNames)
 {
     _dataColumnNames = dataColumnNames;
 
     // Since these columns are appearing in the attribute table, we need to assign them
-    // names that don't conflict with attribute names
+    // names that don't conflict with attribute names, so each is named as the parameterised
+    // attribute that gives its values, e.g. "DataValue.Column 1"
     std::ranges::transform(_dataColumnNames, _dataColumnNames.begin(),
-    [](const auto& columnName)
+    [&attributeName](const auto& columnName)
     {
-        return u"Data Value › %1"_s.arg(columnName);
+        return u"%1.%2"_s.arg(attributeName, columnName);
     });
 
     for(size_t i = 0; i < _dataColumnNames.size(); i++)
@@ -82,18 +84,18 @@ QVariant CorrelationNodeAttributeTableModel::dataValue(size_t row, const QString
     return NodeAttributeTableModel::dataValue(row, columnName);
 }
 
-void CorrelationNodeAttributeTableModel::addContinuousDataColumns(const std::vector<QString>& dataColumnNames,
-    std::vector<double>* dataValues)
+void CorrelationNodeAttributeTableModel::addContinuousDataColumns(const QString& attributeName,
+    const std::vector<QString>& dataColumnNames, std::vector<double>* dataValues)
 {
-    addDataColumnNames(dataColumnNames);
+    addDataColumnNames(attributeName, dataColumnNames);
     Q_ASSERT(_discreteDataValues == nullptr);
     _continuousDataValues = dataValues;
 }
 
-void CorrelationNodeAttributeTableModel::addDiscreteDataColumns(const std::vector<QString>& dataColumnNames,
-    std::vector<QString>* dataValues)
+void CorrelationNodeAttributeTableModel::addDiscreteDataColumns(const QString& attributeName,
+    const std::vector<QString>& dataColumnNames, std::vector<QString>* dataValues)
 {
-    addDataColumnNames(dataColumnNames);
+    addDataColumnNames(attributeName, dataColumnNames);
     Q_ASSERT(_continuousDataValues == nullptr);
     _discreteDataValues = dataValues;
 }

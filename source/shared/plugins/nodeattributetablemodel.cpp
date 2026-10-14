@@ -300,17 +300,10 @@ bool NodeAttributeTableModel::columnIsNumerical(const QString& columnName) const
 
 QString NodeAttributeTableModel::displayNameFor(const QString& columnName) const
 {
-    const auto* graphModel = _document->graphModel();
-
-    if(columnName.isEmpty() || !graphModel->attributeExists(columnName))
+    if(columnName.isEmpty())
         return columnName;
 
-    const auto* attribute = graphModel->attributeByName(columnName);
-
-    if(attribute != nullptr && !attribute->displayName().isEmpty())
-        return attribute->displayName();
-
-    return columnName;
+    return _document->graphModel()->attributeDisplayName(columnName);
 }
 
 QString NodeAttributeTableModel::descriptionFor(const QString& columnName) const

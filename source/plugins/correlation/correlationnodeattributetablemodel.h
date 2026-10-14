@@ -44,13 +44,13 @@ private:
 
     QStringList columnNames() const override;
 
-    void addDataColumnNames(const std::vector<QString>& dataColumnNames);
+    void addDataColumnNames(const QString& attributeName, const std::vector<QString>& dataColumnNames);
 
 public:
-    void addContinuousDataColumns(const std::vector<QString>& dataColumnNames,
-        std::vector<double>* dataValues);
-    void addDiscreteDataColumns(const std::vector<QString>& dataColumnNames,
-        std::vector<QString>* dataValues);
+    void addContinuousDataColumns(const QString& attributeName,
+        const std::vector<QString>& dataColumnNames, std::vector<double>* dataValues);
+    void addDiscreteDataColumns(const QString& attributeName,
+        const std::vector<QString>& dataColumnNames, std::vector<QString>* dataValues);
 
     QVariant dataValue(size_t row, const QString& columnName) const override;
 
