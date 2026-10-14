@@ -120,6 +120,10 @@ struct GraphTransformConfig
     bool equals(const GraphTransformConfig& other,
         NamedBool<"ignoreInertFlags"> ignoreInertFlags = "ignoreInertFlags"_yes) const;
     bool isFlagSet(const QString& flag) const;
+
+private:
+    QString asDisplayString(const GraphTransformFactory* factory, const AttributeDisplayNameFn& attributeDisplayName,
+        const AttributeDisplayValueFn& attributeDisplayValue) const;
 };
 
 #endif // GRAPHTRANSFORMCONFIG_H

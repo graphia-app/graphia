@@ -21,6 +21,7 @@
 
 #include "graphtransform.h"
 #include "graphtransformconfigparser.h"
+#include "transformdisplaytext.h"
 
 #include "app/attributes/attribute.h"
 
@@ -417,50 +418,76 @@ QVariantMap GraphTransformConfig::asVariantMap(const GraphTransformFactory* fact
 QString GraphTransformConfig::asString(bool forDisplay, const GraphTransformFactory* factory,
     const AttributeDisplayNameFn& attributeDisplayName, const AttributeDisplayValueFn& attributeDisplayValue) const
 {
+    if(forDisplay)
+        return asDisplayString(factory, attributeDisplayName, attributeDisplayValue);
+
     QString s;
 
     if(!_flags.empty())
     {
-        if(!forDisplay)
+        s += u"["_s;
+        for(const auto& flag : _flags)
         {
-            s += u"["_s;
-            for(const auto& flag : _flags)
-            {
-                if(s[s.length() - 1] != '[')
-                    s += u", "_s;
+            if(s[s.length() - 1] != '[')
+                s += u", "_s;
 
-                s += flag;
-            }
-            s += u"] "_s;
+            s += flag;
         }
-        else if(isFlagSet(u"pinned"_s))
-            s += QObject::tr("📌 ");
+        s += u"] "_s;
     }
 
-    const auto actionTemplate = forDisplay ? QObject::tr("%1") : u"\"%1\""_s;
-    const auto attributeTemplate = forDisplay ? QObject::tr(" %1") : u" $\"%1\""_s;
-    const auto parameterTemplate = forDisplay ?  QObject::tr(" %1 = %2") : u" \"%1\" = %2"_s;
-
-    s += actionTemplate.arg(forDisplay && factory != nullptr ? factory->displayName() : _action);
+    s += u"\"%1\""_s.arg(_action);
 
     if(!_attributes.empty())
     {
-        s += forDisplay ? QObject::tr(" using") : u" using"_s;
+        s += u" using"_s;
 
         for(const auto& attribute : _attributes)
-        {
-            s += attributeTemplate.arg(forDisplay && attributeDisplayName ?
-                attributeDisplayName(attribute) : attribute);
-        }
+            s += u" $\"%1\""_s.arg(attribute);
     }
 
     if(!_parameters.empty())
     {
-        s += forDisplay ? QObject::tr(" with") : u" with"_s;
+        s += u" with"_s;
+
+        for(const auto& parameter : _parameters)
+            s += u" \"%1\" = %2"_s.arg(parameter._name, parameter.valueAsString(true));
+    }
+
+    if(hasCondition())
+    {
+        s += u" where "_s;
+        s += conditionAsString();
+    }
+
+    return s;
+}
+
+QString GraphTransformConfig::asDisplayString(const GraphTransformFactory* factory,
+    const AttributeDisplayNameFn& attributeDisplayName, const AttributeDisplayValueFn& attributeDisplayValue) const
+{
+    // Each part wraps those before it, so a translation can put it wherever its language needs
+    auto s = factory != nullptr ? factory->displayName() : _action;
+
+    if(!_attributes.empty())
+    {
+        QStringList attributes;
+        attributes.reserve(static_cast<qsizetype>(_attributes.size()));
+
+        for(const auto& attribute : _attributes)
+            attributes.append(attributeDisplayName ? attributeDisplayName(attribute) : attribute);
+
+        s = TransformDisplayText::usingAttributes().arg(s, attributes.join(u' '));
+    }
+
+    if(!_parameters.empty())
+    {
+        QStringList parameters;
+        parameters.reserve(static_cast<qsizetype>(_parameters.size()));
 
         for(const auto& parameter : _parameters)
         {
-            auto factoryParameter = forDisplay && factory != nullptr ?
+            auto factoryParameter = factory != nullptr ?
                 factory->parameter(parameter._name) :
                 GraphTransformParameter();
 
@@ -468,19 +495,24 @@ QString GraphTransformConfig::asString(bool forDisplay, const GraphTransformFact
                 factoryParameter.displayName() :
                 parameter._name;
 
-            auto value = parameter.valueAsString(!forDisplay);
+            auto value = parameter.valueAsString();
             if(factoryParameter.type() == ValueType::StringList)
                 value = factoryParameter.displayValue(value);
 
-            s += parameterTemplate.arg(name, value);
+            parameters.append(TransformDisplayText::parameter().arg(name, value));
         }
+
+        s = TransformDisplayText::withParameters().arg(s, parameters.join(u' '));
     }
 
     if(hasCondition())
     {
-        s += forDisplay ? QObject::tr(" where ") : u" where "_s;
-        s += conditionAsString(forDisplay, attributeDisplayName, attributeDisplayValue);
+        s = TransformDisplayText::whereCondition().arg(s,
+            conditionAsString(true, attributeDisplayName, attributeDisplayValue));
     }
+
+    if(isFlagSet(u"pinned"_s))
+        s = TransformDisplayText::pinned().arg(s);
 
     return s;
 }

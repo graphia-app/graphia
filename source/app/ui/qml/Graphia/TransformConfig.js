@@ -126,21 +126,15 @@ function Create(transformIndex, document, transformString)
     // % isn't potentially misinterpreted as a template substitution parameter
     this.template = "\"" + transform.action.replace(/%/g, "%!") + "\"";
 
-    this._elements = [];
+    let displayText = document.transformDisplayText();
 
-    function appendConditionToElements(elements, condition, type)
+    function conditionElements(condition, type)
     {
         if(typeof condition.rhs !== "object")
-        {
-            appendToElements(elements, Object.assign({type: type}, condition));
-            return;
-        }
+            return [Object.assign({type: type}, condition)];
 
-        appendToElements(elements, "(");
-        appendConditionToElements(elements, condition.lhs, type);
-        appendToElements(elements, ") " + sanitiseOp(condition.op) + " (");
-        appendConditionToElements(elements, condition.rhs, type);
-        appendToElements(elements, ")");
+        return substituted("(%1) " + sanitiseOp(condition.op) + " (%2)",
+            [conditionElements(condition.lhs, type), conditionElements(condition.rhs, type)]);
     }
 
     function conditionToTemplate(condition)
@@ -178,14 +172,17 @@ function Create(transformIndex, document, transformString)
         return template;
     }
 
+    // Each part wraps those before it, so a translation can put it wherever its language needs
+
     // Action
-    appendToElements(this._elements, transform.displayName);
+    this._elements = [transform.displayName];
 
     // Attribute Parameters
     if(transform.attributes.length > 0)
     {
         this.template += " using";
-        appendToElements(this._elements, qsTr(" using "));
+
+        let attributeElements = [];
 
         for(let i = 0; i < transform.attributes.length; i++)
         {
@@ -193,35 +190,36 @@ function Create(transformIndex, document, transformString)
             let attribute = document.attribute(attributeName);
             this.template += " $%" + parameterIndex++;
 
-            appendToElements(this._elements,
+            attributeElements.push(
                 {
                     attributeName: attributeName,
                     elementType: attribute.elementType,
                     valueType: attribute.valueType
                 });
         }
+
+        this._elements = substituted(displayText.usingAttributes, [this._elements, attributeElements]);
     }
 
     // Parameters
     if(transform.parameters.length > 0)
     {
         this.template += " with";
-        appendToElements(this._elements, qsTr(" with "));
 
-        let firstParam = true;
+        let parameterElements = [];
 
         for(let index in transform.parameters)
         {
             // Put whitespace between the parameters
-            if(!firstParam)
-                appendToElements(this._elements, " ");
-            firstParam = false;
+            if(parameterElements.length > 0)
+                appendToElements(parameterElements, " ");
 
             let parameter = transform.parameters[index];
             this.template += " \"" + parameter.name + "\" = %" + parameterIndex++;
-            appendConditionToElements(this._elements,
-                {lhs: "$" + parameter.name, op: "=", rhs: parameter.value}, "parameter");
+            parameterElements.push({type: "parameter", lhs: "$" + parameter.name, op: "=", rhs: parameter.value});
         }
+
+        this._elements = substituted(displayText.withParameters, [this._elements, parameterElements]);
     }
 
     // Condition
@@ -229,8 +227,8 @@ function Create(transformIndex, document, transformString)
     {
         this.template += " where " + conditionToTemplate(transform.condition);
 
-        appendToElements(this._elements, qsTr(" where "));
-        appendConditionToElements(this._elements, transform.condition, "condition");
+        this._elements = substituted(displayText.whereCondition,
+            [this._elements, conditionElements(transform.condition, "condition")]);
     }
 
     this.toComponents =
