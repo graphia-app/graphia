@@ -496,6 +496,10 @@ public:
 
     Q_INVOKABLE bool opIsUnary(const QString& op) const;
 
+    // The phrases transforms are shown with; see TransformDisplayText
+    Q_INVOKABLE QVariantMap transformDisplayText() const;
+    Q_INVOKABLE QVariantMap opDisplayText(const QString& op) const;
+
     Q_INVOKABLE QStringList availableAttributeNames(int _elementTypes = static_cast<int>(ElementType::All),
         int _valueTypes = static_cast<int>(ValueType::All), int _skipFlags = static_cast<int>(AttributeFlag::None),
         const QStringList& skipAttributeNames = {}) const;

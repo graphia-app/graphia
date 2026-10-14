@@ -22,6 +22,7 @@
 
 #include "graphtransform.h"
 #include "graphtransformconfig.h"
+#include "transformdisplaytext.h"
 #include "shared/attributes/valuetype.h"
 
 #include <QString>
@@ -51,6 +52,9 @@ public:
     static GraphTransformConfig::TerminalOp stringToOp(const QString& s);
 
     static bool opIsUnary(const QString& op);
+
+    // How an op is shown; one that isn't known is shown as it's written
+    static TransformDisplayText::Op opDisplayText(const QString& op);
 
     static bool isAttributeName(const QString& variable);
 

@@ -106,6 +106,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/transform/graphtransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/graphtransformparameter.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transformcache.h
+    ${CMAKE_CURRENT_LIST_DIR}/transform/transformdisplaytext.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transformedgraph.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforminfo.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/attributesynthesistransform.h
@@ -221,6 +222,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/transform/graphtransformconfigparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/graphtransform.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transformcache.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/transform/transformdisplaytext.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transformedgraph.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/attributesynthesistransform.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/averageattributetransform.cpp

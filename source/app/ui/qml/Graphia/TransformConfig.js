@@ -88,6 +88,32 @@ function sanitiseOp(text)
     return text;
 }
 
+function appendToElements(elements, value)
+{
+    let last = elements.length - 1;
+    if(last >= 0 && typeof value === "string" && typeof elements[last] === typeof value)
+        elements[last] += value;
+    else
+        elements.push(value);
+}
+
+function substituted(phrase, args)
+{
+    let elements = [];
+
+    for(const part of phrase.split(/(%\d+)/))
+    {
+        let match = part.match(/^%(\d+)$/);
+
+        if(match !== null)
+            args[match[1] - 1].forEach(element => appendToElements(elements, element));
+        else if(part.length > 0)
+            appendToElements(elements, part);
+    }
+
+    return elements;
+}
+
 function Create(transformIndex, document, transformString)
 {
     let parameterIndex = 1;
@@ -101,15 +127,6 @@ function Create(transformIndex, document, transformString)
     this.template = "\"" + transform.action.replace(/%/g, "%!") + "\"";
 
     this._elements = [];
-
-    function appendToElements(elements, value)
-    {
-        let last = elements.length - 1;
-        if(last >= 0 && typeof value === "string" && typeof elements[last] === typeof value)
-            elements[last] += value;
-        else
-            elements.push(value);
-    }
 
     function appendConditionToElements(elements, condition, type)
     {

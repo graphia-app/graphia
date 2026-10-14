@@ -53,6 +53,7 @@
 
 #include "app/transform/graphtransform.h"
 #include "app/transform/graphtransformconfigparser.h"
+#include "app/transform/transformdisplaytext.h"
 #include "app/ui/visualisations/visualisationchannel.h"
 #include "app/ui/visualisations/visualisationinfo.h"
 #include "app/ui/visualisations/visualisationconfigparser.h"
@@ -2114,6 +2115,23 @@ QVariantMap Document::transformInfoAtIndex(int index) const
 bool Document::opIsUnary(const QString& op) const
 {
     return GraphModel::opIsUnary(op);
+}
+
+QVariantMap Document::transformDisplayText() const
+{
+    return
+    {
+        {u"usingAttributes"_s, TransformDisplayText::usingAttributes()},
+        {u"withParameters"_s, TransformDisplayText::withParameters()},
+        {u"whereCondition"_s, TransformDisplayText::whereCondition()},
+        {u"parameter"_s, TransformDisplayText::parameter()}
+    };
+}
+
+QVariantMap Document::opDisplayText(const QString& op) const
+{
+    auto text = GraphTransformConfigParser::opDisplayText(op);
+    return {{u"name"_s, text._name}, {u"phrase"_s, text._phrase}};
 }
 
 QVariantMap Document::transformParameter(const QString& transformName, const QString& parameterName) const

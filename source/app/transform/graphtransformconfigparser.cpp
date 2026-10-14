@@ -34,9 +34,10 @@
 #include <utility>
 #include <vector>
 
+using namespace Qt::Literals::StringLiterals;
+
 namespace LexyGraphTransformParser
 {
-using namespace Qt::Literals::StringLiterals;
 
 namespace dsl = lexy::dsl;
 
@@ -371,6 +372,26 @@ GraphTransformConfig::TerminalOp GraphTransformConfigParser::stringToOp(const QS
 bool GraphTransformConfigParser::opIsUnary(const QString& op)
 {
     return LexyGraphTransformParser::findOp(LexyGraphTransformParser::unaryOps, op) != nullptr;
+}
+
+TransformDisplayText::Op GraphTransformConfigParser::opDisplayText(const QString& op)
+{
+    if(const auto* equalityOp = LexyGraphTransformParser::findOp(LexyGraphTransformParser::equalityOps, op))
+        return TransformDisplayText::op(*equalityOp);
+
+    if(const auto* numericalOp = LexyGraphTransformParser::findOp(LexyGraphTransformParser::numericalOps, op))
+        return TransformDisplayText::op(*numericalOp);
+
+    if(const auto* stringOp = LexyGraphTransformParser::findOp(LexyGraphTransformParser::stringOps, op))
+        return TransformDisplayText::op(*stringOp);
+
+    if(const auto* logicalOp = LexyGraphTransformParser::findOp(LexyGraphTransformParser::logicalOps, op))
+        return TransformDisplayText::op(*logicalOp);
+
+    if(const auto* unaryOp = LexyGraphTransformParser::findOp(LexyGraphTransformParser::unaryOps, op))
+        return TransformDisplayText::op(*unaryOp);
+
+    return {._name = op, ._phrase = u"%1 "_s + op + u" %2"_s};
 }
 
 bool GraphTransformConfigParser::isAttributeName(const QString& variable)
