@@ -1226,7 +1226,7 @@ Item
                 {
                     anchors.fill: parent
 
-                    Label { text: _document.pluginName }
+                    Label { text: _document.pluginDisplayName }
 
                     Item
                     {
@@ -1455,8 +1455,8 @@ Item
         height: 600
         minimumWidth: 480
         minimumHeight: 480
-        title: application && _document.pluginName.length > 0 ?
-                   _document.pluginName + " - " + appName : "";
+        title: application && _document.pluginDisplayName.length > 0 ?
+                   _document.pluginDisplayName + " - " + appName : "";
         visible: root.visible && root.pluginPoppedOut && plugin.loaded
         property bool maximised: visibility === Window.Maximized
 

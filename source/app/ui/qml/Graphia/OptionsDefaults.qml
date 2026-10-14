@@ -339,7 +339,8 @@ Item
                                     Layout.row: index
                                     Layout.column: 1
 
-                                    model: [qsTr("Always Ask…"), ...applicablePlugins]
+                                    model: [qsTr("Always Ask…"), ...applicablePlugins.map(
+                                        pluginName => root.application.pluginDisplayName(pluginName))]
 
                                     urlType: /*model.*/display
                                     property var applicablePlugins: { return root.application.pluginNames(urlType); }

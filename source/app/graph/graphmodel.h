@@ -141,6 +141,7 @@ public:
     bool editable() const;
     bool directed() const;
     QString pluginName() const;
+    QString pluginDisplayName() const;
     int pluginDataVersion() const;
     QString pluginQmlModule() const;
 

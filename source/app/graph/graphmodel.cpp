@@ -518,6 +518,7 @@ bool GraphModel::editable() const { return _plugin->editable(); }
 bool GraphModel::directed() const { return _plugin->directed(); }
 
 QString GraphModel::pluginName() const { return _plugin->name(); }
+QString GraphModel::pluginDisplayName() const { return _plugin->displayName(); }
 int GraphModel::pluginDataVersion() const { return _plugin->dataVersion(); }
 QString GraphModel::pluginQmlModule() const { return _plugin->qmlModule(); }
 

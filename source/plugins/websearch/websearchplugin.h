@@ -38,6 +38,7 @@ class WebSearchPlugin : public BaseGenericPlugin, PluginInstanceProvider<WebSear
 
 public:
     QString name() const override { return u"WebSearch"_s; }
+    QString displayName() const override { return tr("Web Search"); }
     QString description() const override
     {
         return tr("An embedded web browser that searches for the node selection using a URL template.");

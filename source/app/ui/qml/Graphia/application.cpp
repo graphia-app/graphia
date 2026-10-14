@@ -494,6 +494,12 @@ QStringList Application::pluginNames(const QString& urlTypeName) const
     return viablePluginNames;
 }
 
+QString Application::pluginDisplayName(const QString& pluginName) const
+{
+    const auto* plugin = pluginForName(pluginName);
+    return plugin != nullptr ? plugin->displayName() : pluginName;
+}
+
 QString Application::qmlModuleForPlugin(const QString& pluginName) const
 {
     auto* plugin = pluginForName(pluginName);
@@ -1144,6 +1150,9 @@ QVariant PluginDetailsModel::data(const QModelIndex& index, int role) const
     switch(role)
     {
     case Qt::DisplayRole:
+    case DisplayName:
+        return plugin->displayName();
+
     case Name:
         return plugin->name();
 
@@ -1179,6 +1188,7 @@ QHash<int, QByteArray> PluginDetailsModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
     roles[Name] = "name";
+    roles[DisplayName] = "displayName";
     roles[Description] = "description";
     roles[ImageSource] = "imageSource";
     return roles;

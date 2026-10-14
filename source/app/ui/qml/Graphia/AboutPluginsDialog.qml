@@ -74,7 +74,7 @@ Window
             Layout.rowSpan: pluginsWindow.pluginImageSource.length > 0 ? 3 : 2
             Layout.fillHeight: true
 
-            displayRole: "name"
+            displayRole: "displayName"
 
             model: pluginsWindow.pluginDetails
         }

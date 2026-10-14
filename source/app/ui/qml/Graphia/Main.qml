@@ -809,7 +809,7 @@ ApplicationWindow
                             "Please select how you wish to proceed below."), userTextForUrl(url)),
                         "choiceLabelText": qsTr("Open With Plugin:"),
                         "model": model,
-                        "displayRole": "name",
+                        "displayRole": "displayName",
                         "valueRole": "name"
                     }, false);
 
@@ -856,6 +856,7 @@ ApplicationWindow
                 "url": url,
                 "type": type,
                 "pluginName": pluginName,
+                "pluginDisplayName": application.pluginDisplayName(pluginName),
                 "plugin": application.qmlPluginForName(pluginName),
                 "inNewTab": inNewTab
             }, false);
@@ -1957,7 +1958,7 @@ ApplicationWindow
         shortcut: "Ctrl+M"
         icon.name: currentTab && currentTab.pluginMinimised ? "go-top" : "go-bottom"
         text: currentTab ? Utils.format(currentTab.pluginMinimised ? qsTr("Restore {0}") : qsTr("Minimise {0}"),
-            currentTab.document.pluginName) : ""
+            currentTab.document.pluginDisplayName) : ""
         enabled: currentTab && currentTab.document.hasPluginUI && !currentTab.pluginPoppedOut
 
         onTriggered: function()
@@ -1986,7 +1987,7 @@ ApplicationWindow
     {
         id: togglePluginWindowAction
         icon.name: "preferences-system-windows"
-        text: currentTab ? Utils.format(qsTr("Display {0} In Separate &Window"), currentTab.document.pluginName) : ""
+        text: currentTab ? Utils.format(qsTr("Display {0} In Separate &Window"), currentTab.document.pluginDisplayName) : ""
         checkable: true
         checked: currentTab && currentTab.pluginPoppedOut
         enabled: currentTab && currentTab.document.hasPluginUI && !mainWindow._anyDocumentsBusy && Qt.platform.os !== "wasm"

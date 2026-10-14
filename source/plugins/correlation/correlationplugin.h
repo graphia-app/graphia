@@ -243,6 +243,7 @@ public:
     CorrelationPlugin();
 
     QString name() const override { return u"Correlation"_s; }
+    QString displayName() const override { return tr("Correlation"); }
     QString description() const override
     {
         return tr("Creates a graph where nodes represent rows of data, "

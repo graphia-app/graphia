@@ -115,6 +115,7 @@ public:
     enum Roles // NOLINT performance-enum-size
     {
         Name = Qt::UserRole + 1,
+        DisplayName,
         Description,
         ImageSource
     };
@@ -208,6 +209,7 @@ public:
 
     Q_INVOKABLE QObject* qmlPluginForName(const QString& pluginName) const;
     Q_INVOKABLE QStringList pluginNames(const QString& urlTypeName) const;
+    Q_INVOKABLE QString pluginDisplayName(const QString& pluginName) const;
     Q_INVOKABLE QString qmlModuleForPlugin(const QString& pluginName) const;
     Q_INVOKABLE QString parametersQmlTypeForPlugin(const QString& pluginName,
         const QString& urlType) const;

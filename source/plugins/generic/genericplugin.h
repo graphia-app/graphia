@@ -38,6 +38,7 @@ class GenericPlugin : public BaseGenericPlugin, public PluginInstanceProvider<Ge
 
 public:
     QString name() const override { return u"Generic"_s; }
+    QString displayName() const override { return tr("Generic"); }
     QString description() const override
     {
         return tr("A plugin that loads generic graphs from a variety of file formats.");

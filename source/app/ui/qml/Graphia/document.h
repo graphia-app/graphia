@@ -87,6 +87,7 @@ class Document : public QObject, public IDocument, public FailureReason
     Q_PROPERTY(GraphDisplay* graphDisplay MEMBER _graphDisplay NOTIFY graphDisplayChanged)
     Q_PROPERTY(QObject* plugin READ pluginInstance NOTIFY pluginInstanceChanged)
     Q_PROPERTY(QString pluginName MEMBER _pluginName NOTIFY pluginNameChanged)
+    Q_PROPERTY(QString pluginDisplayName MEMBER _pluginDisplayName NOTIFY pluginNameChanged)
     Q_PROPERTY(QString pluginQmlModule READ pluginQmlModule NOTIFY pluginQmlModuleChanged)
 
     Q_PROPERTY(QColor contrastingColor READ contrastingColorForBackground NOTIFY contrastingColorChanged)
@@ -270,6 +271,7 @@ private:
 
     std::unique_ptr<IPluginInstance> _pluginInstance;
     QString _pluginName;
+    QString _pluginDisplayName;
 
     std::unique_ptr<SelectionManager> _selectionManager;
     std::unique_ptr<SearchManager> _searchManager;

@@ -81,6 +81,7 @@ public:
     virtual void initialise(const IApplication* application) = 0;
 
     virtual QString name() const = 0;
+    virtual QString displayName() const = 0;
     virtual QString description() const = 0;
     virtual QString imageSource() const = 0; // Displayed in the about dialog
 

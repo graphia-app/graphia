@@ -241,7 +241,7 @@ bool NativeSaver::save()
     if(uiDataJson.is_object() || uiDataJson.is_array())
         content["ui"] = uiDataJson;
 
-    setPhase(graphModel->pluginName());
+    setPhase(graphModel->pluginDisplayName());
     auto pluginData = _pluginInstance->save(graph, *this);
 
     setProgress(-1);

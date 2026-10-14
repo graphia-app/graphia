@@ -557,7 +557,7 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
     if(header._pluginDataVersion > _pluginInstance->plugin()->dataVersion())
     {
         setFailureReason(QObject::tr("Produced using a newer version of the plugin '%1'. Please upgrade.")
-            .arg(_pluginInstance->plugin()->name()));
+            .arg(_pluginInstance->plugin()->displayName()));
         return false;
     }
 

@@ -32,10 +32,11 @@ Window
     property url url: ""
     property string type: ""
     property string pluginName: ""
+    property string pluginDisplayName: ""
     property var plugin: null
     property bool inNewTab: false
 
-    title: Utils.format(qsTr("{0} Parameters"), pluginName)
+    title: Utils.format(qsTr("{0} Parameters"), pluginDisplayName)
 
     signal initialised();
     signal accepted();

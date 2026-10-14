@@ -581,11 +581,12 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
     if(type != Application::NativeFileType)
     {
         setLog(tr("Loaded from %1, as type %2, using plugin %3 (version %4)")
-            .arg(url.toString(), type, pluginName)
+            .arg(url.toString(), type, plugin->displayName())
             .arg(plugin->dataVersion()));
     }
 
     _pluginName = pluginName;
+    _pluginDisplayName = plugin->displayName();
     emit pluginNameChanged();
 
     setTitle(url.fileName());
@@ -653,7 +654,7 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
         {
             setFailureReason(tr("The plugin %1 does not provide a parser for %2. "
                 "This is probably a bug, please report it to the developers.")
-                .arg(pluginName, type));
+                .arg(plugin->displayName(), type));
 
             emit failureReasonChanged();
             emit loadComplete(url, false);
