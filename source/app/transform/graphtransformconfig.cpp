@@ -334,8 +334,19 @@ QString GraphTransformConfig::conditionAsString(bool forDisplay) const
         QString operator()(const RecursiveValue<CompoundCondition>& wrapper) const
         {
             const auto& compoundCondition = *wrapper;
-            auto lhs = std::visit(ConditionVisitor(_forDisplay), compoundCondition._lhs);
-            auto rhs = std::visit(ConditionVisitor(_forDisplay), compoundCondition._rhs);
+
+            auto operandAsString = [this](const Condition& operand)
+            {
+                auto s = std::visit(ConditionVisitor(_forDisplay), operand);
+
+                if(std::holds_alternative<RecursiveValue<CompoundCondition>>(operand))
+                    return u"(%1)"_s.arg(s);
+
+                return s;
+            };
+
+            auto lhs = operandAsString(compoundCondition._lhs);
+            auto rhs = operandAsString(compoundCondition._rhs);
 
             return u"%1 %2 %3"_s.arg(lhs, prettifyOp(compoundCondition.opAsString()), rhs);
         }
