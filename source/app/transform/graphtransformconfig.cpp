@@ -298,32 +298,20 @@ QString GraphTransformConfig::conditionAsString(bool forDisplay, const Attribute
             return std::visit(Visitor(_forDisplay, _attributeDisplayName), terminalValue);
         }
 
-        QString prettifyOp(const QString& op) const
+        QString applyOp(const QString& op, const QString& lhs, const QString& rhs) const
         {
-            if(!_forDisplay)
-                return op;
+            if(_forDisplay)
+                return GraphTransformConfigParser::opDisplayText(op)._phrase.arg(lhs, rhs);
 
-            std::map<QString, QString> replacements =
-            {
-                {"==",                       QObject::tr("=")},
-                {"!=",                       QObject::tr("≠")},
-                {"<=",                       QObject::tr("≤")},
-                {">=",                       QObject::tr("≥")},
-                {"&&",                       QObject::tr("and")},
-                {"||",                       QObject::tr("or")},
-                {"includes",                 QObject::tr("Includes")},
-                {"excludes",                 QObject::tr("Excludes")},
-                {"starts",                   QObject::tr("Starts With")},
-                {"ends",                     QObject::tr("Ends With")},
-                {"matches",                  QObject::tr("Matches Regex")},
-                {"matchesCaseInsensitive",   QObject::tr("Matches Case Insensitive Regex")},
-                {"hasValue",                 QObject::tr("Has Value")}
-            };
+            return u"%1 %2 %3"_s.arg(lhs, op, rhs);
+        }
 
-            if(u::contains(replacements, op))
-                return replacements.at(op);
+        QString applyOp(const QString& op, const QString& lhs) const
+        {
+            if(_forDisplay)
+                return GraphTransformConfigParser::opDisplayText(op)._phrase.arg(lhs);
 
-            return op;
+            return u"%1 %2"_s.arg(lhs, op);
         }
 
         QString operator()(GraphTransformConfig::NoCondition) const { return {}; }
@@ -344,16 +332,14 @@ QString GraphTransformConfig::conditionAsString(bool forDisplay, const Attribute
                 }
             }
 
-            return u"%1 %2 %3"_s.arg(
-                terminalValueAsString(terminalCondition._lhs),
-                prettifyOp(terminalCondition.opAsString()), rhs);
+            return applyOp(terminalCondition.opAsString(),
+                terminalValueAsString(terminalCondition._lhs), rhs);
         }
 
         QString operator()(const UnaryCondition& unaryCondition) const
         {
-            return u"%1 %2"_s.arg(
-                terminalValueAsString(unaryCondition._lhs),
-                prettifyOp(unaryCondition.opAsString()));
+            return applyOp(unaryCondition.opAsString(),
+                terminalValueAsString(unaryCondition._lhs));
         }
 
         QString operator()(const RecursiveValue<CompoundCondition>& wrapper) const
@@ -373,7 +359,7 @@ QString GraphTransformConfig::conditionAsString(bool forDisplay, const Attribute
             auto lhs = operandAsString(compoundCondition._lhs);
             auto rhs = operandAsString(compoundCondition._rhs);
 
-            return u"%1 %2 %3"_s.arg(lhs, prettifyOp(compoundCondition.opAsString()), rhs);
+            return applyOp(compoundCondition.opAsString(), lhs, rhs);
         }
     };
 

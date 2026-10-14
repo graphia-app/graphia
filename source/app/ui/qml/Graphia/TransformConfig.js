@@ -60,34 +60,6 @@ function addLabelTo(text, parent, transformItem)
     label.color = Qt.binding(function() { return transformItem.textColor; });
 }
 
-function sanitiseOp(text)
-{
-    let replacements =
-    [
-        "==",                       qsTr("="),
-        "!=",                       qsTr("≠"),
-        "<=",                       qsTr("≤"),
-        ">=",                       qsTr("≥"),
-        "&&",                       qsTr("and"),
-        "||",                       qsTr("or"),
-        "includes",                 qsTr("Includes"),
-        "excludes",                 qsTr("Excludes"),
-        "starts",                   qsTr("Starts With"),
-        "ends",                     qsTr("Ends With"),
-        "matches",                  qsTr("Matches Regex"),
-        "matchesCaseInsensitive",   qsTr("Matches Case Insensitive Regex"),
-        "hasValue",                 qsTr("Has Value"),
-    ];
-
-    for(let i = 0; i < replacements.length; i += 2)
-    {
-        let regexLiteral = replacements[i].replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
-        text = text.replace(new RegExp("^" + regexLiteral + "$"), replacements[i + 1]);
-    }
-
-    return text;
-}
-
 function appendToElements(elements, value)
 {
     let last = elements.length - 1;
@@ -133,8 +105,10 @@ function Create(transformIndex, document, transformString)
         if(typeof condition.rhs !== "object")
             return [Object.assign({type: type}, condition)];
 
-        return substituted("(%1) " + sanitiseOp(condition.op) + " (%2)",
-            [conditionElements(condition.lhs, type), conditionElements(condition.rhs, type)]);
+        let bracketed = operand => substituted("(%1)", [conditionElements(operand, type)]);
+
+        return substituted(document.opDisplayText(condition.op).phrase,
+            [bracketed(condition.lhs), bracketed(condition.rhs)]);
     }
 
     function conditionToTemplate(condition)
@@ -216,7 +190,7 @@ function Create(transformIndex, document, transformString)
 
             let parameter = transform.parameters[index];
             this.template += " \"" + parameter.name + "\" = %" + parameterIndex++;
-            parameterElements.push({type: "parameter", lhs: "$" + parameter.name, op: "=", rhs: parameter.value});
+            parameterElements.push({type: "parameter", lhs: "$" + parameter.name, rhs: parameter.value});
         }
 
         this._elements = substituted(displayText.withParameters, [this._elements, parameterElements]);
@@ -341,13 +315,17 @@ function Create(transformIndex, document, transformString)
                         }
                     }
 
-                    addOperand(parameter.lhs, parameter.rhs);
-                    labelText += " " + sanitiseOp(parameter.op);
+                    let phrase = parameter.type === "parameter" ?
+                        displayText.parameter : document.opDisplayText(parameter.op).phrase;
 
-                    if(parameter.rhs !== undefined)
+                    for(const part of phrase.split(/(%\d+)/))
                     {
-                        labelText += " ";
-                        addOperand(parameter.rhs, parameter.lhs);
+                        if(part === "%1")
+                            addOperand(parameter.lhs, parameter.rhs);
+                        else if(part === "%2" && parameter.rhs !== undefined)
+                            addOperand(parameter.rhs, parameter.lhs);
+                        else if(!/^%\d+$/.test(part))
+                            labelText += part;
                     }
                 }
                 else if(parameter.attributeName !== undefined)

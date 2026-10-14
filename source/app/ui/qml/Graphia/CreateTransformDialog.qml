@@ -418,7 +418,7 @@ Window
                                                 {
                                                     let item =
                                                     {
-                                                        display: TransformConfig.sanitiseOp(ops[i]),
+                                                        display: document.opDisplayText(ops[i]).name,
                                                         value: ops[i],
                                                         unary: document.opIsUnary(ops[i])
                                                     };
