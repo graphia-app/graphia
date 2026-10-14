@@ -111,18 +111,18 @@ function Create(transformIndex, document, transformString)
             elements.push(value);
     }
 
-    function appendConditionToElements(elements, condition)
+    function appendConditionToElements(elements, condition, type)
     {
         if(typeof condition.rhs !== "object")
         {
-            appendToElements(elements, condition);
+            appendToElements(elements, Object.assign({type: type}, condition));
             return;
         }
 
         appendToElements(elements, "(");
-        appendConditionToElements(elements, condition.lhs);
+        appendConditionToElements(elements, condition.lhs, type);
         appendToElements(elements, ") " + sanitiseOp(condition.op) + " (");
-        appendConditionToElements(elements, condition.rhs);
+        appendConditionToElements(elements, condition.rhs, type);
         appendToElements(elements, ")");
     }
 
@@ -203,7 +203,7 @@ function Create(transformIndex, document, transformString)
             let parameter = transform.parameters[index];
             this.template += " \"" + parameter.name + "\" = %" + parameterIndex++;
             appendConditionToElements(this._elements,
-                {type: "parameter", lhs: "$" + parameter.name, op: "=", rhs: parameter.value});
+                {lhs: "$" + parameter.name, op: "=", rhs: parameter.value}, "parameter");
         }
     }
 
@@ -212,11 +212,8 @@ function Create(transformIndex, document, transformString)
     {
         this.template += " where " + conditionToTemplate(transform.condition);
 
-        let condition = {type: "condition"};
-        condition = Object.assign(condition, transform.condition);
-
         appendToElements(this._elements, qsTr(" where "));
-        appendConditionToElements(this._elements, condition);
+        appendConditionToElements(this._elements, transform.condition, "condition");
     }
 
     this.toComponents =
