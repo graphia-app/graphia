@@ -22,6 +22,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 import Graphia.Controls
+import Graphia.Utils
 
 import "TransformConfig.js" as TransformConfig
 
