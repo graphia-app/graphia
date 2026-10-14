@@ -50,7 +50,7 @@ QString DeleteNodesCommand::verb() const
 
 QString DeleteNodesCommand::pastParticiple() const
 {
-    return _multipleNodes ? QString(QObject::tr("%1 Nodes Deleted")).arg(_nodeIds.size()) :
+    return _multipleNodes ? QObject::tr("%n Nodes Deleted", nullptr, static_cast<int>(_nodeIds.size())) :
                                     QObject::tr("Node Deleted");
 }
 

@@ -66,7 +66,7 @@ QString ImportAttributesCommand::verb() const
 QString ImportAttributesCommand::pastParticiple() const
 {
     return multipleAttributes() ?
-        QObject::tr("%1 Attributes Imported").arg(numAttributes()) :
+        QObject::tr("%n Attributes Imported", nullptr, static_cast<int>(numAttributes())) :
         QObject::tr("Attribute %1 Imported").arg(firstAttributeName());
 }
 

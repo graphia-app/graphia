@@ -61,7 +61,7 @@ QString ImportAnnotationsCommand::verb() const
 QString ImportAnnotationsCommand::pastParticiple() const
 {
     return multipleAnnotations() ?
-        QObject::tr("%1 Annotations Imported").arg(numAnnotations()) :
+        QObject::tr("%n Annotations Imported", nullptr, static_cast<int>(numAnnotations())) :
         QObject::tr("Annotation %1 Imported").arg(firstAnnotationName());
 }
 

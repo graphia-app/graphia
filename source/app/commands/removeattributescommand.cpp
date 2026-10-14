@@ -56,7 +56,7 @@ QString RemoveAttributesCommand::verb() const
 QString RemoveAttributesCommand::pastParticiple() const
 {
     return _attributeNames.size() > 1 ?
-        QObject::tr("%1 Attributes Removed").arg(_attributeNames.size()) :
+        QObject::tr("%n Attributes Removed", nullptr, static_cast<int>(_attributeNames.size())) :
         QObject::tr("Attribute %1 Removed").arg(_attributeNames.front());
 }
 

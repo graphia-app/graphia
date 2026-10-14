@@ -402,7 +402,7 @@ QString CorrelationPlot::columnAnnotationValueAt(size_t x, size_t y) const
             if(uniqueValues.size() == 1)
                 return *uniqueValues.begin();
 
-            return tr("%1 unique values").arg(uniqueValues.size());
+            return tr("%n unique values", nullptr, static_cast<int>(uniqueValues.size()));
         }
 
         column = _annotationGroupMap.at(x).front();

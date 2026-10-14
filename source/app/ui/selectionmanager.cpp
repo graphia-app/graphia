@@ -347,7 +347,7 @@ QString SelectionManager::numNodesSelectedAsString() const
     }
 
     if(selectionSize > 1)
-        return QString(tr("%1 Nodes Selected")).arg(selectionSize);
+        return tr("%n Nodes Selected", nullptr, static_cast<int>(selectionSize));
 
     return {};
 }
