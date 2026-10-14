@@ -47,7 +47,7 @@
 #include <iterator>
 #include <vector>
 
-const int NativeSaver::Version = 8;
+const int NativeSaver::Version = 9;
 const int NativeSaver::MaxHeaderSize = 1 << 12;
 
 static bool compress(const QByteArray& byteArray, const QString& filePath, Progressable& progressable)
