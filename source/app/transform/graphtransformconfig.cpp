@@ -266,32 +266,31 @@ QString GraphTransformConfig::conditionAsString(bool forDisplay, const Attribute
                 QString operator()(const int& i) const      { return QString::number(i); }
                 QString operator()(const QString& s) const
                 {
-                    const auto attributeWithParameterTemplace = _forDisplay ? QObject::tr("%1%2 › %3") : u"$\"%1%2\".\"%3\""_s;
-                    const auto attributeTemplate = _forDisplay ? QObject::tr("%1%2") : u"$\"%1%2\""_s;
-                    const auto valueTemplate = _forDisplay ? QObject::tr("%1") : u"\"%1\""_s;
-
                     if(GraphTransformConfigParser::isAttributeName(s))
                     {
-                        if(_forDisplay && _attributeDisplayName)
-                            return _attributeDisplayName(s);
+                        if(_forDisplay)
+                        {
+                            return _attributeDisplayName ? _attributeDisplayName(s) :
+                                Attribute::fullyQualifiedDisplayName(s, [](const QString& name) { return name; });
+                        }
 
                         auto info = Attribute::parseAttributeName(s);
 
                         QString prefix;
                         switch(info._type)
                         {
-                        case Attribute::EdgeNodeType::Source: prefix = _forDisplay ? QObject::tr("Source › ") : u"source."_s; break;
-                        case Attribute::EdgeNodeType::Target: prefix = _forDisplay ? QObject::tr("Target › ") : u"target."_s; break;
+                        case Attribute::EdgeNodeType::Source: prefix = u"source."_s; break;
+                        case Attribute::EdgeNodeType::Target: prefix = u"target."_s; break;
                         default: break;
                         }
 
                         if(!info._parameter.isEmpty())
-                            return attributeWithParameterTemplace.arg(prefix, info._name, info._parameter);
+                            return u"$\"%1%2\".\"%3\""_s.arg(prefix, info._name, info._parameter);
 
-                        return attributeTemplate.arg(prefix, info._name);
+                        return u"$\"%1%2\""_s.arg(prefix, info._name);
                     }
 
-                    return valueTemplate.arg(s);
+                    return _forDisplay ? s : u"\"%1\""_s.arg(s);
                 }
             };
 
