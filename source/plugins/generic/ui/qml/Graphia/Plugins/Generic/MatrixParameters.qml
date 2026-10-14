@@ -434,15 +434,14 @@ BaseParameterDialog
 
                     if(tabularDataParser.adjustedGraphSizeEstimate.keys !== undefined)
                     {
-                        if(!tabularDataParser.binaryMatrix)
-                            summaryString += qsTr("Estimated Pre-Transform Graph Size: ");
-                        else
-                            summaryString += qsTr("Estimated Graph Size: ");
-
                         let nodesFont = tabularDataParser.nodesWarning ? warningFont : normalFont;
                         let edgesFont = tabularDataParser.edgesWarning ? warningFont : normalFont;
 
-                        summaryString += Utils.format(qsTr("{0}{3} Nodes{2}, {1}{4} Edges{2}"), nodesFont, edgesFont, "</font>",
+                        let sizeTemplate = !tabularDataParser.binaryMatrix ?
+                            qsTr("Estimated Pre-Transform Graph Size: {0}{3} Nodes{2}, {1}{4} Edges{2}") :
+                            qsTr("Estimated Graph Size: {0}{3} Nodes{2}, {1}{4} Edges{2}");
+
+                        summaryString += Utils.format(sizeTemplate, nodesFont, edgesFont, "</font>",
                             NativeUtils.formatNumberSIPostfix(tabularDataParser.numNodes),
                             NativeUtils.formatNumberSIPostfix(tabularDataParser.numEdges));
 
@@ -455,8 +454,8 @@ BaseParameterDialog
 
                             if(!tabularDataParser.binaryMatrix)
                             {
-                                summaryString +=
-                                    qsTr(" Increasing the Minimum Correlation Value will " +
+                                summaryString += " " +
+                                    qsTr("Increasing the Minimum Correlation Value will " +
                                     "usually reduce the graph size.");
                             }
 

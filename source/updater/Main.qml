@@ -36,7 +36,7 @@ ApplicationWindow
     flags: Constants.defaultWindowFlags
     color: palette.window
 
-    title: Qt.application.name + " " + qsTr("Update")
+    title: Utils.format(qsTr("{0} Update"), Qt.application.name)
 
     width: 640
     height: 480
@@ -206,7 +206,7 @@ ApplicationWindow
 
             Button
             {
-                text: qsTr("Open " + Qt.application.name);
+                text: Utils.format(qsTr("Open {0}"), Qt.application.name);
                 onClicked: function() { root.close(); }
             }
         }

@@ -1386,7 +1386,7 @@ QString CorrelationPluginInstance::log() const
         .arg(_dataRect.x()).arg(_dataRect.y()).arg(_dataRect.width()).arg(_dataRect.height()));
 
     if(_transpose)
-        text.append(tr("\nTransposed"));
+        text.append(u"\n"_s + tr("Transposed"));
 
     auto correlation = ContinuousCorrelation::create(_continuousCorrelationType, _correlationFilterType);
 
@@ -1394,49 +1394,55 @@ QString CorrelationPluginInstance::log() const
     {
     default:
     case CorrelationDataType::Continuous:
-        text.append(tr("\nContinuous Correlation Metric: %1").arg(correlation->name()));
+    {
+        text.append(u"\n"_s + tr("Continuous Correlation Metric: %1").arg(correlation->name()));
 
-        text.append(tr("\nCorrelation Polarity: "));
+        QString polarity;
         switch(_correlationPolarity)
         {
         default:
-        case CorrelationPolarity::Positive: text.append(tr("Positive")); break;
-        case CorrelationPolarity::Negative: text.append(tr("Negative")); break;
-        case CorrelationPolarity::Both: text.append(tr("Both")); break;
+        case CorrelationPolarity::Positive: polarity = tr("Positive"); break;
+        case CorrelationPolarity::Negative: polarity = tr("Negative"); break;
+        case CorrelationPolarity::Both: polarity = tr("Both"); break;
         }
-        break;
 
-    case CorrelationDataType::Discrete:
-        text.append(tr("\nDiscrete Correlation Metric: %1").arg(correlation->name()));
+        text.append(u"\n"_s + tr("Correlation Polarity: %1").arg(polarity));
         break;
     }
 
-    text.append(tr("\nMinimum Correlation Value: %1").arg(
+    case CorrelationDataType::Discrete:
+        text.append(u"\n"_s + tr("Discrete Correlation Metric: %1").arg(correlation->name()));
+        break;
+    }
+
+    text.append(u"\n"_s + tr("Minimum Correlation Value: %1").arg(
         u::formatNumberScientific(_minimumThreshold)));
 
     if(_correlationFilterType == CorrelationFilterType::Knn)
-        text.append(tr("\nMaximum k Value: %1").arg(_maximumK));
+        text.append(u"\n"_s + tr("Maximum k Value: %1").arg(_maximumK));
 
     if(_valuesWereImputed)
     {
-        text.append(tr("\nImputation: "));
+        QString imputation;
         switch(_missingDataType)
         {
         default:
-        case MissingDataType::Constant: text.append(tr("Constant (%1)")
-            .arg(u::formatNumberScientific(_missingDataReplacementValue))); break;
-        case MissingDataType::ColumnAverage: text.append(tr("Column Mean")); break;
-        case MissingDataType::RowInterpolation: text.append(tr("Row Interpolate")); break;
+        case MissingDataType::Constant: imputation = tr("Constant (%1)")
+            .arg(u::formatNumberScientific(_missingDataReplacementValue)); break;
+        case MissingDataType::ColumnAverage: imputation = tr("Column Mean"); break;
+        case MissingDataType::RowInterpolation: imputation = tr("Row Interpolate"); break;
         }
+
+        text.append(u"\n"_s + tr("Imputation: %1").arg(imputation));
     }
 
     switch(_clippingType)
     {
     default:
     case ClippingType::None: break;
-    case ClippingType::Constant: text.append(tr("\nClipping: Constant (%1)")
+    case ClippingType::Constant: text.append(u"\n"_s + tr("Clipping: Constant (%1)")
         .arg(u::formatNumberScientific(_clippingValue))); break;
-    case ClippingType::Winsorization: text.append(tr("\nClipping: Winsorization (%1 percentile)")
+    case ClippingType::Winsorization: text.append(u"\n"_s + tr("Clipping: Winsorization (%1 percentile)")
         .arg(static_cast<int>(_clippingValue))); break;
     }
 
@@ -1444,23 +1450,23 @@ QString CorrelationPluginInstance::log() const
     {
     default:
     case ScalingType::None: break;
-    case ScalingType::Log2: text.append(tr("\nScaling: Log2(x + ε)")); break;
-    case ScalingType::Log10: text.append(tr("\nScaling: Log10(x + ε)")); break;
-    case ScalingType::AntiLog2: text.append(tr("\nScaling: AntiLog2(x)")); break;
-    case ScalingType::AntiLog10: text.append(tr("\nScaling: AntiLog10(x)")); break;
-    case ScalingType::ArcSin: text.append(tr("\nScaling: Arcsin(x)")); break;
+    case ScalingType::Log2: text.append(u"\n"_s + tr("Scaling: Log2(x + ε)")); break;
+    case ScalingType::Log10: text.append(u"\n"_s + tr("Scaling: Log10(x + ε)")); break;
+    case ScalingType::AntiLog2: text.append(u"\n"_s + tr("Scaling: AntiLog2(x)")); break;
+    case ScalingType::AntiLog10: text.append(u"\n"_s + tr("Scaling: AntiLog10(x)")); break;
+    case ScalingType::ArcSin: text.append(u"\n"_s + tr("Scaling: Arcsin(x)")); break;
     }
 
     switch(_normaliseType)
     {
     default:
     case NormaliseType::None: break;
-    case NormaliseType::MinMax: text.append(tr("\nNormalisation: Min/Max")); break;
-    case NormaliseType::Quantile: text.append(tr("\nNormalisation: Quantile")); break;
-    case NormaliseType::Mean: text.append(tr("\nNormalisation: Mean")); break;
-    case NormaliseType::Standardisation: text.append(tr("\nNormalisation: Standardisation")); break;
-    case NormaliseType::UnitScaling: text.append(tr("\nNormalisation: Unit Scaling")); break;
-    case NormaliseType::Softmax: text.append(tr("\nNormalisation: Softmax Scaling")); break;
+    case NormaliseType::MinMax: text.append(u"\n"_s + tr("Normalisation: Min/Max")); break;
+    case NormaliseType::Quantile: text.append(u"\n"_s + tr("Normalisation: Quantile")); break;
+    case NormaliseType::Mean: text.append(u"\n"_s + tr("Normalisation: Mean")); break;
+    case NormaliseType::Standardisation: text.append(u"\n"_s + tr("Normalisation: Standardisation")); break;
+    case NormaliseType::UnitScaling: text.append(u"\n"_s + tr("Normalisation: Unit Scaling")); break;
+    case NormaliseType::Softmax: text.append(u"\n"_s + tr("Normalisation: Softmax Scaling")); break;
     }
 
     return text;

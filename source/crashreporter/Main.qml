@@ -33,7 +33,7 @@ ApplicationWindow
     flags: Constants.defaultWindowFlags
     color: palette.window
 
-    title: Qt.application.name + " " + qsTr("Crash Reporter")
+    title: Utils.format(qsTr("{0} Crash Reporter"), Qt.application.name)
 
     width: 640
     height: 480

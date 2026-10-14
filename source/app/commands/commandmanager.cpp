@@ -192,7 +192,7 @@ void CommandManager::undoReal(NamedBool<"rollback"> rollback)
     auto* command = _stack.at(static_cast<size_t>(_lastExecutedIndex)).get();
 
     QString undoVerb = !command->description().isEmpty() ?
-                QObject::tr("Undoing ") + command->description() :
+                QObject::tr("Undoing %1").arg(command->description()) :
                 QObject::tr("Undoing");
 
     if(rollback)
@@ -234,7 +234,7 @@ void CommandManager::redoReal()
     auto* command = _stack.at(static_cast<size_t>(++_lastExecutedIndex)).get();
 
     const QString redoVerb = !command->description().isEmpty() ?
-                QObject::tr("Redoing ") + command->description() :
+                QObject::tr("Redoing %1").arg(command->description()) :
                 QObject::tr("Redoing");
 
     commandStartDebug(_debug, _busy, redoVerb);
@@ -323,7 +323,7 @@ QString CommandManager::nextUndoAction() const
     {
         const auto& command = _stack.at(static_cast<size_t>(_lastExecutedIndex));
         if(!command->description().isEmpty())
-            return QObject::tr("&Undo ") + command->description();
+            return QObject::tr("&Undo %1").arg(command->description());
     }
 
     return tr("&Undo");
@@ -337,7 +337,7 @@ QString CommandManager::nextRedoAction() const
     {
         const auto& command = _stack.at(static_cast<size_t>(_lastExecutedIndex) + 1);
         if(!command->description().isEmpty())
-            return QObject::tr("&Redo ") + command->description();
+            return QObject::tr("&Redo %1").arg(command->description());
     }
 
     return tr("&Redo");

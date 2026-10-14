@@ -951,18 +951,19 @@ Item
                         Layout.alignment: Qt.AlignRight
                         text:
                         {
-                            let s = "";
                             let numNodes = graph.numNodes;
                             let numVisibleNodes = graph.numVisibleNodes;
 
-                            if(numNodes >= 0)
+                            if(numNodes < 0)
+                                return "";
+
+                            if(numVisibleNodes !== numNodes)
                             {
-                                s += NativeUtils.formatNumberSIPostfix(numNodes);
-                                if(numVisibleNodes !== numNodes)
-                                    s += Utils.format(qsTr(" ({0})"), NativeUtils.formatNumberSIPostfix(numVisibleNodes));
+                                return Utils.format(qsTr("{0} ({1})"), NativeUtils.formatNumberSIPostfix(numNodes),
+                                    NativeUtils.formatNumberSIPostfix(numVisibleNodes));
                             }
 
-                            return s;
+                            return NativeUtils.formatNumberSIPostfix(numNodes);
                         }
                     }
 
@@ -978,18 +979,19 @@ Item
                         Layout.alignment: Qt.AlignRight
                         text:
                         {
-                            let s = "";
                             let numEdges = graph.numEdges;
                             let numVisibleEdges = graph.numVisibleEdges;
 
-                            if(numEdges >= 0)
+                            if(numEdges < 0)
+                                return "";
+
+                            if(numVisibleEdges !== numEdges)
                             {
-                                s += NativeUtils.formatNumberSIPostfix(numEdges);
-                                if(numVisibleEdges !== numEdges)
-                                    s += Utils.format(qsTr(" ({0})"), NativeUtils.formatNumberSIPostfix(numVisibleEdges));
+                                return Utils.format(qsTr("{0} ({1})"), NativeUtils.formatNumberSIPostfix(numEdges),
+                                    NativeUtils.formatNumberSIPostfix(numVisibleEdges));
                             }
 
-                            return s;
+                            return NativeUtils.formatNumberSIPostfix(numEdges);
                         }
                     }
 

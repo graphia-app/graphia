@@ -353,8 +353,8 @@ Item
             setAlertIcon(
             {
                 "alertType": AlertType.Error,
-                "alertText": qsTr("This transform expression is invalid\n") +
-                    (detail.length > 0 ? Utils.format(qsTr("(Reason: {0})\n"), detail) : "") +
+                "alertText": qsTr("This transform expression is invalid") + "\n" +
+                    (detail.length > 0 ? Utils.format(qsTr("(Reason: {0})"), detail) + "\n" : "") +
                     qsTr("Please send a screenshot to the developers")
             });
 
@@ -362,9 +362,9 @@ Item
             template = "";
             _parameterComponents = [];
 
-            TransformConfig.addLabelTo(
-                (detail.length > 0 ? detail + ": " : "Invalid Expression: ") +
-                Utils.addSlashes(value), expression, root);
+            TransformConfig.addLabelTo(detail.length > 0 ?
+                Utils.format(qsTr("{0}: {1}"), detail, Utils.addSlashes(value)) :
+                Utils.format(qsTr("Invalid Expression: {0}"), Utils.addSlashes(value)), expression, root);
         }
     }
 

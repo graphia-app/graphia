@@ -388,12 +388,11 @@ ColumnLayout
 
                     Text
                     {
-                        text: qsTr("This is a list of values that have a fixed assignment " +
+                        text: Utils.format(qsTr("This is a list of values that have a fixed assignment " +
                             "to a particular colour. The value may be selected from the menu, " +
                             "or manually entered. In either case, the supplied value will " +
                             "<b>always</b> be shown using its respective colour. Zero or more " +
-                            "colours may be added, up to a maximum of ") +
-                            root._maxFixedColors + qsTr(".")
+                            "colours may be added, up to a maximum of {0}."), root._maxFixedColors)
                         textFormat: Text.StyledText
                         wrapMode: Text.WordWrap
                     }

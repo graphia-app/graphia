@@ -1773,22 +1773,31 @@ BaseParameterDialog
 
                             if(tabularDataParser.dataRect.hasMissingValues)
                             {
-                                summaryString += Utils.format(qsTr("Imputation: {0}"), missingDataTypeComboBox.currentText);
-
                                 if(missingDataTypeComboBox.value === MissingDataType.Constant)
-                                    summaryString += Utils.format(qsTr(" ({0})"), replacementConstantText.text);
+                                {
+                                    summaryString += Utils.format(qsTr("Imputation: {0} ({1})"),
+                                        missingDataTypeComboBox.currentText, replacementConstantText.text);
+                                }
+                                else
+                                    summaryString += Utils.format(qsTr("Imputation: {0}"), missingDataTypeComboBox.currentText);
 
                                 summaryString += "<br>";
                             }
 
                             if(clippingTypeComboBox.value !== ClippingType.None)
                             {
-                                summaryString += Utils.format(qsTr("Clipping: {0}"), clippingTypeComboBox.currentText);
-
                                 if(clippingTypeComboBox.value === ClippingType.Constant)
-                                    summaryString += Utils.format(qsTr(" ({0})"), clippingValueText.text);
+                                {
+                                    summaryString += Utils.format(qsTr("Clipping: {0} ({1})"),
+                                        clippingTypeComboBox.currentText, clippingValueText.text);
+                                }
                                 else if(clippingTypeComboBox.value === ClippingType.Winsorization)
-                                    summaryString += Utils.format(qsTr(" ({0} percentile)"), winsoriztionValueSpinBox.value);
+                                {
+                                    summaryString += Utils.format(qsTr("Clipping: {0} ({1} percentile)"),
+                                        clippingTypeComboBox.currentText, winsoriztionValueSpinBox.value);
+                                }
+                                else
+                                    summaryString += Utils.format(qsTr("Clipping: {0}"), clippingTypeComboBox.currentText);
 
                                 summaryString += "<br>";
                             }
@@ -1814,7 +1823,7 @@ BaseParameterDialog
 
                         if(tabularDataParser.graphSizeEstimate.keys !== undefined)
                         {
-                            summaryString += "<br>" + qsTr("Estimated Pre-Transform Graph Size: ");
+                            summaryString += "<br>";
 
                             let warningThreshold = 5e6;
 
@@ -1829,7 +1838,8 @@ BaseParameterDialog
                             if(numEdges > warningThreshold)
                                 edgesFont = warningFont;
 
-                            summaryString += Utils.format(qsTr("{0}{3} Nodes{2}, {1}{4} Edges{2}"), nodesFont, edgesFont, "</font>",
+                            summaryString += Utils.format(qsTr("Estimated Pre-Transform Graph Size: {0}{3} Nodes{2}, {1}{4} Edges{2}"),
+                                nodesFont, edgesFont, "</font>",
                                 NativeUtils.formatNumberSIPostfix(numNodes), NativeUtils.formatNumberSIPostfix(numEdges));
 
                             if(numNodes > warningThreshold || numEdges > warningThreshold)

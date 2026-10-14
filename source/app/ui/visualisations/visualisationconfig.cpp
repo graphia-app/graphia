@@ -130,7 +130,7 @@ QString VisualisationConfig::asString(bool forDisplay) const
                 flagsString += replacements.at(flag);
         }
 
-        s += QObject::tr(" (%1)").arg(flagsString);
+        s = QObject::tr("%1 (%2)", "a visualisation and its options").arg(s, flagsString);
     }
 
     return s;

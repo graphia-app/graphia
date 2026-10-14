@@ -82,7 +82,7 @@ RowLayout
         text:
         {
             let filename = NativeUtils.baseFileNameForUrl(root.blockedUrl);
-            return qsTr("Open ") + (filename.length > 0 ? filename : qsTr("Download"));
+            return Utils.format(qsTr("Open {0}"), filename.length > 0 ? filename : qsTr("Download"));
         }
 
         onClicked: function()

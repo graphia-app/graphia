@@ -35,7 +35,7 @@ Window
     property var plugin: null
     property bool inNewTab: false
 
-    title: pluginName + qsTr(" Parameters")
+    title: Utils.format(qsTr("{0} Parameters"), pluginName)
 
     signal initialised();
     signal accepted();

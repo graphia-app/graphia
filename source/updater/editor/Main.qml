@@ -246,8 +246,8 @@ ApplicationWindow
     visible: true
     flags: Qt.Window
 
-    title: qsTr("Update Editor") + (root.lastUsedFilename.length > 0 ?
-        Utils.format(qsTr(" - {0}"), NativeUtils.baseFileNameForUrl(root.lastUsedFilename)) : "")
+    title: root.lastUsedFilename.length > 0 ? Utils.format(qsTr("{0} - {1}"), qsTr("Update Editor"),
+        NativeUtils.baseFileNameForUrl(root.lastUsedFilename)) : qsTr("Update Editor")
 
     width: 800
     height: 600

@@ -77,13 +77,10 @@ ApplicationWindow
 
     title:
     {
-        let text = "";
         if(currentTab !== null && currentTab.title.length > 0)
-            text += currentTab.title + qsTr(" - ");
+            return Utils.format(qsTr("{0} - {1}"), currentTab.title, application.name);
 
-        text += application.name;
-
-        return text;
+        return application.name;
     }
 
     Application { id: application }
@@ -2022,7 +2019,7 @@ ApplicationWindow
     Action
     {
         id: aboutAction
-        text: qsTr("About " + application.name + "…")
+        text: Utils.format(qsTr("About {0}…"), application.name)
         onTriggered: function() { Utils.createWindow(mainWindow, aboutDialog); }
     }
 
@@ -3100,11 +3097,9 @@ ApplicationWindow
                         return "";
 
                     let minutes = Math.floor(currentTab.document.commandSecondsRemaining / 60);
-                    let seconds = String(currentTab.document.commandSecondsRemaining % 60);
-                    if(seconds.length < 2)
-                        seconds = qsTr("0") + seconds;
+                    let seconds = String(currentTab.document.commandSecondsRemaining % 60).padStart(2, "0");
 
-                    return minutes + qsTr(":") + seconds;
+                    return Utils.format(qsTr("{0}:{1}", "minutes and seconds remaining"), minutes, seconds);
                 }
             }
 

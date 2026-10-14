@@ -881,7 +881,7 @@ void Application::updateLoadingCapabilities()
     auto pluginFileTypes = urlTypesForPlugins(_loadedPlugins);
     auto fileTypes = u::combine(nativeFileTypes, pluginFileTypes);
 
-    QString description = QObject::tr("All Files (");
+    QString extensions;
     bool second = false;
 
     for(const auto& fileType : fileTypes)
@@ -889,15 +889,16 @@ void Application::updateLoadingCapabilities()
         for(const auto& extension : fileType._extensions)
         {
             if(second)
-                description += u" "_s;
+                extensions += u" "_s;
             else
                 second = true;
 
-            description += u"*."_s + extension;
+            extensions += u"*."_s + extension;
         }
     }
 
-    description += u")"_s;
+    // The extensions must stay in brackets, as that's how file dialogs find them
+    QString description = QObject::tr("All Files (%1)").arg(extensions);
 
     _nameFilters.clear();
     _nameFilters.append(description);

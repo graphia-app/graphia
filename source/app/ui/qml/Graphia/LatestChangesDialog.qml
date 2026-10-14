@@ -32,7 +32,7 @@ Window
     property string text
     property string version
 
-    title: qsTr("Latest Changes for Version " + root.version)
+    title: Utils.format(qsTr("Latest Changes for Version {0}"), root.version)
     flags: Constants.defaultWindowFlags
     color: palette.window
 

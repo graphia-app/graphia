@@ -235,7 +235,7 @@ Window
                 Layout.alignment: Qt.AlignTop
                 color: palette.buttonText
 
-                text: (root.attributeName.length === 0 ? qsTr("Please select an attribute. ") : "") +
+                text: (root.attributeName.length === 0 ? qsTr("Please select an attribute.") + " " : "") +
                     qsTr("Double click on a value to edit it. " +
                     "Attributes can have their description and type manually changed. " +
                     "For attributes with shared values, selecting <i>Edit All Shared Values</i> " +

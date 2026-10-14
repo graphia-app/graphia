@@ -154,15 +154,15 @@ Rectangle
                     let k = i % 100;
 
                     if(j == 1 && k != 11)
-                      return i + qsTr("st");
+                      return Utils.format(qsTr("{0}st"), i);
 
                     if(j == 2 && k != 12)
-                      return i + qsTr("nd");
+                      return Utils.format(qsTr("{0}nd"), i);
 
                     if(j == 3 && k != 13)
-                      return i + qsTr("rd");
+                      return Utils.format(qsTr("{0}rd"), i);
 
-                    return i + qsTr("th");
+                    return Utils.format(qsTr("{0}th"), i);
                 }
             }
 
