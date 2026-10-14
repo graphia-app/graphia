@@ -164,7 +164,7 @@ private:
 
         QString description;
         QString displayName;
-        DisplayValueFn displayValueFn;
+        DisplayValueFns displayValueFns;
     } _;
 
     AttributeRange<int> _intRange;
@@ -566,9 +566,10 @@ public:
     QString displayName() const override { return _.displayName; }
     Attribute& setDisplayName(const QString& displayName) override { _.displayName = displayName; return *this; }
 
-    QString displayValue(const QString& value) const override { return _.displayValueFn ? _.displayValueFn(value) : value; }
-    bool hasDisplayValues() const { return _.displayValueFn != nullptr; }
-    Attribute& setDisplayValueFn(DisplayValueFn displayValueFn) override { _.displayValueFn = std::move(displayValueFn); return *this; }
+    QString displayValue(const QString& value) const override;
+    QString storedValue(const QString& displayValue) const override;
+    bool hasDisplayValues() const { return _.displayValueFns._displayValue != nullptr; }
+    Attribute& setDisplayValueFns(DisplayValueFns displayValueFns) override { _.displayValueFns = std::move(displayValueFns); return *this; }
 
     bool isValid() const override;
 
@@ -595,7 +596,10 @@ public:
     static QString prettify(QString name);
 
     // For values stored as e.g. "Cluster 3", where prefix is "Cluster ", shows them using displayTemplate, e.g. tr("Cluster %1")
-    static DisplayValueFn numberedDisplayValueFn(const QString& prefix, const QString& displayTemplate);
+    static DisplayValueFns numberedDisplayValueFns(const QString& prefix, const QString& displayTemplate);
+
+    // For values from a fixed set, shown as given by displayValues, i.e. stored value -> display value
+    static DisplayValueFns mappedDisplayValueFns(const std::map<QString, QString>& displayValues);
 
     // Takes a fully qualified internal attribute name and converts it to a
     // display name, where displayNameOf operates on the attribute name itself

@@ -271,6 +271,8 @@ function Create(transformIndex, document, transformString)
                                 {
                                     parameterData = document.attribute(parameterName);
                                     displayOperand = document.attributeDisplayValue(parameterName, operand);
+                                    parameterData.displayValueOf = value => document.attributeDisplayValue(parameterName, value);
+                                    parameterData.storedValueOf = text => document.attributeStoredValue(parameterName, text);
                                 }
                                 else
                                     console.log("Transform element parameter type unknown: " + parameter.type);

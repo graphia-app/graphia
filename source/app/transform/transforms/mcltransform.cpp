@@ -660,7 +660,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target)
     _graphModel->createAttribute(MCLTransformFactory::clusterAttribute())
         .setDescription(QObject::tr("The MCL cluster in which the node resides."))
         .setStringValueFn([clusterNames](NodeId nodeId) { return clusterNames[nodeId]; })
-        .setDisplayValueFn(Attribute::numberedDisplayValueFn(u"Cluster "_s, QObject::tr("Cluster %1")))
+        .setDisplayValueFns(Attribute::numberedDisplayValueFns(u"Cluster "_s, QObject::tr("Cluster %1")))
         .setValueMissingFn([clusterNames](NodeId nodeId) { return clusterNames[nodeId].isEmpty(); })
         .setFlag(AttributeFlag::FindShared)
         .setFlag(AttributeFlag::Searchable);

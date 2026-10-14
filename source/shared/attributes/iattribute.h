@@ -145,8 +145,14 @@ public:
     virtual IAttribute& setDisplayName(const QString& displayName) = 0;
 
     using DisplayValueFn = std::function<QString(const QString&)>;
+    struct DisplayValueFns
+    {
+        DisplayValueFn _displayValue;
+        DisplayValueFn _storedValue;
+    };
     virtual QString displayValue(const QString& value) const = 0;
-    virtual IAttribute& setDisplayValueFn(DisplayValueFn displayValueFn) = 0;
+    virtual QString storedValue(const QString& displayValue) const = 0;
+    virtual IAttribute& setDisplayValueFns(DisplayValueFns displayValueFns) = 0;
 
     virtual bool isValid() const = 0;
 

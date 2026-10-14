@@ -70,16 +70,8 @@ void ConditionalAttributeTransform::apply(TransformedGraph& target)
             .setDescription(QObject::tr("An attribute synthesised by the Boolean Attribute transform."));
 
         attribute.setStringValueFn([newValues](E elementId) { return newValues[elementId]; })
-            .setDisplayValueFn([](const QString& value)
-            {
-                if(value == u"True"_s)
-                    return QObject::tr("True");
-
-                if(value == u"False"_s)
-                    return QObject::tr("False");
-
-                return value;
-            })
+            .setDisplayValueFns(Attribute::mappedDisplayValueFns(
+                {{u"True"_s, QObject::tr("True")}, {u"False"_s, QObject::tr("False")}}))
             .setFlag(AttributeFlag::FindShared)
             .setFlag(AttributeFlag::Searchable);
     };

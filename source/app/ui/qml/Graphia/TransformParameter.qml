@@ -44,6 +44,10 @@ GridLayout
 
     // For a choice from a list, the text shown for each of the values in initialValue
     property var displayValues: []
+
+    // For strings, functions that determine how a value is shown, and how it's stored
+    property var displayValueOf: null
+    property var storedValueOf: null
     property string initialAttributeName
 
     property var document: null
@@ -185,7 +189,8 @@ GridLayout
 
         function updateValue()
         {
-            root.value = "\"" + Utils.escapeQuotes(text) + "\"";
+            let storedText = root.storedValueOf !== null ? root.storedValueOf(text) : text;
+            root.value = "\"" + Utils.escapeQuotes(storedText) + "\"";
         }
 
         onTextChanged:
@@ -312,7 +317,7 @@ GridLayout
             break;
 
         case ValueType.String:
-            textField.text = initialValue;
+            textField.text = displayValueOf !== null ? displayValueOf(initialValue) : initialValue;
 
             if(validatorRegex.length > 0)
                 textFieldValidator.regularExpression = new RegExp(validatorRegex);
@@ -356,7 +361,9 @@ GridLayout
                    validatorRegex: "",
                    initialValue: "",
                    initialIndex: -1,
-                   displayValues: []});
+                   displayValues: [],
+                   displayValueOf: null,
+                   storedValueOf: null});
     }
 
     Component.onCompleted: { reset(); }

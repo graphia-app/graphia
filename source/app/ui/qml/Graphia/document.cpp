@@ -2196,6 +2196,11 @@ QString Document::attributeDisplayValue(const QString& attributeName, const QStr
     return _graphModel != nullptr ? _graphModel->attributeDisplayValue(attributeName, value) : value;
 }
 
+QString Document::attributeStoredValue(const QString& attributeName, const QString& displayValue) const
+{
+    return _graphModel != nullptr ? _graphModel->attributeStoredValue(attributeName, displayValue) : displayValue;
+}
+
 QVariantMap Document::attribute(const QString& attributeName) const
 {
     QVariantMap map;

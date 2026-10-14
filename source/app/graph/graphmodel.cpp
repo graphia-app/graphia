@@ -371,7 +371,7 @@ GraphModel::GraphModel(Application* application, IPlugin* plugin) :
         {
             return u"Component %1"_s.arg(static_cast<int>(_->_transformedGraph.componentIdOfNode(nodeId) + 1));
         })
-        .setDisplayValueFn(Attribute::numberedDisplayValueFn(u"Component "_s, tr("Component %1")))
+        .setDisplayValueFns(Attribute::numberedDisplayValueFns(u"Component "_s, tr("Component %1")))
         .setDescription(tr("A node's component identifier indicates which component it is part of."))
         .setFlag(AttributeFlag::DisableDuringTransform);
 
@@ -381,7 +381,7 @@ GraphModel::GraphModel(Application* application, IPlugin* plugin) :
         {
             return u"Component %1"_s.arg(static_cast<int>(_->_transformedGraph.componentIdOfEdge(edgeId) + 1));
         })
-        .setDisplayValueFn(Attribute::numberedDisplayValueFn(u"Component "_s, tr("Component %1")))
+        .setDisplayValueFns(Attribute::numberedDisplayValueFns(u"Component "_s, tr("Component %1")))
         .setDescription(tr("An edge's component identifier indicates which component it is part of."))
         .setFlag(AttributeFlag::DisableDuringTransform);
 }
@@ -1104,6 +1104,15 @@ QString GraphModel::attributeDisplayValue(const QString& name, const QString& va
 
     const auto* attribute = attributeByName(name);
     return attribute != nullptr ? attribute->displayValue(value) : value;
+}
+
+QString GraphModel::attributeStoredValue(const QString& name, const QString& displayValue) const
+{
+    if(!attributeExists(name))
+        return displayValue;
+
+    const auto* attribute = attributeByName(name);
+    return attribute != nullptr ? attribute->storedValue(displayValue) : displayValue;
 }
 
 bool GraphModel::attributeIsDeclared(const QString& name) const

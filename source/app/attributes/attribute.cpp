@@ -26,6 +26,8 @@
 #include <QRegularExpression>
 #include <QDebug>
 
+#include <optional>
+
 using namespace Qt::Literals::StringLiterals;
 
 void Attribute::clearValueFunctions()
@@ -529,17 +531,64 @@ QString Attribute::prettify(QString name)
     return name;
 }
 
-Attribute::DisplayValueFn Attribute::numberedDisplayValueFn(const QString& prefix, const QString& displayTemplate)
+QString Attribute::displayValue(const QString& value) const
 {
-    return [prefix, displayTemplate](const QString& value)
+    return _.displayValueFns._displayValue ? _.displayValueFns._displayValue(value) : value;
+}
+
+QString Attribute::storedValue(const QString& displayValue) const
+{
+    return _.displayValueFns._storedValue ? _.displayValueFns._storedValue(displayValue) : displayValue;
+}
+
+Attribute::DisplayValueFns Attribute::numberedDisplayValueFns(const QString& prefix, const QString& displayTemplate)
+{
+    auto numberOf = [](const QString& text, const QString& before, const QString& after) -> std::optional<int>
     {
-        if(!value.startsWith(prefix))
-            return value;
+        if(!text.startsWith(before) || !text.endsWith(after) || text.size() <= before.size() + after.size())
+            return std::nullopt;
 
         bool isNumber = false;
-        auto number = value.mid(prefix.size()).toInt(&isNumber);
+        auto number = text.mid(before.size(), text.size() - before.size() - after.size()).toInt(&isNumber);
 
-        return isNumber ? displayTemplate.arg(number) : value;
+        return isNumber ? std::optional<int>(number) : std::nullopt;
+    };
+
+    // The text either side of the number when shown
+    auto placeholderIndex = displayTemplate.indexOf(u"%1"_s);
+    auto displayBefore = displayTemplate.left(placeholderIndex);
+    auto displayAfter = placeholderIndex >= 0 ? displayTemplate.mid(placeholderIndex + 2) : QString();
+
+    return
+    {
+        ._displayValue = [prefix, displayTemplate, numberOf](const QString& value)
+        {
+            auto number = numberOf(value, prefix, {});
+            return number ? displayTemplate.arg(*number) : value;
+        },
+        ._storedValue = [prefix, displayBefore, displayAfter, numberOf](const QString& displayValue)
+        {
+            auto number = numberOf(displayValue, displayBefore, displayAfter);
+            return number ? prefix + QString::number(*number) : displayValue;
+        }
+    };
+}
+
+Attribute::DisplayValueFns Attribute::mappedDisplayValueFns(const std::map<QString, QString>& displayValues)
+{
+    return
+    {
+        ._displayValue = [displayValues](const QString& value)
+        {
+            return u::contains(displayValues, value) ? displayValues.at(value) : value;
+        },
+        ._storedValue = [displayValues](const QString& displayValue)
+        {
+            auto it = std::ranges::find_if(displayValues,
+                [&displayValue](const auto& pair) { return pair.second == displayValue; });
+
+            return it != displayValues.end() ? it->first : displayValue;
+        }
     };
 }
 
