@@ -6,8 +6,14 @@ else()
     project("Graphia" LANGUAGES C CXX ASM)
 endif()
 
-find_package(Qt6 REQUIRED COMPONENTS Core)
-qt_standard_project_setup(REQUIRES 6.11)
+find_package(Qt6 REQUIRED COMPONENTS Core LinguistTools)
+qt_standard_project_setup(REQUIRES 6.11
+    I18N_SOURCE_LANGUAGE en_GB
+    I18N_TRANSLATED_LANGUAGES en_US)
+
+set(SHARED_I18N_OPTIONS
+    NO_GENERATE_PLURALS_TS_FILE
+    LUPDATE_OPTIONS -no-obsolete -locations relative)
 
 include_directories(source)
 
@@ -46,6 +52,36 @@ if(BUILD_TESTS)
     enable_testing()
     add_subdirectory(source/tests)
 endif()
+
+set_property(DIRECTORY source/thirdparty PROPERTY QT_EXCLUDE_FROM_TRANSLATION ON)
+if(BUILD_TESTS)
+    set_property(DIRECTORY source/tests PROPERTY QT_EXCLUDE_FROM_TRANSLATION ON)
+endif()
+qt_collect_translation_source_targets(I18N_SOURCE_TARGETS)
+
+list(APPEND I18N_TARGETS ${PROJECT_NAME})
+if(NOT EMSCRIPTEN)
+    list(APPEND I18N_TARGETS CrashReporter MessageBox Updater UpdateEditor)
+endif()
+
+set(I18N_QM_DIR ${CMAKE_CURRENT_BINARY_DIR}/translations)
+foreach(LANGUAGE IN LISTS QT_I18N_TRANSLATED_LANGUAGES)
+    set_source_files_properties(${I18N_QM_DIR}/graphia_${LANGUAGE}.qm
+        PROPERTIES QT_RESOURCE_ALIAS graphia_${LANGUAGE}.qm)
+endforeach()
+
+qt_add_translations(
+    TARGETS ${I18N_TARGETS}
+    SOURCE_TARGETS ${I18N_SOURCE_TARGETS}
+    TS_FILE_BASE graphia
+    TS_FILE_DIR ${CMAKE_CURRENT_LIST_DIR}/source/translations
+    QM_OUTPUT_DIRECTORY ${I18N_QM_DIR}
+    RESOURCE_PREFIX /i18n
+    MERGE_QT_TRANSLATIONS
+    QT_TRANSLATION_CATALOGS qtbase qtdeclarative
+    # There is no LRELEASE_OPTIONS -removeidentical here, because that would open
+    # the possibility of a plugin being able to override an identical translation
+    ${SHARED_I18N_OPTIONS})
 
 # The following sections are only here so that the files are available
 # for selection/editing in the IDE (if it supports it); nothing is

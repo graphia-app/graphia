@@ -19,6 +19,8 @@
 
 #include "build_defines.h"
 
+#include "shared/utils/translator.h"
+
 #include <QApplication>
 #include <QCoreApplication>
 #include <QMessageBox>
@@ -93,6 +95,7 @@ int main(int argc, char *argv[])
         arguments << QString::fromLocal8Bit(argv[i]);
 
     const QApplication app(argc, argv);
+    u::installTranslator();
 
     QCoreApplication::setOrganizationName(u"Graphia"_s);
     QCoreApplication::setOrganizationDomain(u"graphia.app"_s);

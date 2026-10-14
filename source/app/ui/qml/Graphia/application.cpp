@@ -37,6 +37,7 @@
 #include "shared/utils/scopetimer.h"
 #include "shared/utils/msvcwarningsuppress.h"
 #include "shared/utils/static_block.h"
+#include "shared/utils/translator.h"
 
 #include "app/loading/graphmlsaver.h"
 #include "app/loading/jsongraphsaver.h"
@@ -996,6 +997,7 @@ bool Application::initialisePlugin(IPlugin* plugin, std::unique_ptr<QPluginLoade
         return false;
     }
 
+    u::installPluginTranslator(pluginName, qObjectPlugin);
     plugin->initialise(this);
     _loadedPlugins.emplace_back(plugin, std::move(pluginLoader));
 

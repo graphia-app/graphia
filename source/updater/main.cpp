@@ -26,6 +26,7 @@
 #include "shared/utils/preferences.h"
 #include "shared/utils/consolecapture.h"
 #include "shared/utils/static_block.h"
+#include "shared/utils/translator.h"
 
 #include <qtsingleapplication/qtsingleapplication.h>
 
@@ -72,6 +73,7 @@ static QString existingInstallation(const QString& exe)
 static QStringList showUpdater(int argc, char *argv[])
 {
     const SharedTools::QtSingleApplication app(QStringLiteral(PRODUCT_NAME), argc, argv);
+    u::installTranslator();
 
     auto arguments = QApplication::arguments();
 

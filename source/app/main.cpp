@@ -35,6 +35,7 @@
 #include "shared/utils/console.h"
 #include "shared/utils/consolecapture.h"
 #include "shared/utils/signalhandling.h"
+#include "shared/utils/translator.h"
 
 #include "app/rendering/openglfunctions.h"
 
@@ -265,6 +266,8 @@ static int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
     // until 6.12.1 hides them on the widest items (QTBUG-151107)
     // This needs to come after ApplicationClass is initialised, as its contructor sets it
     ApplicationClass::setAttribute(Qt::AA_DontShowShortcutsInContextMenus);
+
+    u::installTranslator();
 
     QCommandLineParser commandLineParser;
 

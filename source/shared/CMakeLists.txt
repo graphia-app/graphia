@@ -123,6 +123,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/utils/string.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/thread.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/threadpool.h
+    ${CMAKE_CURRENT_LIST_DIR}/utils/translator.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/typeidentity.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/utils.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/visitor.h
@@ -174,6 +175,7 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/utils/static_block.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/string.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/threadpool.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/utils/translator.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/typeidentity.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/utils.cpp
 )

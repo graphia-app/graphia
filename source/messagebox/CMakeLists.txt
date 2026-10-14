@@ -8,6 +8,11 @@ set(CMAKE_AUTORCC ON)
 
 list(APPEND SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/main.cpp
+    ${CMAKE_SOURCE_DIR}/source/shared/utils/translator.cpp
+)
+
+list(APPEND HEADERS
+    ${CMAKE_SOURCE_DIR}/source/shared/utils/translator.h
 )
 
 list(APPEND RESOURCES
