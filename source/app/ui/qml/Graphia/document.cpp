@@ -2592,7 +2592,10 @@ void Document::apply(const QStringList& graphTransforms, const QStringList& visu
             [this, previousGraphTransforms](Command&)   { setTransforms(previousGraphTransforms); }));
     }
     else
-        setTransforms(_graphTransforms);
+    {
+        _graphTransformsFromUI = _graphTransforms;
+        emit transformsChanged();
+    }
 
     if(visualisationsDiffer(_visualisations, visualisations))
     {
@@ -2602,7 +2605,10 @@ void Document::apply(const QStringList& graphTransforms, const QStringList& visu
             _visualisations, visualisations, newGraphTransformIndex));
     }
     else
-        setVisualisations(_visualisations);
+    {
+        _visualisationsFromUI = _visualisations;
+        emit visualisationsChanged();
+    }
 
     const ExecutePolicy policy = replaceLatestCommand ?
         ExecutePolicy::Replace : ExecutePolicy::Add;
