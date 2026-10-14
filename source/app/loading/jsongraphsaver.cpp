@@ -45,6 +45,8 @@ bool JSONGraphSaver::save()
     const size_t numElements = _graphModel->graph().numNodes() + _graphModel->graph().numEdges();
     size_t runningCount = 0;
 
+    const auto exportedNames = exportedAttributeNames(*_graphModel);
+
     // Node Attributes
     setPhase(QObject::tr("Node Attributes"));
     for(auto& node : fileObject["graph"]["nodes"])
@@ -56,11 +58,11 @@ bool JSONGraphSaver::save()
             if(attribute->hasParameter())
                 continue;
 
-            auto byteArray = nodeAttributeName.toUtf8();
+            auto byteArray = exportedNames.at(nodeAttributeName).toUtf8();
             const auto* name = byteArray.constData();
 
             if(attribute->valueType() == ValueType::String)
-                node["metadata"][name] = attribute->stringValueOf(nodeId);
+                node["metadata"][name] = attribute->displayValue(attribute->stringValueOf(nodeId));
             else if(attribute->valueType() == ValueType::Int)
                 node["metadata"][name] = attribute->intValueOf(nodeId);
             else if(attribute->valueType() == ValueType::Float)
@@ -82,11 +84,11 @@ bool JSONGraphSaver::save()
             if(attribute->hasParameter())
                 continue;
 
-            auto byteArray = edgeAttributeName.toUtf8();
+            auto byteArray = exportedNames.at(edgeAttributeName).toUtf8();
             const auto* name = byteArray.constData();
 
             if(attribute->valueType() == ValueType::String)
-                edge["metadata"][name] = attribute->stringValueOf(edgeId);
+                edge["metadata"][name] = attribute->displayValue(attribute->stringValueOf(edgeId));
             else if(attribute->valueType() == ValueType::Int)
                 edge["metadata"][name] = attribute->intValueOf(edgeId);
             else if(attribute->valueType() == ValueType::Float)

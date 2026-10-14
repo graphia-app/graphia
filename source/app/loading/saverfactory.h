@@ -26,6 +26,7 @@
 #include <QString>
 #include <QUrl>
 
+#include <map>
 #include <memory>
 
 class Document;
@@ -34,6 +35,8 @@ class IGraphModel;
 // The entire point of this function is to avoid including document.h
 // Sometimes C++ really sucks
 IGraphModel* graphModelFor(Document* document);
+
+std::map<QString, QString> exportedAttributeNames(const IGraphModel& graphModel);
 
 template<class SaverType>
 class SaverFactory : public ISaverFactory

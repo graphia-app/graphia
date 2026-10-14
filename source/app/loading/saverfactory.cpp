@@ -21,8 +21,38 @@
 
 #include "app/ui/document.h"
 #include "shared/graph/igraphmodel.h"
+#include "shared/attributes/iattribute.h"
+
+#include <set>
+#include <utility>
 
 IGraphModel* graphModelFor(Document* document)
 {
     return document->graphModel();
+}
+
+std::map<QString, QString> exportedAttributeNames(const IGraphModel& graphModel)
+{
+    std::map<std::pair<ElementType, QString>, std::set<QString>> attributesShownAs;
+
+    for(const auto& attributeName : graphModel.attributeNames())
+    {
+        const auto* attribute = graphModel.attributeByName(attributeName);
+        attributesShownAs[{attribute->elementType(), graphModel.attributeDisplayName(attributeName)}].insert(attributeName);
+    }
+
+    std::map<QString, QString> names;
+
+    for(const auto& [shownAs, attributeNames] : attributesShownAs)
+    {
+        const auto& displayName = shownAs.second;
+
+        for(const auto& attributeName : attributeNames)
+        {
+            const bool clashes = attributeNames.size() > 1 && attributeName != displayName;
+            names.emplace(attributeName, clashes ? attributeName : displayName);
+        }
+    }
+
+    return names;
 }

@@ -53,11 +53,13 @@ bool GMLSaver::save()
         return string.toHtmlEscaped();
     };
 
+    const auto exportedNames = exportedAttributeNames(*_graphModel);
+
     std::map<QString, QString> alphanumAttributeNames;
     setPhase(QObject::tr("Attributes"));
     for(const auto& attributeName : _graphModel->attributeNames())
     {
-        auto cleanName = attributeName;
+        auto cleanName = exportedNames.at(attributeName);
         static const QRegularExpression re(uR"([^a-zA-Z\d])"_s);
         cleanName.remove(re);
         if(cleanName.isEmpty())
@@ -102,7 +104,7 @@ bool GMLSaver::save()
 
             if(attribute->valueType() == ValueType::String)
             {
-                const QString escapedValue = escape(attribute->stringValueOf(elementId));
+                const QString escapedValue = escape(attribute->displayValue(attribute->stringValueOf(elementId)));
                 stream << indent(level) << alphanumAttributeNames[attributeName] << " "
                        << u"\"%1\""_s.arg(escapedValue) << "\n";
             }

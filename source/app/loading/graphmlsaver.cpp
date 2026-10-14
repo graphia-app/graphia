@@ -96,6 +96,7 @@ bool GraphMLSaver::save()
     int keyId = 0;
     std::map<QString, QString> idToAttribute;
     std::map<QString, QString> attributeToId;
+    const auto exportedNames = exportedAttributeNames(*_graphModel);
     for(const auto& attributeName : _graphModel->attributeNames())
     {
         runningCount++;
@@ -117,7 +118,7 @@ bool GraphMLSaver::save()
         if(attribute->elementType() == ElementType::Component)
             stream.writeAttribute(u"for"_s, u"graph"_s);
 
-        stream.writeAttribute(u"attr.name"_s, attributeName);
+        stream.writeAttribute(u"attr.name"_s, exportedNames.at(attributeName));
 
         QString valueTypeToString;
         switch(attribute->valueType())
@@ -152,7 +153,7 @@ bool GraphMLSaver::save()
 
             stream.writeStartElement(u"data"_s);
             stream.writeAttribute(u"key"_s, attributeToId.at(nodeAttributeName));
-            stream.writeCharacters(attribute->stringValueOf(nodeId).toHtmlEscaped());
+            stream.writeCharacters(attribute->displayValue(attribute->stringValueOf(nodeId)).toHtmlEscaped());
             stream.writeEndElement();
         }
 
@@ -200,7 +201,7 @@ bool GraphMLSaver::save()
 
             stream.writeStartElement(u"data"_s);
             stream.writeAttribute(u"key"_s, attributeToId.at(edgeAttributeName));
-            stream.writeCharacters(attribute->stringValueOf(edgeId).toHtmlEscaped());
+            stream.writeCharacters(attribute->displayValue(attribute->stringValueOf(edgeId)).toHtmlEscaped());
             stream.writeEndElement();
         }
         stream.writeEndElement(); // edge
