@@ -113,6 +113,16 @@ void SearchManager::findNodes(QString term, Flags<FindOptions> options,
         std::vector<NodeConditionFn> conditionFns;
         for(auto& attribute : attributes)
         {
+            if(attribute.hasDisplayValues())
+            {
+                conditionFns.emplace_back([attribute, re](NodeId nodeId)
+                {
+                    return re.match(attribute.displayValue(attribute.stringValueOf(nodeId))).hasMatch();
+                });
+
+                continue;
+            }
+
             auto conditionFn = CreateConditionFnFor::node(attribute, op, term);
 
             if(conditionFn != nullptr)

@@ -1754,8 +1754,22 @@ void Document::selectByAttributeValue(const QString& attributeName, const QStrin
     if(u::contains(_graphModel->availableAttributeNames(), parsedAttributeName._name))
     {
         const auto& attribute = _graphModel->attributeValueByName(parsedAttributeName._name);
+        NodeConditionFn conditionFn;
 
-        auto conditionFn = CreateConditionFnFor::node(attribute, ConditionFnOp::String::MatchesRegex, term);
+        if(attribute.hasDisplayValues())
+        {
+            const QRegularExpression re(term);
+            if(re.isValid())
+            {
+                conditionFn = [&attribute, re](NodeId nodeId)
+                {
+                    return re.match(attribute.displayValue(attribute.stringValueOf(nodeId))).hasMatch();
+                };
+            }
+        }
+        else
+            conditionFn = CreateConditionFnFor::node(attribute, ConditionFnOp::String::MatchesRegex, term);
+
         if(conditionFn != nullptr)
         {
             for(auto nodeId : _graphModel->graph().nodeIds())

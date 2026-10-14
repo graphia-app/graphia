@@ -518,33 +518,33 @@ Rectangle
                     textRole: "displayValue"
                     valueRole: "value"
 
-                    onCurrentValueChanged:
+                    onCurrentTextChanged:
                     {
-                        // Prevent spurious changes to currentValue
+                        // Prevent spurious changes to currentText
                         if(_modelChanging)
                             return;
 
-                        value = currentValue !== undefined ? currentValue : "";
+                        value = currentText;
                     }
 
                     function refresh()
                     {
                         // Try to keep the same value selected
-                        let preUpdateValue = currentValue;
+                        let preUpdateText = currentText;
 
                         let attributeName = selectAttributeComboBox.currentValue;
                         let attribute = root.document.attribute(attributeName);
-                        let values = attribute.sharedValues.map(sharedValue => ({value: sharedValue,
-                            displayValue: root.document.attributeDisplayValue(attributeName, sharedValue)}));
+                        let values = attribute.sharedValues.map(sharedValue =>
+                            root.document.attributeDisplayValue(attributeName, sharedValue));
 
                         if(preferences.findByAttributeSortLexically)
-                            values.sort((a, b) => NativeUtils.compareStrings(a.displayValue, b.displayValue));
+                            values.sort(NativeUtils.compareStrings);
 
                         _modelChanging = true;
                         model = values;
                         _modelChanging = false;
 
-                        let rowIndex = indexOfValue(preUpdateValue);
+                        let rowIndex = find(preUpdateText);
 
                         if(rowIndex >= 0)
                             currentIndex = rowIndex;
@@ -553,7 +553,7 @@ Rectangle
                         else
                             currentIndex = -1;
 
-                        value = currentValue !== undefined ? currentValue : "";
+                        value = currentText;
                     }
                 }
             }
@@ -598,13 +598,13 @@ Rectangle
 
                     sourceComponent: CheckBox
                     {
-                        text: attributeValueDelegate.modelData.displayValue
+                        text: attributeValueDelegate.modelData
 
                         rightPadding: scrollView.scrollBarWidth
 
                         function isChecked()
                         {
-                            return Utils.setContains(root._attributeValues, attributeValueDelegate.modelData.value);
+                            return Utils.setContains(root._attributeValues, attributeValueDelegate.modelData);
                         }
 
                         checked: { return isChecked(); }
@@ -615,9 +615,9 @@ Rectangle
                             checked = checked;
 
                             if(checked)
-                                root._attributeValues = Utils.setAdd(root._attributeValues, attributeValueDelegate.modelData.value);
+                                root._attributeValues = Utils.setAdd(root._attributeValues, attributeValueDelegate.modelData);
                             else
-                                root._attributeValues = Utils.setRemove(root._attributeValues, attributeValueDelegate.modelData.value);
+                                root._attributeValues = Utils.setRemove(root._attributeValues, attributeValueDelegate.modelData);
 
                             // Rebind so that the delegate doesn't hold the state
                             checked = Qt.binding(isChecked);
@@ -625,7 +625,7 @@ Rectangle
 
                         ToolTip.visible: hovered
                         ToolTip.delay: Constants.toolTipDelay
-                        ToolTip.text: attributeValueDelegate.modelData.displayValue
+                        ToolTip.text: attributeValueDelegate.modelData
                     }
                 }
             }

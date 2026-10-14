@@ -567,6 +567,7 @@ public:
     Attribute& setDisplayName(const QString& displayName) override { _.displayName = displayName; return *this; }
 
     QString displayValue(const QString& value) const override { return _.displayValueFn ? _.displayValueFn(value) : value; }
+    bool hasDisplayValues() const { return _.displayValueFn != nullptr; }
     Attribute& setDisplayValueFn(DisplayValueFn displayValueFn) override { _.displayValueFn = std::move(displayValueFn); return *this; }
 
     bool isValid() const override;
