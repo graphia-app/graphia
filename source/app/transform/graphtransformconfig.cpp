@@ -25,15 +25,28 @@
 
 #include "shared/utils/container.h"
 
+#include <QLocale>
 #include <QObject>
 #include <QStringList>
 #include <QtGlobal>
 #include <QVariantList>
 
 #include <algorithm>
+#include <cmath>
 #include <map>
 
 using namespace Qt::Literals::StringLiterals;
+
+// Enforce consistency in rendering doubles to string
+static QString doubleAsString(double d)
+{
+    auto string = QString::number(d, 'g', QLocale::FloatingPointShortest);
+
+    if(std::isfinite(d) && !string.contains(u'.') && !string.contains(u'e'))
+        string += u".0"_s;
+
+    return string;
+}
 
 bool GraphTransformConfig::TerminalCondition::operator==(const GraphTransformConfig::TerminalCondition& other) const
 {
@@ -135,7 +148,7 @@ QString GraphTransformConfig::Parameter::valueAsString(bool addQuotes) const
 
         explicit Visitor(bool addQuotes_) : _addQuotes(addQuotes_) {}
 
-        QString operator()(double d) const          { return QString::number(d, 'f'); }
+        QString operator()(double d) const          { return doubleAsString(d); }
         QString operator()(int i) const             { return QString::number(i); }
         QString operator()(const QString& s) const
         {
@@ -175,7 +188,7 @@ QVariantMap GraphTransformConfig::conditionAsVariantMap() const
         {
             struct Visitor
             {
-                QString operator()(const double& d) const   { return QString::number(d, 'f'); }
+                QString operator()(const double& d) const   { return doubleAsString(d); }
                 QString operator()(const int& i) const      { return QString::number(i); }
                 QString operator()(const QString& s) const  { return s; }
             };
@@ -241,7 +254,7 @@ QString GraphTransformConfig::conditionAsString(bool forDisplay) const
 
                 bool _forDisplay;
 
-                QString operator()(const double& d) const   { return QString::number(d, 'f'); }
+                QString operator()(const double& d) const   { return doubleAsString(d); }
                 QString operator()(const int& i) const      { return QString::number(i); }
                 QString operator()(const QString& s) const
                 {
