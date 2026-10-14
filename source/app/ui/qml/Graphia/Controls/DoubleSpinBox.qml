@@ -72,8 +72,16 @@ Control
         // Avoid ping-ponging between root.onValueChanged and spinBox.onValueChanged
         property bool _setting: false
 
-        function doubleValue(i) { return root.from + ((root.to - root.from) / (to - from)) * (i - from); }
-        function intValue(d)    { return from + ((to - from) / (root.to - root.from)) * (d - root.from); }
+        function doubleValue(i)
+        {
+            let d = root.from + ((root.to - root.from) / (to - from)) * (i - from);
+            return Number(d.toFixed(root.decimals));
+        }
+
+        function intValue(d)
+        {
+            return from + ((to - from) / (root.to - root.from)) * (d - root.from);
+        }
 
         from: -0x3FFFFFFF
         to: 0x3FFFFFFF
