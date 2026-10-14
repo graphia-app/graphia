@@ -349,7 +349,7 @@ public:
 
 void MCLTransform::calculateMCL(float inflation, TransformedGraph& target)
 {
-    setPhase(u"MCL Initialising"_s);
+    setPhase(QObject::tr("MCL Initialising"));
 
     auto nodeCount = target.numNodes();
 
@@ -434,7 +434,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target)
         if(cancelled())
             return;
 
-        setPhase(u"MCL Iteration %1"_s.arg(QString::number(iter + 1)));
+        setPhase(QObject::tr("MCL Iteration %1").arg(QString::number(iter + 1)));
         if(_debugMatrices)
         {
             matrixStream << "Pre-Expanded Matrix\n";
@@ -569,7 +569,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target)
     if(_debugIteration)
         qDebug() << iter << "iterations";
 
-    setPhase(u"MCL Interpreting"_s);
+    setPhase(QObject::tr("MCL Interpreting"));
 
     // Interpret the matrix
     std::vector<std::set<size_t>> clusters;

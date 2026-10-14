@@ -1909,8 +1909,8 @@ BaseParameterDialog
             let item = model.get(i);
             let correlation = root.plugin.correlationInfoFor(item.value);
 
-            correlationNameComponent.createObject(layout, {text: qsTr("<b>" + correlation.name + ":</b>")});
-            correlationDescriptionComponent.createObject(layout, {text: qsTr(correlation.description)});
+            correlationNameComponent.createObject(layout, {text: "<b>" + correlation.name + ":</b>"});
+            correlationDescriptionComponent.createObject(layout, {text: correlation.description});
         }
     }
 

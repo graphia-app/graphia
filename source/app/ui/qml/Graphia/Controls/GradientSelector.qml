@@ -304,7 +304,7 @@ Window
 
                     Button
                     {
-                        text: "Invert"
+                        text: qsTr("Invert")
                         onClicked: function() { gradientEditor.invert(); }
                     }
                 }

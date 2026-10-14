@@ -59,17 +59,16 @@ MouseArea
             {
                 let items =
                 [
-                    {"Name":        "display"},
-                    {"Category":    "category"}
+                    {text: qsTr("Name"),     roleName: "display"},
+                    {text: qsTr("Category"), roleName: "category"}
                 ];
 
                 items.forEach(function(item)
                 {
-                    let name = Object.keys(item)[0];
-                    let roleName = item[name];
+                    let roleName = item.roleName;
 
                     let menuItem = sortByComponent.createObject(root);
-                    menuItem.text = qsTr(name);
+                    menuItem.text = item.text;
                     menuItem.checked = Qt.binding(function()
                     {
                         return transformsList.sortRoleName === roleName;
@@ -105,17 +104,16 @@ MouseArea
             {
                 let items =
                 [
-                    {"Ascending":   true},
-                    {"Descending":  false}
+                    {text: qsTr("Ascending"),  ascendingSortOrder: true},
+                    {text: qsTr("Descending"), ascendingSortOrder: false}
                 ];
 
                 items.forEach(function(item)
                 {
-                    let name = Object.keys(item)[0];
-                    let ascendingSortOrder = item[name];
+                    let ascendingSortOrder = item.ascendingSortOrder;
 
                     let menuItem = sortAscendingComponent.createObject(root);
-                    menuItem.text = qsTr(name);
+                    menuItem.text = item.text;
                     menuItem.checked = Qt.binding(function()
                     {
                         return transformsList.ascendingSortOrder === ascendingSortOrder;

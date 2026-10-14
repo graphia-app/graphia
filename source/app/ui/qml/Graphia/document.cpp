@@ -2595,8 +2595,8 @@ void Document::apply(const QStringList& graphTransforms, const QStringList& visu
         commands.emplace_back(std::make_unique<Command>(
             Command::CommandDescription
             {
-                u"Apply Transform Flags"_s,
-                u"Applying Transform Flags"_s
+                tr("Apply Transform Flags"),
+                tr("Applying Transform Flags")
             },
             [this, graphTransforms](Command&)           { setTransforms(graphTransforms); },
             [this, previousGraphTransforms](Command&)   { setTransforms(previousGraphTransforms); }));

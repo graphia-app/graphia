@@ -32,7 +32,7 @@ using namespace Qt::Literals::StringLiterals;
 
 void EccentricityTransform::apply(TransformedGraph& target)
 {
-    setPhase(u"Eccentricity"_s);
+    setPhase(QObject::tr("Eccentricity"));
     calculateDistances(target);
 }
 

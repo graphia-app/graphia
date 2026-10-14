@@ -59,7 +59,7 @@ void PageRankTransform::calculatePageRank(TransformedGraph& target)
     // http://michaelnielsen.org/blog/using-your-laptop-to-compute-pagerank-for-millions-of-webpages/
     NodeArray<float> pageRankScores(target);
 
-    setPhase(u"PageRank"_s);
+    setPhase(QObject::tr("PageRank"));
 
     // We must do our own componentisation as the graph's set of components
     // won't necessarily be up-to-date
@@ -99,7 +99,7 @@ void PageRankTransform::calculatePageRank(TransformedGraph& target)
             if(cancelled())
                 return;
 
-            setPhase(u"PageRank Iteration %1"_s.arg(
+            setPhase(QObject::tr("PageRank Iteration %1").arg(
                                 QString::number(totalIterationCount + 1)));
 
             // Calculate pagerank

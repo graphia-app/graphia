@@ -92,13 +92,13 @@ QVariant EnrichmentTableModel::data(const QModelIndex& index, int role) const
     {
         switch(static_cast<Results>(column))
         {
-        case Results::SelectionA:           return _selectionA.isEmpty() ? u"Selection A"_s : _selectionA;
-        case Results::SelectionB:           return _selectionB.isEmpty() ? u"Selection B"_s : _selectionB;
-        case Results::Observed:             return u"Observed"_s;
-        case Results::ExpectedTrial:        return u"Expected"_s;
-        case Results::OverRep:              return u"Representation"_s;
-        case Results::Fishers:              return u"Fishers"_s;
-        case Results::BonferroniAdjusted:   return u"Bonferroni Adjusted"_s;
+        case Results::SelectionA:           return _selectionA.isEmpty() ? tr("Selection A") : _selectionA;
+        case Results::SelectionB:           return _selectionB.isEmpty() ? tr("Selection B") : _selectionB;
+        case Results::Observed:             return tr("Observed");
+        case Results::ExpectedTrial:        return tr("Expected");
+        case Results::OverRep:              return tr("Representation");
+        case Results::Fishers:              return tr("Fishers");
+        case Results::BonferroniAdjusted:   return tr("Bonferroni Adjusted");
         default:
             return {};
         }

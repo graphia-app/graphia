@@ -872,8 +872,8 @@ void Application::updateLoadingCapabilities()
     {
         {
             ._name = NativeFileType,
-            ._individualDescription = QString("%1 File").arg(name()),
-            ._collectiveDescription = QString("%1 Files").arg(name()),
+            ._individualDescription = QObject::tr("%1 File").arg(name()),
+            ._collectiveDescription = QObject::tr("%1 Files").arg(name()),
             ._extensions = {nativeExtension()}
         }
     };

@@ -37,7 +37,7 @@ using namespace Qt::Literals::StringLiterals;
 
 void BetweennessTransform::apply(TransformedGraph& target)
 {
-    setPhase(u"Betweenness"_s);
+    setPhase(QObject::tr("Betweenness"));
     setProgress(0);
 
     const auto& nodeIds = target.nodeIds();
