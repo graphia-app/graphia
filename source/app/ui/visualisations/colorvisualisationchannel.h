@@ -25,10 +25,13 @@
 #include "shared/ui/visualisations/colorgradient.h"
 #include "shared/ui/visualisations/colorpalette.h"
 
+#include <QObject>
 #include <QString>
 #include <QVariantMap>
 
 #include <vector>
+
+using namespace Qt::Literals::StringLiterals;
 
 class ColorVisualisationChannel : public VisualisationChannel
 {
@@ -38,6 +41,9 @@ public:
 
     void apply(double value, ElementVisual& elementVisual) const override;
     void apply(const QString& value, ElementVisual& elementVisual) const override;
+
+    QString name() const override { return u"Colour"_s; }
+    QString displayName() const override { return QObject::tr("Colour"); }
 
     bool supports(ValueType valueType) const override { return valueType != ValueType::Unknown; }
 

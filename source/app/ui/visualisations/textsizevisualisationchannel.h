@@ -22,7 +22,10 @@
 
 #include "visualisationchannel.h"
 
+#include <QObject>
 #include <QString>
+
+using namespace Qt::Literals::StringLiterals;
 
 class TextSizeVisualisationChannel : public VisualisationChannel
 {
@@ -31,6 +34,9 @@ public:
     using VisualisationChannel::apply;
 
     void apply(double value, ElementVisual& elementVisual) const override;
+
+    QString name() const override { return u"Text Size"_s; }
+    QString displayName() const override { return QObject::tr("Text Size"); }
 
     bool supports(ValueType type) const override { return type == ValueType::Int || type == ValueType::Float; }
 

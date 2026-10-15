@@ -22,7 +22,10 @@
 
 #include "visualisationchannel.h"
 
+#include <QObject>
 #include <QString>
+
+using namespace Qt::Literals::StringLiterals;
 
 class SharedTextVisualisationChannel : public VisualisationChannel
 {
@@ -35,6 +38,9 @@ public:
 
     TextVisuals textVisuals(const QString& attributeName,
         const GraphModel& graphModel, const TransformedGraph&) override;
+
+    QString name() const override { return u"Shared Text"_s; }
+    QString displayName() const override { return QObject::tr("Shared Text"); }
 
     bool appliesTo(ElementType elementType) const override { return elementType & ElementType::Node; }
     bool supports(ValueType valueType) const override { return valueType == ValueType::String; }

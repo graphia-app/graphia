@@ -22,7 +22,10 @@
 
 #include "visualisationchannel.h"
 
+#include <QObject>
 #include <QString>
+
+using namespace Qt::Literals::StringLiterals;
 
 class TextVisualisationChannel : public VisualisationChannel
 {
@@ -32,6 +35,9 @@ public:
 
     void apply(double value, ElementVisual& elementVisual) const override;
     void apply(const QString& value, ElementVisual& elementVisual) const override;
+
+    QString name() const override { return u"Text"_s; }
+    QString displayName() const override { return QObject::tr("Text"); }
 
     bool supports(ValueType valueType) const override { return valueType != ValueType::Unknown; }
     bool requiresRange() const override { return false; }

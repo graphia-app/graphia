@@ -42,6 +42,9 @@ class VisualisationChannel
 public:
     virtual ~VisualisationChannel() = default;
 
+    virtual QString name() const = 0;
+    virtual QString displayName() const = 0;
+
     virtual void apply(double, ElementVisual&) const { qFatal("apply not implemented"); }
     virtual void apply(const QString&, ElementVisual&) const { qFatal("apply not implemented"); }
 

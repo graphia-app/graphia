@@ -362,12 +362,18 @@ GraphModel::GraphModel(Application* application, IPlugin* plugin) :
         .setDescription(tr("An edge's component identifier indicates which component it is part of."))
         .setFlag(AttributeFlag::DisableDuringTransform);
 
-    _->_visualisationChannels.emplace(tr("Colour"), std::make_unique<ColorVisualisationChannel>());
-    _->_visualisationChannels.emplace(tr("Size"), std::make_unique<SizeVisualisationChannel>());
-    _->_visualisationChannels.emplace(tr("Shared Text"), std::make_unique<SharedTextVisualisationChannel>());
-    _->_visualisationChannels.emplace(tr("Text"), std::make_unique<TextVisualisationChannel>());
-    _->_visualisationChannels.emplace(tr("Text Colour"), std::make_unique<TextColorVisualisationChannel>());
-    _->_visualisationChannels.emplace(tr("Text Size"), std::make_unique<TextSizeVisualisationChannel>());
+    auto addVisualisationChannel = [this](std::unique_ptr<VisualisationChannel> channel)
+    {
+        auto channelName = channel->name();
+        _->_visualisationChannels.emplace(channelName, std::move(channel));
+    };
+
+    addVisualisationChannel(std::make_unique<ColorVisualisationChannel>());
+    addVisualisationChannel(std::make_unique<SizeVisualisationChannel>());
+    addVisualisationChannel(std::make_unique<SharedTextVisualisationChannel>());
+    addVisualisationChannel(std::make_unique<TextVisualisationChannel>());
+    addVisualisationChannel(std::make_unique<TextColorVisualisationChannel>());
+    addVisualisationChannel(std::make_unique<TextSizeVisualisationChannel>());
 }
 
 GraphModel::~GraphModel() // NOLINT modernize-use-equals-default

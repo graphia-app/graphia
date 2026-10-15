@@ -22,13 +22,19 @@
 
 #include "colorvisualisationchannel.h"
 
+#include <QObject>
 #include <QString>
+
+using namespace Qt::Literals::StringLiterals;
 
 class TextColorVisualisationChannel : public ColorVisualisationChannel
 {
 public:
     using ColorVisualisationChannel::ColorVisualisationChannel;
     using ColorVisualisationChannel::apply;
+
+    QString name() const override { return u"Text Colour"_s; }
+    QString displayName() const override { return QObject::tr("Text Colour"); }
 
     void apply(double value, ElementVisual& elementVisual) const override;
     void apply(const QString& value, ElementVisual& elementVisual) const override;
