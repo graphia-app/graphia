@@ -33,12 +33,13 @@
 # log-analysis job does.
 
 ALL_TOOLS="clang-tidy cppcheck clazy qmllint iwyu"
+DEFAULT_TOOLS="clang-tidy cppcheck clazy qmllint"
 
 usage()
 {
   echo "Usage: $(basename $0) [--no-build] [${ALL_TOOLS// /|} ...]"
   echo "  --no-build  reuse the existing build/clang instead of rebuilding it"
-  echo "  With no tools given, all of them are run."
+  echo "  With no tools given, all but iwyu are run."
   exit 1
 }
 
@@ -73,7 +74,7 @@ do
   esac
 done
 
-[ ${#TOOLS[@]} -eq 0 ] && TOOLS=(${ALL_TOOLS})
+[ ${#TOOLS[@]} -eq 0 ] && TOOLS=(${DEFAULT_TOOLS})
 
 if [ -z "${QT_ROOT_DIR}" ]
 then
