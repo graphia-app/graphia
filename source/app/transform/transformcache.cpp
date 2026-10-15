@@ -124,9 +124,11 @@ TransformCache::Result TransformCache::apply(int index, const GraphTransformConf
     auto& resultSet = _cache.front();
 
     auto it = std::ranges::find_if(resultSet,
-    [index, &config](const auto& cachedResult)
+    [this, index, &config](const auto& cachedResult)
     {
-        return cachedResult._index == index && cachedResult._config.equals(config);
+        return cachedResult._index == index && cachedResult._config.equals(config) &&
+            std::ranges::all_of(config.referencedAttributeNames(), [this](const auto& attributeName)
+            { return _graphModel->attributeExists(attributeName); });
     });
 
     if(it != resultSet.end())
