@@ -311,10 +311,28 @@ Item
     {
         target: document
         function onTransformsChanged() { if(ready) refreshTransformInfo(); }
+
+        function onAttributesChanged(addedNames, removedNames)
+        {
+            if(!root.ready)
+                return;
+
+            let referenced = name => root._referencedAttributeNames.includes(name);
+            if(addedNames.some(referenced) || removedNames.some(referenced))
+            {
+                // Force a rebuild
+                expressionLoader.active = false;
+                expressionLoader.active = true;
+            }
+        }
     }
+
+    property var _referencedAttributeNames: []
 
     function build(expression)
     {
+        _referencedAttributeNames = document.attributeNamesReferencedBy(value);
+
         if(document.graphTransformIsValid(value))
         {
             refreshTransformInfo();
