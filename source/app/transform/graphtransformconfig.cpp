@@ -506,7 +506,8 @@ std::vector<QString> GraphTransformConfig::referencedAttributeNames() const
     return names;
 }
 
-bool GraphTransformConfig::equals(const GraphTransformConfig& other, bool ignoreInertFlags) const
+bool GraphTransformConfig::equals(const GraphTransformConfig& other,
+    NamedBool<"ignoreInertFlags"> ignoreInertFlags) const
 {
     std::vector<QString> flagsToIgnore;
 

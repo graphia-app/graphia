@@ -21,7 +21,10 @@
 #define GRAPHTRANSFORMCONFIG_H
 
 #include "app/attributes/condtionfnops.h"
+
 #include "shared/attributes/valuetype.h"
+
+#include "shared/utils/namedbool.h"
 #include "shared/utils/recursivevalue.h"
 
 #include <QString>
@@ -104,7 +107,8 @@ struct GraphTransformConfig
 
     std::vector<QString> referencedAttributeNames() const;
 
-    bool equals(const GraphTransformConfig& other, bool ignoreInertFlags = true) const;
+    bool equals(const GraphTransformConfig& other,
+        NamedBool<"ignoreInertFlags"> ignoreInertFlags = "ignoreInertFlags"_yes) const;
     bool isFlagSet(const QString& flag) const;
 };
 

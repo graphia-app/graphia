@@ -26,6 +26,7 @@
 
 #include "shared/utils/flags.h"
 #include "shared/utils/color.h"
+#include "shared/utils/namedbool.h"
 #include "shared/utils/string.h"
 #include "shared/utils/json.h"
 #include "shared/loading/tabulardata.h"
@@ -2347,7 +2348,7 @@ void Document::removeGraphTransform(int index)
 // This tests two transform lists to determine if replacing one with the
 // other would actually result in a different transformation
 static bool transformsDiffer(const QStringList& a, const QStringList& b,
-    bool ignoreInertFlags = true)
+    NamedBool<"ignoreInertFlags"> ignoreInertFlags = "ignoreInertFlags"_yes)
 {
     if(a.length() != b.length())
         return true;
@@ -2582,13 +2583,13 @@ void Document::apply(const QStringList& graphTransforms, const QStringList& visu
 
     const bool transformsValid = graphTransformsAreValid(graphTransforms);
 
-    if(transformsValid && transformsDiffer(_graphTransforms, graphTransforms, true))
+    if(transformsValid && transformsDiffer(_graphTransforms, graphTransforms, "ignoreInertFlags"_yes))
     {
         commands.emplace_back(std::make_unique<ApplyTransformsCommand>(
             _graphModel.get(), this,
             _graphTransforms, graphTransforms));
     }
-    else if(transformsValid && transformsDiffer(_graphTransforms, graphTransforms, false))
+    else if(transformsValid && transformsDiffer(_graphTransforms, graphTransforms, "ignoreInertFlags"_no))
     {
         auto previousGraphTransforms = _graphTransforms;
 
