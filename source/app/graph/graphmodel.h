@@ -92,7 +92,6 @@ private:
     const IMutableGraph& mutableGraphImpl() const override;
     const IGraph& graphImpl() const override;
 
-
     void scheduleVisualUpdate();
     void updateVisuals(bool force);
 
