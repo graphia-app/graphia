@@ -591,7 +591,7 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
     emit busyChanged();
     emit commandVerbChanged(); // Show Loading message
 
-    _graphModel = std::make_unique<GraphModel>(plugin);
+    _graphModel = std::make_unique<GraphModel>(_application, plugin);
 
     _graphFileParserThread = std::make_unique<ParserThread>(*_graphModel, url);
 

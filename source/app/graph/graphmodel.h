@@ -51,6 +51,7 @@ class NodePositions;
 class SelectionManager;
 class SearchManager;
 
+class Application;
 class ICommand;
 class IPlugin;
 class Progressable;
@@ -72,7 +73,7 @@ class GraphModel : public QObject, public IGraphModel
 
     Q_OBJECT
 public:
-    explicit GraphModel(IPlugin* plugin);
+    GraphModel(Application* application, IPlugin* plugin);
     ~GraphModel() override;
 
 private:

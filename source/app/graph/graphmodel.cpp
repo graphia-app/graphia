@@ -131,7 +131,8 @@ class GraphModelImpl
     friend class AttributeChangesTracker;
 
 public:
-    explicit GraphModelImpl(GraphModel& graphModel) :
+    GraphModelImpl(GraphModel& graphModel, Application* application) :
+        _application(application),
         _transformedGraph(graphModel, _graph),
         _nodePositions(_graph),
         _nodeVisuals(_graph),
@@ -145,6 +146,8 @@ public:
     }
 
 private:
+    Application* _application;
+
     MutableGraph _graph;
     TransformedGraph _transformedGraph;
     TransformInfosMap _transformInfos;
@@ -268,8 +271,8 @@ private:
     std::set<AttributeChangesTracker*> _attributeChangesTrackers;
 };
 
-GraphModel::GraphModel(IPlugin* plugin) :
-    _(std::make_unique<GraphModelImpl>(*this)),
+GraphModel::GraphModel(Application* application, IPlugin* plugin) :
+    _(std::make_unique<GraphModelImpl>(*this, application)),
     _graphTransformsAreChanging(false),
     _plugin(plugin)
 {
