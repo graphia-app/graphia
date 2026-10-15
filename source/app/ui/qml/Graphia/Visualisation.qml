@@ -475,33 +475,44 @@ Item
             similarAttributes = document.availableAttributesModel();
     }
 
-    onAttributeNameChanged: { updateSimilarAttributes(); }
+    onAttributeNameChanged:
+    {
+        updateSimilarAttributes();
+        updateAttributeTypes();
+    }
+
     Connections
     {
         target: root.document
-        function onAttributesChanged() { root.updateSimilarAttributes(); }
+
+        function onAttributesChanged()
+        {
+            root.updateSimilarAttributes();
+            root.updateAttributeTypes();
+        }
+
         function onVisualisationsChanged() { if(root.ready) root.refreshVisualisationInfo(); }
     }
 
-    property var attributeValueType:
+    property int attributeValueType: ValueType.Unknown
+    property int attributeElementType: ElementType.None
+
+    function updateAttributeTypes()
     {
         let attribute = document.attribute(attributeName);
         if(!attribute.isValid)
-            return ValueType.Unknown;
+        {
+            attributeValueType = ValueType.Unknown;
+            attributeElementType = ElementType.None;
+            return;
+        }
 
         if(attribute.valueType === ValueType.Float || attribute.valueType === ValueType.Int)
-            return ValueType.Numerical;
+            attributeValueType = ValueType.Numerical;
+        else
+            attributeValueType = attribute.valueType;
 
-        return attribute.valueType;
-    }
-
-    property var attributeElementType:
-    {
-        let attribute = document.attribute(attributeName);
-        if(!attribute.isValid)
-            return ElementType.None;
-
-        return attribute.elementType;
+        attributeElementType = attribute.elementType;
     }
 
     property string channel
