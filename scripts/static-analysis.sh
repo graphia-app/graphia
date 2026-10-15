@@ -27,9 +27,10 @@
 # a few usual install locations. The analysers can be overridden in the same way
 # as the individual scripts: CLANG_TIDY, CPPCHECK, CLAZY, QMLLINT, IWYU_SOURCE.
 # Unless CLAZY is set, the clazy commit the CI uses is built once and cached in
-# ~/.cache/graphia-static-analysis. If DEFECTS_DIR points at a checkout of
-# graphia-app/defects, the logs are summarised at the end, as the log-analysis
-# job does.
+# ~/.cache/graphia-static-analysis, as are ctcache and the clang-tidy results it
+# caches (CTCACHE_DIR overrides the latter). If DEFECTS_DIR points at a checkout
+# of graphia-app/defects, the logs are summarised at the end, as the
+# log-analysis job does.
 
 ALL_TOOLS="clang-tidy cppcheck clazy qmllint iwyu"
 
@@ -102,6 +103,8 @@ export CC=clang-${CLANG_VERSION}
 export CXX=clang++-${CLANG_VERSION}
 export BUILD_DIR=build/clang/
 
+CACHE_DIR="${XDG_CACHE_HOME:-${HOME}/.cache}/graphia-static-analysis"
+
 if [ ${BUILD} -eq 1 ]
 then
   BUILD_TYPE=Debug UNITY_BUILD=OFF scripts/linux-build.sh || exit $?
@@ -136,8 +139,28 @@ do
 
   case ${TOOL} in
     clang-tidy)
-      export CLANG_TIDY=${CLANG_TIDY:-clang-tidy-${CLANG_VERSION}}
-      requireCommand ${CLANG_TIDY} && scripts/clang-tidy.sh
+      CLANG_TIDY=${CLANG_TIDY:-clang-tidy-${CLANG_VERSION}}
+      requireCommand ${CLANG_TIDY} || continue
+
+      CTCACHE="${CACHE_DIR}/ctcache"
+
+      if [ ! -x "${CTCACHE}/clang-tidy" ]
+      then
+        git clone --quiet https://github.com/matus-chochlik/ctcache.git ${CTCACHE}
+      fi
+
+      if [ -x "${CTCACHE}/clang-tidy" ]
+      then
+        export CTCACHE_CLANG_TIDY=$(command -v ${CLANG_TIDY})
+        export CTCACHE_DIR=${CTCACHE_DIR:-${CACHE_DIR}/ctcache-data}
+        export CTCACHE_SAVE_OUTPUT=1
+        CLANG_TIDY="${CTCACHE}/clang-tidy"
+      else
+        echo "ctcache not available, running clang-tidy uncached"
+      fi
+
+      export CLANG_TIDY
+      scripts/clang-tidy.sh
       ;;
 
     cppcheck)
@@ -151,7 +174,7 @@ do
       if [ -z "${CLAZY}" ]
       then
         CLAZY_REF=$(sed -n '/repository: KDE\/clazy/,/ref:/s/^ *ref: *//p' ${WORKFLOW})
-        CLAZY_PREFIX="${XDG_CACHE_HOME:-${HOME}/.cache}/graphia-static-analysis/clazy-${CLAZY_REF}"
+        CLAZY_PREFIX="${CACHE_DIR}/clazy-${CLAZY_REF}"
 
         if [ ! -x "${CLAZY_PREFIX}/bin/clazy" ]
         then
