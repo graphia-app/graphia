@@ -510,6 +510,7 @@ public:
 
     Q_INVOKABLE QVariantMap parseGraphTransform(const QString& transform) const;
     Q_INVOKABLE bool graphTransformIsValid(const QString& transform) const;
+    Q_INVOKABLE QStringList attributeNamesReferencedBy(const QString& transform) const;
     Q_INVOKABLE bool graphTransformsAreValid(const QStringList& transforms) const;
     Q_INVOKABLE QString displayTextForGraphTransform(const QString& transform) const;
     Q_INVOKABLE void setGraphTransform(int index, const QString& transform);

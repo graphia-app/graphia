@@ -2303,6 +2303,16 @@ bool Document::graphTransformIsValid(const QString& transform) const
     return _graphModel != nullptr ? _graphModel->graphTransformIsValid(transform) : false;
 }
 
+QStringList Document::attributeNamesReferencedBy(const QString& transform) const
+{
+    GraphTransformConfigParser p;
+    if(!p.parse(transform, false))
+        return {};
+
+    const auto names = p.result().referencedAttributeNames();
+    return {names.begin(), names.end()};
+}
+
 bool Document::graphTransformsAreValid(const QStringList& transforms) const
 {
     if(_graphModel == nullptr)
