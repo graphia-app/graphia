@@ -83,13 +83,24 @@ Item
 
         RowLayout
         {
-            id: expression
             enabled: enabledMenuItem.checked
 
             // Hack to force the row to always be at least the height of a TextField
             // (so that when the Transform is locked, it doesn't change height)
             TextField { id: dummyField; visible: false }
             Rectangle { implicitHeight: dummyField.height }
+
+            Loader
+            {
+                id: expressionLoader
+                active: false
+
+                sourceComponent: RowLayout
+                {
+                    id: expression
+                    Component.onCompleted: { root.build(expression); }
+                }
+            }
         }
 
         Hamburger
@@ -302,45 +313,50 @@ Item
         function onTransformsChanged() { if(ready) refreshTransformInfo(); }
     }
 
+    function build(expression)
+    {
+        if(document.graphTransformIsValid(value))
+        {
+            refreshTransformInfo();
+
+            let transformConfig = new TransformConfig.Create(index, document, value);
+            flags = transformConfig.flags;
+            template = transformConfig.template;
+
+            transformConfig.toComponents(document, expression, root,
+                isFlagSet("locked"), updateExpression);
+            _parameterComponents = transformConfig.parameters;
+        }
+        else
+        {
+            let detail = document.hasTransformInfo() && index >= 0 ?
+                document.transformInfoAtIndex(index).alertText : "";
+
+            setAlertIcon(
+            {
+                "alertType": AlertType.Error,
+                "alertText": qsTr("This transform expression is invalid\n") +
+                    (detail.length > 0 ? Utils.format(qsTr("(Reason: {0})\n"), detail) : "") +
+                    qsTr("Please send a screenshot to the developers")
+            });
+
+            flags = [];
+            template = "";
+            _parameterComponents = [];
+
+            TransformConfig.addLabelTo(
+                (detail.length > 0 ? detail + ": " : "Invalid Expression: ") +
+                Utils.addSlashes(value), expression, root);
+        }
+    }
+
     property int index: -1
     property string value
     onValueChanged:
     {
         if(!ready)
         {
-            if(document.graphTransformIsValid(value))
-            {
-                refreshTransformInfo();
-
-                let transformConfig = new TransformConfig.Create(index, document, value);
-                flags = transformConfig.flags;
-                template = transformConfig.template;
-
-                transformConfig.toComponents(document, expression, root,
-                    isFlagSet("locked"), updateExpression);
-                _parameterComponents = transformConfig.parameters;
-            }
-            else
-            {
-                let detail = document.hasTransformInfo() && index >= 0 ?
-                    document.transformInfoAtIndex(index).alertText : "";
-
-                setAlertIcon(
-                {
-                    "alertType": AlertType.Error,
-                    "alertText": qsTr("This transform expression is invalid\n") +
-                        (detail.length > 0 ? Utils.format(qsTr("(Reason: {0})\n"), detail) : "") +
-                        qsTr("Please send a screenshot to the developers")
-                });
-
-                flags = [];
-                template = "";
-                _parameterComponents = [];
-
-                TransformConfig.addLabelTo(
-                    (detail.length > 0 ? detail + ": " : "Invalid Expression: ") +
-                    Utils.addSlashes(value), expression, root);
-            }
+            expressionLoader.active = true;
 
             enabledMenuItem.checked = !isFlagSet("disabled");
             lockedMenuItem.checked = isFlagSet("locked");
