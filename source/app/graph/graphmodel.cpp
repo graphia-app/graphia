@@ -268,10 +268,9 @@ private:
     std::set<AttributeChangesTracker*> _attributeChangesTrackers;
 };
 
-GraphModel::GraphModel(const QString& name, IPlugin* plugin) :
+GraphModel::GraphModel(IPlugin* plugin) :
     _(std::make_unique<GraphModelImpl>(*this)),
     _graphTransformsAreChanging(false),
-    _name(name),
     _plugin(plugin)
 {
     qRegisterMetaType<VisualChangeFlags>("VisualChangeFlags");

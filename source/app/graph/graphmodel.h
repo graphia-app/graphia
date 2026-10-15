@@ -72,7 +72,7 @@ class GraphModel : public QObject, public IGraphModel
 
     Q_OBJECT
 public:
-    GraphModel(const QString& name, IPlugin* plugin);
+    explicit GraphModel(IPlugin* plugin);
     ~GraphModel() override;
 
 private:
@@ -83,7 +83,6 @@ private:
     std::atomic_bool _visualUpdatesEnabled = false;
 
     std::atomic_bool _graphTransformsAreChanging;
-    QString _name;
     IPlugin* _plugin;
 
     void removeDynamicAttributes();
@@ -138,8 +137,6 @@ public:
 
     QString nodeName(NodeId nodeId) const override;
     void setNodeName(NodeId nodeId, const QString& name) override;
-
-    const QString& name() const { return _name; }
 
     bool editable() const;
     bool directed() const;

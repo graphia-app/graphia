@@ -591,7 +591,7 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
     emit busyChanged();
     emit commandVerbChanged(); // Show Loading message
 
-    _graphModel = std::make_unique<GraphModel>(url.fileName(), plugin);
+    _graphModel = std::make_unique<GraphModel>(plugin);
 
     _graphFileParserThread = std::make_unique<ParserThread>(*_graphModel, url);
 
@@ -1098,7 +1098,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
     _graphModel->enableVisualUpdates();
 
     setStatus(QString(tr("Loaded %1 (%2 nodes, %3 edges, %4 components)"))
-        .arg(_graphModel->name())
+        .arg(_title)
         .arg(_graphModel->graph().numNodes())
         .arg(_graphModel->graph().numEdges())
         .arg(_graphModel->graph().numComponents()));
