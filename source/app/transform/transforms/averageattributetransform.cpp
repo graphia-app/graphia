@@ -120,13 +120,13 @@ void AverageAttributeTransform::apply(TransformedGraph& target)
     }
 }
 
-bool AverageAttributeTransformFactory::configIsValid(const GraphTransformConfig& graphTransformConfig) const
+bool AverageAttributeTransformFactory::configIsValid(const GraphModel& graphModel, const GraphTransformConfig& graphTransformConfig) const
 {
-    return averageAttributeTransformConfigIsValid(*graphModel(), graphTransformConfig)._type == AlertType::None;
+    return averageAttributeTransformConfigIsValid(graphModel, graphTransformConfig)._type == AlertType::None;
 }
 
 std::unique_ptr<GraphTransform> AverageAttributeTransformFactory::create(
-    const GraphTransformConfig&) const
+    GraphModel& graphModel, const GraphTransformConfig&) const
 {
-    return std::make_unique<AverageAttributeTransform>(*graphModel());
+    return std::make_unique<AverageAttributeTransform>(graphModel);
 }

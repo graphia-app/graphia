@@ -45,10 +45,6 @@ private:
 class AverageAttributeTransformFactory : public GraphTransformFactory
 {
 public:
-    explicit AverageAttributeTransformFactory(GraphModel* graphModel) :
-        GraphTransformFactory(graphModel)
-    {}
-
     QString name() const override { return u"Average Attribute"_s; }
     QString displayName() const override { return QObject::tr("Average Attribute"); }
 
@@ -77,8 +73,8 @@ public:
         };
     }
 
-    bool configIsValid(const GraphTransformConfig& graphTransformConfig) const override;
-    std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;
+    bool configIsValid(const GraphModel& graphModel, const GraphTransformConfig& graphTransformConfig) const override;
+    std::unique_ptr<GraphTransform> create(GraphModel& graphModel, const GraphTransformConfig& graphTransformConfig) const override;
 };
 
 #endif // AVERAGEATTRIBUTETRANSFORM_H

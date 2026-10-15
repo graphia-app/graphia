@@ -75,12 +75,12 @@ void RemoveBranchesTransform::apply(TransformedGraph& target)
     removeLeaves(target, *this);
 }
 
-std::unique_ptr<GraphTransform> RemoveLeavesTransformFactory::create(const GraphTransformConfig&) const
+std::unique_ptr<GraphTransform> RemoveLeavesTransformFactory::create(GraphModel&, const GraphTransformConfig&) const
 {
     return std::make_unique<RemoveLeavesTransform>();
 }
 
-std::unique_ptr<GraphTransform> RemoveBranchesTransformFactory::create(const GraphTransformConfig&) const
+std::unique_ptr<GraphTransform> RemoveBranchesTransformFactory::create(GraphModel&, const GraphTransformConfig&) const
 {
     return std::make_unique<RemoveBranchesTransform>();
 }

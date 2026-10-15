@@ -121,13 +121,13 @@ void ForwardMultiElementAttributeTransform::apply(TransformedGraph& target)
     }
 }
 
-bool ForwardMultiElementAttributeTransformFactory::configIsValid(const GraphTransformConfig& graphTransformConfig) const
+bool ForwardMultiElementAttributeTransformFactory::configIsValid(const GraphModel&, const GraphTransformConfig& graphTransformConfig) const
 {
     return forwardMultiElementAttributeTransformConfigIsValid(graphTransformConfig)._type == AlertType::None;
 }
 
 std::unique_ptr<GraphTransform> ForwardMultiElementAttributeTransformFactory::create(
-    const GraphTransformConfig&) const
+    GraphModel& graphModel, const GraphTransformConfig&) const
 {
-    return std::make_unique<ForwardMultiElementAttributeTransform>(*graphModel());
+    return std::make_unique<ForwardMultiElementAttributeTransform>(graphModel);
 }

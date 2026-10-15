@@ -45,10 +45,6 @@ private:
 class ForwardMultiElementAttributeTransformFactory : public GraphTransformFactory
 {
 public:
-    explicit ForwardMultiElementAttributeTransformFactory(GraphModel* graphModel) :
-        GraphTransformFactory(graphModel)
-    {}
-
     QString name() const override { return u"Forward Attribute"_s; }
     QString displayName() const override { return QObject::tr("Forward Attribute"); }
 
@@ -73,8 +69,8 @@ public:
         };
     }
 
-    bool configIsValid(const GraphTransformConfig& graphTransformConfig) const override;
-    std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;
+    bool configIsValid(const GraphModel& graphModel, const GraphTransformConfig& graphTransformConfig) const override;
+    std::unique_ptr<GraphTransform> create(GraphModel& graphModel, const GraphTransformConfig& graphTransformConfig) const override;
 };
 
 #endif // FORWARDMULTIELEMENTATTRIBUTETRANSFORM_H

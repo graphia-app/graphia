@@ -120,8 +120,8 @@ void EccentricityTransform::calculateDistances(TransformedGraph& target)
         .setFlag(AttributeFlag::VisualiseByComponent);
 }
 
-std::unique_ptr<GraphTransform> EccentricityTransformFactory::create(const GraphTransformConfig&) const
+std::unique_ptr<GraphTransform> EccentricityTransformFactory::create(GraphModel& graphModel, const GraphTransformConfig&) const
 {
-    return std::make_unique<EccentricityTransform>(graphModel());
+    return std::make_unique<EccentricityTransform>(&graphModel);
 }
 

@@ -74,7 +74,7 @@ void EdgeReductionTransform::apply(TransformedGraph& target)
     setProgress(-1);
 }
 
-std::unique_ptr<GraphTransform> EdgeReductionTransformFactory::create(const GraphTransformConfig&) const
+std::unique_ptr<GraphTransform> EdgeReductionTransformFactory::create(GraphModel&, const GraphTransformConfig&) const
 {
     return std::make_unique<EdgeReductionTransform>();
 }

@@ -43,11 +43,13 @@
 #include <QVariant>
 #include <QVariantList>
 
+#include <map>
 #include <vector>
 #include <memory>
 #include <utility>
 
 class GraphModel;
+class GraphTransformFactory;
 class IParser;
 class ISaverFactory;
 class IPlugin;
@@ -197,6 +199,10 @@ public:
     ISaverFactory* saverFactoryByName(const QString& name);
     Q_INVOKABLE QVariantList saverFileTypes();
 
+    using GraphTransformFactories = std::map<QString, std::unique_ptr<GraphTransformFactory>>;
+    const GraphTransformFactories& transformFactories() const { return _graphTransformFactories; }
+    const GraphTransformFactory* transformFactory(const QString& transformName) const;
+
     Q_INVOKABLE QObject* qmlPluginForName(const QString& pluginName) const;
     Q_INVOKABLE QStringList pluginNames(const QString& urlTypeName) const;
     Q_INVOKABLE QString qmlModuleForPlugin(const QString& pluginName) const;
@@ -264,6 +270,7 @@ private:
 
     std::vector<LoadedPlugin> _loadedPlugins;
     std::vector<std::unique_ptr<ISaverFactory>> _factories;
+    GraphTransformFactories _graphTransformFactories;
 
     QStringList _nameFilters;
     QStringListModel _loadableExtensions;

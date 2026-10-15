@@ -129,7 +129,7 @@ void KNNTransform::apply(TransformedGraph& target)
         .setFlag(AttributeFlag::AutoRange);
 }
 
-std::unique_ptr<GraphTransform> KNNTransformFactory::create(const GraphTransformConfig&) const
+std::unique_ptr<GraphTransform> KNNTransformFactory::create(GraphModel& graphModel, const GraphTransformConfig&) const
 {
-    return std::make_unique<KNNTransform>(*graphModel());
+    return std::make_unique<KNNTransform>(graphModel);
 }

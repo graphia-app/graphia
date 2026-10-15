@@ -43,10 +43,6 @@ private:
 class EccentricityTransformFactory : public GraphTransformFactory
 {
 public:
-    explicit EccentricityTransformFactory(GraphModel* graphModel) :
-        GraphTransformFactory(graphModel)
-    {}
-
     QString name() const override { return u"Eccentricity"_s; }
     QString displayName() const override { return QObject::tr("Eccentricity"); }
 
@@ -71,7 +67,7 @@ public:
         };
     }
 
-    std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;
+    std::unique_ptr<GraphTransform> create(GraphModel& graphModel, const GraphTransformConfig& graphTransformConfig) const override;
 };
 
 #endif // ECCENTRICITYTRANSFORM_H

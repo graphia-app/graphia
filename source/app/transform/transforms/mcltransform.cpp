@@ -670,8 +670,8 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target)
         .setFlag(AttributeFlag::AutoRange);
 }
 
-std::unique_ptr<GraphTransform> MCLTransformFactory::create(const GraphTransformConfig&) const
+std::unique_ptr<GraphTransform> MCLTransformFactory::create(GraphModel& graphModel, const GraphTransformConfig&) const
 {
-    return std::make_unique<MCLTransform>(graphModel());
+    return std::make_unique<MCLTransform>(&graphModel);
 }
 

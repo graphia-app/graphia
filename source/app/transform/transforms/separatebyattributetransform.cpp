@@ -61,7 +61,7 @@ void SeparateByAttributeTransform::apply(TransformedGraph& target)
     target.mutableGraph().removeEdges(edgeIdsToRemove);
 }
 
-std::unique_ptr<GraphTransform> SeparateByAttributeTransformFactory::create(const GraphTransformConfig&) const
+std::unique_ptr<GraphTransform> SeparateByAttributeTransformFactory::create(GraphModel& graphModel, const GraphTransformConfig&) const
 {
-    return std::make_unique<SeparateByAttributeTransform>(*graphModel());
+    return std::make_unique<SeparateByAttributeTransform>(graphModel);
 }

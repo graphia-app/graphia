@@ -134,13 +134,13 @@ void CombineAttributesTransform::apply(TransformedGraph& target)
         combine(target.edgeIds());
 }
 
-bool CombineAttributesTransformFactory::configIsValid(const GraphTransformConfig& graphTransformConfig) const
+bool CombineAttributesTransformFactory::configIsValid(const GraphModel& graphModel, const GraphTransformConfig& graphTransformConfig) const
 {
-    return combineAttributesTransformConfigIsValid(*graphModel(), graphTransformConfig)._type == AlertType::None;
+    return combineAttributesTransformConfigIsValid(graphModel, graphTransformConfig)._type == AlertType::None;
 }
 
 std::unique_ptr<GraphTransform> CombineAttributesTransformFactory::create(
-    const GraphTransformConfig&) const
+    GraphModel& graphModel, const GraphTransformConfig&) const
 {
-    return std::make_unique<CombineAttributesTransform>(*graphModel());
+    return std::make_unique<CombineAttributesTransform>(graphModel);
 }

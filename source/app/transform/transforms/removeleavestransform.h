@@ -44,10 +44,6 @@ public:
 class RemoveLeavesTransformFactory : public GraphTransformFactory
 {
 public:
-    explicit RemoveLeavesTransformFactory(GraphModel* graphModel) :
-        GraphTransformFactory(graphModel)
-    {}
-
     QString name() const override { return u"Remove Leaves"_s; }
     QString displayName() const override { return QObject::tr("Remove Leaves"); }
 
@@ -70,16 +66,12 @@ public:
         };
     }
 
-    std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;
+    std::unique_ptr<GraphTransform> create(GraphModel& graphModel, const GraphTransformConfig& graphTransformConfig) const override;
 };
 
 class RemoveBranchesTransformFactory : public GraphTransformFactory
 {
 public:
-    explicit RemoveBranchesTransformFactory(GraphModel* graphModel) :
-        GraphTransformFactory(graphModel)
-    {}
-
     QString name() const override { return u"Remove Branches"_s; }
     QString displayName() const override { return QObject::tr("Remove Branches"); }
 
@@ -90,7 +82,7 @@ public:
 
     QString category() const override { return QObject::tr("Structural"); }
 
-    std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;
+    std::unique_ptr<GraphTransform> create(GraphModel& graphModel, const GraphTransformConfig& graphTransformConfig) const override;
 };
 
 #endif // REMOVELEAVESTRANSFORM_H

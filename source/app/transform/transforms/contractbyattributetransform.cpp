@@ -61,7 +61,7 @@ void ContractByAttributeTransform::apply(TransformedGraph& target)
     target.mutableGraph().contractEdges(edgeIdsToContract);
 }
 
-std::unique_ptr<GraphTransform> ContractByAttributeTransformFactory::create(const GraphTransformConfig&) const
+std::unique_ptr<GraphTransform> ContractByAttributeTransformFactory::create(GraphModel& graphModel, const GraphTransformConfig&) const
 {
-    return std::make_unique<ContractByAttributeTransform>(*graphModel());
+    return std::make_unique<ContractByAttributeTransform>(graphModel);
 }

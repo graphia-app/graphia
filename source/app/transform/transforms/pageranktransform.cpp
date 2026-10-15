@@ -182,8 +182,8 @@ void PageRankTransform::calculatePageRank(TransformedGraph& target)
         .setFlag(AttributeFlag::VisualiseByComponent);
 }
 
-std::unique_ptr<GraphTransform> PageRankTransformFactory::create(const GraphTransformConfig&) const
+std::unique_ptr<GraphTransform> PageRankTransformFactory::create(GraphModel& graphModel, const GraphTransformConfig&) const
 {
-    return std::make_unique<PageRankTransform>(graphModel());
+    return std::make_unique<PageRankTransform>(&graphModel);
 }
 

@@ -47,10 +47,6 @@ private:
 class CombineAttributesTransformFactory : public GraphTransformFactory
 {
 public:
-    explicit CombineAttributesTransformFactory(GraphModel* graphModel) :
-        GraphTransformFactory(graphModel)
-    {}
-
     QString name() const override { return u"Combine Attributes"_s; }
     QString displayName() const override { return QObject::tr("Combine Attributes"); }
 
@@ -97,8 +93,8 @@ public:
         };
     }
 
-    bool configIsValid(const GraphTransformConfig& graphTransformConfig) const override;
-    std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;
+    bool configIsValid(const GraphModel& graphModel, const GraphTransformConfig& graphTransformConfig) const override;
+    std::unique_ptr<GraphTransform> create(GraphModel& graphModel, const GraphTransformConfig& graphTransformConfig) const override;
 };
 
 #endif // COMBINEATTRIBUTESTRANSFORM_H

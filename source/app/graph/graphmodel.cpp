@@ -28,32 +28,15 @@
 
 #include "app/layout/nodepositions.h"
 
+#include "app/application.h"
+
 #include "app/ui/document.h"
 #include "app/ui/selectionmanager.h"
 #include "app/ui/searchmanager.h"
 
 #include "app/transform/transformedgraph.h"
 #include "app/transform/transforminfo.h"
-#include "app/transform/transforms/filtertransform.h"
-#include "app/transform/transforms/edgecontractiontransform.h"
-#include "app/transform/transforms/mcltransform.h"
-#include "app/transform/transforms/louvaintransform.h"
-#include "app/transform/transforms/pageranktransform.h"
-#include "app/transform/transforms/eccentricitytransform.h"
-#include "app/transform/transforms/betweennesstransform.h"
-#include "app/transform/transforms/contractbyattributetransform.h"
-#include "app/transform/transforms/separatebyattributetransform.h"
-#include "app/transform/transforms/knntransform.h"
-#include "app/transform/transforms/percentnntransform.h"
-#include "app/transform/transforms/edgereductiontransform.h"
-#include "app/transform/transforms/forwardmultielementattributetransform.h"
-#include "app/transform/transforms/spanningtreetransform.h"
-#include "app/transform/transforms/attributesynthesistransform.h"
-#include "app/transform/transforms/combineattributestransform.h"
-#include "app/transform/transforms/conditionalattributetransform.h"
-#include "app/transform/transforms/averageattributetransform.h"
-#include "app/transform/transforms/typecasttransform.h"
-#include "app/transform/transforms/removeleavestransform.h"
+#include "app/transform/graphtransform.h"
 #include "app/transform/graphtransformconfigparser.h"
 
 #include "app/ui/visualisations/colorvisualisationchannel.h"
@@ -235,8 +218,6 @@ private:
             qDebug() << "updateSharedAttributeValues called on component attribute";
     }
 
-    std::map<QString, std::unique_ptr<GraphTransformFactory>> _graphTransformFactories;
-
     std::map<QString, std::unique_ptr<VisualisationChannel>> _visualisationChannels;
 
     // Slightly hacky state variable that tracks whether or not a edge text
@@ -380,41 +361,6 @@ GraphModel::GraphModel(Application* application, IPlugin* plugin) :
         })
         .setDescription(tr("An edge's component identifier indicates which component it is part of."))
         .setFlag(AttributeFlag::DisableDuringTransform);
-
-    auto addTransformFactory = [this](std::unique_ptr<GraphTransformFactory> factory)
-    {
-        auto transformName = factory->name();
-        _->_graphTransformFactories.emplace(transformName, std::move(factory));
-    };
-
-    addTransformFactory(std::make_unique<FilterTransformFactory>(this, ElementType::Node, false));
-    addTransformFactory(std::make_unique<FilterTransformFactory>(this, ElementType::Edge, false));
-    addTransformFactory(std::make_unique<FilterTransformFactory>(this, ElementType::Component, false));
-    addTransformFactory(std::make_unique<FilterTransformFactory>(this, ElementType::Node, true));
-    addTransformFactory(std::make_unique<FilterTransformFactory>(this, ElementType::Edge, true));
-    addTransformFactory(std::make_unique<FilterTransformFactory>(this, ElementType::Component, true));
-    addTransformFactory(std::make_unique<EdgeContractionTransformFactory>(this));
-    addTransformFactory(std::make_unique<MCLTransformFactory>(this));
-    addTransformFactory(std::make_unique<LouvainTransformFactory>(this));
-    addTransformFactory(std::make_unique<WeightedLouvainTransformFactory>(this));
-    addTransformFactory(std::make_unique<PageRankTransformFactory>(this));
-    addTransformFactory(std::make_unique<EccentricityTransformFactory>(this));
-    addTransformFactory(std::make_unique<BetweennessTransformFactory>(this));
-    addTransformFactory(std::make_unique<ContractByAttributeTransformFactory>(this));
-    addTransformFactory(std::make_unique<SeparateByAttributeTransformFactory>(this));
-    addTransformFactory(std::make_unique<ConditionalAttributeTransformFactory>(this, ElementType::Node));
-    addTransformFactory(std::make_unique<ConditionalAttributeTransformFactory>(this, ElementType::Edge));
-    addTransformFactory(std::make_unique<KNNTransformFactory>(this));
-    addTransformFactory(std::make_unique<PercentNNTransformFactory>(this));
-    addTransformFactory(std::make_unique<EdgeReductionTransformFactory>(this));
-    addTransformFactory(std::make_unique<SpanningTreeTransformFactory>(this));
-    addTransformFactory(std::make_unique<AttributeSynthesisTransformFactory>(this));
-    addTransformFactory(std::make_unique<CombineAttributesTransformFactory>(this));
-    addTransformFactory(std::make_unique<ForwardMultiElementAttributeTransformFactory>(this));
-    addTransformFactory(std::make_unique<AverageAttributeTransformFactory>(this));
-    addTransformFactory(std::make_unique<TypeCastTransformFactory>(this));
-    addTransformFactory(std::make_unique<RemoveLeavesTransformFactory>(this));
-    addTransformFactory(std::make_unique<RemoveBranchesTransformFactory>(this));
 
     _->_visualisationChannels.emplace(tr("Colour"), std::make_unique<ColorVisualisationChannel>());
     _->_visualisationChannels.emplace(tr("Size"), std::make_unique<SizeVisualisationChannel>());
@@ -598,15 +544,15 @@ bool GraphModel::graphTransformIsValid(const QString& transform) const
     {
         const auto& graphTransformConfig = p.result();
 
-        if(!u::contains(_->_graphTransformFactories, graphTransformConfig._action))
-            return false;
+        const auto* factory = transformFactory(graphTransformConfig._action);
 
-        auto& factory = _->_graphTransformFactories.at(graphTransformConfig._action);
+        if(factory == nullptr)
+            return false;
 
         if(factory->requiresCondition() && !graphTransformConfig.hasCondition())
             return false;
 
-        return factory->configIsValid(graphTransformConfig);
+        return factory->configIsValid(*this, graphTransformConfig);
     }
 
     return false;
@@ -625,11 +571,11 @@ QStringList GraphModel::transformsWithMissingParametersSetToDefault(const QStrin
 
         auto graphTransformConfig = graphTransformConfigParser.result();
 
-        // This can happen if the file has transforms that the app doesn't
-        if(!u::contains(_->_graphTransformFactories, graphTransformConfig._action))
-            continue;
+        const auto* factory = transformFactory(graphTransformConfig._action);
 
-        const auto& factory = _->_graphTransformFactories.at(graphTransformConfig._action);
+        // This can happen if the file has transforms that the app doesn't
+        if(factory == nullptr)
+            continue;
 
         factory->setMissingParametersToDefault(graphTransformConfig);
         transformsWithDefaults.append(graphTransformConfig.asString());
@@ -656,11 +602,11 @@ void GraphModel::buildTransforms(const QStringList& transforms, Progressable* pr
         if(graphTransformConfig.isFlagSet(u"disabled"_s))
             continue;
 
-        if(!u::contains(_->_graphTransformFactories, action))
-            continue;
+        const auto* factory = transformFactory(action);
 
-        const auto& factory = _->_graphTransformFactories.at(action);
-        auto graphTransform = factory->create(graphTransformConfig);
+        if(factory == nullptr)
+            continue;
+        auto graphTransform = factory->create(*this, graphTransformConfig);
 
         Q_ASSERT(graphTransform != nullptr);
         if(graphTransform != nullptr)
@@ -685,15 +631,16 @@ void GraphModel::cancelTransformBuild()
 QStringList GraphModel::availableTransformNames() const
 {
     QStringList stringList;
-    stringList.reserve(static_cast<int>(_->_graphTransformFactories.size()));
+    const auto& transformFactories = _->_application->transformFactories();
+    stringList.reserve(static_cast<int>(transformFactories.size()));
 
-    for(auto& t : _->_graphTransformFactories)
+    for(const auto& [transformName, factory] : transformFactories)
     {
-        auto elementType = _->_graphTransformFactories.at(t.first)->elementType();
+        auto elementType = factory->elementType();
         const bool attributesAvailable = !availableAttributeNames(elementType, ValueType::All).isEmpty();
 
         if(elementType == ElementType::None || attributesAvailable)
-            stringList.append(t.first);
+            stringList.append(transformName);
     }
 
     return stringList;
@@ -701,10 +648,7 @@ QStringList GraphModel::availableTransformNames() const
 
 const GraphTransformFactory* GraphModel::transformFactory(const QString& transformName) const
 {
-    if(!transformName.isEmpty() && u::contains(_->_graphTransformFactories, transformName))
-        return _->_graphTransformFactories.at(transformName).get();
-
-    return nullptr;
+    return _->_application->transformFactory(transformName);
 }
 
 QStringList GraphModel::availableAttributeNames(ElementType elementTypes,
@@ -785,9 +729,9 @@ std::vector<QString> GraphModel::addedOrChangedAttributeNamesAtTransformIndexOrL
 
 ValueType GraphModel::valueTypeOfTransformAttributeName(const QString& attributeName) const
 {
-    for(auto& t : _->_graphTransformFactories)
+    for(const auto& [transformName, factory] : _->_application->transformFactories())
     {
-        const auto& defaultVisualisations = _->_graphTransformFactories.at(t.first)->defaultVisualisations();
+        const auto& defaultVisualisations = factory->defaultVisualisations();
 
         for(const auto& v : defaultVisualisations)
         {

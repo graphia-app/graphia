@@ -80,13 +80,13 @@ void ConditionalAttributeTransform::apply(TransformedGraph& target)
         synthesise(target.edgeIds());
 }
 
-bool ConditionalAttributeTransformFactory::configIsValid(const GraphTransformConfig& graphTransformConfig) const
+bool ConditionalAttributeTransformFactory::configIsValid(const GraphModel&, const GraphTransformConfig& graphTransformConfig) const
 {
     return conditionalAttributeTransformConfigIsValid(graphTransformConfig)._type == AlertType::None;
 }
 
 std::unique_ptr<GraphTransform> ConditionalAttributeTransformFactory::create(
-    const GraphTransformConfig&) const
+    GraphModel& graphModel, const GraphTransformConfig&) const
 {
-    return std::make_unique<ConditionalAttributeTransform>(elementType(), *graphModel());
+    return std::make_unique<ConditionalAttributeTransform>(elementType(), graphModel);
 }

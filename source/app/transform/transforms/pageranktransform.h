@@ -50,10 +50,6 @@ private:
 class PageRankTransformFactory : public GraphTransformFactory
 {
 public:
-    explicit PageRankTransformFactory(GraphModel* graphModel) :
-        GraphTransformFactory(graphModel)
-    {}
-
     QString name() const override { return u"PageRank"_s; }
     QString displayName() const override { return QObject::tr("PageRank"); }
 
@@ -77,7 +73,7 @@ public:
         };
     }
 
-    std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;
+    std::unique_ptr<GraphTransform> create(GraphModel& graphModel, const GraphTransformConfig& graphTransformConfig) const override;
 };
 
 #endif // PAGERANKTRANSFORM_H

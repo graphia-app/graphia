@@ -48,10 +48,6 @@ private:
 class KNNTransformFactory : public GraphTransformFactory
 {
 public:
-    explicit KNNTransformFactory(GraphModel* graphModel) :
-        GraphTransformFactory(graphModel)
-    {}
-
     QString name() const override { return u"k-NN"_s; }
     QString displayName() const override { return QObject::tr("k-NN"); }
 
@@ -92,7 +88,7 @@ public:
         };
     }
 
-    std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;
+    std::unique_ptr<GraphTransform> create(GraphModel& graphModel, const GraphTransformConfig& graphTransformConfig) const override;
 };
 
 #endif // KNNTRANSFORM_H

@@ -44,10 +44,6 @@ private:
 class BetweennessTransformFactory : public GraphTransformFactory
 {
 public:
-    explicit BetweennessTransformFactory(GraphModel* graphModel) :
-        GraphTransformFactory(graphModel)
-    {}
-
     QString name() const override { return u"Betweenness"_s; }
     QString displayName() const override { return QObject::tr("Betweenness"); }
 
@@ -77,7 +73,7 @@ public:
         };
     }
 
-    std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;
+    std::unique_ptr<GraphTransform> create(GraphModel& graphModel, const GraphTransformConfig& graphTransformConfig) const override;
 };
 
 #endif // BETWEENNESSTRANSFORM_H

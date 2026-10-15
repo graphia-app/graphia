@@ -104,14 +104,7 @@ using DefaultVisualisations = std::vector<DefaultVisualisation>;
 
 class GraphTransformFactory
 {
-private:
-    GraphModel* _graphModel = nullptr;
-
 public:
-    explicit GraphTransformFactory(GraphModel* graphModel) :
-        _graphModel(graphModel)
-    {}
-
     virtual ~GraphTransformFactory() = default;
 
     virtual QString name() const = 0;
@@ -127,11 +120,10 @@ public:
     GraphTransformParameter parameter(const QString& parameterName) const;
     virtual DefaultVisualisations defaultVisualisations() const { return {}; }
 
-    virtual bool configIsValid(const GraphTransformConfig&) const { return true; }
+    virtual bool configIsValid(const GraphModel&, const GraphTransformConfig&) const { return true; }
     void setMissingParametersToDefault(GraphTransformConfig& graphTransformConfig) const;
-    virtual std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const = 0;
-
-    GraphModel* graphModel() const { return _graphModel; }
+    virtual std::unique_ptr<GraphTransform> create(GraphModel& graphModel,
+        const GraphTransformConfig& graphTransformConfig) const = 0;
 };
 
 using IdentityTransform = GraphTransform;

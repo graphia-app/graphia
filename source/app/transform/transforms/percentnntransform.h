@@ -48,10 +48,6 @@ private:
 class PercentNNTransformFactory : public GraphTransformFactory
 {
 public:
-    explicit PercentNNTransformFactory(GraphModel* graphModel) :
-        GraphTransformFactory(graphModel)
-    {}
-
     QString name() const override { return u"%-NN"_s; }
     QString displayName() const override { return QObject::tr("%-NN"); }
 
@@ -100,7 +96,7 @@ public:
         };
     }
 
-    std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;
+    std::unique_ptr<GraphTransform> create(GraphModel& graphModel, const GraphTransformConfig& graphTransformConfig) const override;
 };
 
 #endif // PERCENTNNTRANSFORM_H

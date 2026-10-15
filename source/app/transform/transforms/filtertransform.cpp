@@ -130,7 +130,7 @@ void FilterTransform::apply(TransformedGraph& target)
     }
 }
 
-std::unique_ptr<GraphTransform> FilterTransformFactory::create(const GraphTransformConfig&) const
+std::unique_ptr<GraphTransform> FilterTransformFactory::create(GraphModel& graphModel, const GraphTransformConfig&) const
 {
-    return std::make_unique<FilterTransform>(elementType(), *graphModel(), _invert);
+    return std::make_unique<FilterTransform>(elementType(), graphModel, _invert);
 }

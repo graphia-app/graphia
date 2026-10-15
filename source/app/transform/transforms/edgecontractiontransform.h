@@ -47,10 +47,6 @@ private:
 class EdgeContractionTransformFactory : public GraphTransformFactory
 {
 public:
-    explicit EdgeContractionTransformFactory(GraphModel* graphModel) :
-        GraphTransformFactory(graphModel)
-    {}
-
     QString name() const override { return u"Contract Edges"_s; }
     QString displayName() const override { return QObject::tr("Contract Edges"); }
 
@@ -64,7 +60,7 @@ public:
     ElementType elementType() const override { return ElementType::Edge; }
     bool requiresCondition() const override { return true; }
 
-    std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;
+    std::unique_ptr<GraphTransform> create(GraphModel& graphModel, const GraphTransformConfig& graphTransformConfig) const override;
 };
 
 #endif // EDGECONTRACTIONTRANSFORM_H

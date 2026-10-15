@@ -126,13 +126,13 @@ void AttributeSynthesisTransform::apply(TransformedGraph& target)
         synthesise(target.edgeIds());
 }
 
-bool AttributeSynthesisTransformFactory::configIsValid(const GraphTransformConfig& graphTransformConfig) const
+bool AttributeSynthesisTransformFactory::configIsValid(const GraphModel&, const GraphTransformConfig& graphTransformConfig) const
 {
     return attributeSynthesisTransformConfigIsValid(graphTransformConfig)._type == AlertType::None;
 }
 
 std::unique_ptr<GraphTransform> AttributeSynthesisTransformFactory::create(
-    const GraphTransformConfig&) const
+    GraphModel& graphModel, const GraphTransformConfig&) const
 {
-    return std::make_unique<AttributeSynthesisTransform>(*graphModel());
+    return std::make_unique<AttributeSynthesisTransform>(graphModel);
 }

@@ -47,6 +47,26 @@
 #include "app/rendering/openglfunctions.h"
 
 #include "app/transform/graphtransformconfigparser.h"
+#include "app/transform/transforms/filtertransform.h"
+#include "app/transform/transforms/edgecontractiontransform.h"
+#include "app/transform/transforms/mcltransform.h"
+#include "app/transform/transforms/louvaintransform.h"
+#include "app/transform/transforms/pageranktransform.h"
+#include "app/transform/transforms/eccentricitytransform.h"
+#include "app/transform/transforms/betweennesstransform.h"
+#include "app/transform/transforms/contractbyattributetransform.h"
+#include "app/transform/transforms/separatebyattributetransform.h"
+#include "app/transform/transforms/knntransform.h"
+#include "app/transform/transforms/percentnntransform.h"
+#include "app/transform/transforms/edgereductiontransform.h"
+#include "app/transform/transforms/forwardmultielementattributetransform.h"
+#include "app/transform/transforms/spanningtreetransform.h"
+#include "app/transform/transforms/attributesynthesistransform.h"
+#include "app/transform/transforms/combineattributestransform.h"
+#include "app/transform/transforms/conditionalattributetransform.h"
+#include "app/transform/transforms/averageattributetransform.h"
+#include "app/transform/transforms/typecasttransform.h"
+#include "app/transform/transforms/removeleavestransform.h"
 #include "app/ui/visualisations/visualisationconfigparser.h"
 
 #include "../crashhandler.h"
@@ -152,6 +172,41 @@ Application::Application(QObject *parent, bool enableUpdateCheck) :
     registerSaverFactory(std::make_unique<GMLSaverFactory>());
     registerSaverFactory(std::make_unique<PairwiseSaverFactory>());
     registerSaverFactory(std::make_unique<JSONGraphSaverFactory>());
+
+    auto addTransformFactory = [this](std::unique_ptr<GraphTransformFactory> factory)
+    {
+        auto transformName = factory->name();
+        _graphTransformFactories.emplace(transformName, std::move(factory));
+    };
+
+    addTransformFactory(std::make_unique<FilterTransformFactory>(ElementType::Node, false));
+    addTransformFactory(std::make_unique<FilterTransformFactory>(ElementType::Edge, false));
+    addTransformFactory(std::make_unique<FilterTransformFactory>(ElementType::Component, false));
+    addTransformFactory(std::make_unique<FilterTransformFactory>(ElementType::Node, true));
+    addTransformFactory(std::make_unique<FilterTransformFactory>(ElementType::Edge, true));
+    addTransformFactory(std::make_unique<FilterTransformFactory>(ElementType::Component, true));
+    addTransformFactory(std::make_unique<EdgeContractionTransformFactory>());
+    addTransformFactory(std::make_unique<MCLTransformFactory>());
+    addTransformFactory(std::make_unique<LouvainTransformFactory>());
+    addTransformFactory(std::make_unique<WeightedLouvainTransformFactory>());
+    addTransformFactory(std::make_unique<PageRankTransformFactory>());
+    addTransformFactory(std::make_unique<EccentricityTransformFactory>());
+    addTransformFactory(std::make_unique<BetweennessTransformFactory>());
+    addTransformFactory(std::make_unique<ContractByAttributeTransformFactory>());
+    addTransformFactory(std::make_unique<SeparateByAttributeTransformFactory>());
+    addTransformFactory(std::make_unique<ConditionalAttributeTransformFactory>(ElementType::Node));
+    addTransformFactory(std::make_unique<ConditionalAttributeTransformFactory>(ElementType::Edge));
+    addTransformFactory(std::make_unique<KNNTransformFactory>());
+    addTransformFactory(std::make_unique<PercentNNTransformFactory>());
+    addTransformFactory(std::make_unique<EdgeReductionTransformFactory>());
+    addTransformFactory(std::make_unique<SpanningTreeTransformFactory>());
+    addTransformFactory(std::make_unique<AttributeSynthesisTransformFactory>());
+    addTransformFactory(std::make_unique<CombineAttributesTransformFactory>());
+    addTransformFactory(std::make_unique<ForwardMultiElementAttributeTransformFactory>());
+    addTransformFactory(std::make_unique<AverageAttributeTransformFactory>());
+    addTransformFactory(std::make_unique<TypeCastTransformFactory>());
+    addTransformFactory(std::make_unique<RemoveLeavesTransformFactory>());
+    addTransformFactory(std::make_unique<RemoveBranchesTransformFactory>());
 
 #ifdef Q_OS_WASM
     u::qrcExtract(":/wasm_resource_files", QStandardPaths::writableLocation(
@@ -359,6 +414,14 @@ ISaverFactory* Application::saverFactoryByName(const QString& name)
         return factoryIt->get();
 
     return nullptr;
+}
+
+const GraphTransformFactory* Application::transformFactory(const QString& transformName) const
+{
+    if(!u::contains(_graphTransformFactories, transformName))
+        return nullptr;
+
+    return _graphTransformFactories.at(transformName).get();
 }
 
 QVariantList Application::saverFileTypes()

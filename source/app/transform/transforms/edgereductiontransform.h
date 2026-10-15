@@ -38,10 +38,6 @@ public:
 class EdgeReductionTransformFactory : public GraphTransformFactory
 {
 public:
-    explicit EdgeReductionTransformFactory(GraphModel* graphModel) :
-        GraphTransformFactory(graphModel)
-    {}
-
     QString name() const override { return u"Edge Reduction"_s; }
     QString displayName() const override { return QObject::tr("Edge Reduction"); }
 
@@ -71,7 +67,7 @@ public:
         };
     }
 
-    std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;
+    std::unique_ptr<GraphTransform> create(GraphModel& graphModel, const GraphTransformConfig& graphTransformConfig) const override;
 };
 
 #endif // EDGEREDUCTIONTRANSFORM_H

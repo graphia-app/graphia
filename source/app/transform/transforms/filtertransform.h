@@ -55,8 +55,7 @@ private:
     bool _invert = false;
 
 public:
-    FilterTransformFactory(GraphModel* graphModel, ElementType elementType, bool invert) :
-        GraphTransformFactory(graphModel),
+    FilterTransformFactory(ElementType elementType, bool invert) :
         _elementType(elementType), _invert(invert)
     {}
 
@@ -96,7 +95,7 @@ public:
     ElementType elementType() const override { return _elementType; }
     bool requiresCondition() const override { return true; }
 
-    std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;
+    std::unique_ptr<GraphTransform> create(GraphModel& graphModel, const GraphTransformConfig& graphTransformConfig) const override;
 };
 
 #endif // FILTERTRANSFORM_H

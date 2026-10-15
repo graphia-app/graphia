@@ -157,8 +157,8 @@ void BetweennessTransform::apply(TransformedGraph& target)
         .setFlag(AttributeFlag::VisualiseByComponent);
 }
 
-std::unique_ptr<GraphTransform> BetweennessTransformFactory::create(const GraphTransformConfig&) const
+std::unique_ptr<GraphTransform> BetweennessTransformFactory::create(GraphModel& graphModel, const GraphTransformConfig&) const
 {
-    return std::make_unique<BetweennessTransform>(graphModel());
+    return std::make_unique<BetweennessTransform>(&graphModel);
 }
 

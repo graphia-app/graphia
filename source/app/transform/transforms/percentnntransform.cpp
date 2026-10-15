@@ -132,7 +132,7 @@ void PercentNNTransform::apply(TransformedGraph& target)
         .setFlag(AttributeFlag::AutoRange);
 }
 
-std::unique_ptr<GraphTransform> PercentNNTransformFactory::create(const GraphTransformConfig&) const
+std::unique_ptr<GraphTransform> PercentNNTransformFactory::create(GraphModel& graphModel, const GraphTransformConfig&) const
 {
-    return std::make_unique<PercentNNTransform>(*graphModel());
+    return std::make_unique<PercentNNTransform>(graphModel);
 }

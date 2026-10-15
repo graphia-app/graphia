@@ -103,7 +103,7 @@ void SpanningTreeTransform::apply(TransformedGraph& target)
     setProgress(-1);
 }
 
-std::unique_ptr<GraphTransform> SpanningTreeTransformFactory::create(const GraphTransformConfig&) const
+std::unique_ptr<GraphTransform> SpanningTreeTransformFactory::create(GraphModel&, const GraphTransformConfig&) const
 {
     return std::make_unique<SpanningTreeTransform>();
 }

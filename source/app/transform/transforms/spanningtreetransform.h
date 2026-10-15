@@ -41,10 +41,6 @@ public:
 class SpanningTreeTransformFactory : public GraphTransformFactory
 {
 public:
-    explicit SpanningTreeTransformFactory(GraphModel* graphModel) :
-        GraphTransformFactory(graphModel)
-    {}
-
     QString name() const override { return u"Spanning Forest"_s; }
     QString displayName() const override { return QObject::tr("Spanning Forest"); }
 
@@ -67,7 +63,7 @@ public:
         };
     }
 
-    std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;
+    std::unique_ptr<GraphTransform> create(GraphModel& graphModel, const GraphTransformConfig& graphTransformConfig) const override;
 };
 
 #endif // SPANNINGTREETRANSFORM_H

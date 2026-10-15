@@ -44,7 +44,7 @@ void EdgeContractionTransform::apply(TransformedGraph& target)
     target.mutableGraph().contractEdges(edgeIdsToContract);
 }
 
-std::unique_ptr<GraphTransform> EdgeContractionTransformFactory::create(const GraphTransformConfig&) const
+std::unique_ptr<GraphTransform> EdgeContractionTransformFactory::create(GraphModel& graphModel, const GraphTransformConfig&) const
 {
-    return std::make_unique<EdgeContractionTransform>(*graphModel());
+    return std::make_unique<EdgeContractionTransform>(graphModel);
 }

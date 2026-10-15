@@ -46,10 +46,6 @@ private:
 class LouvainTransformFactory : public GraphTransformFactory
 {
 public:
-    explicit LouvainTransformFactory(GraphModel* graphModel) :
-        GraphTransformFactory(graphModel)
-    {}
-
     QString name() const override { return u"Louvain Cluster"_s; }
     QString displayName() const override { return QObject::tr("Louvain Cluster"); }
 
@@ -87,17 +83,15 @@ public:
         };
     }
 
-    std::unique_ptr<GraphTransform> create(const GraphTransformConfig&) const override
+    std::unique_ptr<GraphTransform> create(GraphModel& graphModel, const GraphTransformConfig&) const override
     {
-        return std::make_unique<LouvainTransform>(graphModel(), false);
+        return std::make_unique<LouvainTransform>(&graphModel, false);
     }
 };
 
 class WeightedLouvainTransformFactory : public LouvainTransformFactory
 {
 public:
-    using LouvainTransformFactory::LouvainTransformFactory;
-
     QString name() const override { return u"Weighted Louvain Cluster"_s; }
     QString displayName() const override { return QObject::tr("Weighted Louvain Cluster"); }
 
@@ -125,9 +119,9 @@ public:
         };
     }
 
-    std::unique_ptr<GraphTransform> create(const GraphTransformConfig&) const override
+    std::unique_ptr<GraphTransform> create(GraphModel& graphModel, const GraphTransformConfig&) const override
     {
-        return std::make_unique<LouvainTransform>(graphModel(), true);
+        return std::make_unique<LouvainTransform>(&graphModel, true);
     }
 };
 

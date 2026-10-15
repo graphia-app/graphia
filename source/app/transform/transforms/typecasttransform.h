@@ -48,10 +48,6 @@ private:
 class TypeCastTransformFactory : public GraphTransformFactory
 {
 public:
-    explicit TypeCastTransformFactory(GraphModel* graphModel) :
-        GraphTransformFactory(graphModel)
-    {}
-
     QString name() const override { return u"Type Cast"_s; }
     QString displayName() const override { return QObject::tr("Type Cast"); }
 
@@ -92,8 +88,8 @@ public:
         };
     }
 
-    bool configIsValid(const GraphTransformConfig& graphTransformConfig) const override;
-    std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;
+    bool configIsValid(const GraphModel& graphModel, const GraphTransformConfig& graphTransformConfig) const override;
+    std::unique_ptr<GraphTransform> create(GraphModel& graphModel, const GraphTransformConfig& graphTransformConfig) const override;
 };
 
 #endif // TYPECASTTRANSFORM_H

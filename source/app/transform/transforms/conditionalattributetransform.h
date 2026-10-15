@@ -53,8 +53,8 @@ private:
     ElementType _elementType = ElementType::None;
 
 public:
-    ConditionalAttributeTransformFactory(GraphModel* graphModel, ElementType elementType) :
-        GraphTransformFactory(graphModel), _elementType(elementType)
+    explicit ConditionalAttributeTransformFactory(ElementType elementType) :
+        _elementType(elementType)
     {}
 
     QString name() const override
@@ -114,8 +114,8 @@ public:
         };
     }
 
-    bool configIsValid(const GraphTransformConfig& graphTransformConfig) const override;
-    std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;
+    bool configIsValid(const GraphModel& graphModel, const GraphTransformConfig& graphTransformConfig) const override;
+    std::unique_ptr<GraphTransform> create(GraphModel& graphModel, const GraphTransformConfig& graphTransformConfig) const override;
 };
 
 #endif // CONDITIONALATTRIBUTETRANSFORM_H

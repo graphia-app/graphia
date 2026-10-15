@@ -100,12 +100,12 @@ void TypeCastTransform::apply(TransformedGraph&)
         cast.operator()<EdgeId>();
 }
 
-bool TypeCastTransformFactory::configIsValid(const GraphTransformConfig& graphTransformConfig) const
+bool TypeCastTransformFactory::configIsValid(const GraphModel&, const GraphTransformConfig& graphTransformConfig) const
 {
     return typecastTransformConfigIsValid(graphTransformConfig)._type == AlertType::None;
 }
 
-std::unique_ptr<GraphTransform> TypeCastTransformFactory::create(const GraphTransformConfig&) const
+std::unique_ptr<GraphTransform> TypeCastTransformFactory::create(GraphModel& graphModel, const GraphTransformConfig&) const
 {
-    return std::make_unique<TypeCastTransform>(*graphModel());
+    return std::make_unique<TypeCastTransform>(graphModel);
 }
