@@ -31,11 +31,13 @@
 
 #include <vector>
 #include <map>
+#include <memory>
 #include <cstddef>
 
 class VisualisationInfo;
 class GraphModel;
 class TransformedGraph;
+struct VisualisationConfig;
 
 class VisualisationChannel
 {
@@ -71,6 +73,28 @@ public:
 private:
     std::vector<QString> _values;
     std::map<QString, size_t> _valueIndexMap;
+};
+
+class VisualisationChannelFactory
+{
+public:
+    virtual ~VisualisationChannelFactory() = default;
+
+    virtual QString name() const = 0;
+    virtual QString displayName() const = 0;
+
+    virtual bool appliesTo(ElementType) const { return true; }
+    virtual bool supports(ValueType) const = 0;
+    virtual bool requiresRange() const { return true; }
+    virtual bool allowsMapping() const { return true; }
+
+    virtual void findErrors(ElementType, VisualisationInfo&) const {}
+
+    virtual QString description(ElementType, ValueType) const { return {}; }
+
+    virtual QVariantMap defaultParameters(ValueType) const { return {}; }
+
+    virtual std::unique_ptr<VisualisationChannel> create(const VisualisationConfig& visualisationConfig) const = 0;
 };
 
 #endif // VISUALISATIONCHANNEL_H
