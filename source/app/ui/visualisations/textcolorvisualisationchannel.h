@@ -25,6 +25,8 @@
 #include <QObject>
 #include <QString>
 
+#include <memory>
+
 using namespace Qt::Literals::StringLiterals;
 
 class TextColorVisualisationChannel : public ColorVisualisationChannel
@@ -33,13 +35,19 @@ public:
     using ColorVisualisationChannel::ColorVisualisationChannel;
     using ColorVisualisationChannel::apply;
 
+    void apply(double value, ElementVisual& elementVisual) const override;
+    void apply(const QString& value, ElementVisual& elementVisual) const override;
+};
+
+class TextColorVisualisationChannelFactory : public ColorVisualisationChannelFactory
+{
+public:
     QString name() const override { return u"Text Colour"_s; }
     QString displayName() const override { return QObject::tr("Text Colour"); }
 
-    void apply(double value, ElementVisual& elementVisual) const override;
-    void apply(const QString& value, ElementVisual& elementVisual) const override;
-
     QString description(ElementType, ValueType) const override;
+
+    std::unique_ptr<VisualisationChannel> create(const VisualisationConfig& visualisationConfig) const override;
 };
 
 #endif // TEXTCOLORVISUALISATIONCHANNEL_H

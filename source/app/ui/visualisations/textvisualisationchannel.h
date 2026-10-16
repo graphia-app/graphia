@@ -25,17 +25,22 @@
 #include <QObject>
 #include <QString>
 
+#include <memory>
+
 using namespace Qt::Literals::StringLiterals;
 
 class TextVisualisationChannel : public VisualisationChannel
 {
 public:
-    using VisualisationChannel::VisualisationChannel;
     using VisualisationChannel::apply;
 
     void apply(double value, ElementVisual& elementVisual) const override;
     void apply(const QString& value, ElementVisual& elementVisual) const override;
+};
 
+class TextVisualisationChannelFactory : public VisualisationChannelFactory
+{
+public:
     QString name() const override { return u"Text"_s; }
     QString displayName() const override { return QObject::tr("Text"); }
 
@@ -46,6 +51,8 @@ public:
     void findErrors(ElementType elementType, VisualisationInfo& info) const override;
 
     QString description(ElementType, ValueType) const override;
+
+    std::unique_ptr<VisualisationChannel> create(const VisualisationConfig&) const override;
 };
 
 #endif // TEXTVISUALISATIONCHANNEL_H

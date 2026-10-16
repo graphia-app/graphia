@@ -218,7 +218,7 @@ private:
             qDebug() << "updateSharedAttributeValues called on component attribute";
     }
 
-    std::map<QString, std::unique_ptr<VisualisationChannel>> _visualisationChannels;
+    std::map<QString, std::unique_ptr<VisualisationChannelFactory>> _visualisationChannelFactories;
 
     // Slightly hacky state variable that tracks whether or not a edge text
     // visualisation is present. This is required so that we can show a warning
@@ -362,18 +362,18 @@ GraphModel::GraphModel(Application* application, IPlugin* plugin) :
         .setDescription(tr("An edge's component identifier indicates which component it is part of."))
         .setFlag(AttributeFlag::DisableDuringTransform);
 
-    auto addVisualisationChannel = [this](std::unique_ptr<VisualisationChannel> channel)
+    auto addVisualisationChannelFactory = [this](std::unique_ptr<VisualisationChannelFactory> factory)
     {
-        auto channelName = channel->name();
-        _->_visualisationChannels.emplace(channelName, std::move(channel));
+        auto channelName = factory->name();
+        _->_visualisationChannelFactories.emplace(channelName, std::move(factory));
     };
 
-    addVisualisationChannel(std::make_unique<ColorVisualisationChannel>());
-    addVisualisationChannel(std::make_unique<SizeVisualisationChannel>());
-    addVisualisationChannel(std::make_unique<SharedTextVisualisationChannel>());
-    addVisualisationChannel(std::make_unique<TextVisualisationChannel>());
-    addVisualisationChannel(std::make_unique<TextColorVisualisationChannel>());
-    addVisualisationChannel(std::make_unique<TextSizeVisualisationChannel>());
+    addVisualisationChannelFactory(std::make_unique<ColorVisualisationChannelFactory>());
+    addVisualisationChannelFactory(std::make_unique<SizeVisualisationChannelFactory>());
+    addVisualisationChannelFactory(std::make_unique<SharedTextVisualisationChannelFactory>());
+    addVisualisationChannelFactory(std::make_unique<TextVisualisationChannelFactory>());
+    addVisualisationChannelFactory(std::make_unique<TextColorVisualisationChannelFactory>());
+    addVisualisationChannelFactory(std::make_unique<TextSizeVisualisationChannelFactory>());
 }
 
 GraphModel::~GraphModel() // NOLINT modernize-use-equals-default
@@ -763,7 +763,7 @@ bool GraphModel::visualisationIsValid(const QString& visualisation) const
     {
         const auto& visualisationConfig = p.result();
 
-        if(!u::contains(_->_visualisationChannels, visualisationConfig._channelName))
+        if(!u::contains(_->_visualisationChannelFactories, visualisationConfig._channelName))
             return false;
 
         return true;
@@ -816,27 +816,24 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
             continue;
         }
 
-        if(!u::contains(_->_visualisationChannels, channelName))
+        if(!u::contains(_->_visualisationChannelFactories, channelName))
         {
             info.addAlert(AlertType::Error, tr("Visualisation channel '%1' doesn't exist").arg(channelName));
             continue;
         }
 
         auto attribute = attributeValueByName(attributeName);
-        auto& channel = _->_visualisationChannels.at(channelName);
+        const auto& factory = _->_visualisationChannelFactories.at(channelName);
 
-        channel->findErrors(attribute.elementType(), info);
+        factory->findErrors(attribute.elementType(), info);
 
-        if(!channel->supports(attribute.valueType()))
+        if(!factory->supports(attribute.valueType()))
         {
             info.addAlert(AlertType::Error, tr("Visualisation doesn't support attribute type"));
             continue;
         }
 
-        channel->reset();
-
-        for(const auto& parameter : visualisationConfig._parameters)
-            channel->setParameter(parameter._name, parameter.valueAsString());
+        auto channel = factory->create(visualisationConfig);
 
         if(attribute.elementType() == ElementType::Edge && channelName == u"Text"_s)
             _->_hasValidEdgeTextVisualisation = true;
@@ -888,11 +885,11 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
         switch(attribute.elementType())
         {
         case ElementType::Node:
-            nodeVisualisationsBuilder.build(attribute, *channel, visualisationConfig, index, info);
+            nodeVisualisationsBuilder.build(attribute, *factory, *channel, visualisationConfig, index, info);
             break;
 
         case ElementType::Edge:
-            edgeVisualisationsBuilder.build(attribute, *channel, visualisationConfig, index, info);
+            edgeVisualisationsBuilder.build(attribute, *factory, *channel, visualisationConfig, index, info);
             break;
 
         default:
@@ -927,9 +924,9 @@ QStringList GraphModel::availableVisualisationChannelNames(ElementType elementTy
 {
     QStringList stringList;
 
-    for(const auto& [channelName, channel] : _->_visualisationChannels)
+    for(const auto& [channelName, factory] : _->_visualisationChannelFactories)
     {
-        if(channel->appliesTo(elementType) && channel->supports(valueType))
+        if(factory->appliesTo(elementType) && factory->supports(valueType))
             stringList.append(channelName);
     }
 
@@ -941,10 +938,10 @@ bool GraphModel::visualisationChannelAllowsMapping(const QString& channelName) c
     if(channelName.isEmpty())
         return false;
 
-    if(!u::contains(_->_visualisationChannels, channelName))
+    if(!u::contains(_->_visualisationChannelFactories, channelName))
         return false;
 
-    return _->_visualisationChannels.at(channelName)->allowsMapping();
+    return _->_visualisationChannelFactories.at(channelName)->allowsMapping();
 }
 
 QStringList GraphModel::visualisationDescription(const QString& attributeName, const QStringList& channelNames) const
@@ -956,16 +953,16 @@ QStringList GraphModel::visualisationDescription(const QString& attributeName, c
 
     for(const auto& channelName : channelNames)
     {
-        if(!u::contains(_->_visualisationChannels, channelName))
+        if(!u::contains(_->_visualisationChannelFactories, channelName))
             return descriptions;
 
         auto attribute = attributeValueByName(attributeName);
-        auto& channel = _->_visualisationChannels.at(channelName);
+        const auto& factory = _->_visualisationChannelFactories.at(channelName);
 
-        if(!channel->supports(attribute.valueType()))
+        if(!factory->supports(attribute.valueType()))
             descriptions.append(tr("This visualisation channel is not supported for the attribute type."));
         else
-            descriptions.append(channel->description(attribute.elementType(), attribute.valueType()));
+            descriptions.append(factory->description(attribute.elementType(), attribute.valueType()));
     }
 
     return descriptions;
@@ -993,12 +990,12 @@ const VisualisationInfo& GraphModel::visualisationInfoAtIndex(int index) const
 
 QVariantMap GraphModel::visualisationDefaultParameters(ValueType valueType, const QString& channelName) const
 {
-    if(!u::contains(_->_visualisationChannels, channelName))
+    if(!u::contains(_->_visualisationChannelFactories, channelName))
         return {};
 
-    auto& channel = _->_visualisationChannels.at(channelName);
+    const auto& factory = _->_visualisationChannelFactories.at(channelName);
 
-    return channel->defaultParameters(valueType);
+    return factory->defaultParameters(valueType);
 }
 
 std::vector<QString> GraphModel::attributeNames(ElementType elementType) const

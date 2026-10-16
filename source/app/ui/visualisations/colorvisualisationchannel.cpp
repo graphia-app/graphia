@@ -18,12 +18,24 @@
  */
 
 #include "colorvisualisationchannel.h"
+#include "visualisationconfig.h"
 
 #include "app/preferences.h"
 
 #include <QObject>
 
 using namespace Qt::Literals::StringLiterals;
+
+ColorVisualisationChannel::ColorVisualisationChannel(const VisualisationConfig& visualisationConfig)
+{
+    for(const auto& parameter : visualisationConfig._parameters)
+    {
+        if(parameter._name == u"gradient"_s)
+            _colorGradient = ColorGradient(parameter.valueAsString());
+        else if(parameter._name == u"palette"_s)
+            _colorPalette = ColorPalette(parameter.valueAsString());
+    }
+}
 
 void ColorVisualisationChannel::apply(double value, ElementVisual& elementVisual) const
 {
@@ -38,7 +50,7 @@ void ColorVisualisationChannel::apply(const QString& value, ElementVisual& eleme
     elementVisual._outerColor = _colorPalette.get(value, indexOf(value));
 }
 
-QString ColorVisualisationChannel::description(ElementType elementType, ValueType valueType) const
+QString ColorVisualisationChannelFactory::description(ElementType elementType, ValueType valueType) const
 {
     auto elementTypeString = elementTypeAsString(elementType).toLower();
 
@@ -62,15 +74,7 @@ QString ColorVisualisationChannel::description(ElementType elementType, ValueTyp
     return {};
 }
 
-void ColorVisualisationChannel::reset()
-{
-    VisualisationChannel::reset();
-
-    _colorGradient = {};
-    _colorPalette = {};
-}
-
-QVariantMap ColorVisualisationChannel::defaultParameters(ValueType valueType) const
+QVariantMap ColorVisualisationChannelFactory::defaultParameters(ValueType valueType) const
 {
     QVariantMap parameters;
 
@@ -94,10 +98,8 @@ QVariantMap ColorVisualisationChannel::defaultParameters(ValueType valueType) co
     return parameters;
 }
 
-void ColorVisualisationChannel::setParameter(const QString& name, const QString& value)
+std::unique_ptr<VisualisationChannel> ColorVisualisationChannelFactory::create(
+    const VisualisationConfig& visualisationConfig) const
 {
-    if(name == u"gradient"_s)
-        _colorGradient = ColorGradient(value);
-    else if(name == u"palette"_s)
-        _colorPalette = ColorPalette(value);
+    return std::make_unique<ColorVisualisationChannel>(visualisationConfig);
 }

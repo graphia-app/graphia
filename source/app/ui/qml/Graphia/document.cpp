@@ -839,7 +839,7 @@ void Document::onPreferenceChanged(const QString& key, const QVariant&)
         emit contrastingColorChanged();
     else if(key == u"visuals/showEdgeText"_s)
     {
-        // showEdgeText affects the warning state of TextVisualisationChannel
+        // showEdgeText affects the warning state of TextVisualisationChannelFactory
         _commandManager.executeOnce([this](Command&) { refreshVisualisations(); });
     }
 }

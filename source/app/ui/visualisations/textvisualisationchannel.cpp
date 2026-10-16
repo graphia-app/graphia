@@ -40,13 +40,18 @@ void TextVisualisationChannel::apply(const QString& value, ElementVisual& elemen
     elementVisual._text = value;
 }
 
-void TextVisualisationChannel::findErrors(ElementType elementType, VisualisationInfo& info) const
+void TextVisualisationChannelFactory::findErrors(ElementType elementType, VisualisationInfo& info) const
 {
     if(elementType == ElementType::Edge && u::pref(u"visuals/showEdgeText"_s).toInt() == static_cast<int>(TextState::Off))
         info.addAlert(AlertType::Warning, QObject::tr("Edge Text Disabled"));
 }
 
-QString TextVisualisationChannel::description(ElementType, ValueType) const
+QString TextVisualisationChannelFactory::description(ElementType, ValueType) const
 {
     return QObject::tr("The attribute will be visualised as text.");
+}
+
+std::unique_ptr<VisualisationChannel> TextVisualisationChannelFactory::create(const VisualisationConfig&) const
+{
+    return std::make_unique<TextVisualisationChannel>();
 }

@@ -26,9 +26,14 @@ void TextSizeVisualisationChannel::apply(double value, ElementVisual& elementVis
     elementVisual._textSize = static_cast<float>(value);
 }
 
-QString TextSizeVisualisationChannel::description(ElementType elementType, ValueType) const
+QString TextSizeVisualisationChannelFactory::description(ElementType elementType, ValueType) const
 {
     auto elementTypeString = elementTypeAsString(elementType).toLower();
     return QString(QObject::tr("The attribute will be visualised by "
         "varying the size of the %1 text.")).arg(elementTypeString);
+}
+
+std::unique_ptr<VisualisationChannel> TextSizeVisualisationChannelFactory::create(const VisualisationConfig&) const
+{
+    return std::make_unique<TextSizeVisualisationChannel>();
 }

@@ -21,12 +21,6 @@
 
 #include "shared/utils/container.h"
 
-void VisualisationChannel::reset()
-{
-    _values.clear();
-    _valueIndexMap.clear();
-}
-
 void VisualisationChannel::addValue(const QString& value)
 {
     _values.emplace_back(value);

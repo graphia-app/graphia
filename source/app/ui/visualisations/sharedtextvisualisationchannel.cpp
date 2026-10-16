@@ -102,7 +102,12 @@ TextVisuals SharedTextVisualisationChannel::textVisuals(const QString& attribute
     return textVisuals;
 }
 
-QString SharedTextVisualisationChannel::description(ElementType, ValueType) const
+QString SharedTextVisualisationChannelFactory::description(ElementType, ValueType) const
 {
     return QObject::tr("Groups of nodes that share an attribute value will be labelled as such.");
+}
+
+std::unique_ptr<VisualisationChannel> SharedTextVisualisationChannelFactory::create(const VisualisationConfig&) const
+{
+    return std::make_unique<SharedTextVisualisationChannel>();
 }

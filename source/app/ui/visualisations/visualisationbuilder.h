@@ -31,6 +31,7 @@
 class Graph;
 class Attribute;
 class VisualisationChannel;
+class VisualisationChannelFactory;
 struct VisualisationConfig;
 struct ElementVisual;
 
@@ -46,6 +47,7 @@ public:
     void findOverrideAlerts(VisualisationInfosMap& infos);
 
     void build(const Attribute& attribute,
+        const VisualisationChannelFactory& channelFactory,
         const VisualisationChannel& channel,
         const VisualisationConfig& config,
         int index, VisualisationInfo& visualisationInfo);

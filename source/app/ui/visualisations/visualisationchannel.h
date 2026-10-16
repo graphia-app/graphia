@@ -44,27 +44,11 @@ class VisualisationChannel
 public:
     virtual ~VisualisationChannel() = default;
 
-    virtual QString name() const = 0;
-    virtual QString displayName() const = 0;
-
     virtual void apply(double, ElementVisual&) const { qFatal("apply not implemented"); }
     virtual void apply(const QString&, ElementVisual&) const { qFatal("apply not implemented"); }
 
     virtual TextVisuals textVisuals(const QString& /*attributeName*/,
         const GraphModel&, const TransformedGraph&) { return {}; }
-
-    virtual bool appliesTo(ElementType) const { return true; }
-    virtual bool supports(ValueType) const = 0;
-    virtual bool requiresRange() const { return true; }
-    virtual bool allowsMapping() const { return true; }
-
-    virtual void findErrors(ElementType, VisualisationInfo&) const {}
-
-    virtual QString description(ElementType, ValueType) const { return {}; }
-
-    virtual void reset();
-    virtual QVariantMap defaultParameters(ValueType) const { return {}; }
-    virtual void setParameter(const QString& /*name*/, const QString& /*value*/) {}
 
     const std::vector<QString>& values() const { return _values; }
     void addValue(const QString& value);

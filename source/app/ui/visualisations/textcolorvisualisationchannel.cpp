@@ -36,7 +36,7 @@ void TextColorVisualisationChannel::apply(const QString& value, ElementVisual& e
     elementVisual._textColor = _colorPalette.get(value, indexOf(value));
 }
 
-QString TextColorVisualisationChannel::description(ElementType elementType, ValueType valueType) const
+QString TextColorVisualisationChannelFactory::description(ElementType elementType, ValueType valueType) const
 {
     auto elementTypeString = elementTypeAsString(elementType).toLower();
 
@@ -58,4 +58,10 @@ QString TextColorVisualisationChannel::description(ElementType elementType, Valu
     }
 
     return {};
+}
+
+std::unique_ptr<VisualisationChannel> TextColorVisualisationChannelFactory::create(
+    const VisualisationConfig& visualisationConfig) const
+{
+    return std::make_unique<TextColorVisualisationChannel>(visualisationConfig);
 }

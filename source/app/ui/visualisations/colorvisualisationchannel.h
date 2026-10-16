@@ -29,19 +29,28 @@
 #include <QString>
 #include <QVariantMap>
 
-#include <vector>
+#include <memory>
 
 using namespace Qt::Literals::StringLiterals;
 
 class ColorVisualisationChannel : public VisualisationChannel
 {
 public:
-    using VisualisationChannel::VisualisationChannel;
+    explicit ColorVisualisationChannel(const VisualisationConfig& visualisationConfig);
+
     using VisualisationChannel::apply;
 
     void apply(double value, ElementVisual& elementVisual) const override;
     void apply(const QString& value, ElementVisual& elementVisual) const override;
 
+protected:
+    ColorGradient _colorGradient;
+    ColorPalette _colorPalette;
+};
+
+class ColorVisualisationChannelFactory : public VisualisationChannelFactory
+{
+public:
     QString name() const override { return u"Colour"_s; }
     QString displayName() const override { return QObject::tr("Colour"); }
 
@@ -49,14 +58,9 @@ public:
 
     QString description(ElementType, ValueType) const override;
 
-    void reset() override;
     QVariantMap defaultParameters(ValueType valueType) const override;
-    void setParameter(const QString& name, const QString& value) override;
 
-protected:
-    ColorGradient _colorGradient;
-    ColorPalette _colorPalette;
-    std::vector<QString> _sharedValues;
+    std::unique_ptr<VisualisationChannel> create(const VisualisationConfig& visualisationConfig) const override;
 };
 
 #endif // COLORVISUALISATIONCHANNEL_H

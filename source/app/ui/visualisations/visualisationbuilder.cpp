@@ -124,6 +124,7 @@ void VisualisationsBuilder<ElementId>::findOverrideAlerts(VisualisationInfosMap&
 
 template<typename ElementId>
 void VisualisationsBuilder<ElementId>::build(const Attribute& attribute,
+    const VisualisationChannelFactory& channelFactory,
     const VisualisationChannel& channel,
     const VisualisationConfig& config,
     int index, VisualisationInfo& visualisationInfo)
@@ -152,7 +153,7 @@ void VisualisationsBuilder<ElementId>::build(const Attribute& attribute,
 
         auto applyTo = [&](const auto& graph, const u::Statistics& statistics)
         {
-            if(channel.requiresRange() && statistics._range == 0.0)
+            if(channelFactory.requiresRange() && statistics._range == 0.0)
             {
                 visualisationInfo.addAlert(AlertType::Warning,
                     QObject::tr("No numeric range in one or more components"));
@@ -168,7 +169,7 @@ void VisualisationsBuilder<ElementId>::build(const Attribute& attribute,
             {
                 double value = attribute.numericValueOf(elementId);
 
-                if(channel.allowsMapping())
+                if(channelFactory.allowsMapping())
                 {
                     if(invert)
                         value = statistics.inverse(value);

@@ -25,20 +25,24 @@
 #include <QObject>
 #include <QString>
 
+#include <memory>
+
 using namespace Qt::Literals::StringLiterals;
 
 class SharedTextVisualisationChannel : public VisualisationChannel
 {
 public:
-    using VisualisationChannel::VisualisationChannel;
-
     // This visualisation is not applied to individual elements
     void apply(double, ElementVisual&) const override {}
     void apply(const QString&, ElementVisual&) const override {}
 
     TextVisuals textVisuals(const QString& attributeName,
         const GraphModel& graphModel, const TransformedGraph&) override;
+};
 
+class SharedTextVisualisationChannelFactory : public VisualisationChannelFactory
+{
+public:
     QString name() const override { return u"Shared Text"_s; }
     QString displayName() const override { return QObject::tr("Shared Text"); }
 
@@ -48,6 +52,8 @@ public:
     bool allowsMapping() const override { return false; }
 
     QString description(ElementType, ValueType) const override;
+
+    std::unique_ptr<VisualisationChannel> create(const VisualisationConfig&) const override;
 };
 
 #endif // SHAREDTEXTVISUALISATIONCHANNEL_H
