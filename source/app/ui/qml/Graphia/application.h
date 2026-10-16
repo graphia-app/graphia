@@ -50,6 +50,7 @@
 #include <utility>
 
 class GraphModel;
+class VisualisationChannelFactory;
 class IParser;
 class ISaverFactory;
 class IPlugin;
@@ -202,6 +203,10 @@ public:
     const GraphTransformFactories& transformFactories() const { return _graphTransformFactories; }
     const GraphTransformFactory* transformFactory(const QString& transformName) const;
 
+    using VisualisationChannelFactories = std::map<QString, std::unique_ptr<VisualisationChannelFactory>>;
+    const VisualisationChannelFactories& visualisationChannelFactories() const { return _visualisationChannelFactories; }
+    const VisualisationChannelFactory* visualisationChannelFactory(const QString& channelName) const;
+
     Q_INVOKABLE QObject* qmlPluginForName(const QString& pluginName) const;
     Q_INVOKABLE QStringList pluginNames(const QString& urlTypeName) const;
     Q_INVOKABLE QString qmlModuleForPlugin(const QString& pluginName) const;
@@ -270,6 +275,7 @@ private:
     std::vector<LoadedPlugin> _loadedPlugins;
     std::vector<std::unique_ptr<ISaverFactory>> _factories;
     GraphTransformFactories _graphTransformFactories;
+    VisualisationChannelFactories _visualisationChannelFactories;
 
     QStringList _nameFilters;
     QStringListModel _loadableExtensions;

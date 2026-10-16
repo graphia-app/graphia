@@ -68,6 +68,12 @@
 #include "app/transform/transforms/typecasttransform.h"
 #include "app/transform/transforms/removeleavestransform.h"
 #include "app/ui/visualisations/visualisationconfigparser.h"
+#include "app/ui/visualisations/colorvisualisationchannel.h"
+#include "app/ui/visualisations/sizevisualisationchannel.h"
+#include "app/ui/visualisations/sharedtextvisualisationchannel.h"
+#include "app/ui/visualisations/textvisualisationchannel.h"
+#include "app/ui/visualisations/textcolorvisualisationchannel.h"
+#include "app/ui/visualisations/textsizevisualisationchannel.h"
 
 #include "../crashhandler.h"
 
@@ -207,6 +213,19 @@ Application::Application(QObject *parent, bool enableUpdateCheck) :
     addTransformFactory(std::make_unique<TypeCastTransformFactory>());
     addTransformFactory(std::make_unique<RemoveLeavesTransformFactory>());
     addTransformFactory(std::make_unique<RemoveBranchesTransformFactory>());
+
+    auto addVisualisationChannelFactory = [this](std::unique_ptr<VisualisationChannelFactory> factory)
+    {
+        auto channelName = factory->name();
+        _visualisationChannelFactories.emplace(channelName, std::move(factory));
+    };
+
+    addVisualisationChannelFactory(std::make_unique<ColorVisualisationChannelFactory>());
+    addVisualisationChannelFactory(std::make_unique<SizeVisualisationChannelFactory>());
+    addVisualisationChannelFactory(std::make_unique<SharedTextVisualisationChannelFactory>());
+    addVisualisationChannelFactory(std::make_unique<TextVisualisationChannelFactory>());
+    addVisualisationChannelFactory(std::make_unique<TextColorVisualisationChannelFactory>());
+    addVisualisationChannelFactory(std::make_unique<TextSizeVisualisationChannelFactory>());
 
 #ifdef Q_OS_WASM
     u::qrcExtract(":/wasm_resource_files", QStandardPaths::writableLocation(
@@ -422,6 +441,14 @@ const GraphTransformFactory* Application::transformFactory(const QString& transf
         return nullptr;
 
     return _graphTransformFactories.at(transformName).get();
+}
+
+const VisualisationChannelFactory* Application::visualisationChannelFactory(const QString& channelName) const
+{
+    if(!u::contains(_visualisationChannelFactories, channelName))
+        return nullptr;
+
+    return _visualisationChannelFactories.at(channelName).get();
 }
 
 QVariantList Application::saverFileTypes()
