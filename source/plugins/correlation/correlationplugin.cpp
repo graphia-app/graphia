@@ -1102,6 +1102,73 @@ QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, Progressable& p
     return QByteArray::fromStdString(jsonObject.dump());
 }
 
+static void renameKey(json& jsonObject, const char* from, const char* to)
+{
+    if(!u::contains(jsonObject, from))
+        return;
+
+    jsonObject[to] = jsonObject[from];
+    jsonObject.erase(from);
+}
+
+// Rewrites plugin data saved by an older version into the current format
+static void upgradeLegacyFormat(json& jsonObject, int dataVersion, const IGraph& graph)
+{
+    if(dataVersion < 2 && u::contains(jsonObject, "pearsonValues"))
+    {
+        // Correlation values are a plain array indexed by EdgeId
+        json jsonCorrelationValues = json::array();
+
+        size_t i = 0;
+        for(const auto& correlationValue : jsonObject["pearsonValues"])
+        {
+            auto edgeId = static_cast<EdgeId>(i++);
+            if(graph.containsEdgeId(edgeId))
+                jsonCorrelationValues.push_back({{"id", edgeId}, {"value", correlationValue}});
+        }
+
+        jsonObject["pearsonValues"] = jsonCorrelationValues;
+    }
+
+    if(dataVersion < 3)
+    {
+        // Correlation is always Pearson and positive
+        jsonObject["correlationType"] = static_cast<int>(CorrelationType::Pearson);
+        jsonObject["correlationPolarity"] = static_cast<int>(CorrelationPolarity::Positive);
+        renameKey(jsonObject, "pearsonValues", "correlationValues");
+    }
+
+    if(dataVersion < 7)
+    {
+        // Data is always continuous
+        renameKey(jsonObject, "numColumns", "numContinuousColumns");
+        renameKey(jsonObject, "data", "continuousData");
+        renameKey(jsonObject, "correlationType", "continuousCorrelationType");
+        jsonObject["numDiscreteColumns"] = 0;
+        jsonObject["discreteData"] = json::array();
+        jsonObject["correlationDataType"] = static_cast<int>(CorrelationDataType::Continuous);
+        jsonObject["discreteCorrelationType"] = static_cast<int>(CorrelationType::Jaccard);
+    }
+
+    if(dataVersion < 10)
+    {
+        jsonObject["clippingType"] = static_cast<int>(ClippingType::None);
+        jsonObject["clippingValue"] = 0.0;
+    }
+
+    if(dataVersion < 11)
+        jsonObject["hcOrdering"] = json::array();
+
+    if(dataVersion < 12)
+        renameKey(jsonObject, "minimumCorrelationValue", "threshold");
+
+    if(dataVersion < 14)
+    {
+        renameKey(jsonObject, "threshold", "minimumThreshold");
+        jsonObject["maximumK"] = 50;
+    }
+}
+
 bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IMutableGraph& graph, IParser& parser)
 {
     json jsonObject = parseJsonFrom(data, &parser);
@@ -1115,27 +1182,16 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
         return false;
     }
 
-    if(dataVersion >= 7)
-    {
-        if(!u::contains(jsonObject, "numContinuousColumns") || !u::contains(jsonObject, "numDiscreteColumns"))
-        {
-            setGenericFailureReason(CURRENT_SOURCE_LOCATION);
-            return false;
-        }
+    upgradeLegacyFormat(jsonObject, dataVersion, graph);
 
-        _numContinuousColumns = static_cast<size_t>(jsonObject["numContinuousColumns"].get<int>());
-        _numDiscreteColumns = static_cast<size_t>(jsonObject["numDiscreteColumns"].get<int>());
-    }
-    else
+    if(!u::contains(jsonObject, "numContinuousColumns") || !u::contains(jsonObject, "numDiscreteColumns"))
     {
-        if(!u::contains(jsonObject, "numColumns"))
-        {
-            setGenericFailureReason(CURRENT_SOURCE_LOCATION);
-            return false;
-        }
-
-        _numContinuousColumns = static_cast<size_t>(jsonObject["numColumns"].get<int>());
+        setGenericFailureReason(CURRENT_SOURCE_LOCATION);
+        return false;
     }
+
+    _numContinuousColumns = static_cast<size_t>(jsonObject["numContinuousColumns"].get<int>());
+    _numDiscreteColumns = static_cast<size_t>(jsonObject["numDiscreteColumns"].get<int>());
 
     if(!u::contains(jsonObject, "userColumnData"))
     {
@@ -1168,16 +1224,13 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
 
     parser.setPhase(QObject::tr("Data"));
 
-    const char* continuousDataKey =
-        dataVersion >= 7 ? "continuousData" : "data";
-
-    if(!u::contains(jsonObject, continuousDataKey))
+    if(!u::contains(jsonObject, "continuousData"))
     {
         setGenericFailureReason(CURRENT_SOURCE_LOCATION);
         return false;
     }
 
-    const auto& jsonContinuousData = jsonObject[continuousDataKey];
+    const auto& jsonContinuousData = jsonObject["continuousData"];
     for(const auto& value : jsonContinuousData)
     {
         _continuousData.emplace_back(value);
@@ -1198,33 +1251,30 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
 
     _continuousEpsilon = CorrelationFileParser::epsilonFor(_continuousData);
 
-    if(dataVersion >= 7)
+    if(!u::contains(jsonObject, "discreteData"))
     {
-        if(!u::contains(jsonObject, "discreteData"))
+        setGenericFailureReason(CURRENT_SOURCE_LOCATION);
+        return false;
+    }
+
+    i = 0;
+    const auto& jsonDiscreteData = jsonObject["discreteData"];
+    for(const auto& value : jsonDiscreteData)
+    {
+        _discreteData.emplace_back(QString::fromStdString(value));
+        parser.setProgress(static_cast<int>((i++ * 100) / jsonDiscreteData.size()));
+    }
+
+    if(_numDiscreteColumns > 0)
+    {
+        Q_ASSERT((_discreteData.size() % _numDiscreteColumns) == 0);
+        if((_discreteData.size() % _numDiscreteColumns) != 0)
         {
             setGenericFailureReason(CURRENT_SOURCE_LOCATION);
             return false;
         }
 
-        i = 0;
-        const auto& jsonDiscreteData = jsonObject["discreteData"];
-        for(const auto& value : jsonDiscreteData)
-        {
-            _discreteData.emplace_back(QString::fromStdString(value));
-            parser.setProgress(static_cast<int>((i++ * 100) / jsonDiscreteData.size()));
-        }
-
-        if(_numDiscreteColumns > 0)
-        {
-            Q_ASSERT((_discreteData.size() % _numDiscreteColumns) == 0);
-            if((_discreteData.size() % _numDiscreteColumns) != 0)
-            {
-                setGenericFailureReason(CURRENT_SOURCE_LOCATION);
-                return false;
-            }
-
-            _numRows = _discreteData.size() / _numDiscreteColumns;
-        }
+        _numRows = _discreteData.size() / _numDiscreteColumns;
     }
 
     Q_ASSERT(_numRows > 0);
@@ -1234,21 +1284,18 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
         return false;
     }
 
-    if(dataVersion >= 11)
+    if(!u::contains(jsonObject, "hcOrdering"))
     {
-        if(!u::contains(jsonObject, "hcOrdering"))
-        {
-            setGenericFailureReason(CURRENT_SOURCE_LOCATION);
-            return false;
-        }
+        setGenericFailureReason(CURRENT_SOURCE_LOCATION);
+        return false;
+    }
 
-        i = 0;
-        const auto& jsonHcOrdering = jsonObject["hcOrdering"];
-        for(const auto& value : jsonHcOrdering)
-        {
-            _continuousHcOrder.emplace_back(value);
-            parser.setProgress(static_cast<int>((i++ * 100) / jsonHcOrdering.size()));
-        }
+    i = 0;
+    const auto& jsonHcOrdering = jsonObject["hcOrdering"];
+    for(const auto& value : jsonHcOrdering)
+    {
+        _continuousHcOrder.emplace_back(value);
+        parser.setProgress(static_cast<int>((i++ * 100) / jsonHcOrdering.size()));
     }
 
     parser.setProgress(-1);
@@ -1268,61 +1315,35 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
 
     parser.setProgress(-1);
 
-    const char* correlationValuesKey =
-        dataVersion >= 3 ? "correlationValues" : "pearsonValues";
-
-    if(!u::contains(jsonObject, correlationValuesKey))
+    if(!u::contains(jsonObject, "correlationValues"))
     {
-        setFailureReason(tr("Plugin data is missing '%1' key.").arg(correlationValuesKey));
+        setFailureReason(tr("Plugin data is missing '%1' key.").arg(u"correlationValues"_s));
         return false;
     }
 
-    const auto& jsonCorrelationValues = jsonObject[correlationValuesKey];
+    const auto& jsonCorrelationValues = jsonObject["correlationValues"];
     parser.setPhase(QObject::tr("Correlation Values"));
     i = 0;
 
-    if(dataVersion >= 2)
+    u::forEachJsonGraphArray(jsonCorrelationValues, [&](EdgeId edgeId, double correlationValue)
     {
-        u::forEachJsonGraphArray(jsonCorrelationValues, [&](EdgeId edgeId, double correlationValue)
-        {
-            Q_ASSERT(graph.containsEdgeId(edgeId));
-            _correlationValues->set(edgeId, correlationValue);
+        Q_ASSERT(graph.containsEdgeId(edgeId));
+        _correlationValues->set(edgeId, correlationValue);
 
-            parser.setProgress(static_cast<int>((i++ * 100) / jsonCorrelationValues.size()));
-        });
-    }
-    else
-    {
-        for(const auto& correlationValue : jsonCorrelationValues)
-        {
-            auto edgeId = static_cast<EdgeId>(i);
-            if(graph.containsEdgeId(edgeId))
-                _correlationValues->set(edgeId, correlationValue);
-
-            parser.setProgress(static_cast<int>((i++ * 100) / jsonCorrelationValues.size()));
-        }
-    }
+        parser.setProgress(static_cast<int>((i++ * 100) / jsonCorrelationValues.size()));
+    });
 
     parser.setProgress(-1);
 
-    const char* correlationThresholdKey = "minimumCorrelationValue";
-
-    if(dataVersion >= 14)
-        correlationThresholdKey = "minimumThreshold";
-    else if(dataVersion >= 12)
-        correlationThresholdKey = "threshold";
-
-    if(!u::containsAllOf(jsonObject, {correlationThresholdKey, "transpose", "scaling",
+    if(!u::containsAllOf(jsonObject, {"minimumThreshold", "maximumK", "transpose", "scaling",
         "normalisation", "missingDataType", "missingDataReplacementValue"}))
     {
         setGenericFailureReason(CURRENT_SOURCE_LOCATION);
         return false;
     }
 
-    _minimumThreshold = jsonObject[correlationThresholdKey];
-
-    if(dataVersion >= 14)
-        _maximumK = jsonObject["maximumK"];
+    _minimumThreshold = jsonObject["minimumThreshold"];
+    _maximumK = jsonObject["maximumK"];
 
     _transpose = jsonObject["transpose"];
     _scalingType = normaliseQmlEnum<ScalingType>(jsonObject["scaling"]);
@@ -1330,45 +1351,26 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
     _missingDataType = normaliseQmlEnum<MissingDataType>(jsonObject["missingDataType"]);
     _missingDataReplacementValue = jsonObject["missingDataReplacementValue"];
 
-    if(dataVersion >= 10)
+    if(!u::containsAllOf(jsonObject, {"clippingType", "clippingValue"}))
     {
-        if(!u::containsAllOf(jsonObject, {"clippingType", "clippingValue"}))
-        {
-            setGenericFailureReason(CURRENT_SOURCE_LOCATION);
-            return false;
-        }
-
-        _clippingType = normaliseQmlEnum<ClippingType>(jsonObject["clippingType"]);
-        _clippingValue = jsonObject["clippingValue"];
+        setGenericFailureReason(CURRENT_SOURCE_LOCATION);
+        return false;
     }
 
-    if(dataVersion >= 7)
-    {
-        if(!u::containsAllOf(jsonObject, {"correlationDataType", "continuousCorrelationType",
-            "discreteCorrelationType", "correlationPolarity"}))
-        {
-            setGenericFailureReason(CURRENT_SOURCE_LOCATION);
-            return false;
-        }
+    _clippingType = normaliseQmlEnum<ClippingType>(jsonObject["clippingType"]);
+    _clippingValue = jsonObject["clippingValue"];
 
-        _correlationDataType = normaliseQmlEnum<CorrelationDataType>(jsonObject["correlationDataType"]);
-        _continuousCorrelationType = normaliseQmlEnum<CorrelationType>(jsonObject["continuousCorrelationType"]);
-        _discreteCorrelationType = normaliseQmlEnum<CorrelationType>(jsonObject["discreteCorrelationType"]);
-        _correlationPolarity = normaliseQmlEnum<CorrelationPolarity>(jsonObject["correlationPolarity"]);
-    }
-    else if(dataVersion >= 3)
+    if(!u::containsAllOf(jsonObject, {"correlationDataType", "continuousCorrelationType",
+        "discreteCorrelationType", "correlationPolarity"}))
     {
-        if(!u::contains(jsonObject, "correlationType") || !u::contains(jsonObject, "correlationPolarity"))
-        {
-            setGenericFailureReason(CURRENT_SOURCE_LOCATION);
-            return false;
-        }
-
-        _correlationDataType = CorrelationDataType::Continuous;
-        _continuousCorrelationType = normaliseQmlEnum<CorrelationType>(jsonObject["correlationType"]);
-        _discreteCorrelationType = CorrelationType::Jaccard;
-        _correlationPolarity = normaliseQmlEnum<CorrelationPolarity>(jsonObject["correlationPolarity"]);
+        setGenericFailureReason(CURRENT_SOURCE_LOCATION);
+        return false;
     }
+
+    _correlationDataType = normaliseQmlEnum<CorrelationDataType>(jsonObject["correlationDataType"]);
+    _continuousCorrelationType = normaliseQmlEnum<CorrelationType>(jsonObject["continuousCorrelationType"]);
+    _discreteCorrelationType = normaliseQmlEnum<CorrelationType>(jsonObject["discreteCorrelationType"]);
+    _correlationPolarity = normaliseQmlEnum<CorrelationPolarity>(jsonObject["correlationPolarity"]);
 
     createAttributes();
     buildDiscreteDataValueIndex(parser);
