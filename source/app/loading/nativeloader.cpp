@@ -19,6 +19,7 @@
 
 #include "nativeloader.h"
 
+#include "nativeloader_legacy.h"
 #include "nativesaver.h"
 
 #include "app/application.h"
@@ -338,6 +339,7 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
     }
 
     auto jsonBody = jsonArray.at(1);
+    upgradeLegacyFormat(jsonBody, version);
 
     if(u::contains(jsonBody, "infiniteParse"))
     {
@@ -365,52 +367,11 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
 
     if(u::contains(jsonBody, "nodeNames"))
     {
-        if(version >= 4)
+        u::forEachJsonGraphArray(jsonBody["nodeNames"], [graphModel](NodeId nodeId, const QString& nodeName)
         {
-            u::forEachJsonGraphArray(jsonBody["nodeNames"], [graphModel](NodeId nodeId, const QString& nodeName)
-            {
-                Q_ASSERT(graphModel->mutableGraph().containsNodeId(nodeId));
-                graphModel->setNodeName(nodeId, nodeName);
-            });
-        }
-        else
-        {
-            NodeId nodeId(0);
-            for(const auto& jsonNodeName : jsonBody["nodeNames"])
-            {
-                if(graphModel->mutableGraph().containsNodeId(nodeId))
-                    graphModel->setNodeName(nodeId, jsonNodeName);
-
-                ++nodeId;
-            }
-        }
-    }
-
-    if(version < 6)
-    {
-        // Older files store the user attribute data in the plugin section
-        const auto& pluginData = jsonBody["pluginData"];
-
-        if(pluginData.is_object())
-        {
-            if(u::contains(pluginData, "userNodeData") && pluginData["userNodeData"].is_object())
-            {
-                if(!graphModel->userNodeData().load(pluginData["userNodeData"], *this))
-                {
-                    setGenericFailureReason(CURRENT_SOURCE_LOCATION);
-                    return false;
-                }
-            }
-
-            if(u::contains(pluginData, "userEdgeData") && pluginData["userEdgeData"].is_object())
-            {
-                if(!graphModel->userEdgeData().load(pluginData["userEdgeData"], *this))
-                {
-                    setGenericFailureReason(CURRENT_SOURCE_LOCATION);
-                    return false;
-                }
-            }
-        }
+            Q_ASSERT(graphModel->mutableGraph().containsNodeId(nodeId));
+            graphModel->setNodeName(nodeId, nodeName);
+        });
     }
 
     if(u::contains(jsonBody, "userNodeData") && jsonBody["userNodeData"].is_object())
@@ -537,36 +498,15 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
         {
             _nodePositions = std::make_unique<ExactNodePositions>(graphModel->mutableGraph());
 
-            if(version >= 4)
+            u::forEachJsonGraphArray(jsonLayout["positions"], [this, graphModel](NodeId nodeId, const json& position)
             {
-                u::forEachJsonGraphArray(jsonLayout["positions"], [this, graphModel](NodeId nodeId, const json& position)
-                {
-                    Q_ASSERT(graphModel->mutableGraph().containsNodeId(nodeId));
+                Q_ASSERT(graphModel->mutableGraph().containsNodeId(nodeId));
 
-                    _nodePositions->set(nodeId, QVector3D(
-                        position.at(0),
-                        position.at(1),
-                        position.at(2)));
-                });
-            }
-            else
-            {
-                NodeId nodeId(0);
-                for(const auto& jsonPosition : jsonLayout["positions"])
-                {
-                    if(graphModel->mutableGraph().containsNodeId(nodeId))
-                    {
-                        const auto& jsonPositionArray = jsonPosition;
-
-                        _nodePositions->set(nodeId, QVector3D(
-                            jsonPositionArray.at(0),
-                            jsonPositionArray.at(1),
-                            jsonPositionArray.at(2)));
-                    }
-
-                    ++nodeId;
-                }
-            }
+                _nodePositions->set(nodeId, QVector3D(
+                    position.at(0),
+                    position.at(1),
+                    position.at(2)));
+            });
         }
 
         _layoutPaused = jsonLayout["paused"];
@@ -581,7 +521,7 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
     if(u::contains(jsonBody, "textSize"))
         graphModel->setTextSize(jsonBody["textSize"]);
 
-    if(version >= 2 && u::contains(jsonBody, "ui"))
+    if(u::contains(jsonBody, "ui"))
     {
         const auto& jsonUiDataJsonValue = jsonBody["ui"];
 
@@ -631,10 +571,9 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
         return false;
     }
 
-    const auto* pluginUiDataKey = version >= 2 ? "pluginUiData" : "ui";
-    if(u::contains(jsonBody, pluginUiDataKey))
+    if(u::contains(jsonBody, "pluginUiData"))
     {
-        const auto& pluginUiDataJsonValue = jsonBody[pluginUiDataKey];
+        const auto& pluginUiDataJsonValue = jsonBody["pluginUiData"];
 
         if(pluginUiDataJsonValue.is_object() || pluginUiDataJsonValue.is_array())
             _pluginUiData = QByteArray::fromStdString(pluginUiDataJsonValue.dump());
