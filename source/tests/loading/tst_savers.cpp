@@ -44,8 +44,8 @@ using namespace Qt::Literals::StringLiterals;
 
 namespace
 {
-const QString A = u"a"_s;
-const QString B = u"b"_s;
+const QString A = u"a & b"_s;
+const QString B = u"<b>"_s;
 const QString C = u"c"_s;
 const QString D = u"d"_s;
 const QString E = u"e"_s;
@@ -57,7 +57,7 @@ std::unique_ptr<TestGraphModel> createModel()
         C + u"-"_s + D, D + u"-"_s + A, E});
 
     model->addNodeAttribute<QString>(u"Label Text"_s,
-        {{A, u"A"_s}, {B, u"B"_s}, {C, u"C"_s}, {D, u""_s}, {E, u"plain"_s}});
+        {{A, u"A & B"_s}, {B, u"<tag>"_s}, {C, u"q\"q"_s}, {D, u""_s}, {E, u"plain"_s}});
     model->addNodeAttribute<int>(u"Count"_s,
         {{A, 1}, {B, -2}, {C, 3}, {D, 4}, {E, 0}});
     model->addNodeAttribute<double>(u"Score"_s,
@@ -146,9 +146,9 @@ private slots:
         QCOMPARE(reloaded->edgeNames(), _edges);
 
         // Non-alphanumeric characters are removed from the names of attributes
-        QCOMPARE(reloaded->nodeValue(u"Node LabelText"_s, A), u"A"_s);
-        QCOMPARE(reloaded->nodeValue(u"Node LabelText"_s, B), u"B"_s);
-        QCOMPARE(reloaded->nodeValue(u"Node LabelText"_s, C), u"C"_s);
+        QCOMPARE(reloaded->nodeValue(u"LabelText"_s, A), u"A & B"_s);
+        QCOMPARE(reloaded->nodeValue(u"LabelText"_s, B), u"<tag>"_s);
+        QCOMPARE(reloaded->nodeValue(u"LabelText"_s, C), u"q\"q"_s);
         QCOMPARE(reloaded->nodeValue(u"LabelText"_s, E), u"plain"_s);
 
         QCOMPARE(reloaded->nodeValue(u"Count"_s, B), u"-2"_s);
@@ -187,9 +187,9 @@ private slots:
         edges.sort();
         QCOMPARE(reloaded->edgeNames(), edges);
 
-        QCOMPARE(reloaded->nodeValue(u"Label Text"_s, names.at(A)), u"A"_s);
-        QCOMPARE(reloaded->nodeValue(u"Label Text"_s, names.at(B)), u"B"_s);
-        QCOMPARE(reloaded->nodeValue(u"Label Text"_s, names.at(C)), u"C"_s);
+        QCOMPARE(reloaded->nodeValue(u"Label Text"_s, names.at(A)), u"A & B"_s);
+        QCOMPARE(reloaded->nodeValue(u"Label Text"_s, names.at(B)), u"<tag>"_s);
+        QCOMPARE(reloaded->nodeValue(u"Label Text"_s, names.at(C)), u"q\"q"_s);
         QCOMPARE(reloaded->nodeValue(u"Label Text"_s, names.at(E)), u"plain"_s);
 
         QCOMPARE(reloaded->nodeValue(u"Count"_s, names.at(B)), u"-2"_s);
