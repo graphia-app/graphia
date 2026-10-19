@@ -393,9 +393,23 @@ static int numericCompare(const QString& a, const QString& b, Qt::CaseSensitivit
 
         if(aToken.front().isDigit() && bToken.front().isDigit())
         {
-            auto aInt = aToken.toInt(nullptr);
-            auto bInt = bToken.toInt(nullptr);
-            diff = aInt - bInt;
+            // Compare the numbers without converting them, so that their size doesn't matter;
+            // without leading zeroes, a longer number is larger, otherwise compare the digits
+            auto withoutLeadingZeroes = [](QStringView number)
+            {
+                while(number.size() > 1 && number.front() == u'0')
+                    number = number.sliced(1);
+
+                return number;
+            };
+
+            auto aNumber = withoutLeadingZeroes(aToken);
+            auto bNumber = withoutLeadingZeroes(bToken);
+
+            if(aNumber.size() != bNumber.size())
+                diff = aNumber.size() < bNumber.size() ? -1 : 1;
+            else
+                diff = aNumber.compare(bNumber);
         }
         else
             diff = aToken.compare(bToken, cs);
