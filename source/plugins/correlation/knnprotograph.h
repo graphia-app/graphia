@@ -28,6 +28,7 @@
 #include <QVariantMap>
 
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <functional>
 #include <iterator>
@@ -49,8 +50,9 @@ private:
         {
             typename DataVectors::const_iterator _it;
             double _r = 0.0;
+            double _strength = 0.0;
 
-            auto operator<=>(const ProtoEdge& other) const { return _r <=> other._r; }
+            auto operator<=>(const ProtoEdge& other) const { return _strength <=> other._strength; }
         };
 
         std::vector<ProtoEdge> _protoEdges;
@@ -62,11 +64,13 @@ private:
             if(!correlationExceedsThreshold(_protoGraph->_polarity, r, _protoGraph->_threshold))
                 return;
 
+            auto strength = _protoGraph->strengthOf(r);
+
             // Once there are k edges, only a stronger one can displace the weakest
-            if(_protoEdges.size() >= _protoGraph->_k && r <= _protoEdges.back()._r)
+            if(_protoEdges.size() >= _protoGraph->_k && strength <= _protoEdges.back()._strength)
                 return;
 
-            _protoEdges.push_back({it, r});
+            _protoEdges.push_back({it, r, strength});
             std::inplace_merge(_protoEdges.begin(), std::prev(_protoEdges.end()),
                 _protoEdges.end(), std::greater());
             _protoEdges.resize(std::min(_protoEdges.size(), _protoGraph->_k));
@@ -79,6 +83,17 @@ private:
     CorrelationPolarity _polarity = CorrelationPolarity::Positive;
     size_t _k = 0;
     double _threshold = 0.0;
+
+    double strengthOf(double r) const
+    {
+        switch(_polarity)
+        {
+        default:
+        case CorrelationPolarity::Positive: return r;
+        case CorrelationPolarity::Negative: return -r;
+        case CorrelationPolarity::Both:     return std::abs(r);
+        }
+    }
 
 public:
     KnnProtoGraph(const DataVectors& vectors, const QVariantMap& parameters) :
