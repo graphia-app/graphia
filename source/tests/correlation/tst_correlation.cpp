@@ -201,6 +201,10 @@ private slots:
             QList<double>{2.0 / 4.0, 1.0 / 4.0, 1.0 / 4.0};
         QTest::newRow("Jaccard binary") << static_cast<int>(CorrelationType::Jaccard) << true <<
             QList<double>{3.0 / 4.0, 1.0 / 4.0, 2.0 / 4.0};
+        QTest::newRow("SMC") << static_cast<int>(CorrelationType::SMC) << false <<
+            QList<double>{3.0 / 5.0, 2.0 / 5.0, 2.0 / 5.0};
+        QTest::newRow("SMC binary") << static_cast<int>(CorrelationType::SMC) << true <<
+            QList<double>{4.0 / 5.0, 2.0 / 5.0, 3.0 / 5.0};
     }
 
     void discreteCorrelation()
