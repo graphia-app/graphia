@@ -86,7 +86,8 @@ public:
     using AttributeDisplayValueFn = std::function<QString(const QString& attributeName, const QString& value)>;
     void setAttributeDisplayValueFn(AttributeDisplayValueFn attributeDisplayValueFn);
 
-    QVariant storedData(int row, Results result) const;
+    // All of the data, unlike rowCount and data, which present it filtered and sorted
+    const Table& tableData() const { return _data; }
 
 private:
     Table _data;
