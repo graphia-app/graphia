@@ -114,7 +114,9 @@ struct List
 
 struct Gml
 {
-    static constexpr auto whitespace = dsl::ascii::space;
+    // Lines beginning with # are comments
+    static constexpr auto whitespace = dsl::ascii::space |
+        (dsl::lit_c<'#'> >> dsl::until(dsl::ascii::newline).or_eof());
 
     static constexpr auto rule = dsl::p<List> + dsl::eof;
     static constexpr auto value = lexy::forward<LexyGmlParser::List>;
