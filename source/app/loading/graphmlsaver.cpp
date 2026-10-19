@@ -25,6 +25,7 @@
 #include "shared/attributes/iattribute.h"
 
 #include <QFile>
+#include <QLocale>
 #include <QObject>
 #include <QXmlStreamWriter>
 #include <QtGlobal>
@@ -33,6 +34,21 @@
 #include <map>
 
 using namespace Qt::Literals::StringLiterals;
+
+// Attribute::stringValueOf limits the precision of floating point values
+template<typename E>
+static QString valueAsString(const IAttribute& attribute, E elementId)
+{
+    if(attribute.valueType() == ValueType::Float)
+        return QString::number(attribute.floatValueOf(elementId), 'g', QLocale::FloatingPointShortest);
+
+    return attribute.displayValue(attribute.stringValueOf(elementId));
+}
+
+static QString valueAsString(float value)
+{
+    return QString::number(static_cast<double>(value), 'g', QLocale::FloatingPointShortest);
+}
 
 bool GraphMLSaver::save()
 {
@@ -153,7 +169,7 @@ bool GraphMLSaver::save()
 
             stream.writeStartElement(u"data"_s);
             stream.writeAttribute(u"key"_s, attributeToId.at(nodeAttributeName));
-            stream.writeCharacters(attribute->displayValue(attribute->stringValueOf(nodeId)));
+            stream.writeCharacters(valueAsString(*attribute, nodeId));
             stream.writeEndElement();
         }
 
@@ -165,15 +181,15 @@ bool GraphMLSaver::save()
         const auto& pos = graphModel->nodePositions().get(nodeId);
         stream.writeStartElement(u"data"_s);
         stream.writeAttribute(u"key"_s, u"x"_s);
-        stream.writeCharacters(QString::number(static_cast<double>(pos.x())));
+        stream.writeCharacters(valueAsString(pos.x()));
         stream.writeEndElement();
         stream.writeStartElement(u"data"_s);
         stream.writeAttribute(u"key"_s, u"y"_s);
-        stream.writeCharacters(QString::number(static_cast<double>(pos.y())));
+        stream.writeCharacters(valueAsString(pos.y()));
         stream.writeEndElement();
         stream.writeStartElement(u"data"_s);
         stream.writeAttribute(u"key"_s, u"z"_s);
-        stream.writeCharacters(QString::number(static_cast<double>(pos.z())));
+        stream.writeCharacters(valueAsString(pos.z()));
         stream.writeEndElement();
 
         stream.writeEndElement();
@@ -201,7 +217,7 @@ bool GraphMLSaver::save()
 
             stream.writeStartElement(u"data"_s);
             stream.writeAttribute(u"key"_s, attributeToId.at(edgeAttributeName));
-            stream.writeCharacters(attribute->displayValue(attribute->stringValueOf(edgeId)));
+            stream.writeCharacters(valueAsString(*attribute, edgeId));
             stream.writeEndElement();
         }
         stream.writeEndElement(); // edge
