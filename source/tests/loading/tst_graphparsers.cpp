@@ -445,6 +445,23 @@ private slots:
             qPrintable(u"%1 != %2"_s.arg(actual, 0, 'g', 10).arg(expected, 0, 'g', 10)));
     }
 
+    // Elements that have no value for an attribute have no value, whatever its type
+    void missingValues()
+    {
+        auto model = ::parse(u"GML"_s, QByteArray("graph [ node [ id 0 label \"a\" score 1.5 count 1 kind \"x\" ] "
+            "node [ id 1 label \"b\" ] ]"));
+        QVERIFY(model != nullptr);
+
+        for(const auto& attributeName : {u"score"_s, u"count"_s, u"kind"_s})
+        {
+            QVERIFY(model->nodeHasValue(attributeName, u"a"_s));
+            QVERIFY2(!model->nodeHasValue(attributeName, u"b"_s), qPrintable(attributeName));
+        }
+
+        model->applyTransforms({u"RemoveNodes where $score hasValue"_s});
+        QCOMPARE(model->nodeNames(), QStringList{u"b"_s});
+    }
+
     void syntaxErrorLocation_data()
     {
         QTest::addColumn<QString>("format");
