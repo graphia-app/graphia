@@ -103,6 +103,8 @@ private:
 
     QHash<int, QByteArray> _roleNames;
 
+    void sortAndFilter();
+
 private slots:
     void updateSortFilterMap();
 

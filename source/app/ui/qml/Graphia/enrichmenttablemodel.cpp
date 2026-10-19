@@ -171,7 +171,7 @@ void EnrichmentTableModel::setTableData(EnrichmentTableModel::Table data, QStrin
     _data = std::move(data);
     _selectionA = std::move(selectionA);
     _selectionB = std::move(selectionB);
-    updateSortFilterMap();
+    sortAndFilter();
     endResetModel();
 }
 
@@ -189,7 +189,12 @@ void EnrichmentTableModel::setSelectionDisplayNames(const QString& selectionA, c
 void EnrichmentTableModel::updateSortFilterMap()
 {
     beginResetModel();
+    sortAndFilter();
+    endResetModel();
+}
 
+void EnrichmentTableModel::sortAndFilter()
+{
     _sortFilterMap.clear();
 
     if(_enrichedOnly)
@@ -222,6 +227,4 @@ void EnrichmentTableModel::updateSortFilterMap()
             return QVariant::compare(valueA, valueB) == QPartialOrdering::Less;
         });
     }
-
-    endResetModel();
 }
