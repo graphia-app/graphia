@@ -349,9 +349,20 @@ private slots:
         QTest::newRow("JSON Graph unknown node") << u"JSONGraph"_s <<
             QByteArray(R"({"graph":{"nodes":[{"id":"a"}],"edges":[{"source":"a","target":"z"}]}})");
 
+        QTest::newRow("JSON Graph numeric label") << u"JSONGraph"_s <<
+            QByteArray(R"({"graph":{"nodes":[{"id":"a","label":1}],"edges":[]}})");
+        QTest::newRow("JSON Graph numeric metadata") << u"JSONGraph"_s <<
+            QByteArray(R"({"graph":{"nodes":[{"id":"a","metadata":5}],"edges":[]}})");
+
         QTest::newRow("CX object") << u"CX"_s << QByteArray("{}");
         QTest::newRow("CX not objects") << u"CX"_s << QByteArray("[1]");
         QTest::newRow("CX unknown version") << u"CX"_s << QByteArray(R"([{"foo":1}])");
+        QTest::newRow("CX empty version") << u"CX"_s << QByteArray(R"([{"CXVersion":""}])");
+        QTest::newRow("CX numeric version") << u"CX"_s << QByteArray(R"([{"CXVersion":2}])");
+        QTest::newRow("CX numeric alias") << u"CX"_s <<
+            QByteArray(R"([{"CXVersion":"2.0"},{"attributeDeclarations":[{"nodes":{"name":{"a":1}}}]}])");
+        QTest::newRow("CX string id") << u"CX"_s << QByteArray(R"([{"numberVerification":[{"longNumber":281474976710655}]},
+            {"nodes":[{"@id":"10","n":"A"}]}])");
         QTest::newRow("CX unknown node") << u"CX"_s << QByteArray(R"([{"numberVerification":[{"longNumber":281474976710655}]},
             {"nodes":[{"@id":10,"n":"A"}]},{"edges":[{"@id":20,"s":10,"t":99}]}])");
 
