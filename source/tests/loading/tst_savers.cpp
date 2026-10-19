@@ -49,7 +49,7 @@ namespace
 const QString A = u"a & b"_s;
 const QString B = u"<b>"_s;
 const QString C = u"c"_s;
-const QString D = u"d"_s;
+const QString D = u"x%1"_s;
 const QString E = u"e"_s;
 
 // The graph that is saved in each format
