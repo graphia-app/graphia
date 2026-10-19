@@ -35,3 +35,4 @@ add_graphia_test(tst_correlation correlation/tst_correlation.cpp)
 target_link_libraries(tst_correlation PRIVATE correlationcore)
 
 add_graphia_test(tst_tabulardata loading/tst_tabulardata.cpp)
+add_graphia_test(tst_graphparsers loading/tst_graphparsers.cpp)

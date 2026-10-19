@@ -29,14 +29,20 @@
 
 #include "shared/graph/elementid.h"
 
+#include <QByteArray>
+#include <QFile>
 #include <QString>
 #include <QStringList>
+#include <QTemporaryDir>
+#include <QUrl>
 
 #include <algorithm>
 #include <map>
+#include <memory>
 #include <utility>
 
-// A GraphModel built from a compact description of a graph, for testing transforms
+// A GraphModel built from a compact description of a graph, for testing transforms,
+// or parsed from a file, for testing parsers
 class TestGraphModel
 {
 private:
@@ -45,6 +51,23 @@ private:
 
     std::map<QString, NodeId> _nodeIds;
     std::map<std::pair<QString, QString>, EdgeId> _edgeIds;
+
+    TestGraphModel() = default;
+
+    void indexElementsByName()
+    {
+        const auto& mutableGraph = _graphModel.mutableGraph();
+
+        for(auto nodeId : mutableGraph.nodeIds())
+            _nodeIds.emplace(_graphModel.nodeName(nodeId), nodeId);
+
+        for(auto edgeId : mutableGraph.edgeIds())
+        {
+            const auto& edge = mutableGraph.edgeById(edgeId);
+            _edgeIds.emplace(std::make_pair(_graphModel.nodeName(edge.sourceId()),
+                _graphModel.nodeName(edge.targetId())), edgeId);
+        }
+    }
 
 public:
     // The Application that provides GraphModels with their transforms, visualisation channels
@@ -93,6 +116,56 @@ public:
         });
 
         _graphModel.initialiseAttributeRanges();
+    }
+
+    // Parses content, written to a file, in the same way as ParserThread and Document; createParser
+    // is passed the model's user node and edge data, and returns the parser to use. If parsing
+    // fails, nullptr is returned and failureReason is set
+    template<typename CreateParserFn>
+    static std::unique_ptr<TestGraphModel> parse(const QByteArray& content,
+        const CreateParserFn& createParser, QString* failureReason = nullptr)
+    {
+        using namespace Qt::Literals::StringLiterals;
+
+        const QTemporaryDir dir;
+        auto fileName = dir.filePath(u"graph"_s);
+
+        QFile file(fileName);
+        if(!file.open(QIODevice::WriteOnly) || file.write(content) != content.size())
+            return nullptr;
+
+        file.close();
+
+        // Not std::make_unique, as the constructor is private
+        std::unique_ptr<TestGraphModel> model(new TestGraphModel);
+        auto& graphModel = model->_graphModel;
+        auto parser = createParser(&graphModel.userNodeData(), &graphModel.userEdgeData());
+
+        bool success = false;
+        graphModel.mutableGraph().performTransaction([&](IMutableGraph& graph)
+        {
+            success = parser->parse(QUrl::fromLocalFile(fileName), &graphModel);
+
+            if(!success)
+                graph.clear();
+        });
+
+        if(!success)
+        {
+            if(failureReason != nullptr)
+                *failureReason = parser->failureReason();
+
+            return nullptr;
+        }
+
+        graphModel.userNodeData().exposeAsAttributes(graphModel);
+        graphModel.userEdgeData().exposeAsAttributes(graphModel);
+        graphModel.initialiseAttributeRanges();
+
+        model->indexElementsByName();
+        model->applyTransforms({});
+
+        return model;
     }
 
     GraphModel& graphModel() { return _graphModel; }
@@ -193,6 +266,12 @@ public:
     {
         auto attribute = _graphModel.attributeValueByName(attributeName);
         return attribute.stringValueOf(nodeId(nodeName));
+    }
+
+    QString edgeValue(const QString& attributeName, const QString& from, const QString& to) const
+    {
+        auto attribute = _graphModel.attributeValueByName(attributeName);
+        return attribute.stringValueOf(edgeId(from, to));
     }
 
     bool nodeHasValue(const QString& attributeName, const QString& nodeName) const

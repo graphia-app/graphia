@@ -1,0 +1,368 @@
+/* Copyright © 2013-2025 Tim Angus
+ * Copyright © 2013-2025 Tom Freeman
+ *
+ * This file is part of Graphia.
+ *
+ * Graphia is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Graphia is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "tests/common/testenvironment.h"
+#include "tests/common/testgraphmodel.h"
+
+#include "shared/loading/adjacencymatrixfileparser.h"
+#include "shared/loading/biopaxfileparser.h"
+#include "shared/loading/cxparser.h"
+#include "shared/loading/dotfileparser.h"
+#include "shared/loading/gmlfileparser.h"
+#include "shared/loading/graphmlparser.h"
+#include "shared/loading/jsongraphparser.h"
+#include "shared/loading/pairwisefileparser.h"
+
+#include <QTest>
+#include <QByteArray>
+#include <QString>
+#include <QStringList>
+
+#include <memory>
+
+using namespace Qt::Literals::StringLiterals;
+
+namespace
+{
+// Parses content in the given format, which is the name of a parser,
+// optionally followed by a description of how it is configured
+std::unique_ptr<TestGraphModel> parse(const QString& format, const QByteArray& content,
+    QString* failureReason = nullptr)
+{
+    auto parseWith = [&](auto createParser)
+    {
+        return TestGraphModel::parse(content, createParser, failureReason);
+    };
+
+    auto parseWithType = [&]<typename Parser>(const Parser*)
+    {
+        return parseWith([](auto* userNodeData, auto* userEdgeData)
+            { return std::make_unique<Parser>(userNodeData, userEdgeData); });
+    };
+
+    if(format == u"PairwiseCSV"_s)  return parseWithType(static_cast<PairwiseCSVFileParser*>(nullptr));
+    if(format == u"PairwiseTXT"_s)  return parseWithType(static_cast<PairwiseTXTFileParser*>(nullptr));
+    if(format == u"GML"_s)          return parseWithType(static_cast<GmlFileParser*>(nullptr));
+    if(format == u"GraphML"_s)      return parseWithType(static_cast<GraphMLParser*>(nullptr));
+    if(format == u"DOT"_s)          return parseWithType(static_cast<DotFileParser*>(nullptr));
+    if(format == u"JSONGraph"_s)    return parseWithType(static_cast<JsonGraphParser*>(nullptr));
+    if(format == u"CX"_s)           return parseWithType(static_cast<CxParser*>(nullptr));
+    if(format == u"MatrixCSV"_s)    return parseWithType(static_cast<AdjacencyMatrixCSVFileParser*>(nullptr));
+
+    if(format == u"PairwiseCSV attributes"_s)
+    {
+        return parseWith([](auto* userNodeData, auto* userEdgeData)
+        {
+            auto parser = std::make_unique<PairwiseCSVFileParser>(userNodeData, userEdgeData);
+            parser->setFirstRowIsHeader(true);
+            parser->setColumnsConfiguration(
+            {
+                {0, {._type = PairwiseColumnType::SourceNode, ._name = {}}},
+                {1, {._type = PairwiseColumnType::TargetNode, ._name = {}}},
+                {2, {._type = PairwiseColumnType::EdgeAttribute, ._name = u"Weight"_s}},
+                {3, {._type = PairwiseColumnType::SourceNodeAttribute, ._name = u"Type"_s}},
+                {4, {._type = PairwiseColumnType::TargetNodeAttribute, ._name = u"Type"_s}},
+            });
+
+            return parser;
+        });
+    }
+
+    if(format == u"MatrixCSV skip duplicates"_s || format == u"MatrixCSV minimum 0.5"_s)
+    {
+        return parseWith([&format](auto* userNodeData, auto* userEdgeData)
+        {
+            auto parser = std::make_unique<AdjacencyMatrixCSVFileParser>(userNodeData, userEdgeData);
+
+            if(format.endsWith(u"skip duplicates"_s))
+                parser->setSkipDuplicates(true);
+            else
+                parser->setMinimumAbsEdgeWeight(0.5);
+
+            return parser;
+        });
+    }
+
+    if(format == u"BioPAX"_s)
+    {
+        return parseWith([](auto* userNodeData, auto*)
+            { return std::make_unique<BiopaxFileParser>(userNodeData); });
+    }
+
+    return nullptr;
+}
+} // namespace
+
+class TestGraphParsers : public QObject
+{
+    Q_OBJECT
+
+private slots:
+    void initTestCase()
+    {
+        TestEnvironment::initialise();
+    }
+
+    void parse_data()
+    {
+        QTest::addColumn<QString>("format");
+        QTest::addColumn<QByteArray>("content");
+        QTest::addColumn<QStringList>("nodes");
+        QTest::addColumn<QStringList>("edges");
+
+        // Each value is "attribute|node|value" or "attribute|source|target|value"
+        QTest::addColumn<QStringList>("values");
+
+        // Pairwise
+        QTest::newRow("Pairwise") << u"PairwiseCSV"_s << QByteArray("a,b\nb,c\na,b\nc,c\n") <<
+            QStringList{u"a"_s, u"b"_s, u"c"_s} <<
+            QStringList{u"a-b"_s, u"a-b"_s, u"b-c"_s, u"c-c"_s} <<
+            QStringList{u"NodeName|a|a"_s};
+        QTest::newRow("Pairwise attributes") << u"PairwiseCSV attributes"_s <<
+            QByteArray("From,To,Weight,From Type,To Type\na,b,1.5,x,y\nb,c,2,z,w\n") <<
+            QStringList{u"a"_s, u"b"_s, u"c"_s} <<
+            QStringList{u"a-b"_s, u"b-c"_s} <<
+            QStringList{u"Weight|a|b|1.5"_s, u"Weight|b|c|2"_s, u"Type|a|x"_s, u"Type|b|z"_s, u"Type|c|w"_s};
+        QTest::newRow("Pairwise TXT") << u"PairwiseTXT"_s << QByteArray("a  b\n\"c d\"\te\n") <<
+            QStringList{u"a"_s, u"b"_s, u"c d"_s, u"e"_s} <<
+            QStringList{u"a-b"_s, u"c d-e"_s} << QStringList{};
+
+        // GML
+        QTest::newRow("GML") << u"GML"_s << QByteArray(
+            "graph [ directed 1\n"
+            " node [ id 1 label \"A\" weight 2.5 ]\n"
+            " node [ id 2 label \"B\" graphics [ x 1 y -2.0 fill \"#ff0000\" ] ]\n"
+            " node [ id 3 ]\n"
+            " edge [ source 1 target 2 label \"e1\" value 3 ]\n"
+            " edge [ source 2 target 3 ] ]\n") <<
+            QStringList{u"3"_s, u"A"_s, u"B"_s} <<
+            QStringList{u"A-B"_s, u"B-3"_s} <<
+            QStringList{u"weight|A|2.5"_s, u"graphics_x|B|1"_s, u"graphics_y|B|-2"_s,
+                u"graphics_fill|B|#ff0000"_s, u"label|A|B|e1"_s, u"value|A|B|3"_s};
+        QTest::newRow("GML edges first") << u"GML"_s <<
+            QByteArray(R"(graph [ edge [ source 1 target 2 ] node [ id 1 label "A" ] node [ id 2 label "B" ] ])") <<
+            QStringList{u"A"_s, u"B"_s} << QStringList{u"A-B"_s} << QStringList{};
+        QTest::newRow("GML CRLF loops") << u"GML"_s << QByteArray(
+            "graph [\r\n node [ id 1 label \"A\" ]\r\n node [ id 2 label \"B\" ]\r\n"
+            " edge [ source 1 target 1 ]\r\n edge [ source 1 target 2 ]\r\n edge [ source 1 target 2 ]\r\n]") <<
+            QStringList{u"A"_s, u"B"_s} << QStringList{u"A-A"_s, u"A-B"_s, u"A-B"_s} << QStringList{};
+        QTest::newRow("GML UTF-8") << u"GML"_s << QByteArray("graph [ node [ id 1 label \"\xc3\xa9\xe2\x82\xac\" ] ]") <<
+            QStringList{u"é€"_s} << QStringList{} << QStringList{};
+        QTest::newRow("GML numbers") << u"GML"_s << QByteArray("graph [ node [ id 1 label \"A\" x 1e3 y .5 ] ]") <<
+            QStringList{u"A"_s} << QStringList{} << QStringList{u"x|A|1000"_s, u"y|A|0.5"_s};
+        QTest::newRow("GML clashing names") << u"GML"_s <<
+            QByteArray(R"(graph [ node [ id 1 label "A" ComponentSize "n" w 1 ] edge [ source 1 target 1 w 2 ] ])") <<
+            QStringList{u"A"_s} << QStringList{u"A-A"_s} <<
+            QStringList{u"User ComponentSize|A|n"_s, u"w|A|1"_s, u"Edge w|A|A|2"_s};
+
+        // GraphML
+        QTest::newRow("GraphML") << u"GraphML"_s << QByteArray(
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            "<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\">\n"
+            "<key id=\"d0\" for=\"node\" attr.name=\"color\" attr.type=\"string\"/>\n"
+            "<key id=\"d1\" for=\"edge\" attr.name=\"weight\" attr.type=\"double\"/>\n"
+            "<graph id=\"G\" edgedefault=\"undirected\">\n"
+            "<node id=\"n0\"><data key=\"d0\">green</data></node>\n"
+            "<node id=\"n1\"/>\n"
+            "<node id=\"n2\"><data key=\"d0\">blue</data></node>\n"
+            "<edge id=\"e0\" source=\"n0\" target=\"n1\"><data key=\"d1\">1.5</data></edge>\n"
+            "<edge source=\"n1\" target=\"n2\"/>\n"
+            "<edge source=\"n2\" target=\"n2\"/>\n"
+            "</graph></graphml>\n") <<
+            QStringList{u"n0"_s, u"n1"_s, u"n2"_s} <<
+            QStringList{u"n0-n1"_s, u"n1-n2"_s, u"n2-n2"_s} <<
+            QStringList{u"color|n0|green"_s, u"color|n2|blue"_s, u"weight|n0|n1|1.5"_s, u"EdgeName|n0|n1|e0"_s};
+
+        // DOT
+        QTest::newRow("DOT") << u"DOT"_s << QByteArray(
+            "// c\n"
+            "/* c */\n"
+            "digraph G {\n"
+            "  rankdir=LR;\n"
+            "  a [label=\"Alpha\", weight=2];\n"
+            "  a -> b -> c [color=red];\n"
+            "  d:p1:n -> e:sw;\n"
+            "  \"quoted \\\"x\\\"\" -> 42;\n"
+            "  -1.5 -> .5;\n"
+            "  f;\n"
+            "}\n") <<
+            QStringList{u"-1.5"_s, u".5"_s, u"42"_s, u"a"_s, u"b"_s, u"c"_s, u"d"_s, u"e"_s, u"f"_s, u"quoted \"x\""_s} <<
+            QStringList{u"-1.5-.5"_s, u"a-b"_s, u"b-c"_s, u"d-e"_s, u"quoted \"x\"-42"_s} <<
+            QStringList{u"label|a|Alpha"_s, u"weight|a|2"_s, u"color|a|b|red"_s, u"color|b|c|red"_s};
+        QTest::newRow("DOT undirected") << u"DOT"_s << QByteArray("graph { a -- b; b -- a; c -- c }") <<
+            QStringList{u"a"_s, u"b"_s, u"c"_s} << QStringList{u"a-b"_s, u"b-a"_s, u"c-c"_s} << QStringList{};
+        QTest::newRow("DOT subgraphs") << u"DOT"_s << QByteArray("digraph { {a b} -> {c d}; e -> subgraph s1 { f g } }") <<
+            QStringList{u"a"_s, u"b"_s, u"c"_s, u"d"_s, u"e"_s, u"f"_s, u"g"_s} <<
+            QStringList{u"a-c"_s, u"a-d"_s, u"b-c"_s, u"b-d"_s, u"e-f"_s, u"e-g"_s} << QStringList{};
+        QTest::newRow("DOT attribute separators") << u"DOT"_s << QByteArray("digraph { a [x=1, y=2; z=3] b [ ] }") <<
+            QStringList{u"a"_s, u"b"_s} << QStringList{} <<
+            QStringList{u"x|a|1"_s, u"y|a|2"_s, u"z|a|3"_s};
+        QTest::newRow("DOT HTML") << u"DOT"_s << QByteArray("digraph { a [label=<<b>bold</b> &amp; <i>it</i>>] }") <<
+            QStringList{u"a"_s} << QStringList{} << QStringList{u"label|a|<b>bold</b> &amp; <i>it</i>"_s};
+        QTest::newRow("DOT UTF-8 CRLF") << u"DOT"_s << QByteArray("digraph {\r\n caf\xc3\xa9 -> \"\xe2\x82\xac\" [k=\"v\"];\r\n // c\r\n}") <<
+            QStringList{u"café"_s, u"€"_s} << QStringList{u"café-€"_s} << QStringList{u"k|café|€|v"_s};
+        QTest::newRow("DOT keyword prefixes") << u"DOT"_s << QByteArray("digraph { graphA -> nodeB; edgeC; subgraphD }") <<
+            QStringList{u"edgeC"_s, u"graphA"_s, u"nodeB"_s, u"subgraphD"_s} << QStringList{u"graphA-nodeB"_s} << QStringList{};
+        QTest::newRow("DOT no semicolons") << u"DOT"_s << QByteArray("digraph { a -> b c -> d }") <<
+            QStringList{u"a"_s, u"b"_s, u"c"_s, u"d"_s} << QStringList{u"a-b"_s, u"c-d"_s} << QStringList{};
+        QTest::newRow("DOT empty") << u"DOT"_s << QByteArray("digraph {}") <<
+            QStringList{} << QStringList{} << QStringList{};
+
+        // JSON Graph
+        QTest::newRow("JSON Graph") << u"JSONGraph"_s << QByteArray(R"({"graph":{"nodes":[
+            {"id":"n1","label":"A","metadata":{"type":"x","count":3,"score":1.5}},
+            {"id":"n2","label":"B"}],
+            "edges":[{"source":"n1","target":"n2","metadata":{"weight":2.5,"kind":"k"}}]}})") <<
+            QStringList{u"A"_s, u"B"_s} << QStringList{u"A-B"_s} <<
+            QStringList{u"type|A|x"_s, u"count|A|3"_s, u"score|A|1.5"_s, u"weight|A|B|2.5"_s, u"kind|A|B|k"_s};
+        QTest::newRow("JSON Graph multiple") << u"JSONGraph"_s << QByteArray(R"({"graphs":[
+            {"nodes":[{"id":"1","label":"X"},{"id":"2","label":"Y"}],"edges":[{"source":"2","target":"1"}]},
+            {"nodes":[{"id":"q","label":"Q"}],"edges":[]}]})") <<
+            QStringList{u"X"_s, u"Y"_s} << QStringList{u"Y-X"_s} << QStringList{};
+        QTest::newRow("JSON Graph objects") << u"JSONGraph"_s << QByteArray(R"({"graph":{
+            "nodes":{"k1":{"id":"a","label":"A"},"k2":{"id":"b","label":"B"}},
+            "edges":{"e":{"source":"a","target":"b"}}}})") <<
+            QStringList{u"A"_s, u"B"_s} << QStringList{u"A-B"_s} << QStringList{};
+
+        // CX
+        QTest::newRow("CX1") << u"CX"_s << QByteArray(R"([{"numberVerification":[{"longNumber":281474976710655}]},
+            {"nodes":[{"@id":10,"n":"A","r":"up:1"},{"@id":11,"n":"B"}]},
+            {"edges":[{"@id":20,"s":10,"t":11,"i":"binds"}]},
+            {"nodeAttributes":[{"po":10,"n":"type","v":"protein"},{"po":11,"n":"tags","v":["x","y"]}]},
+            {"edgeAttributes":[{"po":20,"n":"score","v":"0.5"}]}])") <<
+            QStringList{u"A"_s, u"B"_s} << QStringList{u"A-B"_s} <<
+            QStringList{u"NodeName|A|A"_s, u"NodeRepresents|A|up:1"_s, u"EdgeInteraction|A|B|binds"_s,
+                u"type|A|protein"_s, uR"(tags|B|["x","y"])"_s, u"score|A|B|0.5"_s};
+        QTest::newRow("CX2") << u"CX"_s << QByteArray(R"([{"CXVersion":"2.0","hasFragments":false},
+            {"attributeDeclarations":[{"nodes":{"name":{"d":"string","a":"n"},"kind":{"d":"string","a":"k"}},
+                "edges":{"interaction":{"d":"string","a":"i"}}}]},
+            {"nodes":[{"id":1,"v":{"k":"protein","n":"A"}},{"id":2,"v":{"n":"B"}}]},
+            {"edges":[{"id":5,"s":1,"t":2,"v":{"i":"binds","w":0.5}}]}])") <<
+            QStringList{u"A"_s, u"B"_s} << QStringList{u"A-B"_s} <<
+            QStringList{u"kind|A|protein"_s, u"interaction|A|B|binds"_s, u"w|A|B|0.5"_s};
+
+        // Adjacency matrices; an edge is created from each row's node to each column's node
+        QTest::newRow("Matrix") << u"MatrixCSV"_s << QByteArray("0,2\n-3,0\n") <<
+            QStringList{u"Node 1"_s, u"Node 2"_s} << QStringList{u"Node 1-Node 2"_s, u"Node 2-Node 1"_s} <<
+            QStringList{u"EdgeWeight|Node 1|Node 2|2"_s, u"AbsoluteEdgeWeight|Node 1|Node 2|2"_s,
+                u"EdgeWeight|Node 2|Node 1|-3"_s, u"AbsoluteEdgeWeight|Node 2|Node 1|3"_s};
+        QTest::newRow("Matrix skip duplicates") << u"MatrixCSV skip duplicates"_s << QByteArray("0,2\n-3,0\n") <<
+            QStringList{u"Node 1"_s, u"Node 2"_s} << QStringList{u"Node 1-Node 2"_s} <<
+            QStringList{u"EdgeWeight|Node 1|Node 2|-3"_s, u"AbsoluteEdgeWeight|Node 1|Node 2|3"_s};
+        QTest::newRow("Matrix headers") << u"MatrixCSV"_s << QByteArray(",A,B,C\nA,0,1,0\nB,1,0,0.5\nC,0,0.5,0\n") <<
+            QStringList{u"A"_s, u"B"_s, u"C"_s} << QStringList{u"A-B"_s, u"B-A"_s, u"B-C"_s, u"C-B"_s} <<
+            QStringList{u"EdgeWeight|C|B|0.5"_s};
+        QTest::newRow("Matrix headers skip duplicates") << u"MatrixCSV skip duplicates"_s <<
+            QByteArray(",A,B,C\nA,0,1,0\nB,1,0,0.5\nC,0,0.5,0\n") <<
+            QStringList{u"A"_s, u"B"_s, u"C"_s} << QStringList{u"A-B"_s, u"B-C"_s} << QStringList{};
+        QTest::newRow("Matrix minimum weight") << u"MatrixCSV minimum 0.5"_s <<
+            QByteArray(",A,B,C\nA,0,1,0\nB,1,0,0.5\nC,0,0.5,0\n") <<
+            QStringList{u"A"_s, u"B"_s} << QStringList{u"A-B"_s, u"B-A"_s} << QStringList{};
+        QTest::newRow("Matrix empty cells") << u"MatrixCSV"_s << QByteArray(",A,B\nA,5,\nB,1,\n") <<
+            QStringList{u"A"_s, u"B"_s} << QStringList{u"A-A"_s, u"B-A"_s} <<
+            QStringList{u"EdgeWeight|A|A|5"_s, u"EdgeWeight|B|A|1"_s};
+    }
+
+    void parse()
+    {
+        QFETCH(const QString, format);
+        QFETCH(const QByteArray, content);
+        QFETCH(const QStringList, nodes);
+        QFETCH(const QStringList, edges);
+        QFETCH(const QStringList, values);
+
+        QString failureReason;
+        auto model = ::parse(format, content, &failureReason);
+        QVERIFY2(model != nullptr, qPrintable(failureReason));
+
+        QCOMPARE(model->nodeNames(), nodes);
+        QCOMPARE(model->edgeNames(), edges);
+
+        for(const auto& value : values)
+        {
+            auto fields = value.split(u'|');
+
+            if(fields.size() == 3)
+                QCOMPARE(model->nodeValue(fields.at(0), fields.at(1)), fields.at(2));
+            else
+                QCOMPARE(model->edgeValue(fields.at(0), fields.at(1), fields.at(2)), fields.at(3));
+        }
+    }
+
+    void parseFailure_data()
+    {
+        QTest::addColumn<QString>("format");
+        QTest::addColumn<QByteArray>("content");
+
+        for(const auto* format : {"PairwiseCSV", "GML", "GraphML", "DOT", "JSONGraph", "CX", "MatrixCSV", "BioPAX"})
+            QTest::addRow("%s empty", format) << QString::fromLatin1(format) << QByteArray();
+
+        QTest::newRow("GML truncated") << u"GML"_s << QByteArray("graph [ node [ id 1 label \"A\" ");
+        QTest::newRow("GML node without id") << u"GML"_s << QByteArray("graph [ node [ label \"A\" ] ]");
+        QTest::newRow("GML real id") << u"GML"_s << QByteArray("graph [ node [ id 1.0 ] ]");
+        QTest::newRow("GML unknown node") << u"GML"_s << QByteArray("graph [ node [ id 1 ] edge [ source 1 target 9 ] ]");
+
+        // Not a raw string, which moc misparses here, missing the test class
+        QTest::newRow("GraphML truncated") << u"GraphML"_s <<
+            QByteArray("<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\"><graph><node id=\"a\"/>"); // NOLINT modernize-raw-string-literal
+        QTest::newRow("GraphML not GraphML") << u"GraphML"_s << QByteArray("<foo/>");
+        QTest::newRow("GraphML duplicate id") << u"GraphML"_s <<
+            QByteArray(R"(<graphml><graph><node id="a"/><node id="a"/></graph></graphml>)");
+        QTest::newRow("GraphML node without id") << u"GraphML"_s <<
+            QByteArray("<graphml><graph><node/></graph></graphml>");
+        QTest::newRow("GraphML edge without target") << u"GraphML"_s <<
+            QByteArray(R"(<graphml><graph><node id="a"/><edge source="a"/></graph></graphml>)");
+
+        QTest::newRow("DOT truncated") << u"DOT"_s << QByteArray("digraph G { a -> b");
+        QTest::newRow("DOT not DOT") << u"DOT"_s << QByteArray("hello");
+
+        QTest::newRow("JSON Graph invalid") << u"JSONGraph"_s << QByteArray("{");
+        QTest::newRow("JSON Graph array") << u"JSONGraph"_s << QByteArray("[]");
+        QTest::newRow("JSON Graph no graph") << u"JSONGraph"_s << QByteArray(R"({"x":1})");
+        QTest::newRow("JSON Graph no nodes") << u"JSONGraph"_s << QByteArray(R"({"graph":{"edges":[]}})");
+        QTest::newRow("JSON Graph node without id") << u"JSONGraph"_s <<
+            QByteArray(R"({"graph":{"nodes":[{"label":"A"}],"edges":[]}})");
+        QTest::newRow("JSON Graph edge without target") << u"JSONGraph"_s <<
+            QByteArray(R"({"graph":{"nodes":[{"id":"a"}],"edges":[{"source":"a"}]}})");
+        QTest::newRow("JSON Graph unknown node") << u"JSONGraph"_s <<
+            QByteArray(R"({"graph":{"nodes":[{"id":"a"}],"edges":[{"source":"a","target":"z"}]}})");
+
+        QTest::newRow("CX object") << u"CX"_s << QByteArray("{}");
+        QTest::newRow("CX not objects") << u"CX"_s << QByteArray("[1]");
+        QTest::newRow("CX unknown version") << u"CX"_s << QByteArray(R"([{"foo":1}])");
+        QTest::newRow("CX unknown node") << u"CX"_s << QByteArray(R"([{"numberVerification":[{"longNumber":281474976710655}]},
+            {"nodes":[{"@id":10,"n":"A"}]},{"edges":[{"@id":20,"s":10,"t":99}]}])");
+
+        QTest::newRow("Matrix single value") << u"MatrixCSV"_s << QByteArray("5\n");
+        QTest::newRow("Matrix not square") << u"MatrixCSV"_s << QByteArray(",A,B\nA,0,1\n");
+        QTest::newRow("Matrix non-numeric") << u"MatrixCSV"_s << QByteArray(",A,B\nA,0,x\nB,1,0\n");
+        QTest::newRow("Matrix mismatched headers") << u"MatrixCSV"_s << QByteArray(",A,B\nC,0,1\nD,1,0\n");
+    }
+
+    void parseFailure()
+    {
+        QFETCH(const QString, format);
+        QFETCH(const QByteArray, content);
+
+        QVERIFY(::parse(format, content) == nullptr);
+    }
+};
+
+QTEST_MAIN(TestGraphParsers)
+#include "tst_graphparsers.moc"

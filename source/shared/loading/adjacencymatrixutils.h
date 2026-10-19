@@ -33,7 +33,7 @@
 
 namespace AdjacencyMatrixUtils
 {
-static MatrixTypeResult isAdjacencyMatrix(const TabularData& tabularData, QPoint* topLeft = nullptr, size_t maxRows = 5)
+inline MatrixTypeResult isAdjacencyMatrix(const TabularData& tabularData, QPoint* topLeft = nullptr, size_t maxRows = 5)
 {
     // A matrix can optionally have column or row headers. Or none.
     // A matrix data rect must be square.
@@ -107,7 +107,7 @@ static MatrixTypeResult isAdjacencyMatrix(const TabularData& tabularData, QPoint
         QObject::tr("Matrix doesn't have numeric first row or column.")};
 }
 
-static MatrixTypeResult isEdgeList(const TabularData& tabularData, size_t maxRows = 5)
+inline MatrixTypeResult isEdgeList(const TabularData& tabularData, size_t maxRows = 5)
 {
     if(tabularData.numColumns() != 3)
         return {._isMatrix = false, ._reason = QObject::tr("Edge list doesn't have 3 columns.")};
