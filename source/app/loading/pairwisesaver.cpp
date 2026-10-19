@@ -24,6 +24,7 @@
 #include "shared/graph/igraphmodel.h"
 
 #include <QFile>
+#include <QLocale>
 #include <QObject>
 #include <QTextStream>
 
@@ -113,7 +114,7 @@ bool PairwiseSaver::save()
         {
             const auto* attribute = _graphModel->attributeByName(edgeWeightAttributeName);
             stream << u"\"%1\" \"%2\" %3\n"_s.arg(sourceName, targetName,
-                QString::number(attribute->floatValueOf(edgeId)));
+                QString::number(attribute->floatValueOf(edgeId), 'g', QLocale::FloatingPointShortest));
         }
         else
             stream << u"\"%1\" \"%2\"\n"_s.arg(sourceName, targetName);

@@ -24,6 +24,7 @@
 #include "shared/graph/igraphmodel.h"
 
 #include <QFile>
+#include <QLocale>
 #include <QObject>
 #include <QRegularExpression>
 #include <QTextStream>
@@ -108,13 +109,18 @@ bool GMLSaver::save()
                 stream << indent(level) << alphanumAttributeNames[attributeName] << " "
                        << u"\"%1\""_s.arg(escapedValue) << "\n";
             }
+            else if(attribute->valueType() == ValueType::Int)
+            {
+                stream << indent(level) << alphanumAttributeNames[attributeName] << " "
+                       << attribute->intValueOf(elementId) << "\n";
+            }
             else if(attribute->valueType() & ValueType::Numerical)
             {
                 auto value = attribute->numericValueOf(elementId);
                 if(!std::isnan(value))
                 {
                     stream << indent(level) << alphanumAttributeNames[attributeName] << " "
-                           << value << "\n";
+                           << QString::number(value, 'g', QLocale::FloatingPointShortest) << "\n";
                 }
             }
         }
