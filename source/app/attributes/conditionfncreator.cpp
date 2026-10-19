@@ -184,7 +184,7 @@ struct AttributesOpVistor
     ElementConditionFn<E> operator()(ConditionFnOp::String op) const
     {
         auto lhs = _lhs;
-        auto rhs = _lhs;
+        auto rhs = _rhs;
 
         Attribute::ValueOfFn<QString, E> valueOfFn = &Attribute::valueOf<QString, E>;
 
