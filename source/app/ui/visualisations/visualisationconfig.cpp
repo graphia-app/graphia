@@ -25,6 +25,7 @@
 
 #include "shared/utils/container.h"
 
+#include <QLocale>
 #include <QObject>
 #include <QVariantList>
 
@@ -46,7 +47,7 @@ QString VisualisationConfig::Parameter::valueAsString(bool asWritten) const
 
         explicit Visitor(bool asWritten_) : _asWritten(asWritten_) {}
 
-        QString operator()(double d) const { return QString::number(d); }
+        QString operator()(double d) const { return QString::number(d, 'g', QLocale::FloatingPointShortest); }
         QString operator()(const QString& s) const
         {
             if(_asWritten)
