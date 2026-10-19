@@ -33,6 +33,7 @@
 #include <stack>
 #include <vector>
 #include <map>
+#include <utility>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -84,6 +85,18 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
     bool inDefault = false;
     std::map<QString, QString> defaults;
     std::vector<EdgeId> edgeIds;
+
+    // Edges may be declared before their nodes, in which case they're created at the end
+    struct PendingEdge
+    {
+        QString _source;
+        QString _target;
+        QString _name;
+        std::vector<std::pair<QString, QString>> _values;
+    };
+
+    std::vector<PendingEdge> pendingEdges;
+    bool pendingEdgeActive = false;
 
     auto processToken = [&](QXmlStreamReader::TokenType tokenType)
     {
@@ -185,7 +198,9 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
 
                 if(!u::contains(nodes, sourceName) || !u::contains(nodes, targetName))
                 {
-                    qDebug() << "WARNING: Edge has unknown source or target:" << sourceName << targetName;
+                    pendingEdges.push_back({._source = sourceName, ._target = targetName,
+                        ._name = attributes.value(u"id"_s).toString(), ._values = {}});
+                    pendingEdgeActive = true;
                     break;
                 }
 
@@ -268,14 +283,19 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
 
             if(elementName == u"node"_s && !activeNodeId.isNull())
                 activeNodeId.setToNull();
-            else if(elementName == u"edge"_s && !activeEdgeId.isNull())
+            else if(elementName == u"edge"_s)
+            {
                 activeEdgeId.setToNull();
+                pendingEdgeActive = false;
+            }
             else if(elementName == u"data"_s && !activeKey.isEmpty())
             {
                 if(!activeNodeId.isNull() && u::contains(nodeAttributes, activeKey))
                     _userNodeData->setValueBy(activeNodeId, nodeAttributes.at(activeKey), activeData);
                 else if(!activeEdgeId.isNull() && u::contains(edgeAttributes, activeKey))
                     _userEdgeData->setValueBy(activeEdgeId, edgeAttributes.at(activeKey), activeData);
+                else if(pendingEdgeActive)
+                    pendingEdges.back()._values.emplace_back(activeKey, activeData);
 
                 activeKey.clear();
                 activeData.clear();
@@ -317,6 +337,27 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
     {
         setFailureReason(QObject::tr("XML parse error: %1").arg(xsr.errorString()));
         return false;
+    }
+
+    for(const auto& pendingEdge : pendingEdges)
+    {
+        if(!u::contains(nodes, pendingEdge._source) || !u::contains(nodes, pendingEdge._target))
+        {
+            qDebug() << "WARNING: Edge has unknown source or target:" << pendingEdge._source << pendingEdge._target;
+            continue;
+        }
+
+        auto edgeId = graphModel->mutableGraph().addEdge(nodes.at(pendingEdge._source), nodes.at(pendingEdge._target));
+        edgeIds.push_back(edgeId);
+
+        if(!pendingEdge._name.isEmpty())
+            _userEdgeData->setValueBy(edgeId, edgeNameAttribute(), pendingEdge._name);
+
+        for(const auto& [key, value] : pendingEdge._values)
+        {
+            if(u::contains(edgeAttributes, key))
+                _userEdgeData->setValueBy(edgeId, edgeAttributes.at(key), value);
+        }
     }
 
     // Elements without a value for a key that has a default take the default
