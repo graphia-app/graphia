@@ -407,6 +407,10 @@ bool UserElementData<E>::load(const json &jsonObject, Progressable &progressable
     {
         E elementId = id.get<int>();
 
+        // The ids must be of elements of the graph
+        if(elementId.isNull() || static_cast<size_t>(elementId) >= _indexes->size())
+            return false;
+
         if(!haveIndexFor(elementId))
             setElementIdForIndex(elementId, index++);
     }
