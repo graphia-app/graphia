@@ -135,13 +135,15 @@ void BetweennessTransform::apply(TransformedGraph& target)
 
     NodeArray<double> nodeBetweenness(target, 0.0);
     EdgeArray<double> edgeBetweenness(target, 0.0);
+
+    // Each shortest path is found twice from each of its ends, so the totals are halved
     for(const auto& arrays : betweennessArrays)
     {
         for(auto nodeId : nodeIds)
-            nodeBetweenness[nodeId] += arrays.nodeBetweenness[nodeId];
+            nodeBetweenness[nodeId] += arrays.nodeBetweenness[nodeId] * 0.5;
 
         for(auto edgeId : edgeIds)
-            edgeBetweenness[edgeId] += arrays.edgeBetweenness[edgeId];
+            edgeBetweenness[edgeId] += arrays.edgeBetweenness[edgeId] * 0.5;
     }
 
     _graphModel->createAttribute(BetweennessTransformFactory::nodeBetweennessAttribute())
