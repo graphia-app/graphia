@@ -256,7 +256,9 @@ bool BiopaxFileParser::parse(const QUrl& url, IGraphModel* graphModel)
 
             activeElements.pop();
 
-            if(isNodeElementName(elementName))
+            // Node elements within node elements don't create nodes
+            if(isNodeElementName(elementName) && (activeElements.empty() ||
+                !isNodeElementName(activeElements.top())))
             {
                 // If the node hasn't been assigned a name, just use its ID
                 if(graphModel->nodeName(activeNodeId).isEmpty())
