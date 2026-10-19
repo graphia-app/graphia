@@ -46,3 +46,11 @@ add_graphia_test(tst_visualisationconfigparser ui/tst_visualisationconfigparser.
 add_graphia_test(tst_qml qml/tst_qml.cpp)
 target_link_libraries(tst_qml PRIVATE Qt6::QuickTest)
 target_compile_definitions(tst_qml PRIVATE QUICK_TEST_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/qml")
+add_graphia_test(tst_string utils/tst_string.cpp)
+
+if(UNIX AND NOT APPLE)
+    # Qt takes the system locale from the environment on Linux, so also run in a
+    # locale whose numbers differ from the C locale's in every respect
+    add_test(NAME tst_string_sv_SE COMMAND tst_string)
+    set_tests_properties(tst_string_sv_SE PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;LC_ALL=sv_SE.UTF-8")
+endif()
