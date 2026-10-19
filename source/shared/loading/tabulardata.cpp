@@ -636,6 +636,14 @@ bool TextDelimitedTabularDataParser::parse(const QUrl& url, IGraphModel*)
 
             if(codePoint == '"')
             {
+                // Within quotes, a pair of quotes is a literal quote
+                if(inQuotes && it < end && *it == '"')
+                {
+                    token += '"';
+                    it++;
+                    continue;
+                }
+
                 if(inQuotes)
                     setCurrentCellToToken();
 
