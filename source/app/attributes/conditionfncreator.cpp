@@ -275,10 +275,10 @@ struct AttributeValueOpVistor
         {
             switch(op)
             {
-            case ConditionFnOp::Numerical::LessThan:            op = ConditionFnOp::Numerical::GreaterThanOrEqual; break;
-            case ConditionFnOp::Numerical::GreaterThan:         op = ConditionFnOp::Numerical::LessThanOrEqual; break;
-            case ConditionFnOp::Numerical::LessThanOrEqual:     op = ConditionFnOp::Numerical::GreaterThan; break;
-            case ConditionFnOp::Numerical::GreaterThanOrEqual:  op = ConditionFnOp::Numerical::LessThan; break;
+            case ConditionFnOp::Numerical::LessThan:            op = ConditionFnOp::Numerical::GreaterThan; break;
+            case ConditionFnOp::Numerical::GreaterThan:         op = ConditionFnOp::Numerical::LessThan; break;
+            case ConditionFnOp::Numerical::LessThanOrEqual:     op = ConditionFnOp::Numerical::GreaterThanOrEqual; break;
+            case ConditionFnOp::Numerical::GreaterThanOrEqual:  op = ConditionFnOp::Numerical::LessThanOrEqual; break;
             }
         }
 
