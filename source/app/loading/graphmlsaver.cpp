@@ -153,13 +153,13 @@ bool GraphMLSaver::save()
 
             stream.writeStartElement(u"data"_s);
             stream.writeAttribute(u"key"_s, attributeToId.at(nodeAttributeName));
-            stream.writeCharacters(attribute->displayValue(attribute->stringValueOf(nodeId)).toHtmlEscaped());
+            stream.writeCharacters(attribute->displayValue(attribute->stringValueOf(nodeId)));
             stream.writeEndElement();
         }
 
         stream.writeStartElement(u"data"_s);
         stream.writeAttribute(u"key"_s, u"desc"_s);
-        stream.writeCharacters(_graphModel->nodeName(nodeId).toHtmlEscaped());
+        stream.writeCharacters(_graphModel->nodeName(nodeId));
         stream.writeEndElement();
 
         const auto& pos = graphModel->nodePositions().get(nodeId);
@@ -201,7 +201,7 @@ bool GraphMLSaver::save()
 
             stream.writeStartElement(u"data"_s);
             stream.writeAttribute(u"key"_s, attributeToId.at(edgeAttributeName));
-            stream.writeCharacters(attribute->displayValue(attribute->stringValueOf(edgeId)).toHtmlEscaped());
+            stream.writeCharacters(attribute->displayValue(attribute->stringValueOf(edgeId)));
             stream.writeEndElement();
         }
         stream.writeEndElement(); // edge
