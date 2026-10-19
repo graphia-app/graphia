@@ -116,6 +116,16 @@ public:
         return value(indexFor(elementId), name);
     }
 
+    // The value as stored, rather than converted to the type of its vector
+    QString storedValueBy(E elementId, const QString& name)
+    {
+        const auto* userDataVector = vector(name);
+        if(userDataVector == nullptr || !haveIndexFor(elementId))
+            return {};
+
+        return userDataVector->get(indexFor(elementId));
+    }
+
     void remove(const QString& name) override;
 
     bool setAttributeType(IGraphModel& graphModel, const QString& attributeName, UserDataVector::Type type);

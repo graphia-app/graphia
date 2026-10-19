@@ -120,9 +120,15 @@ bool EditAttributeCommand::execute()
             Q_ASSERT(success);
         }
 
+        // The values are saved as stored, as their string representations
+        // may not be exact, and missing values are represented as 0
+        const auto* userDataVector = userData.vectorForAttributeName(_attributeName);
+        const auto vectorName = userDataVector != nullptr ? userDataVector->name() : QString();
+
         for(const auto& [elementId, value] : edits)
         {
-            reverseEdits[elementId] = attribute->stringValueOf(elementId);
+            reverseEdits[elementId] = !vectorName.isEmpty() ?
+                userData.storedValueBy(elementId, vectorName) : attribute->stringValueOf(elementId);
             attribute->setValueOf(elementId, value);
         }
 

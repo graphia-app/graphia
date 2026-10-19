@@ -132,7 +132,8 @@ bool UserElementData<E>::setAttributeType(IGraphModel& graphModel,
         })
         .setSetValueFn([this, userDataVectorName](E elementId, const QString& value)
         {
-            if(!u::isNumeric(value))
+            // An empty value is a missing value
+            if(!value.isEmpty() && !u::isNumeric(value))
             {
                 qDebug() << "UserDataVector setValueFn can't convert" << value << "to float, ignoring";
                 return;
@@ -151,7 +152,8 @@ bool UserElementData<E>::setAttributeType(IGraphModel& graphModel,
         })
         .setSetValueFn([this, userDataVectorName](E elementId, const QString& value)
         {
-            if(!u::isInteger(value))
+            // An empty value is a missing value
+            if(!value.isEmpty() && !u::isInteger(value))
             {
                 qDebug() << "UserDataVector setValueFn can't convert" << value << "to integer, ignoring";
                 return;
