@@ -53,10 +53,10 @@ function addLabelTo(text, parent, transformItem)
 
     let label = Qt.createQmlObject("import QtQuick\n" +
         "import QtQuick.Controls\n" +
-        "Label { text: \"" +
-        GraphiaUtils.Utils.normaliseWhitespace(text) +
-        "\" }", parent);
+        "Label {}", parent);
 
+    // Set the text here, rather than in the QML above, so it needn't be escaped
+    label.text = GraphiaUtils.Utils.normaliseWhitespace(text);
     label.color = Qt.binding(function() { return transformItem.textColor; });
 }
 
@@ -288,15 +288,15 @@ function Create(transformIndex, document, transformString)
                                 {
                                 default:
                                 case GraphiaSharedTypes.ValueType.String:
-                                    labelText += "\\\"" + GraphiaUtils.Utils.addSlashes(displayOperand) + "\\\"";
+                                    labelText += "\"" + displayOperand + "\"";
                                     break;
                                 case GraphiaSharedTypes.ValueType.StringList:
                                 {
                                     // A choice from a list, shown by its display text
                                     let index = parameterData.initialValue.indexOf(operand);
                                     let displayValues = parameterData.displayValues;
-                                    labelText += GraphiaUtils.Utils.addSlashes(displayValues !== undefined &&
-                                        index >= 0 && index < displayValues.length ? displayValues[index] : operand);
+                                    labelText += displayValues !== undefined &&
+                                        index >= 0 && index < displayValues.length ? displayValues[index] : operand;
                                     break;
                                 }
                                 case GraphiaSharedTypes.ValueType.Int:
