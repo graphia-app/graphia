@@ -27,10 +27,13 @@
 #include <lexy/lexeme.hpp>
 
 #include <QByteArray>
+#include <QObject>
 #include <QString>
 
+#include <algorithm>
 #include <cstddef>
 #include <functional>
+#include <iterator>
 
 namespace lexyutils
 {
@@ -119,6 +122,25 @@ struct QuotedString : lexy::token_production
         return text;
     });
 };
+
+// An error callback for lexy::parse, which describes the location of the first error,
+// given the beginning of the input
+inline auto describeFirstError(const char* begin, QString& description)
+{
+    return lexy::callback([begin, &description](const auto&, const auto& error)
+    {
+        if(!description.isEmpty())
+            return;
+
+        const char* position = error.position();
+        auto line = std::count(begin, position, '\n') + 1;
+        auto lineBegin = std::find(std::make_reverse_iterator(position),
+            std::make_reverse_iterator(begin), '\n').base();
+        auto column = std::distance(lineBegin, position) + 1;
+
+        description = QObject::tr("The file is malformed at line %1, column %2.").arg(line).arg(column);
+    });
+}
 
 class progress_input
 {

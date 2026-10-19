@@ -136,7 +136,10 @@ bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel*
         }
 
         if(!jsonEdge["source"].is_string() || !jsonEdge["target"].is_string())
+        {
+            parser.setFailureReason(QObject::tr("Edge source or target isn't a string."));
             return false;
+        }
 
         auto sourceIdString = jsonEdge["source"].get<std::string>();
         auto targetIdString = jsonEdge["target"].get<std::string>();
@@ -144,6 +147,8 @@ bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel*
         if(!u::contains(stringNodeIdToNodeId, sourceIdString) ||
             !u::contains(stringNodeIdToNodeId, targetIdString))
         {
+            parser.setFailureReason(QObject::tr("An edge from %1 to %2 refers to a node that doesn't exist.")
+                .arg(QString::fromStdString(sourceIdString), QString::fromStdString(targetIdString)));
             return false;
         }
 

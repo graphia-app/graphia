@@ -189,7 +189,10 @@ static bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphMode
     {
         const auto* id = findIntValue(node, u"id"_s);
         if(id == nullptr)
+        {
+            parser.setFailureReason(QObject::tr("A node has no integer id."));
             return false;
+        }
 
         auto nodeId = graphModel.mutableGraph().addNode();
         gmlIdToNodeId[*id] = nodeId;
@@ -233,10 +236,17 @@ static bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphMode
         const auto* targetId = findIntValue(edge, u"target"_s);
 
         if(sourceId == nullptr || targetId == nullptr)
+        {
+            parser.setFailureReason(QObject::tr("An edge has no integer source or target."));
             return false;
+        }
 
         if(!u::contains(gmlIdToNodeId, *sourceId) || !u::contains(gmlIdToNodeId, *targetId))
+        {
+            parser.setFailureReason(QObject::tr("An edge from %1 to %2 refers to a node that doesn't exist.")
+                .arg(*sourceId).arg(*targetId));
             return false;
+        }
 
         auto sourceNodeId = gmlIdToNodeId[*sourceId];
         auto targetNodeId = gmlIdToNodeId[*targetId];
@@ -272,7 +282,10 @@ static bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphMode
             const auto* graph = std::get_if<List>(&keyValue.get()._value);
 
             if(graph == nullptr)
+            {
+                parser.setFailureReason(QObject::tr("graph is not a list."));
                 return false;
+            }
 
             for(const auto& element : *graph)
             {
@@ -368,10 +381,18 @@ bool GmlFileParser::parse(const QUrl& url, IGraphModel* graphModel)
 
     setPhase(QObject::tr("Parsing"));
 
-    auto result = lexy::parse<LexyGmlParser::grammar::Gml>(input, lexy::noop);
+    QString errorDescription;
+    auto result = lexy::parse<LexyGmlParser::grammar::Gml>(input,
+        lexyutils::describeFirstError(contents.constData(), errorDescription));
 
-    if(cancelled() || !result.is_success())
+    if(cancelled())
         return false;
+
+    if(!result.is_success())
+    {
+        setFailureReason(errorDescription);
+        return false;
+    }
 
     setPhase(QObject::tr("Building Graph"));
     setProgress(-1);
