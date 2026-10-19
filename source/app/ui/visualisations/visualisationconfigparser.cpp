@@ -46,7 +46,7 @@ constexpr auto keywordWith = LEXY_KEYWORD("with", LexyConfigGrammar::idPattern);
 
 struct Double
 {
-    static constexpr auto rule = dsl::capture(lexyutils::real);
+    static constexpr auto rule = dsl::capture(lexyutils::number);
     static constexpr auto value = asDouble;
 };
 
