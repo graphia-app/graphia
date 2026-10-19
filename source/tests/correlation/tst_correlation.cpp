@@ -312,6 +312,11 @@ private slots:
         QTest::newRow("below threshold") << 1 << static_cast<int>(CorrelationPolarity::Positive) <<
             QStringList{u"0-1:0.9"_s, u"0-2:-0.5"_s, u"1-2:-0.6"_s} <<
             QStringList{u"0-1"_s};
+        QTest::newRow("weaker first") << 2 << static_cast<int>(CorrelationPolarity::Positive) <<
+            QStringList{u"0-1:0.9"_s, u"0-2:0.5"_s, u"0-3:0.7"_s, u"0-4:0.1"_s,
+                u"1-2:0.11"_s, u"1-3:0.12"_s, u"1-4:0.13"_s,
+                u"2-3:0.95"_s, u"2-4:0.96"_s, u"3-4:0.97"_s} <<
+            QStringList{u"0-1"_s, u"0-3"_s, u"1-4"_s, u"2-3"_s, u"2-4"_s, u"3-4"_s};
     }
 
     void knnProtoGraph()
