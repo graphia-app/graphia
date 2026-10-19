@@ -205,12 +205,6 @@ bool BiopaxFileParser::parse(const QUrl& url, IGraphModel* graphModel)
 
                     tempEdge._sources.push_back(activeNodeName);
                     tempEdge._targets.push_back(rdfResource);
-
-                    if(elementName == u"right"_s || elementName == u"controlled"_s)
-                    {
-                        tempEdge._targets.push_back(rdfResource);
-                        tempEdge._sources.push_back(activeNodeName);
-                    }
                 }
             }
 
