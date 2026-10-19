@@ -59,11 +59,11 @@ private:
         {
             const std::unique_lock<std::mutex> lock(_mutex);
 
-            auto minR = !_protoEdges.empty() ?
-                std::max(_protoEdges.back()._r, _protoGraph->_threshold) :
-                _protoGraph->_threshold;
+            if(!correlationExceedsThreshold(_protoGraph->_polarity, r, _protoGraph->_threshold))
+                return;
 
-            if(!correlationExceedsThreshold(_protoGraph->_polarity, r, minR))
+            // Once there are k edges, only a stronger one can displace the weakest
+            if(_protoEdges.size() >= _protoGraph->_k && r <= _protoEdges.back()._r)
                 return;
 
             _protoEdges.push_back({it, r});
