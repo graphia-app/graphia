@@ -151,16 +151,15 @@ static json enrichmentTableModelAsJson(const EnrichmentTableModel& table)
 {
     json jsonObject;
 
-    for(int row = 1; row < table.rowCount(); row++)
+    const auto& tableData = table.tableData();
+    for(size_t row = 0; row < tableData.size(); row++)
     {
-        for(int column = 0; column < table.columnCount(); column++)
+        for(const auto& v : tableData.at(row))
         {
-            const auto& v = table.storedData(row, static_cast<EnrichmentTableModel::Results>(column));
-
             if(v.typeId() == QMetaType::QString)
-                jsonObject["data"][static_cast<size_t>(row - 1)].push_back(v.toString().toStdString());
+                jsonObject["data"][row].push_back(v.toString().toStdString());
             else if(v.typeId() == QMetaType::Double || v.typeId() == QMetaType::Int)
-                jsonObject["data"][static_cast<size_t>(row - 1)].push_back(v.toDouble());
+                jsonObject["data"][row].push_back(v.toDouble());
         }
     }
 

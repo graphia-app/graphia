@@ -124,12 +124,6 @@ QVariant EnrichmentTableModel::data(int row, Results result) const
     return data(index(row, column), Qt::DisplayRole);
 }
 
-QVariant EnrichmentTableModel::storedData(int row, Results result) const
-{
-    auto column = static_cast<int>(result);
-    return data(index(row, column), Qt::EditRole);
-}
-
 int EnrichmentTableModel::rowFromAttributeSets(const QString& attributeA, const QString& attributeB) const
 {
     for(int rowIndex = 1; rowIndex < rowCount(); rowIndex++)
