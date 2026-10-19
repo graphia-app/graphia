@@ -254,27 +254,25 @@ namespace u
         return index;
     }
 
+    // Tied values are given the mean of the ranks they span
     template<Container C>
-    std::vector<size_t> rankingOf(const C& container)
+    std::vector<double> rankingOf(const C& container)
     {
         auto index = sortedIndicesOf(container);
-        std::reverse(std::begin(index), std::end(index));
+        std::vector<double> ranking(container.size());
 
-        std::vector<size_t> ranking(container.size());
-
-        size_t rank = 1;
-        for(auto i : index)
-            ranking[i] = rank++;
-
-        // Give duplicates the same rank
-        auto it = ranking.begin();
-        while((it = std::adjacent_find(it, ranking.end(),
-            [&container](size_t a, size_t b)
-            {
-                return a != b && container[a] == container[b];
-            })) != ranking.end())
+        for(size_t i = 0; i < index.size();)
         {
-            *std::next(it) = *it;
+            auto j = i + 1;
+            while(j < index.size() && container[index[j]] == container[index[i]])
+                j++;
+
+            // The values at i to j - 1 have ranks i + 1 to j
+            auto rank = static_cast<double>(i + 1 + j) * 0.5;
+            for(auto k = i; k < j; k++)
+                ranking[index[k]] = rank;
+
+            i = j;
         }
 
         return ranking;
