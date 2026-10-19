@@ -166,11 +166,77 @@ TestCase
         let toB = to.itemAt(1);
 
         // The clones are put in a group of their own, so only one can be checked
+        verify(toA.ButtonGroup.group !== null);
+        verify(toA.ButtonGroup.group !== group);
+        compare(toB.ButtonGroup.group, toA.ButtonGroup.group);
+
         toA.checked = true;
         toB.checked = true;
         verify(!toA.checked);
 
         toA.checked = true;
         verify(!toB.checked);
+    }
+
+    // Count the objects destroyed, without keeping references to them
+    function destroyedAfterClear(populate)
+    {
+        let destroyed = {count: 0};
+        let objects = populate();
+        objects.forEach(o => o.Component.destruction.connect(() => destroyed.count++));
+        objects = null;
+
+        MenuUtils.clear(to);
+        wait(0);
+
+        return destroyed.count;
+    }
+
+    function test_clearDestroysItems()
+    {
+        compare(destroyedAfterClear(() =>
+        {
+            let item = MenuUtils.addItemTo(to, "Item");
+            let separator = MenuUtils.addSeparatorTo(to) ?? to.itemAt(1);
+            let actionItem = MenuUtils.addActionTo(to, actionA);
+            let subMenu = MenuUtils.addSubMenuTo(to, "Sub Menu");
+            let subItem = MenuUtils.addItemTo(subMenu, "Sub Item");
+
+            return [item, separator, actionItem, subMenu, subItem];
+        }), 5);
+
+        compare(to.count, 0);
+    }
+
+    function test_clearDestroysClones()
+    {
+        let a = MenuUtils.addActionTo(from, actionA);
+        let b = MenuUtils.addActionTo(from, actionB);
+        let group = createTemporaryObject(buttonGroupComponent, this);
+        a.ButtonGroup.group = group;
+        b.ButtonGroup.group = group;
+        MenuUtils.addSubMenuTo(from, "Sub Menu");
+
+        compare(destroyedAfterClear(() =>
+        {
+            MenuUtils.clone(from, to);
+
+            let objects = [];
+            for(let i = 0; i < to.count; i++)
+                objects.push(to.itemAt(i));
+
+            return objects;
+        }), 3);
+
+        // Cloning again replaces the earlier clone, which is destroyed,
+        // along with the group created for it
+        MenuUtils.clone(from, to);
+        let count = {value: 0};
+        to.itemAt(0).Component.destruction.connect(() => count.value++);
+        to.itemAt(0).ButtonGroup.group.Component.destruction.connect(() => count.value++);
+        MenuUtils.clone(from, to);
+        wait(0);
+        compare(count.value, 2);
+        compare(to.count, 3);
     }
 }
