@@ -256,6 +256,18 @@ private slots:
             QStringList{u"edgeC"_s, u"graphA"_s, u"nodeB"_s, u"subgraphD"_s} << QStringList{u"graphA-nodeB"_s} << QStringList{};
         QTest::newRow("DOT no semicolons") << u"DOT"_s << QByteArray("digraph { a -> b c -> d }") <<
             QStringList{u"a"_s, u"b"_s, u"c"_s, u"d"_s} << QStringList{u"a-b"_s, u"c-d"_s} << QStringList{};
+        QTest::newRow("DOT node defaults") << u"DOT"_s <<
+            QByteArray("digraph { a [color=blue]; node [color=red]; b; c [color=green] }") <<
+            QStringList{u"a"_s, u"b"_s, u"c"_s} << QStringList{} <<
+            QStringList{u"color|a|blue"_s, u"color|b|red"_s, u"color|c|green"_s};
+        QTest::newRow("DOT subgraph defaults") << u"DOT"_s <<
+            QByteArray("graph { node [k=x] a; subgraph s { node [k=y]; b } c }") <<
+            QStringList{u"a"_s, u"b"_s, u"c"_s} << QStringList{} <<
+            QStringList{u"k|a|x"_s, u"k|b|y"_s, u"k|c|x"_s};
+        QTest::newRow("DOT edge defaults") << u"DOT"_s <<
+            QByteArray("digraph { a -> b; edge [style=dashed]; b -> c; c -> d [style=bold] }") <<
+            QStringList{u"a"_s, u"b"_s, u"c"_s, u"d"_s} << QStringList{u"a-b"_s, u"b-c"_s, u"c-d"_s} <<
+            QStringList{u"style|a|b|"_s, u"style|b|c|dashed"_s, u"style|c|d|bold"_s};
         QTest::newRow("DOT empty") << u"DOT"_s << QByteArray("digraph {}") <<
             QStringList{} << QStringList{} << QStringList{};
 
