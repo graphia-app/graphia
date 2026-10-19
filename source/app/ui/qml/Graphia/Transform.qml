@@ -363,8 +363,8 @@ Item
             _parameterComponents = [];
 
             TransformConfig.addLabelTo(detail.length > 0 ?
-                Utils.format(qsTr("{0}: {1}"), detail, Utils.addSlashes(value)) :
-                Utils.format(qsTr("Invalid Expression: {0}"), Utils.addSlashes(value)), expression, root);
+                Utils.format(qsTr("{0}: {1}"), detail, value) :
+                Utils.format(qsTr("Invalid Expression: {0}"), value), expression, root);
         }
     }
 
