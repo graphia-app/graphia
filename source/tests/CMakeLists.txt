@@ -30,3 +30,6 @@ add_graphia_test(tst_conditionfncreator attributes/tst_conditionfncreator.cpp)
 add_graphia_test(tst_structuraltransforms transform/tst_structuraltransforms.cpp)
 add_graphia_test(tst_analysistransforms transform/tst_analysistransforms.cpp)
 add_graphia_test(tst_attributetransforms transform/tst_attributetransforms.cpp)
+
+add_graphia_test(tst_correlation correlation/tst_correlation.cpp)
+target_link_libraries(tst_correlation PRIVATE correlationcore)
