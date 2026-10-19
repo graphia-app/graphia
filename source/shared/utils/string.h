@@ -102,7 +102,7 @@ namespace u
                 number = match.captured(2).toInt() + 1;
             }
 
-            newName = u"%1(%2)"_s.arg(newName).arg(number);
+            newName = u"%1(%2)"_s.arg(newName, QString::number(number));
         }
 
         return newName;
