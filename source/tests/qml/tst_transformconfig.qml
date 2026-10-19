@@ -37,7 +37,8 @@ TestCase
             "ComponentSize":    {valueType: ValueType.Int},
             "NodeDegree":       {valueType: ValueType.Int},
             "NodeName":         {valueType: ValueType.String},
-            "Weight":           {valueType: ValueType.Float}
+            "Weight":           {valueType: ValueType.Float},
+            "Rank %1":          {valueType: ValueType.Float}
         })
 
         property var parameters:
@@ -155,7 +156,9 @@ TestCase
             {tag: "numeric string",
                 transform: "RemoveNodes where $NodeName == \"123\""},
             {tag: "percent in action",
-                transform: "\"%-NN\" with k = 5"}
+                transform: "\"%-NN\" with k = 5"},
+            {tag: "percent and digit in attribute name",
+                transform: "RemoveNodes where $\"Rank %1\" > 2.5"}
         ];
     }
 
