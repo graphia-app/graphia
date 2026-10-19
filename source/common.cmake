@@ -88,6 +88,10 @@ if(MSVC)
 
         # Clang-cl doesn't seem to understand this
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:throwingNew")
+    else()
+        # Qt's manifest already gives the execution level; llvm-mt merges another from
+        # the linker into an invalid manifest that stops the executable starting
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFESTUAC:NO")
     endif()
 
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
