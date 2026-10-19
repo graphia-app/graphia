@@ -198,6 +198,13 @@ private slots:
             "</graph></graphml>") <<
             QStringList{u"a"_s} << QStringList{} << QStringList{u"text|a|x & y <z> w"_s};
 
+        QTest::newRow("GraphML for all") << u"GraphML"_s << QByteArray(
+            "<graphml><key id=\"d0\" for=\"all\" attr.name=\"note\"/><graph>"
+            "<node id=\"a\"><data key=\"d0\">x</data></node><node id=\"b\"/>"
+            "<edge source=\"a\" target=\"b\"><data key=\"d0\">y</data></edge>"
+            "</graph></graphml>") <<
+            QStringList{u"a"_s, u"b"_s} << QStringList{u"a-b"_s} << QStringList{u"note|a|x"_s, u"Edge note|a|b|y"_s};
+
         // DOT
         QTest::newRow("DOT") << u"DOT"_s << QByteArray(
             "// c\n"
