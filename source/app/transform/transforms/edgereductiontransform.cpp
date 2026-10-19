@@ -25,6 +25,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <utility>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -46,14 +47,18 @@ void EdgeReductionTransform::apply(TransformedGraph& target)
             continue;
 
         std::mt19937 generator(static_cast<std::mt19937::result_type>(static_cast<size_t>(nodeId)));
-        std::uniform_int_distribution<size_t> distribution(0, edgeIds.size() - 1);
 
-        const size_t numEdgesToRetain = std::max(minimum, (edgeIds.size() * percentage) / 100);
+        const size_t numEdgesToRetain = std::min(edgeIds.size(),
+            std::max(minimum, (edgeIds.size() * percentage) / 100));
 
+        // Select the edges to retain without replacement, using a partial Fisher-Yates shuffle;
+        // the generator's output is used directly as, unlike std::uniform_int_distribution,
+        // it is the same on every platform
         for(size_t i = 0u; i < numEdgesToRetain; i++)
         {
-            auto index = distribution(generator);
-            removees.set(edgeIds[index], false);
+            auto index = i + static_cast<size_t>(generator() % (edgeIds.size() - i));
+            std::swap(edgeIds[i], edgeIds[index]);
+            removees.set(edgeIds[i], false);
         }
 
         setProgress(static_cast<int>((progress++ * 100u) /
