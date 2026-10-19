@@ -23,6 +23,17 @@ if(NOT EMSCRIPTEN)
     add_subdirectory(source/updater/editor)
 endif()
 
+if(NOT EMSCRIPTEN)
+    option(GRAPHIA_BUILD_TESTS "Build the unit tests" ON)
+else()
+    set(GRAPHIA_BUILD_TESTS OFF)
+endif()
+
+if(GRAPHIA_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(source/tests)
+endif()
+
 # The following sections are only here so that the files are available
 # for selection/editing in the IDE (if it supports it); nothing is
 # actually built

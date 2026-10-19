@@ -197,7 +197,6 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/loading/pairwisesaver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/nativesaver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/saverfactory.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/main.cpp
     ${CMAKE_CURRENT_LIST_DIR}/maths/boundingbox.cpp
     ${CMAKE_CURRENT_LIST_DIR}/maths/boundingsphere.cpp
     ${CMAKE_CURRENT_LIST_DIR}/maths/conicalfrustum.cpp
@@ -292,6 +291,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 list(APPEND SOURCES ${APP_SOURCES})
 
+# Everything except main() is built as an object library, so that the unit tests
+# can link against the same code as the application
+add_library(appcore OBJECT ${SOURCES} ${HEADERS})
+
 if(APPLE)
     set(MACOSX_BUNDLE_ICON_FILE Icon.icns)
     set(MACOSX_BUNDLE_GUI_IDENTIFIER app.graphia.${PROJECT_NAME})
@@ -308,16 +311,16 @@ if(APPLE)
     set(ICON ${CMAKE_CURRENT_LIST_DIR}/icon/Icon.icns)
     set_source_files_properties(${ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 
-    qt_add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${RESOURCES} ${ICON})
+    qt_add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${CMAKE_CURRENT_LIST_DIR}/main.cpp ${RESOURCES} ${ICON})
 
     set_target_properties(${PROJECT_NAME} PROPERTIES
         MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/misc/MacOSXBundleInfo.plist.in)
 elseif(MSVC)
     set(ICON ${CMAKE_CURRENT_LIST_DIR}/icon/Icon.rc)
 
-    qt_add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${HEADERS} ${RESOURCES} ${ICON})
+    qt_add_executable(${PROJECT_NAME} WIN32 ${CMAKE_CURRENT_LIST_DIR}/main.cpp ${RESOURCES} ${ICON})
 else()
-    qt_add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${RESOURCES})
+    qt_add_executable(${PROJECT_NAME} ${CMAKE_CURRENT_LIST_DIR}/main.cpp ${RESOURCES})
     install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
 
     foreach(RESOLUTION 1024x1024 512x512 256x256 128x128 64x64 48x48 32x32 16x16)
@@ -355,10 +358,10 @@ elseif(MSVC)
 endif()
 
 add_subdirectory(ui/qml/Graphia)
-target_link_libraries(${PROJECT_NAME} PRIVATE main_qmlplugin controls_qmlplugin loading_qmlplugin plugins_qmlplugin utils_qmlplugin)
+target_link_libraries(appcore PUBLIC main_qmlplugin controls_qmlplugin loading_qmlplugin plugins_qmlplugin utils_qmlplugin)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE shared sharedtypes_qmlplugin)
-target_link_libraries(${PROJECT_NAME} PRIVATE thirdparty_static thirdparty)
+target_link_libraries(appcore PUBLIC shared sharedtypes_qmlplugin)
+target_link_libraries(appcore PUBLIC thirdparty_static thirdparty)
 
 if(LINK_TYPE STREQUAL STATIC)
     # Link with all of the available plugins in the static build case
@@ -366,12 +369,12 @@ if(LINK_TYPE STREQUAL STATIC)
 
     foreach(PLUGIN_DIRECTORY IN LISTS PLUGIN_DIRECTORIES)
         get_property(PLUGIN_TARGET DIRECTORY "${PLUGIN_DIRECTORY}" PROPERTY BUILDSYSTEM_TARGETS)
-        target_link_libraries(${PROJECT_NAME} PRIVATE ${PLUGIN_TARGET})
+        target_link_libraries(appcore PUBLIC ${PLUGIN_TARGET})
     endforeach()
 endif()
 
 find_package(Qt6 REQUIRED COMPONENTS Concurrent Core Qml Quick QuickControls2 OpenGL Svg Widgets Xml Network)
-target_link_libraries(${PROJECT_NAME} PRIVATE
+target_link_libraries(appcore PUBLIC
     Qt6::Core
     Qt6::Concurrent
     Qt6::Qml
@@ -386,14 +389,16 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 
 if(NOT EMSCRIPTEN)
     find_package(Qt6 REQUIRED COMPONENTS WebEngineQuick)
-    target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::WebEngineQuick)
+    target_link_libraries(appcore PUBLIC Qt6::WebEngineQuick)
 endif()
 
 find_package(OpenGL REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE ${OPENGL_gl_LIBRARY})
+target_link_libraries(appcore PUBLIC ${OPENGL_gl_LIBRARY})
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
+target_link_libraries(appcore PUBLIC Threads::Threads)
 
 add_definitions(-DQCUSTOMPLOT_USE_LIBRARY)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE appcore)
