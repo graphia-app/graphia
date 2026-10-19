@@ -259,6 +259,10 @@ private slots:
             QStringList{u"A"_s, u"B"_s} << QStringList{u"A-B"_s} <<
             QStringList{u"kind|A|protein"_s, u"interaction|A|B|binds"_s, u"w|A|B|0.5"_s};
 
+        QTest::newRow("CX2 attributes after name") << u"CX"_s <<
+            QByteArray(R"([{"CXVersion":"2.0"},{"nodes":[{"id":1,"v":{"n":"A","score":2}}]}])") <<
+            QStringList{u"A"_s} << QStringList{} << QStringList{u"score|A|2"_s};
+
         // Adjacency matrices; an edge is created from each row's node to each column's node
         QTest::newRow("Matrix") << u"MatrixCSV"_s << QByteArray("0,2\n-3,0\n") <<
             QStringList{u"Node 1"_s, u"Node 2"_s} << QStringList{u"Node 1-Node 2"_s, u"Node 2-Node 1"_s} <<
