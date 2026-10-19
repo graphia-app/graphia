@@ -423,6 +423,14 @@ private slots:
             {3.0, 5.83333333, 4.66666667}, {4.66666667, 3.0, 5.83333333}
         };
 
+        // Tied values are given the mean of the values for the ranks they span
+        QTest::newRow("Quantile ties") << u"Quantile"_s <<
+            Rows{{0.0, 4.0, 3.0}, {0.0, 1.0, 4.0}, {0.0, 4.0, 6.0}, {5.0, 2.0, 8.0}} << Rows
+        {
+            {2.22222222, 4.5, 1.33333333}, {2.22222222, 1.33333333, 2.0},
+            {2.22222222, 4.5, 3.33333333}, {5.66666667, 2.0, 5.66666667}
+        };
+
         for(const auto* normaliser : {"MinMax", "Mean", "Standardisation", "UnitScaling", "Quantile", "Softmax"})
             QTest::addRow("%s empty", normaliser) << QString::fromLatin1(normaliser) << Rows{} << Rows{};
     }
