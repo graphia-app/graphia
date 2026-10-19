@@ -29,10 +29,12 @@ static TypeIdentity::Type typeOf(const QString& value)
 
     bool conversionSucceeded = false;
 
-    auto intValue = value.toLongLong(&conversionSucceeded);
+    auto intValue = value.toInt(&conversionSucceeded);
     Q_UNUSED(intValue); // Keep cppcheck happy
     if(conversionSucceeded)
         return TypeIdentity::Type::Int;
+
+    // Values that are too large for an int fallthrough and are treated as floats
 
     auto doubleValue = value.toDouble(&conversionSucceeded);
     Q_UNUSED(doubleValue); // Keep cppcheck happy
