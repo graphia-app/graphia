@@ -303,6 +303,69 @@ public:
         return attribute.numericValueOf(edgeId(from, to));
     }
 
+    // A description of the graph and every attribute value, in full, for checking that a change
+    // and its reversal leave everything exactly as it was
+    QStringList state()
+    {
+        using namespace Qt::Literals::StringLiterals;
+
+        QStringList state;
+        const auto& mutableGraph = _graphModel.mutableGraph();
+
+        state.reserve(static_cast<qsizetype>(mutableGraph.nodeIds().size()));
+        for(auto nodeId : mutableGraph.nodeIds())
+            state.append(u"Node %1 %2"_s.arg(static_cast<int>(nodeId)).arg(_graphModel.nodeName(nodeId)));
+
+        for(auto edgeId : mutableGraph.edgeIds())
+        {
+            const auto& edge = mutableGraph.edgeById(edgeId);
+            state.append(u"Edge %1 %2-%3"_s.arg(static_cast<int>(edgeId))
+                .arg(static_cast<int>(edge.sourceId())).arg(static_cast<int>(edge.targetId())));
+        }
+
+        auto valueOf = [](const IAttribute& attribute, auto elementId)
+        {
+            if(attribute.valueMissingOf(elementId))
+                return u"<missing>"_s;
+
+            if(attribute.valueType() == ValueType::Float)
+                return QString::number(attribute.floatValueOf(elementId), 'g', 17);
+
+            return attribute.stringValueOf(elementId);
+        };
+
+        for(const auto& attributeName : _graphModel.attributeNames())
+        {
+            const auto* attribute = _graphModel.attributeByName(attributeName);
+            if(attribute->hasParameter())
+                continue;
+
+            state.append(u"Attribute %1 %2 %3"_s.arg(attributeName)
+                .arg(static_cast<int>(attribute->valueType())).arg(attribute->description()));
+
+            if(attribute->elementType() == ElementType::Node)
+            {
+                for(auto nodeId : graph().nodeIds())
+                    state.append(u"  %1 %2"_s.arg(static_cast<int>(nodeId)).arg(valueOf(*attribute, nodeId)));
+            }
+            else if(attribute->elementType() == ElementType::Edge)
+            {
+                for(auto edgeId : graph().edgeIds())
+                    state.append(u"  %1 %2"_s.arg(static_cast<int>(edgeId)).arg(valueOf(*attribute, edgeId)));
+            }
+        }
+
+        state.reserve(state.size() + static_cast<qsizetype>(_graphModel.userNodeData().vectorNames().size()));
+        for(const auto& vectorName : _graphModel.userNodeData().vectorNames())
+            state.append(u"Node data %1"_s.arg(vectorName));
+
+        state.reserve(state.size() + static_cast<qsizetype>(_graphModel.userEdgeData().vectorNames().size()));
+        for(const auto& vectorName : _graphModel.userEdgeData().vectorNames())
+            state.append(u"Edge data %1"_s.arg(vectorName));
+
+        return state;
+    }
+
     // The nodes grouped by their value of the given attribute, ignoring what the values
     // actually are, e.g. for comparing clusterings where the cluster names are arbitrary
     QStringList nodePartition(const QString& attributeName) const

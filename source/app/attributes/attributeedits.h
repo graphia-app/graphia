@@ -40,6 +40,9 @@ private:
 public:
     auto nodeValues() const { return _nodeValues; }
     auto edgeValues() const { return _edgeValues; }
+
+    void setNodeValue(NodeId nodeId, const QString& value) { _nodeValues[nodeId] = value; }
+    void setEdgeValue(EdgeId edgeId, const QString& value) { _edgeValues[edgeId] = value; }
 };
 
 #endif // ATTRIBUTEEDITS_H
