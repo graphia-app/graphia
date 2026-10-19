@@ -69,8 +69,10 @@ double EnrichmentCalculator::fishers(size_t a, size_t b, size_t c, size_t d)
     const double lm = (ac < cd) ? 0.0 : ac - cd;
     const double um = (ac < ab) ? ac  : ab;
 
-    // Fisher's exact test
-    const double crit = hyperGeometricProb(static_cast<double>(a), ab, cd, ac, bd);
+    // Fisher's exact test; tables with the same probability as the observed table are
+    // included, but rounding errors may make their probabilities appear slightly greater,
+    // so a little relative tolerance is allowed for, as in R's fisher.test
+    const double crit = hyperGeometricProb(static_cast<double>(a), ab, cd, ac, bd) * (1.0 + 1e-7);
 
     for(auto x = static_cast<int>(lm); x <= static_cast<int>(um); x++)
     {
@@ -80,7 +82,8 @@ double EnrichmentCalculator::fishers(size_t a, size_t b, size_t c, size_t d)
             twoPval += prob;
     }
 
-    return twoPval;
+    // The sum may be slightly over 1, again due to rounding errors
+    return std::min(twoPval, 1.0);
 }
 
 EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(
