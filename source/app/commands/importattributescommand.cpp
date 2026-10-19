@@ -169,7 +169,7 @@ bool ImportAttributesCommand::execute()
     else if(keyAttribute->elementType() == ElementType::Edge)
         _createdAttributeNames = createAttributes(_graphModel->mutableGraph().edgeIds());
 
-    return !_createdAttributeNames.empty();
+    return !_createdAttributeNames.empty() || !_replacedUserDataVectors.empty();
 }
 
 void ImportAttributesCommand::undo()
