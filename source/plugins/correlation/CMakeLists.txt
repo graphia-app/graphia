@@ -26,6 +26,7 @@ list(APPEND CORE_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/correlation.cpp
     ${CMAKE_CURRENT_LIST_DIR}/correlationdatavector.cpp
     ${CMAKE_CURRENT_LIST_DIR}/featurescaling.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/loading/correlationpreprocessing.cpp
     ${CMAKE_CURRENT_LIST_DIR}/quantilenormaliser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/softmaxnormaliser.cpp
 )
