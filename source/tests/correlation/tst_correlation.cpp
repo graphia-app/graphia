@@ -24,13 +24,16 @@
 #include "plugins/correlation/correlationtype.h"
 #include "plugins/correlation/featurescaling.h"
 #include "plugins/correlation/knnprotograph.h"
+#include "plugins/correlation/loading/correlationfileparser.h"
 #include "plugins/correlation/quantilenormaliser.h"
 #include "plugins/correlation/softmaxnormaliser.h"
 
 #include "shared/graph/edgelist.h"
+#include "shared/loading/tabulardata.h"
 
 #include <QTest>
 #include <QList>
+#include <QRect>
 #include <QString>
 #include <QStringList>
 #include <QVariantMap>
@@ -38,6 +41,7 @@
 #include <cmath>
 #include <map>
 #include <memory>
+#include <numbers>
 #include <utility>
 #include <vector>
 
@@ -377,6 +381,123 @@ private slots:
 
         // 2 has no positive correlations; 3 is most strongly correlated with 1
         QCOMPARE(pairsOf(correlation->edgeList(vectors, parameters)), (QStringList{u"0-1"_s, u"1-3"_s}));
+    }
+
+    void scaleValue_data()
+    {
+        QTest::addColumn<int>("scalingType");
+        QTest::addColumn<double>("value");
+        QTest::addColumn<double>("expected");
+
+        QTest::newRow("None") << static_cast<int>(ScalingType::None) << 5.0 << 5.0;
+        QTest::newRow("Log2") << static_cast<int>(ScalingType::Log2) << 8.0 << 3.0;
+        QTest::newRow("Log10") << static_cast<int>(ScalingType::Log10) << 100.0 << 2.0;
+        QTest::newRow("AntiLog2") << static_cast<int>(ScalingType::AntiLog2) << 3.0 << 8.0;
+        QTest::newRow("AntiLog10") << static_cast<int>(ScalingType::AntiLog10) << 2.0 << 100.0;
+        QTest::newRow("ArcSin") << static_cast<int>(ScalingType::ArcSin) << 1.0 << std::numbers::pi / 2.0;
+    }
+
+    void scaleValue()
+    {
+        QFETCH(const int, scalingType);
+        QFETCH(const double, value);
+        QFETCH(const double, expected);
+
+        QVERIFY(fuzzyEqual(CorrelationFileParser::scaleValue(static_cast<ScalingType>(scalingType), value), expected));
+    }
+
+    void logScalingZero()
+    {
+        const std::vector<double> data = {0.0, 4.0, 2.0, -1.0};
+
+        // Half the smallest positive value is added to each value, so that zero can be log scaled
+        auto epsilon = CorrelationFileParser::epsilonFor(data);
+        QCOMPARE(epsilon, 1.0);
+        QCOMPARE(CorrelationFileParser::scaleValue(ScalingType::Log2, 0.0, epsilon), 0.0);
+
+        QCOMPARE(CorrelationFileParser::epsilonFor({}), std::nextafter(0.0, 1.0));
+    }
+
+    void clipValues_data()
+    {
+        QTest::addColumn<int>("clippingType");
+        QTest::addColumn<double>("clippingValue");
+        QTest::addColumn<QList<double>>("expected");
+
+        // Rows of 5 values: 1, 2, 3, 4, 100 and 50, 40, 30, 20, 10
+        QTest::newRow("None") << static_cast<int>(ClippingType::None) << 4.0 <<
+            QList<double>{1.0, 2.0, 3.0, 4.0, 100.0, 50.0, 40.0, 30.0, 20.0, 10.0};
+        QTest::newRow("Constant") << static_cast<int>(ClippingType::Constant) << 35.0 <<
+            QList<double>{1.0, 2.0, 3.0, 4.0, 35.0, 35.0, 35.0, 30.0, 20.0, 10.0};
+
+        // Per row, values above the given percentile are replaced by the value at it
+        QTest::newRow("Winsorization") << static_cast<int>(ClippingType::Winsorization) << 75.0 <<
+            QList<double>{1.0, 2.0, 3.0, 4.0, 4.0, 40.0, 40.0, 30.0, 20.0, 10.0};
+        QTest::newRow("Winsorization 100") << static_cast<int>(ClippingType::Winsorization) << 100.0 <<
+            QList<double>{1.0, 2.0, 3.0, 4.0, 100.0, 50.0, 40.0, 30.0, 20.0, 10.0};
+    }
+
+    void clipValues()
+    {
+        QFETCH(const int, clippingType);
+        QFETCH(const double, clippingValue);
+        QFETCH(const QList<double>, expected);
+
+        std::vector<double> data = {1.0, 2.0, 3.0, 4.0, 100.0, 50.0, 40.0, 30.0, 20.0, 10.0};
+        CorrelationFileParser::clipValues(static_cast<ClippingType>(clippingType), clippingValue, 5, data);
+
+        QCOMPARE(QList<double>(data.begin(), data.end()), expected);
+    }
+
+    void imputeValue_data()
+    {
+        QTest::addColumn<int>("missingDataType");
+        QTest::addColumn<int>("column");
+        QTest::addColumn<int>("row");
+        QTest::addColumn<double>("expected");
+
+        // See imputeValue for the data
+        QTest::newRow("Constant") << static_cast<int>(MissingDataType::Constant) << 2 << 1 << 9.0;
+
+        QTest::newRow("Interpolation") << static_cast<int>(MissingDataType::RowInterpolation) << 2 << 1 << 3.0;
+        QTest::newRow("Interpolation 2") << static_cast<int>(MissingDataType::RowInterpolation) << 3 << 1 << 5.0;
+        QTest::newRow("Interpolation right only") << static_cast<int>(MissingDataType::RowInterpolation) << 1 << 2 << 4.0;
+        QTest::newRow("Interpolation left only") << static_cast<int>(MissingDataType::RowInterpolation) << 4 << 4 << 7.0;
+    }
+
+    void imputeValue()
+    {
+        QFETCH(const int, missingDataType);
+        QFETCH(const int, column);
+        QFETCH(const int, row);
+        QFETCH(const double, expected);
+
+        const QList<QStringList> rows =
+        {
+            {u"Name"_s, u"S1"_s, u"S2"_s, u"S3"_s, u"S4"_s},
+            {u"a"_s,    u"1"_s,  u""_s,   u""_s,   u"7"_s},
+            {u"b"_s,    u""_s,   u"4"_s,  u"8"_s,  u"2"_s},
+            {u"c"_s,    u"5"_s,  u"6"_s,  u""_s,   u"1"_s},
+            {u"d"_s,    u"7"_s,  u""_s,   u""_s,   u""_s},
+            {u"e"_s,    u"3"_s,  u"3"_s,  u"3"_s,  u"3"_s},
+        };
+
+        TabularData tabularData;
+        for(size_t r = 0; const auto& rowValues : rows)
+        {
+            for(size_t c = 0; const auto& value : rowValues)
+                tabularData.setValueAt(c++, r, value);
+
+            r++;
+        }
+
+        // The data is 4 columns by 5 rows
+        const QRect dataRect(1, 1, 4, 5);
+        QVERIFY(tabularData.valueAt(static_cast<size_t>(column), static_cast<size_t>(row)).isEmpty());
+
+        auto actual = CorrelationFileParser::imputeValue(static_cast<MissingDataType>(missingDataType), 9.0,
+            tabularData, dataRect, static_cast<size_t>(column), static_cast<size_t>(row));
+        QVERIFY2(fuzzyEqual(actual, expected), qPrintable(u"%1 != %2"_s.arg(actual).arg(expected)));
     }
 
     void normalise_data()
