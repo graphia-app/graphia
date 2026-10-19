@@ -44,6 +44,7 @@ static bool calcStandardValues(const ContinuousDataVectors& dataRows,
         return true;
 
     auto numColumns = dataRows.at(0).size();
+    auto numRows = static_cast<double>(dataRows.size());
 
     if(values.mins != nullptr)
         values.mins->resize(numColumns, std::numeric_limits<double>::max());
@@ -78,7 +79,7 @@ static bool calcStandardValues(const ContinuousDataVectors& dataRows,
                 (*values.maxs)[column] = std::max((*values.maxs)[column], value);
 
             if(values.means != nullptr)
-                (*values.means)[column] += (value / static_cast<double>(numColumns));
+                (*values.means)[column] += (value / numRows);
         }
 
         if(parser != nullptr)
@@ -106,7 +107,7 @@ static bool calcStandardValues(const ContinuousDataVectors& dataRows,
             {
                 auto deviation = dataRow.valueAt(column) - (*values.means)[column];
                 deviation *= deviation;
-                (*values.stddevs)[column] += (deviation / static_cast<double>(numColumns));
+                (*values.stddevs)[column] += (deviation / numRows);
             }
 
             if(parser != nullptr)
