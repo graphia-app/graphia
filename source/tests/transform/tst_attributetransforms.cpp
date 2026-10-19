@@ -264,6 +264,19 @@ private slots:
         QCOMPARE(model->nodeNumericValue(u"MeanScoreOfGroup"_s, u"d"_s), 15.0);
     }
 
+    void averageAttributeWithEmptyValues()
+    {
+        auto model = createPathGraph();
+        model->addNodeAttribute<QString>(u"Partial Group"_s,
+            {{u"a"_s, u"X"_s}, {u"b"_s, u"X"_s}, {u"c"_s, u""_s}, {u"d"_s, u"Y"_s}});
+
+        QCOMPARE(model->applyTransforms({uR"(AverageAttribute using $"Partial Group" $Score)"_s}), QStringList{});
+
+        QCOMPARE(model->nodeNumericValue(u"MeanScoreOfPartialGroup"_s, u"a"_s), 2.0);
+        QVERIFY(!model->nodeHasValue(u"MeanScoreOfPartialGroup"_s, u"c"_s));
+        QCOMPARE(model->nodeNumericValue(u"MeanScoreOfPartialGroup"_s, u"d"_s), 20.0);
+    }
+
     void combineAttributes_data()
     {
         QTest::addColumn<QString>("transform");

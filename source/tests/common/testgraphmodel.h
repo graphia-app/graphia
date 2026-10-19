@@ -195,6 +195,12 @@ public:
         return attribute.stringValueOf(nodeId(nodeName));
     }
 
+    bool nodeHasValue(const QString& attributeName, const QString& nodeName) const
+    {
+        auto attribute = _graphModel.attributeValueByName(attributeName);
+        return !attribute.valueMissingOf(nodeId(nodeName));
+    }
+
     double nodeNumericValue(const QString& attributeName, const QString& nodeName) const
     {
         auto attribute = _graphModel.attributeValueByName(attributeName);
