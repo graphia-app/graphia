@@ -445,6 +445,30 @@ private slots:
             qPrintable(u"%1 != %2"_s.arg(actual, 0, 'g', 10).arg(expected, 0, 'g', 10)));
     }
 
+    void syntaxErrorLocation_data()
+    {
+        QTest::addColumn<QString>("format");
+        QTest::addColumn<QByteArray>("content");
+        QTest::addColumn<QString>("expected");
+
+        // The values are missing at the closing ]
+        QTest::newRow("GML") << u"GML"_s << QByteArray("graph [\n  node [ id 1 x ]\n]") <<
+            u"The file is malformed at line 2, column 17."_s;
+        QTest::newRow("DOT") << u"DOT"_s << QByteArray("digraph {\n  a -> ;\n}") <<
+            u"The file is malformed at line 2, column 8."_s;
+    }
+
+    void syntaxErrorLocation()
+    {
+        QFETCH(const QString, format);
+        QFETCH(const QByteArray, content);
+        QFETCH(const QString, expected);
+
+        QString failureReason;
+        QVERIFY(::parse(format, content, &failureReason) == nullptr);
+        QCOMPARE(failureReason, expected);
+    }
+
     void parseFailure_data()
     {
         QTest::addColumn<QString>("format");
@@ -511,7 +535,9 @@ private slots:
         QFETCH(const QString, format);
         QFETCH(const QByteArray, content);
 
-        QVERIFY(::parse(format, content) == nullptr);
+        QString failureReason;
+        QVERIFY(::parse(format, content, &failureReason) == nullptr);
+        QVERIFY(!failureReason.isEmpty());
     }
 };
 
