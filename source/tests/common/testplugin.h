@@ -47,7 +47,7 @@ public:
     std::unique_ptr<IPluginInstance> createInstance() override { return nullptr; }
 };
 
-// A minimal plugin instance, which saves nothing, and records the data it's given to load
+// A minimal plugin instance, which records the data it's given to load, and saves the same data
 class TestPluginInstance : public IPluginInstance
 {
 private:
@@ -66,7 +66,7 @@ public:
     QStringList defaultTransforms() const override { return {}; }
     QStringList defaultVisualisations() const override { return {}; }
 
-    QByteArray save(IMutableGraph&, Progressable&) const override { return {}; }
+    QByteArray save(IMutableGraph&, Progressable&) const override { return _loadedData; }
     bool load(const QByteArray& data, int dataVersion, IMutableGraph&, IParser&) override
     {
         _loadedData = data;

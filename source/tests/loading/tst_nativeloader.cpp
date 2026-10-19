@@ -21,6 +21,7 @@
 #include "tests/common/testgraphmodel.h"
 #include "tests/common/testplugin.h"
 
+#include "app/attributes/enrichmenttablemodel.h"
 #include "app/layout/nodepositions.h"
 #include "app/loading/nativeloader.h"
 #include "app/loading/nativesaver.h"
@@ -174,10 +175,18 @@ json body(int version)
     body["bookmarks"] = {{"Ends", {0, 2}}};
     body["log"] = "Log text";
     json enrichmentTable;
-    enrichmentTable["data"] = json::array({json::array({"x", 0.25})});
+    // Selections A and B, observed, expected, over-representation, Fisher's and Bonferroni adjusted
+    enrichmentTable["data"] = json::array({json::array({"x", "y", 3.0, 1.5, 2.0, 0.01, 0.02})});
     enrichmentTable["selectionA"] = "A";
     enrichmentTable["selectionB"] = "B";
     body["enrichmentTables"] = json::array({enrichmentTable});
+
+    if(version >= 5)
+    {
+        body["projection"] = static_cast<int>(Projection::TwoDee);
+        body["2dshading"] = static_cast<int>(Shading::Smooth);
+        body["3dshading"] = static_cast<int>(Shading::Flat);
+    }
 
     body["nodeSize"] = 0.5;
     body["edgeSize"] = 0.25;
@@ -209,6 +218,75 @@ class TestNativeLoader : public QObject
 private:
     TestPlugin _plugin;
 
+    // Checks that the content of body(version) was loaded
+    static void verify(TestGraphModel& model, const TestPluginInstance& pluginInstance, int version)
+    {
+        const auto* loader = model.parser<Loader>();
+        QVERIFY(loader != nullptr);
+
+        QCOMPARE(model.nodeNames(), (QStringList{u"a"_s, u"b"_s, u"c"_s}));
+        QCOMPARE(model.edgeNames(), (QStringList{u"a-b"_s, u"b-c"_s}));
+
+        QCOMPARE(model.nodeValue(u"Type"_s, u"b"_s), u"y"_s);
+        QCOMPARE(model.edgeNumericValue(u"Weight"_s, u"b"_s, u"c"_s), 2.0);
+
+        QVERIFY(loader->nodePositions() != nullptr);
+        QCOMPARE(loader->nodePositions()->get(model.nodeId(u"b"_s)), PositionOfB);
+        QCOMPARE(loader->layoutName(), u"ForceDirected"_s);
+        QCOMPARE(loader->layoutSettings().size(), 1);
+        QCOMPARE(loader->layoutSettings().at(0)._name, u"ShortRangeRepulseTerm"_s);
+        QCOMPARE(loader->layoutSettings().at(0)._value, 2.5F);
+        QVERIFY(loader->layoutPaused());
+
+        if(version >= 5)
+        {
+            QCOMPARE(loader->projection(), Projection::TwoDee);
+            QCOMPARE(loader->shading(), Shading::Flat);
+        }
+
+        if(version >= 9)
+        {
+            QCOMPARE(loader->transforms(), QStringList{u"RemoveLeaves where $NodeDegree < 1"_s});
+            QCOMPARE(loader->visualisations(), QStringList{u"NodeDegree Size"_s});
+        }
+        else
+        {
+            // Older names are upgraded where they are, keeping their quotes
+            QCOMPARE(loader->transforms(), QStringList{uR"("RemoveLeaves" where $"NodeDegree" < 1)"_s});
+            QCOMPARE(loader->visualisations(), QStringList{uR"("NodeDegree" "Size")"_s});
+        }
+
+        QCOMPARE(loader->bookmarks().size(), 1);
+        QCOMPARE(loader->bookmarks().at(u"Ends"_s),
+            (NodeIdSet{model.nodeId(u"a"_s), model.nodeId(u"c"_s)}));
+
+        QCOMPARE(loader->log(), u"Log text"_s);
+
+        QCOMPARE(loader->enrichmentTableData().size(), 1);
+        const auto& enrichmentTable = loader->enrichmentTableData().at(0);
+        QCOMPARE(enrichmentTable._table.size(), 1);
+        QCOMPARE(enrichmentTable._table.at(0), (EnrichmentTableModel::Row{u"x"_s, u"y"_s, 3.0, 1.5, 2.0, 0.01, 0.02}));
+        QCOMPARE(enrichmentTable._selectionA, u"A"_s);
+        QCOMPARE(enrichmentTable._selectionB, u"B"_s);
+
+        QCOMPARE(model.graphModel().nodeSize(), 0.5F);
+        QCOMPARE(model.graphModel().edgeSize(), 0.25F);
+        QCOMPARE(model.graphModel().textSize(), 0.75F);
+
+        if(version >= 2)
+            QCOMPARE(jsonString(json::parse(loader->uiData())), jsonString(json({{"uiKey", "uiValue"}})));
+        else
+            QVERIFY(loader->uiData().isEmpty());
+
+        QCOMPARE(jsonString(json::parse(loader->pluginUiData())),
+            jsonString(json({{"pluginUiKey", "pluginUiValue"}})));
+        QCOMPARE(loader->pluginUiDataVersion(), 1);
+
+        QCOMPARE(jsonString(json::parse(pluginInstance.loadedData())["pluginKey"]),
+            jsonString("pluginValue"));
+        QCOMPARE(pluginInstance.loadedDataVersion(), 1);
+    }
+
 private slots:
     void initTestCase()
     {
@@ -225,7 +303,20 @@ private slots:
 
     void versions()
     {
-        QFETCH(int, version);
+        QFETCH(const int, version);
+
+        TestPluginInstance pluginInstance(&_plugin);
+        QString failureReason;
+        auto model = load(nativeFile(header(version), body(version)), pluginInstance, &failureReason);
+        QVERIFY2(model != nullptr, qPrintable(failureReason));
+
+        verify(*model, pluginInstance, version);
+    }
+
+    // Saving what was loaded, then loading it again, must give the same result
+    void saveAndLoad()
+    {
+        const auto version = NativeSaver::Version;
 
         TestPluginInstance pluginInstance(&_plugin);
         QString failureReason;
@@ -233,63 +324,43 @@ private slots:
         QVERIFY2(model != nullptr, qPrintable(failureReason));
 
         const auto* loader = model->parser<Loader>();
-        QVERIFY(loader != nullptr);
 
-        QCOMPARE(model->nodeNames(), (QStringList{u"a"_s, u"b"_s, u"c"_s}));
-        QCOMPARE(model->edgeNames(), (QStringList{u"a-b"_s, u"b-c"_s}));
+        // Use the loaded state, as Document does
+        NodeLayoutPositions nodePositions(model->graphModel().mutableGraph());
+        for(auto nodeId : model->graphModel().mutableGraph().nodeIds())
+            nodePositions.set(nodeId, loader->nodePositions()->get(nodeId));
 
-        QCOMPARE(model->nodeValue(u"Type"_s, u"b"_s), u"y"_s);
-        QCOMPARE(model->edgeNumericValue(u"Weight"_s, u"b"_s, u"c"_s), 2.0);
+        model->graphModel().nodePositions().update(nodePositions);
 
-        QVERIFY(loader->nodePositions() != nullptr);
-        QCOMPARE(loader->nodePositions()->get(model->nodeId(u"b"_s)), PositionOfB);
-        QCOMPARE(loader->layoutName(), u"ForceDirected"_s);
-        QCOMPARE(loader->layoutSettings().size(), 1);
-        QCOMPARE(loader->layoutSettings().at(0)._name, u"ShortRangeRepulseTerm"_s);
-        QCOMPARE(loader->layoutSettings().at(0)._value, 2.5F);
-        QVERIFY(loader->layoutPaused());
+        EnrichmentTableModel enrichmentTableModel;
+        const auto& enrichmentTableData = loader->enrichmentTableData().at(0);
+        enrichmentTableModel.setTableData(enrichmentTableData._table,
+            enrichmentTableData._selectionA, enrichmentTableData._selectionB);
 
-        if(version >= 9)
-        {
-            QCOMPARE(loader->transforms(), QStringList{u"RemoveLeaves where $NodeDegree < 1"_s});
-            QCOMPARE(loader->visualisations(), QStringList{u"NodeDegree Size"_s});
-        }
-        else
-        {
-            // Older names are upgraded where they are, keeping their quotes
-            QCOMPARE(loader->transforms(), QStringList{uR"("RemoveLeaves" where $"NodeDegree" < 1)"_s});
-            QCOMPARE(loader->visualisations(), QStringList{uR"("NodeDegree" "Size")"_s});
-        }
+        NativeSaver::Content content;
+        content._layoutName = loader->layoutName();
+        content._layoutSettings = loader->layoutSettings();
+        content._layoutPaused = loader->layoutPaused();
+        content._projection = static_cast<int>(loader->projection());
+        content._shading3D = static_cast<int>(loader->shading());
+        content._transforms = loader->transforms();
+        content._visualisations = loader->visualisations();
+        content._bookmarks = loader->bookmarks();
+        content._log = loader->log();
+        content._enrichmentTableModels = {&enrichmentTableModel};
 
-        QCOMPARE(loader->bookmarks().size(), 1);
-        QCOMPARE(loader->bookmarks().at(u"Ends"_s),
-            (NodeIdSet{model->nodeId(u"a"_s), model->nodeId(u"c"_s)}));
+        const QTemporaryDir dir;
+        auto fileName = dir.filePath(u"saved"_s);
 
-        QCOMPARE(loader->log(), u"Log text"_s);
+        NativeSaver saver(QUrl::fromLocalFile(fileName), &model->graphModel(), content,
+            &pluginInstance, loader->uiData(), loader->pluginUiData());
+        QVERIFY(saver.save());
 
-        QCOMPARE(loader->enrichmentTableData().size(), 1);
-        const auto& enrichmentTable = loader->enrichmentTableData().at(0);
-        QCOMPARE(enrichmentTable._table.size(), 1);
-        QCOMPARE(enrichmentTable._table.at(0), (EnrichmentTableModel::Row{u"x"_s, 0.25}));
-        QCOMPARE(enrichmentTable._selectionA, u"A"_s);
-        QCOMPARE(enrichmentTable._selectionB, u"B"_s);
+        TestPluginInstance reloadedPluginInstance(&_plugin);
+        auto reloaded = load(readFile(fileName), reloadedPluginInstance, &failureReason);
+        QVERIFY2(reloaded != nullptr, qPrintable(failureReason));
 
-        QCOMPARE(model->graphModel().nodeSize(), 0.5F);
-        QCOMPARE(model->graphModel().edgeSize(), 0.25F);
-        QCOMPARE(model->graphModel().textSize(), 0.75F);
-
-        if(version >= 2)
-            QCOMPARE(jsonString(json::parse(loader->uiData())), jsonString(json({{"uiKey", "uiValue"}})));
-        else
-            QVERIFY(loader->uiData().isEmpty());
-
-        QCOMPARE(jsonString(json::parse(loader->pluginUiData())),
-            jsonString(json({{"pluginUiKey", "pluginUiValue"}})));
-        QCOMPARE(loader->pluginUiDataVersion(), 1);
-
-        QCOMPARE(jsonString(json::parse(pluginInstance.loadedData())["pluginKey"]),
-            jsonString("pluginValue"));
-        QCOMPARE(pluginInstance.loadedDataVersion(), 1);
+        verify(*reloaded, reloadedPluginInstance, version);
     }
 
     // A file saved by a release of the application, with gzip compression
