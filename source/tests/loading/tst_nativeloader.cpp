@@ -176,7 +176,8 @@ json body(int version)
     body["log"] = "Log text";
     json enrichmentTable;
     // Selections A and B, observed, expected, over-representation, Fisher's and Bonferroni adjusted
-    enrichmentTable["data"] = json::array({json::array({"x", "y", 3.0, 1.5, 2.0, 0.01, 0.02})});
+    enrichmentTable["data"] = json::array({json::array({"x", "y", 3.0, 1.5, 2.0, 0.01, 0.02}),
+        json::array({"x", "z", 1.0, 2.0, 0.5, 0.9, 1.0})});
     enrichmentTable["selectionA"] = "A";
     enrichmentTable["selectionB"] = "B";
     body["enrichmentTables"] = json::array({enrichmentTable});
@@ -265,8 +266,9 @@ private:
 
         QCOMPARE(loader->enrichmentTableData().size(), 1);
         const auto& enrichmentTable = loader->enrichmentTableData().at(0);
-        QCOMPARE(enrichmentTable._table.size(), 1);
+        QCOMPARE(enrichmentTable._table.size(), 2);
         QCOMPARE(enrichmentTable._table.at(0), (EnrichmentTableModel::Row{u"x"_s, u"y"_s, 3.0, 1.5, 2.0, 0.01, 0.02}));
+        QCOMPARE(enrichmentTable._table.at(1), (EnrichmentTableModel::Row{u"x"_s, u"z"_s, 1.0, 2.0, 0.5, 0.9, 1.0}));
         QCOMPARE(enrichmentTable._selectionA, u"A"_s);
         QCOMPARE(enrichmentTable._selectionB, u"B"_s);
 
