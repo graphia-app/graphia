@@ -192,6 +192,12 @@ private slots:
             QStringList{u"n0-n1"_s, u"n1-n2"_s, u"n2-n2"_s} <<
             QStringList{u"color|n0|green"_s, u"color|n2|blue"_s, u"weight|n0|n1|1.5"_s, u"EdgeName|n0|n1|e0"_s};
 
+        QTest::newRow("GraphML split text") << u"GraphML"_s << QByteArray(
+            "<graphml><key id=\"d0\" for=\"node\" attr.name=\"text\"/><graph>"
+            "<node id=\"a\"><data key=\"d0\">x &amp; y<![CDATA[ <z>]]><!-- c --> w</data></node>"
+            "</graph></graphml>") <<
+            QStringList{u"a"_s} << QStringList{} << QStringList{u"text|a|x & y <z> w"_s};
+
         // DOT
         QTest::newRow("DOT") << u"DOT"_s << QByteArray(
             "// c\n"
