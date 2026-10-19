@@ -20,6 +20,9 @@
 #ifndef TESTENVIRONMENT_H
 #define TESTENVIRONMENT_H
 
+#include "shared/utils/scopetimer.h"
+#include "shared/utils/threadpool.h"
+
 #include <QCoreApplication>
 #include <QSettings>
 #include <QString>
@@ -27,12 +30,15 @@
 
 namespace TestEnvironment
 {
-// Call from initTestCase in any test that exercises code which reads or writes
-// preferences, so that the user's real settings are left untouched
+// Call from initTestCase in any test that exercises application code; this sets up the
+// singletons main() would otherwise create, and keeps any preferences the code under test
+// reads or writes out of the user's real settings
 inline void initialise()
 {
     using namespace Qt::Literals::StringLiterals;
 
+    static const ThreadPoolSingleton threadPool;
+    static const ScopeTimerManager scopeTimerManager;
     static const QTemporaryDir settingsDir;
 
     QCoreApplication::setOrganizationName(u"GraphiaTests"_s);
