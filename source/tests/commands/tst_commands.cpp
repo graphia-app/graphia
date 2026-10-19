@@ -278,6 +278,26 @@ private slots:
             QCOMPARE(model->nodeNumericValue(u"Extra"_s, u"c"_s), 30.0);
         });
     }
+
+    void importAttributesReplacing()
+    {
+        auto model = createModel();
+        QVERIFY(model != nullptr);
+
+        auto data = tabularData(
+        {
+            {u"Name"_s, u"kind"_s},
+            {u"a"_s, u"p"_s},
+            {u"c"_s, u"q"_s},
+        });
+
+        ImportAttributesCommand command(&model->graphModel(), u"NodeName"_s, &data, 0, {1}, true);
+        checkExecuteUndoRedo(*model, command, [&]
+        {
+            QCOMPARE(model->nodeValue(u"kind"_s, u"a"_s), u"p"_s);
+            QCOMPARE(model->nodeValue(u"kind"_s, u"c"_s), u"q"_s);
+        });
+    }
 };
 
 QTEST_MAIN(TestCommands)
