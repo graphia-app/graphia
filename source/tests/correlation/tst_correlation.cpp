@@ -317,6 +317,9 @@ private slots:
                 u"1-2:0.11"_s, u"1-3:0.12"_s, u"1-4:0.13"_s,
                 u"2-3:0.95"_s, u"2-4:0.96"_s, u"3-4:0.97"_s} <<
             QStringList{u"0-1"_s, u"0-3"_s, u"1-4"_s, u"2-3"_s, u"2-4"_s, u"3-4"_s};
+        QTest::newRow("one sided") << 1 << static_cast<int>(CorrelationPolarity::Positive) <<
+            QStringList{u"0-1:0.9"_s, u"0-2:0.5"_s, u"0-3:0.7"_s, u"1-2:0.6"_s, u"1-3:0.2"_s, u"2-3:0.3"_s} <<
+            QStringList{u"0-1"_s, u"0-3"_s, u"1-2"_s};
     }
 
     void knnProtoGraph()
@@ -353,6 +356,19 @@ private slots:
 
         actual.sort();
         QCOMPARE(actual, expected);
+    }
+
+    void knnCorrelation()
+    {
+        auto correlation = ContinuousCorrelation::create(CorrelationType::Pearson,
+            CorrelationFilterType::Knn);
+
+        auto vectors = dataVectors<ContinuousDataVectors>(continuousRows);
+        auto parameters = thresholdParameters(0.0, CorrelationPolarity::Positive);
+        parameters.insert(u"maximumK"_s, 1);
+
+        // 2 has no positive correlations; 3 is most strongly correlated with 1
+        QCOMPARE(pairsOf(correlation->edgeList(vectors, parameters)), (QStringList{u"0-1"_s, u"1-3"_s}));
     }
 
     void normalise_data()
