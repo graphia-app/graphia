@@ -359,6 +359,9 @@ QString u::escapeQuotes(QString s)
 
 static int numericCompare(const QString& a, const QString& b, Qt::CaseSensitivity cs = Qt::CaseSensitive)
 {
+    if(a.isEmpty() || b.isEmpty())
+        return a.compare(b, cs);
+
     auto tokenise = [](const QStringView& s)
     {
         std::vector<qsizetype> indices;
