@@ -77,6 +77,7 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
     NodeId activeNodeId;
     EdgeId activeEdgeId;
     QString activeKey;
+    QString activeData;
 
     auto processToken = [&](QXmlStreamReader::TokenType tokenType)
     {
@@ -205,12 +206,8 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
             if(activeKey.isEmpty() || _userNodeData == nullptr)
                 break;
 
-            const auto& data = xsr.text().toString();
-
-            if(!activeNodeId.isNull() && u::contains(nodeAttributes, activeKey))
-                _userNodeData->setValueBy(activeNodeId, nodeAttributes.at(activeKey), data);
-            else if(!activeEdgeId.isNull() && u::contains(edgeAttributes, activeKey))
-                _userEdgeData->setValueBy(activeEdgeId, edgeAttributes.at(activeKey), data);
+            // The text may be split, e.g. by entities or CDATA sections
+            activeData += xsr.text();
 
             break;
         }
@@ -246,7 +243,15 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
             else if(elementName == u"edge"_s && !activeEdgeId.isNull())
                 activeEdgeId.setToNull();
             else if(elementName == u"data"_s && !activeKey.isEmpty())
+            {
+                if(!activeNodeId.isNull() && u::contains(nodeAttributes, activeKey))
+                    _userNodeData->setValueBy(activeNodeId, nodeAttributes.at(activeKey), activeData);
+                else if(!activeEdgeId.isNull() && u::contains(edgeAttributes, activeKey))
+                    _userEdgeData->setValueBy(activeEdgeId, edgeAttributes.at(activeKey), activeData);
+
                 activeKey.clear();
+                activeData.clear();
+            }
 
             break;
         }
