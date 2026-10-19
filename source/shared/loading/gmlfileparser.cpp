@@ -32,6 +32,7 @@
 #include <QByteArray>
 #include <QFile>
 #include <QObject>
+#include <QRegularExpression>
 #include <QLocale>
 #include <QString>
 #include <QtGlobal>
@@ -132,6 +133,30 @@ struct Attribute
 
 using AttributeVector = std::vector<Attribute>;
 
+// Strings may contain HTML style character entities, e.g. &amp;, &#233; or &eacute;
+static QString decodeEntities(const QString& string)
+{
+    if(!string.contains(u'&'))
+        return string;
+
+    static const QRegularExpression entityRe(uR"(&(#[0-9]+|#[xX][0-9a-fA-F]+|[a-zA-Z][a-zA-Z0-9]*);)"_s);
+
+    QString decoded;
+    qsizetype position = 0;
+
+    for(auto it = entityRe.globalMatch(string); it.hasNext();)
+    {
+        auto match = it.next();
+        decoded += string.mid(position, match.capturedStart() - position);
+        decoded += QTextDocumentFragment::fromHtml(match.captured()).toPlainText();
+        position = match.capturedEnd();
+    }
+
+    decoded += string.mid(position);
+
+    return decoded;
+}
+
 static AttributeVector processAttribute(const KeyValue& attribute)
 {
     struct Visitor
@@ -143,7 +168,7 @@ static AttributeVector processAttribute(const KeyValue& attribute)
         AttributeVector operator()(int v) const             { return {{_name, QString::number(v)}}; }
         AttributeVector operator()(const QString& v) const
         {
-            return {{_name, QTextDocumentFragment::fromHtml(v).toPlainText()}};
+            return {{_name, decodeEntities(v)}};
         }
         AttributeVector operator()(const List& v) const
         {
@@ -207,7 +232,7 @@ static bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphMode
                 // If there is a label attribute, use it as the node name
                 const auto* label = std::get_if<QString>(&keyValue._value);
                 if(label != nullptr)
-                    nodeName = *label;
+                    nodeName = decodeEntities(*label);
             }
             else
             {
