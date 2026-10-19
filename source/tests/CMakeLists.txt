@@ -1,5 +1,6 @@
 include(${CMAKE_SOURCE_DIR}/source/common.cmake)
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
 # The Qt targets appcore links against must also be visible here, otherwise
@@ -25,3 +26,4 @@ endfunction()
 
 add_graphia_test(tst_mutablegraph graph/tst_mutablegraph.cpp)
 add_graphia_test(tst_graphtransformconfigparser transform/tst_graphtransformconfigparser.cpp)
+add_graphia_test(tst_conditionfncreator attributes/tst_conditionfncreator.cpp)
