@@ -112,10 +112,8 @@ bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel*
 
                 if(it.value().is_string())
                     value = QString::fromStdString(it.value().get<std::string>());
-                else if(it.value().is_number_integer())
-                    value = QString::number(it.value().get<int>());
-                else if(it.value().is_number_float())
-                    value = QString::number(it.value().get<double>());
+                else if(it.value().is_number())
+                    value = QString::fromStdString(it.value().dump());
 
                 userNodeData->setValueBy(nodeId, key, value);
             }
@@ -173,10 +171,8 @@ bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel*
 
                 if(it.value().is_string())
                     value = QString::fromStdString(it.value().get<std::string>());
-                else if(it.value().is_number_integer())
-                    value = QString::number(it.value().get<int>());
-                else if(it.value().is_number_float())
-                    value = QString::number(it.value().get<double>());
+                else if(it.value().is_number())
+                    value = QString::fromStdString(it.value().dump());
 
                 userEdgeData->setValueBy(edgeId, key, value);
             }
