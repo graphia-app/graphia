@@ -90,6 +90,15 @@ own. This file should be deleted once everything here is resolved.
   is dropped.
 - **Correlation:** `CorrelationFileParser::epsilonFor` returns `DBL_MAX / 2`
   when the data has no positive values.
+- **Visualisations:**
+  - `ApplyVisualisationsCommand::patchedVisualisations` matches attribute names
+    created by a transform using a regular expression built from the name
+    without `QRegularExpression::escape`. A name containing `(`, `+` or the
+    like is never matched, so the default visualisation isn't updated to the
+    attribute's actual name. It's unfixed because it can only be tested
+    through a `Document`.
+  - A string parameter ending in a backslash can't be read back, as the
+    closing quote is taken as escaped.
 - **Native files:** an enrichment table row with fewer than 7 values throws
   `std::out_of_range` when the table is shown. Graphia always writes 7, so
   only a hand-edited file would have fewer.

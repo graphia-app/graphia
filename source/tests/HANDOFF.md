@@ -110,6 +110,7 @@ testing, which may come later as an extra safety net.
 | `tst_savers` | GML, GraphML, JSON Graph and pairwise export, then re-import |
 | `tst_nativeloader` | native files: every format version, Tutorial.graphia, malformed files, save then load |
 | `tst_commands` | execute, undo and redo of delete nodes and the edit, clone, remove and import attribute commands |
+| `tst_visualisationconfigparser` | visualisation config round trips, malformed configs, the display form |
 
 ## Bugs fixed so far
 
@@ -158,8 +159,13 @@ Each one is a commit; see `git log` for the details.
 - **Commands:**
   - edit undo restored rounded or invented values;
   - clone rounded floats;
-  - remove's undo lost the description and column order;
+  - remove's undo lost the description and column order, and removing user
+    data used a freed name, so on macOS undo didn't restore it at all;
   - an import that only replaces columns couldn't be undone.
+- **Visualisation configs:**
+  - whole number parameters couldn't be parsed;
+  - numbers were written with 6 significant figures;
+  - quotes in attribute names weren't escaped.
 
 ## Gotchas
 
@@ -196,33 +202,32 @@ Each one is a commit; see `git log` for the details.
   in production code.
 - **Warnings:** `QTest::failOnWarning()` in `init()` makes a test fail on any
   Qt warning. `tst_enrichmenttablemodel` uses it.
+- **valgrind** works well on the Debug build and found a use-after-free that
+  only failed on macOS. Set `QT_ENABLE_REGEXP_JIT=0`, otherwise
+  `QRegularExpression`'s JIT produces false reports of uninitialised values.
+  The whole suite is currently clean under it.
 
 ## Next steps, in rough order
 
-1. **Visualisation config round trips** (`app/ui/visualisations/visualisationconfig*`),
-   in the style of `tst_graphtransformconfigparser`. Things to check:
-   - double parameters are written with `QString::number`, i.e. 6
-     significant figures;
-   - only quotes are escaped in string parameters, so backslashes may not
-     round trip, and palette JSON is full of quotes;
-   - attribute names aren't escaped, and parameter names aren't quoted.
-2. **Enrichment calculator** (`app/attributes/enrichmentcalculator.cpp`):
+1. **Enrichment calculator** (`app/attributes/enrichmentcalculator.cpp`):
    p-values for a known contingency table. It needs a settable random seed:
    - `shared/utils/random.cpp`;
    - `enrichmentcalculator.cpp`, which seeds from `std::random_device`.
-3. **QML JavaScript helpers:** Qt Quick Test (`QUICK_TEST_MAIN`) for
+2. **QML JavaScript helpers:** Qt Quick Test (`QUICK_TEST_MAIN`) for
    `Utils.js`, `TransformConfig.js`, `AttributeUtils.js`, `MenuUtils.js` and
    `VisualisationUtils.js` in `app/ui/qml/Graphia/`.
-4. **Commands that need a `Document`:** `ApplyTransformsCommand` and
+3. **Commands that need a `Document`:** `ApplyTransformsCommand` and
    `ApplyVisualisationsCommand`. These may need the same kind of separation as
    `NativeSaver::Content`, or a `Document` level integration test, possibly
-   under xvfb.
-5. **Preference defaults:** move the `u::definePref` calls out of `main.cpp`
+   under xvfb. `ApplyVisualisationsCommand::patchedVisualisations` builds a
+   regular expression from an attribute name without escaping it; see
+   `PENDING_DECISIONS.md`.
+4. **Preference defaults:** move the `u::definePref` calls out of `main.cpp`
    into a function that tests can call, once a test needs them.
-6. **CI additions:**
+5. **CI additions:**
    - ASan and UBSan in the Clang Debug job;
    - coverage reporting with `llvm-cov`.
-7. **Later:** the corpus comparison of release and candidate builds.
+6. **Later:** the corpus comparison of release and candidate builds.
 
 The original plan, for reference, had these priorities:
 1. wrong analysis results (config grammars, conditions, transforms,
