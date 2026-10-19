@@ -333,6 +333,41 @@ struct AttributeValueOpVistor
 
         auto value = _rhs.toString();
 
+        if(_operandsAreSwitched)
+        {
+            // The value is on the left hand side and the attribute on the right
+            switch(op)
+            {
+            case ConditionFnOp::String::Includes:
+                return [attribute, valueOfFn, value](E elementId) { return value.contains((attribute.*valueOfFn)(elementId)); };
+            case ConditionFnOp::String::Excludes:
+                return [attribute, valueOfFn, value](E elementId) { return !value.contains((attribute.*valueOfFn)(elementId)); };
+            case ConditionFnOp::String::Starts:
+                return [attribute, valueOfFn, value](E elementId) { return value.startsWith((attribute.*valueOfFn)(elementId)); };
+            case ConditionFnOp::String::Ends:
+                return [attribute, valueOfFn, value](E elementId) { return value.endsWith((attribute.*valueOfFn)(elementId)); };
+            case ConditionFnOp::String::MatchesRegex:
+            case ConditionFnOp::String::MatchesRegexCaseInsensitive:
+            {
+                auto reOption = op == ConditionFnOp::String::MatchesRegexCaseInsensitive ?
+                            QRegularExpression::CaseInsensitiveOption :
+                            QRegularExpression::NoPatternOption;
+
+                return [attribute, valueOfFn, value, reOption](E elementId)
+                {
+                    const QRegularExpression re((attribute.*valueOfFn)(elementId), reOption);
+                    if(!re.isValid())
+                        return false; // Regex isn't valid
+
+                    return re.match(value).hasMatch();
+                };
+            }
+            default:
+                qFatal("Unhandled ConditionFnOp::String");
+                return nullptr;
+            }
+        }
+
         switch(op)
         {
         case ConditionFnOp::String::Includes:
