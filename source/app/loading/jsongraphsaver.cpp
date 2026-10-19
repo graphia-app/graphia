@@ -52,6 +52,8 @@ bool JSONGraphSaver::save()
     for(auto& node : fileObject["graph"]["nodes"])
     {
         const NodeId nodeId = std::stoi(node["id"].get<std::string>());
+        node["label"] = _graphModel->nodeName(nodeId);
+
         for(const auto& nodeAttributeName : _graphModel->attributeNames(ElementType::Node))
         {
             const auto* attribute = _graphModel->attributeByName(nodeAttributeName);
