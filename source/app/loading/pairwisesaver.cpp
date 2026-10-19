@@ -112,8 +112,8 @@ bool PairwiseSaver::save()
         if(!edgeWeightAttributeName.isEmpty())
         {
             const auto* attribute = _graphModel->attributeByName(edgeWeightAttributeName);
-            stream << u"\"%1\" \"%2\" %3\n"_s.arg(sourceName, targetName)
-                .arg(attribute->floatValueOf(edgeId));
+            stream << u"\"%1\" \"%2\" %3\n"_s.arg(sourceName, targetName,
+                QString::number(attribute->floatValueOf(edgeId)));
         }
         else
             stream << u"\"%1\" \"%2\"\n"_s.arg(sourceName, targetName);
