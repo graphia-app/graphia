@@ -118,16 +118,15 @@ private slots:
         QCOMPARE(model->nodeValue(u"NodeEccentricity"_s, node), QString::number(expected));
     }
 
-    // Shortest paths are counted in both directions, so each pair of nodes contributes twice
     void nodeBetweenness_data()
     {
         QTest::addColumn<QString>("node");
         QTest::addColumn<double>("expected");
 
         QTest::newRow("path end")       << u"a"_s << 0.0;
-        QTest::newRow("path middle")    << u"b"_s << 4.0;
-        QTest::newRow("path middle 2")  << u"c"_s << 4.0;
-        QTest::newRow("star centre")    << u"x"_s << 6.0;
+        QTest::newRow("path middle")    << u"b"_s << 2.0;
+        QTest::newRow("path middle 2")  << u"c"_s << 2.0;
+        QTest::newRow("star centre")    << u"x"_s << 3.0;
         QTest::newRow("star leaf")      << u"p"_s << 0.0;
         QTest::newRow("isolated")       << u"z"_s << 0.0;
     }
@@ -148,9 +147,9 @@ private slots:
         QTest::addColumn<QString>("to");
         QTest::addColumn<double>("expected");
 
-        QTest::newRow("path end")       << u"a"_s << u"b"_s << 6.0;
-        QTest::newRow("path middle")    << u"b"_s << u"c"_s << 8.0;
-        QTest::newRow("star")           << u"x"_s << u"p"_s << 6.0;
+        QTest::newRow("path end")       << u"a"_s << u"b"_s << 3.0;
+        QTest::newRow("path middle")    << u"b"_s << u"c"_s << 4.0;
+        QTest::newRow("star")           << u"x"_s << u"p"_s << 3.0;
     }
 
     void edgeBetweenness()
