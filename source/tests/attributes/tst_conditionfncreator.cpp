@@ -131,6 +131,12 @@ private slots:
         QTest::newRow("int <= float")               << uR"($"Int" <= 1.5)"_s                    << u"11000"_s;
         QTest::newRow("float > int")                << uR"($"Float" > 2)"_s                     << u"00111"_s;
 
+        // Numerical, value on the left hand side
+        QTest::newRow("value < int")                << uR"(2 < $"Int")"_s                       << u"00011"_s;
+        QTest::newRow("value > int")                << uR"(2 > $"Int")"_s                       << u"11000"_s;
+        QTest::newRow("value <= int")               << uR"(2 <= $"Int")"_s                      << u"00111"_s;
+        QTest::newRow("value >= int")               << uR"(2 >= $"Int")"_s                      << u"11100"_s;
+
         QTest::newRow("numerical op on string")     << uR"($"String" < 2)"_s                    << u"invalid"_s;
 
         // String operators
