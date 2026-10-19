@@ -29,7 +29,8 @@ static TypeIdentity::Type typeOf(const QString& value)
 
     bool conversionSucceeded = false;
 
-    auto intValue = value.toLongLong(&conversionSucceeded);
+    // Int attributes are ints, so larger integers must be treated as floats
+    auto intValue = value.toInt(&conversionSucceeded);
     Q_UNUSED(intValue); // Keep cppcheck happy
     if(conversionSucceeded)
         return TypeIdentity::Type::Int;
