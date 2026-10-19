@@ -357,6 +357,12 @@ private slots:
         QTest::newRow("JSON Graph") << u"JSONGraph"_s <<
             QByteArray(R"({"graph":{"nodes":[{"id":"a","label":"A","metadata":{"x":0.123456789}}],"edges":[]}})") <<
             u"x"_s << QStringList{u"A"_s} << 0.123456789;
+        QTest::newRow("JSON Graph large integer") << u"JSONGraph"_s <<
+            QByteArray(R"({"graph":{"nodes":[{"id":"a","label":"A","metadata":{"x":3000000000}}],"edges":[]}})") <<
+            u"x"_s << QStringList{u"A"_s} << 3000000000.0;
+        QTest::newRow("Pairwise large integer") << u"PairwiseCSV attributes"_s <<
+            QByteArray("From,To,Weight,From Type,To Type\na,b,3000000000,x,y\nb,c,2,z,w\n") <<
+            u"Weight"_s << QStringList{u"a"_s, u"b"_s} << 3000000000.0;
         QTest::newRow("Matrix") << u"MatrixCSV"_s << QByteArray("0,0.123456789\n1234567.5,0\n") <<
             u"EdgeWeight"_s << QStringList{u"Node 1"_s, u"Node 2"_s} << 0.123456789;
     }
