@@ -48,9 +48,15 @@ private slots:
             uR"("Remove Nodes" where ($"Node Degree" > 3 and $"Node Name" includes "abc") or $"Weight" hasValue)"_s;
         QTest::newRow("all string ops") <<
             uR"("Remove Nodes" where ($"A" starts "x" or $"A" ends "y") and ($"A" matches "^z" || $"A" matchesCaseInsensitive "w"))"_s;
+        QTest::newRow("quotes in condition value") <<
+            u"\"Remove Nodes\" where $\"Node Name\" == \"say \\\"hi\\\"\""_s;
         // Not a raw string, which moc misparses here, missing the test class
         QTest::newRow("quotes in attribute name") <<
             u"RemoveNodes where $\"Score \\\"raw\\\"\" > 1"_s; // NOLINT modernize-raw-string-literal
+        QTest::newRow("unquoted names") <<
+            u"[pinned] RemoveComponents where $source.ComponentSize <= 1"_s;
+        QTest::newRow("unquoted values") <<
+            u"KNN using $Weight with k = 5 RankOrder = Ascending"_s;
     }
 
     void roundTrip()
