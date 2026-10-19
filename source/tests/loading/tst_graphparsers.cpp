@@ -268,6 +268,9 @@ private slots:
             QByteArray("digraph { a -> b; edge [style=dashed]; b -> c; c -> d [style=bold] }") <<
             QStringList{u"a"_s, u"b"_s, u"c"_s, u"d"_s} << QStringList{u"a-b"_s, u"b-c"_s, u"c-d"_s} <<
             QStringList{u"style|a|b|"_s, u"style|b|c|dashed"_s, u"style|c|d|bold"_s};
+        QTest::newRow("DOT keyword case") << u"DOT"_s <<
+            QByteArray("STRICT DiGraph { Node [k=x]; a -> b; SubGraph s { c } }") <<
+            QStringList{u"a"_s, u"b"_s, u"c"_s} << QStringList{u"a-b"_s} << QStringList{u"k|c|x"_s};
         QTest::newRow("DOT empty") << u"DOT"_s << QByteArray("digraph {}") <<
             QStringList{} << QStringList{} << QStringList{};
 
