@@ -180,6 +180,10 @@ private slots:
             QStringList{u"A&B"_s} << QStringList{} <<
             QStringList{u"a|A&B|x < y"_s, u"b|A&B|<b>two</b>  spaces"_s, u"c|A&B|\"ééé&bogus;"_s};
 
+        QTest::newRow("GML comments") << u"GML"_s <<
+            QByteArray("# Comment\ngraph [\n# Comment \"\n node [ id 1 label \"#A\" ]\n]\n# Comment") <<
+            QStringList{u"#A"_s} << QStringList{} << QStringList{};
+
         // GraphML
         QTest::newRow("GraphML") << u"GraphML"_s << QByteArray(
             "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
