@@ -217,6 +217,9 @@ private slots:
         QTest::newRow("prefix") << u"a"_s << u"a1"_s << -1;
         QTest::newRow("number before text") << u"1"_s << u"a"_s << -1;
         QTest::newRow("leading zeroes") << u"a01"_s << u"a1"_s << -1;
+        QTest::newRow("empty") << QString() << u"a"_s << -1;
+        QTest::newRow("both empty") << QString() << QString() << 0;
+        QTest::newRow("empty and number") << u""_s << u"1"_s << -1;
     }
 
     void numericCompare()
