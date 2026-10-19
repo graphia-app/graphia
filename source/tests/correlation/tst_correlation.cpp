@@ -320,6 +320,14 @@ private slots:
         QTest::newRow("one sided") << 1 << static_cast<int>(CorrelationPolarity::Positive) <<
             QStringList{u"0-1:0.9"_s, u"0-2:0.5"_s, u"0-3:0.7"_s, u"1-2:0.6"_s, u"1-3:0.2"_s, u"2-3:0.3"_s} <<
             QStringList{u"0-1"_s, u"0-3"_s, u"1-2"_s};
+        QTest::newRow("negative") << 1 << static_cast<int>(CorrelationPolarity::Negative) <<
+            QStringList{u"0-1:-0.9"_s, u"0-2:-0.2"_s, u"0-3:-0.5"_s,
+                u"1-2:0.5"_s, u"1-3:0.5"_s, u"2-3:-0.95"_s} <<
+            QStringList{u"0-1"_s, u"2-3"_s};
+        QTest::newRow("both") << 1 << static_cast<int>(CorrelationPolarity::Both) <<
+            QStringList{u"0-1:0.5"_s, u"0-2:-0.9"_s, u"0-3:0.1"_s,
+                u"1-2:0.1"_s, u"1-3:0.8"_s, u"2-3:0.1"_s} <<
+            QStringList{u"0-2"_s, u"1-3"_s};
     }
 
     void knnProtoGraph()
