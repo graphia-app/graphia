@@ -81,6 +81,9 @@ json graph()
 
 const QVector3D PositionOfB(1.5F, -2.25F, 3.0F);
 
+// An id far beyond those of the graph's nodes
+const int MissingNodeId = 100000000;
+
 // The body of a file of the given version, as the version of NativeSaver at the time would have
 // written it; the differences between versions are those that NativeLoader accounts for
 json body(int version)
@@ -347,6 +350,23 @@ private slots:
         QVERIFY(!Loader::canOpen(noVersionUrl));
     }
 
+    // Names and positions for nodes that aren't in the graph are ignored
+    void valuesForMissingNodes()
+    {
+        auto version = NativeSaver::Version;
+        auto content = body(version);
+        content["nodeNames"].push_back({{"id", MissingNodeId}, {"value", "missing"}});
+        content["layout"]["positions"].push_back({{"id", MissingNodeId}, {"value", {1.0, 2.0, 3.0}}});
+
+        TestPluginInstance pluginInstance(&_plugin);
+        QString failureReason;
+        auto model = load(nativeFile(header(version), content), pluginInstance, &failureReason);
+        QVERIFY2(model != nullptr, qPrintable(failureReason));
+
+        QCOMPARE(model->nodeNames(), (QStringList{u"a"_s, u"b"_s, u"c"_s}));
+        QCOMPARE(model->parser<Loader>()->nodePositions()->get(model->nodeId(u"b"_s)), PositionOfB);
+    }
+
     void invalid_data()
     {
         QTest::addColumn<QByteArray>("content");
@@ -375,6 +395,18 @@ private slots:
         auto edgeToNowhere = body(version);
         edgeToNowhere["graph"]["edges"].push_back({{"id", "2"}, {"source", "2"}, {"target", "3"}});
         QTest::newRow("Edge to nowhere") << nativeFile(header(version), edgeToNowhere) << QString();
+
+        // User data values are matched to elements by the order of their ids, so the
+        // data can't be loaded if any of the ids aren't those of elements in the graph
+        auto userNodeDataForMissingNode = body(version);
+        userNodeDataForMissingNode["userNodeData"]["ids"] = {0, 1, MissingNodeId};
+        QTest::newRow("User node data for missing node") <<
+            nativeFile(header(version), userNodeDataForMissingNode) << QString();
+
+        auto userEdgeDataForMissingEdge = body(version);
+        userEdgeDataForMissingEdge["userEdgeData"]["ids"] = {0, MissingNodeId};
+        QTest::newRow("User edge data for missing edge") <<
+            nativeFile(header(version), userEdgeDataForMissingEdge) << QString();
 
         QTest::newRow("Newer version") << nativeFile(header(version + 1), body(version)) <<
             u"newer version of"_s;
