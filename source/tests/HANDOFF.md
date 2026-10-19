@@ -1,0 +1,244 @@
+# Unit test work: notes for continuing elsewhere
+
+This describes the state of the unit test work on the
+`claude/unit-test-infrastructure` branch, so that it can be picked up in a new
+session, for example Claude Code on the desktop. Read this first, then
+`PENDING_DECISIONS.md`, which lists questions waiting on Tim. Delete both files
+before the branch is merged.
+
+## The goal
+
+The aim is a comprehensive unit test suite that stops releases going
+backwards, especially:
+- wrong analysis results;
+- crashes;
+- files that no longer load or save correctly.
+
+Unit tests are the centrepiece; Tim chose them over corpus or differential
+testing, which may come later as an extra safety net.
+
+## How Tim wants the work done
+
+- **Bugs:** fix any bug that a test finds.
+  - Each fix is its own commit, which also adds the test that exercises it.
+  - Check every fix by building and running the test without it and seeing it
+    fail, then with it and seeing it pass. Do this by temporarily reverting
+    only the source change, e.g. with `git stash push <source paths>`.
+- **Test commits:** a commit adding tests for an area comes before the fix
+  commits for that area, and must pass on the code as it was. Each fix commit
+  then adds the checks that fail without it.
+- **Behaviour changes:** if a fix changes behaviour that could have been
+  intentional, add it to `PENDING_DECISIONS.md` rather than asking.
+- **CI:** watch it and fix any failures. Fold CI fixes into the earlier commits
+  they belong to, rather than adding "fix CI" commits. Rewriting history on
+  this branch is fine; push with `--force-with-lease`.
+- **No pull request** until Tim asks for one. The branch has around 70
+  commits, and where to draw the line for a PR is one of the pending
+  decisions.
+- **Commit messages:** a short imperative subject, then a body explaining the
+  problem and the fix in prose. End with the attribution trailers used
+  throughout the branch, and don't put model names or identifiers in commits or
+  code.
+- **Code style:** test code should look like the surrounding code: Qt idioms,
+  `u""_s` literals, Allman braces, comments only where something isn't
+  obvious.
+
+## Building and running the tests
+
+- **Option:** tests are built when `GRAPHIA_BUILD_TESTS` is on, which is the
+  default except for WebAssembly.
+- **Running:** after a normal CMake configure and build, run `ctest` in the
+  build directory, or run a single program, e.g. `source/tests/tst_commands`,
+  optionally with a test function name.
+- **Headless:** set `QT_QPA_PLATFORM=offscreen`.
+- **Qt:** CI uses Qt 6.11.2 and every build job runs `ctest`. Clang-Tidy,
+  cppcheck, clazy, IWYU and qmllint also run on every push, so keep new code
+  clean for them.
+
+## Infrastructure
+
+- **`appcore`:** an OBJECT library in `source/app/CMakeLists.txt` with all the
+  application sources except `main.cpp`. Tests link it.
+- **`correlationcore`:** a static, PIC library in
+  `source/plugins/correlation/CMakeLists.txt` with the correlation plugin's
+  maths and its CSV preprocessing (`loading/correlationpreprocessing.cpp`).
+  `tst_correlation` links it.
+- **`add_graphia_test`:** registers each test program in
+  `source/tests/CMakeLists.txt`.
+- **`tests/common/testenvironment.h`:** `TestEnvironment::initialise()`, called
+  from `initTestCase`, sets up the thread pool, `ScopeTimerManager` and a
+  temporary `QSettings` location.
+- **`tests/common/testplugin.h`:**
+  - `TestPlugin`, a minimal plugin;
+  - `TestPluginInstance`, which records the plugin data it's given to load and
+    saves the same data back.
+- **`tests/common/testgraphmodel.h`:** `TestGraphModel`, which wraps a
+  `GraphModel`.
+  - It's built either from a compact description, e.g. `{"a-b", "b-c", "d"}`,
+    or by `TestGraphModel::parse(content, createParser, &failureReason)`, which
+    parses a file the way `ParserThread` and `Document` do. `parse` keeps the
+    parser, so it can be queried with `parser<T>()`.
+  - Helpers:
+    - names: `nodeNames`, `edgeNames`, `nodeId`, `edgeId`;
+    - values: `nodeValue`, `edgeValue`, `nodeNumericValue`,
+      `edgeNumericValue`, `nodeHasValue`, `nodePartition`;
+    - set-up: `addNodeAttribute`, `addEdgeAttribute`, `applyTransforms`;
+    - `state()`, which describes the whole graph and every attribute value
+      exactly, for checking that a change and its undo leave everything as it
+      was.
+- **`NativeSaver::Content`:** holds the document state that `NativeSaver`
+  saves, which `NativeSaverFactory` gathers from the `Document`. Tests can
+  therefore save native files without a `Document`.
+- **`AttributeEdits`:** has public setters, so tests can create edits.
+- **`lexyutils::describeFirstError`:** in `source/thirdparty/lexy_utils.h`,
+  gives the line and column of the first lexy parse error.
+
+## What's covered
+
+| Program | Covers |
+|---|---|
+| `tst_mutablegraph` | graph editing and consistency |
+| `tst_graphtransformconfigparser` | transform config grammar round trips |
+| `tst_conditionfncreator` | every condition operator and type |
+| `tst_structuraltransforms` | filters, contraction, edge reduction and so on |
+| `tst_analysistransforms` | clustering, centrality, k-NN and so on |
+| `tst_attributetransforms` | attribute synthesis, combination, averaging and so on |
+| `tst_enrichmenttablemodel` | sorting, filtering and resets |
+| `tst_correlation` | correlation types, threshold, the k-NN proto graph, normalisation, scaling, clipping, imputation (expected values from numpy) |
+| `tst_tabulardata` | CSV, TSV, SSV and TXT tokenising and detection |
+| `tst_graphparsers` | pairwise, GML, GraphML, DOT, JSON Graph, CX, BioPAX and adjacency matrix files: valid, precise, malformed, syntax error locations, missing values |
+| `tst_savers` | GML, GraphML, JSON Graph and pairwise export, then re-import |
+| `tst_nativeloader` | native files: every format version, Tutorial.graphia, malformed files, save then load |
+| `tst_commands` | execute, undo and redo of delete nodes and the edit, clone, remove and import attribute commands |
+
+## Bugs fixed so far
+
+Each one is a commit; see `git log` for the details.
+
+- **Build:** the Windows Clang manifest.
+- **Conditions:** 4 fixes, including string operators.
+- **Transforms:**
+  - betweenness, 2 fixes;
+  - edge reduction;
+  - the average attribute.
+- **Correlation:**
+  - SMC;
+  - Spearman ties;
+  - the k-NN proto graph, 3 fixes;
+  - mean and standardisation normalisation;
+  - unit scaling;
+  - quantile ties;
+  - column average imputation.
+- **CSV:** escaped quotes.
+- **Parsers:**
+  - pairwise blank or one-sided rows;
+  - CX2 attributes;
+  - JSON and CX type errors;
+  - BioPAX nesting and duplicate edges;
+  - adjacency matrix headers;
+  - number precision;
+  - integers too large for an `int`;
+  - GraphML split text, `for="all"`, `<default>` and edges before nodes;
+  - DOT scoped defaults and case-insensitive keywords;
+  - GML entities and comments;
+  - failure reasons.
+- **Export:**
+  - GraphML double escaping;
+  - JSON Graph node names;
+  - pairwise `%1` in names and pairwise quotes;
+  - number precision.
+- **Native files:**
+  - node ids not in the graph writing out of bounds;
+  - 2D shading not restored;
+  - enrichment results lost on saving.
+- **Enrichment table model:** a nested model reset.
+- **User data:**
+  - missing numeric values read as 0, rather than as missing;
+  - editing a numeric value to nothing was ignored.
+- **Commands:**
+  - edit undo restored rounded or invented values;
+  - clone rounded floats;
+  - remove's undo lost the description and column order;
+  - an import that only replaces columns couldn't be undone.
+
+## Gotchas
+
+- **moc** lexes raw string literals as ordinary strings, so an unbalanced quote
+  or bracket inside `R"(...)"` breaks it. Use escaped normal strings for those.
+- **Floats:**
+  - `QCOMPARE` on floating point values is fuzzy, at about 1e-5 relative.
+  - Attribute values are stored as `float`, so compare with
+    `std::equal_to<>()(static_cast<float>(a), static_cast<float>(b))` where
+    precision matters.
+  - `Attribute::stringValueOf` formats floats with 6 significant figures,
+    which is fine for display but loses precision anywhere values are copied
+    or saved.
+- **nlohmann::json** turns `{{"x", 1}}` into an object, not an array of
+  arrays. Use `json::array(...)` explicitly.
+- **Don't `QCOMPARE` json values.** On Windows with Clang this fails to
+  compile, because Qt Test's check for a `QDebug` operator instantiates
+  nlohmann's conversions with an incomplete Windows type. `tst_nativeloader`
+  compares `jsonString(...)` values instead.
+- **Missing values:** user data is stored as strings. An empty string is a
+  missing value, and `UserData::value` converts to the vector's type, so check
+  the stored string with `storedValueBy`.
+- **Transformed graph:**
+  - It's empty until `applyTransforms()` runs. `TestGraphModel::parse` calls
+    `applyTransforms({})`.
+  - A merged node set must be queried by its head node.
+- **Parallel edges:** `TestGraphModel::_edgeIds` keeps only the first of
+  several, though `edgeNames()` lists all of them.
+- **Name hiding:** a test slot hides a free function with the same name, so
+  write `::parse(...)` inside the class.
+- **`QFINDTESTDATA`** finds files relative to the test source, which is how
+  `tst_nativeloader` reads `app/examples/Tutorial.graphia`.
+- **WebAssembly** disables exceptions, so prefer explicit checks to try/catch
+  in production code.
+- **Warnings:** `QTest::failOnWarning()` in `init()` makes a test fail on any
+  Qt warning. `tst_enrichmenttablemodel` uses it.
+
+## Next steps, in rough order
+
+1. **Visualisation config round trips** (`app/ui/visualisations/visualisationconfig*`),
+   in the style of `tst_graphtransformconfigparser`. Things to check:
+   - double parameters are written with `QString::number`, i.e. 6
+     significant figures;
+   - only quotes are escaped in string parameters, so backslashes may not
+     round trip, and palette JSON is full of quotes;
+   - attribute names aren't escaped, and parameter names aren't quoted.
+2. **Enrichment calculator** (`app/attributes/enrichmentcalculator.cpp`):
+   p-values for a known contingency table. It needs a settable random seed:
+   - `shared/utils/random.cpp`;
+   - `enrichmentcalculator.cpp`, which seeds from `std::random_device`.
+3. **QML JavaScript helpers:** Qt Quick Test (`QUICK_TEST_MAIN`) for
+   `Utils.js`, `TransformConfig.js`, `AttributeUtils.js`, `MenuUtils.js` and
+   `VisualisationUtils.js` in `app/ui/qml/Graphia/`.
+4. **Commands that need a `Document`:** `ApplyTransformsCommand` and
+   `ApplyVisualisationsCommand`. These may need the same kind of separation as
+   `NativeSaver::Content`, or a `Document` level integration test, possibly
+   under xvfb.
+5. **Preference defaults:** move the `u::definePref` calls out of `main.cpp`
+   into a function that tests can call, once a test needs them.
+6. **CI additions:**
+   - ASan and UBSan in the Clang Debug job;
+   - coverage reporting with `llvm-cov`.
+7. **Later:** the corpus comparison of release and candidate builds.
+
+The original plan, for reference, had these priorities:
+1. wrong analysis results (config grammars, conditions, transforms,
+   correlation, enrichment);
+2. crashes and loading and saving (parsers, native files, savers, graph core,
+   commands);
+3. UI logic (JavaScript helpers, one `Document` level test);
+4. `shared/utils`.
+
+Its mutation check plants deliberate bugs (an off-by-one in PageRank, a
+flipped operator in `condtionfnops.h`, a changed default in the pairwise
+parser, a dropped field in `nativesaver.cpp`) and expects each to make a test
+fail.
+
+## Checking CI
+
+The `Build` workflow runs on every push to the branch. Look at the latest runs
+for `claude/unit-test-infrastructure` on GitHub, or use the GitHub tools
+available in the session, and read the logs of any failed job.
