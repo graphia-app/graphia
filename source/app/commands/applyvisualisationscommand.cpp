@@ -116,7 +116,7 @@ QStringList ApplyVisualisationsCommand::patchedVisualisations() const
 
                 // c.f. u::findUniqueName
                 const QRegularExpression re(uR"(^%1\(\d+\))"_s
-                    .arg(visualisationConfig._attributeName));
+                    .arg(QRegularExpression::escape(visualisationConfig._attributeName)));
 
                 for(const auto& createdAttributeName : createdAttributeNames)
                 {
