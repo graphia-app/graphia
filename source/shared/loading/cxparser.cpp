@@ -427,7 +427,8 @@ bool CxParser::parseJson(const json& jsonArray, IGraphModel* graphModel)
         return parseCx1(jsonArray, graphModel, this, _userNodeData, _userEdgeData);
 
     const bool version2 = u::contains(jsonArray.at(0), "CXVersion") &&
-        jsonArray.at(0).at("CXVersion").get<std::string>().front() == '2';
+        jsonArray.at(0).at("CXVersion").is_string() &&
+        jsonArray.at(0).at("CXVersion").get<std::string>().starts_with('2');
     if(version2)
         return parseCx2(jsonArray, graphModel, this, _userNodeData, _userEdgeData);;
 

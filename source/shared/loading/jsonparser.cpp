@@ -23,6 +23,7 @@
 #include "shared/utils/json.h"
 
 #include <QFile>
+#include <QObject>
 #include <QByteArray>
 #include <QDataStream>
 
@@ -74,5 +75,15 @@ bool JsonParser::parse(const QUrl& url, IGraphModel* graphModel)
     if(cancelled())
         return false;
 
-    return parseJson(jsonBody, graphModel);
+    try
+    {
+        return parseJson(jsonBody, graphModel);
+    }
+    catch(const json::exception& e)
+    {
+        // A value isn't of the expected type
+        setFailureReason(QObject::tr("Invalid content: %1").arg(QString::fromStdString(e.what())));
+    }
+
+    return false;
 }
