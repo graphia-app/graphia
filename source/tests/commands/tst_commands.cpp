@@ -227,6 +227,20 @@ private slots:
         });
     }
 
+    void cloneAttribute()
+    {
+        auto model = createModel();
+        QVERIFY(model != nullptr);
+
+        CloneAttributeCommand command(&model->graphModel(), u"score"_s, u"Copy"_s);
+        checkExecuteUndoRedo(*model, command, [&]
+        {
+            QVERIFY(exactlyEqual(model->nodeNumericValue(u"Copy"_s, u"a"_s), 0.123456789));
+            QVERIFY(!model->nodeHasValue(u"Copy"_s, u"b"_s));
+            QVERIFY(exactlyEqual(model->nodeNumericValue(u"Copy"_s, u"c"_s), 2.5));
+        });
+    }
+
     void importAttributes()
     {
         auto model = createModel();
