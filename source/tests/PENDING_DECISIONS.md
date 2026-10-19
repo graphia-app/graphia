@@ -11,6 +11,11 @@ own. This file should be deleted once everything here is resolved.
   new attribute is detected as an int, rather than having no value. That
   makes them indistinguishable from real empty or zero values. This was left
   untested and unchanged.
+- **Enrichment's Bonferroni correction.** Each p-value is multiplied by the
+  number of values of the second attribute, though a test is done for every
+  pair of values of the two attributes. That's right if each value of the
+  first attribute is regarded as a separate family of tests, but otherwise
+  it understates the correction.
 - **Clone Attribute only clones the nodes in the transformed graph.** Nodes
   hidden by a filter, or merged into others, get no value in the clone, so
   removing the filter reveals nodes without values. Using every node in the

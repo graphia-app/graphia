@@ -103,6 +103,7 @@ testing, which may come later as an extra safety net.
 | `tst_structuraltransforms` | filters, contraction, edge reduction and so on |
 | `tst_analysistransforms` | clustering, centrality, k-NN and so on |
 | `tst_attributetransforms` | attribute synthesis, combination, averaging and so on |
+| `tst_enrichmentcalculator` | Fisher's exact test against an exact calculation, over-representation on a small graph |
 | `tst_enrichmenttablemodel` | sorting, filtering and resets |
 | `tst_correlation` | correlation types, threshold, the k-NN proto graph, normalisation, scaling, clipping, imputation (expected values from numpy) |
 | `tst_tabulardata` | CSV, TSV, SSV and TXT tokenising and detection |
@@ -152,7 +153,10 @@ Each one is a commit; see `git log` for the details.
   - node ids not in the graph writing out of bounds;
   - 2D shading not restored;
   - enrichment results lost on saving.
-- **Enrichment table model:** a nested model reset.
+- **Enrichment:**
+  - Fisher's exact test excluded tables tied with the observed one, roughly
+    halving many p-values;
+  - the table model reset itself twice when its data was set.
 - **User data:**
   - missing numeric values read as 0, rather than as missing;
   - editing a numeric value to nothing was ignored.
@@ -209,24 +213,24 @@ Each one is a commit; see `git log` for the details.
 
 ## Next steps, in rough order
 
-1. **Enrichment calculator** (`app/attributes/enrichmentcalculator.cpp`):
-   p-values for a known contingency table. It needs a settable random seed:
-   - `shared/utils/random.cpp`;
-   - `enrichmentcalculator.cpp`, which seeds from `std::random_device`.
-2. **QML JavaScript helpers:** Qt Quick Test (`QUICK_TEST_MAIN`) for
+1. **QML JavaScript helpers:** Qt Quick Test (`QUICK_TEST_MAIN`) for
    `Utils.js`, `TransformConfig.js`, `AttributeUtils.js`, `MenuUtils.js` and
    `VisualisationUtils.js` in `app/ui/qml/Graphia/`.
-3. **Commands that need a `Document`:** `ApplyTransformsCommand` and
+2. **Commands that need a `Document`:** `ApplyTransformsCommand` and
    `ApplyVisualisationsCommand`. These may need the same kind of separation as
    `NativeSaver::Content`, or a `Document` level integration test, possibly
    under xvfb. `ApplyVisualisationsCommand::patchedVisualisations` builds a
    regular expression from an attribute name without escaping it; see
    `PENDING_DECISIONS.md`.
-4. **Preference defaults:** move the `u::definePref` calls out of `main.cpp`
+3. **Preference defaults:** move the `u::definePref` calls out of `main.cpp`
    into a function that tests can call, once a test needs them.
-5. **CI additions:**
+4. **CI additions:**
    - ASan and UBSan in the Clang Debug job;
    - coverage reporting with `llvm-cov`.
+5. **A settable random seed** (`shared/utils/random.cpp`, and
+   `enrichmentcalculator.cpp`, which seeds from `std::random_device`), once a
+   test needs exact results from something random. The enrichment tests
+   didn't, as only the spread of the expected count is random.
 6. **Later:** the corpus comparison of release and candidate builds.
 
 The original plan, for reference, had these priorities:
