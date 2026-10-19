@@ -114,14 +114,34 @@ void AverageAttributeTransform::apply(TransformedGraph& target)
         }
 
         ElementIdArray<E, double> averages(target);
+        ElementIdArray<E, bool> missing(target, false);
+        bool anyMissing = false;
 
         for(auto elementId : elementIds)
+        {
+            // Elements with no shared value have no mean
+            if(elementValues[elementId] == nullptr)
+            {
+                missing.set(elementId, true);
+                anyMissing = true;
+                continue;
+            }
+
             averages[elementId] = elementValues[elementId]->mean();
+        }
 
         meanAttribute.setFloatValueFn([averages](E elementId)
         {
             return averages[elementId];
         });
+
+        if(anyMissing)
+        {
+            meanAttribute.setValueMissingFn([missing](E elementId)
+            {
+                return missing.get(elementId);
+            });
+        }
     };
 
     switch(sourceAttribute.elementType())
