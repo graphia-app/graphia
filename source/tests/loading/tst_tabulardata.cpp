@@ -112,6 +112,8 @@ private slots:
             Cells{{u"a"_s, u""_s, u""_s}, {u"1"_s, u"2"_s, u"3"_s}};
         QTest::newRow("CSV quoted") << u"CSV"_s << QByteArray("\"a,b\",c\n\"\",\"d\"\n") <<
             Cells{{u"a,b"_s, u"c"_s}, {u""_s, u"d"_s}};
+        QTest::newRow("CSV escaped quotes") << u"CSV"_s << QByteArray("\"say \"\"hi\"\"\",\"\"\"\"\n") <<
+            Cells{{u"say \"hi\""_s, u"\""_s}};
         // Values are trimmed, even when quoted
         QTest::newRow("CSV whitespace") << u"CSV"_s << QByteArray("\" a \", b c \n") <<
             Cells{{u"a"_s, u"b c"_s}};
