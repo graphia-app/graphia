@@ -26,6 +26,7 @@
 
 #include "shared/loading/userelementdata.h"
 
+#include <QLocale>
 #include <QObject>
 #include <QtGlobal>
 
@@ -84,7 +85,19 @@ bool CloneAttributeCommand::execute()
 
         for(auto elementId : elementIds)
         {
-            auto value = sourceAttribute.stringValueOf(elementId);
+            // Attribute::stringValueOf limits the precision of floating point values
+            QString value;
+            if(sourceAttribute.valueType() == ValueType::Float)
+            {
+                value = QString::number(sourceAttribute.floatValueOf(elementId),
+                    'g', QLocale::FloatingPointShortest);
+            }
+            else
+                value = sourceAttribute.stringValueOf(elementId);
+
+            if(sourceAttribute.valueMissingOf(elementId))
+                value.clear();
+
             userData->setValueBy(elementId, _createdVectorName, value);
         }
 
