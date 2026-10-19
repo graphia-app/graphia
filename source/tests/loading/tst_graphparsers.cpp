@@ -216,6 +216,14 @@ private slots:
             QStringList{u"color|a|green"_s, u"color|b|yellow"_s, u"color|c|yellow"_s,
                 u"weight|a|b|2"_s, u"weight|b|c|1"_s};
 
+        QTest::newRow("GraphML edges first") << u"GraphML"_s << QByteArray(
+            "<graphml><key id=\"d0\" for=\"edge\" attr.name=\"weight\"/><graph>"
+            "<edge id=\"e\" source=\"a\" target=\"b\"><data key=\"d0\">2</data></edge>"
+            "<edge source=\"a\" target=\"z\"/><node id=\"a\"/><node id=\"b\"/>"
+            "</graph></graphml>") <<
+            QStringList{u"a"_s, u"b"_s} << QStringList{u"a-b"_s} <<
+            QStringList{u"weight|a|b|2"_s, u"EdgeName|a|b|e"_s};
+
         // DOT
         QTest::newRow("DOT") << u"DOT"_s << QByteArray(
             "// c\n"
