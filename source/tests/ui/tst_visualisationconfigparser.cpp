@@ -48,6 +48,7 @@ private slots:
         QTest::newRow("Integer parameter") << u"\"Node Degree\" \"Size\" with min = 2"_s;
         QTest::newRow("Several parameters") << u"\"Node Degree\" \"Colour\" with a = 1 b = \"x\" c = 3"_s;
         QTest::newRow("Precise number") << u"\"Node Degree\" \"Size\" with min = 0.123456789"_s;
+        QTest::newRow("Quotes in names") << u"\"Score \\\"raw\\\"\" \"Size\""_s;
         QTest::newRow("Attribute parameter") << u"\"Pearson Value\".\"x\" \"Size\""_s;
         QTest::newRow("Non-ASCII") << u"\"Größe\" \"Size\" with label = \"→\""_s;
         QTest::newRow("Unquoted names") << u"NodeDegree Size with min = 2.5"_s;
