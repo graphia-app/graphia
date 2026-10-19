@@ -22,6 +22,7 @@
 #include "app/attributes/enrichmenttablemodel.h"
 
 #include <QTest>
+#include <QSignalSpy>
 #include <QString>
 #include <QStringList>
 
@@ -62,10 +63,21 @@ private slots:
         TestEnvironment::initialise();
     }
 
+    void init()
+    {
+        QTest::failOnWarning();
+    }
+
     void setTableData()
     {
         EnrichmentTableModel model;
+        const QSignalSpy aboutToBeReset(&model, &QAbstractItemModel::modelAboutToBeReset);
+        const QSignalSpy reset(&model, &QAbstractItemModel::modelReset);
+
         model.setTableData(Data, u"A"_s, u"B"_s);
+
+        QCOMPARE(aboutToBeReset.count(), 1);
+        QCOMPARE(reset.count(), 1);
 
         QCOMPARE(model.tableData(), Data);
         QCOMPARE(model.columnCount(), static_cast<int>(Results::NumResultColumns));
