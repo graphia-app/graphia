@@ -29,6 +29,7 @@
 
 #include <lexy_utils.h>
 #include <lexy/action/parse.hpp>
+#include <lexy/dsl/case_folding.hpp>
 
 #include <QByteArray>
 #include <QFile>
@@ -122,10 +123,11 @@ constexpr auto idLead = dsl::ascii::alpha_underscore / nonAsciiByte;
 constexpr auto idTrailing = dsl::ascii::alpha_digit_underscore / nonAsciiByte;
 constexpr auto idPattern = dsl::identifier(idLead, idTrailing);
 
-constexpr auto keywordStrict = LEXY_KEYWORD("strict", idPattern);
-constexpr auto keywordGraph = LEXY_KEYWORD("graph", idPattern);
-constexpr auto keywordDigraph = LEXY_KEYWORD("digraph", idPattern);
-constexpr auto keywordSubgraph = LEXY_KEYWORD("subgraph", idPattern);
+// Keywords are case independent
+constexpr auto keywordStrict = dsl::ascii::case_folding(LEXY_KEYWORD("strict", idPattern));
+constexpr auto keywordGraph = dsl::ascii::case_folding(LEXY_KEYWORD("graph", idPattern));
+constexpr auto keywordDigraph = dsl::ascii::case_folding(LEXY_KEYWORD("digraph", idPattern));
+constexpr auto keywordSubgraph = dsl::ascii::case_folding(LEXY_KEYWORD("subgraph", idPattern));
 
 constexpr auto edgeOperator = LEXY_LIT("--") | LEXY_LIT("->");
 
@@ -239,6 +241,7 @@ struct EdgeEnd
 };
 
 constexpr auto attributeTypes = lexy::symbol_table<LexyDotParser::AttributeStatementType>
+    .case_folding(dsl::ascii::case_folding)
     .map<LEXY_SYMBOL("graph")>(LexyDotParser::AttributeStatementType::Graph)
     .map<LEXY_SYMBOL("node")>(LexyDotParser::AttributeStatementType::Node)
     .map<LEXY_SYMBOL("edge")>(LexyDotParser::AttributeStatementType::Edge);
