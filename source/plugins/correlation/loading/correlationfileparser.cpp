@@ -65,10 +65,13 @@ double CorrelationFileParser::imputeValue(MissingDataType missingDataType,
     }
     case MissingDataType::ColumnAverage:
     {
+        auto top = static_cast<size_t>(dataRect.y());
+        auto bottom = static_cast<size_t>(dataRect.y()) + static_cast<size_t>(dataRect.height());
+
         // Calculate column averages
         double averageValue = 0.0;
         size_t rowCount = 0;
-        for(size_t avgRowIndex = left; avgRowIndex < right; avgRowIndex++)
+        for(size_t avgRowIndex = top; avgRowIndex < bottom; avgRowIndex++)
         {
             const auto& value = tabularData.valueAt(columnIndex, avgRowIndex);
             if(!value.isEmpty())
