@@ -22,10 +22,12 @@
 
 #include "app/loading/gmlsaver.h"
 #include "app/loading/graphmlsaver.h"
+#include "app/loading/jsongraphsaver.h"
 #include "app/loading/pairwisesaver.h"
 
 #include "shared/loading/gmlfileparser.h"
 #include "shared/loading/graphmlparser.h"
+#include "shared/loading/jsongraphparser.h"
 #include "shared/loading/pairwisefileparser.h"
 
 #include <QTest>
@@ -201,6 +203,31 @@ private slots:
 
         QVERIFY(exactlyEqual(reloaded->edgeNumericValue(u"Weight"_s, names.at(A), names.at(B)), 1.25));
         QVERIFY(exactlyEqual(reloaded->edgeNumericValue(u"Weight"_s, names.at(D), names.at(A)), 7.25));
+    }
+
+    void jsonGraph()
+    {
+        auto model = createModel();
+        auto reloaded = reload<JsonGraphParser>(save<JSONGraphSaver>(*model));
+        QVERIFY(reloaded != nullptr);
+
+        QCOMPARE(reloaded->nodeNames(), _nodes);
+        QCOMPARE(reloaded->edgeNames(), _edges);
+
+        QCOMPARE(reloaded->nodeValue(u"Label Text"_s, A), u"A & B"_s);
+        QCOMPARE(reloaded->nodeValue(u"Label Text"_s, B), u"<tag>"_s);
+        QCOMPARE(reloaded->nodeValue(u"Label Text"_s, C), u"q\"q"_s);
+        QCOMPARE(reloaded->nodeValue(u"Label Text"_s, E), u"plain"_s);
+
+        QCOMPARE(reloaded->nodeValue(u"Count"_s, B), u"-2"_s);
+        QCOMPARE(reloaded->nodeValue(u"Count"_s, D), u"4"_s);
+
+        QVERIFY(exactlyEqual(reloaded->nodeNumericValue(u"Score"_s, A), 0.5));
+        QVERIFY(exactlyEqual(reloaded->nodeNumericValue(u"Score"_s, B), 1e-7));
+        QVERIFY(exactlyEqual(reloaded->nodeNumericValue(u"Score"_s, C), 1234.0));
+
+        QVERIFY(exactlyEqual(reloaded->edgeNumericValue(u"Weight"_s, A, B), 1.25));
+        QVERIFY(exactlyEqual(reloaded->edgeNumericValue(u"Weight"_s, D, A), 7.25));
     }
 
     void pairwise()
