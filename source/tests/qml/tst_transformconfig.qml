@@ -38,6 +38,9 @@ TestCase
             "NodeDegree":       {valueType: ValueType.Int},
             "NodeName":         {valueType: ValueType.String},
             "Weight":           {valueType: ValueType.Float},
+            "Score":            {valueType: ValueType.Float},
+            "EdgeWeight":       {valueType: ValueType.Float, elementType: ElementType.Edge},
+            "source.Score":     {valueType: ValueType.Float, elementType: ElementType.Edge},
             "Rank %1":          {valueType: ValueType.Float},
             "A\\B":             {valueType: ValueType.String}
         })
@@ -87,14 +90,38 @@ TestCase
         }
 
         function addedOrChangedAttributeNamesAtTransformIndexOrLater(index) { return []; }
+
+        function availableAttributesModel(elementTypes, valueTypes, skipFlags, skipAttributeNames)
+        {
+            return testHelper.availableAttributesModel(elementTypes, valueTypes,
+                skipFlags, skipAttributeNames);
+        }
     }
 
     Item { id: container }
 
+    // The controls created for a transform; those for a locked transform have no
+    // parent, so are destroyed here rather than left to the garbage collector,
+    // which can destroy them in any order, causing spurious warnings
+    property var parameters: []
+
+    function toComponents(config, locked)
+    {
+        config.toComponents(document, container, {textColor: "black"}, locked, null);
+        parameters = config.parameters;
+    }
+
     function cleanup()
     {
+        for(let parameter of parameters)
+            parameter.destroy();
+
+        parameters = [];
+
         for(let i = container.children.length - 1; i >= 0; i--)
             container.children[i].destroy();
+
+        wait(0);
     }
 
     function test_create()
@@ -139,6 +166,12 @@ TestCase
                 transform: "\"RemoveComponents\" where $\"ComponentSize\" <= 1"},
             {tag: "int parameter",
                 transform: "KNN with k = 5"},
+            {tag: "attribute parameter",
+                transform: "KNN using $EdgeWeight with k = 5"},
+            {tag: "node attribute parameters",
+                transform: "\"Some Transform\" using $Score $NodeName"},
+            {tag: "source attribute parameter",
+                transform: "\"Some Transform\" using $source.Score"},
             {tag: "float parameter",
                 transform: "MCLCluster with Granularity = 2.2"},
             {tag: "string list parameter",
@@ -168,7 +201,7 @@ TestCase
         verify(testHelper.graphTransformIsValid(data.transform));
 
         let config = new TransformConfig.Create(0, document, data.transform);
-        config.toComponents(document, container, {textColor: "black"}, false, null);
+        toComponents(config, false);
 
         let expanded = expand(config.template, config.flags, config.parameters);
         verify(testHelper.graphTransformsAreEquivalent(expanded, data.transform),
@@ -197,6 +230,9 @@ TestCase
             {tag: "string list parameter",
                 transform: "KNN with RankOrder = Ascending",
                 expected: "k-NN with Rank Order = Lowest First"},
+            {tag: "attribute parameters",
+                transform: "\"Some Transform\" using $Score $source.Score with k = 3",
+                expected: "Some Transform using Score|Source › Score|with k = 3"},
             {tag: "string",
                 transform: "RemoveNodes where $NodeName includes \"abc\"",
                 expected: "Remove Nodes where Node Name Includes \"abc\""},
@@ -214,7 +250,7 @@ TestCase
         verify(testHelper.graphTransformIsValid(data.transform));
 
         let config = new TransformConfig.Create(0, document, data.transform);
-        config.toComponents(document, container, {textColor: "black"}, true, null);
+        toComponents(config, true);
 
         compare(labelText(), data.expected);
     }

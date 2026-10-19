@@ -20,9 +20,12 @@
 #include "app/attributes/attribute.h"
 #include "app/configgrammar.h"
 #include "app/transform/graphtransformconfigparser.h"
+#include "app/transform/transformdisplaytext.h"
+#include "app/ui/qml/Graphia/availableattributesmodel.h"
 #include "app/ui/visualisations/visualisationconfigparser.h"
 
 #include "tests/common/testenvironment.h"
+#include "tests/common/testgraphmodel.h"
 
 #include <QtQuickTest/quicktest.h>
 #include <QQmlContext>
@@ -30,6 +33,8 @@
 #include <QObject>
 #include <QString>
 #include <QVariantMap>
+
+#include <memory>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -39,6 +44,9 @@ using namespace Qt::Literals::StringLiterals;
 class Setup : public QObject
 {
     Q_OBJECT
+
+    // A graph with a few attributes, for availableAttributesModel
+    std::unique_ptr<TestGraphModel> _graphModel;
 
 public:
     Setup() = default;
@@ -113,10 +121,31 @@ public:
         return {};
     }
 
+    // As Document::availableAttributesModel, but with the attributes of _graphModel, which
+    // are those it declares, such as NodeName, along with those added in applicationAvailable
+    Q_INVOKABLE AvailableAttributesModel* availableAttributesModel(int elementTypes, int valueTypes,
+        int skipFlags, const QStringList& skipAttributeNames) const
+    {
+        // The caller takes ownership
+        return new AvailableAttributesModel(_graphModel->graphModel(), nullptr,
+            static_cast<ElementType>(elementTypes), static_cast<ValueType>(valueTypes),
+            static_cast<AttributeFlag>(skipFlags), skipAttributeNames);
+    }
+
 public slots:
-    void applicationAvailable() // NOLINT readability-convert-member-functions-to-static
+    void applicationAvailable()
     {
         TestEnvironment::initialise();
+
+        _graphModel = std::make_unique<TestGraphModel>(QStringList{u"a-b"_s});
+        // As loaded by a plugin, which declares the attribute's display name
+        _graphModel->addNodeAttribute<QString>(u"NodeName"_s, {{u"a"_s, u"a"_s}, {u"b"_s, u"b"_s}});
+        _graphModel->graphModel().attributeByName(u"NodeName"_s)->setDisplayName(u"Node Name"_s);
+        _graphModel->addNodeAttribute<double>(u"Score"_s, {{u"a"_s, 1.0}, {u"b"_s, 2.0}});
+        _graphModel->addNodeAttribute<double>(u"Weight"_s, {{u"a"_s, 1.0}, {u"b"_s, 2.0}});
+        _graphModel->addNodeAttribute<double>(u"Rank %1"_s, {{u"a"_s, 1.0}, {u"b"_s, 2.0}});
+        _graphModel->addNodeAttribute<QString>(u"A\\B"_s, {{u"a"_s, u"x"_s}, {u"b"_s, u"y"_s}});
+        _graphModel->addEdgeAttribute<double>(u"EdgeWeight"_s, {{{u"a"_s, u"b"_s}, 1.0}});
     }
 
     void qmlEngineAvailable(QQmlEngine* engine)
