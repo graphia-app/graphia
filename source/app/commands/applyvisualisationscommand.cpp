@@ -80,55 +80,59 @@ void ApplyVisualisationsCommand::apply(const QStringList& visualisations,
     }, u"setVisualisations"_s);
 }
 
-QStringList ApplyVisualisationsCommand::patchedVisualisations() const
+QStringList ApplyVisualisationsCommand::patchedVisualisations(const QStringList& previousVisualisations,
+    const QStringList& visualisations, const std::vector<QString>& createdAttributeNames)
 {
     //FIXME This whole approach is pretty fragile and needs to be made more robust
 
+    if(createdAttributeNames.empty())
+        return visualisations;
+
+    QStringList patched;
+    patched.reserve(visualisations.size());
+
+    for(int i = 0; i < visualisations.size(); i++)
+    {
+        const auto& visualisation = visualisations.at(i);
+
+        if(i < previousVisualisations.size())
+        {
+            // Just pass through the visualisations that aren't new
+            patched.append(visualisation);
+            continue;
+        }
+
+        VisualisationConfigParser p;
+
+        if(!p.parse(visualisation))
+            continue;
+
+        auto visualisationConfig = p.result();
+
+        // c.f. u::findUniqueName
+        const QRegularExpression re(uR"(^%1\(\d+\))"_s
+            .arg(QRegularExpression::escape(visualisationConfig._attributeName)));
+
+        for(const auto& createdAttributeName : createdAttributeNames)
+        {
+            if(re.match(createdAttributeName).hasMatch()) // clazy:exclude=use-static-qregularexpression
+                visualisationConfig._attributeName = createdAttributeName;
+        }
+
+        patched.append(visualisationConfig.asString());
+    }
+
+    return patched;
+}
+
+QStringList ApplyVisualisationsCommand::patchedVisualisations() const
+{
+    // When a transform creates a new attribute, its name may not match the default
+    // visualisation that it created for it, so we need to do a bit of patching
     if(_transformIndex >= 0 && _visualisations.size() > _previousVisualisations.size())
     {
-        // When a transform creates a new attribute, its name may not match the default
-        // visualisation that it created for it, so we need to do a bit of patching
-
-        auto createdAttributeNames = _graphModel->addedOrChangedAttributeNamesAtTransformIndex(_transformIndex);
-
-        if(!createdAttributeNames.empty())
-        {
-            QStringList patched;
-            patched.reserve(_visualisations.size());
-
-            for(int i = 0; i < _visualisations.size(); i++)
-            {
-                const auto& visualisation = _visualisations.at(i);
-
-                if(i < _previousVisualisations.size())
-                {
-                    // Just pass through the visualisations that aren't new
-                    patched.append(visualisation);
-                    continue;
-                }
-
-                VisualisationConfigParser p;
-
-                if(!p.parse(visualisation))
-                    continue;
-
-                auto visualisationConfig = p.result();
-
-                // c.f. u::findUniqueName
-                const QRegularExpression re(uR"(^%1\(\d+\))"_s
-                    .arg(QRegularExpression::escape(visualisationConfig._attributeName)));
-
-                for(const auto& createdAttributeName : createdAttributeNames)
-                {
-                    if(re.match(createdAttributeName).hasMatch()) // clazy:exclude=use-static-qregularexpression
-                        visualisationConfig._attributeName = createdAttributeName;
-                }
-
-                patched.append(visualisationConfig.asString());
-            }
-
-            return patched;
-        }
+        return patchedVisualisations(_previousVisualisations, _visualisations,
+            _graphModel->addedOrChangedAttributeNamesAtTransformIndex(_transformIndex));
     }
 
     return _visualisations;

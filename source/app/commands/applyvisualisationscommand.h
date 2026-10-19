@@ -25,6 +25,8 @@
 #include <QString>
 #include <QStringList>
 
+#include <vector>
+
 class GraphModel;
 class Document;
 
@@ -57,6 +59,13 @@ public:
     QString verb() const override;
 
     QString debugDescription() const override;
+
+    // When a transform creates an attribute whose name is already in use, the
+    // attribute is given a unique name instead (c.f. u::findUniqueName), so the
+    // visualisations added for it, i.e. those beyond previousVisualisations,
+    // are changed to refer to the attribute by the name it was actually given
+    static QStringList patchedVisualisations(const QStringList& previousVisualisations,
+        const QStringList& visualisations, const std::vector<QString>& createdAttributeNames);
 
     bool execute() override;
     void undo() override;

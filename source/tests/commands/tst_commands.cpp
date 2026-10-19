@@ -25,8 +25,10 @@
 #include "app/commands/deletenodescommand.h"
 #include "app/commands/editattributecommand.h"
 #include "app/commands/importattributescommand.h"
+#include "app/commands/applyvisualisationscommand.h"
 #include "app/commands/removeattributescommand.h"
 #include "app/ui/selectionmanager.h"
+#include "app/ui/visualisations/visualisationconfigparser.h"
 
 #include "shared/loading/gmlfileparser.h"
 #include "shared/loading/tabulardata.h"
@@ -38,6 +40,7 @@
 #include <algorithm>
 #include <functional>
 #include <memory>
+#include <vector>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -54,6 +57,24 @@ const QByteArray Gml = R"(graph
     edge [ source 0 target 2 weight 3 ]
     edge [ source 2 target 2 weight 4 ]
 ])";
+
+// Whether two lists of visualisations are the same, ignoring formatting
+bool visualisationsEquivalent(const QStringList& a, const QStringList& b)
+{
+    if(a.size() != b.size())
+        return false;
+
+    for(int i = 0; i < a.size(); i++)
+    {
+        VisualisationConfigParser pa;
+        VisualisationConfigParser pb;
+
+        if(!pa.parse(a.at(i)) || !pb.parse(b.at(i)) || !pa.result().equals(pb.result()))
+            return false;
+    }
+
+    return true;
+}
 
 std::unique_ptr<TestGraphModel> createModel()
 {
@@ -297,6 +318,71 @@ private slots:
             QCOMPARE(model->nodeValue(u"kind"_s, u"a"_s), u"p"_s);
             QCOMPARE(model->nodeValue(u"kind"_s, u"c"_s), u"q"_s);
         });
+    }
+
+    void patchedVisualisations_data()
+    {
+        QTest::addColumn<QStringList>("previous");
+        QTest::addColumn<QStringList>("visualisations");
+        QTest::addColumn<QStringList>("createdAttributeNames");
+        QTest::addColumn<QStringList>("expected");
+
+        const QStringList previous{uR"("score" "Size")"_s};
+
+        QTest::newRow("nothing created") << previous <<
+            QStringList{previous.at(0), uR"("Cluster" "Colour")"_s} <<
+            QStringList{} <<
+            QStringList{previous.at(0), uR"("Cluster" "Colour")"_s};
+
+        QTest::newRow("name not in use") << previous <<
+            QStringList{previous.at(0), uR"("Cluster" "Colour")"_s} <<
+            QStringList{u"Cluster"_s, u"Cluster Size"_s} <<
+            QStringList{previous.at(0), uR"("Cluster" "Colour")"_s};
+
+        QTest::newRow("name in use") << previous <<
+            QStringList{previous.at(0), uR"("Cluster" "Colour")"_s, uR"("Cluster Size" "Size")"_s} <<
+            QStringList{u"Cluster(1)"_s, u"Cluster Size(2)"_s} <<
+            QStringList{previous.at(0), u"\"Cluster(1)\" \"Colour\""_s, u"\"Cluster Size(2)\" \"Size\""_s};
+
+        QTest::newRow("previous visualisations unchanged") <<
+            QStringList{uR"("Cluster" "Size")"_s} <<
+            QStringList{uR"("Cluster" "Size")"_s, uR"("Cluster" "Colour")"_s} <<
+            QStringList{u"Cluster(1)"_s} <<
+            QStringList{uR"("Cluster" "Size")"_s, u"\"Cluster(1)\" \"Colour\""_s};
+
+        QTest::newRow("flags and parameters kept") << QStringList{} <<
+            QStringList{uR"([component] "Cluster" "Colour" with gradient = "x")"_s} <<
+            QStringList{u"Cluster(1)"_s} <<
+            QStringList{u"[component] \"Cluster(1)\" \"Colour\" with gradient = \"x\""_s};
+    }
+
+    void patchedVisualisations()
+    {
+        QFETCH(const QStringList, previous);
+        QFETCH(const QStringList, visualisations);
+        QFETCH(QStringList, createdAttributeNames);
+        QFETCH(const QStringList, expected);
+
+        const std::vector<QString> created(createdAttributeNames.begin(), createdAttributeNames.end());
+        auto patched = ApplyVisualisationsCommand::patchedVisualisations(previous, visualisations, created);
+        QVERIFY2(visualisationsEquivalent(patched, expected), qPrintable(patched.join(u"\n"_s)));
+    }
+
+    // The names a transform gives the attributes it creates, when they're already in use
+    void patchedVisualisationsForTransform()
+    {
+        auto model = createModel();
+        QCOMPARE(model->applyTransforms({u"LouvainCluster"_s, u"LouvainCluster"_s}), QStringList{});
+
+        auto created = model->graphModel().addedOrChangedAttributeNamesAtTransformIndex(1);
+        std::ranges::sort(created);
+        QCOMPARE(created, (std::vector<QString>{u"LouvainCluster(1)"_s, u"LouvainClusterSize(1)"_s}));
+
+        auto patched = ApplyVisualisationsCommand::patchedVisualisations({},
+            {u"LouvainCluster Colour"_s, u"LouvainClusterSize Size"_s}, created);
+        QVERIFY2(visualisationsEquivalent(patched,
+            {u"\"LouvainCluster(1)\" Colour"_s, u"\"LouvainClusterSize(1)\" Size"_s}),
+            qPrintable(patched.join(u"\n"_s)));
     }
 };
 
