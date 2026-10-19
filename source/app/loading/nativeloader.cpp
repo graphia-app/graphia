@@ -369,8 +369,8 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
     {
         u::forEachJsonGraphArray(jsonBody["nodeNames"], [graphModel](NodeId nodeId, const QString& nodeName)
         {
-            Q_ASSERT(graphModel->mutableGraph().containsNodeId(nodeId));
-            graphModel->setNodeName(nodeId, nodeName);
+            if(graphModel->mutableGraph().containsNodeId(nodeId))
+                graphModel->setNodeName(nodeId, nodeName);
         });
     }
 
@@ -500,7 +500,8 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
 
             u::forEachJsonGraphArray(jsonLayout["positions"], [this, graphModel](NodeId nodeId, const json& position)
             {
-                Q_ASSERT(graphModel->mutableGraph().containsNodeId(nodeId));
+                if(!graphModel->mutableGraph().containsNodeId(nodeId))
+                    return;
 
                 _nodePositions->set(nodeId, QVector3D(
                     position.at(0),
