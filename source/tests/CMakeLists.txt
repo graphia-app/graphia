@@ -5,7 +5,7 @@ set(CMAKE_AUTOMOC ON)
 
 # The Qt targets appcore links against must also be visible here, otherwise
 # Qt can't walk the tests' dependencies when finalising the executables
-find_package(Qt6 REQUIRED COMPONENTS Concurrent Core Qml Quick QuickControls2 OpenGL Svg Widgets Xml Network Test)
+find_package(Qt6 REQUIRED COMPONENTS Concurrent Core Qml Quick QuickControls2 OpenGL Svg Widgets Xml Network Test QuickTest)
 if(NOT EMSCRIPTEN)
     find_package(Qt6 REQUIRED COMPONENTS WebEngineQuick)
 endif()
@@ -42,3 +42,7 @@ add_graphia_test(tst_savers loading/tst_savers.cpp)
 add_graphia_test(tst_nativeloader loading/tst_nativeloader.cpp)
 add_graphia_test(tst_commands commands/tst_commands.cpp)
 add_graphia_test(tst_visualisationconfigparser ui/tst_visualisationconfigparser.cpp)
+
+add_graphia_test(tst_qml qml/tst_qml.cpp)
+target_link_libraries(tst_qml PRIVATE Qt6::QuickTest)
+target_compile_definitions(tst_qml PRIVATE QUICK_TEST_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/qml")
