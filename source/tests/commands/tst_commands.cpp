@@ -158,6 +158,45 @@ private slots:
         QCOMPARE(selectionManager.selectedNodes(), selection);
     }
 
+    void editAttribute()
+    {
+        auto model = createModel();
+        QVERIFY(model != nullptr);
+
+        const auto* score = model->graphModel().attributeByName(u"score"_s);
+        const auto description = score->description();
+
+        AttributeEdits edits;
+        edits.setNodeValue(model->nodeId(u"a"_s), u"7"_s);
+        edits.setNodeValue(model->nodeId(u"b"_s), u"1.25"_s);
+        edits.setNodeValue(model->nodeId(u"c"_s), u""_s);
+
+        EditAttributeCommand command(&model->graphModel(), u"score"_s, edits, ValueType::Unknown, description);
+        checkExecuteUndoRedo(*model, command, [&]
+        {
+            QCOMPARE(model->nodeNumericValue(u"score"_s, u"a"_s), 7.0);
+            QCOMPARE(model->nodeNumericValue(u"score"_s, u"b"_s), 1.25);
+            QVERIFY(!model->nodeHasValue(u"score"_s, u"c"_s));
+        });
+    }
+
+    void editEdgeAttribute()
+    {
+        auto model = createModel();
+        QVERIFY(model != nullptr);
+
+        const auto description = model->graphModel().attributeByName(u"weight"_s)->description();
+
+        AttributeEdits edits;
+        edits.setEdgeValue(model->edgeId(u"b"_s, u"c"_s), u"-1"_s);
+
+        EditAttributeCommand command(&model->graphModel(), u"weight"_s, edits, ValueType::Unknown, description);
+        checkExecuteUndoRedo(*model, command, [&]
+        {
+            QCOMPARE(model->edgeNumericValue(u"weight"_s, u"b"_s, u"c"_s), -1.0);
+        });
+    }
+
     void editAttributeType()
     {
         auto model = createModel();
