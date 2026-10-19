@@ -220,6 +220,9 @@ private slots:
         QTest::newRow("empty") << QString() << u"a"_s << -1;
         QTest::newRow("both empty") << QString() << QString() << 0;
         QTest::newRow("empty and number") << u""_s << u"1"_s << -1;
+        QTest::newRow("large numbers") << u"x9999999999"_s << u"x10000000000"_s << -1;
+        QTest::newRow("large numbers, then text") << u"x3000000000b"_s << u"x4000000000a"_s << -1;
+        QTest::newRow("large numbers with leading zeroes") << u"x0010000000000"_s << u"x9999999999"_s << 1;
     }
 
     void numericCompare()
