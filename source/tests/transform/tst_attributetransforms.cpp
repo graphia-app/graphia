@@ -170,6 +170,13 @@ private slots:
         check(u"b"_s, u"d"_s, 0, 2, 2.0);
     }
 
+    void edgeReductionRetainsAll()
+    {
+        auto model = createCompleteGraph(10);
+        QCOMPARE(model->applyTransforms({u"EdgeReduction with Percentage = 100 Minimum = 1"_s}), QStringList{});
+        QCOMPARE(model->graph().numEdges(), 45);
+    }
+
     void edgeReductionMinimum()
     {
         auto model = createCompleteGraph(10);
