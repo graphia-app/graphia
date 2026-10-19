@@ -68,7 +68,8 @@ private:
     bool _layoutPaused = false;
 
     Projection _projection = Projection::Perspective;
-    Shading _shading = Shading::Smooth;
+    Shading _shading2D = Shading::Flat;
+    Shading _shading3D = Shading::Smooth;
 
     QString _log;
 
@@ -93,7 +94,8 @@ public:
     bool layoutPaused() const { return _layoutPaused; }
 
     Projection projection() const { return _projection; }
-    Shading shading() const { return _shading; }
+    Shading shading2D() const { return _shading2D; }
+    Shading shading3D() const { return _shading3D; }
 
     static QString pluginNameFor(const QUrl& url);
     static bool canOpen(const QUrl& url);

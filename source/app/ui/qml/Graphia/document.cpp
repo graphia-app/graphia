@@ -709,7 +709,8 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
             }
 
             setProjection(static_cast<int>(completedLoader->projection()));
-            setShading3D(static_cast<int>(completedLoader->shading()));
+            setShading2D(static_cast<int>(completedLoader->shading2D()));
+            setShading3D(static_cast<int>(completedLoader->shading3D()));
 
             _uiData = completedLoader->uiData();
 
