@@ -163,6 +163,24 @@ private slots:
         QCOMPARE(model->edgeNumericValue(u"EdgeBetweenness"_s, from, to), expected);
     }
 
+    // The a-b and b-a edges are distinct routes between a and b, so they share
+    // the shortest paths that pass between them
+    void reciprocalEdgeBetweenness()
+    {
+        TestGraphModel model({u"d-a"_s, u"a-b"_s, u"b-a"_s, u"b-c"_s});
+        QCOMPARE(model.applyTransforms({u"Betweenness"_s}), QStringList{});
+
+        QCOMPARE(model.nodeNumericValue(u"NodeBetweenness"_s, u"d"_s), 0.0);
+        QCOMPARE(model.nodeNumericValue(u"NodeBetweenness"_s, u"a"_s), 2.0);
+        QCOMPARE(model.nodeNumericValue(u"NodeBetweenness"_s, u"b"_s), 2.0);
+        QCOMPARE(model.nodeNumericValue(u"NodeBetweenness"_s, u"c"_s), 0.0);
+
+        QCOMPARE(model.edgeNumericValue(u"EdgeBetweenness"_s, u"d"_s, u"a"_s), 3.0);
+        QCOMPARE(model.edgeNumericValue(u"EdgeBetweenness"_s, u"a"_s, u"b"_s), 2.0);
+        QCOMPARE(model.edgeNumericValue(u"EdgeBetweenness"_s, u"b"_s, u"a"_s), 2.0);
+        QCOMPARE(model.edgeNumericValue(u"EdgeBetweenness"_s, u"b"_s, u"c"_s), 3.0);
+    }
+
     void clustering_data()
     {
         QTest::addColumn<QString>("transform");
