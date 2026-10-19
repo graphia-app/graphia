@@ -263,6 +263,24 @@ private slots:
             QByteArray(R"([{"CXVersion":"2.0"},{"nodes":[{"id":1,"v":{"n":"A","score":2}}]}])") <<
             QStringList{u"A"_s} << QStringList{} << QStringList{u"score|A|2"_s};
 
+        // BioPAX
+        QTest::newRow("BioPAX") << u"BioPAX"_s << QByteArray(
+            "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" "
+            "xmlns:bp=\"http://www.biopax.org/release/biopax-level3.owl#\">\n"
+            "<bp:Protein rdf:ID=\"p1\"><bp:displayName>Kinase</bp:displayName><bp:comment>c</bp:comment></bp:Protein>\n"
+            "<bp:SmallMolecule rdf:ID=\"m1\"/>\n"
+            "<bp:BiochemicalReaction rdf:ID=\"r1\"><bp:left rdf:resource=\"#m1\"/></bp:BiochemicalReaction>\n"
+            "<bp:Catalysis rdf:ID=\"c1\"><bp:controller rdf:resource=\"#p1\"/></bp:Catalysis>\n"
+            "</rdf:RDF>\n") <<
+            QStringList{u"Kinase"_s, u"c1"_s, u"m1"_s, u"r1"_s} << QStringList{u"c1-Kinase"_s, u"r1-m1"_s} <<
+            QStringList{u"ID|Kinase|p1"_s, u"Class|Kinase|Protein"_s, u"Comment|Kinase|c"_s};
+        QTest::newRow("BioPAX nested") << u"BioPAX"_s << QByteArray(
+            "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" "
+            "xmlns:bp=\"http://www.biopax.org/release/biopax-level3.owl#\">\n"
+            "<bp:Complex rdf:ID=\"x\"><bp:Protein/></bp:Complex><bp:Protein rdf:ID=\"p\"/>\n"
+            "</rdf:RDF>\n") <<
+            QStringList{u"p"_s, u"x"_s} << QStringList{} << QStringList{};
+
         // Adjacency matrices; an edge is created from each row's node to each column's node
         QTest::newRow("Matrix") << u"MatrixCSV"_s << QByteArray("0,2\n-3,0\n") <<
             QStringList{u"Node 1"_s, u"Node 2"_s} << QStringList{u"Node 1-Node 2"_s, u"Node 2-Node 1"_s} <<
