@@ -117,8 +117,9 @@ function Create(transformIndex, document, transformString)
         {
             if(text[0] === '$')
             {
+                // As with the action, escape '%' in attribute names
                 text = text.substring(1);
-                return "$" + document.writtenAttributeName(text);
+                return "$" + document.writtenAttributeName(text).replace(/%/g, "%!");
             }
 
             return "%" + parameterIndex++;
