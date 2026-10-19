@@ -241,6 +241,23 @@ private slots:
         });
     }
 
+    void removeAttributes()
+    {
+        auto model = createModel();
+        QVERIFY(model != nullptr);
+
+        // Overriding the description, which must also be restored
+        EditAttributeCommand editCommand(&model->graphModel(), u"score"_s, {}, ValueType::Unknown, u"Scores"_s);
+        QVERIFY(editCommand.execute());
+
+        RemoveAttributesCommand command(&model->graphModel(), {u"score"_s, u"weight"_s});
+        checkExecuteUndoRedo(*model, command, [&]
+        {
+            QVERIFY(!model->graphModel().attributeExists(u"score"_s));
+            QVERIFY(!model->graphModel().attributeExists(u"weight"_s));
+        });
+    }
+
     void importAttributes()
     {
         auto model = createModel();
