@@ -404,6 +404,12 @@ private slots:
             {0.0, 1.34164079, 0.0}, {1.60356745, 0.447213595, 0.0}
         };
 
+        QTest::newRow("UnitScaling") << u"UnitScaling"_s << input << Rows
+        {
+            {0.141421356, 0.182574186, 0.0}, {0.282842712, 0.365148372, 0.0},
+            {0.424264069, 0.730296743, 0.0}, {0.848528137, 0.547722558, 0.0}
+        };
+
         QTest::newRow("Softmax") << u"Softmax"_s << input << Rows
         {
             {0.00626878689, 9.35719813e-14, 0.25}, {0.0170403295, 2.06106005e-09, 0.25},
@@ -417,7 +423,7 @@ private slots:
             {3.0, 5.83333333, 4.66666667}, {4.66666667, 3.0, 5.83333333}
         };
 
-        for(const auto* normaliser : {"MinMax", "Mean", "Standardisation", "Quantile", "Softmax"})
+        for(const auto* normaliser : {"MinMax", "Mean", "Standardisation", "UnitScaling", "Quantile", "Softmax"})
             QTest::addRow("%s empty", normaliser) << QString::fromLatin1(normaliser) << Rows{} << Rows{};
     }
 
