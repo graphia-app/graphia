@@ -28,6 +28,7 @@
 #include "app/transform/transforminfo.h"
 
 #include "shared/graph/elementid.h"
+#include "shared/loading/iparser.h"
 
 #include <QByteArray>
 #include <QFile>
@@ -48,6 +49,9 @@ class TestGraphModel
 private:
     TestPlugin _plugin;
     GraphModel _graphModel{application(), &_plugin};
+
+    // Declared after the GraphModel, as parsers may refer to its graph
+    std::unique_ptr<IParser> _parser;
 
     std::map<QString, NodeId> _nodeIds;
     std::map<std::pair<QString, QString>, EdgeId> _edgeIds;
@@ -158,6 +162,8 @@ public:
             return nullptr;
         }
 
+        model->_parser = std::move(parser);
+
         graphModel.userNodeData().exposeAsAttributes(graphModel);
         graphModel.userEdgeData().exposeAsAttributes(graphModel);
         graphModel.initialiseAttributeRanges();
@@ -169,6 +175,11 @@ public:
     }
 
     GraphModel& graphModel() { return _graphModel; }
+
+    // The parser that parse used, for querying anything else it loaded
+    template<typename Parser>
+    const Parser* parser() const { return dynamic_cast<const Parser*>(_parser.get()); }
+
     const Graph& graph() const { return _graphModel.graph(); }
 
     NodeId nodeId(const QString& name) const { return _nodeIds.at(name); }

@@ -22,9 +22,11 @@
 
 #include "shared/plugins/baseplugin.h"
 
+#include <QByteArray>
 #include <QString>
 #include <QStringList>
 #include <QUrl>
+#include <QVariant>
 
 #include <memory>
 
@@ -43,6 +45,39 @@ public:
     bool editable() const override { return true; }
 
     std::unique_ptr<IPluginInstance> createInstance() override { return nullptr; }
+};
+
+// A minimal plugin instance, which saves nothing, and records the data it's given to load
+class TestPluginInstance : public IPluginInstance
+{
+private:
+    const IPlugin* _plugin = nullptr;
+    QByteArray _loadedData;
+    int _loadedDataVersion = -1;
+
+public:
+    explicit TestPluginInstance(const IPlugin* plugin) : _plugin(plugin) {}
+
+    void initialise(const IPlugin*, IDocument*, const IParserThread*) override {}
+    std::unique_ptr<IParser> parserForUrlTypeName(const QString&) override { return nullptr; }
+
+    void applyParameter(const QString&, const QVariant&) override {}
+
+    QStringList defaultTransforms() const override { return {}; }
+    QStringList defaultVisualisations() const override { return {}; }
+
+    QByteArray save(IMutableGraph&, Progressable&) const override { return {}; }
+    bool load(const QByteArray& data, int dataVersion, IMutableGraph&, IParser&) override
+    {
+        _loadedData = data;
+        _loadedDataVersion = dataVersion;
+        return true;
+    }
+
+    const IPlugin* plugin() override { return _plugin; }
+
+    const QByteArray& loadedData() const { return _loadedData; }
+    int loadedDataVersion() const { return _loadedDataVersion; }
 };
 
 #endif // TESTPLUGIN_H
