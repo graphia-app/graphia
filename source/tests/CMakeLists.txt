@@ -29,3 +29,4 @@ add_graphia_test(tst_graphtransformconfigparser transform/tst_graphtransformconf
 add_graphia_test(tst_conditionfncreator attributes/tst_conditionfncreator.cpp)
 add_graphia_test(tst_structuraltransforms transform/tst_structuraltransforms.cpp)
 add_graphia_test(tst_analysistransforms transform/tst_analysistransforms.cpp)
+add_graphia_test(tst_attributetransforms transform/tst_attributetransforms.cpp)
