@@ -25,6 +25,7 @@
 #include "shared/commands/icommand.h"
 
 #include <QTest>
+#include <QDebug>
 #include <QString>
 #include <QStringList>
 
@@ -110,6 +111,12 @@ private slots:
         QTest::newRow("Perfect association") << 5 << 0 << 0 << 5 << 0.007936507936507936;
         QTest::newRow("Zero cell") << 7 << 12 << 0 << 5 << 0.272068511198946;
         QTest::newRow("Large") << 100 << 50 << 40 << 120 << 1.2818103033369866e-13;
+
+        // Tables with the same probability as the observed one count towards the p-value,
+        // but rounding errors can make their probabilities appear slightly greater
+        QTest::newRow("Tied tables") << 0 << 1 << 6 << 5 << 1.0;
+        QTest::newRow("Tied tables, half") << 0 << 2 << 5 << 3 << 0.4444444444444444;
+        QTest::newRow("Balanced") << 2 << 2 << 2 << 2 << 1.0;
     }
 
     void fishers()
@@ -124,6 +131,34 @@ private slots:
             static_cast<size_t>(c), static_cast<size_t>(d));
         QVERIFY2(approximatelyEqual(actual, expected),
             qPrintable(u"%1 != %2"_s.arg(actual, 0, 'g', 17).arg(expected, 0, 'g', 17)));
+    }
+
+    // Every table of up to 20 elements, compared with an exact calculation
+    void fishersExhaustive()
+    {
+        const uint64_t MaxTotal = 20;
+        int failures = 0;
+
+        for(uint64_t a = 0; a <= MaxTotal; a++)
+        for(uint64_t b = 0; a + b <= MaxTotal; b++)
+        for(uint64_t c = 0; a + b + c <= MaxTotal; c++)
+        for(uint64_t d = 0; a + b + c + d <= MaxTotal; d++)
+        {
+            // Fisher's test isn't defined if any row or column is empty
+            if(a + b == 0 || c + d == 0 || a + c == 0 || b + d == 0)
+                continue;
+
+            auto actual = EnrichmentCalculator::fishers(a, b, c, d);
+            auto expected = exactFishers(a, b, c, d);
+
+            if(!approximatelyEqual(actual, expected) && failures++ < 5)
+            {
+                qWarning().noquote() << u"%1 %2 %3 %4: %5 != %6"_s.arg(a).arg(b).arg(c).arg(d)
+                    .arg(actual, 0, 'g', 17).arg(expected, 0, 'g', 17);
+            }
+        }
+
+        QCOMPARE(failures, 0);
     }
 
     void overRepresentation()
