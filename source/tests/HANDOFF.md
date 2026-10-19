@@ -90,6 +90,10 @@ testing, which may come later as an extra safety net.
   saves, which `NativeSaverFactory` gathers from the `Document`. Tests can
   therefore save native files without a `Document`.
 - **`AttributeEdits`:** has public setters, so tests can create edits.
+- **`tst_qml`:** runs the QML tests in `source/tests/qml` with Qt Quick Test.
+  `tst_qml.cpp` gives them a `testHelper` context property, which parses
+  transforms and visualisations with the real parsers, so that the QML tests
+  can stand in for a `Document` with a small `QtObject`.
 - **`lexyutils::describeFirstError`:** in `source/thirdparty/lexy_utils.h`,
   gives the line and column of the first lexy parse error.
 
@@ -112,6 +116,7 @@ testing, which may come later as an extra safety net.
 | `tst_nativeloader` | native files: every format version, Tutorial.graphia, malformed files, save then load |
 | `tst_commands` | execute, undo and redo of delete nodes and the edit, clone, remove and import attribute commands |
 | `tst_visualisationconfigparser` | visualisation config round trips, malformed configs, the display form |
+| `tst_qml` | `Utils.js`, `AttributeUtils.js`, `VisualisationUtils.js`, and `TransformConfig.js`: building a transform's controls, then its expression, gives back the same transform; locked transforms' text |
 
 ## Bugs fixed so far
 
@@ -166,6 +171,14 @@ Each one is a commit; see `git log` for the details.
   - remove's undo lost the description and column order, and removing user
     data used a freed name, so on macOS undo didn't restore it at all;
   - an import that only replaces columns couldn't be undone.
+- **Transform configs:** quotes in condition strings weren't escaped when
+  transforms were rewritten on loading, so the transform was lost.
+- **Transform panel (QML):**
+  - editing a value in a condition on an attribute with `%` and a digit in
+    its name changed the name;
+  - labels with quotes or backslashes lost them, or failed with an
+    exception;
+  - attribute names starting with "source" or "target" were capitalised.
 - **Visualisation configs:**
   - whole number parameters couldn't be parsed;
   - numbers were written with 6 significant figures;
@@ -206,6 +219,14 @@ Each one is a commit; see `git log` for the details.
   in production code.
 - **Warnings:** `QTest::failOnWarning()` in `init()` makes a test fail on any
   Qt warning. `tst_enrichmenttablemodel` uses it.
+- **QML tests:**
+  - The JavaScript and QML files are compiled into the binary, so rebuild
+    `tst_qml` after changing them.
+  - Run one file with `tst_qml -input <path to .qml>`.
+  - `AttributeUtils.prettify` puts thin spaces (U+2009) around `›`.
+  - `TransformConfig.js` isn't a `.pragma library`, but
+    `Qt.createComponent("TransformParameter.qml")` still finds the component
+    when called from a test, so the real controls are created.
 - **valgrind** works well on the Debug build and found a use-after-free that
   only failed on macOS. Set `QT_ENABLE_REGEXP_JIT=0`, otherwise
   `QRegularExpression`'s JIT produces false reports of uninitialised values.
@@ -213,9 +234,9 @@ Each one is a commit; see `git log` for the details.
 
 ## Next steps, in rough order
 
-1. **QML JavaScript helpers:** Qt Quick Test (`QUICK_TEST_MAIN`) for
-   `Utils.js`, `TransformConfig.js`, `AttributeUtils.js`, `MenuUtils.js` and
-   `VisualisationUtils.js` in `app/ui/qml/Graphia/`.
+1. **More QML:** `MenuUtils.js` (cloning menus, which needs
+   `Graphia.Controls` menus), and attribute parameters in
+   `TransformConfig.js`, which need an `AvailableAttributesModel`.
 2. **Commands that need a `Document`:** `ApplyTransformsCommand` and
    `ApplyVisualisationsCommand`. These may need the same kind of separation as
    `NativeSaver::Content`, or a `Document` level integration test, possibly

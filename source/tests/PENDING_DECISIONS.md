@@ -31,6 +31,20 @@ own. This file should be deleted once everything here is resolved.
   user attributes when the file is imported.
 - **Pairwise exports drop nodes that have no edges.** Since 4e36b1e, a row
   with a single node name creates that node, so these could be exported too.
+- **Quotes in attribute names.** `Attribute::parseAttributeName` removes every
+  quote from a name, and names are put between quotes without escaping when
+  expressions are built (`Attribute::enquoteAttributeName`,
+  `AvailableAttributesModel::get`, `GraphTransformConfig::asString`). So an
+  attribute with a `"` in its name, for example from a CSV header, can't be
+  used in a transform. Dots are already replaced with underscores when an
+  attribute is created (`GraphModel::normalisedAttributeName`); doing the same
+  for quotes would be the simplest fix.
+- **Strings starting with `$` in conditions.** A quoted string in a condition
+  is stored in the same way as an attribute name, which is distinguished only
+  by a leading `$`. So in `$"Node Name" == "$HOME"`, `"$HOME"` is taken to be
+  the attribute `HOME`. Fixing this needs a separate type for attribute
+  references in `GraphTransformConfig::TerminalValue`, and a change to how
+  conditions are passed to QML, which relies on the `$`.
 
 ## Behaviour changes to confirm or drop
 
@@ -53,6 +67,9 @@ own. This file should be deleted once everything here is resolved.
 - **Clearing a numeric attribute value.** Editing a numeric value to nothing
   was ignored. It now removes the value, which undoing an edit of a value that
   was missing requires.
+- **Newlines in locked transforms.** A newline in a string value in a locked
+  transform was shown as a line break; since the fix for labels with quotes
+  or backslashes, it's shown as a space, like other whitespace.
 - **9fd3601: DOT `node [...]` and `edge [...]` defaults.** These used to be
   applied to every element after parsing, overriding explicit values and
   ignoring subgraph scope. They now follow the DOT spec: they apply to
