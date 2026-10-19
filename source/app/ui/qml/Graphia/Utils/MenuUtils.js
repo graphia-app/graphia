@@ -66,7 +66,14 @@ function addSubMenuTo(menu, title)
 function clear(menu)
 {
     while(menu.count > 0)
-        menu.takeItem(0);
+    {
+        let item = menu.itemAt(0);
+
+        if(item.subMenu)
+            menu.removeMenu(item.subMenu);
+        else
+            menu.removeItem(item);
+    }
 }
 
 // Clone one menu into another, such that to is a "proxy" for from that looks
@@ -140,12 +147,14 @@ function clone(from, to)
     // Create new ButtonGroups which correspond to the source menu's ButtonGroups
     for(let key in buttonGroups)
     {
-        let fromButtonGroup = buttonGroups[key];
-        let toButtonGroup = createQmlItem("ButtonGroup", to)
+        let menuItems = buttonGroups[key];
 
-        fromButtonGroup.forEach(function(menuItem)
+        // Parent the group to one of its items, so that it's destroyed along with them
+        let toButtonGroup = createQmlItem("ButtonGroup", menuItems[0]);
+
+        menuItems.forEach(function(menuItem)
         {
-            toButtonGroup.addButton(menuItem);
+            menuItem.QtQuickControls.ButtonGroup.group = toButtonGroup;
         });
     }
 }
