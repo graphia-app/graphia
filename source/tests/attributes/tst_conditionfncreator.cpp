@@ -153,6 +153,14 @@ private slots:
         QTest::newRow("string op on int")           << uR"($"Int" includes "1")"_s              << u"01000"_s;
         QTest::newRow("string op on float")         << uR"($"Float" starts "-")"_s              << u"10000"_s;
 
+        // String operators, value on the left hand side
+        QTest::newRow("value includes")             << uR"("apple pie" includes $"String")"_s   << u"10011"_s;
+        QTest::newRow("value excludes")             << uR"("apple pie" excludes $"String")"_s   << u"01100"_s;
+        QTest::newRow("value starts")               << uR"("cherry pie" starts $"String")"_s    << u"00110"_s;
+        QTest::newRow("value ends")                 << uR"("big apple" ends $"String")"_s       << u"10010"_s;
+        QTest::newRow("value matches")              << uR"("apple" matches $"String")"_s        << u"10010"_s;
+        QTest::newRow("value matchesCaseInsensitive") << uR"("BANANA" matchesCaseInsensitive $"String")"_s << u"01010"_s;
+
         // Both sides are attributes
         QTest::newRow("int == int")                 << uR"($"Int" == $"Int2")"_s                << u"01010"_s;
         QTest::newRow("int < int")                  << uR"($"Int" < $"Int2")"_s                 << u"10001"_s;
