@@ -38,7 +38,8 @@ TestCase
             "NodeDegree":       {valueType: ValueType.Int},
             "NodeName":         {valueType: ValueType.String},
             "Weight":           {valueType: ValueType.Float},
-            "Rank %1":          {valueType: ValueType.Float}
+            "Rank %1":          {valueType: ValueType.Float},
+            "A\\B":             {valueType: ValueType.String}
         })
 
         property var parameters:
@@ -201,7 +202,10 @@ TestCase
                 expected: "Remove Nodes where Node Name Includes \"abc\""},
             {tag: "string with quotes and backslashes",
                 transform: "RemoveNodes where $NodeName == \"a \\\"b\\\" \\\\ c\"",
-                expected: "Remove Nodes where Node Name = \"a \"b\" \\ c\""}
+                expected: "Remove Nodes where Node Name = \"a \"b\" \\ c\""},
+            {tag: "backslash in attribute name",
+                transform: "RemoveNodes where $\"A\\B\" == \"x\"",
+                expected: "Remove Nodes where A\\B = \"x\""}
         ];
     }
 
@@ -212,6 +216,22 @@ TestCase
         let config = new TransformConfig.Create(0, document, data.transform);
         config.toComponents(document, container, {textColor: "black"}, true, null);
 
+        compare(labelText(), data.expected);
+    }
+
+    function test_addLabelTo_data()
+    {
+        return [
+            {tag: "plain", text: "Invalid Expression", expected: "Invalid Expression"},
+            {tag: "whitespace", text: " a \n b ", expected: "a b"},
+            {tag: "quotes", text: "Attribute \"x\" not found", expected: "Attribute \"x\" not found"},
+            {tag: "backslashes", text: "a \\u b \\", expected: "a \\u b \\"}
+        ];
+    }
+
+    function test_addLabelTo(data)
+    {
+        TransformConfig.addLabelTo(data.text, container, {textColor: "black"});
         compare(labelText(), data.expected);
     }
 }
