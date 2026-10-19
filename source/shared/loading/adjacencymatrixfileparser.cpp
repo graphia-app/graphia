@@ -118,14 +118,35 @@ bool AdjacencyMatrixParser::parseAdjacencyMatrix(const TabularData& tabularData,
 
     std::map<size_t, NodeId> indexToNodeId;
 
+    // Nodes are indexed by their position in the data, and named by
+    // whichever headers there are, if any
+    auto addNode = [&](size_t index)
+    {
+        if(u::contains(indexToNodeId, index))
+            return indexToNodeId.at(index);
+
+        QString nodeName;
+        if(hasColumnHeaders)
+            nodeName = tabularData.valueAt(index + dataStartColumn, 0);
+        else if(hasRowHeaders)
+            nodeName = tabularData.valueAt(0, index + dataStartRow);
+
+        if(nodeName.isEmpty())
+            nodeName = QObject::tr("Node %1").arg(index + 1);
+
+        auto nodeId = graphModel->mutableGraph().addNode();
+        _userNodeData->setValueBy(nodeId, nodeNameAttribute(), nodeName);
+        graphModel->setNodeName(nodeId, nodeName);
+
+        indexToNodeId[index] = nodeId;
+
+        return nodeId;
+    };
+
     for(size_t rowIndex = dataStartRow; rowIndex < tabularData.numRows(); rowIndex++)
     {
-        const QString rowHeader = hasRowHeaders ? tabularData.valueAt(0, rowIndex) : QString();
-
         for(size_t columnIndex = dataStartColumn; columnIndex < tabularData.numColumns(); columnIndex++)
         {
-            const QString columnHeader = hasColumnHeaders ? tabularData.valueAt(columnIndex, 0) : QString();
-
             const auto& value = tabularData.valueAt(columnIndex, rowIndex);
             double edgeWeight = u::toNumber(value);
 
@@ -137,23 +158,8 @@ bool AdjacencyMatrixParser::parseAdjacencyMatrix(const TabularData& tabularData,
             if(absEdgeWeight <= _minimumAbsEdgeWeight)
                 continue;
 
-            auto addNode = [this, &indexToNodeId, graphModel](size_t index, const QString& name)
-            {
-                if(u::contains(indexToNodeId, index))
-                    return indexToNodeId.at(index);
-
-                auto nodeId = graphModel->mutableGraph().addNode();
-                auto nodeName = !name.isEmpty() ? name : QObject::tr("Node %1").arg(index + 1);
-                _userNodeData->setValueBy(nodeId, nodeNameAttribute(), nodeName);
-                graphModel->setNodeName(nodeId, nodeName);
-
-                indexToNodeId[index] = nodeId;
-
-                return nodeId;
-            };
-
-            const NodeId sourceNodeId = addNode(columnIndex, columnHeader);
-            const NodeId targetNodeId = addNode(rowIndex, rowHeader);
+            const NodeId sourceNodeId = addNode(columnIndex - dataStartColumn);
+            const NodeId targetNodeId = addNode(rowIndex - dataStartRow);
             addEdge(graphModel, sourceNodeId, targetNodeId, edgeWeight, absEdgeWeight);
 
             setProgress(static_cast<int>((progress++ * 100) / totalIterations));
