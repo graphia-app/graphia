@@ -459,6 +459,9 @@ private slots:
         // See imputeValue for the data
         QTest::newRow("Constant") << static_cast<int>(MissingDataType::Constant) << 2 << 1 << 9.0;
 
+        QTest::newRow("Column average") << static_cast<int>(MissingDataType::ColumnAverage) << 1 << 2 << 4.0;
+        QTest::newRow("Column average 2") << static_cast<int>(MissingDataType::ColumnAverage) << 4 << 4 << 3.25;
+
         QTest::newRow("Interpolation") << static_cast<int>(MissingDataType::RowInterpolation) << 2 << 1 << 3.0;
         QTest::newRow("Interpolation 2") << static_cast<int>(MissingDataType::RowInterpolation) << 3 << 1 << 5.0;
         QTest::newRow("Interpolation right only") << static_cast<int>(MissingDataType::RowInterpolation) << 1 << 2 << 4.0;
