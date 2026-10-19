@@ -214,6 +214,9 @@ bool StandardisationNormaliser::process(ContinuousDataVectors& dataRows, IParser
 
 bool UnitScalingNormaliser::process(ContinuousDataVectors& dataRows, IParser* parser) const
 {
+    if(dataRows.empty())
+        return true;
+
     auto numColumns = dataRows.at(0).size();
 
     std::vector<double> vectorLengthColumn(numColumns);
@@ -252,7 +255,8 @@ bool UnitScalingNormaliser::process(ContinuousDataVectors& dataRows, IParser* pa
 
         for(size_t column = 0; column < numColumns; column++)
         {
-            auto scaledValue = dataRow.valueAt(column) / vectorLengthColumn[column];
+            auto scaledValue = vectorLengthColumn[column] > 0.0 ?
+                dataRow.valueAt(column) / vectorLengthColumn[column] : 0.0;
             dataRow.setValueAt(column, scaledValue);
         }
 
