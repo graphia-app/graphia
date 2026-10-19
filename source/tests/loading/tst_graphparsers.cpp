@@ -302,6 +302,12 @@ private slots:
         QTest::newRow("Matrix minimum weight") << u"MatrixCSV minimum 0.5"_s <<
             QByteArray(",A,B,C\nA,0,1,0\nB,1,0,0.5\nC,0,0.5,0\n") <<
             QStringList{u"A"_s, u"B"_s} << QStringList{u"A-B"_s, u"B-A"_s} << QStringList{};
+        QTest::newRow("Matrix column headers") << u"MatrixCSV"_s << QByteArray("A,B\n0,1\n2,0\n") <<
+            QStringList{u"A"_s, u"B"_s} << QStringList{u"A-B"_s, u"B-A"_s} <<
+            QStringList{u"EdgeWeight|A|B|1"_s, u"EdgeWeight|B|A|2"_s};
+        QTest::newRow("Matrix row headers") << u"MatrixCSV"_s << QByteArray("A,0,1\nB,2,0\n") <<
+            QStringList{u"A"_s, u"B"_s} << QStringList{u"A-B"_s, u"B-A"_s} <<
+            QStringList{u"EdgeWeight|A|B|1"_s, u"EdgeWeight|B|A|2"_s};
         QTest::newRow("Matrix empty cells") << u"MatrixCSV"_s << QByteArray(",A,B\nA,5,\nB,1,\n") <<
             QStringList{u"A"_s, u"B"_s} << QStringList{u"A-A"_s, u"B-A"_s} <<
             QStringList{u"EdgeWeight|A|A|5"_s, u"EdgeWeight|B|A|1"_s};
