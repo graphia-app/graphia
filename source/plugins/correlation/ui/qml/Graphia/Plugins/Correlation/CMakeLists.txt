@@ -18,7 +18,7 @@ qt_add_qml_module(correlation_qml
             correlationplot_discrete.cpp
         correlationplotsaveimagecommand.h correlationplotsaveimagecommand.cpp
         correlationtabulardataparser.h correlationtabulardataparser.cpp
-        correlationtype.h correlationtype.cpp
+        correlationtype.h
         importannotationskeydetection.h importannotationskeydetection.cpp
         qcpcolumnannotations.h qcpcolumnannotations.cpp
     RESOURCES
