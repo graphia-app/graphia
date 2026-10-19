@@ -61,11 +61,11 @@ std::unique_ptr<TestGraphModel> createModel()
     model->addNodeAttribute<QString>(u"Label Text"_s,
         {{A, u"A & B"_s}, {B, u"<tag>"_s}, {C, u"q\"q"_s}, {D, u""_s}, {E, u"plain"_s}});
     model->addNodeAttribute<int>(u"Count"_s,
-        {{A, 1}, {B, -2}, {C, 3}, {D, 4}, {E, 0}});
+        {{A, 1}, {B, -2}, {C, 3}, {D, 2000000001}, {E, 0}});
     model->addNodeAttribute<double>(u"Score"_s,
-        {{A, 0.5}, {B, 1e-7}, {C, 1234.0}, {D, -0.5}, {E, 3.0}});
+        {{A, 0.123456789}, {B, 1e-7}, {C, 12345678.0}, {D, -0.5}, {E, 3.0}});
     model->addEdgeAttribute<double>(u"Weight"_s,
-        {{{A, B}, 1.25}, {{B, C}, 2.0}, {{C, D}, 0.1}, {{D, A}, 7.25}});
+        {{{A, B}, 1.23456789}, {{B, C}, 2.0}, {{C, D}, 0.1}, {{D, A}, 7.25}});
 
     model->applyTransforms({});
 
@@ -154,13 +154,13 @@ private slots:
         QCOMPARE(reloaded->nodeValue(u"LabelText"_s, E), u"plain"_s);
 
         QCOMPARE(reloaded->nodeValue(u"Count"_s, B), u"-2"_s);
-        QCOMPARE(reloaded->nodeValue(u"Node Count"_s, D), u"4"_s);
+        QCOMPARE(reloaded->nodeValue(u"Count"_s, D), u"2000000001"_s);
 
-        QVERIFY(exactlyEqual(reloaded->nodeNumericValue(u"Node Score"_s, A), 0.5));
+        QVERIFY(exactlyEqual(reloaded->nodeNumericValue(u"Score"_s, A), 0.123456789));
         QVERIFY(exactlyEqual(reloaded->nodeNumericValue(u"Score"_s, B), 1e-7));
-        QVERIFY(exactlyEqual(reloaded->nodeNumericValue(u"Node Score"_s, C), 1234.0));
+        QVERIFY(exactlyEqual(reloaded->nodeNumericValue(u"Score"_s, C), 12345678.0));
 
-        QVERIFY(exactlyEqual(reloaded->edgeNumericValue(u"Edge Weight"_s, A, B), 1.25));
+        QVERIFY(exactlyEqual(reloaded->edgeNumericValue(u"Weight"_s, A, B), 1.23456789));
         QVERIFY(exactlyEqual(reloaded->edgeNumericValue(u"Weight"_s, D, A), 7.25));
     }
 
@@ -195,13 +195,13 @@ private slots:
         QCOMPARE(reloaded->nodeValue(u"Label Text"_s, names.at(E)), u"plain"_s);
 
         QCOMPARE(reloaded->nodeValue(u"Count"_s, names.at(B)), u"-2"_s);
-        QCOMPARE(reloaded->nodeValue(u"Count"_s, names.at(D)), u"4"_s);
+        QCOMPARE(reloaded->nodeValue(u"Count"_s, names.at(D)), u"2000000001"_s);
 
-        QVERIFY(exactlyEqual(reloaded->nodeNumericValue(u"Score"_s, names.at(A)), 0.5));
+        QVERIFY(exactlyEqual(reloaded->nodeNumericValue(u"Score"_s, names.at(A)), 0.123456789));
         QVERIFY(exactlyEqual(reloaded->nodeNumericValue(u"Score"_s, names.at(B)), 1e-7));
-        QVERIFY(exactlyEqual(reloaded->nodeNumericValue(u"Score"_s, names.at(C)), 1234.0));
+        QVERIFY(exactlyEqual(reloaded->nodeNumericValue(u"Score"_s, names.at(C)), 12345678.0));
 
-        QVERIFY(exactlyEqual(reloaded->edgeNumericValue(u"Weight"_s, names.at(A), names.at(B)), 1.25));
+        QVERIFY(exactlyEqual(reloaded->edgeNumericValue(u"Weight"_s, names.at(A), names.at(B)), 1.23456789));
         QVERIFY(exactlyEqual(reloaded->edgeNumericValue(u"Weight"_s, names.at(D), names.at(A)), 7.25));
     }
 
@@ -220,13 +220,13 @@ private slots:
         QCOMPARE(reloaded->nodeValue(u"Label Text"_s, E), u"plain"_s);
 
         QCOMPARE(reloaded->nodeValue(u"Count"_s, B), u"-2"_s);
-        QCOMPARE(reloaded->nodeValue(u"Count"_s, D), u"4"_s);
+        QCOMPARE(reloaded->nodeValue(u"Count"_s, D), u"2000000001"_s);
 
-        QVERIFY(exactlyEqual(reloaded->nodeNumericValue(u"Score"_s, A), 0.5));
+        QVERIFY(exactlyEqual(reloaded->nodeNumericValue(u"Score"_s, A), 0.123456789));
         QVERIFY(exactlyEqual(reloaded->nodeNumericValue(u"Score"_s, B), 1e-7));
-        QVERIFY(exactlyEqual(reloaded->nodeNumericValue(u"Score"_s, C), 1234.0));
+        QVERIFY(exactlyEqual(reloaded->nodeNumericValue(u"Score"_s, C), 12345678.0));
 
-        QVERIFY(exactlyEqual(reloaded->edgeNumericValue(u"Weight"_s, A, B), 1.25));
+        QVERIFY(exactlyEqual(reloaded->edgeNumericValue(u"Weight"_s, A, B), 1.23456789));
         QVERIFY(exactlyEqual(reloaded->edgeNumericValue(u"Weight"_s, D, A), 7.25));
     }
 
@@ -254,7 +254,7 @@ private slots:
         QCOMPARE(reloaded->nodeNames(), _nodes);
         QCOMPARE(reloaded->edgeNames(), _edges);
 
-        QVERIFY(exactlyEqual(reloaded->edgeNumericValue(u"Weight"_s, A, B), 1.25));
+        QVERIFY(exactlyEqual(reloaded->edgeNumericValue(u"Weight"_s, A, B), 1.23456789));
         QVERIFY(exactlyEqual(reloaded->edgeNumericValue(u"Weight"_s, B, C), 2.0));
         QVERIFY(exactlyEqual(reloaded->edgeNumericValue(u"Weight"_s, D, A), 7.25));
     }
