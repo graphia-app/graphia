@@ -282,18 +282,18 @@ struct AttributeValueOpVistor
             }
         }
 
-        auto comparisonFn = [op](const Attribute& attribute, auto value) -> ElementConditionFn<E>
+        auto comparisonFn = [op](const Attribute& attribute, auto valueOfFn, auto value) -> ElementConditionFn<E>
         {
             switch(op)
             {
             case ConditionFnOp::Numerical::LessThan:
-                return [attribute, value](E elementId) { return attribute.template valueOf<decltype(value), E>(elementId) < value; };
+                return [attribute, valueOfFn, value](E elementId) { return (attribute.*valueOfFn)(elementId) < value; };
             case ConditionFnOp::Numerical::GreaterThan:
-                return [attribute, value](E elementId) { return attribute.template valueOf<decltype(value), E>(elementId) > value; };
+                return [attribute, valueOfFn, value](E elementId) { return (attribute.*valueOfFn)(elementId) > value; };
             case ConditionFnOp::Numerical::LessThanOrEqual:
-                return [attribute, value](E elementId) { return attribute.template valueOf<decltype(value), E>(elementId) <= value; };
+                return [attribute, valueOfFn, value](E elementId) { return (attribute.*valueOfFn)(elementId) <= value; };
             case ConditionFnOp::Numerical::GreaterThanOrEqual:
-                return [attribute, value](E elementId) { return attribute.template valueOf<decltype(value), E>(elementId) >= value; };
+                return [attribute, valueOfFn, value](E elementId) { return (attribute.*valueOfFn)(elementId) >= value; };
             default:
                 qFatal("Unhandled ConditionFnOp::Numerical");
                 return nullptr;
@@ -306,8 +306,9 @@ struct AttributeValueOpVistor
 
             switch(_lhs.valueType())
             {
-            case ValueType::Float:  return comparisonFn(_lhs, numberValue);
-            case ValueType::Int:    return comparisonFn(_lhs, static_cast<int>(numberValue));
+            case ValueType::Float:  return comparisonFn(_lhs, &Attribute::valueOf<double, E>, numberValue);
+            // Compare as floating point so that the fractional part of the value isn't lost
+            case ValueType::Int:    return comparisonFn(_lhs, &Attribute::floatValueOf<E>, numberValue);
             default: return nullptr;
             }
         }
@@ -315,8 +316,8 @@ struct AttributeValueOpVistor
         {
             switch(_lhs.valueType())
             {
-            case ValueType::Float:  return comparisonFn(_lhs, std::get<double>(*_rhs));
-            case ValueType::Int:    return comparisonFn(_lhs, std::get<int>(*_rhs));
+            case ValueType::Float:  return comparisonFn(_lhs, &Attribute::valueOf<double, E>, std::get<double>(*_rhs));
+            case ValueType::Int:    return comparisonFn(_lhs, &Attribute::valueOf<int, E>, std::get<int>(*_rhs));
             default: return nullptr;
             }
         }
