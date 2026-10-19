@@ -260,7 +260,8 @@ std::vector<QString> UserElementData<E>::exposeAsAttributes(IGraphModel& graphMo
             if(!haveIndexFor(elementId))
                 return false;
 
-            return value(indexFor(elementId), userDataVectorName).toString().isEmpty();
+            // The value as stored, as once converted to a number, it's no longer empty
+            return vector(userDataVectorName)->get(indexFor(elementId)).isEmpty();
         });
 
         attribute.setMetaDataFn([this, userDataVectorName]
