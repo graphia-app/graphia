@@ -401,10 +401,17 @@ struct DotGraph
 static bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graphModel,
     IUserNodeData& userNodeData, IUserEdgeData& userEdgeData)
 {
-    std::vector<NodeId> nodeIds;
-    std::vector<EdgeId> edgeIds;
     std::map<QString, NodeId> dotNodeToNodeId;
-    std::vector<AttributeStatement> attributeStatements;
+
+    // Default attributes apply to elements created after they're set,
+    // within the graph or subgraph that sets them
+    struct Defaults
+    {
+        std::map<QString, QString> _node;
+        std::map<QString, QString> _edge;
+    };
+
+    std::vector<Defaults> defaults(1);
 
     auto addNode = [&](const QString& nodeName)
     {
@@ -415,7 +422,9 @@ static bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graph
             dotNodeToNodeId[nodeName] = nodeId;
             userNodeData.setValueBy(nodeId, IParser::nodeNameAttribute(), nodeName);
             graphModel.setNodeName(nodeId, nodeName);
-            nodeIds.emplace_back(nodeId);
+
+            for(const auto& [key, value] : defaults.back()._node)
+                userNodeData.setValueBy(nodeId, key, value);
         }
 
         return dotNodeToNodeId.at(nodeName);
@@ -423,10 +432,12 @@ static bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graph
 
     std::function<std::vector<QString>(const Statement& s)> processStatement;
 
-    auto processStatementList = [&parser, &processStatement](const StatementList& l)
+    auto processStatementList = [&parser, &processStatement, &defaults](const StatementList& l)
     {
         std::vector<QString> nodes;
         size_t i = 0;
+
+        defaults.push_back(defaults.back());
 
         for(const auto& s : l)
         {
@@ -435,6 +446,8 @@ static bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graph
 
             parser.setProgress(static_cast<int>((i++ * 100) / l.size()));
         }
+
+        defaults.pop_back();
 
         return nodes;
     };
@@ -458,7 +471,14 @@ static bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graph
                 { return processStatementList(subGraph.get()._statementList); },
             [&](const AttributeStatement& attribute)
             {
-                attributeStatements.emplace_back(attribute);
+                for(const auto& [key, value] : attribute._attributeList)
+                {
+                    if(attribute._type == AttributeStatementType::Node)
+                        defaults.back()._node[key] = value;
+                    else if(attribute._type == AttributeStatementType::Edge)
+                        defaults.back()._edge[key] = value;
+                }
+
                 return std::vector<QString>{};
             },
             [&](const EdgeStatement& edge)
@@ -490,7 +510,6 @@ static bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graph
                                 sourceNodeId, targetNodeId);
 
                             addedEdgeIds.emplace_back(edgeId);
-                            edgeIds.emplace_back(edgeId);
                         }
                     }
 
@@ -499,6 +518,9 @@ static bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graph
 
                 for(auto edgeId : addedEdgeIds)
                 {
+                    for(const auto& [key, value] : defaults.back()._edge)
+                        userEdgeData.setValueBy(edgeId, key, value);
+
                     for(const auto& attribute : edge._attributeList)
                     {
                         const QString attributeName = attribute._key;
@@ -527,32 +549,6 @@ static bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graph
     processStatementList(dot._statementList);
 
     parser.setProgress(-1);
-
-    for(const auto& s : attributeStatements)
-    {
-        if(s._type == AttributeStatementType::Node)
-        {
-            for(const auto& attribute : s._attributeList)
-            {
-                for(auto nodeId : nodeIds)
-                {
-                    const QString attributeName = attribute._key;
-                    userNodeData.setValueBy(nodeId, attributeName, attribute._value);
-                }
-            }
-        }
-        else if(s._type == AttributeStatementType::Edge)
-        {
-            for(const auto& attribute : s._attributeList)
-            {
-                for(auto edgeId : edgeIds)
-                {
-                    const QString attributeName = attribute._key;
-                    userEdgeData.setValueBy(edgeId, attributeName, attribute._value);
-                }
-            }
-        }
-    }
 
     return true;
 }
