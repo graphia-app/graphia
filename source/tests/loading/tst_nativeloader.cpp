@@ -241,7 +241,8 @@ private:
         if(version >= 5)
         {
             QCOMPARE(loader->projection(), Projection::TwoDee);
-            QCOMPARE(loader->shading(), Shading::Flat);
+            QCOMPARE(loader->shading2D(), Shading::Smooth);
+            QCOMPARE(loader->shading3D(), Shading::Flat);
         }
 
         if(version >= 9)
@@ -342,7 +343,8 @@ private slots:
         content._layoutSettings = loader->layoutSettings();
         content._layoutPaused = loader->layoutPaused();
         content._projection = static_cast<int>(loader->projection());
-        content._shading3D = static_cast<int>(loader->shading());
+        content._shading2D = static_cast<int>(loader->shading2D());
+        content._shading3D = static_cast<int>(loader->shading3D());
         content._transforms = loader->transforms();
         content._visualisations = loader->visualisations();
         content._bookmarks = loader->bookmarks();
