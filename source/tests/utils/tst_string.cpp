@@ -186,6 +186,7 @@ private slots:
         QTest::newRow("used twice") << QStringList{u"a"_s, u"a(1)"_s} << u"a"_s << u"a(2)"_s;
         QTest::newRow("numbered") << QStringList{u"a(1)"_s} << u"a(1)"_s << u"a(2)"_s;
         QTest::newRow("empty") << QStringList{QString()} << QString() << QString();
+        QTest::newRow("percent and digit") << QStringList{u"Rank %1"_s} << u"Rank %1"_s << u"Rank %1(1)"_s;
     }
 
     void findUniqueName()
