@@ -608,10 +608,18 @@ bool DotFileParser::parse(const QUrl& url, IGraphModel* graphModel)
 
     setPhase(QObject::tr("Parsing"));
 
-    auto result = lexy::parse<LexyDotParser::grammar::DotGraph>(input, lexy::noop);
+    QString errorDescription;
+    auto result = lexy::parse<LexyDotParser::grammar::DotGraph>(input,
+        lexyutils::describeFirstError(contents.constData(), errorDescription));
 
-    if(cancelled() || !result.is_success())
+    if(cancelled())
         return false;
+
+    if(!result.is_success())
+    {
+        setFailureReason(errorDescription);
+        return false;
+    }
 
     setPhase(QObject::tr("Building Graph"));
     setProgress(-1);
