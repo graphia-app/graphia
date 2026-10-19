@@ -34,6 +34,7 @@
 #include <QString>
 #include <QStringList>
 
+#include <functional>
 #include <memory>
 
 using namespace Qt::Literals::StringLiterals;
@@ -337,6 +338,48 @@ private slots:
             else
                 QCOMPARE(model->edgeValue(fields.at(0), fields.at(1), fields.at(2)), fields.at(3));
         }
+    }
+
+    void numericPrecision_data()
+    {
+        QTest::addColumn<QString>("format");
+        QTest::addColumn<QByteArray>("content");
+        QTest::addColumn<QString>("attribute");
+        QTest::addColumn<QStringList>("element");
+        QTest::addColumn<double>("expected");
+
+        QTest::newRow("GML") << u"GML"_s <<
+            QByteArray("graph [ node [ id 1 label \"A\" x 1234567.5 ] ]") <<
+            u"x"_s << QStringList{u"A"_s} << 1234567.5;
+        QTest::newRow("GML small") << u"GML"_s <<
+            QByteArray("graph [ node [ id 1 label \"A\" x 0.123456789 ] ]") <<
+            u"x"_s << QStringList{u"A"_s} << 0.123456789;
+        QTest::newRow("JSON Graph") << u"JSONGraph"_s <<
+            QByteArray(R"({"graph":{"nodes":[{"id":"a","label":"A","metadata":{"x":0.123456789}}],"edges":[]}})") <<
+            u"x"_s << QStringList{u"A"_s} << 0.123456789;
+        QTest::newRow("Matrix") << u"MatrixCSV"_s << QByteArray("0,0.123456789\n1234567.5,0\n") <<
+            u"EdgeWeight"_s << QStringList{u"Node 1"_s, u"Node 2"_s} << 0.123456789;
+    }
+
+    void numericPrecision()
+    {
+        QFETCH(const QString, format);
+        QFETCH(const QByteArray, content);
+        QFETCH(const QString, attribute);
+        QFETCH(const QStringList, element);
+        QFETCH(const double, expected);
+
+        QString failureReason;
+        auto model = ::parse(format, content, &failureReason);
+        QVERIFY2(model != nullptr, qPrintable(failureReason));
+
+        auto actual = element.size() == 1 ? model->nodeNumericValue(attribute, element.at(0)) :
+            model->edgeNumericValue(attribute, element.at(0), element.at(1));
+
+        // Attribute values are stored as floats; these must be exactly
+        // equal, which QCOMPARE doesn't require of floating point values
+        QVERIFY2(std::equal_to<>()(static_cast<float>(actual), static_cast<float>(expected)),
+            qPrintable(u"%1 != %2"_s.arg(actual, 0, 'g', 10).arg(expected, 0, 'g', 10)));
     }
 
     void parseFailure_data()
