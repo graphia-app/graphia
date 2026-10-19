@@ -155,9 +155,15 @@ public:
                 }
             }
             // Skip edges we've already iterated over (in the other direction)
-            while((**this)._a > (**this)._b);
+            while(visitedFromOtherNode());
 
             return *this;
+        }
+
+        bool visitedFromOtherNode() const
+        {
+            auto relation = **this;
+            return relation._a > relation._b && _protoGraph->retains(relation._b, relation._a);
         }
 
         self_type operator++(int)
@@ -182,6 +188,13 @@ public:
         bool operator!=(const self_type& other) const { return !operator==(other); }
         bool operator==(const self_type& other) const { return _protoNodeIt == other._protoNodeIt; }
     };
+
+    // Whether or not b is one of the k nearest neighbours of a
+    bool retains(typename DataVectors::const_iterator a, typename DataVectors::const_iterator b) const
+    {
+        const auto& protoEdges = _protoNodes.at(static_cast<size_t>(a - _begin))._protoEdges;
+        return std::ranges::any_of(protoEdges, [&b](const auto& protoEdge) { return protoEdge._it == b; });
+    }
 
     iterator begin() const { return {this, false}; }
     iterator end() const   { return {this, true}; }
