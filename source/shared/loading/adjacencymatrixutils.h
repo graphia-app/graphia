@@ -86,8 +86,9 @@ static MatrixTypeResult isAdjacencyMatrix(const TabularData& tabularData, QPoint
         }
     }
 
-    auto numDataColumns = tabularData.numColumns() - (firstColumnAllDouble ? 1 : 0);
-    auto numDataRows = tabularData.numRows() - (firstRowAllDouble ? 1 : 0);
+    // A first column or row that isn't numeric is headers
+    auto numDataColumns = tabularData.numColumns() - (firstColumnAllDouble ? 0 : 1);
+    auto numDataRows = tabularData.numRows() - (firstRowAllDouble ? 0 : 1);
 
     // Note we can't test for equality as we may not be seeing all the rows (due to a row limit)
     if(numDataColumns < numDataRows)
@@ -95,8 +96,8 @@ static MatrixTypeResult isAdjacencyMatrix(const TabularData& tabularData, QPoint
 
     if(topLeft != nullptr)
     {
-        topLeft->setX(firstColumnAllDouble ? 1 : 0);
-        topLeft->setY(firstRowAllDouble ? 1 : 0);
+        topLeft->setX(firstColumnAllDouble ? 0 : 1);
+        topLeft->setY(firstRowAllDouble ? 0 : 1);
     }
 
     if(headerMatch || firstColumnAllDouble || firstRowAllDouble)
