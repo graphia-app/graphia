@@ -90,7 +90,7 @@ bool PairwiseSaver::save()
 
     auto escape = [](QString string)
     {
-        string.replace(u"\""_s, u"\\\""_s);
+        string.replace(u"\""_s, u"\"\""_s);
         return string;
     };
 
