@@ -269,10 +269,14 @@ private slots:
             "xmlns:bp=\"http://www.biopax.org/release/biopax-level3.owl#\">\n"
             "<bp:Protein rdf:ID=\"p1\"><bp:displayName>Kinase</bp:displayName><bp:comment>c</bp:comment></bp:Protein>\n"
             "<bp:SmallMolecule rdf:ID=\"m1\"/>\n"
-            "<bp:BiochemicalReaction rdf:ID=\"r1\"><bp:left rdf:resource=\"#m1\"/></bp:BiochemicalReaction>\n"
-            "<bp:Catalysis rdf:ID=\"c1\"><bp:controller rdf:resource=\"#p1\"/></bp:Catalysis>\n"
+            "<bp:SmallMolecule rdf:ID=\"m2\"/>\n"
+            "<bp:BiochemicalReaction rdf:ID=\"r1\"><bp:left rdf:resource=\"#m1\"/><bp:right rdf:resource=\"#m2\"/>"
+            "</bp:BiochemicalReaction>\n"
+            "<bp:Catalysis rdf:ID=\"c1\"><bp:controller rdf:resource=\"#p1\"/><bp:controlled rdf:resource=\"#r1\"/>"
+            "</bp:Catalysis>\n"
             "</rdf:RDF>\n") <<
-            QStringList{u"Kinase"_s, u"c1"_s, u"m1"_s, u"r1"_s} << QStringList{u"c1-Kinase"_s, u"r1-m1"_s} <<
+            QStringList{u"Kinase"_s, u"c1"_s, u"m1"_s, u"m2"_s, u"r1"_s} <<
+            QStringList{u"c1-Kinase"_s, u"c1-r1"_s, u"r1-m1"_s, u"r1-m2"_s} <<
             QStringList{u"ID|Kinase|p1"_s, u"Class|Kinase|Protein"_s, u"Comment|Kinase|c"_s};
         QTest::newRow("BioPAX nested") << u"BioPAX"_s << QByteArray(
             "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" "
