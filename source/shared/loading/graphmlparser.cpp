@@ -122,9 +122,12 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
                 const auto& attributeName = attributes.value(u"attr.name"_s);
                 const auto& keyId = attributes.value(u"id"_s);
 
-                if(attributes.value(u"for"_s) == u"node"_s)
+                const auto& keyFor = attributes.value(u"for"_s);
+
+                if(keyFor == u"node"_s || keyFor == u"all"_s)
                     nodeAttributes.emplace(keyId.toString(), attributeName.toString());
-                else if(attributes.value(u"for"_s) == u"edge"_s)
+
+                if(keyFor == u"edge"_s || keyFor == u"all"_s)
                     edgeAttributes.emplace(keyId.toString(), attributeName.toString());
             }
 
