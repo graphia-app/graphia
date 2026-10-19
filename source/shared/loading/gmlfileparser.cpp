@@ -32,6 +32,7 @@
 #include <QByteArray>
 #include <QFile>
 #include <QObject>
+#include <QLocale>
 #include <QString>
 #include <QtGlobal>
 #include <QFileInfo>
@@ -138,7 +139,7 @@ static AttributeVector processAttribute(const KeyValue& attribute)
         QString _name;
         explicit Visitor(const QString& name) : _name(name) {}
 
-        AttributeVector operator()(double v) const          { return {{_name, QString::number(v)}}; }
+        AttributeVector operator()(double v) const          { return {{_name, QString::number(v, 'g', QLocale::FloatingPointShortest)}}; }
         AttributeVector operator()(int v) const             { return {{_name, QString::number(v)}}; }
         AttributeVector operator()(const QString& v) const
         {

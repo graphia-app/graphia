@@ -25,17 +25,41 @@
 
 #include <matio.h>
 
+#include <QLocale>
 #include <QString>
 #include <QtGlobal>
 #include <QUrl>
 
 #include <cstddef>
 #include <cstdint>
+#include <type_traits>
 
 class MatLabFileParser : public IParser
 {
 private:
     TabularData _tabularData;
+
+    template<typename T>
+    static QString toString(T value)
+    {
+        if constexpr(std::is_same_v<T, float>)
+        {
+            // As a double, a float has digits it was never given, so use the fewest
+            // digits that read back as the same float
+            for(int precision = 1; precision < 9; precision++)
+            {
+                auto s = QString::number(value, 'g', precision);
+                if(s.toFloat() == value)
+                    return s;
+            }
+
+            return QString::number(value, 'g', 9);
+        }
+        else if constexpr(std::is_floating_point_v<T>)
+            return QString::number(value, 'g', QLocale::FloatingPointShortest);
+        else
+            return QString::number(value);
+    }
 
     template<class T>
     bool storeMatVarAsTabularData(const matvar_t* v)
@@ -69,7 +93,7 @@ private:
 
                     _tabularData.setValueAt(0, tabularDataRow, QString::number(column));
                     _tabularData.setValueAt(1, tabularDataRow, QString::number(row));
-                    _tabularData.setValueAt(2, tabularDataRow, QString::number(value));
+                    _tabularData.setValueAt(2, tabularDataRow, toString(value));
                     tabularDataRow++;
 
                     setProgress(static_cast<int>((i * 100) / sparseMatrix->njc));
@@ -98,7 +122,7 @@ private:
                         return false;
 
                     T value = *(dataPtr + rowOffset + column);
-                    _tabularData.setValueAt(column, row, QString::number(value));
+                    _tabularData.setValueAt(column, row, toString(value));
 
                     setProgress(static_cast<int>((progress++ * 100) / totalIterations));
                 }

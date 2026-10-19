@@ -25,6 +25,7 @@
 #include "shared/utils/container.h"
 #include "shared/utils/string.h"
 
+#include <QLocale>
 #include <QObject>
 
 #include <cmath>
@@ -58,9 +59,10 @@ void AdjacencyMatrixParser::addEdge(IGraphModel* graphModel,
 
     if(setWeights)
     {
-        _userEdgeData->setValueBy(edgeId, edgeWeightAttribute(), QString::number(edgeWeight));
+        _userEdgeData->setValueBy(edgeId, edgeWeightAttribute(),
+            QString::number(edgeWeight, 'g', QLocale::FloatingPointShortest));
         _userEdgeData->setValueBy(edgeId, absoluteEdgeWeightAttribute(),
-            QString::number(absEdgeWeight));
+            QString::number(absEdgeWeight, 'g', QLocale::FloatingPointShortest));
     }
 }
 
