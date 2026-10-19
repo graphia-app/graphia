@@ -350,6 +350,11 @@ private slots:
             QStringList{u"Cluster(1)"_s} <<
             QStringList{uR"("Cluster" "Size")"_s, u"\"Cluster(1)\" \"Colour\""_s};
 
+        QTest::newRow("regular expression characters in name") << QStringList{} <<
+            QStringList{u"\"Score (raw)\" \"Colour\""_s, uR"("A+B" "Size")"_s} <<
+            QStringList{u"Score (raw)(1)"_s, u"A+B(1)"_s} <<
+            QStringList{u"\"Score (raw)(1)\" \"Colour\""_s, u"\"A+B(1)\" \"Size\""_s};
+
         QTest::newRow("flags and parameters kept") << QStringList{} <<
             QStringList{uR"([component] "Cluster" "Colour" with gradient = "x")"_s} <<
             QStringList{u"Cluster(1)"_s} <<
