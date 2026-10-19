@@ -244,6 +244,27 @@ private slots:
         }
     }
 
+    void spearmanRankTies()
+    {
+        // Independently computed with numpy, giving tied values their mean rank
+        const Rows rows =
+        {
+            {1.0, 2.0, 2.0, 3.0, 5.0},
+            {4.0, 4.0, 1.0, 2.0, 2.0},
+            {1.0, 1.0, 1.0, 2.0, 3.0},
+        };
+
+        auto correlation = ContinuousCorrelation::create(CorrelationType::SpearmanRank,
+            CorrelationFilterType::Threshold);
+
+        auto vectors = dataVectors<ContinuousDataVectors>(rows);
+        auto correlations = correlationsOf(correlation->edgeList(vectors, allPairsParameters()));
+
+        QVERIFY(fuzzyEqual(correlations[{0, 1}], -0.459627360));
+        QVERIFY(fuzzyEqual(correlations[{0, 2}], 0.917662935));
+        QVERIFY(fuzzyEqual(correlations[{1, 2}], -0.294627825));
+    }
+
     void threshold_data()
     {
         QTest::addColumn<int>("polarity");
