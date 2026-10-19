@@ -127,6 +127,8 @@ private slots:
         QTest::newRow("float >=")                   << uR"($"Float" >= 2.5)"_s                  << u"00111"_s;
 
         // Numerical, attribute and value of different types
+        QTest::newRow("int < float")                << uR"($"Int" < 2.5)"_s                     << u"11100"_s;
+        QTest::newRow("int >= float")               << uR"($"Int" >= 2.5)"_s                    << u"00011"_s;
         QTest::newRow("int > float")                << uR"($"Int" > 1.5)"_s                     << u"00111"_s;
         QTest::newRow("int <= float")               << uR"($"Int" <= 1.5)"_s                    << u"11000"_s;
         QTest::newRow("float > int")                << uR"($"Float" > 2)"_s                     << u"00111"_s;
