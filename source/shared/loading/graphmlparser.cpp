@@ -31,6 +31,7 @@
 #include <QDebug>
 
 #include <stack>
+#include <vector>
 #include <map>
 
 using namespace Qt::Literals::StringLiterals;
@@ -78,6 +79,11 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
     EdgeId activeEdgeId;
     QString activeKey;
     QString activeData;
+
+    QString activeKeyId;
+    bool inDefault = false;
+    std::map<QString, QString> defaults;
+    std::vector<EdgeId> edgeIds;
 
     auto processToken = [&](QXmlStreamReader::TokenType tokenType)
     {
@@ -129,7 +135,11 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
 
                 if(keyFor == u"edge"_s || keyFor == u"all"_s)
                     edgeAttributes.emplace(keyId.toString(), attributeName.toString());
+
+                activeKeyId = keyId.toString();
             }
+            else if(elementName == u"default"_s && !activeKeyId.isEmpty())
+                inDefault = true;
 
             if(graphNestLevel != 1)
                 break;
@@ -183,6 +193,7 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
                 auto targetId = nodes.at(targetName);
 
                 activeEdgeId = graphModel->mutableGraph().addEdge(sourceId, targetId);
+                edgeIds.push_back(activeEdgeId);
 
                 if(attributes.hasAttribute(u"id"_s))
                 {
@@ -203,6 +214,12 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
 
         case QXmlStreamReader::Characters:
         {
+            if(inDefault)
+            {
+                activeData += xsr.text();
+                break;
+            }
+
             if(graphNestLevel != 1)
                 break;
 
@@ -237,6 +254,14 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
 
             if(elementName == u"graph"_s)
                 graphNestLevel--;
+            else if(elementName == u"default"_s && inDefault)
+            {
+                defaults[activeKeyId] = activeData;
+                activeData.clear();
+                inDefault = false;
+            }
+            else if(elementName == u"key"_s)
+                activeKeyId.clear();
 
             if(graphNestLevel != 1)
                 break;
@@ -292,6 +317,32 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
     {
         setFailureReason(QObject::tr("XML parse error: %1").arg(xsr.errorString()));
         return false;
+    }
+
+    // Elements without a value for a key that has a default take the default
+    for(const auto& [keyId, defaultValue] : defaults)
+    {
+        if(u::contains(nodeAttributes, keyId))
+        {
+            const auto& attributeName = nodeAttributes.at(keyId);
+
+            for(const auto& [nodeName, nodeId] : nodes)
+            {
+                if(_userNodeData->valueBy(nodeId, attributeName).toString().isEmpty())
+                    _userNodeData->setValueBy(nodeId, attributeName, defaultValue);
+            }
+        }
+
+        if(u::contains(edgeAttributes, keyId))
+        {
+            const auto& attributeName = edgeAttributes.at(keyId);
+
+            for(auto edgeId : edgeIds)
+            {
+                if(_userEdgeData->valueBy(edgeId, attributeName).toString().isEmpty())
+                    _userEdgeData->setValueBy(edgeId, attributeName, defaultValue);
+            }
+        }
     }
 
     return true;
