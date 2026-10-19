@@ -174,6 +174,12 @@ private slots:
             QStringList{u"A"_s} << QStringList{u"A-A"_s} <<
             QStringList{u"User ComponentSize|A|n"_s, u"w|A|1"_s, u"Edge w|A|A|2"_s};
 
+        // Not a raw string, which moc misparses here, missing the test class
+        QTest::newRow("GML strings") << u"GML"_s << QByteArray(
+            "graph [ node [ id 1 label \"A&amp;B\" a \"x < y\" b \"<b>two</b>  spaces\" c \"&quot;&#233;&#xe9;&eacute;&bogus;\" ] ]") << // NOLINT modernize-raw-string-literal
+            QStringList{u"A&B"_s} << QStringList{} <<
+            QStringList{u"a|A&B|x < y"_s, u"b|A&B|<b>two</b>  spaces"_s, u"c|A&B|\"ééé&bogus;"_s};
+
         // GraphML
         QTest::newRow("GraphML") << u"GraphML"_s << QByteArray(
             "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
