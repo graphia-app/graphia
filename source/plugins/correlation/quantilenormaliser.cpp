@@ -26,6 +26,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <iterator>
+#include <numeric>
 #include <vector>
 
 bool QuantileNormaliser::process(ContinuousDataVectors& dataRows, IParser* parser) const
@@ -36,55 +37,26 @@ bool QuantileNormaliser::process(ContinuousDataVectors& dataRows, IParser* parse
     auto numColumns = dataRows.at(0).size();
 
     std::vector<std::vector<double>> sortedColumnValues(numColumns);
-    std::vector<size_t> ranking(dataRows.size() * numColumns);
-
-    size_t row = 0;
 
     for(size_t column = 0; column < numColumns; column++)
     {
         if(parser != nullptr && parser->cancelled())
             return false;
 
-        std::vector<double> columnValues;
-        columnValues.reserve(dataRows.size());
+        auto& sortedValues = sortedColumnValues[column];
+        sortedValues.reserve(dataRows.size());
 
         // Get column values
-        std::ranges::transform(dataRows, std::back_inserter(columnValues),
+        std::ranges::transform(dataRows, std::back_inserter(sortedValues),
         [column](const auto& dataRow)
         {
             return dataRow.valueAt(column);
         });
 
-        // Sort
-        auto sortedValues = columnValues;
         std::ranges::sort(sortedValues);
-        auto uniqueSortedValues = sortedValues;
-        uniqueSortedValues.erase(std::ranges::unique(uniqueSortedValues).begin(),
-            uniqueSortedValues.end());
-
-        row = 0;
-        for(const auto& dataRow : dataRows)
-        {
-            auto index = (row * numColumns) + column;
-
-            // Set the ranking
-            size_t i = 0;
-            for(auto uniqueValue : uniqueSortedValues)
-            {
-                if(uniqueValue == dataRow.valueAt(column))
-                    ranking[index] = i;
-
-                i++;
-            }
-
-            row++;
-        }
 
         if(parser != nullptr)
             parser->setProgress(static_cast<int>((column * 100) / numColumns));
-
-        // Copy Result to sortedColumns
-        sortedColumnValues[column] = sortedValues;
     }
 
     if(parser != nullptr)
@@ -93,7 +65,7 @@ bool QuantileNormaliser::process(ContinuousDataVectors& dataRows, IParser* parse
     std::vector<double> rowMeans(dataRows.size());
 
     // Populate row means
-    for(row = 0; row < rowMeans.size(); row++)
+    for(size_t row = 0; row < rowMeans.size(); row++)
     {
         double meanValue = 0.0;
         for(size_t column = 0; column < numColumns; column++)
@@ -102,7 +74,10 @@ bool QuantileNormaliser::process(ContinuousDataVectors& dataRows, IParser* parse
         rowMeans[row] = meanValue / static_cast<double>(numColumns);
     }
 
-    row = 0;
+    // So that the mean of a range of row means can be found quickly
+    std::vector<double> cumulativeRowMeans(rowMeans.size() + 1, 0.0);
+    std::partial_sum(rowMeans.begin(), rowMeans.end(), cumulativeRowMeans.begin() + 1);
+
     for(auto& dataRow : dataRows)
     {
         if(parser != nullptr && parser->cancelled())
@@ -110,14 +85,18 @@ bool QuantileNormaliser::process(ContinuousDataVectors& dataRows, IParser* parse
 
         for(size_t column = 0; column < numColumns; column++)
         {
-            auto index = (row * numColumns) + column;
-            auto rank = ranking[index];
-            Q_ASSERT(rank < rowMeans.size());
+            const auto& sortedValues = sortedColumnValues[column];
+            auto [first, last] = std::ranges::equal_range(sortedValues, dataRow.valueAt(column));
+            auto lo = static_cast<size_t>(std::distance(sortedValues.begin(), first));
+            auto hi = static_cast<size_t>(std::distance(sortedValues.begin(), last));
+            Q_ASSERT(lo < hi && hi <= rowMeans.size());
 
-            dataRow.setValueAt(column, rowMeans[rank]);
+            // Tied values are given the mean of the row means for the ranks they span
+            auto value = (hi - lo) == 1 ? rowMeans[lo] :
+                (cumulativeRowMeans[hi] - cumulativeRowMeans[lo]) / static_cast<double>(hi - lo);
+
+            dataRow.setValueAt(column, value);
         }
-
-        row++;
     }
 
     return true;
