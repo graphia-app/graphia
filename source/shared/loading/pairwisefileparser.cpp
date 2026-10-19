@@ -83,43 +83,35 @@ bool PairwiseParser::parse(const QUrl& url, IGraphModel* graphModel)
 
     std::map<QString, NodeId> nodeIdMap;
 
+    auto nodeIdFor = [&](const QString& name)
+    {
+        // A row with only one node name creates that node, without an edge
+        if(name.isEmpty())
+            return NodeId();
+
+        if(u::contains(nodeIdMap, name))
+            return nodeIdMap.at(name);
+
+        auto nodeId = graphModel->mutableGraph().addNode();
+        nodeIdMap.emplace(name, nodeId);
+
+        if(_userNodeData != nullptr)
+        {
+            _userNodeData->setValueBy(nodeId, nodeNameAttribute(), name);
+            graphModel->setNodeName(nodeId, name);
+        }
+
+        return nodeId;
+    };
+
     for(size_t rowIndex = _firstRowIsHeader ? 1 : 0; rowIndex < _tabularData.numRows(); rowIndex++)
     {
-        auto source = _tabularData.valueAt(sourceNodeColumn, rowIndex);
-        auto target = _tabularData.valueAt(targetNodeColumn, rowIndex);
+        auto sourceNodeId = nodeIdFor(_tabularData.valueAt(sourceNodeColumn, rowIndex));
+        auto targetNodeId = nodeIdFor(_tabularData.valueAt(targetNodeColumn, rowIndex));
 
-        NodeId sourceNodeId;
-        NodeId targetNodeId;
-
-        if(!u::contains(nodeIdMap, source))
-        {
-            sourceNodeId = graphModel->mutableGraph().addNode();
-            nodeIdMap.emplace(source, sourceNodeId);
-
-            if(_userNodeData != nullptr)
-            {
-                _userNodeData->setValueBy(sourceNodeId, nodeNameAttribute(), source);
-                graphModel->setNodeName(sourceNodeId, source);
-            }
-        }
-        else
-            sourceNodeId = nodeIdMap[source];
-
-        if(!u::contains(nodeIdMap, target))
-        {
-            targetNodeId = graphModel->mutableGraph().addNode();
-            nodeIdMap.emplace(target, targetNodeId);
-
-            if(_userNodeData != nullptr)
-            {
-                _userNodeData->setValueBy(targetNodeId, nodeNameAttribute(), target);
-                graphModel->setNodeName(targetNodeId, target);
-            }
-        }
-        else
-            targetNodeId = nodeIdMap[target];
-
-        auto edgeId = graphModel->mutableGraph().addEdge(sourceNodeId, targetNodeId);
+        EdgeId edgeId;
+        if(!sourceNodeId.isNull() && !targetNodeId.isNull())
+            edgeId = graphModel->mutableGraph().addEdge(sourceNodeId, targetNodeId);
 
         for(const auto& attributeColumn : _attributeColumns)
         {
@@ -128,15 +120,15 @@ bool PairwiseParser::parse(const QUrl& url, IGraphModel* graphModel)
             switch(attributeColumn._type)
             {
             case PairwiseColumnType::EdgeAttribute:
-                if(_userEdgeData != nullptr)
+                if(_userEdgeData != nullptr && !edgeId.isNull())
                     _userEdgeData->setValueBy(edgeId, attributeColumn._name, value);
                 break;
             case PairwiseColumnType::SourceNodeAttribute:
-                if(_userNodeData != nullptr)
+                if(_userNodeData != nullptr && !sourceNodeId.isNull())
                     _userNodeData->setValueBy(sourceNodeId, attributeColumn._name, value);
                 break;
             case PairwiseColumnType::TargetNodeAttribute:
-                if(_userNodeData != nullptr)
+                if(_userNodeData != nullptr && !targetNodeId.isNull())
                     _userNodeData->setValueBy(targetNodeId, attributeColumn._name, value);
                 break;
 
