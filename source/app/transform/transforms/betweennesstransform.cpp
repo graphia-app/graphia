@@ -114,8 +114,11 @@ void BetweennessTransform::apply(TransformedGraph& target)
                 auto d = (static_cast<double>(sigma[predecessor]) /
                     static_cast<double>(sigma[other])) * (1.0 + delta[other]);
 
-                for(auto edgeId : target.edgeIdsBetween(predecessor, other))
-                    _edgeBetweenness[edgeId] += d;
+                // When there are multiple edges between the nodes, the predecessor appears
+                // once for each of them, so share each appearance across the edges
+                auto edgeIdsBetween = target.edgeIdsBetween(predecessor, other);
+                for(auto edgeId : edgeIdsBetween)
+                    _edgeBetweenness[edgeId] += d / static_cast<double>(edgeIdsBetween.size());
 
                 delta[predecessor] += d;
             }
