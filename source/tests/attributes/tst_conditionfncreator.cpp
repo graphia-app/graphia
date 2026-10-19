@@ -149,6 +149,8 @@ private slots:
         QTest::newRow("int == int")                 << uR"($"Int" == $"Int2")"_s                << u"01010"_s;
         QTest::newRow("int < int")                  << uR"($"Int" < $"Int2")"_s                 << u"10001"_s;
         QTest::newRow("int >= float attributes")    << uR"($"Int" >= $"Float")"_s               << u"11010"_s;
+        QTest::newRow("string includes string")     << uR"($"String" includes $"String2")"_s    << u"11011"_s;
+        QTest::newRow("string starts string")       << uR"($"String" starts $"String2")"_s      << u"10010"_s;
         QTest::newRow("numerical op on strings")    << uR"($"String" < $"String2")"_s           << u"invalid"_s;
 
         // Neither side is an attribute
