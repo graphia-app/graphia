@@ -451,8 +451,10 @@ private:
                         const auto& vectorAValue = vectorAIt->valueAt(i);
                         const auto& vectorBValue = vectorBIt->valueAt(i);
 
+                        // Mutual absence is ignored when Denominator is 0 (Jaccard),
+                        // and counts as a match when it is 1 (SMC)
                         if(!vectorAValue && !vectorBValue)
-                            fraction += {0, Denominator};
+                            fraction += {Denominator, Denominator};
                         else
                             fraction += f(vectorAValue, vectorBValue);
                     }
