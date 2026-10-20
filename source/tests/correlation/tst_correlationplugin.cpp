@@ -381,6 +381,78 @@ private slots:
         QVERIFY(importAnnotations({1}, false));
         QCOMPARE(annotationNames(), (QStringList{u"Batch"_s, u"Kind"_s, u"Kind(1)"_s}));
     }
+    // Discrete data, e.g. categories, and its log
+    void discrete()
+    {
+        // r1 and r4 are the same, and r2 shares two of their three values
+        QVERIFY(open(write(u"words.csv"_s,
+            "Name,a,b,c\n"
+            "r1,x,y,z\n"
+            "r2,x,y,y\n"
+            "r3,z,z,z\n"
+            "r4,x,y,z\n"), u"CorrelationCSV"_s, u"Correlation"_s,
+        {
+            {u"correlationDataType"_s, u"Discrete"_s},
+            {u"discreteCorrelationType"_s, u"SMC"_s},
+            {u"minimumThreshold"_s, 0.5},
+            {u"initialThreshold"_s, 0.5},
+        }));
+
+        QCOMPARE(plugin()->property("numContinuousColumns").toInt(), 0);
+        QCOMPARE(plugin()->property("numDiscreteColumns").toInt(), 3);
+        QCOMPARE(edgeNames(), (QStringList{u"r1-r2"_s, u"r1-r4"_s, u"r2-r4"_s}));
+
+        const auto log = _document->property("log").toString();
+        QVERIFY(log.contains(u"Data Frame: [ Column: 1 Row: 1 Width: 3 Height: 4 ]"_s));
+        QVERIFY(log.contains(u"Minimum Correlation Value: 0.5"_s));
+
+        // The data is saved with the Document
+        const auto edges = edgeNames();
+        auto url = QUrl::fromLocalFile(_dir.filePath(u"discrete.%1"_s.arg(Application::nativeExtension())));
+        QVERIFY(execute([&] { _document->saveFile(url, Application::name(), {}, {}); }));
+        QVERIFY(open(url, QString::fromLatin1(Application::NativeFileType), {}));
+        QCOMPARE(edgeNames(), edges);
+        QCOMPARE(plugin()->property("numDiscreteColumns").toInt(), 3);
+    }
+
+    // The columns are the rows, and the rows' attributes are the columns' annotations
+    void transposed()
+    {
+        QVERIFY(open({{u"transpose"_s, u"true"_s}}));
+
+        // Before the default transforms remove the columns that don't correlate
+        QStringList names;
+        names.reserve(static_cast<qsizetype>(graphModel()->mutableGraph().nodeIds().size()));
+        for(auto id : graphModel()->mutableGraph().nodeIds())
+            names.append(graphModel()->nodeName(id));
+        names.sort();
+        QCOMPARE(names, (QStringList{u"c1"_s, u"c2"_s, u"c3"_s, u"c4"_s, u"c5"_s, u"c6"_s}));
+        QCOMPARE(graphModel()->attributeValueByName(u"Kind"_s).stringValueOf(nodeId(u"c4"_s)), u"y"_s);
+        QCOMPARE(plugin()->property("numContinuousColumns").toInt(), 5);
+        QCOMPARE(plugin()->property("columnAnnotationNames").toStringList(), QStringList{u"Group"_s});
+        QVERIFY(_document->property("log").toString().contains(u"Transposed"_s));
+    }
+
+    // Columns with the same name are made unique
+    void duplicateColumnNames()
+    {
+        QVERIFY(open(write(u"duplicates.csv"_s,
+            "Name,c,c,c,d\n"
+            "r1,1,2,3,4\n"
+            "r2,2,4,6,8\n"), u"CorrelationCSV"_s, u"Correlation"_s));
+
+        const auto columnNames = tableModel()->property("columnNames").toStringList();
+        QStringList dataColumnNames;
+        for(const auto& name : columnNames)
+        {
+            if(name.startsWith(u"DataValue"_s))
+                dataColumnNames.append(name);
+        }
+
+        QCOMPARE(dataColumnNames.size(), 4);
+        QCOMPARE(dataColumnNames.removeDuplicates(), 0);
+    }
+
     // The dialog for opening a correlation file finds the data and estimates the size of the graph
     void importParser()
     {
