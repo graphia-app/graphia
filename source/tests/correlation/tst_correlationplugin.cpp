@@ -293,6 +293,11 @@ private slots:
         QVERIFY(execute([this] { _document->redo(); }));
         QCOMPARE(annotationNames(), (QStringList{u"Batch"_s, u"Kind"_s}));
 
+        // Replacing an annotation of the same type, here numbers
+        QVERIFY(importAnnotations({2}, true));
+        QCOMPARE(annotationNames(), (QStringList{u"Batch"_s, u"Kind"_s}));
+        QCOMPARE(_document->property("status").toString(), u"Annotation Batch Imported"_s);
+
         // Not replacing an existing annotation gives the import a name of its own
         QVERIFY(importAnnotations({1}, false));
         QCOMPARE(annotationNames(), (QStringList{u"Batch"_s, u"Kind"_s, u"Kind(1)"_s}));
