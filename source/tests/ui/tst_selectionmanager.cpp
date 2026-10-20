@@ -194,6 +194,20 @@ private slots:
         QCOMPARE(selected(), QStringList{u"e"_s});
     }
 
+    void unselectedNodes()
+    {
+        QCOMPARE(names(_selectionManager->unselectedNodes()),
+            (QStringList{u"a"_s, u"b"_s, u"c"_s, u"d"_s, u"e"_s}));
+
+        _selectionManager->selectNodes(nodeIds({u"a"_s, u"c"_s}));
+        QCOMPARE(names(_selectionManager->unselectedNodes()), (QStringList{u"b"_s, u"d"_s, u"e"_s}));
+        QCOMPARE(selected(), (QStringList{u"a"_s, u"c"_s}));
+
+        _selectionManager->selectAllNodes();
+        QCOMPARE(names(_selectionManager->unselectedNodes()), QStringList{});
+        QCOMPARE(_selectionManager->numNodesSelected(), 5u);
+    }
+
     void mergedNodes()
     {
         QCOMPARE(_model->applyTransforms({u"ContractEdges where $Weight == 1"_s}), QStringList{});
