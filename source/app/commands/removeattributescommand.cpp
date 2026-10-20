@@ -83,17 +83,9 @@ bool RemoveAttributesCommand::execute()
             continue;
 
         if(attribute->elementType() == ElementType::Node)
-        {
-            _removedNodeAttributeTypes[attributeName] = attribute->valueType();
-            auto v = _graphModel->userNodeData().removeByAttributeName(attributeName);
-            _removedUserNodeDataVectors.emplace_back(std::move(v));
-        }
+            _removedUserNodeData.emplace_back(_graphModel->userNodeData().removeByAttributeName(attributeName));
         else if(attribute->elementType() == ElementType::Edge)
-        {
-            _removedEdgeAttributeTypes[attributeName] = attribute->valueType();
-            auto v = _graphModel->userEdgeData().removeByAttributeName(attributeName);
-            _removedUserEdgeDataVectors.emplace_back(std::move(v));
-        }
+            _removedUserEdgeData.emplace_back(_graphModel->userEdgeData().removeByAttributeName(attributeName));
 
         _graphModel->removeAttribute(attributeName);
     }
@@ -105,29 +97,15 @@ void RemoveAttributesCommand::undo()
 {
     const AttributeChangesTracker tracker(_graphModel);
 
-    for(auto&& vector : _removedUserNodeDataVectors)
-        _graphModel->userNodeData().setVector(std::move(vector));
+    for(auto&& removed : _removedUserNodeData)
+        _graphModel->userNodeData().restore(std::move(removed));
 
-    for(auto&& vector : _removedUserEdgeDataVectors)
-        _graphModel->userEdgeData().setVector(std::move(vector));
+    for(auto&& removed : _removedUserEdgeData)
+        _graphModel->userEdgeData().restore(std::move(removed));
 
     _graphModel->userNodeData().exposeAsAttributes(*_graphModel);
     _graphModel->userEdgeData().exposeAsAttributes(*_graphModel);
 
-    for(const auto& [attributeName, type] : _removedNodeAttributeTypes)
-    {
-        _graphModel->userNodeData().setAttributeType(*_graphModel,
-            attributeName, UserDataVector::equivalentTypeFor(type));
-    }
-
-    for(const auto& [attributeName, type] : _removedEdgeAttributeTypes)
-    {
-        _graphModel->userEdgeData().setAttributeType(*_graphModel,
-            attributeName, UserDataVector::equivalentTypeFor(type));
-    }
-
-    _removedUserNodeDataVectors.clear();
-    _removedNodeAttributeTypes.clear();
-    _removedUserEdgeDataVectors.clear();
-    _removedEdgeAttributeTypes.clear();
+    _removedUserNodeData.clear();
+    _removedUserEdgeData.clear();
 }

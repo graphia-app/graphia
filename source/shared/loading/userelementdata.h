@@ -53,12 +53,23 @@ private:
     std::map<QString, QString> _exposedAsAttributes;
     std::map<QString, QString> _inverseExposedAsAttributes;
 
+public:
     struct AttributeOverride
     {
+        QString _vectorName;
         ValueType _type = ValueType::Unknown;
         QString _description;
     };
 
+    // Convenience for RemoveAttributesCommand
+    struct RemovedVector
+    {
+        UserDataVector _vector;
+        QString _attributeName;
+        AttributeOverride _override;
+    };
+
+private:
     std::map<QString, AttributeOverride> _exposedAttributeOverrides;
 
     void generateElementIdMapping(E elementId);
@@ -113,7 +124,8 @@ public:
     std::vector<QString> exposeAsAttributes(IGraphModel& graphModel);
 
     const UserDataVector* vectorForAttributeName(const QString& attributeName);
-    UserDataVector removeByAttributeName(const QString& attributeName);
+    RemovedVector removeByAttributeName(const QString& attributeName);
+    void restore(RemovedVector removed);
 
     json save(const IMutableGraph&, const std::vector<E>& elementIds, Progressable& progressable) const;
     bool load(const json& jsonObject, Progressable& progressable);

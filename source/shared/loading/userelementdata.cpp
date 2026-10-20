@@ -93,9 +93,12 @@ template<typename E>
 void UserElementData<E>::remove(const QString& name)
 {
     UserData::remove(name);
-    _inverseExposedAsAttributes.erase(_exposedAsAttributes.at(name));
-    _exposedAttributeOverrides.erase(name);
+
+    // name may refer to the value in _inverseExposedAsAttributes, so erase that last
+    const auto attributeName = _exposedAsAttributes.at(name);
+    _exposedAttributeOverrides.erase(attributeName);
     _exposedAsAttributes.erase(name);
+    _inverseExposedAsAttributes.erase(attributeName);
 }
 
 template<typename E>
@@ -220,9 +223,20 @@ std::vector<QString> UserElementData<E>::exposeAsAttributes(IGraphModel& graphMo
         if(_exposedAsAttributes.contains(userDataVectorName))
             continue;
 
-        QString attributeName = graphModel.attributeIsDeclared(userDataVectorName) && !vectorIsDeclared(userDataVectorName) ?
-            QObject::tr("User %1").arg(userDataVectorName) :
-            userDataVectorName;
+        QString attributeName;
+
+        auto savedOverride = std::ranges::find_if(_exposedAttributeOverrides,
+            [&userDataVectorName](const auto& exposedAttributeOverride)
+            {
+                return exposedAttributeOverride.second._vectorName == userDataVectorName;
+            });
+
+        if(savedOverride != _exposedAttributeOverrides.end())
+            attributeName = savedOverride->first;
+        else if(graphModel.attributeIsDeclared(userDataVectorName) && !vectorIsDeclared(userDataVectorName))
+            attributeName = QObject::tr("User %1").arg(userDataVectorName);
+        else
+            attributeName = userDataVectorName;
 
         auto& attribute = graphModel.createAttribute(attributeName, &attributeName, clashHint)
             .setFlag(AttributeFlag::Searchable)
@@ -230,8 +244,9 @@ std::vector<QString> UserElementData<E>::exposeAsAttributes(IGraphModel& graphMo
 
         _exposedAsAttributes.emplace(userDataVectorName, attributeName);
         _inverseExposedAsAttributes.emplace(attributeName, userDataVectorName);
-        const auto& attributeOverride =
+        auto& attributeOverride =
             _exposedAttributeOverrides.emplace(attributeName, AttributeOverride()).first->second;
+        attributeOverride._vectorName = userDataVectorName;
         createdAttributeNames.emplace_back(attributeName);
 
         auto type = attributeOverride._type != ValueType::Unknown ?
@@ -284,18 +299,27 @@ const UserDataVector* UserElementData<E>::vectorForAttributeName(const QString& 
 }
 
 template<typename E>
-UserDataVector UserElementData<E>::removeByAttributeName(const QString& attributeName)
+typename UserElementData<E>::RemovedVector UserElementData<E>::removeByAttributeName(const QString& attributeName)
 {
-    UserDataVector removee;
+    RemovedVector removee;
 
     if(_inverseExposedAsAttributes.contains(attributeName))
     {
         const auto& vectorName = _inverseExposedAsAttributes.at(attributeName);
-        removee = std::move(*vector(vectorName));
+        removee._vector = std::move(*vector(vectorName));
+        removee._attributeName = attributeName;
+        removee._override = _exposedAttributeOverrides.at(attributeName);
         remove(vectorName);
     }
 
     return removee;
+}
+
+template<typename E>
+void UserElementData<E>::restore(RemovedVector removed)
+{
+    _exposedAttributeOverrides[removed._attributeName] = std::move(removed._override);
+    setVector(std::move(removed._vector));
 }
 
 template<typename E>
@@ -335,6 +359,9 @@ json UserElementData<E>::save(const IMutableGraph &, const std::vector<E> &eleme
             jsonAttribute["type"] = typeString;
 
         jsonAttribute["description"] = override._description.toStdString();
+
+        if(!override._vectorName.isEmpty())
+            jsonAttribute["vector"] = override._vectorName.toStdString();
     }
 
     jsonObject["attributes"] = jsonAttributes;
@@ -412,6 +439,9 @@ bool UserElementData<E>::load(const json &jsonObject, Progressable &progressable
                 _exposedAttributeOverrides[attributeName]._description =
                     QString::fromStdString(override["description"]);
             }
+
+            if(u::contains(override, "vector") && override["vector"].is_string())
+                _exposedAttributeOverrides[attributeName]._vectorName = QString::fromStdString(override["vector"]);
         }
     }
 
