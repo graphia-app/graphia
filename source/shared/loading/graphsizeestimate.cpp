@@ -32,9 +32,20 @@
 #include <set>
 #include <cstdlib>
 #include <cmath>
+#include <limits>
 #include <vector>
 
 using namespace Qt::Literals::StringLiterals;
+
+// The maximum number of edges between the given number of nodes, or
+// the largest size_t, if that's too many to represent
+static size_t maxEdgesFor(size_t maxNodes)
+{
+    if(maxNodes != 0 && maxNodes > std::numeric_limits<size_t>::max() / maxNodes)
+        return std::numeric_limits<size_t>::max();
+
+    return maxNodes * maxNodes;
+}
 
 QVariantMap graphSizeEstimateThreshold(EdgeList edgeList,
     size_t numSampleNodes, size_t maxNodes)
@@ -42,9 +53,7 @@ QVariantMap graphSizeEstimateThreshold(EdgeList edgeList,
     if(edgeList.empty())
         return {};
 
-    auto maxEdges = maxNodes == std::numeric_limits<size_t>::max() ?
-        std::numeric_limits<size_t>::max() :
-        maxNodes * maxNodes;
+    auto maxEdges = maxEdgesFor(maxNodes);
     auto nodesScale = static_cast<double>(maxNodes) / static_cast<double>(numSampleNodes);
     auto edgesScale = nodesScale * nodesScale;
 
@@ -124,7 +133,7 @@ QVariantMap graphSizeEstimateKnn(EdgeList edgeList, size_t maximumK,
     if(edgeList.empty())
         return {};
 
-    auto maxEdges = maxNodes * maxNodes;
+    auto maxEdges = maxEdgesFor(maxNodes);
     auto scale = static_cast<double>(maxNodes) / static_cast<double>(numSampleNodes);
 
     std::ranges::sort(edgeList,
