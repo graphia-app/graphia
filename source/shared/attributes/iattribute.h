@@ -156,4 +156,12 @@ public:
     static constexpr auto ValidNameRegex = "^[a-zA-Z_][a-zA-Z0-9_ ]*$";
 };
 
+struct AttributeDeclaration
+{
+    QString _name;
+    QString _displayName;
+};
+
+using AttributeDeclarations = std::vector<AttributeDeclaration>;
+
 #endif // IATTRIBUTE_H

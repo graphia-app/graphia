@@ -32,6 +32,7 @@
 class IGraph;
 class IMutableGraph;
 class IAttribute;
+struct AttributeDeclaration;
 struct IElementVisual;
 
 template<typename> class IUserElementData;
@@ -78,6 +79,8 @@ public:
     virtual bool attributeExists(const QString& name) const = 0;
 
     virtual QString attributeDisplayName(const QString& name) const = 0;
+
+    virtual bool attributeIsDeclared(const QString& name) const = 0;
     virtual std::vector<QString> attributeNames(ElementType elementType = ElementType::All) const = 0;
 
     template<typename Fn>

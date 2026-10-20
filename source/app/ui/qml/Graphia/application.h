@@ -238,8 +238,9 @@ public:
 
     Q_INVOKABLE void submitTrackingData() const;
 
-    QString displayTextForTransform(const QString& transform) const override;
-    QString displayTextForVisualisation(const QString& visualisation) const override;
+    const AttributeDeclaration* attributeDeclaration(const QString& name, const IPlugin* plugin) const;
+    QString displayTextForTransform(const QString& transform, const IPlugin* plugin) const override;
+    QString displayTextForVisualisation(const QString& visualisation, const IPlugin* plugin) const override;
 
     static QString resolvedExe(const QString& exe);
 
@@ -274,6 +275,8 @@ private:
     DownloadQueue _downloadQueue;
 
     std::vector<LoadedPlugin> _loadedPlugins;
+    AttributeDeclarations _declaredAttributes;
+    std::map<const IPlugin*, AttributeDeclarations> _pluginDeclaredAttributes;
     std::vector<std::unique_ptr<ISaverFactory>> _factories;
     GraphTransformFactories _graphTransformFactories;
     VisualisationChannelFactories _visualisationChannelFactories;
@@ -287,6 +290,9 @@ private:
     bool initialisePlugin(IPlugin* plugin, std::unique_ptr<QPluginLoader> pluginLoader);
     void updateLoadingCapabilities();
     void unloadPlugins();
+
+    void collectAttributeDeclarations();
+    QString attributeDisplayName(const QString& name, const IPlugin* plugin) const;
 
     QStringList nameFilters() const { return _nameFilters; }
     QStringListModel* loadableExtensions() { return &_loadableExtensions; }

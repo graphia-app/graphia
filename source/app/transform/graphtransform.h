@@ -23,6 +23,7 @@
 #include "shared/graph/elementtype.h"
 
 #include "shared/attributes/attributeflag.h"
+#include "shared/attributes/iattribute.h"
 
 #include "shared/utils/flags.h"
 #include "shared/utils/cancellable.h"
@@ -120,6 +121,7 @@ public:
     virtual GraphTransformParameters parameters() const { return {}; }
     GraphTransformParameter parameter(const QString& parameterName) const;
     virtual DefaultVisualisations defaultVisualisations() const { return {}; }
+    virtual AttributeDeclarations attributeDeclarations() const { return {}; }
 
     virtual bool configIsValid(const GraphModel&, const GraphTransformConfig&) const { return true; }
     void setMissingParametersToDefault(GraphTransformConfig& graphTransformConfig) const;

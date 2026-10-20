@@ -188,6 +188,7 @@ public:
     QString imageSource() const override;
     QString parametersQmlType(const QString&) const override;
     QString qmlModule() const override;
+    AttributeDeclarations attributeDeclarations() const override { return {}; }
     bool directed() const override;
     const IApplication* application() const override;
     QObject* ptr() override;

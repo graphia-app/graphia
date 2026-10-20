@@ -187,6 +187,8 @@ public:
 
     Attribute& createAttribute(QString name, QString* assignedName = nullptr) override;
 
+    static AttributeDeclarations attributeDeclarations() { return {}; }
+
     void addAttributes(const std::map<QString, Attribute>& attributes);
     void removeAttribute(const QString& name);
 
@@ -194,6 +196,7 @@ public:
     Attribute* attributeByName(const QString& name) override;
     bool attributeExists(const QString& name) const override;
     QString attributeDisplayName(const QString& name) const override;
+    bool attributeIsDeclared(const QString& name) const override;
     bool attributeIsValid(const QString& name) const;
     Attribute attributeValueByName(const QString& name) const;
 

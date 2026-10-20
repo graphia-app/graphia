@@ -22,13 +22,15 @@
 
 #include <QString>
 
+class IPlugin;
+
 class IApplication
 {
 public:
     virtual ~IApplication() = default;
 
-    virtual QString displayTextForTransform(const QString& transform) const = 0;
-    virtual QString displayTextForVisualisation(const QString& visualisation) const = 0;
+    virtual QString displayTextForTransform(const QString& transform, const IPlugin* plugin) const = 0;
+    virtual QString displayTextForVisualisation(const QString& visualisation, const IPlugin* plugin) const = 0;
 };
 
 #endif // IAPPLICATION_H

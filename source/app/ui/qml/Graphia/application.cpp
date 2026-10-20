@@ -44,6 +44,10 @@
 #include "app/loading/nativesaver.h"
 #include "app/loading/nativeloader.h"
 
+#include "app/attributes/attribute.h"
+
+#include "app/graph/graphmodel.h"
+
 #include "app/rendering/openglfunctions.h"
 
 #include "app/transform/graphtransformconfigparser.h"
@@ -67,6 +71,7 @@
 #include "app/transform/transforms/averageattributetransform.h"
 #include "app/transform/transforms/typecasttransform.h"
 #include "app/transform/transforms/removeleavestransform.h"
+
 #include "app/ui/visualisations/visualisationconfigparser.h"
 #include "app/ui/visualisations/colorvisualisationchannel.h"
 #include "app/ui/visualisations/sizevisualisationchannel.h"
@@ -233,6 +238,7 @@ Application::Application(QObject *parent, bool enableUpdateCheck) :
 #endif
 
     loadPlugins();
+    collectAttributeDeclarations();
 }
 
 Application::~Application() = default;
@@ -776,14 +782,45 @@ void Application::submitTrackingData() const
 #endif
 }
 
-QString Application::displayTextForTransform(const QString& transform) const
+const AttributeDeclaration* Application::attributeDeclaration(const QString& name, const IPlugin* plugin) const
 {
-    return GraphTransformConfigParser::parseForDisplay(transform, _graphTransformFactories);
+    auto find = [&name](const AttributeDeclarations& declarations) -> const AttributeDeclaration*
+    {
+        auto it = std::ranges::find_if(declarations,
+            [&name](const auto& declaredAttribute) { return declaredAttribute._name == name; });
+
+        return it != declarations.end() ? &*it : nullptr;
+    };
+
+    if(const auto* declaredAttribute = find(_declaredAttributes))
+        return declaredAttribute;
+
+    if(u::contains(_pluginDeclaredAttributes, plugin))
+        return find(_pluginDeclaredAttributes.at(plugin));
+
+    return nullptr;
 }
 
-QString Application::displayTextForVisualisation(const QString& visualisation) const
+QString Application::attributeDisplayName(const QString& name, const IPlugin* plugin) const
 {
-    return VisualisationConfigParser::parseForDisplay(visualisation, _visualisationChannelFactories);
+    return Attribute::fullyQualifiedDisplayName(name, [this, plugin](const QString& attributeName)
+    {
+        const auto* declaredAttribute = attributeDeclaration(attributeName, plugin);
+        return declaredAttribute != nullptr && !declaredAttribute->_displayName.isEmpty() ?
+            declaredAttribute->_displayName : attributeName;
+    });
+}
+
+QString Application::displayTextForTransform(const QString& transform, const IPlugin* plugin) const
+{
+    return GraphTransformConfigParser::parseForDisplay(transform, _graphTransformFactories,
+        [this, plugin](const QString& attributeName) { return attributeDisplayName(attributeName, plugin); });
+}
+
+QString Application::displayTextForVisualisation(const QString& visualisation, const IPlugin* plugin) const
+{
+    return VisualisationConfigParser::parseForDisplay(visualisation, _visualisationChannelFactories,
+        [this, plugin](const QString& attributeName) { return attributeDisplayName(attributeName, plugin); });
 }
 
 QString Application::resolvedExe(const QString& exe)
@@ -1085,6 +1122,17 @@ void Application::unloadPlugins()
     }
 
     _loadedPlugins.clear();
+}
+
+void Application::collectAttributeDeclarations()
+{
+    u::append(_declaredAttributes, GraphModel::attributeDeclarations());
+
+    for(const auto& [transformName, factory] : _graphTransformFactories)
+        u::append(_declaredAttributes, factory->attributeDeclarations());
+
+    for(const auto& [plugin, _] : _loadedPlugins)
+        _pluginDeclaredAttributes[plugin] = plugin->attributeDeclarations();
 }
 
 int Application::updateDownloadProgress() const

@@ -60,10 +60,10 @@ QObject* BasePlugin::ptr()
 
 QString BasePlugin::displayTextForTransform(const QString& transform) const
 {
-    return application()->displayTextForTransform(transform);
+    return application()->displayTextForTransform(transform, this);
 }
 
 QString BasePlugin::displayTextForVisualisation(const QString& visualisation) const
 {
-    return application()->displayTextForVisualisation(visualisation);
+    return application()->displayTextForVisualisation(visualisation, this);
 }

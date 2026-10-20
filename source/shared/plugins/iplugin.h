@@ -24,6 +24,8 @@
 
 #include "shared/iapplication.h"
 
+#include "shared/attributes/iattribute.h"
+
 #include "shared/loading/iurltypes.h"
 #include "shared/loading/iparser.h"
 
@@ -95,6 +97,8 @@ public:
 
     virtual QString parametersQmlType(const QString& urlType) const = 0;
     virtual QString qmlModule() const = 0;
+
+    virtual AttributeDeclarations attributeDeclarations() const = 0;
 
     virtual const IApplication* application() const = 0;
 

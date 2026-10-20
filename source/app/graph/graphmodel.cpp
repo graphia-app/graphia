@@ -40,6 +40,7 @@
 #include "app/transform/graphtransformconfigparser.h"
 
 #include "app/ui/visualisations/visualisationchannel.h"
+
 #include "app/ui/visualisations/visualisationconfigparser.h"
 #include "app/ui/visualisations/visualisationbuilder.h"
 #include "app/ui/visualisations/visualisationinfo.h"
@@ -1062,6 +1063,11 @@ bool GraphModel::attributeExists(const QString& name) const
     return u::contains(_->_attributes, attributeName._name);
 }
 
+bool GraphModel::attributeIsDeclared(const QString& name) const
+{
+    return _->_application->attributeDeclaration(name, _plugin) != nullptr;
+}
+
 QString GraphModel::attributeDisplayName(const QString& name) const
 {
     if(name.isEmpty())
@@ -1072,13 +1078,15 @@ QString GraphModel::attributeDisplayName(const QString& name) const
         const auto* attribute = u::contains(_->_attributes, attributeName) ?
             &_->_attributes.at(attributeName) : nullptr;
 
-        if(attribute != nullptr)
-        {
-            if(!attribute->displayName().isEmpty())
-                return attribute->displayName();
+        if(attribute != nullptr && !attribute->displayName().isEmpty())
+            return attribute->displayName();
 
+        const auto* declaredAttribute = _->_application->attributeDeclaration(attributeName, _plugin);
+        if(declaredAttribute != nullptr && !declaredAttribute->_displayName.isEmpty())
+            return declaredAttribute->_displayName;
+
+        if(attribute != nullptr)
             return attributeName;
-        }
 
         // It doesn't exist, so there's no name to show for it
         return QObject::tr("Unknown Attribute");
