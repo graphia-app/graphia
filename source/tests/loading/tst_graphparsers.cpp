@@ -401,6 +401,11 @@ private slots:
             "nodes":{"k1":{"id":"a","label":"A"},"k2":{"id":"b","label":"B"}},
             "edges":{"e":{"source":"a","target":"b"}}}})") <<
             QStringList{u"A"_s, u"B"_s} << QStringList{u"A-B"_s} << QStringList{};
+        // JSON Graph Format 2 keys nodes by their ids
+        QTest::newRow("JSON Graph keyed nodes") << u"JSONGraph"_s << QByteArray(R"({"graph":{
+            "nodes":{"a":{"label":"A"},"b":{"label":"B","metadata":{"type":"y"}}},
+            "edges":[{"source":"a","target":"b"}]}})") <<
+            QStringList{u"A"_s, u"B"_s} << QStringList{u"A-B"_s} << QStringList{u"type|B|y"_s};
 
         // CX
         QTest::newRow("CX1") << u"CX"_s << QByteArray(R"([{"numberVerification":[{"longNumber":281474976710655}]},
