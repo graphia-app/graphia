@@ -92,7 +92,7 @@ bool FastInitialLayout::execute(bool, Dimensionality dimensionality)
             const bool visited = visitedNodes.get(childNodeId);
             if(!visited)
             {
-                QVector3D offsetPosition(1.0, 0.0, 0.0);
+                QVector3D offsetPosition(-1.0, 0.0, 0.0);
                 positionNode(offsetPosition,
                              orientationMatrix,
                              parentNodePosition,
