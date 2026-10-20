@@ -25,6 +25,7 @@
 #include "app/graph/graphmodel.h"
 #include "app/graph/mutablegraph.h"
 #include "app/ui/document.h"
+#include "app/ui/qml/Graphia/editattributetablemodel.h"
 #include "app/ui/qml/Graphia/findtypes.h"
 #include "app/ui/qml/Graphia/graphdisplay.h"
 #include "app/ui/selectionmanager.h"
@@ -48,11 +49,11 @@ namespace
 const QByteArray Gml = R"(graph
 [
     directed 1
-    node [ id 0 label "a" score 1 ]
-    node [ id 1 label "b" score 2 ]
-    node [ id 2 label "c" score 3 ]
-    node [ id 3 label "d" score 4 ]
-    node [ id 4 label "e" score 5 ]
+    node [ id 0 label "a" score 1 kind "x" ]
+    node [ id 1 label "b" score 2 kind "x" ]
+    node [ id 2 label "c" score 3 kind "x" ]
+    node [ id 3 label "d" score 4 kind "y" ]
+    node [ id 4 label "e" score 5 kind "y" ]
     edge [ source 0 target 1 ]
     edge [ source 1 target 2 ]
     edge [ source 2 target 3 ]
@@ -427,6 +428,66 @@ private slots:
         QVERIFY(!_document->property("failureReason").toString().isEmpty());
 
         QVERIFY(!open(write(u"graph.gml"_s, Gml), u"GML"_s, u"Nothing"_s));
+    }
+
+    // The table in the dialog for editing an attribute's values
+    void editAttributeTable()
+    {
+        QVERIFY(open());
+
+        EditAttributeTableModel model;
+        model.setProperty("document", QVariant::fromValue(_document.get()));
+        model.setProperty("attributeName", u"kind"_s);
+
+        auto value = [&model](int row, int column)
+            { return model.data(model.index(row, column), Qt::DisplayRole); };
+
+        // Sorted by name, by default
+        QCOMPARE(model.rowCount(), 5);
+        QCOMPARE(value(0, 0).toString(), u"a"_s);
+        QCOMPARE(value(4, 0).toString(), u"e"_s);
+        QCOMPARE(value(3, 1).toString(), u"y"_s);
+
+        model.setProperty("ascendingSortOrder", false);
+        QCOMPARE(value(0, 0).toString(), u"e"_s);
+        model.setProperty("ascendingSortOrder", true);
+
+        model.editValue(1, u"z"_s);
+        QVERIFY(model.property("hasEdits").toBool());
+        QVERIFY(model.rowIsEdited(1));
+        QVERIFY(!model.rowIsEdited(0));
+        QCOMPARE(value(1, 1).toString(), u"z"_s);
+
+        model.resetRowValue(1);
+        QVERIFY(!model.property("hasEdits").toBool());
+        QCOMPARE(value(1, 1).toString(), u"x"_s);
+
+        // Only the selected nodes, if any
+        QVERIFY(execute([this] { _document->selectNeighbours(nodeId(u"d"_s), false); }));
+        QCOMPARE(model.rowCount(), 2);
+        QCOMPARE(value(0, 0).toString(), u"c"_s);
+        QVERIFY(execute([this] { _document->selectNone(); }));
+        QCOMPARE(model.rowCount(), 5);
+
+        // Each distinct value, with how many nodes have it
+        model.setProperty("combineSharedValues", true);
+        QCOMPARE(model.rowCount(), 2);
+
+        const int xRow = value(0, 1).toString() == u"x"_s ? 0 : 1;
+        QCOMPARE(value(xRow, 0).toInt(), 3);
+        QCOMPARE(value(1 - xRow, 0).toInt(), 2);
+
+        model.editValue(xRow, u"w"_s);
+        QVERIFY(model.rowIsEdited(xRow));
+
+        // Applying the edits, as the dialog does
+        const auto edits = model.property("edits").value<AttributeEdits>();
+        QCOMPARE(edits.nodeValues().size(), 3u);
+        QVERIFY(execute([&] { _document->editAttribute(u"kind"_s, edits, ValueType::Unknown, {}); }));
+
+        const auto values = _document->allAttributeValues(u"kind"_s);
+        QCOMPARE(values.count(u"w"_s), 3);
+        QCOMPARE(values.count(u"y"_s), 2);
     }
 };
 
