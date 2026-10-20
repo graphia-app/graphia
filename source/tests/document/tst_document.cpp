@@ -21,6 +21,7 @@
 
 #include "app/application.h"
 #include "app/attributes/attributeedits.h"
+#include "app/attributes/enrichmenttablemodel.h"
 #include "app/graph/graph.h"
 #include "app/graph/graphmodel.h"
 #include "app/graph/mutablegraph.h"
@@ -28,7 +29,10 @@
 #include "app/ui/qml/Graphia/editattributetablemodel.h"
 #include "app/ui/qml/Graphia/findtypes.h"
 #include "app/ui/qml/Graphia/graphdisplay.h"
+#include "app/ui/qml/Graphia/importattributeskeydetection.h"
 #include "app/ui/selectionmanager.h"
+
+#include "shared/loading/tabulardata.h"
 
 #include <QFile>
 #include <QMetaObject>
@@ -505,6 +509,86 @@ private slots:
         const auto values = _document->allAttributeValues(u"kind"_s);
         QCOMPARE(values.count(u"w"_s), 3);
         QCOMPARE(values.count(u"y"_s), 2);
+    }
+
+    // Finding which column of a table to match with which attribute, then importing it
+    void importAttributes()
+    {
+        QVERIFY(open());
+
+        auto data = std::make_shared<TabularData>();
+        const QList<QStringList> rows
+        {
+            {u"Id"_s,   u"Group"_s,   u"Value"_s},
+            {u"a"_s,    u"p"_s,       u"1.5"_s},
+            {u"b"_s,    u"q"_s,       u"2.5"_s},
+            {u"c"_s,    u"p"_s,       u"3.5"_s},
+            {u"z"_s,    u"q"_s,       u"4.5"_s},
+        };
+
+        data->reserve(3, static_cast<size_t>(rows.size()));
+        for(qsizetype row = 0; row < rows.size(); row++)
+        {
+            for(qsizetype column = 0; column < 3; column++)
+                data->setValueAt(static_cast<size_t>(column), static_cast<size_t>(row), rows.at(row).at(column));
+        }
+
+        ImportAttributesKeyDetection keyDetection;
+        keyDetection.setProperty("document", QVariant::fromValue(_document.get()));
+        keyDetection.setProperty("tabularData", QVariant::fromValue(data));
+
+        QSignalSpy resultChanged(&keyDetection, &ImportAttributesKeyDetection::resultChanged);
+        keyDetection.start();
+        QVERIFY(QTest::qWaitFor([&] { return !resultChanged.isEmpty() && !keyDetection.busy(); }, Timeout));
+
+        // Three of the five nodes are in the table
+        const auto result = keyDetection.property("result").toMap();
+        QCOMPARE(result.value(u"attributeName"_s).toString(), u"NodeName"_s);
+        QCOMPARE(result.value(u"column"_s).toInt(), 0);
+        QCOMPARE(result.value(u"percent"_s).toInt(), 60);
+
+        QVERIFY(execute([&] { _document->importAttributesFromTable(u"NodeName"_s, data, 0, {2}, false); }));
+        QVERIFY(_document->attributeExists(u"Value"_s));
+        QCOMPARE(graphModel()->attributeValueByName(u"Value"_s).numericValueOf(nodeId(u"c"_s)), 3.5);
+        QVERIFY(graphModel()->attributeValueByName(u"Value"_s).valueMissingOf(nodeId(u"d"_s)));
+
+        QVERIFY(execute([this] { _document->undo(); }));
+        QVERIFY(!_document->attributeExists(u"Value"_s));
+
+        keyDetection.reset();
+        QVERIFY(keyDetection.property("result").toMap().isEmpty());
+    }
+
+    // Enrichment results are kept with the Document, and saved with it
+    void enrichment()
+    {
+        QVERIFY(open());
+
+        QVERIFY(execute([this] { _document->performEnrichment(u"kind"_s, u"kind"_s); }));
+
+        auto tableModels = _document->property("enrichmentTableModels").toList();
+        QCOMPARE(tableModels.size(), 1);
+
+        auto* tableModel = tableModels.at(0).value<EnrichmentTableModel*>();
+        QVERIFY(tableModel != nullptr);
+        const auto rowCount = tableModel->rowCount();
+        QVERIFY(rowCount > 0);
+        QVERIFY(_document->property("saveRequired").toBool());
+
+        auto url = QUrl::fromLocalFile(_dir.filePath(u"enrichment.%1"_s.arg(Application::nativeExtension())));
+        QVERIFY(execute([&] { _document->saveFile(url, Application::name(), {}, {}); }));
+        QVERIFY(open(url, QString::fromLatin1(Application::NativeFileType), {}));
+
+        // The results are added once loading is complete
+        QVERIFY(QTest::qWaitFor([this]
+            { return !_document->property("enrichmentTableModels").toList().isEmpty(); }, Timeout));
+
+        tableModels = _document->property("enrichmentTableModels").toList();
+        QCOMPARE(tableModels.size(), 1);
+        QCOMPARE(tableModels.at(0).value<EnrichmentTableModel*>()->rowCount(), rowCount);
+
+        _document->removeEnrichmentResults(0);
+        QVERIFY(_document->property("enrichmentTableModels").toList().isEmpty());
     }
 };
 
