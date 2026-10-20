@@ -423,6 +423,15 @@ private slots:
         auto noVersionUrl = write(u"noVersion"_s, nativeFile({{"pluginName", "Test"}, {"pluginDataVersion", 1}},
             body(NativeSaver::Version)));
         QVERIFY(!Loader::canOpen(noVersionUrl));
+
+        auto versionNotNumberUrl = write(u"versionNotNumber"_s, nativeFile({{"version", "8"},
+            {"pluginName", "Test"}, {"pluginDataVersion", 1}}, body(NativeSaver::Version)));
+        QVERIFY(!Loader::canOpen(versionNotNumberUrl));
+        QVERIFY(Loader::pluginNameFor(versionNotNumberUrl).isEmpty());
+
+        auto pluginNameNotStringUrl = write(u"pluginNameNotString"_s, nativeFile({{"version", 8},
+            {"pluginName", 1}, {"pluginDataVersion", 1}}, body(NativeSaver::Version)));
+        QVERIFY(!Loader::canOpen(pluginNameNotStringUrl));
     }
 
     // Names and positions for nodes that aren't in the graph are ignored
@@ -511,6 +520,21 @@ private slots:
         userEdgeDataForMissingEdge["userEdgeData"]["ids"] = {0, MissingNodeId};
         QTest::newRow("User edge data for missing edge") <<
             nativeFile(header(version), userEdgeDataForMissingEdge) << QString();
+
+        auto pluginDataVersionNotNumber = header(version);
+        pluginDataVersionNotNumber["pluginDataVersion"] = "1";
+        QTest::newRow("Plugin data version not a number") <<
+            nativeFile(pluginDataVersionNotNumber, body(version)) << QString();
+
+        auto nodeNameNotString = body(version);
+        nodeNameNotString["nodeNames"].push_back({{"id", 0}, {"value", json::array()}});
+        QTest::newRow("Node name not a string") << nativeFile(header(version), nodeNameNotString) <<
+            u"Invalid content"_s;
+
+        auto positionNotNumbers = body(version);
+        positionNotNumbers["layout"]["positions"][0]["value"] = {"x", "y", "z"};
+        QTest::newRow("Position not numbers") << nativeFile(header(version), positionNotNumbers) <<
+            u"Invalid content"_s;
 
         QTest::newRow("Newer version") << nativeFile(header(version + 1), body(version)) <<
             u"newer version of"_s;

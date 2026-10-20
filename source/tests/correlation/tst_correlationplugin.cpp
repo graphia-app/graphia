@@ -473,6 +473,38 @@ private slots:
         QVERIFY(!openNative(content));
     }
 
+    void wrongPluginDataTypes_data()
+    {
+        QTest::addColumn<QString>("key");
+        QTest::addColumn<QString>("value");
+
+        QTest::newRow("maximumK missing") << u"maximumK"_s << QString();
+        QTest::newRow("transpose") << u"transpose"_s << u"yes"_s;
+        QTest::newRow("scaling") << u"scaling"_s << u"log"_s;
+        QTest::newRow("numContinuousColumns") << u"numContinuousColumns"_s << u"6"_s;
+        QTest::newRow("continuousData") << u"continuousData"_s << u"1,2,3"_s;
+    }
+
+    // Plugin data with a value of the wrong type fails to load
+    void wrongPluginDataTypes()
+    {
+        QFETCH(const QString, key);
+        QFETCH(const QString, value);
+
+        QVERIFY(open());
+
+        auto content = saved();
+        QVERIFY(content.is_array() && content.size() == 2);
+
+        auto& pluginData = content[1]["pluginData"];
+        if(value.isEmpty())
+            pluginData.erase(key.toStdString());
+        else
+            pluginData[key.toStdString()] = value.toStdString();
+
+        QVERIFY(!openNative(content));
+    }
+
     // Data that doesn't fill a whole number of rows fails to load
     void partialRow()
     {
