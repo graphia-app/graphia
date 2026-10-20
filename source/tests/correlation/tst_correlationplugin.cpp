@@ -23,10 +23,13 @@
 #include "app/ui/qml/Graphia/availableattributesmodel.h"
 
 #include "shared/loading/tabulardata.h"
+#include "shared/utils/json.h"
 
 #include "plugins/correlation/correlationtype.h"
 
 #include <QAbstractTableModel>
+#include <QByteArray>
+#include <QFile>
 #include <QList>
 #include <QMetaObject>
 #include <QQmlComponent>
@@ -39,6 +42,8 @@
 #include <QUrl>
 #include <QVariantMap>
 #include <QVector>
+
+#include <zlib.h>
 
 #include <algorithm>
 #include <cmath>
@@ -61,6 +66,97 @@ const QByteArray Csv =
     "r3,g2,6,5,4,3,2,1\n"
     "r4,g2,1,3,2,5,4,6\n"
     "r5,g2,6,4,5,2,3,1\n";
+
+// The content of a file compressed with gzip, as native files are saved
+QByteArray gunzip(QByteArray compressed)
+{
+    z_stream stream = {};
+    if(inflateInit2(&stream, MAX_WBITS + 32) != Z_OK) // 32 means read the gzip header
+        return {};
+
+    stream.next_in = reinterpret_cast<Bytef*>(compressed.data());
+    stream.avail_in = static_cast<uInt>(compressed.size());
+
+    QByteArray content;
+    std::vector<char> buffer(16384);
+    int result = Z_OK;
+
+    do
+    {
+        stream.next_out = reinterpret_cast<Bytef*>(buffer.data());
+        stream.avail_out = static_cast<uInt>(buffer.size());
+
+        result = inflate(&stream, Z_NO_FLUSH);
+        if(result != Z_OK && result != Z_STREAM_END)
+        {
+            content.clear();
+            break;
+        }
+
+        content.append(buffer.data(), static_cast<qsizetype>(buffer.size() - stream.avail_out));
+    } while(result != Z_STREAM_END);
+
+    inflateEnd(&stream);
+    return content;
+}
+
+// Rewrites the plugin's data, as saved now, as an earlier version of the plugin saved it
+void downgrade(json& data, int version)
+{
+    auto rename = [&data](const char* from, const char* to)
+    {
+        data[to] = data[from];
+        data.erase(from);
+    };
+
+    if(version < 14)
+    {
+        rename("minimumThreshold", version >= 12 ? "threshold" : "minimumCorrelationValue");
+        data.erase("maximumK");
+    }
+
+    if(version < 11)
+        data.erase("hcOrdering");
+
+    if(version < 10)
+    {
+        data.erase("clippingType");
+        data.erase("clippingValue");
+    }
+
+    if(version < 7)
+    {
+        rename("numContinuousColumns", "numColumns");
+        rename("continuousData", "data");
+        rename("continuousCorrelationType", "correlationType");
+
+        for(const auto* key : {"numDiscreteColumns", "discreteData", "correlationDataType", "discreteCorrelationType"})
+            data.erase(key);
+    }
+
+    if(version < 3)
+    {
+        rename("correlationValues", "pearsonValues");
+        data.erase("correlationType");
+        data.erase("correlationPolarity");
+    }
+
+    if(version < 2)
+    {
+        // An array of values, indexed by edge id
+        json values = json::array();
+        for(const auto& element : data["pearsonValues"])
+        {
+            const size_t id = element["id"];
+            while(values.size() <= id)
+                values.push_back(0.0);
+
+            values[id] = element["value"];
+        }
+
+        data["pearsonValues"] = values;
+    }
+}
 } // namespace
 
 // The correlation plugin, used through a Document, as in the UI
@@ -173,6 +269,28 @@ class TestCorrelationPlugin : public DocumentTest
         }
 
         return std::numeric_limits<double>::quiet_NaN();
+    }
+
+    // The Document, saved, as JSON
+    json saved()
+    {
+        auto url = QUrl::fromLocalFile(_dir.filePath(u"saved.%1"_s.arg(Application::nativeExtension())));
+        if(!execute([&] { _document->saveFile(url, Application::name(), {}, {}); }))
+            return {};
+
+        QFile file(url.toLocalFile());
+        if(!file.open(QIODevice::ReadOnly))
+            return {};
+
+        return parseJsonFrom(gunzip(file.readAll()));
+    }
+
+    bool openNative(const json& content)
+    {
+        auto url = write(u"edited.%1"_s.arg(Application::nativeExtension()),
+            QByteArray::fromStdString(content.dump()));
+
+        return open(url, QString::fromLatin1(Application::NativeFileType), {});
     }
 
 private slots:
@@ -296,6 +414,84 @@ private slots:
         QCOMPARE(plugin()->property("numContinuousColumns").toInt(), 6);
         QCOMPARE(plugin()->property("columnAnnotationNames").toStringList(), QStringList{u"Kind"_s});
         QCOMPARE(tableModel()->rowCount(), 5);
+    }
+
+    // Files saved by earlier versions of the plugin
+    void earlierVersions_data()
+    {
+        QTest::addColumn<int>("version");
+
+        for(int version = 1; version <= 15; version++)
+            QTest::addRow("%d", version) << version;
+    }
+
+    void earlierVersions()
+    {
+        QFETCH(const int, version);
+
+        QVERIFY(open());
+        const auto edges = edgeNames();
+
+        auto content = saved();
+        QVERIFY(content.is_array() && content.size() == 2);
+        QCOMPARE(content[0]["pluginDataVersion"].get<int>(), 15);
+
+        content[0]["pluginDataVersion"] = version;
+        downgrade(content[1]["pluginData"], version);
+        QVERIFY(openNative(content));
+
+        QCOMPARE(edgeNames(), edges);
+        QCOMPARE(edgeValue(u"PearsonCorrelationValue"_s, u"r1-r4"_s), 31.0 / 35.0);
+        QCOMPARE(nodeValue(u"MeanDataValue"_s, u"r2"_s), 7.0);
+        QCOMPARE(plugin()->property("numContinuousColumns").toInt(), 6);
+        QCOMPARE(tableModel()->rowCount(), 5);
+    }
+
+    void missingPluginData_data()
+    {
+        QTest::addColumn<QString>("key");
+
+        for(const auto* key : {"numContinuousColumns", "numDiscreteColumns", "userColumnData", "dataColumnNames",
+            "continuousData", "discreteData", "hcOrdering", "correlationValues", "minimumThreshold", "transpose",
+            "clippingType", "correlationDataType", "correlationPolarity"})
+        {
+            QTest::newRow(key) << QString::fromLatin1(key);
+        }
+    }
+
+    // Plugin data that's missing something fails to load
+    void missingPluginData()
+    {
+        QFETCH(const QString, key);
+
+        QVERIFY(open());
+
+        auto content = saved();
+        QVERIFY(content.is_array() && content.size() == 2);
+
+        content[1]["pluginData"].erase(key.toStdString());
+        QVERIFY(!openNative(content));
+    }
+
+    // Saving after deleting a node keeps each row's data with its node
+    void deletedNodeSaveAndLoad()
+    {
+        QVERIFY(open());
+        QVERIFY(execute([this] { _document->deleteNode(nodeId(u"r2"_s)); }));
+
+        const auto edges = edgeNames();
+
+        auto url = QUrl::fromLocalFile(_dir.filePath(u"deleted.%1"_s.arg(Application::nativeExtension())));
+        QVERIFY(execute([&] { _document->saveFile(url, Application::name(), {}, {}); }));
+        QVERIFY(open(url, QString::fromLatin1(Application::NativeFileType), {}));
+
+        QCOMPARE(nodeNames(), (QStringList{u"r1"_s, u"r3"_s, u"r4"_s, u"r5"_s}));
+        QCOMPARE(edgeNames(), edges);
+        QCOMPARE(nodeValue(u"MeanDataValue"_s, u"r1"_s), 3.5);
+        QCOMPARE(nodeValue(u"MeanDataValue"_s, u"r4"_s), 3.5);
+        QCOMPARE(nodeValue(u"MaximumDataValue"_s, u"r3"_s), 6.0);
+        QCOMPARE(edgeValue(u"PearsonCorrelationValue"_s, u"r1-r4"_s), 31.0 / 35.0);
+        QCOMPARE(tableModel()->rowCount(), 4);
     }
 
     void hierarchicalClustering()
