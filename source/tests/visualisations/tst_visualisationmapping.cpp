@@ -59,6 +59,8 @@ private slots:
         QTest::newRow("not JSON") << u"{min"_s << 2.0 << 9.0;
         QTest::newRow("not an object") << u"[1]"_s << 2.0 << 9.0;
         QTest::newRow("type not a string") << u"{\"type\": 1}"_s << 2.0 << 9.0;
+        QTest::newRow("min not a number") << u"{\"min\": \"3\", \"max\": 8}"_s << 2.0 << 9.0;
+        QTest::newRow("exponent not a number") << u"{\"min\": 3, \"max\": 8, \"exponent\": \"2\"}"_s << 3.0 << 8.0;
     }
 
     void range()
