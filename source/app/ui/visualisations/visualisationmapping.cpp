@@ -58,8 +58,16 @@ VisualisationMapping::VisualisationMapping(const u::Statistics& statistics,
 
     if(u::contains(jsonDocument, "min") && u::contains(jsonDocument, "max"))
     {
-        _min = jsonDocument["min"].get<double>();
-        _max = jsonDocument["max"].get<double>();
+        const auto& min = jsonDocument["min"];
+        const auto& max = jsonDocument["max"];
+
+        if(min.is_number() && max.is_number())
+        {
+            _min = min.get<double>();
+            _max = max.get<double>();
+        }
+        else
+            qDebug() << "VisualisationMapping.min or max is not a number" << descriptor;
     }
 
     if(u::contains(jsonDocument, "type"))
@@ -98,7 +106,14 @@ VisualisationMapping::VisualisationMapping(const u::Statistics& statistics,
     }
 
     if(u::contains(jsonDocument, "exponent"))
-        _exponent = jsonDocument["exponent"].get<double>();
+    {
+        const auto& exponent = jsonDocument["exponent"];
+
+        if(exponent.is_number())
+            _exponent = exponent.get<double>();
+        else
+            qDebug() << "VisualisationMapping.exponent is not a number" << descriptor;
+    }
 }
 
 double VisualisationMapping::map(double value) const
