@@ -285,6 +285,7 @@ private slots:
 
         QVERIFY(importAnnotations({2}, false));
         QCOMPARE(annotationNames(), (QStringList{u"Batch"_s, u"Kind"_s}));
+        QCOMPARE(_document->property("status").toString(), u"Annotation Batch Imported"_s);
 
         QVERIFY(execute([this] { _document->undo(); }));
         QCOMPARE(annotationNames(), QStringList{u"Kind"_s});
