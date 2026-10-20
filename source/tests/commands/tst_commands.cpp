@@ -21,18 +21,21 @@
 #include "tests/common/testgraphmodel.h"
 
 #include "app/attributes/attributeedits.h"
+#include "app/commands/applytransformscommand.h"
 #include "app/commands/cloneattributecommand.h"
 #include "app/commands/deletenodescommand.h"
 #include "app/commands/editattributecommand.h"
 #include "app/commands/importattributescommand.h"
 #include "app/commands/applyvisualisationscommand.h"
 #include "app/commands/removeattributescommand.h"
+#include "app/ui/document.h"
 #include "app/ui/selectionmanager.h"
 #include "app/ui/visualisations/visualisationconfigparser.h"
 
 #include "shared/loading/gmlfileparser.h"
 #include "shared/loading/tabulardata.h"
 
+#include <QMetaObject>
 #include <QTest>
 #include <QString>
 #include <QStringList>
@@ -127,6 +130,22 @@ TabularData tabularData(const QList<QStringList>& rows)
     }
 
     return data;
+}
+
+// A Document with nothing loaded, which is all ApplyTransformsCommand needs; the
+// commands are executed on the main thread, so what they ask the Document to do
+// on the main thread is done immediately
+std::unique_ptr<Document> createDocument()
+{
+    auto document = std::make_unique<Document>();
+    auto* documentPtr = document.get();
+
+    QObject::connect(documentPtr, &Document::taskAddedToExecutor, documentPtr, [documentPtr]
+    {
+        QMetaObject::invokeMethod(documentPtr, "executeDeferred", Qt::DirectConnection);
+    }, Qt::DirectConnection);
+
+    return document;
 }
 } // namespace
 
@@ -388,6 +407,82 @@ private slots:
         QVERIFY2(visualisationsEquivalent(patched,
             {u"\"LouvainCluster(1)\" Colour"_s, u"\"LouvainClusterSize(1)\" Size"_s}),
             qPrintable(patched.join(u"\n"_s)));
+    }
+
+    void applyTransforms()
+    {
+        auto model = createModel();
+        QVERIFY(model != nullptr);
+        auto document = createDocument();
+
+        const QStringList transforms
+        {
+            uR"(RemoveEdges where $weight > 2)"_s,
+            u"PageRank"_s
+        };
+
+        const auto edges = model->edgeNames();
+
+        ApplyTransformsCommand command(&model->graphModel(), document.get(), {}, transforms);
+        QVERIFY(command.execute());
+        QCOMPARE(model->edgeNames(), (QStringList{u"a-b"_s, u"b-c"_s}));
+        QVERIFY(model->graphModel().attributeExists(u"NodePageRank"_s));
+        QCOMPARE(document->transforms(), transforms);
+        QCOMPARE(document->graphTransformConfigurationsFromUI(), transforms);
+
+        command.undo();
+        QCOMPARE(model->edgeNames(), edges);
+        QVERIFY(!model->graphModel().attributeExists(u"NodePageRank"_s));
+        QCOMPARE(document->transforms(), QStringList{});
+
+        QVERIFY(command.execute());
+        QCOMPARE(model->edgeNames(), (QStringList{u"a-b"_s, u"b-c"_s}));
+        QCOMPARE(document->transforms(), transforms);
+
+        // Removing one of the transforms
+        ApplyTransformsCommand removeCommand(&model->graphModel(), document.get(),
+            transforms, {transforms.at(1)});
+        QVERIFY(removeCommand.execute());
+        QCOMPARE(model->edgeNames(), edges);
+        QVERIFY(model->graphModel().attributeExists(u"NodePageRank"_s));
+
+        removeCommand.undo();
+        QCOMPARE(model->edgeNames(), (QStringList{u"a-b"_s, u"b-c"_s}));
+        QCOMPARE(document->transforms(), transforms);
+    }
+
+    // As the Document does after a command changes an attribute that a transform refers to
+    void applyTransformsDeferred()
+    {
+        auto model = createModel();
+        QVERIFY(model != nullptr);
+        auto document = createDocument();
+
+        const QStringList transforms{uR"(RemoveEdges where $weight > 2)"_s};
+        ApplyTransformsCommand command(&model->graphModel(), document.get(), {}, transforms);
+        QVERIFY(command.execute());
+
+        // There's nothing to do
+        QVERIFY(!model->graphModel().transformRebuildRequired());
+        ApplyTransformsCommand nothingToDo(&model->graphModel(), document.get());
+        QVERIFY(nothingToDo.execute());
+        QCOMPARE(document->transforms(), transforms);
+
+        AttributeEdits edits;
+        edits.setEdgeValue(model->edgeId(u"a"_s, u"b"_s), u"5"_s);
+        const auto description = model->graphModel().attributeByName(u"weight"_s)->description();
+        EditAttributeCommand editCommand(&model->graphModel(), u"weight"_s, edits, ValueType::Unknown, description);
+        QVERIFY(editCommand.execute());
+        QVERIFY(model->graphModel().transformRebuildRequired());
+
+        // The edge is only removed once the transforms are applied again
+        QCOMPARE(model->edgeNames(), (QStringList{u"a-b"_s, u"b-c"_s}));
+
+        ApplyTransformsCommand rebuild(&model->graphModel(), document.get());
+        QVERIFY(rebuild.execute());
+        QVERIFY(!model->graphModel().transformRebuildRequired());
+        QCOMPARE(model->edgeNames(), QStringList{u"b-c"_s});
+        QCOMPARE(document->transforms(), transforms);
     }
 };
 
