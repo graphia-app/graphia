@@ -25,6 +25,7 @@
 #include "app/graph/graph.h"
 #include "app/graph/graphmodel.h"
 #include "app/graph/mutablegraph.h"
+#include "app/layout/nodepositions.h"
 #include "app/ui/document.h"
 #include "app/ui/qml/Graphia/availableattributesmodel.h"
 #include "app/ui/qml/Graphia/editattributetablemodel.h"
@@ -34,6 +35,8 @@
 #include "app/ui/selectionmanager.h"
 
 #include "shared/loading/tabulardata.h"
+#include "shared/utils/container.h"
+#include "shared/utils/json.h"
 
 #include <QFile>
 #include <QMetaObject>
@@ -44,8 +47,11 @@
 #include <QTemporaryDir>
 #include <QTest>
 #include <QUrl>
+#include <QVector3D>
 
+#include <map>
 #include <memory>
+#include <vector>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -706,6 +712,93 @@ private slots:
         QFile file(fileName);
         QVERIFY(file.open(QIODevice::ReadOnly));
         QCOMPARE(QString::fromUtf8(file.readAll()), expected);
+    }
+
+    std::vector<QVector3D> positions()
+    {
+        std::vector<QVector3D> v;
+        v.reserve(graph().nodeIds().size());
+        for(auto nodeId : graph().nodeIds())
+            v.push_back(graphModel()->nodePositions().get(nodeId));
+
+        return v;
+    }
+
+    // Node positions saved, then loaded again
+    void nodePositions()
+    {
+        QVERIFY(open());
+
+        // Let the layout put the nodes in different places
+        QVERIFY(QTest::qWaitFor([this]
+        {
+            const auto& positions = graphModel()->nodePositions();
+            return positions.get(nodeId(u"a"_s)) != positions.get(nodeId(u"c"_s));
+        }, Timeout));
+
+        _document->setUserLayoutPaused(true);
+        QVERIFY(waitForCommands());
+
+        const auto saved = QUrl::fromLocalFile(_dir.filePath(u"positions.json"_s));
+        QVERIFY(execute([&] { _document->saveNodePositionsToFile(saved); }));
+
+        QFile file(saved.toLocalFile());
+        QVERIFY(file.open(QIODevice::ReadOnly));
+        const auto content = parseJsonFrom(file.readAll());
+        QVERIFY(content.is_array());
+        QCOMPARE(content.size(), 5u);
+
+        // Each node's position as the layout has it, before it's scaled for display
+        std::map<QString, QVector3D> savedPositions;
+        for(const auto& node : content)
+        {
+            const auto& position = node["position"];
+            savedPositions.emplace(QString::fromStdString(node["name"].get<std::string>()),
+                QVector3D(position.at(0).get<float>(), position.at(1).get<float>(), position.at(2).get<float>()));
+        }
+
+        QVERIFY(savedPositions.at(u"a"_s) != savedPositions.at(u"c"_s));
+
+        auto displayed = [this](const QString& name) { return graphModel()->nodePositions().get(nodeId(name)); };
+        const auto scale = graphModel()->nodePositions().scale();
+
+        // Move a, then load the saved positions, which puts it back
+        const auto moved = write(u"moved.json"_s,
+            QByteArray::fromStdString(json::array({{{"id", static_cast<int>(nodeId(u"a"_s))},
+            {"position", {100.0, 200.0, 300.0}}}}).dump()));
+        QVERIFY(execute([&] { _document->loadNodePositionsFromFile(moved); }));
+        QCOMPARE(displayed(u"a"_s), QVector3D(100.0f, 200.0f, 300.0f) * scale);
+
+        QVERIFY(execute([&] { _document->loadNodePositionsFromFile(saved); }));
+
+        for(const auto& [name, position] : savedPositions)
+            QCOMPARE(displayed(name), position * scale);
+    }
+
+    void malformedNodePositions_data()
+    {
+        QTest::addColumn<QByteArray>("content");
+
+        QTest::newRow("Not JSON") << QByteArray("[");
+        QTest::newRow("Not an array") << QByteArray(R"({"id": 0})");
+        QTest::newRow("Unknown node") << QByteArray(R"([{"id": 1000, "position": [1, 2, 3]}])");
+        QTest::newRow("No position") << QByteArray(R"([{"id": 0}])");
+        QTest::newRow("Short position") << QByteArray(R"([{"id": 0, "position": [1, 2]}])");
+    }
+
+    // A file that can't be loaded changes nothing
+    void malformedNodePositions()
+    {
+        QFETCH(QByteArray, content);
+
+        QVERIFY(open());
+
+        _document->setUserLayoutPaused(true);
+        QVERIFY(waitForCommands());
+
+        const auto before = positions();
+        QVERIFY(execute([&] { _document->loadNodePositionsFromFile(write(u"positions.json"_s, content)); }));
+        QCOMPARE(positions(), before);
     }
 };
 
