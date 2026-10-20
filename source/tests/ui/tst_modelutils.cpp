@@ -116,6 +116,11 @@ private slots:
         proxy.setProperty("sortRoleName", u"kind"_s);
         QCOMPARE(namesOf(proxy), (QStringList{u"d"_s, u"c"_s, u"b"_s, u"a"_s}));
 
+        // ...whichever way it's sorted
+        proxy.setProperty("ascendingSortOrder", false);
+        QCOMPARE(namesOf(proxy), (QStringList{u"b"_s, u"a"_s, u"d"_s, u"c"_s}));
+        proxy.setProperty("ascendingSortOrder", true);
+
         // Filtering
         proxy.setProperty("filterRoleName", u"kind"_s);
         proxy.setFilterRegularExpression(QRegularExpression(u"^x$"_s));
