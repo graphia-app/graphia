@@ -51,6 +51,14 @@ testing, which may come later as an extra safety net.
   everything with them (not MSVC). The Clang Debug CI job uses it, through
   `linux-build.sh`'s `SANITIZERS` variable. The whole suite was clean under
   GCC's ASan, UBSan and LeakSanitizer when this was added.
+- **Standard library checks:** `GRAPHIA_STDLIB_ASSERTIONS` builds with
+  `_GLIBCXX_ASSERTIONS`, which the Clang Debug CI job uses (`STDLIB_ASSERTIONS`
+  in `linux-build.sh`). The fuller `_GLIBCXX_DEBUG`, which also checks
+  iterators, crashes with a Qt not built with it, as it changes the layout of
+  `std::map`, which `QMap` uses. Building locally with it, by adding
+  `-D_GLIBCXX_DEBUG` to the flags, still runs the tests that don't destroy a
+  `QVariantMap` made by our code, and found the transform cache and
+  Winsorization bugs.
 - **Locales:** numbers are formatted in the system locale, which on Linux Qt
   takes from `LC_ALL` and the like, so the suite can be run in another
   locale with, e.g., `LC_ALL=sv_SE.UTF-8 ctest`. `tst_string` is also run in
@@ -170,6 +178,7 @@ testing, which may come later as an extra safety net.
 | `tst_layoutthread` | the layout thread, driven as `Document` drives it: running to completion, 2D, pausing, components added and removed, settings |
 | `tst_nodeattributetablemodel` | the table of node attributes in plugins' panels: columns, values, removed nodes, selection, attributes added, removed and edited, related rows; the display model the table view shows: rows, hidden and ordered columns, sorting, row order, rows selected in the table |
 | `tst_modelutils` | `SortFilterProxyModel` (sorting by role, both orders, ties, filtering) and `ModelCompleter` (candidates, common prefix, closest match) |
+| `tst_transformcache` | invalidating cached transform results when attributes change |
 | `tst_tabulardataparser` | the parsers the table import and matrix dialogs use: headers for the key column by type, duplicates, failures, and the matrix size estimate |
 | `tst_headless` | headless mode, end to end with the real plugins and `Document`: GML, pairwise and correlation files to native files, which are loaded back, and failures |
 | `tst_document` | `Document`, as the UI uses it: loading, transforms (applied, edited, moved, removed, undone), selection, Find, deleting nodes, bookmarks, attribute commands, an edited attribute reapplying transforms, visualisations, saving and loading again, the edit attribute table, finding the key for and importing attributes, enrichment results, what the transform and visualisation panels ask of it, exporting tables, saving and loading node positions, the transforms offered when adding one, selecting by value, stepping through found nodes, moving visualisations, `Application`'s file type identification, failure reasons, links and resource files, the tree of attributes in attribute lists, an edge's nodes' attributes in transforms, matrices with the dialog's options, GraphML, DOT, JSON Graph and pairwise TSV through the generic plugin |
@@ -321,6 +330,10 @@ Each one is a commit; see `git log` for the details.
   longer than a shorter match (not visible, as only its presence is used).
 - **JSON Graph:** files in version 2 of the format, whose nodes are keyed
   by id, failed to load.
+- **Transform cache:** invalidating results compared iterators the erase
+  had invalidated, and discarded results unaffected by the change.
+- **Winsorization:** dereferenced the end of the data, which aborts with
+  checked iterators (MSVC debug builds).
 - **Exported tables:** values with line breaks split their rows.
 - **Node positions files:** a non-numeric id or coordinate crashed Graphia.
 - **Edit attribute table:** a value edited back to what it was kept the
