@@ -46,8 +46,16 @@ ColorGradient::ColorGradient(const QString& descriptor)
 
     for(const auto& i : jsonDocument.items())
     {
-        auto value = std::stod(i.key());
-        auto colorString = QString::fromStdString(i.value());
+        bool isNumber = false;
+        auto value = QString::fromStdString(i.key()).toDouble(&isNumber);
+
+        if(!isNumber || !i.value().is_string())
+        {
+            qDebug() << "ColorGradient has an invalid stop" << descriptor;
+            continue;
+        }
+
+        auto colorString = QString::fromStdString(i.value().get<std::string>());
 
         _stops.emplace_back(Stop{._value = value, ._color = colorString});
     }

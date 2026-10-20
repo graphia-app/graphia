@@ -27,6 +27,7 @@
 #include <QDebug>
 
 #include <cstddef>
+#include <string>
 #include <utility>
 
 using namespace Qt::Literals::StringLiterals;
@@ -65,21 +66,33 @@ ColorPalette::ColorPalette(const QString& descriptor)
         return;
     }
 
-    if(hasAutoColors)
+    if(hasAutoColors && autoColorsValue.is_array())
     {
         for(const auto& color : autoColorsValue)
         {
-            auto colorString = QString::fromStdString(color);
+            if(!color.is_string())
+            {
+                qDebug() << "ColorPalette.autoColors contains a non-string";
+                continue;
+            }
+
+            auto colorString = QString::fromStdString(color.get<std::string>());
             _colors.emplace_back(colorString);
         }
     }
 
-    if(hasFixedColors)
+    if(hasFixedColors && fixedColorsValue.is_object())
     {
         for(const auto& i : fixedColorsValue.items())
         {
+            if(!i.value().is_string())
+            {
+                qDebug() << "ColorPalette.fixedColors contains a non-string";
+                continue;
+            }
+
             auto value = QString::fromStdString(i.key());
-            auto colorString = QString::fromStdString(i.value());
+            auto colorString = QString::fromStdString(i.value().get<std::string>());
 
             _fixedColors[value] = colorString;
         }
