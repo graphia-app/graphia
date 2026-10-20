@@ -116,6 +116,7 @@ bool ImportAnnotationsCommand::execute()
         {
             annotationName = u::findUniqueName(userData.vectorNames(), annotationName);
             _createdVectorNames.emplace(annotationName);
+            _createdAnnotationNames.push_back(annotationName);
         }
 
         for(size_t column = 0; column < _plugin->numColumns(); column++)
@@ -144,6 +145,7 @@ void ImportAnnotationsCommand::undo()
         userData.setVector(std::move(vector));
 
     _createdVectorNames.clear();
+    _createdAnnotationNames.clear();
     _replacedUserDataVectors.clear();
 
     _plugin->rebuildColumnAnnotations();
