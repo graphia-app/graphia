@@ -22,14 +22,21 @@
 
 #include "shared/loading/tabulardata.h"
 
+#include "plugins/correlation/correlationtype.h"
+
 #include <QAbstractTableModel>
+#include <QList>
 #include <QMetaObject>
+#include <QQmlComponent>
+#include <QQmlEngine>
+#include <QRect>
 #include <QSignalSpy>
 #include <QString>
 #include <QStringList>
 #include <QTest>
 #include <QUrl>
 #include <QVariantMap>
+#include <QVector>
 
 #include <algorithm>
 #include <iterator>
@@ -66,6 +73,63 @@ class TestCorrelationPlugin : public DocumentTest
     }
 
     QObject* plugin() { return _document->pluginInstance(); }
+
+    std::unique_ptr<QQmlEngine> _engine;
+
+    // One of the types in the plugin's QML module, as the plugin's QML creates
+    std::unique_ptr<QObject> createQmlObject(const QString& typeName)
+    {
+        QQmlComponent component(_engine.get());
+        component.setData(u"import Graphia.Plugins.Correlation\n%1 {}"_s.arg(typeName).toUtf8(), {});
+
+        std::unique_ptr<QObject> object(component.create());
+        if(object == nullptr)
+            qWarning() << component.errorString();
+
+        return object;
+    }
+
+    // Parses a file with the parser the dialog for opening correlation files uses
+    std::unique_ptr<QObject> parse(const QUrl& url, const QString& type = u"CorrelationCSV"_s)
+    {
+        auto parser = createQmlObject(u"CorrelationTabularDataParser"_s);
+        if(parser == nullptr)
+            return nullptr;
+
+        QSignalSpy complete(parser.get(), SIGNAL(completeChanged()));
+        QMetaObject::invokeMethod(parser.get(), "parse", Q_ARG(QUrl, url), Q_ARG(QString, type));
+
+        if(!QTest::qWaitFor([&] { return !complete.isEmpty() && !parser->property("busy").toBool(); }, Timeout))
+            return nullptr;
+
+        return parser;
+    }
+
+    // Calls a method that finds the data rectangle, and waits for it
+    template<typename... Args>
+    static QVariantMap dataRect(QObject* parser, const char* method, Args... args)
+    {
+        const QSignalSpy dataRectChanged(parser, SIGNAL(dataRectChanged()));
+        QMetaObject::invokeMethod(parser, method, args...);
+
+        if(!QTest::qWaitFor([&] { return !dataRectChanged.isEmpty() && !parser->property("busy").toBool(); }, Timeout))
+            return {};
+
+        return parser->property("dataRect").toMap();
+    }
+
+    static QRect rect(const QVariantMap& dataRect) { return dataRect.value(u"asQRect"_s).toRect(); }
+
+    static QVariantMap estimateGraphSize(QObject* parser, const QVariantMap& parameters)
+    {
+        QSignalSpy estimateChanged(parser, SIGNAL(graphSizeEstimateChanged()));
+        QMetaObject::invokeMethod(parser, "estimateGraphSize", Q_ARG(QVariantMap, parameters));
+
+        if(!QTest::qWaitFor([&] { return !estimateChanged.isEmpty(); }, Timeout))
+            return {};
+
+        return parser->property("graphSizeEstimate").toMap();
+    }
 
     QAbstractTableModel* tableModel()
     {
@@ -113,6 +177,9 @@ private slots:
     {
         TestEnvironment::initialise();
         QVERIFY(createApplication());
+
+        // The plugin's QML types are registered when it's loaded, by the Application
+        _engine = std::make_unique<QQmlEngine>();
     }
 
     void cleanup()
@@ -122,6 +189,7 @@ private slots:
 
     void cleanupTestCase()
     {
+        _engine.reset();
         destroyApplication();
     }
 
@@ -301,6 +369,228 @@ private slots:
         // Not replacing an existing annotation gives the import a name of its own
         QVERIFY(importAnnotations({1}, false));
         QCOMPARE(annotationNames(), (QStringList{u"Batch"_s, u"Kind"_s, u"Kind(1)"_s}));
+    }
+    // The dialog for opening a correlation file finds the data and estimates the size of the graph
+    void importParser()
+    {
+        auto parser = parse(write(u"data.csv"_s, Csv));
+        QVERIFY(parser != nullptr);
+        QVERIFY(!parser->property("failed").toBool());
+        QVERIFY(parser->property("dataHasNumericalRect").toBool());
+
+        auto* model = parser->property("model").value<QAbstractTableModel*>();
+        QVERIFY(model != nullptr);
+        QCOMPARE(model->rowCount(), 7);
+        QCOMPARE(model->columnCount(), 8);
+        QCOMPARE(model->data(model->index(3, 2)).toString(), u"2"_s);
+
+        // The numbers, below the column annotation and right of the row attribute
+        auto detected = dataRect(parser.get(), "autoDetectDataRectangle");
+        QCOMPARE(rect(detected), QRect(2, 2, 6, 5));
+        QCOMPARE(detected.value(u"hasMissingValues"_s).toBool(), false);
+        QCOMPARE(detected.value(u"hasDiscreteValues"_s).toBool(), false);
+        QCOMPARE(detected.value(u"appearsToBeContinuous"_s).toBool(), true);
+        QCOMPARE(detected.value(u"minValue"_s).toDouble(), 1.0);
+        QCOMPARE(detected.value(u"maxValue"_s).toDouble(), 12.0);
+
+        // Chosen by the user; the rectangle extends to the bottom right
+        auto chosen = dataRect(parser.get(), "setDataRectangle", Q_ARG(size_t, 3), Q_ARG(size_t, 4));
+        QCOMPARE(rect(chosen), QRect(3, 4, 5, 3));
+        QCOMPARE(chosen.value(u"minValue"_s).toDouble(), 1.0);
+        QCOMPARE(chosen.value(u"maxValue"_s).toDouble(), 6.0);
+
+        // Including the column annotation and the row attribute, which aren't numbers, and
+        // the annotation's empty value for the row attribute
+        chosen = dataRect(parser.get(), "setDataRectangle", Q_ARG(size_t, 1), Q_ARG(size_t, 1));
+        QCOMPARE(rect(chosen), QRect(1, 1, 7, 6));
+        QCOMPARE(chosen.value(u"hasMissingValues"_s).toBool(), true);
+        QCOMPARE(chosen.value(u"hasDiscreteValues"_s).toBool(), true);
+        QCOMPARE(chosen.value(u"appearsToBeContinuous"_s).toBool(), false);
+
+        // The first column is always the row names
+        chosen = dataRect(parser.get(), "setDataRectangle", Q_ARG(size_t, 0), Q_ARG(size_t, 2));
+        QCOMPARE(rect(chosen), QRect(1, 2, 7, 5));
+
+        detected = dataRect(parser.get(), "autoDetectDataRectangle");
+        QCOMPARE(rect(detected), QRect(2, 2, 6, 5));
+
+        // Transposing the table transposes the rectangle
+        const QSignalSpy dataRectChanged(parser.get(), SIGNAL(dataRectChanged()));
+        parser->setProperty("transposed", true);
+        QCOMPARE(dataRectChanged.count(), 1);
+        QCOMPARE(rect(parser->property("dataRect").toMap()), QRect(2, 2, 5, 6));
+        QCOMPARE(model->rowCount(), 8);
+        QCOMPARE(model->columnCount(), 7);
+        QCOMPARE(model->data(model->index(2, 3)).toString(), u"2"_s);
+
+        detected = dataRect(parser.get(), "autoDetectDataRectangle");
+        QCOMPARE(rect(detected), QRect(2, 2, 5, 6));
+
+        parser->setProperty("transposed", false);
+        QCOMPARE(rect(parser->property("dataRect").toMap()), QRect(2, 2, 6, 5));
+        QCOMPARE(model->rowCount(), 7);
+
+        // Every row is sampled, so the estimate is exact: r1 and r2 correlate perfectly, and
+        // three other pairs at 0.886
+        auto estimate = estimateGraphSize(parser.get(),
+        {
+            {u"minimumThreshold"_s, 0.7},
+            {u"correlationFilterType"_s, static_cast<int>(CorrelationFilterType::Threshold)},
+            {u"correlationDataType"_s, static_cast<int>(CorrelationDataType::Continuous)},
+            {u"continuousCorrelationType"_s, static_cast<int>(CorrelationType::Pearson)},
+        });
+
+        auto keys = estimate.value(u"keys"_s).value<QVector<double>>();
+        auto numNodes = estimate.value(u"numNodes"_s).value<QVector<double>>();
+        auto numEdges = estimate.value(u"numUniqueEdges"_s).value<QVector<double>>();
+        QVERIFY(!keys.isEmpty());
+        QCOMPARE(numNodes.size(), keys.size());
+        QCOMPARE(numEdges.size(), keys.size());
+        QVERIFY(std::ranges::is_sorted(keys));
+        QVERIFY(qFuzzyCompare(keys.front(), 31.0 / 35.0));
+        QCOMPARE(numNodes.front(), 5.0);
+        QCOMPARE(numEdges.front(), 4.0);
+        QVERIFY(qFuzzyCompare(keys.back(), 1.0));
+        QCOMPARE(numNodes.back(), 2.0);
+        QCOMPARE(numEdges.back(), 1.0);
+
+        // Each row's most correlated other row
+        estimate = estimateGraphSize(parser.get(),
+        {
+            {u"maximumK"_s, 2},
+            {u"correlationFilterType"_s, static_cast<int>(CorrelationFilterType::Knn)},
+            {u"correlationDataType"_s, static_cast<int>(CorrelationDataType::Continuous)},
+            {u"continuousCorrelationType"_s, static_cast<int>(CorrelationType::Pearson)},
+        });
+
+        keys = estimate.value(u"keys"_s).value<QVector<double>>();
+        numNodes = estimate.value(u"numNodes"_s).value<QVector<double>>();
+        QCOMPARE(keys, (QVector<double>{2.0, 1.0}));
+        QCOMPARE(numNodes, (QVector<double>{5.0, 5.0}));
+    }
+
+    void importParserDiscrete()
+    {
+        // Few distinct whole numbers, and one missing
+        auto parser = parse(write(u"discrete.tsv"_s,
+            "Name\ta\tb\tc\n"
+            "r1\t1\t1\t2\n"
+            "r2\t1\t2\t\n"
+            "r3\t1\t1\t2\n"
+            "r4\t2\t1\t2\n"
+            "r5\t1\t1\t2\n"), u"CorrelationTSV"_s);
+        QVERIFY(parser != nullptr);
+
+        auto detected = dataRect(parser.get(), "autoDetectDataRectangle");
+        QCOMPARE(rect(detected), QRect(1, 1, 3, 5));
+        QCOMPARE(detected.value(u"hasMissingValues"_s).toBool(), true);
+        QCOMPARE(detected.value(u"hasDiscreteValues"_s).toBool(), false);
+        QCOMPARE(detected.value(u"appearsToBeContinuous"_s).toBool(), false);
+
+        // Words
+        parser = parse(write(u"words.csv"_s,
+            "Name,a,b,c\n"
+            "r1,x,y,z\n"
+            "r2,x,y,y\n"
+            "r3,z,z,z\n"));
+        QVERIFY(parser != nullptr);
+        QVERIFY(!parser->property("dataHasNumericalRect").toBool());
+
+        detected = dataRect(parser.get(), "autoDetectDataRectangle");
+        QCOMPARE(rect(detected), QRect(1, 1, 3, 3));
+        QCOMPARE(detected.value(u"hasDiscreteValues"_s).toBool(), true);
+
+        // r1 has two values in common with r2, and one with r3
+        const auto estimate = estimateGraphSize(parser.get(),
+        {
+            {u"minimumThreshold"_s, 0.1},
+            {u"correlationFilterType"_s, static_cast<int>(CorrelationFilterType::Threshold)},
+            {u"correlationDataType"_s, static_cast<int>(CorrelationDataType::Discrete)},
+            {u"discreteCorrelationType"_s, static_cast<int>(CorrelationType::SMC)},
+        });
+
+        const auto keys = estimate.value(u"keys"_s).value<QVector<double>>();
+        QCOMPARE(keys.size(), 2);
+        QVERIFY(qFuzzyCompare(keys.at(0), 1.0 / 3.0));
+        QVERIFY(qFuzzyCompare(keys.at(1), 2.0 / 3.0));
+        QCOMPARE(estimate.value(u"numUniqueEdges"_s).value<QVector<double>>(), (QVector<double>{2.0, 1.0}));
+    }
+
+    void importParserFailure()
+    {
+        auto parser = parse(QUrl::fromLocalFile(_dir.filePath(u"missing.csv"_s)));
+        QVERIFY(parser != nullptr);
+        QVERIFY(parser->property("failed").toBool());
+        QVERIFY(parser->property("complete").toBool());
+
+        parser = parse(write(u"data.csv"_s, Csv), u"NotAType"_s);
+        QVERIFY(parser != nullptr);
+        QVERIFY(parser->property("failed").toBool());
+    }
+
+    // Finding the row of a table of annotations that names the data's columns
+    void importAnnotationsKeyDetection_data()
+    {
+        QTest::addColumn<QList<QStringList>>("rows");
+        QTest::addColumn<int>("row");
+        QTest::addColumn<int>("percent");
+
+        QTest::newRow("First row") << QList<QStringList>
+        {
+            {u"Column"_s, u"c1"_s, u"c2"_s, u"c3"_s, u"c4"_s, u"c5"_s, u"c6"_s},
+            {u"Kind"_s,   u"p"_s,  u"p"_s,  u"q"_s,  u"q"_s,  u"r"_s,  u"r"_s},
+        } << 0 << 100;
+
+        QTest::newRow("Partial") << QList<QStringList>
+        {
+            {u"Kind"_s,   u"p"_s,  u"p"_s,  u"q"_s,  u"q"_s,  u"r"_s,  u"r"_s},
+            {u"Column"_s, u"c1"_s, u"c2"_s, u"c3"_s, u"x"_s,  u"y"_s,  u""_s},
+        } << 1 << 50;
+
+        // The earlier of two equally good rows
+        QTest::newRow("Tie") << QList<QStringList>
+        {
+            {u"Kind"_s,   u"p"_s,  u"p"_s,  u"q"_s,  u"q"_s,  u"r"_s,  u"r"_s},
+            {u"A"_s,      u"c1"_s, u"c2"_s, u"x"_s,  u"x"_s,  u"x"_s,  u"x"_s},
+            {u"B"_s,      u"x"_s,  u"x"_s,  u"c3"_s, u"c4"_s, u"x"_s,  u"x"_s},
+        } << 1 << 33;
+
+        // Rows of numbers that aren't whole aren't keys
+        QTest::newRow("Floats") << QList<QStringList>
+        {
+            {u"Kind"_s,   u"p"_s,  u"p"_s,  u"q"_s,  u"q"_s,  u"r"_s,  u"r"_s},
+            {u"1.5"_s,    u"1.5"_s, u"2.5"_s, u"3.5"_s, u"4.5"_s, u"5.5"_s, u"6.5"_s},
+        } << 0 << 0;
+    }
+
+    void importAnnotationsKeyDetection()
+    {
+        QFETCH(const QList<QStringList>, rows);
+        QFETCH(const int, row);
+        QFETCH(const int, percent);
+
+        QVERIFY(open());
+
+        auto data = std::make_shared<TabularData>();
+        data->reserve(static_cast<size_t>(rows.at(0).size()), static_cast<size_t>(rows.size()));
+        for(qsizetype r = 0; r < rows.size(); r++)
+        {
+            for(qsizetype c = 0; c < rows.at(r).size(); c++)
+                data->setValueAt(static_cast<size_t>(c), static_cast<size_t>(r), rows.at(r).at(c));
+        }
+
+        auto keyDetection = createQmlObject(u"ImportAnnotationsKeyDetection"_s);
+        QVERIFY(keyDetection != nullptr);
+        QVERIFY(keyDetection->setProperty("plugin", QVariant::fromValue(plugin())));
+        QVERIFY(keyDetection->setProperty("tabularData", QVariant::fromValue(data)));
+
+        QSignalSpy resultChanged(keyDetection.get(), SIGNAL(resultChanged()));
+        QMetaObject::invokeMethod(keyDetection.get(), "start");
+        QVERIFY(QTest::qWaitFor([&] { return !resultChanged.isEmpty() && !keyDetection->property("busy").toBool(); }, Timeout));
+
+        const auto result = keyDetection->property("result").toMap();
+        QCOMPARE(result.value(u"row"_s).toInt(), row);
+        QCOMPARE(result.value(u"percent"_s).toInt(), percent);
     }
 };
 
