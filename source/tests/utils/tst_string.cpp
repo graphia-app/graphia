@@ -78,6 +78,9 @@ private slots:
         QTest::newRow("exponent") << u"1e-3"_s << true << false;
         QTest::newRow("empty") << QString() << false << false;
         QTest::newRow("text") << u"abc"_s << false << false;
+        QTest::newRow("trailing text") << u"1a"_s << false << false;
+        QTest::newRow("incomplete exponent") << u"1e"_s << false << false;
+        QTest::newRow("sign") << u"-"_s << false << false;
     }
 
     void isNumeric()
