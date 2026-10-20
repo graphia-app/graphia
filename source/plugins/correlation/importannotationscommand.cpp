@@ -108,7 +108,7 @@ bool ImportAnnotationsCommand::execute()
         auto* existingVector = userData.vector(annotationName);
 
         const bool replace = _replace && existingVector != nullptr &&
-            existingVector->type() == _data.columnTypeIdentity(static_cast<size_t>(rowIndex)).type();
+            existingVector->type() == _data.rowTypeIdentity(static_cast<size_t>(rowIndex)).type();
 
         if(replace)
             _replacedUserDataVectors.emplace_back(*existingVector);
