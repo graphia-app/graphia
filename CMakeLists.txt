@@ -11,6 +11,14 @@ qt_standard_project_setup(REQUIRES 6.9)
 
 include_directories(source)
 
+# Sanitizers to build everything with, e.g. "address;undefined"
+set(GRAPHIA_SANITIZERS "" CACHE STRING "Sanitizers to build with, e.g. address;undefined")
+if(GRAPHIA_SANITIZERS AND NOT MSVC)
+    list(JOIN GRAPHIA_SANITIZERS "," SANITIZERS)
+    add_compile_options(-fsanitize=${SANITIZERS} -fno-sanitize-recover=all -fno-omit-frame-pointer)
+    add_link_options(-fsanitize=${SANITIZERS})
+endif()
+
 add_subdirectory(source/thirdparty)
 add_subdirectory(source/shared)
 add_subdirectory(source/plugins)

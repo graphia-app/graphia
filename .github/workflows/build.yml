@@ -357,10 +357,13 @@ jobs:
       env:
         BUILD_TYPE: Debug
         UNITY_BUILD: OFF
+        SANITIZERS: address;undefined
         CC: clang-${{ env.CLANG_VERSION }}
         CXX: clang++-${{ env.CLANG_VERSION }}
     - name: Test
       run: ctest --test-dir build/clang --output-on-failure
+      env:
+        UBSAN_OPTIONS: print_stacktrace=1
     - uses: actions/upload-artifact@v7
       with:
         name: static-analysis-logs-clang
