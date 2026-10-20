@@ -161,6 +161,10 @@ bool u::rsaVerifySignature(const std::string& signaturePlusString,
         auto publicKey = loadKey<CryptoPP::RSA::PublicKey>(publicKeyFileName);
         const CryptoPP::RSASSA_PKCS1v15_SHA_Verifier rsaVerifier(publicKey);
 
+        // Too short to contain a signature, so not even attempting verification
+        if(signaturePlusString.size() < rsaVerifier.SignatureLength())
+            return false;
+
         auto* sink = new CryptoPP::StringSink(recoveredMessage);
         auto* filter = new CryptoPP::SignatureVerificationFilter(rsaVerifier, sink,
             CryptoPP::SignatureVerificationFilter::SIGNATURE_AT_BEGIN |
