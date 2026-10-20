@@ -167,7 +167,7 @@ void Headless::processNext()
         else
             target = _->_destination;
 
-        if(!QFileInfo(QFileInfo(target).canonicalPath()).isWritable())
+        if(!QFileInfo(QFileInfo(target).absolutePath()).isWritable())
         {
             if(_->_displayProgress)
                 std::cout << "\n";
