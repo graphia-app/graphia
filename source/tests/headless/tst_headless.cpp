@@ -157,6 +157,50 @@ private slots:
         QVERIFY(model->graphModel().directed());
     }
 
+    void pairwiseWithTransforms()
+    {
+        const QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+
+        auto source = write(dir, u"edges.csv"_s, "a,b,1\nb,c,2\nc,d,3\nd,a,4\n");
+        const QTemporaryDir destination;
+        QVERIFY(destination.isValid());
+
+        const json parameters =
+        {
+            {"type", "PairwiseCSV"},
+            {"destination", destination.path().toStdString()},
+            {"plugin",
+            {
+                {"name", "Generic"},
+                {"parameters",
+                {
+                    {"additionalTransforms", json::array({"RemoveLeaves"})},
+                    {"additionalVisualisations", json::array({"NodeDegree Size"})}
+                }}
+            }}
+        };
+
+        QVERIFY(run(dir, {source}, parameters));
+
+        auto target = destination.filePath(u"edges.%1"_s.arg(Application::nativeExtension()));
+        QVERIFY(QFileInfo::exists(target));
+
+        TestPluginInstance pluginInstance(&_plugin);
+        auto model = load(target, pluginInstance);
+        QVERIFY(model != nullptr);
+
+        QCOMPARE(model->nodeNames(), (QStringList{u"a"_s, u"b"_s, u"c"_s, u"d"_s}));
+        QCOMPARE(model->edgeNames(), (QStringList{u"a-b"_s, u"b-c"_s, u"c-d"_s, u"d-a"_s}));
+
+        // The transforms and visualisations are saved, with their default parameters
+        const auto* loader = model->parser<Loader>();
+        QCOMPARE(loader->transforms().size(), 1);
+        QVERIFY(loader->transforms().at(0).contains(u"RemoveLeaves"_s));
+        QCOMPARE(loader->visualisations().size(), 1);
+        QVERIFY(loader->visualisations().at(0).startsWith(u"NodeDegree Size"_s));
+    }
+
     // The columns are given as the import dialog gives them
     void pairwiseColumns()
     {
@@ -181,6 +225,30 @@ private slots:
 
         QCOMPARE(model->edgeNames(), (QStringList{u"a-b"_s, u"b-c"_s}));
         QCOMPARE(model->edgeNumericValue(u"Weight"_s, u"a"_s, u"b"_s), 1.5);
+    }
+
+    void multipleFiles()
+    {
+        const QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+
+        auto first = write(dir, u"first.csv"_s, "a,b\n");
+        auto second = write(dir, u"second.csv"_s, "c,d\nd,e\n");
+
+        const QTemporaryDir destination;
+        QVERIFY(destination.isValid());
+
+        QVERIFY(run(dir, {first, second}, {{"type", "PairwiseCSV"},
+            {"destination", destination.path().toStdString()}, {"plugin", {{"name", "Generic"}}}}));
+
+        TestPluginInstance pluginInstance(&_plugin);
+        auto model = load(destination.filePath(u"second.%1"_s.arg(Application::nativeExtension())), pluginInstance);
+        QVERIFY(model != nullptr);
+        QCOMPARE(model->edgeNames(), (QStringList{u"c-d"_s, u"d-e"_s}));
+
+        model = load(destination.filePath(u"first.%1"_s.arg(Application::nativeExtension())), pluginInstance);
+        QVERIFY(model != nullptr);
+        QCOMPARE(model->edgeNames(), QStringList{u"a-b"_s});
     }
 
     void correlation()
