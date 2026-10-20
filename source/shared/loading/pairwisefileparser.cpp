@@ -24,9 +24,9 @@
 #include "shared/utils/container.h"
 
 #include <QString>
-#include <QtGlobal>
 
 #include <cstddef>
+#include <limits>
 #include <map>
 #include <utility>
 #include <vector>
@@ -49,8 +49,10 @@ bool PairwiseParser::parse(const QUrl& url, IGraphModel* graphModel)
 
     setProgress(-1);
 
-    size_t sourceNodeColumn = 0;
-    size_t targetNodeColumn = 0;
+    // Columns the data doesn't have are ignored, as are rows' missing source or target node
+    const size_t noColumn = std::numeric_limits<size_t>::max();
+    size_t sourceNodeColumn = noColumn;
+    size_t targetNodeColumn = noColumn;
 
     struct AttributeColumn
     {
@@ -63,7 +65,8 @@ bool PairwiseParser::parse(const QUrl& url, IGraphModel* graphModel)
 
     for(const auto& [column, configuration] : _columnsConfiguration)
     {
-        Q_ASSERT(column < _tabularData.numColumns());
+        if(column >= _tabularData.numColumns())
+            continue;
 
         switch(configuration._type)
         {
@@ -80,6 +83,12 @@ bool PairwiseParser::parse(const QUrl& url, IGraphModel* graphModel)
             break;
         }
     }
+
+    const QString noValue;
+    auto valueAt = [&](size_t column, size_t row) -> const QString&
+    {
+        return column != noColumn ? _tabularData.valueAt(column, row) : noValue;
+    };
 
     std::map<QString, NodeId> nodeIdMap;
 
@@ -106,8 +115,8 @@ bool PairwiseParser::parse(const QUrl& url, IGraphModel* graphModel)
 
     for(size_t rowIndex = _firstRowIsHeader ? 1 : 0; rowIndex < _tabularData.numRows(); rowIndex++)
     {
-        auto sourceNodeId = nodeIdFor(_tabularData.valueAt(sourceNodeColumn, rowIndex));
-        auto targetNodeId = nodeIdFor(_tabularData.valueAt(targetNodeColumn, rowIndex));
+        auto sourceNodeId = nodeIdFor(valueAt(sourceNodeColumn, rowIndex));
+        auto targetNodeId = nodeIdFor(valueAt(targetNodeColumn, rowIndex));
 
         EdgeId edgeId;
         if(!sourceNodeId.isNull() && !targetNodeId.isNull())
