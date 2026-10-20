@@ -181,6 +181,22 @@ private slots:
         searchManager.refresh();
         QCOMPARE(namesOf(*model, searchManager.foundNodeIds()), (QStringList{u"a"_s}));
     }
+
+    // Searching all attributes includes those created since the search began
+    void refreshWithNewAttribute()
+    {
+        auto model = createModel();
+        SearchManager searchManager(model->graphModel());
+
+        searchManager.findNodes(u"cluster"_s, {}, {}, FindSelectStyle::None);
+        QVERIFY(searchManager.foundNodeIds().empty());
+
+        addSearchableAttribute<QString>(*model, u"Group"_s, {{u"a"_s, u"Cluster 1"_s},
+            {u"b"_s, u"Cluster 1"_s}, {u"c"_s, u"Cluster 2"_s}, {u"d"_s, u"None"_s}});
+
+        searchManager.refresh();
+        QCOMPARE(namesOf(*model, searchManager.foundNodeIds()), (QStringList{u"a"_s, u"b"_s, u"c"_s}));
+    }
 };
 
 QTEST_MAIN(TestSearchManager)
