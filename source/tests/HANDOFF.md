@@ -122,7 +122,7 @@ testing, which may come later as an extra safety net.
 | `tst_enrichmenttablemodel` | sorting, filtering and resets |
 | `tst_correlation` | correlation types, threshold, the k-NN proto graph, normalisation, scaling, clipping, imputation (expected values from numpy) |
 | `tst_tabulardata` | CSV, TSV, SSV and TXT tokenising and detection |
-| `tst_graphparsers` | pairwise, GML, GraphML, DOT, JSON Graph, CX, BioPAX and adjacency matrix files: valid, precise, malformed, syntax error locations, missing values |
+| `tst_graphparsers` | pairwise, GML, GraphML, DOT, JSON Graph, CX, BioPAX, adjacency matrix and MATLAB files (written with matio by the test): valid, precise, malformed, syntax error locations, missing values |
 | `tst_savers` | GML, GraphML, JSON Graph and pairwise export, then re-import |
 | `tst_nativeloader` | native files: every format version, Tutorial.graphia, malformed files, save then load |
 | `tst_commands` | execute, undo and redo of delete nodes and the edit, clone, remove and import attribute commands |
@@ -130,6 +130,9 @@ testing, which may come later as an extra safety net.
 | `tst_qml` | `Utils.js`, `AttributeUtils.js`, `MenuUtils.js`, `VisualisationUtils.js`, and `TransformConfig.js`: building a transform's controls (including attribute parameters), then its expression, gives back the same transform; locked transforms' text |
 | `tst_colorvisualisations` | colour gradients and palettes, including malformed ones |
 | `tst_visualisationmapping` | the range values are mapped from, and the exponent |
+| `tst_searchmanager` | Find: case, whole words, regular expressions, chosen attributes, merged nodes, refreshing |
+| `tst_commandmanager` | the undo stack: undo, redo, replace, once, failures, maximum levels, rollbacks, queued commands |
+| `tst_graphsizeestimate` | the threshold and k-NN graph size estimates plotted when importing |
 | `tst_visualisations` | building visualisations on a graph and the resulting visuals: gradients, palettes, inversion, mappings, sizes, text |
 | `tst_string`, `tst_statistics`, `tst_container`, `tst_datastructures`, `tst_json`, `tst_color` | `shared/utils`: strings and natural order, statistics (against numpy), containers and set operations, `CircularBuffer`, `FixedSizeStack`, `Flags`, JSON conversions, colours |
 
@@ -213,6 +216,13 @@ Each one is a commit; see `git log` for the details.
   - the `std::string` number checks accepted "1e" and "-".
 - **Visualisations:** inverting didn't reflect values about the middle of the
   mapping range.
+- **Find:** attributes created after a search began weren't searched when it
+  was refreshed.
+- **Undo:** a rollback after an undo left the wrong command redoable.
+- **MATLAB files:** the first variable with a matrix was loaded, rather than
+  the biggest, and the file was left open.
+- **Graph size estimates:** k-NN estimates overflowed with the default sizes,
+  and a k of 0 crashed.
 - **Visualisation configs:**
   - whole number parameters couldn't be parsed;
   - numbers were written with 6 significant figures;
@@ -283,7 +293,8 @@ Each one is a commit; see `git log` for the details.
    `enrichmentcalculator.cpp`, which seeds from `std::random_device`), once a
    test needs exact results from something random. The enrichment tests
    didn't, as only the spread of the expected count is random.
-4. **Later:** the corpus comparison of release and candidate builds.
+4. **Coverage gaps:** see "Coverage" below.
+5. **Later:** the corpus comparison of release and candidate builds.
 
 The original plan, for reference, had these priorities:
 1. wrong analysis results (config grammars, conditions, transforms,
@@ -297,6 +308,24 @@ Its mutation check plants deliberate bugs (an off-by-one in PageRank, a
 flipped operator in `condtionfnops.h`, a changed default in the pairwise
 parser, a dropped field in `nativesaver.cpp`) and expects each to make a test
 fail.
+
+## Coverage
+
+A coverage build shows what the tests don't reach. With GCC, configure a
+Debug build with `--coverage` in the C, C++ and linker flags and
+`-DCMAKE_UNITY_BUILD=OFF`, build the test targets, run `ctest`, then e.g.
+`gcovr --gcov-executable <gcov> -r source --filter 'source/(app|shared|plugins)/'
+--exclude '.*thirdparty.*' --exclude '.*_autogen.*' --gcov-ignore-errors=all
+--gcov-ignore-parse-errors=all --txt cov.txt <build dir>`. Template code is
+counted per instantiation, so files like `conditionfncreator.cpp` look less
+covered than they are.
+
+As of the work above, the biggest gaps outside rendering and UI code are:
+`correlation.cpp` (k-NN variants, cancellation), `tabulardata.cpp` (XLSX),
+`basegenericplugin.cpp`, `selectionmanager.cpp`, the layouts
+(`forcedirectedlayout.cpp`, `barneshuttree.h`, `spatialtree.h`,
+`nodepositions.cpp`), `boundingbox.cpp`, `boundingsphere.cpp` and
+`crypto.cpp`.
 
 ## Checking CI
 
