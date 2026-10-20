@@ -462,6 +462,20 @@ private slots:
         QVERIFY(!model.property("hasEdits").toBool());
         QCOMPARE(value(1, 1).toString(), u"x"_s);
 
+        // Editing a value back to what it was is no edit
+        model.editValue(1, u"z"_s);
+        model.editValue(1, u"x"_s);
+        QCOMPARE(value(1, 1).toString(), u"x"_s);
+        QVERIFY(!model.rowIsEdited(1));
+        QVERIFY(!model.property("hasEdits").toBool());
+
+        // Numbers too, though what's typed is a string
+        model.setProperty("attributeName", u"score"_s);
+        model.editValue(1, u"9"_s);
+        model.editValue(1, u"2"_s);
+        QVERIFY(!model.rowIsEdited(1));
+        model.setProperty("attributeName", u"kind"_s);
+
         // Only the selected nodes, if any
         QVERIFY(execute([this] { _document->selectNeighbours(nodeId(u"d"_s), false); }));
         QCOMPARE(model.rowCount(), 2);
@@ -476,6 +490,9 @@ private slots:
         const int xRow = value(0, 1).toString() == u"x"_s ? 0 : 1;
         QCOMPARE(value(xRow, 0).toInt(), 3);
         QCOMPARE(value(1 - xRow, 0).toInt(), 2);
+
+        model.editValue(xRow, u"x"_s);
+        QVERIFY(!model.rowIsEdited(xRow));
 
         model.editValue(xRow, u"w"_s);
         QVERIFY(model.rowIsEdited(xRow));
