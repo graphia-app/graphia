@@ -345,6 +345,13 @@ private slots:
         QVERIFY(run(dir, {source}, {{"type", "PairwiseCSV"}, {"plugin", json::object()}}));
         QVERIFY(run(dir, {source}, {{"type", "Native"}, {"plugin", {{"name", "Generic"}}}}));
 
+        // Values of the wrong types
+        QVERIFY(run(dir, {source}, {{"type", 1}, {"plugin", {{"name", "Generic"}}}}));
+        QVERIFY(run(dir, {source}, {{"type", "PairwiseCSV"}, {"plugin", {{"name", 1}}}}));
+        QVERIFY(run(dir, {source}, {{"type", "PairwiseCSV"}, {"plugin", "Generic"}}));
+        QVERIFY(run(dir, {source}, {{"type", "PairwiseCSV"}, {"plugin", {{"name", "Generic"}}}, {"destination", 1}}));
+        QVERIFY(run(dir, {source}, json::array({1, 2})));
+
         // Several files must go to a directory
         QVERIFY(run(dir, {source, source}, {{"type", "PairwiseCSV"}, {"plugin", {{"name", "Generic"}}}}));
 
