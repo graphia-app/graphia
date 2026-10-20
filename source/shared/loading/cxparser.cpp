@@ -301,7 +301,7 @@ static bool parseCx2(const json& jsonArray, IGraphModel* graphModel,
                 {
                     graphModel->setNodeName(elementId, attributeValue);
                     userData.setValueBy(elementId, u"Node Name"_s, attributeValue);
-                    return;
+                    continue;
                 }
             }
 
