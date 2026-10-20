@@ -107,6 +107,14 @@ private slots:
         QCOMPARE(cachedAttributeNames(cache), (QStringList{u"A"_s, u"B"_s}));
     }
 
+    // Results before an invalid one in its set don't depend on it, so stay cached
+    void earlierResults()
+    {
+        auto cache = createCache();
+        cache.attributeAddedOrChanged(u"X"_s);
+        QCOMPARE(cachedAttributeNames(cache), QStringList{u"A"_s});
+    }
+
     // Results that depend on an invalid one are invalid too
     void dependentResults()
     {
