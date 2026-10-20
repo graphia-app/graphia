@@ -150,6 +150,11 @@ private slots:
         changedSignature.back() = static_cast<char>(changedSignature.back() ^ 1);
         QVERIFY(!u::rsaVerifySignature(string, changedSignature, path(u"a.public.der"_s)));
 
+        // Missing or truncated signatures
+        QVERIFY(!u::rsaVerifySignature(string, {}, path(u"a.public.der"_s)));
+        QVERIFY(!u::rsaVerifySignature(string, signature.substr(0, 10), path(u"a.public.der"_s)));
+        QVERIFY(!u::rsaVerifySignature(std::string{}, path(u"a.public.der"_s)));
+
         // The wrong key
         QVERIFY(!u::rsaVerifySignature(string, signature, path(u"b.public.der"_s)));
 
