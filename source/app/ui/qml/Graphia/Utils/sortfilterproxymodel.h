@@ -52,6 +52,7 @@ private:
     QString _filterRoleName;
     QJSValue _filterExpression;
 
+    bool ascendingLessThan(const QModelIndex& left, const QModelIndex& right) const;
     bool lessThan(const QModelIndex& left, const QModelIndex& right) const override;
     bool filterAcceptsRow(int row, const QModelIndex &parent) const override;
 

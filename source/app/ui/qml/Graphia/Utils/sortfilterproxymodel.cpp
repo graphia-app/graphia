@@ -20,6 +20,8 @@
 #include "sortfilterproxymodel.h"
 #include <QDebug>
 
+#include <tuple>
+
 SortFilterProxyModel::SortFilterProxyModel(QObject* parent) : QSortFilterProxyModel(parent)
 {
     connect(this, &SortFilterProxyModel::sourceModelChanged, this, &SortFilterProxyModel::updateFilterRole);
@@ -56,13 +58,23 @@ int SortFilterProxyModel::role(const QString& name) const
 
 bool SortFilterProxyModel::lessThan(const QModelIndex& left, const QModelIndex& right) const
 {
+    // Descending order compares the other way round, rather than negating the comparison,
+    // which would put equal rows before each other, and so in no particular order
+    const auto& [first, second] = _ascendingSortOrder ?
+        std::tie(left, right) : std::tie(right, left);
+
+    return ascendingLessThan(first, second);
+}
+
+bool SortFilterProxyModel::ascendingLessThan(const QModelIndex& left, const QModelIndex& right) const
+{
     if(!left.isValid())
         return false;
 
     if(!right.isValid())
         return true;
 
-    bool result;
+    bool result = false;
 
     auto* engine = qjsEngine(this);
     if(engine != nullptr && _sortExpression.isCallable())
@@ -84,7 +96,7 @@ bool SortFilterProxyModel::lessThan(const QModelIndex& left, const QModelIndex& 
     else
         result = QSortFilterProxyModel::lessThan(left, right);
 
-    return _ascendingSortOrder ? result : !result;
+    return result;
 }
 
 bool SortFilterProxyModel::filterAcceptsRow(int row, const QModelIndex& parent) const
