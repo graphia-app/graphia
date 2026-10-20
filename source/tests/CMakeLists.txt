@@ -54,3 +54,5 @@ if(UNIX AND NOT APPLE)
     add_test(NAME tst_string_sv_SE COMMAND tst_string)
     set_tests_properties(tst_string_sv_SE PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;LC_ALL=sv_SE.UTF-8")
 endif()
+
+add_graphia_test(tst_statistics utils/tst_statistics.cpp)
