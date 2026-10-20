@@ -240,6 +240,10 @@ private slots:
             QStringList{u"Weight|a|b|1.5"_s, u"Weight|b|c|2"_s, u"Type|a|x"_s, u"Type|b|z"_s, u"Type|c|w"_s};
         QTest::newRow("Pairwise blank rows") << u"PairwiseCSV"_s << QByteArray("a,b\n\n,\nc,\n,d\n") <<
             QStringList{u"a"_s, u"b"_s, u"c"_s, u"d"_s} << QStringList{u"a-b"_s} << QStringList{};
+        QTest::newRow("Pairwise one column") << u"PairwiseCSV"_s << QByteArray("a\nb\n") <<
+            QStringList{u"a"_s, u"b"_s} << QStringList{} << QStringList{};
+        QTest::newRow("Pairwise missing columns") << u"PairwiseCSV attributes"_s << QByteArray("From,To\na,b\nb,c\n") <<
+            QStringList{u"a"_s, u"b"_s, u"c"_s} << QStringList{u"a-b"_s, u"b-c"_s} << QStringList{};
         QTest::newRow("Pairwise TXT") << u"PairwiseTXT"_s << QByteArray("a  b\n\"c d\"\te\n") <<
             QStringList{u"a"_s, u"b"_s, u"c d"_s, u"e"_s} <<
             QStringList{u"a-b"_s, u"c d-e"_s} << QStringList{};
