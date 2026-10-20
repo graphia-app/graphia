@@ -130,7 +130,7 @@ QVariantMap graphSizeEstimateThreshold(EdgeList edgeList,
 QVariantMap graphSizeEstimateKnn(EdgeList edgeList, size_t maximumK,
     size_t numSampleNodes, size_t maxNodes)
 {
-    if(edgeList.empty())
+    if(edgeList.empty() || maximumK == 0)
         return {};
 
     auto maxEdges = maxEdgesFor(maxNodes);
