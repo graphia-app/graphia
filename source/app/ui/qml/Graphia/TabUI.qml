@@ -699,7 +699,7 @@ Item
                             {
                                 required property string modelData
                                 text: root.document.attributeDisplayName(modelData)
-                                onTriggered: { root.selectBySharedAttributeValue(modelData, contextMenu.clickedNodeId); }
+                                onTriggered: { root.selectBySharedAttributeValue(modelData, contextMenu.clickedNodeId, false); }
                             }
                             onObjectAdded: function(index, object) { sharedValuesOfNodeContextMenu.insertItem(index, object); }
                             onObjectRemoved: function(index, object) { sharedValuesOfNodeContextMenu.removeItem(object); }
