@@ -41,7 +41,8 @@ bool u::isNumeric(const std::string& string)
     long double value = 0.0L;
     ss >> value;
 
-    return ss.eof();
+    // The whole string must have been read, successfully
+    return !ss.fail() && ss.eof();
 }
 
 bool u::isNumeric(const QString& string)
@@ -64,7 +65,7 @@ bool u::isInteger(const std::string& string)
     long int value = 0;
     ss >> value;
 
-    return ss.eof();
+    return !ss.fail() && ss.eof();
 }
 
 bool u::isInteger(const QString& string)
@@ -87,7 +88,7 @@ double u::toNumber(const std::string& string)
     double value = 0.0;
     ss >> value;
 
-    if(ss.eof())
+    if(!ss.fail() && ss.eof())
         return value;
 
     return std::numeric_limits<double>::quiet_NaN();
