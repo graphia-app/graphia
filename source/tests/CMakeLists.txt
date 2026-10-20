@@ -32,6 +32,7 @@ add_graphia_test(tst_enrichmenttablemodel attributes/tst_enrichmenttablemodel.cp
 add_graphia_test(tst_structuraltransforms transform/tst_structuraltransforms.cpp)
 add_graphia_test(tst_analysistransforms transform/tst_analysistransforms.cpp)
 add_graphia_test(tst_attributetransforms transform/tst_attributetransforms.cpp)
+add_graphia_test(tst_transformcache transform/tst_transformcache.cpp)
 
 add_graphia_test(tst_correlation correlation/tst_correlation.cpp)
 target_link_libraries(tst_correlation PRIVATE correlationcore)
