@@ -73,6 +73,8 @@ private:
 
     QString _log;
 
+    bool parseNativeFile(const QUrl& url, IGraphModel* igraphModel);
+
 public:
     bool parse(const QUrl& url, IGraphModel* igraphModel) override;
     void setPluginInstance(IPluginInstance* pluginInstance);
