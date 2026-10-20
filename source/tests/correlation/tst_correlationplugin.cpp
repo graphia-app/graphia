@@ -176,6 +176,11 @@ private slots:
 
         QTest::newRow("Spearman") << QVariantMap{{u"continuousCorrelationType"_s, u"SpearmanRank"_s}} <<
             QStringList{u"r1-r2"_s, u"r1-r4"_s, u"r2-r4"_s, u"r3-r5"_s};
+
+        // Each row's most correlated other row; r1 and r2 are equally like r4, and the earlier is kept
+        QTest::newRow("k-NN") <<
+            QVariantMap{{u"correlationFilterType"_s, u"Knn"_s}, {u"maximumK"_s, 1}, {u"initialK"_s, 1}} <<
+            QStringList{u"r1-r2"_s, u"r3-r5"_s, u"r4-r1"_s};
     }
 
     void parameters()

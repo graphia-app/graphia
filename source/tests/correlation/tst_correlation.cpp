@@ -336,6 +336,15 @@ private slots:
             QStringList{u"0-1:0.5"_s, u"0-2:-0.9"_s, u"0-3:0.1"_s,
                 u"1-2:0.1"_s, u"1-3:0.8"_s, u"2-3:0.1"_s} <<
             QStringList{u"0-2"_s, u"1-3"_s};
+
+        // 3 is as strongly correlated with 0 as with 1; whichever order they're added
+        // in, which varies as correlations are calculated in parallel, the earlier is kept
+        QTest::newRow("tie, earlier first") << 1 << static_cast<int>(CorrelationPolarity::Positive) <<
+            QStringList{u"0-1:0.9"_s, u"0-3:0.8"_s, u"1-3:0.8"_s} <<
+            QStringList{u"0-1"_s, u"0-3"_s};
+        QTest::newRow("tie, later first") << 1 << static_cast<int>(CorrelationPolarity::Positive) <<
+            QStringList{u"0-1:0.9"_s, u"1-3:0.8"_s, u"0-3:0.8"_s} <<
+            QStringList{u"0-1"_s, u"0-3"_s};
     }
 
     void knnProtoGraph()
