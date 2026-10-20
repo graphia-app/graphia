@@ -335,7 +335,10 @@ result in the job summary and uploads the full report, and an LCOV file, as
 the `coverage` artifact. Locally, configure with Clang and
 `-DGRAPHIA_COVERAGE=ON`, run `ctest` with `LLVM_PROFILE_FILE` set to e.g.
 `$PWD/profiles/%m-%p.profraw`, then use `llvm-profdata merge` and
-`llvm-cov report`, as in the workflow. Alternatively, with GCC, configure a
+`llvm-cov report`, as in the workflow. `llvm-cov` warns of thousands of
+"functions with mismatched data": inline and template code is instrumented
+separately in each test program, and only one copy's counts are used, so
+coverage of header code is understated. Alternatively, with GCC, configure a
 Debug build with `--coverage` in the C, C++ and linker flags and
 `-DCMAKE_UNITY_BUILD=OFF`, build the test targets, run `ctest`, then e.g.
 `gcovr --gcov-executable <gcov> -r source --filter 'source/(app|shared|plugins)/'
