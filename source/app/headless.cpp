@@ -234,7 +234,8 @@ void Headless::run()
         return;
     }
 
-    if(!u::containsAllOf(parameters, {"type", "plugin"}))
+    if(!parameters.is_object() || !u::containsAllOf(parameters, {"type", "plugin"}) ||
+        !parameters["type"].is_string() || !parameters["plugin"].is_object())
     {
         std::cerr << "Parameters file must specify 'type' and 'plugin'.\n";
         emit done();
@@ -243,9 +244,16 @@ void Headless::run()
 
     auto plugin = parameters["plugin"];
 
-    if(!u::contains(plugin, "name"))
+    if(!u::contains(plugin, "name") || !plugin["name"].is_string())
     {
         std::cerr << "Parameters file 'plugin' must specify 'name'.\n";
+        emit done();
+        return;
+    }
+
+    if(u::contains(parameters, "destination") && !parameters["destination"].is_string())
+    {
+        std::cerr << "Parameters file 'destination' must be a path.\n";
         emit done();
         return;
     }
