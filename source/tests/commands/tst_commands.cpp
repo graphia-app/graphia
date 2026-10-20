@@ -147,6 +147,21 @@ std::unique_ptr<Document> createDocument()
 
     return document;
 }
+
+// Cancels itself as soon as the transforms report any progress, i.e. part way through applying them
+class CancellingApplyTransformsCommand : public ApplyTransformsCommand
+{
+public:
+    using ApplyTransformsCommand::ApplyTransformsCommand;
+
+    void setProgress(int progress) override
+    {
+        ApplyTransformsCommand::setProgress(progress);
+
+        if(!cancelled())
+            cancel();
+    }
+};
 } // namespace
 
 class TestCommands : public QObject
@@ -483,6 +498,55 @@ private slots:
         QVERIFY(!model->graphModel().transformRebuildRequired());
         QCOMPARE(model->edgeNames(), QStringList{u"b-c"_s});
         QCOMPARE(document->transforms(), transforms);
+    }
+
+    void cancelApplyTransforms()
+    {
+        auto model = createModel();
+        QVERIFY(model != nullptr);
+        auto document = createDocument();
+
+        const auto edges = model->edgeNames();
+        const auto state = model->state();
+
+        const QStringList transforms{uR"(RemoveEdges where $weight > 2)"_s};
+        CancellingApplyTransformsCommand command(&model->graphModel(), document.get(), {}, transforms);
+        command.execute();
+        QVERIFY(command.cancelled());
+
+        QCOMPARE(model->edgeNames(), edges);
+        QCOMPARE(model->state(), state);
+        QCOMPARE(document->transforms(), QStringList{});
+
+        // Changing the graph applies the transforms again, which must still be those from before
+        model->graphModel().mutableGraph().performTransaction([&](IMutableGraph& graph)
+        {
+            graph.removeEdge(model->edgeId(u"c"_s, u"c"_s));
+        });
+
+        QCOMPARE(model->edgeNames(), (QStringList{u"a-b"_s, u"a-c"_s, u"b-c"_s}));
+    }
+
+    // The command is cancelled just after the transforms have been applied
+    void cancelApplyTransformsAfterBuild()
+    {
+        auto model = createModel();
+        QVERIFY(model != nullptr);
+        auto document = createDocument();
+
+        const auto edges = model->edgeNames();
+
+        const QStringList transforms{uR"(RemoveEdges where $weight > 2)"_s};
+        ApplyTransformsCommand command(&model->graphModel(), document.get(), {}, transforms);
+
+        QObject::connect(&model->graphModel().graph(), &Graph::graphChanged, document.get(),
+            [&command] { command.cancel(); }, Qt::SingleShotConnection);
+
+        command.execute();
+        QVERIFY(command.cancelled());
+
+        QCOMPARE(model->edgeNames(), edges);
+        QCOMPARE(document->transforms(), QStringList{});
     }
 
     // The command is cancelled after the transforms have been applied, but before it completes
