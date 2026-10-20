@@ -132,6 +132,9 @@ private slots:
     {
         QVERIFY(graphSizeEstimateThreshold({}).isEmpty());
         QVERIFY(graphSizeEstimateKnn({}, 5).isEmpty());
+
+        // A k of 0 gives no graph at all
+        QVERIFY(graphSizeEstimateKnn(cycle(), 0).isEmpty());
     }
 };
 
