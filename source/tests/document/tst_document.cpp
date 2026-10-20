@@ -1,0 +1,434 @@
+/* Copyright © 2013-2025 Tim Angus
+ * Copyright © 2013-2025 Tom Freeman
+ *
+ * This file is part of Graphia.
+ *
+ * Graphia is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Graphia is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "tests/common/testenvironment.h"
+
+#include "app/application.h"
+#include "app/attributes/attributeedits.h"
+#include "app/graph/graph.h"
+#include "app/graph/graphmodel.h"
+#include "app/graph/mutablegraph.h"
+#include "app/ui/document.h"
+#include "app/ui/qml/Graphia/findtypes.h"
+#include "app/ui/qml/Graphia/graphdisplay.h"
+#include "app/ui/selectionmanager.h"
+
+#include <QFile>
+#include <QMetaObject>
+#include <QSignalSpy>
+#include <QString>
+#include <QStringList>
+#include <QTemporaryDir>
+#include <QTest>
+#include <QUrl>
+
+#include <memory>
+
+using namespace Qt::Literals::StringLiterals;
+
+namespace
+{
+// a -> b -> c -> d, with a -> c and e on its own
+const QByteArray Gml = R"(graph
+[
+    directed 1
+    node [ id 0 label "a" score 1 ]
+    node [ id 1 label "b" score 2 ]
+    node [ id 2 label "c" score 3 ]
+    node [ id 3 label "d" score 4 ]
+    node [ id 4 label "e" score 5 ]
+    edge [ source 0 target 1 ]
+    edge [ source 1 target 2 ]
+    edge [ source 2 target 3 ]
+    edge [ source 0 target 2 ]
+])";
+
+const int Timeout = 60000;
+} // namespace
+
+// A Document, as the UI uses it, but with a GraphDisplay that isn't in a window, so
+// there's no rendering
+class TestDocument_ : public QObject
+{
+    Q_OBJECT
+
+    QTemporaryDir _dir;
+    std::unique_ptr<Application> _application;
+    std::unique_ptr<GraphDisplay> _graphDisplay;
+    std::unique_ptr<Document> _document;
+
+    QUrl write(const QString& fileName, const QByteArray& content)
+    {
+        auto filePath = _dir.filePath(fileName);
+        QFile file(filePath);
+        if(!file.open(QIODevice::WriteOnly) || file.write(content) != content.size())
+            return {};
+
+        return QUrl::fromLocalFile(filePath);
+    }
+
+    bool open(const QUrl& url, const QString& type, const QString& pluginName)
+    {
+        // Destroy any previous Document first, as the UI does when its tab is closed
+        _document.reset();
+
+        _graphDisplay = std::make_unique<GraphDisplay>();
+        _document = std::make_unique<Document>();
+        _document->setProperty("application", QVariant::fromValue(_application.get()));
+        _document->setProperty("graphDisplay", QVariant::fromValue(_graphDisplay.get()));
+
+        QSignalSpy loadComplete(_document.get(), &Document::loadComplete);
+        if(!_document->openUrl(url, type, pluginName, {}))
+            return false;
+
+        if(!QTest::qWaitFor([&] { return !loadComplete.isEmpty(); }, Timeout))
+            return false;
+
+        if(!loadComplete.at(0).at(1).toBool())
+            return false;
+
+        // As the renderer does once it has been created, which is otherwise never, as
+        // the display isn't in a window; until then, the Document is always busy. The
+        // Document only learns of this once events are processed, and pauses the layout
+        // when commands start only if it has, so wait for it, as there is in the UI
+        QSignalSpy busyChanged(_document.get(), &Document::busyChanged);
+        QMetaObject::invokeMethod(_graphDisplay.get(), "onRendererInitialised");
+
+        return QTest::qWaitFor([&] { return !busyChanged.isEmpty() && !_document->busy(); }, Timeout);
+    }
+
+    bool open()
+    {
+        return open(write(u"graph.gml"_s, Gml), u"GML"_s, u"Generic"_s);
+    }
+
+    bool waitForCommands()
+    {
+        return QTest::qWaitFor([this] { return !_document->busy(); }, Timeout);
+    }
+
+    // Does something that executes commands, then waits for them to finish
+    template<typename Fn>
+    bool execute(const Fn& fn)
+    {
+        QSignalSpy commandsFinished(_document.get(), &Document::commandsFinished);
+        fn();
+
+        return QTest::qWaitFor([&] { return !commandsFinished.isEmpty(); }, Timeout) && waitForCommands();
+    }
+
+    GraphModel* graphModel() { return dynamic_cast<GraphModel*>(_document->graphModel()); }
+    const Graph& graph() { return graphModel()->graph(); }
+
+    NodeId nodeId(const QString& name)
+    {
+        for(auto nodeId : graphModel()->mutableGraph().nodeIds())
+        {
+            if(graphModel()->nodeName(nodeId) == name)
+                return nodeId;
+        }
+
+        return {};
+    }
+
+    // The names of the selected nodes, sorted
+    QStringList selected()
+    {
+        QStringList names;
+        for(auto nodeId : _document->selectionManager()->selectedNodes())
+            names.append(graphModel()->nodeName(nodeId));
+
+        names.sort();
+        return names;
+    }
+
+    // The names of the nodes in the transformed graph, sorted
+    QStringList nodeNames()
+    {
+        QStringList names;
+        for(auto nodeId : graph().nodeIds())
+            names.append(graphModel()->nodeName(nodeId));
+
+        names.sort();
+        return names;
+    }
+
+private slots:
+    void initTestCase()
+    {
+        TestEnvironment::initialise();
+        QVERIFY(_dir.isValid());
+
+        Application::setAppDir(QStringLiteral(GRAPHIA_BUILD_DIR));
+        _application = std::make_unique<Application>(nullptr, false);
+    }
+
+    void cleanup()
+    {
+        _document.reset();
+        _graphDisplay.reset();
+    }
+
+    void cleanupTestCase()
+    {
+        _application.reset();
+    }
+
+    void load()
+    {
+        QVERIFY(open());
+
+        QCOMPARE(graph().numNodes(), 5u);
+        QCOMPARE(graph().numEdges(), 4u);
+        QCOMPARE(graph().numComponents(), 2u);
+        QVERIFY(!_document->canUndo());
+    }
+
+    void applyTransformUndoRedo()
+    {
+        QVERIFY(open());
+
+        QVERIFY(execute([this] { _document->update({u"RemoveNodes where $score > 3"_s}); }));
+        QCOMPARE(graph().numNodes(), 3u);
+        QCOMPARE(_document->transforms().size(), 1);
+        QVERIFY(_document->canUndo());
+
+        QVERIFY(execute([this] { _document->undo(); }));
+        QCOMPARE(graph().numNodes(), 5u);
+        QVERIFY(_document->transforms().isEmpty());
+        QVERIFY(_document->canRedo());
+
+        QVERIFY(execute([this] { _document->redo(); }));
+        QCOMPARE(graph().numNodes(), 3u);
+        QCOMPARE(_document->transforms().size(), 1);
+    }
+
+    void selection()
+    {
+        QVERIFY(open());
+
+        QVERIFY(execute([this] { _document->selectAll(); }));
+        QCOMPARE(_document->property("numNodesSelected").toInt(), 5);
+
+        QVERIFY(execute([this] { _document->selectNone(); }));
+        QCOMPARE(_document->property("numNodesSelected").toInt(), 0);
+
+        QVERIFY(execute([this] { _document->selectNeighbours(nodeId(u"b"_s)); }));
+        QCOMPARE(selected(), (QStringList{u"a"_s, u"b"_s, u"c"_s}));
+
+        QVERIFY(execute([this] { _document->invertSelection(); }));
+        QCOMPARE(selected(), (QStringList{u"d"_s, u"e"_s}));
+
+        QVERIFY(execute([this] { _document->selectSources(nodeId(u"c"_s), false); }));
+        QCOMPARE(selected(), (QStringList{u"a"_s, u"b"_s, u"c"_s}));
+
+        QVERIFY(execute([this] { _document->selectTargets(nodeId(u"a"_s), false); }));
+        QCOMPARE(selected(), (QStringList{u"a"_s, u"b"_s, u"c"_s}));
+
+        QVERIFY(execute([this] { _document->selectTargets(nodeId(u"c"_s), true); }));
+        QCOMPARE(selected(), (QStringList{u"a"_s, u"b"_s, u"c"_s, u"d"_s}));
+
+        // Selection isn't undoable
+        QVERIFY(!_document->canUndo());
+    }
+
+    void find()
+    {
+        QVERIFY(open());
+
+        QVERIFY(execute([this]
+        {
+            _document->find(u"[ab]"_s, static_cast<int>(FindOptions::MatchUsingRegex),
+                {u"NodeName"_s}, static_cast<int>(FindSelectStyle::All));
+        }));
+
+        QCOMPARE(_document->property("numNodesFound").toInt(), 2);
+        QCOMPARE(selected(), (QStringList{u"a"_s, u"b"_s}));
+
+        QVERIFY(execute([this] { _document->resetFind(); }));
+        QCOMPARE(_document->property("numNodesFound").toInt(), 0);
+    }
+
+    void deleteNodes()
+    {
+        QVERIFY(open());
+
+        QVERIFY(execute([this] { _document->deleteNode(nodeId(u"c"_s)); }));
+        QCOMPARE(nodeNames(), (QStringList{u"a"_s, u"b"_s, u"d"_s, u"e"_s}));
+        QCOMPARE(graph().numEdges(), 1u);
+        QVERIFY(_document->property("saveRequired").toBool());
+
+        QVERIFY(execute([this] { _document->undo(); }));
+        QCOMPARE(graph().numNodes(), 5u);
+        QCOMPARE(graph().numEdges(), 4u);
+
+        QVERIFY(execute([this] { _document->selectNeighbours(nodeId(u"a"_s), false); }));
+        QVERIFY(execute([this] { _document->deleteSelectedNodes(); }));
+        QCOMPARE(nodeNames(), (QStringList{u"d"_s, u"e"_s}));
+        QCOMPARE(_document->property("numNodesSelected").toInt(), 0);
+    }
+
+    void bookmarks()
+    {
+        QVERIFY(open());
+
+        QVERIFY(execute([this] { _document->selectNeighbours(nodeId(u"d"_s), false); }));
+        _document->addBookmark(u"cd"_s);
+        QCOMPARE(_document->bookmarks(), QStringList{u"cd"_s});
+
+        QVERIFY(execute([this] { _document->selectNone(); }));
+        QVERIFY(execute([this] { _document->gotoBookmark(u"cd"_s); }));
+        QCOMPARE(selected(), (QStringList{u"c"_s, u"d"_s}));
+
+        _document->renameBookmark(u"cd"_s, u"Renamed"_s);
+        QCOMPARE(_document->bookmarks(), QStringList{u"Renamed"_s});
+
+        _document->removeBookmarks({u"Renamed"_s});
+        QVERIFY(_document->bookmarks().isEmpty());
+    }
+
+    void attributes()
+    {
+        QVERIFY(open());
+
+        QVERIFY(execute([this] { _document->cloneAttribute(u"score"_s, u"Copy"_s); }));
+        QVERIFY(_document->attributeExists(u"Copy"_s));
+        QCOMPARE(_document->allAttributeValues(u"Copy"_s).size(), 5);
+
+        QVERIFY(execute([this] { _document->removeAttributes({u"score"_s}); }));
+        QVERIFY(!_document->attributeExists(u"score"_s));
+
+        QVERIFY(execute([this] { _document->undo(); }));
+        QVERIFY(_document->attributeExists(u"score"_s));
+
+        QVERIFY(execute([this] { _document->undo(); }));
+        QVERIFY(!_document->attributeExists(u"Copy"_s));
+    }
+
+    // Editing an attribute that a transform refers to applies the transforms again
+    void editAttributeUsedByTransform()
+    {
+        QVERIFY(open());
+
+        QVERIFY(execute([this] { _document->update({u"RemoveNodes where $score > 3"_s}); }));
+        QCOMPARE(nodeNames(), (QStringList{u"a"_s, u"b"_s, u"c"_s}));
+
+        AttributeEdits edits;
+        edits.setNodeValue(nodeId(u"a"_s), u"10"_s);
+        QVERIFY(execute([&] { _document->editAttribute(u"score"_s, edits, ValueType::Unknown, {}); }));
+        QCOMPARE(nodeNames(), (QStringList{u"b"_s, u"c"_s}));
+
+        QVERIFY(execute([this] { _document->undo(); }));
+        QCOMPARE(nodeNames(), (QStringList{u"a"_s, u"b"_s, u"c"_s}));
+
+        // The transforms are unchanged throughout
+        QCOMPARE(_document->transforms().size(), 1);
+    }
+
+    void visualisations()
+    {
+        QVERIFY(open());
+
+        QVERIFY(execute([this] { _document->update({}, {u"score Colour"_s}); }));
+        QCOMPARE(_document->visualisations().size(), 1);
+        QVERIFY(_document->visualisations().at(0).startsWith(u"score Colour"_s));
+        QVERIFY(_document->hasVisualisationInfo());
+
+        QVERIFY(execute([this] { _document->undo(); }));
+        QVERIFY(_document->visualisations().isEmpty());
+    }
+
+    // As the transform panel edits them; the edits are only applied when the panel applies them
+    void transformsEdited()
+    {
+        QVERIFY(open());
+
+        QVERIFY(execute([this] { _document->update({u"RemoveNodes where $score > 3"_s}); }));
+        QVERIFY(execute([this] { _document->update({uR"(RemoveNodes where $NodeName == "a")"_s}); }));
+        QCOMPARE(nodeNames(), (QStringList{u"b"_s, u"c"_s}));
+
+        auto applyFromUI = [this]
+        {
+            _document->apply(_document->property("transforms").toStringList(),
+                _document->property("visualisations").toStringList());
+        };
+
+        _document->setGraphTransform(0, u"RemoveNodes where $score > 4"_s);
+        QCOMPARE(nodeNames(), (QStringList{u"b"_s, u"c"_s}));
+        QVERIFY(execute(applyFromUI));
+        QCOMPARE(nodeNames(), (QStringList{u"b"_s, u"c"_s, u"d"_s}));
+
+        _document->removeGraphTransform(0);
+        QVERIFY(execute(applyFromUI));
+        QCOMPARE(nodeNames(), (QStringList{u"b"_s, u"c"_s, u"d"_s, u"e"_s}));
+        QCOMPARE(_document->transforms().size(), 1);
+
+        QVERIFY(execute([this] { _document->undo(); }));
+        QCOMPARE(nodeNames(), (QStringList{u"b"_s, u"c"_s, u"d"_s}));
+
+        const auto transforms = _document->transforms();
+        QVERIFY(execute([this] { _document->moveGraphTransform(0, 1); }));
+        QCOMPARE(_document->transforms(), (QStringList{transforms.at(1), transforms.at(0)}));
+        QCOMPARE(nodeNames(), (QStringList{u"b"_s, u"c"_s, u"d"_s}));
+    }
+
+    // What's saved is what's loaded, including the transforms, visualisations and bookmarks
+    void saveAndLoad()
+    {
+        QVERIFY(open());
+
+        QVERIFY(execute([this]
+        {
+            _document->update({u"RemoveNodes where $score > 4"_s}, {u"score Size"_s});
+        }));
+
+        QVERIFY(execute([this] { _document->selectNeighbours(nodeId(u"a"_s), false); }));
+        _document->addBookmark(u"Around a"_s);
+
+        const auto transforms = _document->transforms();
+        const auto visualisations = _document->visualisations();
+
+        auto url = QUrl::fromLocalFile(_dir.filePath(u"saved.%1"_s.arg(Application::nativeExtension())));
+        QSignalSpy saveComplete(_document.get(), &Document::saveComplete);
+        QVERIFY(execute([&] { _document->saveFile(url, Application::name(), {}, {}); }));
+        QVERIFY(QTest::qWaitFor([&] { return !saveComplete.isEmpty(); }, Timeout));
+        QVERIFY(saveComplete.at(0).at(0).toBool());
+        QVERIFY(!_document->property("saveRequired").toBool());
+
+        QVERIFY(open(url, QString::fromLatin1(Application::NativeFileType), {}));
+
+        QCOMPARE(nodeNames(), (QStringList{u"a"_s, u"b"_s, u"c"_s, u"d"_s}));
+        QCOMPARE(_document->transforms(), transforms);
+        QCOMPARE(_document->visualisations(), visualisations);
+        QCOMPARE(_document->bookmarks(), QStringList{u"Around a"_s});
+        QVERIFY(execute([this] { _document->gotoBookmark(u"Around a"_s); }));
+        QCOMPARE(selected(), (QStringList{u"a"_s, u"b"_s, u"c"_s}));
+    }
+
+    void loadFailure()
+    {
+        QVERIFY(!open(write(u"broken.gml"_s, "graph [ node [ id 0 "), u"GML"_s, u"Generic"_s));
+        QVERIFY(!_document->property("failureReason").toString().isEmpty());
+
+        QVERIFY(!open(write(u"graph.gml"_s, Gml), u"GML"_s, u"Nothing"_s));
+    }
+};
+
+QTEST_MAIN(TestDocument_)
+#include "tst_document.moc"
