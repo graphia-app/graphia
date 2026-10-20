@@ -1402,13 +1402,12 @@ QString CorrelationPluginInstance::log() const
     if(_transpose)
         text.append(u"\n"_s + tr("Transposed"));
 
-    auto correlation = ContinuousCorrelation::create(_continuousCorrelationType, _correlationFilterType);
-
     switch(_correlationDataType)
     {
     default:
     case CorrelationDataType::Continuous:
     {
+        auto correlation = ContinuousCorrelation::create(_continuousCorrelationType, _correlationFilterType);
         text.append(u"\n"_s + tr("Continuous Correlation Metric: %1").arg(correlation->name()));
 
         QString polarity;
@@ -1425,8 +1424,11 @@ QString CorrelationPluginInstance::log() const
     }
 
     case CorrelationDataType::Discrete:
+    {
+        auto correlation = DiscreteCorrelation::create(_discreteCorrelationType, _correlationFilterType);
         text.append(u"\n"_s + tr("Discrete Correlation Metric: %1").arg(correlation->name()));
         break;
+    }
     }
 
     text.append(u"\n"_s + tr("Minimum Correlation Value: %1").arg(
