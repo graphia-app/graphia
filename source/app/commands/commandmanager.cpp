@@ -452,11 +452,12 @@ void CommandManager::cancel()
 
 void CommandManager::wait()
 {
-    do
-    {
-        joinThread();
-    }
-    while(commandsArePending());
+    joinThread();
+
+    // Queued commands are only started once the main thread processes the completion
+    // of the one before, which it can't do while it's waiting here, so discard them
+    const std::unique_lock<std::recursive_mutex> lock(_queueMutex);
+    _pendingCommands.clear();
 }
 
 QString CommandManager::commandStackSummary() const

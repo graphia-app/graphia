@@ -95,6 +95,7 @@ public:
 
     void cancel();
 
+    // Waits for the command that's executing to finish, discarding any that are queued
     void wait();
 
     // This is intended for debugging only
