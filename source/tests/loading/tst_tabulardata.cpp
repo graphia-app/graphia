@@ -470,6 +470,20 @@ private slots:
         QCOMPARE(rows.rowMatchPercentage(0, {u"s1"_s, u"s2"_s, u"s3"_s}), 100);
         QCOMPARE(rows.rowMatchPercentage(0, {u"s1"_s, u"s4"_s}), 50);
         QCOMPARE(rows.rowMatchPercentage(1, {u"s1"_s}), 0);
+
+        // The values are those of each node or edge, so values are often repeated, e.g. a
+        // node attribute with values a, a, a and b is wholly matched by the column
+        QCOMPARE(tabularData.columnMatchPercentage(0, {u"a"_s, u"a"_s, u"a"_s, u"b"_s}), 100);
+        QCOMPARE(tabularData.columnMatchPercentage(0, {u"a"_s, u"a"_s, u"d"_s, u"d"_s}), 50);
+        QCOMPARE(rows.rowMatchPercentage(0, {u"s1"_s, u"s1"_s, u"s2"_s}), 100);
+
+        // Missing values aren't matched, even by empty cells
+        const auto withEmpty = tabularDataOf(cellsFrom(u"Key\na\n\nc"_s));
+        QCOMPARE(withEmpty.columnMatchPercentage(0, {u""_s, u""_s, u"a"_s}), 33);
+        QCOMPARE(withEmpty.columnMatchPercentage(0, {u""_s}), 0);
+
+        QCOMPARE(tabularData.columnMatchPercentage(0, {}), 0);
+        QCOMPARE(rows.rowMatchPercentage(0, {}), 0);
     }
 
     void contentIdentity_data()
