@@ -114,6 +114,7 @@ private slots:
         const std::map<int, char> m{{2, 'b'}, {1, 'a'}};
 
         QCOMPARE(u::keysFor(m), (std::vector<int>{1, 2}));
+        QCOMPARE(u::valuesFor(m), (std::vector<char>{'a', 'b'}));
         QCOMPARE(u::vectorFrom(std::set<int>{3, 1}), (std::vector<int>{1, 3}));
     }
 
