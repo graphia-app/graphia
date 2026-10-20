@@ -473,6 +473,46 @@ private slots:
         QVERIFY(!openNative(content));
     }
 
+    // Data that doesn't fill a whole number of rows fails to load
+    void partialRow()
+    {
+        QVERIFY(open());
+
+        auto content = saved();
+        QVERIFY(content.is_array() && content.size() == 2);
+
+        content[1]["pluginData"]["continuousData"].erase(0);
+        QVERIFY(!openNative(content));
+    }
+
+    // As are files with no data
+    void noRows()
+    {
+        QVERIFY(open());
+
+        auto content = saved();
+        QVERIFY(content.is_array() && content.size() == 2);
+
+        content[1]["pluginData"]["continuousData"] = json::array();
+        QVERIFY(!openNative(content));
+    }
+
+    // Correlation values for edges that aren't in the graph are ignored
+    void unknownEdge()
+    {
+        QVERIFY(open());
+        const auto edges = edgeNames();
+
+        auto content = saved();
+        QVERIFY(content.is_array() && content.size() == 2);
+
+        content[1]["pluginData"]["correlationValues"].push_back({{"id", 1000}, {"value", 0.5}});
+        QVERIFY(openNative(content));
+
+        QCOMPARE(edgeNames(), edges);
+        QCOMPARE(edgeValue(u"PearsonCorrelationValue"_s, u"r1-r4"_s), 31.0 / 35.0);
+    }
+
     // Saving after deleting a node keeps each row's data with its node
     void deletedNodeSaveAndLoad()
     {
