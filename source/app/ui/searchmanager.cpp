@@ -54,15 +54,17 @@ void SearchManager::findNodes(QString term, Flags<FindOptions> options,
 
     NodeIdSet foundNodeIds;
 
-    // If no attributes are specified, search them all
-    if(_attributeNames.empty())
+    // If no attributes are specified, search them all; this is decided afresh each
+    // time, so that a refresh includes any attributes created since
+    auto attributeNamesToSearch = _attributeNames;
+    if(attributeNamesToSearch.empty())
     {
-        for(auto& attributeName : _graphModel->attributeNames(ElementType::Node))
-            _attributeNames.append(attributeName);
+        const auto allAttributeNames = _graphModel->attributeNames(ElementType::Node);
+        attributeNamesToSearch = QStringList(allAttributeNames.begin(), allAttributeNames.end());
     }
 
     std::vector<Attribute> attributes;
-    for(auto& attributeName : _attributeNames)
+    for(auto& attributeName : attributeNamesToSearch)
     {
         if(!_graphModel->attributeExists(attributeName))
             continue;
@@ -77,7 +79,7 @@ void SearchManager::findNodes(QString term, Flags<FindOptions> options,
     }
 
     // None of the given attributes are searchable
-    if(!_attributeNames.empty() && attributes.empty())
+    if(!attributeNamesToSearch.empty() && attributes.empty())
     {
         clearFoundNodeIds();
         return;
