@@ -21,6 +21,8 @@
 
 #include "shared/utils/source_location.h"
 
+#include <QObject>
+
 struct MatLabMatrix
 {
     matvar_t* _var = nullptr;
@@ -102,10 +104,10 @@ bool MatLabFileParser::parse(const QUrl& url, IGraphModel*)
         return false;
     }
 
-    matvar_t* matVar = nullptr;
-    const bool result = false;
-
+    // Find the biggest matrix in the file, keeping only the variable that contains it
     MatLabMatrix biggestMatrix;
+    matvar_t* biggestMatrixVar = nullptr;
+    matvar_t* matVar = nullptr;
 
     while((matVar = Mat_VarReadNext(matFile)) != nullptr)
     {
@@ -113,31 +115,44 @@ bool MatLabFileParser::parse(const QUrl& url, IGraphModel*)
 
         if(candidate > biggestMatrix)
         {
+            Mat_VarFree(biggestMatrixVar);
             biggestMatrix = candidate;
-            const auto* v = biggestMatrix._var;
-
-            switch(v->data_type)
-            {
-            case MAT_T_DOUBLE:  return storeMatVarAsTabularData<double>(v);
-            case MAT_T_SINGLE:  return storeMatVarAsTabularData<float>(v);
-            case MAT_T_INT64:   return storeMatVarAsTabularData<mat_int64_t>(v);
-            case MAT_T_UINT64:  return storeMatVarAsTabularData<mat_uint64_t>(v);
-            case MAT_T_INT32:   return storeMatVarAsTabularData<mat_int32_t>(v);
-            case MAT_T_UINT32:  return storeMatVarAsTabularData<mat_uint32_t>(v);
-            case MAT_T_INT16:   return storeMatVarAsTabularData<mat_int16_t>(v);
-            case MAT_T_UINT16:  return storeMatVarAsTabularData<mat_uint16_t>(v);
-            case MAT_T_INT8:    return storeMatVarAsTabularData<mat_int8_t>(v);
-            case MAT_T_UINT8:   return storeMatVarAsTabularData<mat_uint8_t>(v);
-            default:
-                setGenericFailureReason(CURRENT_SOURCE_LOCATION);
-                return false;
-            }
+            biggestMatrixVar = matVar;
         }
-
-        Mat_VarFree(matVar);
+        else
+            Mat_VarFree(matVar);
     }
 
     Mat_Close(matFile);
+
+    bool result = false;
+
+    if(biggestMatrix._var != nullptr)
+    {
+        const auto* v = biggestMatrix._var;
+
+        switch(v->data_type)
+        {
+        case MAT_T_DOUBLE:  result = storeMatVarAsTabularData<double>(v); break;
+        case MAT_T_SINGLE:  result = storeMatVarAsTabularData<float>(v); break;
+        case MAT_T_INT64:   result = storeMatVarAsTabularData<mat_int64_t>(v); break;
+        case MAT_T_UINT64:  result = storeMatVarAsTabularData<mat_uint64_t>(v); break;
+        case MAT_T_INT32:   result = storeMatVarAsTabularData<mat_int32_t>(v); break;
+        case MAT_T_UINT32:  result = storeMatVarAsTabularData<mat_uint32_t>(v); break;
+        case MAT_T_INT16:   result = storeMatVarAsTabularData<mat_int16_t>(v); break;
+        case MAT_T_UINT16:  result = storeMatVarAsTabularData<mat_uint16_t>(v); break;
+        case MAT_T_INT8:    result = storeMatVarAsTabularData<mat_int8_t>(v); break;
+        case MAT_T_UINT8:   result = storeMatVarAsTabularData<mat_uint8_t>(v); break;
+        default:
+            setGenericFailureReason(CURRENT_SOURCE_LOCATION);
+            break;
+        }
+    }
+    else
+        setFailureReason(QObject::tr("The file contains no matrices."));
+
+    Mat_VarFree(biggestMatrixVar);
+
     return result;
 }
 
