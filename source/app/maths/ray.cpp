@@ -43,10 +43,10 @@ QVector3D Ray::closestPointTo(const Ray& other) const
 
 float Ray::distanceTo(const QVector3D& point) const
 {
-    return closestPointTo(point).length();
+    return (closestPointTo(point) - point).length();
 }
 
 float Ray::distanceTo(const Ray& other) const
 {
-    return closestPointTo(other).length();
+    return (closestPointTo(other) - other.closestPointTo(*this)).length();
 }
