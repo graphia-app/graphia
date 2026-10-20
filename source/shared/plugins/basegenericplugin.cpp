@@ -31,6 +31,7 @@
 #include "shared/utils/container.h"
 
 #include <QDebug>
+#include <QLocale>
 #include <QObject>
 #include <QtGlobal>
 
@@ -192,8 +193,9 @@ QStringList BaseGenericPluginInstance::defaultTransforms() const
     {
         defaultTransforms.append(
             u"RemoveEdges where $%1 < %2"_s
-            .arg(AdjacencyMatrixParser::absoluteEdgeWeightAttribute()._name)
-            .arg(_adjacencyMatrixParameters._initialAbsEdgeWeightThreshold));
+            .arg(AdjacencyMatrixParser::absoluteEdgeWeightAttribute()._name,
+                QString::number(_adjacencyMatrixParameters._initialAbsEdgeWeightThreshold,
+                'g', QLocale::FloatingPointShortest)));
     }
 
     defaultTransforms.reserve(defaultTransforms.size() + _additionalTransforms.size());
