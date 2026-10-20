@@ -156,11 +156,14 @@ namespace u
         if(a.size() != b.size())
             return true;
 
-        return std::any_of(a.begin(), a.end(),
-        [&b](const auto& value)
+        // Both ways round, as either may have duplicates
+        auto notIn = [](const auto& container)
         {
-            return !contains(b, value);
-        });
+            return [&container](const auto& value) { return !contains(container, value); };
+        };
+
+        return std::any_of(a.begin(), a.end(), notIn(b)) ||
+            std::any_of(b.begin(), b.end(), notIn(a));
     }
 
     template<Container C1, Container C2>
