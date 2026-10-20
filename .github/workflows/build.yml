@@ -359,6 +359,7 @@ jobs:
         UNITY_BUILD: OFF
         SANITIZERS: address;undefined
         COVERAGE: ON
+        STDLIB_ASSERTIONS: ON
         CC: clang-${{ env.CLANG_VERSION }}
         CXX: clang++-${{ env.CLANG_VERSION }}
     - name: Test

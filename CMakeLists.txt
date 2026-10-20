@@ -19,6 +19,14 @@ if(GRAPHIA_SANITIZERS AND NOT MSVC)
     add_link_options(-fsanitize=${SANITIZERS})
 endif()
 
+# The standard library's assertions, which check preconditions such as indices being
+# in range; its debug mode, _GLIBCXX_DEBUG, also checks iterators, but changes the
+# layout of std::map, which QMap uses, so can't be used with a Qt not built with it
+option(GRAPHIA_STDLIB_ASSERTIONS "Build with the standard library's assertions (libstdc++ only)" OFF)
+if(GRAPHIA_STDLIB_ASSERTIONS)
+    add_compile_definitions(_GLIBCXX_ASSERTIONS)
+endif()
+
 add_subdirectory(source/thirdparty)
 
 # Clang's source based code coverage, for everything except third party code;
