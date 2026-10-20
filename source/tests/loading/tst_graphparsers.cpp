@@ -27,20 +27,114 @@
 #include "shared/loading/gmlfileparser.h"
 #include "shared/loading/graphmlparser.h"
 #include "shared/loading/jsongraphparser.h"
+#include "shared/loading/matlabfileparser.h"
 #include "shared/loading/pairwisefileparser.h"
 
 #include <QTest>
 #include <QByteArray>
+#include <QFile>
 #include <QString>
 #include <QStringList>
+#include <QTemporaryDir>
 
+#include <array>
 #include <functional>
 #include <memory>
+#include <vector>
 
 using namespace Qt::Literals::StringLiterals;
 
 namespace
 {
+using CreateMatVarFn = std::function<matvar_t*()>;
+
+// The content of a MATLAB file holding the variables created by the given functions
+QByteArray matFile(const std::vector<CreateMatVarFn>& createVariables)
+{
+    const QTemporaryDir dir;
+    auto fileName = dir.filePath(u"data.mat"_s);
+
+    auto* matFile = Mat_CreateVer(qPrintable(fileName), nullptr, MAT_FT_MAT5);
+    if(matFile == nullptr)
+        return {};
+
+    for(const auto& createVariable : createVariables)
+    {
+        auto* variable = createVariable();
+        Mat_VarWrite(matFile, variable, MAT_COMPRESSION_NONE);
+        Mat_VarFree(variable);
+    }
+
+    Mat_Close(matFile);
+
+    QFile file(fileName);
+    if(!file.open(QIODevice::ReadOnly))
+        return {};
+
+    return file.readAll();
+}
+
+// A dense matrix, whose values are given in column major order, as MATLAB stores them
+template<typename T>
+CreateMatVarFn denseMatrix(const char* name, size_t rows, size_t columns, std::vector<T> values,
+    matio_classes classType = MAT_C_DOUBLE, matio_types dataType = MAT_T_DOUBLE)
+{
+    return [=]() mutable
+    {
+        std::array<size_t, 2> dims{rows, columns};
+        return Mat_VarCreate(name, classType, dataType, 2, dims.data(), values.data(), 0);
+    };
+}
+
+// A sparse matrix, given as (row, column, value) triples, in column order
+CreateMatVarFn sparseMatrix(const char* name, size_t rows, size_t columns,
+    const std::vector<std::tuple<mat_uint32_t, mat_uint32_t, double>>& entries)
+{
+    return [=]
+    {
+        std::vector<mat_uint32_t> ir;
+        std::vector<mat_uint32_t> jc(columns + 1, 0);
+        std::vector<double> data;
+
+        ir.reserve(entries.size());
+        data.reserve(entries.size());
+        for(const auto& [row, column, value] : entries)
+        {
+            ir.push_back(row);
+            data.push_back(value);
+            jc.at(column + 1)++;
+        }
+
+        for(size_t column = 0; column < columns; column++)
+            jc.at(column + 1) += jc.at(column);
+
+        mat_sparse_t sparse{};
+        sparse.nzmax = static_cast<mat_uint32_t>(data.size());
+        sparse.ir = ir.data();
+        sparse.nir = static_cast<mat_uint32_t>(ir.size());
+        sparse.jc = jc.data();
+        sparse.njc = static_cast<mat_uint32_t>(jc.size());
+        sparse.ndata = static_cast<mat_uint32_t>(data.size());
+        sparse.data = data.data();
+
+        std::array<size_t, 2> dims{rows, columns};
+        return Mat_VarCreate(name, MAT_C_SPARSE, MAT_T_DOUBLE, 2, dims.data(), &sparse, 0);
+    };
+}
+
+// A struct with one field, holding the given variable
+CreateMatVarFn structOf(const char* name, const char* fieldName, const CreateMatVarFn& createField)
+{
+    return [=]
+    {
+        std::array<size_t, 2> dims{1, 1};
+        std::array<const char*, 1> fieldNames{fieldName};
+        auto* variable = Mat_VarCreateStruct(name, 2, dims.data(), fieldNames.data(), 1);
+        Mat_VarSetStructFieldByName(variable, fieldName, 0, createField());
+        return variable;
+    };
+}
+
 // Parses content in the given format, which is the name of a parser,
 // optionally followed by a description of how it is configured
 std::unique_ptr<TestGraphModel> parse(const QString& format, const QByteArray& content,
@@ -65,6 +159,7 @@ std::unique_ptr<TestGraphModel> parse(const QString& format, const QByteArray& c
     if(format == u"JSONGraph"_s)    return parseWithType(static_cast<JsonGraphParser*>(nullptr));
     if(format == u"CX"_s)           return parseWithType(static_cast<CxParser*>(nullptr));
     if(format == u"MatrixCSV"_s)    return parseWithType(static_cast<AdjacencyMatrixCSVFileParser*>(nullptr));
+    if(format == u"MatrixMatLab"_s) return parseWithType(static_cast<AdjacencyMatrixMatLabFileParser*>(nullptr));
 
     if(format == u"PairwiseCSV attributes"_s)
     {
@@ -343,6 +438,31 @@ private slots:
             "</rdf:RDF>\n") <<
             QStringList{u"p"_s, u"x"_s} << QStringList{} << QStringList{};
 
+        // MATLAB adjacency matrices; as with CSV, an edge is created from each row's node to each column's
+        // node; the matrix here is 4 by 4, with 2 at row 1, column 2, and -1 at row 4, column 1
+        // (a 3 by 3 matrix of integers can't be distinguished from an edge list)
+        std::vector<double> matrix(16, 0.0);
+        matrix.at(4) = 2.0;
+        matrix.at(3) = -1.0;
+        const std::vector<mat_int32_t> intMatrix(matrix.begin(), matrix.end());
+
+        const QStringList matrixNodes{u"Node 1"_s, u"Node 2"_s, u"Node 4"_s};
+        const QStringList matrixEdges{u"Node 1-Node 2"_s, u"Node 4-Node 1"_s};
+        const QStringList matrixValues{u"EdgeWeight|Node 1|Node 2|2"_s, u"EdgeWeight|Node 4|Node 1|-1"_s};
+
+        QTest::newRow("MATLAB") << u"MatrixMatLab"_s << matFile({denseMatrix("m", 4, 4, matrix)}) <<
+            matrixNodes << matrixEdges << matrixValues;
+        QTest::newRow("MATLAB int32") << u"MatrixMatLab"_s <<
+            matFile({denseMatrix("m", 4, 4, intMatrix, MAT_C_INT32, MAT_T_INT32)}) <<
+            matrixNodes << matrixEdges << matrixValues;
+        QTest::newRow("MATLAB struct") << u"MatrixMatLab"_s <<
+            matFile({structOf("s", "m", denseMatrix("m", 4, 4, matrix))}) <<
+            matrixNodes << matrixEdges << matrixValues;
+        QTest::newRow("MATLAB precision") << u"MatrixMatLab"_s <<
+            matFile({denseMatrix<double>("m", 2, 2, {0, 0, 0.1, 0})}) <<
+            QStringList{u"Node 1"_s, u"Node 2"_s} << QStringList{u"Node 1-Node 2"_s} <<
+            QStringList{u"EdgeWeight|Node 1|Node 2|0.1"_s};
+
         // Adjacency matrices; an edge is created from each row's node to each column's node
         QTest::newRow("Matrix") << u"MatrixCSV"_s << QByteArray("0,2\n-3,0\n") <<
             QStringList{u"Node 1"_s, u"Node 2"_s} << QStringList{u"Node 1-Node 2"_s, u"Node 2-Node 1"_s} <<
@@ -395,6 +515,32 @@ private slots:
             else
                 QCOMPARE(model->edgeValue(fields.at(0), fields.at(1), fields.at(2)), fields.at(3));
         }
+    }
+
+    // A sparse matrix is loaded as an edge list, whose nodes are named in the order they're found
+    void matLabSparse()
+    {
+        QString failureReason;
+        auto model = ::parse(u"MatrixMatLab"_s,
+            matFile({sparseMatrix("m", 4, 4, {{3, 0, -1.0}, {0, 1, 2.0}})}), &failureReason);
+        QVERIFY2(model != nullptr, qPrintable(failureReason));
+
+        QCOMPARE(model->graph().numNodes(), 3);
+        QCOMPARE(model->graph().numEdges(), 2);
+
+        QStringList weights;
+        weights.reserve(static_cast<qsizetype>(model->graph().edgeIds().size()));
+        for(auto edgeId : model->graph().edgeIds())
+            weights.append(model->graphModel().attributeValueByName(u"EdgeWeight"_s).stringValueOf(edgeId));
+
+        weights.sort();
+        QCOMPARE(weights, (QStringList{u"-1"_s, u"2"_s}));
+    }
+
+    void matLabInvalid()
+    {
+        QString failureReason;
+        QVERIFY(::parse(u"MatrixMatLab"_s, QByteArray("not a MATLAB file"), &failureReason) == nullptr);
     }
 
     void numericPrecision_data()
