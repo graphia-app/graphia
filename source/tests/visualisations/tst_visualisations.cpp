@@ -130,6 +130,20 @@ private slots:
         QCOMPARE(gradientPositionOf(*model, u"h"_s), 1.0);
     }
 
+    // Inverting reverses the mapping, about the middle of its range
+    void invertedStandardDeviationMapping()
+    {
+        auto model = createModel();
+        visualise(*model, {uR"([invert] "score" "Colour" with )"_s + BlackToWhite + u" "_s +
+            parameter(u"mapping"_s, u"{\"type\": \"stddev\"}"_s)});
+
+        QCOMPARE(gradientPositionOf(*model, u"a"_s), 1.0);
+        QVERIFY(std::abs(gradientPositionOf(*model, u"b"_s) - 0.75) < 0.01);
+        QVERIFY(std::abs(gradientPositionOf(*model, u"e"_s) - 0.5) < 0.01);
+        QCOMPARE(gradientPositionOf(*model, u"g"_s), 0.0);
+        QCOMPARE(gradientPositionOf(*model, u"h"_s), 0.0);
+    }
+
     void size()
     {
         auto model = createModel();
