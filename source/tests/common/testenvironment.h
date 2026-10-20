@@ -22,6 +22,7 @@
 
 #include "app/defaultpreferences.h"
 
+#include "shared/utils/random.h"
 #include "shared/utils/scopetimer.h"
 #include "shared/utils/threadpool.h"
 
@@ -34,8 +35,8 @@ namespace TestEnvironment
 {
 // Call from initTestCase in any test that exercises application code; this sets up the
 // singletons main() would otherwise create, defines the preferences with their defaults,
-// and keeps any preferences the code under test reads or writes out of the user's real
-// settings
+// keeps any preferences the code under test reads or writes out of the user's real
+// settings, and makes anything random reproducible
 inline void initialise()
 {
     using namespace Qt::Literals::StringLiterals;
@@ -49,6 +50,9 @@ inline void initialise()
     QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, settingsDir.path());
 
     defineDefaultPreferences(u"Sans"_s);
+
+    // So that anything random gives the same results every time
+    u::setRandomSeed(1);
 }
 } // namespace TestEnvironment
 

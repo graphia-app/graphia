@@ -19,10 +19,33 @@
 
 #include "random.h"
 
+#include <mutex>
+#include <optional>
 #include <random>
 
 static std::random_device randomh_rd;
 static std::mt19937 randomh_mt19937(randomh_rd());
+
+static std::mutex randomh_seedMutex;
+static std::optional<uint32_t> randomh_seed;
+
+void u::setRandomSeed(uint32_t seed)
+{
+    const std::unique_lock<std::mutex> lock(randomh_seedMutex);
+
+    randomh_seed = seed;
+    randomh_mt19937.seed(seed);
+}
+
+std::mt19937 u::seededRandomGenerator()
+{
+    const std::unique_lock<std::mutex> lock(randomh_seedMutex);
+
+    if(randomh_seed)
+        return std::mt19937(*randomh_seed);
+
+    return std::mt19937(randomh_rd());
+}
 
 float u::rand(float low, float high)
 {
