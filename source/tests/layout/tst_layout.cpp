@@ -313,6 +313,26 @@ private slots:
                     QCOMPARE(target.z(), 0.0f);
                 }
             }
+
+            // No two siblings are in the same place
+            for(auto nodeId : component.nodeIds())
+            {
+                const auto neighbourIds = m.graph().neighboursOf(nodeId);
+
+                std::vector<QVector3D> neighbours;
+                neighbours.reserve(neighbourIds.size());
+                for(auto neighbourId : neighbourIds)
+                    neighbours.push_back(positions.get(neighbourId));
+
+                for(size_t i = 0; i < neighbours.size(); i++)
+                {
+                    for(size_t j = i + 1; j < neighbours.size(); j++)
+                    {
+                        if(dimensionality == Layout::Dimensionality::ThreeDee)
+                            QVERIFY(neighbours.at(i).distanceToPoint(neighbours.at(j)) > 1.0f);
+                    }
+                }
+            }
         }
     }
 
