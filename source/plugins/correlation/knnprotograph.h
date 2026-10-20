@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <compare>
 #include <cstddef>
 #include <functional>
 #include <iterator>
@@ -52,7 +53,15 @@ private:
             double _r = 0.0;
             double _strength = 0.0;
 
-            auto operator<=>(const ProtoEdge& other) const { return _strength <=> other._strength; }
+            // Ties go to the earlier vector, so the result doesn't depend on the order edges
+            // are added in, as when the correlations are calculated in parallel
+            std::partial_ordering operator<=>(const ProtoEdge& other) const
+            {
+                if(auto order = _strength <=> other._strength; order != 0)
+                    return order;
+
+                return other._it <=> _it;
+            }
         };
 
         std::vector<ProtoEdge> _protoEdges;
@@ -64,13 +73,13 @@ private:
             if(!correlationExceedsThreshold(_protoGraph->_polarity, r, _protoGraph->_threshold))
                 return;
 
-            auto strength = _protoGraph->strengthOf(r);
+            const ProtoEdge protoEdge{it, r, _protoGraph->strengthOf(r)};
 
-            // Once there are k edges, only a stronger one can displace the weakest
-            if(_protoEdges.size() >= _protoGraph->_k && strength <= _protoEdges.back()._strength)
+            // Once there are k edges, only a greater one can displace the least
+            if(_protoEdges.size() >= _protoGraph->_k && !(protoEdge > _protoEdges.back()))
                 return;
 
-            _protoEdges.push_back({it, r, strength});
+            _protoEdges.push_back(protoEdge);
             std::inplace_merge(_protoEdges.begin(), std::prev(_protoEdges.end()),
                 _protoEdges.end(), std::greater());
             _protoEdges.resize(std::min(_protoEdges.size(), _protoGraph->_k));
