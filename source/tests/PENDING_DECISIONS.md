@@ -51,6 +51,17 @@ own. This file should be deleted once everything here is resolved.
   the attribute `HOME`. Fixing this needs a separate type for attribute
   references in `GraphTransformConfig::TerminalValue`, and a change to how
   conditions are passed to QML, which relies on the `$`.
+- **Removing a component while the layout runs.** If a component is
+  removed while the layout thread isn't paused,
+  `LayoutThread::removeComponent` pauses it, removes the component's layout,
+  then resumes it, all while the graph is still part way through changing,
+  so the layout runs on a graph that's being rebuilt. In a test that does
+  this, the result is a fatal "componentById called with component
+  management disabled", nodes left unpositioned, or a hang. `Document`
+  pauses the layout whenever a command starts, and graphs only change in
+  commands, so this doesn't happen in the app, and the tests don't do it.
+  Either the resume could wait for `graphChanged`, or the branch could go,
+  with an assertion that the layout is paused.
 - **Picking the node nearest a click.** `nodeIdInsideFrustumNearestPoint` in
   `graphcommoninteractor.cpp` scores each node in the picking frustum by its
   distance from the clicked point plus `Ray(frustum.centreLine()).distanceTo(point)`.
