@@ -29,6 +29,8 @@
 #include "plugins/correlation/softmaxnormaliser.h"
 
 #include "shared/graph/edgelist.h"
+#include "shared/utils/cancellable.h"
+#include "shared/utils/progressable.h"
 #include "shared/loading/tabulardata.h"
 
 #include <QTest>
@@ -41,6 +43,8 @@
 #include <cmath>
 #include <map>
 #include <memory>
+#include <mutex>
+#include <algorithm>
 #include <numbers>
 #include <utility>
 #include <vector>
@@ -381,6 +385,217 @@ private slots:
 
         // 2 has no positive correlations; 3 is most strongly correlated with 1
         QCOMPARE(pairsOf(correlation->edgeList(vectors, parameters)), (QStringList{u"0-1"_s, u"1-3"_s}));
+    }
+
+    // With k as big as it can be, and nothing filtered by polarity or
+    // threshold, k-NN keeps every pair, so gives the same as a threshold of 0
+    void knnAllNeighbours_data()
+    {
+        QTest::addColumn<int>("type");
+
+        QTest::newRow("Pearson") << static_cast<int>(CorrelationType::Pearson);
+        QTest::newRow("Spearman") << static_cast<int>(CorrelationType::SpearmanRank);
+        QTest::newRow("Euclidean") << static_cast<int>(CorrelationType::EuclideanSimilarity);
+        QTest::newRow("Cosine") << static_cast<int>(CorrelationType::CosineSimilarity);
+        QTest::newRow("Bicor") << static_cast<int>(CorrelationType::Bicor);
+        QTest::newRow("Jaccard") << static_cast<int>(CorrelationType::Jaccard);
+        QTest::newRow("SMC") << static_cast<int>(CorrelationType::SMC);
+    }
+
+    void knnAllNeighbours()
+    {
+        QFETCH(const int, type);
+        auto correlationType = static_cast<CorrelationType>(type);
+
+        auto parameters = allPairsParameters();
+        parameters.insert(u"maximumK"_s, static_cast<int>(continuousRows.size()) - 1);
+
+        auto compare = [&](const auto& threshold, const auto& knn, const auto& vectors)
+        {
+            QVERIFY(threshold != nullptr);
+            QVERIFY(knn != nullptr);
+
+            auto expected = correlationsOf(threshold->edgeList(vectors, parameters));
+            auto actual = correlationsOf(knn->edgeList(vectors, parameters));
+            QCOMPARE(actual, expected);
+
+            // The matrix has the same values
+            auto matrix = knn->matrix(vectors, parameters);
+            QCOMPARE(matrix.size(), vectors.size());
+            for(const auto& [pair, r] : expected)
+            {
+                QCOMPARE(matrix.valueAt(static_cast<size_t>(pair.first), static_cast<size_t>(pair.second)), r);
+                QCOMPARE(matrix.valueAt(static_cast<size_t>(pair.second), static_cast<size_t>(pair.first)), r);
+            }
+
+            QCOMPARE(knn->name(), threshold->name());
+            QCOMPARE(knn->attributeName(), threshold->attributeName());
+        };
+
+        if(correlationType == CorrelationType::Jaccard || correlationType == CorrelationType::SMC)
+        {
+            const QList<QStringList> rows =
+            {
+                {u"a"_s, u"b"_s, u""_s, u"c"_s, u"0"_s},
+                {u"a"_s, u"c"_s, u""_s, u"c"_s, u"x"_s},
+                {u""_s,  u"b"_s, u""_s, u""_s,  u"x"_s},
+                {u"a"_s, u"b"_s, u"d"_s, u""_s,  u"x"_s},
+            };
+
+            DiscreteDataVectors vectors;
+            for(int i = 0; const auto& row : rows)
+                vectors.emplace_back(std::vector<QString>{row.begin(), row.end()}, NodeId(i++));
+
+            compare(DiscreteCorrelation::create(correlationType, CorrelationFilterType::Threshold),
+                DiscreteCorrelation::create(correlationType, CorrelationFilterType::Knn), vectors);
+        }
+        else
+        {
+            auto vectors = dataVectors<ContinuousDataVectors>(continuousRows);
+
+            compare(ContinuousCorrelation::create(correlationType, CorrelationFilterType::Threshold),
+                ContinuousCorrelation::create(correlationType, CorrelationFilterType::Knn), vectors);
+        }
+    }
+
+    void discreteKnn()
+    {
+        const QList<QStringList> rows =
+        {
+            {u"a"_s, u"b"_s, u"c"_s, u"d"_s},
+            {u"a"_s, u"b"_s, u"c"_s, u"x"_s},
+            {u"a"_s, u"y"_s, u"z"_s, u"w"_s},
+            {u"q"_s, u"y"_s, u"z"_s, u"w"_s},
+        };
+
+        DiscreteDataVectors vectors;
+        for(int i = 0; const auto& row : rows)
+            vectors.emplace_back(std::vector<QString>{row.begin(), row.end()}, NodeId(i++));
+
+        auto parameters = allPairsParameters();
+        parameters.insert(u"maximumK"_s, 1);
+
+        // Each row's most similar row
+        auto correlation = DiscreteCorrelation::create(CorrelationType::Jaccard, CorrelationFilterType::Knn);
+        QCOMPARE(pairsOf(correlation->edgeList(vectors, parameters)), (QStringList{u"0-1"_s, u"2-3"_s}));
+    }
+
+    void matrix()
+    {
+        auto correlation = ContinuousCorrelation::create(CorrelationType::Pearson,
+            CorrelationFilterType::Threshold);
+
+        auto vectors = dataVectors<ContinuousDataVectors>(continuousRows);
+        auto matrix = correlation->matrix(vectors, thresholdParameters(0.75, CorrelationPolarity::Positive));
+
+        // Pairs that don't pass the filter are left as 0; the diagonal is 1
+        QCOMPARE(matrix.size(), 4u);
+        QVERIFY(fuzzyEqual(matrix.valueAt(0, 1), 0.799502686));
+        QVERIFY(fuzzyEqual(matrix.valueAt(3, 1), 0.767814038));
+        QCOMPARE(matrix.valueAt(0, 2), 0.0);
+        QCOMPARE(matrix.valueAt(2, 2), 1.0);
+    }
+
+    void euclideanDistance()
+    {
+        auto correlation = ContinuousCorrelation::createEuclideanDistance();
+
+        auto vectors = dataVectors<ContinuousDataVectors>(continuousRows);
+        auto matrix = correlation->matrix(vectors, {});
+
+        // Independently computed with numpy
+        const QList<double> expected{3.5, 6.103277808, 6.873863542, 6.819090848, 5.958187643, 10.793516572};
+        for(int i = 0, a = 0; a < continuousRows.size(); a++)
+        {
+            for(int b = a + 1; b < continuousRows.size(); b++)
+            {
+                auto actual = matrix.valueAt(static_cast<size_t>(a), static_cast<size_t>(b));
+                QVERIFY2(fuzzyEqual(actual, expected.at(i)), qPrintable(u"%1-%2: %3 != %4"_s
+                    .arg(a).arg(b).arg(actual).arg(expected.at(i))));
+                i++;
+            }
+        }
+    }
+
+    void nonFiniteCorrelations()
+    {
+        // A constant vector has no Pearson correlation with anything
+        const Rows rows =
+        {
+            {1.0, 2.0, 3.0},
+            {2.0, 2.0, 2.0},
+            {3.0, 1.0, 2.0},
+        };
+
+        auto correlation = ContinuousCorrelation::create(CorrelationType::Pearson,
+            CorrelationFilterType::Threshold);
+
+        auto vectors = dataVectors<ContinuousDataVectors>(rows);
+        QCOMPARE(pairsOf(correlation->edgeList(vectors, allPairsParameters())), QStringList{u"0-2"_s});
+    }
+
+    void noVectors()
+    {
+        for(auto filterType : {CorrelationFilterType::Threshold, CorrelationFilterType::Knn})
+        {
+            auto correlation = ContinuousCorrelation::create(CorrelationType::Pearson, filterType);
+            QVERIFY(correlation->edgeList({}, allPairsParameters()).empty());
+            QCOMPARE(correlation->matrix({}, allPairsParameters()).size(), 0u);
+
+            auto discrete = DiscreteCorrelation::create(CorrelationType::Jaccard, filterType);
+            QVERIFY(discrete->edgeList({}, allPairsParameters()).empty());
+            QCOMPARE(discrete->matrix({}, allPairsParameters()).size(), 0u);
+        }
+    }
+
+    void cancellation()
+    {
+        Cancellable cancellable;
+        cancellable.cancel();
+
+        auto vectors = dataVectors<ContinuousDataVectors>(continuousRows);
+        auto parameters = allPairsParameters();
+        parameters.insert(u"maximumK"_s, 1);
+
+        for(auto filterType : {CorrelationFilterType::Threshold, CorrelationFilterType::Knn})
+        {
+            auto correlation = ContinuousCorrelation::create(CorrelationType::Pearson, filterType);
+            QVERIFY(correlation->edgeList(vectors, parameters, &cancellable).empty());
+            QCOMPARE(correlation->matrix(vectors, parameters, &cancellable).size(), 0u);
+        }
+
+        DiscreteDataVectors discreteVectors;
+        discreteVectors.emplace_back(std::vector<QString>{u"a"_s, u"b"_s}, NodeId(0));
+        discreteVectors.emplace_back(std::vector<QString>{u"a"_s, u"c"_s}, NodeId(1));
+
+        auto discrete = DiscreteCorrelation::create(CorrelationType::Jaccard, CorrelationFilterType::Threshold);
+        QVERIFY(!discrete->edgeList(discreteVectors, allPairsParameters()).empty());
+        QVERIFY(discrete->edgeList(discreteVectors, allPairsParameters(), &cancellable).empty());
+    }
+
+    void progress()
+    {
+        Progressable progressable;
+        std::vector<int> progress;
+        std::mutex mutex;
+        progressable.setProgressFn([&](int percent)
+        {
+            const std::unique_lock<std::mutex> lock(mutex);
+            progress.push_back(percent);
+        });
+
+        auto correlation = ContinuousCorrelation::create(CorrelationType::Pearson,
+            CorrelationFilterType::Threshold);
+
+        auto vectors = dataVectors<ContinuousDataVectors>(continuousRows);
+        correlation->edgeList(vectors, allPairsParameters(), nullptr, &progressable);
+
+        // Indeterminate to begin with and at the end, and reaching 100 in between
+        QVERIFY(progress.size() >= 3);
+        QCOMPARE(progress.front(), -1);
+        QCOMPARE(progress.back(), -1);
+        QVERIFY(std::ranges::find(progress, 100) != progress.end());
+        QVERIFY(std::ranges::all_of(progress, [](int p) { return p >= -1 && p <= 100; }));
     }
 
     void scaleValue_data()
