@@ -218,8 +218,9 @@ void CommandManager::undoReal(NamedBool<"rollback"> rollback)
 
         if(rollback)
         {
-            // If rolling back, prevent redo
-            _stack.pop_back();
+            // If rolling back, prevent redo, of this command and of any that were
+            // undone before it, as they can't be redone without it
+            _stack.erase(_stack.begin() + (_lastExecutedIndex + 1), _stack.end());
         }
 
         emit commandCompleted(true, description, {});
