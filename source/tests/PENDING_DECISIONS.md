@@ -112,13 +112,7 @@ own. This file should be deleted once everything here is resolved.
     - `#` preprocessor lines
     - a UTF-8 BOM
   - In `{a -> b} -> c`, the edges to `c` are lost.
-- **Adjacency matrices:**
-  - A file with exactly 3 integer columns, such as a 3x3 0/1 matrix, is read
-    as an edge list.
-  - Edge list mode names nodes "Node 1", "Node 2" and so on in order of
-    appearance, rather than using the ids in the file.
-  - CSV and MATLAB matrices give opposite edge directions. CSV cell (row i,
-    column j) gives an edge j→i, but MATLAB `M(i,j)` gives i→j.
+- **Adjacency matrices:** see the section below.
 - **MATLAB:**
   - The first numeric variable is used rather than the largest, because the
     function returns inside its loop.
@@ -126,7 +120,6 @@ own. This file should be deleted once everything here is resolved.
   - Complex data isn't checked for, and is reinterpreted as real.
   - When nothing usable is found, it fails without giving a reason.
 - **JSON Graph:**
-  - JGF v2 nodes keyed by id without an `"id"` field are rejected.
   - A graph with no `edges` key is rejected, though the key is optional.
   - Numeric ids are rejected.
   - A label is used as the node name but isn't stored as a "Node Name"
@@ -176,5 +169,5 @@ own. This file should be deleted once everything here is resolved.
 
 ## The PR
 
-The branch has around 70 commits, and a PR was deferred until more was
+The branch has over 220 commits, about half of them fixes, and a PR was deferred until more was
 implemented. It may be worth deciding where to draw the line.
