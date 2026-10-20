@@ -574,14 +574,18 @@ QString Application::resourceFile(const QString& relativePath) const
 
 bool Application::isResourceFile(const QString& path) const
 {
-    QString canonicalPath = QFileInfo(path).canonicalPath();
+    const QString canonicalPath = QFileInfo(path).canonicalFilePath();
+
+    if(canonicalPath.isEmpty())
+        return false;
 
     const auto& dirs = resourceDirectories();
 
     return std::ranges::any_of(dirs, [&canonicalPath](const auto& resourceDirectory)
     {
-        const QString canonicalResourceDirectory = QFileInfo(resourceDirectory).canonicalPath();
-        return canonicalPath.startsWith(canonicalResourceDirectory);
+        const QString canonicalResourceDirectory = QFileInfo(resourceDirectory).canonicalFilePath();
+        return !canonicalResourceDirectory.isEmpty() &&
+            canonicalPath.startsWith(canonicalResourceDirectory + u'/');
     });
 }
 
