@@ -1350,9 +1350,14 @@ void Document::deleteNode(QmlNodeId nodeId)
     if(busy())
         return;
 
+    // Delete any nodes it's merged with too, as they're shown as one
+    NodeIdSet nodeIds;
+    for(auto mergedNodeId : _graphModel->graph().mergedNodeIdsForNodeId(nodeId))
+        nodeIds.insert(mergedNodeId);
+
     _commandManager.execute(ExecutePolicy::Add,
         std::make_unique<DeleteNodesCommand>(_graphModel.get(),
-        _selectionManager.get(), NodeIdSet{nodeId}));
+        _selectionManager.get(), nodeIds));
 }
 
 void Document::deleteSelectedNodes()
