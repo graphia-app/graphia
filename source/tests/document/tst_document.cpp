@@ -24,9 +24,11 @@
 #include "app/attributes/enrichmenttablemodel.h"
 #include "app/layout/nodepositions.h"
 #include "app/ui/qml/Graphia/availableattributesmodel.h"
+#include "app/ui/qml/Graphia/availabletransformsmodel.h"
 #include "app/ui/qml/Graphia/editattributetablemodel.h"
 #include "app/ui/qml/Graphia/findtypes.h"
 #include "app/ui/qml/Graphia/importattributeskeydetection.h"
+#include "app/ui/qml/Graphia/Utils/preferences.h"
 
 #include "shared/loading/tabulardata.h"
 #include "shared/utils/container.h"
@@ -243,6 +245,49 @@ private slots:
 
         // The transforms are unchanged throughout
         QCOMPARE(_document->transforms().size(), 1);
+    }
+
+    // The transforms offered when adding one, by category, with the user's favourites first
+    void availableTransforms()
+    {
+        QVERIFY(open());
+
+        const std::unique_ptr<AvailableTransformsModel> model(_document->availableTransforms());
+        QVERIFY(model != nullptr);
+        QVERIFY(model->roleNames().values().contains("category"));
+
+        auto valueFor = [&model](const QString& transformName, const QByteArray& roleName)
+        {
+            for(int row = 0; row < model->rowCount({}); row++)
+            {
+                auto index = model->index(row);
+                if(model->get(index).toString() == transformName)
+                    return model->data(index, model->roleNames().key(roleName));
+            }
+
+            return QVariant{};
+        };
+
+        QCOMPARE(model->rowCount({}), static_cast<int>(graphModel()->availableTransformNames().size()));
+        QCOMPARE(valueFor(u"PageRank"_s, "category").toString(), u"Metrics"_s);
+        QCOMPARE(valueFor(u"PageRank"_s, "isFavourite").toBool(), false);
+        QVERIFY(!model->data(model->index(model->rowCount({})), Qt::DisplayRole).isValid());
+
+        QSignalSpy modelReset(model.get(), &AvailableTransformsModel::modelReset);
+        u::setPref(u"misc/favouriteTransforms"_s, uR"(["PageRank", 1])"_s);
+        QVERIFY(QTest::qWaitFor([&] { return !modelReset.isEmpty(); }));
+        QCOMPARE(valueFor(u"PageRank"_s, "category").toString(), u"Favourites"_s);
+        QCOMPARE(valueFor(u"PageRank"_s, "isFavourite").toBool(), true);
+        QCOMPARE(valueFor(u"Betweenness"_s, "category").toString(), u"Metrics"_s);
+
+        // Not JSON
+        u::setPref(u"misc/favouriteTransforms"_s, u"PageRank"_s);
+        QTest::qWait(0);
+        QCOMPARE(valueFor(u"PageRank"_s, "isFavourite").toBool(), true);
+
+        u::setPref(u"misc/favouriteTransforms"_s, u"[]"_s);
+        QVERIFY(QTest::qWaitFor([&] { return modelReset.count() == 2; }));
+        QCOMPARE(valueFor(u"PageRank"_s, "isFavourite").toBool(), false);
     }
 
     void visualisations()
