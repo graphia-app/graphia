@@ -158,20 +158,6 @@ own. This file should be deleted once everything here is resolved.
 - **3 by 3 matrices.** A 3 by 3 adjacency matrix of integers is
   indistinguishable from an edge list, and is loaded as one.
 
-## Tables
-
-- **Missing values as keys.** When finding the key column for importing
-  attributes or annotations, an element whose value is missing used to count
-  as a match for any empty cell. It no longer does, which lowers the match
-  percentage of attributes with many missing values. Revert that part of
-  "Fix the key match percentages when values are repeated" if it was
-  intended.
-- **Data that doesn't reach the right edge.** The correlation plugin's
-  default data rectangle has to reach the bottom right of the table, so a
-  table with an annotation column after the data, e.g. "Notes", gets no
-  rectangle at all, numerical or not, and the data has to be selected by
-  hand. Allowing columns after the data would find it.
-
 ## The PR
 
 The branch has around 70 commits, and a PR was deferred until more was
