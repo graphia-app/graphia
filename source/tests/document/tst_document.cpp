@@ -24,6 +24,7 @@
 #include "app/attributes/enrichmenttablemodel.h"
 #include "app/layout/nodepositions.h"
 #include "app/ui/qml/Graphia/availableattributesmodel.h"
+#include "app/ui/qml/Graphia/alert.h"
 #include "app/ui/qml/Graphia/availabletransformsmodel.h"
 #include "app/ui/qml/Graphia/editattributetablemodel.h"
 #include "app/ui/qml/Graphia/findtypes.h"
@@ -245,6 +246,206 @@ private slots:
 
         // The transforms are unchanged throughout
         QCOMPARE(_document->transforms().size(), 1);
+    }
+
+    // As the context menu's "Select Shared Values", and selecting by an attribute's value
+    void selectByValue()
+    {
+        QVERIFY(open());
+
+        // The nodes that share d's kind
+        QVERIFY(execute([this] { _document->selectBySharedAttributeValue(u"kind"_s, nodeId(u"d"_s), false); }));
+        QCOMPARE(selected(), (QStringList{u"d"_s, u"e"_s}));
+
+        // ...and, adding the selection's, a's score
+        QVERIFY(execute([this] { _document->selectBySharedAttributeValue(u"score"_s, nodeId(u"a"_s), true); }));
+        QCOMPARE(selected(), (QStringList{u"a"_s, u"d"_s, u"e"_s}));
+
+        // The selection's
+        QVERIFY(execute([this] { _document->selectBySharedAttributeValue(u"kind"_s); }));
+        QCOMPARE(selected(), (QStringList{u"a"_s, u"b"_s, u"c"_s, u"d"_s, u"e"_s}));
+
+        QVERIFY(execute([this] { _document->selectByAttributeValue(u"kind"_s, u"^y$"_s); }));
+        QCOMPARE(selected(), (QStringList{u"d"_s, u"e"_s}));
+
+        QVERIFY(execute([this] { _document->selectByAttributeValue(u"score"_s, u"^[12]$"_s); }));
+        QCOMPARE(selected(), (QStringList{u"a"_s, u"b"_s}));
+
+        // Nothing matches, or there's no such attribute, so nothing is selected
+        _document->selectByAttributeValue(u"kind"_s, u"z"_s);
+        QVERIFY(QTest::qWaitFor([this] { return selected().isEmpty(); }));
+
+        QVERIFY(execute([this] { _document->selectAll(); }));
+        _document->selectByAttributeValue(u"Not an attribute"_s, u"x"_s);
+        QVERIFY(QTest::qWaitFor([this] { return selected().isEmpty(); }));
+    }
+
+    // What the UI shows of the selection
+    void selectionInfo()
+    {
+        QVERIFY(open());
+
+        QVERIFY(execute([this] { _document->selectSources(nodeId(u"c"_s), false); }));
+        QCOMPARE(_document->property("numHeadNodesSelected").toInt(), 3);
+
+        const auto selectedNodeIds = _document->property("selectedNodeIds").toList();
+
+        QStringList names;
+        names.reserve(selectedNodeIds.size());
+        for(const auto& id : selectedNodeIds)
+            names.append(_document->nodeName(id.value<QmlNodeId>()));
+        names.sort();
+        QCOMPARE(names, (QStringList{u"a"_s, u"b"_s, u"c"_s}));
+        QCOMPARE(_document->property("selectedHeadNodeIds").toList().size(), 3);
+
+        QVERIFY(_document->nodeIsSelected(nodeId(u"a"_s)));
+        QVERIFY(!_document->nodeIsSelected(nodeId(u"d"_s)));
+
+        QVERIFY(_document->property("directed").toBool());
+        QVERIFY(_document->property("editable").toBool());
+
+        QCOMPARE(_document->graphSizeSummary(),
+            u"Mutable Graph Nodes: 5 Edges: 4\nTransformed Graph Nodes: 5 Edges: 4 Components: 2"_s);
+    }
+
+    // Stepping through the nodes found, as the find panel's buttons do
+    void findNavigation()
+    {
+        QVERIFY(open());
+
+        QVERIFY(execute([this]
+        {
+            _document->find(u"[abd]"_s, static_cast<int>(FindOptions::MatchUsingRegex),
+                {u"NodeName"_s}, static_cast<int>(FindSelectStyle::None));
+        }));
+        QCOMPARE(_document->property("numNodesFound").toInt(), 3);
+
+        // With nothing selected, the first found node is selected
+        QCOMPARE(selected(), QStringList{u"a"_s});
+        QCOMPARE(_document->property("foundIndex").toInt(), 0);
+
+        // The nodes found are in order, by component, wrapping around
+        QVERIFY(execute([this] { _document->selectNextFound(); }));
+        QCOMPARE(selected(), QStringList{u"b"_s});
+        QVERIFY(execute([this] { _document->selectNextFound(); }));
+        QCOMPARE(selected(), QStringList{u"d"_s});
+        QCOMPARE(_document->property("foundIndex").toInt(), 2);
+        QVERIFY(execute([this] { _document->selectNextFound(); }));
+        QCOMPARE(selected(), QStringList{u"a"_s});
+
+        QVERIFY(execute([this] { _document->selectPrevFound(); }));
+        QCOMPARE(selected(), QStringList{u"d"_s});
+
+        QVERIFY(execute([this] { _document->selectFirstFound(); }));
+        QCOMPARE(selected(), QStringList{u"a"_s});
+
+        QVERIFY(execute([this] { _document->selectAllFound(); }));
+        QCOMPARE(selected(), (QStringList{u"a"_s, u"b"_s, u"d"_s}));
+        QCOMPARE(_document->property("foundIndex").toInt(), -1);
+    }
+
+    void gotoAllBookmarks()
+    {
+        QVERIFY(open());
+
+        QVERIFY(execute([this] { _document->selectSources(nodeId(u"b"_s), false); }));
+        _document->addBookmark(u"ab"_s);
+        QVERIFY(execute([this] { _document->selectBySharedAttributeValue(u"kind"_s, nodeId(u"e"_s), false); }));
+        _document->addBookmark(u"de"_s);
+
+        QVERIFY(execute([this] { _document->selectNone(); }));
+        QVERIFY(execute([this] { _document->gotoAllBookmarks(); }));
+        QCOMPARE(selected(), (QStringList{u"a"_s, u"b"_s, u"d"_s, u"e"_s}));
+
+        // Bookmarked nodes that have been removed are skipped
+        QVERIFY(execute([this] { _document->update({uR"(RemoveNodes where $NodeName == "a")"_s}); }));
+        QVERIFY(execute([this] { _document->selectNone(); }));
+        QVERIFY(execute([this] { _document->gotoAllBookmarks(); }));
+        QCOMPARE(selected(), (QStringList{u"b"_s, u"d"_s, u"e"_s}));
+    }
+
+    // The details the transform and visualisation panels show
+    void transformAndVisualisationDetails()
+    {
+        QVERIFY(open());
+
+        auto k = _document->transformParameter(u"KNN"_s, u"k"_s);
+        QCOMPARE(k.value(u"name"_s).toString(), u"k"_s);
+        QCOMPARE(k.value(u"displayName"_s).toString(), u"k"_s);
+        QCOMPARE(k.value(u"valueType"_s).toInt(), static_cast<int>(ValueType::Int));
+        QCOMPARE(k.value(u"hasMinimumValue"_s).toBool(), true);
+        QCOMPARE(k.value(u"minimumValue"_s).toInt(), 1);
+        QCOMPARE(k.value(u"hasMaximumValue"_s).toBool(), false);
+        QCOMPARE(k.value(u"initialValue"_s).toInt(), 5);
+
+        auto rankOrder = _document->transformParameter(u"KNN"_s, u"RankOrder"_s);
+        QCOMPARE(rankOrder.value(u"initialIndex"_s).toInt(), 0);
+        QCOMPARE(rankOrder.value(u"displayName"_s).toString(), u"Rank Order"_s);
+        QVERIFY(_document->transformParameter(u"KNN"_s, u"Not a parameter"_s).isEmpty());
+        QVERIFY(_document->transformParameter(u"Not a transform"_s, u"k"_s).isEmpty());
+
+        const auto knn = _document->transform(u"KNN"_s);
+        QCOMPARE(knn.value(u"displayName"_s).toString(), u"k-NN"_s);
+        QCOMPARE(knn.value(u"attributeParameterNames"_s).toStringList(), QStringList{u"Ranked Attribute"_s});
+        const auto rankedAttribute = knn.value(u"attributeParameters"_s).toList().at(0).toMap();
+        QCOMPARE(rankedAttribute.value(u"elementType"_s).toInt(), static_cast<int>(ElementType::Edge));
+        QCOMPARE(rankedAttribute.value(u"valueType"_s).toInt(), static_cast<int>(ValueType::Numerical));
+
+        const auto parsed = _document->parseGraphTransform(u"RemoveNodes where $score > 3"_s);
+        QCOMPARE(parsed.value(u"action"_s).toString(), u"RemoveNodes"_s);
+        QCOMPARE(parsed.value(u"displayName"_s).toString(), u"Remove Nodes"_s);
+        QVERIFY(_document->parseGraphTransform(u"not a transform"_s).isEmpty());
+
+        QVERIFY(execute([this] { _document->update({u"RemoveNodes where $score > 3"_s}); }));
+        QCOMPARE(_document->transformInfoAtIndex(0).value(u"alertType"_s).toInt(), static_cast<int>(AlertType::None));
+
+        // Of the nodes that remain
+        QVERIFY(execute([this]
+        {
+            _document->update({u"RemoveNodes where $score > 3"_s},
+                {u"score Size"_s, u"kind Colour"_s});
+        }));
+        auto info = _document->visualisationInfoAtIndex(0);
+        QCOMPARE(info.value(u"minimumNumericValue"_s).toDouble(), 1.0);
+        QCOMPARE(info.value(u"maximumNumericValue"_s).toDouble(), 3.0);
+        QCOMPARE(info.value(u"hasNumericRange"_s).toBool(), true);
+        QCOMPARE(info.value(u"alertType"_s).toInt(), static_cast<int>(AlertType::None));
+
+        auto values = _document->visualisationNumericValuesAtIndex(0);
+        std::ranges::sort(values);
+        QCOMPARE(values, (QList<double>{1.0, 2.0, 3.0}));
+
+        auto strings = _document->visualisationStringValuesAtIndex(1);
+        strings.removeDuplicates();
+        QCOMPARE(strings, QStringList{u"x"_s});
+
+        const auto parsedVisualisation = _document->parseVisualisation(u"kind Colour"_s);
+        QCOMPARE(parsedVisualisation.value(u"attribute"_s).toString(), u"kind"_s);
+        QCOMPARE(parsedVisualisation.value(u"channel"_s).toString(), u"Colour"_s);
+
+        QVERIFY(_document->visualisationsAreValid({u"kind Colour"_s}));
+        QVERIFY(!_document->visualisationsAreValid({u"kind Colour"_s, uR"("kind" "Not a channel")"_s}));
+        QVERIFY(!_document->visualisationDefaultParameters(static_cast<int>(ValueType::Float), u"Colour"_s).isEmpty());
+
+        // Attributes like another, for the visualisation panel's menu of alternatives
+        const std::unique_ptr<AvailableAttributesModel> similar(_document->attributesSimilarTo(u"score"_s, 0));
+        QVERIFY(similar != nullptr);
+        QVERIFY(_document->attributesSimilarTo(u"Not an attribute"_s, 0) == nullptr);
+    }
+
+    // The layout's settings, as the layout settings panel shows them
+    void layoutSettings()
+    {
+        QVERIFY(open());
+
+        const auto names = _document->property("layoutSettingNames").toStringList();
+        QVERIFY(!names.isEmpty());
+
+        const auto setting = _document->layoutSetting(names.at(0));
+        QCOMPARE(setting.value(u"name"_s).toString(), names.at(0));
+        QVERIFY(setting.value(u"minimumValue"_s).toFloat() <= setting.value(u"value"_s).toFloat());
+        QVERIFY(setting.value(u"value"_s).toFloat() <= setting.value(u"maximumValue"_s).toFloat());
+        QVERIFY(_document->layoutSetting(u"Not a setting"_s).isEmpty());
     }
 
     // The transforms offered when adding one, by category, with the user's favourites first
