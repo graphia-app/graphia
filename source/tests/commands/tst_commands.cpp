@@ -484,6 +484,39 @@ private slots:
         QCOMPARE(model->edgeNames(), QStringList{u"b-c"_s});
         QCOMPARE(document->transforms(), transforms);
     }
+
+    // The command is cancelled after the transforms have been applied, but before it completes
+    void cancelApplyTransformsLate()
+    {
+        auto model = createModel();
+        QVERIFY(model != nullptr);
+        auto document = createDocument();
+
+        const auto edges = model->edgeNames();
+
+        const QStringList transforms{uR"(RemoveEdges where $weight > 2)"_s};
+        ApplyTransformsCommand command(&model->graphModel(), document.get(), {}, transforms);
+
+        auto connection = QObject::connect(document.get(), &Document::taskAddedToExecutor,
+            document.get(), [&command] { command.cancel(); }, Qt::DirectConnection);
+
+        command.execute();
+        QObject::disconnect(connection);
+        QVERIFY(command.cancelled());
+
+        // Either way, the graph and the Document must agree on which transforms are applied
+        const bool applied = model->edgeNames() != edges;
+        QCOMPARE(document->transforms(), applied ? transforms : QStringList{});
+
+        // Later changes to the graph still apply the transforms
+        model->graphModel().mutableGraph().performTransaction([&](IMutableGraph& graph)
+        {
+            graph.removeEdge(model->edgeId(u"a"_s, u"b"_s));
+        });
+
+        QCOMPARE(model->edgeNames(), applied ? QStringList{u"b-c"_s} :
+            (QStringList{u"a-c"_s, u"b-c"_s, u"c-c"_s}));
+    }
 };
 
 QTEST_MAIN(TestCommands)
