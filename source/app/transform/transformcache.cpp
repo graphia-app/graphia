@@ -26,6 +26,7 @@
 #include "shared/utils/container.h"
 
 #include <algorithm>
+#include <iterator>
 
 TransformCache::TransformCache(GraphModel& graphModel) :
     _graphModel(&graphModel)
@@ -87,13 +88,21 @@ void TransformCache::attributeAddedOrChanged(const QString& attributeName)
             u::contains(result._addedOrChangedAttributes, attributeName);
     };
 
-    auto resultSetIt = std::ranges::find_if(_cache, [&invalidatedBy](const auto& resultSet)
+    for(auto resultSetIt = _cache.begin(); resultSetIt != _cache.end(); ++resultSetIt)
     {
-        return std::ranges::any_of(resultSet, invalidatedBy);
-    });
+        auto& resultSet = *resultSetIt;
+        auto resultIt = std::ranges::find_if(resultSet, invalidatedBy);
 
-    // That result set and all subsequent ones are now invalid
-    _cache.erase(resultSetIt, _cache.end());
+        if(resultIt == resultSet.end())
+            continue;
+
+        // The results before it in its set don't depend on it, so remain valid
+        resultSet.erase(resultIt, resultSet.end());
+
+        // All subsequent result sets are now also invalid, as is this one if it's empty
+        _cache.erase(resultSet.empty() ? resultSetIt : std::next(resultSetIt), _cache.end());
+        break;
+    }
 }
 
 TransformCache::Result TransformCache::apply(int index, const GraphTransformConfig& config, TransformedGraph& graph)
