@@ -157,6 +157,18 @@ private slots:
         completer.setProperty("startsWith", u"Node D"_s);
         QCOMPARE(completer.property("commonPrefix").toString(), u"Node Degree"_s);
 
+        // A match that's shorter than an earlier one
+        completer.setProperty("startsWith", u"Node Degree"_s);
+        QCOMPARE(namesOf(completer.property("candidates").value<QList<QModelIndex>>()),
+            (QStringList{u"Node Degree"_s, u"node degree source"_s}));
+        QCOMPARE(completer.property("commonPrefix").toString(), u"Node Degree"_s);
+
+        auto reversed = createModel({{u"Node Degree Centrality"_s, {}}, {u"Node Degree"_s, {}}});
+        completer.setProperty("model", QVariant::fromValue<QAbstractItemModel*>(reversed.get()));
+        QCOMPARE(completer.property("commonPrefix").toString(), u"Node Degree"_s);
+        QCOMPARE(completer.property("closestMatch").toModelIndex().data().toString(), u"Node Degree"_s);
+        completer.setProperty("model", QVariant::fromValue<QAbstractItemModel*>(model.get()));
+
         completer.setProperty("startsWith", u"x"_s);
         QVERIFY(completer.property("candidates").value<QList<QModelIndex>>().isEmpty());
         QVERIFY(completer.property("commonPrefix").toString().isEmpty());
