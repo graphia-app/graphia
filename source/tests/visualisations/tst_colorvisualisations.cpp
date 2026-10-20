@@ -130,6 +130,29 @@ private slots:
         QCOMPARE(ColorPalette(u"{}"_s).get(u"b"_s, 0).name(), u::colorForString(u"b"_s).name());
         QCOMPARE(ColorPalette().get(u"b"_s, 0).name(), u::colorForString(u"b"_s).name());
     }
+
+    // Descriptors come from visualisations, which may have been edited by hand
+    void malformedGradient()
+    {
+        const ColorGradient nonNumericStop(u"{\"x\": \"#ff0000\", \"1\": \"#0000ff\"}"_s);
+        QCOMPARE(nonNumericStop.get(0.0).name(), u"#0000ff"_s);
+
+        const ColorGradient nonStringColor(u"{\"0\": 1, \"1\": \"#0000ff\"}"_s);
+        QCOMPARE(nonStringColor.get(0.0).name(), u"#0000ff"_s);
+    }
+
+    void malformedPalette()
+    {
+        const ColorPalette nonStringAutoColor(u"{\"autoColors\": [1, \"#ff0000\"]}"_s);
+        QCOMPARE(nonStringAutoColor.get(u"x"_s, 0).name(), u"#ff0000"_s);
+
+        const ColorPalette autoColorsObject(u"{\"autoColors\": {\"a\": 1}, \"fixedColors\": {\"a\": \"#00ff00\"}}"_s);
+        QCOMPARE(autoColorsObject.get(u"a"_s, 0).name(), u"#00ff00"_s);
+
+        const ColorPalette nonStringFixedColor(u"{\"fixedColors\": {\"a\": 1, \"b\": \"#00ff00\"}}"_s);
+        QCOMPARE(nonStringFixedColor.get(u"b"_s, 0).name(), u"#00ff00"_s);
+        QCOMPARE(nonStringFixedColor.get(u"a"_s, 0).name(), u::colorForString(u"a"_s).name());
+    }
 };
 
 QTEST_GUILESS_MAIN(TestColorVisualisations)
