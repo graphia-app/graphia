@@ -1096,6 +1096,66 @@ private slots:
         QVERIFY(!graphModel()->attributeValueByName(u"source.EdgeMultiplicity"_s).isValid());
     }
 
+    // An edge attribute, whose rows are the edges
+    void editEdgeAttributeTable()
+    {
+        QVERIFY(open(write(u"edges.gml"_s,
+            "graph [ directed 1\n"
+            "    node [ id 0 label \"a\" ] node [ id 1 label \"b\" ] node [ id 2 label \"c\" ]\n"
+            "    edge [ source 0 target 1 kind \"p\" ]\n"
+            "    edge [ source 1 target 2 kind \"q\" ]\n"
+            "    edge [ source 2 target 0 kind \"p\" ]\n"
+            "]\n"), u"GML"_s, u"Generic"_s));
+
+        EditAttributeTableModel model;
+        model.setProperty("document", QVariant::fromValue(_document.get()));
+        model.setProperty("attributeName", u"kind"_s);
+
+        auto value = [&model](int row, int column)
+            { return model.data(model.index(row, column), Qt::DisplayRole); };
+
+        QCOMPARE(model.rowCount(), 3);
+        QStringList kinds;
+        kinds.reserve(model.rowCount());
+        for(int row = 0; row < model.rowCount(); row++)
+            kinds.append(value(row, 1).toString());
+        kinds.sort();
+        QCOMPARE(kinds, (QStringList{u"p"_s, u"p"_s, u"q"_s}));
+
+        int row = 0;
+        while(value(row, 1).toString() != u"q"_s)
+            row++;
+
+        model.editValue(row, u"r"_s);
+        QVERIFY(model.rowIsEdited(row));
+        QCOMPARE(value(row, 1).toString(), u"r"_s);
+        model.resetRowValue(row);
+        QVERIFY(!model.property("hasEdits").toBool());
+
+        model.editValue(row, u"r"_s);
+        model.resetAllEdits();
+        QVERIFY(!model.property("hasEdits").toBool());
+        QCOMPARE(value(row, 1).toString(), u"q"_s);
+
+        // Shared values: p is on two edges
+        model.setProperty("combineSharedValues", true);
+        QCOMPARE(model.rowCount(), 2);
+        const int pRow = value(0, 1).toString() == u"p"_s ? 0 : 1;
+        QCOMPARE(value(pRow, 0).toInt(), 2);
+
+        model.editValue(pRow, u"s"_s);
+        QVERIFY(model.rowIsEdited(pRow));
+        QCOMPARE(value(pRow, 1).toString(), u"s"_s);
+
+        const auto edits = model.property("edits").value<AttributeEdits>();
+        QCOMPARE(edits.edgeValues().size(), 2u);
+        QVERIFY(execute([&] { _document->editAttribute(u"kind"_s, edits, ValueType::Unknown, {}); }));
+
+        const auto values = _document->allAttributeValues(u"kind"_s);
+        QCOMPARE(values.count(u"s"_s), 2);
+        QCOMPARE(values.count(u"q"_s), 1);
+    }
+
     // Tables, such as those of node attributes or enrichment results, exported to files
     void exportTable_data()
     {
