@@ -26,6 +26,7 @@
 #include "app/graph/graphmodel.h"
 #include "app/graph/mutablegraph.h"
 #include "app/ui/document.h"
+#include "app/ui/qml/Graphia/availableattributesmodel.h"
 #include "app/ui/qml/Graphia/editattributetablemodel.h"
 #include "app/ui/qml/Graphia/findtypes.h"
 #include "app/ui/qml/Graphia/graphdisplay.h"
@@ -589,6 +590,65 @@ private slots:
 
         _document->removeEnrichmentResults(0);
         QVERIFY(_document->property("enrichmentTableModels").toList().isEmpty());
+    }
+
+    // What the transform and visualisation panels ask of the Document
+    void queries()
+    {
+        QVERIFY(open());
+
+        auto numerical = _document->availableAttributeNames(static_cast<int>(ElementType::Node),
+            static_cast<int>(ValueType::Numerical));
+        QVERIFY(numerical.contains(u"score"_s));
+        QVERIFY(numerical.contains(u"NodeDegree"_s));
+        QVERIFY(!numerical.contains(u"kind"_s));
+
+        // Edges can be filtered by their nodes' attributes
+        auto edge = _document->availableAttributeNames(static_cast<int>(ElementType::Edge),
+            static_cast<int>(ValueType::All));
+        QVERIFY(edge.contains(u"source.kind"_s));
+        QVERIFY(edge.contains(u"target.score"_s));
+
+        auto score = _document->attribute(u"score"_s);
+        QVERIFY(score.value(u"isValid"_s).toBool());
+        QVERIFY(score.value(u"userDefined"_s).toBool());
+        QCOMPARE(score.value(u"minimumValue"_s).toDouble(), 1.0);
+        QCOMPARE(score.value(u"maximumValue"_s).toDouble(), 5.0);
+        QVERIFY(score.value(u"ops"_s).toStringList().contains(u">"_s));
+
+        auto sourceKind = _document->attribute(u"source.kind"_s);
+        QCOMPARE(sourceKind.value(u"name"_s).toString(), u"source.kind"_s);
+        QCOMPARE(sourceKind.value(u"sharedValues"_s).toStringList(), (QStringList{u"x"_s, u"y"_s}));
+
+        QVERIFY(!_document->attribute(u"Not an attribute"_s).value(u"isValid"_s).toBool());
+
+        auto removeNodes = _document->transform(u"RemoveNodes"_s);
+        QVERIFY(removeNodes.value(u"requiresCondition"_s).toBool());
+        QVERIFY(!removeNodes.value(u"description"_s).toString().isEmpty());
+
+        auto pageRank = _document->transform(u"PageRank"_s);
+        QVERIFY(!pageRank.value(u"requiresCondition"_s).toBool());
+        QVERIFY(!pageRank.value(u"defaultVisualisations"_s).toMap().isEmpty());
+
+        QVERIFY(_document->transform(u"Not a transform"_s).isEmpty());
+
+        const auto transform = uR"(RemoveNodes where $score > 3 and $kind == "x")"_s;
+        QVERIFY(_document->graphTransformIsValid(transform));
+        QVERIFY(!_document->graphTransformIsValid(u"RemoveNodes where"_s));
+        auto referenced = _document->attributeNamesReferencedBy(transform);
+        referenced.sort();
+        QCOMPARE(referenced, (QStringList{u"kind"_s, u"score"_s}));
+        QVERIFY(!_document->displayTextForGraphTransform(transform).isEmpty());
+
+        QVERIFY(_document->availableVisualisationChannelNames(static_cast<int>(ElementType::Node),
+            static_cast<int>(ValueType::Int)).contains(u"Colour"_s));
+        QVERIFY(_document->visualisationIsValid(u"score Size"_s));
+        QVERIFY(!_document->visualisationIsValid(u"score Nothing"_s));
+
+        std::unique_ptr<AvailableAttributesModel> model(_document->availableAttributesModel(
+            static_cast<int>(ElementType::Node), static_cast<int>(ValueType::Numerical)));
+        QVERIFY(model != nullptr);
+        QVERIFY(model->rowCount() > 0);
     }
 };
 
