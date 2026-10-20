@@ -452,6 +452,9 @@ struct ValuesOpVistor
         if(_lhs.isSameTypeAs(_rhs) && _lhs.type() != ValueType::String)
             return comparisonFn(*_lhs, *_rhs);
 
+        if(_lhs.type() != ValueType::String && _rhs.type() != ValueType::String)
+            return comparisonFn(_lhs.toDouble(), _rhs.toDouble());
+
         return comparisonFn(_lhs.toString(), _rhs.toString());
     }
 
