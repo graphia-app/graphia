@@ -29,6 +29,8 @@
 #include "app/ui/qml/Graphia/editattributetablemodel.h"
 #include "app/ui/qml/Graphia/findtypes.h"
 #include "app/ui/qml/Graphia/importattributeskeydetection.h"
+#include "app/ui/qml/Graphia/graphrenderertypes.h"
+#include "app/ui/qml/Graphia/limitconstants.h"
 #include "app/ui/qml/Graphia/Utils/preferences.h"
 
 #include "shared/loading/tabulardata.h"
@@ -36,12 +38,15 @@
 #include "shared/utils/json.h"
 
 #include <QAbstractItemModel>
+#include <QClipboard>
+#include <QGuiApplication>
 #include <QCoreApplication>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
 #include <QTemporaryDir>
 #include <QSignalSpy>
+#include <QStandardItem>
 #include <QStandardItemModel>
 #include <QString>
 #include <QStringList>
@@ -1300,6 +1305,176 @@ private slots:
         const auto before = positions();
         QVERIFY(execute([&] { _document->loadNodePositionsFromFile(write(u"positions.json"_s, content)); }));
         QCOMPARE(positions(), before);
+    }
+
+    // Changing only a transform's flags, such as locking it, is undoable, without
+    // applying the transforms again
+    void transformFlags()
+    {
+        QVERIFY(open());
+
+        QVERIFY(execute([this] { _document->update({u"RemoveNodes where $score > 3"_s}); }));
+        QCOMPARE(graph().numNodes(), 3u);
+
+        QVERIFY(execute([this]
+        {
+            _document->apply({u"[locked] RemoveNodes where $score > 3"_s},
+                _document->visualisations());
+        }));
+        QCOMPARE(_document->transforms(), QStringList{u"[locked] RemoveNodes where $score > 3"_s});
+        QCOMPARE(graph().numNodes(), 3u);
+        QVERIFY(_document->property("nextUndoAction").toString().endsWith(u"Apply Transform Flags"_s));
+
+        QVERIFY(execute([this] { _document->undo(); }));
+        QCOMPARE(_document->transforms(), QStringList{u"RemoveNodes where $score > 3"_s});
+        QCOMPARE(graph().numNodes(), 3u);
+
+        // Applying the same transforms again does nothing
+        const auto undoAction = _document->property("nextUndoAction").toString();
+        _document->apply(_document->transforms(), _document->visualisations());
+        QVERIFY(waitForCommands());
+        QCOMPARE(_document->property("nextUndoAction").toString(), undoAction);
+    }
+
+    // A transform that refers to an attribute that doesn't exist is shown with an error
+    void transformAlert()
+    {
+        QVERIFY(open());
+
+        QVERIFY(execute([this] { _document->update({uR"(RemoveNodes where $"Not an attribute" > 3)"_s}); }));
+        QCOMPARE(graph().numNodes(), 5u);
+
+        const auto info = _document->transformInfoAtIndex(0);
+        QCOMPARE(info.value(u"alertType"_s).toInt(), static_cast<int>(AlertType::Error));
+        QVERIFY2(info.value(u"alertText"_s).toString().contains(u"Not an attribute"_s),
+            qPrintable(info.value(u"alertText"_s).toString()));
+    }
+
+    // The sizes of nodes, edges and text, which are saved with the Document
+    void sizes()
+    {
+        QVERIFY(open());
+        QVERIFY(!_document->property("saveRequired").toBool());
+
+        const QSignalSpy nodeSizeChanged(_document.get(), &Document::nodeSizeChanged);
+        _document->setProperty("nodeSize", 0.75f);
+        _document->setProperty("edgeSize", 0.25f);
+        _document->setProperty("textSize", 0.25f);
+        QCOMPARE(nodeSizeChanged.count(), 1);
+        QCOMPARE(_document->property("nodeSize").toFloat(), 0.75f);
+        QCOMPARE(_document->property("edgeSize").toFloat(), 0.25f);
+        QCOMPARE(_document->property("textSize").toFloat(), 0.25f);
+        QVERIFY(_document->property("saveRequired").toBool());
+
+        // Setting the same size again changes nothing
+        _document->setProperty("nodeSize", 0.75f);
+        QCOMPARE(nodeSizeChanged.count(), 1);
+
+        auto url = QUrl::fromLocalFile(_dir.filePath(u"sizes.%1"_s.arg(Application::nativeExtension())));
+        QVERIFY(execute([&] { _document->saveFile(url, Application::name(), {}, {}); }));
+        QVERIFY(open(url, QString::fromLatin1(Application::NativeFileType), {}));
+
+        QCOMPARE(_document->property("nodeSize").toFloat(), 0.75f);
+        QCOMPARE(_document->property("edgeSize").toFloat(), 0.25f);
+        QCOMPARE(_document->property("textSize").toFloat(), 0.25f);
+
+        _document->resetNodeSize();
+        _document->resetEdgeSize();
+        _document->resetTextSize();
+        QCOMPARE(_document->property("nodeSize").toFloat(), u::pref(u"visuals/defaultNormalNodeSize"_s).toFloat());
+        QCOMPARE(_document->property("edgeSize").toFloat(), u::pref(u"visuals/defaultNormalEdgeSize"_s).toFloat());
+        QCOMPARE(_document->property("textSize").toFloat(), LimitConstants::defaultTextSize());
+    }
+
+    // As the visualisation panel removes them; the removal is only applied when the panel applies it
+    void removeVisualisation()
+    {
+        QVERIFY(open());
+
+        QVERIFY(execute([this]
+        {
+            _document->update({}, {u"score Size"_s, u"kind Colour"_s});
+        }));
+
+        _document->removeVisualisation(0);
+        QCOMPARE(_document->property("visualisations").toStringList(), QStringList{u"kind Colour"_s});
+        QCOMPARE(_document->visualisations().size(), 2);
+
+        QVERIFY(execute([this]
+        {
+            _document->apply(_document->transforms(), _document->property("visualisations").toStringList());
+        }));
+        QCOMPARE(_document->visualisations(), QStringList{u"kind Colour"_s});
+    }
+
+    // A command that runs until it's cancelled, as from the cancel button
+    void cancelCommand()
+    {
+        QVERIFY(open());
+        QVERIFY(!_document->property("commandIsCancellable").toBool());
+
+        QSignalSpy commandsFinished(_document.get(), &Document::commandsFinished);
+        const QSignalSpy cancellableChanged(_document.get(), &Document::commandIsCancellableChanged);
+        _document->startTestCommand();
+
+        QVERIFY(QTest::qWaitFor([this] { return _document->property("commandIsCancellable").toBool(); }, Timeout));
+        QVERIFY(_document->busy());
+        QCOMPARE(_document->property("commandVerb").toString(), u"Test Command"_s);
+        QVERIFY(!_document->property("commandIsCancelling").toBool());
+
+        _document->cancelCommand();
+        QVERIFY(_document->property("commandIsCancelling").toBool());
+
+        QVERIFY(QTest::qWaitFor([&] { return !commandsFinished.isEmpty(); }, Timeout));
+        QVERIFY(waitForCommands());
+        QVERIFY(!_document->property("commandIsCancelling").toBool());
+        QVERIFY(!_document->canUndo());
+    }
+
+    // Edge text visualisations warn that edge text is hidden, and stop when it's shown
+    void edgeTextPreference()
+    {
+        u::setPref(u"visuals/showEdgeText"_s, static_cast<int>(TextState::Off));
+        QVERIFY(open());
+
+        QVERIFY(execute([this] { _document->update({}, {u"EdgeMultiplicity Text"_s}); }));
+        QCOMPARE(_document->visualisationInfoAtIndex(0).value(u"alertType"_s).toInt(),
+            static_cast<int>(AlertType::Warning));
+        QVERIFY(_document->property("hasValidEdgeTextVisualisation").toBool());
+
+        QSignalSpy visualisationsChanged(_document.get(), &Document::visualisationsChanged);
+        u::setPref(u"visuals/showEdgeText"_s, static_cast<int>(TextState::All));
+        QVERIFY(QTest::qWaitFor([&] { return !visualisationsChanged.isEmpty(); }, Timeout));
+        QVERIFY(waitForCommands());
+
+        QCOMPARE(_document->visualisationInfoAtIndex(0).value(u"alertType"_s).toInt(),
+            static_cast<int>(AlertType::None));
+
+        visualisationsChanged.clear();
+        u::setPref(u"visuals/showEdgeText"_s, static_cast<int>(TextState::Selected));
+        QVERIFY(QTest::qWaitFor([&] { return !visualisationsChanged.isEmpty(); }, Timeout));
+        QVERIFY(waitForCommands());
+    }
+
+    // A column of a table, as copied from its header's menu
+    void copyColumnToClipboard()
+    {
+        QVERIFY(open());
+
+        QStandardItemModel model(3, 2);
+        for(int row = 0; row < 3; row++)
+        {
+            model.setItem(row, 0, new QStandardItem(u"r%1"_s.arg(row)));
+            model.setItem(row, 1, new QStandardItem(QString::number(row * 10)));
+        }
+
+        _document->copyTableModelColumnToClipboard(&model, 1, {2, 0});
+        QCOMPARE(QGuiApplication::clipboard()->text(), u"20\n0\n"_s);
+
+        // A column that doesn't exist copies nothing
+        QTest::ignoreMessage(QtDebugMsg, "Document::copyTableModelColumnToClipboard: requested column exceeds column count");
+        _document->copyTableModelColumnToClipboard(&model, 2, {0});
+        QCOMPARE(QGuiApplication::clipboard()->text(), u"20\n0\n"_s);
     }
 };
 
