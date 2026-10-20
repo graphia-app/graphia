@@ -22,17 +22,20 @@
 
 #include "shared/loading/tabulardata.h"
 #include "shared/loading/xlsxtabulardataparser.h"
+#include "shared/utils/typeidentity.h"
 
 #include <QTest>
 #include <QByteArray>
 #include <QFile>
 #include <QList>
+#include <QRect>
 #include <QString>
 #include <QStringList>
 #include <QTemporaryDir>
 #include <QUrl>
 
 #include <memory>
+#include <vector>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -63,6 +66,35 @@ Cells cellsOf(const TabularData& tabularData)
         for(size_t column = 0; column < tabularData.numColumns(); column++)
             rowCells.append(tabularData.valueAt(column, row));
     }
+
+    return cells;
+}
+
+TabularData tabularDataOf(const Cells& cells)
+{
+    TabularData tabularData;
+    tabularData.reserve(static_cast<size_t>(cells.at(0).size()), static_cast<size_t>(cells.size()));
+
+    for(qsizetype row = 0; row < cells.size(); row++)
+    {
+        for(qsizetype column = 0; column < cells.at(row).size(); column++)
+        {
+            tabularData.setValueAt(static_cast<size_t>(column), static_cast<size_t>(row),
+                cells.at(row).at(column));
+        }
+    }
+
+    return tabularData;
+}
+
+Cells cellsFrom(const QString& csv)
+{
+    const auto rows = csv.split(u'\n');
+
+    Cells cells;
+    cells.reserve(rows.size());
+    for(const auto& row : rows)
+        cells.append(row.split(u','));
 
     return cells;
 }
@@ -303,6 +335,141 @@ private slots:
         // the start of a file, so it doesn't matter
         QCOMPARE(tabularData.numRows(), 4u);
         QCOMPARE(tabularData.valueAt(0, 3), u"r3"_s);
+    }
+
+    // The data rectangle is what the correlation plugin takes to be the data, by default
+    void dataRect_data()
+    {
+        QTest::addColumn<QString>("csv");
+        QTest::addColumn<QRect>("numerical");
+        QTest::addColumn<QRect>("nonNumerical");
+
+        QTest::newRow("Typical") << u"Name,c1,c2,c3\na,1,2,3\nb,4,5,6"_s <<
+            QRect(1, 1, 3, 2) << QRect(0, 1, 1, 2);
+        QTest::newRow("Annotation column") << u"Name,Type,c1,c2\na,x,1,2\nb,y,3,4"_s <<
+            QRect(2, 1, 2, 2) << QRect();
+        QTest::newRow("Missing values") << u"Name,c1,c2\na,1,\nb,,4\nc,5,6"_s <<
+            QRect(1, 1, 2, 3) << QRect(0, 1, 1, 3);
+        QTest::newRow("Scientific notation") << u"Name,c1,c2\na,1e-3,-2.5E+2\nb,0.5,7"_s <<
+            QRect(1, 1, 2, 2) << QRect(0, 1, 1, 2);
+
+        // Rows above a non-numerical value are left out, if that gives the larger area
+        QTest::newRow("Non-numerical value") << u"Name,c1,c2,c3\na,1,x,3\nb,4,5,6\nc,7,8,9"_s <<
+            QRect(1, 2, 3, 2) << QRect();
+
+        // The first row and column are taken to be names, even if they're numbers
+        QTest::newRow("All numerical") << u"1,2,3\n4,5,6\n7,8,9"_s <<
+            QRect(1, 1, 2, 2) << QRect();
+
+        // The data must be at the bottom right, so nothing is found here
+        QTest::newRow("Trailing annotation column") << u"Name,c1,c2,Notes\na,1,2,x\nb,3,4,y"_s <<
+            QRect() << QRect();
+
+        QTest::newRow("Discrete") << u"Name,s1,s2\na,x,y\nb,z,w"_s <<
+            QRect() << QRect(1, 1, 2, 2);
+        QTest::newRow("One row") << u"a,1,2"_s << QRect(1, 0, 2, 1) << QRect(0, 0, 1, 1);
+        QTest::newRow("One value") << u"1"_s << QRect(0, 0, 1, 1) << QRect();
+    }
+
+    void dataRect()
+    {
+        QFETCH(const QString, csv);
+        QFETCH(const QRect, numerical);
+        QFETCH(const QRect, nonNumerical);
+
+        const auto tabularData = tabularDataOf(cellsFrom(csv));
+
+        QCOMPARE(tabularData.findLargestNumericalDataRect(), numerical);
+
+        // Only used when there's no numerical data
+        if(numerical.isEmpty())
+            QCOMPARE(tabularData.findLargestNonNumericalDataRect(), nonNumerical);
+    }
+
+    void typeIdentities()
+    {
+        const auto tabularData = tabularDataOf(cellsFrom(
+            u"Name,Int,Float,String,Empty,Mixed\n"
+            "a,1,1.5,x,,1\n"
+            "b,2,2,y,,z\n"
+            "c,-3,1e3,1,,2.5"_s));
+
+        using Type = TypeIdentity::Type;
+
+        // The first row is skipped, as a header
+        const auto columnTypeIdentities = tabularData.columnTypeIdentities();
+        std::vector<Type> columnTypes;
+        columnTypes.reserve(columnTypeIdentities.size());
+        for(const auto& identity : columnTypeIdentities)
+            columnTypes.push_back(identity.type());
+
+        QCOMPARE(columnTypes, (std::vector<Type>{Type::String, Type::Int, Type::Float,
+            Type::String, Type::Unknown, Type::String}));
+
+        QCOMPARE(tabularData.columnTypeIdentity(5, 3).type(), Type::Float);
+        QCOMPARE(tabularData.columnTypeIdentity(1, 0).type(), Type::String);
+
+        // The first column is skipped, as names
+        const auto rowTypeIdentities = tabularData.rowTypeIdentities();
+        std::vector<Type> rowTypes;
+        rowTypes.reserve(rowTypeIdentities.size());
+        for(const auto& identity : rowTypeIdentities)
+            rowTypes.push_back(identity.type());
+
+        QCOMPARE(rowTypes, (std::vector<Type>{Type::String, Type::String, Type::String, Type::Float}));
+        QCOMPARE(tabularData.rowTypeIdentity(1, 4).type(), Type::Int);
+        QCOMPARE(tabularData.rowTypeIdentity(2, 4).type(), Type::String);
+        QCOMPARE(tabularData.rowTypeIdentity(3, 0).type(), Type::String);
+    }
+
+    void duplicates()
+    {
+        const auto tabularData = tabularDataOf(cellsFrom(
+            u"Name,Unique,Repeated,Empty\n"
+            "a,1,x,\n"
+            "b,2,x,\n"
+            "a,3,y,"_s));
+
+        // Empty values aren't duplicates
+        QCOMPARE(tabularData.columnDuplicates(), (std::vector<bool>{true, false, true, false}));
+        QVERIFY(!tabularData.columnHasDuplicates(0, 2));
+
+        QCOMPARE(tabularData.rowDuplicates(), (std::vector<bool>{false, false, false, false}));
+        QVERIFY(!tabularData.rowHasDuplicates(1, 0));
+
+        const auto rows = tabularDataOf(cellsFrom(u"Name,c1,c2\na,1,1\nb,1,2"_s));
+        QCOMPARE(rows.rowDuplicates(), (std::vector<bool>{false, true, false}));
+    }
+
+    // How many of the values are in a column, or row, which is how the key for importing
+    // attributes or annotations is found
+    void matchPercentage()
+    {
+        const auto tabularData = tabularDataOf(cellsFrom(
+            u"Key,Value\n"
+            "a,1\n"
+            "b,2\n"
+            "c,3"_s));
+
+        // The header isn't matched
+        QCOMPARE(tabularData.columnMatchPercentage(0, {u"a"_s, u"b"_s, u"c"_s}), 100);
+        QCOMPARE(tabularData.columnMatchPercentage(0, {u"a"_s, u"b"_s, u"c"_s, u"d"_s}), 75);
+        QCOMPARE(tabularData.columnMatchPercentage(0, {u"Key"_s}), 0);
+        QCOMPARE(tabularData.columnMatchPercentage(1, {u"a"_s}), 0);
+
+        // Any match at all is at least 1%
+        QStringList many;
+        many.reserve(1000);
+        for(int i = 0; i < 1000; i++)
+            many.append(u"v%1"_s.arg(i));
+
+        many.append(u"a"_s);
+        QCOMPARE(tabularData.columnMatchPercentage(0, many), 1);
+
+        const auto rows = tabularDataOf(cellsFrom(u"Name,s1,s2,s3\nType,x,y,z"_s));
+        QCOMPARE(rows.rowMatchPercentage(0, {u"s1"_s, u"s2"_s, u"s3"_s}), 100);
+        QCOMPARE(rows.rowMatchPercentage(0, {u"s1"_s, u"s4"_s}), 50);
+        QCOMPARE(rows.rowMatchPercentage(1, {u"s1"_s}), 0);
     }
 
     void contentIdentity_data()
