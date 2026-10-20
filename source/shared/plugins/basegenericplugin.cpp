@@ -77,7 +77,11 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
         auto configurePairwiseParser = [&](auto pairwiseParser)
         {
             pairwiseParser->setFirstRowIsHeader(_pairwiseParameters._firstRowIsHeader);
-            pairwiseParser->setColumnsConfiguration(_pairwiseParameters._columns);
+
+            // The columns are only given when the file is opened in the UI; otherwise
+            // the parser's default, of a source and a target column, is kept
+            if(!_pairwiseParameters._columns.empty())
+                pairwiseParser->setColumnsConfiguration(_pairwiseParameters._columns);
 
             return pairwiseParser;
         };
