@@ -20,6 +20,8 @@
 #include "tests/common/documenttest.h"
 #include "tests/common/testenvironment.h"
 
+#include "shared/loading/tabulardata.h"
+
 #include <QAbstractTableModel>
 #include <QMetaObject>
 #include <QSignalSpy>
@@ -32,6 +34,7 @@
 #include <algorithm>
 #include <iterator>
 #include <limits>
+#include <memory>
 #include <vector>
 
 using namespace Qt::Literals::StringLiterals;
@@ -235,6 +238,63 @@ private slots:
 
         // Scored by the sum of the columns' values, less the sum of the rest's, r2 scores 2, and r1 1
         QCOMPARE(rows, (std::vector<int>{1, 0}));
+    }
+
+    // A table of annotations for the data's columns, as from the dialog for importing them
+    static std::shared_ptr<TabularData> annotationsTable()
+    {
+        const QList<QStringList> rows
+        {
+            {u"Column"_s,   u"c1"_s,  u"c2"_s,  u"c3"_s,  u"c4"_s,  u"c5"_s,  u"c6"_s},
+            {u"Kind"_s,     u"p"_s,   u"p"_s,   u"q"_s,   u"q"_s,   u"r"_s,   u"r"_s},
+            {u"Batch"_s,    u"1"_s,   u"1"_s,   u"2"_s,   u"2"_s,   u"3"_s,   u"3"_s},
+        };
+
+        auto data = std::make_shared<TabularData>();
+        data->reserve(7, 3);
+
+        for(qsizetype row = 0; row < rows.size(); row++)
+        {
+            for(qsizetype column = 0; column < rows.at(row).size(); column++)
+                data->setValueAt(static_cast<size_t>(column), static_cast<size_t>(row), rows.at(row).at(column));
+        }
+
+        return data;
+    }
+
+    bool importAnnotations(const std::vector<int>& rows, bool replace)
+    {
+        return execute([&]
+        {
+            QMetaObject::invokeMethod(plugin(), "importAnnotationsFromTable",
+                Q_ARG(std::shared_ptr<TabularData>, annotationsTable()), Q_ARG(int, 0),
+                Q_ARG(std::vector<int>, rows), Q_ARG(bool, replace));
+        });
+    }
+
+    void importAnnotations()
+    {
+        QVERIFY(open());
+
+        auto annotationNames = [this]
+        {
+            auto names = plugin()->property("columnAnnotationNames").toStringList();
+            names.sort();
+            return names;
+        };
+
+        QVERIFY(importAnnotations({2}, false));
+        QCOMPARE(annotationNames(), (QStringList{u"Batch"_s, u"Kind"_s}));
+
+        QVERIFY(execute([this] { _document->undo(); }));
+        QCOMPARE(annotationNames(), QStringList{u"Kind"_s});
+
+        QVERIFY(execute([this] { _document->redo(); }));
+        QCOMPARE(annotationNames(), (QStringList{u"Batch"_s, u"Kind"_s}));
+
+        // Not replacing an existing annotation gives the import a name of its own
+        QVERIFY(importAnnotations({1}, false));
+        QCOMPARE(annotationNames(), (QStringList{u"Batch"_s, u"Kind"_s, u"Kind(1)"_s}));
     }
 };
 
