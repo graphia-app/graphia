@@ -155,6 +155,12 @@ private slots:
 
         // No key
         QVERIFY(!u::rsaVerifySignature(string, signature, path(u"missing.der"_s)));
+
+        // Not a key
+        QVERIFY(!u::rsaVerifySignature(string, signature, path(u"garbage.der"_s)));
+
+        // A private key isn't a public key
+        QVERIFY(!u::rsaVerifySignature(string, signature, path(u"a.private.der"_s)));
     }
 
     void signFailures()
