@@ -918,6 +918,59 @@ private slots:
         QVERIFY(model->rowCount() > 0);
     }
 
+    // The tree of attributes the UI's attribute lists show, including an edge's nodes' attributes
+    void availableAttributesTree()
+    {
+        QVERIFY(open());
+
+        const std::unique_ptr<AvailableAttributesModel> model(_document->availableAttributesModel(
+            static_cast<int>(ElementType::Edge), static_cast<int>(ValueType::All)));
+        QVERIFY(model != nullptr);
+        QCOMPARE(model->columnCount({}), 1);
+        QCOMPARE(model->headerData(0, Qt::Horizontal, Qt::DisplayRole).toString(), u"Attribute"_s);
+
+        auto roleFor = [&model](const QByteArray& name) { return model->roleNames().key(name); };
+
+        const auto source = model->find(u"source.score"_s);
+        QVERIFY(source.isValid());
+        QCOMPARE(source.data().toString(), u"score"_s);
+        QCOMPARE(model->get(source), u"source.score"_s);
+        QCOMPARE(model->parent(source).data().toString(), u"Source Node"_s);
+        QCOMPARE(model->data(model->parent(source), roleFor("hasChildren")).toBool(), true);
+
+        // The nodes' attributes are an edge's
+        QCOMPARE(model->data(source, roleFor("elementType")).toString(), u"Edge"_s);
+
+        const auto target = model->find(u"target.kind"_s);
+        QVERIFY(target.isValid());
+        QCOMPARE(model->get(target), u"target.kind"_s);
+        QVERIFY(model->find(uR"(target."Not an attribute")"_s) == QModelIndex());
+
+        const auto multiplicity = model->find(u"EdgeMultiplicity"_s);
+        QVERIFY(multiplicity.isValid());
+        QCOMPARE(model->get(multiplicity), u"EdgeMultiplicity"_s);
+        QCOMPARE(model->data(multiplicity, roleFor("elementType")).toString(), u"Edge"_s);
+        QCOMPARE(model->data(multiplicity, roleFor("valueType")).toString(), u"Numerical"_s);
+        QCOMPARE(model->data(multiplicity, roleFor("userDefined")).toString(), u"Calculated"_s);
+        QCOMPARE(model->data(multiplicity, roleFor("editable")).toBool(), false);
+        QCOMPARE(model->data(multiplicity, roleFor("hasChildren")).toBool(), false);
+        QCOMPARE(model->data(multiplicity, roleFor("hasParameter")).toBool(), false);
+        QVERIFY(model->flags(multiplicity).testFlag(Qt::ItemIsEnabled));
+
+        // Node attributes on their own
+        const std::unique_ptr<AvailableAttributesModel> nodes(_document->availableAttributesModel(
+            static_cast<int>(ElementType::Node), static_cast<int>(ValueType::All)));
+        const auto kind = nodes->find(u"kind"_s);
+        QVERIFY(kind.isValid());
+        QVERIFY(!nodes->parent(kind).isValid());
+        QCOMPARE(nodes->data(kind, roleFor("valueType")).toString(), u"Textual"_s);
+        QCOMPARE(nodes->data(kind, roleFor("userDefined")).toString(), u"User Defined"_s);
+        QCOMPARE(nodes->data(kind, roleFor("editable")).toBool(), true);
+        QCOMPARE(nodes->data(kind, roleFor("hasSharedValues")).toBool(), true);
+        QCOMPARE(nodes->data(kind, roleFor("searchable")).toBool(), true);
+        QCOMPARE(nodes->data(kind, roleFor("elementType")).toString(), u"Node"_s);
+    }
+
     // Tables, such as those of node attributes or enrichment results, exported to files
     void exportTable_data()
     {

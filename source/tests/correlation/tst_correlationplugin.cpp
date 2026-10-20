@@ -20,6 +20,8 @@
 #include "tests/common/documenttest.h"
 #include "tests/common/testenvironment.h"
 
+#include "app/ui/qml/Graphia/availableattributesmodel.h"
+
 #include "shared/loading/tabulardata.h"
 
 #include "plugins/correlation/correlationtype.h"
@@ -381,6 +383,27 @@ private slots:
         QVERIFY(importAnnotations({1}, false));
         QCOMPARE(annotationNames(), (QStringList{u"Batch"_s, u"Kind"_s, u"Kind(1)"_s}));
     }
+    // The Data Value attribute has a value per column, which attribute lists show as its children
+    void dataValueAttribute()
+    {
+        QVERIFY(open());
+
+        const std::unique_ptr<AvailableAttributesModel> model(_document->availableAttributesModel(
+            static_cast<int>(ElementType::Node), static_cast<int>(ValueType::All)));
+        const auto dataValue = model->find(u"DataValue"_s);
+        QVERIFY(dataValue.isValid());
+        QCOMPARE(model->data(dataValue, model->roleNames().key("hasParameter")).toBool(), true);
+        QCOMPARE(model->rowCount(dataValue), 6);
+
+        const auto c3 = model->index(2, 0, dataValue);
+        QCOMPARE(c3.data().toString(), u"c3"_s);
+        QCOMPARE(model->get(c3), u"DataValue.c3"_s);
+        QCOMPARE(model->find(model->get(c3)), c3);
+
+        // As a transform refers to it
+        QCOMPARE(graphModel()->attributeValueByName(u"DataValue.c3"_s).numericValueOf(nodeId(u"r3"_s)), 4.0);
+    }
+
     // Discrete data, e.g. categories, and its log
     void discrete()
     {
