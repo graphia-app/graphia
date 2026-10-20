@@ -254,13 +254,13 @@ static bool parseHeader(const QUrl& url, Header* header = nullptr)
     if(jsonHeader.is_discarded() || jsonHeader.is_null() || !jsonHeader.is_object())
         return false;
 
-    if(!u::contains(jsonHeader, "version"))
+    if(!u::contains(jsonHeader, "version") || !jsonHeader["version"].is_number_integer())
         return false;
 
-    if(!u::contains(jsonHeader, "pluginName"))
+    if(!u::contains(jsonHeader, "pluginName") || !jsonHeader["pluginName"].is_string())
         return false;
 
-    if(!u::contains(jsonHeader, "pluginDataVersion"))
+    if(!u::contains(jsonHeader, "pluginDataVersion") || !jsonHeader["pluginDataVersion"].is_number_integer())
         return false;
 
     if(header != nullptr)
@@ -274,6 +274,21 @@ static bool parseHeader(const QUrl& url, Header* header = nullptr)
 }
 
 bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
+{
+    try
+    {
+        return parseNativeFile(url, igraphModel);
+    }
+    catch(const json::exception& e)
+    {
+        // A value isn't of the expected type
+        setFailureReason(QObject::tr("Invalid content: %1").arg(QString::fromStdString(e.what())));
+    }
+
+    return false;
+}
+
+bool Loader::parseNativeFile(const QUrl& url, IGraphModel* igraphModel)
 {
     auto* graphModel = dynamic_cast<GraphModel*>(igraphModel);
 
