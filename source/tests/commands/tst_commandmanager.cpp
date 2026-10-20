@@ -23,6 +23,7 @@
 #include "app/preferences.h"
 
 #include "shared/commands/command.h"
+#include "shared/commands/compoundcommand.h"
 
 #include <QTest>
 #include <QSignalSpy>
@@ -343,6 +344,57 @@ private slots:
         QVERIFY(QTest::qWaitFor([&runs] { return runs == 3; }, 5000));
 
         _commandManager->clearPostCommandFunction();
+    }
+    // Several commands executed, and undone, as one
+    void compound()
+    {
+        QString log;
+        QString undone;
+
+        auto append = [&log, &undone](const QString& text, const QString& pastParticiple)
+        {
+            return std::make_unique<Command>(
+                Command::CommandDescription{u"Append %1"_s.arg(text), {}, pastParticiple},
+                [&log, text](Command&) { log += text; },
+                [&log, &undone, text](Command&) { log.chop(1); undone += text; });
+        };
+
+        ICommandPtrsVector commands;
+        commands.emplace_back(append(u"a"_s, u"Appended a"_s));
+        commands.emplace_back(append(u"b"_s, {}));
+        commands.emplace_back(append(u"c"_s, u"Appended c"_s));
+
+        QSignalSpy commandCompleted(_commandManager.get(), &CommandManager::commandCompleted);
+        _commandManager->execute(ExecutePolicy::Add, std::move(commands), {u"Append all"_s});
+        QVERIFY(waitUntilIdle());
+        QCOMPARE(log, u"abc"_s);
+        QCOMPARE(toVector(_commandManager->undoableCommandDescriptions()), (std::vector<QString>{u"Append all"_s}));
+
+        // With no past participle of its own, those of its commands
+        QVERIFY(QTest::qWaitFor([&] { return !commandCompleted.isEmpty(); }, 5000));
+        QCOMPARE(commandCompleted.at(0).at(2).toString(), u"Appended a, Appended c"_s);
+
+        // Undone in reverse order, so each command undoes what it did
+        undo();
+        QVERIFY(log.isEmpty());
+        QCOMPARE(undone, u"cba"_s);
+
+        redo();
+        QCOMPARE(log, u"abc"_s);
+
+        // Its debug description is that of each command, indented
+        CompoundCommand compound({u"Outer"_s}, [&]
+        {
+            ICommandPtrsVector inner;
+            inner.emplace_back(append(u"x"_s, {}));
+            return inner;
+        }());
+        QCOMPARE(compound.debugDescription(), u"Outer\n  Append x"_s);
+        QCOMPARE(compound.pastParticiple(), QString());
+        compound.setPastParticiple(u"Done"_s);
+        QCOMPARE(compound.pastParticiple(), u"Done"_s);
+        QVERIFY(!compound.cancellable());
+        QCOMPARE(compound.progress(), -1);
     }
 };
 
