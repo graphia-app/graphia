@@ -18,6 +18,7 @@
  */
 
 #include "tests/common/testenvironment.h"
+#include "tests/common/xlsxwriter.h"
 
 #include "shared/plugins/basegenericplugin.h"
 #include "app/transform/graphtransformconfigparser.h"
@@ -101,6 +102,12 @@ private slots:
         QTest::newRow("CX") << u"graph.cx"_s << QByteArray(R"([{"numberVerification": [{"longNumber": 281474976710655}]}])") << QStringList{u"CX"_s};
         QTest::newRow("CX2") << u"graph.cx2"_s << QByteArray(R"([{"CXVersion": "2.0"}])") << QStringList{u"CX"_s};
         QTest::newRow("BioPAX") << u"pathway.owl"_s << QByteArray("<rdf:RDF></rdf:RDF>") << QStringList{u"BiopaxOWL"_s};
+        QTest::newRow("Pairwise XLSX") << u"pairwise.xlsx"_s <<
+            XlsxWriter::xlsx({{u"a"_s, u"b"_s}, {u"b"_s, u"c"_s}}) << QStringList{u"PairwiseXLSX"_s};
+        QTest::newRow("Matrix XLSX") << u"matrix.xlsx"_s <<
+            XlsxWriter::xlsx({{u""_s, u"a"_s, u"b"_s}, {u"a"_s, u"0"_s, u"1"_s}, {u"b"_s, u"1"_s, u"0"_s}}) <<
+            QStringList{u"MatrixXLSX"_s, u"PairwiseXLSX"_s};
+        QTest::newRow("Not XLSX") << u"csv.xlsx"_s << QByteArray("a,b\n") << QStringList{};
         QTest::newRow("Unknown extension") << u"graph.xyz"_s << QByteArray("a,b\n") << QStringList{};
         QTest::newRow("No extension") << u"graph"_s << QByteArray("a,b\n") << QStringList{};
         QTest::newRow("Empty CSV") << u"empty.csv"_s << QByteArray() << QStringList{};
