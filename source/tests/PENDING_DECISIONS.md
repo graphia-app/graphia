@@ -101,6 +101,10 @@ own. This file should be deleted once everything here is resolved.
 - **Newlines in locked transforms.** A newline in a string value in a locked
   transform was shown as a line break; since the fix for labels with quotes
   or backslashes, it's shown as a space, like other whitespace.
+- **Deleting a merged node from its context menu.** "Delete 'a'" on a node
+  that a transform such as Contract Edges merged with others now deletes all
+  of them, as deleting it when it's selected does. Before, only the node it
+  was shown as was deleted, and the rest stayed, shown as one node.
 - **9fd3601: DOT `node [...]` and `edge [...]` defaults.** These used to be
   applied to every element after parsing, overriding explicit values and
   ignoring subgraph scope. They now follow the DOT spec: they apply to

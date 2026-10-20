@@ -340,6 +340,11 @@ Each one is a commit; see `git log` for the details.
 - **Winsorization:** dereferenced the end of the data, which aborts with
   checked iterators (MSVC debug builds).
 - **Exported tables:** values with line breaks split their rows.
+- **Commands:** destroying a Document while a command was queued behind
+  another hung (the UI waits for commands before closing a tab, so this
+  mostly affected the tests).
+- **Deleting a merged node** from its context menu deleted only the node
+  it was shown as, leaving the rest of the merged nodes in its place.
 - **Native files:** a value of the wrong type, in the header (even when
   the file was only being identified), the body or the plugin's data,
   aborted Graphia.
@@ -358,6 +363,10 @@ Each one is a commit; see `git log` for the details.
 - **CryptoPP's assertions** are enabled in debug builds, where `_DEBUG` is
   defined, and raise SIGTRAP; the Clang Debug CI job runs the tests that way,
   so a test that only passes in release builds fails there.
+- **Helpers in test classes** go before `private slots:`. moc registers the
+  types of slots' parameters and return values as metatypes, and registering
+  `json` fails to compile with Windows Clang (Qt's `QDebug` operator check
+  reaches the incomplete Windows `MSG` type through json's conversions).
 - **moc** lexes raw string literals as ordinary strings, so an unbalanced quote
   or bracket inside `R"(...)"` breaks it. Use escaped normal strings for those.
 - **Floats:**
@@ -495,6 +504,12 @@ values of a column, takes `nth_element` at 1400 even when the column has
 fewer than 1400 values. In practice that keeps every value, which is what
 recovery wants, but it's undefined; it needs a node with over 1100
 neighbours after expansion to reach.
+
+Destroying a Document while a command it's executing waits for the main
+thread (`Document::executeOnMainThreadAndWait`, used by refreshing
+visualisations and others) would deadlock, as `~Document` joins the
+command's thread before running deferred tasks. The UI waits for commands
+to finish before closing a tab, so this was left.
 
 `BarnesHutTree::differenceEpsilon` increments a `mutable` counter, and
 `evaluateKernel` is called from several threads at once by the force
