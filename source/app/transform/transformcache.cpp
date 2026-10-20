@@ -81,36 +81,20 @@ void TransformCache::attributeAddedOrChanged(const QString& attributeName)
     // invalidate any subsequent entries that depend on it
     // Furthermore, if any entries are /creating/ the same attribute that we're adding,
     // invalidate those too as their names will need to be regenerated
-    auto resultSetIt = _cache.begin();
-    auto resultSetEnd = _cache.end();
-    for(; resultSetIt != resultSetEnd; ++resultSetIt)
+    auto invalidatedBy = [&attributeName](const Result& result)
     {
-        auto resultIt = resultSetIt->begin();
-        auto resultEnd = resultSetIt->end();
-        for(; resultIt != resultEnd; ++resultIt)
-        {
-            // Depends on attributeName
-            if(u::contains(resultIt->_config.referencedAttributeNames(), attributeName))
-            {
-                resultSetIt->erase(resultIt, resultEnd);
-                break;
-            }
+        // Depends on attributeName, or creates it
+        return u::contains(result._config.referencedAttributeNames(), attributeName) ||
+            u::contains(result._addedOrChangedAttributes, attributeName);
+    };
 
-            // Creates attributeName
-            if(u::contains(resultIt->_addedOrChangedAttributes, attributeName))
-            {
-                resultSetIt->erase(resultIt, resultEnd);
-                break;
-            }
-        }
+    auto resultSetIt = std::ranges::find_if(_cache, [&invalidatedBy](const auto& resultSet)
+    {
+        return std::ranges::any_of(resultSet, invalidatedBy);
+    });
 
-        // All subsequent results are now also invalid
-        if(resultIt != resultEnd)
-        {
-            _cache.erase(resultSetIt, resultSetEnd);
-            break;
-        }
-    }
+    // That result set and all subsequent ones are now invalid
+    _cache.erase(resultSetIt, _cache.end());
 }
 
 TransformCache::Result TransformCache::apply(int index, const GraphTransformConfig& config, TransformedGraph& graph)
