@@ -468,6 +468,12 @@ bool Loader::parseNativeFile(const QUrl& url, IGraphModel* igraphModel)
                         continue;
                     }
 
+                    if(dataRow.size() != EnrichmentTableModel::Results::NumResultColumns)
+                    {
+                        qDebug() << "enrichment table dataRow has the wrong number of values";
+                        continue;
+                    }
+
                     auto& row = data._table.emplace_back();
                     row.reserve(dataRow.size());
 
