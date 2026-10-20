@@ -72,7 +72,8 @@ NodeIdSet SelectionManager::unselectedNodes() const
 
     const auto& nodeIds = _graphModel->graph().nodeIds();
     auto unselectedNodeIds = NodeIdSet(nodeIds.begin(), nodeIds.end());
-    unselectedNodeIds.erase(_selectedNodeIds.begin(), _selectedNodeIds.end());
+    for(auto nodeId : _selectedNodeIds)
+        unselectedNodeIds.erase(nodeId);
 
     return unselectedNodeIds;
 }
