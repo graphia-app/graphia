@@ -2647,10 +2647,10 @@ void Document::moveVisualisation(int from, int to)
     if(_graphModel == nullptr)
         return;
 
-    if(from < 0 || from >= _graphTransforms.size())
+    if(from < 0 || from >= _visualisations.size())
         return;
 
-    if(to < 0 || to >= _graphTransforms.size())
+    if(to < 0 || to >= _visualisations.size())
         return;
 
     QStringList newVisualisations = _visualisations;
