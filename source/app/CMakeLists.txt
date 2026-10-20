@@ -42,6 +42,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/graph/graphmodel.h
     ${CMAKE_CURRENT_LIST_DIR}/graph/mutablegraph.h
     ${CMAKE_CURRENT_LIST_DIR}/graph/qmlelementid.h
+    ${CMAKE_CURRENT_LIST_DIR}/defaultpreferences.h
     ${CMAKE_CURRENT_LIST_DIR}/headless.h
     ${CMAKE_CURRENT_LIST_DIR}/layout/barneshuttree.h
     ${CMAKE_CURRENT_LIST_DIR}/layout/centreinglayout.h
@@ -174,6 +175,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/graph/graph.cpp
     ${CMAKE_CURRENT_LIST_DIR}/graph/graphmodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/graph/mutablegraph.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/defaultpreferences.cpp
     ${CMAKE_CURRENT_LIST_DIR}/headless.cpp
     ${CMAKE_CURRENT_LIST_DIR}/layout/centreinglayout.cpp
     ${CMAKE_CURRENT_LIST_DIR}/layout/circlepackcomponentlayout.cpp

@@ -20,6 +20,8 @@
 #ifndef TESTENVIRONMENT_H
 #define TESTENVIRONMENT_H
 
+#include "app/defaultpreferences.h"
+
 #include "shared/utils/scopetimer.h"
 #include "shared/utils/threadpool.h"
 
@@ -31,8 +33,9 @@
 namespace TestEnvironment
 {
 // Call from initTestCase in any test that exercises application code; this sets up the
-// singletons main() would otherwise create, and keeps any preferences the code under test
-// reads or writes out of the user's real settings
+// singletons main() would otherwise create, defines the preferences with their defaults,
+// and keeps any preferences the code under test reads or writes out of the user's real
+// settings
 inline void initialise()
 {
     using namespace Qt::Literals::StringLiterals;
@@ -44,6 +47,8 @@ inline void initialise()
     QCoreApplication::setOrganizationName(u"GraphiaTests"_s);
     QCoreApplication::setApplicationName(u"GraphiaTests"_s);
     QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, settingsDir.path());
+
+    defineDefaultPreferences(u"Sans"_s);
 }
 } // namespace TestEnvironment
 
