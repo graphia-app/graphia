@@ -348,54 +348,41 @@ std::vector<bool> TabularData::rowDuplicates(Progressable* progressable, size_t 
     return b;
 }
 
-int TabularData::columnMatchPercentage(size_t columnIndex, const QStringList& referenceValues) const
+static int matchPercentage(const std::set<QString>& values, const QStringList& referenceValues)
 {
-    const std::set<QString> referenceSet(referenceValues.begin(), referenceValues.end());
+    if(referenceValues.isEmpty())
+        return 0;
 
-    std::set<QString> columnValues;
-    std::set<QString> intersection;
+    const auto numMatches = static_cast<size_t>(std::ranges::count_if(referenceValues,
+        [&values](const auto& value) { return !value.isEmpty() && values.contains(value); }));
 
-    for(size_t row = 1; row < numRows(); row++)
-        columnValues.insert(valueAt(columnIndex, row));
+    auto percent = static_cast<int>((numMatches * 100) / static_cast<size_t>(referenceValues.size()));
 
-    std::ranges::set_intersection(referenceSet,
-        columnValues,
-        std::inserter(intersection, intersection.begin()));
-
-    auto percent = static_cast<int>((intersection.size() * 100) /
-        static_cast<size_t>(referenceValues.size()));
-
-    // In the case where the intersection is very small, but non-zero,
-    // don't report a 0% match
-    if(percent == 0 && !intersection.empty())
+    // In the case where the matches are very few, but non-zero, don't report a 0% match
+    if(percent == 0 && numMatches > 0)
         percent = 1;
 
     return percent;
 }
 
+int TabularData::columnMatchPercentage(size_t columnIndex, const QStringList& referenceValues) const
+{
+    std::set<QString> columnValues;
+
+    for(size_t row = 1; row < numRows(); row++)
+        columnValues.insert(valueAt(columnIndex, row));
+
+    return matchPercentage(columnValues, referenceValues);
+}
+
 int TabularData::rowMatchPercentage(size_t rowIndex, const QStringList& referenceValues) const
 {
-    const std::set<QString> referenceSet(referenceValues.begin(), referenceValues.end());
-
     std::set<QString> rowValues;
-    std::set<QString> intersection;
 
     for(size_t column = 1; column < numColumns(); column++)
         rowValues.insert(valueAt(column, rowIndex));
 
-    std::ranges::set_intersection(referenceSet,
-        rowValues,
-        std::inserter(intersection, intersection.begin()));
-
-    auto percent = static_cast<int>((intersection.size() * 100) /
-        static_cast<size_t>(referenceValues.size()));
-
-    // In the case where the intersection is very small, but non-zero,
-    // don't report a 0% match
-    if(percent == 0 && !intersection.empty())
-        percent = 1;
-
-    return percent;
+    return matchPercentage(rowValues, referenceValues);
 }
 
 template<typename Fn>
