@@ -26,6 +26,7 @@ endfunction()
 
 add_graphia_test(tst_mutablegraph graph/tst_mutablegraph.cpp)
 add_graphia_test(tst_graphtransformconfigparser transform/tst_graphtransformconfigparser.cpp)
+add_graphia_test(tst_attribute attributes/tst_attribute.cpp)
 add_graphia_test(tst_conditionfncreator attributes/tst_conditionfncreator.cpp)
 add_graphia_test(tst_enrichmentcalculator attributes/tst_enrichmentcalculator.cpp)
 add_graphia_test(tst_enrichmenttablemodel attributes/tst_enrichmenttablemodel.cpp)
