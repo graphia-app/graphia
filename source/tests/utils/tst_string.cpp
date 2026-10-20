@@ -144,6 +144,9 @@ private slots:
         QTest::newRow("zero") << 0.0 << u"0"_s;
         QTest::newRow("int") << 42.0 << u"42"_s;
         QTest::newRow("fraction") << 0.25 << u"0.25"_s;
+        QTest::newRow("small") << 0.0000123 << u"1.23×10⁻⁵"_s;
+        QTest::newRow("large") << 123456.0 << u"1.23×10⁵"_s;
+        QTest::newRow("negative large") << -1.5e12 << u"-1.50×10¹²"_s;
     }
 
     void formatNumberScientific()
