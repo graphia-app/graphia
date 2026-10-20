@@ -19,6 +19,16 @@
 
 #include "ray.h"
 
+// Not inline, as a direction parallel to an axis deliberately divides by zero, giving
+// infinities, and where the direction is a constant, MSVC warns of it when inlined
+void Ray::initialise()
+{
+    _invDir = QVector3D(1.0f / _dir.x(), 1.0f / _dir.y(), 1.0f/ _dir.z());
+    _sign[0] = (_invDir.x() < 0.0f) ? 1 : 0;
+    _sign[1] = (_invDir.y() < 0.0f) ? 1 : 0;
+    _sign[2] = (_invDir.z() < 0.0f) ? 1 : 0;
+}
+
 QVector3D Ray::closestPointTo(const QVector3D& point) const
 {
     const float t = QVector3D::dotProduct(point - _origin, _dir);
