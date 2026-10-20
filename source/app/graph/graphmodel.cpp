@@ -408,15 +408,18 @@ void GraphModel::removeDynamicAttributes()
     }
 }
 
-QString GraphModel::normalisedAttributeName(QString attribute) const
+QString GraphModel::normalisedAttributeName(QString attribute, const QString& clashHint) const
 {
     // Dots in attribute names are disallowed as they conflict with
     // the dot syntax for parameterised attributes
     attribute.replace('.', '_');
 
-    attribute = u::findUniqueName(_->_attributes, attribute);
+    QString newAttribute = u::findUniqueName(_->_attributes, attribute);
 
-    return attribute;
+    if(newAttribute != attribute && !clashHint.isEmpty())
+        newAttribute = u::findUniqueName(_->_attributes, clashHint.arg(attribute));
+
+    return newAttribute;
 }
 
 IMutableGraph& GraphModel::mutableGraphImpl() { return mutableGraph(); }
@@ -1031,9 +1034,9 @@ Attribute& GraphModel::createAttribute(const AttributeDeclaration& declaration)
     return GraphModel::createAttribute(declaration._name).setDisplayName(declaration._displayName);
 }
 
-Attribute& GraphModel::createAttribute(QString name, QString* assignedName)
+Attribute& GraphModel::createAttribute(QString name, QString* assignedName, QString clashHint)
 {
-    name = normalisedAttributeName(name);
+    name = normalisedAttributeName(name, clashHint);
 
     if(assignedName != nullptr)
         *assignedName = name;

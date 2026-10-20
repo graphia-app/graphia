@@ -32,6 +32,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <type_traits>
 #include <utility>
 
 template<typename E>
@@ -195,6 +196,14 @@ bool UserElementData<E>::setAttributeDescription(IGraphModel& graphModel,
 template<typename E>
 std::vector<QString> UserElementData<E>::exposeAsAttributes(IGraphModel& graphModel)
 {
+    QString clashHint;
+
+    // If an exposed attribute would clash, disambiguate with a prefix
+    if constexpr(std::is_same_v<E, NodeId>)
+        clashHint = QObject::tr("Node %1");
+    else if constexpr(std::is_same_v<E, EdgeId>)
+        clashHint = QObject::tr("Edge %1");
+
     std::vector<QString> createdAttributeNames;
 
     for(const auto& userDataVectorName : *this)
@@ -206,7 +215,7 @@ std::vector<QString> UserElementData<E>::exposeAsAttributes(IGraphModel& graphMo
 
         QString attributeName;
 
-        auto& attribute = graphModel.createAttribute(userDataVectorName, &attributeName)
+        auto& attribute = graphModel.createAttribute(userDataVectorName, &attributeName, clashHint)
             .setFlag(AttributeFlag::Searchable)
             .setUserDefined(true);
 

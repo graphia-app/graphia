@@ -87,7 +87,7 @@ private:
     IPlugin* _plugin;
 
     void removeDynamicAttributes();
-    QString normalisedAttributeName(QString attribute) const;
+    QString normalisedAttributeName(QString attribute, const QString& clashHint = {}) const;
 
     IMutableGraph& mutableGraphImpl() override;
     const IMutableGraph& mutableGraphImpl() const override;
@@ -185,7 +185,7 @@ public:
 
     std::vector<QString> attributeNames(ElementType elementType = ElementType::All) const override;
 
-    Attribute& createAttribute(QString name, QString* assignedName = nullptr) override;
+    Attribute& createAttribute(QString name, QString* assignedName = nullptr, QString clashHint = {}) override;
     Attribute& createAttribute(const AttributeDeclaration& declaration) override;
 
     static AttributeDeclarations attributeDeclarations();
