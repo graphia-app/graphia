@@ -19,6 +19,7 @@
 
 #include "tests/common/testenvironment.h"
 #include "tests/common/testgraphmodel.h"
+#include "tests/common/xlsxwriter.h"
 
 #include "shared/loading/adjacencymatrixfileparser.h"
 #include "shared/loading/biopaxfileparser.h"
@@ -160,6 +161,8 @@ std::unique_ptr<TestGraphModel> parse(const QString& format, const QByteArray& c
     if(format == u"CX"_s)           return parseWithType(static_cast<CxParser*>(nullptr));
     if(format == u"MatrixCSV"_s)    return parseWithType(static_cast<AdjacencyMatrixCSVFileParser*>(nullptr));
     if(format == u"MatrixMatLab"_s) return parseWithType(static_cast<AdjacencyMatrixMatLabFileParser*>(nullptr));
+    if(format == u"PairwiseXLSX"_s) return parseWithType(static_cast<PairwiseXLSXFileParser*>(nullptr));
+    if(format == u"MatrixXLSX"_s)   return parseWithType(static_cast<AdjacencyMatrixXLSXFileParser*>(nullptr));
 
     if(format == u"PairwiseCSV attributes"_s)
     {
@@ -494,6 +497,17 @@ private slots:
         QTest::newRow("Matrix empty cells") << u"MatrixCSV"_s << QByteArray(",A,B\nA,5,\nB,1,\n") <<
             QStringList{u"A"_s, u"B"_s} << QStringList{u"A-A"_s, u"B-A"_s} <<
             QStringList{u"EdgeWeight|A|A|5"_s, u"EdgeWeight|B|A|1"_s};
+
+        // XLSX
+        QTest::newRow("Pairwise XLSX") << u"PairwiseXLSX"_s <<
+            XlsxWriter::xlsx({{u"a"_s, u"b"_s}, {u"b"_s, u"c d"_s}, {u"a & e"_s, u"1"_s}}) <<
+            QStringList{u"1"_s, u"a"_s, u"a & e"_s, u"b"_s, u"c d"_s} <<
+            QStringList{u"a & e-1"_s, u"a-b"_s, u"b-c d"_s} << QStringList{};
+        QTest::newRow("Matrix XLSX") << u"MatrixXLSX"_s <<
+            XlsxWriter::xlsx({{u""_s, u"A"_s, u"B"_s, u"C"_s}, {u"A"_s, u"0"_s, u"1"_s, u"0"_s},
+                {u"B"_s, u"1"_s, u"0"_s, u"0.5"_s}, {u"C"_s, u"0"_s, u"0.5"_s, u"0"_s}}) <<
+            QStringList{u"A"_s, u"B"_s, u"C"_s} << QStringList{u"A-B"_s, u"B-A"_s, u"B-C"_s, u"C-B"_s} <<
+            QStringList{u"EdgeWeight|C|B|0.5"_s};
     }
 
     void parse()
