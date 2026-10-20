@@ -151,7 +151,8 @@ testing, which may come later as an extra safety net.
 |---|---|
 | `tst_mutablegraph` | graph editing and consistency |
 | `tst_graphtransformconfigparser` | transform config grammar round trips |
-| `tst_conditionfncreator` | every condition operator and type |
+| `tst_attribute` | attributes of nodes, edges and components: value, missing value and set value functions, ranges, shared values, parameters, names, an edge's nodes' attributes |
+| `tst_conditionfncreator` | every condition operator and type, with attributes or values on either side |
 | `tst_structuraltransforms` | filters, contraction, edge reduction and so on |
 | `tst_analysistransforms` | clustering, centrality, k-NN and so on |
 | `tst_attributetransforms` | attribute synthesis, combination, averaging and so on |
@@ -192,7 +193,8 @@ testing, which may come later as an extra safety net.
 Each one is a commit; see `git log` for the details.
 
 - **Build:** the Windows Clang manifest.
-- **Conditions:** 4 fixes, including string operators.
+- **Conditions:** 5 fixes, including string operators, and comparing
+  an integer with a float as text.
 - **Transforms:**
   - betweenness, 2 fixes;
   - edge reduction;
