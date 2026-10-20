@@ -174,6 +174,16 @@ own. This file should be deleted once everything here is resolved.
   usually keep missing values last either way. `tst_nodeattributetablemodel`
   pins the current order.
 
+## The transform cache
+
+- **Results before an invalidated one.** When an attribute is added or
+  changed, `TransformCache::attributeAddedOrChanged` discards the cached
+  result set containing the first result that depends on it, and every
+  later set. The code trimmed that set to the results before the invalid
+  one first, which suggests they were meant to be kept, but then discarded
+  the whole set anyway; that's what it still does. Keeping them would only
+  make more use of the cache.
+
 ## The PR
 
 The branch has around 70 commits, and a PR was deferred until more was
