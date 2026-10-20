@@ -452,6 +452,16 @@ undoing it, so a command must roll itself back when cancelled.
 decided whether it was cancelled still drops it from the undo stack with its
 transforms applied. The window is tiny, so this was left alone.
 
+`CompoundCommand::undo` undoes each of its commands, even one whose
+`execute` returned false, i.e. did nothing. No command executed as part
+of an undoable compound returns false at the moment, so this was left.
+
+`MCLTransform`'s second recovery step, after selecting the 1100 largest
+values of a column, takes `nth_element` at 1400 even when the column has
+fewer than 1400 values. In practice that keeps every value, which is what
+recovery wants, but it's undefined; it needs a node with over 1100
+neighbours after expansion to reach.
+
 `BarnesHutTree::differenceEpsilon` increments a `mutable` counter, and
 `evaluateKernel` is called from several threads at once by the force
 directed layout. That's a data race, though a harmless one in practice, as

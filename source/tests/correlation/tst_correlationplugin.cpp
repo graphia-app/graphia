@@ -404,6 +404,21 @@ private slots:
         QCOMPARE(graphModel()->attributeValueByName(u"DataValue.c3"_s).numericValueOf(nodeId(u"r3"_s)), 4.0);
     }
 
+    // Attribute names from files are made valid, as a dot, for example, separates a parameter
+    void attributeNameFromFile()
+    {
+        QVERIFY(open(write(u"dotted.csv"_s,
+            "Name,gene.type,c1,c2,c3\n"
+            "r1,coding,1,2,3\n"
+            "r2,noncoding,2,4,6\n"
+            "r3,coding,1,2,3\n"), u"CorrelationCSV"_s, u"Correlation"_s));
+
+        QVERIFY(_document->attributeExists(u"gene_type"_s));
+        QCOMPARE(graphModel()->attributeValueByName(uR"("gene_type")"_s).stringValueOf(nodeId(u"r2"_s)), u"noncoding"_s);
+        QVERIFY(execute([this] { _document->update({uR"(RemoveNodes where $gene_type == "noncoding")"_s}); }));
+        QCOMPARE(nodeNames(), (QStringList{u"r1"_s, u"r3"_s}));
+    }
+
     // Discrete data, e.g. categories, and its log
     void discrete()
     {
