@@ -70,6 +70,13 @@ own. This file should be deleted once everything here is resolved.
   favour nodes near the centre of the frustum. Using the node's position would
   change which node is picked.
 
+- **Empty values in numeric column annotations.** In the correlation plot,
+  an empty value in a column annotation whose other values are all numbers
+  is drawn in the gradient's lowest colour, the same as the smallest value,
+  whereas in other annotations empty values are left transparent
+  (`QCPColumnAnnotations::resolveRects`). Leaving them transparent would
+  distinguish them.
+
 ## Behaviour changes to confirm or drop
 
 - **4e36b1e: pairwise rows with only one node name.** A blank row used to
