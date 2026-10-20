@@ -971,6 +971,51 @@ private slots:
         QCOMPARE(nodes->data(kind, roleFor("elementType")).toString(), u"Node"_s);
     }
 
+    // An edge's source and target nodes' attributes, as transforms refer to them
+    void edgeNodeAttributes()
+    {
+        QVERIFY(open(write(u"weights.gml"_s, R"(graph
+[
+    directed 1
+    node [ id 0 label "a" weight 0.5 rank 1 kind "x" ]
+    node [ id 1 label "b" weight 1.5 rank 2 kind "y" ]
+    node [ id 2 label "c" weight 2.5 rank 3 kind "x" ]
+    edge [ source 0 target 1 ]
+    edge [ source 1 target 2 ]
+    edge [ source 2 target 0 ]
+])"), u"GML"_s, u"Generic"_s));
+
+        auto edges = [this]
+        {
+            QStringList names;
+            for(auto edgeId : graph().edgeIds())
+            {
+                const auto& edge = graph().edgeById(edgeId);
+                names.append(graphModel()->nodeName(edge.sourceId()) + graphModel()->nodeName(edge.targetId()));
+            }
+
+            names.sort();
+            return names;
+        };
+
+        QCOMPARE(graphModel()->attributeValueByName(u"source.weight"_s).valueType(), ValueType::Float);
+        QVERIFY(execute([this] { _document->update({u"RemoveEdges where $source.weight > 1"_s}); }));
+        QCOMPARE(edges(), QStringList{u"ab"_s});
+        QVERIFY(execute([this] { _document->undo(); }));
+
+        QCOMPARE(graphModel()->attributeValueByName(u"target.rank"_s).valueType(), ValueType::Int);
+        QVERIFY(execute([this] { _document->update({u"RemoveEdges where $target.rank == 1"_s}); }));
+        QCOMPARE(edges(), (QStringList{u"ab"_s, u"bc"_s}));
+        QVERIFY(execute([this] { _document->undo(); }));
+
+        QVERIFY(execute([this] { _document->update({uR"(RemoveEdges where $target.kind == "x")"_s}); }));
+        QCOMPARE(edges(), QStringList{u"ab"_s});
+        QCOMPARE(_document->transforms().size(), 1);
+
+        // Only nodes have source and target nodes
+        QVERIFY(!graphModel()->attributeValueByName(u"source.EdgeMultiplicity"_s).isValid());
+    }
+
     // Tables, such as those of node attributes or enrichment results, exported to files
     void exportTable_data()
     {
