@@ -17,34 +17,26 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "tests/common/documenttest.h"
 #include "tests/common/testenvironment.h"
 
-#include "app/application.h"
 #include "app/attributes/attributeedits.h"
 #include "app/attributes/enrichmenttablemodel.h"
-#include "app/graph/graph.h"
-#include "app/graph/graphmodel.h"
-#include "app/graph/mutablegraph.h"
 #include "app/layout/nodepositions.h"
-#include "app/ui/document.h"
 #include "app/ui/qml/Graphia/availableattributesmodel.h"
 #include "app/ui/qml/Graphia/editattributetablemodel.h"
 #include "app/ui/qml/Graphia/findtypes.h"
-#include "app/ui/qml/Graphia/graphdisplay.h"
 #include "app/ui/qml/Graphia/importattributeskeydetection.h"
-#include "app/ui/selectionmanager.h"
 
 #include "shared/loading/tabulardata.h"
 #include "shared/utils/container.h"
 #include "shared/utils/json.h"
 
 #include <QFile>
-#include <QMetaObject>
 #include <QSignalSpy>
 #include <QStandardItemModel>
 #include <QString>
 #include <QStringList>
-#include <QTemporaryDir>
 #include <QTest>
 #include <QUrl>
 #include <QVector3D>
@@ -71,136 +63,35 @@ const QByteArray Gml = R"(graph
     edge [ source 2 target 3 ]
     edge [ source 0 target 2 ]
 ])";
-
-const int Timeout = 60000;
 } // namespace
 
-// A Document, as the UI uses it, but with a GraphDisplay that isn't in a window, so
-// there's no rendering
-class TestDocument_ : public QObject
+// Document, as the UI uses it
+class TestDocument_ : public DocumentTest
 {
     Q_OBJECT
 
-    QTemporaryDir _dir;
-    std::unique_ptr<Application> _application;
-    std::unique_ptr<GraphDisplay> _graphDisplay;
-    std::unique_ptr<Document> _document;
-
-    QUrl write(const QString& fileName, const QByteArray& content)
-    {
-        auto filePath = _dir.filePath(fileName);
-        QFile file(filePath);
-        if(!file.open(QIODevice::WriteOnly) || file.write(content) != content.size())
-            return {};
-
-        return QUrl::fromLocalFile(filePath);
-    }
-
-    bool open(const QUrl& url, const QString& type, const QString& pluginName)
-    {
-        // Destroy any previous Document first, as the UI does when its tab is closed
-        _document.reset();
-
-        _graphDisplay = std::make_unique<GraphDisplay>();
-        _document = std::make_unique<Document>();
-        _document->setProperty("application", QVariant::fromValue(_application.get()));
-        _document->setProperty("graphDisplay", QVariant::fromValue(_graphDisplay.get()));
-
-        QSignalSpy loadComplete(_document.get(), &Document::loadComplete);
-        if(!_document->openUrl(url, type, pluginName, {}))
-            return false;
-
-        if(!QTest::qWaitFor([&] { return !loadComplete.isEmpty(); }, Timeout))
-            return false;
-
-        if(!loadComplete.at(0).at(1).toBool())
-            return false;
-
-        // As the renderer does once it has been created, which is otherwise never, as
-        // the display isn't in a window; until then, the Document is always busy. The
-        // Document only learns of this once events are processed, and pauses the layout
-        // when commands start only if it has, so wait for it, as there is in the UI
-        QSignalSpy busyChanged(_document.get(), &Document::busyChanged);
-        QMetaObject::invokeMethod(_graphDisplay.get(), "onRendererInitialised");
-
-        return QTest::qWaitFor([&] { return !busyChanged.isEmpty() && !_document->busy(); }, Timeout);
-    }
+    using DocumentTest::open;
 
     bool open()
     {
         return open(write(u"graph.gml"_s, Gml), u"GML"_s, u"Generic"_s);
     }
 
-    bool waitForCommands()
-    {
-        return QTest::qWaitFor([this] { return !_document->busy(); }, Timeout);
-    }
-
-    // Does something that executes commands, then waits for them to finish
-    template<typename Fn>
-    bool execute(const Fn& fn)
-    {
-        QSignalSpy commandsFinished(_document.get(), &Document::commandsFinished);
-        fn();
-
-        return QTest::qWaitFor([&] { return !commandsFinished.isEmpty(); }, Timeout) && waitForCommands();
-    }
-
-    GraphModel* graphModel() { return dynamic_cast<GraphModel*>(_document->graphModel()); }
-    const Graph& graph() { return graphModel()->graph(); }
-
-    NodeId nodeId(const QString& name)
-    {
-        for(auto nodeId : graphModel()->mutableGraph().nodeIds())
-        {
-            if(graphModel()->nodeName(nodeId) == name)
-                return nodeId;
-        }
-
-        return {};
-    }
-
-    // The names of the selected nodes, sorted
-    QStringList selected()
-    {
-        QStringList names;
-        for(auto nodeId : _document->selectionManager()->selectedNodes())
-            names.append(graphModel()->nodeName(nodeId));
-
-        names.sort();
-        return names;
-    }
-
-    // The names of the nodes in the transformed graph, sorted
-    QStringList nodeNames()
-    {
-        QStringList names;
-        for(auto nodeId : graph().nodeIds())
-            names.append(graphModel()->nodeName(nodeId));
-
-        names.sort();
-        return names;
-    }
-
 private slots:
     void initTestCase()
     {
         TestEnvironment::initialise();
-        QVERIFY(_dir.isValid());
-
-        Application::setAppDir(QStringLiteral(GRAPHIA_BUILD_DIR));
-        _application = std::make_unique<Application>(nullptr, false);
+        QVERIFY(createApplication());
     }
 
     void cleanup()
     {
-        _document.reset();
-        _graphDisplay.reset();
+        closeDocument();
     }
 
     void cleanupTestCase()
     {
-        _application.reset();
+        destroyApplication();
     }
 
     void load()
