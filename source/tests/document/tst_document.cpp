@@ -37,7 +37,10 @@
 
 #include <QAbstractItemModel>
 #include <QCoreApplication>
+#include <QDir>
 #include <QFile>
+#include <QFileInfo>
+#include <QTemporaryDir>
 #include <QSignalSpy>
 #include <QStandardItemModel>
 #include <QString>
@@ -513,6 +516,21 @@ private slots:
 
         // The files that come with Graphia, here the tests in the build directory
         QVERIFY(application->isResourceFile(QCoreApplication::applicationFilePath()));
+        QVERIFY(!application->isResourceFile(gml.toLocalFile()));
+        QVERIFY(!application->isResourceFileUrl(gml));
+
+        // Beside the build directory, and in one whose name starts with the build directory's
+        for(const auto& name : {u"tst_document-XXXXXX"_s, QFileInfo(QStringLiteral(GRAPHIA_BUILD_DIR)).fileName() + u"-XXXXXX"_s})
+        {
+            const QTemporaryDir besideBuildDir(QFileInfo(QStringLiteral(GRAPHIA_BUILD_DIR)).dir().filePath(name));
+            QVERIFY(besideBuildDir.isValid());
+
+            QFile file(besideBuildDir.filePath(u"Tutorial.graphia"_s));
+            QVERIFY(file.open(QIODevice::WriteOnly));
+            file.close();
+
+            QVERIFY2(!application->isResourceFile(file.fileName()), qPrintable(file.fileName()));
+        }
     }
 
     // The transforms offered when adding one, by category, with the user's favourites first
