@@ -767,7 +767,7 @@ QStringList CorrelationPluginInstance::defaultTransforms() const
 {
     QStringList defaultTransforms =
     {
-        R"([pinned] "RemoveComponents" where $"ComponentSize" <= 1)"
+        u"[pinned] RemoveComponents where $ComponentSize <= 1"_s
     };
 
     auto correlationFilterType = normaliseQmlEnum<CorrelationFilterType>(_correlationFilterType);
@@ -800,7 +800,7 @@ QStringList CorrelationPluginInstance::defaultTransforms() const
     case CorrelationFilterType::Threshold:
     {
         defaultTransforms.append(
-            QStringLiteral(R"("RemoveEdges" where $"%1" %2 %3)")
+            u"RemoveEdges where $%1 %2 %3"_s
             .arg(*filterAttribute, filterOperator)
             .arg(_initialThreshold));
 
@@ -810,13 +810,13 @@ QStringList CorrelationPluginInstance::defaultTransforms() const
     case CorrelationFilterType::Knn:
     {
         defaultTransforms.append(
-            QStringLiteral(R"("KNN" using $"%1" with "k" = %2)")
+            u"KNN using $%1 with k = %2"_s
             .arg(correlationPolarity == CorrelationPolarity::Positive ?
             _correlationAttributeName : _correlationAbsAttributeName)
             .arg(_initialK));
 
         defaultTransforms.append(
-            QStringLiteral(R"("RemoveEdges" where $"%1" %2 %3)")
+            u"RemoveEdges where $%1 %2 %3"_s
             .arg(*filterAttribute, filterOperator)
             .arg(_minimumThreshold));
 
