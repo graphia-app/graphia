@@ -62,6 +62,10 @@ TransformedGraph::TransformedGraph(GraphModel& graphModel, const MutableGraph& s
 void TransformedGraph::cancelRebuild()
 {
     const std::unique_lock<std::mutex> lock(_currentTransformMutex);
+
+    if(!_rebuilding)
+        return;
+
     _cancelled = true;
 
     if(_currentTransform != nullptr)
@@ -127,8 +131,10 @@ void TransformedGraph::rebuild()
     if(!_autoRebuild)
         return;
 
-    if(_cancelled)
-        return;
+    {
+        const std::unique_lock<std::mutex> lock(_currentTransformMutex);
+        _rebuilding = true;
+    }
 
     emit graphWillChange(this);
 
@@ -238,7 +244,12 @@ void TransformedGraph::rebuild()
         emit attributeValuesChanged(changedAttributeNames);
 
     enableComponentManagement();
-    _cancelled = false;
+
+    {
+        const std::unique_lock<std::mutex> lock(_currentTransformMutex);
+        _rebuilding = false;
+        _cancelled = false;
+    }
 
     emit graphChanged(this, _changeSignalsEmitted);
 }
