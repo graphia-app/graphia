@@ -458,6 +458,11 @@ private slots:
         QTest::newRow("MATLAB struct") << u"MatrixMatLab"_s <<
             matFile({structOf("s", "m", denseMatrix("m", 4, 4, matrix))}) <<
             matrixNodes << matrixEdges << matrixValues;
+        // The biggest matrix in the file is loaded
+        QTest::newRow("MATLAB several variables") << u"MatrixMatLab"_s <<
+            matFile({denseMatrix<double>("small", 1, 2, {5.0, 6.0}), denseMatrix("m", 4, 4, matrix),
+                denseMatrix<double>("smaller", 1, 1, {7.0})}) <<
+            matrixNodes << matrixEdges << matrixValues;
         QTest::newRow("MATLAB precision") << u"MatrixMatLab"_s <<
             matFile({denseMatrix<double>("m", 2, 2, {0, 0, 0.1, 0})}) <<
             QStringList{u"Node 1"_s, u"Node 2"_s} << QStringList{u"Node 1-Node 2"_s} <<
