@@ -247,11 +247,15 @@ private slots:
         const Ray ray({0.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 0.0f});
 
         QCOMPARE(ray.closestPointTo(QVector3D(2.0f, 3.0f, 0.0f)), QVector3D(2.0f, 0.0f, 0.0f));
+        QCOMPARE(ray.distanceTo(QVector3D(2.0f, 3.0f, 0.0f)), 3.0f);
+        QCOMPARE(ray.distanceTo(QVector3D(5.0f, 0.0f, 0.0f)), 0.0f);
 
         // Perpendicular, and offset in z
         const Ray other({2.0f, -1.0f, 1.0f}, {0.0f, 1.0f, 0.0f});
         QCOMPARE_VECTOR(ray.closestPointTo(other), QVector3D(2.0f, 0.0f, 0.0f));
         QCOMPARE_VECTOR(other.closestPointTo(ray), QVector3D(2.0f, 0.0f, 1.0f));
+        QCOMPARE(ray.distanceTo(other), 1.0f);
+        QCOMPARE(other.distanceTo(ray), 1.0f);
 
         const Ray fromLine(Line3D({1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 5.0f}));
         QCOMPARE(fromLine.origin(), QVector3D(1.0f, 1.0f, 1.0f));

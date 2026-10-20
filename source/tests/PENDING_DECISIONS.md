@@ -51,6 +51,13 @@ own. This file should be deleted once everything here is resolved.
   the attribute `HOME`. Fixing this needs a separate type for attribute
   references in `GraphTransformConfig::TerminalValue`, and a change to how
   conditions are passed to QML, which relies on the `$`.
+- **Picking the node nearest a click.** `nodeIdInsideFrustumNearestPoint` in
+  `graphcommoninteractor.cpp` scores each node in the picking frustum by its
+  distance from the clicked point plus `Ray(frustum.centreLine()).distanceTo(point)`.
+  The second term uses the clicked point rather than the node's position, so
+  it's the same for every node and has no effect; it was presumably meant to
+  favour nodes near the centre of the frustum. Using the node's position would
+  change which node is picked.
 
 ## Behaviour changes to confirm or drop
 
