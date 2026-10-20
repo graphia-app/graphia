@@ -171,8 +171,10 @@ void VisualisationsBuilder<ElementId>::build(const Attribute& attribute,
 
                 if(channelFactory.allowsMapping())
                 {
+                    // Reflect the value about the middle of the range it's mapped from,
+                    // which isn't necessarily the range of the values themselves
                     if(invert)
-                        value = statistics.inverse(value);
+                        value = mapping.min() + mapping.max() - value;
 
                     value = mapping.map(value);
                 }
