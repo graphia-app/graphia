@@ -47,6 +47,14 @@ testing, which may come later as an extra safety net.
 
 - **Option:** tests are built when `GRAPHIA_BUILD_TESTS` is on, which is the
   default except for WebAssembly.
+- **Sanitizers:** `GRAPHIA_SANITIZERS`, e.g. `address;undefined`, builds
+  everything with them (not MSVC). The Clang Debug CI job uses it, through
+  `linux-build.sh`'s `SANITIZERS` variable. The whole suite was clean under
+  GCC's ASan, UBSan and LeakSanitizer when this was added.
+- **Locales:** numbers are formatted in the system locale, which on Linux Qt
+  takes from `LC_ALL` and the like, so the suite can be run in another
+  locale with, e.g., `LC_ALL=sv_SE.UTF-8 ctest`. `tst_string` is also run in
+  that locale on Linux. macOS and Windows CI run in en_US.
 - **Running:** after a normal CMake configure and build, run `ctest` in the
   build directory, or run a single program, e.g. `source/tests/tst_commands`,
   optionally with a test function name.
@@ -94,6 +102,9 @@ testing, which may come later as an extra safety net.
   `tst_qml.cpp` gives them a `testHelper` context property, which parses
   transforms and visualisations with the real parsers, so that the QML tests
   can stand in for a `Document` with a small `QtObject`.
+- **`defineDefaultPreferences`:** in `app/defaultpreferences.cpp`, defines
+  every preference with its default; `main()` and
+  `TestEnvironment::initialise()` both call it.
 - **`lexyutils::describeFirstError`:** in `source/thirdparty/lexy_utils.h`,
   gives the line and column of the first lexy parse error.
 
@@ -116,7 +127,11 @@ testing, which may come later as an extra safety net.
 | `tst_nativeloader` | native files: every format version, Tutorial.graphia, malformed files, save then load |
 | `tst_commands` | execute, undo and redo of delete nodes and the edit, clone, remove and import attribute commands |
 | `tst_visualisationconfigparser` | visualisation config round trips, malformed configs, the display form |
-| `tst_qml` | `Utils.js`, `AttributeUtils.js`, `VisualisationUtils.js`, and `TransformConfig.js`: building a transform's controls, then its expression, gives back the same transform; locked transforms' text |
+| `tst_qml` | `Utils.js`, `AttributeUtils.js`, `MenuUtils.js`, `VisualisationUtils.js`, and `TransformConfig.js`: building a transform's controls (including attribute parameters), then its expression, gives back the same transform; locked transforms' text |
+| `tst_colorvisualisations` | colour gradients and palettes, including malformed ones |
+| `tst_visualisationmapping` | the range values are mapped from, and the exponent |
+| `tst_visualisations` | building visualisations on a graph and the resulting visuals: gradients, palettes, inversion, mappings, sizes, text |
+| `tst_string`, `tst_statistics`, `tst_container`, `tst_datastructures`, `tst_json`, `tst_color` | `shared/utils`: strings and natural order, statistics (against numpy), containers and set operations, `CircularBuffer`, `FixedSizeStack`, `Flags`, JSON conversions, colours |
 
 ## Bugs fixed so far
 
@@ -157,7 +172,10 @@ Each one is a commit; see `git log` for the details.
 - **Native files:**
   - node ids not in the graph writing out of bounds;
   - 2D shading not restored;
-  - enrichment results lost on saving.
+  - enrichment results lost on saving;
+  - enrichment rows with the wrong number of values failing when shown.
+- **Visualisation parameters:** malformed colour gradients, palettes and
+  mappings threw uncaught exceptions.
 - **Enrichment:**
   - Fisher's exact test excluded tables tied with the observed one, roughly
     halving many p-values;
@@ -178,7 +196,23 @@ Each one is a commit; see `git log` for the details.
     its name changed the name;
   - labels with quotes or backslashes lost them, or failed with an
     exception;
-  - attribute names starting with "source" or "target" were capitalised.
+  - attribute names starting with "source" or "target" were capitalised;
+  - menu items leaked whenever a menu was cleared and rebuilt.
+- **Visualisations for created attributes:** when a transform's attribute was
+  given a unique name, a name with `(` or `+` stopped its visualisation
+  following it. `ApplyVisualisationsCommand::patchedVisualisations` is now a
+  static function that tests can call without a `Document`.
+- **`shared/utils`:**
+  - `u::findUniqueName` mangled names containing `%` and a digit;
+  - `u::numericCompare` crashed on a null string, and ordered numbers too
+    large for an `int` as text;
+  - `u::setsDiffer` ignored values only in its second argument;
+  - `u::valuesFor` didn't compile for maps;
+  - scientific notation wasn't used in most locales, e.g. on Windows and
+    macOS;
+  - the `std::string` number checks accepted "1e" and "-".
+- **Visualisations:** inverting didn't reflect values about the middle of the
+  mapping range.
 - **Visualisation configs:**
   - whole number parameters couldn't be parsed;
   - numbers were written with 6 significant figures;
@@ -227,6 +261,13 @@ Each one is a commit; see `git log` for the details.
   - `TransformConfig.js` isn't a `.pragma library`, but
     `Qt.createComponent("TransformParameter.qml")` still finds the component
     when called from a test, so the real controls are created.
+  - Objects with no parent are destroyed by the garbage collector in any
+    order, which can produce spurious warnings; destroy them in `cleanup()`.
+  - `ButtonGroup.addButton` doesn't set a button's attached
+    `ButtonGroup.group`.
+- **moc and raw strings:** besides unbalanced quotes and brackets, a `)"`
+  inside the string, as in `R"("Name (1)")"`, ends it early for the
+  compiler too, and `//` inside one can be taken by moc for a comment.
 - **valgrind** works well on the Debug build and found a use-after-free that
   only failed on macOS. Set `QT_ENABLE_REGEXP_JIT=0`, otherwise
   `QRegularExpression`'s JIT produces false reports of uninitialised values.
@@ -234,25 +275,15 @@ Each one is a commit; see `git log` for the details.
 
 ## Next steps, in rough order
 
-1. **More QML:** `MenuUtils.js` (cloning menus, which needs
-   `Graphia.Controls` menus), and attribute parameters in
-   `TransformConfig.js`, which need an `AvailableAttributesModel`.
-2. **Commands that need a `Document`:** `ApplyTransformsCommand` and
-   `ApplyVisualisationsCommand`. These may need the same kind of separation as
-   `NativeSaver::Content`, or a `Document` level integration test, possibly
-   under xvfb. `ApplyVisualisationsCommand::patchedVisualisations` builds a
-   regular expression from an attribute name without escaping it; see
-   `PENDING_DECISIONS.md`.
-3. **Preference defaults:** move the `u::definePref` calls out of `main.cpp`
-   into a function that tests can call, once a test needs them.
-4. **CI additions:**
-   - ASan and UBSan in the Clang Debug job;
-   - coverage reporting with `llvm-cov`.
-5. **A settable random seed** (`shared/utils/random.cpp`, and
+1. **Commands that need a `Document`:** `ApplyTransformsCommand`. This may
+   need the same kind of separation as `NativeSaver::Content`, or a
+   `Document` level integration test, possibly under xvfb.
+2. **CI additions:** coverage reporting with `llvm-cov`.
+3. **A settable random seed** (`shared/utils/random.cpp`, and
    `enrichmentcalculator.cpp`, which seeds from `std::random_device`), once a
    test needs exact results from something random. The enrichment tests
    didn't, as only the spread of the expected count is random.
-6. **Later:** the corpus comparison of release and candidate builds.
+4. **Later:** the corpus comparison of release and candidate builds.
 
 The original plan, for reference, had these priorities:
 1. wrong analysis results (config grammars, conditions, transforms,
