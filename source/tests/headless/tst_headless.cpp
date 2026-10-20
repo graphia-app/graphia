@@ -293,6 +293,21 @@ private slots:
         QVERIFY(model->edgeNames().contains(u"r-s"_s) || model->edgeNames().contains(u"s-r"_s));
     }
 
+    // A destination that's a file, rather than a directory
+    void destinationFile()
+    {
+        const QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        auto source = write(dir, u"edges.csv"_s, "a,b\nb,c\n");
+
+        const auto target = dir.filePath(u"named.%1"_s.arg(Application::nativeExtension()));
+        QVERIFY(run(dir, {source}, {{"type", "PairwiseCSV"}, {"plugin", {{"name", "Generic"}}},
+            {"destination", target.toStdString()}}));
+
+        QVERIFY(QFileInfo::exists(target));
+        QVERIFY(!QFileInfo::exists(dir.filePath(u"edges.%1"_s.arg(Application::nativeExtension()))));
+    }
+
     void failures()
     {
         const QTemporaryDir dir;
