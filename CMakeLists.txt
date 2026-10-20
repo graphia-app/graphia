@@ -20,6 +20,19 @@ if(GRAPHIA_SANITIZERS AND NOT MSVC)
 endif()
 
 add_subdirectory(source/thirdparty)
+
+# Clang's source based code coverage, for everything except third party code;
+# run the tests with LLVM_PROFILE_FILE set, then use llvm-profdata and llvm-cov
+option(GRAPHIA_COVERAGE "Build with Clang source based code coverage instrumentation" OFF)
+if(GRAPHIA_COVERAGE)
+    if(NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        message(FATAL_ERROR "GRAPHIA_COVERAGE requires Clang")
+    endif()
+
+    add_compile_options(-fprofile-instr-generate -fcoverage-mapping)
+    add_link_options(-fprofile-instr-generate)
+endif()
+
 add_subdirectory(source/shared)
 add_subdirectory(source/plugins)
 add_subdirectory(source/app)

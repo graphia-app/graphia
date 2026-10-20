@@ -358,12 +358,52 @@ jobs:
         BUILD_TYPE: Debug
         UNITY_BUILD: OFF
         SANITIZERS: address;undefined
+        COVERAGE: ON
         CC: clang-${{ env.CLANG_VERSION }}
         CXX: clang++-${{ env.CLANG_VERSION }}
     - name: Test
       run: ctest --test-dir build/clang --output-on-failure
       env:
         UBSAN_OPTIONS: print_stacktrace=1
+        LLVM_PROFILE_FILE: ${{ github.workspace }}/build/clang/profiles/%m-%p.profraw
+    - name: Coverage
+      if: ${{ success() || failure() }}
+      run: |
+        cd build/clang
+        llvm-profdata-${{ env.CLANG_VERSION }} merge -sparse profiles/*.profraw -o coverage.profdata
+
+        # The first test is the positional argument, the rest are -object arguments
+        OBJECTS=()
+        for TEST in source/tests/tst_*
+        do
+          [ -f "${TEST}" ] && [ -x "${TEST}" ] || continue
+          [ ${#OBJECTS[@]} -eq 0 ] && OBJECTS+=("${TEST}") || OBJECTS+=("-object" "${TEST}")
+        done
+
+        # The plugins are loaded by the tests at runtime, so aren't part of any test binary
+        for PLUGIN in plugins/lib*.so
+        do
+          [ -f "${PLUGIN}" ] && OBJECTS+=("-object" "${PLUGIN}")
+        done
+
+        IGNORE='(thirdparty|source/tests|_autogen|/\.rcc/|/\.qt/|^/usr/|qtenv|/Qt/)'
+        llvm-cov-${{ env.CLANG_VERSION }} report "${OBJECTS[@]}" -instr-profile=coverage.profdata \
+          -ignore-filename-regex="${IGNORE}" > coverage.txt
+        llvm-cov-${{ env.CLANG_VERSION }} export "${OBJECTS[@]}" -instr-profile=coverage.profdata \
+          -ignore-filename-regex="${IGNORE}" -format=lcov > coverage.lcov
+
+        echo '### Coverage' >> ${GITHUB_STEP_SUMMARY}
+        echo '```' >> ${GITHUB_STEP_SUMMARY}
+        head -n 2 coverage.txt >> ${GITHUB_STEP_SUMMARY}
+        tail -n 1 coverage.txt >> ${GITHUB_STEP_SUMMARY}
+        echo '```' >> ${GITHUB_STEP_SUMMARY}
+    - uses: actions/upload-artifact@v7
+      if: ${{ success() || failure() }}
+      with:
+        name: coverage
+        path: |
+          build/clang/coverage.txt
+          build/clang/coverage.lcov
     - uses: actions/upload-artifact@v7
       with:
         name: static-analysis-logs-clang

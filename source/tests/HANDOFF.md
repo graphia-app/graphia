@@ -310,9 +310,8 @@ Each one is a commit; see `git log` for the details.
 1. **Commands that need a `Document`:** `ApplyTransformsCommand`. This may
    need the same kind of separation as `NativeSaver::Content`, or a
    `Document` level integration test, possibly under xvfb.
-2. **CI additions:** coverage reporting with `llvm-cov`.
-3. **Coverage gaps:** see "Coverage" below.
-4. **Later:** the corpus comparison of release and candidate builds.
+2. **Coverage gaps:** see "Coverage" below.
+3. **Later:** the corpus comparison of release and candidate builds.
 
 The original plan, for reference, had these priorities:
 1. wrong analysis results (config grammars, conditions, transforms,
@@ -329,7 +328,14 @@ fail.
 
 ## Coverage
 
-A coverage build shows what the tests don't reach. With GCC, configure a
+A coverage build shows what the tests don't reach. The Clang Debug CI job
+builds with `-DGRAPHIA_COVERAGE=ON` (Clang's source based coverage, for
+everything but third party code), and its Coverage step summarises the
+result in the job summary and uploads the full report, and an LCOV file, as
+the `coverage` artifact. Locally, configure with Clang and
+`-DGRAPHIA_COVERAGE=ON`, run `ctest` with `LLVM_PROFILE_FILE` set to e.g.
+`$PWD/profiles/%m-%p.profraw`, then use `llvm-profdata merge` and
+`llvm-cov report`, as in the workflow. Alternatively, with GCC, configure a
 Debug build with `--coverage` in the C, C++ and linker flags and
 `-DCMAKE_UNITY_BUILD=OFF`, build the test targets, run `ctest`, then e.g.
 `gcovr --gcov-executable <gcov> -r source --filter 'source/(app|shared|plugins)/'
