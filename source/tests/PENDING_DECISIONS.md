@@ -39,6 +39,12 @@ own. This file should be deleted once everything here is resolved.
   used in a transform. Dots are already replaced with underscores when an
   attribute is created (`GraphModel::normalisedAttributeName`); doing the same
   for quotes would be the simplest fix.
+- **Colours for string values only use part of the hue range.**
+  `u::colorForString`, which colours string values that a palette gives no
+  colour, takes the hue modulo 255, whereas `QColor` hues run from 0 to 359,
+  so blue-violet to pink never appear. It also adds 128 to a `char`, which is
+  unsigned on some platforms, such as Linux on ARM, where the colours would
+  differ. Changing either would change existing colours.
 - **Strings starting with `$` in conditions.** A quoted string in a condition
   is stored in the same way as an attribute name, which is distinguished only
   by a leading `$`. So in `$"Node Name" == "$HOME"`, `"$HOME"` is taken to be
