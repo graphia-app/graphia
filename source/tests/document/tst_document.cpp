@@ -784,6 +784,9 @@ private slots:
         QTest::newRow("Unknown node") << QByteArray(R"([{"id": 1000, "position": [1, 2, 3]}])");
         QTest::newRow("No position") << QByteArray(R"([{"id": 0}])");
         QTest::newRow("Short position") << QByteArray(R"([{"id": 0, "position": [1, 2]}])");
+        QTest::newRow("String id") << QByteArray(R"([{"id": "0", "position": [1, 2, 3]}])");
+        QTest::newRow("String coordinate") << QByteArray(R"([{"id": 0, "position": [1, "2", 3]}])");
+        QTest::newRow("Null coordinate") << QByteArray(R"([{"id": 0, "position": [1, null, 3]}])");
     }
 
     // A file that can't be loaded changes nothing
