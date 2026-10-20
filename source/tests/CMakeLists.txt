@@ -64,3 +64,4 @@ add_graphia_test(tst_colorvisualisations visualisations/tst_colorvisualisations.
 add_graphia_test(tst_visualisationmapping visualisations/tst_visualisationmapping.cpp)
 add_graphia_test(tst_visualisations visualisations/tst_visualisations.cpp)
 add_graphia_test(tst_searchmanager ui/tst_searchmanager.cpp)
+add_graphia_test(tst_commandmanager commands/tst_commandmanager.cpp)
