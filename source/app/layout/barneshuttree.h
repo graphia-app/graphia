@@ -147,9 +147,13 @@ public:
             {
                 auto subVolume = subTree->_nonEmptyLeaves.at(i);
 
-                const NodeId otherNodeId = subVolume->_nodeIds.front();
-                if(otherNodeId != nodeId)
+                // Leaves usually have one node, but have more where they
+                // can't be divided, such as when nodes are in the same place
+                for(const NodeId otherNodeId : subVolume->_nodeIds)
                 {
+                    if(otherNodeId == nodeId)
+                        continue;
+
                     const QVector3D& otherNodePosition = nodePositions.get(otherNodeId);
                     QVector3D difference = otherNodePosition - nodePosition;
                     float distanceSq = difference.lengthSquared();
