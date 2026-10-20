@@ -95,6 +95,7 @@ private slots:
         QTest::newRow("different values") << std::vector<int>{1, 2} << std::vector<int>{1, 3} << true;
         QTest::newRow("different sizes") << std::vector<int>{1, 2} << std::vector<int>{1, 2, 3} << true;
         QTest::newRow("both empty") << std::vector<int>{} << std::vector<int>{} << false;
+        QTest::newRow("duplicates") << std::vector<int>{1, 1, 2} << std::vector<int>{1, 2, 3} << true;
     }
 
     void setsDiffer()
