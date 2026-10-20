@@ -3249,6 +3249,9 @@ void Document::loadNodePositionsFromFile(const QUrl& fileUrl)
             if(!u::contains(jsonNode, "id") || !u::contains(jsonNode, "position"))
                 return false;
 
+            if(!jsonNode["id"].is_number_integer())
+                return false;
+
             const NodeId nodeId = jsonNode["id"].get<int>();
 
             if(!_graphModel->mutableGraph().containsNodeId(nodeId))
@@ -3257,6 +3260,9 @@ void Document::loadNodePositionsFromFile(const QUrl& fileUrl)
             auto positionArray = jsonNode["position"];
 
             if(positionArray.is_null() || !positionArray.is_array() || positionArray.size() != 3)
+                return false;
+
+            if(!std::ranges::all_of(positionArray, [](const auto& value) { return value.is_number(); }))
                 return false;
 
             const QVector3D position(positionArray.at(0), positionArray.at(1), positionArray.at(2));
