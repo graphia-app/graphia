@@ -167,7 +167,9 @@ void Headless::processNext()
         else
             target = _->_destination;
 
-        if(!QFileInfo(QFileInfo(target).canonicalPath()).isWritable())
+        // The target needn't exist, so its directory is checked; canonicalPath would be
+        // empty for a target that doesn't exist, which is taken as the current directory
+        if(!QFileInfo(QFileInfo(target).absolutePath()).isWritable())
         {
             if(_->_displayProgress)
                 std::cout << "\n";
