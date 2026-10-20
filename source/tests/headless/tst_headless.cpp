@@ -28,7 +28,6 @@
 #include "shared/ui/qml/Graphia/SharedTypes/pairwisecolumntype.h"
 #include "shared/utils/json.h"
 
-#include <QDir>
 #include <QFile>
 #include <QFileInfo>
 #include <QSignalSpy>
@@ -37,8 +36,10 @@
 #include <QTemporaryDir>
 #include <QTest>
 
+#include <iostream>
 #include <limits>
 #include <memory>
+#include <sstream>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -306,6 +307,24 @@ private slots:
 
         QVERIFY(QFileInfo::exists(target));
         QVERIFY(!QFileInfo::exists(dir.filePath(u"edges.%1"_s.arg(Application::nativeExtension()))));
+    }
+
+    // A target in a directory that can't be written to is reported as such, rather than
+    // failing to save; whether it can be written doesn't depend on the current directory
+    void unwritableDestination()
+    {
+        const QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        auto source = write(dir, u"edges.csv"_s, "a,b\n");
+
+        const std::ostringstream errors;
+        auto* previous = std::cerr.rdbuf(errors.rdbuf());
+        const bool ran = run(dir, {source}, {{"type", "PairwiseCSV"}, {"plugin", {{"name", "Generic"}}},
+            {"destination", dir.filePath(u"missing/edges.graphia"_s).toStdString()}});
+        std::cerr.rdbuf(previous);
+
+        QVERIFY(ran);
+        QVERIFY2(errors.str().find("is not writable") != std::string::npos, errors.str().c_str());
     }
 
     void failures()
