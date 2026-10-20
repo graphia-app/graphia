@@ -63,8 +63,8 @@ MatrixTypeResult AdjacencyMatrixTabularDataParser::onParseComplete()
                 if(weight == 0.0)
                     continue;
 
-                edgeList.emplace_back(EdgeListEdge{._source = NodeId(rowIndex),
-                    ._target = NodeId(columnIndex), ._weight = weight});
+                edgeList.emplace_back(EdgeListEdge{._source = NodeId(rowIndex - static_cast<size_t>(topLeft.y())),
+                    ._target = NodeId(columnIndex - static_cast<size_t>(topLeft.x())), ._weight = weight});
             }
 
             setProgress(static_cast<int>((rowIndex * 100) / data.numRows()));
