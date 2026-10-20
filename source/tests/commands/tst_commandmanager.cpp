@@ -28,7 +28,9 @@
 #include <QTest>
 #include <QSignalSpy>
 #include <QString>
+#include <QThread>
 
+#include <atomic>
 #include <memory>
 #include <vector>
 
@@ -77,6 +79,28 @@ public:
         _oldValue = setCommand->_oldValue;
         _hasOldValue = true;
     }
+};
+
+// Runs until it's cancelled, then reports that it did nothing
+class WaitCommand : public ICommand
+{
+public:
+    std::atomic<bool> _started = false;
+
+    QString description() const override { return u"Wait"_s; }
+    bool cancellable() const override { return true; }
+
+    bool execute() override
+    {
+        _started = true;
+
+        while(!cancelled())
+            QThread::msleep(1);
+
+        return false;
+    }
+
+    void undo() override {}
 };
 
 std::vector<QString> toVector(const std::vector<QString>& descriptions) { return descriptions; }
@@ -395,6 +419,36 @@ private slots:
         QCOMPARE(compound.pastParticiple(), u"Done"_s);
         QVERIFY(!compound.cancellable());
         QCOMPARE(compound.progress(), -1);
+    }
+    // A long running command, cancelled as the UI's cancel button does
+    void cancel()
+    {
+        set(1);
+
+        const QSignalSpy cancellingChanged(_commandManager.get(), &CommandManager::commandIsCancellingChanged);
+        QSignalSpy commandCompleted(_commandManager.get(), &CommandManager::commandCompleted);
+
+        auto command = std::make_unique<WaitCommand>();
+        auto* waitCommand = command.get();
+        _commandManager->execute(ExecutePolicy::Add, std::move(command));
+
+        QVERIFY(QTest::qWaitFor([this, &started = waitCommand->_started] { return _commandManager->busy() && started; }, 5000));
+        QVERIFY(_commandManager->commandIsCancellable());
+
+        _commandManager->cancel();
+        QVERIFY(waitUntilIdle());
+
+        // It was cancelling, then wasn't, and isn't on the undo stack
+        QCOMPARE(cancellingChanged.count(), 2);
+        QVERIFY(!_commandManager->commandIsCancelling());
+        QVERIFY(QTest::qWaitFor([&] { return !commandCompleted.isEmpty(); }, 5000));
+        QCOMPARE(commandCompleted.last().at(0).toBool(), false);
+        QCOMPARE(toVector(_commandManager->undoableCommandDescriptions()), (std::vector<QString>{u"Set 1"_s}));
+        QCOMPARE(_value, 1);
+
+        // Nothing is running to cancel
+        _commandManager->cancel();
+        QVERIFY(!_commandManager->commandIsCancellable());
     }
 };
 
