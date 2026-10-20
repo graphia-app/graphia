@@ -773,35 +773,17 @@ QStringList CorrelationPluginInstance::defaultTransforms() const
     auto correlationFilterType = normaliseQmlEnum<CorrelationFilterType>(_correlationFilterType);
     auto correlationPolarity = normaliseQmlEnum<CorrelationPolarity>(_correlationPolarity);
 
-    const char* filterOperator = nullptr;
-    const QString* filterAttribute = nullptr;
-
-    switch(normaliseQmlEnum<CorrelationPolarity>(_correlationPolarity))
-    {
-    default:
-    case CorrelationPolarity::Positive:
-        filterOperator = "<";
-        filterAttribute = &_correlationAttributeName;
-        break;
-
-    case CorrelationPolarity::Negative:
-        filterOperator = ">";
-        filterAttribute = &_correlationAttributeName;
-        break;
-
-    case CorrelationPolarity::Both:
-        filterOperator = "<";
-        filterAttribute = &_correlationAbsAttributeName;
-        break;
-    }
+    // The thresholds are magnitudes, so negative correlations are filtered by their absolute values
+    const auto* filterAttribute = correlationPolarity == CorrelationPolarity::Positive ?
+        &_correlationAttributeName : &_correlationAbsAttributeName;
 
     switch(correlationFilterType)
     {
     case CorrelationFilterType::Threshold:
     {
         defaultTransforms.append(
-            u"RemoveEdges where $%1 %2 %3"_s
-            .arg(*filterAttribute, filterOperator)
+            u"RemoveEdges where $%1 < %2"_s
+            .arg(*filterAttribute)
             .arg(_initialThreshold));
 
         break;
@@ -811,13 +793,12 @@ QStringList CorrelationPluginInstance::defaultTransforms() const
     {
         defaultTransforms.append(
             u"KNN using $%1 with k = %2"_s
-            .arg(correlationPolarity == CorrelationPolarity::Positive ?
-            _correlationAttributeName : _correlationAbsAttributeName)
+            .arg(*filterAttribute)
             .arg(_initialK));
 
         defaultTransforms.append(
-            u"RemoveEdges where $%1 %2 %3"_s
-            .arg(*filterAttribute, filterOperator)
+            u"RemoveEdges where $%1 < %2"_s
+            .arg(*filterAttribute)
             .arg(_minimumThreshold));
 
         break;
