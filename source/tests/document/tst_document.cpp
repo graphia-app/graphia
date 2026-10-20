@@ -35,6 +35,8 @@
 #include "shared/utils/container.h"
 #include "shared/utils/json.h"
 
+#include <QAbstractItemModel>
+#include <QCoreApplication>
 #include <QFile>
 #include <QSignalSpy>
 #include <QStandardItemModel>
@@ -44,6 +46,7 @@
 #include <QUrl>
 #include <QVector3D>
 
+#include <algorithm>
 #include <map>
 #include <memory>
 #include <vector>
@@ -446,6 +449,70 @@ private slots:
         QVERIFY(setting.value(u"minimumValue"_s).toFloat() <= setting.value(u"value"_s).toFloat());
         QVERIFY(setting.value(u"value"_s).toFloat() <= setting.value(u"maximumValue"_s).toFloat());
         QVERIFY(_document->layoutSetting(u"Not a setting"_s).isEmpty());
+    }
+
+    // What the Application tells the UI about opening files, and links
+    void application()
+    {
+        auto* application = _application.get();
+
+        const auto gml = write(u"graph.gml"_s, Gml);
+        QCOMPARE(application->urlTypesOf(gml), QStringList{u"GML"_s});
+        QCOMPARE(application->urlTypesFor(u"gml"_s), QStringList{u"GML"_s});
+        QVERIFY(application->urlTypesFor(u"csv"_s).contains(u"CorrelationCSV"_s));
+        QVERIFY(application->pluginNames(u"GML"_s).contains(u"Generic"_s));
+        QCOMPARE(application->pluginNames(u"CorrelationCSV"_s), QStringList{u"Correlation"_s});
+        QVERIFY(application->pluginNames(u"Not a type"_s).isEmpty());
+
+        QVERIFY(application->canOpen(u"GML"_s));
+        QVERIFY(application->canOpen(QString::fromLatin1(Application::NativeFileType)));
+        QVERIFY(!application->canOpen(u"Not a type"_s));
+        QVERIFY(application->canOpenAnyOf({u"Not a type"_s, u"GML"_s}));
+        QVERIFY(!application->canOpenAnyOf({u"Not a type"_s}));
+
+        // A file type is identified by its description and extensions, as the open file dialog lists them
+        const auto description = application->descriptionForUrlType(u"GML"_s);
+        QVERIFY(!description.isEmpty());
+        QCOMPARE(application->urlTypeFor(description, {u"gml"_s}), u"GML"_s);
+        QVERIFY(application->urlTypeFor(description, {u"xml"_s}).isEmpty());
+
+        // Why a file couldn't be identified, here as its extension doesn't match its content
+        const auto tabs = write(u"tabs.csv"_s, "Name\ta\tb\nr1\t1\t2\nr2\t3\t4\n");
+        QVERIFY(!application->urlTypesOf(tabs).contains(u"CorrelationCSV"_s));
+        const auto reasons = application->failureReasons(tabs);
+        QVERIFY(std::ranges::any_of(reasons, [](const auto& reason) { return reason.contains(u"resembles a 'TSV' file"_s); }));
+        QVERIFY(application->failureReasons(write(u"unknown.xyz"_s, "?")).isEmpty());
+
+        auto saverNames = [application]
+        {
+            const auto saverFileTypes = application->saverFileTypes();
+
+            QStringList names;
+            names.reserve(saverFileTypes.size());
+            for(const auto& saver : saverFileTypes)
+                names.append(saver.toMap().value(u"extension"_s).toString());
+            return names;
+        }();
+        QVERIFY(saverNames.contains(u"gml"_s));
+        QVERIFY(saverNames.contains(u"graphml"_s));
+
+        const std::unique_ptr<QAbstractItemModel> plugins(application->pluginDetailsModel());
+        QCOMPARE(plugins->rowCount(), 3);
+        QVERIFY(!plugins->data(plugins->index(0, 0), Qt::DisplayRole).toString().isEmpty());
+        const std::unique_ptr<QAbstractItemModel> urlTypes(application->urlTypeDetailsModel());
+        QVERIFY(urlTypes->rowCount() > 0);
+
+        // Links to Graphia itself
+        const QUrl link(u"%1://v2/open/a%20b/"_s.arg(Application::nativeExtension()));
+        QVERIFY(application->isNativeLink(link));
+        QCOMPARE(application->linkVersionFor(link), 2);
+        QCOMPARE(application->linkArgumentsFor(link), (QStringList{u"open"_s, u"a b"_s}));
+        QCOMPARE(application->linkVersionFor(QUrl(u"%1://x/open"_s.arg(Application::nativeExtension()))), -1);
+        QVERIFY(!application->isNativeLink(QUrl(u"https://graphia.app"_s)));
+        QCOMPARE(application->linkVersionFor(QUrl(u"https://graphia.app"_s)), -1);
+
+        // The files that come with Graphia, here the tests in the build directory
+        QVERIFY(application->isResourceFile(QCoreApplication::applicationFilePath()));
     }
 
     // The transforms offered when adding one, by category, with the user's favourites first
