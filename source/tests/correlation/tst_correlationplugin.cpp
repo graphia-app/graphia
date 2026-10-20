@@ -41,6 +41,7 @@
 #include <QVector>
 
 #include <algorithm>
+#include <cmath>
 #include <iterator>
 #include <limits>
 #include <memory>
@@ -383,6 +384,73 @@ private slots:
         QVERIFY(importAnnotations({1}, false));
         QCOMPARE(annotationNames(), (QStringList{u"Batch"_s, u"Kind"_s, u"Kind(1)"_s}));
     }
+    // The data is scaled, normalised, clipped and imputed as the import dialog's options say
+    void preprocessing_data()
+    {
+        QTest::addColumn<QVariantMap>("parameters");
+        QTest::addColumn<QString>("attribute");
+        QTest::addColumn<QString>("row");
+        QTest::addColumn<double>("value");
+        QTest::addColumn<QString>("log");
+
+        // c1 is 1, 2, 6, 1, 6, and c6 is 6, 12, 1, 6, 1
+        QTest::newRow("Min/max") << QVariantMap{{u"normalise"_s, u"MinMax"_s}} <<
+            u"DataValue.c1"_s << u"r2"_s << 0.2 << u"Normalisation: Min/Max"_s;
+
+        // Half the smallest positive value is added, so that zeros can be logged
+        QTest::newRow("Log2") << QVariantMap{{u"scaling"_s, u"Log2"_s}} <<
+            u"DataValue.c1"_s << u"r2"_s << std::log2(2.5) << u"Scaling: Log2(x + ε)"_s;
+
+        QTest::newRow("Clipped") << QVariantMap{{u"clippingType"_s, u"Constant"_s}, {u"clippingValue"_s, 5.0}} <<
+            u"DataValue.c6"_s << u"r2"_s << 5.0 << u"Clipping: Constant (5)"_s;
+    }
+
+    void preprocessing()
+    {
+        QFETCH(const QVariantMap, parameters);
+        QFETCH(const QString, attribute);
+        QFETCH(const QString, row);
+        QFETCH(const double, value);
+        QFETCH(const QString, log);
+
+        QVERIFY(open(parameters));
+        QVERIFY(std::abs(nodeValue(attribute, row) - value) < 1e-9);
+        QVERIFY2(_document->property("log").toString().contains(log), qPrintable(_document->property("log").toString()));
+    }
+
+    // Missing values are imputed
+    void imputation_data()
+    {
+        QTest::addColumn<QString>("missingDataType");
+        QTest::addColumn<double>("value");
+        QTest::addColumn<QString>("log");
+
+        QTest::newRow("Constant") << u"Constant"_s << 7.0 << u"Imputation: Constant (7)"_s;
+        QTest::newRow("Column mean") << u"ColumnAverage"_s << 3.0 << u"Imputation: Column Mean"_s;
+        QTest::newRow("Row interpolation") << u"RowInterpolation"_s << 3.0 << u"Imputation: Row Interpolate"_s;
+    }
+
+    void imputation()
+    {
+        QFETCH(QString, missingDataType);
+        QFETCH(const double, value);
+        QFETCH(const QString, log);
+
+        // r2's c2 is missing; c2's others average 3, and r2's neighbours are 2 and 4
+        QVERIFY(open(write(u"imputed.csv"_s,
+            "Name,c1,c2,c3\n"
+            "r1,1,2,3\n"
+            "r2,2,,4\n"
+            "r3,3,4,5\n"), u"CorrelationCSV"_s, u"Correlation"_s,
+        {
+            {u"missingDataType"_s, missingDataType},
+            {u"missingDataValue"_s, 7.0},
+        }));
+
+        QVERIFY(std::abs(nodeValue(u"DataValue.c2"_s, u"r2"_s) - value) < 1e-9);
+        QVERIFY2(_document->property("log").toString().contains(log), qPrintable(_document->property("log").toString()));
+    }
+
     // The Data Value attribute has a value per column, which attribute lists show as its children
     void dataValueAttribute()
     {
