@@ -2926,7 +2926,7 @@ void Document::writeTableModelToFile(QAbstractItemModel* model, const QUrl& file
 
         auto csvEscapedString = [](const QString& string)
         {
-            static const QRegularExpression re(u"[\",]"_s);
+            static const QRegularExpression re(u"[\",\r\n]"_s);
             if(string.contains(re))
             {
                 QString escaped = string;
@@ -2946,7 +2946,10 @@ void Document::writeTableModelToFile(QAbstractItemModel* model, const QUrl& file
 
             // "The IANA standard for TSV achieves simplicity
             // by simply disallowing tabs within fields."
-            return escaped.replace(u"\t"_s, u""_s);
+            escaped.replace(u"\t"_s, u""_s);
+
+            static const QRegularExpression lineBreaks(u"\r\n|\r|\n"_s);
+            return escaped.replace(lineBreaks, u" "_s);
         };
 
         std::function<QString(const QString&)> escapedString = csvEscapedString;
