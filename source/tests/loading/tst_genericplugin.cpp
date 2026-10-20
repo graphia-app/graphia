@@ -175,6 +175,33 @@ private slots:
         QTest::ignoreMessage(QtDebugMsg, QRegularExpression(u"unknown parameter"_s));
         instance->applyParameter(u"unknown"_s, 1);
     }
+
+    void edgeFilterThresholdPrecision_data()
+    {
+        QTest::addColumn<double>("threshold");
+        QTest::addColumn<QString>("expected");
+
+        QTest::newRow("Large") << 1234567.0 << u"1234567"_s;
+        QTest::newRow("Many digits") << 0.123456789 << u"0.123456789"_s;
+        QTest::newRow("Small") << 0.0000123456 << u"1.23456e-05"_s;
+        QTest::newRow("Negative") << -2.5 << u"-2.5"_s;
+    }
+
+    void edgeFilterThresholdPrecision()
+    {
+        QFETCH(const double, threshold);
+        QFETCH(const QString, expected);
+
+        // The threshold must be exactly as given, so that the edges whose
+        // weights are the same as it, but no more, are kept
+        auto instance = _plugin.createInstance();
+        instance->applyParameter(u"filterEdges"_s, u"true"_s);
+        instance->applyParameter(u"initialThreshold"_s, threshold);
+
+        const auto transform = instance->defaultTransforms().at(0);
+        QCOMPARE(transform, u"RemoveEdges where $AbsoluteEdgeWeight < %1"_s.arg(expected));
+        QVERIFY(GraphTransformConfigParser().parse(transform));
+    }
 };
 
 QTEST_GUILESS_MAIN(TestGenericPlugin_)
