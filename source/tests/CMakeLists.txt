@@ -75,3 +75,15 @@ add_graphia_test(tst_genericplugin loading/tst_genericplugin.cpp)
 add_graphia_test(tst_layoutthread layout/tst_layoutthread.cpp)
 add_graphia_test(tst_random utils/tst_random.cpp)
 add_graphia_test(tst_nodeattributetablemodel plugins/tst_nodeattributetablemodel.cpp)
+
+# Headless mode loads the real plugins, from the build directory
+add_graphia_test(tst_headless headless/tst_headless.cpp)
+target_compile_definitions(tst_headless PRIVATE GRAPHIA_BUILD_DIR="${CMAKE_BINARY_DIR}")
+add_dependencies(tst_headless generic correlation)
+
+if(GRAPHIA_SANITIZERS)
+    # The plugins each have their own copy of the shared library, as the test does,
+    # which AddressSanitizer reports as violating the one definition rule
+    set_property(TEST tst_headless APPEND PROPERTY
+        ENVIRONMENT_MODIFICATION "ASAN_OPTIONS=string_append::detect_odr_violation=0")
+endif()
