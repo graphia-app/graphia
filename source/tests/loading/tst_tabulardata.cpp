@@ -18,8 +18,10 @@
  */
 
 #include "tests/common/testenvironment.h"
+#include "tests/common/xlsxwriter.h"
 
 #include "shared/loading/tabulardata.h"
+#include "shared/loading/xlsxtabulardataparser.h"
 
 #include <QTest>
 #include <QByteArray>
@@ -73,9 +75,9 @@ class TestTabularData : public QObject
 private:
     QTemporaryDir _dir;
 
-    QUrl writeFile(const QByteArray& content)
+    QUrl writeFile(const QByteArray& content, const QString& name = u"data"_s)
     {
-        auto fileName = _dir.filePath(u"data"_s);
+        auto fileName = _dir.filePath(name);
 
         QFile file(fileName);
         if(!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
@@ -194,6 +196,133 @@ private slots:
             QCOMPARE(TsvFileParser::canLoad(url), expected);
         else
             QFAIL("Unknown type");
+    }
+
+    void xlsx_data()
+    {
+        QTest::addColumn<Cells>("cells");
+        QTest::addColumn<Cells>("expected");
+
+        const Cells table{{u"Name"_s, u"Value"_s, u"Notes"_s},
+            {u"a"_s, u"1"_s, u"first"_s}, {u"b"_s, u"2.5"_s, u"second"_s}};
+        QTest::newRow("Table") << table << table;
+
+        QTest::newRow("Gaps") <<
+            Cells{{u"a"_s, u""_s, u"c"_s}, {u""_s, u"2"_s, u""_s}, {u""_s, u""_s, u""_s}, {u"d"_s}} <<
+            Cells{{u"a"_s, u""_s, u"c"_s}, {u""_s, u"2"_s, u""_s}, {u""_s, u""_s, u""_s}, {u"d"_s, u""_s, u""_s}};
+
+        QTest::newRow("Shared strings") <<
+            Cells{{u"x"_s, u"x"_s}, {u"y"_s, u"x"_s}} << Cells{{u"x"_s, u"x"_s}, {u"y"_s, u"x"_s}};
+
+        QTest::newRow("Escaping and Unicode") <<
+            Cells{{u"a & b"_s, u"<c>"_s, u"\"d\""_s, u"café →"_s}} <<
+            Cells{{u"a & b"_s, u"<c>"_s, u"\"d\""_s, u"café →"_s}};
+
+        QTest::newRow("Numbers") <<
+            Cells{{u"-1"_s, u"0.1"_s, u"1e-07"_s, u"123456789012"_s}} <<
+            Cells{{u"-1"_s, u"0.1"_s, u"1e-07"_s, u"123456789012"_s}};
+
+        QTest::newRow("Wide") <<
+            Cells{QStringList(30, u"v"_s)} << Cells{QStringList(30, u"v"_s)};
+
+        QTest::newRow("Empty") << Cells{} << Cells{};
+    }
+
+    void xlsx()
+    {
+        QFETCH(const Cells, cells);
+        QFETCH(const Cells, expected);
+
+        const auto fileName = _dir.filePath(u"data.xlsx"_s);
+        QVERIFY(XlsxWriter::write(fileName, cells));
+        const auto url = QUrl::fromLocalFile(fileName);
+
+        QVERIFY(XlsxTabularDataParser::canLoad(url));
+        QCOMPARE(TabularData::contentIdentityOf(url), u"XLSX"_s);
+
+        XlsxTabularDataParser parser;
+        QVERIFY(parser.parse(url));
+        QCOMPARE(cellsOf(parser.tabularData()), expected);
+    }
+
+    void xlsxNotXlsx()
+    {
+        // A CSV file with an XLSX extension
+        const auto url = writeFile("a,b\n1,2\n", u"data.xlsx"_s);
+        QVERIFY(!XlsxTabularDataParser::canLoad(url));
+
+        XlsxTabularDataParser parser;
+        QVERIFY(!parser.parse(url));
+        QVERIFY(!parser.failureReason().isEmpty());
+
+        QVERIFY(!XlsxTabularDataParser::canLoad(QUrl::fromLocalFile(_dir.filePath(u"missing.xlsx"_s))));
+    }
+
+    void rowLimit_data()
+    {
+        QTest::addColumn<QString>("type");
+
+        QTest::newRow("CSV") << u"CSV"_s;
+        QTest::newRow("XLSX") << u"XLSX"_s;
+    }
+
+    void rowLimit()
+    {
+        QFETCH(const QString, type);
+
+        Cells cells;
+        cells.reserve(10);
+        for(int row = 0; row < 10; row++)
+            cells.append({u"r%1"_s.arg(row), QString::number(row)});
+
+        TabularData tabularData;
+
+        if(type == u"XLSX"_s)
+        {
+            const auto fileName = _dir.filePath(u"rows.xlsx"_s);
+            QVERIFY(XlsxWriter::write(fileName, cells));
+
+            XlsxTabularDataParser parser;
+            parser.setRowLimit(3);
+            QVERIFY(parser.parse(QUrl::fromLocalFile(fileName)));
+            tabularData = std::move(parser.tabularData());
+        }
+        else
+        {
+            QByteArray csv;
+            for(const auto& row : cells)
+                csv += row.join(u',').toUtf8() + "\n";
+
+            CsvFileParser parser;
+            parser.setRowLimit(3);
+            QVERIFY(parser.parse(writeFile(csv)));
+            tabularData = std::move(parser.tabularData());
+        }
+
+        // Both read one more row than the limit, which is only used to look at
+        // the start of a file, so it doesn't matter
+        QCOMPARE(tabularData.numRows(), 4u);
+        QCOMPARE(tabularData.valueAt(0, 3), u"r3"_s);
+    }
+
+    void contentIdentity_data()
+    {
+        QTest::addColumn<QByteArray>("content");
+        QTest::addColumn<QString>("expected");
+
+        QTest::newRow("CSV") << QByteArray("a,b,c\n1,2,3\n") << u"CSV"_s;
+        QTest::newRow("TSV") << QByteArray("a\tb\tc\n1\t2\t3\n") << u"TSV"_s;
+        QTest::newRow("SSV") << QByteArray("a;b;c\n1;2;3\n") << u"SSV"_s;
+        QTest::newRow("Quoted commas") << QByteArray("\"a,b\";\"c,d\"\n1;2\n") << u"SSV"_s;
+        QTest::newRow("Nothing") << QByteArray("abc\n") << QString();
+    }
+
+    void contentIdentity()
+    {
+        QFETCH(const QByteArray, content);
+        QFETCH(const QString, expected);
+
+        QCOMPARE(TabularData::contentIdentityOf(writeFile(content)), expected);
     }
 };
 
