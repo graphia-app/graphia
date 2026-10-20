@@ -1251,7 +1251,6 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
 
     if(_numContinuousColumns > 0)
     {
-        Q_ASSERT((_continuousData.size() % _numContinuousColumns) == 0);
         if((_continuousData.size() % _numContinuousColumns) != 0)
         {
             setGenericFailureReason(CURRENT_SOURCE_LOCATION);
@@ -1279,7 +1278,6 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
 
     if(_numDiscreteColumns > 0)
     {
-        Q_ASSERT((_discreteData.size() % _numDiscreteColumns) == 0);
         if((_discreteData.size() % _numDiscreteColumns) != 0)
         {
             setGenericFailureReason(CURRENT_SOURCE_LOCATION);
@@ -1289,7 +1287,6 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
         _numRows = _discreteData.size() / _numDiscreteColumns;
     }
 
-    Q_ASSERT(_numRows > 0);
     if(_numRows == 0)
     {
         setGenericFailureReason(CURRENT_SOURCE_LOCATION);
@@ -1339,8 +1336,8 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
 
     u::forEachJsonGraphArray(jsonCorrelationValues, [&](EdgeId edgeId, double correlationValue)
     {
-        Q_ASSERT(graph.containsEdgeId(edgeId));
-        _correlationValues->set(edgeId, correlationValue);
+        if(graph.containsEdgeId(edgeId))
+            _correlationValues->set(edgeId, correlationValue);
 
         parser.setProgress(static_cast<int>((i++ * 100) / jsonCorrelationValues.size()));
     });
