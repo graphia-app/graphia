@@ -214,7 +214,7 @@ static bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphMode
 
                 for(const auto& attribute : attributes)
                 {
-                    const QString attributeName = QObject::tr("Node ") + attribute._name;
+                    const QString attributeName = attribute._name;
                     userNodeData.setValueBy(nodeId, attributeName, attribute._value);
                 }
             }
@@ -251,7 +251,7 @@ static bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphMode
 
             for(const auto& attribute : attributes)
             {
-                const QString attributeName = QObject::tr("Edge ") + attribute._name;
+                const QString attributeName = attribute._name;
                 userEdgeData.setValueBy(edgeId, attributeName, attribute._value);
             }
         }

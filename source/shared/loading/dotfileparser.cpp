@@ -501,7 +501,7 @@ static bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graph
                 {
                     for(const auto& attribute : edge._attributeList)
                     {
-                        const QString attributeName = QObject::tr("Edge ") + attribute._key;
+                        const QString attributeName = attribute._key;
                         userEdgeData.setValueBy(edgeId, attributeName, attribute._value);
                     }
                 }
@@ -514,7 +514,7 @@ static bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graph
 
                 for(const auto& attribute : node._attributeList)
                 {
-                    const QString attributeName = QObject::tr("Node ") + attribute._key;
+                    const QString attributeName = attribute._key;
                     userNodeData.setValueBy(nodeId, attributeName, attribute._value);
                 }
 
@@ -536,7 +536,7 @@ static bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graph
             {
                 for(auto nodeId : nodeIds)
                 {
-                    const QString attributeName = QObject::tr("Node ") + attribute._key;
+                    const QString attributeName = attribute._key;
                     userNodeData.setValueBy(nodeId, attributeName, attribute._value);
                 }
             }
@@ -547,7 +547,7 @@ static bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graph
             {
                 for(auto edgeId : edgeIds)
                 {
-                    const QString attributeName = QObject::tr("Edge ") + attribute._key;
+                    const QString attributeName = attribute._key;
                     userEdgeData.setValueBy(edgeId, attributeName, attribute._value);
                 }
             }

@@ -156,29 +156,31 @@ static bool parseCx1(const json& jsonArray, IGraphModel* graphModel,
         }
     }
 
-    auto addAttribute = [parser](const json& attribute, const char* elementType, const auto& idMap, auto& userData)
+    auto addAttribute = [parser](const json& attribute, const auto& idMap, auto& userData)
     {
         if(!u::contains(attribute, "po") || !attribute["po"].is_number())
         {
-            parser->setFailureReason(QObject::tr("%1 attribute is missing ID.").arg(elementType));
+            parser->setFailureReason(QObject::tr("Attribute is missing ID."));
             return false;
         }
 
         if(!u::contains(attribute, "n") || !u::contains(attribute, "v"))
         {
-            parser->setFailureReason(QObject::tr("%1 attribute is missing name or value.").arg(elementType));
+            parser->setFailureReason(QObject::tr("Attribute is missing name or value."));
             return false;
         }
 
         if(!attribute["n"].is_string())
         {
-            parser->setFailureReason(QObject::tr("%1 attribute name is not a string.").arg(elementType));
+            parser->setFailureReason(QObject::tr("Attribute name is not a string."));
             return false;
         }
 
+        auto attributeName = QString::fromStdString(attribute["n"].get<std::string>());
+
         if(!attribute["v"].is_string() && !attribute["v"].is_array())
         {
-            parser->setFailureReason(QObject::tr("%1 attribute value is not a string or list.").arg(elementType));
+            parser->setFailureReason(QObject::tr("Attribute '%1' value is not a string or list.").arg(attributeName));
             return false;
         }
 
@@ -186,13 +188,11 @@ static bool parseCx1(const json& jsonArray, IGraphModel* graphModel,
 
         if(!u::contains(idMap, cxId))
         {
-            parser->setFailureReason(QObject::tr("%1 ID not in graph.").arg(elementType));
+            parser->setFailureReason(QObject::tr("Attribute '%1' ID not in graph.").arg(attributeName));
             return false;
         }
 
         auto elementId = idMap.at(cxId);
-        auto attributeName = QObject::tr("%1 %2")
-            .arg(elementType, QString::fromStdString(attribute["n"].get<std::string>()));
         auto attributeValue = attribute["v"].is_string() ?
             QString::fromStdString(attribute["v"].get<std::string>()) :
             QString::fromStdString(attribute["v"].dump());
@@ -213,7 +213,7 @@ static bool parseCx1(const json& jsonArray, IGraphModel* graphModel,
             int i = 0;
             for(const auto& nodeAttribute : nodeAttributesArray)
             {
-                if(!addAttribute(nodeAttribute, "Node", cxIdToNodeId, *userNodeData))
+                if(!addAttribute(nodeAttribute, cxIdToNodeId, *userNodeData))
                     return false;
 
                 parser->setProgress((i++ * 100) / numNodeAttributes);
@@ -229,7 +229,7 @@ static bool parseCx1(const json& jsonArray, IGraphModel* graphModel,
             int i = 0;
             for(const auto& edgeAttribute : edgeAttributesArray)
             {
-                if(!addAttribute(edgeAttribute, "Edge", cxIdToEdgeId, *userEdgeData))
+                if(!addAttribute(edgeAttribute, cxIdToEdgeId, *userEdgeData))
                     return false;
 
                 parser->setProgress((i++ * 100) / numEdgeAttributes);
@@ -285,7 +285,7 @@ static bool parseCx2(const json& jsonArray, IGraphModel* graphModel,
         }
     }
 
-    auto addAttribute = [graphModel](const char* elementType, auto elementId, const json& attributes,
+    auto addAttribute = [graphModel](auto elementId, const json& attributes,
         const auto& aliases, auto& userData)
     {
         for(const auto& attribute : attributes.items())
@@ -300,7 +300,7 @@ static bool parseCx2(const json& jsonArray, IGraphModel* graphModel,
                 if(name == "n")
                 {
                     graphModel->setNodeName(elementId, attributeValue);
-                    userData.setValueBy(elementId, u"Node Name"_s, attributeValue);
+                    userData.setValueBy(elementId, QObject::tr("Node Name"), attributeValue);
                     continue;
                 }
             }
@@ -308,8 +308,7 @@ static bool parseCx2(const json& jsonArray, IGraphModel* graphModel,
             if(u::contains(aliases, name))
                 name = aliases.at(name);
 
-            auto attributeName = QObject::tr("%1 %2")
-                .arg(elementType, QString::fromStdString(name));
+            auto attributeName = QString::fromStdString(name);
             userData.setValueBy(elementId, attributeName, attributeValue);
         }
     };
@@ -343,7 +342,7 @@ static bool parseCx2(const json& jsonArray, IGraphModel* graphModel,
                 cxIdToNodeId[cxId] = nodeId;
 
                 if(u::contains(node, "v") && node["v"].is_object())
-                    addAttribute("Node", nodeId, node["v"], nodeAttributeAliases, *userNodeData);
+                    addAttribute(nodeId, node["v"], nodeAttributeAliases, *userNodeData);
 
                 parser->setProgress((i++ * 100) / numNodes);
 
@@ -391,7 +390,7 @@ static bool parseCx2(const json& jsonArray, IGraphModel* graphModel,
                 auto edgeId = graphModel->mutableGraph().addEdge(sourceId, targetId);
 
                 if(u::contains(edge, "v") && edge["v"].is_object())
-                    addAttribute("Edge", edgeId, edge["v"], edgeAttributeAliases, *userEdgeData);
+                    addAttribute(edgeId, edge["v"], edgeAttributeAliases, *userEdgeData);
 
                 parser->setProgress((i++ * 100) / numEdges);
 
