@@ -163,15 +163,42 @@ private slots:
 
         // Both sides are attributes
         QTest::newRow("int == int")                 << uR"($"Int" == $"Int2")"_s                << u"01010"_s;
+        QTest::newRow("int != int")                 << uR"($"Int" != $"Int2")"_s                << u"10101"_s;
         QTest::newRow("int < int")                  << uR"($"Int" < $"Int2")"_s                 << u"10001"_s;
+        QTest::newRow("int <= int")                 << uR"($"Int" <= $"Int2")"_s                << u"11011"_s;
         QTest::newRow("int >= float attributes")    << uR"($"Int" >= $"Float")"_s               << u"11010"_s;
+        QTest::newRow("float > int attributes")     << uR"($"Float" > $"Int")"_s                << u"00101"_s;
+        QTest::newRow("float == float")             << uR"($"Float" == $"Float")"_s             << u"11111"_s;
+        QTest::newRow("float < float")              << uR"($"Float" < $"Float")"_s              << u"00000"_s;
+        QTest::newRow("string == string")           << uR"($"String" == $"String2")"_s          << u"00010"_s;
+        // Compared as strings, as their types differ
+        QTest::newRow("int == float attributes")    << uR"($"Int" == $"Float")"_s               << u"00010"_s;
         QTest::newRow("string includes string")     << uR"($"String" includes $"String2")"_s    << u"11011"_s;
+        QTest::newRow("string excludes string")     << uR"($"String" excludes $"String2")"_s    << u"00100"_s;
         QTest::newRow("string starts string")       << uR"($"String" starts $"String2")"_s      << u"10010"_s;
+        QTest::newRow("string ends string")         << uR"($"String" ends $"String2")"_s        << u"00011"_s;
+        QTest::newRow("string matches string")      << uR"($"String" matches $"String2")"_s     << u"11011"_s;
+        QTest::newRow("string matchesCaseInsensitive string") << uR"($"String2" matchesCaseInsensitive $"String")"_s << u"00010"_s;
+        QTest::newRow("int includes string")        << uR"($"Int" includes $"String2")"_s       << u"00010"_s;
         QTest::newRow("numerical op on strings")    << uR"($"String" < $"String2")"_s           << u"invalid"_s;
 
         // Neither side is an attribute
         QTest::newRow("value < value")              << uR"(1 < 2)"_s                            << u"11111"_s;
+        QTest::newRow("value > value")              << uR"(1 > 2)"_s                            << u"00000"_s;
+        QTest::newRow("value <= value")             << uR"(2 <= 2)"_s                           << u"11111"_s;
+        QTest::newRow("value >= value")             << uR"(1 >= 2)"_s                           << u"00000"_s;
+        QTest::newRow("value < value of another type") << uR"(1 < 2.5)"_s                      << u"11111"_s;
         QTest::newRow("value == value")             << uR"("a" == "b")"_s                       << u"00000"_s;
+        QTest::newRow("value != value")             << uR"("a" != "b")"_s                       << u"11111"_s;
+        QTest::newRow("value == value of another type") << uR"(2 == 2.0)"_s                     << u"11111"_s;
+        QTest::newRow("string value < value")       << uR"("a" < "b")"_s                        << u"11111"_s;
+        QTest::newRow("value includes value")       << uR"("apple" includes "pl")"_s            << u"11111"_s;
+        QTest::newRow("value excludes value")       << uR"("apple" excludes "pl")"_s            << u"00000"_s;
+        QTest::newRow("value starts value")         << uR"("apple" starts "ap")"_s              << u"11111"_s;
+        QTest::newRow("value ends value")           << uR"("apple" ends "ap")"_s                << u"00000"_s;
+        QTest::newRow("value matches value")        << uR"("apple" matches "^A")"_s             << u"00000"_s;
+        QTest::newRow("value matchesCaseInsensitive value") << uR"("apple" matchesCaseInsensitive "^A")"_s << u"11111"_s;
+        QTest::newRow("value matches invalid regex") << u"\"apple\" matches \"[a\""_s           << u"invalid"_s;
 
         // Unary
         QTest::newRow("hasValue")                   << uR"($"Partial" hasValue)"_s              << u"10101"_s;
