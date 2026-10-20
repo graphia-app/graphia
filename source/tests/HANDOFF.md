@@ -98,6 +98,13 @@ testing, which may come later as an extra safety net.
   saves, which `NativeSaverFactory` gathers from the `Document`. Tests can
   therefore save native files without a `Document`.
 - **`AttributeEdits`:** has public setters, so tests can create edits.
+- **A bare `Document`:** `tst_commands` creates a `Document` with nothing
+  loaded, which is enough for `ApplyTransformsCommand`, and connects its
+  `taskAddedToExecutor` signal to its `executeDeferred` slot so that what
+  commands ask of the main thread is done at once. A loaded `Document` isn't
+  usable without a `GraphDisplay` that has a renderer, which needs OpenGL;
+  without one, `onLoadComplete` stops early, and `busy()` dereferences the
+  display.
 - **`tst_qml`:** runs the QML tests in `source/tests/qml` with Qt Quick Test.
   `tst_qml.cpp` gives them a `testHelper` context property, which parses
   transforms and visualisations with the real parsers, so that the QML tests
@@ -125,7 +132,7 @@ testing, which may come later as an extra safety net.
 | `tst_graphparsers` | pairwise, GML, GraphML, DOT, JSON Graph, CX, BioPAX, adjacency matrix and MATLAB files (written with matio by the test): valid, precise, malformed, syntax error locations, missing values |
 | `tst_savers` | GML, GraphML, JSON Graph and pairwise export, then re-import |
 | `tst_nativeloader` | native files: every format version, Tutorial.graphia, malformed files, save then load |
-| `tst_commands` | execute, undo and redo of delete nodes and the edit, clone, remove and import attribute commands |
+| `tst_commands` | execute, undo and redo of delete nodes, the edit, clone, remove and import attribute commands, and applying transforms, including the deferred form and cancelling it |
 | `tst_visualisationconfigparser` | visualisation config round trips, malformed configs, the display form |
 | `tst_qml` | `Utils.js`, `AttributeUtils.js`, `MenuUtils.js`, `VisualisationUtils.js`, and `TransformConfig.js`: building a transform's controls (including attribute parameters), then its expression, gives back the same transform; locked transforms' text |
 | `tst_colorvisualisations` | colour gradients and palettes, including malformed ones |
@@ -242,6 +249,12 @@ Each one is a commit; see `git log` for the details.
   - the fast initial layout put the first two children of its starting node
     in the same place;
   - Barnes-Hut trees ignored all but one of the nodes in the same place.
+- **Cancelling applying transforms:**
+  - a cancel that arrived when no rebuild was running, e.g. while "Apply
+    Transforms and Visualisations" applied the visualisations, stopped every
+    later rebuild, so the graph stopped following changes;
+  - the cancelled transforms stayed in the transformed graph, and were
+    applied the next time the graph changed.
 - **Visualisation configs:**
   - whole number parameters couldn't be parsed;
   - numbers were written with 6 significant figures;
@@ -307,10 +320,9 @@ Each one is a commit; see `git log` for the details.
 
 ## Next steps, in rough order
 
-1. **Commands that need a `Document`:** `ApplyTransformsCommand`. This may
-   need the same kind of separation as `NativeSaver::Content`, or a
-   `Document` level integration test, possibly under xvfb.
-2. **Coverage gaps:** see "Coverage" below.
+1. **Coverage gaps:** see "Coverage" below.
+2. **A `Document` level integration test,** with a real `GraphDisplay`. That
+   needs OpenGL, e.g. Mesa under xvfb on Linux CI.
 3. **Later:** the corpus comparison of release and candidate builds.
 
 The original plan, for reference, had these priorities:
@@ -352,6 +364,12 @@ As of the work above, the biggest gaps outside rendering and UI code are
 (`correlationplugin.cpp`, which isn't in `correlationcore`, so can't be
 linked by a test). XLSX files can be written by tests with
 `tests/common/xlsxwriter.h`.
+
+`CommandManager` drops a command that reports itself cancelled, without
+undoing it, so a command must roll itself back when cancelled.
+`ApplyTransformsCommand` now does, but a cancel that arrives after it has
+decided whether it was cancelled still drops it from the undo stack with its
+transforms applied. The window is tiny, so this was left alone.
 
 `BarnesHutTree::differenceEpsilon` increments a `mutable` counter, and
 `evaluateKernel` is called from several threads at once by the force
