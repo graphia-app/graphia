@@ -72,6 +72,13 @@ std::vector<QString> UserElementData<E>::exposedAttributeNames() const
 }
 
 template<typename E>
+bool UserElementData<E>::setValueBy(E elementId, const AttributeDeclaration& declaration, const QString& value)
+{
+    add(declaration);
+    return setValueBy(elementId, declaration._name, value);
+}
+
+template<typename E>
 E UserElementData<E>::elementIdForIndex(size_t index) const
 {
     if(u::contains(_indexToElementIdMap, index))
@@ -213,7 +220,7 @@ std::vector<QString> UserElementData<E>::exposeAsAttributes(IGraphModel& graphMo
         if(_exposedAsAttributes.contains(userDataVectorName))
             continue;
 
-        QString attributeName = graphModel.attributeIsDeclared(userDataVectorName) ?
+        QString attributeName = graphModel.attributeIsDeclared(userDataVectorName) && !vectorIsDeclared(userDataVectorName) ?
             QObject::tr("User %1").arg(userDataVectorName) :
             userDataVectorName;
 
@@ -258,7 +265,7 @@ std::vector<QString> UserElementData<E>::exposeAsAttributes(IGraphModel& graphMo
 
         auto description = !attributeOverride._description.isEmpty() ?
             attributeOverride._description :
-            QObject::tr("%1 is a user defined attribute.").arg(userDataVectorName);
+            QObject::tr("%1 is a user defined attribute.").arg(graphModel.attributeDisplayName(attributeName));
 
         setAttributeDescription(graphModel, attributeName, description);
     }

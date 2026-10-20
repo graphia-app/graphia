@@ -106,7 +106,7 @@ bool isEdgeElementName(const QString& name)
 BiopaxFileParser::BiopaxFileParser(IUserNodeData* userNodeData) : _userNodeData(userNodeData)
 {
     // Add this up front, so that it appears first in the attribute table
-    userNodeData->add(QObject::tr("Node Name"));
+    userNodeData->add(nodeNameAttribute());
 }
 
 struct TempEdge
@@ -184,8 +184,8 @@ bool BiopaxFileParser::parse(const QUrl& url, IGraphModel* graphModel)
 
                 if(_userNodeData != nullptr)
                 {
-                    _userNodeData->setValueBy(nodeId, QObject::tr("ID"), rdfId);
-                    _userNodeData->setValueBy(nodeId, QObject::tr("Class"), elementName);
+                    _userNodeData->setValueBy(nodeId, idAttribute(), rdfId);
+                    _userNodeData->setValueBy(nodeId, classAttribute(), elementName);
                 }
             }
             else if(isEdgeElementName(elementName))
@@ -228,11 +228,11 @@ bool BiopaxFileParser::parse(const QUrl& url, IGraphModel* graphModel)
 
             if(activeElements.top() == u"displayName"_s)
             {
-                _userNodeData->setValueBy(activeNodeId, QObject::tr("Node Name"), data);
+                _userNodeData->setValueBy(activeNodeId, nodeNameAttribute(), data);
                 graphModel->setNodeName(activeNodeId, data);
             }
             else if(activeElements.top() == u"comment"_s)
-                _userNodeData->setValueBy(activeNodeId, QObject::tr("Comment"), data);
+                _userNodeData->setValueBy(activeNodeId, commentAttribute(), data);
 
             break;
         }
@@ -261,8 +261,8 @@ bool BiopaxFileParser::parse(const QUrl& url, IGraphModel* graphModel)
                 // If the node hasn't been assigned a name, just use its ID
                 if(graphModel->nodeName(activeNodeId).isEmpty())
                 {
-                    auto nodeIdString = _userNodeData->valueBy(activeNodeId, QObject::tr("ID")).toString();
-                    _userNodeData->setValueBy(activeNodeId, QObject::tr("Node Name"), nodeIdString);
+                    auto nodeIdString = _userNodeData->valueBy(activeNodeId, idAttribute()._name).toString();
+                    _userNodeData->setValueBy(activeNodeId, nodeNameAttribute(), nodeIdString);
                     graphModel->setNodeName(activeNodeId, nodeIdString);
                 }
 

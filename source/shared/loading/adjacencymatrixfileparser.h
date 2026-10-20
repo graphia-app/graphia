@@ -30,6 +30,7 @@
 
 #include "shared/utils/is_detected.h"
 
+#include <QObject>
 #include <QString>
 #include <QUrl>
 
@@ -69,6 +70,10 @@ public:
 
     bool parse(const QUrl& url, IGraphModel* graphModel) override;
     QString log() const override;
+
+    static AttributeDeclaration edgeWeightAttribute()           { return {._name = u"EdgeWeight"_s,         ._displayName = QObject::tr("Edge Weight")}; }
+    static AttributeDeclaration absoluteEdgeWeightAttribute()   { return {._name = u"AbsoluteEdgeWeight"_s, ._displayName = QObject::tr("Absolute Edge Weight")}; }
+    static AttributeDeclarations attributeDeclarations() { return {edgeWeightAttribute(), absoluteEdgeWeightAttribute()}; }
 };
 
 template<typename TabularDataParserType>

@@ -111,6 +111,8 @@ public:
 
     bool editable() const override { return true; }
 
+    AttributeDeclarations attributeDeclarations() const override;
+
     QString parametersQmlType(const QString& urlType) const override;
 };
 

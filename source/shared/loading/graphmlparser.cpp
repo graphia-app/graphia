@@ -41,7 +41,7 @@ GraphMLParser::GraphMLParser(IUserNodeData* userNodeData, IUserEdgeData* userEdg
     _userNodeData(userNodeData), _userEdgeData(userEdgeData)
 {
     // Add this up front, so that it appears first in the attribute table
-    userNodeData->add(QObject::tr("Node Name"));
+    userNodeData->add(nodeNameAttribute());
 }
 
 bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
@@ -149,7 +149,7 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
                 activeNodeId = graphModel->mutableGraph().addNode();
                 nodes.emplace(nodeName, activeNodeId);
 
-                _userNodeData->setValueBy(activeNodeId, QObject::tr("Node Name"), nodeName);
+                _userNodeData->setValueBy(activeNodeId, nodeNameAttribute(), nodeName);
                 graphModel->setNodeName(activeNodeId, nodeName);
             }
             else if(elementName == u"edge"_s)
@@ -183,7 +183,7 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
                 if(attributes.hasAttribute(u"id"_s))
                 {
                     auto edgeName = attributes.value(u"id"_s).toString();
-                    _userEdgeData->setValueBy(activeEdgeId, QObject::tr("Edge Name"), edgeName);
+                    _userEdgeData->setValueBy(activeEdgeId, edgeNameAttribute(), edgeName);
                 }
             }
             else if(elementName == u"data"_s)

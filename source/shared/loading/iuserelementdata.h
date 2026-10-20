@@ -44,6 +44,7 @@ public:
 
     virtual QVariant valueBy(E elementId, const QString& name) const = 0;
     virtual bool setValueBy(E elementId, const QString& name, const QString& value) = 0;
+    virtual bool setValueBy(E elementId, const AttributeDeclaration& declaration, const QString& value) = 0;
 };
 
 using IUserNodeData = IUserElementData<NodeId>;

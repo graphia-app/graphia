@@ -23,7 +23,6 @@
 #include "shared/graph/imutablegraph.h"
 #include "shared/utils/container.h"
 
-#include <QObject>
 #include <QString>
 #include <QtGlobal>
 
@@ -40,7 +39,7 @@ PairwiseParser::PairwiseParser(IUserNodeData* userNodeData,
         _tabularData = std::move(*tabularData);
 
     // Add this up front, so that it appears first in the attribute table
-    userNodeData->add(QObject::tr("Node Name"));
+    userNodeData->add(nodeNameAttribute());
 }
 
 bool PairwiseParser::parse(const QUrl& url, IGraphModel* graphModel)
@@ -99,7 +98,7 @@ bool PairwiseParser::parse(const QUrl& url, IGraphModel* graphModel)
 
             if(_userNodeData != nullptr)
             {
-                _userNodeData->setValueBy(sourceNodeId, QObject::tr("Node Name"), source);
+                _userNodeData->setValueBy(sourceNodeId, nodeNameAttribute(), source);
                 graphModel->setNodeName(sourceNodeId, source);
             }
         }
@@ -113,7 +112,7 @@ bool PairwiseParser::parse(const QUrl& url, IGraphModel* graphModel)
 
             if(_userNodeData != nullptr)
             {
-                _userNodeData->setValueBy(targetNodeId, QObject::tr("Node Name"), target);
+                _userNodeData->setValueBy(targetNodeId, nodeNameAttribute(), target);
                 graphModel->setNodeName(targetNodeId, target);
             }
         }

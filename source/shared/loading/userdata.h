@@ -32,6 +32,7 @@
 
 #include <cstddef>
 #include <map>
+#include <set>
 #include <vector>
 
 class UserData : public QObject, public virtual IUserData
@@ -41,6 +42,7 @@ class UserData : public QObject, public virtual IUserData
 private:
     std::map<QString, UserDataVector> _userDataVectors;
     std::vector<QString> _vectorNames;
+    std::set<QString> _declaredVectorNames;
     size_t _numValues = 0;
 
 public:
@@ -57,6 +59,8 @@ public:
     auto end() const { return _vectorNames.end(); }
 
     void add(const QString& name) override;
+    void add(const AttributeDeclaration& declaration) override;
+    bool vectorIsDeclared(const QString& name) const { return _declaredVectorNames.contains(name); }
     bool setValue(size_t index, const QString& name, const QString& value) override;
     QVariant value(size_t index, const QString& name) const override;
 

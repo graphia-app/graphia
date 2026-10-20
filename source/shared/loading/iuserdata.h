@@ -26,6 +26,8 @@
 #include <cstddef>
 #include <vector>
 
+struct AttributeDeclaration;
+
 class IUserData
 {
 public:
@@ -39,6 +41,7 @@ public:
     virtual const std::vector<QString>& vectorNames() const = 0;
 
     virtual void add(const QString& name) = 0;
+    virtual void add(const AttributeDeclaration& declaration) = 0;
 
     virtual QVariant value(size_t index, const QString& name) const = 0;
     virtual bool setValue(size_t index, const QString& name, const QString& value) = 0;

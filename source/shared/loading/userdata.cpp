@@ -19,6 +19,7 @@
 
 #include "userdata.h"
 
+#include "shared/attributes/iattribute.h"
 #include "shared/utils/container.h"
 #include "shared/utils/json.h"
 
@@ -73,6 +74,12 @@ void UserData::add(const QString& name)
 
     _vectorNames.emplace_back(normalisedName);
     _userDataVectors.emplace(normalisedName, UserDataVector(normalisedName));
+}
+
+void UserData::add(const AttributeDeclaration& declaration)
+{
+    add(declaration._name);
+    _declaredVectorNames.insert(normalise(declaration._name));
 }
 
 bool UserData::setValue(size_t index, const QString& name, const QString& value)
@@ -151,6 +158,7 @@ void UserData::remove(const QString& name)
     const QString normalisedName = normalise(name);
     _userDataVectors.erase(normalisedName);
     u::removeByValue(_vectorNames, normalisedName);
+    _declaredVectorNames.erase(normalisedName);
 }
 
 json UserData::save(Progressable& progressable, const std::vector<size_t>& indexes) const

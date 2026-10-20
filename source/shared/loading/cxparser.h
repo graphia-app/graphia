@@ -24,6 +24,7 @@
 #include "shared/loading/iuserelementdata.h"
 #include "shared/utils/json_fwd.h"
 
+#include <QObject>
 #include <QUrl>
 
 class CxParser : public JsonParser
@@ -38,6 +39,10 @@ public:
     CxParser(IUserNodeData* userNodeData, IUserEdgeData* userEdgeData);
 
     static bool canLoad(const QUrl &) { return true; }
+
+    static AttributeDeclaration nodeRepresentsAttribute()   { return {._name = u"NodeRepresents"_s,  ._displayName = QObject::tr("Node Represents")}; }
+    static AttributeDeclaration edgeInteractionAttribute()  { return {._name = u"EdgeInteraction"_s, ._displayName = QObject::tr("Edge Interaction")}; }
+    static AttributeDeclarations attributeDeclarations() { return {nodeRepresentsAttribute(), edgeInteractionAttribute()}; }
 };
 
 #endif // CXPARSER_H

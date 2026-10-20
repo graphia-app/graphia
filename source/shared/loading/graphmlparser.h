@@ -23,6 +23,7 @@
 #include "shared/loading/iparser.h"
 #include "shared/loading/iuserelementdata.h"
 
+#include <QObject>
 #include <QUrl>
 
 class IGraphModel;
@@ -37,6 +38,9 @@ public:
     explicit GraphMLParser(IUserNodeData* userNodeData, IUserEdgeData* userEdgeData);
     bool parse(const QUrl& url, IGraphModel* graphModel) override;
     static bool canLoad(const QUrl&) { return true; }
+
+    static AttributeDeclaration edgeNameAttribute() { return {._name = u"EdgeName"_s, ._displayName = QObject::tr("Edge Name")}; }
+    static AttributeDeclarations attributeDeclarations() { return {edgeNameAttribute()}; }
 };
 
 #endif // GRAPHMLPARSER_H

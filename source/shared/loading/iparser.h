@@ -20,11 +20,15 @@
 #ifndef IPARSER_H
 #define IPARSER_H
 
+#include "shared/attributes/iattribute.h"
 #include "shared/utils/progressable.h"
 #include "shared/utils/cancellable.h"
 #include "shared/utils/failurereason.h"
 
+#include <QObject>
 #include <QString>
+
+using namespace Qt::Literals::StringLiterals;
 
 class QUrl;
 class IGraphModel;
@@ -36,6 +40,8 @@ public:
 
     virtual bool parse(const QUrl& url, IGraphModel* graphModel = nullptr) = 0;
     virtual QString log() const { return {}; }
+
+    static AttributeDeclaration nodeNameAttribute() { return {._name = u"NodeName"_s, ._displayName = QObject::tr("Node Name")}; }
 };
 
 #endif // IPARSER_H

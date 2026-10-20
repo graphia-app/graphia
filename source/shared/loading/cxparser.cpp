@@ -40,7 +40,7 @@ CxParser::CxParser(IUserNodeData* userNodeData, IUserEdgeData* userEdgeData) :
     _userNodeData(userNodeData), _userEdgeData(userEdgeData)
 {
     // Add this up front, so that it appears first in the attribute table
-    userNodeData->add(QObject::tr("Node Name"));
+    userNodeData->add(nodeNameAttribute());
 }
 
 static bool parseCx1(const json& jsonArray, IGraphModel* graphModel,
@@ -78,14 +78,14 @@ static bool parseCx1(const json& jsonArray, IGraphModel* graphModel,
                 if(u::contains(node, "n") && node["n"].is_string())
                 {
                     auto name = QString::fromStdString(node["n"].get<std::string>());
-                    userNodeData->setValueBy(nodeId, QObject::tr("Node Name"), name);
+                    userNodeData->setValueBy(nodeId, IParser::nodeNameAttribute(), name);
                     graphModel->setNodeName(nodeId, name);
                 }
 
                 if(u::contains(node, "r") && node["r"].is_string())
                 {
                     auto represents = QString::fromStdString(node["r"].get<std::string>());
-                    userNodeData->setValueBy(nodeId, QObject::tr("Node Represents"), represents);
+                    userNodeData->setValueBy(nodeId, CxParser::nodeRepresentsAttribute(), represents);
                 }
 
                 parser->setProgress((i++ * 100) / numNodes);
@@ -145,7 +145,7 @@ static bool parseCx1(const json& jsonArray, IGraphModel* graphModel,
                 if(u::contains(edge, "i") && edge["i"].is_string())
                 {
                     auto interaction = QString::fromStdString(edge["i"].get<std::string>());
-                    userEdgeData->setValueBy(edgeId, QObject::tr("Edge Interaction"), interaction);
+                    userEdgeData->setValueBy(edgeId, CxParser::edgeInteractionAttribute(), interaction);
                 }
 
                 parser->setProgress((i++ * 100) / numEdges);
@@ -300,7 +300,7 @@ static bool parseCx2(const json& jsonArray, IGraphModel* graphModel,
                 if(name == "n")
                 {
                     graphModel->setNodeName(elementId, attributeValue);
-                    userData.setValueBy(elementId, QObject::tr("Node Name"), attributeValue);
+                    userData.setValueBy(elementId, IParser::nodeNameAttribute(), attributeValue);
                     continue;
                 }
             }

@@ -23,6 +23,7 @@
 #include "shared/loading/iparser.h"
 #include "shared/loading/iuserelementdata.h"
 
+#include <QObject>
 #include <QUrl>
 
 class IGraphModel;
@@ -38,6 +39,11 @@ public:
 
     bool parse(const QUrl& url, IGraphModel* graphModel) override;
     static bool canLoad(const QUrl&) { return true; }
+
+    static AttributeDeclaration idAttribute()       { return {._name = u"ID"_s,      ._displayName = QObject::tr("ID")}; }
+    static AttributeDeclaration classAttribute()    { return {._name = u"Class"_s,   ._displayName = QObject::tr("Class")}; }
+    static AttributeDeclaration commentAttribute()  { return {._name = u"Comment"_s, ._displayName = QObject::tr("Comment")}; }
+    static AttributeDeclarations attributeDeclarations() { return {idAttribute(), classAttribute(), commentAttribute()}; }
 };
 
 #endif // BIOPAXFILEPARSER_H

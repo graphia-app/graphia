@@ -191,7 +191,8 @@ QStringList BaseGenericPluginInstance::defaultTransforms() const
     if(_adjacencyMatrixParameters._filterEdges)
     {
         defaultTransforms.append(
-            QStringLiteral(R"("RemoveEdges" where $"Absolute Edge Weight" < %2)")
+            uR"("RemoveEdges" where $"%1" < %2)"_s
+            .arg(AdjacencyMatrixParser::absoluteEdgeWeightAttribute()._name)
             .arg(_adjacencyMatrixParameters._initialAbsEdgeWeightThreshold));
     }
 
@@ -334,6 +335,18 @@ QString BaseGenericPlugin::failureReason(const QUrl& url) const
     }
 
     return {};
+}
+
+AttributeDeclarations BaseGenericPlugin::attributeDeclarations() const
+{
+    AttributeDeclarations declarations = {IParser::nodeNameAttribute()};
+
+    u::append(declarations, GraphMLParser::attributeDeclarations());
+    u::append(declarations, AdjacencyMatrixParser::attributeDeclarations());
+    u::append(declarations, BiopaxFileParser::attributeDeclarations());
+    u::append(declarations, CxParser::attributeDeclarations());
+
+    return declarations;
 }
 
 QString BaseGenericPlugin::parametersQmlType(const QString& urlType) const

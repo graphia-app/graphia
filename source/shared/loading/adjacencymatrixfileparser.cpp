@@ -54,12 +54,12 @@ void AdjacencyMatrixParser::addEdge(IGraphModel* graphModel,
     if(edgeId.isNull())
         edgeId = graphModel->mutableGraph().addEdge(sourceNodeId, targetNodeId);
     else
-        setWeights = _userEdgeData->valueBy(edgeId, QObject::tr("Absolute Edge Weight")).toDouble() < absEdgeWeight;
+        setWeights = _userEdgeData->valueBy(edgeId, absoluteEdgeWeightAttribute()._name).toDouble() < absEdgeWeight;
 
     if(setWeights)
     {
-        _userEdgeData->setValueBy(edgeId, QObject::tr("Edge Weight"), QString::number(edgeWeight));
-        _userEdgeData->setValueBy(edgeId, QObject::tr("Absolute Edge Weight"),
+        _userEdgeData->setValueBy(edgeId, edgeWeightAttribute(), QString::number(edgeWeight));
+        _userEdgeData->setValueBy(edgeId, absoluteEdgeWeightAttribute(),
             QString::number(absEdgeWeight));
     }
 }
@@ -142,7 +142,7 @@ bool AdjacencyMatrixParser::parseAdjacencyMatrix(const TabularData& tabularData,
 
                 auto nodeId = graphModel->mutableGraph().addNode();
                 auto nodeName = !name.isEmpty() ? name : QObject::tr("Node %1").arg(index + 1);
-                _userNodeData->setValueBy(nodeId, QObject::tr("Node Name"), nodeName);
+                _userNodeData->setValueBy(nodeId, nodeNameAttribute(), nodeName);
                 graphModel->setNodeName(nodeId, nodeName);
 
                 indexToNodeId[index] = nodeId;
@@ -199,7 +199,7 @@ bool AdjacencyMatrixParser::parseEdgeList(const TabularData& tabularData, IGraph
             nodeIdMap.emplace(firstCell, sourceNodeId);
 
             auto nodeName = QObject::tr("Node %1").arg(static_cast<int>(sourceNodeId + 1));
-            _userNodeData->setValueBy(sourceNodeId, QObject::tr("Node Name"), nodeName);
+            _userNodeData->setValueBy(sourceNodeId, nodeNameAttribute(), nodeName);
             graphModel->setNodeName(sourceNodeId, nodeName);
         }
         else
@@ -211,7 +211,7 @@ bool AdjacencyMatrixParser::parseEdgeList(const TabularData& tabularData, IGraph
             nodeIdMap.emplace(secondCell, targetNodeId);
 
             auto nodeName = QObject::tr("Node %1").arg(static_cast<int>(targetNodeId + 1));
-            _userNodeData->setValueBy(targetNodeId, QObject::tr("Node Name"), nodeName);
+            _userNodeData->setValueBy(targetNodeId, nodeNameAttribute(), nodeName);
             graphModel->setNodeName(targetNodeId, nodeName);
         }
         else
