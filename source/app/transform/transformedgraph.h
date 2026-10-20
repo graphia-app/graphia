@@ -117,7 +117,9 @@ private:
     bool _autoRebuild = false;
 
     std::atomic_bool _cancelled;
+    bool _rebuilding = false;
 
+    // Guards _currentTransform and _rebuilding
     std::mutex _currentTransformMutex;
     GraphTransform* _currentTransform = nullptr;
 
