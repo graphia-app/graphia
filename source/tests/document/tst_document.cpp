@@ -504,6 +504,44 @@ private slots:
         QVERIFY(_document->visualisations().isEmpty());
     }
 
+    // As when dragging one in the visualisation panel; there can be more visualisations than transforms
+    void moveVisualisation()
+    {
+        QVERIFY(open());
+
+        const QStringList visualisations
+        {
+            u"score Colour"_s,
+            u"kind Text"_s,
+            u"score Size"_s,
+        };
+
+        // No transforms
+        QVERIFY(execute([&] { _document->update({}, visualisations); }));
+        QVERIFY(_document->transforms().isEmpty());
+
+        auto channels = [this]
+        {
+            const auto documentVisualisations = _document->visualisations();
+
+            QStringList result;
+            result.reserve(documentVisualisations.size());
+            for(const auto& visualisation : documentVisualisations)
+                result.append(_document->parseVisualisation(visualisation).value(u"channel"_s).toString());
+
+            return result;
+        };
+
+        QCOMPARE(channels(), (QStringList{u"Colour"_s, u"Text"_s, u"Size"_s}));
+
+        _document->moveVisualisation(0, 2);
+        QVERIFY(QTest::qWaitFor([&] { return channels() == QStringList{u"Text"_s, u"Size"_s, u"Colour"_s}; }));
+        QVERIFY(waitForCommands());
+
+        QVERIFY(execute([this] { _document->undo(); }));
+        QCOMPARE(channels(), (QStringList{u"Colour"_s, u"Text"_s, u"Size"_s}));
+    }
+
     // As the transform panel edits them; the edits are only applied when the panel applies them
     void transformsEdited()
     {
