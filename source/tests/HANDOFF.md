@@ -458,7 +458,8 @@ run `llvm-cov show` with the first test program as a positional argument,
 the rest with `-object`, and `-sources <file>`; passing a source file
 without `-sources` makes `llvm-cov` take it for an object file.
 
-Line coverage was about 57% at the last measurement. The biggest gaps
+Line coverage was 62.6% at the last measurement, or 84% leaving out
+rendering, interaction, plotting, the updater and platform code. The biggest gaps
 outside rendering and UI code are the parts of `Document` that
 `tst_document` doesn't use yet, the updater (the update manifest is signed
 with a key that's compiled in, so tests can't sign one), and the rest of
