@@ -86,9 +86,14 @@ add_graphia_test(tst_document document/tst_document.cpp)
 target_compile_definitions(tst_document PRIVATE GRAPHIA_BUILD_DIR="${CMAKE_BINARY_DIR}")
 add_dependencies(tst_document generic correlation)
 
+# The correlation plugin, through a Document
+add_graphia_test(tst_correlationplugin correlation/tst_correlationplugin.cpp)
+target_compile_definitions(tst_correlationplugin PRIVATE GRAPHIA_BUILD_DIR="${CMAKE_BINARY_DIR}")
+add_dependencies(tst_correlationplugin correlation)
+
 if(GRAPHIA_SANITIZERS)
     # The plugins each have their own copy of the shared library, as the tests do,
     # which AddressSanitizer reports as violating the one definition rule
-    set_property(TEST tst_headless tst_document APPEND PROPERTY
+    set_property(TEST tst_headless tst_document tst_correlationplugin APPEND PROPERTY
         ENVIRONMENT_MODIFICATION "ASAN_OPTIONS=string_append::detect_odr_violation=0")
 endif()
