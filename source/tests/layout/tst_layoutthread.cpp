@@ -26,6 +26,7 @@
 #include "app/graph/graph.h"
 #include "app/graph/graphmodel.h"
 
+#include <QElapsedTimer>
 #include <QTest>
 #include <QSignalSpy>
 #include <QString>
@@ -33,6 +34,7 @@
 #include <QVector3D>
 
 #include <cmath>
+#include <map>
 #include <memory>
 
 using namespace Qt::Literals::StringLiterals;
@@ -276,6 +278,46 @@ private slots:
 
         _layoutThread->resume();
         QVERIFY(waitUntilFinished());
+    }
+
+    // Visual updates take the positions' lock to place text, as does the layout thread when it
+    // publishes positions, so they must take them in the same order as each other, or deadlock
+    void visualUpdatesWhileRunning()
+    {
+        create(path(u"n"_s, 2000));
+
+        // Text visuals make the time each thread holds the locks long enough to collide
+        std::map<QString, QString> groups;
+        for(int i = 0; i < 2000; i++)
+            groups.emplace(u"n%1"_s.arg(i), u"g%1"_s.arg(i / 4));
+
+        _model->addNodeAttribute(u"Group"_s, groups);
+        const QStringList visualisations{uR"("Group" "Shared Text")"_s};
+        const QStringList colouredVisualisations{uR"("Group" "Shared Text")"_s, uR"("Group" "Colour")"_s};
+        _model->graphModel().buildVisualisations(visualisations);
+        _model->graphModel().enableVisualUpdates();
+
+        _layoutThread->start(false);
+        QVERIFY(QTest::qWaitFor([this] { return !_layoutThread->paused(); }, TIMEOUT));
+
+        QElapsedTimer timer;
+        timer.start();
+
+        // Each update changes the visuals, which places the text
+        for(int i = 0; timer.elapsed() < 5000; i++)
+        {
+            // Keep the layout running
+            if(_layoutThread->paused())
+            {
+                _layoutThread->setSettingValue(u"LongRangeRepulseTerm"_s, (i % 2 == 0) ? 5.0f : 10.0f);
+                _layoutThread->resume();
+            }
+
+            _model->graphModel().buildVisualisations((i % 2 == 0) ? colouredVisualisations : visualisations);
+            _model->graphModel().applyPendingVisualUpdates();
+        }
+
+        _layoutThread->pauseAndWait();
     }
 
     void stopWithoutStarting()
