@@ -234,7 +234,18 @@ private slots:
             "0.5,0,2\n"
             "0,2,0\n") << false << 3.0 << 2.0;
 
-        // a and b are connected
+        // In each, a and b are connected
+        QTest::newRow("Row headers") << QByteArray(
+            "a,0,1,0\n"
+            "b,1,0,0\n"
+            "c,0,0,0\n") << true << 2.0 << 1.0;
+
+        QTest::newRow("Column headers") << QByteArray(
+            "a,b,c\n"
+            "0,1,0\n"
+            "1,0,0\n"
+            "0,0,0\n") << true << 2.0 << 1.0;
+
         QTest::newRow("Both headers") << QByteArray(
             ",a,b,c\n"
             "a,0,1,0\n"
