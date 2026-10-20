@@ -154,13 +154,13 @@ bool u::rsaVerifySignature(const std::string& string, const std::string& signatu
 bool u::rsaVerifySignature(const std::string& signaturePlusString,
     const std::string& publicKeyFileName, std::string* message)
 {
-    auto publicKey = loadKey<CryptoPP::RSA::PublicKey>(publicKeyFileName);
-
-    const CryptoPP::RSASSA_PKCS1v15_SHA_Verifier rsaVerifier(publicKey);
     std::string recoveredMessage;
 
     try
     {
+        auto publicKey = loadKey<CryptoPP::RSA::PublicKey>(publicKeyFileName);
+        const CryptoPP::RSASSA_PKCS1v15_SHA_Verifier rsaVerifier(publicKey);
+
         auto* sink = new CryptoPP::StringSink(recoveredMessage);
         auto* filter = new CryptoPP::SignatureVerificationFilter(rsaVerifier, sink,
             CryptoPP::SignatureVerificationFilter::SIGNATURE_AT_BEGIN |
