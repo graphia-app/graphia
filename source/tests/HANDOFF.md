@@ -330,6 +330,9 @@ Each one is a commit; see `git log` for the details.
   longer than a shorter match (not visible, as only its presence is used).
 - **JSON Graph:** files in version 2 of the format, whose nodes are keyed
   by id, failed to load.
+- **Headless mode:** checked that the current directory, not the target's,
+  could be written to; parameters of the wrong types, such as a numeric
+  type, aborted Graphia.
 - **Transform cache:** invalidating results compared iterators the erase
   had invalidated, and discarded results unaffected by the change.
 - **Winsorization:** dereferenced the end of the data, which aborts with
