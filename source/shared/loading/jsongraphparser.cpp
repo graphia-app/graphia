@@ -73,15 +73,23 @@ bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel*
     parser.setPhase(QObject::tr("Nodes"));
 
     std::map<std::string, NodeId> stringNodeIdToNodeId;
-    for(const auto& jsonNode : jsonNodes)
+    for(auto nodeIt = jsonNodes.begin(); nodeIt != jsonNodes.end(); ++nodeIt)
     {
-        if(!u::contains(jsonNode, "id") || !jsonNode["id"].is_string())
+        const auto& jsonNode = *nodeIt;
+        std::string nodeIdString;
+
+        if(u::contains(jsonNode, "id") && jsonNode["id"].is_string())
+            nodeIdString = jsonNode["id"].get<std::string>();
+        else if(jsonNodes.is_object())
+        {
+            // JSON Graph Format 2 keys nodes by their ids
+            nodeIdString = nodeIt.key();
+        }
+        else
         {
             parser.setFailureReason(QObject::tr("Node has no ID."));
             return false;
         }
-
-        auto nodeIdString = jsonNode["id"].get<std::string>();
 
         NodeId nodeId;
 
