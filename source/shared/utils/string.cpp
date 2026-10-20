@@ -226,7 +226,8 @@ QString u::formatNumberScientific(double value, int minDecimalPlaces, int maxDec
 
     const double smallThreshold = std::pow(10, -minScientificFormattedStringDigitsThreshold);
     const double largeThreshold = std::pow(10, maxScientificFormattedStringDigitsThreshold);
-    auto exponentChar = QLocale::system().exponential();
+    const auto locale = QLocale::system();
+    auto exponentChar = locale.exponential();
     auto absValue = std::abs(value);
 
     if(maxDecimalPlaces == 0)
@@ -236,15 +237,19 @@ QString u::formatNumberScientific(double value, int minDecimalPlaces, int maxDec
 
     if(std::isfinite(value) && (absValue >= largeThreshold || (absValue < smallThreshold && value != 0.0)))
     {
-        formattedString = QLocale::system().toString(value, 'e', 2);
-        auto splitString = formattedString.split(exponentChar);
+        formattedString = locale.toString(value, 'e', 2);
+
+        // The 'e' format gives a lower case exponent separator, whatever the case of the locale's
+        auto splitString = formattedString.split(exponentChar, Qt::KeepEmptyParts, Qt::CaseInsensitive);
 
         const QString superScript = QStringLiteral(u"⁰¹²³⁴⁵⁶⁷⁸⁹");
         if(splitString.length() > 1)
         {
             auto exponentValueString = stripZeroes(splitString[1]);
 
+            exponentValueString.replace(locale.negativeSign(), u"⁻"_s);
             exponentValueString.replace(u"-"_s, u"⁻"_s);
+            exponentValueString.replace(locale.positiveSign(), u""_s);
             exponentValueString.replace(u"+"_s, u""_s);
 
             for(auto& character : exponentValueString)
@@ -258,7 +263,7 @@ QString u::formatNumberScientific(double value, int minDecimalPlaces, int maxDec
     }
     else
     {
-        formattedString = QLocale::system().toString(value, 'f', maxDecimalPlaces);
+        formattedString = locale.toString(value, 'f', maxDecimalPlaces);
         formattedString = stripZeroes(formattedString);
     }
 
