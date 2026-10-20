@@ -20,7 +20,6 @@
 #include "modelcompleter.h"
 
 #include <limits>
-#include <algorithm>
 
 ModelCompleter::ModelCompleter()
 {
@@ -49,7 +48,10 @@ void ModelCompleter::update()
             {
                 if(!commonPrefix.isEmpty())
                 {
-                    for(int i = 0 ; i < std::min(commonPrefix.length(), name.length()); i++)
+                    // A name that's shorter than the prefix, but otherwise the same, shortens it too
+                    commonPrefix.truncate(name.length());
+
+                    for(int i = 0 ; i < commonPrefix.length(); i++)
                     {
                         if(commonPrefix.at(i).toLower() != name.at(i).toLower())
                         {
