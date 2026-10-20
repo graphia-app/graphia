@@ -280,6 +280,29 @@ private slots:
         QVERIFY(waitUntilFinished());
     }
 
+    // As when a command starts just after the previous one finished: the layout is resumed, then
+    // paused before it has woken up, and must stay paused, as the command is changing the graph
+    void pauseJustAfterResuming()
+    {
+        create(path(u"n"_s, 200));
+
+        QSignalSpy initialised(_layoutThread.get(), &LayoutThread::initialised);
+        _layoutThread->start(true);
+        QVERIFY(initialised.wait(TIMEOUT));
+
+        for(int i = 0; i < 20; i++)
+        {
+            _layoutThread->resume();
+            _layoutThread->pauseAndWait();
+
+            const auto before = position(u"n100"_s);
+            QTest::qWait(20);
+
+            QVERIFY(_layoutThread->paused());
+            QCOMPARE(position(u"n100"_s), before);
+        }
+    }
+
     // Visual updates take the positions' lock to place text, as does the layout thread when it
     // publishes positions, so they must take them in the same order as each other, or deadlock
     void visualUpdatesWhileRunning()
