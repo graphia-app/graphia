@@ -50,6 +50,7 @@
 #include <QVector3D>
 
 #include <algorithm>
+#include <cmath>
 #include <map>
 #include <memory>
 #include <vector>
@@ -72,6 +73,19 @@ const QByteArray Gml = R"(graph
     edge [ source 2 target 3 ]
     edge [ source 0 target 2 ]
 ])";
+// a -> b -> c, in other formats
+const QByteArray GraphML =
+    "<?xml version=\"1.0\"?>\n"
+    "<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\">\n"
+    "  <graph edgedefault=\"directed\">\n"
+    "    <node id=\"a\"/><node id=\"b\"/><node id=\"c\"/>\n"
+    "    <edge source=\"a\" target=\"b\"/><edge source=\"b\" target=\"c\"/>\n"
+    "  </graph>\n"
+    "</graphml>\n";
+
+const QByteArray JsonGraph =
+    "{\"graph\": {\"nodes\": [{\"id\": \"a\"}, {\"id\": \"b\"}, {\"id\": \"c\"}], "
+    "\"edges\": [{\"source\": \"a\", \"target\": \"b\"}, {\"source\": \"b\", \"target\": \"c\"}]}}";
 } // namespace
 
 // Document, as the UI uses it
@@ -969,6 +983,72 @@ private slots:
         QCOMPARE(nodes->data(kind, roleFor("hasSharedValues")).toBool(), true);
         QCOMPARE(nodes->data(kind, roleFor("searchable")).toBool(), true);
         QCOMPARE(nodes->data(kind, roleFor("elementType")).toString(), u"Node"_s);
+    }
+
+    // A matrix, as the dialog for opening one configures the generic plugin
+    void matrix()
+    {
+        // a-b at 0.3 one way and 0.9 the other, b-c at 0.1, and a-c at 0.6
+        const QByteArray csv =
+            ",a,b,c\n"
+            "a,0,0.9,0.6\n"
+            "b,0.3,0,0.1\n"
+            "c,0,0,0\n";
+
+        QVERIFY(open(write(u"matrix.csv"_s, csv), u"MatrixCSV"_s, u"Generic"_s,
+        {
+            {u"filterEdges"_s, u"true"_s},
+            {u"minimumThreshold"_s, 0.2},
+            {u"initialThreshold"_s, 0.5},
+            {u"skipDuplicates"_s, u"true"_s},
+        }));
+
+        QCOMPARE(_document->transforms(), QStringList{u"RemoveEdges where $AbsoluteEdgeWeight < 0.5"_s});
+
+        // b-c is below the minimum, and the duplicate a-b keeps the larger weight
+        QCOMPARE(graphModel()->mutableGraph().numEdges(), 2u);
+        QCOMPARE(graph().numEdges(), 2u);
+
+        std::vector<double> weights;
+        weights.reserve(graph().edgeIds().size());
+        for(auto edgeId : graph().edgeIds())
+            weights.push_back(graphModel()->attributeValueByName(u"EdgeWeight"_s).numericValueOf(edgeId));
+        std::ranges::sort(weights);
+        QCOMPARE(weights.size(), 2u);
+        QVERIFY(std::abs(weights.at(0) - 0.6) < 1e-6);
+        QVERIFY(std::abs(weights.at(1) - 0.9) < 1e-6);
+
+        // Without the options, every non-zero value is an edge
+        QVERIFY(open(write(u"matrix.csv"_s, csv), u"MatrixCSV"_s, u"Generic"_s));
+        QVERIFY(_document->transforms().isEmpty());
+        QCOMPARE(graph().numEdges(), 4u);
+    }
+
+    // The other file types the generic plugin loads, through Document
+    void genericFileTypes_data()
+    {
+        QTest::addColumn<QString>("fileName");
+        QTest::addColumn<QString>("type");
+        QTest::addColumn<QByteArray>("content");
+
+        QTest::newRow("GraphML") << u"graph.graphml"_s << u"GraphML"_s << GraphML;
+        QTest::newRow("DOT") << u"graph.dot"_s << u"DOT"_s << QByteArray("digraph { a -> b; b -> c; }");
+        QTest::newRow("JSON Graph") << u"graph.json"_s << u"JSONGraph"_s << JsonGraph;
+        QTest::newRow("Pairwise TSV") << u"graph.tsv"_s << u"PairwiseTSV"_s << QByteArray("a\tb\nb\tc\n");
+    }
+
+    void genericFileTypes()
+    {
+        QFETCH(const QString, fileName);
+        QFETCH(const QString, type);
+        QFETCH(const QByteArray, content);
+
+        const auto url = write(fileName, content);
+        QVERIFY(_application->urlTypesOf(url).contains(type));
+        QVERIFY(open(url, type, u"Generic"_s));
+
+        QCOMPARE(graph().numNodes(), 3u);
+        QCOMPARE(graph().numEdges(), 2u);
     }
 
     // An edge's source and target nodes' attributes, as transforms refer to them
