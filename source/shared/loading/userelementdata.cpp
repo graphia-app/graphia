@@ -213,9 +213,11 @@ std::vector<QString> UserElementData<E>::exposeAsAttributes(IGraphModel& graphMo
         if(_exposedAsAttributes.contains(userDataVectorName))
             continue;
 
-        QString attributeName;
+        QString attributeName = graphModel.attributeIsDeclared(userDataVectorName) ?
+            QObject::tr("User %1").arg(userDataVectorName) :
+            userDataVectorName;
 
-        auto& attribute = graphModel.createAttribute(userDataVectorName, &attributeName, clashHint)
+        auto& attribute = graphModel.createAttribute(attributeName, &attributeName, clashHint)
             .setFlag(AttributeFlag::Searchable)
             .setUserDefined(true);
 
