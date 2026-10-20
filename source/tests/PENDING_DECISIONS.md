@@ -166,6 +166,14 @@ own. This file should be deleted once everything here is resolved.
   such values, as RFC 4180 requires, though Graphia's own CSV parser reads
   a line at a time, so can't load them back.
 
+## The node attribute table
+
+- **Missing values when sorting descending.** Sorting a column of the node
+  attribute table puts the nodes with no value for it last when ascending,
+  but first when descending, as the order is simply reversed. Spreadsheets
+  usually keep missing values last either way. `tst_nodeattributetablemodel`
+  pins the current order.
+
 ## The PR
 
 The branch has around 70 commits, and a PR was deferred until more was

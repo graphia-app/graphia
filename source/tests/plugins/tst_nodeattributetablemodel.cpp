@@ -26,9 +26,13 @@
 #include "app/commands/editattributecommand.h"
 #include "app/commands/removeattributescommand.h"
 
+#include "app/ui/qml/Graphia/Utils/nodeattributetabledisplaymodel.h"
+
 #include "shared/loading/gmlfileparser.h"
 #include "shared/plugins/nodeattributetablemodel.h"
 
+#include <QAbstractItemModel>
+#include <QList>
 #include <QSignalSpy>
 #include <QTest>
 #include <QString>
@@ -100,6 +104,35 @@ class TestNodeAttributeTableModel : public QObject
         return _tableModel->data(_tableModel->index(rowFor(nodeName), 0), NodeAttributeTableModel::NodeSelectedRole);
     }
 
+    QString nameOfSourceRow(int sourceRow) const
+    {
+        return _tableModel->data(_tableModel->index(sourceRow, columnFor(u"NodeName"_s))).toString();
+    }
+
+    // The node names of a display model's rows, in order
+    QStringList names(const NodeAttributeTableDisplayModel& display) const
+    {
+        QStringList result;
+        result.reserve(display.rowCount());
+        for(int row = 0; row < display.rowCount(); row++)
+            result.append(nameOfSourceRow(display.sourceRowFor(row)));
+
+        return result;
+    }
+
+    // The node names of a display model's selected rows
+    QStringList selectedNames(const NodeAttributeTableDisplayModel& display) const
+    {
+        const auto selectedRows = display.property("selectedRows").value<QList<int>>();
+
+        QStringList result;
+        result.reserve(selectedRows.size());
+        for(auto sourceRow : selectedRows)
+            result.append(nameOfSourceRow(sourceRow));
+
+        return result;
+    }
+
     std::vector<int> rows(const QStringList& nodeNames) const
     {
         std::vector<int> result;
@@ -109,6 +142,21 @@ class TestNodeAttributeTableModel : public QObject
 
         std::ranges::sort(result);
         return result;
+    }
+
+    // Selects only the given nodes in the graph, which the table shows
+    void selectNodes(const QStringList& nodeNames)
+    {
+        QSignalSpy selectionChanged(_tableModel.get(), &NodeAttributeTableModel::selectionChanged);
+
+        NodeIdSet nodeIds;
+        for(const auto& nodeName : nodeNames)
+            nodeIds.insert(_model->nodeId(nodeName));
+
+        _document->selectionManager()->clearNodeSelection();
+        _document->selectionManager()->selectNodes(nodeIds);
+        _tableModel->onSelectionChanged();
+        QVERIFY(QTest::qWaitFor([&] { return !selectionChanged.isEmpty(); }));
     }
 
 private slots:
@@ -356,6 +404,150 @@ private slots:
 
         QCOMPARE(value(u"b"_s, u"score"_s).toDouble(), 7.0);
         QCOMPARE(value(u"a"_s, u"score"_s).toDouble(), 0.5);
+    }
+    // What the table shows: the selected nodes' rows, and the visible columns in order
+    void displayRowsAndColumns()
+    {
+        create();
+        if(QTest::currentTestFailed())
+            return;
+
+        selectNodes({u"a"_s, u"c"_s});
+        NodeAttributeTableDisplayModel display;
+        display.setProperty("sourceModel", QVariant::fromValue<QAbstractItemModel*>(_tableModel.get()));
+
+        QCOMPARE(names(display), (QStringList{u"a"_s, u"c"_s}));
+        QCOMPARE(display.property("numRows").toInt(), 2);
+        QCOMPARE(display.columnCount(), _tableModel->columnCount());
+        QCOMPARE(display.data(display.index(1, columnFor(u"count"_s)), Qt::DisplayRole).toInt(), 3);
+        QVERIFY(display.roleNames().values().contains("subSelected"));
+
+        // Out of range
+        QCOMPARE(display.sourceRowFor(2), -1);
+        QCOMPARE(display.sourceColumnFor(-1), -1);
+        QVERIFY(!display.data(display.index(5, 0), Qt::DisplayRole).isValid());
+
+        const QSignalSpy sourceRowsChanged(&display, &NodeAttributeTableDisplayModel::sourceRowsChanged);
+        selectNodes({u"a"_s, u"b"_s, u"c"_s});
+        QCOMPARE(names(display), (QStringList{u"a"_s, u"b"_s, u"c"_s}));
+        QCOMPARE(sourceRowsChanged.count(), 1);
+
+        display.setProperty("hiddenColumns", QStringList{u"score"_s, u"Not a column"_s});
+        QCOMPARE(display.columnCount(), _tableModel->columnCount() - 1);
+        for(int column = 0; column < display.columnCount(); column++)
+            QVERIFY(display.sourceColumnFor(column) != columnFor(u"score"_s));
+
+        // The columns not given keep their place
+        display.setProperty("hiddenColumns", QStringList{});
+        display.setProperty("columnOrder", QStringList{u"kind"_s, u"Not a column"_s, u"NodeName"_s});
+        const auto columnOrder = display.property("columnOrder").toStringList();
+        QCOMPARE(columnOrder.mid(0, 5), (QStringList{u"kind"_s, u"score"_s, u"count"_s,
+            u"NodeName"_s, u"NodeComponentIdentifier"_s}));
+        QCOMPARE(columnOrder.size(), _tableModel->columnCount());
+        QCOMPARE(display.sourceColumnFor(0), columnFor(u"kind"_s));
+        QCOMPARE(display.sourceColumnFor(3), columnFor(u"NodeName"_s));
+        QCOMPARE(display.data(display.index(2, 0), Qt::DisplayRole).toString(), u"z"_s);
+    }
+
+    void displaySorting()
+    {
+        create();
+        if(QTest::currentTestFailed())
+            return;
+
+        selectNodes({u"a"_s, u"b"_s, u"c"_s});
+        NodeAttributeTableDisplayModel display;
+        display.setProperty("sourceModel", QVariant::fromValue<QAbstractItemModel*>(_tableModel.get()));
+        QCOMPARE(display.property("sortColumn").toString(), QString());
+
+        // A column is first sorted ascending
+        const QSignalSpy sortOrderChanged(&display, &NodeAttributeTableDisplayModel::sortOrderChanged);
+        display.setProperty("sortColumn", u"count"_s);
+        QCOMPARE(display.property("sortOrder").value<Qt::SortOrder>(), Qt::AscendingOrder);
+        QCOMPARE(sortOrderChanged.count(), 1);
+        QCOMPARE(names(display), (QStringList{u"a"_s, u"b"_s, u"c"_s}));
+
+        display.setProperty("sortOrder", QVariant::fromValue(Qt::DescendingOrder));
+        QCOMPARE(names(display), (QStringList{u"c"_s, u"b"_s, u"a"_s}));
+
+        // b has no score, and is sorted after the others either way
+        display.setProperty("sortColumn", u"score"_s);
+        QCOMPARE(names(display), (QStringList{u"a"_s, u"c"_s, u"b"_s}));
+        display.setProperty("sortOrder", QVariant::fromValue(Qt::DescendingOrder));
+        QCOMPARE(names(display), (QStringList{u"c"_s, u"a"_s, u"b"_s}));
+        display.setProperty("sortOrder", QVariant::fromValue(Qt::AscendingOrder));
+
+        // A column sorted before keeps its order
+        display.setProperty("sortColumn", u"count"_s);
+        QCOMPARE(display.property("sortOrder").value<Qt::SortOrder>(), Qt::DescendingOrder);
+        QCOMPARE(names(display), (QStringList{u"c"_s, u"b"_s, u"a"_s}));
+
+        // An explicit order of rows comes first, then the sort order
+        const QSignalSpy isRowOrderSetChanged(&display, &NodeAttributeTableDisplayModel::isRowOrderSetChanged);
+        display.setRowOrder({rowFor(u"a"_s), rowFor(u"b"_s)});
+        QVERIFY(display.property("isRowOrderSet").toBool());
+        QCOMPARE(isRowOrderSetChanged.count(), 1);
+        QCOMPARE(names(display), (QStringList{u"a"_s, u"b"_s, u"c"_s}));
+
+        // Sorting again ends it
+        display.setProperty("sortOrder", QVariant::fromValue(Qt::DescendingOrder));
+        QVERIFY(!display.property("isRowOrderSet").toBool());
+        QCOMPARE(names(display), (QStringList{u"c"_s, u"b"_s, u"a"_s}));
+
+        // Sorting on a column that's removed stops
+        display.setProperty("sortColumn", u"kind"_s);
+        QSignalSpy columnNamesChanged(_tableModel.get(), &NodeAttributeTableModel::columnNamesChanged);
+        RemoveAttributesCommand removeCommand(&_model->graphModel(), {u"kind"_s});
+        QVERIFY(removeCommand.execute());
+        QVERIFY(QTest::qWaitFor([&] { return !columnNamesChanged.isEmpty(); }));
+        QCOMPARE(display.property("sortColumn").toString(), u"count"_s);
+        QCOMPARE(names(display), (QStringList{u"c"_s, u"b"_s, u"a"_s}));
+    }
+
+    // Rows selected in the table, of the nodes selected in the graph
+    void displaySubSelection()
+    {
+        create();
+        if(QTest::currentTestFailed())
+            return;
+
+        selectNodes({u"a"_s, u"b"_s, u"c"_s});
+        NodeAttributeTableDisplayModel display;
+        display.setProperty("sourceModel", QVariant::fromValue<QAbstractItemModel*>(_tableModel.get()));
+        display.setProperty("sortColumn", u"count"_s);
+        display.setProperty("sortOrder", QVariant::fromValue(Qt::DescendingOrder));
+        QTest::qWait(0);
+
+        // Every row starts selected
+        QCOMPARE(selectedNames(display), (QStringList{u"c"_s, u"b"_s, u"a"_s}));
+
+        const QSignalSpy dataChanged(&display, &NodeAttributeTableDisplayModel::dataChanged);
+        display.selectRows(2, 1, true);
+        QCOMPARE(selectedNames(display), (QStringList{u"b"_s, u"a"_s}));
+        QVERIFY(!display.isRowSelected(0));
+        QVERIFY(display.isRowSelected(1));
+        QCOMPARE(display.data(display.index(1, 0), 999 + Qt::UserRole).toBool(), true);
+        QCOMPARE(dataChanged.count(), 1);
+
+        display.deselectRows(1, 5);
+        QVERIFY(selectedNames(display).isEmpty());
+
+        display.selectSourceRows({rowFor(u"c"_s), 99});
+        QCOMPARE(selectedNames(display), QStringList{u"c"_s});
+
+        // The selection follows the rows when they're sorted again
+        display.setProperty("sortOrder", QVariant::fromValue(Qt::AscendingOrder));
+        QCOMPARE(display.isRowSelected(2), true);
+        QCOMPARE(selectedNames(display), QStringList{u"c"_s});
+
+        // A new selection in the graph selects every row again, once whatever reacts to
+        // the new rows has had the chance to select from them itself
+        const QSignalSpy rowsReplaced(&display, &NodeAttributeTableDisplayModel::rowsReplaced);
+        selectNodes({u"a"_s, u"b"_s});
+        QCOMPARE(rowsReplaced.count(), 1);
+        QCOMPARE(names(display), (QStringList{u"a"_s, u"b"_s}));
+        QVERIFY(display.isRowSelected(0) && display.isRowSelected(1));
+        QVERIFY(QTest::qWaitFor([&] { return selectedNames(display) == QStringList{u"a"_s, u"b"_s}; }));
     }
 };
 
