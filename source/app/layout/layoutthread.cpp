@@ -95,10 +95,12 @@ LayoutThread::~LayoutThread()
 void LayoutThread::pause()
 {
     std::unique_lock<std::mutex> lock(_mutex);
+
+    _pause = true;
+
     if(_paused)
         return;
 
-    _pause = true;
     cancel();
 
     lock.unlock();
@@ -107,13 +109,15 @@ void LayoutThread::pause()
 void LayoutThread::pauseAndWait()
 {
     std::unique_lock<std::mutex> lock(_mutex);
+
+    _pause = true;
+
     if(_paused)
         return;
 
-    _pause = true;
     cancel();
 
-    _waitForPause.wait(lock);
+    _waitForPause.wait(lock, [this] { return _paused; });
 }
 
 bool LayoutThread::paused() const
@@ -306,7 +310,9 @@ void LayoutThread::run()
             u::setCurrentThreadName(u"Layout ||"_s);
             uncancel();
             _waitForPause.notify_all();
-            _waitForResume.wait(lock);
+
+            _pause = true;
+            _waitForResume.wait(lock, [this] { return !_pause; });
 
             _paused = false;
             emit pausedChanged();
