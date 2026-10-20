@@ -85,8 +85,14 @@ void ApplyTransformsCommand::doTransform(const QStringList& transformations, con
 {
     _graphModel->buildTransforms(transformations, this);
 
+    // A cancelled build leaves the graph as it was, but the transforms that were being
+    // built must be replaced too, otherwise they'd be applied when the graph next changes
+    const bool wasCancelled = cancelled();
+    if(wasCancelled)
+        _graphModel->buildTransforms(previousTransformations, nullptr);
+
     _document->executeOnMainThreadAndWait(
-    [this, newTransformations = cancelled() ? previousTransformations : transformations]
+    [this, newTransformations = wasCancelled ? previousTransformations : transformations]
     {
         _document->setTransforms(newTransformations);
     }, u"setTransforms"_s);
