@@ -245,6 +245,17 @@ private slots:
             QStringList{u"r1-r2"_s, u"r1-r3"_s, u"r1-r4"_s, u"r1-r5"_s, u"r2-r3"_s, u"r2-r4"_s, u"r2-r5"_s,
                 u"r3-r4"_s, u"r3-r5"_s, u"r4-r5"_s};
 
+        // r3 and r5 are the reverses of r1 and r4; the rest of the negative correlations are -0.886
+        QTest::newRow("Negative") <<
+            QVariantMap{{u"correlationPolarity"_s, u"Negative"_s},
+                {u"minimumThreshold"_s, 0.7}, {u"initialThreshold"_s, 0.9}} <<
+            QStringList{u"r1-r3"_s, u"r2-r3"_s, u"r4-r5"_s};
+
+        QTest::newRow("Negative k-NN") <<
+            QVariantMap{{u"correlationPolarity"_s, u"Negative"_s}, {u"correlationFilterType"_s, u"Knn"_s},
+                {u"minimumThreshold"_s, 0.9}, {u"maximumK"_s, 2}, {u"initialK"_s, 2}} <<
+            QStringList{u"r1-r3"_s, u"r2-r3"_s, u"r4-r5"_s};
+
         QTest::newRow("Spearman") << QVariantMap{{u"continuousCorrelationType"_s, u"SpearmanRank"_s}} <<
             QStringList{u"r1-r2"_s, u"r1-r4"_s, u"r2-r4"_s, u"r3-r5"_s};
 
