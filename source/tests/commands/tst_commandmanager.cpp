@@ -334,6 +334,25 @@ private slots:
         QCOMPARE(toVector(_commandManager->redoableCommandDescriptions()), (std::vector<QString>{u"Set 5"_s}));
     }
 
+    // Waiting, as a Document does when it's destroyed, for a command while another is queued
+    // behind it, which could only be started once the first's completion is processed
+    void waitWithQueuedCommand()
+    {
+        auto command = std::make_unique<WaitCommand>();
+        auto* waitCommand = command.get();
+        _commandManager->execute(ExecutePolicy::Add, std::move(command));
+        QVERIFY(QTest::qWaitFor([&started = waitCommand->_started] { return started.load(); }, 5000));
+
+        _commandManager->execute(ExecutePolicy::Add, std::make_unique<SetCommand>(_value, 1));
+        _commandManager->cancel();
+        _commandManager->wait();
+
+        // The queued command is discarded
+        QVERIFY(waitUntilIdle());
+        QCOMPARE(_value, 0);
+        QVERIFY(!_commandManager->canUndo());
+    }
+
     void commandFunctions()
     {
         QString log;
