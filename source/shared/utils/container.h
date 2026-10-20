@@ -287,6 +287,12 @@ namespace u
         return std::unique(container.begin(), container.end()) == container.end();
     }
 
+    template<Container C>
+    void append(C& destination, const C& source)
+    {
+        std::copy(source.begin(), source.end(), std::back_inserter(destination));
+    }
+
 } // namespace u
 
 #endif // CONTAINER_H
