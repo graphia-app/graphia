@@ -212,9 +212,9 @@ namespace u
     }
 
     template<Container C>
-    std::vector<typename C::value_type> valuesFor(const C& container)
+    std::vector<typename C::mapped_type> valuesFor(const C& container)
     {
-        std::vector<typename C::value_type> values;
+        std::vector<typename C::mapped_type> values;
         auto valueWrapper = make_value_wrapper(container);
         std::copy(valueWrapper.begin(), valueWrapper.end(), std::back_inserter(values));
         return values;
