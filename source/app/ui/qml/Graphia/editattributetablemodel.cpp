@@ -157,17 +157,28 @@ void EditAttributeTableModel::editValue(int row, const QString& value)
 {
     auto sortedRow = _sortMap.at(static_cast<size_t>(row));
 
+    // A value that's edited back to what it was is no longer edited
+    auto edit = [&value](auto& edits, auto elementId, const QString& originalValue)
+    {
+        if(value != originalValue)
+            edits[elementId] = value;
+        else
+            edits.erase(elementId);
+    };
+
     if(_combineSharedValues)
     {
+        const auto& sharedValue = _attributeSharedValues.at(static_cast<size_t>(sortedRow))._value;
+
         if(_attribute->elementType() == ElementType::Node)
         {
             for(auto nodeId : _nodeIdsMap.at(sortedRow))
-                _edits._nodeValues[nodeId] = value;
+                edit(_edits._nodeValues, nodeId, sharedValue);
         }
         else if(_attribute->elementType() == ElementType::Edge)
         {
             for(auto edgeId : _edgeIdsMap.at(sortedRow))
-                _edits._edgeValues[edgeId] = value;
+                edit(_edits._edgeValues, edgeId, sharedValue);
         }
     }
     else
@@ -175,16 +186,12 @@ void EditAttributeTableModel::editValue(int row, const QString& value)
         if(_attribute->elementType() == ElementType::Node)
         {
             auto nodeId = rowToNodeId(sortedRow);
-
-            if(value != _attribute->valueOf(nodeId))
-                _edits._nodeValues[nodeId] = value;
+            edit(_edits._nodeValues, nodeId, _attribute->valueOf(nodeId).toString());
         }
         else if(_attribute->elementType() == ElementType::Edge)
         {
             auto edgeId = _document->graphModel()->graph().edgeIds().at(static_cast<size_t>(sortedRow));
-
-            if(value != _attribute->valueOf(edgeId))
-                _edits._edgeValues[edgeId] = value;
+            edit(_edits._edgeValues, edgeId, _attribute->valueOf(edgeId).toString());
         }
     }
 
