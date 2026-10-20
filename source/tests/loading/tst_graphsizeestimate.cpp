@@ -99,6 +99,15 @@ private slots:
         QCOMPARE(valuesOf(estimate, u"numUniqueEdges"_s), (QVector<double>{4.0, 3.0}));
     }
 
+    // By default, the sample is the whole data
+    void knnUnscaled()
+    {
+        auto estimate = graphSizeEstimateKnn(cycle(), 2);
+
+        QCOMPARE(valuesOf(estimate, u"numNodes"_s), (QVector<double>{4.0, 4.0}));
+        QCOMPARE(valuesOf(estimate, u"numEdges"_s), (QVector<double>{4.0, 3.0}));
+    }
+
     // For k-NN, the number of edges grows linearly with the number of nodes
     void knnScaled()
     {
