@@ -402,18 +402,20 @@ void LayoutThread::publishNodePositions(bool force)
             return;
     }
 
-    const std::unique_lock<NodePositions> lock(_graphModel->nodePositions());
+    {
+        const std::unique_lock<NodePositions> lock(_graphModel->nodePositions());
 
-    _graphModel->nodePositions().update(_nodeLayoutPositions);
+        _graphModel->nodePositions().update(_nodeLayoutPositions);
 
-    const bool requiresFlattening = _dimensionalityMode == Layout::Dimensionality::TwoDee &&
-        std::ranges::any_of(_layouts, [](const auto& layout)
-        {
-            return layout.second->dimensionality() == Layout::Dimensionality::ThreeDee;
-        });
+        const bool requiresFlattening = _dimensionalityMode == Layout::Dimensionality::TwoDee &&
+            std::ranges::any_of(_layouts, [](const auto& layout)
+            {
+                return layout.second->dimensionality() == Layout::Dimensionality::ThreeDee;
+            });
 
-    if(requiresFlattening)
-        _graphModel->nodePositions().flatten();
+        if(requiresFlattening)
+            _graphModel->nodePositions().flatten();
+    }
 
     emit executed();
 
