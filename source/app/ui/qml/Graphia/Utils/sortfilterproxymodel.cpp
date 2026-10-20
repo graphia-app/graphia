@@ -32,7 +32,8 @@ SortFilterProxyModel::SortFilterProxyModel(QObject* parent) : QSortFilterProxyMo
     connect(this, &SortFilterProxyModel::layoutChanged, this, &SortFilterProxyModel::countChanged);
 
     connect(this, &SortFilterProxyModel::sourceModelChanged, this, &SortFilterProxyModel::invalidate);
-    connect(this, &SortFilterProxyModel::ascendingSortOrderChanged, this, &SortFilterProxyModel::invalidate);
+    connect(this, &SortFilterProxyModel::ascendingSortOrderChanged, this,
+        [this] { sort(0, _ascendingSortOrder ? Qt::AscendingOrder : Qt::DescendingOrder); });
 
     sort(0);
 }
@@ -84,7 +85,7 @@ bool SortFilterProxyModel::lessThan(const QModelIndex& left, const QModelIndex& 
     else
         result = QSortFilterProxyModel::lessThan(left, right);
 
-    return _ascendingSortOrder ? result : !result;
+    return result;
 }
 
 bool SortFilterProxyModel::filterAcceptsRow(int row, const QModelIndex& parent) const
