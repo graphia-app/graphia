@@ -405,6 +405,7 @@ private slots:
         const auto log = _document->property("log").toString();
         QVERIFY(log.contains(u"Data Frame: [ Column: 1 Row: 1 Width: 3 Height: 4 ]"_s));
         QVERIFY(log.contains(u"Minimum Correlation Value: 0.5"_s));
+        QVERIFY2(log.contains(u"Discrete Correlation Metric: Simple Matching Coefficient"_s), qPrintable(log));
 
         // The data is saved with the Document
         const auto edges = edgeNames();
