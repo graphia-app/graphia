@@ -197,6 +197,22 @@ private slots:
         QCOMPARE(_document->property("numNodesFound").toInt(), 0);
     }
 
+    // Nodes merged by a transform are shown as one, so are deleted together, as when selected
+    void deleteMergedNode()
+    {
+        QVERIFY(open());
+
+        QVERIFY(execute([this] { _document->update({uR"(ContractEdges where $source.NodeName == "a")"_s}); }));
+        QCOMPARE(graph().mergedNodeIdsForNodeId(nodeId(u"a"_s)).size(), 3u);
+
+        QVERIFY(execute([this] { _document->deleteNode(nodeId(u"a"_s)); }));
+        QCOMPARE(nodeNames(), (QStringList{u"d"_s, u"e"_s}));
+
+        QVERIFY(execute([this] { _document->undo(); }));
+        QCOMPARE(nodeNames(), (QStringList{u"a"_s, u"b"_s, u"c"_s, u"d"_s, u"e"_s}));
+        QCOMPARE(graphModel()->mutableGraph().numEdges(), 4u);
+    }
+
     void deleteNodes()
     {
         QVERIFY(open());
