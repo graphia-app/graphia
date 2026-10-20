@@ -442,6 +442,35 @@ private slots:
         QCOMPARE(model->parser<Loader>()->nodePositions()->get(model->nodeId(u"b"_s)), PositionOfB);
     }
 
+    // Enrichment results with the wrong number of values are ignored, rather than
+    // failing when they're shown
+    void enrichmentRowsOfWrongLength()
+    {
+        auto version = NativeSaver::Version;
+        auto content = body(version);
+        auto& rows = content["enrichmentTables"][0]["data"];
+        rows.push_back(json::array({"x", "w", 1.0}));
+        rows.push_back(json::array({"x", "v", 1.0, 2.0, 0.5, 0.9, 1.0, 9.0}));
+
+        TestPluginInstance pluginInstance(&_plugin);
+        QString failureReason;
+        auto model = load(nativeFile(header(version), content), pluginInstance, &failureReason);
+        QVERIFY2(model != nullptr, qPrintable(failureReason));
+
+        const auto& tableData = model->parser<Loader>()->enrichmentTableData().at(0);
+        QCOMPARE(tableData._table.size(), 2);
+
+        EnrichmentTableModel tableModel;
+        tableModel.setTableData(tableData._table, tableData._selectionA, tableData._selectionB);
+        QCOMPARE(tableModel.rowCount(), 2);
+
+        for(int row = 0; row < tableModel.rowCount(); row++)
+        {
+            for(int column = 0; column < tableModel.columnCount(); column++)
+                QVERIFY(tableModel.data(tableModel.index(row, column), Qt::DisplayRole).isValid());
+        }
+    }
+
     void invalid_data()
     {
         QTest::addColumn<QByteArray>("content");
