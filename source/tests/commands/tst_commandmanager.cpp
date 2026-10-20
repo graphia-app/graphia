@@ -260,6 +260,25 @@ private slots:
             (std::vector<QString>{u"Set 1"_s}));
     }
 
+    // A rollback following an undo rolls back the command before, along with
+    // the command already undone, as it can't be redone without it
+    void rollbackAfterUndo()
+    {
+        set(1);
+        set(2);
+        set(3);
+        undo();
+        doRollback();
+
+        QCOMPARE(_value, 1);
+        QVERIFY(!_commandManager->canRedo());
+        QCOMPARE(toVector(_commandManager->undoableCommandDescriptions()),
+            (std::vector<QString>{u"Set 1"_s}));
+
+        undo();
+        QCOMPARE(_value, 0);
+    }
+
     void clearCommandStack()
     {
         const QSignalSpy spy(_commandManager.get(), &CommandManager::commandStackCleared);
