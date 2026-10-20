@@ -226,7 +226,7 @@ TestCase
                 expected: "Remove Components where Component Size ≤ 1"},
             {tag: "parameters",
                 transform: "MCLCluster with Granularity = 2.2 k = 3",
-                expected: "MCL Cluster with Granularity = 2.2 k = 3"},
+                expected: "MCL Cluster with Granularity = 2" + Qt.locale().decimalPoint + "2 k = 3"},
             {tag: "string list parameter",
                 transform: "KNN with RankOrder = Ascending",
                 expected: "k-NN with Rank Order = Lowest First"},
