@@ -56,3 +56,4 @@ if(UNIX AND NOT APPLE)
 endif()
 
 add_graphia_test(tst_statistics utils/tst_statistics.cpp)
+add_graphia_test(tst_container utils/tst_container.cpp)
