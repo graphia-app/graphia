@@ -188,6 +188,9 @@ private slots:
         QTest::newRow("value <= value")             << uR"(2 <= 2)"_s                           << u"11111"_s;
         QTest::newRow("value >= value")             << uR"(1 >= 2)"_s                           << u"00000"_s;
         QTest::newRow("value < value of another type") << uR"(1 < 2.5)"_s                      << u"11111"_s;
+        // Compared numerically, not as strings
+        QTest::newRow("value > value of another type") << uR"(10 > 2.5)"_s                     << u"11111"_s;
+        QTest::newRow("value <= value of another type") << uR"(2.5 <= 10)"_s                   << u"11111"_s;
         QTest::newRow("value == value")             << uR"("a" == "b")"_s                       << u"00000"_s;
         QTest::newRow("value != value")             << uR"("a" != "b")"_s                       << u"11111"_s;
         QTest::newRow("value == value of another type") << uR"(2 == 2.0)"_s                     << u"11111"_s;
