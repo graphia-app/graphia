@@ -662,13 +662,15 @@ private slots:
             u"Name,\"Value, in units\"\r\n"
             "plain,1.5\r\n"
             "\"a,b\",42\r\n"
-            "\"say \"\"hi\"\"\",\r\n"_s;
+            "\"say \"\"hi\"\"\",\r\n"
+            "\"two\nlines\",x\r\n"_s;
 
         QTest::newRow("TSV") << u"tsv"_s <<
             u"Name\tValue, in units\r\n"
             "plain\t1.5\r\n"
             "a,b\t42\r\n"
-            "say \"hi\"\t\r\n"_s;
+            "say \"hi\"\t\r\n"
+            "two lines\tx\r\n"_s;
     }
 
     void exportTable()
@@ -690,6 +692,9 @@ private slots:
         appendRow(u"plain"_s, 1.5);
         appendRow(u"a,b"_s, 42);
         appendRow(u"say \"hi\""_s, {});
+
+        // Line breaks would split the row
+        appendRow(u"two\nlines"_s, u"x"_s);
 
         auto fileName = _dir.filePath(u"table.%1"_s.arg(extension));
         QVERIFY(execute([&]

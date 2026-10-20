@@ -158,6 +158,14 @@ own. This file should be deleted once everything here is resolved.
 - **3 by 3 matrices.** A 3 by 3 adjacency matrix of integers is
   indistinguishable from an edge list, and is loaded as one.
 
+## Exported tables
+
+- **Line breaks in TSV files.** A value with line breaks is now written to
+  a TSV file with each replaced by a space, as TSV doesn't allow them in
+  fields; tabs were already removed, rather than replaced. CSV files quote
+  such values, as RFC 4180 requires, though Graphia's own CSV parser reads
+  a line at a time, so can't load them back.
+
 ## The PR
 
 The branch has around 70 commits, and a PR was deferred until more was
