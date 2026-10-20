@@ -123,7 +123,7 @@ Document::~Document()
     }
 
     // Wait for any executing commands to complete
-    _commandManager.wait();
+    _commandManager.waitForCompletionAndDiscard();
     _commandManager.clearPostCommandFunction();
 
     // Execute anything pending (primarily to avoid deadlock)

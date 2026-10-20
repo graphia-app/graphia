@@ -95,7 +95,7 @@ public:
 
     void cancel();
 
-    void wait();
+    void waitForCompletionAndDiscard();
 
     // This is intended for debugging only
     QString commandStackSummary() const;
