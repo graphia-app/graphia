@@ -122,6 +122,24 @@ own. This file should be deleted once everything here is resolved.
   - A string parameter ending in a backslash can't be read back, as the
     closing quote is taken as escaped.
 
+## Adjacency matrices
+
+- **Which way edges go.** In a CSV adjacency matrix, a value at row r and
+  column c creates an edge from c's node to r's. In a MATLAB matrix it's the
+  other way round, from r's node to c's, which is the more usual convention.
+- **Node names in edge lists.** A three-column table of two integer columns
+  and a number is loaded as an edge list, whose nodes are named "Node 1",
+  "Node 2" and so on in the order they're found, rather than after the
+  integers. So the integer ids in a CSV edge list are lost, and a sparse
+  MATLAB matrix, which is loaded as an edge list, gets different node names
+  from the same matrix stored densely.
+- **MATLAB data is transposed.** `MatLabFileParser` puts each MATLAB column
+  in a row of its table. That's what makes the adjacency matrix edges go
+  from row to column, but where a MATLAB file is loaded as a table, such as
+  for correlation data, a matrix with a row per gene gives a column per gene.
+- **3 by 3 matrices.** A 3 by 3 adjacency matrix of integers is
+  indistinguishable from an edge list, and is loaded as one.
+
 ## The PR
 
 The branch has around 70 commits, and a PR was deferred until more was
