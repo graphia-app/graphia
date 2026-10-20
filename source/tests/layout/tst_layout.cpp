@@ -485,6 +485,32 @@ private slots:
         }
     }
 
+    void barnesHutTreeCoincidentNodes()
+    {
+        Model m(path(6));
+        auto& positions = *m._positions;
+        const auto& component = m.component();
+
+        // Three nodes in the same place, which can't be separated into leaves of their own
+        positions.set(m.nodeId(u"n0"_s), {0.0f, 0.0f, 0.0f});
+        positions.set(m.nodeId(u"n1"_s), {10.0f, 10.0f, 10.0f});
+        positions.set(m.nodeId(u"n2"_s), {10.0f, 10.0f, 10.0f});
+        positions.set(m.nodeId(u"n3"_s), {10.0f, 10.0f, 10.0f});
+        positions.set(m.nodeId(u"n4"_s), {-5.0f, 3.0f, 1.0f});
+        positions.set(m.nodeId(u"n5"_s), {2.0f, -7.0f, 4.0f});
+
+        BarnesHutTree3D tree;
+        tree.setTheta(0.0f);
+        tree.build(component, positions);
+
+        for(auto nodeId : component.nodeIds())
+        {
+            auto mass = tree.evaluateKernel(positions, nodeId,
+                [](int count, const QVector3D&, float) { return QVector3D(static_cast<float>(count), 0.0f, 0.0f); });
+            QCOMPARE(mass.x(), 5.0f);
+        }
+    }
+
     void componentLayouts_data()
     {
         QTest::addColumn<QString>("type");
