@@ -67,9 +67,11 @@ void WatchdogWorker::showWarning()
         return;
     }
 
+    const auto waitText = tr("Wait");
+
     QStringList arguments;
     arguments <<
-        u"-title"_s << u"Error"_s <<
+        u"-title"_s << tr("Error") <<
         u"-text"_s << QString(
             tr("%1 is not responding. System resources could be under pressure, "
                "so you may optionally wait in case a recovery occurs. "
@@ -77,9 +79,9 @@ void WatchdogWorker::showWarning()
                "freeze is as a result of a software problem."))
             .arg(QCoreApplication::applicationName()) <<
         u"-icon"_s << u"Critical"_s <<
-        u"-button"_s << u"Wait:Reset"_s <<
-        u"-button"_s << u"Close and Report Bug:Destructive"_s <<
-        u"-defaultButton"_s << u"Wait"_s;
+        u"-button"_s << u"%1:Reset"_s.arg(waitText) <<
+        u"-button"_s << u"%1:Destructive"_s.arg(tr("Close and Report Bug")) <<
+        u"-defaultButton"_s << waitText;
 
     auto* warningProcess = new QProcess(this);
 
