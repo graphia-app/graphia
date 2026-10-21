@@ -1,10 +1,16 @@
 # Unit test work: notes for continuing elsewhere
 
-This describes the state of the unit test work on the
-`claude/unit-test-infrastructure` branch, so that it can be picked up in a new
-session, for example Claude Code on the desktop. Read this first, then
+This describes the state of the unit test work, so that it can be picked up
+in a new session, for example Claude Code on the desktop. Read this first, then
 `PENDING_DECISIONS.md`, which lists questions waiting on Tim. Delete both files
 before the branch is merged.
+
+The work is on two branches:
+- **`claude/bug-fixes`** has the fixes for the bugs the tests found, and
+  nothing else. It starts from the same commit as the test work did, and each
+  fix is one commit with no test changes in it.
+- **`claude/unit-test-infrastructure`** has the tests, the infrastructure for
+  them and these notes. It's always rebased onto the tip of `claude/bug-fixes`.
 
 ## The goal
 
@@ -20,21 +26,32 @@ testing, which may come later as an extra safety net.
 ## How Tim wants the work done
 
 - **Bugs:** fix any bug that a test finds.
-  - Each fix is its own commit, which also adds the test that exercises it.
+  - Each fix is its own commit on `claude/bug-fixes`, changing only the source,
+    not the tests. Then rebase `claude/unit-test-infrastructure` onto it, and
+    add the test that exercises the fix as its own commit on the test branch,
+    titled "Test the fix for ...".
   - Check every fix by building and running the test without it and seeing it
     fail, then with it and seeing it pass. Do this by temporarily reverting
     only the source change, e.g. with `git stash push <source paths>`.
-- **Test commits:** a commit adding tests for an area comes before the fix
-  commits for that area, and must pass on the code as it was. Each fix commit
-  then adds the checks that fail without it.
+  - A fix must work without the test infrastructure. Where the test branch has
+    refactored the code a fix changes, such as moving the correlation
+    preprocessing into `correlationpreprocessing.cpp` or splitting
+    `ApplyVisualisationsCommand::patchedVisualisations`, write the fix
+    against the code as it is on `claude/bug-fixes`, then resolve the
+    refactoring commit's conflict in the rebase so the moved code has the fix.
+  - Push both branches with `--force-with-lease` after the rebase. The test
+    branch's tree must be the same before and after a rebase that only brings
+    in fixes already on it; check with `git diff`.
+- **Test commits:** a commit adding tests for an area comes before the commits
+  testing fixes for that area. On the test branch every fix is already
+  underneath, so the tests pass on every commit.
 - **Behaviour changes:** if a fix changes behaviour that could have been
   intentional, add it to `PENDING_DECISIONS.md` rather than asking.
-- **CI:** watch it and fix any failures. Fold CI fixes into the earlier commits
-  they belong to, rather than adding "fix CI" commits. Rewriting history on
-  this branch is fine; push with `--force-with-lease`.
-- **No pull request** until Tim asks for one. The branch has around 70
-  commits, and where to draw the line for a PR is one of the pending
-  decisions.
+- **CI:** watch it on both branches and fix any failures. Fold CI fixes into
+  the earlier commits they belong to, rather than adding "fix CI" commits.
+  Rewriting history on these branches is fine; push with `--force-with-lease`.
+  A fold into `claude/bug-fixes` means rebasing the test branch again.
+- **No pull request** until Tim asks for one.
 - **Commit messages:** a short imperative subject, then a body explaining the
   problem and the fix in prose. End with the attribution trailers used
   throughout the branch, and don't put model names or identifiers in commits or

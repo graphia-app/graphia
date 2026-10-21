@@ -1,8 +1,9 @@
 # Pending decisions from the unit test work
 
 These came up while writing the tests on `claude/unit-test-infrastructure`. Each
-bug fix is a separate commit, so any of the changes below can be dropped on its
-own. This file should be deleted once everything here is resolved.
+bug fix is a separate commit on `claude/bug-fixes`, so any of the changes below
+can be dropped on its own, along with the commit on the test branch that tests
+it. This file should be deleted once everything here is resolved.
 
 ## Is this a bug?
 
