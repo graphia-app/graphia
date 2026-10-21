@@ -22,7 +22,9 @@
 
 #include "shared/utils/json_fwd.h"
 
+class GraphModel;
+
 // Rewrites the body of a file saved by an older version into the current format
-void upgradeLegacyFormat(json& jsonBody, int version);
+void upgradeLegacyFormat(json& jsonBody, int version, const GraphModel& graphModel);
 
 #endif // NATIVELOADER_LEGACY_H

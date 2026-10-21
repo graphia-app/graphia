@@ -19,14 +19,23 @@
 
 #include "nativeloader_legacy.h"
 
+#include "app/legacynames.h"
+#include "app/graph/graphmodel.h"
+
 #include "shared/utils/container.h"
 #include "shared/utils/json.h"
 #include "shared/utils/string.h"
+
+#include <QByteArray>
+#include <QString>
 
 #include <array>
 #include <map>
 #include <set>
 #include <string>
+#include <vector>
+
+using namespace Qt::Literals::StringLiterals;
 
 // Converts an array indexed by NodeId into the current [{id, value}] form,
 // keeping only the nodes that are in the graph
@@ -105,7 +114,102 @@ static void mergeUserData(const json& jsonFrom, json& jsonTo)
     jsonTo = {{"ids", jsonIds}, {"vectors", jsonVectors}, {"attributes", jsonAttributes}};
 }
 
-void upgradeLegacyFormat(json& jsonBody, int version)
+// Before version 9, each user data vector was shown as the attribute of the same name, numbered if that
+// was taken, and the attribute's saved settings didn't say which vector it showed; this records each
+// vector against the attribute it was shown as, so it keeps that name, and returns those names
+static std::set<QString> recordUserDataVectorNames(json& jsonUserData)
+{
+    std::set<QString> attributeNames;
+
+    if(!isUserData(jsonUserData))
+        return attributeNames;
+
+    if(!u::contains(jsonUserData, "attributes") || !jsonUserData["attributes"].is_object())
+        jsonUserData["attributes"] = json::object();
+
+    auto& jsonAttributes = jsonUserData["attributes"];
+    const auto jsonSavedAttributes = jsonAttributes;
+
+    for(const auto& jsonVector : jsonUserData["vectors"])
+    {
+        if(!jsonVector.is_object() || jsonVector.empty())
+            continue;
+
+        const auto& vectorName = jsonVector.begin().key();
+
+        // Dots were replaced, as GraphModel::normalisedAttributeName did, and names that were taken
+        // numbered, as u::findUniqueName did; a vector whose attribute has no saved settings keeps its name
+        auto name = QString::fromStdString(vectorName).replace(u'.', u'_');
+        auto attributeName = name;
+
+        for(size_t number = 0; number <= jsonSavedAttributes.size(); number++)
+        {
+            auto numberedName = number == 0 ? name : u"%1(%2)"_s.arg(name).arg(number);
+
+            if(u::contains(jsonSavedAttributes, numberedName.toStdString()) && !u::contains(attributeNames, numberedName))
+            {
+                attributeName = numberedName;
+                break;
+            }
+        }
+
+        jsonAttributes[attributeName.toStdString()]["vector"] = vectorName;
+        attributeNames.insert(attributeName);
+    }
+
+    return attributeNames;
+}
+
+static void renameLegacyNames(json& jsonBody, const GraphModel& graphModel)
+{
+    std::set<QString> userAttributeNames;
+
+    for(const auto* key : {"userNodeData", "userEdgeData"})
+    {
+        if(u::contains(jsonBody, key))
+            userAttributeNames.merge(recordUserDataVectorNames(jsonBody[key]));
+    }
+
+    LegacyNames legacyNames(
+        [&graphModel](const QString& name) { return graphModel.transformFactory(name); },
+        [&graphModel](const QString& name) { return graphModel.attributeIsDeclared(name); },
+        userAttributeNames);
+
+    if(u::contains(jsonBody, "transforms"))
+        renameEachIn(jsonBody["transforms"], [&legacyNames](const QString& transform) { return legacyNames.transform(transform); });
+
+    if(u::contains(jsonBody, "visualisations"))
+        renameEachIn(jsonBody["visualisations"], [&legacyNames](const QString& visualisation) { return legacyNames.visualisation(visualisation); });
+
+    if(u::contains(jsonBody, "enrichmentTables") && jsonBody["enrichmentTables"].is_array())
+    {
+        for(auto& jsonTable : jsonBody["enrichmentTables"])
+            legacyNames.renameAttributesIn(jsonTable, {"selectionA", "selectionB"});
+    }
+
+    if(u::contains(jsonBody, "ui"))
+        legacyNames.renameAttributesIn(jsonBody["ui"], {"lastAdvancedFindAttributeName", "lastFindByAttributeName"});
+
+    if(u::contains(jsonBody, "pluginUiData"))
+    {
+        auto& jsonPluginUiData = jsonBody["pluginUiData"];
+
+        const auto jsonDecodedPluginUiData = jsonPluginUiData.is_string() ?
+            parseJsonFrom(QByteArray::fromHex(QByteArray::fromStdString(jsonPluginUiData.get<std::string>()))) :
+            jsonPluginUiData;
+
+        auto jsonRenamedPluginUiData = jsonDecodedPluginUiData;
+
+        // The keys of the plugins' UI data whose values are attribute names, or table columns named after one
+        legacyNames.renameAttributesIn(jsonRenamedPluginUiData, {"sortColumn", "hiddenColumns", "columnOrder",
+            "plotScaleAttributeName", "plotAveragingAttributeName"});
+
+        if(jsonRenamedPluginUiData != jsonDecodedPluginUiData)
+            jsonPluginUiData = jsonRenamedPluginUiData;
+    }
+}
+
+void upgradeLegacyFormat(json& jsonBody, int version, const GraphModel& graphModel)
 {
     if(version < 2 && u::contains(jsonBody, "ui"))
     {
@@ -154,4 +258,7 @@ void upgradeLegacyFormat(json& jsonBody, int version)
             jsonPluginData.erase(key);
         }
     }
+
+    if(version < 9)
+        renameLegacyNames(jsonBody, graphModel);
 }

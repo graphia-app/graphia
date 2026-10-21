@@ -339,7 +339,7 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
     }
 
     auto jsonBody = jsonArray.at(1);
-    upgradeLegacyFormat(jsonBody, version);
+    upgradeLegacyFormat(jsonBody, version, *graphModel);
 
     if(u::contains(jsonBody, "infiniteParse"))
     {
