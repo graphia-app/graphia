@@ -68,6 +68,7 @@ add_graphia_test(tst_visualisationmapping visualisations/tst_visualisationmappin
 add_graphia_test(tst_visualisations visualisations/tst_visualisations.cpp)
 add_graphia_test(tst_searchmanager ui/tst_searchmanager.cpp)
 add_graphia_test(tst_modelutils ui/tst_modelutils.cpp)
+add_graphia_test(tst_preferences ui/tst_preferences.cpp)
 add_graphia_test(tst_commandmanager commands/tst_commandmanager.cpp)
 add_graphia_test(tst_graphsizeestimate loading/tst_graphsizeestimate.cpp)
 add_graphia_test(tst_geometry maths/tst_geometry.cpp)
