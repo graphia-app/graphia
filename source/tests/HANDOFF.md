@@ -432,10 +432,15 @@ Each one is a commit; see `git log` for the details.
 
 ## Next steps, in rough order
 
-1. **Coverage gaps:** see "Coverage" below.
-2. **More of `Document`:** `tst_document` makes it possible to test
-   the other QML facing models that need a loaded `Document`.
-3. **Later:** the corpus comparison of release and candidate builds.
+1. **Tim's decisions:** `PENDING_DECISIONS.md`, and when to open a PR.
+2. **Coverage gaps:** see "Coverage" below. What's left outside rendering
+   is mostly in `Document` (component navigation and other things that need
+   the renderer), the correlation plugin's plot helpers, and debug output, so
+   returns are diminishing.
+3. **The corpus comparison** of release and candidate builds needs the
+   private corpus of real files, which the cloud sessions don't have.
+4. **The mutation check** (below): add a mutation when a transform or format
+   changes, and rerun it now and then.
 
 The original plan, for reference, had these priorities:
 1. wrong analysis results (config grammars, conditions, transforms,
@@ -483,10 +488,10 @@ run `llvm-cov show` with the first test program as a positional argument,
 the rest with `-object`, and `-sources <file>`; passing a source file
 without `-sources` makes `llvm-cov` take it for an object file.
 
-Line coverage was 62.6% at the last measurement, or 84% leaving out
-rendering, interaction, plotting, the updater and platform code. The biggest gaps
-outside rendering and UI code are the parts of `Document` that
-`tst_document` doesn't use yet, the updater (the update manifest is signed
+Line coverage of `app`, `shared` and `plugins` was 63.7% at the last
+measurement; most of the rest is rendering, interaction, plotting, the
+updater and platform code. The biggest gaps outside those are the parts of
+`Document` that need the renderer, the updater (the update manifest is signed
 with a key that's compiled in, so tests can't sign one), and the rest of
 the correlation plugin's instance (`correlationplugin.cpp`, used through
 `Document` by `tst_correlationplugin`). XLSX files can be written by tests
