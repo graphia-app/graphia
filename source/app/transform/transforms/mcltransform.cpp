@@ -109,8 +109,8 @@ static void expandAndPruneRow(MatrixType& mclMatrix, size_t columnId,
     const bool DEBUG = false;
 
     // Perhaps make these changable parameters later
-    const int RECOVERY_COUNT = 1400;
-    const int SELECTION_COUNT = 1100;
+    const size_t RECOVERY_COUNT = 1400;
+    const size_t SELECTION_COUNT = 1100;
 
     size_t nonzeros = 0;
 
@@ -180,44 +180,49 @@ static void expandAndPruneRow(MatrixType& mclMatrix, size_t columnId,
         auto first = rowData.indices.begin();
         auto last = rowData.indices.begin() + static_cast<std::ptrdiff_t>(nonzeros);
 
+        auto keepLargest = [&](size_t count)
+        {
+            count = std::min(count, nonzeros);
+
+            if(count < nonzeros)
+            {
+                std::nth_element(first, first + static_cast<std::ptrdiff_t>(count), last,
+                    [&rowData](size_t i1, size_t i2) { return rowData.values[i1] > rowData.values[i2]; });
+
+                minValueCutoff = rowData.values[rowData.indices[count]];
+            }
+            else
+                minValueCutoff = std::numeric_limits<float>::lowest();
+
+            remainCount = count;
+            rowPruneSum = 0;
+            for(size_t i = 0UL; i < count; ++i)
+                rowPruneSum += rowData.values[rowData.indices[i]];
+        };
+
         if(remainCount != nonzeros && rowPruneSum < targetMass && remainCount < RECOVERY_COUNT)
         {
             // Recover
             if(DEBUG)
                 qDebug() << "RECOVERY" << "MASS:" << rowPruneSum;
-            std::nth_element(first, rowData.indices.begin() + RECOVERY_COUNT, last,
-                [&rowData](size_t i1, size_t i2) { return rowData.values[i1] > rowData.values[i2]; });
 
-            minValueCutoff = rowData.values[rowData.indices[RECOVERY_COUNT]];
-            remainCount = RECOVERY_COUNT;
-            rowPruneSum = 0;
-            for(size_t i = 0UL; i < RECOVERY_COUNT; ++i)
-                rowPruneSum += rowData.values[rowData.indices[i]];
+            keepLargest(RECOVERY_COUNT);
         }
         else if(remainCount > SELECTION_COUNT)
         {
             // Selection prune
             // Refine the cutoff so MAXIMUM SELECTION_COUNT elements remain
             // Should speedtest this vs copy+std::greater<float>
-            std::nth_element(first, rowData.indices.begin() + SELECTION_COUNT, last,
-                [&rowData](size_t i1, size_t i2) { return rowData.values[i1] > rowData.values[i2]; });
+            if(DEBUG)
+                qDebug() << "Pre selection Remain" << remainCount << "mass" << rowPruneSum;
 
-            minValueCutoff = rowData.values[rowData.indices[SELECTION_COUNT]];
+            keepLargest(SELECTION_COUNT);
 
             if(DEBUG)
             {
                 qDebug() << "Selection Cutoff" << minValueCutoff;
-                qDebug() << "Pre selection Remain" << remainCount << "mass" << rowPruneSum;
-            }
-
-            // Recalculate new mass
-            remainCount = SELECTION_COUNT;
-            rowPruneSum = 0;
-            for(size_t i = 0UL; i < SELECTION_COUNT; ++i)
-                rowPruneSum += rowData.values[rowData.indices[i]];
-
-            if(DEBUG)
                 qDebug() << "Post selection Remain" << remainCount << "mass" << rowPruneSum;
+            }
 
             Q_ASSERT(remainCount < RECOVERY_COUNT);
 
@@ -227,13 +232,7 @@ static void expandAndPruneRow(MatrixType& mclMatrix, size_t columnId,
                 if(DEBUG)
                     qDebug() << "RECOVERY 2" << "MASS:" << rowPruneSum;
 
-                std::nth_element(first, rowData.indices.begin() + RECOVERY_COUNT, last,
-                    [&rowData](size_t i1, size_t i2) { return rowData.values[i1] > rowData.values[i2]; });
-                minValueCutoff = rowData.values[rowData.indices[RECOVERY_COUNT]];
-                remainCount = RECOVERY_COUNT;
-                rowPruneSum = 0;
-                for(size_t i = 0UL; i < RECOVERY_COUNT; ++i)
-                    rowPruneSum += rowData.values[rowData.indices[i]];
+                keepLargest(RECOVERY_COUNT);
             }
         }
 
