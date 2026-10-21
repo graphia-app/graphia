@@ -106,7 +106,7 @@ Window
                 let userDefined = model.data(model.index(row, 0), modelRole("userDefined"));
                 let hasParameter = model.data(model.index(row, 0), modelRole("hasParameter"));
 
-                return (userDefined === qsTr("User Defined")) && !hasParameter;
+                return (userDefined === qsTranslate("AvailableAttributesModel", "User Defined")) && !hasParameter;
             }
 
             AttributeListSortMenu { attributeList: parent }

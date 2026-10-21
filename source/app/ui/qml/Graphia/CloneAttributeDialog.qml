@@ -23,6 +23,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 import Graphia.Controls
+import Graphia.SharedTypes
 import Graphia.Utils
 
 Window
@@ -59,7 +60,7 @@ Window
 
             if(root.sourceAttributeName.length === 0)
             {
-                attributeList.model = document.availableAttributesModel();
+                attributeList.model = document.availableAttributesModel(ElementType.Node|ElementType.Edge);
                 newAttributeName.text = "";
             }
             else
@@ -129,9 +130,6 @@ Window
             showParentGuide: true
             sortRoleName: "elementType"
             prettifyFunction: (name) => root.document.attributeDisplayName(name)
-
-            filterRoleName: "elementType"
-            filterRegularExpression: { return new RegExp(qsTr("Node") + "|" + qsTr("Edge")); }
 
             onSelectedValueChanged:
             {
