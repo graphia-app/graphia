@@ -68,7 +68,7 @@ Item
         edgeSizeSlider.value = visuals.defaultNormalEdgeSize;
         minimumComponentRadiusSlider.value = visuals.minimumComponentRadius;
 
-        let themeIndex = userInterfaceComboBox.model.indexOf(system.uiTheme);
+        let themeIndex = userInterfaceComboBox.indexOfValue(system.uiTheme);
         userInterfaceComboBox.currentIndex = themeIndex >= 0 ? themeIndex : 0;
 
         delayedPreferences.enabled = true;
@@ -303,9 +303,11 @@ Item
                 ComboBox
                 {
                     id: userInterfaceComboBox
-                    model: ["Default", "Fusion"]
+                    model: [{text: qsTr("Default"), value: "Default"}, {text: "Fusion", value: "Fusion"}]
+                    textRole: "text"
+                    valueRole: "value"
 
-                    onCurrentTextChanged: { system.uiTheme = currentText; }
+                    onCurrentValueChanged: { system.uiTheme = currentValue; }
                 }
             }
 
