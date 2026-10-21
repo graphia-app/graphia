@@ -340,6 +340,8 @@ Each one is a commit; see `git log` for the details.
 - **Winsorization:** dereferenced the end of the data, which aborts with
   checked iterators (MSVC debug builds).
 - **Exported tables:** values with line breaks split their rows.
+- **MCL:** recovering pruned values read beyond a column's values, and in
+  graphs of 1400 nodes or fewer beyond the end of its indices.
 - **Commands:** destroying a Document while a command was queued behind
   another hung (the UI waits for commands before closing a tab, so this
   mostly affected the tests).
@@ -498,12 +500,6 @@ transforms applied. The window is tiny, so this was left alone.
 `CompoundCommand::undo` undoes each of its commands, even one whose
 `execute` returned false, i.e. did nothing. No command executed as part
 of an undoable compound returns false at the moment, so this was left.
-
-`MCLTransform`'s second recovery step, after selecting the 1100 largest
-values of a column, takes `nth_element` at 1400 even when the column has
-fewer than 1400 values. In practice that keeps every value, which is what
-recovery wants, but it's undefined; it needs a node with over 1100
-neighbours after expansion to reach.
 
 Destroying a Document while a command it's executing waits for the main
 thread (`Document::executeOnMainThreadAndWait`, used by refreshing
