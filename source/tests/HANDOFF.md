@@ -445,10 +445,17 @@ The original plan, for reference, had these priorities:
 3. UI logic (JavaScript helpers, one `Document` level test);
 4. `shared/utils`.
 
-Its mutation check plants deliberate bugs (an off-by-one in PageRank, a
-flipped operator in `condtionfnops.h`, a changed default in the pairwise
-parser, a dropped field in `nativesaver.cpp`) and expects each to make a test
-fail.
+Its mutation check plants deliberate bugs and expects each to make a test
+fail. `source/tests/mutation-check.py <build directory>` does this for 12 of
+them, one at a time, restoring each file afterwards: an off-by-one in PageRank,
+a flipped condition operator, swapped pairwise columns, fields dropped from
+native files, k-NN keeping too many edges, betweenness not halved, the sign of
+Pearson's numerator, inverting the selection doing nothing, component filters
+ignoring inversion, undoing deleting nodes losing edges, and MCL's prune limit.
+All but the last are caught. Raising MCL's prune limit from 1e-4 to 0.1 changes
+the clusters of a ring of 24 nodes, but how a ring splits depends on floating
+point tie-breaking, which could differ between compilers, so no test pins it.
+Add mutations to the script when a transform or format changes.
 
 ## Coverage
 
