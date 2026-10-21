@@ -551,3 +551,38 @@ Every push also uploads the builds, about 400MB, to graphia.dev. In October
 2026 the "Upload Builds to graphia.dev" job started failing with "No space
 left on device" on the server, which has nothing to do with the branch, so
 batch pushes rather than pushing every commit.
+
+## Static analysis
+
+CI's static analysis jobs (clang-tidy, clazy, cppcheck, include-what-you-use,
+and the compilers' own warnings) don't fail the build. Their findings for each
+branch are collected in the `graphia-app/defects` repository, on a branch of the
+same name, e.g. `claude/unit-test-infrastructure`; `master`'s is empty, so
+anything listed there came from the branch. Check it after pushing, and fix
+what's listed, folding each fix into the commit that introduced the problem.
+
+CI uses clang 19; clang-tidy 18 misses most of what 19 reports.
+`scripts/static-analysis.sh` runs the same analysis locally, building the
+clazy commit CI uses; it needs `clang-tidy-19`, `llvm-19-dev` and
+`libclang-19-dev`. To run a tool on a few files by hand instead, note that the
+local builds are unity builds, whose `compile_commands.json` has one entry per
+batch of files; expand it into one entry per file, from the `#include`s in
+each `Unity/unity_*.cxx`, first.
+
+CI's clang-tidy goes through ctcache, which keys its results on each file's
+preprocessed source, so without comments. Adding a `NOLINT` to a file whose
+code doesn't otherwise change therefore changes nothing there: the cached
+warning is reported again. Prefer changing the code so that the warning
+doesn't apply.
+
+Conventions that keep the tests clean:
+- `QFETCH(const T, name)` and `const QSignalSpy`, unless they're modified.
+- `reserve` before appending in a loop, or construct the container directly.
+- Don't loop over a temporary Qt container; hold it in a `const` local first.
+- Suppress false positives the way the rest of the codebase does, with
+  `// clazy:exclude=...` or `// NOLINT check-name` on the line.
+- moc misparses some raw strings, e.g. ones containing `</b>`, and then finds
+  no classes, which shows up as an undefined vtable for the test class. Use an
+  escaped string there, with `// NOLINT modernize-raw-string-literal`.
+- MSVC wrongly sees escape sequences in raw strings in macro arguments, so put
+  such strings in a variable outside `QCOMPARE` and friends.
