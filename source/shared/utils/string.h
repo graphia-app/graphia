@@ -110,8 +110,6 @@ namespace u
 
     QString escapeQuotes(QString s);
 
-    QString pluralise(size_t count, const QString& singular, const QString& plural);
-
     int numericCompare(const QString& a, const QString& b);
     int numericCompareCaseInsensitive(const QString& a, const QString& b);
 

@@ -170,9 +170,8 @@ Item
                 visible: panel.hidden && list.count > 0
                 text:
                 {
-                    return Utils.pluralise(list.count,
-                                           qsTr("visualisation"),
-                                           qsTr("visualisations"));
+                    return list.count === 1 ? qsTr("1 visualisation") :
+                        qsTr("%n visualisations", "", list.count);
                 }
             }
 

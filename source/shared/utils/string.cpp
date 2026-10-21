@@ -357,14 +357,6 @@ QString u::escapeQuotes(QString s)
     return s;
 }
 
-QString u::pluralise(size_t count, const QString& singular, const QString& plural)
-{
-    if(count == 1)
-        return u"1 %1"_s.arg(singular);
-
-    return u"%1 %2"_s.arg(count).arg(plural);
-}
-
 static int numericCompare(const QString& a, const QString& b, Qt::CaseSensitivity cs = Qt::CaseSensitive)
 {
     auto tokenise = [](const QStringView& s)

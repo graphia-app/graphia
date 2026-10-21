@@ -896,10 +896,12 @@ Item
 
                         text:
                         {
-                            let nodeText = _document.numInvisibleNodesSelected === 1 ? qsTr("node") : qsTr("nodes");
-                            let numNodes = NativeUtils.formatNumberSIPostfix(_document.numInvisibleNodesSelected);
-                            return Utils.format(qsTr("<i>({0} selected {1} not currently visible)</i>"), numNodes, nodeText);
+                            let n = _document.numInvisibleNodesSelected;
+                            if(n === 1)
+                                return qsTr("<i>(1 selected node not currently visible)</i>");
 
+                            return Utils.format(qsTr("<i>({0} selected nodes not currently visible)</i>", "", n),
+                                NativeUtils.formatNumberSIPostfix(n));
                         }
 
                         color: _document.contrastingColor

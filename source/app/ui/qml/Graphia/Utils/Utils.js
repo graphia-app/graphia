@@ -254,14 +254,6 @@ function generateColorFrom(color)
     return "#FF0000";
 }
 
-function pluralise(count, singular, plural)
-{
-    if(count === 1)
-        return "1 " + singular;
-
-    return count + " " + plural;
-}
-
 function format(string, ...args)
 {
     return string.replace(/{([0-9]+)}/g, (match, index) =>

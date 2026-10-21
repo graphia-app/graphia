@@ -700,9 +700,14 @@ bool CorrelationPlot::updateTooltip()
                     value = plottable1D->dataMainValue(dataIndex);
                 }
 
-                auto columnName = _groupByAnnotation ?
-                    u::pluralise(_annotationGroupMap.at(index).size(), tr("column"), tr("columns")) :
-                    _pluginInstance->columnName(_sortMap.at(index));
+                QString columnName;
+                if(_groupByAnnotation)
+                {
+                    auto numColumns = static_cast<int>(_annotationGroupMap.at(index).size());
+                    columnName = numColumns == 1 ? tr("1 column") : tr("%n columns", nullptr, numColumns);
+                }
+                else
+                    columnName = _pluginInstance->columnName(_sortMap.at(index));
 
                 _hoverLabel->setText(tr("%1, %2: %3")
                     .arg(plottableUnderCursor->name(),

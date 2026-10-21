@@ -92,9 +92,8 @@ Item
                 visible: panel.hidden && list.count > 0
                 text:
                 {
-                    return Utils.pluralise(list.count,
-                                           qsTr("transform"),
-                                           qsTr("transforms"));
+                    return list.count === 1 ? qsTr("1 transform") :
+                        qsTr("%n transforms", "", list.count);
                 }
             }
 
