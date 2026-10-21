@@ -20,6 +20,9 @@
 #include "visualisationconfig.h"
 #include "visualisationchannel.h"
 
+#include "app/configgrammar.h"
+#include "app/attributes/attribute.h"
+
 #include "shared/utils/container.h"
 
 #include <QObject>
@@ -35,30 +38,25 @@ bool VisualisationConfig::Parameter::operator==(const VisualisationConfig::Param
             _value == other._value;
 }
 
-QString VisualisationConfig::Parameter::valueAsString(bool addQuotes) const
+QString VisualisationConfig::Parameter::valueAsString(bool asWritten) const
 {
     struct Visitor
     {
-        bool _addQuotes;
+        bool _asWritten;
 
-        explicit Visitor(bool addQuotes_) : _addQuotes(addQuotes_) {}
+        explicit Visitor(bool asWritten_) : _asWritten(asWritten_) {}
 
         QString operator()(double d) const { return QString::number(d); }
         QString operator()(const QString& s) const
         {
-            if(_addQuotes)
-            {
-                QString escapedString = s;
-                escapedString.replace(u"\""_s, u"\\\""_s);
-
-                return u"\"%1\""_s.arg(escapedString);
-            }
+            if(_asWritten)
+                return LexyConfigGrammar::writtenString(s);
 
             return s;
         }
     };
 
-    return std::visit(Visitor(addQuotes), _value);
+    return std::visit(Visitor(asWritten), _value);
 }
 
 QVariantMap VisualisationConfig::asVariantMap() const
@@ -100,11 +98,13 @@ QString VisualisationConfig::asString(bool forDisplay, const VisualisationChanne
         s += u"] "_s;
     }
 
-    auto assignmentTemplate = forDisplay ? QObject::tr("%1 using %2") : u"\"%1\" \"%2\""_s;
-
-    s += assignmentTemplate.arg(forDisplay && attributeDisplayName ?
-        attributeDisplayName(_attributeName) : _attributeName,
-        forDisplay && factory != nullptr ? factory->displayName() : _channelName);
+    if(forDisplay)
+    {
+        s += QObject::tr("%1 using %2").arg(attributeDisplayName ? attributeDisplayName(_attributeName) : _attributeName,
+            factory != nullptr ? factory->displayName() : _channelName);
+    }
+    else
+        s += u"%1 %2"_s.arg(Attribute::writtenAttributeName(_attributeName), LexyConfigGrammar::writtenString(_channelName));
 
     if(!forDisplay && !_parameters.empty())
     {

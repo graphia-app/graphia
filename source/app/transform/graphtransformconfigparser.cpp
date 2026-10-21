@@ -41,12 +41,10 @@ namespace LexyGraphTransformParser
 
 namespace dsl = lexy::dsl;
 
-using lexyutils::QuotedString;
-
 using LexyConfigGrammar::AttributeParameters;
 using LexyConfigGrammar::Flags;
 using LexyConfigGrammar::idPattern;
-using LexyConfigGrammar::Name;
+using LexyConfigGrammar::String;
 
 constexpr auto equalityOps = lexy::symbol_table<ConditionFnOp::Equality>
     .map<LEXY_SYMBOL("==")>(ConditionFnOp::Equality::Equal)
@@ -85,7 +83,7 @@ constexpr auto keywordWhere = LEXY_KEYWORD("where", idPattern);
 struct AttributeNameNoDollar : lexy::token_production
 {
     static constexpr auto rule = dsl::lit_c<'$'> >>
-        (dsl::p<Name> + dsl::p<AttributeParameters>);
+        (dsl::p<String> + dsl::p<AttributeParameters>);
 
     static constexpr auto value = LexyConfigGrammar::asAttributeName;
 };
@@ -106,7 +104,7 @@ struct Number
 
 struct ValueOperand
 {
-    static constexpr auto rule = dsl::p<AttributeName> | dsl::p<Number> | dsl::p<QuotedString>;
+    static constexpr auto rule = dsl::p<AttributeName> | dsl::p<Number> | dsl::p<String>;
     static constexpr auto value = lexy::construct<GraphTransformConfig::TerminalValue>;
 };
 
@@ -188,8 +186,8 @@ struct Parameter
     // A parameter is only committed to once its = has been seen, otherwise a
     // trailing where clause would be mistaken for the start of another parameter
     static constexpr auto rule =
-        dsl::peek(dsl::p<Name> + dsl::while_(dsl::ascii::space) + dsl::lit_c<'='>) >>
-        (dsl::p<Name> + dsl::lit_c<'='> + (dsl::p<Number> | dsl::p<QuotedString>));
+        dsl::peek(dsl::p<String> + dsl::while_(dsl::ascii::space) + dsl::lit_c<'='>) >>
+        (dsl::p<String> + dsl::lit_c<'='> + (dsl::p<Number> | dsl::p<String>));
 
     static constexpr auto value = lexy::construct<GraphTransformConfig::Parameter>;
 };
@@ -221,7 +219,7 @@ struct Transform
 {
     static constexpr auto whitespace = dsl::ascii::space;
 
-    static constexpr auto rule = dsl::p<Flags> + dsl::p<Name> + dsl::p<Attributes> +
+    static constexpr auto rule = dsl::p<Flags> + dsl::p<String> + dsl::p<Attributes> +
         dsl::p<Parameters> + dsl::p<OptionalCondition> + dsl::eof;
 
     static constexpr auto value = lexy::construct<GraphTransformConfig>;

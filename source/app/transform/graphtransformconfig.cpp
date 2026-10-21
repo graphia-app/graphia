@@ -23,6 +23,7 @@
 #include "graphtransformconfigparser.h"
 #include "transformdisplaytext.h"
 
+#include "app/configgrammar.h"
 #include "app/attributes/attribute.h"
 
 #include "shared/utils/container.h"
@@ -142,31 +143,26 @@ void GraphTransformConfig::setParameterValue(const QString& name,
         _parameters.emplace_back(Parameter{._name = name, ._value = value});
 }
 
-QString GraphTransformConfig::Parameter::valueAsString(bool addQuotes) const
+QString GraphTransformConfig::Parameter::valueAsString(bool asWritten) const
 {
     struct Visitor
     {
-        bool _addQuotes;
+        bool _asWritten;
 
-        explicit Visitor(bool addQuotes_) : _addQuotes(addQuotes_) {}
+        explicit Visitor(bool asWritten_) : _asWritten(asWritten_) {}
 
         QString operator()(double d) const          { return doubleAsString(d); }
         QString operator()(int i) const             { return QString::number(i); }
         QString operator()(const QString& s) const
         {
-            if(_addQuotes)
-            {
-                QString escapedString = s;
-                escapedString.replace(u"\""_s, u"\\\""_s);
-
-                return u"\"%1\""_s.arg(escapedString);
-            }
+            if(_asWritten)
+                return LexyConfigGrammar::writtenString(s);
 
             return s;
         }
     };
 
-    return std::visit(Visitor(addQuotes), _value);
+    return std::visit(Visitor(asWritten), _value);
 }
 
 bool GraphTransformConfig::hasCondition() const
@@ -274,23 +270,10 @@ QString GraphTransformConfig::conditionAsString(bool forDisplay, const Attribute
                                 Attribute::fullyQualifiedDisplayName(s, [](const QString& name) { return name; });
                         }
 
-                        auto info = Attribute::parseAttributeName(s);
-
-                        QString prefix;
-                        switch(info._type)
-                        {
-                        case Attribute::EdgeNodeType::Source: prefix = u"source."_s; break;
-                        case Attribute::EdgeNodeType::Target: prefix = u"target."_s; break;
-                        default: break;
-                        }
-
-                        if(!info._parameter.isEmpty())
-                            return u"$\"%1%2\".\"%3\""_s.arg(prefix, info._name, info._parameter);
-
-                        return u"$\"%1%2\""_s.arg(prefix, info._name);
+                        return u"$%1"_s.arg(Attribute::writtenAttributeName(s));
                     }
 
-                    return _forDisplay ? s : u"\"%1\""_s.arg(s);
+                    return _forDisplay ? s : LexyConfigGrammar::writtenString(s);
                 }
             };
 
@@ -381,7 +364,7 @@ QVariantMap GraphTransformConfig::asVariantMap(const GraphTransformFactory* fact
     QStringList attributes;
     attributes.reserve(static_cast<int>(_attributes.size()));
     for(const auto& attribute : _attributes)
-        attributes.append(Attribute::enquoteAttributeName(attribute));
+        attributes.append(Attribute::writtenAttributeName(attribute));
     map.insert(u"attributes"_s, attributes);
 
     QVariantList parameters;
@@ -421,14 +404,14 @@ QString GraphTransformConfig::asString(bool forDisplay, const GraphTransformFact
         s += u"] "_s;
     }
 
-    s += u"\"%1\""_s.arg(_action);
+    s += LexyConfigGrammar::writtenString(_action);
 
     if(!_attributes.empty())
     {
         s += u" using"_s;
 
         for(const auto& attribute : _attributes)
-            s += u" $\"%1\""_s.arg(attribute);
+            s += u" $%1"_s.arg(Attribute::writtenAttributeName(attribute));
     }
 
     if(!_parameters.empty())
@@ -436,7 +419,7 @@ QString GraphTransformConfig::asString(bool forDisplay, const GraphTransformFact
         s += u" with"_s;
 
         for(const auto& parameter : _parameters)
-            s += u" \"%1\" = %2"_s.arg(parameter._name, parameter.valueAsString(true));
+            s += u" %1 = %2"_s.arg(LexyConfigGrammar::writtenString(parameter._name), parameter.valueAsString(true));
     }
 
     if(hasCondition())

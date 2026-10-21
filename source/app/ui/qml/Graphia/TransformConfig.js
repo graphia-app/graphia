@@ -96,7 +96,7 @@ function Create(transformIndex, document, transformString)
 
     // Escape '%' to '%!' so that when the template is actually employed, a literal
     // % isn't potentially misinterpreted as a template substitution parameter
-    this.template = "\"" + transform.action.replace(/%/g, "%!") + "\"";
+    this.template = document.writtenString(transform.action).replace(/%/g, "%!");
 
     let displayText = document.transformDisplayText();
 
@@ -118,7 +118,7 @@ function Create(transformIndex, document, transformString)
             if(text[0] === '$')
             {
                 text = text.substring(1);
-                return "$\"" + text + "\"";
+                return "$" + document.writtenAttributeName(text);
             }
 
             return "%" + parameterIndex++;
@@ -189,7 +189,7 @@ function Create(transformIndex, document, transformString)
                 appendToElements(parameterElements, " ");
 
             let parameter = transform.parameters[index];
-            this.template += " \"" + parameter.name + "\" = %" + parameterIndex++;
+            this.template += " " + document.writtenString(parameter.name) + " = %" + parameterIndex++;
             parameterElements.push({type: "parameter", lhs: "$" + parameter.name, rhs: parameter.value});
         }
 

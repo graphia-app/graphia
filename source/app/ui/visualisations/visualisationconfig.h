@@ -39,7 +39,7 @@ struct VisualisationConfig
         ParameterValue _value;
 
         bool operator==(const Parameter& other) const;
-        QString valueAsString(bool addQuotes = false) const;
+        QString valueAsString(bool asWritten = false) const;
     };
 
     std::vector<QString> _flags;

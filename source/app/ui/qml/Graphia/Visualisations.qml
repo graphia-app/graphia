@@ -55,7 +55,7 @@ Item
                     return;
 
                 let visualisation = list.itemAt(visualisationIndex);
-                visualisation.parameters["gradient"] = "\"" + Utils.escapeQuotes(configuration) + "\"";
+                visualisation.parameters["gradient"] = root.document.writtenString(configuration);
                 visualisation.updateExpression();
             }
 
@@ -68,7 +68,7 @@ Item
             onApplyClicked: function(alreadyApplied)
             {
                 let visualisation = list.itemAt(visualisationIndex);
-                visualisation.parameters["gradient"] = "\"" + Utils.escapeQuotes(configuration) + "\"";
+                visualisation.parameters["gradient"] = root.document.writtenString(configuration);
                 visualisation.updateExpression(alreadyApplied);
             }
         }
@@ -90,7 +90,7 @@ Item
                     return;
 
                 let visualisation = list.itemAt(visualisationIndex);
-                visualisation.parameters["palette"] = "\"" + Utils.escapeQuotes(configuration) + "\"";
+                visualisation.parameters["palette"] = root.document.writtenString(configuration);
                 visualisation.updateExpression();
             }
 
@@ -103,7 +103,7 @@ Item
             onApplyClicked: function(alreadyApplied)
             {
                 let visualisation = list.itemAt(visualisationIndex);
-                visualisation.parameters["palette"] = "\"" + Utils.escapeQuotes(configuration) + "\"";
+                visualisation.parameters["palette"] = root.document.writtenString(configuration);
                 visualisation.updateExpression(alreadyApplied);
             }
         }
@@ -125,7 +125,7 @@ Item
                     return;
 
                 let visualisation = list.itemAt(visualisationIndex);
-                visualisation.parameters["mapping"] = "\"" + Utils.escapeQuotes(configuration) + "\"";
+                visualisation.parameters["mapping"] = root.document.writtenString(configuration);
                 visualisation.updateExpression();
             }
 
@@ -141,7 +141,7 @@ Item
             onApplyClicked: function(alreadyApplied)
             {
                 let visualisation = list.itemAt(visualisationIndex);
-                visualisation.parameters["mapping"] = "\"" + Utils.escapeQuotes(configuration) + "\"";
+                visualisation.parameters["mapping"] = root.document.writtenString(configuration);
                 visualisation.updateExpression(alreadyApplied);
             }
         }

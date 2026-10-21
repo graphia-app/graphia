@@ -20,9 +20,14 @@
 #ifndef CONFIGGRAMMAR_H
 #define CONFIGGRAMMAR_H
 
-#include <lexy_utils.h>
-#include <lexy/grammar.hpp>
+#include "shared/utils/string.h"
 
+#include <lexy_utils.h>
+#include <lexy/action/match.hpp>
+#include <lexy/grammar.hpp>
+#include <lexy/input/string_input.hpp>
+
+#include <QByteArray>
 #include <QString>
 
 #include <utility>
@@ -44,7 +49,27 @@ struct Identifier : lexy::token_production
     static constexpr auto value = lexyutils::asQString;
 };
 
-struct Name
+struct WholeIdentifier
+{
+    static constexpr auto rule = dsl::p<Identifier> + dsl::eof;
+};
+
+// This takes a transform, attribute, parameter, channel name,
+// or string value, and returns it quoted if necessary
+inline QString writtenString(const QString& string)
+{
+    const auto bytes = string.toUtf8();
+    const auto input = lexy::string_input<lexy::default_encoding>(
+        bytes.constData(), bytes.constData() + bytes.size());
+
+    if(lexy::match<WholeIdentifier>(input))
+        return string;
+
+    return u"\"%1\""_s.arg(u::escapeQuotes(string));
+}
+
+// A name or a string value; either is quoted unless it's an identifier
+struct String
 {
     static constexpr auto rule = dsl::p<lexyutils::QuotedString> | dsl::p<Identifier>;
     static constexpr auto value = lexy::forward<QString>;
@@ -52,7 +77,7 @@ struct Name
 
 struct AttributeParameter
 {
-    static constexpr auto rule = dsl::lit_c<'.'> >> dsl::p<Name>;
+    static constexpr auto rule = dsl::lit_c<'.'> >> dsl::p<String>;
     static constexpr auto value = lexy::callback<QString>(
         [](const QString& name) { return u"."_s + name; });
 };

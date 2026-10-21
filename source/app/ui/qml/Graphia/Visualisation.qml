@@ -531,8 +531,8 @@ Item
 
         let newAttributeName = attributeList.selectedValue ?
             attributeList.selectedValue :
-            " \"" + root.attributeName + "\"";
-        let newExpression = flagsString + newAttributeName + " \"" + channel + "\"";
+            document.writtenAttributeName(root.attributeName);
+        let newExpression = flagsString + newAttributeName + " " + document.writtenString(channel);
 
         if(Object.keys(parameters).length !== 0)
             newExpression += " with";

@@ -20,6 +20,7 @@
 #include "availableattributesmodel.h"
 
 #include "app/application.h"
+#include "app/configgrammar.h"
 
 #include "app/graph/graphmodel.h"
 
@@ -335,7 +336,7 @@ QString AvailableAttributesModel::get(const QModelIndex& index) const
     if(item == nullptr)
         return {};
 
-    QString text = u"\"%1\""_s.arg(item->value());
+    QString text = LexyConfigGrammar::writtenString(item->value());
 
     auto* parent = parentItem(index);
     if(u::contains(_attributeItemsWithParameters, parent))

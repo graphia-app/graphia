@@ -190,7 +190,7 @@ GridLayout
         function updateValue()
         {
             let storedText = root.storedValueOf !== null ? root.storedValueOf(text) : text;
-            root.value = "\"" + Utils.escapeQuotes(storedText) + "\"";
+            root.value = root.document.writtenString(storedText);
         }
 
         onTextChanged:
@@ -221,7 +221,7 @@ GridLayout
 
         function updateValue()
         {
-            root.value = "\"" + currentValue + "\"";
+            root.value = root.document.writtenString(currentValue);
         }
 
         onCurrentValueChanged: { updateValue(); }
@@ -322,7 +322,7 @@ GridLayout
             if(validatorRegex.length > 0)
                 textFieldValidator.regularExpression = new RegExp(validatorRegex);
 
-            value = "\"" + Utils.escapeQuotes(initialValue) + "\"";
+            value = root.document.writtenString(initialValue);
             break;
 
         case ValueType.StringList:
@@ -330,7 +330,7 @@ GridLayout
                 displayValue: index < root.displayValues.length ? root.displayValues[index] : choice}));
             comboBox.currentIndex = initialIndex;
 
-            value = "\"" + Utils.escapeQuotes(comboBox.currentValue) + "\"";
+            value = root.document.writtenString(comboBox.currentValue);
             break;
 
         case ValueType.Attribute:

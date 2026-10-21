@@ -518,6 +518,8 @@ public:
     Q_INVOKABLE QStringList addedOrChangedAttributeNamesAtTransformIndexOrLater(int firstIndex) const;
 
     Q_INVOKABLE QVariantMap parseGraphTransform(const QString& transform) const;
+    Q_INVOKABLE QString writtenString(const QString& string) const;
+    Q_INVOKABLE QString writtenAttributeName(const QString& attributeName) const;
     Q_INVOKABLE bool graphTransformIsValid(const QString& transform) const;
     Q_INVOKABLE QStringList attributeNamesReferencedBy(const QString& transform) const;
     Q_INVOKABLE bool graphTransformsAreValid(const QStringList& transforms) const;

@@ -51,6 +51,8 @@
 #include "app/commands/importattributescommand.h"
 #include "app/commands/selectnodescommand.h"
 
+#include "app/configgrammar.h"
+
 #include "app/transform/graphtransform.h"
 #include "app/transform/graphtransformconfigparser.h"
 #include "app/transform/transformdisplaytext.h"
@@ -779,8 +781,8 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
                     const auto& parameterKeys = defaultParameters.keys();
                     for(const auto& key : parameterKeys)
                     {
-                        auto value = u::escapeQuotes(defaultParameters.value(key).toString());
-                        visualisation += u" %1 = \"%2\""_s.arg(key, value);
+                        visualisation += u" %1 = %2"_s.arg(LexyConfigGrammar::writtenString(key),
+                            LexyConfigGrammar::writtenString(defaultParameters.value(key).toString()));
                     }
                 }
             }
@@ -2061,7 +2063,7 @@ QVariantMap Document::transform(const QString& transformName) const
         for(const auto& defaultVisualisation : transformFactory->defaultVisualisations())
         {
             QVariantMap defaultVisualisationMap;
-            auto attributeName = Attribute::enquoteAttributeName(defaultVisualisation._attributeName);
+            auto attributeName = Attribute::writtenAttributeName(defaultVisualisation._attributeName);
             defaultVisualisationMap.insert(u"name"_s, attributeName);
             defaultVisualisationMap.insert(u"displayName"_s, _graphModel->attributeDisplayName(defaultVisualisation._attributeName));
             defaultVisualisationMap.insert(u"flags"_s, static_cast<int>(*defaultVisualisation._attributeFlags));
@@ -2359,6 +2361,16 @@ QVariantMap Document::parseGraphTransform(const QString& transform) const
         return p.result().asVariantMap(_application->transformFactory(p.result()._action));
 
     return {};
+}
+
+QString Document::writtenString(const QString& string) const
+{
+    return LexyConfigGrammar::writtenString(string);
+}
+
+QString Document::writtenAttributeName(const QString& attributeName) const
+{
+    return Attribute::writtenAttributeName(attributeName);
 }
 
 bool Document::graphTransformIsValid(const QString& transform) const

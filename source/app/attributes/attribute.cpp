@@ -19,6 +19,8 @@
 
 #include "attribute.h"
 
+#include "app/configgrammar.h"
+
 #include "shared/graph/igraph.h"
 #include "shared/utils/container.h"
 
@@ -446,26 +448,23 @@ Attribute::Name Attribute::parseAttributeName(QString name)
     return {._type = type, ._name = name, ._parameter = parameter};
 }
 
-QString Attribute::enquoteAttributeName(const QString& name)
+QString Attribute::writtenAttributeName(const QString& name)
 {
-    const QString sourceString = u"source."_s;
-    const QString targetString = u"target."_s;
-    QString prefix;
-    QString postfix;
-
     auto parsedAttributeName = parseAttributeName(name);
 
+    QString prefix;
     switch(parsedAttributeName._type)
     {
-    case EdgeNodeType::Source: prefix = sourceString; break;
-    case EdgeNodeType::Target: prefix = targetString; break;
+    case EdgeNodeType::Source: prefix = u"source."_s; break;
+    case EdgeNodeType::Target: prefix = u"target."_s; break;
     default: break;
     }
 
+    QString postfix;
     if(!parsedAttributeName._parameter.isEmpty())
-        postfix = u".\"%1\""_s.arg(parsedAttributeName._parameter);
+        postfix = u".%1"_s.arg(LexyConfigGrammar::writtenString(parsedAttributeName._parameter));
 
-    return u"%1\"%2\"%3"_s.arg(prefix, parsedAttributeName._name, postfix);
+    return u"%1%2%3"_s.arg(prefix, LexyConfigGrammar::writtenString(parsedAttributeName._name), postfix);
 }
 
 Attribute Attribute::edgeNodesAttribute(const IGraph& graph, const Attribute& nodeAttribute,

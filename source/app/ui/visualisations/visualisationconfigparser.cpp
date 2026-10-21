@@ -37,11 +37,10 @@ namespace LexyVisualisationParser
 namespace dsl = lexy::dsl;
 
 using lexyutils::asDouble;
-using lexyutils::QuotedString;
 
 using LexyConfigGrammar::AttributeParameters;
 using LexyConfigGrammar::Flags;
-using LexyConfigGrammar::Name;
+using LexyConfigGrammar::String;
 
 constexpr auto keywordWith = LEXY_KEYWORD("with", LexyConfigGrammar::idPattern);
 
@@ -53,8 +52,8 @@ struct Double
 
 struct Parameter
 {
-    static constexpr auto rule = dsl::p<Name> >>
-        (dsl::lit_c<'='> + (dsl::p<Double> | dsl::p<QuotedString>));
+    static constexpr auto rule = dsl::p<String> >>
+        (dsl::lit_c<'='> + (dsl::p<Double> | dsl::p<String>));
 
     static constexpr auto value = lexy::construct<VisualisationConfig::Parameter>;
 };
@@ -69,7 +68,7 @@ struct Parameters
 // skipped between the attribute name and its parameters
 struct AttributeName : lexy::token_production
 {
-    static constexpr auto rule = dsl::p<Name> >> dsl::p<AttributeParameters>;
+    static constexpr auto rule = dsl::p<String> >> dsl::p<AttributeParameters>;
     static constexpr auto value = LexyConfigGrammar::asAttributeName;
 };
 
@@ -78,7 +77,7 @@ struct Visualisation
     static constexpr auto whitespace = dsl::ascii::space;
 
     static constexpr auto rule = dsl::p<Flags> + dsl::p<AttributeName> +
-        dsl::p<Name> + dsl::p<Parameters> + dsl::eof;
+        dsl::p<String> + dsl::p<Parameters> + dsl::eof;
 
     static constexpr auto value = lexy::construct<VisualisationConfig>;
 };

@@ -30,7 +30,7 @@ function expressionFor(document, attributeName, flags, type, channelName)
     if(flags & GraphiaSharedTypes.AttributeFlag.VisualiseByComponent)
         expression += "[component] ";
 
-    expression += attributeName + " \"" + channelName +"\"";
+    expression += attributeName + " " + document.writtenString(channelName);
 
     let parameters = document.visualisationDefaultParameters(
         type, channelName);
@@ -43,9 +43,8 @@ function expressionFor(document, attributeName, flags, type, channelName)
         {
             let parameter = parameters[key];
             parameter = GraphiaUtils.Utils.sanitiseJson(parameter);
-            parameter = GraphiaUtils.Utils.escapeQuotes(parameter);
 
-            expression += " " + key + " = \"" + parameter + "\"";
+            expression += " " + document.writtenString(key) + " = " + document.writtenString(parameter);
         }
     }
 
