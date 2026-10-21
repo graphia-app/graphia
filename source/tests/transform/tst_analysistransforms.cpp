@@ -210,6 +210,29 @@ private slots:
         }
     }
 
+    // A node whose neighbours include a hub with a little over a thousand neighbours of its
+    // own: after expansion, its column has over 10% of its mass in values small enough to be
+    // pruned, but fewer values in all than MCL keeps when it recovers pruned mass
+    void mclRecoveryWithFewValues()
+    {
+        QStringList edges;
+        edges.reserve(7 + 1 + 1198);
+        for(int i = 0; i < 7; i++)
+            edges.append(u"j-l%1"_s.arg(i));
+
+        edges.append(u"j-k"_s);
+
+        for(int i = 0; i < 1198; i++)
+            edges.append(u"k-m%1"_s.arg(i));
+
+        TestGraphModel model(edges);
+        QCOMPARE(model.applyTransforms({u"MCLCluster"_s}), QStringList{});
+
+        // j's leaves are clustered with it
+        QCOMPARE(model.nodeValue(u"MCLCluster"_s, u"l0"_s), model.nodeValue(u"MCLCluster"_s, u"j"_s));
+        QCOMPARE(model.nodeValue(u"MCLCluster"_s, u"l6"_s), model.nodeValue(u"MCLCluster"_s, u"j"_s));
+    }
+
     void weightedLouvain()
     {
         auto model = createTwoCliquesGraph();
