@@ -19,10 +19,6 @@
 
 #include "preferences.h"
 
-#include "app/limitconstants.h"
-
-#include "shared/utils/utils.h"
-
 #include <QSettings>
 #include <QCoreApplication>
 #include <QRegularExpression>
@@ -84,29 +80,6 @@ void u::setPref(const QString& key, const QVariant& value)
 
     if(changed)
         PreferencesWatcher::setPref(key, value);
-}
-
-void u::updateOldPrefs()
-{
-    if(u::prefExists(u"visuals/defaultNodeSize"_s))
-    {
-        auto absNodeSize = u::pref(u"visuals/defaultNodeSize"_s).toFloat();
-        auto normalNodeSize = u::normalise(LimitConstants::minimumNodeSize(),
-                                           LimitConstants::maximumNodeSize(), absNodeSize);
-
-        u::setPref(u"visuals/defaultNormalNodeSize"_s, normalNodeSize);
-        u::removePref(u"visuals/defaultNodeSize"_s);
-    }
-
-    if(u::prefExists(u"visuals/defaultEdgeSize"_s))
-    {
-        auto absEdgeSize = u::pref(u"visuals/defaultEdgeSize"_s).toFloat();
-        auto normalEdgeSize = u::normalise(LimitConstants::minimumEdgeSize(),
-                                           LimitConstants::maximumEdgeSize(), absEdgeSize);
-
-        u::setPref(u"visuals/defaultNormalEdgeSize"_s, normalEdgeSize);
-        u::removePref(u"visuals/defaultEdgeSize"_s);
-    }
 }
 
 QString u::settingsFileName()

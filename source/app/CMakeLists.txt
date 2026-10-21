@@ -100,6 +100,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/rendering/shadertools.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/transition.h
     ${CMAKE_CURRENT_LIST_DIR}/preferences.h
+    ${CMAKE_CURRENT_LIST_DIR}/preferences_legacy.h
     ${CMAKE_CURRENT_LIST_DIR}/tracking.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/graphtransformattributeparameter.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/graphtransformconfig.h
@@ -219,6 +220,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/rendering/screenshotrenderer.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/shadertools.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/transition.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/preferences_legacy.cpp
     ${CMAKE_CURRENT_LIST_DIR}/tracking.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/graphtransformconfig.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/graphtransformconfigparser.cpp

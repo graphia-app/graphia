@@ -27,6 +27,7 @@
 #endif
 
 #include "app/preferences.h"
+#include "app/preferences_legacy.h"
 
 #include "shared/plugins/iplugin.h"
 #include "shared/utils/container_combine.h"
@@ -239,6 +240,7 @@ Application::Application(QObject *parent, bool enableUpdateCheck) :
 
     loadPlugins();
     collectAttributeDeclarations();
+    upgradeLegacyPreferences(this);
 }
 
 Application::~Application() = default;
@@ -799,6 +801,12 @@ const AttributeDeclaration* Application::attributeDeclaration(const QString& nam
         return find(_pluginDeclaredAttributes.at(plugin));
 
     return nullptr;
+}
+
+bool Application::attributeIsDeclared(const QString& name) const
+{
+    return attributeDeclaration(name, nullptr) != nullptr || std::ranges::any_of(_loadedPlugins,
+        [this, &name](const auto& loadedPlugin) { return attributeDeclaration(name, loadedPlugin._interface) != nullptr; });
 }
 
 QString Application::attributeDisplayName(const QString& name, const IPlugin* plugin) const

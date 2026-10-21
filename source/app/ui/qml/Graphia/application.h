@@ -239,6 +239,7 @@ public:
     Q_INVOKABLE void submitTrackingData() const;
 
     const AttributeDeclaration* attributeDeclaration(const QString& name, const IPlugin* plugin) const;
+    bool attributeIsDeclared(const QString& name) const;
     QString displayTextForTransform(const QString& transform, const IPlugin* plugin) const override;
     QString displayTextForVisualisation(const QString& visualisation, const IPlugin* plugin) const override;
 

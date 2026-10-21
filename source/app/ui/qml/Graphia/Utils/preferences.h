@@ -41,8 +41,6 @@ namespace u
     bool removePref(const QString& key);
     void setPref(const QString& key, const QVariant& value);
 
-    void updateOldPrefs();
-
     QString settingsFileName();
 } // namespace u
 

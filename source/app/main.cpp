@@ -434,8 +434,6 @@ static int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
     u::definePref(u"system/uiTheme"_s,                          "Default");
 #endif
 
-    u::updateOldPrefs();
-
     const PreferencesWatcher preferencesWatcher;
 
     QObject::connect(&preferencesWatcher, &PreferencesWatcher::preferenceChanged,
