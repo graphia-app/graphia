@@ -28,6 +28,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <ranges>
 #include <utility>
 
 using namespace Qt::Literals::StringLiterals;
@@ -97,10 +98,11 @@ void RemoveAttributesCommand::undo()
 {
     const AttributeChangesTracker tracker(_graphModel);
 
-    for(auto&& removed : _removedUserNodeData)
+    // In the reverse order of their removal, so that each position is as it was at the time
+    for(auto&& removed : std::views::reverse(_removedUserNodeData))
         _graphModel->userNodeData().restore(std::move(removed));
 
-    for(auto&& removed : _removedUserEdgeData)
+    for(auto&& removed : std::views::reverse(_removedUserEdgeData))
         _graphModel->userEdgeData().restore(std::move(removed));
 
     _graphModel->userNodeData().exposeAsAttributes(*_graphModel);

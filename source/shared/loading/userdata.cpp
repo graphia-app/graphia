@@ -153,6 +153,22 @@ void UserData::setVector(UserDataVector&& other)
     *vector(normalisedName) = std::move(other);
 }
 
+size_t UserData::positionOf(const QString& name) const
+{
+    auto it = std::ranges::find(_vectorNames, normalise(name));
+    return static_cast<size_t>(std::distance(_vectorNames.begin(), it));
+}
+
+void UserData::setVector(UserDataVector&& other, size_t position)
+{
+    const QString normalisedName = normalise(other.name());
+    setVector(std::move(other));
+
+    u::removeByValue(_vectorNames, normalisedName);
+    position = std::min(position, _vectorNames.size());
+    _vectorNames.insert(_vectorNames.begin() + static_cast<std::ptrdiff_t>(position), normalisedName);
+}
+
 void UserData::remove(const QString& name)
 {
     const QString normalisedName = normalise(name);

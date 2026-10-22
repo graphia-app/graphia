@@ -67,6 +67,10 @@ public:
     UserDataVector* vector(const QString& name);
     void setVector(UserDataVector&& other);
 
+    // The position of a vector in the order of the vectors, and setting a vector at a position
+    size_t positionOf(const QString& name) const;
+    void setVector(UserDataVector&& other, size_t position);
+
     virtual void remove(const QString& name);
 
     json save(Progressable& progressable, const std::vector<size_t>& indexes = {}) const;

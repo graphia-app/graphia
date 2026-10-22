@@ -312,6 +312,7 @@ typename UserElementData<E>::RemovedVector UserElementData<E>::removeByAttribute
         removee._vector = std::move(*vector(vectorName));
         removee._attributeName = attributeName;
         removee._override = _exposedAttributeOverrides.at(attributeName);
+        removee._position = positionOf(vectorName);
         remove(vectorName);
     }
 
@@ -322,7 +323,7 @@ template<typename E>
 void UserElementData<E>::restore(RemovedVector removed)
 {
     _exposedAttributeOverrides[removed._attributeName] = std::move(removed._override);
-    setVector(std::move(removed._vector));
+    setVector(std::move(removed._vector), removed._position);
 }
 
 template<typename E>
