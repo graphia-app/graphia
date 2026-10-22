@@ -32,14 +32,12 @@ it. This file should be deleted once everything here is resolved.
   user attributes when the file is imported.
 - **Pairwise exports drop nodes that have no edges.** Since 4e36b1e, a row
   with a single node name creates that node, so these could be exported too.
-- **Quotes in attribute names.** `Attribute::parseAttributeName` removes every
-  quote from a name, and names are put between quotes without escaping when
-  expressions are built (`Attribute::enquoteAttributeName`,
-  `AvailableAttributesModel::get`, `GraphTransformConfig::asString`). So an
-  attribute with a `"` in its name, for example from a CSV header, can't be
-  used in a transform. Dots are already replaced with underscores when an
-  attribute is created (`GraphModel::normalisedAttributeName`); doing the same
-  for quotes would be the simplest fix.
+- **Attributes from files named like those parsers declare.** A file
+  attribute called, for example, `NodeName` shares the user data that holds
+  the node names, so its values are lost. Before `i18n` it was called
+  `Node NodeName`, so didn't clash. Clashes with attributes Graphia declares
+  are already given a "User " prefix; doing the same for those of the parser
+  would avoid this.
 - **Colours for string values only use part of the hue range.**
   `u::colorForString`, which colours string values that a palette gives no
   colour, takes the hue modulo 255, whereas `QColor` hues run from 0 to 359,

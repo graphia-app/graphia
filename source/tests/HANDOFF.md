@@ -7,10 +7,40 @@ before the branch is merged.
 
 The work is on two branches:
 - **`claude/bug-fixes`** has the fixes for the bugs the tests found, and
-  nothing else. It starts from the same commit as the test work did, and each
-  fix is one commit with no test changes in it.
+  nothing else. It's based on Tim's `i18n` branch, and each fix is one commit
+  with no test changes in it.
 - **`claude/unit-test-infrastructure`** has the tests, the infrastructure for
   them and these notes. It's always rebased onto the tip of `claude/bug-fixes`.
+
+## The i18n branch
+
+`i18n` makes the names Graphia stores and parses separate from those it
+shows, so they can be translated:
+- Transforms, their parameters and the attributes Graphia declares have
+  compact names, e.g. `RemoveNodes`, `RankOrder` and `NodeDegree`, with
+  display names such as "Remove Nodes". Transform configs write names
+  without quotes unless they need them, e.g.
+  `RemoveNodes where $NodeDegree < 2 and $"Gene Type" == "x"`.
+- Attributes loaded from files no longer have a "Node " or "Edge " prefix;
+  one gets "Node " or "Edge " only when a node and an edge attribute would
+  share a name, and "User " when it would clash with a declared attribute.
+- `GraphModel` takes its transform and visualisation channel factories, and
+  attribute declarations, from `Application`, so tests need one; see
+  `TestGraphModel::application()`.
+- Native files before version 9, and preferences, have their names upgraded
+  when they're loaded (`nativeloader_legacy.cpp`, `legacynames.cpp`).
+
+When `i18n` moves on, rebase `claude/bug-fixes` onto it, then the test branch
+onto that. When the branches were first rebased onto it:
+- the fixes for the CX2 parser and for quotes in condition strings were
+  dropped, as `i18n` makes them too; their tests remain;
+- the fix for `source`/`target` in `AttributeUtils.js` was dropped with its
+  test, as `i18n` removes the file;
+- the fix for quotes in visualised attribute names was replaced by one for
+  `Attribute::parseAttributeName`, as writing names on `i18n` removed the
+  quotes within them;
+- `i18n`'s own fixes for removing attributes' undo (descriptions, and the
+  freed name) left only the column order to fix.
 
 ## The goal
 
@@ -107,6 +137,11 @@ testing, which may come later as an extra safety net.
     saves the same data back.
 - **`tests/common/testgraphmodel.h`:** `TestGraphModel`, which wraps a
   `GraphModel`.
+  - `TestGraphModel::application()` is the one `Application` of the test,
+    which every `GraphModel` the tests make needs. Creating it queries OpenGL,
+    so tests that use it have a `QGuiApplication`, through `QTEST_MAIN`,
+    rather than `QTEST_GUILESS_MAIN`. It loads no plugins, so attributes that
+    plugins declare, such as `NodeName`, have no display names.
   - It's built either from a compact description, e.g. `{"a-b", "b-c", "d"}`,
     or by `TestGraphModel::parse(content, createParser, &failureReason)`, which
     parses a file the way `ParserThread` and `Document` do. `parse` keeps the
@@ -154,8 +189,9 @@ testing, which may come later as an extra safety net.
   display.
 - **`tst_qml`:** runs the QML tests in `source/tests/qml` with Qt Quick Test.
   `tst_qml.cpp` gives them a `testHelper` context property, which parses
-  transforms and visualisations with the real parsers, so that the QML tests
-  can stand in for a `Document` with a small `QtObject`.
+  transforms and visualisations with the real parsers, and writes and
+  displays names and conditions with the real code, so that the QML tests can
+  stand in for a `Document` with a small `QtObject`.
 - **`defineDefaultPreferences`:** in `app/defaultpreferences.cpp`, defines
   every preference with its default; `main()` and
   `TestEnvironment::initialise()` both call it.
@@ -182,7 +218,7 @@ testing, which may come later as an extra safety net.
 | `tst_nativeloader` | native files: every format version, Tutorial.graphia, malformed files and values of the wrong type, save then load |
 | `tst_commands` | execute, undo and redo of delete nodes, the edit, clone, remove and import attribute commands, and applying transforms, including the deferred form and cancelling it |
 | `tst_visualisationconfigparser` | visualisation config round trips, malformed configs, the display form |
-| `tst_qml` | `Utils.js`, `AttributeUtils.js`, `MenuUtils.js`, `VisualisationUtils.js`, and `TransformConfig.js`: building a transform's controls (including attribute parameters), then its expression, gives back the same transform; locked transforms' text |
+| `tst_qml` | `Utils.js`, `MenuUtils.js`, `VisualisationUtils.js`, and `TransformConfig.js`: building a transform's controls (including attribute parameters), then its expression, gives back the same transform; locked transforms' text, with display names |
 | `tst_colorvisualisations` | colour gradients and palettes, including malformed ones |
 | `tst_visualisationmapping` | the range values are mapped from, and the exponent |
 | `tst_searchmanager` | Find: case, whole words, regular expressions, chosen attributes, merged nodes, refreshing |
@@ -259,17 +295,13 @@ Each one is a commit; see `git log` for the details.
 - **Commands:**
   - edit undo restored rounded or invented values;
   - clone rounded floats;
-  - remove's undo lost the description and column order, and removing user
-    data used a freed name, so on macOS undo didn't restore it at all;
+  - remove's undo lost the column order;
   - an import that only replaces columns couldn't be undone.
-- **Transform configs:** quotes in condition strings weren't escaped when
-  transforms were rewritten on loading, so the transform was lost.
 - **Transform panel (QML):**
   - editing a value in a condition on an attribute with `%` and a digit in
     its name changed the name;
   - labels with quotes or backslashes lost them, or failed with an
     exception;
-  - attribute names starting with "source" or "target" were capitalised;
   - menu items leaked whenever a menu was cleared and rebuilt.
 - **Visualisations for created attributes:** when a transform's attribute was
   given a unique name, a name with `(` or `+` stopped its visualisation
@@ -375,7 +407,7 @@ Each one is a commit; see `git log` for the details.
 - **Visualisation configs:**
   - whole number parameters couldn't be parsed;
   - numbers were written with 6 significant figures;
-  - quotes in attribute names weren't escaped.
+  - quotes within attribute names were removed when names were written.
 
 ## Gotchas
 
@@ -423,7 +455,8 @@ Each one is a commit; see `git log` for the details.
   - The JavaScript and QML files are compiled into the binary, so rebuild
     `tst_qml` after changing them.
   - Run one file with `tst_qml -input <path to .qml>`.
-  - `AttributeUtils.prettify` puts thin spaces (U+2009) around `›`.
+  - Display names of attribute parameters and an edge's nodes' attributes
+    have thin spaces (U+2009) around `›`.
   - `TransformConfig.js` isn't a `.pragma library`, but
     `Qt.createComponent("TransformParameter.qml")` still finds the component
     when called from a test, so the real controls are created.
