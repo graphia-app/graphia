@@ -434,18 +434,38 @@ Attribute::Name Attribute::parseAttributeName(QString name)
         name = name.mid(targetString.length());
     }
 
+    // The first dot that isn't within quotes separates the name from its parameter
+    qsizetype dotIndex = -1;
+    bool quoted = false;
+    for(qsizetype i = 0; i < name.size() && dotIndex < 0; i++)
+    {
+        if(quoted && name.at(i) == '\\')
+            i++; // Skip the escaped character
+        else if(name.at(i) == '"')
+            quoted = !quoted;
+        else if(!quoted && name.at(i) == '.')
+            dotIndex = i;
+    }
+
     QString parameter;
-    auto dotIndex = name.indexOf('.');
     if(dotIndex >= 0)
     {
         parameter = name.mid(dotIndex + 1);
         name = name.mid(0, dotIndex);
     }
 
-    name.replace(u"\""_s, ""_L1);
-    parameter.replace(u"\""_s, ""_L1);
+    // Remove the quotes around the name and parameter, but not any within them
+    auto unquoted = [](const QString& text)
+    {
+        if(text.size() < 2 || !text.startsWith('"') || !text.endsWith('"'))
+            return text;
 
-    return {._type = type, ._name = name, ._parameter = parameter};
+        auto unquotedText = text.mid(1, text.size() - 2);
+        unquotedText.replace(u"\\\""_s, u"\""_s);
+        return unquotedText;
+    };
+
+    return {._type = type, ._name = unquoted(name), ._parameter = unquoted(parameter)};
 }
 
 QString Attribute::writtenAttributeName(const QString& name)
