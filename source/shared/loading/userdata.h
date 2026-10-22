@@ -65,8 +65,10 @@ public:
     bool setValue(size_t index, const QString& name, const QString& value) override;
     QVariant value(size_t index, const QString& name) const override;
 
+    size_t vectorNamesPositionOf(const QString& name) const;
     UserDataVector* vector(const QString& name);
     void setVector(UserDataVector&& other);
+    void setVector(UserDataVector&& other, size_t position);
 
     virtual void remove(const QString& name);
 

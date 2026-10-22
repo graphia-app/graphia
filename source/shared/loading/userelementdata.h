@@ -67,6 +67,7 @@ public:
         UserDataVector _vector;
         QString _attributeName;
         AttributeOverride _override;
+        size_t _position = 0;
     };
 
 private:

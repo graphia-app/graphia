@@ -142,6 +142,12 @@ QVariant UserData::value(size_t index, const QString& name) const
     return {};
 }
 
+size_t UserData::vectorNamesPositionOf(const QString& name) const
+{
+    auto it = std::ranges::find(_vectorNames, normalise(name));
+    return static_cast<size_t>(std::distance(_vectorNames.begin(), it));
+}
+
 UserDataVector* UserData::vector(const QString& name)
 {
     QString normalisedName = normalise(name);
@@ -159,6 +165,16 @@ void UserData::setVector(UserDataVector&& other)
     const QString normalisedName = normalise(other.name());
     add(normalisedName);
     *vector(normalisedName) = std::move(other);
+}
+
+void UserData::setVector(UserDataVector&& other, size_t position)
+{
+    const QString normalisedName = normalise(other.name());
+    setVector(std::move(other));
+
+    u::removeByValue(_vectorNames, normalisedName);
+    position = std::min(position, _vectorNames.size());
+    _vectorNames.insert(_vectorNames.begin() + static_cast<std::ptrdiff_t>(position), normalisedName);
 }
 
 void UserData::remove(const QString& name)
