@@ -504,7 +504,7 @@ static bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graph
             graphModel.setNodeName(nodeId, nodeName);
 
             for(const auto& [key, value] : defaults.back()._node)
-                userNodeData.setValueBy(nodeId, key, value);
+                userNodeData.setValueBy(nodeId, userNodeData.undeclaredVectorName(key), value);
         }
 
         return dotNodeToNodeId.at(nodeName);
@@ -605,11 +605,11 @@ static bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graph
                 for(auto edgeId : addedEdgeIds)
                 {
                     for(const auto& [key, value] : defaults.back()._edge)
-                        userEdgeData.setValueBy(edgeId, key, value);
+                        userEdgeData.setValueBy(edgeId, userEdgeData.undeclaredVectorName(key), value);
 
                     for(const auto& attribute : edge._attributeList)
                     {
-                        const QString attributeName = attribute._key;
+                        const QString attributeName = userEdgeData.undeclaredVectorName(attribute._key);
                         userEdgeData.setValueBy(edgeId, attributeName, attribute._value);
                     }
                 }
@@ -622,7 +622,7 @@ static bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graph
 
                 for(const auto& attribute : node._attributeList)
                 {
-                    const QString attributeName = attribute._key;
+                    const QString attributeName = userNodeData.undeclaredVectorName(attribute._key);
                     userNodeData.setValueBy(nodeId, attributeName, attribute._value);
                 }
 

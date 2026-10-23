@@ -249,7 +249,7 @@ static bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphMode
 
                 for(const auto& attribute : attributes)
                 {
-                    const QString attributeName = attribute._name;
+                    const QString attributeName = userNodeData.undeclaredVectorName(attribute._name);
                     userNodeData.setValueBy(nodeId, attributeName, attribute._value);
                 }
             }
@@ -293,7 +293,7 @@ static bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphMode
 
             for(const auto& attribute : attributes)
             {
-                const QString attributeName = attribute._name;
+                const QString attributeName = userEdgeData.undeclaredVectorName(attribute._name);
                 userEdgeData.setValueBy(edgeId, attributeName, attribute._value);
             }
         }

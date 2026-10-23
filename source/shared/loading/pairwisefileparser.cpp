@@ -130,15 +130,15 @@ bool PairwiseParser::parse(const QUrl& url, IGraphModel* graphModel)
             {
             case PairwiseColumnType::EdgeAttribute:
                 if(_userEdgeData != nullptr && !edgeId.isNull())
-                    _userEdgeData->setValueBy(edgeId, attributeColumn._name, value);
+                    _userEdgeData->setValueBy(edgeId, _userEdgeData->undeclaredVectorName(attributeColumn._name), value);
                 break;
             case PairwiseColumnType::SourceNodeAttribute:
                 if(_userNodeData != nullptr && !sourceNodeId.isNull())
-                    _userNodeData->setValueBy(sourceNodeId, attributeColumn._name, value);
+                    _userNodeData->setValueBy(sourceNodeId, _userNodeData->undeclaredVectorName(attributeColumn._name), value);
                 break;
             case PairwiseColumnType::TargetNodeAttribute:
                 if(_userNodeData != nullptr && !targetNodeId.isNull())
-                    _userNodeData->setValueBy(targetNodeId, attributeColumn._name, value);
+                    _userNodeData->setValueBy(targetNodeId, _userNodeData->undeclaredVectorName(attributeColumn._name), value);
                 break;
 
             default: break;

@@ -82,6 +82,14 @@ void UserData::add(const AttributeDeclaration& declaration)
     _declaredVectorNames.insert(normalise(declaration._name));
 }
 
+QString UserData::undeclaredVectorName(const QString& name) const
+{
+    if(!vectorIsDeclared(normalise(name)))
+        return name;
+
+    return QObject::tr("User %1").arg(name);
+}
+
 bool UserData::setValue(size_t index, const QString& name, const QString& value)
 {
     QString normalisedName = normalise(name);

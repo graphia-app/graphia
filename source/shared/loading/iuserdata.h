@@ -43,6 +43,10 @@ public:
     virtual void add(const QString& name) = 0;
     virtual void add(const AttributeDeclaration& declaration) = 0;
 
+    // The name of the vector to hold the values of an attribute that isn't declared, such as one
+    // from a file, which is prefixed if a declared vector has its name, to keep their values apart
+    virtual QString undeclaredVectorName(const QString& name) const = 0;
+
     virtual QVariant value(size_t index, const QString& name) const = 0;
     virtual bool setValue(size_t index, const QString& name, const QString& value) = 0;
 };

@@ -61,6 +61,7 @@ public:
     void add(const QString& name) override;
     void add(const AttributeDeclaration& declaration) override;
     bool vectorIsDeclared(const QString& name) const { return _declaredVectorNames.contains(name); }
+    QString undeclaredVectorName(const QString& name) const override;
     bool setValue(size_t index, const QString& name, const QString& value) override;
     QVariant value(size_t index, const QString& name) const override;
 

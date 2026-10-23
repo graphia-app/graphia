@@ -142,7 +142,7 @@ bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel*
                 else if(it.value().is_number())
                     value = QString::fromStdString(it.value().dump());
 
-                userNodeData->setValueBy(nodeId, key, value);
+                userNodeData->setValueBy(nodeId, userNodeData->undeclaredVectorName(key), value);
             }
         }
 
@@ -209,7 +209,7 @@ bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel*
                 else if(it.value().is_number())
                     value = QString::fromStdString(it.value().dump());
 
-                userEdgeData->setValueBy(edgeId, key, value);
+                userEdgeData->setValueBy(edgeId, userEdgeData->undeclaredVectorName(key), value);
             }
 
         }
