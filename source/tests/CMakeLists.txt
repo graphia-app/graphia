@@ -38,6 +38,11 @@ add_graphia_test(tst_transformcache transform/tst_transformcache.cpp)
 add_graphia_test(tst_correlation correlation/tst_correlation.cpp)
 target_link_libraries(tst_correlation PRIVATE correlationcore)
 
+# The correlation plot's column annotations, which are built into the plugin's QML module
+add_graphia_test(tst_columnannotations correlation/tst_columnannotations.cpp
+    ${CMAKE_SOURCE_DIR}/source/plugins/correlation/columnannotation.cpp
+    ${CMAKE_SOURCE_DIR}/source/plugins/correlation/ui/qml/Graphia/Plugins/Correlation/qcpcolumnannotations.cpp)
+
 add_graphia_test(tst_tabulardata loading/tst_tabulardata.cpp)
 add_graphia_test(tst_tabulardataparser loading/tst_tabulardataparser.cpp)
 add_graphia_test(tst_graphparsers loading/tst_graphparsers.cpp)
