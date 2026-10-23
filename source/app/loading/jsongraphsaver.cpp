@@ -23,6 +23,7 @@
 #include "shared/attributes/iattribute.h"
 #include "shared/graph/igraph.h"
 #include "shared/graph/igraphmodel.h"
+#include "shared/utils/container.h"
 #include "shared/utils/json.h"
 
 #include <QByteArray>
@@ -57,7 +58,7 @@ bool JSONGraphSaver::save()
         for(const auto& nodeAttributeName : _graphModel->attributeNames(ElementType::Node))
         {
             const auto* attribute = _graphModel->attributeByName(nodeAttributeName);
-            if(attribute->hasParameter())
+            if(attribute->hasParameter() || !u::contains(exportedNames, nodeAttributeName))
                 continue;
 
             auto byteArray = exportedNames.at(nodeAttributeName).toUtf8();
@@ -83,7 +84,7 @@ bool JSONGraphSaver::save()
         for(const auto& edgeAttributeName : _graphModel->attributeNames(ElementType::Edge))
         {
             const auto* attribute = _graphModel->attributeByName(edgeAttributeName);
-            if(attribute->hasParameter())
+            if(attribute->hasParameter() || !u::contains(exportedNames, edgeAttributeName))
                 continue;
 
             auto byteArray = exportedNames.at(edgeAttributeName).toUtf8();

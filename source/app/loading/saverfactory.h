@@ -36,6 +36,8 @@ class IGraphModel;
 // Sometimes C++ really sucks
 IGraphModel* graphModelFor(Document* document);
 
+// The names to export attributes with, keyed by attribute name; attributes Graphia computes
+// from the graph's structure, such as NodeDegree, aren't exported, so have no entry
 std::map<QString, QString> exportedAttributeNames(const IGraphModel& graphModel);
 
 template<class SaverType>

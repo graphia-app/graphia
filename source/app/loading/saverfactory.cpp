@@ -20,8 +20,10 @@
 #include "saverfactory.h"
 
 #include "app/ui/document.h"
+#include "app/graph/graphmodel.h"
 #include "shared/graph/igraphmodel.h"
 #include "shared/attributes/iattribute.h"
+#include "shared/utils/container.h"
 
 #include <set>
 #include <utility>
@@ -33,10 +35,18 @@ IGraphModel* graphModelFor(Document* document)
 
 std::map<QString, QString> exportedAttributeNames(const IGraphModel& graphModel)
 {
+    std::set<QString> structuralAttributeNames;
+    for(const auto& declaration : GraphModel::attributeDeclarations())
+        structuralAttributeNames.insert(declaration._name);
+
     std::map<std::pair<ElementType, QString>, std::set<QString>> attributesShownAs;
 
     for(const auto& attributeName : graphModel.attributeNames())
     {
+        // These are computed from the graph, so would only come back as user attributes when it's imported
+        if(u::contains(structuralAttributeNames, attributeName))
+            continue;
+
         const auto* attribute = graphModel.attributeByName(attributeName);
         attributesShownAs[{attribute->elementType(), graphModel.attributeDisplayName(attributeName)}].insert(attributeName);
     }

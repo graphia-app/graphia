@@ -22,6 +22,7 @@
 #include "shared/attributes/iattribute.h"
 #include "shared/graph/igraph.h"
 #include "shared/graph/igraphmodel.h"
+#include "shared/utils/container.h"
 
 #include <QFile>
 #include <QLocale>
@@ -60,6 +61,9 @@ bool GMLSaver::save()
     setPhase(QObject::tr("Attributes"));
     for(const auto& attributeName : _graphModel->attributeNames())
     {
+        if(!u::contains(exportedNames, attributeName))
+            continue;
+
         auto cleanName = exportedNames.at(attributeName);
         static const QRegularExpression re(uR"([^a-zA-Z\d])"_s);
         cleanName.remove(re);
@@ -100,7 +104,7 @@ bool GMLSaver::save()
         for(const auto& attributeName : attributeNames)
         {
             const auto* attribute = _graphModel->attributeByName(attributeName);
-            if(attribute->hasParameter())
+            if(attribute->hasParameter() || !u::contains(exportedNames, attributeName))
                 continue;
 
             if(attribute->valueType() == ValueType::String)
