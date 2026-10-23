@@ -37,6 +37,7 @@
 #include <QString>
 #include <QStringList>
 #include <QTemporaryDir>
+#include <QUrl>
 
 #include <array>
 #include <functional>
@@ -582,6 +583,30 @@ private slots:
     {
         QString failureReason;
         QVERIFY(::parse(u"MatrixMatLab"_s, QByteArray("not a MATLAB file"), &failureReason) == nullptr);
+    }
+
+    // A MATLAB matrix's rows are the rows of the table it's loaded as, as for correlation data
+    void matLabTabularData()
+    {
+        const QTemporaryDir dir;
+        const auto fileName = dir.filePath(u"matrix.mat"_s);
+
+        {
+            QFile file(fileName);
+            QVERIFY(file.open(QIODevice::WriteOnly));
+            file.write(matFile({denseMatrix<double>("m", 2, 3, {1, 4, 2, 5, 3, 6})}));
+        }
+
+        MatLabFileParser parser;
+        QVERIFY(parser.parse(QUrl::fromLocalFile(fileName)));
+
+        const auto& tabularData = parser.tabularData();
+        QCOMPARE(tabularData.numRows(), 2u);
+        QCOMPARE(tabularData.numColumns(), 3u);
+        QCOMPARE(tabularData.valueAt(0, 0), u"1"_s);
+        QCOMPARE(tabularData.valueAt(2, 0), u"3"_s);
+        QCOMPARE(tabularData.valueAt(0, 1), u"4"_s);
+        QCOMPARE(tabularData.valueAt(2, 1), u"6"_s);
     }
 
     void numericPrecision_data()
