@@ -284,6 +284,8 @@ private slots:
             QStringList{u"é€"_s} << QStringList{} << QStringList{};
         QTest::newRow("GML numbers") << u"GML"_s << QByteArray("graph [ node [ id 1 label \"A\" x 1e3 y .5 ] ]") <<
             QStringList{u"A"_s} << QStringList{} << QStringList{u"x|A|1000"_s, u"y|A|0.5"_s};
+        QTest::newRow("GML numeric labels") << u"GML"_s << QByteArray("graph [ node [ id 1 label 5 ] node [ id 2 label 1.5 ] ]") <<
+            QStringList{u"1.5"_s, u"5"_s} << QStringList{} << QStringList{u"NodeName|5|5"_s};
         QTest::newRow("GML clashing names") << u"GML"_s <<
             QByteArray(R"(graph [ node [ id 1 label "A" ComponentSize "n" w 1 ] edge [ source 1 target 1 w 2 ] ])") <<
             QStringList{u"A"_s} << QStringList{u"A-A"_s} <<
@@ -770,6 +772,7 @@ private slots:
         QTest::newRow("GML node without id") << u"GML"_s << QByteArray("graph [ node [ label \"A\" ] ]");
         QTest::newRow("GML real id") << u"GML"_s << QByteArray("graph [ node [ id 1.0 ] ]");
         QTest::newRow("GML unknown node") << u"GML"_s << QByteArray("graph [ node [ id 1 ] edge [ source 1 target 9 ] ]");
+        QTest::newRow("GML duplicate id") << u"GML"_s << QByteArray("graph [ node [ id 1 ] node [ id 1 ] ]");
 
         // Not a raw string, which moc misparses here, missing the test class
         QTest::newRow("GraphML truncated") << u"GraphML"_s <<
