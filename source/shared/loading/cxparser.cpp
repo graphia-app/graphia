@@ -197,7 +197,7 @@ static bool parseCx1(const json& jsonArray, IGraphModel* graphModel,
             QString::fromStdString(attribute["v"].get<std::string>()) :
             QString::fromStdString(attribute["v"].dump());
 
-        userData.setValueBy(elementId, attributeName, attributeValue);
+        userData.setValueBy(elementId, userData.undeclaredVectorName(attributeName), attributeValue);
 
         return true;
     };
@@ -308,7 +308,7 @@ static bool parseCx2(const json& jsonArray, IGraphModel* graphModel,
             if(u::contains(aliases, name))
                 name = aliases.at(name);
 
-            auto attributeName = QString::fromStdString(name);
+            auto attributeName = userData.undeclaredVectorName(QString::fromStdString(name));
             userData.setValueBy(elementId, attributeName, attributeValue);
         }
     };

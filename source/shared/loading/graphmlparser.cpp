@@ -144,10 +144,10 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
                 const auto& keyFor = attributes.value(u"for"_s);
 
                 if(keyFor == u"node"_s || keyFor == u"all"_s)
-                    nodeAttributes.emplace(keyId.toString(), attributeName.toString());
+                    nodeAttributes.emplace(keyId.toString(), _userNodeData->undeclaredVectorName(attributeName.toString()));
 
                 if(keyFor == u"edge"_s || keyFor == u"all"_s)
-                    edgeAttributes.emplace(keyId.toString(), attributeName.toString());
+                    edgeAttributes.emplace(keyId.toString(), _userEdgeData->undeclaredVectorName(attributeName.toString()));
 
                 activeKeyId = keyId.toString();
             }
