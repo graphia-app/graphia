@@ -105,7 +105,8 @@ TestCase
         return [
             {tag: "none", value: "abc", escaped: "abc"},
             {tag: "quotes", value: "say \"hi\"", escaped: "say \\\"hi\\\""},
-            {tag: "only quotes", value: "\"\"", escaped: "\\\"\\\""}
+            {tag: "only quotes", value: "\"\"", escaped: "\\\"\\\""},
+            {tag: "backslashes", value: "a\\b\\", escaped: "a\\\\b\\\\"}
         ];
     }
 
@@ -122,7 +123,9 @@ TestCase
             {tag: "enclosing quotes and whitespace", value: "  \"abc\"\n", expected: "abc"},
             {tag: "enclosing quotes and newlines", value: "\"a\nb\"", expected: "a\nb"},
             {tag: "escaped quotes inside", value: "\"a \\\"b\\\"\"", expected: "a \"b\""},
-            {tag: "no enclosing quotes", value: "a \\\"b\\\"", expected: "a \"b\""}
+            {tag: "no enclosing quotes", value: "a \\\"b\\\"", expected: "a \"b\""},
+            {tag: "trailing backslash", value: "\"C:\\\\\"", expected: "C:\\"},
+            {tag: "other backslashes", value: "\"\\d\"", expected: "\\d"}
         ];
     }
 

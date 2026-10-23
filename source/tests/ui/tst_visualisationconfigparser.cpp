@@ -53,6 +53,17 @@ private slots:
         QTest::newRow("Non-ASCII") << u"\"Größe\" \"Size\" with label = \"→\""_s;
         QTest::newRow("Unquoted names") << u"NodeDegree Size with min = 2.5"_s;
         QTest::newRow("Unquoted string") << u"NodeName Text with size = large"_s;
+        QTest::newRow("Backslashes") << u"NodeName Text with a = \"C:\\\\\" b = \"\\d\""_s;
+    }
+
+    // A string ending in a backslash, which must not escape the closing quote
+    void trailingBackslash()
+    {
+        VisualisationConfigParser parser;
+        QVERIFY(parser.parse(u"NodeName Text with a = \"C:\\\\\" b = \"\\d\""_s));
+
+        QCOMPARE(parser.result().parameterValue(u"a"_s), u"C:\\"_s);
+        QCOMPARE(parser.result().parameterValue(u"b"_s), u"\\d"_s);
     }
 
     void roundTrip()

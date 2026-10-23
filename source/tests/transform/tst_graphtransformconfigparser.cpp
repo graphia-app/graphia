@@ -57,6 +57,8 @@ private slots:
             u"[pinned] RemoveComponents where $source.ComponentSize <= 1"_s;
         QTest::newRow("unquoted values") <<
             u"KNN using $Weight with k = 5 RankOrder = Ascending"_s;
+        QTest::newRow("backslashes in values") <<
+            u"RemoveNodes where $Name == \"C:\\\\\" or $Name matches \"\\d+\""_s; // NOLINT modernize-raw-string-literal
     }
 
     void roundTrip()
@@ -123,6 +125,23 @@ private slots:
         QCOMPARE(std::get<QString>(condition->_rhs), u"$HOME"_s);
         QCOMPARE(parser.result().asString(), uR"(RemoveNodes where $NodeName == "$HOME")"_s);
         QCOMPARE(parser.result().referencedAttributeNames(), std::vector<QString>{u"NodeName"_s});
+    }
+
+    // A backslash escapes a quote or another backslash, but is otherwise just a backslash
+    void parsesBackslashes()
+    {
+        GraphTransformConfigParser parser;
+        QVERIFY(parser.parse(u"RemoveNodes where $Name == \"C:\\\\\" or $Name matches \"\\d+\""_s)); // NOLINT modernize-raw-string-literal
+
+        const auto* condition = std::get_if<RecursiveValue<GraphTransformConfig::CompoundCondition>>(
+            &parser.result()._condition);
+        QVERIFY(condition != nullptr);
+
+        const auto* lhs = std::get_if<GraphTransformConfig::TerminalCondition>(&(*condition)->_lhs);
+        const auto* rhs = std::get_if<GraphTransformConfig::TerminalCondition>(&(*condition)->_rhs);
+        QVERIFY(lhs != nullptr && rhs != nullptr);
+        QCOMPARE(std::get<QString>(lhs->_rhs), u"C:\\"_s);
+        QCOMPARE(std::get<QString>(rhs->_rhs), u"\\d+"_s);
     }
 
     // Names, and string values, are only quoted when they aren't identifiers

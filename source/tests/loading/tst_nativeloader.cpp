@@ -451,6 +451,23 @@ private slots:
         QCOMPARE(model->parser<Loader>()->nodePositions()->get(model->nodeId(u"b"_s)), PositionOfB);
     }
 
+    // In older files, a backslash in a string only escaped a quote, so other backslashes
+    // are escaped when they're upgraded, to keep their meaning
+    void legacyBackslashes()
+    {
+        const int version = 8;
+        auto content = body(version);
+        content["transforms"] = {"\"Remove Nodes\" where $\"Type\" == \"a\\b\\\\c\\\"d\""}; // NOLINT modernize-raw-string-literal
+
+        TestPluginInstance pluginInstance(&_plugin);
+        QString failureReason;
+        auto model = load(nativeFile(header(version), content), pluginInstance, &failureReason);
+        QVERIFY2(model != nullptr, qPrintable(failureReason));
+
+        QCOMPARE(model->parser<Loader>()->transforms(),
+            QStringList{u"\"RemoveNodes\" where $\"Type\" == \"a\\\\b\\\\\\\\c\\\"d\""_s}); // NOLINT modernize-raw-string-literal
+    }
+
     // Enrichment results with the wrong number of values are ignored, rather than
     // failing when they're shown
     void enrichmentRowsOfWrongLength()
