@@ -443,6 +443,16 @@ private slots:
             "nodes":{"a":{"label":"A"},"b":{"label":"B","metadata":{"type":"y"}}},
             "edges":[{"source":"a","target":"b"}]}})") <<
             QStringList{u"A"_s, u"B"_s} << QStringList{u"A-B"_s} << QStringList{u"type|B|y"_s};
+        // The edges are optional, ids can be integers, and labels are the values of NodeName
+        QTest::newRow("JSON Graph no edges") << u"JSONGraph"_s <<
+            QByteArray(R"({"graph":{"nodes":[{"id":"a","label":"A"}]}})") <<
+            QStringList{u"A"_s} << QStringList{} << QStringList{u"NodeName|A|A"_s};
+        QTest::newRow("JSON Graph integer ids") << u"JSONGraph"_s <<
+            QByteArray(R"({"graph":{"nodes":[{"id":1,"label":"A"},{"id":2,"label":"B"}],"edges":[{"source":1,"target":2}]}})") <<
+            QStringList{u"A"_s, u"B"_s} << QStringList{u"A-B"_s} << QStringList{u"NodeName|B|B"_s};
+        QTest::newRow("JSON Graph declared name") << u"JSONGraph"_s <<
+            QByteArray(R"({"graph":{"nodes":[{"id":"a","label":"A","metadata":{"NodeName":"x"}}]}})") <<
+            QStringList{u"A"_s} << QStringList{} << QStringList{u"NodeName|A|A"_s, u"User NodeName|A|x"_s};
 
         // CX
         QTest::newRow("CX1") << u"CX"_s << QByteArray(R"([{"numberVerification":[{"longNumber":281474976710655}]},
