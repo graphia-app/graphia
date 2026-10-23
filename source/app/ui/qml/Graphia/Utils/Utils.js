@@ -148,8 +148,10 @@ function normaliseWhitespace(text)
     return text;
 }
 
+// A backslash escapes a quote or another backslash
 function escapeQuotes(text)
 {
+    text = text.replace(/\\/g, "\\\\");
     text = text.replace(/\"/g, "\\\"");
     return text;
 }
@@ -163,7 +165,7 @@ function unescapeQuotes(text)
     if(text.match(re))
         text = text.replace(re, "$1");
 
-    text = text.replace(/\\"/g, "\"");
+    text = text.replace(/\\(["\\])/g, "$1");
     return text;
 }
 
