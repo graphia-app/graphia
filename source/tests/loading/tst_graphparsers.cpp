@@ -124,6 +124,18 @@ CreateMatVarFn sparseMatrix(const char* name, size_t rows, size_t columns,
     };
 }
 
+// A dense matrix of complex numbers, whose real and imaginary parts are given in column major order
+CreateMatVarFn complexMatrix(const char* name, size_t rows, size_t columns,
+    std::vector<double> real, std::vector<double> imaginary)
+{
+    return [=]() mutable
+    {
+        std::array<size_t, 2> dims{rows, columns};
+        mat_complex_split_t data{.Re = real.data(), .Im = imaginary.data()};
+        return Mat_VarCreate(name, MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims.data(), &data, MAT_F_COMPLEX);
+    };
+}
+
 // A struct with one field, holding the given variable
 CreateMatVarFn structOf(const char* name, const char* fieldName, const CreateMatVarFn& createField)
 {
@@ -607,6 +619,20 @@ private slots:
     {
         QString failureReason;
         QVERIFY(::parse(u"MatrixMatLab"_s, QByteArray("not a MATLAB file"), &failureReason) == nullptr);
+    }
+
+    // Complex values can't be read as real ones, so their matrices are ignored
+    void matLabComplex()
+    {
+        QString failureReason;
+        QVERIFY(::parse(u"MatrixMatLab"_s,
+            matFile({complexMatrix("c", 2, 2, {0, 1, 1, 0}, {0, 1, 1, 0})}), &failureReason) == nullptr);
+        QVERIFY(failureReason.contains(u"complex"_s));
+
+        auto model = ::parse(u"MatrixMatLab"_s, matFile({denseMatrix<double>("m", 2, 2, {0, 0, 0.5, 0}),
+            complexMatrix("c", 4, 4, std::vector<double>(16, 1.0), std::vector<double>(16, 1.0))}), &failureReason);
+        QVERIFY2(model != nullptr, qPrintable(failureReason));
+        QCOMPARE(model->edgeNames(), QStringList{u"Node 1-Node 2"_s});
     }
 
     // A MATLAB matrix's rows are the rows of the table it's loaded as, as for correlation data
