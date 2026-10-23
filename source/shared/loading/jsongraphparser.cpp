@@ -30,6 +30,7 @@
 
 #include <cstdint>
 #include <map>
+#include <optional>
 #include <string>
 
 bool JsonGraphParser::parseJson(const json& jsonObject, IGraphModel* graphModel)
@@ -55,18 +56,33 @@ bool JsonGraphParser::parseJson(const json& jsonObject, IGraphModel* graphModel)
     return parseGraphObject(*graph, graphModel, *this, false, _userNodeData, _userEdgeData);
 }
 
+// Node ids, and the sources and targets of edges, are strings, or sometimes integers
+static std::optional<std::string> idString(const json& id)
+{
+    if(id.is_string())
+        return id.get<std::string>();
+
+    if(id.is_number_integer())
+        return id.dump();
+
+    return std::nullopt;
+}
+
 bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel* graphModel,
     IParser& parser, bool useElementIdsLiterally,
     IUserNodeData* userNodeData, IUserEdgeData* userEdgeData)
 {
-    if(!u::contains(jsonGraphObject, "nodes") || !u::contains(jsonGraphObject, "edges"))
+    if(!u::contains(jsonGraphObject, "nodes"))
     {
-        parser.setFailureReason(QObject::tr("Graph doesn't contain nodes or edges arrays."));
+        parser.setFailureReason(QObject::tr("Graph doesn't contain a nodes array."));
         return false;
     }
 
+    // A graph needn't have any edges
+    static const json noEdges = json::array();
+
     const auto& jsonNodes = jsonGraphObject["nodes"];
-    const auto& jsonEdges = jsonGraphObject["edges"];
+    const auto& jsonEdges = u::contains(jsonGraphObject, "edges") ? jsonGraphObject["edges"] : noEdges;
 
     uint64_t i = 0;
 
@@ -78,8 +94,8 @@ bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel*
         const auto& jsonNode = *nodeIt;
         std::string nodeIdString;
 
-        if(u::contains(jsonNode, "id") && jsonNode["id"].is_string())
-            nodeIdString = jsonNode["id"].get<std::string>();
+        if(auto id = u::contains(jsonNode, "id") ? idString(jsonNode["id"]) : std::nullopt)
+            nodeIdString = *id;
         else if(jsonNodes.is_object())
         {
             // JSON Graph Format 2 keys nodes by their ids
@@ -106,8 +122,11 @@ bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel*
 
         if(u::contains(jsonNode, "label"))
         {
-            auto nodeJsonLabel = jsonNode["label"].get<std::string>();
-            graphModel->setNodeName(nodeId, QString::fromStdString(nodeJsonLabel));
+            auto nodeName = QString::fromStdString(jsonNode["label"].get<std::string>());
+            graphModel->setNodeName(nodeId, nodeName);
+
+            if(userNodeData != nullptr)
+                userNodeData->setValueBy(nodeId, IParser::nodeNameAttribute(), nodeName);
         }
 
         if(u::contains(jsonNode, "metadata") && userNodeData != nullptr)
@@ -143,14 +162,17 @@ bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel*
             return false;
         }
 
-        if(!jsonEdge["source"].is_string() || !jsonEdge["target"].is_string())
+        auto source = idString(jsonEdge["source"]);
+        auto target = idString(jsonEdge["target"]);
+
+        if(!source || !target)
         {
-            parser.setFailureReason(QObject::tr("Edge source or target isn't a string."));
+            parser.setFailureReason(QObject::tr("Edge source or target isn't a string or an integer."));
             return false;
         }
 
-        auto sourceIdString = jsonEdge["source"].get<std::string>();
-        auto targetIdString = jsonEdge["target"].get<std::string>();
+        const auto& sourceIdString = *source;
+        const auto& targetIdString = *target;
 
         if(!u::contains(stringNodeIdToNodeId, sourceIdString) ||
             !u::contains(stringNodeIdToNodeId, targetIdString))
