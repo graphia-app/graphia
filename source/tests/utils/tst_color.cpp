@@ -23,6 +23,8 @@
 #include <QColor>
 #include <QString>
 
+#include <algorithm>
+
 using namespace Qt::Literals::StringLiterals;
 
 class TestColor : public QObject
@@ -65,6 +67,40 @@ private slots:
             QCOMPARE(color.hslSaturation(), 255);
             QVERIFY(color.lightness() >= 64 && color.lightness() <= 190);
         }
+    }
+
+    void colorForStringValues_data()
+    {
+        QTest::addColumn<QString>("string");
+        QTest::addColumn<int>("hue");
+        QTest::addColumn<int>("lightness");
+
+        // The same on every platform, whether char is signed or not
+        QTest::newRow("a") << u"a"_s << 58 << 159;
+        QTest::newRow("b") << u"b"_s << 185 << 122;
+        QTest::newRow("longer") << u"Some longer value"_s << 10 << 110;
+        QTest::newRow("unicode") << u"ünïcode"_s << 293 << 85;
+    }
+
+    void colorForStringValues()
+    {
+        QFETCH(const QString, string);
+        QFETCH(const int, hue);
+        QFETCH(const int, lightness);
+
+        auto color = u::colorForString(string);
+        QCOMPARE(color.hslHue(), hue);
+        QCOMPARE(color.lightness(), lightness);
+    }
+
+    void colorForStringUsesEveryHue()
+    {
+        int maxHue = 0;
+        for(int i = 0; i < 1000; i++)
+            maxHue = std::max(maxHue, u::colorForString(u"s%1"_s.arg(i)).hslHue());
+
+        // Hues run from 0 to 359, and blue-violet to pink is above 255
+        QVERIFY(maxHue > 300);
     }
 };
 
