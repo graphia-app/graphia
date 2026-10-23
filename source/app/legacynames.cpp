@@ -77,6 +77,26 @@ static std::vector<QuotedString> quotedStringsIn(const QString& text)
     return quotedStrings;
 }
 
+// Only quotes were escaped, so a backslash that doesn't escape a quote is
+// itself escaped, now that a backslash can also escape another backslash
+static QString upgradedEscapes(const QString& content)
+{
+    QString result;
+    result.reserve(content.size());
+
+    for(qsizetype i = 0; i < content.size(); i++)
+    {
+        if(content.at(i) == '\\' && i + 1 < content.size() && content.at(i + 1) == '"')
+            result.append(content.at(i++));
+        else if(content.at(i) == '\\')
+            result.append('\\');
+
+        result.append(content.at(i));
+    }
+
+    return result;
+}
+
 static QString renamed(const QString& text, const std::vector<QuotedString>& quotedStrings,
     const std::vector<QString>& newContents)
 {
@@ -86,7 +106,7 @@ static QString renamed(const QString& text, const std::vector<QuotedString>& quo
     for(auto i = quotedStrings.size(); i-- > 0;)
     {
         const auto& quotedString = quotedStrings.at(i);
-        const auto& newContent = newContents.at(i);
+        const auto newContent = upgradedEscapes(newContents.at(i));
 
         if(newContent == quotedString._content)
             continue;

@@ -459,9 +459,7 @@ Attribute::Name Attribute::parseAttributeName(QString name)
         if(text.size() < 2 || !text.startsWith('"') || !text.endsWith('"'))
             return text;
 
-        auto unquotedText = text.mid(1, text.size() - 2);
-        unquotedText.replace(u"\\\""_s, u"\""_s);
-        return unquotedText;
+        return LexyConfigGrammar::unescaped(text.mid(1, text.size() - 2));
     };
 
     return {._type = type, ._name = unquoted(name), ._parameter = unquoted(parameter)};

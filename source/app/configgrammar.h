@@ -54,6 +54,45 @@ struct WholeIdentifier
     static constexpr auto rule = dsl::p<Identifier> + dsl::eof;
 };
 
+// In a quoted string, a backslash escapes a quote or another backslash; any other
+// backslash is just a backslash, so that, say, regular expressions are easier to write
+inline QString escaped(QString string)
+{
+    string.replace(u"\\"_s, u"\\\\"_s);
+    return u::escapeQuotes(string);
+}
+
+inline QString unescaped(const QString& string)
+{
+    QString result;
+    result.reserve(string.size());
+
+    for(qsizetype i = 0; i < string.size(); i++)
+    {
+        if(string.at(i) == '\\' && i + 1 < string.size() &&
+            (string.at(i + 1) == '"' || string.at(i + 1) == '\\'))
+        {
+            i++;
+        }
+
+        result.append(string.at(i));
+    }
+
+    return result;
+}
+
+struct QuotedString : lexy::token_production
+{
+    static constexpr auto rule = dsl::lit_c<'"'> >>
+        (dsl::capture(dsl::token(dsl::while_(LEXY_LIT("\\\\") | LEXY_LIT("\\\"") |
+            (lexyutils::anyByte - dsl::lit_c<'"'>)))) + dsl::lit_c<'"'>);
+
+    static constexpr auto value = lexy::callback<QString>([](const auto& lexeme)
+    {
+        return unescaped(lexyutils::qStringFrom(lexeme));
+    });
+};
+
 // This takes a transform, attribute, parameter, channel name,
 // or string value, and returns it quoted if necessary
 inline QString writtenString(const QString& string)
@@ -65,13 +104,13 @@ inline QString writtenString(const QString& string)
     if(lexy::match<WholeIdentifier>(input))
         return string;
 
-    return u"\"%1\""_s.arg(u::escapeQuotes(string));
+    return u"\"%1\""_s.arg(escaped(string));
 }
 
 // A name or a string value; either is quoted unless it's an identifier
 struct String
 {
-    static constexpr auto rule = dsl::p<lexyutils::QuotedString> | dsl::p<Identifier>;
+    static constexpr auto rule = dsl::p<QuotedString> | dsl::p<Identifier>;
     static constexpr auto value = lexy::forward<QString>;
 };
 
