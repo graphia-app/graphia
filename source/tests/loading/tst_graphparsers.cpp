@@ -517,6 +517,19 @@ private slots:
                 {u"B"_s, u"1"_s, u"0"_s, u"0.5"_s}, {u"C"_s, u"0"_s, u"0.5"_s, u"0"_s}}) <<
             QStringList{u"A"_s, u"B"_s, u"C"_s} << QStringList{u"A-B"_s, u"B-A"_s, u"B-C"_s, u"C-B"_s} <<
             QStringList{u"EdgeWeight|C|B|0.5"_s};
+
+        // Attributes from files named like those a parser declares, which are kept apart from them
+        QTest::newRow("GML declared name") << u"GML"_s <<
+            QByteArray("graph [ node [ id 1 label \"A\" NodeName \"x\" ] ]") << // NOLINT modernize-raw-string-literal
+            QStringList{u"A"_s} << QStringList{} << QStringList{u"NodeName|A|A"_s, u"User NodeName|A|x"_s};
+        QTest::newRow("GraphML declared name") << u"GraphML"_s << QByteArray(
+            "<graphml><key id=\"d0\" for=\"node\" attr.name=\"NodeName\"/><graph>" // NOLINT modernize-raw-string-literal
+            "<node id=\"a\"><data key=\"d0\">x</data></node>" // NOLINT modernize-raw-string-literal
+            "</graph></graphml>") <<
+            QStringList{u"a"_s} << QStringList{} << QStringList{u"NodeName|a|a"_s, u"User NodeName|a|x"_s};
+        QTest::newRow("DOT declared name") << u"DOT"_s <<
+            QByteArray("digraph { a [NodeName=\"x\"] }") << // NOLINT modernize-raw-string-literal
+            QStringList{u"a"_s} << QStringList{} << QStringList{u"NodeName|a|a"_s, u"User NodeName|a|x"_s};
     }
 
     void parse()
