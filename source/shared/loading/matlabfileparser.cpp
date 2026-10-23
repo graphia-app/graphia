@@ -36,7 +36,7 @@ struct MatLabMatrix
     }
 };
 
-static MatLabMatrix findBiggestMatrix(matvar_t* v, MatLabMatrix& m)
+static MatLabMatrix findBiggestMatrix(matvar_t* v, MatLabMatrix& m, bool& complexFound)
 {
     switch(v->class_type)
     {
@@ -45,7 +45,7 @@ static MatLabMatrix findBiggestMatrix(matvar_t* v, MatLabMatrix& m)
         for(auto i = 0u; i < Mat_VarGetNumberOfFields(v); i++)
         {
             auto* field = Mat_VarGetStructFieldByIndex(v, i, 0);
-            findBiggestMatrix(field, m);
+            findBiggestMatrix(field, m, complexFound);
         }
         break;
     }
@@ -64,6 +64,13 @@ static MatLabMatrix findBiggestMatrix(matvar_t* v, MatLabMatrix& m)
     {
         if(v->rank != 2)
             break;
+
+        // Complex values are stored differently, and have no meaning as weights or data
+        if(v->isComplex != 0)
+        {
+            complexFound = true;
+            break;
+        }
 
         const MatLabMatrix candidate{._var = v};
         if(candidate > m)
@@ -86,10 +93,10 @@ static MatLabMatrix findBiggestMatrix(matvar_t* v, MatLabMatrix& m)
     return m;
 }
 
-static MatLabMatrix findBiggestMatrix(matvar_t* v)
+static MatLabMatrix findBiggestMatrix(matvar_t* v, bool& complexFound)
 {
     MatLabMatrix m;
-    return findBiggestMatrix(v, m);
+    return findBiggestMatrix(v, m, complexFound);
 }
 
 bool MatLabFileParser::parse(const QUrl& url, IGraphModel*)
@@ -108,10 +115,11 @@ bool MatLabFileParser::parse(const QUrl& url, IGraphModel*)
     MatLabMatrix biggestMatrix;
     matvar_t* biggestMatrixVar = nullptr;
     matvar_t* matVar = nullptr;
+    bool complexFound = false;
 
     while((matVar = Mat_VarReadNext(matFile)) != nullptr)
     {
-        auto candidate = findBiggestMatrix(matVar);
+        auto candidate = findBiggestMatrix(matVar, complexFound);
 
         if(candidate > biggestMatrix)
         {
@@ -148,6 +156,8 @@ bool MatLabFileParser::parse(const QUrl& url, IGraphModel*)
             break;
         }
     }
+    else if(complexFound)
+        setFailureReason(QObject::tr("The file contains only matrices of complex numbers, which can't be loaded."));
     else
         setFailureReason(QObject::tr("The file contains no matrices."));
 
