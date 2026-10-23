@@ -43,6 +43,7 @@
 #include <variant>
 #include <functional>
 #include <map>
+#include <set>
 #include <vector>
 
 // https://www.graphviz.org/doc/info/lang.html
@@ -105,6 +106,8 @@ struct DotSubGraph
 
 struct DotGraph
 {
+    bool _strict = false;
+    bool _directed = false;
     QString _id;
     StatementList _statementList;
 };
@@ -116,7 +119,6 @@ namespace dsl = lexy::dsl;
 using lexyutils::anyByte;
 using lexyutils::asQString;
 using lexyutils::nonAsciiByte;
-using lexyutils::QuotedString;
 
 // char_("a-zA-Z\200-\377_") and char_("a-zA-Z0-9\200-\377_") respectively
 constexpr auto idLead = dsl::ascii::alpha_underscore / nonAsciiByte;
@@ -124,15 +126,15 @@ constexpr auto idTrailing = dsl::ascii::alpha_digit_underscore / nonAsciiByte;
 constexpr auto idPattern = dsl::identifier(idLead, idTrailing);
 
 constexpr auto keywordStrict = dsl::ascii::case_folding(LEXY_KEYWORD("strict", idPattern));
-constexpr auto keywordGraph = dsl::ascii::case_folding(LEXY_KEYWORD("graph", idPattern));
-constexpr auto keywordDigraph = dsl::ascii::case_folding(LEXY_KEYWORD("digraph", idPattern));
 constexpr auto keywordSubgraph = dsl::ascii::case_folding(LEXY_KEYWORD("subgraph", idPattern));
 
 constexpr auto edgeOperator = LEXY_LIT("--") | LEXY_LIT("->");
 
+// Lines beginning with # are output by the C preprocessor, and are ignored
 constexpr auto comment =
     (LEXY_LIT("//") >> dsl::until(dsl::ascii::newline).or_eof()) |
-    (LEXY_LIT("/*") >> dsl::until(LEXY_LIT("*/")));
+    (LEXY_LIT("/*") >> dsl::until(LEXY_LIT("*/"))) |
+    (dsl::lit_c<'#'> >> dsl::until(dsl::ascii::newline).or_eof());
 
 constexpr auto skipper = dsl::ascii::space | comment;
 
@@ -152,10 +154,54 @@ struct Numeral : lexy::token_production
     static constexpr auto value = asQString;
 };
 
+// Within a quoted string, \" is a quote, and \\ is a pair of backslashes that doesn't
+// escape what follows; any other backslash is kept as it is, as Graphviz does
+struct QuotedString : lexy::token_production
+{
+    static constexpr auto rule = dsl::lit_c<'"'> >>
+        (dsl::capture(dsl::token(dsl::while_(LEXY_LIT("\\\\") | LEXY_LIT("\\\"") |
+            (anyByte - dsl::lit_c<'"'>)))) + dsl::lit_c<'"'>);
+
+    static constexpr auto value = lexy::callback<QString>([](const auto& lexeme)
+    {
+        auto text = lexyutils::qStringFrom(lexeme);
+        QString result;
+        result.reserve(text.size());
+
+        for(qsizetype i = 0; i < text.size(); i++)
+        {
+            if(text.at(i) == '\\' && i + 1 < text.size())
+            {
+                if(text.at(i + 1) == '"')
+                    i++;
+                else if(text.at(i + 1) == '\\')
+                    result.append(text.at(i++));
+            }
+
+            result.append(text.at(i));
+        }
+
+        return result;
+    });
+};
+
+struct ConcatenatedString
+{
+    static constexpr auto rule = dsl::list(dsl::p<QuotedString>, dsl::sep(dsl::lit_c<'+'>));
+    static constexpr auto value = lexy::as_list<std::vector<QString>> >>
+        lexy::callback<QString>([](const std::vector<QString>& strings)
+        {
+            QString result;
+            for(const auto& string : strings)
+                result.append(string);
+
+            return result;
+        });
+};
+
 struct HtmlString : lexy::token_production
 {
-    static constexpr auto nonXml = anyByte -
-        (dsl::lit_c<'['> / dsl::lit_c<'<'> / dsl::lit_c<'>'>);
+    static constexpr auto nonXml = anyByte - (dsl::lit_c<'<'> / dsl::lit_c<'>'>);
     static constexpr auto xmlTag = dsl::lit_c<'<'> >>
         (dsl::while_one(anyByte - dsl::lit_c<'>'>) + dsl::lit_c<'>'>);
 
@@ -170,7 +216,7 @@ struct HtmlString : lexy::token_production
 
 struct Identifier
 {
-    static constexpr auto rule = dsl::p<HtmlString> | dsl::p<QuotedString> |
+    static constexpr auto rule = dsl::p<HtmlString> | dsl::p<ConcatenatedString> |
         dsl::p<Numeral> | dsl::p<AlphaNumericId>;
 
     static constexpr auto value = lexy::forward<QString>;
@@ -204,6 +250,12 @@ struct KeyValueList
             dsl::if_(dsl::lit_c<';'> / dsl::lit_c<','>))) + dsl::lit_c<']'>);
 
     static constexpr auto value = lexy::as_list<LexyDotParser::AttributeList>;
+};
+
+struct AttributeLists
+{
+    static constexpr auto rule = dsl::list(dsl::p<KeyValueList>);
+    static constexpr auto value = lexy::concat<LexyDotParser::AttributeList>;
 };
 
 struct DotNode
@@ -253,7 +305,7 @@ struct AttributeStatement
         static constexpr auto value = lexy::forward<LexyDotParser::AttributeStatementType>;
     };
 
-    static constexpr auto rule = dsl::p<Type> >> dsl::p<KeyValueList>;
+    static constexpr auto rule = dsl::p<Type> >> dsl::p<AttributeLists>;
     static constexpr auto value = lexy::construct<LexyDotParser::AttributeStatement>;
 };
 
@@ -341,7 +393,7 @@ struct Statement
                 LexyDotParser::NodeStatement nodeStatement{._node = std::move(node), ._attributeList = {}};
 
                 lexy::scan_result<LexyDotParser::AttributeList> attributeList;
-                if(scanner.branch(attributeList, KeyValueList{}))
+                if(scanner.branch(attributeList, AttributeLists{}))
                 {
                     if(!scanner)
                         return lexy::scan_failed;
@@ -368,7 +420,7 @@ struct Statement
         }
 
         lexy::scan_result<LexyDotParser::AttributeList> attributeList;
-        if(scanner.branch(attributeList, KeyValueList{}))
+        if(scanner.branch(attributeList, AttributeLists{}))
         {
             if(!scanner)
                 return lexy::scan_failed;
@@ -388,13 +440,20 @@ struct StatementList
     static constexpr auto value = lexy::as_list<LexyDotParser::StatementList>;
 };
 
+// Whether the graph is directed
+constexpr auto graphTypes = lexy::symbol_table<bool>
+    .case_folding(dsl::ascii::case_folding)
+    .map<LEXY_SYMBOL("graph")>(false)
+    .map<LEXY_SYMBOL("digraph")>(true);
+
 struct DotGraph
 {
     static constexpr auto whitespace = skipper;
 
     static constexpr auto rule =
-        dsl::if_(keywordStrict) + (keywordGraph | keywordDigraph) + dsl::p<OptionalIdentifier> +
-        dsl::curly_bracketed(dsl::p<StatementList>) + dsl::eof;
+        dsl::flag(keywordStrict) +
+        dsl::symbol<graphTypes>(idPattern) +
+        dsl::p<OptionalIdentifier> + dsl::curly_bracketed(dsl::p<StatementList>) + dsl::eof;
 
     static constexpr auto value = lexy::construct<LexyDotParser::DotGraph>;
 };
@@ -414,6 +473,25 @@ static bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graph
     };
 
     std::vector<Defaults> defaults(1);
+
+    // In a strict graph, there is at most one edge between a pair of nodes, in each
+    // direction if it's directed, and repeating an edge gives the existing one
+    std::map<std::pair<NodeId, NodeId>, EdgeId> strictEdges;
+
+    auto addEdge = [&](NodeId sourceNodeId, NodeId targetNodeId)
+    {
+        if(!dot._strict)
+            return graphModel.mutableGraph().addEdge(sourceNodeId, targetNodeId);
+
+        auto key = std::make_pair(sourceNodeId, targetNodeId);
+        if(!dot._directed && key.second < key.first)
+            std::swap(key.first, key.second);
+
+        if(!u::contains(strictEdges, key))
+            strictEdges.emplace(key, graphModel.mutableGraph().addEdge(sourceNodeId, targetNodeId));
+
+        return strictEdges.at(key);
+    };
 
     auto addNode = [&](const QString& nodeName)
     {
@@ -437,14 +515,18 @@ static bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graph
     auto processStatementList = [&parser, &processStatement, &defaults](const StatementList& l)
     {
         std::vector<QString> nodes;
+        std::set<QString> nodesSeen;
         size_t i = 0;
 
         defaults.push_back(defaults.back());
 
         for(const auto& s : l)
         {
-            for(const auto& nodeId : processStatement(s))
-                nodes.emplace_back(nodeId);
+            for(const auto& node : processStatement(s))
+            {
+                if(nodesSeen.insert(node).second)
+                    nodes.emplace_back(node);
+            }
 
             parser.setProgress(static_cast<int>((i++ * 100) / l.size()));
         }
@@ -489,6 +571,10 @@ static bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graph
 
                 auto sourceNodes = processEdgeEnd(edge._edgeEnd);
 
+                // Every node in the statement, so that an edge to or from a subgraph
+                // containing it is also an edge to or from it
+                auto statementNodes = sourceNodes;
+
                 for(const auto& target : edge._edgeEnds)
                 {
                     std::vector<NodeId> sourceNodeIds;
@@ -508,13 +594,11 @@ static bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graph
                     {
                         for(auto targetNodeId : targetNodeIds)
                         {
-                            auto edgeId = graphModel.mutableGraph().addEdge(
-                                sourceNodeId, targetNodeId);
-
-                            addedEdgeIds.emplace_back(edgeId);
+                            addedEdgeIds.emplace_back(addEdge(sourceNodeId, targetNodeId));
                         }
                     }
 
+                    statementNodes.insert(statementNodes.end(), targetNodes.begin(), targetNodes.end());
                     sourceNodes = std::move(targetNodes);
                 }
 
@@ -530,7 +614,7 @@ static bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graph
                     }
                 }
 
-                return std::vector<QString>{};
+                return statementNodes;
             },
             [&](const NodeStatement& node)
             {
@@ -588,8 +672,12 @@ bool DotFileParser::parse(const QUrl& url, IGraphModel* graphModel)
     if(!file.open(QIODevice::ReadOnly))
         return false;
 
-    const auto contents = file.readAll();
+    auto contents = file.readAll();
     file.close();
+
+    // A UTF-8 byte order mark
+    if(contents.startsWith("\xEF\xBB\xBF"))
+        contents.remove(0, 3);
 
     if(contents.isEmpty())
         return false;
