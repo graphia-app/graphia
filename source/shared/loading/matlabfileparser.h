@@ -104,24 +104,25 @@ private:
         {
             Q_ASSERT(v->class_type >= MAT_C_DOUBLE && v->class_type <= MAT_C_UINT64);
 
-            const size_t numColumns = v->dims[0];
-            const size_t numRows = v->dims[1];
+            const size_t numRows = v->dims[0];
+            const size_t numColumns = v->dims[1];
             auto totalIterations = static_cast<uint64_t>(numColumns * numRows);
 
             _tabularData.reserve(numColumns, numRows);
 
             auto* dataPtr = reinterpret_cast<T*>(v->data);
 
-            for(size_t row = 0; row < numRows; row++)
+            // MATLAB stores matrices a column at a time
+            for(size_t column = 0; column < numColumns; column++)
             {
-                const size_t rowOffset = row * numColumns;
+                const size_t columnOffset = column * numRows;
 
-                for(size_t column = 0; column < numColumns; column++)
+                for(size_t row = 0; row < numRows; row++)
                 {
                     if(cancelled())
                         return false;
 
-                    T value = *(dataPtr + rowOffset + column);
+                    T value = *(dataPtr + columnOffset + row);
                     _tabularData.setValueAt(column, row, toString(value));
 
                     setProgress(static_cast<int>((progress++ * 100) / totalIterations));
