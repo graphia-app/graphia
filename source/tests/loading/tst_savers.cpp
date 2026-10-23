@@ -230,6 +230,37 @@ private slots:
         QVERIFY(exactlyEqual(reloaded->edgeNumericValue(u"Weight"_s, D, A), 7.25));
     }
 
+    void structuralAttributesAreNotExported()
+    {
+        auto model = createModel();
+
+        // Outside QCOMPARE, as MSVC wrongly sees escape sequences in raw strings in macro arguments
+        const auto transform =
+            uR"(AttributeSynthesis using $"Label Text" with Name = "Synthesised" RegularExpression = "^(.*)$" AttributeValue = "\1")"_s;
+        QCOMPARE(model->applyTransforms({transform}), QStringList{});
+
+        const std::map<QString, QByteArray> contents
+        {
+            {u"GML"_s, save<GMLSaver>(*model)},
+            {u"GraphML"_s, save<GraphMLSaver>(*model)},
+            {u"JSON Graph"_s, save<JSONGraphSaver>(*model)},
+        };
+
+        for(const auto& [format, content] : contents)
+        {
+            QVERIFY2(!content.isEmpty(), qPrintable(format));
+
+            // Importing the file computes these again
+            QVERIFY2(!content.contains("Degree"), qPrintable(format));
+            QVERIFY2(!content.contains("Multiplicity"), qPrintable(format));
+            QVERIFY2(!content.contains("Component"), qPrintable(format));
+
+            // Attributes from the user's data or from transforms still are
+            QVERIFY2(content.contains("Count"), qPrintable(format));
+            QVERIFY2(content.contains("Synthesised"), qPrintable(format));
+        }
+    }
+
     void pairwise()
     {
         auto model = createModel();
