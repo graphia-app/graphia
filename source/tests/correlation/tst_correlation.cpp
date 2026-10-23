@@ -642,6 +642,14 @@ private slots:
         QCOMPARE(CorrelationFileParser::epsilonFor({}), std::nextafter(0.0, 1.0));
     }
 
+    void logScalingNoPositiveValues()
+    {
+        // Rather than one so large that it swamps the values
+        auto epsilon = CorrelationFileParser::epsilonFor({0.0, -1.0});
+        QCOMPARE(epsilon, std::nextafter(0.0, 1.0));
+        QVERIFY(CorrelationFileParser::scaleValue(ScalingType::Log2, 0.0, epsilon) < -1000.0);
+    }
+
     void clipValues_data()
     {
         QTest::addColumn<int>("clippingType");
