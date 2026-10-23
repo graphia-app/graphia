@@ -264,15 +264,19 @@ bool CorrelationFileParser::normalise(NormaliseType normaliseType,
 
 double CorrelationFileParser::epsilonFor(const std::vector<double>& data)
 {
-    if(data.empty())
-        return std::nextafter(0.0, 1.0);
-
     double minValue = std::numeric_limits<double>::max();
+    bool anyPositive = false;
     for(const auto& value : data)
     {
         if(value > 0.0 && value < minValue)
+        {
             minValue = value;
+            anyPositive = true;
+        }
     }
+
+    if(!anyPositive)
+        return std::nextafter(0.0, 1.0);
 
     // This is picked to be appropriately small for log scaling
     // data, but not so small that it obscures the values themselves
