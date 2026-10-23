@@ -221,6 +221,12 @@ static bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphMode
             return false;
         }
 
+        if(u::contains(gmlIdToNodeId, *id))
+        {
+            parser.setFailureReason(QObject::tr("More than one node has the id %1.").arg(*id));
+            return false;
+        }
+
         auto nodeId = graphModel.mutableGraph().addNode();
         gmlIdToNodeId[*id] = nodeId;
 
@@ -232,12 +238,10 @@ static bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphMode
             if(keyValue._key == u"id"_s)
                 continue;
 
-            if(keyValue._key == u"label"_s)
+            if(keyValue._key == u"label"_s && !std::holds_alternative<List>(keyValue._value))
             {
-                // If there is a label attribute, use it as the node name
-                const auto* label = std::get_if<QString>(&keyValue._value);
-                if(label != nullptr)
-                    nodeName = decodeEntities(*label);
+                // If there is a label attribute, use it as the node name, even if it's a number
+                nodeName = processAttribute(keyValue).front()._value;
             }
             else
             {
