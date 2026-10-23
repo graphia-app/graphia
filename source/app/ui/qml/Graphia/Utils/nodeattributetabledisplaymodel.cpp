@@ -456,6 +456,10 @@ void NodeAttributeTableDisplayModel::sortSourceRows()
             if(valueA == valueB)
                 continue;
 
+            // Rows with no value go last, whichever the order
+            if(!valueA.isValid() || !valueB.isValid())
+                return valueA.isValid();
+
             if(static_cast<QMetaType::Type>(valueA.typeId()) == QMetaType::QString &&
                 static_cast<QMetaType::Type>(valueB.typeId()) == QMetaType::QString)
             {
