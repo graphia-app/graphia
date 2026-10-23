@@ -37,7 +37,11 @@ private:
 public:
     JsonGraphParser(IUserNodeData* userNodeData, IUserEdgeData* userEdgeData) :
         _userNodeData(userNodeData), _userEdgeData(userEdgeData)
-    {}
+    {
+        // Add this up front, so that it appears first in the attribute table
+        if(userNodeData != nullptr)
+            userNodeData->add(nodeNameAttribute());
+    }
 
     static bool canLoad(const QUrl &) { return true; }
     static bool parseGraphObject(const json& jsonGraphObject, IGraphModel *graphModel,
