@@ -296,6 +296,25 @@ private slots:
         });
     }
 
+    void cloneAttributeOfRemovedNodes()
+    {
+        auto model = createModel();
+        QVERIFY(model != nullptr);
+        QCOMPARE(model->applyTransforms({uR"(RemoveNodes where $NodeName == "c")"_s}), QStringList{});
+
+        // Attributes from the user's data are cloned for nodes a transform removes, which come back
+        // when it's removed, but computed attributes only have values for the nodes that are left
+        CloneAttributeCommand userCommand(&model->graphModel(), u"score"_s, u"Copy"_s);
+        CloneAttributeCommand computedCommand(&model->graphModel(), u"NodeDegree"_s, u"DegreeCopy"_s);
+        QVERIFY(userCommand.execute());
+        QVERIFY(computedCommand.execute());
+
+        QVERIFY(exactlyEqual(model->nodeNumericValue(u"Copy"_s, u"c"_s), 2.5));
+        QVERIFY(!model->nodeHasValue(u"Copy"_s, u"b"_s));
+        QCOMPARE(model->nodeValue(u"DegreeCopy"_s, u"a"_s), u"1"_s);
+        QVERIFY(!model->nodeHasValue(u"DegreeCopy"_s, u"c"_s));
+    }
+
     void removeAttributes()
     {
         auto model = createModel();
