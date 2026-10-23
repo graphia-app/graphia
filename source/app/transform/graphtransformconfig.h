@@ -30,6 +30,7 @@
 #include <QString>
 #include <QVariantMap>
 
+#include <compare>
 #include <functional>
 #include <vector>
 #include <variant>
@@ -40,7 +41,16 @@ struct GraphTransformConfig
 {
     using AttributeDisplayNameFn = std::function<QString(const QString&)>;
     using AttributeDisplayValueFn = std::function<QString(const QString& attributeName, const QString& value)>;
-    using TerminalValue = std::variant<double, int, QString>;
+    // An attribute named in a condition, as opposed to a string value
+    struct AttributeReference
+    {
+        QString _name;
+
+        bool operator==(const AttributeReference& other) const = default;
+        std::weak_ordering operator<=>(const AttributeReference& other) const = default;
+    };
+
+    using TerminalValue = std::variant<double, int, QString, AttributeReference>;
     using TerminalOp = std::variant<ConditionFnOp::Equality, ConditionFnOp::Numerical, ConditionFnOp::String>;
 
     struct TerminalCondition

@@ -38,9 +38,9 @@ void ContractByAttributeTransform::apply(TransformedGraph& target)
 
     GraphTransformConfig::TerminalCondition condition
     {
-        ._lhs = u"$source.%1"_s.arg(attributeName),
+        ._lhs = GraphTransformConfig::AttributeReference{u"source.%1"_s.arg(attributeName)},
         ._op = ConditionFnOp::Equality::Equal,
-        ._rhs = u"$target.%1"_s.arg(attributeName),
+        ._rhs = GraphTransformConfig::AttributeReference{u"target.%1"_s.arg(attributeName)},
     };
 
     auto conditionFn = CreateConditionFnFor::edge(*_graphModel, condition);

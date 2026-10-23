@@ -113,14 +113,11 @@ function Create(transformIndex, document, transformString)
 
     function conditionToTemplate(condition)
     {
-        function templated(text)
+        function templated(text, isName)
         {
-            if(text[0] === '$')
-            {
-                // As with the action, escape '%' in attribute names
-                text = text.substring(1);
+            // As with the action, escape '%' in attribute names
+            if(isName)
                 return "$" + document.writtenAttributeName(text).replace(/%/g, "%!");
-            }
 
             return "%" + parameterIndex++;
         }
@@ -130,7 +127,7 @@ function Create(transformIndex, document, transformString)
         if(typeof condition.lhs === "object")
             template += "(" + conditionToTemplate(condition.lhs) + ")";
         else
-            template += templated(condition.lhs);
+            template += templated(condition.lhs, condition.lhsIsName);
 
         template += " " + condition.op;
 
@@ -141,7 +138,7 @@ function Create(transformIndex, document, transformString)
             if(typeof condition.rhs === "object")
                 template += "(" + conditionToTemplate(condition.rhs) + ")";
             else
-                template += templated(condition.rhs);
+                template += templated(condition.rhs, condition.rhsIsName);
         }
 
         return template;
@@ -191,7 +188,7 @@ function Create(transformIndex, document, transformString)
 
             let parameter = transform.parameters[index];
             this.template += " " + document.writtenString(parameter.name) + " = %" + parameterIndex++;
-            parameterElements.push({type: "parameter", lhs: "$" + parameter.name, rhs: parameter.value});
+            parameterElements.push({type: "parameter", lhs: parameter.name, lhsIsName: true, rhs: parameter.value});
         }
 
         this._elements = substituted(displayText.withParameters, [this._elements, parameterElements]);
@@ -233,15 +230,15 @@ function Create(transformIndex, document, transformString)
                 {
                     // The element is a parameter or a condition
 
-                    function addOperand(operand, opposite)
+                    // An operand is either a name, of a parameter or an attribute, or a value
+                    function addOperand(operand, isName, opposite, oppositeIsName)
                     {
-                        if(operand[0] === '$')
+                        if(isName)
                         {
                             if(parameter.type === "parameter")
                             {
-                                let parameterName = operand.substring(1);
-                                let displayName = document.transformParameter(that.action, parameterName).displayName;
-                                labelText += displayName !== undefined ? displayName : parameterName;
+                                let displayName = document.transformParameter(that.action, operand).displayName;
+                                labelText += displayName !== undefined ? displayName : operand;
                             }
                             else
                                 labelText += document.attributeDisplayName(operand);
@@ -251,9 +248,9 @@ function Create(transformIndex, document, transformString)
                             let parameterData = {};
                             let displayOperand = operand;
 
-                            if(opposite !== undefined && opposite.length > 0 && opposite[0] === '$')
+                            if(opposite !== undefined && oppositeIsName)
                             {
-                                let parameterName = opposite.substring(1);
+                                let parameterName = opposite;
 
                                 if(parameter.type === "parameter")
                                     parameterData = document.transformParameter(that.action, parameterName);
@@ -322,9 +319,9 @@ function Create(transformIndex, document, transformString)
                     for(const part of phrase.split(/(%\d+)/))
                     {
                         if(part === "%1")
-                            addOperand(parameter.lhs, parameter.rhs);
+                            addOperand(parameter.lhs, parameter.lhsIsName, parameter.rhs, parameter.rhsIsName);
                         else if(part === "%2" && parameter.rhs !== undefined)
-                            addOperand(parameter.rhs, parameter.lhs);
+                            addOperand(parameter.rhs, parameter.rhsIsName, parameter.lhs, parameter.lhsIsName);
                         else if(!/^%\d+$/.test(part))
                             labelText += part;
                     }

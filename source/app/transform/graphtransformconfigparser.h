@@ -56,7 +56,6 @@ public:
     // How an op is shown; one that isn't known is shown as it's written
     static TransformDisplayText::Op opDisplayText(const QString& op);
 
-    static bool isAttributeName(const QString& variable);
 
     static QString parseForDisplay(const QString& text, const GraphTransformFactories& factories,
         const GraphTransformConfig::AttributeDisplayNameFn& attributeDisplayName = {},

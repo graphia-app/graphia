@@ -92,11 +92,18 @@ struct AttributeName : lexy::token_production
 {
     static constexpr auto rule = dsl::p<AttributeNameNoDollar>;
 
-    static constexpr auto value = lexy::callback<QString>(
-        [](const QString& name) { return u"$"_s + name; });
+    static constexpr auto value = lexy::callback<GraphTransformConfig::AttributeReference>(
+        [](QString&& name) { return GraphTransformConfig::AttributeReference{std::move(name)}; });
 };
 
 struct Number
+{
+    static constexpr auto rule = dsl::capture(lexyutils::number);
+    static constexpr auto value = lexyutils::asNumber<GraphTransformConfig::ParameterValue>;
+};
+
+// A number as a condition's operand
+struct NumberOperand
 {
     static constexpr auto rule = dsl::capture(lexyutils::number);
     static constexpr auto value = lexyutils::asNumber<GraphTransformConfig::TerminalValue>;
@@ -104,7 +111,7 @@ struct Number
 
 struct ValueOperand
 {
-    static constexpr auto rule = dsl::p<AttributeName> | dsl::p<Number> | dsl::p<String>;
+    static constexpr auto rule = dsl::p<AttributeName> | dsl::p<NumberOperand> | dsl::p<String>;
     static constexpr auto value = lexy::construct<GraphTransformConfig::TerminalValue>;
 };
 
@@ -390,11 +397,6 @@ TransformDisplayText::Op GraphTransformConfigParser::opDisplayText(const QString
         return TransformDisplayText::op(*unaryOp);
 
     return {._name = op, ._phrase = u"%1 "_s + op + u" %2"_s};
-}
-
-bool GraphTransformConfigParser::isAttributeName(const QString& variable)
-{
-    return !variable.isEmpty() && variable[0] == '$';
 }
 
 QString GraphTransformConfigParser::parseForDisplay(const QString& text, const GraphTransformFactories& factories,

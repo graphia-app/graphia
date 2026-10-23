@@ -186,22 +186,26 @@ QVariantMap GraphTransformConfig::conditionAsVariantMap() const
         {
             struct Visitor
             {
-                QString operator()(const double& d) const   { return doubleAsString(d); }
-                QString operator()(const int& i) const      { return QString::number(i); }
-                QString operator()(const QString& s) const  { return s; }
+                QString operator()(const double& d) const                   { return doubleAsString(d); }
+                QString operator()(const int& i) const                      { return QString::number(i); }
+                QString operator()(const QString& s) const                  { return s; }
+                QString operator()(const AttributeReference& a) const       { return a._name; }
             };
 
             return std::visit(Visitor(), terminalValue);
         }
 
+        // Attribute names are distinguished from string values by lhsIsName and rhsIsName
         QVariantMap operator()(GraphTransformConfig::NoCondition) const { return {}; }
         QVariantMap operator()(const TerminalCondition& terminalCondition) const
         {
             QVariantMap map;
 
             map.insert(u"lhs"_s, terminalValueAsString(terminalCondition._lhs));
+            map.insert(u"lhsIsName"_s, std::holds_alternative<AttributeReference>(terminalCondition._lhs));
             map.insert(u"op"_s, terminalCondition.opAsString());
             map.insert(u"rhs"_s, terminalValueAsString(terminalCondition._rhs));
+            map.insert(u"rhsIsName"_s, std::holds_alternative<AttributeReference>(terminalCondition._rhs));
 
             return map;
         }
@@ -211,6 +215,7 @@ QVariantMap GraphTransformConfig::conditionAsVariantMap() const
             QVariantMap map;
 
             map.insert(u"lhs"_s, terminalValueAsString(unaryCondition._lhs));
+            map.insert(u"lhsIsName"_s, std::holds_alternative<AttributeReference>(unaryCondition._lhs));
             map.insert(u"op"_s, unaryCondition.opAsString());
 
             return map;
@@ -262,18 +267,18 @@ QString GraphTransformConfig::conditionAsString(bool forDisplay, const Attribute
                 QString operator()(const int& i) const      { return QString::number(i); }
                 QString operator()(const QString& s) const
                 {
-                    if(GraphTransformConfigParser::isAttributeName(s))
-                    {
-                        if(_forDisplay)
-                        {
-                            return _attributeDisplayName ? _attributeDisplayName(s) :
-                                Attribute::fullyQualifiedDisplayName(s, [](const QString& name) { return name; });
-                        }
+                    return _forDisplay ? s : LexyConfigGrammar::writtenString(s);
+                }
 
-                        return u"$%1"_s.arg(Attribute::writtenAttributeName(s));
+                QString operator()(const AttributeReference& a) const
+                {
+                    if(_forDisplay)
+                    {
+                        return _attributeDisplayName ? _attributeDisplayName(a._name) :
+                            Attribute::fullyQualifiedDisplayName(a._name, [](const QString& name) { return name; });
                     }
 
-                    return _forDisplay ? s : LexyConfigGrammar::writtenString(s);
+                    return u"$%1"_s.arg(Attribute::writtenAttributeName(a._name));
                 }
             };
 
@@ -303,15 +308,11 @@ QString GraphTransformConfig::conditionAsString(bool forDisplay, const Attribute
 
             if(_forDisplay && _attributeDisplayValue)
             {
-                const auto* attributeName = std::get_if<QString>(&terminalCondition._lhs);
+                const auto* attribute = std::get_if<AttributeReference>(&terminalCondition._lhs);
                 const auto* value = std::get_if<QString>(&terminalCondition._rhs);
 
-                if(attributeName != nullptr && value != nullptr &&
-                    GraphTransformConfigParser::isAttributeName(*attributeName) &&
-                    !GraphTransformConfigParser::isAttributeName(*value))
-                {
-                    rhs = _attributeDisplayValue(*attributeName, *value);
-                }
+                if(attribute != nullptr && value != nullptr)
+                    rhs = _attributeDisplayValue(attribute->_name, *value);
             }
 
             return applyOp(terminalCondition.opAsString(),
@@ -500,11 +501,8 @@ std::vector<QString> GraphTransformConfig::referencedAttributeNames() const
 
         static QString attributeFromTerminalValue(const TerminalValue& terminalValue)
         {
-            const auto* s = std::get_if<QString>(&terminalValue);
-            if(s != nullptr && GraphTransformConfigParser::isAttributeName(*s))
-                return s->mid(1); // Strip leading $
-
-            return {};
+            const auto* attribute = std::get_if<AttributeReference>(&terminalValue);
+            return attribute != nullptr ? attribute->_name : QString();
         }
 
         void operator()(const TerminalCondition& terminalCondition) const
