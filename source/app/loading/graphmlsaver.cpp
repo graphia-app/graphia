@@ -23,6 +23,7 @@
 #include "app/layout/nodepositions.h"
 #include "shared/graph/igraph.h"
 #include "shared/attributes/iattribute.h"
+#include "shared/utils/container.h"
 
 #include <QFile>
 #include <QLocale>
@@ -119,7 +120,7 @@ bool GraphMLSaver::save()
         setProgress(static_cast<int>(runningCount * 100 / numElements));
 
         const auto* attribute = _graphModel->attributeByName(attributeName);
-        if(attribute->hasParameter())
+        if(attribute->hasParameter() || !u::contains(exportedNames, attributeName))
             continue;
 
         stream.writeStartElement(u"key"_s);
@@ -164,7 +165,7 @@ bool GraphMLSaver::save()
         for(const auto& nodeAttributeName : _graphModel->attributeNames(ElementType::Node))
         {
             const auto* attribute = _graphModel->attributeByName(nodeAttributeName);
-            if(attribute->hasParameter())
+            if(attribute->hasParameter() || !u::contains(exportedNames, nodeAttributeName))
                 continue;
 
             stream.writeStartElement(u"data"_s);
@@ -212,7 +213,7 @@ bool GraphMLSaver::save()
         for(const auto& edgeAttributeName : _graphModel->attributeNames(ElementType::Edge))
         {
             const auto* attribute = _graphModel->attributeByName(edgeAttributeName);
-            if(attribute->hasParameter())
+            if(attribute->hasParameter() || !u::contains(exportedNames, edgeAttributeName))
                 continue;
 
             stream.writeStartElement(u"data"_s);
