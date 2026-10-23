@@ -335,6 +335,29 @@ private slots:
         QCOMPARE(model->nodeValue(u"Prefix"_s, u"d"_s), u""_s);
     }
 
+    void attributeSynthesisNonMatchingHaveNoValue()
+    {
+        // Outside QCOMPARE, as MSVC wrongly sees escape sequences in raw strings in macro arguments
+        const auto stringTransform =
+            uR"(AttributeSynthesis using $Id with Name = "Prefix" RegularExpression = "^([a-z]+)_\d+$" AttributeValue = "\1")"_s;
+        const auto intTransform =
+            uR"(AttributeSynthesis using $Id with Name = "Number" RegularExpression = "^[a-z]+_(\d+)$" AttributeValue = "\1")"_s;
+
+        auto model = createPathGraph();
+        QCOMPARE(model->applyTransforms({stringTransform, intTransform}), QStringList{});
+
+        QVERIFY(model->nodeHasValue(u"Prefix"_s, u"a"_s));
+        QVERIFY(!model->nodeHasValue(u"Prefix"_s, u"d"_s));
+
+        QCOMPARE(model->graphModel().attributeValueByName(u"Number"_s).valueType(), ValueType::Int);
+        QCOMPARE(model->nodeNumericValue(u"Number"_s, u"c"_s), 3.0);
+        QVERIFY(model->nodeHasValue(u"Number"_s, u"c"_s));
+        QVERIFY(!model->nodeHasValue(u"Number"_s, u"d"_s));
+
+        QCOMPARE(model->applyTransforms({stringTransform, intTransform, u"RemoveNodes where $Number hasValue"_s}), QStringList{});
+        QCOMPARE(model->graph().numNodes(), 1);
+    }
+
     void forwardAttribute()
     {
         auto model = createPathGraph();
