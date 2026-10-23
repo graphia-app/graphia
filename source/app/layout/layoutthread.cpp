@@ -462,15 +462,11 @@ QString LayoutThread::layoutDisplayName() const
 
 void LayoutThread::removeComponent(ComponentId componentId)
 {
-    bool resumeAfterRemoval = false;
+    // Components are only removed while the graph changes, and Document pauses the layout
+    // before that happens; resuming it here would let it run on a graph part way through changing
+    Q_ASSERT(paused());
 
-    if(!paused())
-    {
-        pauseAndWait();
-        resumeAfterRemoval = true;
-    }
-
-    std::unique_lock<std::mutex> lock(_mutex);
+    const std::unique_lock<std::mutex> lock(_mutex);
 
     // There's a slim chance that the component has just been added
     // Most of the time this is a no-op
@@ -481,11 +477,6 @@ void LayoutThread::removeComponent(ComponentId componentId)
         _layoutsToBeRemoved.emplace_back(std::move(_layouts.at(componentId)));
         _layouts.erase(componentId);
     }
-
-    lock.unlock();
-
-    if(resumeAfterRemoval)
-        resume();
 }
 
 void LayoutThread::onComponentSplit(const Graph*, const ComponentSplitSet& componentSplitSet)
