@@ -64,21 +64,19 @@ void QCPColumnAnnotations::resolveRects()
     auto colorFor = [this](const Row& row, size_t index) -> QColor
     {
         const auto* annotation = row._columnAnnotation;
+        const auto& value = annotation->valueAt(index);
+
+        if(value.isEmpty())
+            return Qt::transparent;
 
         if(!annotation->isNumeric())
         {
-            const auto& value = annotation->valueAt(index);
-
-            if(value.isEmpty())
-                return Qt::transparent;
-
             auto offsetByPrime = row._offset * 13;
             auto colorIndex = annotation->uniqueIndexOf(value) + offsetByPrime;
             return _colorPalette.get(value, static_cast<int>(colorIndex));
         }
 
-        auto value = annotation->normalisedNumericValueAt(index);
-        return _colorGradient.get(value);
+        return _colorGradient.get(annotation->normalisedNumericValueAt(index));
     };
 
     for(const auto& [y, row] : _rows)
