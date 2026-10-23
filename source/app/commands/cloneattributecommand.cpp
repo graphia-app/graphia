@@ -21,6 +21,7 @@
 
 #include "app/graph/graphmodel.h"
 #include "app/graph/graph.h"
+#include "app/graph/mutablegraph.h"
 
 #include "shared/utils/string.h"
 
@@ -104,10 +105,16 @@ bool CloneAttributeCommand::execute()
         return userData->exposeAsAttributes(*_graphModel);
     };
 
+    // Attributes from the user's data have values for every element, including those that
+    // transforms have removed or merged, whereas computed attributes only have values for
+    // the elements of the transformed graph
+    const Graph& graph = sourceAttribute.userDefined() ?
+        static_cast<const Graph&>(_graphModel->mutableGraph()) : _graphModel->graph();
+
     if(sourceAttribute.elementType() == ElementType::Node)
-        _createdAttributeNames = createAttribute(_graphModel->graph().nodeIds());
+        _createdAttributeNames = createAttribute(graph.nodeIds());
     else if(sourceAttribute.elementType() == ElementType::Edge)
-        _createdAttributeNames = createAttribute(_graphModel->graph().edgeIds());
+        _createdAttributeNames = createAttribute(graph.edgeIds());
 
     return !_createdAttributeNames.empty();
 }
