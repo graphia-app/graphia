@@ -81,7 +81,7 @@ testing, which may come later as an extra safety net.
   the earlier commits they belong to, rather than adding "fix CI" commits.
   Rewriting history on these branches is fine; push with `--force-with-lease`.
   A fold into `claude/bug-fixes` means rebasing the test branch again.
-- **No pull request** until Tim asks for one.
+- **No pull requests:** Tim has decided not to open any for these branches.
 - **Commit messages:** a short imperative subject, then a body explaining the
   problem and the fix in prose. End with the attribution trailers used
   throughout the branch, and don't put model names or identifiers in commits or
@@ -212,6 +212,7 @@ testing, which may come later as an extra safety net.
 | `tst_enrichmentcalculator` | Fisher's exact test against an exact calculation, over-representation on a small graph |
 | `tst_enrichmenttablemodel` | sorting, filtering and resets |
 | `tst_correlation` | correlation types, threshold, k-NN for every type, matrices, cancellation, the k-NN proto graph, normalisation, scaling, clipping, imputation (expected values from numpy) |
+| `tst_columnannotations` | the correlation plot's column annotations: empty values are left transparent |
 | `tst_tabulardata` | CSV, TSV, SSV, TXT and XLSX tokenising and detection, the data rectangle the correlation plugin finds, row and column types and duplicates, key match percentages |
 | `tst_graphparsers` | pairwise, GML, GraphML, DOT, JSON Graph, CX, BioPAX, adjacency matrix and MATLAB files (written with matio by the test): valid, precise, malformed, syntax error locations, missing values |
 | `tst_savers` | GML, GraphML, JSON Graph and pairwise export, then re-import |
@@ -409,6 +410,41 @@ Each one is a commit; see `git log` for the details.
   - numbers were written with 6 significant figures;
   - quotes within attribute names were removed when names were written.
 
+### Decided by Tim
+
+These were in `PENDING_DECISIONS.md`, and Tim chose to change them.
+
+- **Attribute Synthesis:** elements that don't match have no value, rather
+  than an empty string or 0.
+- **Clone Attribute:** attributes from the user's data are cloned for every
+  node, including those a transform removed or merged.
+- **Exports:** GML, GraphML and JSON Graph exports leave out the attributes
+  Graphia computes from the graph (`GraphModel::attributeDeclarations`);
+  pairwise exports write a row with one name for each node with no edges.
+- **File attributes** named like an attribute the parser declares, such as
+  `NodeName`, get a "User " prefix (`IUserData::undeclaredVectorName`).
+- **String colours** use every hue, and are the same on every platform.
+- **Conditions:** a string starting with `$` is a string; attribute names
+  have their own type, `GraphTransformConfig::AttributeReference`, and QML is
+  told which operands are names by `lhsIsName` and `rhsIsName`.
+- **The layout thread** asserts that it's paused when a component is
+  removed, rather than pausing and resuming itself (not tested, as it's an
+  assertion).
+- **Column annotations:** empty numeric values are transparent.
+- **Node attribute table:** rows with no value are last in either order.
+- **Adjacency matrices:** CSV edges go from the row's node to the column's,
+  as MATLAB's did, and MATLAB data is no longer transposed.
+- **DOT:** `strict`, edges to subgraphs containing edge statements, `+`
+  concatenation, several attribute lists, `[` in HTML strings, strings ending
+  in a backslash, `#` lines and byte order marks.
+- **MATLAB:** matrices of complex numbers are ignored.
+- **JSON Graph:** no `edges` key, integer ids, and labels as `NodeName`.
+- **GML:** repeated ids fail, and numeric labels are used.
+- **Correlation:** data with no positive values gets a tiny epsilon for log
+  scaling, rather than a huge one.
+- **Config strings:** a backslash escapes a quote or a backslash, so a string
+  can end in one; older files' strings are upgraded to keep their meaning.
+
 ## Gotchas
 
 - **CryptoPP's assertions** are enabled in debug builds, where `_DEBUG` is
@@ -482,7 +518,8 @@ Each one is a commit; see `git log` for the details.
 
 ## Next steps, in rough order
 
-1. **Tim's decisions:** `PENDING_DECISIONS.md`, and when to open a PR.
+1. **Tim's decisions:** the deferred questions in `PENDING_DECISIONS.md`.
+   No pull requests are to be opened for these branches.
 2. **Coverage gaps:** see "Coverage" below. What's left outside rendering
    is mostly in `Document` (component navigation and other things that need
    the renderer), the correlation plugin's plot helpers, and debug output, so

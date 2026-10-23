@@ -1,90 +1,12 @@
 # Pending decisions from the unit test work
 
 These came up while writing the tests on `claude/unit-test-infrastructure`.
-Most have now been decided. What's left is split into changes to make, and
-questions deferred for later. Delete this file once everything in it is
+Most have now been decided, and the changes decided on have been made; what's
+left are the questions deferred for later. Delete this file once they're
 resolved.
 
 Fixes are on `claude/bug-fixes`, one commit each, and each is tested by a
 commit on the test branch titled "Test the fix for ...".
-
-## Decided: changes to make
-
-- **Attribute Synthesis values for elements that don't match.** An element
-  whose source value doesn't match the regular expression gets `""`, or `0`
-  if the new attribute is detected as an integer, so it can't be told apart
-  from one with a real empty or zero value. Give such elements no value.
-- **Clone Attribute and nodes that aren't shown.** Only the nodes in the
-  transformed graph get a value in the clone, so nodes hidden by a filter, or
-  merged into others, have none, which shows when the filter is removed. For
-  attributes from the user's data, copy the values of every node. Attributes
-  a transform computes stay as they are.
-- **Computed attributes in exports.** GML and GraphML exports include the
-  attributes Graphia computes, such as `NodeDegree` and
-  `NodeComponentIdentifier`, which come back as user attributes when the
-  file is imported. Leave them out.
-- **Pairwise exports and nodes with no edges.** Such nodes aren't written.
-  Write a row with just the node's name for each, which the pairwise parser
-  now loads as a node with no edges.
-- **File attributes named like the attributes a parser declares.** An
-  attribute from a file named, for example, `NodeName` shares the user data
-  that holds the node names, so its own values are lost. Give these the
-  "User " prefix, as attributes that clash with the ones Graphia declares
-  already get.
-- **Colours of string values.** Fix both problems in `u::colorForString`,
-  though it changes the colours of existing documents:
-  - it takes the hue modulo 255, but `QColor` hues run from 0 to 359, so
-    blue-violet to pink never appear;
-  - it adds 128 to a `char`, which is unsigned on some platforms, such as
-    Linux on ARM, so the colours differ between platforms.
-- **Strings starting with `$` in conditions.** A string in a condition is
-  stored the same way as an attribute name, which is only told apart by a
-  leading `$`, so in `$NodeName == "$HOME"`, `"$HOME"` is taken to be the
-  attribute `HOME`. Give attribute names their own type in
-  `GraphTransformConfig::TerminalValue`, and change how conditions are given
-  to QML, which also relies on the `$`.
-- **Removing a component while the layout runs.** If a component is removed
-  while the layout isn't paused, `LayoutThread::removeComponent` pauses it,
-  removes the component's layout, then resumes it while the graph is still
-  part way through changing. `Document` always pauses the layout before the
-  graph changes, so remove that branch and assert that the layout is paused.
-- **Empty values in numeric column annotations.** In the correlation plot,
-  an empty value in a column annotation whose other values are all numbers
-  is drawn in the gradient's lowest colour. Leave it transparent, as other
-  annotations do (`QCPColumnAnnotations::resolveRects`).
-- **Missing values when sorting the node attribute table.** Nodes with no
-  value in the sorted column go last when sorting ascending, but first when
-  descending. Keep them last either way, and update
-  `tst_nodeattributetablemodel`, which pins the current order.
-- **Adjacency matrix edge direction and MATLAB transposing.** These two
-  changes go together, so that both formats make an edge from row r's node
-  to column c's:
-  - In a CSV adjacency matrix, the value at row r and column c creates an
-    edge from c's node to r's. Make it go from r's to c's.
-  - `MatLabFileParser` puts each MATLAB column in a row of its table, so a
-    MATLAB file loaded as a table, such as for correlation data, has a
-    column per row of the matrix. Stop transposing, and reverse the matrix
-    edges so they still go from r's node to c's.
-- **Parser gaps.** Fix all of these:
-  - DOT:
-    - `strict` is ignored, so duplicate edges are kept;
-    - in `{a -> b} -> c`, the edges to `c` are lost;
-    - these fail to parse: `"a" + "b"` string concatenation, more than one
-      attribute list as in `a [x=1][y=2]`, `[` inside HTML strings, a quoted
-      string ending in a backslash, `#` preprocessor lines, and a UTF-8 byte
-      order mark.
-  - MATLAB: complex data isn't detected, and is read as if it were real.
-  - JSON Graph:
-    - a graph with no `edges` key is rejected, though the key is optional;
-    - numeric node ids, e.g. `"id": 1`, are rejected;
-    - a node's label is used as its name, but not stored as a `NodeName`
-      attribute.
-  - GML: a repeated `id` silently creates two nodes, and a label that isn't
-    a string is dropped.
-  - Correlation: `CorrelationFileParser::epsilonFor` returns `DBL_MAX / 2`
-    when the data has no positive values.
-  - Visualisations: a string parameter ending in a backslash can't be read
-    back, as its closing quote is taken to be escaped.
 
 ## Deferred
 
