@@ -158,8 +158,9 @@ bool AdjacencyMatrixParser::parseAdjacencyMatrix(const TabularData& tabularData,
             if(absEdgeWeight <= _minimumAbsEdgeWeight)
                 continue;
 
-            const NodeId sourceNodeId = addNode(columnIndex - dataStartColumn);
-            const NodeId targetNodeId = addNode(rowIndex - dataStartRow);
+            // The value in row r and column c is an edge from r's node to c's
+            const NodeId sourceNodeId = addNode(rowIndex - dataStartRow);
+            const NodeId targetNodeId = addNode(columnIndex - dataStartColumn);
             addEdge(graphModel, sourceNodeId, targetNodeId, edgeWeight, absEdgeWeight);
 
             setProgress(static_cast<int>((progress++ * 100) / totalIterations));
