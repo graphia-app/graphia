@@ -386,6 +386,30 @@ private slots:
             QStringList{u"a"_s, u"b"_s, u"c"_s} << QStringList{u"a-b"_s} << QStringList{u"k|c|x"_s};
         QTest::newRow("DOT empty") << u"DOT"_s << QByteArray("digraph {}") <<
             QStringList{} << QStringList{} << QStringList{};
+        QTest::newRow("DOT strict") << u"DOT"_s <<
+            QByteArray("strict digraph { a -> b; a -> b [k=x]; b -> a; a -> a; a -> a }") <<
+            QStringList{u"a"_s, u"b"_s} << QStringList{u"a-a"_s, u"a-b"_s, u"b-a"_s} << QStringList{u"k|a|b|x"_s};
+        QTest::newRow("DOT strict undirected") << u"DOT"_s << QByteArray("strict graph { a -- b; b -- a }") <<
+            QStringList{u"a"_s, u"b"_s} << QStringList{u"a-b"_s} << QStringList{};
+        QTest::newRow("DOT edge subgraph edges") << u"DOT"_s << QByteArray("digraph { {a -> b} -> c; d -> {e -> f; e} }") <<
+            QStringList{u"a"_s, u"b"_s, u"c"_s, u"d"_s, u"e"_s, u"f"_s} <<
+            QStringList{u"a-b"_s, u"a-c"_s, u"b-c"_s, u"d-e"_s, u"d-f"_s, u"e-f"_s} << QStringList{};
+        QTest::newRow("DOT concatenation") << u"DOT"_s <<
+            QByteArray("digraph { \"a\" + \"b\" -> c [k=\"x\" + \"y\"] }") << // NOLINT modernize-raw-string-literal
+            QStringList{u"ab"_s, u"c"_s} << QStringList{u"ab-c"_s} << QStringList{u"k|ab|c|xy"_s};
+        QTest::newRow("DOT attribute lists") << u"DOT"_s << QByteArray("digraph { node [k=x][l=y] a [m=1][n=2] }") <<
+            QStringList{u"a"_s} << QStringList{} <<
+            QStringList{u"k|a|x"_s, u"l|a|y"_s, u"m|a|1"_s, u"n|a|2"_s};
+        QTest::newRow("DOT HTML brackets") << u"DOT"_s << QByteArray("digraph { a [label=<x[1]>] }") <<
+            QStringList{u"a"_s} << QStringList{} << QStringList{u"label|a|x[1]"_s};
+        QTest::newRow("DOT trailing backslash") << u"DOT"_s <<
+            QByteArray("digraph { \"a\\\\\" -> \"b\\c\" }") << // NOLINT modernize-raw-string-literal
+            QStringList{u"a\\\\"_s, u"b\\c"_s} << QStringList{u"a\\\\-b\\c"_s} << QStringList{};
+        QTest::newRow("DOT preprocessor lines") << u"DOT"_s <<
+            QByteArray("# 1 \"graph.gv\"\ndigraph {\n# 2\na -> b\n}\n") << // NOLINT modernize-raw-string-literal
+            QStringList{u"a"_s, u"b"_s} << QStringList{u"a-b"_s} << QStringList{};
+        QTest::newRow("DOT byte order mark") << u"DOT"_s << QByteArray("\xEF\xBB\xBF" "digraph { a -> b }") <<
+            QStringList{u"a"_s, u"b"_s} << QStringList{u"a-b"_s} << QStringList{};
 
         // JSON Graph
         QTest::newRow("JSON Graph") << u"JSONGraph"_s << QByteArray(R"({"graph":{"nodes":[
