@@ -152,6 +152,7 @@ private slots:
         QTest::newRow("matches invalid regex")      << u"$\"String\" matches \"[a\""_s      << u"invalid"_s;
         QTest::newRow("string op on int")           << uR"($"Int" includes "1")"_s              << u"01000"_s;
         QTest::newRow("string op on float")         << uR"($"Float" starts "-")"_s              << u"10000"_s;
+        QTest::newRow("string starting with $")     << uR"($"String" == "$String")"_s           << u"00000"_s;
 
         // String operators, value on the left hand side
         QTest::newRow("value includes")             << uR"("apple pie" includes $"String")"_s   << u"10011"_s;

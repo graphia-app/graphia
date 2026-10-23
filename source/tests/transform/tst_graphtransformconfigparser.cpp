@@ -111,6 +111,20 @@ private slots:
         QVERIFY(!config.hasParameter(u"Missing"_s));
     }
 
+    // A string is a value, even when it starts with $, as an attribute name does
+    void stringsStartingWithDollar()
+    {
+        GraphTransformConfigParser parser;
+        QVERIFY(parser.parse(uR"(RemoveNodes where $NodeName == "$HOME")"_s));
+
+        const auto* condition = std::get_if<GraphTransformConfig::TerminalCondition>(&parser.result()._condition);
+        QVERIFY(condition != nullptr);
+        QCOMPARE(std::get<GraphTransformConfig::AttributeReference>(condition->_lhs)._name, u"NodeName"_s);
+        QCOMPARE(std::get<QString>(condition->_rhs), u"$HOME"_s);
+        QCOMPARE(parser.result().asString(), uR"(RemoveNodes where $NodeName == "$HOME")"_s);
+        QCOMPARE(parser.result().referencedAttributeNames(), std::vector<QString>{u"NodeName"_s});
+    }
+
     // Names, and string values, are only quoted when they aren't identifiers
     void writtenWithoutUnnecessaryQuotes()
     {

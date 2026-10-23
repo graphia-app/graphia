@@ -239,6 +239,9 @@ TestCase
             {tag: "string with quotes and backslashes",
                 transform: "RemoveNodes where $NodeName == \"a \\\"b\\\" \\\\ c\"",
                 expected: "Remove Nodes where Node Name = \"a \"b\" \\ c\""},
+            {tag: "string starting with $",
+                transform: "RemoveNodes where $NodeName == \"$HOME\"",
+                expected: "Remove Nodes where Node Name = \"$HOME\""},
             {tag: "backslash in attribute name",
                 transform: "RemoveNodes where $\"A\\B\" == \"x\"",
                 expected: "Remove Nodes where A\\B = \"x\""}
