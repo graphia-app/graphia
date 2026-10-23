@@ -86,13 +86,18 @@ bool PairwiseSaver::save()
         return false;
 
     QTextStream stream(&file);
-    const size_t edgeCount = _graphModel->graph().numEdges();
+    const size_t elementCount = _graphModel->graph().numEdges() + _graphModel->graph().numNodes();
     size_t runningCount = 0;
 
-    auto escape = [](QString string)
+    auto nameOf = [this](NodeId nodeId)
     {
-        string.replace(u"\""_s, u"\"\""_s);
-        return string;
+        auto name = _graphModel->nodeName(nodeId);
+        name.replace(u"\""_s, u"\"\""_s);
+
+        if(name.isEmpty())
+            name = QString::number(static_cast<int>(nodeId));
+
+        return name;
     };
 
     auto edgeWeightAttributeName = findEdgeWeightAttributeName(_graphModel);
@@ -101,14 +106,8 @@ bool PairwiseSaver::save()
     for(auto edgeId : _graphModel->graph().edgeIds())
     {
         const auto& edge = _graphModel->graph().edgeById(edgeId);
-        auto sourceName = escape(_graphModel->nodeName(edge.sourceId()));
-        auto targetName = escape(_graphModel->nodeName(edge.targetId()));
-
-        if(sourceName.isEmpty())
-            sourceName = QString::number(static_cast<int>(edge.sourceId()));
-
-        if(targetName.isEmpty())
-            targetName = QString::number(static_cast<int>(edge.targetId()));
+        auto sourceName = nameOf(edge.sourceId());
+        auto targetName = nameOf(edge.targetId());
 
         if(!edgeWeightAttributeName.isEmpty())
         {
@@ -120,7 +119,18 @@ bool PairwiseSaver::save()
             stream << u"\"%1\" \"%2\"\n"_s.arg(sourceName, targetName);
 
         runningCount++;
-        setProgress(static_cast<int>(runningCount * 100 / edgeCount));
+        setProgress(static_cast<int>(runningCount * 100 / elementCount));
+    }
+
+    // A row with only one name is a node with no edges
+    setPhase(QObject::tr("Nodes"));
+    for(auto nodeId : _graphModel->graph().nodeIds())
+    {
+        if(_graphModel->graph().nodeById(nodeId).degree() == 0)
+            stream << u"\"%1\"\n"_s.arg(nameOf(nodeId));
+
+        runningCount++;
+        setProgress(static_cast<int>(runningCount * 100 / elementCount));
     }
 
     return true;
