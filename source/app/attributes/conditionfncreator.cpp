@@ -61,6 +61,7 @@ public:
             QString operator()(double v) const          { return QString::number(v); }
             QString operator()(int v) const             { return QString::number(v); }
             QString operator()(const QString& v) const  { return v; }
+            QString operator()(const GraphTransformConfig::AttributeRef&) const { qFatal("Unresolved AttributeRef"); return {}; }
         };
 
         return std::visit(Visitor(), _terminalValue);
@@ -73,6 +74,7 @@ public:
             double operator()(double v) const          { return v; }
             double operator()(int v) const             { return static_cast<double>(v); }
             double operator()(const QString& v) const  { return v.toDouble(); }
+            double operator()(const GraphTransformConfig::AttributeRef&) const { qFatal("Unresolved AttributeRef"); return 0.0; }
         };
 
         return std::visit(Visitor(), _terminalValue);
@@ -90,6 +92,7 @@ public:
             ValueType operator()(double) const          { return ValueType::Float; }
             ValueType operator()(int) const             { return ValueType::Int; }
             ValueType operator()(const QString&) const  { return ValueType::String; }
+            ValueType operator()(const GraphTransformConfig::AttributeRef&) const { qFatal("Unresolved AttributeRef"); return ValueType::Unknown; }
         };
 
         return std::visit(Visitor(), _terminalValue);
@@ -522,12 +525,10 @@ struct ConditionVisitor
 
             ResolvedTerminalValue operator()(double v) const { return v; }
             ResolvedTerminalValue operator()(int v) const { return v; }
-            ResolvedTerminalValue operator()(const QString& v) const
+            ResolvedTerminalValue operator()(const QString& v) const { return v; }
+            ResolvedTerminalValue operator()(const GraphTransformConfig::AttributeRef& v) const
             {
-                if(GraphTransformConfigParser::isAttributeName(v))
-                    return _graphModel->attributeValueByName(v);
-
-                return v;
+                return _graphModel->attributeValueByName(v._name);
             }
         };
 
