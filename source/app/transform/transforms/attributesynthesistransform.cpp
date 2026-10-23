@@ -69,6 +69,7 @@ void AttributeSynthesisTransform::apply(TransformedGraph& target)
         using E = typename std::remove_reference<decltype(elementIds)>::type::value_type;
 
         ElementIdArray<E, QString> newValues(target);
+        ElementIdArray<E, bool> missing(target, true);
         TypeIdentity typeIdentity;
 
         for(auto elementId : elementIds)
@@ -79,6 +80,7 @@ void AttributeSynthesisTransform::apply(TransformedGraph& target)
             if(match.hasMatch())
             {
                 newValues[elementId] = value.replace(regex, attributeValue); // clazy:exclude=use-static-qregularexpression
+                missing.set(elementId, false);
                 typeIdentity.updateType(newValues[elementId]);
             }
         }
@@ -118,6 +120,9 @@ void AttributeSynthesisTransform::apply(TransformedGraph& target)
             break;
         }
         }
+
+        // Elements whose value doesn't match have no value, rather than an empty string or zero
+        attribute.setValueMissingFn([missing](E elementId) { return missing.get(elementId); });
     };
 
     if(sourceAttribute.elementType() == ElementType::Node)
