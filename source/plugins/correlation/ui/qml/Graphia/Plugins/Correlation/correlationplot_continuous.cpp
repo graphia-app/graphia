@@ -433,7 +433,7 @@ void CorrelationPlot::populateMeanHistogramPlot()
 
     if(!_averagingAttributeName.isEmpty())
     {
-        addPlotPerAttributeValue(_pluginInstance, tr("Median histogram of %1: %2"),
+        addPlotPerAttributeValue(_pluginInstance, tr("Mean histogram of %1: %2"),
             _averagingAttributeName, _selectedRows, addMeanBars);
 
         auto* barsGroup = new QCPBarsGroup(&_customPlot);
