@@ -55,6 +55,19 @@ std::unique_ptr<TestGraphModel> createTwoCliquesGraph()
     return std::make_unique<TestGraphModel>(twoCliquesEdges);
 }
 
+// The edges of a clique of n nodes, named prefix0 to prefix(n - 1)
+QStringList cliqueEdges(const QString& prefix, int n)
+{
+    QStringList edges;
+    for(int i = 0; i < n; i++)
+    {
+        for(int j = i + 1; j < n; j++)
+            edges.append(u"%1%2-%1%3"_s.arg(prefix).arg(i).arg(j));
+    }
+
+    return edges;
+}
+
 const QStringList twoCliquesPartition = {u"a1 a2 a3 a4"_s, u"b1 b2 b3 b4"_s};
 } // namespace
 
@@ -231,6 +244,53 @@ private slots:
         // j's leaves are clustered with it
         QCOMPARE(model.nodeValue(u"MCLCluster"_s, u"l0"_s), model.nodeValue(u"MCLCluster"_s, u"j"_s));
         QCOMPARE(model.nodeValue(u"MCLCluster"_s, u"l6"_s), model.nodeValue(u"MCLCluster"_s, u"j"_s));
+    }
+
+    // The hub's column has so many values after expansion that MCL keeps only the largest, but
+    // they hold too little of the column's mass, so it then recovers more of them
+    void mclRecoveryAfterSelection()
+    {
+        QStringList edges;
+        edges.reserve(2000);
+        for(int i = 0; i < 2000; i++)
+            edges.append(u"h-s%1"_s.arg(i));
+
+        TestGraphModel model(edges);
+        QCOMPARE(model.applyTransforms({u"MCLCluster"_s}), QStringList{});
+
+        QCOMPARE(model.nodePartition(u"MCLCluster"_s).size(), 1);
+        QCOMPARE(model.nodeValue(u"MCLClusterSize"_s, u"h"_s), u"2001"_s);
+    }
+
+    // Nodes that MCL finds attracted to two clusters; each is put in only one of them
+    void mclNodesBetweenClusters_data()
+    {
+        QTest::addColumn<QStringList>("edges");
+        QTest::addColumn<QStringList>("partition");
+
+        QTest::newRow("path")
+            << QStringList{u"a-b"_s, u"b-c"_s, u"c-d"_s, u"d-e"_s}
+            << QStringList{u"a b c d e"_s};
+        QTest::newRow("one edge to each of two cliques")
+            << (cliqueEdges(u"a"_s, 5) + cliqueEdges(u"b"_s, 5) + QStringList{u"a0-m"_s, u"m-b0"_s})
+            << QStringList{u"a0 a1 a2 a3 a4 m"_s, u"b0 b1 b2 b3 b4"_s};
+        QTest::newRow("two edges to each of two cliques")
+            << (cliqueEdges(u"a"_s, 4) + cliqueEdges(u"b"_s, 4) + QStringList{u"a0-m"_s, u"a1-m"_s, u"m-b0"_s, u"m-b1"_s})
+            << QStringList{u"a0 a1 a2 a3 m"_s, u"b0 b1 b2 b3"_s};
+        QTest::newRow("one edge to each of three cliques")
+            << (cliqueEdges(u"a"_s, 4) + cliqueEdges(u"b"_s, 4) + cliqueEdges(u"c"_s, 4) +
+                QStringList{u"a0-m"_s, u"b0-m"_s, u"c0-m"_s})
+            << QStringList{u"a0 a1 a2 a3 m"_s, u"b0 b1 b2 b3"_s, u"c0 c1 c2 c3"_s};
+    }
+
+    void mclNodesBetweenClusters()
+    {
+        QFETCH(const QStringList, edges);
+        QFETCH(const QStringList, partition);
+
+        TestGraphModel model(edges);
+        QCOMPARE(model.applyTransforms({u"MCLCluster"_s}), QStringList{});
+        QCOMPARE(model.nodePartition(u"MCLCluster"_s), partition);
     }
 
     void weightedLouvain()
