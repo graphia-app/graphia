@@ -349,6 +349,11 @@ private slots:
                 u"1-2:0.1"_s, u"1-3:0.8"_s, u"2-3:0.1"_s} <<
             QStringList{u"0-2"_s, u"1-3"_s};
 
+        // 0 has no correlations of its own, only correlations added to the others
+        QTest::newRow("first without correlations") << 1 << static_cast<int>(CorrelationPolarity::Positive) <<
+            QStringList{u"1-2:0.9"_s, u"3-4:0.8"_s} <<
+            QStringList{u"1-2"_s, u"3-4"_s};
+
         // 3 is as strongly correlated with 0 as with 1; whichever order they're added
         // in, which varies as correlations are calculated in parallel, the earlier is kept
         QTest::newRow("tie, earlier first") << 1 << static_cast<int>(CorrelationPolarity::Positive) <<
@@ -722,6 +727,7 @@ private slots:
         QTest::newRow("Interpolation 2") << static_cast<int>(MissingDataType::RowInterpolation) << 3 << 1 << 5.0;
         QTest::newRow("Interpolation right only") << static_cast<int>(MissingDataType::RowInterpolation) << 1 << 2 << 4.0;
         QTest::newRow("Interpolation left only") << static_cast<int>(MissingDataType::RowInterpolation) << 4 << 4 << 7.0;
+        QTest::newRow("Interpolation nothing on the row") << static_cast<int>(MissingDataType::RowInterpolation) << 2 << 6 << 0.0;
     }
 
     void imputeValue()
@@ -739,6 +745,7 @@ private slots:
             {u"c"_s,    u"5"_s,  u"6"_s,  u""_s,   u"1"_s},
             {u"d"_s,    u"7"_s,  u""_s,   u""_s,   u""_s},
             {u"e"_s,    u"3"_s,  u"3"_s,  u"3"_s,  u"3"_s},
+            {u"f"_s,    u""_s,   u""_s,   u""_s,   u""_s},
         };
 
         TabularData tabularData;
@@ -750,8 +757,8 @@ private slots:
             r++;
         }
 
-        // The data is 4 columns by 5 rows
-        const QRect dataRect(1, 1, 4, 5);
+        // The data is 4 columns by 6 rows
+        const QRect dataRect(1, 1, 4, 6);
         QVERIFY(tabularData.valueAt(static_cast<size_t>(column), static_cast<size_t>(row)).isEmpty());
 
         auto actual = CorrelationFileParser::imputeValue(static_cast<MissingDataType>(missingDataType), 9.0,

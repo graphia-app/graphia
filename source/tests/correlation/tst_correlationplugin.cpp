@@ -24,6 +24,7 @@
 #include "app/ui/qml/Graphia/availableattributesmodel.h"
 
 #include "shared/loading/tabulardata.h"
+#include "shared/ui/visualisations/ielementvisual.h"
 #include "shared/utils/json.h"
 
 #include "plugins/correlation/correlationtype.h"
@@ -811,6 +812,16 @@ private slots:
         QCOMPARE(plugin()->property("numContinuousColumns").toInt(), 0);
         QCOMPARE(plugin()->property("numDiscreteColumns").toInt(), 3);
         QCOMPARE(edgeNames(), (QStringList{u"r1-r2"_s, u"r1-r4"_s, u"r2-r4"_s}));
+        QCOMPARE(graphModel()->attributeValueByName(u"DataValue.c"_s).stringValueOf(nodeId(u"r2"_s)), u"y"_s);
+
+        // The table's columns of data are strings
+        auto* model = tableModel();
+        const auto columnNames = model->property("columnNames").toStringList();
+        const auto dataColumn = *std::ranges::find_if(columnNames,
+            [](const auto& name) { return name.startsWith(u"DataValue"_s); });
+        bool isNumerical = true;
+        QMetaObject::invokeMethod(model, "columnIsNumerical", Q_RETURN_ARG(bool, isNumerical), Q_ARG(QString, dataColumn));
+        QVERIFY(!isNumerical);
 
         const auto log = _document->property("log").toString();
         QVERIFY(log.contains(u"Data Frame: [ Column: 1 Row: 1 Width: 3 Height: 4 ]"_s));
@@ -862,6 +873,333 @@ private slots:
 
         QCOMPARE(dataColumnNames.size(), 4);
         QCOMPARE(dataColumnNames.removeDuplicates(), 0);
+    }
+
+    // The data rectangle given as a map, as it is in headless mode
+    void dataRectAsMap_data()
+    {
+        QTest::addColumn<QVariantMap>("dataRect");
+        QTest::addColumn<int>("numNodes");
+        QTest::addColumn<int>("numColumns");
+        QTest::addColumn<QString>("log");
+
+        QTest::newRow("position and size") <<
+            QVariantMap{{u"x"_s, 2}, {u"y"_s, 2}, {u"width"_s, 6}, {u"height"_s, 5}} << 5 << 6 <<
+            u"Data Frame: [ Column: 2 Row: 2 Width: 6 Height: 5 ]"_s;
+        QTest::newRow("edges") <<
+            QVariantMap{{u"left"_s, 2}, {u"top"_s, 2}, {u"right"_s, 4}, {u"bottom"_s, 6}} << 5 << 3 <<
+            u"Data Frame: [ Column: 2 Row: 2 Width: 3 Height: 5 ]"_s;
+        QTest::newRow("fewer rows") <<
+            QVariantMap{{u"x"_s, 2}, {u"y"_s, 2}, {u"width"_s, 6}, {u"height"_s, 3}} << 3 << 6 <<
+            u"Data Frame: [ Column: 2 Row: 2 Width: 6 Height: 3 ]"_s;
+    }
+
+    void dataRectAsMap()
+    {
+        QFETCH(const QVariantMap, dataRect);
+        QFETCH(const int, numNodes);
+        QFETCH(const int, numColumns);
+        QFETCH(const QString, log);
+
+        QVERIFY(open({{u"dataRect"_s, dataRect}}));
+
+        // Before the default transforms remove the rows that don't correlate
+        QCOMPARE(static_cast<int>(graphModel()->mutableGraph().numNodes()), numNodes);
+        QCOMPARE(plugin()->property("numContinuousColumns").toInt(), numColumns);
+        QVERIFY2(_document->property("log").toString().contains(log), qPrintable(_document->property("log").toString()));
+    }
+
+    // As it is from the import dialog
+    void dataRectAsRect()
+    {
+        QVERIFY(open({{u"dataRect"_s, QRect(2, 2, 4, 5)}}));
+        QCOMPARE(plugin()->property("numContinuousColumns").toInt(), 4);
+    }
+
+    // The node attributes the plot can group or scale its rows by
+    void attributeNameLists()
+    {
+        QVERIFY(open());
+
+        const auto sharedValues = plugin()->property("sharedValuesAttributeNames").toStringList();
+        QVERIFY(sharedValues.contains(u"Group"_s));
+        QVERIFY(!sharedValues.contains(u"DataValue"_s));
+
+        const auto numerical = plugin()->property("numericalAttributeNames").toStringList();
+        QVERIFY(numerical.contains(u"MeanDataValue"_s));
+        QVERIFY(!numerical.contains(u"Group"_s));
+        QVERIFY(!numerical.contains(u"DataValue"_s));
+    }
+
+    // The data needs a column of row names and a row of column names before it
+    void dataRectWithoutNames_data()
+    {
+        QTest::addColumn<QVariantMap>("dataRect");
+
+        QTest::newRow("no row names") << QVariantMap{{u"x"_s, 0}, {u"y"_s, 2}, {u"width"_s, 8}, {u"height"_s, 5}};
+        QTest::newRow("no column names") << QVariantMap{{u"x"_s, 2}, {u"y"_s, 0}, {u"width"_s, 6}, {u"height"_s, 7}};
+    }
+
+    void dataRectWithoutNames()
+    {
+        QFETCH(const QVariantMap, dataRect);
+        QVERIFY(!open({{u"dataRect"_s, dataRect}}));
+    }
+
+    // Discrete values treated as binary are either present or absent, whatever they are
+    void treatAsBinary_data()
+    {
+        QTest::addColumn<bool>("treatAsBinary");
+        QTest::addColumn<QStringList>("edges");
+
+        // r1 and r2 have values in the same columns, but different values
+        QTest::newRow("values") << false << QStringList{};
+        QTest::newRow("binary") << true << QStringList{u"r1-r2"_s};
+    }
+
+    void treatAsBinary()
+    {
+        QFETCH(const bool, treatAsBinary);
+        QFETCH(const QStringList, edges);
+
+        QVERIFY(open(write(u"binary.csv"_s,
+            "Name,a,b,c,d\n"
+            "r1,x,y,,\n"
+            "r2,z,w,,\n"
+            "r3,,,x,y\n"), u"CorrelationCSV"_s, u"Correlation"_s,
+        {
+            {u"correlationDataType"_s, u"Discrete"_s},
+            {u"discreteCorrelationType"_s, u"Jaccard"_s},
+            {u"treatAsBinary"_s, treatAsBinary},
+            {u"minimumThreshold"_s, 0.5},
+            {u"initialThreshold"_s, 0.5},
+        }));
+
+        QCOMPARE(edgeNames(), edges);
+    }
+
+    // Rows highlighted in the plugin's table or plot are highlighted in the graph
+    void highlightedRows()
+    {
+        QVERIFY(open());
+
+        // Highlighting only affects nodes that are selected
+        QVERIFY(execute([this] { _document->selectAll(); }));
+
+        auto unhighlighted = [this](const QString& name)
+        {
+            return graphModel()->nodeVisual(nodeId(name)).state().test(VisualFlags::Unhighlighted);
+        };
+
+        const QSignalSpy highlightedRowsChanged(plugin(), SIGNAL(highlightedRowsChanged()));
+
+        // r1 and r3
+        QMetaObject::invokeMethod(plugin(), "setHighlightedRows", Q_ARG(QList<int>, (QList<int>{0, 2})));
+        QCOMPARE(highlightedRowsChanged.count(), 1);
+        QVERIFY(QTest::qWaitFor([&] { return unhighlighted(u"r2"_s); }, Timeout));
+        QVERIFY(!unhighlighted(u"r1"_s));
+        QVERIFY(!unhighlighted(u"r3"_s));
+        QVERIFY(unhighlighted(u"r4"_s));
+
+        QMetaObject::invokeMethod(plugin(), "setHighlightedRows", Q_ARG(QList<int>, {}));
+        QCOMPARE(highlightedRowsChanged.count(), 2);
+        QVERIFY(QTest::qWaitFor([&] { return !unhighlighted(u"r2"_s); }, Timeout));
+
+        // Clearing what's already clear does nothing
+        QMetaObject::invokeMethod(plugin(), "setHighlightedRows", Q_ARG(QList<int>, {}));
+        QCOMPARE(highlightedRowsChanged.count(), 2);
+    }
+
+    // The table shows which nodes are selected
+    void tableSelection()
+    {
+        QVERIFY(open());
+
+        auto* model = tableModel();
+        const auto role = model->roleNames().key("nodeSelected");
+        auto selected = [&](int row) { return model->data(model->index(row, 0), role).toBool(); };
+
+        QVERIFY(!selected(0));
+
+        QVERIFY(execute([this] { _document->selectAll(); }));
+        QVERIFY(QTest::qWaitFor([&] { return selected(0) && selected(4); }, Timeout));
+
+        QVERIFY(execute([this] { _document->selectNone(); }));
+        QVERIFY(QTest::qWaitFor([&] { return !selected(0) && !selected(4); }, Timeout));
+    }
+
+    // The table's columns of data are numbers when the data is continuous, and hidden by default
+    void tableDataColumns()
+    {
+        QVERIFY(open());
+
+        auto* model = tableModel();
+        auto is = [&](const char* method, const QString& columnName)
+        {
+            bool result = false;
+            QMetaObject::invokeMethod(model, method, Q_RETURN_ARG(bool, result), Q_ARG(QString, columnName));
+            return result;
+        };
+
+        const auto columnNames = model->property("columnNames").toStringList();
+        const auto dataColumn = *std::ranges::find_if(columnNames,
+            [](const auto& name) { return name.startsWith(u"DataValue"_s); });
+
+        QVERIFY(!is("columnIsCalculated", dataColumn));
+        QVERIFY(is("columnIsHiddenByDefault", dataColumn));
+        QVERIFY(is("columnIsFloatingPoint", dataColumn));
+        QVERIFY(is("columnIsNumerical", dataColumn));
+
+        // Columns that aren't data are as they are in any table
+        QVERIFY(is("columnIsCalculated", u"MeanDataValue"_s));
+        QVERIFY(!is("columnIsHiddenByDefault", u"Group"_s));
+        QVERIFY(!is("columnIsNumerical", u"Group"_s));
+    }
+
+    // The column order hierarchical clustering finds is saved, so it needn't be found again
+    void hierarchicalClusteringSaveAndLoad()
+    {
+        QVERIFY(open());
+
+        QSignalSpy complete(plugin(), SIGNAL(hierarchicalClusteringComplete()));
+        QVERIFY(execute([this] { QMetaObject::invokeMethod(plugin(), "computeHierarchicalClustering"); }));
+        QVERIFY(QTest::qWaitFor([&] { return !complete.isEmpty(); }, Timeout));
+
+        auto content = saved();
+        QVERIFY(content.is_array() && content.size() == 2);
+
+        const auto& hcOrdering = content[1]["pluginData"]["hcOrdering"];
+        QCOMPARE(hcOrdering.size(), 6u);
+
+        QVERIFY(openNative(content));
+
+        // Already known, so complete at once
+        const QSignalSpy completeAfterLoading(plugin(), SIGNAL(hierarchicalClusteringComplete()));
+        QMetaObject::invokeMethod(plugin(), "computeHierarchicalClustering");
+        QCOMPARE(completeAfterLoading.count(), 1);
+        QVERIFY(!_document->busy());
+
+        QCOMPARE(saved()[1]["pluginData"]["hcOrdering"].dump(), hcOrdering.dump());
+    }
+
+    // Plugin data that's malformed in other ways fails to load
+    void malformedPluginData_data()
+    {
+        QTest::addColumn<QString>("malformation");
+
+        QTest::newRow("not an object") << u"not an object"_s;
+        QTest::newRow("userColumnData not an object") << u"userColumnData"_s;
+        QTest::newRow("partial discrete row") << u"discreteData"_s;
+    }
+
+    void malformedPluginData()
+    {
+        QFETCH(const QString, malformation);
+
+        if(malformation == u"discreteData"_s)
+        {
+            QVERIFY(open(write(u"words.csv"_s, "Name,a,b,c\nr1,x,y,z\nr2,x,y,y\nr3,x,y,z\n"),
+                u"CorrelationCSV"_s, u"Correlation"_s, {{u"correlationDataType"_s, u"Discrete"_s}}));
+        }
+        else
+            QVERIFY(open());
+
+        auto content = saved();
+        QVERIFY(content.is_array() && content.size() == 2);
+
+        auto& pluginData = content[1]["pluginData"];
+
+        if(malformation == u"not an object"_s)
+            pluginData = "not an object";
+        else if(malformation == u"userColumnData"_s)
+            pluginData["userColumnData"] = 1;
+        else
+            pluginData["discreteData"].erase(0);
+
+        QVERIFY(!openNative(content));
+    }
+
+    // What the import dialog shows of each type of correlation
+    void correlationInfo_data()
+    {
+        QTest::addColumn<int>("type");
+        QTest::addColumn<QString>("name");
+        QTest::addColumn<QString>("attributeName");
+
+        QTest::newRow("Pearson") << static_cast<int>(CorrelationType::Pearson) <<
+            u"Pearson"_s << u"PearsonCorrelationValue"_s;
+        QTest::newRow("Spearman") << static_cast<int>(CorrelationType::SpearmanRank) <<
+            u"Spearman Rank"_s << u"SpearmanRankCorrelationValue"_s;
+        QTest::newRow("Euclidean") << static_cast<int>(CorrelationType::EuclideanSimilarity) <<
+            u"Euclidean Similarity"_s << u"EuclideanSimilarity"_s;
+        QTest::newRow("Cosine") << static_cast<int>(CorrelationType::CosineSimilarity) <<
+            u"Cosine Similarity"_s << u"CosineSimilarity"_s;
+        QTest::newRow("Bicor") << static_cast<int>(CorrelationType::Bicor) <<
+            u"Bicor"_s << u"BicorCorrelationValue"_s;
+        QTest::newRow("Jaccard") << static_cast<int>(CorrelationType::Jaccard) <<
+            u"Jaccard"_s << u"JaccardCorrelationValue"_s;
+        QTest::newRow("SMC") << static_cast<int>(CorrelationType::SMC) <<
+            u"Simple Matching Coefficient"_s << u"SimpleMatchingCoefficient"_s;
+    }
+
+    void correlationInfo()
+    {
+        QFETCH(const int, type);
+        QFETCH(const QString, name);
+        QFETCH(const QString, attributeName);
+
+        auto* correlationPlugin = _application->qmlPluginForName(u"Correlation"_s);
+        QVERIFY(correlationPlugin != nullptr);
+
+        QVariantMap info;
+        QVERIFY(QMetaObject::invokeMethod(correlationPlugin, "correlationInfoFor",
+            Q_RETURN_ARG(QVariantMap, info), Q_ARG(int, type)));
+
+        QCOMPARE(info.value(u"name"_s).toString(), name);
+        QVERIFY(!info.value(u"description"_s).toString().isEmpty());
+        QCOMPARE(info.value(u"attributeName"_s).toString(), attributeName);
+        QVERIFY(!info.value(u"attributeDescription"_s).toString().isEmpty());
+    }
+
+    // Why a file the plugin might load can't be
+    void failureReasons()
+    {
+        // A file with no delimiters in it, so of no recognisable type
+        const auto reasons = _application->failureReasons(write(u"undelimited.csv"_s, "just some words\n"));
+        QVERIFY2(std::ranges::any_of(reasons, [](const auto& reason)
+            { return reason.contains(u"its content could not be determined"_s); }), qPrintable(reasons.join(u'\n')));
+    }
+
+    // A file the parser for its type can't read fails to load
+    void unreadableFile()
+    {
+        QVERIFY(!open(write(u"notxlsx.xlsx"_s, "not a spreadsheet"), u"CorrelationXLSX"_s, u"Correlation"_s));
+    }
+
+    // The log describes how the data was processed
+    void preprocessingLog_data()
+    {
+        QTest::addColumn<QVariantMap>("parameters");
+        QTest::addColumn<QString>("log");
+
+        QTest::newRow("Winsorization") <<
+            QVariantMap{{u"clippingType"_s, u"Winsorization"_s}, {u"clippingValue"_s, 90.0}} <<
+            u"Clipping: Winsorization (90 percentile)"_s;
+        QTest::newRow("Log10") << QVariantMap{{u"scaling"_s, u"Log10"_s}} << u"Scaling: Log10(x + ε)"_s;
+        QTest::newRow("AntiLog2") << QVariantMap{{u"scaling"_s, u"AntiLog2"_s}} << u"Scaling: AntiLog2(x)"_s;
+        QTest::newRow("AntiLog10") << QVariantMap{{u"scaling"_s, u"AntiLog10"_s}} << u"Scaling: AntiLog10(x)"_s;
+        QTest::newRow("Mean") << QVariantMap{{u"normalise"_s, u"Mean"_s}} << u"Normalisation: Mean"_s;
+        QTest::newRow("Quantile") << QVariantMap{{u"normalise"_s, u"Quantile"_s}} << u"Normalisation: Quantile"_s;
+        QTest::newRow("Softmax") << QVariantMap{{u"normalise"_s, u"Softmax"_s}} << u"Normalisation: Softmax Scaling"_s;
+    }
+
+    void preprocessingLog()
+    {
+        QFETCH(const QVariantMap, parameters);
+        QFETCH(const QString, log);
+
+        QVERIFY(open(parameters));
+        QVERIFY2(_document->property("log").toString().contains(log), qPrintable(_document->property("log").toString()));
     }
 
     // The dialog for opening a correlation file finds the data and estimates the size of the graph
@@ -1022,6 +1360,120 @@ private slots:
         QVERIFY(parser->property("failed").toBool());
     }
 
+    // Estimates for missing values are made with them imputed
+    void importParserMissingValues()
+    {
+        auto parser = parse(write(u"missing.csv"_s,
+            "Name,c1,c2,c3,c4\n"
+            "r1,1,2,3,4\n"
+            "r2,2,,6,8\n"
+            "r3,4,3,2,1\n"));
+        QVERIFY(parser != nullptr);
+        const auto detected = dataRect(parser.get(), "autoDetectDataRectangle");
+        QCOMPARE(rect(detected), QRect(1, 1, 4, 3));
+        QVERIFY(detected.value(u"hasMissingValues"_s).toBool());
+
+        // Interpolated, r2's c2 is 4, making it r1 doubled
+        const auto estimate = estimateGraphSize(parser.get(),
+        {
+            {u"minimumThreshold"_s, 0.9},
+            {u"correlationFilterType"_s, static_cast<int>(CorrelationFilterType::Threshold)},
+            {u"correlationDataType"_s, static_cast<int>(CorrelationDataType::Continuous)},
+            {u"continuousCorrelationType"_s, static_cast<int>(CorrelationType::Pearson)},
+            {u"missingDataType"_s, static_cast<int>(MissingDataType::RowInterpolation)},
+        });
+
+        const auto keys = estimate.value(u"keys"_s).value<QVector<double>>();
+        QCOMPARE(keys.size(), 1);
+        QVERIFY(qFuzzyCompare(keys.at(0), 1.0));
+        QCOMPARE(estimate.value(u"numUniqueEdges"_s).value<QVector<double>>(), QVector<double>{1.0});
+    }
+
+    // An estimate asked for while another is being made is made after it
+    void importParserQueuedEstimate()
+    {
+        auto parser = parse(write(u"data.csv"_s, Csv));
+        QVERIFY(parser != nullptr);
+        QCOMPARE(rect(dataRect(parser.get(), "autoDetectDataRectangle")), QRect(2, 2, 6, 5));
+
+        QSignalSpy estimateChanged(parser.get(), SIGNAL(graphSizeEstimateChanged()));
+
+        QMetaObject::invokeMethod(parser.get(), "estimateGraphSize", Q_ARG(QVariantMap, (QVariantMap
+        {
+            {u"minimumThreshold"_s, 0.7},
+            {u"correlationFilterType"_s, static_cast<int>(CorrelationFilterType::Threshold)},
+            {u"correlationDataType"_s, static_cast<int>(CorrelationDataType::Continuous)},
+            {u"continuousCorrelationType"_s, static_cast<int>(CorrelationType::Pearson)},
+        })));
+
+        QMetaObject::invokeMethod(parser.get(), "estimateGraphSize", Q_ARG(QVariantMap, (QVariantMap
+        {
+            {u"maximumK"_s, 2},
+            {u"correlationFilterType"_s, static_cast<int>(CorrelationFilterType::Knn)},
+            {u"correlationDataType"_s, static_cast<int>(CorrelationDataType::Continuous)},
+            {u"continuousCorrelationType"_s, static_cast<int>(CorrelationType::Pearson)},
+        })));
+
+        QVERIFY(QTest::qWaitFor([&] { return estimateChanged.count() == 2 &&
+            !parser->property("graphSizeEstimateInProgress").toBool(); }, Timeout));
+
+        // The last estimate asked for is the one given
+        QCOMPARE(parser->property("graphSizeEstimate").toMap().value(u"keys"_s).value<QVector<double>>(),
+            (QVector<double>{2.0, 1.0}));
+    }
+
+    // Once the dialog's data is cleared, there's nothing to estimate
+    void importParserClearData()
+    {
+        auto parser = parse(write(u"data.csv"_s, Csv));
+        QVERIFY(parser != nullptr);
+        QCOMPARE(rect(dataRect(parser.get(), "autoDetectDataRectangle")), QRect(2, 2, 6, 5));
+
+        QMetaObject::invokeMethod(parser.get(), "clearData");
+
+        const auto estimate = estimateGraphSize(parser.get(),
+        {
+            {u"minimumThreshold"_s, 0.7},
+            {u"correlationFilterType"_s, static_cast<int>(CorrelationFilterType::Threshold)},
+            {u"correlationDataType"_s, static_cast<int>(CorrelationDataType::Continuous)},
+            {u"continuousCorrelationType"_s, static_cast<int>(CorrelationType::Pearson)},
+        });
+
+        QVERIFY(estimate.isEmpty());
+    }
+
+    // A parse that's cancelled fails, without waiting for the file to be read
+    void importParserCancel()
+    {
+        QByteArray content = "Name";
+        content.reserve(qsizetype{20000} * 400);
+        for(int column = 0; column < 100; column++)
+            content += ",c" + QByteArray::number(column);
+        content += "\n";
+
+        for(int row = 0; row < 20000; row++)
+        {
+            content += "r" + QByteArray::number(row);
+            for(int column = 0; column < 100; column++)
+                content += "," + QByteArray::number((row * column) % 97);
+            content += "\n";
+        }
+
+        auto parser = createQmlObject(u"CorrelationTabularDataParser"_s);
+        QVERIFY(parser != nullptr);
+
+        QSignalSpy complete(parser.get(), SIGNAL(completeChanged()));
+        QMetaObject::invokeMethod(parser.get(), "parse",
+            Q_ARG(QUrl, write(u"large.csv"_s, content)), Q_ARG(QString, u"CorrelationCSV"_s));
+
+        // Once it's part way through reading
+        QVERIFY(QTest::qWaitFor([&] { return parser->property("progress").toInt() > 0; }, Timeout));
+        QMetaObject::invokeMethod(parser.get(), "cancelParse");
+
+        QVERIFY(QTest::qWaitFor([&] { return !complete.isEmpty() && !parser->property("busy").toBool(); }, Timeout));
+        QVERIFY(parser->property("failed").toBool());
+    }
+
     // Finding the row of a table of annotations that names the data's columns
     void importAnnotationsKeyDetection_data()
     {
@@ -1085,6 +1537,10 @@ private slots:
         const auto result = keyDetection->property("result").toMap();
         QCOMPARE(result.value(u"row"_s).toInt(), row);
         QCOMPARE(result.value(u"percent"_s).toInt(), percent);
+
+        // As when the dialog is closed
+        QMetaObject::invokeMethod(keyDetection.get(), "reset");
+        QVERIFY(keyDetection->property("result").toMap().isEmpty());
     }
 };
 
