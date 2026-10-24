@@ -55,7 +55,7 @@ static QString updateFilePath()
     return u"%1/update.json"_s.arg(updatesLocation());
 }
 
-json updateStringToJson(const QString& updateString, QString* status)
+json updateStringToJson(const QString& updateString, QString* status, const std::string& publicKeyFileName)
 {
     auto updateStringStdString = updateString.toStdString();
     auto updateObject = json::parse(updateStringStdString.begin(), updateStringStdString.end(),
@@ -74,7 +74,7 @@ json updateStringToJson(const QString& updateString, QString* status)
     auto hexSignature = updateObject["signature"].get<std::string>();
     auto signature = u::hexToString(hexSignature);
 
-    if(!u::rsaVerifySignature(updatesString, signature, ":/update_keys/public_update_key.der"))
+    if(!u::rsaVerifySignature(updatesString, signature, publicKeyFileName))
         return {};
 
     auto decodedUpdatesString = u::isHex(updatesString) ? u::hexToString(updatesString) : updatesString;

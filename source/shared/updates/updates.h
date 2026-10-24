@@ -24,8 +24,12 @@
 
 #include <QString>
 
+#include <string>
+
 QString updatesLocation();
-json updateStringToJson(const QString& updateString, QString* status = nullptr);
+// The update manifest's signature is checked with the key Graphia is built with, unless another is given
+json updateStringToJson(const QString& updateString, QString* status = nullptr,
+    const std::string& publicKeyFileName = ":/update_keys/public_update_key.der");
 
 QString fullyQualifiedInstallerFileName(const json& update);
 json latestUpdateJson(QString* status = nullptr);
