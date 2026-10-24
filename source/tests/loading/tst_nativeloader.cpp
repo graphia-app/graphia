@@ -451,6 +451,33 @@ private slots:
         QCOMPARE(model->parser<Loader>()->nodePositions()->get(model->nodeId(u"b"_s)), PositionOfB);
     }
 
+    // Before version 6 the user data was stored in the plugin data, but some was sometimes in
+    // the body too; the two are merged, matching values by element id
+    void legacyUserDataInBodyAndPluginData()
+    {
+        const int version = 5;
+        auto content = body(version);
+        content["userNodeData"] = {{"ids", {2, 0}}, {"vectors", json::array({{{"Score", {{"values", {"30", "10"}}}}}})}};
+        content["userEdgeData"] = {{"ids", {1}}, {"vectors", json::array({{{"Label", {{"values", {"bc"}}}}}})}};
+
+        TestPluginInstance pluginInstance(&_plugin);
+        QString failureReason;
+        auto model = load(nativeFile(header(version), content), pluginInstance, &failureReason);
+        QVERIFY2(model != nullptr, qPrintable(failureReason));
+
+        // From the plugin data
+        QCOMPARE(model->nodeValue(u"Type"_s, u"a"_s), u"x"_s);
+        QCOMPARE(model->nodeValue(u"Type"_s, u"c"_s), u"z"_s);
+        QCOMPARE(model->edgeNumericValue(u"Weight"_s, u"a"_s, u"b"_s), 0.5);
+
+        // From the body
+        QCOMPARE(model->nodeNumericValue(u"Score"_s, u"a"_s), 10.0);
+        QCOMPARE(model->nodeNumericValue(u"Score"_s, u"c"_s), 30.0);
+        QVERIFY(!model->nodeHasValue(u"Score"_s, u"b"_s));
+        QCOMPARE(model->edgeValue(u"Label"_s, u"b"_s, u"c"_s), u"bc"_s);
+        QCOMPARE(model->edgeValue(u"Label"_s, u"a"_s, u"b"_s), QString());
+    }
+
     // In older files, a backslash in a string only escaped a quote, so other backslashes
     // are escaped when they're upgraded, to keep their meaning
     void legacyBackslashes()
