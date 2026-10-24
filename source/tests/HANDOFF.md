@@ -228,7 +228,7 @@ testing, which may come later as an extra safety net.
 | `tst_visualisations` | building visualisations on a graph and the resulting visuals: gradients, palettes, inversion, mappings, sizes, text |
 | `tst_selectionmanager` | selecting, deselecting, toggling, inverting, masks, merged nodes, removed nodes, signals |
 | `tst_geometry` | bounding boxes and spheres, including ray intersection, rays, lines, planes, frustums, circles |
-| `tst_layout` | node positions, layout settings, the simple, fast initial and force directed layouts, Barnes-Hut trees against exact forces, component layouts |
+| `tst_layout` | node positions, layout settings, the simple, fast initial and force directed layouts, Barnes-Hut trees against exact forces, component layouts, picking nodes with a ray |
 | `tst_genericplugin` | which file types files are identified as, the default transforms and visualisations of the generic plugin |
 | `tst_layoutthread` | the layout thread, driven as `Document` drives it: running to completion, 2D, pausing, components added and removed, settings |
 | `tst_nodeattributetablemodel` | the table of node attributes in plugins' panels: columns, values, removed nodes, selection, attributes added, removed and edited, related rows; the display model the table view shows: rows, hidden and ordered columns, sorting, row order, rows selected in the table |

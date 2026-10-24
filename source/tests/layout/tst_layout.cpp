@@ -23,6 +23,7 @@
 #include "app/layout/barneshuttree.h"
 #include "app/layout/centreinglayout.h"
 #include "app/layout/circlepackcomponentlayout.h"
+#include "app/layout/collision.h"
 #include "app/layout/fastinitiallayout.h"
 #include "app/layout/forcedirectedlayout.h"
 #include "app/layout/layoutsettings.h"
@@ -32,6 +33,8 @@
 #include "app/layout/scalinglayout.h"
 
 #include "app/graph/graph.h"
+#include "app/graph/graphmodel.h"
+#include "app/ui/selectionmanager.h"
 
 #include <QTest>
 #include <QSignalSpy>
@@ -40,6 +43,7 @@
 #include <QVector3D>
 
 #include <cmath>
+#include <map>
 #include <memory>
 #include <numeric>
 #include <utility>
@@ -585,6 +589,118 @@ private slots:
                     .arg(i).arg(j).arg(-a.distanceTo(b))));
             }
         }
+    }
+
+    // Picking nodes with a ray from the origin looking along -z: a is on the ray, b is a little to the
+    // side of it and nearer the origin, and c is on the ray but behind the origin
+    void collision_data()
+    {
+        QTest::addColumn<float>("bOffset");
+        QTest::addColumn<float>("radius");
+        QTest::addColumn<QStringList>("inside");
+        QTest::addColumn<QString>("nearest");
+
+        // Offsets and radii are in multiples of the size of a node
+        QTest::newRow("b touches the ray") << 0.5F << 0.0F << QStringList{u"a"_s, u"b"_s} << u"b"_s;
+        QTest::newRow("b misses the ray") << 2.0F << 0.0F << QStringList{u"a"_s} << u"a"_s;
+        QTest::newRow("b inside the cylinder") << 3.0F << 2.5F << QStringList{u"a"_s, u"b"_s} << u"b"_s;
+        QTest::newRow("b outside the cylinder") << 3.0F << 1.5F << QStringList{u"a"_s} << u"a"_s;
+    }
+
+    void collision()
+    {
+        QFETCH(const float, bOffset);
+        QFETCH(const float, radius);
+        QFETCH(const QStringList, inside);
+        QFETCH(const QString, nearest);
+
+        TestGraphModel model({u"a-b"_s, u"b-c"_s});
+        model.applyTransforms({});
+        auto& graphModel = model.graphModel();
+        graphModel.enableVisualUpdates();
+        graphModel.buildVisualisations({});
+        graphModel.applyPendingVisualUpdates();
+
+        const auto size = graphModel.nodeVisual(model.nodeId(u"a"_s))._size;
+        QVERIFY(size > 0.0F);
+
+        setPositions(model, {{u"a"_s, {0.0F, 0.0F, -10.0F}}, {u"b"_s, {bOffset * size, 0.0F, -5.0F}},
+            {u"c"_s, {0.0F, 0.0F, 5.0F}}});
+
+        const QVector3D origin;
+        const QVector3D direction(0.0F, 0.0F, -1.0F);
+        Collision collision(graphModel, model.graph().componentIdOfNode(model.nodeId(u"a"_s)));
+
+        std::vector<NodeId> nodeIds;
+        collision.nodesInsideCylinder(origin, direction, radius * size, nodeIds);
+        QCOMPARE(namesOf(model, nodeIds), inside);
+        QCOMPARE(model.graphModel().nodeName(collision.nearestNodeInsideCylinder(origin, direction, radius * size)), nearest);
+
+        // A cylinder with no radius is a line
+        if(radius <= 0.0F)
+        {
+            nodeIds.clear();
+            collision.nodesIntersectingLine(origin, direction, nodeIds);
+            QCOMPARE(namesOf(model, nodeIds), inside);
+            QCOMPARE(model.graphModel().nodeName(collision.nearestNodeIntersectingLine(origin, direction)), nearest);
+        }
+
+        // a is the closest to the line; c is closer to it, but behind the origin
+        QCOMPARE(model.graphModel().nodeName(collision.nodeClosestToLine(origin, direction)), u"a"_s);
+    }
+
+    // Nodes left unhighlighted, when others are highlighted, can't be picked unless asked for
+    void collisionIgnoresUnhighlightedNodes()
+    {
+        TestGraphModel model({u"a-b"_s, u"b-c"_s});
+        model.applyTransforms({});
+        auto& graphModel = model.graphModel();
+        graphModel.enableVisualUpdates();
+        graphModel.buildVisualisations({});
+
+        // Highlighting only affects selected nodes
+        SelectionManager selectionManager(graphModel);
+        selectionManager.selectNodes(NodeIdSet{model.nodeId(u"a"_s), model.nodeId(u"b"_s), model.nodeId(u"c"_s)});
+        graphModel.onSelectionChanged(&selectionManager);
+        graphModel.highlightNodes({model.nodeId(u"a"_s)});
+        graphModel.applyPendingVisualUpdates();
+
+        QVERIFY(graphModel.nodeVisual(model.nodeId(u"b"_s)).state().test(VisualFlags::Unhighlighted));
+        QVERIFY(!graphModel.nodeVisual(model.nodeId(u"a"_s)).state().test(VisualFlags::Unhighlighted));
+
+        setPositions(model, {{u"a"_s, {0.0F, 0.0F, -10.0F}}, {u"b"_s, {0.0F, 0.0F, -5.0F}},
+            {u"c"_s, {0.0F, 0.0F, 5.0F}}});
+
+        const QVector3D origin;
+        const QVector3D direction(0.0F, 0.0F, -1.0F);
+        auto componentId = model.graph().componentIdOfNode(model.nodeId(u"a"_s));
+
+        Collision collision(graphModel, componentId);
+        QCOMPARE(graphModel.nodeName(collision.nearestNodeIntersectingLine(origin, direction)), u"a"_s);
+
+        Collision includingNotFound(graphModel, componentId, true);
+        QCOMPARE(graphModel.nodeName(includingNotFound.nearestNodeIntersectingLine(origin, direction)), u"b"_s);
+    }
+
+private:
+    static void setPositions(TestGraphModel& model, const std::map<QString, QVector3D>& positions)
+    {
+        NodeLayoutPositions nodePositions(model.graphModel().mutableGraph());
+        for(const auto& [name, position] : positions)
+            nodePositions.set(model.nodeId(name), position);
+
+        model.graphModel().nodePositions().update(nodePositions);
+    }
+
+    static QStringList namesOf(TestGraphModel& model, const std::vector<NodeId>& nodeIds)
+    {
+        QStringList names;
+        names.reserve(static_cast<qsizetype>(nodeIds.size()));
+        for(auto nodeId : nodeIds)
+            names.append(model.graphModel().nodeName(nodeId));
+
+        names.sort();
+        return names;
     }
 };
 
