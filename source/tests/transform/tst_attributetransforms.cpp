@@ -376,6 +376,169 @@ private slots:
         QCOMPARE(model->nodeValue(u"Score"_s, u"c"_s), u"10"_s);
         QCOMPARE(model->nodeValue(u"Score"_s, u"d"_s), u"20"_s);
     }
+
+    void forwardEdgeAttribute()
+    {
+        // Contracting a-b makes a-c and b-c parallel, so they're merged into one edge
+        auto model = std::make_unique<TestGraphModel>(QStringList{u"a-b"_s, u"a-c"_s, u"b-c"_s});
+        model->addEdgeAttribute<int>(u"Weight"_s, {{{u"a"_s, u"b"_s}, 1}, {{u"a"_s, u"c"_s}, 5}, {{u"b"_s, u"c"_s}, 7}});
+
+        QCOMPARE(model->applyTransforms(
+        {
+            u"ContractEdges where $Weight == 1"_s,
+            u"ForwardAttribute using $Weight"_s
+        }), QStringList{});
+
+        auto acWeight = model->edgeValue(u"Weight"_s, u"a"_s, u"c"_s);
+        QCOMPARE(model->edgeValue(u"Weight"_s, u"b"_s, u"c"_s), acWeight);
+        QVERIFY(acWeight == u"5"_s || acWeight == u"7"_s);
+    }
+
+    void booleanNodeAttribute()
+    {
+        auto model = createPathGraph();
+        QCOMPARE(model->applyTransforms({uR"(BooleanNodeAttribute with Name = "High" where $Score > 2)"_s}), QStringList{});
+
+        QCOMPARE(model->nodeValue(u"High"_s, u"a"_s), u"False"_s);
+        QCOMPARE(model->nodeValue(u"High"_s, u"b"_s), u"True"_s);
+        QCOMPARE(model->nodeValue(u"High"_s, u"c"_s), u"True"_s);
+        QCOMPARE(model->nodeValue(u"High"_s, u"d"_s), u"True"_s);
+
+        QCOMPARE(model->graphModel().attributeValueByName(u"High"_s).elementType(), ElementType::Node);
+    }
+
+    // Each of the transforms that make attributes, applied to edge attributes
+    void edgeAttributes_data()
+    {
+        QTest::addColumn<QString>("transform");
+        QTest::addColumn<QString>("attributeName");
+        QTest::addColumn<QStringList>("expected");
+
+        QTest::newRow("boolean")
+            << uR"(BooleanEdgeAttribute with Name = "Heavy" where $Weight > 1)"_s
+            << u"Heavy"_s << QStringList{u"False"_s, u"True"_s, u"True"_s};
+        QTest::newRow("type cast")
+            << uR"(TypeCast using $Weight with Type = String Name = "Cast")"_s
+            << u"Cast"_s << QStringList{u"1"_s, u"2"_s, u"3"_s};
+        QTest::newRow("average")
+            << u"AverageAttribute using $Kind $Weight"_s
+            << u"MeanWeightOfKind"_s << QStringList{u"1.5"_s, u"1.5"_s, u"3"_s};
+        QTest::newRow("combine")
+            << uR"(CombineAttributes using $Kind $Weight with Name = "Combined")"_s
+            << u"Combined"_s << QStringList{u"x 1"_s, u"x 2"_s, u"y 3"_s};
+        QTest::newRow("synthesis")
+            << uR"(AttributeSynthesis using $Label with Name = "Suffix" RegularExpression = "^e_(.*)$" AttributeValue = "\1")"_s
+            << u"Suffix"_s << QStringList{u"one"_s, u"two"_s, u"three"_s};
+    }
+
+    void edgeAttributes()
+    {
+        QFETCH(const QString, transform);
+        QFETCH(const QString, attributeName);
+        QFETCH(const QStringList, expected);
+
+        auto model = createPathGraph();
+        model->addEdgeAttribute<QString>(u"Kind"_s, {{{u"a"_s, u"b"_s}, u"x"_s}, {{u"b"_s, u"c"_s}, u"x"_s}, {{u"c"_s, u"d"_s}, u"y"_s}});
+        model->addEdgeAttribute<QString>(u"Label"_s,
+            {{{u"a"_s, u"b"_s}, u"e_one"_s}, {{u"b"_s, u"c"_s}, u"e_two"_s}, {{u"c"_s, u"d"_s}, u"e_three"_s}});
+
+        QCOMPARE(model->applyTransforms({transform}), QStringList{});
+        QCOMPARE(model->graphModel().attributeValueByName(attributeName).elementType(), ElementType::Edge);
+
+        QStringList actual;
+        actual.reserve(3);
+        for(const auto& [from, to] : {std::pair{u"a"_s, u"b"_s}, std::pair{u"b"_s, u"c"_s}, std::pair{u"c"_s, u"d"_s}})
+            actual.append(model->edgeValue(attributeName, from, to));
+
+        QCOMPARE(actual, expected);
+    }
+
+    void floatResults_data()
+    {
+        QTest::addColumn<QString>("transform");
+        QTest::addColumn<QString>("attributeName");
+
+        QTest::newRow("synthesis")
+            << uR"(AttributeSynthesis using $Value with Name = "Synthesised" RegularExpression = "(.*)$" AttributeValue = "\1")"_s
+            << u"Synthesised"_s;
+        QTest::newRow("combine")
+            << uR"(CombineAttributes using $Value $Score with Name = "Combined" AttributeValue = "\1")"_s
+            << u"Combined"_s;
+    }
+
+    // When every value made looks like a non-integer number, the attribute is a float attribute
+    void floatResults()
+    {
+        QFETCH(const QString, transform);
+        QFETCH(const QString, attributeName);
+
+        auto model = createPathGraph();
+        QCOMPARE(model->applyTransforms({transform}), QStringList{});
+
+        QCOMPARE(model->graphModel().attributeValueByName(attributeName).valueType(), ValueType::Float);
+        QCOMPARE(model->nodeNumericValue(attributeName, u"a"_s), 1.5);
+        QCOMPARE(model->nodeNumericValue(attributeName, u"c"_s), -3.7);
+    }
+
+    void invalidConfigs_data()
+    {
+        QTest::addColumn<QString>("transform");
+        QTest::addColumn<bool>("valid");
+
+        QTest::newRow("type cast")
+            << uR"(TypeCast using $Value with Type = String Name = "Cast")"_s << true;
+        QTest::newRow("type cast invalid name")
+            << uR"(TypeCast using $Value with Type = String Name = "1 Cast")"_s << false;
+        QTest::newRow("synthesis")
+            << uR"(AttributeSynthesis using $Id with Name = "S" RegularExpression = "(.*)$" AttributeValue = "\1")"_s << true;
+        QTest::newRow("synthesis invalid name")
+            << uR"(AttributeSynthesis using $Id with Name = "S!" RegularExpression = "(.*)$" AttributeValue = "\1")"_s << false;
+        QTest::newRow("synthesis invalid regex")
+            << u"AttributeSynthesis using $Id with Name = \"S\" RegularExpression = \"(.*\" AttributeValue = \"\\1\""_s << false; // NOLINT modernize-raw-string-literal
+        QTest::newRow("combine")
+            << uR"(CombineAttributes using $Group $Score with Name = "C")"_s << true;
+        QTest::newRow("combine one attribute")
+            << uR"(CombineAttributes using $Group with Name = "C")"_s << false;
+        QTest::newRow("combine invalid name")
+            << uR"(CombineAttributes using $Group $Score with Name = "")"_s << false;
+        QTest::newRow("average")
+            << u"AverageAttribute using $Group $Score"_s << true;
+        QTest::newRow("average one attribute")
+            << u"AverageAttribute using $Group"_s << false;
+        QTest::newRow("average node and edge")
+            << u"AverageAttribute using $Group $Weight"_s << false;
+        QTest::newRow("boolean")
+            << uR"(BooleanNodeAttribute with Name = "B" where $Score > 2)"_s << true;
+        QTest::newRow("boolean invalid name")
+            << uR"(BooleanNodeAttribute with Name = "-B" where $Score > 2)"_s << false;
+        QTest::newRow("boolean no condition")
+            << uR"(BooleanNodeAttribute with Name = "B")"_s << false;
+        QTest::newRow("forward")
+            << u"ForwardAttribute using $Score"_s << true;
+        QTest::newRow("forward no attribute")
+            << u"ForwardAttribute"_s << false;
+    }
+
+    // The UI checks configs with graphTransformIsValid; an invalid config that's applied anyway
+    // makes nothing, and says why
+    void invalidConfigs()
+    {
+        QFETCH(const QString, transform);
+        QFETCH(const bool, valid);
+
+        auto model = createPathGraph();
+        QCOMPARE(model->graphModel().graphTransformIsValid(transform), valid);
+
+        if(valid)
+            return;
+
+        const auto attributeNames = model->graphModel().attributeNames();
+        const auto alerts = model->applyTransforms({transform});
+
+        QVERIFY(!alerts.isEmpty());
+
+        QVERIFY(model->graphModel().attributeNames() == attributeNames);
+    }
 };
 
 QTEST_MAIN(TestAttributeTransforms)
