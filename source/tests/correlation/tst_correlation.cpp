@@ -131,6 +131,18 @@ std::unique_ptr<Normaliser> createNormaliser(const QString& name)
     return nullptr;
 }
 
+NormaliseType normaliseTypeFor(const QString& name)
+{
+    if(name == u"MinMax"_s)             return NormaliseType::MinMax;
+    if(name == u"Mean"_s)               return NormaliseType::Mean;
+    if(name == u"Standardisation"_s)    return NormaliseType::Standardisation;
+    if(name == u"UnitScaling"_s)        return NormaliseType::UnitScaling;
+    if(name == u"Quantile"_s)           return NormaliseType::Quantile;
+    if(name == u"Softmax"_s)            return NormaliseType::Softmax;
+
+    return NormaliseType::None;
+}
+
 bool fuzzyEqual(double a, double b)
 {
     return std::abs(a - b) < 1e-6;
@@ -401,23 +413,28 @@ private slots:
     void knnAllNeighbours_data()
     {
         QTest::addColumn<int>("type");
+        QTest::addColumn<bool>("treatAsBinary");
 
-        QTest::newRow("Pearson") << static_cast<int>(CorrelationType::Pearson);
-        QTest::newRow("Spearman") << static_cast<int>(CorrelationType::SpearmanRank);
-        QTest::newRow("Euclidean") << static_cast<int>(CorrelationType::EuclideanSimilarity);
-        QTest::newRow("Cosine") << static_cast<int>(CorrelationType::CosineSimilarity);
-        QTest::newRow("Bicor") << static_cast<int>(CorrelationType::Bicor);
-        QTest::newRow("Jaccard") << static_cast<int>(CorrelationType::Jaccard);
-        QTest::newRow("SMC") << static_cast<int>(CorrelationType::SMC);
+        QTest::newRow("Pearson") << static_cast<int>(CorrelationType::Pearson) << false;
+        QTest::newRow("Spearman") << static_cast<int>(CorrelationType::SpearmanRank) << false;
+        QTest::newRow("Euclidean") << static_cast<int>(CorrelationType::EuclideanSimilarity) << false;
+        QTest::newRow("Cosine") << static_cast<int>(CorrelationType::CosineSimilarity) << false;
+        QTest::newRow("Bicor") << static_cast<int>(CorrelationType::Bicor) << false;
+        QTest::newRow("Jaccard") << static_cast<int>(CorrelationType::Jaccard) << false;
+        QTest::newRow("Jaccard binary") << static_cast<int>(CorrelationType::Jaccard) << true;
+        QTest::newRow("SMC") << static_cast<int>(CorrelationType::SMC) << false;
+        QTest::newRow("SMC binary") << static_cast<int>(CorrelationType::SMC) << true;
     }
 
     void knnAllNeighbours()
     {
         QFETCH(const int, type);
+        QFETCH(const bool, treatAsBinary);
         auto correlationType = static_cast<CorrelationType>(type);
 
         auto parameters = allPairsParameters();
         parameters.insert(u"maximumK"_s, static_cast<int>(continuousRows.size()) - 1);
+        parameters.insert(u"treatAsBinary"_s, treatAsBinary);
 
         auto compare = [&](const auto& threshold, const auto& knn, const auto& vectors)
         {
@@ -428,13 +445,15 @@ private slots:
             auto actual = correlationsOf(knn->edgeList(vectors, parameters));
             QCOMPARE(actual, expected);
 
-            // The matrix has the same values
-            auto matrix = knn->matrix(vectors, parameters);
-            QCOMPARE(matrix.size(), vectors.size());
-            for(const auto& [pair, r] : expected)
+            // The matrices have the same values
+            for(const auto& matrix : {knn->matrix(vectors, parameters), threshold->matrix(vectors, parameters)})
             {
-                QCOMPARE(matrix.valueAt(static_cast<size_t>(pair.first), static_cast<size_t>(pair.second)), r);
-                QCOMPARE(matrix.valueAt(static_cast<size_t>(pair.second), static_cast<size_t>(pair.first)), r);
+                QCOMPARE(matrix.size(), vectors.size());
+                for(const auto& [pair, r] : expected)
+                {
+                    QCOMPARE(matrix.valueAt(static_cast<size_t>(pair.first), static_cast<size_t>(pair.second)), r);
+                    QCOMPARE(matrix.valueAt(static_cast<size_t>(pair.second), static_cast<size_t>(pair.first)), r);
+                }
             }
 
             QCOMPARE(knn->name(), threshold->name());
@@ -511,6 +530,7 @@ private slots:
 
         auto vectors = dataVectors<ContinuousDataVectors>(continuousRows);
         auto matrix = correlation->matrix(vectors, {});
+        auto edges = correlationsOf(correlation->edgeList(vectors, allPairsParameters()));
 
         // Independently computed with numpy
         const QList<double> expected{3.5, 6.103277808, 6.873863542, 6.819090848, 5.958187643, 10.793516572};
@@ -521,6 +541,10 @@ private slots:
                 auto actual = matrix.valueAt(static_cast<size_t>(a), static_cast<size_t>(b));
                 QVERIFY2(fuzzyEqual(actual, expected.at(i)), qPrintable(u"%1-%2: %3 != %4"_s
                     .arg(a).arg(b).arg(actual).arg(expected.at(i))));
+
+                // The edge list has the same distances
+                QVERIFY(edges.contains({a, b}));
+                QCOMPARE(edges.at({a, b}), actual);
                 i++;
             }
         }
@@ -797,9 +821,28 @@ private slots:
         QFETCH(const Rows, input);
         QFETCH(const Rows, expected);
 
+        // Using the normaliser directly, and as the loader does when given the normalisation type
         auto vectors = dataVectors<ContinuousDataVectors>(input);
         QVERIFY(createNormaliser(normaliser)->process(vectors));
+        compareValues(vectors, expected);
 
+        vectors = dataVectors<ContinuousDataVectors>(input);
+        QVERIFY(CorrelationFileParser::normalise(normaliseTypeFor(normaliser), vectors));
+        compareValues(vectors, expected);
+    }
+
+    void noNormalisation()
+    {
+        const Rows input = {{1.0, 10.0}, {2.0, 20.0}};
+
+        auto vectors = dataVectors<ContinuousDataVectors>(input);
+        QVERIFY(CorrelationFileParser::normalise(NormaliseType::None, vectors));
+        compareValues(vectors, input);
+    }
+
+private:
+    static void compareValues(const ContinuousDataVectors& vectors, const Rows& expected)
+    {
         QCOMPARE(vectors.size(), static_cast<size_t>(expected.size()));
 
         for(size_t row = 0; row < vectors.size(); row++)

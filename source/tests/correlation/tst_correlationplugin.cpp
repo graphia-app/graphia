@@ -18,6 +18,7 @@
  */
 
 #include "tests/common/documenttest.h"
+#include "tests/common/xlsxwriter.h"
 #include "tests/common/testenvironment.h"
 
 #include "app/ui/qml/Graphia/availableattributesmodel.h"
@@ -350,6 +351,41 @@ private slots:
         QVERIFY(c3 < columnNames.size());
         QVERIFY(QTest::qWaitFor([&] { return model->columnCount() == columnNames.size(); }, Timeout));
         QCOMPARE(model->data(model->index(1, static_cast<int>(c3))).toDouble(), 6.0);
+    }
+
+    // The same data in each of the file types the plugin loads
+    void fileTypes_data()
+    {
+        QTest::addColumn<QString>("fileName");
+        QTest::addColumn<QString>("type");
+        QTest::addColumn<QByteArray>("content");
+
+        const auto lines = QString::fromUtf8(Csv).split(u'\n', Qt::SkipEmptyParts);
+
+        XlsxWriter::Cells cells;
+        cells.reserve(lines.size());
+        for(const auto& line : lines)
+            cells.append(line.split(u','));
+
+        QTest::newRow("CSV") << u"data.csv"_s << u"CorrelationCSV"_s << Csv;
+        QTest::newRow("TSV") << u"data.tsv"_s << u"CorrelationTSV"_s << QByteArray(Csv).replace(',', '\t');
+        QTest::newRow("SSV") << u"data.ssv"_s << u"CorrelationSSV"_s << QByteArray(Csv).replace(',', ';');
+        QTest::newRow("XLSX") << u"data.xlsx"_s << u"CorrelationXLSX"_s << XlsxWriter::xlsx(cells);
+    }
+
+    void fileTypes()
+    {
+        QFETCH(const QString, fileName);
+        QFETCH(const QString, type);
+        QFETCH(const QByteArray, content);
+
+        QVERIFY(open(write(fileName, content), type, u"Correlation"_s));
+
+        QCOMPARE(nodeNames(), (QStringList{u"r1"_s, u"r2"_s, u"r3"_s, u"r4"_s, u"r5"_s}));
+        QCOMPARE(edgeNames(), (QStringList{u"r1-r2"_s, u"r1-r4"_s, u"r2-r4"_s, u"r3-r5"_s}));
+        QCOMPARE(edgeValue(u"PearsonCorrelationValue"_s, u"r1-r4"_s), 31.0 / 35.0);
+        QCOMPARE(plugin()->property("columnAnnotationNames").toStringList(), QStringList{u"Kind"_s});
+        QCOMPARE(graphModel()->attributeValueByName(u"Group"_s).stringValueOf(nodeId(u"r3"_s)), u"g2"_s);
     }
 
     void parameters_data()
