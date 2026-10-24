@@ -658,7 +658,7 @@ void CorrelationPlot::populateStdDevPlot(QCPAbstractPlottable* meanPlot,
             stdDev += (value * value);
         }
 
-        stdDev /= static_cast<double>(_pluginInstance->numContinuousColumns());
+        stdDev /= static_cast<double>(rows.length());
         stdDev = std::sqrt(stdDev);
         stdDevs[static_cast<int>(column)] = stdDev;
     }
@@ -684,7 +684,7 @@ void CorrelationPlot::populateStdErrorPlot(QCPAbstractPlottable* meanPlot,
             stdErr += (value * value);
         }
 
-        stdErr /= static_cast<double>(_pluginInstance->numContinuousColumns());
+        stdErr /= static_cast<double>(rows.length());
         stdErr = std::sqrt(stdErr) / std::sqrt(static_cast<double>(rows.length()));
         stdErrs[static_cast<int>(column)] = stdErr;
     }
