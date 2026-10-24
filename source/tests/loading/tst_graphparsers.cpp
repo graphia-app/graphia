@@ -40,7 +40,9 @@
 #include <QUrl>
 
 #include <array>
+#include <cstring>
 #include <functional>
+#include <limits>
 #include <memory>
 #include <vector>
 
@@ -669,6 +671,81 @@ private slots:
         QCOMPARE(tabularData.valueAt(2, 0), u"3"_s);
         QCOMPARE(tabularData.valueAt(0, 1), u"4"_s);
         QCOMPARE(tabularData.valueAt(2, 1), u"6"_s);
+    }
+
+    // Each numeric type MATLAB stores matrices as, with the extremes of the integer types
+    void matLabNumericTypes_data()
+    {
+        QTest::addColumn<QByteArray>("content");
+        QTest::addColumn<QStringList>("expected");
+
+        auto addRow = [](const char* name, const auto& values, matio_classes classType, matio_types dataType,
+            const QStringList& expected)
+        {
+            QTest::newRow(name) << matFile({denseMatrix("m", 1, 2, values, classType, dataType)}) << expected;
+        };
+
+        addRow("double", std::vector<double>{0.1, -2.5e300}, MAT_C_DOUBLE, MAT_T_DOUBLE, {u"0.1"_s, u"-2.5e+300"_s});
+        addRow("single", std::vector<float>{0.1f, -3.0f}, MAT_C_SINGLE, MAT_T_SINGLE, {u"0.1"_s, u"-3"_s});
+        addRow("int8", std::vector<mat_int8_t>{-128, 127}, MAT_C_INT8, MAT_T_INT8, {u"-128"_s, u"127"_s});
+        addRow("uint8", std::vector<mat_uint8_t>{0, 255}, MAT_C_UINT8, MAT_T_UINT8, {u"0"_s, u"255"_s});
+        addRow("int16", std::vector<mat_int16_t>{-32768, 32767}, MAT_C_INT16, MAT_T_INT16,
+            {u"-32768"_s, u"32767"_s});
+        addRow("uint16", std::vector<mat_uint16_t>{0, 65535}, MAT_C_UINT16, MAT_T_UINT16, {u"0"_s, u"65535"_s});
+        addRow("int32", std::vector<mat_int32_t>{std::numeric_limits<mat_int32_t>::min(), 1}, MAT_C_INT32, MAT_T_INT32,
+            {u"-2147483648"_s, u"1"_s});
+        addRow("uint32", std::vector<mat_uint32_t>{0, std::numeric_limits<mat_uint32_t>::max()}, MAT_C_UINT32, MAT_T_UINT32,
+            {u"0"_s, u"4294967295"_s});
+        addRow("int64", std::vector<mat_int64_t>{std::numeric_limits<mat_int64_t>::min(), 1}, MAT_C_INT64, MAT_T_INT64,
+            {u"-9223372036854775808"_s, u"1"_s});
+        addRow("uint64", std::vector<mat_uint64_t>{0, std::numeric_limits<mat_uint64_t>::max()}, MAT_C_UINT64, MAT_T_UINT64,
+            {u"0"_s, u"18446744073709551615"_s});
+    }
+
+    void matLabNumericTypes()
+    {
+        QFETCH(const QByteArray, content);
+        QFETCH(const QStringList, expected);
+
+        const QTemporaryDir dir;
+        const auto fileName = dir.filePath(u"matrix.mat"_s);
+
+        {
+            QFile file(fileName);
+            QVERIFY(file.open(QIODevice::WriteOnly));
+            file.write(content);
+        }
+
+        MatLabFileParser parser;
+        QVERIFY(parser.parse(QUrl::fromLocalFile(fileName)));
+
+        const auto& tabularData = parser.tabularData();
+        QCOMPARE(tabularData.numRows(), 1u);
+        QCOMPARE(tabularData.numColumns(), 2u);
+        QCOMPARE((QStringList{tabularData.valueAt(0, 0), tabularData.valueAt(1, 0)}), expected);
+    }
+
+    // Variables that aren't numeric matrices are ignored
+    void matLabText()
+    {
+        auto text = [](const char* name, const char* value)
+        {
+            return [=]
+            {
+                std::array<size_t, 2> dims{1, std::strlen(value)};
+                return Mat_VarCreate(name, MAT_C_CHAR, MAT_T_UINT8, 2, dims.data(), const_cast<char*>(value), 0);
+            };
+        };
+
+        QString failureReason;
+        QVERIFY(::parse(u"MatrixMatLab"_s, matFile({text("t", "some text")}), &failureReason) == nullptr);
+        QVERIFY(!failureReason.isEmpty());
+
+        auto model = ::parse(u"MatrixMatLab"_s,
+            matFile({text("t", "some longer text than the matrix"), denseMatrix<double>("m", 2, 2, {0, 0, 0.5, 0})}),
+            &failureReason);
+        QVERIFY(model != nullptr);
+        QCOMPARE(model->edgeNames(), QStringList{u"Node 1-Node 2"_s});
     }
 
     void numericPrecision_data()
