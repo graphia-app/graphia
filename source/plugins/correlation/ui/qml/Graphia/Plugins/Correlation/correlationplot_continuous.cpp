@@ -476,14 +476,9 @@ std::pair<double, double> CorrelationPlot::addIQRBoxPlotTo(QCPAxis* keyAxis, QCP
     if(color.isValid())
         statisticalBox->setBrush(color);
 
-    // Partial (efficient) sort which is suitable for IQR calculation
-    const auto Q1 = values.size() / 4;
-    const auto Q2 = values.size() / 2;
-    const auto Q3 = Q1 + Q2;
-
-    std::nth_element(values.begin(),          values.begin() + Q1, values.end());
-    std::nth_element(values.begin() + Q1 + 1, values.begin() + Q2, values.end());
-    std::nth_element(values.begin() + Q2 + 1, values.begin() + Q3, values.end());
+    // Partial (efficient) sort which is suitable for IQR calculation; the quartiles
+    // are the medians of each half, so it's enough that the halves are separated
+    std::nth_element(values.begin(), values.begin() + (values.size() / 2), values.end());
 
     const double secondQuartile = u::medianOf(values);
     double firstQuartile = secondQuartile;
