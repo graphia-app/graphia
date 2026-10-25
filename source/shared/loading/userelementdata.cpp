@@ -257,8 +257,9 @@ std::vector<QString> UserElementData<E>::exposeAsAttributes(IGraphModel& graphMo
 
         attribute.setValueMissingFn([this, userDataVectorName](E elementId)
         {
+            // An element with no user data has no value
             if(!haveIndexFor(elementId))
-                return false;
+                return true;
 
             return vector(userDataVectorName)->get(indexFor(elementId)).isEmpty();
         });
