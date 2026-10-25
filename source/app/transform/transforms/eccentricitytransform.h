@@ -64,7 +64,7 @@ public:
         {
             {
                 ._attributeName = nodeEccentricityAttribute()._name, ._elementType = ElementType::Node,
-                ._attributeValueType = ValueType::Float, ._attributeFlags = {AttributeFlag::VisualiseByComponent},
+                ._attributeValueType = ValueType::Int, ._attributeFlags = {AttributeFlag::VisualiseByComponent},
                 ._channel = "Colour"
             }
         };
