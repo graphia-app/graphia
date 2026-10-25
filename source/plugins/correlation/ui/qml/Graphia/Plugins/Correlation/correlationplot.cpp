@@ -615,9 +615,10 @@ QCPAbstractPlottable* CorrelationPlot::abstractPlottableUnderCursor(double& keyC
             }
             else if(plottable != nullptr) // Placate MSVC C28182
             {
-                const auto distanceSq = plottable->selectTest(_hoverPoint, false, &details);
+                const auto distance = plottable->selectTest(_hoverPoint, false, &details);
+                const auto distanceSq = distance * distance;
 
-                if(distanceSq >= 0.0 && distanceSq < minDistanceSq)
+                if(distance >= 0.0 && distanceSq < minDistanceSq)
                 {
                     minDistanceSq = distanceSq;
                     nearestPlottable = plottable;

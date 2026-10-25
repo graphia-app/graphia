@@ -850,6 +850,7 @@ void CorrelationPlot::configureContinuousAxisRect()
 
     selectedColumnsColorMap->setInterpolate(false);
     selectedColumnsColorMap->setGradient(gradient);
+    selectedColumnsColorMap->setSelectable(QCP::SelectionType::stNone);
 
     auto numColumns = static_cast<int>(_pluginInstance->numContinuousColumns());
     selectedColumnsColorMap->data()->setSize(numColumns, 1);
