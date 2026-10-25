@@ -548,7 +548,7 @@ public:
     Q_INVOKABLE void moveVisualisation(int from, int to);
 
     // Execute commands to apply transform and/or visualisation changes
-    Q_INVOKABLE void apply(const QStringList& graphTransforms = {},
+    Q_INVOKABLE void apply(const QStringList& transforms = {},
         const QStringList& visualisations = {},
         bool replaceLatestCommand = false,
         int newGraphTransformIndex = -1);

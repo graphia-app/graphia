@@ -2657,7 +2657,7 @@ void Document::moveVisualisation(int from, int to)
         _visualisations, newVisualisations));
 }
 
-void Document::apply(const QStringList& graphTransforms, const QStringList& visualisations,
+void Document::apply(const QStringList& transforms, const QStringList& visualisations,
     bool replaceLatestCommand, int newGraphTransformIndex)
 {
     if(_graphModel == nullptr)
@@ -2665,7 +2665,12 @@ void Document::apply(const QStringList& graphTransforms, const QStringList& visu
 
     ICommandPtrsVector commands;
 
-    const bool transformsValid = graphTransformsAreValid(graphTransforms);
+    const bool transformsValid = graphTransformsAreValid(transforms);
+
+    // Transforms that aren't from the UI, such as those of a template saved by an earlier
+    // version, may not give every parameter, which the transforms rely on having
+    const auto graphTransforms = transformsValid ?
+        _graphModel->transformsWithMissingParametersSetToDefault(transforms) : transforms;
 
     if(transformsValid && transformsDiffer(_graphTransforms, graphTransforms, "ignoreInertFlags"_yes))
     {
