@@ -33,6 +33,7 @@
 #include <cmath>
 #include <cstddef>
 #include <map>
+#include <set>
 #include <vector>
 
 using namespace Qt::Literals::StringLiterals;
@@ -58,6 +59,10 @@ bool GMLSaver::save()
     const auto exportedNames = exportedAttributeNames(*_graphModel);
 
     std::map<QString, QString> alphanumAttributeNames;
+
+    // The keys the file already uses for nodes and edges, which attributes mustn't be written as
+    std::set<QString> usedCleanNames{u"id"_s, u"label"_s, u"source"_s, u"target"_s};
+
     setPhase(QObject::tr("Attributes"));
     for(const auto& attributeName : _graphModel->attributeNames())
     {
@@ -70,15 +75,18 @@ bool GMLSaver::save()
         if(cleanName.isEmpty())
             cleanName = u"Attribute"_s;
 
+        if(cleanName.at(0).isDigit())
+            cleanName = u"Attribute"_s + cleanName;
+
         // Duplicate attributenames can occur when removing non alphanum chars, append a number.
-        if(alphanumAttributeNames.find(cleanName) != alphanumAttributeNames.end())
+        if(u::contains(usedCleanNames, cleanName))
         {
             int suffix = 1;
             while(true)
             {
                 auto uniqueCleanName = cleanName;
                 uniqueCleanName.append(QString::number(suffix++));
-                if(alphanumAttributeNames.find(uniqueCleanName) == alphanumAttributeNames.end())
+                if(!u::contains(usedCleanNames, uniqueCleanName))
                 {
                     cleanName = uniqueCleanName;
                     break;
@@ -86,9 +94,7 @@ bool GMLSaver::save()
             }
         }
 
-        if(cleanName.at(0).isDigit())
-            cleanName = u"Attribute"_s + cleanName;
-
+        usedCleanNames.insert(cleanName);
         alphanumAttributeNames[attributeName] = cleanName;
 
         runningCount++;
