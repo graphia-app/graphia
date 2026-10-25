@@ -158,14 +158,16 @@ void VisualisationMappingPlot::buildPlot()
 
     for(int i = 0; i <= numSamples; i++)
     {
-        double n = static_cast<double>(i) / static_cast<double>(numSamples);
+        const double n = static_cast<double>(i) / static_cast<double>(numSamples);
         x.append(n);
 
+        // The value that the visualisation maps to n, i.e. the inverse of VisualisationMapping::map,
+        // with the value reflected about the middle of the range when inverted
+        auto t = std::pow(n, 1.0 / _exponent);
         if(_invert)
-            n = 1.0 - n;
+            t = 1.0 - t;
 
-        auto e = std::pow(n, _exponent);
-        auto value = _min + (e * (_max - _min));
+        auto value = _min + (t * (_max - _min));
         value = std::clamp(value, _statistics._min, _statistics._max);
         y.append(value);
     }
