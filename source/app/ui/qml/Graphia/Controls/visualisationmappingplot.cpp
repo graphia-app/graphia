@@ -25,6 +25,7 @@
 #include <QString>
 
 #include <algorithm>
+#include <cmath>
 #include <limits>
 #include <utility>
 
@@ -73,7 +74,7 @@ void VisualisationMappingPlot::setExponent(double exponent)
 
 void VisualisationMappingPlot::setMinimum(double min)
 {
-    if(!_statistics._values.empty())
+    if(!_values.empty())
         _min = std::clamp(min, _statistics._min, _statistics._max);
     else
         _min = min;
@@ -81,7 +82,7 @@ void VisualisationMappingPlot::setMinimum(double min)
     _min = std::min(_min, _max);
 
     if(_min == _max)
-        _min = _max - std::numeric_limits<double>::epsilon();
+        _min = std::nextafter(_max, std::numeric_limits<double>::lowest());
 
     emit minimumChanged();
     buildPlot();
@@ -89,7 +90,7 @@ void VisualisationMappingPlot::setMinimum(double min)
 
 void VisualisationMappingPlot::setMaximum(double max)
 {
-    if(!_statistics._values.empty())
+    if(!_values.empty())
         _max = std::clamp(max, _statistics._min, _statistics._max);
     else
         _max = max;
@@ -97,7 +98,7 @@ void VisualisationMappingPlot::setMaximum(double max)
     _max = std::max(_max, _min);
 
     if(_max == _min)
-        _max = _min + std::numeric_limits<double>::epsilon();
+        _max = std::nextafter(_min, std::numeric_limits<double>::max());
 
     emit maximumChanged();
     buildPlot();
