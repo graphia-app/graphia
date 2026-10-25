@@ -59,7 +59,8 @@ QString CloneAttributeCommand::debugDescription() const
 {
     QString text = description();
 
-    text.append(u"\n  %1"_s.arg(_createdAttributeNames.front()));
+    text.append(u"\n  %1"_s.arg(!_createdAttributeNames.empty() ?
+        _createdAttributeNames.front() : _newAttributeName));
 
     return text;
 }

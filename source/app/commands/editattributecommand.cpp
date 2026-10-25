@@ -57,14 +57,18 @@ QString EditAttributeCommand::debugDescription() const
     if(_newType != ValueType::Unknown)
         text += u" %1"_s.arg(QVariant::fromValue(_newType).toString());
 
-    auto appendDetails = [&text](const auto& edits, auto& reverseEdits)
+    // The values before the edits are only known while the edits are done, and the
+    // attribute may since have been removed, so neither can be relied on here
+    auto appendDetails = [&text](const auto& edits, const auto& reverseEdits)
     {
         int maxEdits = 10;
 
         for(const auto& [elementId, value] : edits)
         {
-            auto old = reverseEdits.at(elementId);
-            text += u"\n  %1 -> %2"_s.arg(old, value);
+            auto old = reverseEdits.find(elementId);
+            text += old != reverseEdits.end() ?
+                u"\n  %1 -> %2"_s.arg(old->second, value) :
+                u"\n  -> %1"_s.arg(value);
 
             if(--maxEdits == 0)
             {
@@ -74,12 +78,8 @@ QString EditAttributeCommand::debugDescription() const
         }
     };
 
-    const auto* attribute = _graphModel->attributeByName(_attributeName);
-
-    if(attribute->elementType() == ElementType::Node)
-        appendDetails(_edits._nodeValues, _reverseEdits._nodeValues);
-    else if(attribute->elementType() == ElementType::Edge)
-        appendDetails(_edits._edgeValues, _reverseEdits._edgeValues);
+    appendDetails(_edits._nodeValues, _reverseEdits._nodeValues);
+    appendDetails(_edits._edgeValues, _reverseEdits._edgeValues);
 
     return text;
 }
