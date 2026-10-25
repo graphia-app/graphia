@@ -130,6 +130,12 @@ static void circlePack(const std::vector<ComponentId>& componentIds,
         b = links[a]._next;
     }
 
+    auto intersects = [&componentLayoutData](ComponentId x, ComponentId y)
+    {
+        const float EPSILON = 0.01f;
+        return componentLayoutData[x].distanceToSq(componentLayoutData[y]) < -EPSILON;
+    };
+
     for(size_t i = 3; i < numComponents; i++)
     {
         c = componentIds[i];
@@ -137,53 +143,53 @@ static void circlePack(const std::vector<ComponentId>& componentIds,
                                      componentLayoutData[b],
                                      componentLayoutData[c]);
 
-        const float EPSILON = 0.01f;
-        bool intersects = false;
-        int s1 = 1;
-        ComponentId j, k;
+        // Find the intersecting circle of the front chain that is nearest, by the distance
+        // along the chain, either ahead of b or behind a, and splice out those in between
+        auto j = links[b]._next;
+        auto k = links[a]._prev;
+        float sj = componentLayoutData[b].radius();
+        float sk = componentLayoutData[a].radius();
+        bool spliced = false;
 
-        for(j = links[b]._next;
-            j != b;
-            j = links[j]._next, s1++)
+        do
         {
-            if(componentLayoutData[c].distanceToSq(componentLayoutData[j]) < -EPSILON)
+            if(sj <= sk)
             {
-                intersects = true;
-                break;
-            }
-        }
-
-        if(intersects)
-        {
-            int s2 = 1;
-
-            for(k = links[a]._prev;
-                k != links[j]._prev;
-                k = links[k]._prev, s2++)
-            {
-                if(componentLayoutData[c].distanceToSq(componentLayoutData[k]) < -EPSILON)
+                if(intersects(c, j))
+                {
+                    b = j;
+                    join(links, a, b);
+                    spliced = true;
                     break;
-            }
+                }
 
-            if(s1 < s2 || (s1 == s2 && componentLayoutData[b].radius() <
-                                       componentLayoutData[a].radius()))
-            {
-                b = j;
-                join(links, a, b);
+                sj += componentLayoutData[j].radius();
+                j = links[j]._next;
             }
             else
             {
-                a = k;
-                join(links, a, b);
-            }
+                if(intersects(c, k))
+                {
+                    a = k;
+                    join(links, a, b);
+                    spliced = true;
+                    break;
+                }
 
-            i--;
-        }
-        else
+                sk += componentLayoutData[k].radius();
+                k = links[k]._prev;
+            }
+        } while(j != links[k]._next);
+
+        if(spliced)
         {
-            insert(links, a, c);
-            b = c;
+            // Try again, between the new a and b
+            i--;
+            continue;
         }
+
+        insert(links, a, c);
+        b = c;
     }
 }
 
