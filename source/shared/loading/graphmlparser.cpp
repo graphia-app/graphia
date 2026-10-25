@@ -103,7 +103,7 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
         if(!activeNodeId.isNull() && !activeEdgeId.isNull())
         {
             setFailureReason(QObject::tr("Node and edge both active: %1 %2")
-                .arg(static_cast<int>(activeNodeId), static_cast<int>(activeEdgeId)));
+                .arg(static_cast<int>(activeNodeId)).arg(static_cast<int>(activeEdgeId)));
             return false;
         }
 
