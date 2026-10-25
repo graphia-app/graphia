@@ -38,8 +38,14 @@ static void removeLeaves(TransformedGraph& target, Progressable& progressable, s
     {
         for(auto nodeId : target.nodeIds())
         {
+            if(target.typeOf(nodeId) == MultiElementType::Tail)
+                continue;
+
             if(target.nodeById(nodeId).degree() <= 1)
-                removees.emplace_back(nodeId);
+            {
+                const auto mergedNodeIds = target.mergedNodeIdsForNodeId(nodeId);
+                removees.insert(removees.end(), mergedNodeIds.begin(), mergedNodeIds.end());
+            }
         }
 
         if(removees.empty())
