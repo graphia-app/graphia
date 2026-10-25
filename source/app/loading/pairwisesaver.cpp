@@ -101,6 +101,8 @@ bool PairwiseSaver::save()
     };
 
     auto edgeWeightAttributeName = findEdgeWeightAttributeName(_graphModel);
+    const auto* weightAttribute = !edgeWeightAttributeName.isEmpty() ?
+        _graphModel->attributeByName(edgeWeightAttributeName) : nullptr;
 
     setPhase(QObject::tr("Edges"));
     for(auto edgeId : _graphModel->graph().edgeIds())
@@ -109,11 +111,10 @@ bool PairwiseSaver::save()
         auto sourceName = nameOf(edge.sourceId());
         auto targetName = nameOf(edge.targetId());
 
-        if(!edgeWeightAttributeName.isEmpty())
+        if(weightAttribute != nullptr && !weightAttribute->valueMissingOf(edgeId))
         {
-            const auto* attribute = _graphModel->attributeByName(edgeWeightAttributeName);
             stream << u"\"%1\" \"%2\" %3\n"_s.arg(sourceName, targetName,
-                QString::number(attribute->floatValueOf(edgeId), 'g', QLocale::FloatingPointShortest));
+                QString::number(weightAttribute->floatValueOf(edgeId), 'g', QLocale::FloatingPointShortest));
         }
         else
             stream << u"\"%1\" \"%2\"\n"_s.arg(sourceName, targetName);

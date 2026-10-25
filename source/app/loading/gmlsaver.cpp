@@ -113,6 +113,9 @@ bool GMLSaver::save()
             if(attribute->hasParameter() || !u::contains(exportedNames, attributeName))
                 continue;
 
+            if((attribute->valueType() & ValueType::Numerical) && attribute->valueMissingOf(elementId))
+                continue;
+
             if(attribute->valueType() == ValueType::String)
             {
                 const QString escapedValue = escape(attribute->displayValue(attribute->stringValueOf(elementId)));

@@ -187,6 +187,9 @@ bool GraphMLSaver::save()
             if(attribute->hasParameter() || !u::contains(exportedNames, nodeAttributeName))
                 continue;
 
+            if((attribute->valueType() & ValueType::Numerical) && attribute->valueMissingOf(nodeId))
+                continue;
+
             stream.writeStartElement(u"data"_s);
             stream.writeAttribute(u"key"_s, attributeToId.at(nodeAttributeName));
             stream.writeCharacters(valueAsString(*attribute, nodeId));
@@ -231,6 +234,9 @@ bool GraphMLSaver::save()
         {
             const auto* attribute = _graphModel->attributeByName(edgeAttributeName);
             if(attribute->hasParameter() || !u::contains(exportedNames, edgeAttributeName))
+                continue;
+
+            if((attribute->valueType() & ValueType::Numerical) && attribute->valueMissingOf(edgeId))
                 continue;
 
             stream.writeStartElement(u"data"_s);

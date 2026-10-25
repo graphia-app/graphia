@@ -61,6 +61,9 @@ bool JSONGraphSaver::save()
             if(attribute->hasParameter() || !u::contains(exportedNames, nodeAttributeName))
                 continue;
 
+            if((attribute->valueType() & ValueType::Numerical) && attribute->valueMissingOf(nodeId))
+                continue;
+
             auto byteArray = exportedNames.at(nodeAttributeName).toUtf8();
             const auto* name = byteArray.constData();
 
@@ -85,6 +88,9 @@ bool JSONGraphSaver::save()
         {
             const auto* attribute = _graphModel->attributeByName(edgeAttributeName);
             if(attribute->hasParameter() || !u::contains(exportedNames, edgeAttributeName))
+                continue;
+
+            if((attribute->valueType() & ValueType::Numerical) && attribute->valueMissingOf(edgeId))
                 continue;
 
             auto byteArray = exportedNames.at(edgeAttributeName).toUtf8();
