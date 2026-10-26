@@ -37,6 +37,7 @@ try
 
     cmake -DCMAKE_UNITY_BUILD="$Env:UNITY_BUILD" `
         -DCMAKE_BUILD_TYPE="$Env:BUILD_TYPE" `
+        -DSANITIZERS="$Env:SANITIZERS" `
         -GNinja `
         -DBUILD_TESTS=ON `
         -DCMAKE_C_COMPILER="$Env:CC" `

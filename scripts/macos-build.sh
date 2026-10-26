@@ -23,6 +23,7 @@
 
 NUM_CORES=$(sysctl -n hw.ncpu)
 BUILD_DIR="build"
+[ -z "${OSX_ARCHITECTURES}" ] && OSX_ARCHITECTURES="x86_64;arm64"
 
 rm -rf ${BUILD_DIR}
 mkdir -p ${BUILD_DIR}
@@ -45,9 +46,10 @@ GCC_TREAT_WARNINGS_AS_ERRORS=NO xcodebuild -project \
   cd ${BUILD_DIR}
   cmake --version || exit $?
   cmake -DCMAKE_UNITY_BUILD=${UNITY_BUILD} -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
+    -DSANITIZERS="${SANITIZERS}" \
     -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0 \
     -DBUILD_TESTS=ON \
-    -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" \
+    -DCMAKE_OSX_ARCHITECTURES="${OSX_ARCHITECTURES}" \
     -GNinja .. || exit $?
   cat variables.sh
   . variables.sh
@@ -61,7 +63,7 @@ function makeSymFile
   TARGET_DIR=$2
   BASENAME=$(basename ${SOURCE})
 
-  for ARCH in x86_64 arm64
+  for ARCH in ${OSX_ARCHITECTURES//;/ }
   do
     INTERMEDIATE=${TARGET_DIR}/${BASENAME}.dsym
     TARGET=${TARGET_DIR}/${BASENAME}-${ARCH}.sym

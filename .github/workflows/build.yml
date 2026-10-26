@@ -251,6 +251,72 @@ jobs:
       env:
         SYM_UPLOAD_URL: ${{ secrets.SYM_UPLOAD_URL }}
 
+  macos-sanitizers:
+    name: macOS Sanitizers
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        ref: ${{ github.ref }}
+        fetch-depth: 0
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: ${{ env.QT_VERSION }}
+        modules: ${{ env.QT_MODULES }}
+        cache: true
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@main
+      with:
+        key: macos-sanitizers
+    - uses: seanmiddleditch/gha-setup-ninja@v3
+    - name: Compile
+      run: scripts/macos-build.sh
+      env:
+        BUILD_TYPE: Debug
+        SANITIZERS: address;undefined
+        OSX_ARCHITECTURES: arm64
+    - name: Test
+      run: ctest --test-dir build --output-on-failure
+      env:
+        UBSAN_OPTIONS: print_stacktrace=1
+
+  windows-asan:
+    name: Windows ASan
+    runs-on: windows-2022
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        ref: ${{ github.ref }}
+        fetch-depth: 0
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        aqtsource: ${{ env.AQT_SOURCE }}
+        version: ${{ env.QT_VERSION }}
+        modules: ${{ env.QT_MODULES }}
+        cache: true
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@main
+      with:
+        variant: sccache
+        key: windows-asan
+    - name: Register msdia
+      shell: cmd
+      run: regsvr32.exe /s "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\DIA SDK\bin\msdia140.dll"
+    - uses: ilammy/msvc-dev-cmd@v1
+    - uses: seanmiddleditch/gha-setup-ninja@v3
+    - name: Compile
+      shell: pwsh
+      run: . .\scripts\windows-build.ps1
+      env:
+        SANITIZERS: address
+        CC: cl.exe
+        CXX: cl.exe
+    - name: Test
+      shell: pwsh
+      run: ctest --test-dir build --output-on-failure
+
   wasm:
     name: WebAssembly
     runs-on: ubuntu-latest
@@ -357,10 +423,13 @@ jobs:
       env:
         BUILD_TYPE: Debug
         UNITY_BUILD: OFF
+        SANITIZERS: address;undefined
         CC: clang-${{ env.CLANG_VERSION }}
         CXX: clang++-${{ env.CLANG_VERSION }}
     - name: Test
       run: ctest --test-dir build/clang --output-on-failure
+      env:
+        UBSAN_OPTIONS: print_stacktrace=1
     - uses: actions/upload-artifact@v7
       with:
         name: static-analysis-logs-clang
