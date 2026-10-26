@@ -130,16 +130,48 @@ $MAKENSIS_ARGS | Set-Content "$BUILD_DIR\makensis_args.txt"
 
 $UNINSTALLER_INSTALLER = "uninstaller-installer.exe"
 
+function Invoke-NsisExecutable($Executable, $Arguments)
+{
+    $process = Start-Process -FilePath $Executable -ArgumentList $Arguments -NoNewWindow -Wait -PassThru
+    if($process.ExitCode -ne 0)
+    {
+        throw "$Executable failed with exit code $($process.ExitCode)"
+    }
+}
+
+# Apparently something may briefly hold a freshly run executable open, so we need to retry
+function Remove-ItemWithRetry($Path)
+{
+    for($attempt = 1; ; $attempt++)
+    {
+        try
+        {
+            Remove-Item $Path -Recurse -Force
+            return
+        }
+        catch
+        {
+            if($attempt -ge 10) { throw }
+
+            Write-Host "Failed to remove ${Path} (attempt ${attempt}): $($_.Exception.Message)"
+            Start-Sleep -Seconds 1
+        }
+    }
+}
+
 Write-Host "------ making uninstaller-installer"
 & makensis @MAKENSIS_ARGS "/XOutFile $UNINSTALLER_INSTALLER" "installers\windows\installer.nsi"
 
 $UNINSTALLER_INSTALL_DIR = "$PWD\uninstaller"
 Write-Host "------ running uninstaller-installer"
-& ".\$UNINSTALLER_INSTALLER" /S /D=$UNINSTALLER_INSTALL_DIR | Out-Default
+Invoke-NsisExecutable ".\$UNINSTALLER_INSTALLER" "/S /D=$UNINSTALLER_INSTALL_DIR"
 
 $UNSIGNED_UNINSTALLER_EXE = "$UNINSTALLER_INSTALL_DIR\Uninstall.exe"
 Copy-Item $UNSIGNED_UNINSTALLER_EXE "$INSTALLER_DIR\Uninstall.exe" -Verbose
 
 Write-Host "------ uninstalling uninstaller-installer"
-& "$UNSIGNED_UNINSTALLER_EXE" /S
-Remove-Item $UNINSTALLER_INSTALLER -Force
+# _?= stops the uninstaller copying itself to a temporary location and returning immediately,
+# but it also means it can't delete itself, hence the explicit removal of the directory
+Invoke-NsisExecutable "$UNSIGNED_UNINSTALLER_EXE" "/S _?=$UNINSTALLER_INSTALL_DIR"
+Remove-ItemWithRetry $UNINSTALLER_INSTALL_DIR
+Remove-ItemWithRetry $UNINSTALLER_INSTALLER
