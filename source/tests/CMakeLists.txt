@@ -51,3 +51,11 @@ add_unit_test(tst_analysistransforms transform/tst_analysistransforms.cpp)
 add_unit_test(tst_attributetransforms transform/tst_attributetransforms.cpp)
 add_unit_test(tst_transformcache transform/tst_transformcache.cpp)
 add_unit_test(tst_transformfactories transform/tst_transformfactories.cpp)
+
+add_unit_test(tst_correlation correlation/tst_correlation.cpp)
+target_link_libraries(tst_correlation PRIVATE correlation_core)
+
+# The correlation plot's column annotations, which are built into the plugin's QML module
+add_unit_test(tst_columnannotations correlation/tst_columnannotations.cpp
+    ${CMAKE_SOURCE_DIR}/source/plugins/correlation/columnannotation.cpp
+    ${CMAKE_SOURCE_DIR}/source/plugins/correlation/ui/qml/Graphia/Plugins/Correlation/qcpcolumnannotations.cpp)
