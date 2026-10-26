@@ -22,6 +22,8 @@
 
 #include "shared/utils/qmlenum.h"
 
+#include <cmath>
+
 // Note: the ordering of these enums is important from a save
 // file point of view; i.e. only append, don't reorder
 
@@ -74,6 +76,17 @@ DEFINE_QML_ENUM(ClippingType,
     Constant,
     Winsorization);
 
-bool correlationExceedsThreshold(CorrelationPolarity polarity, double r, double threshold);
+inline bool correlationExceedsThreshold(CorrelationPolarity polarity, double r, double threshold)
+{
+    switch(polarity)
+    {
+    default:
+    case CorrelationPolarity::Positive: return (r >= threshold); break;
+    case CorrelationPolarity::Negative: return (r <= -threshold); break;
+    case CorrelationPolarity::Both:     return (std::abs(r) >= threshold); break;
+    }
+
+    return false;
+}
 
 #endif // CORRELATIONTYPE_H
