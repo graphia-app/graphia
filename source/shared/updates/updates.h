@@ -24,8 +24,11 @@
 
 #include <QString>
 
+#include <string>
+
 QString updatesLocation();
-json updateStringToJson(const QString& updateString, QString* status = nullptr);
+json updateStringToJson(const QString& updateString, QString* status = nullptr,
+    const std::string& publicKeyFileName = ":/update_keys/public_update_key.der");
 
 QString fullyQualifiedInstallerFileName(const json& update);
 json latestUpdateJson(QString* status = nullptr);
