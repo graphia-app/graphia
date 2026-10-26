@@ -62,12 +62,16 @@ template<typename G, typename C> static bool check(const G& graph, const C& comp
 
 static bool checkComponents(const Graph& graph)
 {
+    if(!graph.componentManagementEnabled())
+        return true;
+
     bool consistent = true;
 
     for(auto componentId : graph.componentIds())
     {
         const auto* component = graph.componentById(componentId);
-        consistent = check(graph, *component, componentId);
+        if(!check(graph, *component, componentId))
+            consistent = false;
     }
 
     return consistent;
@@ -152,7 +156,8 @@ template<typename G, typename C> static bool check(const G& graph, const C& comp
         }
     }
 
-    checkComponents(component);
+    if(!checkComponents(component))
+        consistent = false;
 
     if(!consistent)
     {
@@ -163,6 +168,11 @@ template<typename G, typename C> static bool check(const G& graph, const C& comp
     }
 
     return consistent;
+}
+
+bool GraphConsistencyChecker::isConsistent(const Graph& graph)
+{
+    return check(graph, graph);
 }
 
 void GraphConsistencyChecker::onGraphChanged(const Graph* graph)

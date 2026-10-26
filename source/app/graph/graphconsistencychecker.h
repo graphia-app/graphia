@@ -36,6 +36,8 @@ public:
     void disable();
     bool enabled() const { return _enabled; }
 
+    static bool isConsistent(const Graph& graph);
+
 private:
     const Graph* _graph;
     bool _enabled = false;
