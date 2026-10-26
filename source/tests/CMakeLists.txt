@@ -59,3 +59,6 @@ target_link_libraries(tst_correlation PRIVATE correlation_core)
 add_unit_test(tst_columnannotations correlation/tst_columnannotations.cpp
     ${CMAKE_SOURCE_DIR}/source/plugins/correlation/columnannotation.cpp
     ${CMAKE_SOURCE_DIR}/source/plugins/correlation/ui/qml/Graphia/Plugins/Correlation/qcpcolumnannotations.cpp)
+
+add_unit_test(tst_tabulardata loading/tst_tabulardata.cpp)
+add_unit_test(tst_tabulardataparser loading/tst_tabulardataparser.cpp)
