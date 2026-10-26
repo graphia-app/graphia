@@ -25,6 +25,8 @@
 #include <QString>
 #include <QStringList>
 
+#include <vector>
+
 class GraphModel;
 class Document;
 
@@ -57,6 +59,9 @@ public:
     QString verb() const override;
 
     QString debugDescription() const override;
+
+    static QStringList patchedVisualisations(const QStringList& previousVisualisations,
+        const QStringList& visualisations, const std::vector<QString>& createdAttributeNames);
 
     bool execute() override;
     void undo() override;
