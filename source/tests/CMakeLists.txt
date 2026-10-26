@@ -63,5 +63,6 @@ add_unit_test(tst_columnannotations correlation/tst_columnannotations.cpp
 add_unit_test(tst_tabulardata loading/tst_tabulardata.cpp)
 add_unit_test(tst_tabulardataparser loading/tst_tabulardataparser.cpp)
 add_unit_test(tst_graphparsers loading/tst_graphparsers.cpp)
+add_unit_test(tst_savers loading/tst_savers.cpp)
 
 add_unit_test(tst_graphsizeestimate loading/tst_graphsizeestimate.cpp)
