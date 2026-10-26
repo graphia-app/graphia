@@ -52,8 +52,14 @@ void FilterTransform::apply(TransformedGraph& target)
 
         for(auto nodeId : target.nodeIds())
         {
+            if(target.typeOf(nodeId) == MultiElementType::Tail)
+                continue;
+
             if(u::exclusiveOr(conditionFn(nodeId), _invert))
-                removees.push_back(nodeId);
+            {
+                const auto mergedNodeIds = target.mergedNodeIdsForNodeId(nodeId);
+                removees.insert(removees.end(), mergedNodeIds.begin(), mergedNodeIds.end());
+            }
         }
 
         auto numRemovees = static_cast<uint64_t>(removees.size());
