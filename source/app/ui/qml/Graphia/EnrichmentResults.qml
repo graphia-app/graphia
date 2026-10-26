@@ -267,7 +267,7 @@ ApplicationWindow
                     table.columnResizeRequired = true;
 
                     table.sortIndicatorColumn = model ? model.sortColumn : 0;
-                    table.sortIndicatorOrder = model ? (model.ascendingSortOrder === Qt.AscendingOrder) : true;
+                    table.sortIndicatorOrder = !model || model.ascendingSortOrder ? Qt.AscendingOrder : Qt.DescendingOrder;
                     showOnlyEnrichedButton.checked = model ? model.enrichedOnly : true;
 
                     table.updateRowCount();
