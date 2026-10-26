@@ -121,11 +121,11 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
             {
                 graphNestLevel++;
 
-                if(graphNestLevel > 1)
-                {
-                    //FIXME: we just skip everything when nested
-                    qDebug() << "WARNING: nested graphs not supported";
-                }
+                // A nested graph is flattened into the one containing it; the node or edge
+                // it's within has no data after it, so is finished with
+                activeNodeId.setToNull();
+                activeEdgeId.setToNull();
+                pendingEdgeActive = false;
             }
             else if(elementName == u"key"_s)
             {
@@ -154,7 +154,7 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
             else if(elementName == u"default"_s && !activeKeyId.isEmpty())
                 inDefault = true;
 
-            if(graphNestLevel != 1)
+            if(graphNestLevel < 1)
                 break;
 
             if(elementName == u"node"_s)
@@ -235,7 +235,7 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
                 break;
             }
 
-            if(graphNestLevel != 1)
+            if(graphNestLevel < 1)
                 break;
 
             if(activeKey.isEmpty() || _userNodeData == nullptr)
@@ -278,7 +278,7 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
             else if(elementName == u"key"_s)
                 activeKeyId.clear();
 
-            if(graphNestLevel != 1)
+            if(graphNestLevel < 1)
                 break;
 
             if(elementName == u"node"_s && !activeNodeId.isNull())
