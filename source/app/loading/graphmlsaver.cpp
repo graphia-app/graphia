@@ -33,6 +33,7 @@
 
 #include <cstddef>
 #include <map>
+#include <set>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -151,6 +152,24 @@ bool GraphMLSaver::save()
         keyId++;
     }
 
+    // Nodes are identified by their names, so they keep them when the file is loaded
+    // again, unless any are the same as another's
+    bool idsAreNames = true;
+    std::set<QString> nodeNames;
+    for(auto nodeId : _graphModel->graph().nodeIds())
+    {
+        if(!nodeNames.insert(_graphModel->nodeName(nodeId)).second)
+        {
+            idsAreNames = false;
+            break;
+        }
+    }
+
+    auto idOf = [&](NodeId nodeId)
+    {
+        return idsAreNames ? _graphModel->nodeName(nodeId) : u"n%1"_s.arg(static_cast<int>(nodeId));
+    };
+
     stream.writeStartElement(u"graph"_s);
     stream.writeAttribute(u"edgedefault"_s, u"directed"_s);
 
@@ -161,7 +180,7 @@ bool GraphMLSaver::save()
         setProgress(static_cast<int>(runningCount * 100 / numElements));
 
         stream.writeStartElement(u"node"_s);
-        stream.writeAttribute(u"id"_s, u"n%1"_s.arg(static_cast<int>(nodeId)));
+        stream.writeAttribute(u"id"_s, idOf(nodeId));
         for(const auto& nodeAttributeName : _graphModel->attributeNames(ElementType::Node))
         {
             const auto* attribute = _graphModel->attributeByName(nodeAttributeName);
@@ -206,10 +225,8 @@ bool GraphMLSaver::save()
         const auto& edge = _graphModel->graph().edgeById(edgeId);
         stream.writeStartElement(u"edge"_s);
         stream.writeAttribute(u"id"_s, u"e%1"_s.arg(edgeCount++));
-        stream.writeAttribute(u"source"_s,
-                              u"n%1"_s.arg(static_cast<int>(edge.sourceId())));
-        stream.writeAttribute(u"target"_s,
-                              u"n%1"_s.arg(static_cast<int>(edge.targetId())));
+        stream.writeAttribute(u"source"_s, idOf(edge.sourceId()));
+        stream.writeAttribute(u"target"_s, idOf(edge.targetId()));
         for(const auto& edgeAttributeName : _graphModel->attributeNames(ElementType::Edge))
         {
             const auto* attribute = _graphModel->attributeByName(edgeAttributeName);
