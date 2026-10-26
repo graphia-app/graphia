@@ -24,8 +24,16 @@
 #include <QVector3D>
 #include <QColor>
 
+#include <cstdint>
+#include <random>
+
 namespace u
 {
+    // Makes everything random from here on reproducible, for testing
+    void setRandomSeed(uint32_t seed);
+
+    std::mt19937 randomGenerator();
+
     float rand(float low, float high);
     int rand(int low, int high);
 

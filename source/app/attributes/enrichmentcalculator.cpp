@@ -25,6 +25,7 @@
 
 #include "shared/utils/container.h"
 #include "shared/utils/msvcwarningsuppress.h"
+#include "shared/utils/random.h"
 
 #include "shared/attributes/iattribute.h"
 
@@ -194,8 +195,7 @@ std::vector<double> EnrichmentCalculator::doRandomSampling(int sampleCount, doub
     double observationStdDev = 0.0;
     double overRepresentationStdDev = 0.0;
 
-    std::random_device rd;
-    auto seededGenerator = std::mt19937(rd());
+    auto seededGenerator = u::randomGenerator();
     auto distribution = std::uniform_real_distribution<>(0.0f, 1.0f);
 
     for(size_t i = 0; i < NUMBER_OF_TRIALS; i++)
