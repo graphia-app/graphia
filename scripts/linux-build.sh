@@ -48,6 +48,7 @@ mkdir -p ${BUILD_DIR}
   cmake --version || exit $?
   cmake -DCMAKE_UNITY_BUILD=${UNITY_BUILD} \
     -DCMAKE_INSTALL_PREFIX=AppDir/usr \
+    -DBUILD_TESTS=ON \
     -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -GNinja ../.. || exit $?
   cat variables.sh
   . variables.sh

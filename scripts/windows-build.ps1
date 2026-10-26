@@ -38,6 +38,7 @@ try
     cmake -DCMAKE_UNITY_BUILD="$Env:UNITY_BUILD" `
         -DCMAKE_BUILD_TYPE="$Env:BUILD_TYPE" `
         -GNinja `
+        -DBUILD_TESTS=ON `
         -DCMAKE_C_COMPILER="$Env:CC" `
         -DCMAKE_CXX_COMPILER="$Env:CXX" `
         ..

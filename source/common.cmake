@@ -40,6 +40,7 @@ if(UNIX)
     mark_as_advanced(MOLD_EXECUTABLE)
     if(MOLD_EXECUTABLE)
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=mold")
+        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=mold")
     endif()
 endif()
 

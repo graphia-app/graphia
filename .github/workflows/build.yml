@@ -43,6 +43,8 @@ jobs:
       env:
         CC: gcc-${{ env.GCC_VERSION }}
         CXX: g++-${{ env.GCC_VERSION }}
+    - name: Test
+      run: ctest --test-dir build/gcc --output-on-failure
     - name: AppImage
       run: |
         installers/linux/build.sh
@@ -98,6 +100,9 @@ jobs:
       env:
         CC: cl.exe
         CXX: cl.exe
+    - name: Test
+      shell: pwsh
+      run: ctest --test-dir build --output-on-failure
     - name: Upload Executables for Signing
       id: unsigned-exes
       if: needs.check-is-release.outputs.is-release == 'true'
@@ -217,6 +222,8 @@ jobs:
         node-version: '18'
     - name: Compile
       run: scripts/macos-build.sh
+    - name: Test
+      run: ctest --test-dir build --output-on-failure
     - name: app and dmg
       run: |
         npm install -g appdmg
@@ -352,6 +359,8 @@ jobs:
         UNITY_BUILD: OFF
         CC: clang-${{ env.CLANG_VERSION }}
         CXX: clang++-${{ env.CLANG_VERSION }}
+    - name: Test
+      run: ctest --test-dir build/clang --output-on-failure
     - uses: actions/upload-artifact@v7
       with:
         name: static-analysis-logs-clang
@@ -375,6 +384,7 @@ jobs:
           build/clang/**/*.js
           build/clang/**/*.qmltypes
           build/clang/**/*.qrc
+          build/clang/**/*.moc
           build/clang/**/.rcc/qmllint/*.rsp
 
   windows-clang:
@@ -410,6 +420,9 @@ jobs:
       env:
         CC: clang-cl.exe
         CXX: clang-cl.exe
+    - name: Test
+      shell: pwsh
+      run: ctest --test-dir build --output-on-failure
     - name: Upload Executables for Signing
       id: unsigned-exes
       if: needs.check-is-release.outputs.is-release == 'true'
