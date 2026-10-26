@@ -22,6 +22,11 @@ if(SANITIZERS)
     endif()
 endif()
 
+option(ENABLE_STDLIB_ASSERTIONS "Build with the standard library's assertions (libstdc++ only)" OFF)
+if(ENABLE_STDLIB_ASSERTIONS)
+    add_compile_definitions(_GLIBCXX_ASSERTIONS)
+endif()
+
 add_subdirectory(source/thirdparty)
 
 # Clang's source based code coverage, run the tests with LLVM_PROFILE_FILE
