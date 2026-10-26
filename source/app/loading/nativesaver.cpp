@@ -45,6 +45,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <utility>
 #include <vector>
 
 const int NativeSaver::Version = 9;
@@ -112,16 +113,13 @@ static bool compress(const QByteArray& byteArray, const QString& filePath, Progr
     return true;
 }
 
-static json bookmarksAsJson(const Document& document)
+static json bookmarksAsJson(const std::map<QString, NodeIdSet>& bookmarks)
 {
     json jsonObject = json::object();
 
-    const auto bookmarks = document.bookmarks();
-    for(const auto& bookmark : bookmarks)
+    for(const auto& [bookmark, bookmarkedNodeIds] : bookmarks)
     {
         json nodeIds;
-
-        auto bookmarkedNodeIds = document.nodeIdsForBookmark(bookmark);
         std::ranges::copy(bookmarkedNodeIds, std::back_inserter(nodeIds));
 
         auto byteArray = bookmark.toUtf8();
@@ -132,16 +130,15 @@ static json bookmarksAsJson(const Document& document)
     return jsonObject;
 }
 
-static json layoutSettingsAsJson(const Document& document)
+static json layoutSettingsAsJson(const std::vector<LayoutSettingKeyValue>& settings)
 {
     json jsonObject;
 
-    auto settings = document.layoutSettings();
     for(const auto& setting : settings)
     {
-        auto byteArray = setting.name().toUtf8();
+        auto byteArray = setting._name.toUtf8();
         const auto* settingName = byteArray.constData();
-        jsonObject[settingName] = setting.value();
+        jsonObject[settingName] = setting._value;
     }
 
     return jsonObject;
@@ -173,7 +170,7 @@ bool NativeSaver::save()
 {
     json jsonArray;
 
-    auto* graphModel = dynamic_cast<GraphModel*>(_document->graphModel());
+    auto* graphModel = _graphModel;
 
     Q_ASSERT(graphModel != nullptr);
     if(graphModel == nullptr)
@@ -202,8 +199,8 @@ bool NativeSaver::save()
 
     json layout;
 
-    layout["algorithm"] = _document->layoutName();
-    layout["settings"] = layoutSettingsAsJson(*_document);
+    layout["algorithm"] = _content._layoutName;
+    layout["settings"] = layoutSettingsAsJson(_content._layoutSettings);
 
     layout["positions"] = u::graphArrayAsJson(graphModel->nodePositions(), graph.nodeIds(), this,
     [](const auto& v)
@@ -211,29 +208,26 @@ bool NativeSaver::save()
         return json({v.x(), v.y(), v.z()});
     });
 
-    layout["paused"] = _document->layoutPauseState() == LayoutPauseState::Paused;
+    layout["paused"] = _content._layoutPaused;
     content["layout"] = layout;
 
-    content["nodeSize"] = _document->nodeSize();
-    content["edgeSize"] = _document->edgeSize();
-    content["textSize"] = _document->textSize();
+    content["nodeSize"] = graphModel->nodeSize();
+    content["edgeSize"] = graphModel->edgeSize();
+    content["textSize"] = graphModel->textSize();
 
-    content["projection"] = _document->projection();
-    content["2dshading"] = _document->shading2D();
-    content["3dshading"] = _document->shading3D();
+    content["projection"] = _content._projection;
+    content["2dshading"] = _content._shading2D;
+    content["3dshading"] = _content._shading3D;
 
-    content["transforms"] = u::toQStringVector(_document->transforms());
-    content["visualisations"] = u::toQStringVector(_document->visualisations());
+    content["transforms"] = u::toQStringVector(_content._transforms);
+    content["visualisations"] = u::toQStringVector(_content._visualisations);
 
-    content["bookmarks"] = bookmarksAsJson(*_document);
+    content["bookmarks"] = bookmarksAsJson(_content._bookmarks);
 
-    content["log"] = _document->log();
+    content["log"] = _content._log;
 
-    for(const auto& variant : _document->enrichmentTableModels())
-    {
-        auto* table = variant.value<EnrichmentTableModel*>();
+    for(const auto* table : _content._enrichmentTableModels)
         content["enrichmentTables"].push_back(enrichmentTableModelAsJson(*table));
-    }
 
     auto uiDataJson = json::parse(_uiData.cbegin(), _uiData.cend(), nullptr, false);
 
@@ -271,5 +265,31 @@ std::unique_ptr<ISaver> NativeSaverFactory::create(const QUrl& url, Document* do
                                              const IPluginInstance* pluginInstance, const QByteArray& uiData,
                                              const QByteArray& pluginUiData)
 {
-    return std::make_unique<NativeSaver>(url, document, pluginInstance, uiData, pluginUiData);
+    NativeSaver::Content content;
+
+    content._layoutName = document->layoutName();
+
+    for(const auto& setting : document->layoutSettings())
+        content._layoutSettings.push_back({setting.name(), setting.value()});
+
+    content._layoutPaused = document->layoutPauseState() == LayoutPauseState::Paused;
+
+    content._projection = document->projection();
+    content._shading2D = document->shading2D();
+    content._shading3D = document->shading3D();
+
+    content._transforms = document->transforms();
+    content._visualisations = document->visualisations();
+
+    const auto bookmarks = document->bookmarks();
+    for(const auto& bookmark : bookmarks)
+        content._bookmarks.emplace(bookmark, document->nodeIdsForBookmark(bookmark));
+
+    content._log = document->log();
+
+    for(const auto& variant : document->enrichmentTableModels())
+        content._enrichmentTableModels.push_back(variant.value<EnrichmentTableModel*>());
+
+    return std::make_unique<NativeSaver>(url, dynamic_cast<GraphModel*>(document->graphModel()),
+        std::move(content), pluginInstance, uiData, pluginUiData);
 }
