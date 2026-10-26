@@ -93,8 +93,9 @@ static NodeId nodeIdInsideFrustumNearestPoint(const GraphModel& graphModel,
         if(graphModel.nodeVisual(nodeId).state().test(VisualFlags::Unhighlighted))
             continue;
 
-        const float distanceToCentre = Ray(frustum.centreLine()).distanceTo(point);
-        const float distanceToPoint = graphModel.nodePositions().get(nodeId).distanceToPoint(point);
+        const QVector3D nodePosition = graphModel.nodePositions().get(nodeId);
+        const float distanceToCentre = Ray(frustum.centreLine()).distanceTo(nodePosition);
+        const float distanceToPoint = nodePosition.distanceToPoint(point);
         const float distance = distanceToCentre + distanceToPoint;
 
         if(distance < minimumDistance)
