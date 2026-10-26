@@ -424,12 +424,28 @@ jobs:
         BUILD_TYPE: Debug
         UNITY_BUILD: OFF
         SANITIZERS: address;undefined
+        COVERAGE: ON
         CC: clang-${{ env.CLANG_VERSION }}
         CXX: clang++-${{ env.CLANG_VERSION }}
     - name: Test
       run: ctest --test-dir build/clang --output-on-failure
       env:
         UBSAN_OPTIONS: print_stacktrace=1
+        LLVM_PROFILE_FILE: ${{ github.workspace }}/build/clang/profiles/%m-%p.profraw
+    - name: Coverage
+      if: ${{ success() || failure() }}
+      run: scripts/coverage.sh
+      env:
+        LLVM_PROFDATA: llvm-profdata-${{ env.CLANG_VERSION }}
+        LLVM_COV: llvm-cov-${{ env.CLANG_VERSION }}
+        BUILD_DIR: build/clang/
+    - uses: actions/upload-artifact@v7
+      if: ${{ success() || failure() }}
+      with:
+        name: coverage
+        path: |
+          build/clang/coverage.txt
+          build/clang/coverage.lcov
     - uses: actions/upload-artifact@v7
       with:
         name: static-analysis-logs-clang

@@ -23,6 +23,19 @@ if(SANITIZERS)
 endif()
 
 add_subdirectory(source/thirdparty)
+
+# Clang's source based code coverage, run the tests with LLVM_PROFILE_FILE
+# set, then use llvm-profdata and llvm-cov
+option(COLLECT_COVERAGE "Build with Clang source based code coverage instrumentation" OFF)
+if(COLLECT_COVERAGE)
+    if(NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        message(FATAL_ERROR "COLLECT_COVERAGE requires Clang")
+    endif()
+
+    add_compile_options(-fprofile-instr-generate -fcoverage-mapping)
+    add_link_options(-fprofile-instr-generate)
+endif()
+
 add_subdirectory(source/shared)
 add_subdirectory(source/plugins)
 add_subdirectory(source/app)
@@ -63,6 +76,7 @@ list(APPEND MISC
     ${CMAKE_CURRENT_LIST_DIR}/scripts/clang-tidy.sh
     ${CMAKE_CURRENT_LIST_DIR}/scripts/clazy.sh
     ${CMAKE_CURRENT_LIST_DIR}/scripts/cloc.sh
+    ${CMAKE_CURRENT_LIST_DIR}/scripts/coverage.sh
     ${CMAKE_CURRENT_LIST_DIR}/scripts/cppcheck.cfg
     ${CMAKE_CURRENT_LIST_DIR}/scripts/cppcheck.sh
     ${CMAKE_CURRENT_LIST_DIR}/scripts/emsdk-version-for-qt-version.sh
