@@ -34,10 +34,16 @@ class SelectionManager;
 class GraphRenderer;
 class GraphComponentRenderer;
 class BaseFrustum;
+class QVector3D;
 
 NodeIdSet nodeIdsInsideFrustum(const GraphModel& graphModel,
                                ComponentId componentId,
                                const BaseFrustum& frustum);
+
+NodeId nodeIdInsideFrustumNearestPoint(const GraphModel& graphModel,
+                                       ComponentId componentId,
+                                       const BaseFrustum& frustum,
+                                       const QVector3D& point);
 
 class GraphCommonInteractor : public Interactor
 {

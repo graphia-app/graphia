@@ -78,10 +78,10 @@ NodeIdSet nodeIdsInsideFrustum(const GraphModel& graphModel,
     return selection;
 }
 
-static NodeId nodeIdInsideFrustumNearestPoint(const GraphModel& graphModel,
-                                              ComponentId componentId,
-                                              const BaseFrustum& frustum,
-                                              const QVector3D& point)
+NodeId nodeIdInsideFrustumNearestPoint(const GraphModel& graphModel,
+                                       ComponentId componentId,
+                                       const BaseFrustum& frustum,
+                                       const QVector3D& point)
 {
     auto nodeIds = nodeIdsInsideFrustum(graphModel, componentId, frustum);
 
