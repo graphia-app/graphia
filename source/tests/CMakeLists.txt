@@ -41,3 +41,5 @@ function(add_unit_test NAME)
             ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:${CMAKE_BINARY_DIR}")
     endif()
 endfunction()
+
+add_unit_test(tst_mutablegraph graph/tst_mutablegraph.cpp)
