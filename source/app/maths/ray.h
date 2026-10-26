@@ -34,13 +34,7 @@ private:
     QVector3D _invDir;
     std::array<int, 3> _sign{{0, 0, 0}};
 
-    void initialise()
-    {
-        _invDir = QVector3D(1.0f / _dir.x(), 1.0f / _dir.y(), 1.0f/ _dir.z());
-        _sign[0] = (_invDir.x() < 0.0f) ? 1 : 0;
-        _sign[1] = (_invDir.y() < 0.0f) ? 1 : 0;
-        _sign[2] = (_invDir.z() < 0.0f) ? 1 : 0;
-    }
+    void initialise();
 
 public:
     Ray(const QVector3D& origin, const QVector3D& dir) :
