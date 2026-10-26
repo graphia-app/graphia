@@ -43,3 +43,5 @@ function(add_unit_test NAME)
 endfunction()
 
 add_unit_test(tst_mutablegraph graph/tst_mutablegraph.cpp)
+add_unit_test(tst_attribute attributes/tst_attribute.cpp)
+add_unit_test(tst_conditionfncreator attributes/tst_conditionfncreator.cpp)
