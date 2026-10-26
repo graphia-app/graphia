@@ -38,13 +38,13 @@ void TabularDataModel::setTransposed(bool transposed)
     }
 }
 
-bool TabularDataModel::columnIsNumerical(int column) const
+bool TabularDataModel::columnIsNumerical(int column, int fromRow) const
 {
     auto c = static_cast<size_t>(column);
 
     if(_data != nullptr && c < _data->numColumns())
     {
-        auto type = _data->columnTypeIdentity(c, 0).type();
+        auto type = _data->columnTypeIdentity(c, static_cast<size_t>(fromRow)).type();
 
         return type == TypeIdentity::Type::Int || type == TypeIdentity::Type::Float;
     }

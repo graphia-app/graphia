@@ -186,6 +186,13 @@ BaseParameterDialog
                 {
                     let newParameters = Object.assign({}, root.parameters);
 
+                    // The header stopped the third column being taken to be the edges' weights
+                    if(!newParameters.columns.hasOwnProperty(2) && tabularDataParser.model.columnCount() > 2 &&
+                        tabularDataParser.model.columnIsNumerical(2, 1))
+                    {
+                        newParameters.columns[2] = { "type": PairwiseColumnType.EdgeAttribute, "name": "" };
+                    }
+
                     for(const index in newParameters.columns)
                     {
                         let type = newParameters.columns[index].type;
