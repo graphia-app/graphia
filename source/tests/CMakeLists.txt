@@ -113,9 +113,14 @@ add_unit_test(tst_headless headless/tst_headless.cpp)
 target_compile_definitions(tst_headless PRIVATE BUILD_DIR="${CMAKE_BINARY_DIR}")
 add_dependencies(tst_headless generic correlation)
 
+# A Document, loading files with the real plugins
+add_unit_test(tst_document document/tst_document.cpp)
+target_compile_definitions(tst_document PRIVATE BUILD_DIR="${CMAKE_BINARY_DIR}")
+add_dependencies(tst_document generic correlation)
+
 if(SANITIZERS)
     # The plugins each have their own copy of the shared library, as the tests do,
     # which AddressSanitizer reports as violating the one definition rule
-    set_property(TEST tst_headless APPEND PROPERTY
+    set_property(TEST tst_headless tst_document APPEND PROPERTY
         ENVIRONMENT_MODIFICATION "ASAN_OPTIONS=string_append::detect_odr_violation=0")
 endif()
