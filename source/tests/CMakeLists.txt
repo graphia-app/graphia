@@ -70,8 +70,23 @@ add_unit_test(tst_nativeloader loading/tst_nativeloader.cpp)
 add_unit_test(tst_commands commands/tst_commands.cpp)
 add_unit_test(tst_visualisationconfigparser ui/tst_visualisationconfigparser.cpp)
 
+add_unit_test(tst_string utils/tst_string.cpp)
+
+if(UNIX AND NOT APPLE)
+    # Qt takes the system locale from the environment on Linux, so also run in a
+    # locale whose numbers differ from the C locale's in every respect
+    add_test(NAME tst_string_sv_SE COMMAND tst_string)
+    set_tests_properties(tst_string_sv_SE PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;LC_ALL=sv_SE.UTF-8")
+endif()
+
+add_unit_test(tst_statistics utils/tst_statistics.cpp)
+add_unit_test(tst_container utils/tst_container.cpp)
+add_unit_test(tst_datastructures utils/tst_datastructures.cpp)
+add_unit_test(tst_json utils/tst_json.cpp)
+add_unit_test(tst_color utils/tst_color.cpp)
 add_unit_test(tst_colorvisualisations visualisations/tst_colorvisualisations.cpp)
 add_unit_test(tst_visualisationmapping visualisations/tst_visualisationmapping.cpp)
 add_unit_test(tst_visualisations visualisations/tst_visualisations.cpp)
 add_unit_test(tst_commandmanager commands/tst_commandmanager.cpp)
 add_unit_test(tst_graphsizeestimate loading/tst_graphsizeestimate.cpp)
+add_unit_test(tst_random utils/tst_random.cpp)
