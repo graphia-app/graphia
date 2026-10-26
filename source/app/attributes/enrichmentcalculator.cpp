@@ -174,7 +174,7 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(
             row[EnrichmentTableModel::Results::OverRep] = static_cast<double>(selectedInCategory) / expectedNo;
             row[EnrichmentTableModel::Results::Fishers] = f;
             row[EnrichmentTableModel::Results::BonferroniAdjusted] =
-                std::min(1.0, f * static_cast<double>(attributeValueEntryCountBTotal.size()));
+                std::min(1.0, f * static_cast<double>(iterations));
 
             tableModel.push_back(row);
         }
