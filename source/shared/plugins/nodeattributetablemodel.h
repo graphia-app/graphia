@@ -125,4 +125,6 @@ signals:
     void selectionChanged();
 };
 
+Q_DECLARE_INTERFACE(NodeAttributeTableModel, "NodeAttributeTableModel")
+
 #endif // NODEATTRIBUTETABLEMODEL_H
