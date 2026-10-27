@@ -88,8 +88,8 @@ jobs:
     - name: ccache
       uses: hendrikmuhs/ccache-action@main
       with:
-        variant: sccache
         key: windows
+        install: binary
     - name: Register msdia
       shell: cmd
       run: regsvr32.exe /s "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\DIA SDK\bin\msdia140.dll"
@@ -302,8 +302,8 @@ jobs:
     - name: ccache
       uses: hendrikmuhs/ccache-action@main
       with:
-        variant: sccache
         key: windows-asan
+        install: binary
     - name: Register msdia
       shell: cmd
       run: regsvr32.exe /s "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\DIA SDK\bin\msdia140.dll"
@@ -498,8 +498,8 @@ jobs:
     - name: ccache
       uses: hendrikmuhs/ccache-action@main
       with:
-        variant: sccache
         key: windows-clang
+        install: binary
     - name: Register msdia
       shell: cmd
       run: regsvr32.exe /s "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\DIA SDK\bin\msdia140.dll"
