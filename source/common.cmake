@@ -31,11 +31,6 @@ if(UNIX)
     # Surprisingly, this actually makes a difference to the pearson correlation code
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -funroll-loops")
 
-    # This tells the linker to export all symbols, even if it thinks they're unused
-    # We need it because the plugins require symbols in order for certain things to
-    # work e.g. dynamic_cast to QObject from IGraph, under clang
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -rdynamic")
-
     find_program(MOLD_EXECUTABLE mold)
     mark_as_advanced(MOLD_EXECUTABLE)
     if(MOLD_EXECUTABLE)

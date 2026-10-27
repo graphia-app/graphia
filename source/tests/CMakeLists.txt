@@ -127,10 +127,3 @@ add_dependencies(tst_correlationplugin correlation)
 add_unit_test(tst_correlationplot correlation/tst_correlationplot.cpp)
 target_compile_definitions(tst_correlationplot PRIVATE BUILD_DIR="${CMAKE_BINARY_DIR}")
 add_dependencies(tst_correlationplot correlation)
-
-if(SANITIZERS)
-    # The plugins each have their own copy of the shared library, as the tests do,
-    # which AddressSanitizer reports as violating the one definition rule
-    set_property(TEST tst_headless tst_document tst_correlationplugin tst_correlationplot APPEND PROPERTY
-        ENVIRONMENT_MODIFICATION "ASAN_OPTIONS=string_append::detect_odr_violation=0")
-endif()
