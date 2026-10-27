@@ -37,6 +37,7 @@ jobs:
       uses: hendrikmuhs/ccache-action@main
       with:
         key: linux
+        install: binary
     - uses: seanmiddleditch/gha-setup-ninja@v3
     - name: Compile
       run: scripts/linux-build.sh
@@ -216,6 +217,7 @@ jobs:
       uses: hendrikmuhs/ccache-action@main
       with:
         key: macos
+        install: binary
     - uses: seanmiddleditch/gha-setup-ninja@v3
     - uses: actions/setup-node@v4
       with:
@@ -269,6 +271,7 @@ jobs:
       uses: hendrikmuhs/ccache-action@main
       with:
         key: macos-sanitizers
+        install: binary
     - uses: seanmiddleditch/gha-setup-ninja@v3
     - name: Compile
       run: scripts/macos-build.sh
@@ -347,6 +350,7 @@ jobs:
       uses: hendrikmuhs/ccache-action@main
       with:
         key: wasm
+        install: binary
     - uses: seanmiddleditch/gha-setup-ninja@v3
     - name: Compile
       run: |
@@ -415,6 +419,7 @@ jobs:
       uses: hendrikmuhs/ccache-action@main
       with:
         key: clang-debug
+        install: binary
     - uses: seanmiddleditch/gha-setup-ninja@v3
     - name: Compile
       run: |
@@ -730,6 +735,7 @@ jobs:
       uses: hendrikmuhs/ccache-action@main
       with:
         key: clazy
+        install: binary
     - uses: seanmiddleditch/gha-setup-ninja@v3
     - name: Build clazy
       run: |
@@ -812,6 +818,7 @@ jobs:
       uses: hendrikmuhs/ccache-action@main
       with:
         key: iwyu
+        install: binary
     - uses: seanmiddleditch/gha-setup-ninja@v3
     - name: Build IWYU
       run: |
