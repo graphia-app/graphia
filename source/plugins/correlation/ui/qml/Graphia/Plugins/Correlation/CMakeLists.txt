@@ -26,5 +26,5 @@ qt_add_qml_module(correlation_qml
 )
 
 target_link_libraries(correlation_qml
-    PRIVATE Qt6::Quick Qt6::Concurrent
+    PRIVATE Qt6::Quick Qt6::Concurrent shared
 )
