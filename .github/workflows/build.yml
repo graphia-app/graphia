@@ -203,7 +203,7 @@ jobs:
         ref: ${{ github.ref }}
         fetch-depth: 0
     - name: Force Python to version 3.10 to workaround node-gyp install problem (remove later)
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v7
       with:
         python-version: '3.10'
     - name: Install Qt
@@ -219,7 +219,7 @@ jobs:
         key: macos
         install: binary
     - uses: seanmiddleditch/gha-setup-ninja@v3
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v7
       with:
         node-version: '18'
     - name: Compile
@@ -333,7 +333,7 @@ jobs:
         EMSDK_VERSION=$(scripts/emsdk-version-for-qt-version.sh ${{ env.QT_VERSION }})
         echo "EMSDK_VERSION=${EMSDK_VERSION}" >> $GITHUB_ENV
     - name: Install emsdk
-      uses: mymindstorm/setup-emsdk@v13
+      uses: emscripten-core/setup-emsdk@v16
       with:
         version: ${{ env.EMSDK_VERSION }}
     - name: Install Qt
@@ -636,7 +636,7 @@ jobs:
         echo "date=$(/bin/date -u "+%Y%m%d")" >> $GITHUB_OUTPUT
       shell: bash
     - name: Store ctcache
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         key: ctcache-${{ steps.get-date.outputs.date }}
         path: /tmp/clang-tidy-cache
@@ -1066,7 +1066,7 @@ jobs:
         merge-multiple: true
         path: logs/staticanalysis
     - name: Install Perl modules
-      uses: perl-actions/install-with-cpanm@v1
+      uses: perl-actions/install-with-cpanm@v2
       with:
         install: |
           Text::Table::CSV
