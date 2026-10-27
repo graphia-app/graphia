@@ -38,7 +38,6 @@ jobs:
       with:
         key: linux
         install: binary
-    - uses: seanmiddleditch/gha-setup-ninja@v3
     - name: Compile
       run: scripts/linux-build.sh
       env:
@@ -94,7 +93,6 @@ jobs:
       shell: cmd
       run: regsvr32.exe /s "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\DIA SDK\bin\msdia140.dll"
     - uses: ilammy/msvc-dev-cmd@v1
-    - uses: seanmiddleditch/gha-setup-ninja@v3
     - name: Compile
       shell: pwsh
       run: . .\scripts\windows-build.ps1
@@ -218,7 +216,6 @@ jobs:
       with:
         key: macos
         install: binary
-    - uses: seanmiddleditch/gha-setup-ninja@v3
     - uses: actions/setup-node@v7
       with:
         node-version: '24'
@@ -272,7 +269,6 @@ jobs:
       with:
         key: macos-sanitizers
         install: binary
-    - uses: seanmiddleditch/gha-setup-ninja@v3
     - name: Compile
       run: scripts/macos-build.sh
       env:
@@ -308,7 +304,6 @@ jobs:
       shell: cmd
       run: regsvr32.exe /s "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\DIA SDK\bin\msdia140.dll"
     - uses: ilammy/msvc-dev-cmd@v1
-    - uses: seanmiddleditch/gha-setup-ninja@v3
     - name: Compile
       shell: pwsh
       run: . .\scripts\windows-build.ps1
@@ -351,7 +346,6 @@ jobs:
       with:
         key: wasm
         install: binary
-    - uses: seanmiddleditch/gha-setup-ninja@v3
     - name: Compile
       run: |
         scripts/wasm-build.sh
@@ -420,7 +414,6 @@ jobs:
       with:
         key: clang-debug
         install: binary
-    - uses: seanmiddleditch/gha-setup-ninja@v3
     - name: Compile
       run: |
         scripts/linux-build.sh
@@ -504,7 +497,6 @@ jobs:
       shell: cmd
       run: regsvr32.exe /s "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\DIA SDK\bin\msdia140.dll"
     - uses: ilammy/msvc-dev-cmd@v1
-    - uses: seanmiddleditch/gha-setup-ninja@v3
     - name: Compile
       shell: pwsh
       run: . .\scripts\windows-build.ps1
@@ -736,7 +728,6 @@ jobs:
       with:
         key: clazy
         install: binary
-    - uses: seanmiddleditch/gha-setup-ninja@v3
     - name: Build clazy
       run: |
         cd clazy/
@@ -819,7 +810,6 @@ jobs:
       with:
         key: iwyu
         install: binary
-    - uses: seanmiddleditch/gha-setup-ninja@v3
     - name: Build IWYU
       run: |
         cd iwyu/
