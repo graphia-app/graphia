@@ -314,8 +314,6 @@ jobs:
       - wasm
     steps:
     - uses: actions/checkout@v7
-      with:
-        fetch-depth: 0
     - uses: actions/checkout@v7
       with:
         repository: graphia-app/web
@@ -409,8 +407,6 @@ jobs:
       - clang-debug
     steps:
     - uses: actions/checkout@v7
-      with:
-        fetch-depth: 0
     - name: Install Tools
       run: |
         scripts/install-llvm.sh ${{ env.CLANG_VERSION }} clang-tidy-${{ env.CLANG_VERSION }}
@@ -460,8 +456,6 @@ jobs:
       - clang-debug
     steps:
     - uses: actions/checkout@v7
-      with:
-        fetch-depth: 0
     - name: Install Tools
       run: |
         scripts/install-llvm.sh ${{ env.CLANG_VERSION }} cppcheck
@@ -488,8 +482,6 @@ jobs:
       - clang-debug
     steps:
     - uses: actions/checkout@v7
-      with:
-        fetch-depth: 0
     - name: Install Tools
       run: |
         scripts/install-llvm.sh ${{ env.CLANG_VERSION }} clang llvm-${{ env.CLANG_VERSION }}-dev libclang-${{ env.CLANG_VERSION }}-dev
@@ -535,8 +527,6 @@ jobs:
       - clang-debug
     steps:
     - uses: actions/checkout@v7
-      with:
-        fetch-depth: 0
     - name: Install Qt
       uses: ./.github/actions/install-qt
     - uses: actions/download-artifact@v8
@@ -559,8 +549,6 @@ jobs:
       - clang-debug
     steps:
     - uses: actions/checkout@v7
-      with:
-        fetch-depth: 0
     - name: Install Tools
       run: |
         scripts/install-llvm.sh ${{ env.CLANG_VERSION }} clang llvm-${{ env.CLANG_VERSION }}-dev libclang-${{ env.CLANG_VERSION }}-dev
