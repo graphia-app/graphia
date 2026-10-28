@@ -64,6 +64,14 @@ CorrelationPlotWorker::CorrelationPlotWorker(std::recursive_mutex& mutex,
     }
 }
 
+CorrelationPlotWorker::~CorrelationPlotWorker()
+{
+    // Disabling OpenGL destroys the context, here on the thread that created it
+    const std::unique_lock<std::recursive_mutex> lock(*_mutex);
+    if(_customPlot->openGl())
+        _customPlot->setOpenGl(false);
+}
+
 bool CorrelationPlotWorker::busy() const
 {
     return _busy;

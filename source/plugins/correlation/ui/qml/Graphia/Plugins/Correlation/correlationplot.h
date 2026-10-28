@@ -109,6 +109,7 @@ class CorrelationPlotWorker : public QObject
 public:
     CorrelationPlotWorker(std::recursive_mutex& mutex,
         QCustomPlot& customPlot);
+    ~CorrelationPlotWorker() override;
 
     bool busy() const;
 
