@@ -16,7 +16,6 @@ jobs:
     steps:
     - uses: actions/checkout@v7
       with:
-        ref: ${{ github.ref }}
         fetch-depth: 0
     - name: Install Tools
       run: |
@@ -81,7 +80,6 @@ jobs:
     steps:
     - uses: actions/checkout@v7
       with:
-        ref: ${{ github.ref }}
         fetch-depth: 0
     - name: Install Qt
       uses: ./.github/actions/install-qt
@@ -165,7 +163,6 @@ jobs:
     steps:
     - uses: actions/checkout@v7
       with:
-        ref: ${{ github.ref }}
         fetch-depth: 0
     - name: Install Qt
       uses: ./.github/actions/install-qt
@@ -214,7 +211,6 @@ jobs:
     steps:
     - uses: actions/checkout@v7
       with:
-        ref: ${{ github.ref }}
         fetch-depth: 0
     - name: Install Qt
       uses: ./.github/actions/install-qt
@@ -240,7 +236,6 @@ jobs:
     steps:
     - uses: actions/checkout@v7
       with:
-        ref: ${{ github.ref }}
         fetch-depth: 0
     - name: Install Qt
       uses: ./.github/actions/install-qt
@@ -268,7 +263,6 @@ jobs:
     steps:
     - uses: actions/checkout@v7
       with:
-        ref: ${{ github.ref }}
         fetch-depth: 0
     - name: Determine appropriate emsdk version
       run: |
@@ -321,7 +315,6 @@ jobs:
     steps:
     - uses: actions/checkout@v7
       with:
-        ref: ${{ github.ref }}
         fetch-depth: 0
     - uses: actions/checkout@v7
       with:
@@ -341,7 +334,6 @@ jobs:
     steps:
     - uses: actions/checkout@v7
       with:
-        ref: ${{ github.ref }}
         fetch-depth: 0
     - name: Install Tools
       run: |
@@ -418,7 +410,6 @@ jobs:
     steps:
     - uses: actions/checkout@v7
       with:
-        ref: ${{ github.ref }}
         fetch-depth: 0
     - name: Install Tools
       run: |
@@ -470,7 +461,6 @@ jobs:
     steps:
     - uses: actions/checkout@v7
       with:
-        ref: ${{ github.ref }}
         fetch-depth: 0
     - name: Install Tools
       run: |
@@ -499,7 +489,6 @@ jobs:
     steps:
     - uses: actions/checkout@v7
       with:
-        ref: ${{ github.ref }}
         fetch-depth: 0
     - name: Install Tools
       run: |
@@ -547,7 +536,6 @@ jobs:
     steps:
     - uses: actions/checkout@v7
       with:
-        ref: ${{ github.ref }}
         fetch-depth: 0
     - name: Install Qt
       uses: ./.github/actions/install-qt
@@ -572,7 +560,6 @@ jobs:
     steps:
     - uses: actions/checkout@v7
       with:
-        ref: ${{ github.ref }}
         fetch-depth: 0
     - name: Install Tools
       run: |
@@ -770,7 +757,6 @@ jobs:
     steps:
     - uses: actions/checkout@v7
       with:
-        ref: ${{ github.ref }}
         fetch-depth: 0
     - uses: actions/download-artifact@v8
       with:
