@@ -55,6 +55,25 @@ finally
     Pop-Location
 }
 
+$identity = [Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()
+$msdia = Join-Path $Env:VSINSTALLDIR "DIA SDK\bin\msdia140.dll"
+
+# dump_syms reads PDBs through msdia, which only an administrator can register
+if($identity.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator))
+{
+    # regsvr32 is a GUI program, which PowerShell only waits for when asked to
+    $regsvr32 = Start-Process regsvr32.exe -ArgumentList "/s", "`"$msdia`"" -Wait -PassThru
+
+    if($regsvr32.ExitCode -ne 0)
+    {
+        throw "Registering $msdia failed with exit code $($regsvr32.ExitCode)"
+    }
+}
+else
+{
+    Write-Host "Not running as an administrator; leaving the registration of $msdia as it is"
+}
+
 $dumpSyms = "source\thirdparty\breakpad\src\tools\windows\binaries\dump_syms.exe"
 
 & $dumpSyms "$BUILD_DIR\${PRODUCT_NAME}.exe" > "$BUILD_DIR\${PRODUCT_NAME}.sym"
