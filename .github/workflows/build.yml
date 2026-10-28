@@ -615,6 +615,16 @@ jobs:
         fi
       shell: bash
 
+  workflow-env:
+    name: Workflow Environment
+    runs-on: ubuntu-latest
+    outputs:
+      qt-version: ${{ env.QT_VERSION }}
+      qt-modules: ${{ env.QT_MODULES }}
+      clang-version: ${{ env.CLANG_VERSION }}
+    steps:
+    - run: echo "Qt ${QT_VERSION} (${QT_MODULES}), Clang ${CLANG_VERSION}"
+
   release:
     name: GitHub Release
     if: github.event_name != 'pull_request' && needs.check-is-release.outputs.is-release == 'true'
