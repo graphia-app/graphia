@@ -376,7 +376,7 @@ jobs:
           build/clang/coverage.lcov
     - uses: actions/upload-artifact@v7
       with:
-        name: static-analysis-logs-clang
+        name: static-analysis-clang-logs
         path: build/clang/*.log
     - uses: actions/upload-artifact@v7
       with:
@@ -446,7 +446,7 @@ jobs:
         BUILD_DIR: build/clang/
     - uses: actions/upload-artifact@v7
       with:
-        name: static-analysis-logs-clang-tidy
+        name: static-analysis-clang-tidy-logs
         path: build/clang/*.log
 
   cppcheck:
@@ -472,7 +472,7 @@ jobs:
         BUILD_DIR: build/clang/
     - uses: actions/upload-artifact@v7
       with:
-        name: static-analysis-logs-cppcheck
+        name: static-analysis-cppcheck-logs
         path: build/clang/*.log
 
   clazy:
@@ -517,7 +517,7 @@ jobs:
         BUILD_DIR: build/clang/
     - uses: actions/upload-artifact@v7
       with:
-        name: static-analysis-logs-clazy
+        name: static-analysis-clazy-logs
         path: build/clang/*.log
 
   qmllint:
@@ -539,7 +539,7 @@ jobs:
         BUILD_DIR: build/clang/
     - uses: actions/upload-artifact@v7
       with:
-        name: static-analysis-logs-qmllint
+        name: static-analysis-qmllint-logs
         path: build/clang/*.log
 
   iwyu:
@@ -581,7 +581,7 @@ jobs:
         IWYU_SOURCE: ${{ github.workspace }}/iwyu
     - uses: actions/upload-artifact@v7
       with:
-        name: static-analysis-logs-iwyu
+        name: static-analysis-iwyu-logs
         path: build/clang/*.log
 
   check-is-release:
@@ -717,7 +717,7 @@ jobs:
     steps:
     - uses: actions/download-artifact@v8
       with:
-        pattern: static-analysis-logs-*
+        pattern: static-analysis-*-logs
         merge-multiple: true
         path: prerelease/Static Analysis Logs
     - uses: horochx/deploy-via-scp@master
@@ -748,29 +748,8 @@ jobs:
         fetch-depth: 0
     - uses: actions/download-artifact@v8
       with:
-        name: linux-logs
-        path: logs/linux
-    - uses: actions/download-artifact@v8
-      with:
-        name: macos-logs
-        path: logs/macos
-    - uses: actions/download-artifact@v8
-      with:
-        name: windows-logs
-        path: logs/windows
-    - uses: actions/download-artifact@v8
-      with:
-        name: windows-clang-logs
-        path: logs/windows-clang
-    - uses: actions/download-artifact@v8
-      with:
-        name: webassembly-logs
-        path: logs/wasm
-    - uses: actions/download-artifact@v8
-      with:
-        pattern: static-analysis-logs-*
-        merge-multiple: true
-        path: logs/staticanalysis
+        pattern: '*-logs'
+        path: logs
     - name: Install Perl modules
       uses: perl-actions/install-with-cpanm@v2
       with:
