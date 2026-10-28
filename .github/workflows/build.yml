@@ -821,7 +821,6 @@ jobs:
         path: build/clang/*.log
 
   check-is-release:
-    if: github.event_name != 'pull_request'
     name: Check For Release Tag
     runs-on: ubuntu-latest
     outputs:
