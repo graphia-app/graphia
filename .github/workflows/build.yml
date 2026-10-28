@@ -24,9 +24,7 @@ jobs:
         sudo apt-get update
         sudo apt install gcc-${{ env.GCC_VERSION }} g++-${{ env.GCC_VERSION }} mold
     - name: Install Dependencies
-      run: |
-        sudo apt-get update
-        sudo apt install libxcb-cursor0
+      run: sudo apt install libxcb-cursor0
     - name: Install Qt
       uses: ./.github/actions/install-qt
       with:
