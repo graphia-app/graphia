@@ -221,7 +221,7 @@ jobs:
     - uses: seanmiddleditch/gha-setup-ninja@v3
     - uses: actions/setup-node@v7
       with:
-        node-version: '18'
+        node-version: '24'
     - name: Compile
       run: scripts/macos-build.sh
     - name: Test
