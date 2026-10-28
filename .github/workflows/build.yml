@@ -871,44 +871,15 @@ jobs:
         name: webassembly
         path: release/WebAssembly
     - name: Create Release
-      uses: actions/create-release@v1
+      run: |
+        gh release create "${GITHUB_REF_NAME}" --title "Release ${GITHUB_REF_NAME}" --notes "" \
+          "release/Linux AppImage"/*.tar.gz \
+          "release/macOS Disk Image"/*.dmg \
+          "release/Windows Installer"/*.exe \
+          "release/WebAssembly"/*.tar.gz
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-    - name: Upload Linux Binary
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: release/Linux AppImage/*.tar.gz
-        tag: ${{ github.ref }}
-        overwrite: true
-        file_glob: true
-    - name: Upload macOS Binary
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: release/macOS Disk Image/*.dmg
-        tag: ${{ github.ref }}
-        overwrite: true
-        file_glob: true
-    - name: Upload Windows Binary
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: release/Windows Installer/*.exe
-        tag: ${{ github.ref }}
-        overwrite: true
-        file_glob: true
-    - name: Upload WebAssembly Tarball
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: release/WebAssembly/*.tar.gz
-        tag: ${{ github.ref }}
-        overwrite: true
-        file_glob: true
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_REPO: ${{ github.repository }}
 
   prereleasebuilds:
     if: github.event_name != 'pull_request'
