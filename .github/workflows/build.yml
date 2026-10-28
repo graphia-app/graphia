@@ -517,7 +517,7 @@ jobs:
       run: |
         sudo wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh
         sudo bash /tmp/llvm.sh ${{ env.CLANG_VERSION }}
-        sudo apt install g++ cmake clang llvm-${{ env.CLANG_VERSION }}-dev git-core libclang-${{ env.CLANG_VERSION }}-dev
+        sudo apt install clang llvm-${{ env.CLANG_VERSION }}-dev libclang-${{ env.CLANG_VERSION }}-dev
     - name: Install Qt
       uses: ./.github/actions/install-qt
     - uses: actions/checkout@v7
@@ -592,7 +592,7 @@ jobs:
       run: |
         sudo wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh
         sudo bash /tmp/llvm.sh ${{ env.CLANG_VERSION }}
-        sudo apt install g++ cmake clang llvm-${{ env.CLANG_VERSION }}-dev git-core libclang-${{ env.CLANG_VERSION }}-dev
+        sudo apt install clang llvm-${{ env.CLANG_VERSION }}-dev libclang-${{ env.CLANG_VERSION }}-dev
     - name: Install Qt
       uses: ./.github/actions/install-qt
     - uses: actions/checkout@v7
