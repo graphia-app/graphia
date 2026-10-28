@@ -313,27 +313,6 @@ jobs:
         name: webassembly-logs
         path: build/wasm/*.log
 
-  wasm-deploy:
-    name: Deploy WebAssembly
-    if: github.event_name != 'pull_request' && needs.check-is-release.outputs.is-release == 'true'
-    runs-on: ubuntu-latest
-    needs:
-      - check-is-release
-      - wasm
-    steps:
-    - uses: actions/checkout@v7
-    - uses: actions/checkout@v7
-      with:
-        repository: graphia-app/web
-        ssh-key: ${{ secrets.WASM_SSH_PRIVATE_KEY }}
-        path: web
-    - uses: actions/download-artifact@v8
-      with:
-        name: webassembly
-        path: build
-    - name: Deploy
-      run: scripts/wasm-deploy.sh web
-
   clang-debug:
     name: Clang Debug
     runs-on: ubuntu-latest
@@ -453,101 +432,19 @@ jobs:
     steps:
     - run: echo "Qt ${QT_VERSION} (${QT_MODULES}), Clang ${CLANG_VERSION}"
 
-  release:
-    name: GitHub Release
-    if: github.event_name != 'pull_request' && needs.check-is-release.outputs.is-release == 'true'
-    runs-on: ubuntu-latest
+  publish:
+    name: Publish
+    if: github.event_name != 'pull_request'
     needs:
       - check-is-release
       - linux
       - windows
       - macos
       - wasm
-    steps:
-    - uses: actions/download-artifact@v8
-      with:
-        name: linux-appimage
-        path: release/Linux AppImage
-    - uses: actions/download-artifact@v8
-      with:
-        name: macos-disk-image
-        path: release/macOS Disk Image
-    - uses: actions/download-artifact@v8
-      with:
-        name: windows-installer
-        path: release/Windows Installer
-    - uses: actions/download-artifact@v8
-      with:
-        name: webassembly
-        path: release/WebAssembly
-    - name: Create Release
-      run: |
-        gh release create "${GITHUB_REF_NAME}" --title "Release ${GITHUB_REF_NAME}" --notes "" \
-          "release/Linux AppImage"/*.tar.gz \
-          "release/macOS Disk Image"/*.dmg \
-          "release/Windows Installer"/*.exe \
-          "release/WebAssembly"/*.tar.gz
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        GH_REPO: ${{ github.repository }}
-
-  prereleasebuilds:
-    if: github.event_name != 'pull_request'
-    name: Upload Builds to graphia.dev
-    runs-on: ubuntu-latest
-    needs:
-      - linux
-      - windows
-      - macos
-      - wasm
-    steps:
-    - uses: actions/download-artifact@v8
-      with:
-        name: linux-appimage
-        path: prerelease/Linux AppImage
-    - uses: actions/download-artifact@v8
-      with:
-        name: linux-logs
-        path: prerelease/Linux Logs
-    - uses: actions/download-artifact@v8
-      with:
-        name: macos-disk-image
-        path: prerelease/macOS Disk Image
-    - uses: actions/download-artifact@v8
-      with:
-        name: macos-logs
-        path: prerelease/macOS Logs
-    - uses: actions/download-artifact@v8
-      with:
-        name: windows-installer
-        path: prerelease/Windows Installer
-    - uses: actions/download-artifact@v8
-      with:
-        name: windows-logs
-        path: prerelease/Windows Logs
-    - uses: actions/download-artifact@v8
-      with:
-        name: windows-clang-installer
-        path: prerelease/Windows Clang Installer
-    - uses: actions/download-artifact@v8
-      with:
-        name: windows-clang-logs
-        path: prerelease/Windows Clang Logs
-    - uses: actions/download-artifact@v8
-      with:
-        name: webassembly
-        path: prerelease/WebAssembly
-    - uses: actions/download-artifact@v8
-      with:
-        name: webassembly-logs
-        path: prerelease/WebAssembly Logs
-    - uses: horochx/deploy-via-scp@master
-      with:
-        host: ${{ secrets.PRERELEASE_HOST }}
-        user: ${{ secrets.PRERELEASE_USERNAME }}
-        key: ${{ secrets.PRERELEASE_KEY }}
-        local: "prerelease/*"
-        remote: ${{ secrets.PRERELEASE_DIR }}
+    uses: ./.github/workflows/publish.yml
+    with:
+      is-release: ${{ needs.check-is-release.outputs.is-release == 'true' }}
+    secrets: inherit
 
   log-analysis:
     if: github.event_name != 'pull_request'
