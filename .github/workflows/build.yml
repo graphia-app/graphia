@@ -111,74 +111,50 @@ jobs:
     - name: Test
       shell: pwsh
       run: ctest --test-dir build --output-on-failure
-    - name: Upload Executables for Signing
-      id: unsigned-exes
+    - name: Sign Executables
       if: needs.check-is-release.outputs.is-release == 'true'
-      uses: actions/upload-artifact@v7
+      uses: ./.github/actions/sign
       with:
-        name: ${{ matrix.id }}-unsigned-exes
+        artifact-name: ${{ matrix.id }}-unsigned-exes
         path: |
           build/CrashReporter.exe
           build/Graphia.exe
           build/MessageBox.exe
           build/Updater.exe
           build/plugins/*.dll
-    - name: Sign Executables
-      if: needs.check-is-release.outputs.is-release == 'true'
-      uses: signpath/github-action-submit-signing-request@v1
-      with:
+        output-directory: build
         api-token: ${{ secrets.WINDOWS_SIGNPATH_API_TOKEN }}
         organization-id: ${{ secrets.WINDOWS_SIGNPATH_ORGANIZATION_ID }}
         project-slug: ${{ secrets.WINDOWS_SIGNPATH_PROJECT_SLUG }}
         signing-policy-slug: ${{ secrets.WINDOWS_SIGNPATH_SIGNING_POLICY_SLUG }}
-        artifact-configuration-slug: zipped-exes
-        github-artifact-id: ${{ steps.unsigned-exes.outputs.artifact-id }}
-        wait-for-completion: true
-        output-artifact-directory: build
     - name: Prepare NSIS Installer
       shell: pwsh
       run: .\installers\windows\prepare-installer.ps1
-    - name: Upload Uninstaller for Signing
-      id: unsigned-uninstaller
-      if: needs.check-is-release.outputs.is-release == 'true'
-      uses: actions/upload-artifact@v7
-      with:
-        name: ${{ matrix.id }}-unsigned-uninstaller
-        path: installer/Uninstall.exe
     - name: Sign Uninstaller
       if: needs.check-is-release.outputs.is-release == 'true'
-      uses: signpath/github-action-submit-signing-request@v1
+      uses: ./.github/actions/sign
       with:
+        artifact-name: ${{ matrix.id }}-unsigned-uninstaller
+        path: installer/Uninstall.exe
+        output-directory: installer
         api-token: ${{ secrets.WINDOWS_SIGNPATH_API_TOKEN }}
         organization-id: ${{ secrets.WINDOWS_SIGNPATH_ORGANIZATION_ID }}
         project-slug: ${{ secrets.WINDOWS_SIGNPATH_PROJECT_SLUG }}
         signing-policy-slug: ${{ secrets.WINDOWS_SIGNPATH_SIGNING_POLICY_SLUG }}
-        artifact-configuration-slug: zipped-exes
-        github-artifact-id: ${{ steps.unsigned-uninstaller.outputs.artifact-id }}
-        wait-for-completion: true
-        output-artifact-directory: installer
     - name: Make NSIS Installer
       shell: pwsh
       run: .\installers\windows\make-installer.ps1
-    - name: Upload Installer for Signing
-      id: unsigned-installer
-      if: needs.check-is-release.outputs.is-release == 'true'
-      uses: actions/upload-artifact@v7
-      with:
-        name: ${{ matrix.id }}-unsigned-installer
-        path: installer/*-installer.exe
     - name: Sign Installer
       if: needs.check-is-release.outputs.is-release == 'true'
-      uses: signpath/github-action-submit-signing-request@v1
+      uses: ./.github/actions/sign
       with:
+        artifact-name: ${{ matrix.id }}-unsigned-installer
+        path: installer/*-installer.exe
+        output-directory: installer
         api-token: ${{ secrets.WINDOWS_SIGNPATH_API_TOKEN }}
         organization-id: ${{ secrets.WINDOWS_SIGNPATH_ORGANIZATION_ID }}
         project-slug: ${{ secrets.WINDOWS_SIGNPATH_PROJECT_SLUG }}
         signing-policy-slug: ${{ secrets.WINDOWS_SIGNPATH_SIGNING_POLICY_SLUG }}
-        artifact-configuration-slug: zipped-exes
-        github-artifact-id: ${{ steps.unsigned-installer.outputs.artifact-id }}
-        wait-for-completion: true
-        output-artifact-directory: installer
     - uses: actions/upload-artifact@v7
       if: github.event_name != 'pull_request'
       with:
