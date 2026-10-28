@@ -826,24 +826,19 @@ jobs:
     outputs:
       is-release: ${{ steps.is-release-test.outputs.result }}
     steps:
-    - uses: actions/checkout@v7
-      with:
-        ref: ${{ github.ref }}
-        fetch-depth: 0
     - name: Check Release Tag
       id: is-release-test
       run: |
-        GIT_TAG=$(git describe --exact-match --tags || true)
-        if [[ -z "${GIT_TAG}" || "${{ github.ref_type }}" != 'tag' ]]
+        if [[ "${GITHUB_REF_TYPE}" != 'tag' ]]
         then
           echo "Not tagged"
           echo "result=false" >> $GITHUB_OUTPUT
-        elif [[ "${GIT_TAG}" =~ ^[0-9]+\.[0-9]+(-rc[0-9]+)?$ ]]
+        elif [[ "${GITHUB_REF_NAME}" =~ ^[0-9]+\.[0-9]+(-rc[0-9]+)?$ ]]
         then
-          echo "'${GIT_TAG}' is a release"
+          echo "'${GITHUB_REF_NAME}' is a release"
           echo "result=true" >> $GITHUB_OUTPUT
         else
-          echo "'${GIT_TAG}' is not a release"
+          echo "'${GITHUB_REF_NAME}' is not a release"
           echo "result=false" >> $GITHUB_OUTPUT
         fi
       shell: bash
