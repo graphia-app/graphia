@@ -28,11 +28,9 @@ jobs:
         sudo apt-get update
         sudo apt install libxcb-cursor0
     - name: Install Qt
-      uses: jurplel/install-qt-action@v4
+      uses: ./.github/actions/install-qt
       with:
-        version: ${{ env.QT_VERSION }}
-        modules: ${{ env.QT_MODULES }} qtserialport
-        cache: true
+        extra-modules: qtserialport
     - name: ccache
       uses: hendrikmuhs/ccache-action@main
       with:
@@ -88,12 +86,7 @@ jobs:
         ref: ${{ github.ref }}
         fetch-depth: 0
     - name: Install Qt
-      uses: jurplel/install-qt-action@v4
-      with:
-        aqtsource: ${{ env.AQT_SOURCE }}
-        version: ${{ env.QT_VERSION }}
-        modules: ${{ env.QT_MODULES }}
-        cache: true
+      uses: ./.github/actions/install-qt
     - name: ccache
       uses: hendrikmuhs/ccache-action@main
       with:
@@ -177,11 +170,7 @@ jobs:
         ref: ${{ github.ref }}
         fetch-depth: 0
     - name: Install Qt
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: ${{ env.QT_VERSION }}
-        modules: ${{ env.QT_MODULES }}
-        cache: true
+      uses: ./.github/actions/install-qt
     - name: ccache
       uses: hendrikmuhs/ccache-action@main
       with:
@@ -230,11 +219,7 @@ jobs:
         ref: ${{ github.ref }}
         fetch-depth: 0
     - name: Install Qt
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: ${{ env.QT_VERSION }}
-        modules: ${{ env.QT_MODULES }}
-        cache: true
+      uses: ./.github/actions/install-qt
     - name: ccache
       uses: hendrikmuhs/ccache-action@main
       with:
@@ -260,12 +245,7 @@ jobs:
         ref: ${{ github.ref }}
         fetch-depth: 0
     - name: Install Qt
-      uses: jurplel/install-qt-action@v4
-      with:
-        aqtsource: ${{ env.AQT_SOURCE }}
-        version: ${{ env.QT_VERSION }}
-        modules: ${{ env.QT_MODULES }}
-        cache: true
+      uses: ./.github/actions/install-qt
     - name: ccache
       uses: hendrikmuhs/ccache-action@main
       with:
@@ -373,11 +353,7 @@ jobs:
         sudo apt-get install libc++-${{ env.CLANG_VERSION }}-dev libc++1-${{ env.CLANG_VERSION }} libc++abi-${{ env.CLANG_VERSION }}-dev libc++abi1-${{ env.CLANG_VERSION }} mold
         sudo apt-get install libunwind-${{ env.CLANG_VERSION }}-dev
     - name: Install Qt
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: ${{ env.QT_VERSION }}
-        modules: ${{ env.QT_MODULES }}
-        cache: true
+      uses: ./.github/actions/install-qt
     - name: ccache
       uses: hendrikmuhs/ccache-action@main
       with:
@@ -479,11 +455,7 @@ jobs:
         restore-keys: |
           ctcache-
     - name: Install Qt
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: ${{ env.QT_VERSION }}
-        modules: ${{ env.QT_MODULES }}
-        cache: true
+      uses: ./.github/actions/install-qt
     - uses: actions/download-artifact@v8
       with:
         name: static-analysis-build
@@ -521,11 +493,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install cppcheck
     - name: Install Qt
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: ${{ env.QT_VERSION }}
-        modules: ${{ env.QT_MODULES }}
-        cache: true
+      uses: ./.github/actions/install-qt
     - uses: actions/download-artifact@v8
       with:
         name: static-analysis-build
@@ -556,11 +524,7 @@ jobs:
         sudo bash /tmp/llvm.sh ${{ env.CLANG_VERSION }}
         sudo apt install g++ cmake clang llvm-${{ env.CLANG_VERSION }}-dev git-core libclang-${{ env.CLANG_VERSION }}-dev
     - name: Install Qt
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: ${{ env.QT_VERSION }}
-        modules: ${{ env.QT_MODULES }}
-        cache: true
+      uses: ./.github/actions/install-qt
     - uses: actions/checkout@v7
       with:
         repository: KDE/clazy
@@ -605,11 +569,7 @@ jobs:
         ref: ${{ github.ref }}
         fetch-depth: 0
     - name: Install Qt
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: ${{ env.QT_VERSION }}
-        modules: ${{ env.QT_MODULES }}
-        cache: true
+      uses: ./.github/actions/install-qt
     - uses: actions/download-artifact@v8
       with:
         name: static-analysis-build
@@ -639,11 +599,7 @@ jobs:
         sudo bash /tmp/llvm.sh ${{ env.CLANG_VERSION }}
         sudo apt install g++ cmake clang llvm-${{ env.CLANG_VERSION }}-dev git-core libclang-${{ env.CLANG_VERSION }}-dev
     - name: Install Qt
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: ${{ env.QT_VERSION }}
-        modules: ${{ env.QT_MODULES }}
-        cache: true
+      uses: ./.github/actions/install-qt
     - uses: actions/checkout@v7
       with:
         repository: include-what-you-use/include-what-you-use
