@@ -521,15 +521,10 @@ Item
                 visible: tableView.columns !== 0
                 boundsBehavior: Flickable.StopAtBounds
 
-                onOriginXChanged:
-                {
-                    // Weird things can happen when the origin shifts, for some reason when the origin
-                    // returns to 0 contentX can be left in a -ve position offsetting the content.
-                    // This corrects that behaviour.
-                    // (Reproduce by scrolling to far right, deselecting, selecting. Then scroll to far left slowly)
-                    // Then select another node...)
-                    contentX = originX + (horizontalTableViewScrollBar.position * contentWidth);
-                }
+                ScrollBar.horizontal: horizontalTableViewScrollBar
+
+                // A relayout can move the origin past contentX, which would leave a gap at the edge
+                onOriginXChanged: { returnToBounds(); }
 
                 readonly property int sortIndicatorWidth: 7
                 readonly property int sortIndicatorHeight: 4
@@ -905,6 +900,27 @@ Item
                 visible: tableView.columns !== 0
                 boundsBehavior: Flickable.StopAtBounds
 
+                // Horizontal scrolling goes through headerView, whose extents are
+                // correct even when there are no rows to lay out here
+                flickableDirection: Flickable.VerticalFlick
+
+                WheelHandler
+                {
+                    orientation: Qt.Horizontal
+                    blocking: false
+
+                    onWheel: function(event)
+                    {
+                        const angleDeltaPerStep = 120;
+                        const pixelsPerLine = 24;
+
+                        let pixels = event.pixelDelta.x !== 0 ? event.pixelDelta.x :
+                            (event.angleDelta.x / angleDeltaPerStep) * Qt.styleHints.wheelScrollLines * pixelsPerLine;
+
+                        horizontalTableViewScrollBar.scrollBy(-pixels);
+                    }
+                }
+
                 // This entire canvas's purpose is to render
                 // alternating colours when no rows are selected
                 Canvas
@@ -932,33 +948,6 @@ Item
                     }
 
                     CanvasPaletteHelper {}
-                }
-
-                ScrollBar.horizontal: ScrollBar
-                {
-                    id: horizontalTableViewScrollBar
-
-                    parent: tableView.parent
-                    anchors.left: tableView.left
-                    anchors.right: tableView.right
-                    anchors.rightMargin: verticalTableViewScrollBar.size < 1 ? verticalTableViewScrollBar.width : 0
-                    anchors.bottom: tableView.bottom
-
-                    policy: ScrollBar.AsNeeded
-                    minimumSize: 0.1
-                    visible: size < 1.0 // So that it's invisible to mouse clicks
-
-                    onPositionChanged: function()
-                    {
-                        // Sometimes syncViews don't actually sync visibleAreas
-                        // however contentX and contentWidth are synced.
-                        // The only reliable way to position both views is using
-                        // the scrollbar position directly
-                        if(position + size > 1)
-                            position = 1 - size;
-                        if(position < 0)
-                            position = 0;
-                    }
                 }
 
                 ScrollBar.vertical: ScrollBar
@@ -1231,6 +1220,26 @@ Item
 
                 // This is just a reference to the menu, so we can repopulate it later as necessary
                 property PlatformMenu _tableMenu
+            }
+
+            ScrollBar
+            {
+                id: horizontalTableViewScrollBar
+
+                anchors.left: tableView.left
+                anchors.right: tableView.right
+                anchors.rightMargin: verticalTableViewScrollBar.size < 1 ? verticalTableViewScrollBar.width : 0
+                anchors.bottom: tableView.bottom
+
+                policy: ScrollBar.AsNeeded
+                minimumSize: 0.1
+                visible: size < 1.0 // So that it's invisible to mouse clicks
+
+                function scrollBy(pixels)
+                {
+                    let contentLength = headerView.width / size;
+                    position = Utils.clamp(position + (pixels / contentLength), 0, 1 - size);
+                }
             }
 
             ScrollBarCornerFiller
