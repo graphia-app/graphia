@@ -19,8 +19,11 @@
 $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $true
 
+. .\scripts\enter-vs-dev-shell.ps1
+
 $BUILD_DIR = "build"
 $INSTALLER_DIR = "installer"
+$CRT_DIR = "$Env:VCToolsRedistDir\x64\Microsoft.VC143.CRT"
 
 Get-Content ".\$BUILD_DIR\variables.ps1"
 . ".\$BUILD_DIR\variables.ps1"
@@ -67,7 +70,7 @@ Write-Host "------ windeployqt"
 }
 
 Write-Host "------ copying runtime + extras"
-Copy-Item "${Env:CRTDIRECTORY}\*.*" $INSTALLER_DIR -Recurse -Verbose
+Copy-Item "$CRT_DIR\*.*" $INSTALLER_DIR -Recurse -Verbose
 Copy-Item "${Env:WindowsSdkDir}\redist\ucrt\DLLs\x64\*.*" $INSTALLER_DIR -Recurse -Verbose
 Copy-Item "misc\windows-extras\*.*" $INSTALLER_DIR -Recurse -Verbose
 
@@ -84,7 +87,7 @@ Copy-Item "$BUILD_DIR\Updater.exe", "$BUILD_DIR\thirdparty.dll" $UPDATER_DIR -Ve
     & windeployqt @WINDEPLOYQT_ARGS --dir $UPDATER_DIR "$UPDATER_DIR\thirdparty.dll"
 }
 
-Copy-Item "${Env:CRTDIRECTORY}\*.*", "${Env:WindowsSdkDir}\redist\ucrt\DLLs\x64\*.*" $UPDATER_DIR -Recurse -Verbose
+Copy-Item "$CRT_DIR\*.*", "${Env:WindowsSdkDir}\redist\ucrt\DLLs\x64\*.*" $UPDATER_DIR -Recurse -Verbose
 
 Get-ChildItem -Path $UPDATER_DIR -File -Recurse | ForEach-Object {
     $relPath = $_.FullName.Substring((Resolve-Path "$UPDATER_DIR").Path.Length + 1)

@@ -70,6 +70,7 @@ endif()
 list(APPEND MISC
     ${CMAKE_CURRENT_LIST_DIR}/scripts/defaults.ps1
     ${CMAKE_CURRENT_LIST_DIR}/scripts/defaults.sh
+    ${CMAKE_CURRENT_LIST_DIR}/scripts/enter-vs-dev-shell.ps1
     ${CMAKE_CURRENT_LIST_DIR}/scripts/linux-build.sh
     ${CMAKE_CURRENT_LIST_DIR}/scripts/macos-build.sh
     ${CMAKE_CURRENT_LIST_DIR}/scripts/wasm-build.sh

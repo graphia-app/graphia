@@ -20,6 +20,7 @@ $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $true
 
 . .\scripts\defaults.ps1
+. .\scripts\enter-vs-dev-shell.ps1
 
 $BUILD_DIR = "build"
 
