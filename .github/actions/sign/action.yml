@@ -1,0 +1,40 @@
+name: Sign
+description: Sign files with SignPath, replacing them with their signed versions
+inputs:
+  artifact-name:
+    description: Name of the artifact that carries the files to SignPath
+    required: true
+  path:
+    description: Files to sign
+    required: true
+  output-directory:
+    description: Directory the signed files are written to
+    required: true
+  api-token:
+    required: true
+  organization-id:
+    required: true
+  project-slug:
+    required: true
+  signing-policy-slug:
+    required: true
+runs:
+  using: composite
+  steps:
+  - name: Upload for Signing
+    id: unsigned
+    uses: actions/upload-artifact@v7
+    with:
+      name: ${{ inputs.artifact-name }}
+      path: ${{ inputs.path }}
+  - name: Sign
+    uses: signpath/github-action-submit-signing-request@v1
+    with:
+      api-token: ${{ inputs.api-token }}
+      organization-id: ${{ inputs.organization-id }}
+      project-slug: ${{ inputs.project-slug }}
+      signing-policy-slug: ${{ inputs.signing-policy-slug }}
+      artifact-configuration-slug: zipped-exes
+      github-artifact-id: ${{ steps.unsigned.outputs.artifact-id }}
+      wait-for-completion: true
+      output-artifact-directory: ${{ inputs.output-directory }}
