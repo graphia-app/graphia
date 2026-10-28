@@ -34,7 +34,12 @@ function(add_unit_test NAME)
 
     add_test(NAME ${NAME} COMMAND ${NAME})
     # Without a console, Qt and QtTest log to the debugger or the journal instead
-    set_tests_properties(${NAME} PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_FORCE_STDERR_LOGGING=1")
+    set_tests_properties(${NAME} PROPERTIES ENVIRONMENT "QT_FORCE_STDERR_LOGGING=1")
+
+    if(UNIX AND NOT APPLE)
+        # The offscreen platform only has OpenGL through GLX, so elsewhere the native one is used
+        set_property(TEST ${NAME} APPEND PROPERTY ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+    endif()
 
     if(WIN32)
         # Windows has no rpath, so the shared libraries in the root of the build need to be on PATH
@@ -108,6 +113,8 @@ add_unit_test(tst_genericplugin loading/tst_genericplugin.cpp)
 add_unit_test(tst_layoutthread layout/tst_layoutthread.cpp)
 add_unit_test(tst_random utils/tst_random.cpp)
 add_unit_test(tst_nodeattributetablemodel plugins/tst_nodeattributetablemodel.cpp)
+
+add_unit_test(tst_opengl rendering/tst_opengl.cpp)
 
 # Headless mode loads the real plugins, from the build directory
 add_unit_test(tst_headless headless/tst_headless.cpp)
