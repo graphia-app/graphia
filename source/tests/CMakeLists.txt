@@ -33,7 +33,8 @@ function(add_unit_test NAME)
     target_link_libraries(${NAME} PRIVATE ${APP_CORE_FOR_TESTS} Qt6::Test)
 
     add_test(NAME ${NAME} COMMAND ${NAME})
-    set_tests_properties(${NAME} PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+    # Without a console, Qt and QtTest log to the debugger or the journal instead
+    set_tests_properties(${NAME} PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_FORCE_STDERR_LOGGING=1")
 
     if(WIN32)
         # Windows has no rpath, so the shared libraries in the root of the build need to be on PATH
@@ -79,7 +80,7 @@ if(UNIX AND NOT APPLE)
     # Qt takes the system locale from the environment on Linux, so also run in a
     # locale whose numbers differ from the C locale's in every respect
     add_test(NAME tst_string_sv_SE COMMAND tst_string)
-    set_tests_properties(tst_string_sv_SE PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;LC_ALL=sv_SE.UTF-8")
+    set_tests_properties(tst_string_sv_SE PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_FORCE_STDERR_LOGGING=1;LC_ALL=sv_SE.UTF-8")
 endif()
 
 add_unit_test(tst_statistics utils/tst_statistics.cpp)
