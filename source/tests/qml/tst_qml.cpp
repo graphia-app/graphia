@@ -25,15 +25,21 @@
 #include "app/ui/qml/Graphia/enrichmenttablemodel.h"
 #include "app/ui/visualisations/visualisationconfigparser.h"
 
+#include "tests/common/testdocument.h"
 #include "tests/common/testenvironment.h"
 #include "tests/common/testgraphmodel.h"
 
+#include "shared/loading/gmlfileparser.h"
+#include "shared/plugins/nodeattributetablemodel.h"
+
 #include <QtQuickTest/quicktest.h>
 #include <QApplication>
+#include <QByteArray>
 #include <QQmlContext>
 #include <QQmlEngine>
 #include <QObject>
 #include <QString>
+#include <QStringList>
 #include <QVariantMap>
 
 #include <memory>
@@ -49,6 +55,10 @@ class Setup : public QObject
 
     // A graph with a few attributes, for availableAttributesModel
     std::unique_ptr<TestGraphModel> _graphModel;
+
+    // A graph whose node attributes have names of very different lengths, for nodeAttributeTableModel
+    std::unique_ptr<TestGraphModel> _tableGraphModel;
+    std::unique_ptr<TestDocument> _tableDocument;
 
 public:
     Setup() = default;
@@ -140,6 +150,19 @@ public:
         return new EnrichmentTableModel;
     }
 
+    // As a plugin's table of node attributes, of _tableGraphModel; the caller takes ownership
+    Q_INVOKABLE NodeAttributeTableModel* nodeAttributeTableModel()
+    {
+        auto* tableModel = new NodeAttributeTableModel;
+        tableModel->initialise(_tableDocument.get(), &_tableGraphModel->graphModel().userNodeData());
+
+        // The table is filled when the transformed graph changes, as it does once loaded
+        _tableGraphModel->applyTransforms({uR"(RemoveNodes where $NodeName == "a")"_s});
+        _tableGraphModel->applyTransforms({});
+
+        return tableModel;
+    }
+
 public slots:
     void applicationAvailable()
     {
@@ -154,6 +177,26 @@ public slots:
         _graphModel->addNodeAttribute<double>(u"Rank %1"_s, {{u"a"_s, 1.0}, {u"b"_s, 2.0}});
         _graphModel->addNodeAttribute<QString>(u"A\\B"_s, {{u"a"_s, u"x"_s}, {u"b"_s, u"y"_s}});
         _graphModel->addEdgeAttribute<double>(u"EdgeWeight"_s, {{{u"a"_s, u"b"_s}, 1.0}});
+
+        // A column is widened to fit its name, so with ever longer names last, a table
+        // that has only loaded some of its columns misjudges its width
+        QStringList attributes;
+        attributes.reserve(10u);
+        for(int i = 0; i < 10; i++)
+            attributes.append(u"short%1 %2"_s.arg(i).arg(i));
+        for(int i = 0; i < 10; i++)
+            attributes.append(u"longerName%1%2 %3"_s.arg(i).arg(QString(static_cast<qsizetype>(i) * 4, u'x')).arg(i));
+
+        auto attributeGml = attributes.join(u" "_s);
+        auto gml = uR"(graph
+[
+    node [ id 0 label "a" %1 ]
+    node [ id 1 label "b" %1 ]
+])"_s.arg(attributeGml).toUtf8();
+
+        _tableGraphModel = TestGraphModel::parse(gml, [](auto* userNodeData, auto* userEdgeData)
+            { return std::make_unique<GmlFileParser>(userNodeData, userEdgeData); });
+        _tableDocument = std::make_unique<TestDocument>(*_tableGraphModel);
     }
 
     void qmlEngineAvailable(QQmlEngine* engine)
