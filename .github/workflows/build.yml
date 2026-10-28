@@ -345,10 +345,7 @@ jobs:
         fetch-depth: 0
     - name: Install Tools
       run: |
-        sudo wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh
-        sudo bash /tmp/llvm.sh ${{ env.CLANG_VERSION }}
-        sudo apt-get update
-        sudo apt-get install mold
+        scripts/install-llvm.sh ${{ env.CLANG_VERSION }} mold
     - name: Install Qt
       uses: ./.github/actions/install-qt
     - name: ccache
@@ -425,10 +422,7 @@ jobs:
         fetch-depth: 0
     - name: Install Tools
       run: |
-        sudo wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh
-        sudo bash /tmp/llvm.sh ${{ env.CLANG_VERSION }}
-        sudo apt-get update
-        sudo apt-get install clang-tidy-${{ env.CLANG_VERSION }}
+        scripts/install-llvm.sh ${{ env.CLANG_VERSION }} clang-tidy-${{ env.CLANG_VERSION }}
     - name: Checkout ctcache
       uses: actions/checkout@v7
       with:
@@ -480,11 +474,7 @@ jobs:
         fetch-depth: 0
     - name: Install Tools
       run: |
-        sudo wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh
-        sudo bash /tmp/llvm.sh ${{ env.CLANG_VERSION }}
-        sudo apt-get update
-        sudo apt-get update
-        sudo apt-get install cppcheck
+        scripts/install-llvm.sh ${{ env.CLANG_VERSION }} cppcheck
     - name: Install Qt
       uses: ./.github/actions/install-qt
     - uses: actions/download-artifact@v8
@@ -513,9 +503,7 @@ jobs:
         fetch-depth: 0
     - name: Install Tools
       run: |
-        sudo wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh
-        sudo bash /tmp/llvm.sh ${{ env.CLANG_VERSION }}
-        sudo apt install clang llvm-${{ env.CLANG_VERSION }}-dev libclang-${{ env.CLANG_VERSION }}-dev
+        scripts/install-llvm.sh ${{ env.CLANG_VERSION }} clang llvm-${{ env.CLANG_VERSION }}-dev libclang-${{ env.CLANG_VERSION }}-dev
     - name: Install Qt
       uses: ./.github/actions/install-qt
     - uses: actions/checkout@v7
@@ -588,9 +576,7 @@ jobs:
         fetch-depth: 0
     - name: Install Tools
       run: |
-        sudo wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh
-        sudo bash /tmp/llvm.sh ${{ env.CLANG_VERSION }}
-        sudo apt install clang llvm-${{ env.CLANG_VERSION }}-dev libclang-${{ env.CLANG_VERSION }}-dev
+        scripts/install-llvm.sh ${{ env.CLANG_VERSION }} clang llvm-${{ env.CLANG_VERSION }}-dev libclang-${{ env.CLANG_VERSION }}-dev
     - name: Install Qt
       uses: ./.github/actions/install-qt
     - uses: actions/checkout@v7
