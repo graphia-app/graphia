@@ -8,7 +8,7 @@ on:
 
 jobs:
   wasm-deploy:
-    name: Deploy WebAssembly
+    name: Deploy wasm
     if: inputs.is-release
     runs-on: ubuntu-latest
     steps:
@@ -58,7 +58,7 @@ jobs:
         GH_REPO: ${{ github.repository }}
 
   prereleasebuilds:
-    name: Upload Builds to graphia.dev
+    name: Upload Builds
     runs-on: ubuntu-latest
     steps:
     - uses: actions/download-artifact@v8
