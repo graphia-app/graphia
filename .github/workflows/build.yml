@@ -350,8 +350,7 @@ jobs:
         sudo wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh
         sudo bash /tmp/llvm.sh ${{ env.CLANG_VERSION }}
         sudo apt-get update
-        sudo apt-get install libc++-${{ env.CLANG_VERSION }}-dev libc++1-${{ env.CLANG_VERSION }} libc++abi-${{ env.CLANG_VERSION }}-dev libc++abi1-${{ env.CLANG_VERSION }} mold
-        sudo apt-get install libunwind-${{ env.CLANG_VERSION }}-dev
+        sudo apt-get install mold
     - name: Install Qt
       uses: ./.github/actions/install-qt
     - name: ccache
@@ -431,8 +430,6 @@ jobs:
         sudo wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh
         sudo bash /tmp/llvm.sh ${{ env.CLANG_VERSION }}
         sudo apt-get update
-        sudo apt-get install libc++-${{ env.CLANG_VERSION }}-dev libc++1-${{ env.CLANG_VERSION }} libc++abi-${{ env.CLANG_VERSION }}-dev libc++abi1-${{ env.CLANG_VERSION }}
-        sudo apt-get install libunwind-${{ env.CLANG_VERSION }}-dev
         sudo apt-get install clang-tidy-${{ env.CLANG_VERSION }}
     - name: Checkout ctcache
       uses: actions/checkout@v7
@@ -488,8 +485,6 @@ jobs:
         sudo wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh
         sudo bash /tmp/llvm.sh ${{ env.CLANG_VERSION }}
         sudo apt-get update
-        sudo apt-get install libc++-${{ env.CLANG_VERSION }}-dev libc++1-${{ env.CLANG_VERSION }} libc++abi-${{ env.CLANG_VERSION }}-dev libc++abi1-${{ env.CLANG_VERSION }}
-        sudo apt-get install libunwind-${{ env.CLANG_VERSION }}-dev
         sudo apt-get update
         sudo apt-get install cppcheck
     - name: Install Qt
