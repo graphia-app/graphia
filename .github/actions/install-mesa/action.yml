@@ -1,0 +1,15 @@
+name: Install Mesa
+description: Use Mesa for software OpenGL on Windows, as Qt's own opengl32sw.dll is Mesa 11, which has only OpenGL 3.0
+runs:
+  using: composite
+  steps:
+  - shell: pwsh
+    run: |
+      gh release download 26.2.4 --repo pal1000/mesa-dist-win --pattern mesa3d-26.2.4-release-msvc.7z --output mesa.7z
+      7z x mesa.7z -omesa
+      Copy-Item mesa\x64\opengl32.dll mesa\x64\opengl32sw.dll
+      "QT_OPENGL=software" >> $env:GITHUB_ENV
+      "QT_OPENGL_DLL=$PWD\mesa\x64\opengl32sw.dll" >> $env:GITHUB_ENV
+      "$PWD\mesa\x64" >> $env:GITHUB_PATH
+    env:
+      GH_TOKEN: ${{ github.token }}

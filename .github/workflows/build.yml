@@ -23,7 +23,7 @@ jobs:
         sudo apt-get update
         sudo apt install gcc-${{ env.GCC_VERSION }} g++-${{ env.GCC_VERSION }} mold
     - name: Install Dependencies
-      run: sudo apt install libxcb-cursor0
+      run: sudo apt install libxcb-cursor0 xvfb
     - name: Install Qt
       uses: ./.github/actions/install-qt
       with:
@@ -40,7 +40,7 @@ jobs:
         CC: gcc-${{ env.GCC_VERSION }}
         CXX: g++-${{ env.GCC_VERSION }}
     - name: Test
-      run: ctest --test-dir build/gcc --output-on-failure
+      run: xvfb-run -a ctest --test-dir build/gcc --output-on-failure
     - name: AppImage
       run: |
         installers/linux/build.sh
@@ -84,6 +84,8 @@ jobs:
         fetch-depth: 0
     - name: Install Qt
       uses: ./.github/actions/install-qt
+    - name: Install Mesa
+      uses: ./.github/actions/install-mesa
     - name: ccache
       uses: hendrikmuhs/ccache-action@main
       with:
@@ -244,6 +246,8 @@ jobs:
         fetch-depth: 0
     - name: Install Qt
       uses: ./.github/actions/install-qt
+    - name: Install Mesa
+      uses: ./.github/actions/install-mesa
     - name: ccache
       uses: hendrikmuhs/ccache-action@main
       with:
@@ -324,6 +328,7 @@ jobs:
     - name: Install Tools
       run: |
         scripts/install-llvm.sh ${{ env.CLANG_VERSION }} mold
+        sudo apt-get install -y xvfb
     - name: Install Qt
       uses: ./.github/actions/install-qt
     - name: ccache
@@ -344,7 +349,7 @@ jobs:
         CC: clang-${{ env.CLANG_VERSION }}
         CXX: clang++-${{ env.CLANG_VERSION }}
     - name: Test
-      run: ctest --test-dir build/clang --output-on-failure
+      run: xvfb-run -a ctest --test-dir build/clang --output-on-failure
       env:
         UBSAN_OPTIONS: print_stacktrace=1
         LLVM_PROFILE_FILE: ${{ github.workspace }}/build/clang/profiles/%m-%p.profraw
