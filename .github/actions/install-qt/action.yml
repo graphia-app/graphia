@@ -1,0 +1,15 @@
+name: Install Qt
+description: Install the QT_VERSION and QT_MODULES the workflow sets
+inputs:
+  extra-modules:
+    description: Modules to install as well as QT_MODULES
+    default: ''
+runs:
+  using: composite
+  steps:
+  - uses: jurplel/install-qt-action@v4
+    with:
+      aqtsource: ${{ runner.os == 'Windows' && env.AQT_SOURCE || '' }}
+      version: ${{ env.QT_VERSION }}
+      modules: ${{ inputs.extra-modules && format('{0} {1}', env.QT_MODULES, inputs.extra-modules) || env.QT_MODULES }}
+      cache: true
