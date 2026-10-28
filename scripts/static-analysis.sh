@@ -19,9 +19,10 @@
 # along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-# Run the static analysis jobs from .github/workflows/build.yml locally: the
-# Clang Debug build that produces compile_commands.json, then each analyser,
-# leaving their logs in build/clang/. Run from the root of the source tree.
+# Run the static analysis jobs from .github/workflows/static-analysis.yml
+# locally: the Clang Debug build that produces compile_commands.json, then each
+# analyser, leaving their logs in build/clang/. Run from the root of the source
+# tree.
 #
 # Qt is found via QT_ROOT_DIR (as set by install-qt-action), or failing that in
 # a few usual install locations. The analysers can be overridden in the same way
@@ -44,12 +45,16 @@ usage()
 }
 
 WORKFLOW=".github/workflows/build.yml"
+ANALYSIS_WORKFLOW=".github/workflows/static-analysis.yml"
 
-if [ ! -e ${WORKFLOW} ]
-then
-  echo "${WORKFLOW} not found; run from the root of the source tree"
-  exit 1
-fi
+for FILE in ${WORKFLOW} ${ANALYSIS_WORKFLOW}
+do
+  if [ ! -e ${FILE} ]
+  then
+    echo "${FILE} not found; run from the root of the source tree"
+    exit 1
+  fi
+done
 
 workflowEnv()
 {
@@ -174,7 +179,7 @@ do
       # so by default build the same commit as the CI does
       if [ -z "${CLAZY}" ]
       then
-        CLAZY_REF=$(sed -n '/repository: KDE\/clazy/,/ref:/s/^ *ref: *//p' ${WORKFLOW})
+        CLAZY_REF=$(sed -n '/repository: KDE\/clazy/,/ref:/s/^ *ref: *//p' ${ANALYSIS_WORKFLOW})
         CLAZY_PREFIX="${CACHE_DIR}/clazy-${CLAZY_REF}"
 
         if [ ! -x "${CLAZY_PREFIX}/bin/clazy" ]
