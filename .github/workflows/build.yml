@@ -178,16 +178,12 @@ jobs:
         artifact-configuration-slug: zipped-exes
         github-artifact-id: ${{ steps.unsigned-installer.outputs.artifact-id }}
         wait-for-completion: true
-        output-artifact-directory: build
-    - name: Move Unsigned Installer
-      if: needs.check-is-release.outputs.is-release != 'true'
-      shell: pwsh
-      run: Move-Item installer/*-installer.exe build -Verbose
+        output-artifact-directory: installer
     - uses: actions/upload-artifact@v7
       if: github.event_name != 'pull_request'
       with:
         name: ${{ matrix.id }}-installer
-        path: build/Graphia-*-installer.exe
+        path: installer/Graphia-*-installer.exe
     - uses: actions/upload-artifact@v7
       with:
         name: ${{ matrix.id }}-logs
