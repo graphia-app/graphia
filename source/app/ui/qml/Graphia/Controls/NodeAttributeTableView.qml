@@ -962,7 +962,7 @@ Item
 
                     policy: ScrollBar.AsNeeded
                     minimumSize: 0.1
-                    visible: size < 1.0 // So that it's invisible to mouse clicks
+                    visible: size < 1.0 // So that it's invisible to mouse clicks (QTBUG-120352)
                 }
 
                 model: NodeAttributeTableDisplayModel
