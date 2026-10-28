@@ -1,6 +1,7 @@
 # [Graphia](https://graphia.app/)
 
 [![Build Status](https://github.com/graphia-app/graphia/actions/workflows/build.yml/badge.svg)](https://github.com/graphia-app/graphia/actions/workflows/build.yml)
+[![Coverage](https://coveralls.io/repos/github/graphia-app/graphia/badge.svg)](https://coveralls.io/github/graphia-app/graphia)
 ![Release](https://img.shields.io/github/v/release/graphia-app/graphia)
 ![Size](https://img.shields.io/github/repo-size/graphia-app/graphia)
 ![Downloads](https://img.shields.io/github/downloads/graphia-app/graphia/total)

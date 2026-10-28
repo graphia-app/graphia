@@ -362,6 +362,11 @@ jobs:
         path: |
           build/clang/coverage.txt
           build/clang/coverage.lcov
+    - uses: coverallsapp/github-action@v2
+      if: ${{ success() || failure() }}
+      with:
+        file: build/clang/coverage.lcov
+        fail-on-error: false
     - uses: actions/upload-artifact@v7
       with:
         name: static-analysis-clang-logs
