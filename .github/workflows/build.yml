@@ -197,17 +197,12 @@ jobs:
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
-    - name: Force Python to version 3.10 to workaround node-gyp install problem (remove later)
-      uses: actions/setup-python@v7
-      with:
-        python-version: '3.10'
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
         cache: true
-        setup-python: false # Python installed above
     - name: ccache
       uses: hendrikmuhs/ccache-action@main
       with:
