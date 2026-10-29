@@ -266,7 +266,7 @@ void SelectionManager::invertNodeSelection()
         emit selectionChanged(this);
 }
 
-void SelectionManager::setNodesMask(const NodeIdSet& nodeIds, bool applyMask)
+void SelectionManager::setNodesMask(const NodeIdSet& nodeIds, NamedBool<"applyMask"> applyMask)
 {
     {
         const std::unique_lock<std::recursive_mutex> lock(_mutex);
@@ -306,7 +306,7 @@ bool SelectionManager::nodesMaskActive() const
     return !_nodeIdsMask.empty();
 }
 
-void SelectionManager::setNodesMask(const std::vector<NodeId>& nodeIds, bool applyMask)
+void SelectionManager::setNodesMask(const std::vector<NodeId>& nodeIds, NamedBool<"applyMask"> applyMask)
 {
     setNodesMask(NodeIdSet(nodeIds.begin(), nodeIds.end()), applyMask);
 }

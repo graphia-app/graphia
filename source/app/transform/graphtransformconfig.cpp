@@ -143,13 +143,13 @@ void GraphTransformConfig::setParameterValue(const QString& name,
         _parameters.emplace_back(Parameter{._name = name, ._value = value});
 }
 
-QString GraphTransformConfig::Parameter::valueAsString(bool asWritten) const
+QString GraphTransformConfig::Parameter::valueAsString(NamedBool<"asWritten"> asWritten) const
 {
     struct Visitor
     {
-        bool _asWritten;
+        NamedBool<"asWritten"> _asWritten;
 
-        explicit Visitor(bool asWritten_) : _asWritten(asWritten_) {}
+        explicit Visitor(NamedBool<"asWritten"> asWritten_) : _asWritten(asWritten_) {}
 
         QString operator()(double d) const          { return doubleAsString(d); }
         QString operator()(int i) const             { return QString::number(i); }
@@ -238,17 +238,17 @@ QVariantMap GraphTransformConfig::conditionAsVariantMap() const
     return std::visit(ConditionVisitor(), _condition);
 }
 
-QString GraphTransformConfig::conditionAsString(bool forDisplay, const AttributeDisplayNameFn& attributeDisplayName,
-    const AttributeDisplayValueFn& attributeDisplayValue) const
+QString GraphTransformConfig::conditionAsString(NamedBool<"forDisplay"> forDisplay,
+    const AttributeDisplayNameFn& attributeDisplayName, const AttributeDisplayValueFn& attributeDisplayValue) const
 {
     struct ConditionVisitor
     {
-        ConditionVisitor(bool forDisplay, const AttributeDisplayNameFn& attributeDisplayName,
+        ConditionVisitor(NamedBool<"forDisplay"> forDisplay, const AttributeDisplayNameFn& attributeDisplayName,
             const AttributeDisplayValueFn& attributeDisplayValue) :
             _forDisplay(forDisplay), _attributeDisplayName(attributeDisplayName),
             _attributeDisplayValue(attributeDisplayValue) {}
 
-        bool _forDisplay;
+        NamedBool<"forDisplay"> _forDisplay;
         AttributeDisplayNameFn _attributeDisplayName;
         AttributeDisplayValueFn _attributeDisplayValue;
 
@@ -256,10 +256,10 @@ QString GraphTransformConfig::conditionAsString(bool forDisplay, const Attribute
         {
             struct Visitor
             {
-                Visitor(bool forDisplay, const AttributeDisplayNameFn& attributeDisplayName) :
+                Visitor(NamedBool<"forDisplay"> forDisplay, const AttributeDisplayNameFn& attributeDisplayName) :
                     _forDisplay(forDisplay), _attributeDisplayName(attributeDisplayName) {}
 
-                bool _forDisplay;
+                NamedBool<"forDisplay"> _forDisplay;
                 AttributeDisplayNameFn _attributeDisplayName;
 
                 QString operator()(const double& d) const   { return doubleAsString(d); }
@@ -383,7 +383,7 @@ QVariantMap GraphTransformConfig::asVariantMap(const GraphTransformFactory* fact
     return map;
 }
 
-QString GraphTransformConfig::asString(bool forDisplay, const GraphTransformFactory* factory,
+QString GraphTransformConfig::asString(NamedBool<"forDisplay"> forDisplay, const GraphTransformFactory* factory,
     const AttributeDisplayNameFn& attributeDisplayName, const AttributeDisplayValueFn& attributeDisplayValue) const
 {
     if(forDisplay)
@@ -419,7 +419,7 @@ QString GraphTransformConfig::asString(bool forDisplay, const GraphTransformFact
         s += u" with"_s;
 
         for(const auto& parameter : _parameters)
-            s += u" %1 = %2"_s.arg(LexyConfigGrammar::writtenString(parameter._name), parameter.valueAsString(true));
+            s += u" %1 = %2"_s.arg(LexyConfigGrammar::writtenString(parameter._name), parameter.valueAsString("asWritten"_yes));
     }
 
     if(hasCondition())
@@ -476,7 +476,7 @@ QString GraphTransformConfig::asDisplayString(const GraphTransformFactory* facto
     if(hasCondition())
     {
         s = TransformDisplayText::whereCondition().arg(s,
-            conditionAsString(true, attributeDisplayName, attributeDisplayValue));
+            conditionAsString("forDisplay"_yes, attributeDisplayName, attributeDisplayValue));
     }
 
     if(isFlagSet(u"pinned"_s))

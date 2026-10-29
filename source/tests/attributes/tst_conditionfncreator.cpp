@@ -68,7 +68,7 @@ private:
     QString evaluate(const QString& condition) const
     {
         GraphTransformConfigParser parser;
-        if(!parser.parse(uR"("Filter" where )"_s + condition, false))
+        if(!parser.parse(uR"("Filter" where )"_s + condition, "warnOnFailure"_no))
             return u"unparseable"_s;
 
         auto conditionFn = CreateConditionFnFor::node(*_graphModel, parser.result()._condition);

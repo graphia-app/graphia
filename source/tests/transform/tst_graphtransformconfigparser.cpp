@@ -200,7 +200,7 @@ private slots:
         QFETCH(const QString, config);
 
         GraphTransformConfigParser parser;
-        QVERIFY(!parser.parse(config, false));
+        QVERIFY(!parser.parse(config, "warnOnFailure"_no));
         QVERIFY(!parser.success());
     }
 };

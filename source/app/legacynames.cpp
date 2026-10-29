@@ -194,7 +194,7 @@ QString LegacyNames::transform(const QString& transform)
     GraphTransformConfigParser legacyParser;
     GraphTransformConfigParser parser;
 
-    if(legacyParser.parse(transform, false) && parser.parse(renamedTransform, false) &&
+    if(legacyParser.parse(transform, "warnOnFailure"_no) && parser.parse(renamedTransform, "warnOnFailure"_no) &&
         parser.result()._action == u"AverageAttribute"_s)
     {
         const auto& legacyUsedAttributeNames = legacyParser.result().attributeNames();

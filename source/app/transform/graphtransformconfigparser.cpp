@@ -266,7 +266,7 @@ static const typename Table::mapped_type* findOp(const Table& table, const QStri
 }
 } // namespace LexyGraphTransformParser
 
-bool GraphTransformConfigParser::parse(const QString& text, bool warnOnFailure)
+bool GraphTransformConfigParser::parse(const QString& text, NamedBool<"warnOnFailure"> warnOnFailure)
 {
     const auto bytes = text.toUtf8();
     const auto* const begin = bytes.constData();
@@ -410,7 +410,7 @@ QString GraphTransformConfigParser::parseForDisplay(const QString& text, const G
         const auto* factory = u::contains(factories, result._action) ?
             factories.at(result._action).get() : nullptr;
 
-        return result.asString(true, factory, attributeDisplayName, attributeDisplayValue);
+        return result.asString("forDisplay"_yes, factory, attributeDisplayName, attributeDisplayValue);
     }
 
     return {};

@@ -33,7 +33,7 @@ private slots:
     {
         // Expected values computed with numpy
         const std::vector<double> values{3.0, -7.5, 2.0, 0.5, 4.0};
-        auto s = u::findStatisticsFor(values, true);
+        auto s = u::findStatisticsFor(values, "includeValues"_yes);
 
         QCOMPARE(s._values, values);
         QCOMPARE(s._min, -7.5);

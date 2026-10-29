@@ -185,7 +185,7 @@ void VisualisationsBuilder<ElementId>::build(const Attribute& attribute,
             numApplications++;
         };
 
-        auto statistics = attribute.findStatisticsforElements(elementIds(), true);
+        auto statistics = attribute.findStatisticsforElements(elementIds(), "includeValues"_yes);
 
         if(perComponent)
         {

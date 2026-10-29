@@ -20,6 +20,8 @@
 #ifndef STATISTICS_H
 #define STATISTICS_H
 
+#include "shared/utils/namedbool.h"
+
 #include <cstddef>
 #include <iterator>
 #include <utility>
@@ -58,7 +60,7 @@ struct Statistics
 
 template<typename C, typename Fn>
 Statistics findStatisticsFor(const C& container,
-    const Fn& fn, bool storeValues = false)
+    const Fn& fn, NamedBool<"includeValues"> includeValues = "includeValues"_no)
 {
     Statistics s;
 
@@ -109,16 +111,16 @@ Statistics findStatisticsFor(const C& container,
     s._stddev = std::sqrt(s._variance);
     s._coefVar = (allPositive && s._mean > 0.0) ? s._stddev / s._mean : std::nan("1");
 
-    if(storeValues)
+    if(includeValues)
         s._values = std::move(values);
 
     return s;
 }
 
 template<typename C>
-Statistics findStatisticsFor(const C& container, bool storeValues = false)
+Statistics findStatisticsFor(const C& container, NamedBool<"includeValues"> includeValues = "includeValues"_no)
 {
-    return findStatisticsFor(container, [](typename C::const_reference& t) { return t; }, storeValues);
+    return findStatisticsFor(container, [](typename C::const_reference& t) { return t; }, includeValues);
 }
 
 template<typename C>

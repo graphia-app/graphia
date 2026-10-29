@@ -83,7 +83,7 @@ struct Visualisation
 };
 } // namespace LexyVisualisationParser
 
-bool VisualisationConfigParser::parse(const QString& text, bool warnOnFailure)
+bool VisualisationConfigParser::parse(const QString& text, NamedBool<"warnOnFailure"> warnOnFailure)
 {
     const auto bytes = text.toUtf8();
     const auto* const begin = bytes.constData();
@@ -133,7 +133,7 @@ QString VisualisationConfigParser::parseForDisplay(const QString& text, const Vi
         const auto* factory = u::contains(factories, result._channelName) ?
             factories.at(result._channelName).get() : nullptr;
 
-        return result.asString(true, factory, attributeDisplayName);
+        return result.asString("forDisplay"_yes, factory, attributeDisplayName);
     }
 
     return {};

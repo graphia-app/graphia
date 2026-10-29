@@ -98,7 +98,7 @@ struct GraphTransformConfig
         ParameterValue _value = 0;
 
         bool operator==(const Parameter& other) const;
-        QString valueAsString(bool asWritten = false) const;
+        QString valueAsString(NamedBool<"asWritten"> asWritten = "asWritten"_no) const;
     };
 
     std::vector<QString> _flags;
@@ -116,13 +116,15 @@ struct GraphTransformConfig
     bool hasCondition() const;
 
     QVariantMap conditionAsVariantMap() const;
-    QString conditionAsString(bool forDisplay = false, const AttributeDisplayNameFn& attributeDisplayName = {},
+    QString conditionAsString(NamedBool<"forDisplay"> forDisplay = "forDisplay"_no,
+        const AttributeDisplayNameFn& attributeDisplayName = {},
         const AttributeDisplayValueFn& attributeDisplayValue = {}) const;
 
     QVariantMap asVariantMap(const GraphTransformFactory* factory) const;
     // When forDisplay, attributeDisplayName gives the name to show for each attribute, and
     // attributeDisplayValue the value to show where one is compared with an attribute, if supplied
-    QString asString(bool forDisplay = false, const GraphTransformFactory* factory = nullptr,
+    QString asString(NamedBool<"forDisplay"> forDisplay = "forDisplay"_no,
+        const GraphTransformFactory* factory = nullptr,
         const AttributeDisplayNameFn& attributeDisplayName = {},
         const AttributeDisplayValueFn& attributeDisplayValue = {}) const;
 

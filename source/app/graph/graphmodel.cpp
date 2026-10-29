@@ -558,7 +558,7 @@ QString GraphModel::pluginQmlModule() const { return _plugin->qmlModule(); }
 bool GraphModel::graphTransformIsValid(const QString& transform) const
 {
     GraphTransformConfigParser p;
-    const bool parsed = p.parse(transform, false);
+    const bool parsed = p.parse(transform, "warnOnFailure"_no);
 
     if(parsed)
     {
@@ -771,7 +771,7 @@ bool GraphModel::opIsUnary(const QString& op)
 bool GraphModel::visualisationIsValid(const QString& visualisation) const
 {
     VisualisationConfigParser p;
-    const bool parsed = p.parse(visualisation, false);
+    const bool parsed = p.parse(visualisation, "warnOnFailure"_no);
 
     if(parsed)
     {

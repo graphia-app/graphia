@@ -24,6 +24,7 @@
 #include "graphtransformconfig.h"
 #include "transformdisplaytext.h"
 #include "shared/attributes/valuetype.h"
+#include "shared/utils/namedbool.h"
 
 #include <QString>
 #include <QStringList>
@@ -36,7 +37,7 @@ private:
     QString _failedInput;
 
 public:
-    bool parse(const QString& text, bool warnOnFailure = true);
+    bool parse(const QString& text, NamedBool<"warnOnFailure"> warnOnFailure = "warnOnFailure"_yes);
 
     const GraphTransformConfig& result() const { return _result; }
     bool success() const { return _success; }

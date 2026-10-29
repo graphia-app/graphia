@@ -375,7 +375,7 @@ bool Loader::parseNativeFile(const QUrl& url, IGraphModel* igraphModel)
 
     const auto& jsonGraph = jsonBody["graph"];
 
-    if(!JsonGraphParser::parseGraphObject(jsonGraph, graphModel, *this, true))
+    if(!JsonGraphParser::parseGraphObject(jsonGraph, graphModel, *this, "useElementIdsLiterally"_yes))
         return false;
 
     setProgress(-1);

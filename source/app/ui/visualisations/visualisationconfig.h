@@ -20,6 +20,8 @@
 #ifndef VISUALISATIONCONFIG_H
 #define VISUALISATIONCONFIG_H
 
+#include "shared/utils/namedbool.h"
+
 #include <QString>
 #include <QVariantMap>
 
@@ -39,7 +41,7 @@ struct VisualisationConfig
         ParameterValue _value;
 
         bool operator==(const Parameter& other) const;
-        QString valueAsString(bool asWritten = false) const;
+        QString valueAsString(NamedBool<"asWritten"> asWritten = "asWritten"_no) const;
     };
 
     std::vector<QString> _flags;
@@ -49,7 +51,8 @@ struct VisualisationConfig
 
     QVariantMap asVariantMap() const;
     // When forDisplay, attributeDisplayName gives the name to show for the attribute, if supplied
-    QString asString(bool forDisplay = false, const VisualisationChannelFactory* factory = nullptr,
+    QString asString(NamedBool<"forDisplay"> forDisplay = "forDisplay"_no,
+        const VisualisationChannelFactory* factory = nullptr,
         const AttributeDisplayNameFn& attributeDisplayName = {}) const;
 
     QString parameterValue(const QString& name) const;

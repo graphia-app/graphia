@@ -22,6 +22,7 @@
 
 #include "app/transform/graphtransform.h"
 
+#include "shared/utils/namedbool.h"
 #include "shared/utils/redirects.h"
 
 #include <QObject>
@@ -34,13 +35,13 @@ using namespace Qt::Literals::StringLiterals;
 class LouvainTransform : public GraphTransform
 {
 public:
-    explicit LouvainTransform(GraphModel* graphModel, bool weighted) :
+    explicit LouvainTransform(GraphModel* graphModel, NamedBool<"weighted"> weighted) :
         _graphModel(graphModel), _weighted(weighted) {}
     void apply(TransformedGraph& target) override;
 
 private:
     GraphModel* _graphModel = nullptr;
-    bool _weighted = false;
+    NamedBool<"weighted"> _weighted;
 };
 
 class LouvainTransformFactory : public GraphTransformFactory
@@ -49,21 +50,21 @@ public:
     QString name() const override { return u"LouvainCluster"_s; }
     QString displayName() const override { return QObject::tr("Louvain Cluster"); }
 
-    static AttributeDeclaration clusterAttribute(bool weighted)
+    static AttributeDeclaration clusterAttribute(NamedBool<"weighted"> weighted)
     {
         return weighted ?
             AttributeDeclaration{._name = u"WeightedLouvainCluster"_s,      ._displayName = QObject::tr("Weighted Louvain Cluster")} :
             AttributeDeclaration{._name = u"LouvainCluster"_s,              ._displayName = QObject::tr("Louvain Cluster")};
     }
 
-    static AttributeDeclaration clusterSizeAttribute(bool weighted)
+    static AttributeDeclaration clusterSizeAttribute(NamedBool<"weighted"> weighted)
     {
         return weighted ?
             AttributeDeclaration{._name = u"WeightedLouvainClusterSize"_s,  ._displayName = QObject::tr("Weighted Louvain Cluster Size")} :
             AttributeDeclaration{._name = u"LouvainClusterSize"_s,          ._displayName = QObject::tr("Louvain Cluster Size")};
     }
 
-    AttributeDeclarations attributeDeclarations() const override { return {clusterAttribute(false), clusterSizeAttribute(false)}; }
+    AttributeDeclarations attributeDeclarations() const override { return {clusterAttribute("weighted"_no), clusterSizeAttribute("weighted"_no)}; }
 
     QString description() const override
     {
@@ -93,7 +94,7 @@ public:
         return
         {
             {
-                ._attributeName = clusterAttribute(false)._name, ._elementType = ElementType::Node,
+                ._attributeName = clusterAttribute("weighted"_no)._name, ._elementType = ElementType::Node,
                 ._attributeValueType = ValueType::String, ._attributeFlags = {},
                 ._channel = "Colour"
             }
@@ -102,7 +103,7 @@ public:
 
     std::unique_ptr<GraphTransform> create(GraphModel& graphModel, const GraphTransformConfig&) const override
     {
-        return std::make_unique<LouvainTransform>(&graphModel, false);
+        return std::make_unique<LouvainTransform>(&graphModel, "weighted"_no);
     }
 };
 
@@ -112,7 +113,7 @@ public:
     QString name() const override { return u"WeightedLouvainCluster"_s; }
     QString displayName() const override { return QObject::tr("Weighted Louvain Cluster"); }
 
-    AttributeDeclarations attributeDeclarations() const override { return {clusterAttribute(true), clusterSizeAttribute(true)}; }
+    AttributeDeclarations attributeDeclarations() const override { return {clusterAttribute("weighted"_yes), clusterSizeAttribute("weighted"_yes)}; }
 
     GraphTransformAttributeParameters attributeParameters() const override
     {
@@ -131,7 +132,7 @@ public:
         return
         {
             {
-                ._attributeName = clusterAttribute(true)._name, ._elementType = ElementType::Node,
+                ._attributeName = clusterAttribute("weighted"_yes)._name, ._elementType = ElementType::Node,
                 ._attributeValueType = ValueType::String, ._attributeFlags = {},
                 ._channel = "Colour"
             }
@@ -140,7 +141,7 @@ public:
 
     std::unique_ptr<GraphTransform> create(GraphModel& graphModel, const GraphTransformConfig&) const override
     {
-        return std::make_unique<LouvainTransform>(&graphModel, true);
+        return std::make_unique<LouvainTransform>(&graphModel, "weighted"_yes);
     }
 };
 

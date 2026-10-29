@@ -1148,7 +1148,7 @@ void Document::selectAllFound()
     if(busy() || _selectionManager == nullptr)
         return;
 
-    _selectionManager->setNodesMask(_searchManager->foundNodeIds(), true);
+    _selectionManager->setNodesMask(_searchManager->foundNodeIds(), "applyMask"_yes);
     selectAll();
 }
 
@@ -1834,7 +1834,7 @@ void Document::onFoundNodeIdsChanged(const SearchManager* searchManager)
         return;
     }
 
-    _selectionManager->setNodesMask(searchManager->foundNodeIds(), false);
+    _selectionManager->setNodesMask(searchManager->foundNodeIds(), "applyMask"_no);
     _foundNodeIds = u::vectorFrom(searchManager->foundNodeIds());
 
     std::ranges::sort(_foundNodeIds, [this](auto a, auto b)
@@ -2387,7 +2387,7 @@ bool Document::graphTransformIsValid(const QString& transform) const
 QStringList Document::attributeNamesReferencedBy(const QString& transform) const
 {
     GraphTransformConfigParser p;
-    if(!p.parse(transform, false))
+    if(!p.parse(transform, "warnOnFailure"_no))
         return {};
 
     const auto names = p.result().referencedAttributeNames();

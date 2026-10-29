@@ -23,6 +23,8 @@
 #include "visualisationchannel.h"
 #include "visualisationconfig.h"
 
+#include "shared/utils/namedbool.h"
+
 #include <QString>
 
 class VisualisationConfigParser
@@ -33,7 +35,7 @@ private:
     QString _failedInput;
 
 public:
-    bool parse(const QString& text, bool warnOnFailure = true);
+    bool parse(const QString& text, NamedBool<"warnOnFailure"> warnOnFailure = "warnOnFailure"_yes);
 
     const VisualisationConfig& result() const { return _result; }
     bool success() const { return _success; }

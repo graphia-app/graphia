@@ -347,7 +347,7 @@ private slots:
         Attribute attribute;
         attribute.setIntValueFn([](NodeId nodeId) { return static_cast<int>(nodeId) + 1; });
 
-        const auto statistics = attribute.findStatisticsforElements(nodeIds(), true);
+        const auto statistics = attribute.findStatisticsforElements(nodeIds(), "includeValues"_yes);
         QCOMPARE(statistics._min, 1.0);
         QCOMPARE(statistics._max, 4.0);
         QCOMPARE(statistics._mean, 2.5);

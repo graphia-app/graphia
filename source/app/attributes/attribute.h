@@ -24,6 +24,7 @@
 #include "shared/graph/elementtype.h"
 #include "shared/attributes/iattribute.h"
 #include "shared/utils/flags.h"
+#include "shared/utils/namedbool.h"
 #include "shared/utils/statistics.h"
 #include "shared/utils/string.h"
 
@@ -536,13 +537,13 @@ public:
 
     template<typename E>
     u::Statistics findStatisticsforElements(const std::vector<E>& elementIds,
-        bool storeValues = false) const
+        NamedBool<"includeValues"> includeValues = "includeValues"_no) const
     {
         return u::findStatisticsFor(elementIds,
         [this](const auto& elementId)
         {
             return this->floatValueOf(elementId);
-        }, storeValues);
+        }, includeValues);
     }
 
     AttributeFlag flags() const { return *_.flags; }

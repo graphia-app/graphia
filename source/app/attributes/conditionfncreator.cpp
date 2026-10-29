@@ -22,6 +22,7 @@
 #include "attribute.h"
 #include "condtionfnops.h"
 
+#include "shared/utils/namedbool.h"
 #include "shared/utils/recursivevalue.h"
 
 #include "shared/graph/elementid.h"
@@ -235,7 +236,7 @@ struct AttributeValueOpVistor
     bool _operandsAreSwitched;
 
     AttributeValueOpVistor(const Attribute& lhs, TerminalValueWrapper rhs,
-                           bool operandsAreSwitched = false) :
+                           NamedBool<"operandsAreSwitched"> operandsAreSwitched = "operandsAreSwitched"_no) :
         _lhs(lhs), _rhs(std::move(rhs)), _operandsAreSwitched(operandsAreSwitched)
     {}
 
@@ -628,14 +629,14 @@ struct ConditionVisitor
         if(lhsAttribute.isValid())
         {
             // Left hand side is an attribute
-            const AttributeValueOpVistor<E> visitor(lhsAttribute, terminalCondition._rhs, false);
+            const AttributeValueOpVistor<E> visitor(lhsAttribute, terminalCondition._rhs, "operandsAreSwitched"_no);
             return std::visit(visitor, terminalCondition._op);
         }
 
         if(rhsAttribute.isValid())
         {
             // Right hand side is an attribute
-            const AttributeValueOpVistor<E> visitor(rhsAttribute, terminalCondition._lhs, true);
+            const AttributeValueOpVistor<E> visitor(rhsAttribute, terminalCondition._lhs, "operandsAreSwitched"_yes);
             return std::visit(visitor, terminalCondition._op);
         }
 
@@ -718,14 +719,14 @@ ComponentConditionFn CreateConditionFnFor::component(const GraphModel& graphMode
 NodeConditionFn CreateConditionFnFor::node(const Attribute& attribute,
     const GraphTransformConfig::TerminalOp& op, const GraphTransformConfig::TerminalValue& value)
 {
-    const AttributeValueOpVistor<NodeId> visitor(attribute, TerminalValueWrapper(value), false);
+    const AttributeValueOpVistor<NodeId> visitor(attribute, TerminalValueWrapper(value), "operandsAreSwitched"_no);
     return std::visit(visitor, op);
 }
 
 EdgeConditionFn CreateConditionFnFor::edge(const Attribute& attribute,
     const GraphTransformConfig::TerminalOp& op, const GraphTransformConfig::TerminalValue& value)
 {
-    const AttributeValueOpVistor<EdgeId> visitor(attribute, TerminalValueWrapper(value), false);
+    const AttributeValueOpVistor<EdgeId> visitor(attribute, TerminalValueWrapper(value), "operandsAreSwitched"_no);
     return std::visit(visitor, op);
 }
 
@@ -733,7 +734,7 @@ ComponentConditionFn CreateConditionFnFor::component(const Attribute& attribute,
     const GraphTransformConfig::TerminalOp& op, const GraphTransformConfig::TerminalValue& value)
 {
     const AttributeValueOpVistor<const IGraphComponent&> visitor(attribute,
-        TerminalValueWrapper(value), false);
+        TerminalValueWrapper(value), "operandsAreSwitched"_no);
     return std::visit(visitor, op);
 }
 

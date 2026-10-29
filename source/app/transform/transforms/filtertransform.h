@@ -22,6 +22,8 @@
 
 #include "app/transform/graphtransform.h"
 
+#include "shared/utils/namedbool.h"
+
 #include <QObject>
 #include <QString>
 
@@ -55,7 +57,7 @@ private:
     bool _invert = false;
 
 public:
-    FilterTransformFactory(ElementType elementType, bool invert) :
+    FilterTransformFactory(ElementType elementType, NamedBool<"invert"> invert) :
         _elementType(elementType), _invert(invert)
     {}
 

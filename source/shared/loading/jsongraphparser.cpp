@@ -53,7 +53,7 @@ bool JsonGraphParser::parseJson(const json& jsonObject, IGraphModel* graphModel)
         return false;
     }
 
-    return parseGraphObject(*graph, graphModel, *this, false, _userNodeData, _userEdgeData);
+    return parseGraphObject(*graph, graphModel, *this, "useElementIdsLiterally"_no, _userNodeData, _userEdgeData);
 }
 
 // Node ids, and the sources and targets of edges, are strings, or sometimes integers
@@ -69,7 +69,7 @@ static std::optional<std::string> idString(const json& id)
 }
 
 bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel* graphModel,
-    IParser& parser, bool useElementIdsLiterally,
+    IParser& parser, NamedBool<"useElementIdsLiterally"> useElementIdsLiterally,
     IUserNodeData* userNodeData, IUserEdgeData* userEdgeData)
 {
     if(!u::contains(jsonGraphObject, "nodes"))

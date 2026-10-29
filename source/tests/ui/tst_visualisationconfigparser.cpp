@@ -101,7 +101,7 @@ private slots:
         QFETCH(const QString, config);
 
         VisualisationConfigParser parser;
-        QVERIFY(!parser.parse(config, false));
+        QVERIFY(!parser.parse(config, "warnOnFailure"_no));
         QVERIFY(!parser.success());
     }
 

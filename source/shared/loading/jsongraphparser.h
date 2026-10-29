@@ -23,6 +23,7 @@
 #include "shared/loading/jsonparser.h"
 #include "shared/loading/iuserelementdata.h"
 #include "shared/utils/json_fwd.h"
+#include "shared/utils/namedbool.h"
 
 #include <QUrl>
 
@@ -45,7 +46,7 @@ public:
 
     static bool canLoad(const QUrl &) { return true; }
     static bool parseGraphObject(const json& jsonGraphObject, IGraphModel *graphModel,
-        IParser& parser, bool useElementIdsLiterally = false,
+        IParser& parser, NamedBool<"useElementIdsLiterally"> useElementIdsLiterally = "useElementIdsLiterally"_no,
         IUserNodeData* userNodeData = nullptr, IUserEdgeData* userEdgeData = nullptr);
 };
 

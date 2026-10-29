@@ -39,13 +39,13 @@ bool VisualisationConfig::Parameter::operator==(const VisualisationConfig::Param
             _value == other._value;
 }
 
-QString VisualisationConfig::Parameter::valueAsString(bool asWritten) const
+QString VisualisationConfig::Parameter::valueAsString(NamedBool<"asWritten"> asWritten) const
 {
     struct Visitor
     {
-        bool _asWritten;
+        NamedBool<"asWritten"> _asWritten;
 
-        explicit Visitor(bool asWritten_) : _asWritten(asWritten_) {}
+        explicit Visitor(NamedBool<"asWritten"> asWritten_) : _asWritten(asWritten_) {}
 
         QString operator()(double d) const { return QString::number(d, 'g', QLocale::FloatingPointShortest); }
         QString operator()(const QString& s) const
@@ -75,13 +75,13 @@ QVariantMap VisualisationConfig::asVariantMap() const
 
     QVariantMap parameters;
     for(const auto& parameter : _parameters)
-        parameters.insert(parameter._name, parameter.valueAsString(true));
+        parameters.insert(parameter._name, parameter.valueAsString("asWritten"_yes));
     map.insert(u"parameters"_s, parameters);
 
     return map;
 }
 
-QString VisualisationConfig::asString(bool forDisplay, const VisualisationChannelFactory* factory,
+QString VisualisationConfig::asString(NamedBool<"forDisplay"> forDisplay, const VisualisationChannelFactory* factory,
     const AttributeDisplayNameFn& attributeDisplayName) const
 {
     QString s;
@@ -112,7 +112,7 @@ QString VisualisationConfig::asString(bool forDisplay, const VisualisationChanne
         s += u" with "_s;
 
         for(const auto& parameter : _parameters)
-            s += u" %1 = %2"_s.arg(parameter._name, parameter.valueAsString(true));
+            s += u" %1 = %2"_s.arg(parameter._name, parameter.valueAsString("asWritten"_yes));
     }
 
     if(forDisplay && !_flags.empty())

@@ -191,12 +191,12 @@ Application::Application(QObject *parent, bool enableUpdateCheck) :
         _graphTransformFactories.emplace(transformName, std::move(factory));
     };
 
-    addTransformFactory(std::make_unique<FilterTransformFactory>(ElementType::Node, false));
-    addTransformFactory(std::make_unique<FilterTransformFactory>(ElementType::Edge, false));
-    addTransformFactory(std::make_unique<FilterTransformFactory>(ElementType::Component, false));
-    addTransformFactory(std::make_unique<FilterTransformFactory>(ElementType::Node, true));
-    addTransformFactory(std::make_unique<FilterTransformFactory>(ElementType::Edge, true));
-    addTransformFactory(std::make_unique<FilterTransformFactory>(ElementType::Component, true));
+    addTransformFactory(std::make_unique<FilterTransformFactory>(ElementType::Node, "invert"_no));
+    addTransformFactory(std::make_unique<FilterTransformFactory>(ElementType::Edge, "invert"_no));
+    addTransformFactory(std::make_unique<FilterTransformFactory>(ElementType::Component, "invert"_no));
+    addTransformFactory(std::make_unique<FilterTransformFactory>(ElementType::Node, "invert"_yes));
+    addTransformFactory(std::make_unique<FilterTransformFactory>(ElementType::Edge, "invert"_yes));
+    addTransformFactory(std::make_unique<FilterTransformFactory>(ElementType::Component, "invert"_yes));
     addTransformFactory(std::make_unique<EdgeContractionTransformFactory>());
     addTransformFactory(std::make_unique<MCLTransformFactory>());
     addTransformFactory(std::make_unique<LouvainTransformFactory>());

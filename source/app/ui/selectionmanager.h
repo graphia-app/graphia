@@ -21,6 +21,7 @@
 #define SELECTIONMANAGER_H
 
 #include "shared/ui/iselectionmanager.h"
+#include "shared/utils/namedbool.h"
 
 #include <QObject>
 #include <QString>
@@ -59,8 +60,8 @@ public:
     bool clearNodeSelection() override;
     void invertNodeSelection() override;
 
-    void setNodesMask(const NodeIdSet& nodeIds, bool applyMask = true);
-    void setNodesMask(const std::vector<NodeId>& nodeIds, bool applyMask = true);
+    void setNodesMask(const NodeIdSet& nodeIds, NamedBool<"applyMask"> applyMask = "applyMask"_yes);
+    void setNodesMask(const std::vector<NodeId>& nodeIds, NamedBool<"applyMask"> applyMask = "applyMask"_yes);
     void clearNodesMask();
     bool nodesMaskActive() const;
 

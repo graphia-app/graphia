@@ -184,7 +184,7 @@ private slots:
 
         // A mask that isn't applied leaves the selection alone, but still
         // restricts what can be selected afterwards
-        _selectionManager->setNodesMask(std::vector<NodeId>{id(u"e"_s)}, false);
+        _selectionManager->setNodesMask(std::vector<NodeId>{id(u"e"_s)}, "applyMask"_no);
         QCOMPARE(selected(), (QStringList{u"a"_s, u"d"_s}));
         QVERIFY(!_selectionManager->selectNode(id(u"b"_s)));
         QVERIFY(_selectionManager->selectNode(id(u"e"_s)));
