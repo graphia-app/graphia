@@ -497,7 +497,7 @@ ApplicationWindow
         TextDialog
         {
             title: qsTr("Provenance Log")
-            text: currentTab !== null ? currentTab.document.log : ""
+            text: currentTab?.document.log ?? ""
         }
     }
 
@@ -1479,7 +1479,7 @@ ApplicationWindow
             }
         }
 
-        text: currentTab && currentTab.document.layoutPauseState === LayoutPauseState.Paused ?
+        text: currentTab?.document.layoutPauseState === LayoutPauseState.Paused ?
                   qsTr("&Resume Layout") : qsTr("&Pause Layout")
         shortcut: "Pause"
         enabled: currentTab ? !currentTab.document.busy : false
@@ -1823,7 +1823,7 @@ ApplicationWindow
         id: dumpGraphAction
         text: qsTr("Dump graph to qDebug")
         enabled: application.debugEnabled
-        onTriggered: currentTab && currentTab.document.dumpGraph()
+        onTriggered: currentTab?.document.dumpGraph()
     }
 
     Action
@@ -1949,7 +1949,7 @@ ApplicationWindow
     {
         id: togglePluginMinimiseAction
         shortcut: "Ctrl+M"
-        icon.name: currentTab && currentTab.pluginMinimised ? "go-top" : "go-bottom"
+        icon.name: currentTab?.pluginMinimised ? "go-top" : "go-bottom"
         text: currentTab ? Utils.format(currentTab.pluginMinimised ? qsTr("Restore {0}") : qsTr("Minimise {0}"),
             currentTab.document.pluginDisplayName) : ""
         enabled: currentTab && currentTab.document.hasPluginUI && !currentTab.pluginPoppedOut
@@ -2157,7 +2157,7 @@ ApplicationWindow
 
                 Instantiator
                 {
-                    model: currentTab !== null ? currentTab.sharedValuesAttributeNames : []
+                    model: currentTab?.sharedValuesAttributeNames ?? []
                     PlatformMenuItem
                     {
                         text: currentTab.document.attributeDisplayName(modelData)
@@ -2312,7 +2312,7 @@ ApplicationWindow
 
                         onTriggered: function(source) // qmllint disable signal-handler-parameters
                         {
-                            if(source && source.menu)
+                            if(source?.menu)
                                 source.menu.dismiss();
 
                             currentTab.gotoBookmark(bookmarkMenuItem.text);
@@ -2851,8 +2851,7 @@ ApplicationWindow
                 {
                     let tab = insertTabAtIndex(tabBar.count);
 
-                    if(typeof(onCreateFunction) !== "undefined")
-                        onCreateFunction();
+                    onCreateFunction?.();
 
                     return tab;
                 }
@@ -3038,13 +3037,13 @@ ApplicationWindow
             // Progress
             Label
             {
-                text: currentTab && currentTab.document.significantCommandInProgress ? currentTab.document.commandVerb : ""
+                text: currentTab?.document.significantCommandInProgress ? currentTab.document.commandVerb : ""
             }
 
             ProgressBar
             {
                 id: progressBar
-                value: currentTab && currentTab.document.commandProgress >= 0.0 ? currentTab.document.commandProgress / 100.0 : 0.0
+                value: currentTab?.document.commandProgress >= 0.0 ? currentTab.document.commandProgress / 100.0 : 0.0
                 visible: currentTab ? currentTab.document.significantCommandInProgress : false
                 indeterminate: currentTab ? currentTab.document.commandProgress < 0.0 ||
                     currentTab.document.commandProgress === 100.0 : false

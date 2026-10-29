@@ -49,7 +49,7 @@ TextField
     ModelCompleter
     {
         id: modelCompleter
-        model: root.treeBox && root.treeBox.model ? root.treeBox.model : null
+        model: root.treeBox?.model ?? null
     }
 
     validator: RegularExpressionValidator

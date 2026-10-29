@@ -46,9 +46,9 @@ Window
     property var defaultVisualisations
 
     property var _transform: undefined
-    property int _numParameters: _transform !== undefined ? _transform.parameterNames.length : 0
-    property int _numAttributeParameters: _transform !== undefined ? _transform.attributeParameterNames.length : 0
-    property int _numDefaultVisualisations: _transform !== undefined ? Object.keys(_transform.defaultVisualisations).length : 0
+    property int _numParameters: _transform?.parameterNames.length ?? 0
+    property int _numAttributeParameters: _transform?.attributeParameterNames.length ?? 0
+    property int _numDefaultVisualisations: Object.keys(_transform?.defaultVisualisations ?? {}).length
 
     Preferences
     {
@@ -260,7 +260,7 @@ Window
                         Layout.preferredHeight: 64
                         fillMode: Image.PreserveAspectFit
                         sourceSize.height: 64
-                        source: _transform !== undefined ? _transform.image : ""
+                        source: _transform?.image ?? ""
                     }
                 }
 
@@ -785,8 +785,7 @@ Window
                                                 return visualisations.resolvedAttributeName(modelData);
                                             }
 
-                                            property var visualisation: _transform !== undefined ?
-                                                _transform.defaultVisualisations[modelData] : undefined
+                                            property var visualisation: _transform?.defaultVisualisations[modelData]
 
                                             RowLayout
                                             {

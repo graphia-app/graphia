@@ -45,7 +45,7 @@ FramedScrollView
         {
             id: repeater
 
-            model: root.model ? root.model : []
+            model: root.model ?? []
 
             ValueCheckBox
             {

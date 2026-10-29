@@ -260,7 +260,7 @@ BaseParameterDialog
                         if(column === undefined || column.type === undefined)
                             return qsTr("⨯ <i>Unused</i>");
 
-                        let columnName = column.name ? column.name : "";
+                        let columnName = column.name ?? "";
 
                         if(columnName.length === 0)
                             columnName = "<b><font color=\"red\">Name Required</font></b>";

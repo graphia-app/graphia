@@ -189,7 +189,7 @@ GridLayout
 
         function updateValue()
         {
-            let storedText = root.storedValueOf !== null ? root.storedValueOf(text) : text;
+            let storedText = root.storedValueOf?.(text) ?? text;
             root.value = root.document.writtenString(storedText);
         }
 
@@ -235,9 +235,9 @@ GridLayout
         visible: root.valueType === ValueType.Attribute
         enabled: root.valueType !== ValueType.Unknown && currentIndexIsValid
 
-        prettifyFunction: (name) => root.document !== null ? root.document.attributeDisplayName(name) : name
+        prettifyFunction: (name) => root.document?.attributeDisplayName(name) ?? name
 
-        onSelectedValueChanged: { root.value = selectedValue ? selectedValue : ""; }
+        onSelectedValueChanged: { root.value = selectedValue ?? ""; }
 
         Preferences
         {
@@ -317,7 +317,7 @@ GridLayout
             break;
 
         case ValueType.String:
-            textField.text = displayValueOf !== null ? displayValueOf(initialValue) : initialValue;
+            textField.text = root.displayValueOf?.(initialValue) ?? initialValue;
 
             if(validatorRegex.length > 0)
                 textFieldValidator.regularExpression = new RegExp(validatorRegex);

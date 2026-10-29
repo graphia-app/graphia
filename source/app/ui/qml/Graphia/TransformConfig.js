@@ -238,7 +238,7 @@ class Create
                 return document.attributeDisplayName(name);
 
             let displayName = document.transformParameter(transform.action, name).displayName;
-            return displayName !== undefined ? displayName : name;
+            return displayName ?? name;
         }
 
         // A value's type comes from the name opposite it, if there is one
@@ -274,7 +274,7 @@ class Create
             case GraphiaSharedTypes.ValueType.String:
             {
                 let displayValueOf = parameterData.displayValueOf;
-                return "\"" + (displayValueOf !== undefined ? displayValueOf(value) : value) + "\"";
+                return "\"" + (displayValueOf?.(value) ?? value) + "\"";
             }
             case GraphiaSharedTypes.ValueType.StringList:
             {

@@ -430,7 +430,7 @@ PluginContent
 
         function showSaveImageDialog(onAcceptedFn)
         {
-            let folder = screenshot.path !== undefined ? screenshot.path : "";
+            let folder = screenshot.path ?? "";
             let path = Utils.format(qsTr("{0}/{1}-correlation-plot"),
                 NativeUtils.fileNameForUrl(folder),
                 root.baseFileNameNoExtension);

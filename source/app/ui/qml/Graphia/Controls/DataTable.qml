@@ -456,9 +456,7 @@ Rectangle
                         {
                             if(drag.active)
                             {
-                                let currentColumnWidth = root._columnWidths[headerViewDelegate.model.column];
-                                if(currentColumnWidth === undefined)
-                                    currentColumnWidth = parent.width;
+                                let currentColumnWidth = root._columnWidths[headerViewDelegate.model.column] ?? parent.width;
 
                                 root._columnWidths[headerViewDelegate.model.column] =
                                     Math.max(root._minimumColumnWidth, currentColumnWidth + (mouseX - width));
@@ -546,7 +544,7 @@ Rectangle
                         return 0;
 
                     // If the static height is set, use it, otherwise automatically size
-                    return root._cellDelegateHeight ? root._cellDelegateHeight : -1;
+                    return root._cellDelegateHeight || -1;
                 }
 
                 columnWidthProvider: function(column) { return headerView.columnWidthProvider(column); }

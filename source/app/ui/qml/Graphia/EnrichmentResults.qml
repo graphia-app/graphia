@@ -34,11 +34,7 @@ ApplicationWindow
     property var models
     property var document
 
-    property var _currentModel:
-    {
-        let m = models[tabBar.currentIndex];
-        return m ? m : null;
-    }
+    property var _currentModel: models[tabBar.currentIndex] ?? null
 
     property bool _resultsAvailable: root.models.length > 0
 
@@ -208,7 +204,7 @@ ApplicationWindow
                 property int rowCount: 0
                 function updateRowCount()
                 {
-                    table.rowCount = table.model !== null ? table.model.rowCount() : 0;
+                    table.rowCount = table.model?.rowCount() ?? 0;
                 }
 
                 onHeaderClicked: function(column, mouse)
@@ -369,7 +365,7 @@ ApplicationWindow
             icon.name: "camera-photo"
             onTriggered: function()
             {
-                let folder = screenshot.path !== undefined ? screenshot.path : "";
+                let folder = screenshot.path ?? "";
                 let path = root.saveFileName(folder);
 
                 saveImageFileDialog.currentFolder = folder;
@@ -390,7 +386,7 @@ ApplicationWindow
             icon.name: "document-save"
             onTriggered: function()
             {
-                let folder = misc.fileSaveInitialFolder !== undefined ? misc.fileSaveInitialFolder : "";
+                let folder = misc.fileSaveInitialFolder ?? "";
                 let path = root.saveFileName(folder);
 
                 exportTableFileDialog.currentFolder = folder;

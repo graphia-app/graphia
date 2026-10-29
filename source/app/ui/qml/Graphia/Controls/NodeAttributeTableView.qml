@@ -325,7 +325,7 @@ Item
 
         onTriggered: function()
         {
-            let folder = misc.fileSaveInitialFolder !== undefined ? misc.fileSaveInitialFolder : "";
+            let folder = misc.fileSaveInitialFolder ?? "";
             let path = Utils.format("{0}/{1}", NativeUtils.fileNameForUrl(folder), root.exportBaseFileName);
 
             exportTableFileDialog.currentFolder = folder;

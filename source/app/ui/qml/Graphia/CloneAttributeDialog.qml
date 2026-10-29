@@ -36,7 +36,7 @@ Window
     property string selectedAttributeName:
     {
         if(sourceAttributeName.length === 0)
-            return attributeList.selectedValue ? attributeList.selectedValue : "";
+            return attributeList.selectedValue ?? "";
 
         return sourceAttributeName;
     }

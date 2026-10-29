@@ -173,7 +173,7 @@ Item
                 model: SortFilterProxyModel
                 {
                     id: sortFilterProxyModel
-                    sourceModel: root.model !== undefined ? root.model : null
+                    sourceModel: root.model ?? null
                 }
 
                 readonly property int sectionRole:

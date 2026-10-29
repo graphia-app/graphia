@@ -43,7 +43,7 @@ ColumnLayout
     {
         let palette = JSON.parse(configuration);
 
-        let autoColors = palette.autoColors !== undefined ? [...palette.autoColors] : [];
+        let autoColors = [...(palette.autoColors ?? [])];
 
         paletteAutoColorListRepeater.model = root._autoColors = autoColors;
 
@@ -194,8 +194,7 @@ ColumnLayout
 
         Text
         {
-            visible: paletteAutoColorListRepeater.model !== undefined ?
-                paletteAutoColorListRepeater.model.length === 0 : true
+            visible: (paletteAutoColorListRepeater.model?.length ?? 0) === 0
             text: qsTr("<i>None</i>")
         }
 
@@ -470,8 +469,7 @@ ColumnLayout
         Text
         {
             color: palette.buttonText
-            visible: paletteFixedColorListRepeater.model !== undefined ?
-                paletteFixedColorListRepeater.model.length === 0 : true
+            visible: (paletteFixedColorListRepeater.model?.length ?? 0) === 0
             text: qsTr("<i>None</i>")
         }
 

@@ -85,7 +85,7 @@ Item
         return text;
     }
 
-    readonly property string appName: application !== null ? application.name : ""
+    readonly property string appName: application?.name ?? ""
 
     property alias document: _document
 
@@ -306,7 +306,7 @@ Item
         let initialFileUrl = NativeUtils.removeExtension(root.hasBeenSaved ? root.savedFileUrl : root.url);
 
         fileSaveDialog.selectedFile = initialFileUrl;
-        fileSaveDialog.currentFolder = misc.fileSaveInitialFolder !== undefined ? misc.fileSaveInitialFolder: "";
+        fileSaveDialog.currentFolder = misc.fileSaveInitialFolder ?? "";
         fileSaveDialog.open();
     }
 
@@ -367,7 +367,7 @@ Item
     function selectSources(nodeId, add)
     {
         _lastSelectType = TabUI.LS_Sources;
-        if(typeof(nodeId) !== "undefined" && typeof(add) !== "undefined")
+        if(nodeId !== undefined && add !== undefined)
             _document.selectSources(nodeId, add);
         else
             _document.selectSources();
@@ -376,7 +376,7 @@ Item
     function selectTargets(nodeId, add)
     {
         _lastSelectType = TabUI.LS_Targets;
-        if(typeof(nodeId) !== "undefined" && typeof(add) !== "undefined")
+        if(nodeId !== undefined && add !== undefined)
             _document.selectTargets(nodeId, add);
         else
             _document.selectTargets();
@@ -386,7 +386,7 @@ Item
     {
         _lastSelectType = TabUI.LS_Neighbours;
 
-        if(typeof(nodeId) !== "undefined" && typeof(add) !== "undefined")
+        if(nodeId !== undefined && add !== undefined)
             _document.selectNeighbours(nodeId, add);
         else
             _document.selectNeighbours();
@@ -397,7 +397,7 @@ Item
         _lastSelectType = TabUI.LS_BySharedValue;
         _lastSharedValueAttributeName = attributeName;
 
-        if(typeof(nodeId) !== "undefined" && typeof(add) !== "undefined")
+        if(nodeId !== undefined && add !== undefined)
             _document.selectBySharedAttributeValue(attributeName, nodeId, add);
         else
             _document.selectBySharedAttributeValue(attributeName);
@@ -516,8 +516,7 @@ Item
 
     function exportNodePositions()
     {
-        let folder = misc.fileSaveInitialFolder !== undefined ?
-            misc.fileSaveInitialFolder : "";
+        let folder = misc.fileSaveInitialFolder ?? "";
         let path = Utils.format(qsTr("{0}/{1}-node-positions"), NativeUtils.fileNameForUrl(folder),
             root.baseFileNameNoExtension);
 
@@ -542,8 +541,7 @@ Item
 
     function importNodePositions()
     {
-        let folder = misc.fileOpenInitialFolder !== undefined ?
-            misc.fileOpenInitialFolder : "";
+        let folder = misc.fileOpenInitialFolder ?? "";
 
         nodePositionFileImportDialog.currentFolder = folder;
         nodePositionFileImportDialog.open();

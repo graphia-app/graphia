@@ -306,7 +306,7 @@ Item
 
     function onHover()
     {
-        let hoverTarget = _mouseCapture !== null ? _mouseCapture : target;
+        let hoverTarget = _mouseCapture ?? target;
         if(hoverTarget.hovered)
         {
             hoverTimer.start();

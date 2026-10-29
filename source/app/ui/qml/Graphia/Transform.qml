@@ -259,7 +259,7 @@ Item
 
             let parameterComponent = _parameterComponents[index - 1];
             let value = parameterComponent.value;
-            return value !== undefined ? value : match;
+            return value ?? match;
         });
 
         // Unescape literal % in the original template

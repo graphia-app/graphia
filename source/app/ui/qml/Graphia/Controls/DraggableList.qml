@@ -233,7 +233,7 @@ Item
                 }
             }
 
-            property bool pinned: loader.item.pinned !== undefined ? loader.item.pinned : false
+            property bool pinned: loader.item.pinned ?? false
         }
     }
 

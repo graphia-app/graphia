@@ -40,7 +40,7 @@ MenuItem // qmllint disable import
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
 
-        text: root.action && root.action.shortcut ? NativeUtils.nativeShortcutSequence(root.action.shortcut) : ""
+        text: root.action?.shortcut ? NativeUtils.nativeShortcutSequence(root.action.shortcut) : ""
         color: root._textColor
     }
 

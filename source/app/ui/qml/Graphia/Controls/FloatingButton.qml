@@ -59,10 +59,8 @@ AbstractButton
     {
         spacing: 4
 
-        property string _iconName: root.action !== null && root.action.icon !== null ?
-            root.action.icon.name : root.icon.name
-        property string _text: root.action !== null ?
-            root.action.text : root.text
+        property string _iconName: root.action?.icon.name ?? root.icon.name
+        property string _text: root.action?.text ?? root.text
         property string _cleansedText: { return _text.replace("&", ""); }
 
         NamedIcon

@@ -26,8 +26,8 @@ Rectangle
     property ScrollBar horizontalScrollBar
     property ScrollBar verticalScrollBar
 
-    width: verticalScrollBar && verticalScrollBar.size < 1 ? verticalScrollBar.width : 0
-    height: horizontalScrollBar && horizontalScrollBar.size < 1 ? horizontalScrollBar.height : 0
+    width: verticalScrollBar?.size < 1 ? verticalScrollBar.width : 0
+    height: horizontalScrollBar?.size < 1 ? horizontalScrollBar.height : 0
 
     anchors.right: parent.right
     anchors.bottom: parent.bottom

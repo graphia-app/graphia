@@ -125,7 +125,7 @@ Window
         id: loadingInfo
 
         property string fileUrl: ""
-        property string baseFileName: fileUrl && fileUrl.length > 0 ?
+        property string baseFileName: fileUrl.length > 0 ?
             NativeUtils.baseFileNameForUrl(fileUrl) : ""
 
         anchors.centerIn: parent

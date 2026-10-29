@@ -147,15 +147,11 @@ Item
 
             invert: root.isFlagSet("invert");
 
-            minimum: root._visualisationInfo.minimumNumericValue !== undefined ?
-                root._visualisationInfo.minimumNumericValue : 0.0
-            maximum: root._visualisationInfo.maximumNumericValue !== undefined ?
-                root._visualisationInfo.maximumNumericValue : 0.0
+            minimum: root._visualisationInfo.minimumNumericValue ?? 0.0
+            maximum: root._visualisationInfo.maximumNumericValue ?? 0.0
 
-            mappedMinimum: root._visualisationInfo.mappedMinimumNumericValue !== undefined ?
-                root._visualisationInfo.mappedMinimumNumericValue : 0.0
-            mappedMaximum: root._visualisationInfo.mappedMaximumNumericValue !== undefined ?
-                root._visualisationInfo.mappedMaximumNumericValue : 0.0
+            mappedMinimum: root._visualisationInfo.mappedMinimumNumericValue ?? 0.0
+            mappedMaximum: root._visualisationInfo.mappedMaximumNumericValue ?? 0.0
 
             showLabels:
             {

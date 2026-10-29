@@ -348,7 +348,7 @@ Window
 
                 function update()
                 {
-                    if(root._selectedAttribute && root._selectedAttribute.metaData.userDataType !== undefined)
+                    if(root._selectedAttribute?.metaData.userDataType !== undefined)
                     {
                         const intValue = {value: ValueType.Int, text: qsTr("Integer")};
                         const floatValue = {value: ValueType.Float, text: qsTr("Float")};

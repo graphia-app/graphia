@@ -241,7 +241,7 @@ function generateColorFrom(color)
 function format(string, ...args)
 {
     return string.replace(/{([0-9]+)}/g, (match, index) =>
-        typeof(args[index]) === "undefined" ? match : args[index]);
+        args[index] === undefined ? match : args[index]);
 }
 
 function setContains(set, value)

@@ -396,7 +396,7 @@ Window
             gradientB = JSON.parse(gradientB);
         }
 
-        if(typeof(gradientA) === "undefined" || typeof(gradientB) === "undefined")
+        if(gradientA === undefined || gradientB === undefined)
             return false;
 
         let aValues = Object.getOwnPropertyNames(gradientA);

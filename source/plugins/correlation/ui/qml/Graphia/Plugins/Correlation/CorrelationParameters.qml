@@ -1626,9 +1626,9 @@ BaseParameterDialog
                                 return templates.templateFor(templateComboBox.currentText);
                             }
 
-                            property var transforms: value && value.transforms ? value.transforms : []
+                            property var transforms: value?.transforms ?? []
                             onTransformsChanged: { root.parameters.additionalTransforms = transforms; }
-                            property var visualisations: value && value.visualisations ? value.visualisations : []
+                            property var visualisations: value?.visualisations ?? []
                             onVisualisationsChanged: { root.parameters.additionalVisualisations = visualisations; }
                         }
 

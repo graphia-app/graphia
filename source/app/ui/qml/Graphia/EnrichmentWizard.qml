@@ -229,7 +229,7 @@ Wizard
 
                                 text:
                                 {
-                                    if(root.document && model.display && model.display.length > 0)
+                                    if(root.document && model.display?.length > 0)
                                     {
                                         return Utils.format(qsTr("{0} ({1} entries)"), model.display,
                                             root.document.attribute(model.name).sharedValues.length);
@@ -313,7 +313,7 @@ Wizard
 
                                 text:
                                 {
-                                    if(root.document && model.display && model.display.length > 0)
+                                    if(root.document && model.display?.length > 0)
                                     {
                                         return Utils.format(qsTr("{0} ({1} entries)"), model.display,
                                             root.document.attribute(model.name).sharedValues.length);

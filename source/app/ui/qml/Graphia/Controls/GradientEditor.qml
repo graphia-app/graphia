@@ -360,8 +360,8 @@ Item
     {
         id: toolTip
 
-        anchors.horizontalCenter: parent !== null ? parent.horizontalCenter : undefined
-        anchors.bottom: parent !== null ? parent.top : undefined
+        anchors.horizontalCenter: parent?.horizontalCenter
+        anchors.bottom: parent?.top
         anchors.margins: 5
 
         width: parent !== null ? parent.width + 8 : 0
