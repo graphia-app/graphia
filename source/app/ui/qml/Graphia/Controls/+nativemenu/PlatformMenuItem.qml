@@ -53,6 +53,6 @@ Labs.MenuItem // qmllint disable import
         menuItem.shortcut = Qt.binding(() => action.shortcut);
         menuItem.text = Qt.binding(() => action.text);
 
-        menuItem.triggered.connect(function() { action.trigger(menuItem); });
+        menuItem.triggered.connect(() => { action.trigger(menuItem); });
     }
 }

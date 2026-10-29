@@ -285,10 +285,8 @@ Item
                         //        b) in the case of the item being in a layout, it will potentially add the
                         //           layout's spacing parameter to the sides of said single pixel when really
                         //           the entire thing should be occupying zero space
-                        _mouseCapture.implicitWidth = Qt.binding(function()
-                            { return target.visible ? target.implicitWidth : 1; });
-                        _mouseCapture.implicitHeight = Qt.binding(function()
-                            { return target.visible ? target.implicitHeight : 1; });
+                        _mouseCapture.implicitWidth = Qt.binding(() => target.visible ? target.implicitWidth : 1);
+                        _mouseCapture.implicitHeight = Qt.binding(() => target.visible ? target.implicitHeight : 1);
 
                         // If we can't see the target, disable the hubble
                         _mouseCapture.enabled = Qt.binding(() => target.visible);

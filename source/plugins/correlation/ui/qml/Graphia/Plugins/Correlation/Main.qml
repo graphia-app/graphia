@@ -445,7 +445,7 @@ PluginContent
         icon.name: "camera-photo"
         onTriggered:
         {
-            showSaveImageDialog(function(filename, extension)
+            showSaveImageDialog((filename, extension) =>
             {
                 plot.savePlotImage(filename, extension);
             });
@@ -570,7 +570,7 @@ PluginContent
 
     function addCheckedStateFnFor(checkable, isChecked)
     {
-        _plotMenuStateUpdateFns.push(function() { checkable.checked = isChecked(); });
+        _plotMenuStateUpdateFns.push(() => { checkable.checked = isChecked(); });
     }
 
     function updatePlotMenuState()
@@ -634,7 +634,7 @@ PluginContent
                         plot.scaleType === PlotScaleType.ByAttribute &&
                         attributeName === plot.scaleByAttributeName);
 
-                    attributeMenuItem.triggered.connect(function()
+                    attributeMenuItem.triggered.connect(() =>
                     {
                         plot.scaleByAttributeName = attributeName;
                         plot.scaleType = PlotScaleType.ByAttribute;
@@ -660,7 +660,7 @@ PluginContent
                 allAttributesMenuItem.checkable = true;
                 root.addCheckedStateFnFor(allAttributesMenuItem, () =>
                     plot.averagingAttributeName.length === 0);
-                allAttributesMenuItem.triggered.connect(function()
+                allAttributesMenuItem.triggered.connect(() =>
                 {
                     plot.averagingAttributeName = "";
                 });
@@ -676,7 +676,7 @@ PluginContent
                     root.addCheckedStateFnFor(attributeMenuItem, () =>
                         attributeName === plot.averagingAttributeName);
 
-                    attributeMenuItem.triggered.connect(function()
+                    attributeMenuItem.triggered.connect(() =>
                     {
                         plot.averagingAttributeName = attributeName;
                     });
@@ -718,7 +718,7 @@ PluginContent
                 let sortByMenuItem = MenuUtils.addItemTo(sortByMenu, sortOption.text);
 
                 sortByMenuItem.checkable = true;
-                root.addCheckedStateFnFor(sortByMenuItem, function()
+                root.addCheckedStateFnFor(sortByMenuItem, () =>
                 {
                     let columnSortType = PlotColumnSortType.Natural;
                     let columnSortAnnotation = "";
@@ -740,7 +740,7 @@ PluginContent
                 if(sortOption.type === PlotColumnSortType.DataValue)
                     sortByMenuItem.hidden = Qt.binding(() => plot.groupByAnnotation);
 
-                let sortFn = function()
+                let sortFn = () =>
                 {
                     plot.sortBy(sortOption.type,
                         sortOption.type === PlotColumnSortType.ColumnAnnotation ?
@@ -749,7 +749,7 @@ PluginContent
 
                 if(sortOption.type === PlotColumnSortType.HierarchicalClustering)
                 {
-                    sortByMenuItem.triggered.connect(function()
+                    sortByMenuItem.triggered.connect(() =>
                     {
                         // Reset the menu state (and thus uncheck the clustering item)
                         // in case the clustering is cancelled by the user
@@ -776,7 +776,7 @@ PluginContent
                 root.addCheckedStateFnFor(colorByNoGroupMenuItem, () =>
                     plot.colorGroupByAnnotationName.length === 0);
 
-                colorByNoGroupMenuItem.triggered.connect(function()
+                colorByNoGroupMenuItem.triggered.connect(() =>
                 {
                     plot.colorGroupByAnnotationName = "";
                 });
@@ -789,7 +789,7 @@ PluginContent
                     root.addCheckedStateFnFor(colorGroupsByMenuItem, () =>
                         columnAnnotationName === plot.colorGroupByAnnotationName);
 
-                    colorGroupsByMenuItem.triggered.connect(function()
+                    colorGroupsByMenuItem.triggered.connect(() =>
                     {
                         plot.colorGroupByAnnotationName = columnAnnotationName;
                     });
@@ -805,9 +805,9 @@ PluginContent
             savePlotImageAttributeMenu.enabled = Qt.binding(() => plot.selectedRows.length > 0);
 
             let savePlotImageByRowMenuItem = MenuUtils.addItemTo(savePlotImageAttributeMenu, qsTr("Row"));
-            savePlotImageByRowMenuItem.triggered.connect(function()
+            savePlotImageByRowMenuItem.triggered.connect(() =>
             {
-                savePlotImageAction.showSaveImageDialog(function(filename, extension)
+                savePlotImageAction.showSaveImageDialog((filename, extension) =>
                 {
                     plot.savePlotImageByRow(filename, extension);
                 });
@@ -820,9 +820,9 @@ PluginContent
                 {
                     let savePlotImageByAttributeMenuItem = MenuUtils.addItemTo(savePlotImageAttributeMenu, attributeName);
 
-                    savePlotImageByAttributeMenuItem.triggered.connect(function()
+                    savePlotImageByAttributeMenuItem.triggered.connect(() =>
                     {
-                        savePlotImageAction.showSaveImageDialog(function(filename, extension)
+                        savePlotImageAction.showSaveImageDialog((filename, extension) =>
                         {
                             plot.savePlotImageByAttribute(filename, extension, attributeName);
                         });

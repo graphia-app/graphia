@@ -118,7 +118,7 @@ ApplicationWindow
         }
 
         xhr.responseType = "arraybuffer";
-        xhr.onreadystatechange = function()
+        xhr.onreadystatechange = () =>
         {
             if(xhr.readyState === XMLHttpRequest.DONE)
             {
@@ -227,7 +227,7 @@ ApplicationWindow
 
     onClosing: function(close)
     {
-        let closedImmediately = root.confirmSave(function()
+        let closedImmediately = root.confirmSave(() =>
         {
             // After save confirmed or rejected (not cancelled), resume closing
             root.close();
@@ -380,12 +380,12 @@ ApplicationWindow
 
         tabBar.clear();
 
-        root.updatesArray.sort(function(a, b)
+        root.updatesArray.sort((a, b) =>
         {
             return a.version - b.version;
         });
 
-        root.updatesArray.sort(function(a, b)
+        root.updatesArray.sort((a, b) =>
         {
             if(a.version < b.version)
                 return -1;
@@ -495,7 +495,7 @@ ApplicationWindow
 
         root.updatesArray = [];
         let updatesRemaining = tabBar.count;
-        let onComplete = function()
+        let onComplete = () =>
         {
             let updatesString = settings.hexEncodeUpdatesString ?
                 NativeUtils.stringAsHexString(JSON.stringify(root.updatesArray)) :
@@ -534,7 +534,7 @@ ApplicationWindow
         {
             let updateUI = tabBar.getTab(index);
 
-            updateUI.generateJSON(function(updateObject)
+            updateUI.generateJSON((updateObject) =>
             {
                 root.updatesArray.push(updateObject);
                 updatesRemaining--;
@@ -1084,7 +1084,7 @@ ApplicationWindow
                     let button = tabButtonComponent.createObject(tabBar);
                     tabBar.addItem(button);
 
-                    button.text = Qt.binding(function()
+                    button.text = Qt.binding(() =>
                     {
                         return tab.versionText.trim().length > 0 ?
                             tab.versionText : qsTr("New Upgrade");

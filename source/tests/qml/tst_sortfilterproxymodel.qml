@@ -90,7 +90,7 @@ TestCase
 
     function test_filterExpression()
     {
-        let isX = function(row) { return source.get(row).kind === "x"; };
+        let isX = (row) => source.get(row).kind === "x";
         proxy.filterExpression = isX;
         compare(proxy.filterExpression, isX);
 
@@ -112,7 +112,7 @@ TestCase
     function test_sortedAndFiltered()
     {
         proxy.sortExpression = byScore;
-        proxy.filterExpression = function(row) { return source.get(row).score >= 2; };
+        proxy.filterExpression = (row) => source.get(row).score >= 2;
         compare(names(), ["b", "d", "a"]);
     }
 
@@ -120,11 +120,11 @@ TestCase
     // else, which leaves the rows in the order of the source
     function test_throwingExpressions()
     {
-        proxy.filterExpression = function() { throw new Error("filter"); };
+        proxy.filterExpression = () => { throw new Error("filter"); };
         compare(proxy.count, 0);
         proxy.filterExpression = null;
 
-        proxy.sortExpression = function() { throw new Error("sort"); };
+        proxy.sortExpression = () => { throw new Error("sort"); };
         compare(names(), ["b", "a", "c", "d"]);
     }
 

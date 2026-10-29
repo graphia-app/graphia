@@ -61,7 +61,7 @@ Item
             }
 
             if(storeFn !== undefined)
-                o.store = function() { storeFn(JSON.stringify(o)); };
+                o.store = () => { storeFn(JSON.stringify(o)); };
 
             return o;
         }
@@ -71,7 +71,7 @@ Item
 
         function extensionsAsObject()
         {
-            return _stringToObject(defaults.extensions, function(v)
+            return _stringToObject(defaults.extensions, (v) =>
             {
                 root._storingPreference = true;
                 defaults.extensions = v;
@@ -84,7 +84,7 @@ Item
 
         function pluginsAsObject()
         {
-            return _stringToObject(defaults.plugins, function(v)
+            return _stringToObject(defaults.plugins, (v) =>
             {
                 root._storingPreference = true;
                 defaults.plugins = v;

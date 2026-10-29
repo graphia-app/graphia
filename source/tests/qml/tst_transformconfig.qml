@@ -137,7 +137,7 @@ TestCase
     // As Transform.updateExpression
     function expand(template, flags, parameterComponents)
     {
-        let expanded = template.replace(/%(\d+)/g, function(match, index)
+        let expanded = template.replace(/%(\d+)/g, (match, index) =>
         {
             verify(index <= parameterComponents.length, "Template argument index out of range");
             return parameterComponents[index - 1].value;

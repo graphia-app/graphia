@@ -579,7 +579,7 @@ Window
                                         {
                                             property var parameterData:
                                             {
-                                                return _transform.attributeParameters.find(function(element)
+                                                return _transform.attributeParameters.find((element) =>
                                                 {
                                                     return element.name === modelData;
                                                 });

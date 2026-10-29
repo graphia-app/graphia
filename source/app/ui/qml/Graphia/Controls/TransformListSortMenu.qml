@@ -69,11 +69,11 @@ MouseArea
 
                     let menuItem = sortByComponent.createObject(root);
                     menuItem.text = item.text;
-                    menuItem.checked = Qt.binding(function()
+                    menuItem.checked = Qt.binding(() =>
                     {
                         return transformsList.sortRoleName === roleName;
                     });
-                    menuItem.triggered.connect(function()
+                    menuItem.triggered.connect(() =>
                     {
                         return transformsList.sortRoleName = roleName;
                     });
@@ -114,11 +114,11 @@ MouseArea
 
                     let menuItem = sortAscendingComponent.createObject(root);
                     menuItem.text = item.text;
-                    menuItem.checked = Qt.binding(function()
+                    menuItem.checked = Qt.binding(() =>
                     {
                         return transformsList.ascendingSortOrder === ascendingSortOrder;
                     });
-                    menuItem.triggered.connect(function()
+                    menuItem.triggered.connect(() =>
                     {
                         transformsList.ascendingSortOrder = ascendingSortOrder;
                     });

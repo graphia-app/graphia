@@ -135,9 +135,9 @@ function clone(from, to)
                 // bindMenuProperties is called again after a trigger as MenuItems have a tendency
                 // to set their own properties (checked in particular), which breaks the existing bindings
                 if(fromItem.action !== null)
-                    toItem.triggered.connect(function() { fromItem.action.trigger(); bindMenuProperties(); });
+                    toItem.triggered.connect(() => { fromItem.action.trigger(); bindMenuProperties(); });
                 else
-                    toItem.triggered.connect(function() { fromItem.triggered(); bindMenuProperties(); });
+                    toItem.triggered.connect(() => { fromItem.triggered(); bindMenuProperties(); });
             }
         }
         else if(fromItem instanceof Controls.PlatformMenuSeparator)

@@ -141,7 +141,7 @@ Window
         comboBox.currentIndex = 0;
 
         root._onAcceptedFn = onAcceptedFn;
-        Qt.callLater(function()
+        Qt.callLater(() =>
         {
             // Delay the opening in case an existing choice is still "in-flight",
             // e.g. when choosing a plugin immediately after choosing file type

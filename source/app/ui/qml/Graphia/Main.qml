@@ -197,7 +197,7 @@ ApplicationWindow
             if(stack.length > 0)
                 s += "\n\nCommand Stack:\n" + stack;
 
-            let listToString = function(list, title)
+            let listToString = (list, title) =>
             {
                 if(list.length > 0)
                 {
@@ -247,7 +247,7 @@ ApplicationWindow
             return;
 
         let url = NativeUtils.urlForUserInput(argument);
-        Qt.callLater(function()
+        Qt.callLater(() =>
         {
             // Queue this up to do later in the event loop, in case there
             // is any other plugin initialisation to do be done beforehand
@@ -770,7 +770,7 @@ ApplicationWindow
                 }, false);
 
                 Utils.centreWindow(urlTypeChooserDialog);
-                urlTypeChooserDialog.open(function(selectedType, remember)
+                urlTypeChooserDialog.open((selectedType, remember) =>
                 {
                     if(remember)
                         defaults.setUrlTypeFor(extension, selectedType);
@@ -787,7 +787,7 @@ ApplicationWindow
 
     function openUrlOfType(url, type, inNewTab)
     {
-        let onSaveConfirmed = function()
+        let onSaveConfirmed = () =>
         {
             let pluginNames = application.pluginNames(type);
 
@@ -812,7 +812,7 @@ ApplicationWindow
                     }, false);
 
                     Utils.centreWindow(pluginChooserDialog);
-                    pluginChooserDialog.open(function(selectedPlugin, remember)
+                    pluginChooserDialog.open((selectedPlugin, remember) =>
                     {
                         if(remember)
                             defaults.setPluginFor(type, selectedPlugin);
@@ -866,7 +866,7 @@ ApplicationWindow
                 return;
             }
 
-            parameterDialog.accepted.connect(function()
+            parameterDialog.accepted.connect(() =>
             {
                 openUrlOfTypeWithPluginAndParameters(parameterDialog.url,
                     parameterDialog.type, parameterDialog.pluginName,
@@ -900,7 +900,7 @@ ApplicationWindow
 
     function openUrlOfTypeWithPluginAndParameters(url, type, pluginName, parameters, inNewTab)
     {
-        let openInCurrentTab = function()
+        let openInCurrentTab = () =>
         {
             tabBar.openInCurrentTab(url, type, pluginName, parameters);
         };
@@ -1049,7 +1049,7 @@ ApplicationWindow
             if(tabBar.count > 0)
             {
                 // If any tabs are open, close the first one...
-                tabBar.closeTab(0, function()
+                tabBar.closeTab(0, () =>
                 {
                     // ...then (recursively) resume closing if the user doesn't cancel
                     tabBar.removeTab(0);
@@ -2831,7 +2831,7 @@ ApplicationWindow
                     tabBar.currentIndex = index;
 
                     // Make the tab title match the document title
-                    button.text = Qt.binding(function() { return tab.title });
+                    button.text = Qt.binding(() => tab.title);
 
                     return tab;
                 }
@@ -2931,7 +2931,7 @@ ApplicationWindow
                         }
                         else
                         {
-                            let closeTabFunction = function()
+                            let closeTabFunction = () =>
                             {
                                 tab.commandComplete.disconnect(closeTabFunction);
 

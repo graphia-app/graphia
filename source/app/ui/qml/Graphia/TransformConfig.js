@@ -56,7 +56,7 @@ function addLabelTo(text, parent, transformItem)
         "Label {}", parent);
 
     label.text = GraphiaUtils.Utils.normaliseWhitespace(text);
-    label.color = Qt.binding(function() { return transformItem.textColor; });
+    label.color = Qt.binding(() => transformItem.textColor);
 }
 
 function appendToElements(elements, value)

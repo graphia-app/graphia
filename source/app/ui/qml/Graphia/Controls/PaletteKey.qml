@@ -237,7 +237,7 @@ Item
 
                 property string stringValue:
                 {
-                    let fixedAssignment = root._fixedColors.find(function(element)
+                    let fixedAssignment = root._fixedColors.find((element) =>
                     {
                         return element.index === index;
                     });

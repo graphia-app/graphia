@@ -218,14 +218,14 @@ Item
         if(value)
         {
             flags.push(flag);
-            flags = flags.filter(function(e, i)
+            flags = flags.filter((e, i) =>
             {
                 return flags.lastIndexOf(e) === i;
             });
         }
         else
         {
-            flags = flags.filter(function(e)
+            flags = flags.filter((e) =>
             {
                 return e !== flag;
             });
@@ -248,7 +248,7 @@ Item
         let expandedTemplate = template;
 
         expandedTemplate = expandedTemplate.replace(/%(\d+)/g,
-        function(match, index)
+        (match, index) =>
         {
             if(index > _parameterComponents.length)
             {

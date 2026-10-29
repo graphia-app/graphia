@@ -434,7 +434,7 @@ ColumnLayout
                     {
                         let value = root.stringValues[index];
                         let stringValueAlreadyAssigned =
-                        root._fixedColors.find(function(fixedColor)
+                        root._fixedColors.find((fixedColor) =>
                         {
                             return fixedColor.stringValue === value;
                         });

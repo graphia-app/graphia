@@ -280,7 +280,7 @@ Rectangle
 
     Keys.onPressed: function(event)
     {
-        let moveSelection = function(delta)
+        let moveSelection = (delta) =>
         {
             let newIndex = root._lastSelectedIndex;
             if(newIndex < 0 && root._selectedIndices.length > 0)

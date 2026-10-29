@@ -275,8 +275,8 @@ Window
                     return;
 
                 let newValue = selectedValue; // Capture
-                let doSelect = function() { root._selectedAttributeName = newValue; };
-                let cancelSelect = function() { attributeList.select(attributeList.model.find(root._selectedAttributeName)); };
+                let doSelect = () => { root._selectedAttributeName = newValue; };
+                let cancelSelect = () => { attributeList.select(attributeList.model.find(root._selectedAttributeName)); };
 
                 if(editAttributeTableModel.hasEdits || dataTypeComboBox.hasChanged || descriptionTextField.hasChanged)
                     confirmDiscard.confirm(doSelect, cancelSelect);
@@ -394,8 +394,8 @@ Window
                         return;
 
                     let newCurrentValue = currentValue; // Capture
-                    let doTypeChange = function () { editAttributeTableModel.resetAllEdits(); root._selectedType = newCurrentValue; };
-                    let cancelTypeChange = function() { dataTypeComboBox.setCurrentValueTo(root._selectedType); };
+                    let doTypeChange = () => { editAttributeTableModel.resetAllEdits(); root._selectedType = newCurrentValue; };
+                    let cancelTypeChange = () => { dataTypeComboBox.setCurrentValueTo(root._selectedType); };
 
                     // Confirm edit discard when changing type
                     if(editAttributeTableModel.hasEdits)
@@ -417,8 +417,8 @@ Window
                 onCheckedChanged:
                 {
                     let newChecked = checked; // Capture
-                    let doCheck = function() { editAttributeTableModel.combineSharedValues = newChecked; };
-                    let cancelCheck = function() { editAllSharedValuesCheckbox.checked = false; };
+                    let doCheck = () => { editAttributeTableModel.combineSharedValues = newChecked; };
+                    let cancelCheck = () => { editAllSharedValuesCheckbox.checked = false; };
 
                     // Confirm edit discard when going from non-combined to combined
                     if(checked && editAttributeTableModel.hasEdits)

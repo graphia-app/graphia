@@ -476,7 +476,7 @@ Item
 
     function copyImageToClipboard()
     {
-        graph.grabToImage(function(result)
+        graph.grabToImage((result) =>
         {
             application.copyImageToClipboard(result.image);
             _document.status = qsTr("Copied Viewport To Clipboard");
@@ -1166,7 +1166,7 @@ Item
                     // rendered in threads, so there is a window where the uncorrected dimensions
                     // are visible. Here we delay setting the height on the plugin by a frame,
                     // so that it has had an event loop to update to the limits.
-                    Qt.callLater(function()
+                    Qt.callLater(() =>
                     {
                         let newHeight = height;
 
