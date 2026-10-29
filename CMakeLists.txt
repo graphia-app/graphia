@@ -105,7 +105,13 @@ list(APPEND MISC
 )
 
 list(APPEND MISC
+    ${CMAKE_CURRENT_LIST_DIR}/.github/actions/install-mesa/action.yml
+    ${CMAKE_CURRENT_LIST_DIR}/.github/actions/install-qt/action.yml
+    ${CMAKE_CURRENT_LIST_DIR}/.github/actions/sign/action.yml
+    ${CMAKE_CURRENT_LIST_DIR}/.github/ISSUE_TEMPLATE/bug_report.md
     ${CMAKE_CURRENT_LIST_DIR}/.github/workflows/build.yml
+    ${CMAKE_CURRENT_LIST_DIR}/.github/workflows/publish.yml
+    ${CMAKE_CURRENT_LIST_DIR}/.github/workflows/static-analysis.yml
 )
 
 list(APPEND MISC
