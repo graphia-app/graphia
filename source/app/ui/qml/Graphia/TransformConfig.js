@@ -206,6 +206,8 @@ function Create(transformIndex, document, transformString)
     function(document, parent, transformItem, locked, onParameterChanged)
     {
         let labelText = "";
+        let parameters = [];
+        this.parameters = parameters;
 
         function addLabel()
         {
@@ -213,149 +215,145 @@ function Create(transformIndex, document, transformString)
             labelText = "";
         }
 
-        this.parameters = [];
-
-        for(let i = 0; i < this._elements.length; i++)
+        function addParameter(parameterData)
         {
-            if(typeof this._elements[i] === "string")
-                labelText += this._elements[i];
-            else if(typeof this._elements[i] === 'object')
+            let parameterObject = createTransformParameter(document,
+                locked ? null : parent, // If locked, still create the object, but don't display it
+                parameterData, onParameterChanged);
+
+            parameters.push(parameterObject);
+        }
+
+        function nameText(element, name)
+        {
+            if(element.type !== "parameter")
+                return document.attributeDisplayName(name);
+
+            let displayName = document.transformParameter(transform.action, name).displayName;
+            return displayName !== undefined ? displayName : name;
+        }
+
+        // A value's type comes from the name opposite it, if there is one
+        function valueParameterData(element, oppositeName)
+        {
+            if(oppositeName === undefined)
             {
-                let parameter = this._elements[i];
-
-                let that = this;
-
-                if(parameter.lhs !== undefined)
-                {
-                    // The element is a parameter or a condition
-
-                    // An operand is either a name of a parameter or an attribute, or a value
-                    function addOperand(operand, isName, opposite, oppositeIsName)
-                    {
-                        if(isName)
-                        {
-                            if(parameter.type === "parameter")
-                            {
-                                let displayName = document.transformParameter(that.action, operand).displayName;
-                                labelText += displayName !== undefined ? displayName : operand;
-                            }
-                            else
-                                labelText += document.attributeDisplayName(operand);
-                        }
-                        else
-                        {
-                            let parameterData = {};
-                            let displayOperand = operand;
-
-                            if(opposite !== undefined && oppositeIsName)
-                            {
-                                let parameterName = opposite;
-
-                                if(parameter.type === "parameter")
-                                    parameterData = document.transformParameter(that.action, parameterName);
-                                else if(parameter.type === "condition")
-                                {
-                                    parameterData = document.attribute(parameterName);
-                                    displayOperand = document.attributeDisplayValue(parameterName, operand);
-                                    parameterData.displayValueOf = value => document.attributeDisplayValue(parameterName, value);
-                                    parameterData.storedValueOf = text => document.attributeStoredValue(parameterName, text);
-                                }
-                                else
-                                    console.log("Transform element parameter type unknown: " + parameter.type);
-                            }
-                            else
-                            {
-                                // We known nothing of the type, so just treat it as a string
-                                parameterData.valueType = GraphiaSharedTypes.ValueType.String;
-
-                                parameterData.hasRange = false;
-                                parameterData.hasMinimumValue = false;
-                                parameterData.hasMaximumValue = false;
-                            }
-
-                            if(parameterData.valueType === GraphiaSharedTypes.ValueType.StringList)
-                                parameterData.initialIndex = parameterData.initialValue.indexOf(operand);
-                            else
-                                parameterData.initialValue = operand;
-
-                            if(locked)
-                            {
-                                switch(parameterData.valueType)
-                                {
-                                default:
-                                case GraphiaSharedTypes.ValueType.String:
-                                    labelText += "\"" + displayOperand + "\"";
-                                    break;
-                                case GraphiaSharedTypes.ValueType.StringList:
-                                {
-                                    // A choice from a list, shown by its display text
-                                    let index = parameterData.initialValue.indexOf(operand);
-                                    let displayValues = parameterData.displayValues;
-                                    labelText += displayValues !== undefined &&
-                                        index >= 0 && index < displayValues.length ? displayValues[index] : operand;
-                                    break;
-                                }
-                                case GraphiaSharedTypes.ValueType.Int:
-                                case GraphiaSharedTypes.ValueType.Float:
-                                    labelText += GraphiaUtils.NativeUtils.formatNumberScientific(operand);
-                                    break;
-                                }
-                            }
-                            else
-                                addLabel();
-
-                            let parameterObject = createTransformParameter(document,
-                                locked ? null : parent, // If locked, still create the object, but don't display it
-                                parameterData, onParameterChanged);
-
-                            that.parameters.push(parameterObject);
-                        }
-                    }
-
-                    let phrase = parameter.type === "parameter" ?
-                        displayText.parameter : document.opDisplayText(parameter.op).phrase;
-
-                    for(const part of phrase.split(/(%\d+)/))
-                    {
-                        if(part === "%1")
-                            addOperand(parameter.lhs, parameter.lhsIsName, parameter.rhs, parameter.rhsIsName);
-                        else if(part === "%2" && parameter.rhs !== undefined)
-                            addOperand(parameter.rhs, parameter.rhsIsName, parameter.lhs, parameter.lhsIsName);
-                        else if(!/^%\d+$/.test(part))
-                            labelText += part;
-                    }
-                }
-                else if(parameter.attributeName !== undefined)
-                {
-                    // The element is an attribute
-
-                    if(locked)
-                        labelText += document.attributeDisplayName(parameter.attributeName);
-
-                    addLabel();
-
-                    let parameterData = {};
-                    parameterData.valueType = GraphiaSharedTypes.ValueType.Attribute;
-
-                    // Don't allow the user to choose attributes that don't exist at the point
-                    // in time when the transform is executed
-                    let unavailableAttributeNames =
-                        document.addedOrChangedAttributeNamesAtTransformIndexOrLater(transformIndex);
-
-                    parameterData.initialValue = document.availableAttributesModel(
-                        parameter.elementType, parameter.valueType,
-                        GraphiaSharedTypes.AttributeFlag.DisableDuringTransform,
-                        unavailableAttributeNames);
-
-                    parameterData.initialAttributeName = parameter.attributeName;
-
-                    let parameterObject = createTransformParameter(document,
-                        locked ? null : parent, // If locked, still create the object, but don't display it
-                        parameterData, onParameterChanged);
-
-                    that.parameters.push(parameterObject);
-                }
+                // We know nothing of the type, so just treat it as a string
+                return {valueType: GraphiaSharedTypes.ValueType.String,
+                    hasRange: false, hasMinimumValue: false, hasMaximumValue: false};
             }
+
+            if(element.type === "parameter")
+                return document.transformParameter(transform.action, oppositeName);
+
+            if(element.type !== "condition")
+            {
+                console.log("Transform element parameter type unknown: " + element.type);
+                return {};
+            }
+
+            let parameterData = document.attribute(oppositeName);
+            parameterData.displayValueOf = value => document.attributeDisplayValue(oppositeName, value);
+            parameterData.storedValueOf = text => document.attributeStoredValue(oppositeName, text);
+            return parameterData;
+        }
+
+        function lockedValueText(parameterData, value)
+        {
+            switch(parameterData.valueType)
+            {
+            default:
+            case GraphiaSharedTypes.ValueType.String:
+            {
+                let displayValueOf = parameterData.displayValueOf;
+                return "\"" + (displayValueOf !== undefined ? displayValueOf(value) : value) + "\"";
+            }
+            case GraphiaSharedTypes.ValueType.StringList:
+            {
+                // A choice from a list, shown by its display text
+                let index = parameterData.initialIndex;
+                let displayValues = parameterData.displayValues;
+                return displayValues !== undefined &&
+                    index >= 0 && index < displayValues.length ? displayValues[index] : value;
+            }
+            case GraphiaSharedTypes.ValueType.Int:
+            case GraphiaSharedTypes.ValueType.Float:
+                return GraphiaUtils.NativeUtils.formatNumberScientific(value);
+            }
+        }
+
+        // An operand is either a name of a parameter or an attribute, or a value
+        function addOperand(element, operand, isName, opposite, oppositeIsName)
+        {
+            if(isName)
+            {
+                labelText += nameText(element, operand);
+                return;
+            }
+
+            let parameterData = valueParameterData(element, oppositeIsName ? opposite : undefined);
+
+            if(parameterData.valueType === GraphiaSharedTypes.ValueType.StringList)
+                parameterData.initialIndex = parameterData.initialValue.indexOf(operand);
+            else
+                parameterData.initialValue = operand;
+
+            if(locked)
+                labelText += lockedValueText(parameterData, operand);
+            else
+                addLabel();
+
+            addParameter(parameterData);
+        }
+
+        // The element is a parameter or a condition
+        function addOperation(element)
+        {
+            let phrase = element.type === "parameter" ?
+                displayText.parameter : document.opDisplayText(element.op).phrase;
+
+            for(const part of phrase.split(/(%\d+)/))
+            {
+                if(part === "%1")
+                    addOperand(element, element.lhs, element.lhsIsName, element.rhs, element.rhsIsName);
+                else if(part === "%2" && element.rhs !== undefined)
+                    addOperand(element, element.rhs, element.rhsIsName, element.lhs, element.lhsIsName);
+                else if(!/^%\d+$/.test(part))
+                    labelText += part;
+            }
+        }
+
+        function addAttribute(element)
+        {
+            if(locked)
+                labelText += document.attributeDisplayName(element.attributeName);
+
+            addLabel();
+
+            // Don't allow the user to choose attributes that don't exist at the point
+            // in time when the transform is executed
+            let unavailableAttributeNames =
+                document.addedOrChangedAttributeNamesAtTransformIndexOrLater(transformIndex);
+
+            addParameter(
+            {
+                valueType: GraphiaSharedTypes.ValueType.Attribute,
+                initialValue: document.availableAttributesModel(
+                    element.elementType, element.valueType,
+                    GraphiaSharedTypes.AttributeFlag.DisableDuringTransform,
+                    unavailableAttributeNames),
+                initialAttributeName: element.attributeName
+            });
+        }
+
+        for(const element of this._elements)
+        {
+            if(typeof element === "string")
+                labelText += element;
+            else if(element.lhs !== undefined)
+                addOperation(element);
+            else if(element.attributeName !== undefined)
+                addAttribute(element);
         }
 
         if(labelText.length > 0)
