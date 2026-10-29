@@ -334,14 +334,12 @@ Item
         {
             // Capture onSaveConfirmedFunction so that it doesn't get overwritten before
             // we use it (though in theory that can't happen)
-            let proxyFn = function(fn)
+            const onSaveConfirmed = onSaveConfirmedFunction;
+            let proxyFn = () =>
             {
-                return function()
-                {
-                    _document.saveComplete.disconnect(proxyFn);
-                    fn();
-                };
-            }(onSaveConfirmedFunction);
+                _document.saveComplete.disconnect(proxyFn);
+                onSaveConfirmed();
+            };
             onSaveConfirmedFunction = null;
 
             _document.saveComplete.connect(proxyFn);
@@ -452,30 +450,24 @@ Item
         return qsTr("Repeat Last Selection");
     }
 
-    function repeatLastSelection(nodeId, add)
+    function repeatLastSelection(nodeId = contextMenu.clickedNodeId, add)
     {
-        let clickedNodeId = typeof(nodeId) !== "undefined" ?
-            nodeId : contextMenu.clickedNodeId;
-
-        let addToSelection = typeof(add) !== "undefined" ?
-            add : undefined;
-
         switch(root._lastSelectType)
         {
         default:
         case TabUI.LS_None:
             return;
         case TabUI.LS_Neighbours:
-            selectNeighbours(clickedNodeId, add);
+            selectNeighbours(nodeId, add);
             return;
         case TabUI.LS_Sources:
-            selectSources(clickedNodeId, add);
+            selectSources(nodeId, add);
             return;
         case TabUI.LS_Targets:
-            selectTargets(clickedNodeId, add);
+            selectTargets(nodeId, add);
             return;
         case TabUI.LS_BySharedValue:
-            selectBySharedAttributeValue(_lastSharedValueAttributeName, clickedNodeId, add);
+            selectBySharedAttributeValue(_lastSharedValueAttributeName, nodeId, add);
             return;
         }
     }

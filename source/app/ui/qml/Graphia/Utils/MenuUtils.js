@@ -50,7 +50,7 @@ function addItemTo(menu, text)
 
 function addActionTo(menu, action)
 {
-    let menuItem = addItemTo(menu, undefined);
+    let menuItem = addItemTo(menu);
     menuItem.action = action;
     return menuItem;
 }
@@ -82,8 +82,8 @@ function clone(from, to)
 {
     clear(to);
 
-    to.title = Qt.binding(function(from) { return () => from.title; }(from));
-    to.enabled = Qt.binding(function(from) { return () => from.enabled; }(from));
+    to.title = Qt.binding(() => from.title);
+    to.enabled = Qt.binding(() => from.enabled);
 
     let buttonGroups = {};
 

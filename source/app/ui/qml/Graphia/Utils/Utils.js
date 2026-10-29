@@ -36,7 +36,7 @@ function proxyProperties(from, to, properties)
     properties.forEach(function(prop)
     {
         if(from[prop] !== undefined)
-            to[prop] = Qt.binding(((from, prop) => () => from[prop])(from, prop));
+            to[prop] = Qt.binding(() => from[prop]);
     });
 }
 
@@ -103,14 +103,8 @@ function printStackTrace()
     console.log(trace);
 }
 
-function printObjectTree(root, indent, post)
+function printObjectTree(root, indent = 0, post = "")
 {
-    if(!indent)
-        indent = 0;
-
-    if(!post)
-        post = "";
-
     post += " (" + root.x + "x" + root.y + "x" + root.width + "x" + root.height + ")";
 
     if(root.text)

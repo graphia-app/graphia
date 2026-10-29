@@ -152,15 +152,12 @@ Item
         }
     }
 
-    function show(animate)
+    function show(animate = true)
     {
         _hidden = false;
 
         if(_opened)
             return;
-
-        if(animate === undefined)
-            animate = true;
 
         let animation; let drop;
         if(direction === Qt.Vertical)
@@ -185,16 +182,13 @@ Item
             drop.enabled = false;
     }
 
-    function hide(animate)
+    function hide(animate = true)
     {
         if(!_opened)
         {
             _hidden = true;
             return;
         }
-
-        if(animate === undefined)
-            animate = true;
 
         let animation; let drop;
         if(direction === Qt.Vertical)
@@ -227,11 +221,8 @@ Item
             _hidden = true;
     }
 
-    function toggle(animate)
+    function toggle(animate = true)
     {
-        if(animate === undefined)
-            animate = true;
-
         if(hidden)
             show(animate);
         else

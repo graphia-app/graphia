@@ -1041,14 +1041,14 @@ ApplicationWindow
                 for(const osName in updateObject.payloads)
                 {
                     let url = updateObject.payloads[osName].url;
-                    calculateChecksum(url, function(osName) { return function(checksum)
+                    calculateChecksum(url, (checksum) =>
                     {
                         updateObject.payloads[osName].installerChecksum = checksum;
 
                         remainingChecksums--;
                         if(remainingChecksums === 0)
                             onComplete(updateObject);
-                    }}(osName));
+                    });
                 }
             }
         }

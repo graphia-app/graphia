@@ -335,18 +335,16 @@ ApplicationWindow
         if(tabBar.count > 0)
         {
             // Capture _restartOnExit so that we can restore its value after a non-cancel exit
-            let closeTabFunction = function(restartOnExit)
+            const restartOnExit = _restartOnExit;
+            let closeTabFunction = () =>
             {
-                return function()
-                {
-                    tabBar.removeTab(0);
-                    _restartOnExit = restartOnExit;
+                tabBar.removeTab(0);
+                _restartOnExit = restartOnExit;
 
-                    // callLater is used because (apparently) ApplicationWindow::close()
-                    // doesn't like to be invoked recursively
-                    Qt.callLater(mainWindow.close);
-                };
-            }(_restartOnExit);
+                // callLater is used because (apparently) ApplicationWindow::close()
+                // doesn't like to be invoked recursively
+                Qt.callLater(mainWindow.close);
+            };
 
             // Reset the value of _restartOnExit so that if the user cancels an exit, any
             // subsequent future exit doesn't then also restart
@@ -2910,16 +2908,13 @@ ApplicationWindow
                     tab.openUrl(url, type, pluginName, parameters);
                 }
 
-                function closeTab(index, onCloseFunction)
+                function closeTab(index, onCloseFunction = () => removeTab(index))
                 {
                     if(index < 0 || index >= tabBar.count)
                     {
                         console.log("closeTab called with out of range index: " + index);
                         return false;
                     }
-
-                    if(typeof(onCloseFunction) === "undefined")
-                        onCloseFunction = function() { removeTab(index); }
 
                     tabBar.currentIndex = index;
                     let tab = tabLayout.get(index);

@@ -85,126 +85,136 @@ function substituted(phrase, args)
     return elements;
 }
 
-function Create(transformIndex, document, transformString)
+class Create
 {
-    let parameterIndex = 1;
-    let transform = document.parseGraphTransform(transformString);
-
-    this.action = transform.action;
-    this.flags = transform.flags;
-
-    // Escape '%' to '%!' so that when the template is actually employed, a literal
-    // % isn't potentially misinterpreted as a template substitution parameter
-    this.template = document.writtenString(transform.action).replace(/%/g, "%!");
-
-    let displayText = document.transformDisplayText();
-
-    function conditionElements(condition, type)
+    constructor(transformIndex, document, transformString)
     {
-        if(typeof condition.rhs !== "object")
-            return [Object.assign({type: type}, condition)];
+        let parameterIndex = 1;
+        let transform = document.parseGraphTransform(transformString);
 
-        let bracketed = operand => substituted("(%1)", [conditionElements(operand, type)]);
+        this.action = transform.action;
+        this.flags = transform.flags;
 
-        return substituted(document.opDisplayText(condition.op).phrase,
-            [bracketed(condition.lhs), bracketed(condition.rhs)]);
-    }
+        // Escape '%' to '%!' so that when the template is actually employed, a literal
+        // % isn't potentially misinterpreted as a template substitution parameter
+        this.template = document.writtenString(transform.action).replace(/%/g, "%!");
 
-    function conditionToTemplate(condition)
-    {
-        function templated(text, isName)
+        let displayText = document.transformDisplayText();
+
+        function conditionElements(condition, type)
         {
-            // As with the action, escape '%' in attribute names
-            if(isName)
-                return "$" + document.writtenAttributeName(text).replace(/%/g, "%!");
+            if(typeof condition.rhs !== "object")
+                return [Object.assign({type: type}, condition)];
 
-            return "%" + parameterIndex++;
+            let bracketed = operand => substituted("(%1)", [conditionElements(operand, type)]);
+
+            return substituted(document.opDisplayText(condition.op).phrase,
+                [bracketed(condition.lhs), bracketed(condition.rhs)]);
         }
 
-        let template = "";
-
-        if(typeof condition.lhs === "object")
-            template += "(" + conditionToTemplate(condition.lhs) + ")";
-        else
-            template += templated(condition.lhs, condition.lhsIsName);
-
-        template += " " + condition.op;
-
-        if(condition.rhs !== undefined)
+        function conditionToTemplate(condition)
         {
-            template += " ";
+            function templated(text, isName)
+            {
+                // As with the action, escape '%' in attribute names
+                if(isName)
+                    return "$" + document.writtenAttributeName(text).replace(/%/g, "%!");
 
-            if(typeof condition.rhs === "object")
-                template += "(" + conditionToTemplate(condition.rhs) + ")";
+                return "%" + parameterIndex++;
+            }
+
+            let template = "";
+
+            if(typeof condition.lhs === "object")
+                template += "(" + conditionToTemplate(condition.lhs) + ")";
             else
-                template += templated(condition.rhs, condition.rhsIsName);
+                template += templated(condition.lhs, condition.lhsIsName);
+
+            template += " " + condition.op;
+
+            if(condition.rhs !== undefined)
+            {
+                template += " ";
+
+                if(typeof condition.rhs === "object")
+                    template += "(" + conditionToTemplate(condition.rhs) + ")";
+                else
+                    template += templated(condition.rhs, condition.rhsIsName);
+            }
+
+            return template;
         }
 
-        return template;
-    }
+        // Each part wraps those before it, so a translation can put it wherever its language needs
 
-    // Each part wraps those before it, so a translation can put it wherever its language needs
+        // Action
+        this._elements = [transform.displayName];
 
-    // Action
-    this._elements = [transform.displayName];
-
-    // Attribute Parameters
-    if(transform.attributes.length > 0)
-    {
-        this.template += " using";
-
-        let attributeElements = [];
-
-        for(let i = 0; i < transform.attributes.length; i++)
+        // Attribute Parameters
+        if(transform.attributes.length > 0)
         {
-            let attributeName = transform.attributes[i];
-            let attribute = document.attribute(attributeName);
-            this.template += " $%" + parameterIndex++;
+            this.template += " using";
 
-            attributeElements.push(
-                {
-                    attributeName: attributeName,
-                    elementType: attribute.elementType,
-                    valueType: attribute.valueType
-                });
+            let attributeElements = [];
+
+            for(let i = 0; i < transform.attributes.length; i++)
+            {
+                let attributeName = transform.attributes[i];
+                let attribute = document.attribute(attributeName);
+                this.template += " $%" + parameterIndex++;
+
+                attributeElements.push(
+                    {
+                        attributeName: attributeName,
+                        elementType: attribute.elementType,
+                        valueType: attribute.valueType
+                    });
+            }
+
+            this._elements = substituted(displayText.usingAttributes, [this._elements, attributeElements]);
         }
 
-        this._elements = substituted(displayText.usingAttributes, [this._elements, attributeElements]);
-    }
-
-    // Parameters
-    if(transform.parameters.length > 0)
-    {
-        this.template += " with";
-
-        let parameterElements = [];
-
-        for(let index in transform.parameters)
+        // Parameters
+        if(transform.parameters.length > 0)
         {
-            // Put whitespace between the parameters
-            if(parameterElements.length > 0)
-                appendToElements(parameterElements, " ");
+            this.template += " with";
 
-            let parameter = transform.parameters[index];
-            this.template += " " + document.writtenString(parameter.name) + " = %" + parameterIndex++;
-            parameterElements.push({type: "parameter", lhs: parameter.name, lhsIsName: true, rhs: parameter.value});
+            let parameterElements = [];
+
+            for(let index in transform.parameters)
+            {
+                // Put whitespace between the parameters
+                if(parameterElements.length > 0)
+                    appendToElements(parameterElements, " ");
+
+                let parameter = transform.parameters[index];
+                this.template += " " + document.writtenString(parameter.name) + " = %" + parameterIndex++;
+                parameterElements.push({type: "parameter", lhs: parameter.name, lhsIsName: true, rhs: parameter.value});
+            }
+
+            this._elements = substituted(displayText.withParameters, [this._elements, parameterElements]);
         }
 
-        this._elements = substituted(displayText.withParameters, [this._elements, parameterElements]);
+        // Condition
+        if(transform.condition !== undefined)
+        {
+            this.template += " where " + conditionToTemplate(transform.condition);
+
+            this._elements = substituted(displayText.whereCondition,
+                [this._elements, conditionElements(transform.condition, "condition")]);
+        }
+
+        this._transformIndex = transformIndex;
+        this._transform = transform;
+        this._displayText = displayText;
     }
 
-    // Condition
-    if(transform.condition !== undefined)
+    toComponents(document, parent, transformItem, locked, onParameterChanged)
     {
-        this.template += " where " + conditionToTemplate(transform.condition);
+        const transformIndex = this._transformIndex;
+        const transform = this._transform;
+        const displayText = this._displayText;
 
-        this._elements = substituted(displayText.whereCondition,
-            [this._elements, conditionElements(transform.condition, "condition")]);
-    }
-
-    this.toComponents =
-    function(document, parent, transformItem, locked, onParameterChanged)
-    {
         let labelText = "";
         let parameters = [];
         this.parameters = parameters;
