@@ -220,13 +220,7 @@ Item
 
     function indexOf(item)
     {
-        for(let i = 0; i < listTabs.length; i++)
-        {
-            if(listTabs[i] === item)
-                return i;
-        }
-
-        return -1;
+        return listTabs.indexOf(item);
     }
 
     NumberAnimation
@@ -254,17 +248,17 @@ Item
     {
         let listBoxModel = [];
 
-        for(let i = 0; i < listTabs.length; i++)
+        for(const listTab of listTabs)
         {
-            listTabs[i].parent = content;
-            listTabs[i].x = Qt.binding(function()
+            listTab.parent = content;
+            listTab.x = Qt.binding(function()
             {
                 return indexOf(this) * contentContainer.width + tabSelectorListBox.implicitWidth;
             });
-            listTabs[i].width = Qt.binding(() => contentContainer.width);
-            listTabs[i].height = Qt.binding(() => contentContainer.height);
+            listTab.width = Qt.binding(() => contentContainer.width);
+            listTab.height = Qt.binding(() => contentContainer.height);
 
-            listBoxModel.push(listTabs[i].title);
+            listBoxModel.push(listTab.title);
         }
 
         tabSelectorListBox.model = listBoxModel;

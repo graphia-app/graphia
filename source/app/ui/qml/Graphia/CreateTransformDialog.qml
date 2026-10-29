@@ -414,13 +414,13 @@ Window
 
                                                 let newModel = modelComponent.createObject();
 
-                                                for(let i = 0; i < ops.length; i++)
+                                                for(const op of ops)
                                                 {
                                                     let item =
                                                     {
-                                                        display: document.opDisplayText(ops[i]).name,
-                                                        value: ops[i],
-                                                        unary: document.opIsUnary(ops[i])
+                                                        display: document.opDisplayText(op).name,
+                                                        value: op,
+                                                        unary: document.opIsUnary(op)
                                                     };
 
                                                     newModel.append(item);
@@ -716,8 +716,8 @@ Window
 
                                     function updateValues()
                                     {
-                                        for(let parameterName in _values)
-                                            _values[parameterName].updateValue();
+                                        for(const transformParameter of Object.values(_values ?? {}))
+                                            transformParameter.updateValue();
 
                                         visualisations.update();
                                     }
@@ -996,16 +996,14 @@ Window
         defaultVisualisations = [];
 
         let resolvedDefaultVisualisations = {};
-        Object.keys(_transform.defaultVisualisations).forEach(function(attributeName)
+        for(const [attributeName, defaultVisualisation] of Object.entries(_transform.defaultVisualisations))
         {
             let resolvedAttributeName = visualisations.resolvedAttributeName(attributeName);
-            resolvedDefaultVisualisations[resolvedAttributeName] =
-                _transform.defaultVisualisations[attributeName];
-        });
+            resolvedDefaultVisualisations[resolvedAttributeName] = defaultVisualisation;
+        }
 
-        Object.keys(resolvedDefaultVisualisations).forEach(function(attributeName)
+        for(const [attributeName, defaultVisualisation] of Object.entries(resolvedDefaultVisualisations))
         {
-            let defaultVisualisation = resolvedDefaultVisualisations[attributeName];
             let channelName = visualisations.selectedVisualisation(attributeName);
 
             if(channelName.length > 0)
@@ -1016,7 +1014,7 @@ Window
 
                 defaultVisualisations.push(expression);
             }
-        });
+        }
     }
 
     onAccepted:

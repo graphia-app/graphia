@@ -537,8 +537,8 @@ Item
         if(Object.keys(parameters).length !== 0)
             newExpression += " with";
 
-        for(let key in parameters)
-            newExpression += " " + key + " = " + parameters[key];
+        for(const [key, parameter] of Object.entries(parameters))
+            newExpression += " " + key + " = " + parameter;
 
         value = newExpression;
         document.setVisualisation(index, value);
@@ -617,9 +617,8 @@ Item
         gradientKey.visible = false;
         paletteKey.visible = false;
 
-        for(let key in parameters)
+        for(const [key, value] of Object.entries(parameters ?? {}))
         {
-            let value = parameters[key];
             let unescaped = Utils.unescapeQuotes(value);
 
             switch(key)

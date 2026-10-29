@@ -115,12 +115,11 @@ Item
         {
             let fixedColors = [];
 
-            for(let stringValue in palette.fixedColors)
+            for(const [stringValue, color] of Object.entries(palette.fixedColors))
             {
                 if(root.stringValues.indexOf(stringValue) === -1)
                     continue;
 
-                let color = palette.fixedColors[stringValue];
                 let colorIndex = -1;
 
                 if(!Utils.setContains(assignedValues, stringValue))

@@ -33,11 +33,11 @@ function watchPropertyChanges(object, handler)
 
 function proxyProperties(from, to, properties)
 {
-    properties.forEach(function(prop)
+    for(const prop of properties)
     {
         if(from[prop] !== undefined)
             to[prop] = Qt.binding(() => from[prop]);
-    });
+    }
 }
 
 function objectsEquivalent(a, b)
@@ -48,15 +48,7 @@ function objectsEquivalent(a, b)
     if(aProps.length !== bProps.length)
         return false;
 
-    for(let i = 0; i < aProps.length; i++)
-    {
-        let propName = aProps[i];
-
-        if(a[propName] !== b[propName])
-            return false;
-    }
-
-    return true;
+    return aProps.every(propName => a[propName] === b[propName]);
 }
 
 function isNumeric(value)
@@ -115,11 +107,8 @@ function printObjectTree(root, indent = 0, post = "")
 
     function printChildren(children, post)
     {
-        if(children.length > 0)
-        {
-            for(let i = 0; i < children.length; i++)
-                printObjectTree(children[i], indent + 1, post);
-        }
+        for(const child of children)
+            printObjectTree(child, indent + 1, post);
     }
 
     if(root.children)
@@ -293,15 +282,7 @@ function setRemove(set, value)
 
 function setIntersection(a, b)
 {
-    let result = [];
-
-    a.forEach(function(value)
-    {
-        if(setContains(b, value))
-            result.push(value);
-    });
-
-    return result;
+    return a.filter(value => setContains(b, value));
 }
 
 // Escape a text value so it will match literally in a regex
@@ -425,13 +406,13 @@ function createWindow(parent, component, properties = {}, immediatelyShow = true
         // Window already exists
         window = parent.windowInstanceMap.get(component);
 
-        Object.keys(properties).forEach(function(key)
+        for(const [key, value] of Object.entries(properties))
         {
             if(window.hasOwnProperty(key))
-                window[key] = properties[key];
+                window[key] = value;
             else
                 console.log("Utils.createWindow: " + window + " has no property " + key);
-        });
+        }
     }
 
     if(immediatelyShow)

@@ -43,13 +43,7 @@ ColumnLayout
     {
         let palette = JSON.parse(configuration);
 
-        let autoColors = [];
-
-        if(palette.autoColors !== undefined)
-        {
-            for(let key = 0; key < palette.autoColors.length; key++)
-                autoColors.push(palette.autoColors[key]);
-        }
+        let autoColors = palette.autoColors !== undefined ? [...palette.autoColors] : [];
 
         paletteAutoColorListRepeater.model = root._autoColors = autoColors;
 
@@ -68,12 +62,12 @@ ColumnLayout
 
         if(palette.fixedColors !== undefined)
         {
-            for(let stringValue in palette.fixedColors)
+            for(const [stringValue, color] of Object.entries(palette.fixedColors))
             {
                 let o =
                 {
                     "stringValue": stringValue,
-                    "color": palette.fixedColors[stringValue]
+                    "color": color
                 };
 
                 fixedColors.push(o);
@@ -106,13 +100,8 @@ ColumnLayout
         {
             let fixedColorsObject = {};
 
-            for(let i = 0; i < root._fixedColors.length; i++)
-            {
-                let stringValue = root._fixedColors[i].stringValue;
-                let color = root._fixedColors[i].color;
-
-                fixedColorsObject[stringValue] = color;
-            }
+            for(const fixedColor of root._fixedColors)
+                fixedColorsObject[fixedColor.stringValue] = fixedColor.color;
 
             o.fixedColors = fixedColorsObject;
         }
@@ -246,14 +235,7 @@ ColumnLayout
                     visible:
                     {
                         let v = root.stringValues[autoColorRow.index];
-
-                        for(let i = 0; i < root._fixedColors.length; i++)
-                        {
-                            if(root._fixedColors[i].stringValue === v)
-                                return true;
-                        }
-
-                        return false;
+                        return root._fixedColors.some(fixedColor => fixedColor.stringValue === v);
                     }
 
                     text: qsTr("<i>(overridden by fixed assignment)</i>")

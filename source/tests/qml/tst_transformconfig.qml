@@ -210,11 +210,7 @@ TestCase
 
     function labelText()
     {
-        let texts = [];
-        for(let i = 0; i < container.children.length; i++)
-            texts.push(container.children[i].text);
-
-        return texts.join("|");
+        return Array.from(container.children, child => child.text).join("|");
     }
 
     // A locked transform is displayed as text, rather than as controls

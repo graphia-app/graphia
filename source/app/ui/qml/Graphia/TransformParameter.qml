@@ -257,10 +257,10 @@ GridLayout
 
     function configure(data)
     {
-        for(let property in data)
+        for(const [property, value] of Object.entries(data))
         {
             if(this[property] !== undefined)
-                this[property] = data[property];
+                this[property] = value;
         }
 
         switch(valueType)

@@ -169,13 +169,13 @@ Rectangle
         let top = Number.MAX_SAFE_INTEGER;
         let bottom = Number.MIN_SAFE_INTEGER;
 
-        root._loadedCells.forEach((cell) =>
+        for(const cell of root._loadedCells)
         {
             left = Math.min(left, cell.x);
             right = Math.max(right, cell.x);
             top = Math.min(top, cell.y);
             bottom = Math.max(bottom, cell.y);
-        });
+        }
 
         root._leftLoadedColumn = left;
         root._rightLoadedColumn = right;
@@ -603,11 +603,11 @@ Rectangle
 
                     TableView.onPooled:
                     {
-                        root._loadedCells.forEach((cell) =>
+                        for(const cell of root._loadedCells)
                         {
                             if(cell.x === model.column && cell.y === model.row)
                                 root._loadedCells.delete(cell);
-                        });
+                        }
 
                         root._cellWidths.delete(model.column + "," + model.row);
 

@@ -278,8 +278,8 @@ Item
         {
             let filters = [];
             let saverTypes = root.application ? root.application.saverFileTypes() : [];
-            for(let i = 0; i < saverTypes.length; i++)
-                filters.push(Utils.format(qsTr("{0} files (*.{1})"), saverTypes[i].name, saverTypes[i].extension));
+            for(const saverType of saverTypes)
+                filters.push(Utils.format(qsTr("{0} files (*.{1})"), saverType.name, saverType.extension));
 
             filters.push(qsTr("All files (*)"));
             return filters;
@@ -1378,16 +1378,7 @@ Item
         }
 
         // At least one enabled direct child
-        property bool enabledChildren:
-        {
-            for(let i = 0; i < children.length; i++)
-            {
-                if(children[i].enabled)
-                    return true;
-            }
-
-            return false;
-        }
+        property bool enabledChildren: children.some(child => child.enabled)
     }
 
     readonly property int pluginX: pluginWindow.x

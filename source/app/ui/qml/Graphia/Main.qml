@@ -202,8 +202,8 @@ ApplicationWindow
                 if(list.length > 0)
                 {
                     s += "\n\n" + title;
-                    for(let row = 0; row < list.length; row++)
-                        s += "\n  " + list[row];
+                    for(const item of list)
+                        s += "\n  " + item;
                 }
             };
 
@@ -640,14 +640,9 @@ ApplicationWindow
         let localRecentFiles = mainWindow.recentFiles.slice();
 
         // Remove any duplicates
-        for(let i = 0; i < localRecentFiles.length; i++)
-        {
-            if(localRecentFiles[i] === fileUrlString)
-            {
-                localRecentFiles.splice(i, 1);
-                break;
-            }
-        }
+        let existingIndex = localRecentFiles.indexOf(fileUrlString);
+        if(existingIndex >= 0)
+            localRecentFiles.splice(existingIndex, 1);
 
         // Add to the top
         localRecentFiles.unshift(fileUrlString);
@@ -3028,10 +3023,8 @@ ApplicationWindow
                 implicitHeight:
                 {
                     let maxHeight = 0;
-                    for(let i = 0; i < toolbarLayout.children.length; i++)
+                    for(const child of toolbarLayout.children)
                     {
-                        let child = toolbarLayout.children[i];
-
                         if(child === this)
                             continue;
 

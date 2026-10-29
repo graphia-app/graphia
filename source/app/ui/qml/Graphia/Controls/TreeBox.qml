@@ -489,10 +489,10 @@ Item
                             if(indicator.color) // qmllint disable missing-property
                                 indicator.color = contrastBinding;
 
-                            for(let i = 0; i < indicator.children.length; i++)
+                            for(const child of indicator.children)
                             {
-                                if(indicator.children[i].color !== undefined)
-                                    indicator.children[i].color = contrastBinding;
+                                if(child.color !== undefined)
+                                    child.color = contrastBinding;
                             }
 
                             // Hack that uses the indicator to affect the overall height of the row

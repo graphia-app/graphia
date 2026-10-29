@@ -218,10 +218,8 @@ Item
             replacer.parent = parent;
 
             // Reattach the original children
-            tail.forEach(function(child)
-            {
+            for(const child of tail)
                 child.parent = parent;
-            });
         }
     }
 

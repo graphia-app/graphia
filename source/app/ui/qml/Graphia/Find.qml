@@ -72,14 +72,7 @@ Rectangle
         {
             if(_selectMultipleMode)
             {
-                let term = "";
-                _attributeValues.forEach(function(value)
-                {
-                    if(term.length !== 0)
-                        term += "|";
-
-                    term += Utils.regexEscape(value);
-                });
+                let term = _attributeValues.map(value => Utils.regexEscape(value)).join("|");
 
                 return "^(" + term + ")$";
             }

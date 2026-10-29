@@ -624,7 +624,7 @@ PluginContent
 
                 let scaleByAttributeMenu = MenuUtils.addSubMenuTo(scalingMenu, qsTr("By Attribute"));
                 scaleByAttributeMenu.enabled = Qt.binding(() => plot.complexScalingEnabled);
-                root.pluginModel.numericalAttributeNames.forEach(function(attributeName)
+                for(const attributeName of root.pluginModel.numericalAttributeNames)
                 {
                     let attributeMenuItem = MenuUtils.addItemTo(scaleByAttributeMenu,
                         root.pluginModel.attributeDisplayName(attributeName));
@@ -639,7 +639,7 @@ PluginContent
                         plot.scaleByAttributeName = attributeName;
                         plot.scaleType = PlotScaleType.ByAttribute;
                     });
-                });
+                }
 
                 let averagingMenu = MenuUtils.addSubMenuTo(menu, qsTr("Averaging"));
                 MenuUtils.addActionTo(averagingMenu, individualLineAverage);
@@ -667,7 +667,7 @@ PluginContent
 
                 MenuUtils.addSeparatorTo(sharedValuesAttributesMenu);
 
-                root.pluginModel.sharedValuesAttributeNames.forEach(function(attributeName)
+                for(const attributeName of root.pluginModel.sharedValuesAttributeNames)
                 {
                     let attributeMenuItem = MenuUtils.addItemTo(sharedValuesAttributesMenu,
                         root.pluginModel.attributeDisplayName(attributeName));
@@ -680,7 +680,7 @@ PluginContent
                     {
                         plot.averagingAttributeName = attributeName;
                     });
-                });
+                }
 
                 let dispersionMenu = MenuUtils.addSubMenuTo(menu, qsTr("Dispersion"));
                 MenuUtils.addActionTo(dispersionMenu, noDispersion);
@@ -707,7 +707,7 @@ PluginContent
             let sortByMenu = MenuUtils.addSubMenuTo(menu, qsTr("Sort Columns By"));
             let addedSortBySeparator = false;
 
-            root._availableplotColumnSortOptions.forEach(function(sortOption)
+            for(const sortOption of root._availableplotColumnSortOptions)
             {
                 if(sortOption.type === PlotColumnSortType.ColumnAnnotation && !addedSortBySeparator)
                 {
@@ -762,7 +762,7 @@ PluginContent
                 }
                 else
                     sortByMenuItem.triggered.connect(sortFn);
-            });
+            }
 
             if(root.pluginModel.columnAnnotationNames.length > 0)
             {
@@ -781,7 +781,7 @@ PluginContent
                     plot.colorGroupByAnnotationName = "";
                 });
 
-                plot.visibleColumnAnnotationNames.forEach(function(columnAnnotationName)
+                for(const columnAnnotationName of plot.visibleColumnAnnotationNames)
                 {
                     let colorGroupsByMenuItem = MenuUtils.addItemTo(colorGroupsByMenu, columnAnnotationName);
 
@@ -793,7 +793,7 @@ PluginContent
                     {
                         plot.colorGroupByAnnotationName = columnAnnotationName;
                     });
-                });
+                }
             }
 
             MenuUtils.addActionTo(menu, importAnnotationsAction);
@@ -816,7 +816,7 @@ PluginContent
             if(root.pluginModel.sharedValuesAttributeNames.length > 0)
             {
                 MenuUtils.addSeparatorTo(savePlotImageAttributeMenu);
-                root.pluginModel.sharedValuesAttributeNames.forEach(function(attributeName)
+                for(const attributeName of root.pluginModel.sharedValuesAttributeNames)
                 {
                     let savePlotImageByAttributeMenuItem = MenuUtils.addItemTo(savePlotImageAttributeMenu, attributeName);
 
@@ -827,7 +827,7 @@ PluginContent
                             plot.savePlotImageByAttribute(filename, extension, attributeName);
                         });
                     });
-                });
+                }
             }
 
             // Initial update
@@ -840,17 +840,7 @@ PluginContent
         return false;
     }
 
-    property var _availableColumnAnnotationNames:
-    {
-        let list = [];
-
-        root.pluginModel.columnAnnotationNames.forEach(function(columnAnnotationName)
-        {
-            list.push(columnAnnotationName);
-        });
-
-        return list;
-    }
+    property var _availableColumnAnnotationNames: Array.from(root.pluginModel.columnAnnotationNames)
 
     property var _availableplotColumnSortOptions:
     {
@@ -869,10 +859,10 @@ PluginContent
         if(root.pluginModel.numContinuousColumns > 0)
             options = options.concat(continuousOptions);
 
-        root._availableColumnAnnotationNames.forEach(function(columnAnnotationName)
+        for(const columnAnnotationName of root._availableColumnAnnotationNames)
         {
             options.push({type: PlotColumnSortType.ColumnAnnotation, text: columnAnnotationName});
-        });
+        }
 
         return options;
     }

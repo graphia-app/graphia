@@ -39,10 +39,9 @@ function expressionFor(document, attributeName, flags, type, channelName)
     {
         expression += " with";
 
-        for(let key in parameters)
+        for(const [key, value] of Object.entries(parameters))
         {
-            let parameter = parameters[key];
-            parameter = GraphiaUtils.Utils.sanitiseJson(parameter);
+            let parameter = GraphiaUtils.Utils.sanitiseJson(value);
 
             expression += " " + document.writtenString(key) + " = " + document.writtenString(parameter);
         }

@@ -157,9 +157,8 @@ class Create
 
             let attributeElements = [];
 
-            for(let i = 0; i < transform.attributes.length; i++)
+            for(const attributeName of transform.attributes)
             {
-                let attributeName = transform.attributes[i];
                 let attribute = document.attribute(attributeName);
                 this.template += " $%" + parameterIndex++;
 
@@ -181,13 +180,12 @@ class Create
 
             let parameterElements = [];
 
-            for(let index in transform.parameters)
+            for(const parameter of transform.parameters)
             {
                 // Put whitespace between the parameters
                 if(parameterElements.length > 0)
                     appendToElements(parameterElements, " ");
 
-                let parameter = transform.parameters[index];
                 this.template += " " + document.writtenString(parameter.name) + " = %" + parameterIndex++;
                 parameterElements.push({type: "parameter", lhs: parameter.name, lhsIsName: true, rhs: parameter.value});
             }

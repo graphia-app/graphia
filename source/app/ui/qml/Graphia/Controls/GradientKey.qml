@@ -75,10 +75,8 @@ Item
         let stops = [];
 
         let object = JSON.parse(configuration);
-        for(let prop in object)
+        for(let [prop, color] of Object.entries(object))
         {
-            let color = object[prop];
-
             if(!root.enabled)
                 color = Utils.desaturate(color, 0.2);
 

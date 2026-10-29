@@ -102,18 +102,15 @@ Rectangle
 
         let newMatchingPresetName = "";
 
-        for(let presetName in root.layoutPresets)
+        for(const [presetName, preset] of Object.entries(root.layoutPresets))
         {
-            let preset = root.layoutPresets[presetName];
-
             if(preset.layoutName !== root.document.layoutName)
                 continue;
 
             let matching = true;
 
-            for(let layoutSettingName in preset.layoutSettings)
+            for(const [layoutSettingName, presetValue] of Object.entries(preset.layoutSettings))
             {
-                let presetValue = preset.layoutSettings[layoutSettingName];
                 let currentValue = root.document.layoutSetting(layoutSettingName).value;
 
                 if(Utils.floatCompare(presetValue, currentValue) !== 0)
@@ -286,9 +283,9 @@ Rectangle
                     {
                         let presetNames = [];
 
-                        for(let presetName in root.layoutPresets)
+                        for(const [presetName, preset] of Object.entries(root.layoutPresets))
                         {
-                            if(root.layoutPresets[presetName].layoutName !== root.document.layoutName)
+                            if(preset.layoutName !== root.document.layoutName)
                                 continue;
 
                             presetNames.push(presetName);
@@ -318,11 +315,8 @@ Rectangle
                         {
                             let preset = root.layoutPresets[selectedValue];
 
-                            for(let layoutSettingName in preset.layoutSettings)
-                            {
-                                let presetValue = preset.layoutSettings[layoutSettingName];
+                            for(const [layoutSettingName, presetValue] of Object.entries(preset.layoutSettings))
                                 root.document.setLayoutSettingValue(layoutSettingName, presetValue);
-                            }
 
                             root.document.nodeSize = preset.nodeSize;
                             root.document.edgeSize = preset.edgeSize;

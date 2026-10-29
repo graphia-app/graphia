@@ -410,10 +410,10 @@ ApplicationWindow
 
             let updateOperatingSystems = [];
 
-            for(const osName in update.payloads)
+            for(const [osName, payload] of Object.entries(update.payloads))
             {
-                let url = update.payloads[osName].url;
-                let checksum = update.payloads[osName].installerChecksum;
+                let url = payload.url;
+                let checksum = payload.installerChecksum;
 
                 let item = tab.osControlsFor(osName);
                 item.osEnabledChecked = true;
@@ -421,7 +421,7 @@ ApplicationWindow
 
                 root.checksums[url] = checksum;
 
-                updateOperatingSystems.push({name: osName, command: update.payloads[osName].command});
+                updateOperatingSystems.push({name: osName, command: payload.command});
             }
 
             let hasCustomCommands = false;
@@ -1038,12 +1038,11 @@ ApplicationWindow
 
                 let remainingChecksums = Object.keys(updateObject.payloads).length;
 
-                for(const osName in updateObject.payloads)
+                for(const payload of Object.values(updateObject.payloads))
                 {
-                    let url = updateObject.payloads[osName].url;
-                    calculateChecksum(url, (checksum) =>
+                    calculateChecksum(payload.url, (checksum) =>
                     {
-                        updateObject.payloads[osName].installerChecksum = checksum;
+                        payload.installerChecksum = checksum;
 
                         remainingChecksums--;
                         if(remainingChecksums === 0)

@@ -227,10 +227,8 @@ Window
                                 let visualisationDescriptions = document.visualisationDescription(
                                     attributeList.selectedValue, channelList.selectedValues);
 
-                                visualisationDescriptions.forEach(function(visualisationDescription)
-                                {
+                                for(const visualisationDescription of visualisationDescriptions)
                                     text += "<br><br>" + visualisationDescription;
-                                });
                             }
                         }
 
@@ -440,7 +438,7 @@ Window
     {
         let newVisualsiationExpressions = [];
 
-        channelList.selectedValues.forEach(function(channelName)
+        for(const channelName of channelList.selectedValues)
         {
             let attribute = document.attribute(attributeList.selectedValue);
 
@@ -449,7 +447,7 @@ Window
                 attribute.valueType, channelName);
 
             newVisualsiationExpressions.push(expression);
-        });
+        }
 
         visualisationExpressions = newVisualsiationExpressions;
     }

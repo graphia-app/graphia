@@ -102,8 +102,8 @@ Window
                             let savedPalettes = root.savedPalettesFromPreferences();
 
                             paletteListModel.clear();
-                            for(let i = 0; i < savedPalettes.length; i++)
-                                paletteListModel.append({"paletteConfiguration" : JSON.stringify(savedPalettes[i])});
+                            for(const savedPalette of savedPalettes)
+                                paletteListModel.append({"paletteConfiguration" : JSON.stringify(savedPalette)});
                         }
 
                         function remove(index)
@@ -130,14 +130,8 @@ Window
                         property int selectedIndex:
                         {
                             let savedPalettes = root.savedPalettesFromPreferences();
-
-                            for(let i = 0; i < savedPalettes.length; i++)
-                            {
-                                if(root.comparePalettes(paletteEditor.configuration, savedPalettes[i]))
-                                    return i;
-                            }
-
-                            return -1;
+                            return savedPalettes.findIndex(savedPalette =>
+                                root.comparePalettes(paletteEditor.configuration, savedPalette));
                         }
 
                         Repeater

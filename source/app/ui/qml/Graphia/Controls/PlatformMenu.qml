@@ -50,9 +50,8 @@ Menu // qmllint disable import
         let maxChildWidth = 200;
 
         let menus = contentChildren[0];
-        for(let i = 0; i < menus.children.length; i++)
+        for(const menu of menus.children)
         {
-            let menu = menus.children[i];
             if(!(menu instanceof MenuItem) || !(menu instanceof PlatformMenuItem))
                 continue;
 

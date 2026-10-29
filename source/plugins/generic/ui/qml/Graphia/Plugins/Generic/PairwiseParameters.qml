@@ -193,9 +193,9 @@ BaseParameterDialog
                         newParameters.columns[2] = { "type": PairwiseColumnType.EdgeAttribute, "name": "" };
                     }
 
-                    for(const index in newParameters.columns)
+                    for(const [index, column] of Object.entries(newParameters.columns))
                     {
-                        let type = newParameters.columns[index].type;
+                        let type = column.type;
 
                         if(type === undefined || type === PairwiseColumnType.Unused)
                             continue;
@@ -203,11 +203,11 @@ BaseParameterDialog
                         if(type === PairwiseColumnType.SourceNode || type === PairwiseColumnType.TargetNode)
                             continue;
 
-                        if(newParameters.columns[index].name.length === 0)
+                        if(column.name.length === 0)
                         {
                             let headerIndex = tabularDataParser.model.index(0, index);
                             let headerText = tabularDataParser.model.data(headerIndex);
-                            newParameters.columns[index].name = headerText;
+                            column.name = headerText;
                         }
                     }
 
@@ -321,9 +321,9 @@ BaseParameterDialog
                             // Unset any existing source/target columns that match the column type being set
                             if(selectedType === PairwiseColumnType.SourceNode || selectedType === PairwiseColumnType.TargetNode)
                             {
-                                for(const index in newParameters.columns)
+                                for(const [index, column] of Object.entries(newParameters.columns))
                                 {
-                                    if(newParameters.columns[index].type === selectedType)
+                                    if(column.type === selectedType)
                                         delete newParameters.columns[index];
                                 }
                             }
@@ -494,10 +494,10 @@ BaseParameterDialog
         if(root.parameters.columns === undefined)
             return false;
 
-        for(const index in root.parameters.columns)
+        for(const column of Object.values(root.parameters.columns))
         {
-            let type = root.parameters.columns[index].type;
-            let nameEmpty = root.parameters.columns[index].name.length === 0;
+            let type = column.type;
+            let nameEmpty = column.name.length === 0;
 
             if(type === undefined || nameEmpty === undefined)
                 continue;

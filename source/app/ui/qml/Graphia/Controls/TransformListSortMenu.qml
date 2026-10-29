@@ -63,7 +63,7 @@ MouseArea
                     {text: qsTr("Category"), roleName: "category"}
                 ];
 
-                items.forEach(function(item)
+                for(const item of items)
                 {
                     let roleName = item.roleName;
 
@@ -79,7 +79,7 @@ MouseArea
                     });
 
                     sortRoleMenu.addItem(menuItem);
-                });
+                }
             }
         }
 
@@ -108,7 +108,7 @@ MouseArea
                     {text: qsTr("Descending"), ascendingSortOrder: false}
                 ];
 
-                items.forEach(function(item)
+                for(const item of items)
                 {
                     let ascendingSortOrder = item.ascendingSortOrder;
 
@@ -124,7 +124,7 @@ MouseArea
                     });
 
                     sortAscendingMenu.addItem(menuItem);
-                });
+                }
             }
         }
     }

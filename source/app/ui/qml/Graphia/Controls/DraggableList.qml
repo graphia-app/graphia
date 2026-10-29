@@ -117,10 +117,8 @@ Item
                     if(typeof(item[eventType]) === "function")
                         receivers.push(item);
 
-                    for(let i = 0; i < item.children.length; i++)
+                    for(const child of item.children)
                     {
-                        let child = item.children[i];
-
                         if(!child.visible || !child.enabled)
                             continue;
 

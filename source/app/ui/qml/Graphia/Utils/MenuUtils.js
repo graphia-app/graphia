@@ -145,16 +145,12 @@ function clone(from, to)
     }
 
     // Create new ButtonGroups which correspond to the source menu's ButtonGroups
-    for(let key in buttonGroups)
+    for(const menuItems of Object.values(buttonGroups))
     {
-        let menuItems = buttonGroups[key];
-
         // Parent the group to one of its items, so that it's destroyed along with them
         let toButtonGroup = createQmlItem("ButtonGroup", menuItems[0]);
 
-        menuItems.forEach(function(menuItem)
-        {
+        for(const menuItem of menuItems)
             menuItem.QtQuickControls.ButtonGroup.group = toButtonGroup;
-        });
     }
 }

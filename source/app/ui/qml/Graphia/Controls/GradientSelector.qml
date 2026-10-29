@@ -96,8 +96,8 @@ Window
                             let savedGradients = root.savedGradientsFromPreferences();
 
                             gradientListModel.clear();
-                            for(let i = 0; i < savedGradients.length; i++)
-                                gradientListModel.append({"gradientConfiguration" : JSON.stringify(savedGradients[i])});
+                            for(const savedGradient of savedGradients)
+                                gradientListModel.append({"gradientConfiguration" : JSON.stringify(savedGradient)});
                         }
 
                         function remove(index)
@@ -124,14 +124,8 @@ Window
                         property int selectedIndex:
                         {
                             let savedGradients = root.savedGradientsFromPreferences();
-
-                            for(let i = 0; i < savedGradients.length; i++)
-                            {
-                                if(root.compareGradients(gradientEditor.configuration, savedGradients[i]))
-                                    return i;
-                            }
-
-                            return -1;
+                            return savedGradients.findIndex(savedGradient =>
+                                root.compareGradients(gradientEditor.configuration, savedGradient));
                         }
 
                         Repeater

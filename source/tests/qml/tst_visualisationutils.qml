@@ -82,10 +82,10 @@ TestCase
 
         compare(Object.keys(visualisation.parameters).sort(), Object.keys(data.parameters).sort());
 
-        for(let name in data.parameters)
+        for(const [name, expected] of Object.entries(data.parameters))
         {
             let value = Utils.unescapeQuotes(visualisation.parameters[name]);
-            compare(value, Utils.sanitiseJson(data.parameters[name]), name);
+            compare(value, Utils.sanitiseJson(expected), name);
         }
     }
 }

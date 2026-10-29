@@ -60,11 +60,11 @@ Item
 
     function initialise()
     {
-        root.model.columnNames.forEach(function(columnName)
+        for(const columnName of root.model.columnNames)
         {
             if(root.model.columnIsHiddenByDefault(columnName))
                 setColumnVisibility(columnName, false);
-        });
+        }
 
         tableView._updateColumnVisibility();
     }
@@ -160,11 +160,11 @@ Item
     {
         let columns = hiddenColumns;
         hiddenColumns = [];
-        root.model.columnNames.forEach(function(columnName)
+        for(const columnName of root.model.columnNames)
         {
             if(root.model.columnIsCalculated(columnName))
                 columns = Utils.setRemove(columns, columnName);
-        });
+        }
 
         hiddenColumns = columns;
     }
@@ -179,11 +179,11 @@ Item
     {
         let columns = hiddenColumns;
         hiddenColumns = [];
-        root.model.columnNames.forEach(function(columnName)
+        for(const columnName of root.model.columnNames)
         {
             if(root.model.columnIsCalculated(columnName))
                 columns = Utils.setAdd(columns, columnName);
-        });
+        }
 
         hiddenColumns = columns;
     }
@@ -965,13 +965,13 @@ Item
                     let top = Number.MAX_SAFE_INTEGER;
                     let bottom = Number.MIN_SAFE_INTEGER;
 
-                    _loadedCells.forEach((cell) =>
+                    for(const cell of _loadedCells)
                     {
                         left = Math.min(left, cell.x);
                         right = Math.max(right, cell.x);
                         top = Math.min(top, cell.y);
                         bottom = Math.max(bottom, cell.y);
-                    });
+                    }
 
                     _leftLoadedColumn = left;
                     _rightLoadedColumn = right;
@@ -1178,11 +1178,11 @@ Item
                     {
                         tableView.fetchColumnSizes.disconnect(updateColumnWidths);
 
-                        tableView._loadedCells.forEach((cell) =>
+                        for(const cell of tableView._loadedCells)
                         {
                             if(cell.x === model.column && cell.y === model.row)
                                 tableView._loadedCells.delete(cell);
-                        });
+                        }
 
                         tableView._updateCellExtents();
                     }

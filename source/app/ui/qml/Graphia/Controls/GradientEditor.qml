@@ -48,8 +48,8 @@ Item
 
         let markers = [];
 
-        for(let value in gradient)
-            markers.push({value: value, color: gradient[value]});
+        for(const [value, color] of Object.entries(gradient))
+            markers.push({value: value, color: color});
 
         markerRepeater.model = root._markers = markers;
     }
@@ -84,14 +84,7 @@ Item
 
     function invert()
     {
-        let markers = [];
-
-        for(let i = 0; i < root._markers.length; i++)
-        {
-            let newValue = 1.0 - root._markers[i].value;
-            let oldColor = root._markers[i].color;
-            markers.push({value:newValue , color: oldColor});
-        }
+        let markers = root._markers.map(marker => ({value: 1.0 - marker.value, color: marker.color}));
 
         markerRepeater.model = root._markers = markers;
     }
@@ -116,10 +109,8 @@ Item
             {
                 let o = {};
 
-                for(let i = 0; i < root._markers.length; i++)
+                for(const marker of root._markers)
                 {
-                    let marker = root._markers[i];
-
                     let normalisedPos = marker.value;
                     let color = marker.color;
 
