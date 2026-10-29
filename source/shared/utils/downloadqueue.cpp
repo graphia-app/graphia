@@ -209,9 +209,9 @@ void DownloadQueue::onReplyReceived(QNetworkReply* reply)
     if(contentDisposition.isValid())
     {
         filename = contentDisposition.toString();
-        static const QRegularExpression re(QStringLiteral(
-            R"|(^(?:[^;]*;)*\s*filename\*?="?([^"]+)"?$)|"));
-        filename.replace(re, QStringLiteral(R"(\1)"));
+        static const QRegularExpression re(
+            uR"|(^(?:[^;]*;)*\s*filename\*?="?([^"]+)"?$)|"_s);
+        filename.replace(re, uR"(\1)"_s);
     }
     else
         filename = _reply->url().fileName();

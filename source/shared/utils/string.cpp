@@ -242,7 +242,7 @@ QString u::formatNumberScientific(double value, int minDecimalPlaces, int maxDec
         // The 'e' format gives a lower case exponent separator, whatever the case of the locale's
         auto splitString = formattedString.split(exponentChar, Qt::KeepEmptyParts, Qt::CaseInsensitive);
 
-        const QString superScript = QStringLiteral(u"⁰¹²³⁴⁵⁶⁷⁸⁹");
+        const QString superScript = u"⁰¹²³⁴⁵⁶⁷⁸⁹"_s;
         if(splitString.length() > 1)
         {
             auto exponentValueString = stripZeroes(splitString[1]);
@@ -358,7 +358,7 @@ std::vector<std::byte> u::hexToBytes(const QString& string)
 
 QString u::escapeQuotes(QString s)
 {
-    s.replace(QStringLiteral(R"(")"), QStringLiteral(R"(\")"));
+    s.replace(uR"(")"_s, uR"(\")"_s);
     return s;
 }
 

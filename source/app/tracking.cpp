@@ -67,7 +67,7 @@ static QString postToTrackingServer(const QString& text)
 
     QHttpPart part;
     part.setHeader(QNetworkRequest::ContentDispositionHeader,
-                   QVariant(R"(form-data; name="request")"));
+                   QVariant(uR"(form-data; name="request")"_s));
     part.setBody(text.toUtf8());
     multiPart->append(part);
 

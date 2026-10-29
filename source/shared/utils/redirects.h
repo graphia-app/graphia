@@ -19,7 +19,7 @@ static QString redirectLink(const char* shortName, QString linkText = {})
         linkText[0] = linkText[0].toUpper();
     }
 
-    return QStringLiteral(R"(<a href="%1/%2">%3</a>)").arg(baseUrl, shortName, linkText);
+    return uR"(<a href="%1/%2">%3</a>)"_s.arg(baseUrl, shortName, linkText);
 }
 } // namespace u
 

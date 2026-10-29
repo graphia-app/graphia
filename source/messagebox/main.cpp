@@ -111,13 +111,13 @@ int main(int argc, char *argv[])
     {
         {{"t", "title"},            QObject::tr("Window title."),    "title",           u"MessageBox"_s},
         {{"q", "text"},             QObject::tr("Window text."),     "text",
-            QStringLiteral("Lorem ipsum dolor sit amet, consectetur adipiscing elit, "
-                "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. "
-                "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris "
-                "nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in "
-                "reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla "
-                "pariatur. Excepteur sint occaecat cupidatat non proident, sunt in "
-                "culpa qui officia deserunt mollit anim id est laborum.")},
+            u"Lorem ipsum dolor sit amet, consectetur adipiscing elit, "
+            u"sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. "
+            u"Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris "
+            u"nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in "
+            u"reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla "
+            u"pariatur. Excepteur sint occaecat cupidatat non proident, sunt in "
+            u"culpa qui officia deserunt mollit anim id est laborum."_s},
         {{"i", "icon"},             QObject::tr("Window icon."),     "icon",            u"Question"_s},
         {{"b", "button"},           QObject::tr("Window button."),   "button",          u"OK:Accept"_s},
         {{"d", "defaultButton"},    QObject::tr("Default button."),  "defaultButton"},

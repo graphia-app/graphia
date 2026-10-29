@@ -196,7 +196,7 @@ static void uploadReport(const QString& email, const QString& text,
     {
         QHttpPart part;
         part.setHeader(QNetworkRequest::ContentDispositionHeader,
-                       QVariant(QStringLiteral(R"(form-data; name="%1")").arg(field.first)));
+                       QVariant(uR"(form-data; name="%1")"_s.arg(field.first)));
         part.setBody(field.second.toLatin1());
         multiPart->append(part);
     }
@@ -204,7 +204,7 @@ static void uploadReport(const QString& email, const QString& text,
     QHttpPart dmpPart;
     dmpPart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/octet-stream"));
     dmpPart.setHeader(QNetworkRequest::ContentDispositionHeader,
-                      QVariant(QStringLiteral(R"(form-data; name="upload_file_minidump"; filename="%1")")
+                      QVariant(uR"(form-data; name="upload_file_minidump"; filename="%1")"_s
                                .arg(QFileInfo(dmpFile).fileName())));
 
     dmpPart.setBodyDevice(file);
@@ -228,7 +228,7 @@ static void uploadReport(const QString& email, const QString& text,
             QHttpPart attachmentPart;
             attachmentPart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/octet-stream"));
             attachmentPart.setHeader(QNetworkRequest::ContentDispositionHeader,
-                                     QVariant(QStringLiteral(R"(form-data; name="%1_%2"; filename="%2")")
+                                     QVariant(uR"(form-data; name="%1_%2"; filename="%2")"_s
                                         .arg(fingerPrint, fileInfo.fileName())));
             auto* attachment = new QFile(fileName);
 

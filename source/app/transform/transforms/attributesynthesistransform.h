@@ -94,7 +94,7 @@ public:
                 .setType(ValueType::String)
                 .setDescription(QObject::tr("The value to assign to the attribute. Capture groups are referenced using \\n "
                     "syntax, where n is the index of the regex capture group."))
-                .setInitialValue(R"(\1)")
+                .setInitialValue(uR"(\1)"_s)
         };
     }
 

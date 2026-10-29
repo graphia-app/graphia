@@ -91,7 +91,7 @@ public:
                 .setType(ValueType::String)
                 .setDescription(QObject::tr("The value to assign to the attribute. \\1 and \\2 will be substituted "
                     "by the first and second attributes, respectively."))
-                .setInitialValue(R"(\1 \2)")
+                .setInitialValue(uR"(\1 \2)"_s)
         };
     }
 

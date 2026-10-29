@@ -1843,7 +1843,7 @@ void CorrelationPlot::savePlotImageByRow(const QUrl& url, const QString& extensi
     for(auto selectedRow : std::as_const(_selectedRows))
     {
         auto rowName = _pluginInstance->rowName(static_cast<size_t>(selectedRow));
-        const static QRegularExpression re(QStringLiteral(R"(\s+)"));
+        const static QRegularExpression re(uR"(\s+)"_s);
         rowName.replace(re, u"_"_s);
 
         cpsic->addImageConfiguration(rowName, {selectedRow});
@@ -1866,7 +1866,7 @@ void CorrelationPlot::savePlotImageByAttribute(const QUrl& url, const QString& e
     {
         auto attributeValue = _pluginInstance->attributeValueFor(attributeName,
             static_cast<size_t>(selectedRow));
-        const static QRegularExpression re(QStringLiteral(R"(\s+)"));
+        const static QRegularExpression re(uR"(\s+)"_s);
         attributeValue.replace(re, u"_"_s);
         images[attributeValue].append(selectedRow); // clazy:exclude=reserve-candidates
     }
