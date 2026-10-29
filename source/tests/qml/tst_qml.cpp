@@ -153,6 +153,8 @@ public:
     // As a plugin's table of node attributes, of _tableGraphModel; the caller takes ownership
     Q_INVOKABLE NodeAttributeTableModel* nodeAttributeTableModel()
     {
+        _tableDocument->clearSelectedNodes();
+
         auto* tableModel = new NodeAttributeTableModel;
         tableModel->initialise(_tableDocument.get(), &_tableGraphModel->graphModel().userNodeData());
 
@@ -161,6 +163,13 @@ public:
         _tableGraphModel->applyTransforms({});
 
         return tableModel;
+    }
+
+    // The table has a row for each selected node
+    Q_INVOKABLE void selectAllTableNodes(NodeAttributeTableModel* tableModel)
+    {
+        _tableDocument->selectionManager()->selectAllNodes();
+        tableModel->onSelectionChanged();
     }
 
 public slots:

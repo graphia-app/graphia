@@ -44,6 +44,7 @@ TestCase
     property var model: null
     property var view: null
     property var headerView: null
+    property var tableView: null
     property var horizontalScrollBar: null
 
     function findAll(item, predicate, found = [])
@@ -65,8 +66,10 @@ TestCase
         view = tableViewComponent.createObject(window.contentItem, {model: model, width: 400, height: 300});
 
         headerView = findAll(view, item => item instanceof TableView && !item.interactive)[0];
+        tableView = findAll(view, item => item instanceof TableView && item.syncView === headerView)[0];
         horizontalScrollBar = findAll(view, item => item instanceof ScrollBar && item.orientation === Qt.Horizontal)[0];
         verify(headerView !== undefined);
+        verify(tableView !== undefined);
         verify(horizontalScrollBar !== undefined);
 
         tryVerify(() => headerView.columns === model.columnNames.length && headerItem(0) !== null);
@@ -177,5 +180,169 @@ TestCase
 
         dragScrollBarToLeft();
         verifyAtLeftEnd();
+    }
+
+    function columnNames()
+    {
+        return view.columnSelectionMode ? view.columnOrder :
+            view.columnOrder.filter(columnName => !view.hiddenColumns.includes(columnName));
+    }
+
+    function leftColumnName() { return columnNames()[headerView.leftColumn]; }
+    function leftColumnOffset() { return headerView.contentX - headerItem(headerView.leftColumn).x; }
+
+    function setColumnSelectionMode(columnSelectionMode)
+    {
+        view.columnSelectionMode = columnSelectionMode;
+        wait(100);
+    }
+
+    function clickCheckBox(columnName)
+    {
+        let item = headerItem(columnNames().indexOf(columnName));
+        verify(item !== null, columnName + " isn't loaded");
+
+        let checkBox = findAll(item, child => child instanceof CheckBox)[0];
+        verify(checkBox !== undefined);
+        let wasChecked = checkBox.checked;
+        mouseClick(checkBox);
+        verify(checkBox.checked !== wasChecked, columnName + " wasn't toggled");
+    }
+
+    function verifyInView(columnName)
+    {
+        let item = headerItem(columnNames().indexOf(columnName));
+        verify(item !== null, columnName + " isn't loaded");
+        verify(item.x >= headerView.contentX - 0.5 &&
+            item.x + item.width <= headerView.contentX + headerView.width + 0.5, columnName + " isn't in view");
+    }
+
+    function test_columnSelectionKeepsScrollPosition()
+    {
+        view.setHiddenColumns(model.columnNames.filter((name, index) => index % 2 === 0));
+        wait(100);
+
+        horizontalScrollBar.position = 0.4;
+        wait(100);
+
+        let columnName = leftColumnName();
+        let offset = leftColumnOffset();
+        verify(offset > 0);
+
+        setColumnSelectionMode(true);
+        compare(leftColumnName(), columnName);
+        fuzzyCompare(leftColumnOffset(), offset, 0.5);
+
+        setColumnSelectionMode(false);
+        compare(leftColumnName(), columnName);
+        fuzzyCompare(leftColumnOffset(), offset, 0.5);
+    }
+
+    function test_columnSelectionKeepsScrollPositionWhenEarlierColumnsAreHidden()
+    {
+        view.setHiddenColumns(model.columnNames.slice(0, 10));
+        wait(100);
+
+        dragScrollBarToRight();
+
+        let columnName = leftColumnName();
+        let offset = leftColumnOffset();
+
+        setColumnSelectionMode(true);
+        compare(leftColumnName(), columnName);
+        fuzzyCompare(leftColumnOffset(), offset, 0.5);
+
+        setColumnSelectionMode(false);
+        compare(leftColumnName(), columnName);
+        fuzzyCompare(leftColumnOffset(), offset, 0.5);
+    }
+
+    function test_columnSelectionKeepsNearestColumnWhenLeftmostIsHidden()
+    {
+        setColumnSelectionMode(true);
+        horizontalScrollBar.position = 0.3;
+        wait(100);
+
+        let allColumnNames = columnNames();
+        let column = headerView.leftColumn;
+        view.setColumnVisibility(allColumnNames[column], false);
+
+        setColumnSelectionMode(false);
+        compare(leftColumnName(), allColumnNames[column + 1]);
+        fuzzyCompare(leftColumnOffset(), 0, 0.5);
+    }
+
+    function test_columnSelectionKeepsLastShownColumnInView()
+    {
+        let lastColumnName = model.columnNames[model.columnNames.length - 1];
+        view.setHiddenColumns([lastColumnName]);
+        wait(100);
+
+        setColumnSelectionMode(true);
+        dragScrollBarToRight();
+        clickCheckBox(lastColumnName);
+        dragScrollBarToLeft();
+
+        setColumnSelectionMode(false);
+        verifyInView(lastColumnName);
+        verifyAtRightEnd();
+    }
+
+    function test_columnSelectionKeepsShownColumnInViewWhenMostAreHidden()
+    {
+        view.setHiddenColumns(model.columnNames.slice(5));
+        wait(100);
+
+        setColumnSelectionMode(true);
+        horizontalScrollBar.position = 0.85 * (1 - horizontalScrollBar.size);
+        wait(100);
+
+        // The rightmost column that can be clicked
+        let column = headerView.rightColumn;
+        let item = headerItem(column);
+        if(item.x + item.width > headerView.contentX + headerView.width)
+            column--;
+
+        let columnName = columnNames()[column];
+        clickCheckBox(columnName);
+
+        setColumnSelectionMode(false);
+        verifyInView(columnName);
+    }
+
+    function test_columnSelectionKeepsScrollPositionWhenLastShownColumnIsInView()
+    {
+        let columnName = model.columnNames[1];
+        view.setHiddenColumns([columnName]);
+        wait(100);
+
+        setColumnSelectionMode(true);
+        clickCheckBox(columnName);
+
+        setColumnSelectionMode(false);
+        verifyAtLeftEnd();
+        verifyInView(columnName);
+    }
+
+    function test_columnSelectionLeavesNoSpaceAfterLastColumn()
+    {
+        setColumnSelectionMode(true);
+        dragScrollBarToRight();
+
+        let allColumnNames = columnNames();
+        for(let column = headerView.leftColumn + 1; column < allColumnNames.length - 1; column++)
+            view.setColumnVisibility(allColumnNames[column], false);
+
+        setColumnSelectionMode(false);
+        verifyAtRightEnd();
+    }
+
+    function test_columnSelectionKeepsScrollPositionWithRows()
+    {
+        testHelper.selectAllTableNodes(model);
+        tryVerify(() => view.rowCount > 0);
+
+        test_columnSelectionKeepsScrollPosition();
+        fuzzyCompare(tableView.contentX, headerView.contentX, 0.5, "The rows aren't scrolled with the header");
     }
 }

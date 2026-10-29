@@ -116,18 +116,24 @@ Item
 
     property alias columnOrder: displayModel.columnOrder
 
+    property string _columnNameToKeepInView: ""
+
     property bool columnSelectionMode: false
     onColumnSelectionModeChanged:
     {
         let indexArray = Array.from(new Array(root.model.columnNames.length).keys());
 
         if(columnSelectionMode)
+        {
             columnSelectionControls.show();
+            headerView.saveScrollPosition();
+            root._columnNameToKeepInView = "";
+        }
         else
+        {
             columnSelectionControls.hide();
-
-        // Reset the scroll position in case the new visible columns are no longer in view
-        horizontalTableViewScrollBar.position = 0;
+            headerView.saveScrollPosition(root._columnNameToKeepInView);
+        }
 
         tableView._updateColumnVisibility();
         tableView.forceLayoutSafe();
@@ -278,7 +284,7 @@ Item
             misc.fileSaveInitialFolder = exportTableFileDialog.currentFolder.toString();
             root.pluginContent.writeTableModelToFile(tableView.model, exportTableFileDialog.selectedFile,
                 exportTableFileDialog.selectedNameFilter.extensions[0],
-                tableView.visibleColumnNames().map(columnName => root.model.displayNameFor(columnName)));
+                headerView.visibleColumnNames().map(columnName => root.model.displayNameFor(columnName)));
         }
     }
 
@@ -526,6 +532,94 @@ Item
                 // A relayout can move the origin past contentX, which would leave a gap at the edge
                 onOriginXChanged: { returnToBounds(); }
 
+                animate: false
+                property var _savedScrollPosition: null
+                onLayoutChanged: { _restoreScrollPosition(); }
+                onColumnsChanged: { if(columns === 0) _savedScrollPosition = null; }
+
+                function visibleColumnNames()
+                {
+                    let columnNames = [];
+
+                    for(let i = 0; i < headerView.columns; i++)
+                    {
+                        let sourceIndex = displayModel.sourceColumnFor(i);
+                        columnNames.push(root.model.columnNames[sourceIndex])
+                    }
+
+                    return columnNames;
+                }
+
+                function saveScrollPosition(columnNameToKeepInView = "")
+                {
+                    let item = itemAtCell(Qt.point(leftColumn, 0));
+                    if(item === null)
+                        return;
+
+                    _savedScrollPosition =
+                    {
+                        columnNames: visibleColumnNames(),
+                        leftColumn: leftColumn,
+                        offset: contentX - item.x,
+                        columnNameToKeepInView: columnNameToKeepInView
+                    };
+
+                    // Relayout the new columns from the start, where their positions are exact;
+                    // from a contentX beyond their end, TableView estimates positions that can be far off
+                    contentX = originX;
+                }
+
+                function _restoreScrollPosition()
+                {
+                    if(_savedScrollPosition === null)
+                        return;
+
+                    let saved = _savedScrollPosition;
+                    _savedScrollPosition = null;
+
+                    let newColumnNames = visibleColumnNames();
+                    let offset = saved.offset;
+                    let column = newColumnNames.indexOf(saved.columnNames[saved.leftColumn]);
+
+                    if(column < 0)
+                    {
+                        offset = 0;
+
+                        let following = saved.columnNames.slice(saved.leftColumn + 1);
+                        let preceding = saved.columnNames.slice(0, saved.leftColumn).reverse();
+                        let nearest = following.concat(preceding).find(name => newColumnNames.includes(name));
+                        if(nearest === undefined)
+                            return;
+
+                        column = newColumnNames.indexOf(nearest);
+                    }
+
+                    let columnToKeepInView = newColumnNames.indexOf(saved.columnNameToKeepInView);
+                    if(columnToKeepInView >= 0)
+                    {
+                        let widthBetween = 0;
+                        for(let i = Math.min(column, columnToKeepInView); i < Math.max(column, columnToKeepInView); i++)
+                            widthBetween += columnWidthProvider(i);
+
+                        let columnToKeepInViewX = (columnToKeepInView >= column ? widthBetween : -widthBetween) - offset;
+                        let columnToKeepInViewWidth = columnWidthProvider(columnToKeepInView);
+
+                        if(columnToKeepInViewX < 0 || columnToKeepInViewWidth > width)
+                        {
+                            positionViewAtColumn(columnToKeepInView, TableView.AlignLeft);
+                            return;
+                        }
+
+                        if(columnToKeepInViewX + columnToKeepInViewWidth > width)
+                        {
+                            positionViewAtColumn(columnToKeepInView, TableView.AlignRight);
+                            return;
+                        }
+                    }
+
+                    positionViewAtColumn(column, TableView.AlignLeft, offset);
+                }
+
                 readonly property int sortIndicatorWidth: 7
                 readonly property int sortIndicatorHeight: 4
                 readonly property int sortIndicatorMargin: 3
@@ -663,6 +757,12 @@ Item
 
                                     // Rebind so that the delegate doesn't hold the state
                                     checked = Qt.binding(isChecked);
+                                }
+
+                                onToggled:
+                                {
+                                    if(checked)
+                                        root._columnNameToKeepInView = headerItem.text;
                                 }
                             }
                         }
@@ -877,19 +977,6 @@ Item
                     _rightLoadedColumn = right;
                     _topLoadedRow = top;
                     _bottomLoadedRow = bottom;
-                }
-
-                function visibleColumnNames()
-                {
-                    let columnNames = [];
-
-                    for(let i = 0; i < tableView.columns; i++)
-                    {
-                        let sourceIndex = displayModel.sourceColumnFor(i);
-                        columnNames.push(root.model.columnNames[sourceIndex])
-                    }
-
-                    return columnNames;
                 }
 
                 signal fetchColumnSizes;
