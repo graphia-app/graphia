@@ -143,8 +143,8 @@ NodeId MutableGraph::addNode()
 {
     if(!_unusedNodeIds.empty())
     {
-        auto unusedNodeId = _unusedNodeIds.front();
-        _unusedNodeIds.pop_front();
+        auto unusedNodeId = _unusedNodeIds.back();
+        _unusedNodeIds.pop_back();
 
         return addNode(unusedNodeId);
     }
@@ -323,8 +323,8 @@ EdgeId MutableGraph::addEdge(NodeId sourceId, NodeId targetId)
 {
     if(!_unusedEdgeIds.empty())
     {
-        auto unusedEdgeId = _unusedEdgeIds.front();
-        _unusedEdgeIds.pop_front();
+        auto unusedEdgeId = _unusedEdgeIds.back();
+        _unusedEdgeIds.pop_back();
 
         return addEdge(unusedEdgeId, sourceId, targetId);
     }

@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <chrono>
 #include <iterator>
+#include <vector>
 
 ComponentManager::ComponentManager(Graph& graph,
                                    const NodeConditionFn& nodeFilter,
@@ -67,15 +68,12 @@ ComponentIdSet ComponentManager::assignConnectedElementsComponentId(const Graph*
         NodeArray<ComponentId>& nodesComponentId,
         EdgeArray<ComponentId>& edgesComponentId)
 {
-    std::queue<NodeId> nodeIds;
+    std::vector<NodeId> nodeIds{rootId};
     ComponentIdSet oldComponentIdsAffected;
 
-    nodeIds.push(rootId);
-
-    while(!nodeIds.empty())
+    for(size_t head = 0; head < nodeIds.size(); head++)
     {
-        auto nodeId = nodeIds.front();
-        nodeIds.pop();
+        auto nodeId = nodeIds[head];
         oldComponentIdsAffected.insert(_nodesComponentId.at(nodeId));
         for(auto mergedNodeId : graph->mergedNodeIdsForNodeId(nodeId))
             nodesComponentId[mergedNodeId] = componentId;
@@ -92,7 +90,7 @@ ComponentIdSet ComponentManager::assignConnectedElementsComponentId(const Graph*
 
             if(nodesComponentId[oppositeNodeId] != componentId)
             {
-                nodeIds.push(oppositeNodeId);
+                nodeIds.push_back(oppositeNodeId);
                 for(auto mergedNodeId : graph->mergedNodeIdsForNodeId(oppositeNodeId))
                     nodesComponentId[mergedNodeId] = componentId;
             }

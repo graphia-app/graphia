@@ -24,8 +24,9 @@
 #include "app/graph/componentmanager.h"
 #include "app/graph/graphcomponent.h"
 
-#include <deque>
+#include <cstddef>
 #include <cstdint>
+#include <vector>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -41,32 +42,33 @@ void SpanningTreeTransform::apply(TransformedGraph& target)
 
     const ComponentManager componentManager(target);
 
+    struct S
+    {
+        NodeId _nodeId;
+        EdgeId _edgeId;
+    };
+
+    std::vector<S> routes;
+
     for(auto componentId : componentManager.componentIds())
     {
-        struct S
-        {
-            NodeId _nodeId;
-            EdgeId _edgeId;
-        };
+        routes.clear();
+        size_t head = 0;
 
-        std::deque<S> deque;
         // NOLINTNEXTLINE modernize-use-emplace
-        deque.push_back({componentManager.componentById(componentId)->nodeIds().at(0), {}});
+        routes.push_back({componentManager.componentById(componentId)->nodeIds().at(0), {}});
 
-        while(!deque.empty())
+        while(head < routes.size())
         {
             S route;
 
             if(dfs)
             {
-                route = deque.back();
-                deque.pop_back();
+                route = routes.back();
+                routes.pop_back();
             }
             else
-            {
-                route = deque.front();
-                deque.pop_front();
-            }
+                route = routes[head++];
 
             auto nodeId = route._nodeId;
             auto traversedEdgeId = route._edgeId;
@@ -84,7 +86,7 @@ void SpanningTreeTransform::apply(TransformedGraph& target)
                 auto oppositeId = target.edgeById(edgeId).oppositeId(nodeId);
 
                 if(!visitedNodes.get(oppositeId))
-                    deque.push_back({oppositeId, edgeId});
+                    routes.push_back({oppositeId, edgeId});
             }
         }
     }

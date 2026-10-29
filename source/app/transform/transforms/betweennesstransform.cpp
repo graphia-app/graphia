@@ -26,8 +26,6 @@
 #include "shared/utils/threadpool.h"
 
 #include <cstdint>
-#include <stack>
-#include <queue>
 #include <thread>
 #include <atomic>
 #include <cstddef>
@@ -75,24 +73,22 @@ void BetweennessTransform::apply(TransformedGraph& target)
         NodeArray<int64_t> distance(target, -1);
         NodeArray<double> delta(target, 0.0);
 
-        std::stack<NodeId> stack;
-        std::queue<NodeId> queue;
+        // The BFS visits nodes in order of distance, so reversing it gives Brandes' stack
+        std::vector<NodeId> visitOrder;
 
         sigma[nodeId] = 1.0;
         distance[nodeId] = 0;
-        queue.push(nodeId);
+        visitOrder.push_back(nodeId);
 
-        while(!queue.empty() && !cancelled())
+        for(size_t head = 0; head < visitOrder.size() && !cancelled(); head++)
         {
-            auto other = queue.front();
-            queue.pop();
-            stack.push(other);
+            auto other = visitOrder[head];
 
             for(auto neighbour : target.neighboursOf(other))
             {
                 if(distance[neighbour] < 0)
                 {
-                    queue.push(neighbour);
+                    visitOrder.push_back(neighbour);
                     distance[neighbour] = distance[other] + 1;
                 }
 
@@ -104,10 +100,9 @@ void BetweennessTransform::apply(TransformedGraph& target)
             }
         }
 
-        while(!stack.empty() && !cancelled())
+        for(auto it = visitOrder.rbegin(); it != visitOrder.rend() && !cancelled(); ++it)
         {
-            auto other = stack.top();
-            stack.pop();
+            auto other = *it;
 
             for(auto predecessor : predecessors[other])
             {

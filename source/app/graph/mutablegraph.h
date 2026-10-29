@@ -26,7 +26,6 @@
 #include "shared/graph/undirectededge.h"
 
 #include <cstddef>
-#include <deque>
 #include <mutex>
 #include <vector>
 #include <map>
@@ -67,7 +66,7 @@ private:
     } _n;
 
     std::vector<NodeId> _nodeIds;
-    std::deque<NodeId> _unusedNodeIds;
+    std::vector<NodeId> _unusedNodeIds;
 
     struct
     {
@@ -104,7 +103,7 @@ private:
     } _e;
 
     std::vector<EdgeId> _edgeIds;
-    std::deque<EdgeId> _unusedEdgeIds;
+    std::vector<EdgeId> _unusedEdgeIds;
 
     bool _updateRequired = false;
 
