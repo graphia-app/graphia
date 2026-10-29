@@ -249,7 +249,7 @@ function setContains(set, value)
     if(typeof(set) !== "array" && typeof(set) !== "object")
         return false;
 
-    return set.indexOf(value) > -1;
+    return set.includes(value);
 }
 
 function setAdd(set, value)

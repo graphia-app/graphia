@@ -117,7 +117,7 @@ Item
 
             for(const [stringValue, color] of Object.entries(palette.fixedColors))
             {
-                if(root.stringValues.indexOf(stringValue) === -1)
+                if(!root.stringValues.includes(stringValue))
                     continue;
 
                 let colorIndex = -1;

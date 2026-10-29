@@ -234,7 +234,7 @@ Item
 
     function isFlagSet(flag)
     {
-        return flags.indexOf(flag) >= 0;
+        return flags.includes(flag);
     }
 
     property string template

@@ -552,7 +552,7 @@ Item
     function searchWebForNode(nodeId)
     {
         let nodeName = _document.nodeName(nodeId);
-        let url = misc.webSearchEngineUrl.indexOf("%1") >= 0 ?
+        let url = misc.webSearchEngineUrl.includes("%1") ?
             misc.webSearchEngineUrl.arg(nodeName) : "";
 
         if(NativeUtils.userUrlStringIsValid(url))

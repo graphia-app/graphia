@@ -270,7 +270,7 @@ Item
 
                     for(let i = min; i <= max; i++)
                     {
-                        if(newSelectedRows.indexOf(i) < 0)
+                        if(!newSelectedRows.includes(i))
                             newSelectedRows.push(i);
                     }
 
@@ -303,7 +303,7 @@ Item
                     newSelectedRows.sort();
 
                     lastSelectedRow = newSelectedRows.length > 0 &&
-                        newSelectedRows.indexOf(row) < 0 ?
+                        !newSelectedRows.includes(row) ?
                         newSelectedRows[newSelectedRows.length - 1] : row;
 
                     selectedRows = newSelectedRows;
@@ -398,7 +398,7 @@ Item
 
                     TableView.onReused:
                     {
-                        selected = treeView.selectedRows.indexOf(model.row) >= 0;
+                        selected = treeView.selectedRows.includes(model.row);
                     }
 
                     required property int row

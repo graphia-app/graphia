@@ -1027,7 +1027,7 @@ PluginContent
                     {
                         root.saveRequired = true;
 
-                        if(plot.visibleColumnAnnotationNames.indexOf(plot.colorGroupByAnnotationName) < 0)
+                        if(!plot.visibleColumnAnnotationNames.includes(plot.colorGroupByAnnotationName))
                             plot.colorGroupByAnnotationName = "";
 
                         if(plot.groupByAnnotation && plot.visibleColumnAnnotationNames.length === 0)

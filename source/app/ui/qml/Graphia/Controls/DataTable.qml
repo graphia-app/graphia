@@ -75,7 +75,7 @@ Rectangle
     property var highlightedProvider: function(column, row)
     {
         if(root.selectionMode !== DataTable.NoSelection)
-            return root.selectedRows.indexOf(row) !== -1;
+            return root.selectedRows.includes(row);
 
         return false;
     }

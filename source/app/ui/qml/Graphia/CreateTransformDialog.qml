@@ -77,7 +77,7 @@ Window
 
         function transformIsFavourite(transform)
         {
-            return favouriteTransformsAsArray().indexOf(transform) >= 0;
+            return favouriteTransformsAsArray().includes(transform);
         }
 
         function toggleFavouriteTransform(transform)

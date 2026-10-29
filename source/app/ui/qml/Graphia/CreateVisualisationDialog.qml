@@ -339,12 +339,12 @@ Window
 
                                 let attribute = document.attribute(attributeList.selectedValue);
 
-                                let colourSelected = channelList.selectedValues.indexOf("Colour") >= 0;
-                                let sizeSelected = channelList.selectedValues.indexOf("Size") >= 0;
-                                let sharedTextSelected = channelList.selectedValues.indexOf("SharedText") >= 0;
-                                let textSelected = channelList.selectedValues.indexOf("Text") >= 0;
-                                let textColourSelected = channelList.selectedValues.indexOf("TextColour") >= 0;
-                                let textSizeSelected = channelList.selectedValues.indexOf("TextSize") >= 0;
+                                let colourSelected = channelList.selectedValues.includes("Colour");
+                                let sizeSelected = channelList.selectedValues.includes("Size");
+                                let sharedTextSelected = channelList.selectedValues.includes("SharedText");
+                                let textSelected = channelList.selectedValues.includes("Text");
+                                let textColourSelected = channelList.selectedValues.includes("TextColour");
+                                let textSizeSelected = channelList.selectedValues.includes("TextSize");
 
                                 if(colourSelected)
                                 {

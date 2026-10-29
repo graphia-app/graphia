@@ -85,7 +85,7 @@ ApplicationWindow
     {
         let hostname;
 
-        if (url.indexOf("//") >= 0)
+        if (url.includes("//"))
             hostname = url.split('/')[2];
         else
             hostname = url.split('/')[0];

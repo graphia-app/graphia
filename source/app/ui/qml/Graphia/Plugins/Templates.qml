@@ -47,7 +47,7 @@ Preferences
 
     function remove(names)
     {
-        let a = asArray().filter(e => names.indexOf(e.name) < 0);
+        let a = asArray().filter(e => !names.includes(e.name));
         templates = JSON.stringify(a);
     }
 

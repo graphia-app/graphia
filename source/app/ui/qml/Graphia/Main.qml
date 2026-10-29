@@ -747,7 +747,7 @@ ApplicationWindow
         {
             let extension = NativeUtils.extensionForUrl(url);
             let defaultType = defaults.urlTypeFor(extension);
-            if(defaultType === undefined || types.indexOf(defaultType) === -1)
+            if(defaultType === undefined || !types.includes(defaultType))
             {
                 let model = application.urlTypeDetailsModel();
                 model.filter = types;
@@ -789,7 +789,7 @@ ApplicationWindow
             if(pluginNames.length > 1)
             {
                 let defaultPlugin = defaults.pluginFor(type);
-                if(defaultPlugin === undefined || pluginNames.indexOf(defaultPlugin) === -1)
+                if(defaultPlugin === undefined || !pluginNames.includes(defaultPlugin))
                 {
                     let model = application.pluginDetailsModel();
                     model.filter = pluginNames;

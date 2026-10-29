@@ -87,7 +87,7 @@ Rectangle
 
     property var highlightedProvider: function(index)
     {
-        return root._selectedIndices.indexOf(index) !== -1;
+        return root._selectedIndices.includes(index);
     }
 
     readonly property real scrollBarWidth: scrollBar.size < 1 ? scrollBar.width : 0
@@ -180,7 +180,7 @@ Rectangle
                 newSelection.sort();
 
                 root._lastSelectedIndex = newSelection.length > 0 &&
-                    newSelection.indexOf(index) < 0 ?
+                    !newSelection.includes(index) ?
                     newSelection[newSelection.length - 1] : index;
 
                 root._selectedIndices = newSelection;
@@ -213,7 +213,7 @@ Rectangle
 
                     for(let i = min; i <= max; i++)
                     {
-                        if(newSelectedIndices.indexOf(i) < 0)
+                        if(!newSelectedIndices.includes(i))
                             newSelectedIndices.push(i);
                     }
                 }

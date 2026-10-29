@@ -110,7 +110,7 @@ TextField
             if(modelCompleter.candidates.length > 0)
             {
                 let candidate =
-                    modelCompleter.candidates.indexOf(treeBox.currentIndex) !== -1 ?
+                    modelCompleter.candidates.includes(treeBox.currentIndex) ?
                     treeBox.currentIndex : modelCompleter.closestMatch;
 
                 root._select(candidate);
@@ -157,7 +157,7 @@ TextField
         function onCurrentIndexChanged()
         {
             if(!root.treeBox.currentIndexIsValid ||
-                modelCompleter.candidates.indexOf(root.treeBox.currentIndex) === -1)
+                !modelCompleter.candidates.includes(root.treeBox.currentIndex))
             {
                 root._disableCompletion();
             }
