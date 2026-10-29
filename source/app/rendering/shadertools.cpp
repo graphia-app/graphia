@@ -58,8 +58,8 @@ static QString shaderStringFromFile(const QString& filename)
     return version + contents;
 }
 
-bool ShaderTools::loadShaderProgram(QOpenGLShaderProgram& program,
-    const QString& vertexShader, const QString& fragmentShader, bool allowFailure)
+void ShaderTools::loadShaderProgram(QOpenGLShaderProgram& program,
+    const QString& vertexShader, const QString& fragmentShader)
 {
     // Temporary message handler that prepends the shader name to any error output
     // that the Qt shader compilation code produces
@@ -74,24 +74,13 @@ bool ShaderTools::loadShaderProgram(QOpenGLShaderProgram& program,
 
     shaderName = vertexShader;
     if(!program.addShaderFromSourceCode(QOpenGLShader::Vertex, shaderStringFromFile(vertexShader)))
-    {
-        if(!allowFailure) qFatal("Vertex shader compilation failure");
-        return false;
-    }
+        qFatal("Vertex shader compilation failure");
 
     shaderName = fragmentShader;
     if(!program.addShaderFromSourceCode(QOpenGLShader::Fragment, shaderStringFromFile(fragmentShader)))
-    {
-        if(!allowFailure) qFatal("Fragment shader compilation failure");
-        return false;
-    }
+        qFatal("Fragment shader compilation failure");
 
     shaderName = u"%1, %2"_s.arg(vertexShader, fragmentShader);
     if(!program.link())
-    {
-        if(!allowFailure) qFatal("Shader link failure");
-        return false;
-    }
-
-    return true;
+        qFatal("Shader link failure");
 }

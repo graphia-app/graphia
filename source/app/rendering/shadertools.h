@@ -25,9 +25,8 @@ class QString;
 
 namespace ShaderTools
 {
-    bool loadShaderProgram(QOpenGLShaderProgram& program,
-        const QString& vertexShader, const QString& fragmentShader,
-        bool allowFailure = false);
+    void loadShaderProgram(QOpenGLShaderProgram& program,
+        const QString& vertexShader, const QString& fragmentShader);
 } // namespace ShaderTools
 
 #endif // SHADERTOOLS_H
