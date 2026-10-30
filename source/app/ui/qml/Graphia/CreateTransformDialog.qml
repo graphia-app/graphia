@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Window
 import QtQuick.Controls
@@ -41,14 +43,20 @@ Window
     minimumWidth: 900
     minimumHeight: 475
 
+    component DefaultVisualisation: ColumnLayout
+    {
+        property string attributeName
+        property string value
+    }
+
     property var document
     property string transformExpression
     property var defaultVisualisations
 
     property var _transform: undefined
-    property int _numParameters: _transform?.parameterNames.length ?? 0
-    property int _numAttributeParameters: _transform?.attributeParameterNames.length ?? 0
-    property int _numDefaultVisualisations: Object.keys(_transform?.defaultVisualisations ?? {}).length
+    property int _numParameters: root._transform?.parameterNames.length ?? 0
+    property int _numAttributeParameters: root._transform?.attributeParameterNames.length ?? 0
+    property int _numDefaultVisualisations: Object.keys(root._transform?.defaultVisualisations ?? {}).length
 
     Preferences
     {
@@ -177,30 +185,30 @@ Window
                             visualisationsRepeater.model = [];
                             visualisations._visualisations = {};
 
-                            root._transform = document.transform(selectedValue);
-                            lhsAttributeList.model = document.availableAttributesModel(
+                            root._transform = root.document.transform(selectedValue);
+                            lhsAttributeList.model = root.document.availableAttributesModel(
                                 root._transform.elementType, ValueType.All,
                                 AttributeFlag.DisableDuringTransform);
                             valueRadioButton.checked = true;
                             rhsAttributeList.model = undefined;
 
-                            if(_transform.parameterNames !== undefined)
-                                parametersRepeater.model = _transform.parameterNames;
+                            if(root._transform.parameterNames !== undefined)
+                                parametersRepeater.model = root._transform.parameterNames;
 
-                            if(_transform.attributeParameterNames !== undefined)
-                                attributeParametersRepeater.model = _transform.attributeParameterNames;
+                            if(root._transform.attributeParameterNames !== undefined)
+                                attributeParametersRepeater.model = root._transform.attributeParameterNames;
 
-                            if(_transform.defaultVisualisations !== undefined)
-                                visualisationsRepeater.model = Object.keys(_transform.defaultVisualisations);
+                            if(root._transform.defaultVisualisations !== undefined)
+                                visualisationsRepeater.model = Object.keys(root._transform.defaultVisualisations);
                         }
 
                         attributeDescription.clear();
-                        updateTransformExpression();
+                        root.updateTransformExpression();
                     }
 
                     onAccepted:
                     {
-                        if(document.graphTransformIsValid(transformExpression))
+                        if(root.document.graphTransformIsValid(root.transformExpression))
                             root.accept();
                     }
 
@@ -235,7 +243,7 @@ Window
 
                 RowLayout
                 {
-                    visible: _transform !== undefined
+                    visible: root._transform !== undefined
                     Layout.fillWidth: true
                     Layout.bottomMargin: Constants.spacing
 
@@ -251,8 +259,8 @@ Window
                         PointingCursorOnHoverLink {}
                         onLinkActivated: function(link) { Qt.openUrlExternally(link); }
 
-                        text: _transform !== undefined ?
-                            "<h3>" + _transform.displayName + "</h3>" + _transform.description : ""
+                        text: root._transform !== undefined ?
+                            "<h3>" + root._transform.displayName + "</h3>" + root._transform.description : ""
                     }
 
                     Image
@@ -260,7 +268,7 @@ Window
                         Layout.preferredHeight: 64
                         fillMode: Image.PreserveAspectFit
                         sourceSize.height: 64
-                        source: _transform?.image ?? ""
+                        source: root._transform?.image ?? ""
                     }
                 }
 
@@ -276,7 +284,7 @@ Window
                     font.italic: true
                     color: palette.buttonText
 
-                    text: _transform !== undefined && _numParameters === 0 && _numAttributeParameters === 0 ?
+                    text: root._transform !== undefined && root._numParameters === 0 && root._numAttributeParameters === 0 ?
                               qsTr("No Parameters Required") : qsTr("Select A Transform")
                 }
 
@@ -331,7 +339,7 @@ Window
                                 ColumnLayout
                                 {
                                     id: condition
-                                    enabled: _transform !== undefined && _transform.requiresCondition
+                                    enabled: root._transform !== undefined && root._transform.requiresCondition
                                     visible: enabled
 
                                     Layout.fillWidth: visible
@@ -372,12 +380,12 @@ Window
 
                                             onSelectedValueChanged:
                                             {
-                                                let attribute = document.attribute(selectedValue);
+                                                let attribute = root.document.attribute(selectedValue);
                                                 if(currentIndexIsSelectable && attribute.isValid)
                                                 {
                                                     opList.updateModel(attribute.ops);
 
-                                                    let parameterData = document.attribute(lhsAttributeList.selectedValue);
+                                                    let parameterData = root.document.attribute(lhsAttributeList.selectedValue);
                                                     rhs.configure(parameterData);
                                                 }
                                                 else
@@ -387,7 +395,7 @@ Window
                                                 }
 
                                                 attributeDescription.updateFor(lhsAttributeList.selectedValue);
-                                                updateTransformExpression();
+                                                root.updateTransformExpression();
                                             }
 
                                             AttributeListSortMenu { attributeList: lhsAttributeList }
@@ -400,7 +408,7 @@ Window
                                             Layout.fillHeight: true
                                             Layout.preferredWidth: 150
 
-                                            onSelectedValueChanged: { updateTransformExpression(); }
+                                            onSelectedValueChanged: { root.updateTransformExpression(); }
 
                                             Component { id: modelComponent; ListModel {} }
 
@@ -412,15 +420,15 @@ Window
                                                     return;
                                                 }
 
-                                                let newModel = modelComponent.createObject();
+                                                let newModel = modelComponent.createObject() as ListModel;
 
                                                 for(const op of ops)
                                                 {
                                                     let item =
                                                     {
-                                                        display: document.opDisplayText(op).name,
+                                                        display: root.document.opDisplayText(op).name,
                                                         value: op,
-                                                        unary: document.opIsUnary(op)
+                                                        unary: root.document.opIsUnary(op)
                                                     };
 
                                                     newModel.append(item);
@@ -452,7 +460,7 @@ Window
 
                                                 // This effectively handles
                                                 // attributeRadioButton::onCheckedChanged too
-                                                onCheckedChanged: { updateTransformExpression(); }
+                                                onCheckedChanged: { root.updateTransformExpression(); }
                                             }
 
                                             TransformParameter
@@ -466,7 +474,7 @@ Window
                                                 updateValueImmediately: true
                                                 direction: Qt.Vertical
                                                 fillWidth: true
-                                                onValueChanged: { updateTransformExpression(); }
+                                                onValueChanged: { root.updateTransformExpression(); }
                                             }
 
                                             RadioButton
@@ -491,7 +499,7 @@ Window
                                                 onSelectedValueChanged:
                                                 {
                                                     attributeDescription.updateFor(rhsAttributeList.selectedValue);
-                                                    updateTransformExpression();
+                                                    root.updateTransformExpression();
                                                 }
 
                                                 AttributeListSortMenu { attributeList: rhsAttributeList }
@@ -503,7 +511,7 @@ Window
 
                                                 if(parameterData.valueType !== undefined)
                                                 {
-                                                    rhsAttributeList.model = document.availableAttributesModel(
+                                                    rhsAttributeList.model = root.document.availableAttributesModel(
                                                         root._transform.elementType, parameterData.valueType,
                                                         AttributeFlag.DisableDuringTransform);
                                                 }
@@ -518,7 +526,7 @@ Window
 
                                                 if(attributeRadioButton.checked)
                                                 {
-                                                    if(!document.attribute(rhsAttributeList.selectedValue).isValid)
+                                                    if(!root.document.attribute(rhsAttributeList.selectedValue).isValid)
                                                         return "";
 
                                                     return "$" + rhsAttributeList.selectedValue;
@@ -550,7 +558,7 @@ Window
 
                                         function updateFor(attributeName)
                                         {
-                                            let parameterData = document.attribute(attributeName);
+                                            let parameterData = root.document.attribute(attributeName);
 
                                             if(parameterData.isValid && parameterData.description !== undefined)
                                                 attributeDescription.text = parameterData.description;
@@ -563,7 +571,7 @@ Window
                                 ColumnLayout
                                 {
                                     id: attributeParameters
-                                    enabled: _transform !== undefined && _numAttributeParameters > 0
+                                    enabled: root._transform !== undefined && root._numAttributeParameters > 0
                                     visible: enabled
 
                                     Layout.fillWidth: visible
@@ -577,11 +585,15 @@ Window
 
                                         RowLayout
                                         {
+                                            id: attributeParametersLayout
+
+                                            required property string modelData
+
                                             property var parameterData:
                                             {
-                                                return _transform.attributeParameters.find((element) =>
+                                                return root._transform.attributeParameters.find((element) =>
                                                 {
-                                                    return element.name === modelData;
+                                                    return element.name === attributeParametersLayout.modelData;
                                                 });
                                             }
 
@@ -596,13 +608,13 @@ Window
                                                     font.italic: true
                                                     font.bold: true
                                                     color: palette.buttonText
-                                                    text: modelData
+                                                    text: attributeParametersLayout.modelData
                                                 }
 
                                                 Text
                                                 {
                                                     width: parent.width
-                                                    text: parameterData.description
+                                                    text: attributeParametersLayout.parameterData.description
                                                     textFormat: Text.StyledText
                                                     wrapMode: Text.Wrap
                                                     elide: Text.ElideRight
@@ -630,9 +642,9 @@ Window
                                                 onSelectedValueChanged:
                                                 {
                                                     if(selectedValue !== undefined)
-                                                        attributeParameters._attributeNames[modelData] = selectedValue;
+                                                        attributeParameters._attributeNames[attributeParametersLayout.modelData] = selectedValue;
 
-                                                    updateTransformExpression();
+                                                    root.updateTransformExpression();
                                                 }
 
                                                 AttributeListSortMenu { attributeList: attributeParameterAttributeList }
@@ -640,8 +652,9 @@ Window
 
                                             Component.onCompleted:
                                             {
-                                                attributeParameterAttributeList.model = document.availableAttributesModel(
-                                                    parameterData.elementType, parameterData.valueType,
+                                                attributeParameterAttributeList.model = root.document.availableAttributesModel(
+                                                    attributeParametersLayout.parameterData.elementType,
+                                                    attributeParametersLayout.parameterData.valueType,
                                                     AttributeFlag.DisableDuringTransform);
                                             }
                                         }
@@ -651,7 +664,7 @@ Window
                                 ColumnLayout
                                 {
                                     id: parameters
-                                    enabled: _transform !== undefined && _numParameters > 0
+                                    enabled: root._transform !== undefined && root._numParameters > 0
                                     visible: enabled
 
                                     Layout.fillWidth: visible
@@ -665,7 +678,10 @@ Window
 
                                         RowLayout
                                         {
-                                            property var parameterData: _transform.parameters[modelData]
+                                            id: parametersInfoLayout
+
+                                            required property string modelData
+                                            property var parameterData: root._transform.parameters[parametersInfoLayout.modelData]
 
                                             Column
                                             {
@@ -678,13 +694,13 @@ Window
                                                     font.italic: true
                                                     font.bold: true
                                                     color: palette.buttonText
-                                                    text: parameterData.displayName
+                                                    text: parametersInfoLayout.parameterData.displayName
                                                 }
 
                                                 Text
                                                 {
                                                     width: parent.width
-                                                    text: parameterData.description
+                                                    text: parametersInfoLayout.parameterData.description
                                                     textFormat: Text.StyledText
                                                     wrapMode: Text.Wrap
                                                     elide: Text.ElideRight
@@ -705,18 +721,18 @@ Window
 
                                             Component.onCompleted:
                                             {
-                                                let transformParameter = TransformConfig.createTransformParameter(document,
-                                                    controlPlaceholder, parameterData, updateTransformExpression);
+                                                let transformParameter = TransformConfig.createTransformParameter(root.document,
+                                                    controlPlaceholder, parametersInfoLayout.parameterData, root.updateTransformExpression);
                                                 transformParameter.updateValueImmediately = true;
                                                 transformParameter.direction = Qt.Vertical;
-                                                parameters._values[modelData] = transformParameter;
+                                                parameters._values[parametersInfoLayout.modelData] = transformParameter;
                                             }
                                         }
                                     }
 
                                     function updateValues()
                                     {
-                                        for(const transformParameter of Object.values(_values ?? {}))
+                                        for(const transformParameter of Object.values(parameters._values ?? {}))
                                             transformParameter.updateValue();
 
                                         visualisations.update();
@@ -724,10 +740,10 @@ Window
 
                                     function valueOf(parameterName)
                                     {
-                                        if(_values === undefined)
+                                        if(parameters._values === undefined)
                                             return "\"\"";
 
-                                        let transformParameter = _values[parameterName];
+                                        let transformParameter = parameters._values[parameterName];
 
                                         if(transformParameter === undefined)
                                             return "\"\"";
@@ -739,7 +755,7 @@ Window
                                 ColumnLayout
                                 {
                                     id: visualisations
-                                    enabled: _transform !== undefined && _numDefaultVisualisations > 0
+                                    enabled: root._transform !== undefined && root._numDefaultVisualisations > 0
                                     visible: enabled
 
                                     Layout.fillWidth: visible
@@ -753,7 +769,7 @@ Window
 
                                         for(let i = 0; i < visualisationsRepeater.count; i++)
                                         {
-                                            let item = visualisationsRepeater.itemAt(i);
+                                            let item = visualisationsRepeater.itemAt(i) as DefaultVisualisation;
                                             if(item === null)
                                             {
                                                 // Not sure why this happens, but it
@@ -778,14 +794,18 @@ Window
                                     {
                                         id: visualisationsRepeater
 
-                                        ColumnLayout
+                                        DefaultVisualisation
                                         {
-                                            property string attributeName:
+                                            id: visualisationLayout
+
+                                            required property string modelData
+
+                                            attributeName:
                                             {
-                                                return visualisations.resolvedAttributeName(modelData);
+                                                return visualisations.resolvedAttributeName(visualisationLayout.modelData);
                                             }
 
-                                            property var visualisation: _transform?.defaultVisualisations[modelData]
+                                            property var visualisation: root._transform?.defaultVisualisations[visualisationLayout.modelData]
 
                                             RowLayout
                                             {
@@ -793,25 +813,28 @@ Window
 
                                                 Label
                                                 {
-                                                    font.italic: attributeName.length === 0
+                                                    font.italic: visualisationLayout.attributeName.length === 0
                                                     color: palette.buttonText
                                                     text:
                                                     {
-                                                        if(attributeName.length === 0)
+                                                        if(visualisationLayout.attributeName.length === 0)
                                                             return qsTr("Invalid Attribute Name");
 
                                                         // Not named by a parameter, so it's the transform's own attribute
-                                                        if(attributeName === modelData && visualisation !== undefined)
-                                                            return visualisation.displayName;
+                                                        if(visualisationLayout.attributeName === visualisationLayout.modelData &&
+                                                            visualisationLayout.visualisation !== undefined)
+                                                        {
+                                                            return visualisationLayout.visualisation.displayName;
+                                                        }
 
-                                                        return document.attributeDisplayName(attributeName);
+                                                        return root.document.attributeDisplayName(visualisationLayout.attributeName);
                                                     }
                                                 }
 
                                                 ComboBox
                                                 {
                                                     id: visualisationsComboBox
-                                                    enabled: attributeName.length > 0
+                                                    enabled: visualisationLayout.attributeName.length > 0
                                                     editable: false
                                                     textRole: "displayName"
                                                     valueRole: "name"
@@ -821,18 +844,19 @@ Window
                                             }
 
                                             // Empty for no visualisation
-                                            property string value: visualisationsComboBox.currentValue ?? ""
+                                            value: visualisationsComboBox.currentValue ?? ""
 
                                             onValueChanged: { visualisations.update(); }
 
                                             Component.onCompleted:
                                             {
-                                                let visualisationChannelNames = document.availableVisualisationChannelNames(
-                                                    visualisation.elementType, visualisation.valueType);
+                                                let visualisationChannelNames = root.document.availableVisualisationChannelNames(
+                                                    visualisationLayout.visualisation.elementType, visualisationLayout.visualisation.valueType);
                                                 visualisationsComboBox.model = [{name: "", displayName: qsTr("None")}].concat(
                                                     visualisationChannelNames.map(channelName => ({name: channelName,
-                                                    displayName: document.visualisationChannelDisplayName(channelName)})));
-                                                visualisationsComboBox.currentIndex = visualisationsComboBox.indexOfValue(visualisation.channelName);
+                                                    displayName: root.document.visualisationChannelDisplayName(channelName)})));
+                                                visualisationsComboBox.currentIndex = visualisationsComboBox.indexOfValue(
+                                                    visualisationLayout.visualisation.channelName);
                                             }
                                         }
                                     }
@@ -840,13 +864,13 @@ Window
                                     function resolvedAttributeName(attributeName)
                                     {
                                         let noQuotesAttributeName = attributeName.replace(/"/g, "");
-                                        if(_transform !== undefined &&
-                                            _transform.parameters.hasOwnProperty(noQuotesAttributeName) &&
-                                            _transform.parameters[noQuotesAttributeName].valueType === ValueType.String)
+                                        if(root._transform !== undefined &&
+                                            root._transform.parameters.hasOwnProperty(noQuotesAttributeName) &&
+                                            root._transform.parameters[noQuotesAttributeName].valueType === ValueType.String)
                                         {
                                             // If the attribute name matches a parameter name, the parameter
                                             // is (probably) the name of a new attribute, so use its value
-                                            return document.writtenAttributeName(parameters.valueOf(noQuotesAttributeName));
+                                            return root.document.writtenAttributeName(parameters.valueOf(noQuotesAttributeName));
                                         }
 
                                         return attributeName;
@@ -854,11 +878,11 @@ Window
 
                                     function selectedVisualisation(attributeName)
                                     {
-                                        if(_visualisations === undefined)
+                                        if(visualisations._visualisations === undefined)
                                             return "";
 
-                                        attributeName = resolvedAttributeName(attributeName);
-                                        let visualisationChannelName = _visualisations[attributeName];
+                                        attributeName = visualisations.resolvedAttributeName(attributeName);
+                                        let visualisationChannelName = visualisations._visualisations[attributeName];
 
                                         if(visualisationChannelName === undefined)
                                             return "";
@@ -887,7 +911,7 @@ Window
                     {
                         Layout.alignment: Qt.AlignBottom
                         text: qsTr("OK")
-                        enabled: { return document.graphTransformIsValid(transformExpression); }
+                        enabled: { return root.document.graphTransformIsValid(root.transformExpression); }
                         onClicked: function() { root.accept(); }
                     }
 
@@ -908,12 +932,12 @@ Window
             {
             case Qt.Key_Escape:
             case Qt.Key_Back:
-                reject();
+                root.reject();
                 break;
 
             case Qt.Key_Enter:
             case Qt.Key_Return:
-                accept();
+                root.accept();
                 break;
 
             default:
@@ -924,19 +948,19 @@ Window
 
     function accept()
     {
-        if(!document.graphTransformIsValid(transformExpression))
+        if(!root.document.graphTransformIsValid(root.transformExpression))
         {
             console.log("CreateTransformDialog: trying to accept invalid expression");
             return;
         }
 
-        accepted();
+        root.accepted();
         root.close();
     }
 
     function reject()
     {
-        rejected();
+        root.rejected();
         root.close();
     }
 
@@ -951,25 +975,25 @@ Window
 
         if(transformsList.selectedValue !== undefined)
         {
-            expression += document.writtenString(transformsList.selectedValue);
+            expression += root.document.writtenString(transformsList.selectedValue);
 
-            if(_numAttributeParameters > 0)
+            if(root._numAttributeParameters > 0)
             {
                 expression += " using";
 
-                for(let attributeParameterName of _transform.attributeParameterNames)
+                for(let attributeParameterName of root._transform.attributeParameterNames)
                 {
                     if(attributeParameterName in attributeParameters._attributeNames)
                         expression += " $" + attributeParameters._attributeNames[attributeParameterName];
                 }
             }
 
-            if(_numParameters > 0)
+            if(root._numParameters > 0)
             {
                 expression += " with";
 
-                for(let parameterName of _transform.parameterNames)
-                    expression += " " + document.writtenString(parameterName) + " = " + parameters.valueOf(parameterName);
+                for(let parameterName of root._transform.parameterNames)
+                    expression += " " + root.document.writtenString(parameterName) + " = " + parameters.valueOf(parameterName);
             }
 
             if(lhsAttributeList.selectedValue !== undefined)
@@ -987,15 +1011,15 @@ Window
             }
         }
 
-        transformExpression = expression;
+        root.transformExpression = expression;
     }
 
     function updateDefaultVisualisations()
     {
-        defaultVisualisations = [];
+        root.defaultVisualisations = [];
 
         let resolvedDefaultVisualisations = {};
-        for(const [attributeName, defaultVisualisation] of Object.entries(_transform.defaultVisualisations))
+        for(const [attributeName, defaultVisualisation] of Object.entries(root._transform.defaultVisualisations))
         {
             let resolvedAttributeName = visualisations.resolvedAttributeName(attributeName);
             resolvedDefaultVisualisations[resolvedAttributeName] = defaultVisualisation;
@@ -1007,28 +1031,28 @@ Window
 
             if(channelName.length > 0)
             {
-                let expression = VisualisationUtils.expressionFor(document,
+                let expression = VisualisationUtils.expressionFor(root.document,
                     attributeName, defaultVisualisation.flags,
                     defaultVisualisation.valueType, channelName);
 
-                defaultVisualisations.push(expression);
+                root.defaultVisualisations.push(expression);
             }
         }
     }
 
     onAccepted:
     {
-        updateTransformExpression();
-        updateDefaultVisualisations();
+        root.updateTransformExpression();
+        root.updateDefaultVisualisations();
 
-        document.update([transformExpression], defaultVisualisations);
+        root.document.update([root.transformExpression], root.defaultVisualisations);
     }
 
     onVisibleChanged:
     {
-        transformExpression.text = "";
-        defaultVisualisations = [];
-        transformsList.model = document.availableTransforms();
+        root.transformExpression = "";
+        root.defaultVisualisations = [];
+        transformsList.model = root.document.availableTransforms();
 
         parametersRepeater.model = undefined;
         parameters._values = {};
@@ -1039,6 +1063,6 @@ Window
         lhsAttributeList.model = rhsAttributeList.model = undefined;
         opList.model = undefined;
 
-        _transform = undefined;
+        root._transform = undefined;
     }
 }

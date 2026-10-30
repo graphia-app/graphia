@@ -1232,8 +1232,8 @@ Item
                     {
                         enabled: !pluginToolBarContainer.transitioning
 
-                        ToolBarButton { action: togglePluginMinimiseAction }
-                        ToolBarButton { visible: Qt.platform.os !== "wasm"; action: togglePluginWindowAction }
+                        ToolBarButton { action: root.mainWindow.togglePluginMinimiseAction }
+                        ToolBarButton { visible: Qt.platform.os !== "wasm"; action: root.mainWindow.togglePluginWindowAction }
                     }
                 }
             }
@@ -1317,9 +1317,9 @@ Item
         onLoadedChanged:
         {
             if(root.pluginPoppedOut)
-                popOutPlugin();
+                root.popOutPlugin();
             else
-                popInPlugin();
+                root.popInPlugin();
 
             plugin.resetSaveRequired();
         }
@@ -1438,8 +1438,8 @@ Item
         height: 600
         minimumWidth: 480
         minimumHeight: 480
-        title: application && _document.pluginDisplayName.length > 0 ?
-                   _document.pluginDisplayName + " - " + appName : "";
+        title: root.application && _document.pluginDisplayName.length > 0 ?
+                   _document.pluginDisplayName + " - " + root.appName : "";
         visible: root.visible && root.pluginPoppedOut && plugin.loaded
         property bool maximised: visibility === Window.Maximized
 
@@ -1448,8 +1448,8 @@ Item
 
         onClosing: function(close)
         {
-            if(visible & !destructing)
-                popInPlugin();
+            if(visible & !root.destructing)
+                root.popInPlugin();
         }
 
         PlatformMenuBar
@@ -1775,7 +1775,7 @@ Item
                     plugin.load(pluginUiData, pluginUiDataVersion);
 
                 plugin.loaded = true;
-                pluginLoadComplete();
+                root.pluginLoadComplete();
             }
         }
 
@@ -1789,8 +1789,8 @@ Item
             }
             else if(Qt.platform.os !== "wasm")
             {
-                savedFileUrl = fileUrl;
-                savedFileSaver = saverName;
+                root.savedFileUrl = fileUrl;
+                root.savedFileSaver = saverName;
                 root.mainWindow.addToRecentFiles(fileUrl);
             }
         }
@@ -1821,13 +1821,13 @@ Item
                 addedNames.pop();
             }
 
-            _refreshAttributesWithSharedValues();
+            root._refreshAttributesWithSharedValues();
         }
 
         onLoadComplete: function(url, success)
         {
             if(success)
-                _refreshAttributesWithSharedValues();
+                root._refreshAttributesWithSharedValues();
 
             root.loadComplete(url, success);
         }
@@ -1935,7 +1935,7 @@ Item
                     if(!misc.hasSeenTutorial)
                     {
                         s += Utils.format(qsTr("As this is your first time starting {0}, " +
-                            "we have opened an example graph.<br>"), appName);
+                            "we have opened an example graph.<br>"), root.appName);
                     }
 
                     s += qsTr("This example graph represents the <b>London Tube System and River Buses!</b>");
@@ -2053,7 +2053,7 @@ Item
                           "<b>Scroll Through Components:</b> PageUp, PageDown<br>" +
                           "<b>Select Node:</b> Click a Node<br>" +
                           "<b>Select Additional Nodes:</b> Hold Shift and Click a Node<br>" +
-                          "<b>Select Multiple Nodes:</b> Hold Shift, Click and Drag a Box Around Nodes"), appName)
+                          "<b>Select Multiple Nodes:</b> Hold Shift, Click and Drag a Box Around Nodes"), root.appName)
                 }
             }
         }
@@ -2178,7 +2178,7 @@ Item
                 }
                 ToolBarButton
                 {
-                    icon.name: findAction.icon.name
+                    icon.name: root.mainWindow.findAction.icon.name
                 }
             }
         }
@@ -2201,7 +2201,7 @@ Item
                 }
                 ToolBarButton
                 {
-                    icon.name: findByAttributeAction.icon.name
+                    icon.name: root.mainWindow.findByAttributeAction.icon.name
                 }
             }
         }
@@ -2223,7 +2223,7 @@ Item
                     text: Utils.format(qsTr("This concludes our brief introduction of {0} using the London transport network!<br>" +
                           "{0} can support <b>millions</b> of nodes and edges, this network is just the beginning.<br><br>" +
                           "Utilising Transforms and Visualisations is key to getting the most from your graph.<br><br>" +
-                          "If you want to explore some more, please have a look at our {1}."), appName,
+                          "If you want to explore some more, please have a look at our {1}."), root.appName,
                           NativeUtils.redirectLink("example_datasets", qsTr("example datasets")))
 
                     PointingCursorOnHoverLink {}

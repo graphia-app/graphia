@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+pragma ComponentBehavior: Bound
+
 import QtCore
 import QtQuick
 import QtQuick.Controls
@@ -262,7 +264,7 @@ ApplicationWindow
 
         onAccepted:
         {
-            setSaveRequired();
+            root.setSaveRequired();
             settings.defaultImageOpenFolder = currentFolder;
 
             let basename = NativeUtils.baseFileNameForUrl(selectedFile);
@@ -286,7 +288,7 @@ ApplicationWindow
 
         onAccepted:
         {
-            setSaveRequired();
+            root.setSaveRequired();
             settings.privateKeyFile = selectedFile;
         }
     }
@@ -298,7 +300,7 @@ ApplicationWindow
         onAccepted:
         {
             settings.operatingSystems = JSON.stringify(operatingSystems);
-            setSaveRequired();
+            root.setSaveRequired();
         }
     }
 
@@ -342,7 +344,7 @@ ApplicationWindow
                 onCheckedChanged:
                 {
                     settings.hexEncodeUpdatesString = checked;
-                    setSaveRequired();
+                    root.setSaveRequired();
                 }
             }
 
@@ -610,7 +612,7 @@ ApplicationWindow
 
         onDiscardClicked:
         {
-            resetSaveRequired();
+            root.resetSaveRequired();
 
             if(onSaveConfirmedFunction !== undefined && onSaveConfirmedFunction !== null)
                 onSaveConfirmedFunction();
@@ -723,7 +725,7 @@ ApplicationWindow
                 {
                     let item = osControls.itemAt(i);
 
-                    if(item.osName === name)
+                    if(item.osName === name) // qmllint disable missing-property
                         return item;
                 }
 
@@ -764,7 +766,7 @@ ApplicationWindow
                                 Layout.fillWidth: true
                                 selectByMouse: true
 
-                                onTextChanged: { setSaveRequired(); }
+                                onTextChanged: { root.setSaveRequired(); }
                             }
 
                             Label { text: qsTr("Target Regex:") }
@@ -774,7 +776,7 @@ ApplicationWindow
                                 Layout.fillWidth: true
                                 selectByMouse: true
 
-                                onTextChanged: { setSaveRequired(); }
+                                onTextChanged: { root.setSaveRequired(); }
                             }
                         }
 
@@ -802,7 +804,7 @@ ApplicationWindow
                                     return;
 
                                 editTimer.restart();
-                                setSaveRequired();
+                                root.setSaveRequired();
 
                                 _lastText = text;
                             }
@@ -818,7 +820,7 @@ ApplicationWindow
                                 text: qsTr("Force")
                                 checked: false
 
-                                onCheckedChanged: { setSaveRequired(); }
+                                onCheckedChanged: { root.setSaveRequired(); }
                             }
 
                             Button
@@ -842,6 +844,10 @@ ApplicationWindow
 
                             delegate: RowLayout
                             {
+                                id: osControl
+
+                                required property var modelData
+
                                 property string osName: modelData.name
                                 property alias osEnabledChecked: osEnabled.checked
                                 property alias urlText: url.text
@@ -851,10 +857,10 @@ ApplicationWindow
                                 {
                                     id: osEnabled
 
-                                    text: modelData.name
+                                    text: osControl.modelData.name
                                     checked: true
 
-                                    onCheckedChanged: { setSaveRequired(); }
+                                    onCheckedChanged: { root.setSaveRequired(); }
                                 }
 
                                 TextField
@@ -871,7 +877,7 @@ ApplicationWindow
                                         if(root.checksums[text] !== undefined)
                                             root.checksums[text] = "";
 
-                                        setSaveRequired();
+                                        root.setSaveRequired();
                                         url.color = palette.text;
                                     }
                                 }
@@ -886,7 +892,7 @@ ApplicationWindow
                             {
                                 id: customCommandsDialog
 
-                                onAccepted: { setSaveRequired(); }
+                                onAccepted: { root.setSaveRequired(); }
                             }
 
                             CheckBox
@@ -894,7 +900,7 @@ ApplicationWindow
                                 id: customCommands
                                 checked: false
 
-                                onCheckedChanged: { setSaveRequired(); }
+                                onCheckedChanged: { root.setSaveRequired(); }
                             }
 
                             Button
@@ -940,16 +946,16 @@ ApplicationWindow
                 {
                     let item = osControls.itemAt(i);
 
-                    if(!item.osEnabledChecked)
+                    if(!item.osEnabledChecked) // qmllint disable missing-property
                         continue;
 
-                    if(item.urlTextField.text.trim().length === 0)
+                    if(item.urlTextField.text.trim().length === 0) // qmllint disable missing-property
                         return false;
 
-                    if(!NativeUtils.urlStringIsValid(item.urlTextField.text.trim()))
+                    if(!NativeUtils.urlStringIsValid(item.urlTextField.text.trim())) // qmllint disable missing-property
                         return false;
 
-                    enabledOses.push(item.osName);
+                    enabledOses.push(item.osName); // qmllint disable missing-property
                 }
 
                 return enabledOses.length > 0 &&
@@ -966,11 +972,11 @@ ApplicationWindow
                 {
                     let item = osControls.itemAt(i);
 
-                    if(!item.osEnabledChecked)
+                    if(!item.osEnabledChecked) // qmllint disable missing-property
                         continue;
 
-                    if(item.urlText === url)
-                        item.urlTextField.color = "red";
+                    if(item.urlText === url) // qmllint disable missing-property
+                        item.urlTextField.color = "red"; // qmllint disable missing-property
                 }
             }
 
@@ -1003,12 +1009,12 @@ ApplicationWindow
                 {
                     let item = osControls.itemAt(i);
 
-                    if(!item.osEnabledChecked)
+                    if(!item.osEnabledChecked) // qmllint disable missing-property
                         continue;
 
-                    let osName = item.osName;
-                    let url = item.urlText.trim();
-                    let hostname = extractHostname(url);
+                    let osName = item.osName; // qmllint disable missing-property
+                    let url = item.urlText.trim(); // qmllint disable missing-property
+                    let hostname = root.extractHostname(url);
                     let filename = url.split('/').pop().split('#')[0].split('?')[0];
 
                     if(filename.length === 0)
@@ -1040,7 +1046,7 @@ ApplicationWindow
 
                 for(const payload of Object.values(updateObject.payloads))
                 {
-                    calculateChecksum(payload.url, (checksum) =>
+                    root.calculateChecksum(payload.url, (checksum) =>
                     {
                         payload.installerChecksum = checksum;
 
@@ -1075,7 +1081,7 @@ ApplicationWindow
 
                 function createTab()
                 {
-                    setSaveRequired();
+                    root.setSaveRequired();
 
                     let tab = tabComponent.createObject(null);
                     tabLayout.insert(tabBar.count, tab);

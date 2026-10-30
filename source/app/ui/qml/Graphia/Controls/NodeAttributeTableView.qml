@@ -1002,7 +1002,7 @@ Item
                         const pixelsPerLine = 24;
 
                         let pixels = event.pixelDelta.x !== 0 ? event.pixelDelta.x :
-                            (event.angleDelta.x / angleDeltaPerStep) * Qt.styleHints.wheelScrollLines * pixelsPerLine;
+                            (event.angleDelta.x / angleDeltaPerStep) * Application.styleHints.wheelScrollLines * pixelsPerLine;
 
                         horizontalTableViewScrollBar.scrollBy(-pixels);
                     }

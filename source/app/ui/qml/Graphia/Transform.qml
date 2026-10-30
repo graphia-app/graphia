@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -109,8 +111,8 @@ Item
 
             implicitWidth: 20
             implicitHeight: 15
-            color: disabledTextColor
-            hoverColor: enabledTextColor
+            color: root.disabledTextColor
+            hoverColor: root.enabledTextColor
             propogatePresses: true
 
             menu: PlatformMenu
@@ -124,8 +126,8 @@ Item
 
                     onCheckedChanged:
                     {
-                        setFlag("disabled", !checked);
-                        updateExpression();
+                        root.setFlag("disabled", !checked);
+                        root.updateExpression();
                     }
                 }
 
@@ -138,8 +140,8 @@ Item
 
                     onCheckedChanged:
                     {
-                        setFlag("locked", checked);
-                        updateExpression();
+                        root.setFlag("locked", checked);
+                        root.updateExpression();
                     }
                 }
 
@@ -152,8 +154,8 @@ Item
 
                     onCheckedChanged:
                     {
-                        setFlag("repeating", checked);
-                        updateExpression();
+                        root.setFlag("repeating", checked);
+                        root.updateExpression();
                     }
                 }
 
@@ -166,8 +168,8 @@ Item
 
                     onCheckedChanged:
                     {
-                        setFlag("pinned", checked);
-                        updateExpression();
+                        root.setFlag("pinned", checked);
+                        root.updateExpression();
                     }
                 }
 
@@ -178,8 +180,8 @@ Item
 
                     onTriggered:
                     {
-                        document.removeGraphTransform(index);
-                        document.update();
+                        root.document.removeGraphTransform(root.index);
+                        root.document.update();
                     }
                 }
             }
@@ -309,8 +311,8 @@ Item
 
     Connections
     {
-        target: document
-        function onTransformsChanged() { if(ready) refreshTransformInfo(); }
+        target: root.document
+        function onTransformsChanged() { if(root.ready) root.refreshTransformInfo(); }
 
         function onAttributesChanged(addedNames, removedNames)
         {

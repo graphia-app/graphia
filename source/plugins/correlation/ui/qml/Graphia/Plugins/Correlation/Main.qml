@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
@@ -1033,7 +1035,7 @@ PluginContent
                         if(plot.groupByAnnotation && plot.visibleColumnAnnotationNames.length === 0)
                             groupByAnnotationAction.trigger();
 
-                        updateMenu();
+                        root.updateMenu();
                     }
 
                     onColumnSortOrdersChanged: { root.saveRequired = true; }
@@ -1051,7 +1053,7 @@ PluginContent
                     }
 
                     property bool iqrStyle: plot.groupByAnnotation || plot.averagingType === PlotAveragingType.IQR
-                    onIqrStyleChanged: { updateMenu(); }
+                    onIqrStyleChanged: { root.updateMenu(); }
 
                     property bool complexScalingEnabled: plot.averagingType === PlotAveragingType.Individual
 

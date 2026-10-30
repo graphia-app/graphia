@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Window
 import QtQuick.Controls
@@ -44,12 +46,12 @@ Window
 
     property bool visualisationExpressionsValid:
     {
-        if(visualisationExpressions.length === 0)
+        if(root.visualisationExpressions.length === 0)
             return false;
 
-        for(let visualisationExpression of visualisationExpressions)
+        for(let visualisationExpression of root.visualisationExpressions)
         {
-            if(!document.visualisationIsValid(visualisationExpression))
+            if(!root.document.visualisationIsValid(visualisationExpression))
                 return false;
         }
 
@@ -92,11 +94,11 @@ Window
 
                 onSelectedValueChanged:
                 {
-                    let attribute = document.attribute(selectedValue);
+                    let attribute = root.document.attribute(selectedValue);
 
                     if(currentIndexIsSelectable && attribute.isValid)
                     {
-                        channelList.model = document.availableVisualisationChannelNames(
+                        channelList.model = root.document.availableVisualisationChannelNames(
                             attribute.elementType, attribute.valueType);
                     }
                     else if(channelList.model)
@@ -104,7 +106,7 @@ Window
 
                     description.update();
                     channelIndicator.update();
-                    updateVisualisationExpressions();
+                    root.updateVisualisationExpressions();
                 }
 
                 AttributeListSortMenu { attributeList: attributeList }
@@ -123,7 +125,7 @@ Window
                 {
                     description.update();
                     channelIndicator.update();
-                    updateVisualisationExpressions();
+                    root.updateVisualisationExpressions();
                 }
 
                 onAccepted: { root.accept(); }
@@ -214,7 +216,7 @@ Window
                                 if(attributeList.selectedValue === undefined || !attributeList.currentIndexIsSelectable)
                                     return;
 
-                                let attribute = document.attribute(attributeList.selectedValue);
+                                let attribute = root.document.attribute(attributeList.selectedValue);
 
                                 if(attribute.description === undefined)
                                     return;
@@ -224,7 +226,7 @@ Window
                                 if(channelList.selectedValues === undefined || channelList.selectedValues.length === 0)
                                     return;
 
-                                let visualisationDescriptions = document.visualisationDescription(
+                                let visualisationDescriptions = root.document.visualisationDescription(
                                     attributeList.selectedValue, channelList.selectedValues);
 
                                 for(const visualisationDescription of visualisationDescriptions)
@@ -337,7 +339,7 @@ Window
                                 if(attributeList.selectedValue === undefined || !attributeList.currentIndexIsSelectable)
                                     return;
 
-                                let attribute = document.attribute(attributeList.selectedValue);
+                                let attribute = root.document.attribute(attributeList.selectedValue);
 
                                 let colourSelected = channelList.selectedValues.includes("Colour");
                                 let sizeSelected = channelList.selectedValues.includes("Size");
@@ -402,12 +404,12 @@ Window
             {
             case Qt.Key_Escape:
             case Qt.Key_Back:
-                reject();
+                root.reject();
                 break;
 
             case Qt.Key_Enter:
             case Qt.Key_Return:
-                accept();
+                root.accept();
                 break;
 
             default:
@@ -421,13 +423,13 @@ Window
         if(!root.visualisationExpressionsValid)
             return;
 
-        accepted();
+        root.accepted();
         root.close();
     }
 
     function reject()
     {
-        rejected();
+        root.rejected();
         root.close();
     }
 
@@ -440,28 +442,28 @@ Window
 
         for(const channelName of channelList.selectedValues)
         {
-            let attribute = document.attribute(attributeList.selectedValue);
+            let attribute = root.document.attribute(attributeList.selectedValue);
 
             let expression = VisualisationUtils.expressionFor(
-                document, attributeList.selectedValue, attribute.flags,
+                root.document, attributeList.selectedValue, attribute.flags,
                 attribute.valueType, channelName);
 
             newVisualsiationExpressions.push(expression);
         }
 
-        visualisationExpressions = newVisualsiationExpressions;
+        root.visualisationExpressions = newVisualsiationExpressions;
     }
 
     onAccepted:
     {
-        updateVisualisationExpressions();
-        document.update([], visualisationExpressions);
+        root.updateVisualisationExpressions();
+        root.document.update([], root.visualisationExpressions);
     }
 
     onVisibleChanged:
     {
         if(visible)
-            attributeList.model = document.availableAttributesModel(ElementType.Node|ElementType.Edge);
+            attributeList.model = root.document.availableAttributesModel(ElementType.Node|ElementType.Edge);
         else
             attributeList.model = null;
 

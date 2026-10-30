@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQml.Models
 
@@ -53,8 +55,10 @@ Item
         {
             id: dragArea
 
-            anchors.left: alignment === Qt.AlignLeft ? column.left : undefined
-            anchors.right: alignment === Qt.AlignRight ? column.right : undefined
+            required property var modelData
+
+            anchors.left: root.alignment === Qt.AlignLeft ? column.left : undefined
+            anchors.right: root.alignment === Qt.AlignRight ? column.right : undefined
 
             acceptedButtons: Qt.AllButtons
 
@@ -156,8 +160,8 @@ Item
                     verticalCenter: parent.verticalCenter
                 }
 
-                width: loader.item ? loader.item.width + Constants.margin * 2 : 0
-                height: loader.item ? loader.item.height + Constants.margin : 0
+                width: dragArea.item ? dragArea.item.width + Constants.margin * 2 : 0
+                height: dragArea.item ? dragArea.item.height + Constants.margin : 0
 
                 color: Qt.rgba(root.heldColor.r, root.heldColor.g, root.heldColor.b, dragArea.held ? 1.0 : 0.0)
                 Behavior on color { ColorAnimation { duration: 100 } }
@@ -224,16 +228,16 @@ Item
 
                     onLoaded:
                     {
-                        if(item.index !== undefined)
-                            item.index = index;
+                        if(item.index !== undefined) // qmllint disable missing-property
+                            item.index = dragArea.index; // qmllint disable missing-property
 
-                        if(item.value !== undefined)
-                            item.value = modelData;
+                        if(item.value !== undefined) // qmllint disable missing-property
+                            item.value = dragArea.modelData; // qmllint disable missing-property
                     }
                 }
             }
 
-            property bool pinned: loader.item.pinned ?? false
+            property bool pinned: loader.item.pinned ?? false // qmllint disable missing-property
         }
     }
 

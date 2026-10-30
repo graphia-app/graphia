@@ -69,16 +69,16 @@ MouseArea
                 {
                     let roleName = item.roleName;
 
-                    let menuItem = sortByComponent.createObject(root);
+                    let menuItem = sortByComponent.createObject(root) as PlatformMenuItem;
                     menuItem.text = item.text;
                     menuItem.checked = Qt.binding(() =>
                     {
-                        return attributeList.sortRoleName === roleName;
+                        return root.attributeList.sortRoleName === roleName;
                     });
                     menuItem.triggered.connect(() =>
                     {
-                        attributeList.clearSelection();
-                        return attributeList.sortRoleName = roleName;
+                        root.attributeList.clearSelection();
+                        root.attributeList.sortRoleName = roleName;
                     });
 
                     sortRoleMenu.addItem(menuItem);
@@ -115,15 +115,15 @@ MouseArea
                 {
                     let ascendingSortOrder = item.ascendingSortOrder;
 
-                    let menuItem = sortAscendingComponent.createObject(root);
+                    let menuItem = sortAscendingComponent.createObject(root) as PlatformMenuItem;
                     menuItem.text = item.text;
                     menuItem.checked = Qt.binding(() =>
                     {
-                        return attributeList.ascendingSortOrder === ascendingSortOrder;
+                        return root.attributeList.ascendingSortOrder === ascendingSortOrder;
                     });
                     menuItem.triggered.connect(() =>
                     {
-                        attributeList.ascendingSortOrder = ascendingSortOrder;
+                        root.attributeList.ascendingSortOrder = ascendingSortOrder;
                     });
 
                     sortAscendingMenu.addItem(menuItem);
