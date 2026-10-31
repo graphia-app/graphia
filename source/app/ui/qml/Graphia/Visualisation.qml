@@ -177,8 +177,10 @@ Item
         {
             let paletteSelector = root.visualisations.createPaletteSelector(root.index);
             Utils.centreWindow(paletteSelector);
+            let document = root.document;
+            let attributeName = root.attributeName;
             paletteSelector.open(paletteKey.configuration, root._stringValues,
-                (value) => root.document.attributeDisplayValue(root.attributeName, value));
+                (value) => document.attributeDisplayValue(attributeName, value));
         }
 
         PaletteKey
