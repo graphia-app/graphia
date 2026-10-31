@@ -209,7 +209,7 @@ Rectangle
                     let min = Math.min(index, root._lastSelectedIndex);
                     let max = Math.max(index, root._lastSelectedIndex);
 
-                    newSelectedIndices = root._selectedIndices;
+                    newSelectedIndices = root._selectedIndices.slice();
 
                     for(let i = min; i <= max; i++)
                     {
@@ -219,7 +219,7 @@ Rectangle
                 }
                 else if(root.allowMultipleSelection && (mouse.modifiers & Qt.ControlModifier))
                 {
-                    newSelectedIndices = root._selectedIndices;
+                    newSelectedIndices = root._selectedIndices.slice();
                     let metaIndex = newSelectedIndices.indexOf(index);
 
                     if(metaIndex < 0)
@@ -243,7 +243,7 @@ Rectangle
 
                 if(root.allowMultipleSelection)
                 {
-                    newSelectedIndices = root._selectedIndices
+                    newSelectedIndices = root._selectedIndices.slice();
                     let metaIndex = newSelectedIndices.indexOf(index);
 
                     if(metaIndex < 0)
