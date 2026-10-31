@@ -55,5 +55,5 @@ MouseArea
 
     // Ignore and pass through any events
     propagateComposedEvents: true
-    onPressed: function(mouse) { mouse.accepted = false; }
+    onPressed: (mouse) => { mouse.accepted = false; }
 }

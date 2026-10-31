@@ -38,7 +38,7 @@ Rectangle
 
         anchors.fill: parent
 
-        onPaint: function(rect)
+        onPaint: (rect) =>
         {
             let context = getContext("2d");
 

@@ -191,9 +191,9 @@ Rectangle
                 return parent.indexAt(mouse.x + parent.contentX, mouse.y + parent.contentY);
             }
 
-            onWheel: function(wheel) { parent.flick(0, wheel.angleDelta.y * Constants.mouseWheelStep); }
+            onWheel: (wheel) => { parent.flick(0, wheel.angleDelta.y * Constants.mouseWheelStep); }
 
-            onPressed: function(mouse)
+            onPressed: (mouse) =>
             {
                 root.forceActiveFocus();
 
@@ -233,7 +233,7 @@ Rectangle
                 setNewSelection(newSelectedIndices, index);
             }
 
-            onPositionChanged: function(mouse)
+            onPositionChanged: (mouse) =>
             {
                 let newSelectedIndices = [];
 
@@ -255,13 +255,13 @@ Rectangle
                 setNewSelection(newSelectedIndices, index);
             }
 
-            onClicked: function(mouse)
+            onClicked: (mouse) =>
             {
                 root.forceActiveFocus();
                 root.clicked(indexAt(mouse));
             }
 
-            onDoubleClicked: function(mouse)
+            onDoubleClicked: (mouse) =>
             {
                 root.forceActiveFocus();
                 root.doubleClicked(indexAt(mouse));
@@ -278,7 +278,7 @@ Rectangle
         anchors.fill: parent
     }
 
-    Keys.onPressed: function(event)
+    Keys.onPressed: (event) =>
     {
         let moveSelection = (delta) =>
         {

@@ -98,7 +98,7 @@ Item
         // showing
         property bool _ignoreClick: false
 
-        onClicked: function(mouse)
+        onClicked: (mouse) =>
         {
             if(mouseArea._ignoreClick)
             {
@@ -110,7 +110,7 @@ Item
                 root.menu.popup(parent, 0, parent.height + 8/*padding*/);
         }
 
-        onPressed: function(mouse)
+        onPressed: (mouse) =>
         {
             if(root.menu instanceof Menu && root.menuDropped)
                 mouseArea._ignoreClick = true;

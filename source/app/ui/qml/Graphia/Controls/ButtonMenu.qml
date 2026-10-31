@@ -60,8 +60,8 @@ Item
     {
         id: menu
 
-        onAboutToShow: root.menuDropped = true;
-        onAboutToHide: root.menuDropped = false;
+        onAboutToShow: { root.menuDropped = true; }
+        onAboutToHide: { root.menuDropped = false; }
 
         Instantiator
         {
@@ -75,8 +75,8 @@ Item
                 onTriggered: { root.selectedValue = text; }
             }
 
-            onObjectAdded: function(index, object) { menu.insertItem(index, object); }
-            onObjectRemoved: function(index, object) { menu.removeItem(object); }
+            onObjectAdded: (index, object) => { menu.insertItem(index, object); }
+            onObjectRemoved: (index, object) => { menu.removeItem(object); }
         }
     }
 
@@ -118,7 +118,7 @@ Item
 
         hoverEnabled: true
         anchors.fill: parent
-        onClicked: function(mouse)
+        onClicked: (mouse) =>
         {
             if(mouse.button === Qt.LeftButton && menu && !root._modelIsUnset)
                 menu.popup(parent, 0, parent.height + 8/*padding*/);
@@ -126,9 +126,9 @@ Item
             root.clicked(mouse);
         }
 
-        onPressed: function(mouse) { mouse.accepted = !root.propogatePresses; }
+        onPressed: (mouse) => { mouse.accepted = !root.propogatePresses; }
 
-        onPressAndHold: function(mouse) { root.held(mouse); }
+        onPressAndHold: (mouse) => { root.held(mouse); }
     }
 
     signal clicked(var mouse)

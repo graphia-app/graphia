@@ -223,7 +223,7 @@ Rectangle
         id: closeAction
         icon.name: "emblem-unreadable"
 
-        onTriggered: function()
+        onTriggered:
         {
             root._visible = false;
             root.hidden();

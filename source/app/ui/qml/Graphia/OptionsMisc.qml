@@ -181,7 +181,7 @@ Item
                     "then select <b>Open In Low Resolution</b>. Restart {0}."), root.application.name)
 
                 PointingCursorOnHoverLink {}
-                onLinkActivated: function(link) { NativeUtils.showAppInFileManager(); }
+                onLinkActivated: (link) => { NativeUtils.showAppInFileManager(); }
             }
 
             Label

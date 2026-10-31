@@ -166,7 +166,7 @@ Item
                 anchors.horizontalCenter: parent.horizontalCenter
                 height: parent.height
                 width: parent.width - picker._markerWidth
-                onClicked: function(mouse)
+                onClicked: (mouse) =>
                 {
                     let leftItem = null;
                     let rightItem = null;
@@ -255,7 +255,7 @@ Item
                         width: picker._markerWidth
                         height: parent.height
 
-                        onPaint: function(rect)
+                        onPaint: (rect) =>
                         {
                             let ctx = getContext("2d");
                             ctx.save();
@@ -311,7 +311,7 @@ Item
                         drag.minimumX: 0
                         drag.maximumX: picker.width - picker._markerWidth
 
-                        onReleased: function(mouse)
+                        onReleased: (mouse) =>
                         {
                             // Snap X Positions to nearest 100th
                             marker.x = parseFloat(marker.x / (picker.width -
@@ -323,7 +323,7 @@ Item
                             root.alterMarker(marker.index, picker.markerToValue(marker), marker.modelData.color);
                         }
 
-                        onDoubleClicked: function(mouse)
+                        onDoubleClicked: (mouse) =>
                         {
                             if(mouse.button & Qt.LeftButton)
                             {
@@ -334,7 +334,7 @@ Item
                             }
                         }
 
-                        onPressed: function(mouse)
+                        onPressed: (mouse) =>
                         {
                             if(mouse.button & Qt.LeftButton)
                             {
@@ -345,7 +345,7 @@ Item
                             }
                         }
 
-                        onClicked: function(mouse)
+                        onClicked: (mouse) =>
                         {
                             if(mouse.button & Qt.RightButton && root._markers.length > 2)
                                 root.removeMarker(marker.index);

@@ -50,7 +50,7 @@ PluginContent
         checkable: true
         checked: true
 
-        onCheckedChanged: function(checked) { root.saveRequired = true; }
+        onCheckedChanged: (checked) => { root.saveRequired = true; }
     }
 
     Action
@@ -61,7 +61,7 @@ PluginContent
         checkable: true
         checked: plot.showColumnNames
 
-        onTriggered: function()
+        onTriggered:
         {
             plot.showAllColumns = false;
             plot.showColumnNames = !plot.showColumnNames;
@@ -78,7 +78,7 @@ PluginContent
 
         checkable: true
 
-        onTriggered: function()
+        onTriggered:
         {
             root.togglePlotMode(PlotMode.RowsOfInterestColumnSelection);
         }
@@ -94,7 +94,7 @@ PluginContent
 
         checkable: true
 
-        onTriggered: function()
+        onTriggered:
         {
             root.togglePlotMode(PlotMode.ColumnAnnotationSelection);
         }
@@ -194,7 +194,7 @@ PluginContent
         checkable: true
         checked: plot.showAllColumns
 
-        onTriggered: function()
+        onTriggered:
         {
             plot.showColumnNames = false;
             plot.showAllColumns = !plot.showAllColumns;
@@ -370,7 +370,7 @@ PluginContent
         checkable: true
         checked: plot.groupByAnnotation
 
-        onTriggered: function()
+        onTriggered:
         {
             plot.groupByAnnotation = !plot.groupByAnnotation;
 
@@ -416,7 +416,7 @@ PluginContent
     {
         id: importAnnotationsAction
         text: qsTr("Import Annotations From Table…")
-        onTriggered: function()
+        onTriggered:
         {
             if(misc.fileOpenInitialFolder.length > 0)
                 importAnnotationsFileOpenDialog.currentFolder = misc.fileOpenInitialFolder;
@@ -495,7 +495,7 @@ PluginContent
                 text: plot.xAxisLabel
             }
         }
-        onAccepted: plot.xAxisLabel = xAxisTextField.text;
+        onAccepted: { plot.xAxisLabel = xAxisTextField.text; }
     }
 
     Dialog
@@ -526,7 +526,7 @@ PluginContent
             }
         }
 
-        onAccepted: plot.yAxisLabel = yAxisTextField.text;
+        onAccepted: { plot.yAxisLabel = yAxisTextField.text; }
     }
 
     Connections
@@ -979,7 +979,7 @@ PluginContent
                 MouseArea
                 {
                     anchors.fill: parent
-                    onWheel: function(wheel)
+                    onWheel: (wheel) =>
                     {
                         plotFlickable.flick(0.0, wheel.angleDelta.y * 4.0);
 

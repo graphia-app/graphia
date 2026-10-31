@@ -104,7 +104,7 @@ Item
     {
         id: hoverTimer
         interval: 750
-        onTriggered: root.visible = true
+        onTriggered: { root.visible = true; }
     }
 
     Rectangle
@@ -147,7 +147,7 @@ Item
                 {
                     cursorShape: Qt.PointingHandCursor
                     anchors.fill: parent
-                    onClicked: function(mouse) { root.skipClicked(); }
+                    onClicked: (mouse) => { root.skipClicked(); }
                 }
             }
 
@@ -157,21 +157,21 @@ Item
             {
                 visible: root.displayPrevious
                 text: qsTr("Previous")
-                onClicked: function() { root.previousClicked(); }
+                onClicked: { root.previousClicked(); }
             }
 
             Button
             {
                 visible: root.displayNext
                 text: qsTr("Next")
-                onClicked: function() { root.nextClicked(); }
+                onClicked: { root.nextClicked(); }
             }
 
             Button
             {
                 visible: root.displayClose
                 text: qsTr("Close")
-                onClicked: function() { root.closeClicked(); }
+                onClicked: { root.closeClicked(); }
             }
         }
     }

@@ -691,8 +691,8 @@ Item
                                 text: root.document.attributeDisplayName(modelData)
                                 onTriggered: { root.selectBySharedAttributeValue(modelData, contextMenu.clickedNodeId, false); }
                             }
-                            onObjectAdded: function(index, object) { sharedValuesOfNodeContextMenu.insertItem(index, object); }
-                            onObjectRemoved: function(index, object) { sharedValuesOfNodeContextMenu.removeItem(object); }
+                            onObjectAdded: (index, object) => { sharedValuesOfNodeContextMenu.insertItem(index, object); }
+                            onObjectRemoved: (index, object) => { sharedValuesOfNodeContextMenu.removeItem(object); }
                         }
                     }
 
@@ -718,8 +718,8 @@ Item
                                 text: root.document.attributeDisplayName(modelData)
                                 onTriggered: { root.selectBySharedAttributeValue(modelData); }
                             }
-                            onObjectAdded: function(index, object) { sharedValuesSelectionContextMenu.insertItem(index, object); }
-                            onObjectRemoved: function(index, object) { sharedValuesSelectionContextMenu.removeItem(object); }
+                            onObjectAdded: (index, object) => { sharedValuesSelectionContextMenu.insertItem(index, object); }
+                            onObjectRemoved: (index, object) => { sharedValuesSelectionContextMenu.removeItem(object); }
                         }
                     }
                     PlatformMenuItem { hidden: !root.mainWindow.repeatLastSelectionAction.enabled; action: root.mainWindow.repeatLastSelectionAction }
@@ -747,7 +747,7 @@ Item
                     }
                 }
 
-                onClicked: function(button, modifiers, nodeId)
+                onClicked: (button, modifiers, nodeId) =>
                 {
                     switch(button)
                     {
@@ -828,7 +828,7 @@ Item
                 icon.name: "go-previous"
                 text: qsTr("Goto Previous Component");
 
-                onClicked: function() { _document.gotoPrevComponent(); }
+                onClicked: { _document.gotoPrevComponent(); }
             }
 
             FloatingButton
@@ -846,7 +846,7 @@ Item
                 icon.name: "go-next"
                 text: qsTr("Goto Next Component");
 
-                onClicked: function() { _document.gotoNextComponent(); }
+                onClicked: { _document.gotoNextComponent(); }
             }
 
             RowLayout
@@ -861,7 +861,7 @@ Item
                 {
                     icon.name: "edit-undo"
                     text: qsTr("Return to Overview Mode")
-                    onClicked: function() { _document.switchToOverviewMode(); }
+                    onClicked: { _document.switchToOverviewMode(); }
                 }
 
                 ColumnLayout
@@ -1457,7 +1457,7 @@ Item
         onXChanged: { if(x < 0 || x >= Screen.desktopAvailableWidth)  x = 0; }
         onYChanged: { if(y < 0 || y >= Screen.desktopAvailableHeight) y = 0; }
 
-        onClosing: function(close)
+        onClosing: (close) =>
         {
             if(visible & !root.destructing)
                 root.popInPlugin();
@@ -1734,7 +1734,7 @@ Item
                 setShading3D(_shading);
         }
 
-        onUiDataChanged: function(uiData)
+        onUiDataChanged: (uiData) =>
         {
             uiData = JSON.parse(uiData);
 
@@ -1745,7 +1745,7 @@ Item
                 find.lastFindByAttributeName = uiData.lastFindByAttributeName;
         }
 
-        onPluginQmlModuleChanged: function(pluginUiData, pluginUiDataVersion)
+        onPluginQmlModuleChanged: (pluginUiData, pluginUiDataVersion) =>
         {
             if(_document.pluginQmlModule.length > 0)
             {
@@ -1790,7 +1790,7 @@ Item
             }
         }
 
-        onSaveComplete: function(success, fileUrl, saverName)
+        onSaveComplete: (success, fileUrl, saverName) =>
         {
             if(!success)
             {
@@ -1806,7 +1806,7 @@ Item
             }
         }
 
-        onAttributesChanged: function(addedNames, removedNames, changedValuesNames, graphChanged)
+        onAttributesChanged: (addedNames, removedNames, changedValuesNames, graphChanged) =>
         {
             // If a new attribute has been created and advanced find or FBAV have
             // not yet been used, set the new attribute as the default for both
@@ -1835,7 +1835,7 @@ Item
             root._refreshAttributesWithSharedValues();
         }
 
-        onLoadComplete: function(url, success)
+        onLoadComplete: (url, success) =>
         {
             if(success)
                 root._refreshAttributesWithSharedValues();
@@ -2238,7 +2238,7 @@ Item
                           NativeUtils.redirectLink("example_datasets", qsTr("example datasets")))
 
                     PointingCursorOnHoverLink {}
-                    onLinkActivated: function(link) { Qt.openUrlExternally(link); }
+                    onLinkActivated: (link) => { Qt.openUrlExternally(link); }
                 }
             }
         }

@@ -152,7 +152,7 @@ Window
                                 {
                                     anchors.fill: parent
 
-                                    onClicked: function(mouse)
+                                    onClicked: (mouse) =>
                                     {
                                         root.configuration = gradientKey.configuration;
                                         gradientEditor.setup(gradientKey.configuration);
@@ -208,7 +208,7 @@ Window
                     enabled: gradientPresets.selectedIndex < 0
                     text: qsTr("Save As New Preset")
 
-                    onClicked: function()
+                    onClicked:
                     {
                         gradientPresets.addPreset(gradientEditor.configuration);
                     }
@@ -246,7 +246,7 @@ Window
                         }
                     }
 
-                    onClicked: function()
+                    onClicked:
                     {
                         deleteDialog.visible = true;
                     }
@@ -264,7 +264,7 @@ Window
 
                     text: qsTr("Set As Default")
 
-                    onClicked: function()
+                    onClicked:
                     {
                         // Add a preset too, if it doesn't exist already
                         if(gradientPresets.selectedIndex < 0)
@@ -299,7 +299,7 @@ Window
                     Button
                     {
                         text: qsTr("Invert")
-                        onClicked: function() { gradientEditor.invert(); }
+                        onClicked: { gradientEditor.invert(); }
                     }
                 }
 
@@ -326,7 +326,7 @@ Window
             {
                 Layout.alignment: Qt.AlignRight
                 text: qsTr("OK")
-                onClicked: function()
+                onClicked:
                 {
                     root.accepted();
                     root.close();
@@ -337,7 +337,7 @@ Window
             {
                 Layout.alignment: Qt.AlignRight
                 text: qsTr("Cancel")
-                onClicked: function()
+                onClicked:
                 {
                     root.rejected();
                     root.close();
@@ -348,7 +348,7 @@ Window
             {
                 Layout.alignment: Qt.AlignRight
                 text: qsTr("Apply")
-                onClicked: function()
+                onClicked:
                 {
                     root.applyClicked(root.applied);
                     root.applied = true;

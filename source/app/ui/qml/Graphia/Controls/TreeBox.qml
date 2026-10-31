@@ -350,7 +350,7 @@ Item
                         keyboardSelect(newRow);
                 }
 
-                Keys.onPressed: function(event)
+                Keys.onPressed: (event) =>
                 {
                     modifiers = event.modifiers;
 
@@ -377,7 +377,7 @@ Item
                     }
                 }
 
-                Keys.onReleased: function(event) { modifiers = event.modifiers; }
+                Keys.onReleased: (event) => { modifiers = event.modifiers; }
                 onActiveFocusChanged: { if(!activeFocus) modifiers = 0; }
 
                 delegate: Rectangle
@@ -558,7 +558,7 @@ Item
                 MouseArea
                 {
                     anchors.fill: parent
-                    onWheel: function(wheel) { treeView.flick(0, wheel.angleDelta.y * Constants.mouseWheelStep); }
+                    onWheel: (wheel) => { treeView.flick(0, wheel.angleDelta.y * Constants.mouseWheelStep); }
                 }
 
                 onContentYChanged: { parentGuideTimer.restart(); }
@@ -584,7 +584,7 @@ Item
                 hoverOpacity: 0.7
                 checkable: true
 
-                onClicked: function() { root.toggleSearch(); }
+                onClicked: { root.toggleSearch(); }
             }
 
             Rectangle
@@ -668,7 +668,7 @@ Item
                     return false;
                 }
 
-                onTriggered: function()
+                onTriggered:
                 {
                     if(!root.showParentGuide)
                         return;

@@ -207,7 +207,7 @@ Window
                             color: palette.buttonText
 
                             PointingCursorOnHoverLink {}
-                            onLinkActivated: function(link) { Qt.openUrlExternally(link); }
+                            onLinkActivated: (link) => { Qt.openUrlExternally(link); }
 
                             function update()
                             {
@@ -387,17 +387,17 @@ Window
             {
                 text: qsTr("OK")
                 enabled: root.visualisationExpressionsValid
-                onClicked: function() { root.accept(); }
+                onClicked: { root.accept(); }
             }
 
             Button
             {
                 text: qsTr("Cancel")
-                onClicked: function() { root.reject(); }
+                onClicked: { root.reject(); }
             }
         }
 
-        Keys.onPressed: function(event)
+        Keys.onPressed: (event) =>
         {
             event.accepted = true;
             switch(event.key)

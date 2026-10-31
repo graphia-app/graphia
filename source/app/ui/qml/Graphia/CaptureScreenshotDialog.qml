@@ -377,13 +377,13 @@ Window
             Button
             {
                 text: qsTr("Cancel")
-                onClicked: function() { root.close(); }
+                onClicked: { root.close(); }
             }
 
             Button
             {
                 text: qsTr("Save…")
-                onClicked: function()
+                onClicked:
                 {
                     let path = Utils.format(qsTr("{0}/{1}-capture-{2}"),
                         NativeUtils.fileNameForUrl(screenshot.path), root.application.name,

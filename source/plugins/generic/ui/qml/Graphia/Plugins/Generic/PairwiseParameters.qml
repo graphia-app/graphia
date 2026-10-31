@@ -119,7 +119,7 @@ BaseParameterDialog
             Button
             {
                 text: tabularDataParser.failed ? qsTr("Close") : qsTr("Cancel")
-                onClicked: function()
+                onClicked:
                 {
                     if(!tabularDataParser.failed)
                         tabularDataParser.cancelParse();
@@ -363,7 +363,7 @@ BaseParameterDialog
                     MouseArea
                     {
                         anchors.fill: parent
-                        onClicked: function(mouse)
+                        onClicked: (mouse) =>
                         {
                             typeMenu.popup(parent, 0, parent.height + 8/*padding*/);
                         }
@@ -428,7 +428,7 @@ BaseParameterDialog
 
                     icon.name: "accessories-text-editor"
 
-                    onClicked: function()
+                    onClicked:
                     {
                         if(attributeNameTextField.visible)
                         {
@@ -453,7 +453,7 @@ BaseParameterDialog
                 Layout.alignment: Qt.AlignRight
                 text: qsTr("OK")
                 enabled: root.parametersAreValid
-                onClicked: function()
+                onClicked:
                 {
                     root.accepted();
                     root.close();
@@ -464,7 +464,7 @@ BaseParameterDialog
             {
                 Layout.alignment: Qt.AlignRight
                 text: qsTr("Cancel")
-                onClicked: function()
+                onClicked:
                 {
                     root.rejected();
                     root.close();

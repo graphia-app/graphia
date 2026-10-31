@@ -64,8 +64,8 @@ Rectangle
             color: palette.windowText
 
             onEditingFinished: { root.editingFinished(); }
-            onLinkActivated: function(link) { root.linkActivated(link); }
-            onLinkHovered: function(link) { root.linkHovered(link); }
+            onLinkActivated: (link) => { root.linkActivated(link); }
+            onLinkHovered: (link) => { root.linkHovered(link); }
         }
     }
 

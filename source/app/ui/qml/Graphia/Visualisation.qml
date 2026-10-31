@@ -44,16 +44,16 @@ Item
     {
         anchors.fill: row
 
-        onClicked: function(mouse)
+        onClicked: (mouse) =>
         {
             if(mouse.button === Qt.RightButton)
                 hamburger.menu.popup();
         }
 
-        onDoubleClicked: function(mouse) { root.toggle(); }
+        onDoubleClicked: (mouse) => { root.toggle(); }
 
         // Pass presses on to parent (DraggableList)
-        onPressed: function(mouse) { mouse.accepted = false; }
+        onPressed: (mouse) => { mouse.accepted = false; }
     }
 
     RowLayout
@@ -164,7 +164,7 @@ Item
                     root._visualisationInfo.numApplications === 1);
             }
 
-            onClicked: function(mouse)
+            onClicked: (mouse) =>
             {
                 if(mouse.button === Qt.LeftButton)
                     row.showGradientSelector();
@@ -195,7 +195,7 @@ Item
             stringValues: root._stringValues
             valueDisplayFunction: (value) => root.document.attributeDisplayValue(root.attributeName, value)
 
-            onClicked: function(mouse)
+            onClicked: (mouse) =>
             {
                 if(mouse.button === Qt.LeftButton)
                     row.showPaletteSelector();

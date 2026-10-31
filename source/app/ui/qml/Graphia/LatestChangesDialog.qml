@@ -55,14 +55,14 @@ Window
             textFormat: TextEdit.MarkdownText
             text: root.text
 
-            onLinkActivated: function(link) { Qt.openUrlExternally(link); }
+            onLinkActivated: (link) => { Qt.openUrlExternally(link); }
         }
 
         Button
         {
             text: qsTr("Close")
             Layout.alignment: Qt.AlignRight
-            onClicked: function() { root.close(); }
+            onClicked: { root.close(); }
         }
     }
 }

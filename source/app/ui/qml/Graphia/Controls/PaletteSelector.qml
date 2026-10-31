@@ -158,7 +158,7 @@ Window
                                 {
                                     anchors.fill: parent
 
-                                    onClicked: function(mouse)
+                                    onClicked: (mouse) =>
                                     {
                                         root.configuration = paletteKey.configuration;
                                         paletteEditor.setup(paletteKey.configuration);
@@ -214,7 +214,7 @@ Window
                     enabled: palettePresets.selectedIndex < 0
                     text: qsTr("Save As New Preset")
 
-                    onClicked: function()
+                    onClicked:
                     {
                         palettePresets.addPreset(paletteEditor.configuration);
                     }
@@ -252,7 +252,7 @@ Window
                         }
                     }
 
-                    onClicked: function()
+                    onClicked:
                     {
                         deleteDialog.visible = true;
                     }
@@ -270,7 +270,7 @@ Window
 
                     text: qsTr("Set As Default")
 
-                    onClicked: function()
+                    onClicked:
                     {
                         // Add a preset too, if it doesn't exist already
                         if(palettePresets.selectedIndex < 0)
@@ -328,7 +328,7 @@ Window
                         paletteEditorScrollview.setPosition(f * (1.0 - paletteEditorScrollview.size));
                     }
 
-                    onItemAdded: function(item) { paletteEditorScrollview._itemToScrollTo = item; }
+                    onItemAdded: (item) => { paletteEditorScrollview._itemToScrollTo = item; }
 
                     onConfigurationChanged:
                     {
@@ -346,7 +346,7 @@ Window
             {
                 Layout.alignment: Qt.AlignRight
                 text: qsTr("OK")
-                onClicked: function()
+                onClicked:
                 {
                     root.accepted();
                     root.close();
@@ -357,7 +357,7 @@ Window
             {
                 Layout.alignment: Qt.AlignRight
                 text: qsTr("Cancel")
-                onClicked: function()
+                onClicked:
                 {
                     root.rejected();
                     root.close();
@@ -368,7 +368,7 @@ Window
             {
                 Layout.alignment: Qt.AlignRight
                 text: qsTr("Apply")
-                onClicked: function()
+                onClicked:
                 {
                     root.applyClicked(root.applied);
                     root.applied = true;

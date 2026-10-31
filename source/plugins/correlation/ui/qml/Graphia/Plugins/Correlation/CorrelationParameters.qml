@@ -153,7 +153,7 @@ BaseParameterDialog
             Button
             {
                 text: tabularDataParser.failed ? qsTr("Close") : qsTr("Cancel")
-                onClicked: function()
+                onClicked:
                 {
                     if(!tabularDataParser.failed)
                         tabularDataParser.cancelParse();
@@ -214,7 +214,7 @@ BaseParameterDialog
                         color: palette.buttonText
 
                         PointingCursorOnHoverLink {}
-                        onLinkActivated: function(link) { Qt.openUrlExternally(link); }
+                        onLinkActivated: (link) => { Qt.openUrlExternally(link); }
                     }
 
                     Image
@@ -428,7 +428,7 @@ BaseParameterDialog
                     model: tabularDataParser.model
 
                     highlightedProvider: (column, row) => root.isInsideRect(column, row, tabularDataParser.dataRect)
-                    onClicked: function(column, row, mouse) { tabularDataParser.setDataRectangle(column, row); }
+                    onClicked: (column, row, mouse) => { tabularDataParser.setDataRectangle(column, row); }
 
                     function positionViewAtSelectedCell()
                     {

@@ -115,7 +115,7 @@ Window
             Button
             {
                 text: qsTr("Close")
-                onClicked: function() { root.close(); }
+                onClicked: { root.close(); }
             }
         }
     }

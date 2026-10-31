@@ -110,7 +110,7 @@ Item
             {
                 id: previousButton
                 text: qsTr("Previous")
-                onClicked: function() { root.goToPrevious(); }
+                onClicked: { root.goToPrevious(); }
                 enabled: root._currentIndex > 0 && root.controlsEnabled
             }
 
@@ -118,7 +118,7 @@ Item
             {
                 id: nextButton
                 text: qsTr("Next")
-                onClicked: function() { root.goToNext(); }
+                onClicked: { root.goToNext(); }
                 enabled: (root._currentIndex < root.listTabs.length - 1) ?
                     root.nextEnabled && root.controlsEnabled : false
             }
@@ -137,7 +137,7 @@ Item
                         return qsTr("Finish");
                 }
 
-                onClicked: function()
+                onClicked:
                 {
                     if(root._currentIndex !== (root.listTabs.length - 1))
                         root.goToTab(root.listTabs.length - 1);
@@ -161,7 +161,7 @@ Item
             {
                 text: qsTr("Cancel")
                 enabled: root.controlsEnabled
-                onClicked: function() { root.rejected(); }
+                onClicked: { root.rejected(); }
             }
         }
     }

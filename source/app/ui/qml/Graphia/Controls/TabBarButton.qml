@@ -56,7 +56,7 @@ TabButton
 
             icon.name: "emblem-unreadable"
 
-            onClicked: function() { root.closeButtonClicked(); }
+            onClicked: { root.closeButtonClicked(); }
         }
     }
 

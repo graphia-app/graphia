@@ -76,7 +76,7 @@ Item
 
                 alignment: Qt.AlignRight
 
-                onItemMoved: function(from, to) { root.document.moveGraphTransform(from, to); }
+                onItemMoved: (from, to) => { root.document.moveGraphTransform(from, to); }
             }
         }
 
@@ -109,7 +109,7 @@ Item
                 textColor: enabled ? root.enabledTextColor : root.disabledTextColor
                 hoverColor: root.heldColor
 
-                onClicked: function(mouse) { Utils.createWindow(root, createTransformDialog); }
+                onClicked: (mouse) => { Utils.createWindow(root, createTransformDialog); }
             }
 
             FloatingButton
@@ -118,7 +118,7 @@ Item
                 icon.name: panel.hidden ? "go-bottom" : "go-top"
                 text: panel.hidden ? qsTr("Show") : qsTr("Hide")
 
-                onClicked: function()
+                onClicked:
                 {
                     if(panel.hidden)
                         panel.show();

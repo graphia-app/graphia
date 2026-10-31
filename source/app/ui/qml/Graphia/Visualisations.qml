@@ -66,7 +66,7 @@ Item
                     root.document.rollback();
             }
 
-            onApplyClicked: function(alreadyApplied)
+            onApplyClicked: (alreadyApplied) =>
             {
                 let visualisation = list.itemAt(visualisationIndex);
                 visualisation.parameters["gradient"] = root.document.writtenString(configuration);
@@ -101,7 +101,7 @@ Item
                     root.document.rollback();
             }
 
-            onApplyClicked: function(alreadyApplied)
+            onApplyClicked: (alreadyApplied) =>
             {
                 let visualisation = list.itemAt(visualisationIndex);
                 visualisation.parameters["palette"] = root.document.writtenString(configuration);
@@ -139,7 +139,7 @@ Item
                 visualisation.setupMappingMenuItems();
             }
 
-            onApplyClicked: function(alreadyApplied)
+            onApplyClicked: (alreadyApplied) =>
             {
                 let visualisation = list.itemAt(visualisationIndex);
                 visualisation.parameters["mapping"] = root.document.writtenString(configuration);
@@ -187,7 +187,7 @@ Item
                 textColor: enabled ? root.enabledTextColor : root.disabledTextColor
                 hoverColor: root.heldColor
 
-                onClicked: function(mouse) { Utils.createWindow(root, createVisualisationDialog); }
+                onClicked: (mouse) => { Utils.createWindow(root, createVisualisationDialog); }
             }
 
             FloatingButton
@@ -196,7 +196,7 @@ Item
                 icon.name: panel.hidden ? "go-top" : "go-bottom"
                 text: panel.hidden ? qsTr("Show") : qsTr("Hide")
 
-                onClicked: function()
+                onClicked:
                 {
                     if(panel.hidden)
                         panel.show();
@@ -234,7 +234,7 @@ Item
 
                 alignment: Qt.AlignRight
 
-                onItemMoved: function(from, to) { root.document.moveVisualisation(from, to); }
+                onItemMoved: (from, to) => { root.document.moveVisualisation(from, to); }
             }
         }
     }

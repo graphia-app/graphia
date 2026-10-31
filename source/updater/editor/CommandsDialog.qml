@@ -107,7 +107,7 @@ Window
             Button
             {
                 text: qsTr("OK")
-                onClicked: function()
+                onClicked:
                 {
                     let osCommands = [];
 
@@ -128,7 +128,7 @@ Window
             Button
             {
                 text: qsTr("Cancel")
-                onClicked: function() { root.close(); }
+                onClicked: { root.close(); }
             }
         }
     }

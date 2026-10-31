@@ -279,7 +279,7 @@ Item
                     anchors.fill: parent
                     visible: key._isLastColor
 
-                    onPaint: function(rect)
+                    onPaint: (rect) =>
                     {
                         let ctx = getContext("2d");
 
@@ -344,12 +344,12 @@ Item
 
         anchors.fill: root
 
-        onClicked: function(mouse) { root.clicked(mouse); }
-        onDoubleClicked: function(mouse) { root.doubleClicked(mouse); }
+        onClicked: (mouse) => { root.clicked(mouse); }
+        onDoubleClicked: (mouse) => { root.doubleClicked(mouse); }
 
         hoverEnabled: root.hoverEnabled
 
-        onPressed: function(mouse) { mouse.accepted = false; }
+        onPressed: (mouse) => { mouse.accepted = false; }
     }
 
     signal clicked(var mouse)

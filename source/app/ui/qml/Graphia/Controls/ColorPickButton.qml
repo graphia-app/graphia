@@ -71,7 +71,7 @@ Item
             anchors.fill: parent
             hoverEnabled: true
 
-            onClicked: function(mouse)
+            onClicked: (mouse) =>
             {
                 colorDialog.color = root.color;
                 colorDialog.open();

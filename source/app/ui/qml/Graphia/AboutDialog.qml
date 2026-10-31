@@ -49,7 +49,7 @@ Window
             Layout.alignment: Qt.AlignTop
             source: "qrc:///icon/Icon128x128.png"
 
-            HiddenSwitch { onActivated: root.hiddenSwitchActivated(); }
+            HiddenSwitch { onActivated: { root.hiddenSwitchActivated(); } }
         }
 
         ColumnLayout
@@ -70,7 +70,7 @@ Window
                     root.applicationRef.name, root.applicationRef.version, root.applicationRef.copyright.replace("\n", "<br>"))
 
                 PointingCursorOnHoverLink {}
-                onLinkActivated: function(link)
+                onLinkActivated: (link) =>
                 {
                     licenseTextArea.text = NativeUtils.readFromFile(":/licensing/" + link + ".html");
 
@@ -98,14 +98,14 @@ Window
                 wrapMode: TextEdit.Wrap
 
                 PointingCursorOnHoverLink {}
-                onLinkActivated: function(link) { Qt.openUrlExternally(link); }
+                onLinkActivated: (link) => { Qt.openUrlExternally(link); }
             }
 
             Button
             {
                 text: qsTr("Close")
                 Layout.alignment: Qt.AlignRight
-                onClicked: function() { root.close(); }
+                onClicked: { root.close(); }
             }
         }
     }

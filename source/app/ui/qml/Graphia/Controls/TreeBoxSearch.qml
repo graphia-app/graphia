@@ -74,7 +74,7 @@ TextField
         modelCompleter.startsWith = "";
     }
 
-    Keys.onPressed: function(event)
+    Keys.onPressed: (event) =>
     {
         switch(event.key)
         {
@@ -199,6 +199,6 @@ TextField
         _select(newIndex);
     }
 
-    Keys.onUpPressed:   function(event) { _moveSelection(-1); }
-    Keys.onDownPressed: function(event) { _moveSelection( 1); }
+    Keys.onUpPressed:   (event) => { _moveSelection(-1); }
+    Keys.onDownPressed: (event) => { _moveSelection( 1); }
 }

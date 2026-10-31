@@ -227,7 +227,7 @@ ApplicationWindow
         resetSaveRequired();
     }
 
-    onClosing: function(close)
+    onClosing: (close) =>
     {
         let closedImmediately = root.confirmSave(() =>
         {
@@ -582,7 +582,7 @@ ApplicationWindow
 
         enabled: !root.busy
 
-        onTriggered: function()
+        onTriggered:
         {
             if(settings.defaultOpenFolder !== undefined)
                 openDialog.currentFolder = settings.defaultOpenFolder;
@@ -658,7 +658,7 @@ ApplicationWindow
 
         enabled: root.canSave
 
-        onTriggered: function()
+        onTriggered:
         {
             root.save();
         }
@@ -671,7 +671,7 @@ ApplicationWindow
 
         enabled: root.canSave
 
-        onTriggered: function()
+        onTriggered:
         {
             root.lastUsedFilename = "";
             root.save();
@@ -826,7 +826,7 @@ ApplicationWindow
                             Button
                             {
                                 text: qsTr("Add Image")
-                                onClicked: function()
+                                onClicked:
                                 {
                                     if(settings.defaultImageOpenFolder !== undefined)
                                         imageFileDialog.currentFolder = settings.defaultImageOpenFolder;
@@ -908,7 +908,7 @@ ApplicationWindow
                                 enabled: customCommands.checked
                                 text: qsTr("Custom Commands")
 
-                                onClicked: function()
+                                onClicked:
                                 {
                                     if(customCommandsDialog.operatingSystems.length === 0)
                                         customCommandsDialog.operatingSystems = JSON.parse(settings.operatingSystems);
@@ -1156,7 +1156,7 @@ ApplicationWindow
                 enabled: !root.busy
 
                 text: qsTr("Add Upgrade")
-                onClicked: function() { tabBar.createTab(); }
+                onClicked: { tabBar.createTab(); }
             }
 
             Button
@@ -1164,7 +1164,7 @@ ApplicationWindow
                 enabled: !root.busy
 
                 text: qsTr("Remove Upgrade")
-                onClicked: function()
+                onClicked:
                 {
                     tabBar.removeTab(tabBar.currentIndex);
                 }

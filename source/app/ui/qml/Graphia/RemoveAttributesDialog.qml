@@ -123,7 +123,7 @@ Window
                 text: qsTr("OK")
                 enabled: attributeList.selectedValues.length > 0
 
-                onClicked: function()
+                onClicked:
                 {
                     root.document.removeAttributes(attributeList.selectedValues);
                     root.close();
@@ -133,7 +133,7 @@ Window
             Button
             {
                 text: qsTr("Cancel")
-                onClicked: function() { root.close(); }
+                onClicked: { root.close(); }
             }
         }
     }

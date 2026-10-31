@@ -224,7 +224,7 @@ Window
                     text: misc.transformIsFavourite(transformsList.selectedValue) ?
                         qsTr("Remove Favourite") : qsTr("Add Favourite")
 
-                    onClicked: function()
+                    onClicked:
                     {
                         let index = transformsList.currentIndex;
                         if(index !== null)
@@ -257,7 +257,7 @@ Window
                         color: palette.buttonText
 
                         PointingCursorOnHoverLink {}
-                        onLinkActivated: function(link) { Qt.openUrlExternally(link); }
+                        onLinkActivated: (link) => { Qt.openUrlExternally(link); }
 
                         text: root._transform !== undefined ?
                             "<h3>" + root._transform.displayName + "</h3>" + root._transform.description : ""
@@ -549,7 +549,7 @@ Window
                                         color: palette.buttonText
 
                                         PointingCursorOnHoverLink {}
-                                        onLinkActivated: function(link) { Qt.openUrlExternally(link); }
+                                        onLinkActivated: (link) => { Qt.openUrlExternally(link); }
 
                                         function clear()
                                         {
@@ -621,7 +621,7 @@ Window
                                                     color: palette.buttonText
 
                                                     PointingCursorOnHoverLink {}
-                                                    onLinkActivated: function(link) { Qt.openUrlExternally(link); }
+                                                    onLinkActivated: (link) => { Qt.openUrlExternally(link); }
                                                 }
                                             }
 
@@ -707,7 +707,7 @@ Window
                                                     color: palette.buttonText
 
                                                     PointingCursorOnHoverLink {}
-                                                    onLinkActivated: function(link) { Qt.openUrlExternally(link); }
+                                                    onLinkActivated: (link) => { Qt.openUrlExternally(link); }
                                                 }
                                             }
 
@@ -912,20 +912,20 @@ Window
                         Layout.alignment: Qt.AlignBottom
                         text: qsTr("OK")
                         enabled: { return root.document.graphTransformIsValid(root.transformExpression); }
-                        onClicked: function() { root.accept(); }
+                        onClicked: { root.accept(); }
                     }
 
                     Button
                     {
                         Layout.alignment: Qt.AlignBottom
                         text: qsTr("Cancel")
-                        onClicked: function() { root.reject(); }
+                        onClicked: { root.reject(); }
                     }
                 }
             }
         }
 
-        Keys.onPressed: function(event)
+        Keys.onPressed: (event) =>
         {
             event.accepted = true;
             switch(event.key)

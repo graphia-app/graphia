@@ -81,7 +81,7 @@ Rectangle
                 text: qsTr("Submit")
                 enabled: emailField.acceptableInput
 
-                onClicked: function()
+                onClicked:
                 {
                     preferences.permission = "given";
                     root.trackingDataEntered();
@@ -111,7 +111,7 @@ Rectangle
 
             PointingCursorOnHoverLink {}
 
-            onLinkActivated: function(link)
+            onLinkActivated: (link) =>
             {
                 preferences.emailAddress = "";
                 preferences.permission = "anonymous";
@@ -119,7 +119,7 @@ Rectangle
             }
         }
 
-        Keys.onPressed: function(event)
+        Keys.onPressed: (event) =>
         {
             if(!emailField.acceptableInput)
                 return;

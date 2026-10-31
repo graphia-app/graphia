@@ -85,17 +85,17 @@ Window
                 text: qsTr("OK")
                 enabled: textField.valid
 
-                onClicked: root.accept();
+                onClicked: { root.accept(); }
             }
 
             Button
             {
                 text: qsTr("Cancel")
-                onClicked: root.reject();
+                onClicked: { root.reject(); }
             }
         }
 
-        Keys.onPressed: function(event)
+        Keys.onPressed: (event) =>
         {
             event.accepted = true;
             switch(event.key)

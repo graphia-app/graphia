@@ -28,7 +28,7 @@ MouseArea
 
     property int _clickState: 0
 
-    onClicked: function(mouse)
+    onClicked: (mouse) =>
     {
         _clickState++;
 

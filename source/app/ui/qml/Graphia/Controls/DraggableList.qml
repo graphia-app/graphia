@@ -75,13 +75,13 @@ Item
             hotspotY: content.y + (content.height * 0.5)
 
             property bool held
-            onPressAndHold: function(mouse) { held = true; }
-            onReleased: function(mouse) { held = false; }
+            onPressAndHold: (mouse) => { held = true; }
+            onReleased: (mouse) => { held = false; }
 
             property int _clickX
             property int _clickY
 
-            onPositionChanged: function(mouse)
+            onPositionChanged: (mouse) =>
             {
                 let manhattan = Math.abs(_clickX - mouse.x) + Math.abs(_clickY - mouse.y);
 
@@ -104,7 +104,7 @@ Item
                     column.dropIndex = newDropIndex;
             }
 
-            onClicked: function(mouse)
+            onClicked: (mouse) =>
             {
                 _clickX = mouse.x;
                 _clickY = mouse.y;
@@ -113,7 +113,7 @@ Item
                 forwardEventToItem(mouse, "clicked");
             }
 
-            onDoubleClicked: function(mouse) { forwardEventToItem(mouse, "doubleClicked"); }
+            onDoubleClicked: (mouse) => { forwardEventToItem(mouse, "doubleClicked"); }
 
             function forwardEventToItem(event, eventType)
             {
@@ -284,7 +284,7 @@ Item
 
         keys: ["DraggableList"]
 
-        onDropped: function(drop)
+        onDropped: (drop) =>
         {
             if(column.dragFromIndex === column.dropIndex)
                 return;

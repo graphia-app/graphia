@@ -46,7 +46,7 @@ BaseParameterDialog
     onWidthChanged: { content.x = currentIndex * -root.width }
     onHeightChanged: { content.x = currentIndex * -root.width }
 
-    onCurrentIndexChanged: pageIndicator.requestPaint();
+    onCurrentIndexChanged: { pageIndicator.requestPaint(); }
 
     ColumnLayout
     {
@@ -71,7 +71,7 @@ BaseParameterDialog
                 implicitWidth: (root.listPages.length * spacing) + (_padding * 2)
                 implicitHeight: pipSize + (_padding  * 2)
 
-                onPaint: function(rect)
+                onPaint: (rect) =>
                 {
                     let ctx = getContext("2d");
                     let currentPipSize = pipSize + 2;
@@ -138,7 +138,7 @@ BaseParameterDialog
             {
                 id: previousButton
                 text: qsTr("Previous")
-                onClicked: function() { root.previous(); }
+                onClicked: { root.previous(); }
                 enabled: root.currentIndex > 0
             }
 
@@ -146,7 +146,7 @@ BaseParameterDialog
             {
                 id: nextButton
                 text: qsTr("Next")
-                onClicked: function() { root.next(); }
+                onClicked: { root.next(); }
                 enabled: (root.currentIndex < root.listPages.length - 1) ? root.nextEnabled : false
             }
 
@@ -154,14 +154,14 @@ BaseParameterDialog
             {
                 id: finishButton
                 text: qsTr("Finish")
-                onClicked: function() { root.accepted(); }
+                onClicked: { root.accepted(); }
                 enabled: (root.currentIndex >= root.enableFinishAtIndex) ? root.finishEnabled : false
             }
 
             Button
             {
                 text: qsTr("Cancel")
-                onClicked: function() { root.close(); }
+                onClicked: { root.close(); }
             }
         }
     }

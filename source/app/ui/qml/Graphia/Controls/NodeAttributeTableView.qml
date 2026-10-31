@@ -295,7 +295,7 @@ Item
         id: resizeColumnsToContentsAction
         text: qsTr("&Resize Columns To Contents")
         icon.name: "auto-column-resize"
-        onTriggered: function()
+        onTriggered:
         {
             root.resizeColumnsToContents();
         }
@@ -323,7 +323,7 @@ Item
         text: qsTr("Export…")
         icon.name: "document-save"
 
-        onTriggered: function()
+        onTriggered:
         {
             let folder = misc.fileSaveInitialFolder;
             let path = Utils.format("{0}/{1}", NativeUtils.fileNameForUrl(folder), root.exportBaseFileName);
@@ -420,7 +420,7 @@ Item
         enabled: root.rowCount > 0
         text: qsTr("Copy Column To Clipboard")
         icon.name: "document-save"
-        onTriggered: function()
+        onTriggered:
         {
             root.pluginContent.copyTableModelColumnToClipboard(root.model, root.lastClickedColumn, root.visibleRows);
         }
@@ -439,7 +439,7 @@ Item
         id: sortAscendingAction
         text: qsTr("Sort Column Ascending")
         checkable: true
-        onTriggered: function()
+        onTriggered:
         {
             displayModel.sortColumn = root.lastClickedColumnName;
             displayModel.sortOrder = Qt.AscendingOrder;
@@ -452,7 +452,7 @@ Item
         id: sortDescendingAction
         text: qsTr("Sort Column Descending")
         checkable: true
-        onTriggered: function()
+        onTriggered:
         {
             displayModel.sortColumn = root.lastClickedColumnName;
             displayModel.sortOrder = Qt.DescendingOrder;
@@ -676,7 +676,7 @@ Item
                         }
                     }
 
-                    onEntered: function(drag)
+                    onEntered: (drag) =>
                     {
                         drag.source.target = displayModel.sourceColumnFor(model.column);
                         tableView.forceLayoutSafe();
@@ -850,7 +850,7 @@ Item
                             hoverEnabled: true
                             acceptedButtons: Qt.LeftButton|Qt.RightButton
 
-                            onClicked: function(mouse)
+                            onClicked: (mouse) =>
                             {
                                 root.lastClickedColumn = headerItem.sourceColumn;
 
@@ -901,7 +901,7 @@ Item
                                     }
                                 }
 
-                                onDoubleClicked: function(mouse) { root.resizeColumnsToContents(); }
+                                onDoubleClicked: (mouse) => { root.resizeColumnsToContents(); }
                             }
                         }
                     }
@@ -996,7 +996,7 @@ Item
                     orientation: Qt.Horizontal
                     blocking: false
 
-                    onWheel: function(event)
+                    onWheel: (event) =>
                     {
                         const angleDeltaPerStep = 120;
                         const pixelsPerLine = 24;
@@ -1017,7 +1017,7 @@ Item
                     height: tableView.height + (tableView.rowHeight * 2)
                     x: tableView.contentX
                     y: tableView.contentY - (tableView.contentY % (tableView.rowHeight * 2))
-                    onPaint: function(rect)
+                    onPaint: (rect) =>
                     {
                         let ctx = getContext("2d");
                         for(let i = 0; i < Math.ceil(tableView.height / tableView.rowHeight) + 1; i++)
@@ -1283,8 +1283,8 @@ Item
                                 return cellItem.model.display;
                             }
 
-                            onLinkHovered: function(link) { tableView.hoveredLink = link; }
-                            onLinkActivated: function(link) { Qt.openUrlExternally(link); }
+                            onLinkHovered: (link) => { tableView.hoveredLink = link; }
+                            onLinkActivated: (link) => { Qt.openUrlExternally(link); }
                         }
                     }
                 }
@@ -1375,31 +1375,31 @@ Item
                             Button
                             {
                                 text: qsTr("Show All")
-                                onClicked: function() { root.showAllColumns(); }
+                                onClicked: { root.showAllColumns(); }
                             }
 
                             Button
                             {
                                 text: qsTr("Hide All")
-                                onClicked: function() { root.hideAllColumns(); }
+                                onClicked: { root.hideAllColumns(); }
                             }
 
                             Button
                             {
                                 text: qsTr("Show Calculated")
-                                onClicked: function() { root.showAllCalculatedColumns(); }
+                                onClicked: { root.showAllCalculatedColumns(); }
                             }
 
                             Button
                             {
                                 text: qsTr("Hide Calculated")
-                                onClicked: function() { root.hideAllCalculatedColumns(); }
+                                onClicked: { root.hideAllCalculatedColumns(); }
                             }
 
                             FloatingButton
                             {
                                 icon.name: "emblem-unreadable"
-                                onClicked: function() { root.columnSelectionMode = false; }
+                                onClicked: { root.columnSelectionMode = false; }
                             }
                         }
                     }
@@ -1424,7 +1424,7 @@ Item
                 cursorShape: tableView.hoveredLink.length > 0 ?
                     Qt.PointingHandCursor : Qt.ArrowCursor;
 
-                onDoubleClicked: function(mouse)
+                onDoubleClicked: (mouse) =>
                 {
                     if(mouse.button !== Qt.LeftButton)
                         return;
@@ -1437,7 +1437,7 @@ Item
                     root.model.moveFocusToNodeForRowIndex(mappedRow);
                 }
 
-                onClicked: function(mouse)
+                onClicked: (mouse) =>
                 {
                     root.lastClickedColumn = tableView.columnAt(mouseX);
 
@@ -1445,7 +1445,7 @@ Item
                         root.rightClick();
                 }
 
-                onPressed: function(mouse)
+                onPressed: (mouse) =>
                 {
                     if(mouse.button !== Qt.LeftButton)
                         return;
@@ -1478,7 +1478,7 @@ Item
                     previousRow = startRow = endRow = clickedRow;
                 }
 
-                onPositionChanged: function(mouse)
+                onPositionChanged: (mouse) =>
                 {
                     if(mouse.buttons !== Qt.LeftButton)
                         return;
@@ -1498,13 +1498,13 @@ Item
                     }
                 }
 
-                onReleased: function(mouse)
+                onReleased: (mouse) =>
                 {
                     previousRow = -1;
                     deselectDrag = false;
                 }
 
-                Keys.onDownPressed: function(event)
+                Keys.onDownPressed: (event) =>
                 {
                     if(endRow !== -1 && (endRow + 1) < tableView.rows)
                     {
@@ -1513,7 +1513,7 @@ Item
                     }
                 }
 
-                Keys.onUpPressed: function(event)
+                Keys.onUpPressed: (event) =>
                 {
                     if(endRow !== -1 && (endRow - 1) >= 0)
                     {

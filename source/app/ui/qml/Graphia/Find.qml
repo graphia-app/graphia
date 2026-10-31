@@ -216,7 +216,7 @@ Rectangle
         icon.name: "go-previous"
         shortcut: root._visible ? "Ctrl+Shift+G" : ""
         enabled: root._type === Find.ByAttribute || root.document.numNodesFound > 0
-        onTriggered: function()
+        onTriggered:
         {
             if(root._type === Find.ByAttribute)
                 valueComboBox.currentIndex = ((valueComboBox.currentIndex - 1) + valueComboBox.count) % valueComboBox.count;
@@ -232,7 +232,7 @@ Rectangle
         icon.name: "go-next"
         shortcut: root._visible ? "Ctrl+G" : ""
         enabled: root._type === Find.ByAttribute || root.document.numNodesFound > 0
-        onTriggered: function()
+        onTriggered:
         {
             if(root._type === Find.ByAttribute)
                 valueComboBox.currentIndex = (valueComboBox.currentIndex + 1) % valueComboBox.count;
@@ -272,7 +272,7 @@ Rectangle
         icon.name: "edit-copy"
         checkable: true
 
-        onCheckedChanged: function(checked)
+        onCheckedChanged: (checked) =>
         {
             if(checked && valueComboBox.value.length > 0)
                 root._attributeValues = [valueComboBox.value];
@@ -290,7 +290,7 @@ Rectangle
         icon.name: "edit-select-all"
         checkable: true
 
-        onCheckedChanged: function(checked) { root._doFind(); }
+        onCheckedChanged: (checked) => { root._doFind(); }
     }
 
     property bool _closing: false
@@ -300,7 +300,7 @@ Rectangle
         text: qsTr("Close")
         icon.name: "emblem-unreadable"
 
-        onTriggered: function()
+        onTriggered:
         {
             findField.focus = false;
             findField.text = "";
@@ -359,9 +359,9 @@ Rectangle
     MouseArea
     {
         anchors.fill: layout
-        onWheel: function(wheel) { /* NO-OP */ }
+        onWheel: (wheel) => { /* NO-OP */ }
         acceptedButtons: Qt.RightButton
-        onClicked: function(mouse) { mouse.accepted = true; }
+        onClicked: (mouse) => { mouse.accepted = true; }
     }
 
     ColumnLayout
@@ -440,7 +440,7 @@ Rectangle
                     MouseArea
                     {
                         anchors.fill: parent
-                        onClicked: function(mouse) { findField.forceActiveFocus(); }
+                        onClicked: (mouse) => { findField.forceActiveFocus(); }
                     }
                 }
             }

@@ -69,7 +69,7 @@ ApplicationWindow
                 anchors.fill: parent
 
                 property int _doubleClickCount: 0
-                onDoubleClicked: function(mouse)
+                onDoubleClicked: (mouse) =>
                 {
                     _doubleClickCount++;
 
@@ -108,7 +108,7 @@ ApplicationWindow
             }
 
             PointingCursorOnHoverLink {}
-            onLinkActivated: function(link) { Qt.openUrlExternally(link); }
+            onLinkActivated: (link) => { Qt.openUrlExternally(link); }
 
             wrapMode: Text.WordWrap
             Layout.margins: Constants.margin
@@ -152,7 +152,7 @@ ApplicationWindow
             text: qsTr("Send Report")
             Layout.columnSpan: 2
             Layout.alignment: Qt.AlignRight
-            onClicked: function()
+            onClicked:
             {
                 if(email.text.length === 0 || email.acceptableInput)
                 {
@@ -165,7 +165,7 @@ ApplicationWindow
         }
     }
 
-    onClosing: function(close)
+    onClosing: (close) =>
     {
         report.email = email.text;
         report.text = description.text;

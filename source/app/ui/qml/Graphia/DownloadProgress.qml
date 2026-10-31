@@ -85,7 +85,7 @@ RowLayout
             return Utils.format(qsTr("Open {0}"), filename.length > 0 ? filename : qsTr("Download"));
         }
 
-        onClicked: function()
+        onClicked:
         {
             root.openClicked(root.blockedUrl);
             root.blockedUrl = "";
@@ -108,7 +108,7 @@ RowLayout
         icon.name: "process-stop"
         text: qsTr("Cancel")
 
-        onClicked: function()
+        onClicked:
         {
             root.blockedUrl = "";
             root.cancelClicked();

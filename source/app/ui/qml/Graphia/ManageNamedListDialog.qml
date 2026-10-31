@@ -145,7 +145,7 @@ Window
                     item.edit();
             }
 
-            onDoubleClicked: function(index) { edit(index); }
+            onDoubleClicked: (index) => { edit(index); }
         }
 
         RowLayout
@@ -156,14 +156,14 @@ Window
             {
                 text: qsTr("Rename")
                 enabled: listBox.selectedIndex >= 0
-                onClicked: function() { listBox.edit(listBox.selectedIndex); }
+                onClicked: { listBox.edit(listBox.selectedIndex); }
             }
 
             Button
             {
                 text: qsTr("Remove")
                 enabled: listBox.selectedIndex >= 0
-                onClicked: function()
+                onClicked:
                 {
                     let names = [];
                     for(const index of listBox.selectedIndices)
@@ -176,7 +176,7 @@ Window
             Button
             {
                 text: qsTr("Close")
-                onClicked: root.close();
+                onClicked: { root.close(); }
             }
         }
     }

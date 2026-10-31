@@ -63,7 +63,7 @@ Rectangle
     function selectRow(row) { root.selectedRows = [row]; }
     function clearSelection() { root.selectedRows = []; }
 
-    onClicked: function(column, row, mouse)
+    onClicked: (column, row, mouse) =>
     {
         if(mouse.button !== Qt.LeftButton)
             return;
@@ -251,8 +251,8 @@ Rectangle
             {
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 anchors.fill: parent
-                onClicked: function(mouse) { root.headerClicked(defaultHeaderDelegate.modelColumn, mouse); }
-                onDoubleClicked: function(mouse) { root.headerDoubleClicked(defaultHeaderDelegate.modelColumn, mouse); }
+                onClicked: (mouse) => { root.headerClicked(defaultHeaderDelegate.modelColumn, mouse); }
+                onDoubleClicked: (mouse) => { root.headerDoubleClicked(defaultHeaderDelegate.modelColumn, mouse); }
             }
         }
 
@@ -298,8 +298,8 @@ Rectangle
             {
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 anchors.fill: parent
-                onClicked: function(mouse) { root.headerClicked(defaultHeaderDelegate.modelColumn, mouse); }
-                onDoubleClicked: function(mouse) { root.headerDoubleClicked(defaultHeaderDelegate.modelColumn, mouse); }
+                onClicked: (mouse) => { root.headerClicked(defaultHeaderDelegate.modelColumn, mouse); }
+                onDoubleClicked: (mouse) => { root.headerDoubleClicked(defaultHeaderDelegate.modelColumn, mouse); }
             }
         }
     }
@@ -344,8 +344,8 @@ Rectangle
         {
             acceptedButtons: Qt.LeftButton | Qt.RightButton
             anchors.fill: parent
-            onClicked: function(mouse) { root.clicked(defaultCellDelegate.modelColumn, defaultCellDelegate.modelRow, mouse); }
-            onDoubleClicked: function(mouse) { root.doubleClicked(defaultCellDelegate.modelColumn, defaultCellDelegate.modelRow, mouse); }
+            onClicked: (mouse) => { root.clicked(defaultCellDelegate.modelColumn, defaultCellDelegate.modelRow, mouse); }
+            onDoubleClicked: (mouse) => { root.doubleClicked(defaultCellDelegate.modelColumn, defaultCellDelegate.modelRow, mouse); }
         }
     }
 
@@ -464,7 +464,7 @@ Rectangle
                             }
                         }
 
-                        onDoubleClicked: function(mouse) { root.resizeColumnToContents(headerViewDelegate.model.column); }
+                        onDoubleClicked: (mouse) => { root.resizeColumnToContents(headerViewDelegate.model.column); }
                     }
                 }
 

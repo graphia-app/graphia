@@ -627,7 +627,7 @@ Window
                                 hoverEnabled: true
                                 acceptedButtons: Qt.LeftButton|Qt.RightButton
 
-                                onClicked: function(mouse)
+                                onClicked: (mouse) =>
                                 {
                                     if(!mouseOverResizeHandle && mouse.button === Qt.LeftButton)
                                     {
@@ -638,7 +638,7 @@ Window
                                     }
                                 }
 
-                                onDoubleClicked: function(mouse)
+                                onDoubleClicked: (mouse) =>
                                 {
                                     if(mouseOverResizeHandle)
                                     {
@@ -673,7 +673,7 @@ Window
                                     }
                                 }
 
-                                onReleased: function(mouse) { resizing = false; }
+                                onReleased: (mouse) => { resizing = false; }
                             }
                         }
                     }
@@ -747,7 +747,7 @@ Window
 
                                     acceptedButtons: Qt.LeftButton|Qt.RightButton
 
-                                    onClicked: function(mouse)
+                                    onClicked: (mouse) =>
                                     {
                                         if(mouse.button === Qt.RightButton)
                                         {
@@ -759,7 +759,7 @@ Window
                                             tableView.activeEditField.cancel();
                                     }
 
-                                    onDoubleClicked: function(mouse)
+                                    onDoubleClicked: (mouse) =>
                                     {
                                         if(cellItem.model.column !== 1)
                                             return;
@@ -855,7 +855,7 @@ Window
                 enabled: root._selectedAttribute &&
                     (editAttributeTableModel.hasEdits || dataTypeComboBox.hasChanged || descriptionTextField.hasChanged)
 
-                onClicked: function()
+                onClicked:
                 {
                     root.document.editAttribute(root._attributeName,
                         editAttributeTableModel.edits, root._selectedType, // qmllint disable unresolved-type
@@ -867,7 +867,7 @@ Window
             Button
             {
                 text: qsTr("Cancel")
-                onClicked: function() { root.close(); }
+                onClicked: { root.close(); }
             }
         }
     }

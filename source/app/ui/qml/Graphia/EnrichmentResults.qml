@@ -105,7 +105,7 @@ ApplicationWindow
             ToolBarButton
             {
                 icon.name: "edit-delete"
-                onClicked: confirmDelete.open();
+                onClicked: { confirmDelete.open(); }
                 text: qsTr("Delete result table")
             }
 
@@ -207,7 +207,7 @@ ApplicationWindow
                     table.rowCount = table.model?.rowCount() ?? 0;
                 }
 
-                onHeaderClicked: function(column, mouse)
+                onHeaderClicked: (column, mouse) =>
                 {
                     if(mouse.button !== Qt.LeftButton)
                         return;
@@ -229,7 +229,7 @@ ApplicationWindow
                 // For some reason NativeUtils isn't available from directly within the sort expression
                 function stringCompare(a, b) { return NativeUtils.compareStrings(a, b); }
 
-                onClicked: function(column, row, mouse)
+                onClicked: (column, row, mouse) =>
                 {
                     if(mouse.button === Qt.RightButton)
                         exportTableMenu.popup();
@@ -237,7 +237,7 @@ ApplicationWindow
 
                 property bool columnResizeRequired: false
 
-                onCellExtentsChanged: function(left, right, top, bottom)
+                onCellExtentsChanged: (left, right, top, bottom) =>
                 {
                     if(columnResizeRequired)
                     {
@@ -297,7 +297,7 @@ ApplicationWindow
                     xAxisLabel: model ? model.selectionADisplayName : ""
                     yAxisLabel: model ? model.selectionBDisplayName : ""
 
-                    onPlotValueClicked: function(row)
+                    onPlotValueClicked: (row) =>
                     {
                         table.selectRow(row);
                         table.positionViewAtRow(row);
@@ -363,7 +363,7 @@ ApplicationWindow
             enabled: root._resultsAvailable && heatmap.visible
             text: qsTr("Save As Image…")
             icon.name: "camera-photo"
-            onTriggered: function()
+            onTriggered:
             {
                 let folder = screenshot.path;
                 let path = root.saveFileName(folder);
@@ -384,7 +384,7 @@ ApplicationWindow
             enabled: root._resultsAvailable && table.rowCount > 1 // rowCount includes header
             text: qsTr("Export Table…")
             icon.name: "document-save"
-            onTriggered: function()
+            onTriggered:
             {
                 let folder = misc.fileSaveInitialFolder;
                 let path = root.saveFileName(folder);

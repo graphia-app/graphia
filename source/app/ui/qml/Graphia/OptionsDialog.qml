@@ -88,7 +88,7 @@ Window
         {
             text: qsTr("Close")
             Layout.alignment: Qt.AlignRight
-            onClicked: root.close()
+            onClicked: { root.close(); }
         }
     }
 }

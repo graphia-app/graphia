@@ -103,7 +103,7 @@ Window
         {
             text: qsTr("Close")
             Layout.alignment: Qt.AlignRight
-            onClicked: pluginsWindow.close()
+            onClicked: { pluginsWindow.close(); }
         }
     }
 }
