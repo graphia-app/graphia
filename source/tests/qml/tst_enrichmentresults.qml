@@ -35,7 +35,8 @@ TestCase
 
     function init()
     {
-        models = [testHelper.enrichmentTableModel(), testHelper.enrichmentTableModel()];
+        models = [testHelper.enrichmentTableModel("Age", "Country"),
+            testHelper.enrichmentTableModel("Gender", "Hand")];
         window = enrichmentResultsComponent.createObject(null, {models: models});
     }
 
@@ -84,5 +85,30 @@ TestCase
         tabBar.currentIndex = 0;
         compare(table.sortIndicatorOrder, Qt.DescendingOrder);
         verify(!models[0].ascendingSortOrder);
+    }
+
+    function test_heatmapAxisLabelsFollowTabs()
+    {
+        let tabBar = findItem(window.contentItem, TabBar);
+        let heatmap = findItem(window.contentItem, EnrichmentHeatmap);
+        verify(tabBar !== null);
+        verify(heatmap !== null);
+
+        compare(heatmap.xAxisLabel, "Age");
+        compare(heatmap.yAxisLabel, "Country");
+
+        tabBar.currentIndex = 1;
+        compare(heatmap.xAxisLabel, "Gender");
+        compare(heatmap.yAxisLabel, "Hand");
+    }
+
+    function test_heatmapAxisLabelsFollowRenaming()
+    {
+        let heatmap = findItem(window.contentItem, EnrichmentHeatmap);
+        verify(heatmap !== null);
+
+        testHelper.setEnrichmentSelectionDisplayNames(models[0], "Years", "Nation");
+        compare(heatmap.xAxisLabel, "Years");
+        compare(heatmap.yAxisLabel, "Nation");
     }
 }

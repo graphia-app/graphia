@@ -168,9 +168,18 @@ public:
     }
 
     // As each of Document::enrichmentTableModels; the caller takes ownership
-    Q_INVOKABLE EnrichmentTableModel* enrichmentTableModel() const
+    Q_INVOKABLE EnrichmentTableModel* enrichmentTableModel(const QString& selectionA, const QString& selectionB) const
     {
-        return new EnrichmentTableModel;
+        auto* tableModel = new EnrichmentTableModel;
+        tableModel->setSelectionDisplayNames(selectionA, selectionB);
+
+        return tableModel;
+    }
+
+    Q_INVOKABLE void setEnrichmentSelectionDisplayNames(EnrichmentTableModel* tableModel,
+        const QString& selectionA, const QString& selectionB) const
+    {
+        tableModel->setSelectionDisplayNames(selectionA, selectionB);
     }
 
     // As a plugin's table of node attributes, of _tableGraphModel; the caller takes ownership
