@@ -35,7 +35,7 @@ TestCase
     {
         id: window
         width: 300
-        height: 300
+        height: 400
         visible: true
     }
 
@@ -44,8 +44,8 @@ TestCase
     function init()
     {
         listBox = listBoxComponent.createObject(window.contentItem,
-            {model: ["a", "b", "c", "d", "e"], width: 200, height: 200});
-        tryVerify(() => listBox.itemAt(4) !== null);
+            {model: ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l"], width: 200, height: 400});
+        tryVerify(() => listBox.itemAt(listBox.count - 1) !== null);
     }
 
     function cleanup()
@@ -87,6 +87,14 @@ TestCase
         clickRow(2, Qt.ControlModifier);
         clickRow(4, Qt.ShiftModifier);
         verifySelection([0, 2, 3, 4]);
+    }
+
+    function test_selectionIsInNumericOrder()
+    {
+        clickRow(10);
+        clickRow(2, Qt.ControlModifier);
+        verifySelection([2, 10]);
+        compare(listBox.selectedIndex, 10);
     }
 
     function test_clickReplacesSelection()

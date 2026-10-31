@@ -177,7 +177,7 @@ Rectangle
 
             function setNewSelection(newSelection, index)
             {
-                newSelection.sort();
+                newSelection.sort((a, b) => a - b);
 
                 root._lastSelectedIndex = newSelection.length > 0 &&
                     !newSelection.includes(index) ?
