@@ -69,6 +69,15 @@ struct LoadedPlugin
     std::unique_ptr<QPluginLoader> _loader;
 };
 
+// Qt doesn't expose QStringListModel to QML; this lets qmllint and
+// qmlcachegen resolve the type of Application's string list models
+struct QStringListModelForeign
+{
+    Q_GADGET
+    QML_FOREIGN(QStringListModel)
+    QML_ANONYMOUS
+};
+
 class UrlTypeDetailsModel : public QAbstractListModel
 {
     Q_OBJECT
