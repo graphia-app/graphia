@@ -2728,25 +2728,25 @@ ApplicationWindow
         anchors.fill: parent
         onDropped: function(drop)
         {
-            let arguments = [];
+            let droppedArguments = [];
 
             if(drop.hasText && drop.text.length > 0)
             {
                 let text = drop.text.trim();
                 text = NativeUtils.urlIsValid(text) ? Qt.resolvedUrl(text) : text;
-                arguments.push(text);
+                droppedArguments.push(text);
             }
 
             if(drop.hasUrls)
             {
                 let resolvedUrls = drop.urls.map(url => Qt.resolvedUrl(url));
-                arguments.push(...resolvedUrls);
+                droppedArguments.push(...resolvedUrls);
             }
 
             // Remove duplicates
-            arguments = [...new Set(arguments)];
+            droppedArguments = [...new Set(droppedArguments)];
 
-            mainWindow.processArguments(arguments);
+            mainWindow.processArguments(droppedArguments);
         }
 
         Component
