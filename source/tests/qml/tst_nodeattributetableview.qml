@@ -191,10 +191,13 @@ TestCase
     function leftColumnName() { return columnNames()[headerView.leftColumn]; }
     function leftColumnOffset() { return headerView.contentX - headerItem(headerView.leftColumn).x; }
 
+    // TableView lays out in its polish, which happens when the window next renders
+    function waitForLayout() { verify(waitForPolish(window)); }
+
     function setColumnSelectionMode(columnSelectionMode)
     {
         view.columnSelectionMode = columnSelectionMode;
-        wait(100);
+        waitForLayout();
     }
 
     function clickCheckBox(columnName)
@@ -220,10 +223,10 @@ TestCase
     function test_columnSelectionKeepsScrollPosition()
     {
         view.setHiddenColumns(model.columnNames.filter((name, index) => index % 2 === 0));
-        wait(100);
+        waitForLayout();
 
         horizontalScrollBar.position = 0.4;
-        wait(100);
+        waitForLayout();
 
         let columnName = leftColumnName();
         let offset = leftColumnOffset();
@@ -241,7 +244,7 @@ TestCase
     function test_columnSelectionKeepsScrollPositionWhenEarlierColumnsAreHidden()
     {
         view.setHiddenColumns(model.columnNames.slice(0, 10));
-        wait(100);
+        waitForLayout();
 
         dragScrollBarToRight();
 
@@ -261,7 +264,7 @@ TestCase
     {
         setColumnSelectionMode(true);
         horizontalScrollBar.position = 0.3;
-        wait(100);
+        waitForLayout();
 
         let allColumnNames = columnNames();
         let column = headerView.leftColumn;
@@ -276,7 +279,7 @@ TestCase
     {
         let lastColumnName = model.columnNames[model.columnNames.length - 1];
         view.setHiddenColumns([lastColumnName]);
-        wait(100);
+        waitForLayout();
 
         setColumnSelectionMode(true);
         dragScrollBarToRight();
@@ -291,11 +294,11 @@ TestCase
     function test_columnSelectionKeepsShownColumnInViewWhenMostAreHidden()
     {
         view.setHiddenColumns(model.columnNames.slice(5));
-        wait(100);
+        waitForLayout();
 
         setColumnSelectionMode(true);
         horizontalScrollBar.position = 0.85 * (1 - horizontalScrollBar.size);
-        wait(100);
+        waitForLayout();
 
         // The rightmost column that can be clicked
         let column = headerView.rightColumn;
@@ -314,7 +317,7 @@ TestCase
     {
         let columnName = model.columnNames[1];
         view.setHiddenColumns([columnName]);
-        wait(100);
+        waitForLayout();
 
         setColumnSelectionMode(true);
         clickCheckBox(columnName);
