@@ -1296,7 +1296,7 @@ ApplicationWindow
     Action
     {
         id: optionsAction
-        enabled: !mainWindow._anyDocumentsBusy && !tracking.visible
+        enabled: !mainWindow._anyTabsBusy && !tracking.visible
         icon.name: "applications-system"
         text: qsTr("&Options…")
         onTriggered: { Utils.createWindow(mainWindow, optionsDialog); }
@@ -1986,7 +1986,7 @@ ApplicationWindow
         text: mainWindow.currentTab ? Utils.format(qsTr("Display {0} In Separate &Window"), mainWindow.currentTab.document.pluginDisplayName) : ""
         checkable: true
         checked: mainWindow.currentTab && mainWindow.currentTab.pluginPoppedOut
-        enabled: mainWindow.currentTab && mainWindow.currentTab.document.hasPluginUI && !mainWindow._anyDocumentsBusy && Qt.platform.os !== "wasm"
+        enabled: mainWindow.currentTab && mainWindow.currentTab.document.hasPluginUI && !mainWindow._anyTabsBusy && Qt.platform.os !== "wasm"
         onTriggered:
         {
             if(mainWindow.currentTab)
