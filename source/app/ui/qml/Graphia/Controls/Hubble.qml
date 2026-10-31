@@ -34,7 +34,7 @@ Item
     property alias color: backRectangle.color
 
     property string title: ""
-    property var target
+    property Item target
     property ApplicationWindow mainWindow: null
 
     property int alignment: Qt.AlignLeft | Qt.AlignTop
@@ -251,9 +251,10 @@ Item
             if(tooltipMode)
             {
                 // Use target's hoverChanged signal
-                if(target.hoveredChanged !== undefined)
+                let button = target as AbstractButton;
+                if(button)
                 {
-                    target.hoveredChanged.connect(onHover);
+                    button.hoveredChanged.connect(onHover);
                 }
                 else
                 {
@@ -306,8 +307,8 @@ Item
 
     function onHover()
     {
-        let hoverTarget = _mouseCapture ?? target;
-        if(hoverTarget.hovered)
+        let hovered = _mouseCapture ? _mouseCapture.hovered : (target as AbstractButton).hovered;
+        if(hovered)
         {
             hoverTimer.start();
             root.parent = root.mainWindow.header;
