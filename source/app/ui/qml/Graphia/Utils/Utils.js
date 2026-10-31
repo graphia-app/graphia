@@ -272,7 +272,7 @@ function setRemove(set, value)
 {
     if(typeof(set) !== "array" && typeof(set) !== "object")
     {
-        console.log("Utils.setAdd passed non-array");
+        console.log("Utils.setRemove passed non-array");
         return;
     }
 
