@@ -345,4 +345,20 @@ TestCase
         test_columnSelectionKeepsScrollPosition();
         fuzzyCompare(tableView.contentX, headerView.contentX, 0.5, "The rows aren't scrolled with the header");
     }
+
+    function test_calculatedColumnCommandsKeepOtherHiddenColumns()
+    {
+        let calculatedColumns = model.columnNames.filter(name => model.columnIsCalculated(name));
+        let userColumn = model.columnNames.find(name => !model.columnIsCalculated(name));
+        verify(calculatedColumns.length > 0);
+        verify(userColumn !== undefined);
+
+        view.setColumnVisibility(userColumn, false);
+
+        view.hideAllCalculatedColumns();
+        compare(view.hiddenColumns.slice().sort(), [userColumn, ...calculatedColumns].sort());
+
+        view.showAllCalculatedColumns();
+        compare(view.hiddenColumns.slice(), [userColumn]);
+    }
 }
