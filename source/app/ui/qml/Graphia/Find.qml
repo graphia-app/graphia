@@ -515,9 +515,6 @@ Rectangle
                     property bool _modelChanging: false
                     property string value: ""
 
-                    textRole: "displayValue"
-                    valueRole: "value"
-
                     onCurrentTextChanged:
                     {
                         // Prevent spurious changes to currentText
