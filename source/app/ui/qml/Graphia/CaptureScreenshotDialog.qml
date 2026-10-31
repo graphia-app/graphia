@@ -22,6 +22,7 @@ import QtQuick.Window
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import Graphia
 import Graphia.Controls
 import Graphia.Utils
 
@@ -39,8 +40,8 @@ Window
     minimumWidth: 600
     minimumHeight: 400
 
-    property var graphView
-    property var application
+    property GraphDisplay graphView
+    property Application application
 
     property bool loadingPreset: false
     property bool generatingPreview: false
@@ -56,7 +57,7 @@ Window
         section: "screenshot"
 
         property alias dpi: dpiSpin.value
-        property var path
+        property string path
     }
 
     Preferences

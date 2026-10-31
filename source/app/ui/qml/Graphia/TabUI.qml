@@ -39,7 +39,7 @@ Item
     id: root
 
     property Application application
-    property var mainWindow: null
+    property Main mainWindow: null
 
     property url url
     property url savedFileUrl
@@ -106,8 +106,8 @@ Item
     property alias pluginMenu3: pluginMenu3
     property alias pluginMenu4: pluginMenu4
 
-    property var previousAction: find.previousAction
-    property var nextAction: find.nextAction
+    property Action previousAction: find.previousAction
+    property Action nextAction: find.nextAction
 
     property bool saveRequired: _document.loadComplete &&
         (!hasBeenSaved || _document.saveRequired || plugin.saveRequired) &&
@@ -306,7 +306,7 @@ Item
         let initialFileUrl = NativeUtils.removeExtension(root.hasBeenSaved ? root.savedFileUrl : root.url);
 
         fileSaveDialog.selectedFile = initialFileUrl;
-        fileSaveDialog.currentFolder = misc.fileSaveInitialFolder ?? "";
+        fileSaveDialog.currentFolder = misc.fileSaveInitialFolder;
         fileSaveDialog.open();
     }
 
@@ -516,7 +516,7 @@ Item
 
     function exportNodePositions()
     {
-        let folder = misc.fileSaveInitialFolder ?? "";
+        let folder = misc.fileSaveInitialFolder;
         let path = Utils.format(qsTr("{0}/{1}-node-positions"), NativeUtils.fileNameForUrl(folder),
             root.baseFileNameNoExtension);
 
@@ -541,7 +541,7 @@ Item
 
     function importNodePositions()
     {
-        let folder = misc.fileOpenInitialFolder ?? "";
+        let folder = misc.fileOpenInitialFolder;
 
         nodePositionFileImportDialog.currentFolder = folder;
         nodePositionFileImportDialog.open();
@@ -1267,7 +1267,7 @@ Item
         property var pluginY
         property var pluginWidth
         property var pluginHeight
-        property var pluginMaximised
+        property bool pluginMaximised
         property int pluginSplitSize
         property bool pluginPoppedOut: false
     }
@@ -1277,8 +1277,8 @@ Item
         id: misc
         section: "misc"
 
-        property var fileOpenInitialFolder
-        property var fileSaveInitialFolder
+        property string fileOpenInitialFolder
+        property string fileSaveInitialFolder
         property string webSearchEngineUrl
         property bool hasSeenTutorial
 
@@ -1404,11 +1404,8 @@ Item
             pluginWindow.height = window.pluginHeight;
         }
 
-        if(window.pluginMaximised !== undefined)
-        {
-            pluginWindow.visibility = Utils.castToBool(window.pluginMaximised) ?
-                Window.Maximized : Window.Windowed;
-        }
+        pluginWindow.visibility = window.pluginMaximised ?
+            Window.Maximized : Window.Windowed;
     }
 
     function savePluginWindowState()

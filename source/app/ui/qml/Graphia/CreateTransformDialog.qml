@@ -49,7 +49,7 @@ Window
         property string value
     }
 
-    property var document
+    property Document document
     property string transformExpression
     property var defaultVisualisations
 

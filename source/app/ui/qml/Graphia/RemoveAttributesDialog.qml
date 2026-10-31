@@ -29,7 +29,7 @@ Window
 {
     id: root
 
-    property var document: null
+    property Document document: null
 
     title: qsTr("Remove Attributes")
     modality: Qt.ApplicationModal

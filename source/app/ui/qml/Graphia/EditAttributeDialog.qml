@@ -36,7 +36,7 @@ Window
 {
     id: root
 
-    property var document: null
+    property Document document: null
     property string attributeName: ""
     property string _selectedAttributeName: ""
 
@@ -83,7 +83,7 @@ Window
         editAttributeTableModel.attributeName = root._attributeName;
     }
 
-    property var _selectedType: ValueType.Unknown
+    property int _selectedType: ValueType.Unknown
 
     title: qsTr("Edit Attribute")
     flags: Constants.defaultWindowFlags
@@ -814,8 +814,8 @@ Window
                                 anchors.leftMargin: 5
                                 anchors.rightMargin: 10
 
-                                property var _doubleValidator: DoubleValidator{}
-                                property var _intValidator: IntValidator{}
+                                property DoubleValidator _doubleValidator: DoubleValidator{}
+                                property IntValidator _intValidator: IntValidator{}
 
                                 validator:
                                 {

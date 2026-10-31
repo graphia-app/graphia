@@ -201,7 +201,7 @@ Item
             {
                 id: key
 
-                required property var modelData
+                required property color modelData
                 required property int index
 
                 property bool _isLastColor: root._lastColorIsDefault &&

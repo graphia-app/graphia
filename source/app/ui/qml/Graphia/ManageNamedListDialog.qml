@@ -63,7 +63,7 @@ Window
             {
                 id: namedListDelegate
 
-                required property var modelData
+                required property string modelData
                 required property int index
 
                 anchors.left: parent.left

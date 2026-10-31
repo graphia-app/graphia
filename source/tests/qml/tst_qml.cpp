@@ -25,6 +25,7 @@
 #include "app/ui/qml/Graphia/enrichmenttablemodel.h"
 #include "app/ui/visualisations/visualisationconfigparser.h"
 
+#include "tests/common/documenttest.h"
 #include "tests/common/testdocument.h"
 #include "tests/common/testenvironment.h"
 #include "tests/common/testgraphmodel.h"
@@ -40,18 +41,38 @@
 #include <QObject>
 #include <QString>
 #include <QStringList>
+#include <QTranslator>
 #include <QVariantMap>
 
 #include <memory>
 
 using namespace Qt::Literals::StringLiterals;
 
+// Translates the names of clusters, so they're displayed differently to how they're stored
+class ClusterNameTranslator : public QTranslator
+{
+    Q_OBJECT
+
+public:
+    QString translate(const char*, const char* sourceText, const char*, int) const override
+    {
+        return qstrcmp(sourceText, "Cluster %1") == 0 ? u"Grappe %1"_s : QString{};
+    }
+
+    bool isEmpty() const override { return false; }
+};
+
 // Runs the QML tests in this directory, which test the JavaScript helpers the
 // UI uses; anything they need from C++ that would otherwise come from a
 // Document is provided here, as the context property "testHelper"
-class Setup : public QObject
+class Setup : public DocumentTest
 {
     Q_OBJECT
+
+    // A Document of two clusters, of three nodes and two, whose names are translated
+    Q_PROPERTY(Document* clusteredDocument READ clusteredDocument CONSTANT)
+
+    ClusterNameTranslator _clusterNameTranslator;
 
     // A graph with a few attributes, for availableAttributesModel
     std::unique_ptr<TestGraphModel> _graphModel;
@@ -62,6 +83,8 @@ class Setup : public QObject
 
 public:
     Setup() = default;
+
+    Document* clusteredDocument() const { return _document.get(); }
 
     // As Document::parseGraphTransform
     Q_INVOKABLE QVariantMap parseGraphTransform(const QString& transform) const
@@ -206,6 +229,27 @@ public slots:
         _tableGraphModel = TestGraphModel::parse(gml, [](auto* userNodeData, auto* userEdgeData)
             { return std::make_unique<GmlFileParser>(userNodeData, userEdgeData); });
         _tableDocument = std::make_unique<TestDocument>(*_tableGraphModel);
+
+        QCoreApplication::installTranslator(&_clusterNameTranslator);
+
+        auto clustersGml = uR"(graph
+[
+    node [ id 0 label "a" ]
+    node [ id 1 label "b" ]
+    node [ id 2 label "c" ]
+    node [ id 3 label "d" ]
+    node [ id 4 label "e" ]
+    edge [ source 0 target 1 ]
+    edge [ source 1 target 2 ]
+    edge [ source 2 target 0 ]
+    edge [ source 3 target 4 ]
+])"_s.toUtf8();
+
+        if(!createApplication() || !open(write(u"clusters.gml"_s, clustersGml), u"GML"_s, u"Generic"_s) ||
+            !execute([this] { _document->update({u"LouvainCluster"_s}); }))
+        {
+            qFatal("Couldn't open the clustered document");
+        }
     }
 
     void qmlEngineAvailable(QQmlEngine* engine)

@@ -25,7 +25,7 @@ RowLayout
 {
     id: root
 
-    property var document
+    property Document document
     property string name
     property string description
     property double value: -1.0

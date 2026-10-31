@@ -20,6 +20,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts
 
 import Graphia.Controls
@@ -31,8 +32,8 @@ Item
     width: layout.width
     height: layout.height
 
-    property var document
-    property var mainWindow: null
+    property Document document
+    property ApplicationWindow mainWindow: null
 
     property color enabledTextColor
     property color disabledTextColor

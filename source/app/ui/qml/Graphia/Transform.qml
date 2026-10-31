@@ -35,7 +35,7 @@ Item
     width: row.width
     height: row.height
 
-    property var document: null
+    property Document document: null
 
     property color enabledTextColor
     property color disabledTextColor

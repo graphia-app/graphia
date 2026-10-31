@@ -39,7 +39,10 @@ Item
 
     component DragArea: MouseArea
     {
-        property var item
+        property Item item
+        property int index
+        property real hotspotY
+        property bool pinned
     }
 
     implicitWidth: column.width
@@ -67,9 +70,9 @@ Item
             drag.minimumY: root.y
             drag.maximumY: drag.minimumY + ((repeater.count - 1) * content.height)
 
-            property int index: DelegateModel.itemsIndex
-            item: loader.item
-            property real hotspotY: content.y + (content.height * 0.5)
+            index: DelegateModel.itemsIndex
+            item: loader.item as Item
+            hotspotY: content.y + (content.height * 0.5)
 
             property bool held
             onPressAndHold: function(mouse) { held = true; }
@@ -94,7 +97,7 @@ Item
                     return;
 
                 let dragItemPinned = column.dragItem.pinned;
-                let dropItemPinned = repeater.itemAt(newDropIndex).pinned;
+                let dropItemPinned = (repeater.itemAt(newDropIndex) as DragArea).pinned;
 
                 // Must both be pinned or neither pinned
                 if(dragItemPinned === dropItemPinned)
@@ -237,7 +240,7 @@ Item
                 }
             }
 
-            property bool pinned: loader.item.pinned ?? false // qmllint disable missing-property
+            pinned: loader.item.pinned ?? false // qmllint disable missing-property
         }
     }
 
@@ -253,7 +256,7 @@ Item
         id: column
 
         property int dragFromIndex: -1
-        property var dragItem: null
+        property DragArea dragItem: null
         property int dropIndex: -1
 
         Repeater

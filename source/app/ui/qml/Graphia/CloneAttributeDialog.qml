@@ -30,7 +30,7 @@ Window
 {
     id: root
 
-    property var document: null
+    property Document document: null
     property string sourceAttributeName: ""
 
     property string selectedAttributeName:

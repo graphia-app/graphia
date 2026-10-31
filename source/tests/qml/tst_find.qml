@@ -38,35 +38,8 @@ TestCase
         visible: true
     }
 
-    ListModel
-    {
-        id: attributesModel
-        ListElement { name: "Cluster"; display: "Cluster"; searchable: true; hasSharedValues: true }
-    }
-
-    // Stands in for Document, providing what Find uses; the attribute's values
-    // are shown differently to how they're stored, as when translated
-    QtObject
-    {
-        id: document
-
-        property int foundIndex: -1
-        property int numNodesFound: 0
-        property bool nodesMaskActive: false
-
-        signal commandsFinished()
-        signal graphChanged(var graph, bool changeOccurred)
-
-        property string findTerm: ""
-
-        function resetFind() {}
-        function find(term, options, attributeNames, selectStyle) { findTerm = term; }
-        function selectByAttributeValue(attributeName, term) {}
-
-        function availableAttributesModel(elementType) { return attributesModel; }
-        function attribute(attributeName) { return {sharedValues: ["Cluster 1", "Cluster 2"]}; }
-        function attributeDisplayValue(attributeName, value) { return value.replace("Cluster", "Grappe"); }
-    }
+    // Its clusters, of three nodes and two, are shown differently to how they're stored, as when translated
+    readonly property Document document: testHelper.clusteredDocument
 
     Component { id: findComponent; Find {} }
 
@@ -103,8 +76,8 @@ TestCase
 
     function init()
     {
-        document.findTerm = "";
-        find = findComponent.createObject(window.contentItem, {document: document});
+        find = findComponent.createObject(window.contentItem,
+            {document: document, lastFindByAttributeName: "LouvainCluster"});
         selectMultipleAction().checked = false;
         find.show(Find.ByAttribute);
     }
@@ -115,6 +88,9 @@ TestCase
         find.destroy();
         find = null;
         wait(0);
+
+        document.resetFind();
+        tryCompare(document, "numNodesFound", 0);
     }
 
     function test_valuesAreDisplayed()
@@ -129,11 +105,10 @@ TestCase
 
     function test_findsDisplayedValue()
     {
-        compare(document.findTerm, "^Grappe 1$");
+        tryCompare(document, "numNodesFound", 3);
 
         valueComboBox().currentIndex = 1;
-        document.commandsFinished();
-        compare(document.findTerm, "^Grappe 2$");
+        tryCompare(document, "numNodesFound", 2);
     }
 
     function test_multipleValuesAreDisplayed()

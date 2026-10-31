@@ -22,6 +22,7 @@ import QtQuick.Window
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import Graphia
 import Graphia.Controls
 import Graphia.Utils
 
@@ -29,7 +30,7 @@ Window
 {
     id: root
 
-    property var applicationRef: null
+    property Application applicationRef: null
 
     title: Utils.format(qsTr("About {0}"), applicationRef.name)
     flags: Constants.defaultWindowFlags

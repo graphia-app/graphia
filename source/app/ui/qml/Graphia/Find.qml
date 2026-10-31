@@ -38,10 +38,10 @@ Rectangle
 
     id: root
 
-    property var document
+    property Document document
 
-    property var previousAction: _previousAction
-    property var nextAction: _nextAction
+    property Action previousAction: _previousAction
+    property Action nextAction: _nextAction
 
     property string lastAdvancedFindAttributeName
     property string lastFindByAttributeName

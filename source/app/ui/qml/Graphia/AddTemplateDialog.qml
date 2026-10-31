@@ -37,7 +37,7 @@ Window
 
     title: qsTr("Add Template")
 
-    property var document: null
+    property Document document: null
 
     modality: Qt.ApplicationModal
     flags: Constants.defaultWindowFlags

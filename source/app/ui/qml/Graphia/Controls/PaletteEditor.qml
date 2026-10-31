@@ -206,7 +206,7 @@ ColumnLayout
             {
                 id: autoColorRow
 
-                required property var modelData
+                required property string modelData
                 required property int index
 
                 onXChanged: { root._itemPositionChanged(this); }

@@ -22,6 +22,7 @@ import QtQuick.Window
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import Graphia
 import Graphia.Controls
 import Graphia.Utils
 
@@ -38,7 +39,7 @@ Window
     maximumWidth: minimumWidth
     maximumHeight: minimumHeight
 
-    property var applicationRef: null
+    property Application applicationRef: null
 
     property bool enabled: true
 

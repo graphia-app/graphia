@@ -30,7 +30,7 @@ Rectangle
 {
     id: root
 
-    property var document
+    property Document document
 
     readonly property bool showing: _visible
     property bool _visible: false
@@ -52,7 +52,7 @@ Rectangle
 
         property bool showEdges
 
-        property var layoutPresets: ""
+        property string layoutPresets: ""
     }
 
     property var layoutPresets:

@@ -36,12 +36,12 @@ Wizard
 
     component AttributeRadioButton: RadioButton
     {
-        property var attributeName
+        property string attributeName
     }
 
     // Must be set before opening
     property var attributeGroups: null
-    property var document: null
+    property Document document: null
 
     property string selectedAttributeGroupA: ""
     property string selectedAttributeGroupB: ""

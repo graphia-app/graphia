@@ -268,7 +268,7 @@ Item
         id: misc
         section: "misc"
 
-        property var fileSaveInitialFolder
+        property string fileSaveInitialFolder
         property alias autoFocusSelectedNodes: autoFocusAction.checked
     }
 
@@ -325,7 +325,7 @@ Item
 
         onTriggered: function()
         {
-            let folder = misc.fileSaveInitialFolder ?? "";
+            let folder = misc.fileSaveInitialFolder;
             let path = Utils.format("{0}/{1}", NativeUtils.fileNameForUrl(folder), root.exportBaseFileName);
 
             exportTableFileDialog.currentFolder = folder;

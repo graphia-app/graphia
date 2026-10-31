@@ -78,7 +78,9 @@ add_unit_test(tst_visualisationconfigparser ui/tst_visualisationconfigparser.cpp
 
 add_unit_test(tst_qml qml/tst_qml.cpp)
 target_link_libraries(tst_qml PRIVATE Qt6::QuickTest)
-target_compile_definitions(tst_qml PRIVATE QUICK_TEST_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/qml")
+target_compile_definitions(tst_qml PRIVATE QUICK_TEST_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/qml"
+    BUILD_DIR="${CMAKE_BINARY_DIR}")
+add_dependencies(tst_qml generic)
 add_unit_test(tst_string utils/tst_string.cpp)
 
 if(UNIX AND NOT APPLE)

@@ -29,13 +29,13 @@ Item
 {
     id: root
 
-    default property var content
+    default property Item content
     readonly property int _padding: 10
     property alias color: backRectangle.color
 
     property string title: ""
     property var target
-    property var mainWindow: null
+    property ApplicationWindow mainWindow: null
 
     property int alignment: Qt.AlignLeft | Qt.AlignTop
     property int edges: Qt.LeftEdge | Qt.TopEdge

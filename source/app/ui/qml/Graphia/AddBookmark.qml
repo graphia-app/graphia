@@ -28,7 +28,7 @@ Rectangle
 {
     id: root
 
-    property var document
+    property Document document
 
     readonly property bool showing: _visible
     property bool _visible: false

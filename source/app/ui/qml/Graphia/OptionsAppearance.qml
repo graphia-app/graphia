@@ -22,6 +22,7 @@ import QtQuick.Dialogs
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import Graphia
 import Graphia.Controls
 import Graphia.Utils
 
@@ -29,7 +30,7 @@ Item
 {
     id: root
 
-    property var application: null
+    property Application application: null
 
     LimitConstants { id: limitConstants }
 
@@ -50,7 +51,7 @@ Item
         property double minimumComponentRadius
 
         property string textFont
-        property var textSize
+        property real textSize
         property alias textAlignment: textAlignmentCombobox.currentIndex
     }
 

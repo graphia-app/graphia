@@ -33,7 +33,7 @@ Item
     height: row.height
 
     property var visualisations: null
-    property var document: null
+    property Document document: null
 
     property color enabledTextColor
     property color disabledTextColor

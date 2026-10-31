@@ -39,7 +39,7 @@ GridLayout
 
     // In configure(...) we test properties for undefined, which is the default
     // for variant, so give initialValue some other (arbitrary) value
-    property variant initialValue: ({})
+    property var initialValue: ({})
     property int initialIndex
 
     // For a choice from a list, the text shown for each of the values in initialValue

@@ -365,7 +365,7 @@ ApplicationWindow
             icon.name: "camera-photo"
             onTriggered: function()
             {
-                let folder = screenshot.path ?? "";
+                let folder = screenshot.path;
                 let path = root.saveFileName(folder);
 
                 saveImageFileDialog.currentFolder = folder;
@@ -386,7 +386,7 @@ ApplicationWindow
             icon.name: "document-save"
             onTriggered: function()
             {
-                let folder = misc.fileSaveInitialFolder ?? "";
+                let folder = misc.fileSaveInitialFolder;
                 let path = root.saveFileName(folder);
 
                 exportTableFileDialog.currentFolder = folder;
@@ -449,7 +449,7 @@ ApplicationWindow
         id: misc
         section: "misc"
 
-        property var fileSaveInitialFolder
+        property string fileSaveInitialFolder
     }
 
     Preferences
@@ -457,6 +457,6 @@ ApplicationWindow
         id: screenshot
         section: "screenshot"
 
-        property var path
+        property string path
     }
 }

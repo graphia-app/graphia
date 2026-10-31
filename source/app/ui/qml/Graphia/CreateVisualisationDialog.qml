@@ -41,7 +41,7 @@ Window
     minimumWidth: 640
     minimumHeight: 350
 
-    property var document
+    property Document document
     property var visualisationExpressions: []
 
     property bool visualisationExpressionsValid:

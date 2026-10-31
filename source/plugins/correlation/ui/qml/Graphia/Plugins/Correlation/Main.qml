@@ -39,7 +39,7 @@ PluginContent
         id: misc
         section: "misc"
 
-        property var fileOpenInitialFolder
+        property string fileOpenInitialFolder
     }
 
     Action
@@ -418,7 +418,7 @@ PluginContent
         text: qsTr("Import Annotations From Table…")
         onTriggered: function()
         {
-            if(misc.fileOpenInitialFolder !== undefined)
+            if(misc.fileOpenInitialFolder.length > 0)
                 importAnnotationsFileOpenDialog.currentFolder = misc.fileOpenInitialFolder;
 
             importAnnotationsFileOpenDialog.open();
@@ -432,7 +432,7 @@ PluginContent
 
         function showSaveImageDialog(onAcceptedFn)
         {
-            let folder = screenshot.path ?? "";
+            let folder = screenshot.path;
             let path = Utils.format(qsTr("{0}/{1}-correlation-plot"),
                 NativeUtils.fileNameForUrl(folder),
                 root.baseFileNameNoExtension);
@@ -1261,7 +1261,7 @@ PluginContent
         id: screenshot
         section: "screenshot"
 
-        property var path
+        property string path
     }
 
     function initialise()

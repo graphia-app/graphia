@@ -46,7 +46,7 @@ ApplicationWindow
     readonly property bool maximised: mainWindow.visibility === Window.Maximized
 
     property TabUI currentTab: tabBar.count > 0 && tabBar.currentIndex < tabLayout.count ?
-        tabLayout.get(tabBar.currentIndex) : null
+        tabLayout.get(tabBar.currentIndex) as TabUI : null
 
     property bool directed: currentTab ? currentTab.document.directed : false
 
@@ -296,7 +296,7 @@ ApplicationWindow
 
         if(Qt.platform.os === "wasm")
             mainWindow.showFullScreen();
-        else if(windowPreferences.maximised !== undefined && Utils.castToBool(windowPreferences.maximised))
+        else if(windowPreferences.maximised)
         {
             if(Qt.platform.os === "linux")
             {
@@ -513,7 +513,7 @@ ApplicationWindow
         section: "window"
         property var width
         property var height
-        property var maximised
+        property bool maximised
         property var x
         property var y
     }
@@ -524,7 +524,7 @@ ApplicationWindow
         section: "misc"
         property alias showGraphMetrics: toggleGraphMetricsAction.checked
 
-        property var fileOpenInitialFolder
+        property string fileOpenInitialFolder
         property string recentFiles
         property bool hasSeenTutorial
         property string update
@@ -960,7 +960,7 @@ ApplicationWindow
             fileOpenDialog.inTab = false;
             fileOpenDialog.type = "";
 
-            if(misc.fileOpenInitialFolder !== undefined)
+            if(misc.fileOpenInitialFolder.length > 0)
                 fileOpenDialog.currentFolder = misc.fileOpenInitialFolder;
 
             fileOpenDialog.open();
@@ -979,7 +979,7 @@ ApplicationWindow
             fileOpenDialog.inTab = true;
             fileOpenDialog.type = "";
 
-            if(misc.fileOpenInitialFolder !== undefined)
+            if(misc.fileOpenInitialFolder.length > 0)
                 fileOpenDialog.currentFolder = misc.fileOpenInitialFolder;
 
             fileOpenDialog.open();
@@ -1365,7 +1365,7 @@ ApplicationWindow
     Component
     {
         id: importAttributesDialog
-        ImportAttributesDialog { document: mainWindow.currentTab && mainWindow.currentTab.document }
+        ImportAttributesDialog { document: mainWindow.currentTab?.document ?? null }
     }
 
     OpenFileDialog
@@ -1392,7 +1392,7 @@ ApplicationWindow
     Component
     {
         id: cloneAttributeDialog
-        CloneAttributeDialog { document: mainWindow.currentTab && mainWindow.currentTab.document }
+        CloneAttributeDialog { document: mainWindow.currentTab?.document ?? null }
     }
 
     Action
@@ -1414,7 +1414,7 @@ ApplicationWindow
     Component
     {
         id: editAttributeDialog
-        EditAttributeDialog { document: mainWindow.currentTab && mainWindow.currentTab.document }
+        EditAttributeDialog { document: mainWindow.currentTab?.document ?? null }
     }
 
     Action
@@ -1436,7 +1436,7 @@ ApplicationWindow
     Component
     {
         id: removeAttributesDialog
-        RemoveAttributesDialog { document: mainWindow.currentTab && mainWindow.currentTab.document }
+        RemoveAttributesDialog { document: mainWindow.currentTab?.document ?? null }
     }
 
     Action
@@ -1462,7 +1462,7 @@ ApplicationWindow
         enabled: mainWindow.currentTab !== null && !mainWindow.currentTab.document.busy
         onTriggered: function()
         {
-            if(misc.fileOpenInitialFolder !== undefined)
+            if(misc.fileOpenInitialFolder.length > 0)
                 importAttributesFileOpenDialog.currentFolder = misc.fileOpenInitialFolder;
 
             importAttributesFileOpenDialog.open();
@@ -1636,7 +1636,7 @@ ApplicationWindow
         id: addTemplateDialog
         AddTemplateDialog
         {
-            document: mainWindow.currentTab && mainWindow.currentTab.document
+            document: mainWindow.currentTab?.document ?? null
 
             onAccepted: function(name, method, transforms, visualisations)
             {
@@ -2626,7 +2626,7 @@ ApplicationWindow
         id: enrichmentWizard
         EnrichmentWizard
         {
-            document: mainWindow.currentTab && mainWindow.currentTab.document
+            document: mainWindow.currentTab?.document ?? null
             onAccepted:
             {
                 if(mainWindow.currentTab !== null)
@@ -2759,7 +2759,7 @@ ApplicationWindow
             TabBarButton
             {
                 showCloseButton: true
-                property var tab: null
+                property TabUI tab: null
 
                 onCloseButtonClicked:
                 {

@@ -27,7 +27,7 @@ import Graphia.Controls
 NamedIcon
 {
     id: root
-    default property var content
+    default property Item content
     property string title: ""
 
     readonly property int _maxWidth: 500

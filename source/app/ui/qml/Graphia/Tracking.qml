@@ -21,6 +21,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import Graphia
 import Graphia.Controls
 import Graphia.Utils
 
@@ -28,7 +29,7 @@ Rectangle
 {
     id: root
 
-    property var applicationRef: null
+    property Application applicationRef: null
 
     property bool validValues: preferences.permission !== "unresolved"
 
