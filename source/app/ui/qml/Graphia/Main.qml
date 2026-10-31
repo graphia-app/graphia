@@ -2607,7 +2607,7 @@ ApplicationWindow
         id: enrichmentResults
         EnrichmentResults
         {
-            document: mainWindow.currentTab && mainWindow.currentTab.document
+            document: mainWindow.currentTab?.document ?? null
 
             onShowWizard: { Utils.createWindow(mainWindow, enrichmentWizard); }
             onRemoveResults: function(index) { mainWindow.currentTab.document.removeEnrichmentResults(index); }

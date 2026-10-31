@@ -32,7 +32,7 @@ ApplicationWindow
     id: root
 
     property var models
-    property var document
+    property Document document
 
     property var _currentModel: models[tabBar.currentIndex] ?? null
 
@@ -294,8 +294,8 @@ ApplicationWindow
 
                     model: root._currentModel
                     elideLabelWidth: 100
-                    xAxisLabel: model ? root.document.attributeDisplayName(model.selectionA) : ""
-                    yAxisLabel: model ? root.document.attributeDisplayName(model.selectionB) : ""
+                    xAxisLabel: model ? model.selectionADisplayName : ""
+                    yAxisLabel: model ? model.selectionBDisplayName : ""
 
                     onPlotValueClicked: function(row)
                     {
@@ -405,8 +405,8 @@ ApplicationWindow
 
         let baseName = root.document.title.replace(/\.[^\.]+$/, "");
         let attributes = Utils.format(qsTr("{0}-vs-{1}"),
-            sanitiseAttributeName(root.document.attributeDisplayName(root._currentModel.selectionA)),
-            sanitiseAttributeName(root.document.attributeDisplayName(root._currentModel.selectionB)));
+            sanitiseAttributeName(root._currentModel.selectionADisplayName),
+            sanitiseAttributeName(root._currentModel.selectionBDisplayName));
         let path = Utils.format(qsTr("{0}/{1}-enrichment-{2}"),
             NativeUtils.fileNameForUrl(folderUrl), baseName, attributes);
 

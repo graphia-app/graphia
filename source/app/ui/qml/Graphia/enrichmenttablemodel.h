@@ -39,6 +39,8 @@ class EnrichmentTableModel : public QAbstractTableModel
 
     Q_PROPERTY(QString selectionA READ selectionA WRITE setSelectionA NOTIFY selectionNamesChanged)
     Q_PROPERTY(QString selectionB READ selectionB WRITE setSelectionB NOTIFY selectionNamesChanged)
+    Q_PROPERTY(QString selectionADisplayName READ selectionADisplayName NOTIFY selectionNamesChanged)
+    Q_PROPERTY(QString selectionBDisplayName READ selectionBDisplayName NOTIFY selectionNamesChanged)
 
     Q_PROPERTY(bool enrichedOnly MEMBER _enrichedOnly NOTIFY enrichedOnlyChanged)
     Q_PROPERTY(int sortColumn MEMBER _sortColumn NOTIFY sortColumnChanged)
@@ -78,6 +80,8 @@ public:
     void setSelectionA(const QString& selectionA);
     QString selectionB() const { return _selectionB; }
     void setSelectionB(const QString& selectionB);
+    QString selectionADisplayName() const { return _selectionADisplayName; }
+    QString selectionBDisplayName() const { return _selectionBDisplayName; }
 
     void setTableData(Table data, QString selectionA, QString selectionB);
 

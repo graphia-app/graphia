@@ -28,15 +28,6 @@ TestCase
 {
     name: "EnrichmentResults"
 
-    // Stands in for Document, providing what EnrichmentResults uses
-    QtObject
-    {
-        id: document
-
-        property string title: "Test.graphia"
-        function attributeDisplayName(attributeName) { return attributeName; }
-    }
-
     Component { id: enrichmentResultsComponent; EnrichmentResults {} }
 
     property var models: []
@@ -45,7 +36,7 @@ TestCase
     function init()
     {
         models = [testHelper.enrichmentTableModel(), testHelper.enrichmentTableModel()];
-        window = enrichmentResultsComponent.createObject(null, {models: models, document: document});
+        window = enrichmentResultsComponent.createObject(null, {models: models});
     }
 
     function cleanup()

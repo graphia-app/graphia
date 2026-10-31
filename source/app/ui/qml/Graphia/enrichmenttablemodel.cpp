@@ -184,6 +184,7 @@ void EnrichmentTableModel::setSelectionDisplayNames(const QString& selectionA, c
 {
     _selectionADisplayName = selectionA;
     _selectionBDisplayName = selectionB;
+    emit selectionNamesChanged();
 }
 
 void EnrichmentTableModel::updateSortFilterMap()
