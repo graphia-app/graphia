@@ -26,7 +26,7 @@ TextField
 {
     id: root
 
-    property var treeBox: null
+    property TreeBox treeBox: null
 
     selectByMouse: true
     placeholderText: qsTr("Search")
