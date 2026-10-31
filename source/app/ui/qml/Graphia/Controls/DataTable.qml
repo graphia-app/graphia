@@ -58,7 +58,7 @@ Rectangle
     }
 
     property int selectionMode: DataTable.NoSelection
-    property var selectedRows: []
+    property list<int> selectedRows: []
 
     function selectRow(row) { root.selectedRows = [row]; }
     function clearSelection() { root.selectedRows = []; }

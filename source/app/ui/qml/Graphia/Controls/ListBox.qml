@@ -29,12 +29,12 @@ Rectangle
 {
     id: root
 
-    readonly property var selectedIndices: _selectedIndices
+    readonly property list<int> selectedIndices: _selectedIndices
 
     readonly property int selectedIndex:
     {
         return root.selectedIndices.length > 0 ?
-            root.selectedIndices[root.selectedIndices.length - 1] : -1;
+            root.selectedIndices.slice(-1)[0] : -1;
     }
 
     readonly property var selectedValues:
@@ -121,7 +121,7 @@ Rectangle
         elide: Text.ElideRight
     }
 
-    property var _selectedIndices: []
+    property list<int> _selectedIndices: []
     property int _lastSelectedIndex: -1
 
     onModelChanged:

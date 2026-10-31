@@ -426,7 +426,7 @@ Item
         root.updateExpression();
     }
 
-    property var flags: []
+    property list<string> flags: []
     function setFlag(flag, value)
     {
         if(!ready)
@@ -542,7 +542,7 @@ Item
     }
 
     property var _visualisationInfo: ({})
-    property var _stringValues: []
+    property list<string> _stringValues: []
 
     function refreshVisualisationInfo()
     {

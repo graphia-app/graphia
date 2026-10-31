@@ -207,7 +207,7 @@ Item
                 }
 
                 property int lastSelectedRow: -1
-                property var selectedRows: []
+                property list<int> selectedRows: []
 
                 onSelectedRowsChanged:
                 {

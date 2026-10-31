@@ -104,7 +104,7 @@ Item
         tableView.forceLayoutSafe();
     }
 
-    property var hiddenColumns: []
+    property list<string> hiddenColumns: []
     function setHiddenColumns(hiddenColumns)
     {
         // Filter out any columns that don't exist in the table
@@ -158,7 +158,7 @@ Item
 
     function showAllCalculatedColumns()
     {
-        let columns = hiddenColumns;
+        let columns = hiddenColumns.slice();
         hiddenColumns = [];
         for(const columnName of root.model.columnNames)
         {
@@ -177,7 +177,7 @@ Item
 
     function hideAllCalculatedColumns()
     {
-        let columns = hiddenColumns;
+        let columns = hiddenColumns.slice();
         hiddenColumns = [];
         for(const columnName of root.model.columnNames)
         {

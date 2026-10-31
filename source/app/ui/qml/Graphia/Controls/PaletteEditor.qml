@@ -32,7 +32,7 @@ ColumnLayout
 
     spacing: Constants.spacing
 
-    property var stringValues: []
+    property list<string> stringValues: []
     property var valueDisplayFunction: (value) => value
 
     readonly property int _removeButtonSize: 24
@@ -83,7 +83,7 @@ ColumnLayout
             defaultColorRadioButton.checked = true;
     }
 
-    property var _autoColors: []
+    property list<string> _autoColors: []
     property string _defaultColor: ""
     property var _fixedColors: []
 

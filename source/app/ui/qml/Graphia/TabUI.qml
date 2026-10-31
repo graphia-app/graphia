@@ -140,7 +140,7 @@ Item
             hideFind();
     }
 
-    property var sharedValuesAttributeNames:
+    property list<string> sharedValuesAttributeNames:
     {
         let attributeNames = [];
 
@@ -195,7 +195,7 @@ Item
         return ab - bb;
     }
 
-    property var _lesserContrastingColors:
+    property list<real> _lesserContrastingColors:
     {
         let colors = [];
 

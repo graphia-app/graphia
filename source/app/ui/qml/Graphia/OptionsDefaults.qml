@@ -272,7 +272,7 @@ Item
                                         urlType => root.application.descriptionForUrlType(urlType))]
 
                                     extension: /*model.*/display
-                                    property var urlTypes: { return root.application.urlTypesFor(extension); }
+                                    property list<string> urlTypes: { return root.application.urlTypesFor(extension); }
 
                                     onCurrentIndexChanged:
                                     {
@@ -344,7 +344,7 @@ Item
                                         pluginName => root.application.pluginDisplayName(pluginName))]
 
                                     urlType: /*model.*/display
-                                    property var applicablePlugins: { return root.application.pluginNames(urlType); }
+                                    property list<string> applicablePlugins: { return root.application.pluginNames(urlType); }
 
                                     onCurrentIndexChanged:
                                     {

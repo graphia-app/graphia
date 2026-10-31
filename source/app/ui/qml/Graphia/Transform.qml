@@ -211,7 +211,7 @@ Item
         updateExpression();
     }
 
-    property var flags: []
+    property list<string> flags: []
     function setFlag(flag, value)
     {
         if(!ready)
@@ -329,7 +329,7 @@ Item
         }
     }
 
-    property var _referencedAttributeNames: []
+    property list<string> _referencedAttributeNames: []
 
     function build(expression)
     {

@@ -33,7 +33,7 @@ Window
     id: root
 
     property string configuration
-    property var stringValues: []
+    property list<string> stringValues: []
     property var valueDisplayFunction: (value) => value
     property bool applied: false
 

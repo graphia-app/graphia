@@ -35,7 +35,7 @@ Item // qmllint disable import
 
     // Dummy properties to satisfy user expectations
     property string title
-    property var nameFilters: []
+    property list<string> nameFilters: []
     property url currentFolder
     property var selectedNameFilter: Item { property int index }
 

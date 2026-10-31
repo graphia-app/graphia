@@ -43,7 +43,7 @@ GridLayout
     property int initialIndex
 
     // For a choice from a list, the text shown for each of the values in initialValue
-    property var displayValues: []
+    property list<string> displayValues: []
 
     // For strings, functions that determine how a value is shown, and how it's stored
     property var displayValueOf: null

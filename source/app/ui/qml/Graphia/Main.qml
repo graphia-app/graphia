@@ -67,7 +67,7 @@ ApplicationWindow
     readonly property alias findAction: findAction
     readonly property alias findByAttributeAction: findByAttributeAction
 
-    property var recentFiles: []
+    property list<string> recentFiles: []
 
     property bool _anyTabsBusy:
     {
@@ -222,8 +222,8 @@ ApplicationWindow
         return s;
     }
 
-    property var _processedArguments: []
-    property var _pendingArguments: []
+    property list<string> _processedArguments: []
+    property list<string> _pendingArguments: []
 
     // This is called with the arguments of a second instance of the app,
     // when it starts then immediately exits
@@ -638,9 +638,6 @@ ApplicationWindow
         }
 
         let fileUrlString = fileUrl.toString();
-
-        if(mainWindow.recentFiles === undefined)
-            mainWindow.recentFiles = [];
 
         // Copy the array
         let localRecentFiles = mainWindow.recentFiles.slice();

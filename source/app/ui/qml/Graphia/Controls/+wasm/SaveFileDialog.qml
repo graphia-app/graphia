@@ -29,15 +29,15 @@ Item // qmllint disable import
 
     // Dummy properties to satisfy user expectations
     property string title
-    property var nameFilters: []
+    property list<string> nameFilters: []
     property url currentFolder
     property var selectedNameFilter: Item
     {
         property int index: 0
-        property var extensions: root.defaultExtensions
+        property list<string> extensions: root.defaultExtensions
     }
 
-    property var defaultExtensions:
+    property list<string> defaultExtensions:
     {
         if(root.nameFilters.length === 0)
             return [];

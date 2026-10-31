@@ -42,7 +42,7 @@ Window
     minimumHeight: 350
 
     property Document document
-    property var visualisationExpressions: []
+    property list<string> visualisationExpressions: []
 
     property bool visualisationExpressionsValid:
     {

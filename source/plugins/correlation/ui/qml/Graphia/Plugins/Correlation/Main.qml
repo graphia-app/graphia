@@ -842,7 +842,7 @@ PluginContent
         return false;
     }
 
-    property var _availableColumnAnnotationNames: Array.from(root.pluginModel.columnAnnotationNames)
+    property list<string> _availableColumnAnnotationNames: root.pluginModel.columnAnnotationNames
 
     property var _availableplotColumnSortOptions:
     {

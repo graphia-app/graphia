@@ -61,7 +61,7 @@ Item
         return Math.min(repeater.count, stringValues.length);
     }
 
-    property var stringValues: []
+    property list<string> stringValues: []
     property var valueDisplayFunction: (value) => value
 
     property double _minimumKeySize: 10

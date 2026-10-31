@@ -53,7 +53,7 @@ Rectangle
 
     property bool _visible: false
 
-    property var _attributeValues: []
+    property list<string> _attributeValues: []
     property bool _selectMultipleMode:
         _type === Find.ByAttribute && selectMultipleModeAction.checked
 
@@ -118,7 +118,7 @@ Rectangle
 
     on_OptionsChanged: { _doFind(); }
 
-    property var _findAttributes:
+    property list<string> _findAttributes:
     {
         if(_type === Find.ByAttribute)
             return [selectAttributeComboBox.currentValue];
