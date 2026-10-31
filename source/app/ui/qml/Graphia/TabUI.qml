@@ -201,8 +201,8 @@ Item
 
         if(_brightBackground)
             colors = [0.0, 0.4, 0.8];
-
-        colors = [1.0, 0.6, 0.3];
+        else
+            colors = [1.0, 0.6, 0.3];
 
         let color1Diff = colorDiff(visuals.backgroundColor, colors[1]);
         let color2Diff = colorDiff(visuals.backgroundColor, colors[2]);
