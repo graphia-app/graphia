@@ -36,11 +36,16 @@ static Alert averageAttributeTransformConfigIsValid(const GraphModel& graphModel
     if(attributeNames.size() != 2)
         return {AlertType::Error, QObject::tr("Invalid parameters")};
 
-    auto firstAttribute = graphModel.attributeValueByName(attributeNames.at(0));
-    auto secondAttribute = graphModel.attributeValueByName(attributeNames.at(1));
+    auto firstAttribute = graphModel.attributeExists(attributeNames.at(0)) ?
+        graphModel.attributeValueByName(attributeNames.at(0)) : Attribute{};
+    auto secondAttribute = graphModel.attributeExists(attributeNames.at(1)) ?
+        graphModel.attributeValueByName(attributeNames.at(1)) : Attribute{};
 
     if(firstAttribute.elementType() != secondAttribute.elementType())
-        return {AlertType::Error, QObject::tr("Attributes must both be node or edge attributes, not a mixture")};
+    {
+        return {AlertType::Error,
+            QObject::tr("Attributes must both be node or edge attributes, not a mixture")};
+    }
 
     return {AlertType::None, {}};
 }
