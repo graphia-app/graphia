@@ -1414,9 +1414,9 @@ Item
         if(!window.pluginPoppedOut)
             return;
 
-        window.pluginMaximised = pluginWindow.maximised;
+        window.pluginMaximised = pluginWindow.maximisedWhenLastShown;
 
-        if(!pluginWindow.maximised)
+        if(!pluginWindow.maximisedWhenLastShown)
         {
             window.pluginX = pluginWindow.x;
             window.pluginY = pluginWindow.y;
@@ -1437,7 +1437,12 @@ Item
         title: root.application && _document.pluginDisplayName.length > 0 ?
                    _document.pluginDisplayName + " - " + root.appName : "";
         visible: root.visible && root.pluginPoppedOut && plugin.loaded
-        property bool maximised: visibility === Window.Maximized
+        property bool maximisedWhenLastShown: false
+        onVisibilityChanged:
+        {
+            if(visibility !== Window.Hidden)
+                maximisedWhenLastShown = visibility === Window.Maximized;
+        }
 
         property bool maximiseWhenShown: false
         onVisibleChanged:
