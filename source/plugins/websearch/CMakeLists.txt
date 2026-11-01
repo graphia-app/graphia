@@ -45,3 +45,5 @@ if(NOT EMSCRIPTEN)
     find_package(Qt6 REQUIRED COMPONENTS WebEngineQuick)
     target_link_libraries(${PluginName} PRIVATE Qt6::WebEngineQuick)
 endif()
+
+add_plugin_translations(${PluginName})
