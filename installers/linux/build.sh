@@ -64,6 +64,9 @@ LINUXDEPLOY=${PWD}/linuxdeploy-x86_64.AppImage
   # See also: https://github.com/probonopd/linuxdeployqt/issues/35
   rm AppDir/usr/lib/libnss*
 
+  # appimagetool only creates .DirIcon from a PNG or XPM at the top level
+  cp AppDir/usr/share/icons/hicolor/256x256/apps/${PRODUCT_NAME}.png AppDir/ || exit $?
+
   ${LINUXDEPLOY} \
     --desktop-file AppDir/usr/share/applications/${PRODUCT_NAME}.desktop \
     --appdir AppDir \
