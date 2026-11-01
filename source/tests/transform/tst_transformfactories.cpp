@@ -217,6 +217,36 @@ private slots:
 
     void applied_data() { factories_data(); }
 
+    // A filter's description is a whole sentence for its element type
+    void filterDescriptions_data()
+    {
+        QTest::addColumn<QString>("name");
+        QTest::addColumn<QString>("description");
+
+        QTest::newRow("RemoveNodes") << u"RemoveNodes"_s <<
+            TestEnvironment::translated("Remove all the nodes which match the specified condition.");
+        QTest::newRow("RemoveEdges") << u"RemoveEdges"_s <<
+            TestEnvironment::translated("Remove all the edges which match the specified condition.");
+        QTest::newRow("RemoveComponents") << u"RemoveComponents"_s <<
+            TestEnvironment::translated("Remove all the components which match the specified condition.");
+        QTest::newRow("KeepNodes") << u"KeepNodes"_s <<
+            TestEnvironment::translated("Keep all the nodes which match the specified condition.");
+        QTest::newRow("KeepEdges") << u"KeepEdges"_s <<
+            TestEnvironment::translated("Keep all the edges which match the specified condition.");
+        QTest::newRow("KeepComponents") << u"KeepComponents"_s <<
+            TestEnvironment::translated("Keep all the components which match the specified condition.");
+    }
+
+    void filterDescriptions()
+    {
+        QFETCH(const QString, name);
+        QFETCH(const QString, description);
+
+        const auto* factory = factoryFor(name);
+        QVERIFY(factory != nullptr);
+        QCOMPARE(factory->description(), description);
+    }
+
     // Applied with its parameters' defaults, each transform creates the attributes it declares,
     // and those it visualises by default, of the element and value types it says they are
     void applied()

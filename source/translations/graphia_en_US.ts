@@ -4428,7 +4428,7 @@ Supported data types: %2</translation>
     </message>
     <message>
         <location line="+3"/>
-        <location filename="../app/transform/transforms/filtertransform.h" line="+96"/>
+        <location filename="../app/transform/transforms/filtertransform.h" line="+102"/>
         <source>Filters</source>
         <translation>Filters</translation>
     </message>
@@ -5428,7 +5428,7 @@ Supported data types: %2</translation>
         <translation>The percentage of edges to rank and retain, per node.</translation>
     </message>
     <message>
-        <location filename="../app/transform/transforms/filtertransform.h" line="-15"/>
+        <location filename="../app/transform/transforms/filtertransform.h" line="-21"/>
         <source>Keep Nodes</source>
         <translation>Keep Nodes</translation>
     </message>
@@ -5458,19 +5458,34 @@ Supported data types: %2</translation>
         <translation>Remove Components</translation>
     </message>
     <message>
-        <location line="+9"/>
-        <source>%1 all the %2s which match the specified condition.</source>
-        <translation>%1 all the %2s which match the specified condition.</translation>
+        <location line="+11"/>
+        <source>Keep all the nodes which match the specified condition.</source>
+        <translation>Keep all the nodes which match the specified condition.</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Keep</source>
-        <translation>Keep</translation>
+        <source>Keep all the edges which match the specified condition.</source>
+        <translation>Keep all the edges which match the specified condition.</translation>
     </message>
     <message>
-        <location line="+0"/>
-        <source>Remove</source>
-        <translation>Remove</translation>
+        <location line="+1"/>
+        <source>Keep all the components which match the specified condition.</source>
+        <translation>Keep all the components which match the specified condition.</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Remove all the nodes which match the specified condition.</source>
+        <translation>Remove all the nodes which match the specified condition.</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Remove all the edges which match the specified condition.</source>
+        <translation>Remove all the edges which match the specified condition.</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Remove all the components which match the specified condition.</source>
+        <translation>Remove all the components which match the specified condition.</translation>
     </message>
     <message>
         <location filename="../app/transform/transforms/mcltransform.h" line="-21"/>

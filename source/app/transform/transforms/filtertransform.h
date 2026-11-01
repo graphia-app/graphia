@@ -89,9 +89,15 @@ public:
 
     QString description() const override
     {
-        return QObject::tr("%1 all the %2s which match the specified condition.")
-                .arg(_invert ? QObject::tr("Keep") : QObject::tr("Remove"),
-                     elementTypeAsString(_elementType).toLower());
+        return _invert ?
+            textForElementType(_elementType,
+                QObject::tr("Keep all the nodes which match the specified condition."),
+                QObject::tr("Keep all the edges which match the specified condition."),
+                QObject::tr("Keep all the components which match the specified condition.")) :
+            textForElementType(_elementType,
+                QObject::tr("Remove all the nodes which match the specified condition."),
+                QObject::tr("Remove all the edges which match the specified condition."),
+                QObject::tr("Remove all the components which match the specified condition."));
     }
     QString category() const override { return QObject::tr("Filters"); }
     ElementType elementType() const override { return _elementType; }
