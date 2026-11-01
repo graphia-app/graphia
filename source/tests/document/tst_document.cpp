@@ -148,6 +148,15 @@ private slots:
         QVERIFY(!_document->canUndo());
     }
 
+    // The status says what was loaded, named as the file is
+    void loadedStatus()
+    {
+        QVERIFY(open(write(u"graph %1.gml"_s, ThreeComponentsGml), u"GML"_s, u"Generic"_s));
+        QCOMPARE(_document->property("status").toString(),
+            TestEnvironment::translated("Loaded %1 (%2 nodes, %3 edges, %4 components)")
+                .arg(u"graph %1.gml"_s, u"6"_s, u"3"_s, u"3"_s));
+    }
+
     void applyTransformUndoRedo()
     {
         QVERIFY(open());

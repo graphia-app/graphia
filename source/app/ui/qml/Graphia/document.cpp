@@ -584,8 +584,7 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
     if(type != Application::NativeFileType)
     {
         setLog(tr("Loaded from %1, as type %2, using plugin %3 (version %4)")
-            .arg(url.toString(), type, plugin->displayName())
-            .arg(plugin->dataVersion()));
+            .arg(url.toString(), type, plugin->displayName(), QString::number(plugin->dataVersion())));
     }
 
     _pluginName = pluginName;
@@ -1108,11 +1107,10 @@ void Document::onLoadComplete(const QUrl&, bool success)
 
     _graphModel->enableVisualUpdates();
 
-    setStatus(QString(tr("Loaded %1 (%2 nodes, %3 edges, %4 components)"))
-        .arg(_title)
-        .arg(_graphModel->graph().numNodes())
-        .arg(_graphModel->graph().numEdges())
-        .arg(_graphModel->graph().numComponents()));
+    setStatus(tr("Loaded %1 (%2 nodes, %3 edges, %4 components)").arg(_title,
+        QString::number(_graphModel->graph().numNodes()),
+        QString::number(_graphModel->graph().numEdges()),
+        QString::number(_graphModel->graph().numComponents())));
 }
 
 void Document::onBusyChanged() const
