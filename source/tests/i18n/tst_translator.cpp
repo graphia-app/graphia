@@ -20,17 +20,50 @@
 #include "shared/utils/translator.h"
 
 #include <QTest>
+#include <QCoreApplication>
+#include <QLocale>
 #include <QObject>
 #include <QString>
 #include <QStringList>
+#include <QTranslator>
 
 using namespace Qt::Literals::StringLiterals;
 
+namespace
+{
+QString translated(const char* sourceText)
+{
+    return QCoreApplication::translate("Test", sourceText);
+}
+
+// As main() does, for a user whose only language is that of locale
+void installAppTranslator(const QLocale& locale)
+{
+    QLocale::setDefault(locale);
+    u::installTranslator();
+}
+} // namespace
+
+// The test catalogues are graphia_fr_FR, graphia_es_ES, and testplugin_ in fr_FR, de_DE and en_GB
 class TestTranslator : public QObject
 {
     Q_OBJECT
 
+    // As it is before any catalogue is installed
+    QString _pluginOnly;
+
 private slots:
+    void initTestCase() { _pluginOnly = translated("Plugin Only"); }
+
+    void cleanup()
+    {
+        // A translator removes itself when it's destroyed
+        qDeleteAll(QCoreApplication::instance()->findChildren<Translator*>(
+            Qt::FindDirectChildrenOnly));
+
+        QLocale::setDefault(QLocale::system());
+    }
+
     // Each row's uiLanguages are what Qt gives for its LANG and LANGUAGE, and en_US is the
     // one language with a catalogue
     void translationLanguage_data()
@@ -60,6 +93,65 @@ private slots:
         QFETCH(const QString, expected);
 
         QCOMPARE(u::translationLanguage(uiLanguages, [](const QString& name) { return name == u"en_US"; }), expected);
+    }
+
+    // The test's own catalogues load as the app's would
+    void appCatalogue()
+    {
+        installAppTranslator(QLocale(QLocale::French, QLocale::France));
+        QCOMPARE(translated("Shared"), u"Partagé (application)"_s);
+    }
+
+    void pluginInAppsLanguage()
+    {
+        installAppTranslator(QLocale(QLocale::French, QLocale::France));
+
+        const QObject plugin;
+        u::installPluginTranslator(u"TestPlugin"_s, &plugin);
+        QCOMPARE(translated("Plugin Only"), u"Extension seulement"_s);
+    }
+
+    void noPluginCatalogueInAppsLanguage()
+    {
+        installAppTranslator(QLocale(QLocale::Spanish, QLocale::Spain));
+
+        const QObject plugin;
+        u::installPluginTranslator(u"TestPlugin"_s, &plugin);
+        QCOMPARE(translated("Plugin Only"), _pluginOnly);
+    }
+
+    // There's no app catalogue in the source language, even where a plugin has one
+    void noPluginCatalogueInSourceLanguage()
+    {
+        installAppTranslator(QLocale(QLocale::English, QLocale::UnitedKingdom));
+
+        const QObject plugin;
+        u::installPluginTranslator(u"TestPlugin"_s, &plugin);
+        QCOMPARE(translated("Plugin Only"), _pluginOnly);
+    }
+
+    void appTakesPrecedence()
+    {
+        installAppTranslator(QLocale(QLocale::French, QLocale::France));
+
+        const QObject plugin;
+        u::installPluginTranslator(u"TestPlugin"_s, &plugin);
+        QCOMPARE(translated("Shared"), u"Partagé (application)"_s);
+        QCOMPARE(translated("Identical"), u"Identical"_s);
+    }
+
+    void pluginCatalogueGoesWithPlugin()
+    {
+        installAppTranslator(QLocale(QLocale::French, QLocale::France));
+
+        {
+            const QObject plugin;
+            u::installPluginTranslator(u"TestPlugin"_s, &plugin);
+            QCOMPARE(translated("Plugin Only"), u"Extension seulement"_s);
+        }
+
+        QCOMPARE(translated("Plugin Only"), _pluginOnly);
+        QCOMPARE(translated("Shared"), u"Partagé (application)"_s);
     }
 };
 

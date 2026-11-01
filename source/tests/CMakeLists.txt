@@ -133,8 +133,20 @@ add_unit_test(tst_nodeattributetablemodel plugins/tst_nodeattributetablemodel.cp
 add_unit_test(tst_catalogues i18n/tst_catalogues.cpp)
 target_compile_definitions(tst_catalogues PRIVATE SOURCE_DIR="${CMAKE_SOURCE_DIR}/source")
 
-# Choosing a catalogue
+# Loading catalogues, with a few of the test's own
 add_unit_test(tst_translator i18n/tst_translator.cpp)
+qt_add_lrelease(
+    TS_FILES
+        i18n/catalogues/graphia_fr_FR.ts
+        i18n/catalogues/graphia_es_ES.ts
+        i18n/catalogues/testplugin_fr_FR.ts
+        i18n/catalogues/testplugin_de_DE.ts
+        i18n/catalogues/testplugin_en_GB.ts
+    LRELEASE_TARGET tst_translator_lrelease
+    QM_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/test_catalogues
+    QM_FILES_OUTPUT_VARIABLE TEST_CATALOGUES)
+qt_add_resources(tst_translator test_catalogues PREFIX /i18n
+    BASE ${CMAKE_CURRENT_BINARY_DIR}/test_catalogues FILES ${TEST_CATALOGUES})
 
 add_unit_test(tst_opengl rendering/tst_opengl.cpp)
 
