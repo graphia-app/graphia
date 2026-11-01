@@ -33,5 +33,7 @@ DEFINE_QML_ENUM(ElementType,
     All = Node|Edge|Component);
 
 QString elementTypeAsString(ElementType elementType);
+QString textForElementType(ElementType elementType, const QString& nodeText,
+    const QString& edgeText, const QString& componentText);
 
 #endif // ELEMENTTYPE_H

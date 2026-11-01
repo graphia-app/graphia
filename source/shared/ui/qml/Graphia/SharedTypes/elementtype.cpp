@@ -33,3 +33,17 @@ QString elementTypeAsString(ElementType elementType)
 
     return {};
 }
+
+QString textForElementType(ElementType elementType, const QString& nodeText,
+    const QString& edgeText, const QString& componentText)
+{
+    switch(elementType)
+    {
+    case ElementType::Node:      return nodeText;
+    case ElementType::Edge:      return edgeText;
+    case ElementType::Component: return componentText;
+    default: break;
+    }
+
+    return {};
+}
