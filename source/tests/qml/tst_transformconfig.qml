@@ -216,31 +216,47 @@ TestCase
     // A locked transform is displayed as text, rather than as controls
     function test_lockedDisplay_data()
     {
+        // Built as the transform's text is, from the translations of its parts, with a | between
+        // the labels it's shown in, each of which is trimmed and has its whitespace collapsed
+        let usingAttributes = (text, attributes) => qsTr("%1 using %2").arg(text).arg(attributes);
+        let withParameters = (text, parameters) => qsTr("%1 with %2").arg(text).arg(parameters.join(" "));
+        let parameter = (name, value) => qsTr("%1 = %2", "a transform parameter's value").arg(name).arg(value);
+        let whereCondition = (text, condition) => qsTr("%1 where %2").arg(text).arg(condition);
+        let op = (phrase, lhs, rhs) => phrase.arg(lhs).arg(rhs);
+        let labels = text => text.split("|").map(label => label.trim().replace(/\s+/g, " ")).join("|");
+
         return [
             {tag: "terminal condition",
                 transform: "RemoveComponents where $ComponentSize <= 1",
-                expected: "Remove Components where Component Size ≤ 1"},
+                expected: labels(whereCondition(qsTr("Remove Components"),
+                    op(qsTr("%1 ≤ %2"), qsTr("Component Size"), "1")))},
             {tag: "parameters",
                 transform: "MCLCluster with Granularity = 2.2 k = 3",
-                expected: "MCL Cluster with Granularity = 2" + Qt.locale().decimalPoint + "2 k = 3"},
+                expected: labels(withParameters(qsTr("MCL Cluster"),
+                    [parameter("Granularity", "2" + Qt.locale().decimalPoint + "2"), parameter("k", "3")]))},
             {tag: "string list parameter",
                 transform: "KNN with RankOrder = Ascending",
-                expected: "k-NN with Rank Order = Lowest First"},
+                expected: labels(withParameters(qsTr("k-NN"), [parameter("Rank Order", "Lowest First")]))},
             {tag: "attribute parameters",
                 transform: "\"Some Transform\" using $Score $source.Score with k = 3",
-                expected: "Some Transform using Score|Source › Score|with k = 3"},
+                expected: labels(withParameters(usingAttributes("Some Transform",
+                    "Score|" + qsTr("Source › %1").arg("Score") + "|"), [parameter("k", "3")]))},
             {tag: "string",
                 transform: "RemoveNodes where $NodeName includes \"abc\"",
-                expected: "Remove Nodes where Node Name Includes \"abc\""},
+                expected: labels(whereCondition(qsTr("Remove Nodes"),
+                    op(qsTr("%1 Includes %2"), "Node Name", "\"abc\"")))},
             {tag: "string with quotes and backslashes",
                 transform: "RemoveNodes where $NodeName == \"a \\\"b\\\" \\\\ c\"",
-                expected: "Remove Nodes where Node Name = \"a \"b\" \\ c\""},
+                expected: labels(whereCondition(qsTr("Remove Nodes"),
+                    op(qsTr("%1 = %2", "a condition"), "Node Name", "\"a \"b\" \\ c\"")))},
             {tag: "string starting with $",
                 transform: "RemoveNodes where $NodeName == \"$HOME\"",
-                expected: "Remove Nodes where Node Name = \"$HOME\""},
+                expected: labels(whereCondition(qsTr("Remove Nodes"),
+                    op(qsTr("%1 = %2", "a condition"), "Node Name", "\"$HOME\"")))},
             {tag: "backslash in attribute name",
                 transform: "RemoveNodes where $\"A\\B\" == \"x\"",
-                expected: "Remove Nodes where A\\B = \"x\""}
+                expected: labels(whereCondition(qsTr("Remove Nodes"),
+                    op(qsTr("%1 = %2", "a condition"), "A\\B", "\"x\"")))}
         ];
     }
 

@@ -170,7 +170,7 @@ private slots:
         auto model = createWeightedCompleteGraph();
         QCOMPARE(model->applyTransforms({}), QStringList{});
         const auto edges = model->edgeNames();
-        QCOMPARE(model->applyTransforms({transform}), QStringList{u"Invalid parameter"_s});
+        QCOMPARE(model->applyTransforms({transform}), QStringList{TestEnvironment::translated("Invalid parameter")});
         QCOMPARE(model->edgeNames(), edges);
     }
 

@@ -145,10 +145,16 @@ private slots:
         auto plot = createPlot<GraphSizeEstimatePlot>(customPlot);
         QVERIFY(customPlot != nullptr);
 
+        auto estimate = [](int numNodes, int numEdges)
+        {
+            return TestEnvironment::translated("Estimated Graph Size: %1 Nodes, %2 Edges")
+                .arg(numNodes).arg(numEdges);
+        };
+
         plot->setProperty("graphSizeEstimate", ::graphSizeEstimate(descending));
         QCOMPARE(customPlot->graphCount(), 2);
-        QCOMPARE(customPlot->graph(0)->name(), u"Nodes"_s);
-        QCOMPARE(customPlot->graph(1)->name(), u"Edges"_s);
+        QCOMPARE(customPlot->graph(0)->name(), TestEnvironment::translated("Nodes"));
+        QCOMPARE(customPlot->graph(1)->name(), TestEnvironment::translated("Edges"));
         QCOMPARE(customPlot->xAxis->rangeReversed(), descending);
         QCOMPARE(customPlot->yAxis->scaleType(), QCPAxis::stLogarithmic);
 
@@ -156,13 +162,13 @@ private slots:
         const QSignalSpy thresholdChanged(plot.get(), SIGNAL(thresholdChanged()));
         plot->setProperty("threshold", 3.3);
         QCOMPARE(thresholdChanged.count(), 1);
-        QCOMPARE(customPlot->xAxis->label(), u"Estimated Graph Size: 40 Nodes, 400 Edges"_s);
+        QCOMPARE(customPlot->xAxis->label(), estimate(40, 400));
 
         plot->setProperty("threshold", 4.6);
-        QCOMPARE(customPlot->xAxis->label(), u"Estimated Graph Size: 160 Nodes, 999 Edges"_s);
+        QCOMPARE(customPlot->xAxis->label(), estimate(160, 999));
 
         plot->setProperty("uniqueEdgesOnly", true);
-        QCOMPARE(customPlot->xAxis->label(), u"Estimated Graph Size: 160 Nodes, 500 Edges"_s);
+        QCOMPARE(customPlot->xAxis->label(), estimate(160, 500));
         QCOMPARE(customPlot->graph(1)->data()->size(), 5);
 
         double maxEdges = 0.0;
@@ -172,13 +178,13 @@ private slots:
 
         // Beyond the keys, the nearest is the last
         plot->setProperty("threshold", 10.0);
-        QCOMPARE(customPlot->xAxis->label(), u"Estimated Graph Size: 160 Nodes, 500 Edges"_s);
+        QCOMPARE(customPlot->xAxis->label(), estimate(160, 500));
 
         // k is a whole number
         plot->setProperty("integralThreshold", true);
         plot->setProperty("threshold", 2.4);
         QCOMPARE(plot->property("threshold").toDouble(), 2.0);
-        QCOMPARE(customPlot->xAxis->label(), u"Estimated Graph Size: 20 Nodes, 100 Edges"_s);
+        QCOMPARE(customPlot->xAxis->label(), estimate(20, 100));
     }
 
     // Clicking or dragging on the plot chooses the threshold
@@ -375,7 +381,8 @@ private slots:
         QHoverEvent hover(QEvent::HoverMove, position, position, position);
         QCoreApplication::sendEvent(plot.get(), &hover);
         QVERIFY(hoverLabel->visible());
-        QCOMPARE(hoverLabel->text(), u"Adj. P-value: %1"_s.arg(u::formatNumberScientific(0.001)));
+        QCOMPARE(hoverLabel->text(),
+            TestEnvironment::translated("Adj. P-value: %1").arg(u::formatNumberScientific(0.001)));
 
         QHoverEvent leave(QEvent::HoverLeave, {}, {}, position);
         QCoreApplication::sendEvent(plot.get(), &leave);

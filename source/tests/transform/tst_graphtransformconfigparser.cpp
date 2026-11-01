@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "tests/common/testenvironment.h"
+
 #include "app/transform/graphtransformconfig.h"
 #include "app/transform/graphtransformconfigparser.h"
 
@@ -159,14 +161,18 @@ private slots:
         QTest::addColumn<QString>("name");
         QTest::addColumn<QString>("phrase");
 
-        QTest::newRow("==") << u"=="_s << u"="_s << u"%1 = %2"_s;
-        QTest::newRow("!=") << u"!="_s << u"≠"_s << u"%1 ≠ %2"_s;
-        QTest::newRow("<=") << u"<="_s << u"≤"_s << u"%1 ≤ %2"_s;
-        QTest::newRow("&&") << u"&&"_s << u"and"_s << u"%1 and %2"_s;
-        QTest::newRow("or") << u"or"_s << u"or"_s << u"%1 or %2"_s;
+        using TestEnvironment::translated;
+
+        QTest::newRow("==") << u"=="_s << translated("=") << translated("%1 = %2", "a condition");
+        QTest::newRow("!=") << u"!="_s << translated("≠") << translated("%1 ≠ %2");
+        QTest::newRow("<=") << u"<="_s << translated("≤") << translated("%1 ≤ %2");
+        QTest::newRow("&&") << u"&&"_s << translated("and") << translated("%1 and %2");
+        QTest::newRow("or") << u"or"_s << translated("or") << translated("%1 or %2");
         QTest::newRow("matchesCaseInsensitive") << u"matchesCaseInsensitive"_s <<
-            u"Matches Case Insensitive Regex"_s << u"%1 Matches Case Insensitive Regex %2"_s;
-        QTest::newRow("hasValue") << u"hasValue"_s << u"Has Value"_s << u"%1 Has Value"_s;
+            translated("Matches Case Insensitive Regex") << translated("%1 Matches Case Insensitive Regex %2");
+        QTest::newRow("hasValue") << u"hasValue"_s << translated("Has Value") << translated("%1 Has Value");
+
+        // An op that isn't known is shown as it's written
         QTest::newRow("unknown") << u"foo"_s << u"foo"_s << u"%1 foo %2"_s;
     }
 

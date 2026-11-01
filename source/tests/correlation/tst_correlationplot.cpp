@@ -506,10 +506,12 @@ private slots:
         // Of r1, r2 and r3
         const QStringList means{u"3"_s, u"3.66667"_s, u"4.33333"_s, u"5"_s, u"5.66667"_s, u"6.33333"_s};
 
-        QTest::newRow("Mean") << AveragingType::MeanLine << u"Mean average of selection"_s << means;
-        QTest::newRow("Median") << AveragingType::MedianLine << u"Median average of selection"_s <<
+        using TestEnvironment::translated;
+        QTest::newRow("Mean") << AveragingType::MeanLine << translated("Mean average of selection") << means;
+        QTest::newRow("Median") << AveragingType::MedianLine << translated("Median average of selection") <<
             QStringList{u"2"_s, u"4"_s, u"4"_s, u"4"_s, u"5"_s, u"6"_s};
-        QTest::newRow("Mean histogram") << AveragingType::MeanHistogram << u"Mean histogram of selection"_s << means;
+        QTest::newRow("Mean histogram") << AveragingType::MeanHistogram <<
+            translated("Mean histogram of selection") << means;
     }
 
     void averaging()
@@ -526,7 +528,9 @@ private slots:
         QCOMPARE(plottableNames(), QStringList{name});
         QCOMPARE(this->values(name), values);
 
-        auto color = plottable(name)->pen().color();
+        auto* average = plottable(name);
+        QVERIFY(average != nullptr);
+        auto color = average->pen().color();
         if(averagingType == AveragingType::MeanHistogram)
             QCOMPARE(color, nodeColor(u"r1"_s).darker(150));
         else
@@ -549,7 +553,7 @@ private slots:
     void averagingByAttribute_data()
     {
         QTest::addColumn<AveragingType>("averagingType");
-        QTest::addColumn<QString>("name");
+        QTest::addColumn<QString>("nameTemplate");
         QTest::addColumn<QStringList>("g1");
         QTest::addColumn<QStringList>("g2");
 
@@ -557,16 +561,19 @@ private slots:
         const QStringList g1{u"1.5"_s, u"3"_s, u"4.5"_s, u"6"_s, u"7.5"_s, u"9"_s};
         const QStringList g2Means{u"4.33333"_s, u"4"_s, u"3.66667"_s, u"3.33333"_s, u"3"_s, u"2.66667"_s};
 
-        QTest::newRow("Mean") << AveragingType::MeanLine << u"Mean average"_s << g1 << g2Means;
-        QTest::newRow("Median") << AveragingType::MedianLine << u"Median average"_s << g1 <<
+        // Of the attribute's name, then its value
+        using TestEnvironment::translated;
+        QTest::newRow("Mean") << AveragingType::MeanLine << translated("Mean average of %1: %2") << g1 << g2Means;
+        QTest::newRow("Median") << AveragingType::MedianLine << translated("Median average of %1: %2") << g1 <<
             QStringList{u"6"_s, u"4"_s, u"4"_s, u"3"_s, u"3"_s, u"1"_s};
-        QTest::newRow("Mean histogram") << AveragingType::MeanHistogram << u"Mean histogram"_s << g1 << g2Means;
+        QTest::newRow("Mean histogram") << AveragingType::MeanHistogram <<
+            translated("Mean histogram of %1: %2") << g1 << g2Means;
     }
 
     void averagingByAttribute()
     {
         QFETCH(const AveragingType, averagingType);
-        QFETCH(const QString, name);
+        QFETCH(const QString, nameTemplate);
         QFETCH(const QStringList, g1);
         QFETCH(const QStringList, g2);
 
@@ -575,8 +582,8 @@ private slots:
         QVERIFY(set("averagingType", averagingType));
         QVERIFY(set("averagingAttributeName", u"Group"_s));
 
-        const auto g1Name = u"%1 of Group: g1"_s.arg(name);
-        const auto g2Name = u"%1 of Group: g2"_s.arg(name);
+        const auto g1Name = nameTemplate.arg(u"Group"_s, u"g1"_s);
+        const auto g2Name = nameTemplate.arg(u"Group"_s, u"g2"_s);
         QCOMPARE(plottableNames(), (QStringList{g1Name, g2Name}));
         QCOMPARE(values(g1Name), g1);
         QCOMPARE(values(g2Name), g2);
@@ -603,15 +610,15 @@ private slots:
         const QStringList stdErrs{u"0.353553"_s, u"0.707107"_s, u"1.06066"_s, u"1.41421"_s, u"1.76777"_s, u"2.12132"_s};
 
         QTest::newRow("Standard deviation bars") << DispersionType::StdDev << DispersionVisualType::Bars <<
-            u"Std Dev"_s << stdDevs;
+            TestEnvironment::translated("Std Dev") << stdDevs;
         QTest::newRow("Standard error bars") << DispersionType::StdErr << DispersionVisualType::Bars <<
-            u"Std Err"_s << stdErrs;
+            TestEnvironment::translated("Std Err") << stdErrs;
 
         // The tops of the areas; one standard deviation either side of the mean is r1 and r2
         QTest::newRow("Standard deviation area") << DispersionType::StdDev << DispersionVisualType::Area <<
-            u"Std Dev"_s << QStringList{u"2"_s, u"4"_s, u"6"_s, u"8"_s, u"10"_s, u"12"_s};
+            TestEnvironment::translated("Std Dev") << QStringList{u"2"_s, u"4"_s, u"6"_s, u"8"_s, u"10"_s, u"12"_s};
         QTest::newRow("Standard error area") << DispersionType::StdErr << DispersionVisualType::Area <<
-            u"Std Err"_s << QStringList{u"1.85355"_s, u"3.70711"_s, u"5.56066"_s,
+            TestEnvironment::translated("Std Err") << QStringList{u"1.85355"_s, u"3.70711"_s, u"5.56066"_s,
             u"7.41421"_s, u"9.26777"_s, u"11.1213"_s};
     }
 
@@ -647,12 +654,13 @@ private slots:
         }
         else
         {
-            QCOMPARE(this->values(u"%1 Top"_s.arg(name)), values);
+            const auto topName = TestEnvironment::translated("%1 Top").arg(name);
+            QCOMPARE(this->values(topName), values);
 
             // The bottom of the area is as far below the mean as the top is above it
-            const auto means = this->values(u"Mean average of selection"_s);
-            const auto tops = this->values(u"%1 Top"_s.arg(name));
-            const auto bottoms = this->values(u"%1 Bottom"_s.arg(name));
+            const auto means = this->values(TestEnvironment::translated("Mean average of selection"));
+            const auto tops = this->values(topName);
+            const auto bottoms = this->values(TestEnvironment::translated("%1 Bottom").arg(name));
             QCOMPARE(bottoms.size(), 6);
             for(qsizetype i = 0; i < bottoms.size(); i++)
             {
@@ -717,7 +725,7 @@ private slots:
         QVERIFY(createPlot(rows));
         QVERIFY(set("averagingType", AveragingType::IQR));
 
-        QCOMPARE(plottableNames<QCPStatisticalBox>(), QStringList(6, u"IQR"_s));
+        QCOMPARE(plottableNames<QCPStatisticalBox>(), QStringList(6, TestEnvironment::translated("IQR")));
         QCOMPARE(this->boxes(), boxes);
     }
 
@@ -928,12 +936,13 @@ private slots:
         // x is c1 to c3, and y is c4 to c6, of r1 and r2
         QVERIFY(set("groupByAnnotation", true));
         QCOMPARE(boxes(), (QStringList{u"1 2 2.5 4 6"_s, u"4 5 7 10 12"_s}));
-        QCOMPARE(plottableNames<QCPStatisticalBox>(), (QStringList{u"IQR"_s, u"IQR"_s}));
+        QCOMPARE(plottableNames<QCPStatisticalBox>(), QStringList(2, TestEnvironment::translated("IQR")));
         QVERIFY(plottables<QCPGraph>().isEmpty());
 
         // The boxes are coloured as the annotation's values are
         QVERIFY(set("colorGroupByAnnotationName", u"Kind"_s));
-        QCOMPARE(plottableNames<QCPStatisticalBox>(), (QStringList{u"IQR of x"_s, u"IQR of y"_s}));
+        QCOMPARE(plottableNames<QCPStatisticalBox>(),
+            (QStringList{TestEnvironment::translated("IQR of %1").arg(u"x"_s), TestEnvironment::translated("IQR of %1").arg(u"y"_s)}));
         const auto boxPlots = plottables<QCPStatisticalBox>();
         QVERIFY(boxPlots.at(0)->brush().color() != boxPlots.at(1)->brush().color());
 
@@ -1089,8 +1098,12 @@ private slots:
         QVERIFY(!tooltip()->visible());
 
         QVERIFY(hover(pixelFor(2.0, 3.0)));
+        using TestEnvironment::translated;
+        auto valueText = [](const QString& plottable, const QString& column, const QString& value)
+            { return translated("%1, %2: %3").arg(plottable, column, value); };
+
         QVERIFY(tooltip()->visible());
-        QCOMPARE(tooltip()->text(), u"r1, c3: 3"_s);
+        QCOMPARE(tooltip()->text(), valueText(u"r1"_s, u"c3"_s, u"3"_s));
 
         // Somewhere with nothing
         QVERIFY(hover(pixelFor(2.0, 6.0)));
@@ -1098,7 +1111,7 @@ private slots:
 
         // Near enough, within 24 pixels
         QVERIFY(hover(pixelFor(4.0, 5.0) + QPointF{0.0, 10.0}));
-        QCOMPARE(tooltip()->text(), u"r1, c5: 5"_s);
+        QCOMPARE(tooltip()->text(), valueText(u"r1"_s, u"c5"_s, u"5"_s));
 
         QVERIFY(replot([this]
         {
@@ -1116,13 +1129,13 @@ private slots:
         QVERIFY(set("groupByAnnotation", true));
         const auto& data = *plottables<QCPStatisticalBox>().constFirst()->data();
         QVERIFY(hover(pixelFor(0.0, data.at(0)->median)));
-        QCOMPARE(tooltip()->text(), u"IQR, 3 columns: 2"_s);
+        QCOMPARE(tooltip()->text(), valueText(translated("IQR"), translated("%n columns", nullptr, 3), u"2"_s));
 
         // A bar
         QVERIFY(set("groupByAnnotation", false));
         QVERIFY(set("averagingType", AveragingType::MeanHistogram));
         QVERIFY(hover(pixelFor(2.0, 1.5)));
-        QCOMPARE(tooltip()->text(), u"Mean histogram of selection, c3: 3"_s);
+        QCOMPARE(tooltip()->text(), valueText(translated("Mean histogram of selection"), u"c3"_s, u"3"_s));
     }
 
     // The value axis can be zoomed with the mouse wheel, and panned by dragging
@@ -1231,7 +1244,7 @@ private slots:
                 moreText = text->text();
         }
 
-        QCOMPARE(moreText, u"…and %1 more"_s.arg(30 - names.size()));
+        QCOMPARE(moreText, TestEnvironment::translated("…and %1 more").arg(30 - names.size()));
     }
 
     // The labels of the axes
@@ -1251,13 +1264,16 @@ private slots:
         QVERIFY(dataAxisRect()->axis(QCPAxis::atBottom)->tickLabels());
         QVERIFY(set("elideLabelWidth", 0));
         QVERIFY(!dataAxisRect()->axis(QCPAxis::atBottom)->tickLabels());
-        QCOMPARE(layoutElement<QCPTextElement>()->text(), u"Columns (Resize To Expose Column Names)"_s);
+        using TestEnvironment::translated;
+        QCOMPARE(layoutElement<QCPTextElement>()->text(),
+            translated("%1 (%2)").arg(u"Columns"_s, translated("Resize To Expose Column Names")));
 
         QVERIFY(invoke("showColumnAnnotations", Q_ARG(QStringList, QStringList{u"Kind"_s})));
-        QCOMPARE(layoutElement<QCPTextElement>()->text(), u"Columns (Resize To Expose Column Information)"_s);
+        QCOMPARE(layoutElement<QCPTextElement>()->text(),
+            translated("%1 (%2)").arg(u"Columns"_s, translated("Resize To Expose Column Information")));
 
         QVERIFY(set("xAxisLabel", QString{}));
-        QCOMPARE(layoutElement<QCPTextElement>()->text(), u"Resize To Expose Column Information"_s);
+        QCOMPARE(layoutElement<QCPTextElement>()->text(), translated("Resize To Expose Column Information"));
 
         QVERIFY(invoke("hideAllColumnAnnotations"));
         QVERIFY(set("showColumnNames", false));
@@ -1327,16 +1343,21 @@ private slots:
         QVERIFY(createPlot({0, 2}));
         QVERIFY(set("averagingType", AveragingType::MeanLine));
 
-        const auto name = u"Mean average of selection"_s;
-        QCOMPARE(plottable(name)->pen().color(), nodeColor(u"r1"_s));
+        auto averageColor = [this]
+        {
+            auto* average = plottable(TestEnvironment::translated("Mean average of selection"));
+            return average != nullptr ? average->pen().color() : QColor{};
+        };
+
+        QCOMPARE(averageColor(), nodeColor(u"r1"_s));
 
         // The plot is redrawn when the colours change
         QVERIFY(replot([this] { execute([this] { _document->update({}, {u"Group Colour"_s}); }); }));
         QVERIFY(nodeColor(u"r1"_s) != nodeColor(u"r3"_s));
-        QCOMPARE(plottable(name)->pen().color(), QCustomPlotColorProvider::penColor());
+        QCOMPARE(averageColor(), QCustomPlotColorProvider::penColor());
 
         QVERIFY(plotRows({0, 1}));
-        QCOMPARE(plottable(name)->pen().color(), nodeColor(u"r1"_s));
+        QCOMPARE(averageColor(), nodeColor(u"r1"_s));
     }
 
     // Discrete data is shown as how many times each value occurs in each column
@@ -1381,7 +1402,7 @@ private slots:
         QCOMPARE(barsList(), (QStringList{u"0 z 1"_s, u"1 z 1"_s, u"2 z 1"_s}));
 
         QVERIFY(hover(pixelFor(0.0, 0.5)));
-        QCOMPARE(tooltip()->text(), u"z, a: 1"_s);
+        QCOMPARE(tooltip()->text(), TestEnvironment::translated("%1, %2: %3").arg(u"z"_s, u"a"_s, u"1"_s));
     }
 
     // Discrete columns sorted by value are sorted by how many of the rows plotted have a value
@@ -1433,8 +1454,9 @@ private slots:
         u::iota(rows, 0);
         QVERIFY(createPlot(rows));
 
-        QCOMPARE(plottableNames<QCPBars>(), (QStringList{u"v00, v01 and 14 more…"_s, u"w"_s}));
-        QCOMPARE(values<QCPBars>(u"v00, v01 and 14 more…"_s), QStringList{u"16"_s});
+        const auto truncated = TestEnvironment::translated("%1, %2 and %3 more…").arg(u"v00"_s, u"v01"_s).arg(14);
+        QCOMPARE(plottableNames<QCPBars>(), (QStringList{truncated, u"w"_s}));
+        QCOMPARE(values<QCPBars>(truncated), QStringList{u"16"_s});
     }
 
     // The plot can be saved as an image, of the rows shown

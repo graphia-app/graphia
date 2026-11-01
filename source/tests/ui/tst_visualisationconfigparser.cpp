@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "tests/common/testenvironment.h"
+
 #include "app/ui/visualisations/colorvisualisationchannel.h"
 #include "app/ui/visualisations/textcolorvisualisationchannel.h"
 #include "app/ui/visualisations/visualisationconfig.h"
@@ -126,18 +128,22 @@ private slots:
         factories.emplace(u"Colour"_s, std::make_unique<ColorVisualisationChannelFactory>());
         factories.emplace(u"TextColour"_s, std::make_unique<TextColorVisualisationChannelFactory>());
 
+        using TestEnvironment::translated;
+
+        const auto flags = translated("Applied Per Component") + translated(", ") + translated("Inverted");
         QCOMPARE(VisualisationConfigParser::parseForDisplay(
             u"[component, invert] NodeDegree Colour with min = 2.5"_s, factories),
-            u"NodeDegree using Colour (Applied Per Component, Inverted)"_s);
+            translated("%1 (%2)", "a visualisation and its options").arg(
+                translated("%1 using %2").arg(u"NodeDegree"_s, translated("Colour")), flags));
 
         // The channel is shown by its display name, as is the attribute, given a function for it
         QCOMPARE(VisualisationConfigParser::parseForDisplay(u"NodeDegree TextColour"_s, factories,
             [](const QString& name) { return name == u"NodeDegree"_s ? u"Node Degree"_s : name; }),
-            u"Node Degree using Text Colour"_s);
+            translated("%1 using %2").arg(u"Node Degree"_s, translated("Text Colour")));
 
         // A channel that isn't known is shown by its name
         QCOMPARE(VisualisationConfigParser::parseForDisplay(u"\"Node Degree\" Size"_s, factories),
-            u"Node Degree using Size"_s);
+            translated("%1 using %2").arg(u"Node Degree"_s, u"Size"_s));
     }
 };
 

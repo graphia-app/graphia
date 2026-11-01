@@ -171,14 +171,14 @@ private slots:
         set(2);
         QCOMPARE(_value, 2);
         QVERIFY(_commandManager->canUndo());
-        QCOMPARE(_commandManager->nextUndoAction(), u"&Undo Set 2"_s);
+        QCOMPARE(_commandManager->nextUndoAction(), TestEnvironment::translated("&Undo %1").arg(u"Set 2"_s));
         QCOMPARE(toVector(_commandManager->undoableCommandDescriptions()),
             (std::vector<QString>{u"Set 2"_s, u"Set 1"_s}));
 
         undo();
         QCOMPARE(_value, 1);
         QVERIFY(_commandManager->canRedo());
-        QCOMPARE(_commandManager->nextRedoAction(), u"&Redo Set 2"_s);
+        QCOMPARE(_commandManager->nextRedoAction(), TestEnvironment::translated("&Redo %1").arg(u"Set 2"_s));
 
         undo();
         QCOMPARE(_value, 0);

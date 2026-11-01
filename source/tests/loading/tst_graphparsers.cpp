@@ -151,6 +151,23 @@ CreateMatVarFn structOf(const char* name, const char* fieldName, const CreateMat
     };
 }
 
+// A node of an adjacency matrix without headers, which the parser names by its number
+QString matrixNode(int number)
+{
+    return TestEnvironment::translated("Node %1").arg(number);
+}
+
+QString matrixEdge(int from, int to)
+{
+    return u"%1-%2"_s.arg(matrixNode(from), matrixNode(to));
+}
+
+// The name a parser gives an attribute from a file that's named like one it declares
+QString userAttributeName(const QString& name)
+{
+    return TestEnvironment::translated("User %1").arg(name);
+}
+
 // Parses content in the given format, which is the name of a parser,
 // optionally followed by a description of how it is configured
 std::unique_ptr<TestGraphModel> parse(const QString& format, const QByteArray& content,
@@ -291,7 +308,8 @@ private slots:
         QTest::newRow("GML clashing names") << u"GML"_s <<
             QByteArray(R"(graph [ node [ id 1 label "A" ComponentSize "n" w 1 ] edge [ source 1 target 1 w 2 ] ])") <<
             QStringList{u"A"_s} << QStringList{u"A-A"_s} <<
-            QStringList{u"User ComponentSize|A|n"_s, u"w|A|1"_s, u"Edge w|A|A|2"_s};
+            QStringList{u"%1|A|n"_s.arg(userAttributeName(u"ComponentSize"_s)), u"w|A|1"_s,
+                u"%1|A|A|2"_s.arg(TestEnvironment::translated("Edge %1").arg(u"w"_s))};
 
         // Not a raw string, which moc misparses here, missing the test class
         QTest::newRow("GML strings") << u"GML"_s << QByteArray(
@@ -332,7 +350,8 @@ private slots:
             "<node id=\"a\"><data key=\"d0\">x</data></node><node id=\"b\"/>"
             "<edge source=\"a\" target=\"b\"><data key=\"d0\">y</data></edge>"
             "</graph></graphml>") <<
-            QStringList{u"a"_s, u"b"_s} << QStringList{u"a-b"_s} << QStringList{u"note|a|x"_s, u"Edge note|a|b|y"_s};
+            QStringList{u"a"_s, u"b"_s} << QStringList{u"a-b"_s} << QStringList{u"note|a|x"_s,
+                u"%1|a|b|y"_s.arg(TestEnvironment::translated("Edge %1").arg(u"note"_s))};
 
         QTest::newRow("GraphML defaults") << u"GraphML"_s << QByteArray(
             "<graphml>"
@@ -467,7 +486,8 @@ private slots:
             QStringList{u"A"_s, u"B"_s} << QStringList{u"A-B"_s} << QStringList{u"NodeName|B|B"_s};
         QTest::newRow("JSON Graph declared name") << u"JSONGraph"_s <<
             QByteArray(R"({"graph":{"nodes":[{"id":"a","label":"A","metadata":{"NodeName":"x"}}]}})") <<
-            QStringList{u"A"_s} << QStringList{} << QStringList{u"NodeName|A|A"_s, u"User NodeName|A|x"_s};
+            QStringList{u"A"_s} << QStringList{} << QStringList{u"NodeName|A|A"_s,
+                u"%1|A|x"_s.arg(userAttributeName(u"NodeName"_s))};
 
         // CX
         QTest::newRow("CX1") << u"CX"_s << QByteArray(R"([{"numberVerification":[{"longNumber":281474976710655}]},
@@ -520,9 +540,10 @@ private slots:
         matrix.at(3) = -1.0;
         const std::vector<mat_int32_t> intMatrix(matrix.begin(), matrix.end());
 
-        const QStringList matrixNodes{u"Node 1"_s, u"Node 2"_s, u"Node 4"_s};
-        const QStringList matrixEdges{u"Node 1-Node 2"_s, u"Node 4-Node 1"_s};
-        const QStringList matrixValues{u"EdgeWeight|Node 1|Node 2|2"_s, u"EdgeWeight|Node 4|Node 1|-1"_s};
+        const QStringList matrixNodes{matrixNode(1), matrixNode(2), matrixNode(4)};
+        const QStringList matrixEdges{matrixEdge(1, 2), matrixEdge(4, 1)};
+        const QStringList matrixValues{u"EdgeWeight|%1|%2|2"_s.arg(matrixNode(1), matrixNode(2)),
+            u"EdgeWeight|%1|%2|-1"_s.arg(matrixNode(4), matrixNode(1))};
 
         QTest::newRow("MATLAB") << u"MatrixMatLab"_s << matFile({denseMatrix("m", 4, 4, matrix)}) <<
             matrixNodes << matrixEdges << matrixValues;
@@ -539,17 +560,20 @@ private slots:
             matrixNodes << matrixEdges << matrixValues;
         QTest::newRow("MATLAB precision") << u"MatrixMatLab"_s <<
             matFile({denseMatrix<double>("m", 2, 2, {0, 0, 0.1, 0})}) <<
-            QStringList{u"Node 1"_s, u"Node 2"_s} << QStringList{u"Node 1-Node 2"_s} <<
-            QStringList{u"EdgeWeight|Node 1|Node 2|0.1"_s};
+            QStringList{matrixNode(1), matrixNode(2)} << QStringList{matrixEdge(1, 2)} <<
+            QStringList{u"EdgeWeight|%1|%2|0.1"_s.arg(matrixNode(1), matrixNode(2))};
 
         // Adjacency matrices; an edge is created from each row's node to each column's node
         QTest::newRow("Matrix") << u"MatrixCSV"_s << QByteArray("0,2\n-3,0\n") <<
-            QStringList{u"Node 1"_s, u"Node 2"_s} << QStringList{u"Node 1-Node 2"_s, u"Node 2-Node 1"_s} <<
-            QStringList{u"EdgeWeight|Node 1|Node 2|2"_s, u"AbsoluteEdgeWeight|Node 1|Node 2|2"_s,
-                u"EdgeWeight|Node 2|Node 1|-3"_s, u"AbsoluteEdgeWeight|Node 2|Node 1|3"_s};
+            QStringList{matrixNode(1), matrixNode(2)} << QStringList{matrixEdge(1, 2), matrixEdge(2, 1)} <<
+            QStringList{u"EdgeWeight|%1|%2|2"_s.arg(matrixNode(1), matrixNode(2)),
+                u"AbsoluteEdgeWeight|%1|%2|2"_s.arg(matrixNode(1), matrixNode(2)),
+                u"EdgeWeight|%1|%2|-3"_s.arg(matrixNode(2), matrixNode(1)),
+                u"AbsoluteEdgeWeight|%1|%2|3"_s.arg(matrixNode(2), matrixNode(1))};
         QTest::newRow("Matrix skip duplicates") << u"MatrixCSV skip duplicates"_s << QByteArray("0,2\n-3,0\n") <<
-            QStringList{u"Node 1"_s, u"Node 2"_s} << QStringList{u"Node 1-Node 2"_s} <<
-            QStringList{u"EdgeWeight|Node 1|Node 2|-3"_s, u"AbsoluteEdgeWeight|Node 1|Node 2|3"_s};
+            QStringList{matrixNode(1), matrixNode(2)} << QStringList{matrixEdge(1, 2)} <<
+            QStringList{u"EdgeWeight|%1|%2|-3"_s.arg(matrixNode(1), matrixNode(2)),
+                u"AbsoluteEdgeWeight|%1|%2|3"_s.arg(matrixNode(1), matrixNode(2))};
         QTest::newRow("Matrix headers") << u"MatrixCSV"_s << QByteArray(",A,B,C\nA,0,1,0\nB,1,0,0.5\nC,0,0.5,0\n") <<
             QStringList{u"A"_s, u"B"_s, u"C"_s} << QStringList{u"A-B"_s, u"B-A"_s, u"B-C"_s, u"C-B"_s} <<
             QStringList{u"EdgeWeight|C|B|0.5"_s};
@@ -583,15 +607,18 @@ private slots:
         // Attributes from files named like those a parser declares, which are kept apart from them
         QTest::newRow("GML declared name") << u"GML"_s <<
             QByteArray("graph [ node [ id 1 label \"A\" NodeName \"x\" ] ]") << // NOLINT modernize-raw-string-literal
-            QStringList{u"A"_s} << QStringList{} << QStringList{u"NodeName|A|A"_s, u"User NodeName|A|x"_s};
+            QStringList{u"A"_s} << QStringList{} << QStringList{u"NodeName|A|A"_s,
+                u"%1|A|x"_s.arg(userAttributeName(u"NodeName"_s))};
         QTest::newRow("GraphML declared name") << u"GraphML"_s << QByteArray(
             "<graphml><key id=\"d0\" for=\"node\" attr.name=\"NodeName\"/><graph>" // NOLINT modernize-raw-string-literal
             "<node id=\"a\"><data key=\"d0\">x</data></node>" // NOLINT modernize-raw-string-literal
             "</graph></graphml>") <<
-            QStringList{u"a"_s} << QStringList{} << QStringList{u"NodeName|a|a"_s, u"User NodeName|a|x"_s};
+            QStringList{u"a"_s} << QStringList{} << QStringList{u"NodeName|a|a"_s,
+                u"%1|a|x"_s.arg(userAttributeName(u"NodeName"_s))};
         QTest::newRow("DOT declared name") << u"DOT"_s <<
             QByteArray("digraph { a [NodeName=\"x\"] }") << // NOLINT modernize-raw-string-literal
-            QStringList{u"a"_s} << QStringList{} << QStringList{u"NodeName|a|a"_s, u"User NodeName|a|x"_s};
+            QStringList{u"a"_s} << QStringList{} << QStringList{u"NodeName|a|a"_s,
+                u"%1|a|x"_s.arg(userAttributeName(u"NodeName"_s))};
     }
 
     void parse()
@@ -652,12 +679,13 @@ private slots:
         QString failureReason;
         QVERIFY(::parse(u"MatrixMatLab"_s,
             matFile({complexMatrix("c", 2, 2, {0, 1, 1, 0}, {0, 1, 1, 0})}), &failureReason) == nullptr);
-        QVERIFY(failureReason.contains(u"complex"_s));
+        QCOMPARE(failureReason, TestEnvironment::translated(
+            "The file contains only matrices of complex numbers, which can't be loaded."));
 
         auto model = ::parse(u"MatrixMatLab"_s, matFile({denseMatrix<double>("m", 2, 2, {0, 0, 0.5, 0}),
             complexMatrix("c", 4, 4, std::vector<double>(16, 1.0), std::vector<double>(16, 1.0))}), &failureReason);
         QVERIFY2(model != nullptr, qPrintable(failureReason));
-        QCOMPARE(model->edgeNames(), QStringList{u"Node 1-Node 2"_s});
+        QCOMPARE(model->edgeNames(), QStringList{matrixEdge(1, 2)});
     }
 
     // A MATLAB matrix's rows are the rows of the table it's loaded as, as for correlation data
@@ -756,7 +784,7 @@ private slots:
             matFile({text("t", "some longer text than the matrix"), denseMatrix<double>("m", 2, 2, {0, 0, 0.5, 0})}),
             &failureReason);
         QVERIFY(model != nullptr);
-        QCOMPARE(model->edgeNames(), QStringList{u"Node 1-Node 2"_s});
+        QCOMPARE(model->edgeNames(), QStringList{matrixEdge(1, 2)});
     }
 
     void numericPrecision_data()
@@ -783,7 +811,7 @@ private slots:
             QByteArray("From,To,Weight,From Type,To Type\na,b,3000000000,x,y\nb,c,2,z,w\n") <<
             u"Weight"_s << QStringList{u"a"_s, u"b"_s} << 3000000000.0;
         QTest::newRow("Matrix") << u"MatrixCSV"_s << QByteArray("0,0.123456789\n1234567.5,0\n") <<
-            u"EdgeWeight"_s << QStringList{u"Node 1"_s, u"Node 2"_s} << 0.123456789;
+            u"EdgeWeight"_s << QStringList{matrixNode(1), matrixNode(2)} << 0.123456789;
     }
 
     void numericPrecision()
@@ -843,15 +871,17 @@ private slots:
 
     void syntaxErrorLocation_data()
     {
+        using TestEnvironment::translated;
+
         QTest::addColumn<QString>("format");
         QTest::addColumn<QByteArray>("content");
         QTest::addColumn<QString>("expected");
 
         // The values are missing at the closing ]
         QTest::newRow("GML") << u"GML"_s << QByteArray("graph [\n  node [ id 1 x ]\n]") <<
-            u"The file is malformed at line 2, column 17."_s;
+            translated("The file is malformed at line %1, column %2.").arg(2).arg(17);
         QTest::newRow("DOT") << u"DOT"_s << QByteArray("digraph {\n  a -> ;\n}") <<
-            u"The file is malformed at line 2, column 8."_s;
+            translated("The file is malformed at line %1, column %2.").arg(2).arg(8);
     }
 
     void syntaxErrorLocation()
@@ -867,6 +897,8 @@ private slots:
 
     void cxFailureReasons_data()
     {
+        using TestEnvironment::translated;
+
         QTest::addColumn<QByteArray>("content");
         QTest::addColumn<QString>("expected");
 
@@ -875,46 +907,48 @@ private slots:
             {"edges":[{"@id":20,"s":10,"t":11}]},)";
 
         QTest::newRow("CX1 node without id") << QByteArray(cx1 + R"({"nodes":[{"n":"A"}]}])") <<
-            u"Node is missing ID."_s;
+            translated("Node is missing ID.");
         QTest::newRow("CX1 edge without id") << QByteArray(cx1 + R"({"nodes":[{"@id":10}]},
-            {"edges":[{"s":10,"t":10}]}])") << u"Edge is missing ID."_s;
+            {"edges":[{"s":10,"t":10}]}])") << translated("Edge is missing ID.");
         QTest::newRow("CX1 edge without target") << QByteArray(cx1 + R"({"nodes":[{"@id":10}]},
-            {"edges":[{"@id":20,"s":10}]}])") << u"Edge is missing source and/or target IDs."_s;
+            {"edges":[{"@id":20,"s":10}]}])") << translated("Edge is missing source and/or target IDs.");
         QTest::newRow("CX1 string edge id") << QByteArray(cx1 + R"({"nodes":[{"@id":10}]},
-            {"edges":[{"@id":"20","s":10,"t":10}]}])") << u"Edge ID is not a number."_s;
+            {"edges":[{"@id":"20","s":10,"t":10}]}])") << translated("Edge ID is not a number.");
         QTest::newRow("CX1 string source") << QByteArray(cx1 + R"({"nodes":[{"@id":10}]},
-            {"edges":[{"@id":20,"s":"10","t":10}]}])") << u"Edge source or target ID is unknown."_s;
+            {"edges":[{"@id":20,"s":"10","t":10}]}])") << translated("Edge source or target ID is unknown.");
         QTest::newRow("CX1 attribute without element") << QByteArray(cx1Graph +
-            R"({"nodeAttributes":[{"n":"type","v":"x"}]}])") << u"Attribute is missing ID."_s;
+            R"({"nodeAttributes":[{"n":"type","v":"x"}]}])") << translated("Attribute is missing ID.");
         QTest::newRow("CX1 attribute with string element") << QByteArray(cx1Graph +
-            R"({"nodeAttributes":[{"po":"10","n":"type","v":"x"}]}])") << u"Attribute is missing ID."_s;
+            R"({"nodeAttributes":[{"po":"10","n":"type","v":"x"}]}])") << translated("Attribute is missing ID.");
         QTest::newRow("CX1 attribute without name") << QByteArray(cx1Graph +
-            R"({"nodeAttributes":[{"po":10,"v":"x"}]}])") << u"Attribute is missing name or value."_s;
+            R"({"nodeAttributes":[{"po":10,"v":"x"}]}])") << translated("Attribute is missing name or value.");
         QTest::newRow("CX1 attribute without value") << QByteArray(cx1Graph +
-            R"({"edgeAttributes":[{"po":20,"n":"score"}]}])") << u"Attribute is missing name or value."_s;
+            R"({"edgeAttributes":[{"po":20,"n":"score"}]}])") << translated("Attribute is missing name or value.");
         QTest::newRow("CX1 numeric attribute name") << QByteArray(cx1Graph +
-            R"({"nodeAttributes":[{"po":10,"n":1,"v":"x"}]}])") << u"Attribute name is not a string."_s;
+            R"({"nodeAttributes":[{"po":10,"n":1,"v":"x"}]}])") << translated("Attribute name is not a string.");
         QTest::newRow("CX1 numeric attribute value") << QByteArray(cx1Graph +
             R"({"nodeAttributes":[{"po":10,"n":"type","v":1}]}])") <<
-            u"Attribute 'type' value is not a string or list."_s;
+            translated("Attribute '%1' value is not a string or list.").arg(u"type"_s);
         QTest::newRow("CX1 attribute of unknown node") << QByteArray(cx1Graph +
-            R"({"nodeAttributes":[{"po":99,"n":"type","v":"x"}]}])") << u"Attribute 'type' ID not in graph."_s;
+            R"({"nodeAttributes":[{"po":99,"n":"type","v":"x"}]}])") <<
+            translated("Attribute '%1' ID not in graph.").arg(u"type"_s);
         // Node and edge ids are separate
         QTest::newRow("CX1 edge attribute of a node") << QByteArray(cx1Graph +
-            R"({"edgeAttributes":[{"po":10,"n":"score","v":"1"}]}])") << u"Attribute 'score' ID not in graph."_s;
+            R"({"edgeAttributes":[{"po":10,"n":"score","v":"1"}]}])") <<
+            translated("Attribute '%1' ID not in graph.").arg(u"score"_s);
 
         const QByteArray cx2 = R"([{"CXVersion":"2.0"},)";
 
         QTest::newRow("CX2 node without id") << QByteArray(cx2 + R"({"nodes":[{"v":{"n":"A"}}]}])") <<
-            u"Node is missing ID."_s;
+            translated("Node is missing ID.");
         QTest::newRow("CX2 string node id") << QByteArray(cx2 + R"({"nodes":[{"id":"1"}]}])") <<
-            u"Node ID is not a number."_s;
+            translated("Node ID is not a number.");
         QTest::newRow("CX2 edge without id") << QByteArray(cx2 + R"({"nodes":[{"id":1}]},
-            {"edges":[{"s":1,"t":1}]}])") << u"Edge is missing ID."_s;
+            {"edges":[{"s":1,"t":1}]}])") << translated("Edge is missing ID.");
         QTest::newRow("CX2 edge without source") << QByteArray(cx2 + R"({"nodes":[{"id":1}]},
-            {"edges":[{"id":5,"t":1}]}])") << u"Edge is missing source and/or target IDs."_s;
+            {"edges":[{"id":5,"t":1}]}])") << translated("Edge is missing source and/or target IDs.");
         QTest::newRow("CX2 unknown target") << QByteArray(cx2 + R"({"nodes":[{"id":1}]},
-            {"edges":[{"id":5,"s":1,"t":2}]}])") << u"Edge source or target ID is unknown."_s;
+            {"edges":[{"id":5,"s":1,"t":2}]}])") << translated("Edge source or target ID is unknown.");
     }
 
     void cxFailureReasons()
@@ -929,6 +963,8 @@ private slots:
 
     void failureReasons_data()
     {
+        using TestEnvironment::translated;
+
         QTest::addColumn<QString>("format");
         QTest::addColumn<QByteArray>("content");
         QTest::addColumn<QString>("expected");
@@ -937,36 +973,37 @@ private slots:
         const QByteArray rdf = "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" " // NOLINT modernize-raw-string-literal
             "xmlns:bp=\"http://www.biopax.org/release/biopax-level3.owl#\">\n"; // NOLINT modernize-raw-string-literal
 
-        QTest::newRow("BioPAX empty") << u"BioPAX"_s << QByteArray() << u"File is empty."_s;
+        QTest::newRow("BioPAX empty") << u"BioPAX"_s << QByteArray() << translated("File is empty.");
         QTest::newRow("BioPAX node without id") << u"BioPAX"_s << QByteArray(rdf + "<bp:Protein/></rdf:RDF>") <<
-            u"Node element has no id."_s;
+            translated("Node element has no id.");
         QTest::newRow("BioPAX edge without resource") << u"BioPAX"_s <<
             QByteArray(rdf + "<bp:Complex rdf:ID=\"x\"><bp:component/></bp:Complex></rdf:RDF>") << // NOLINT modernize-raw-string-literal
-            u"Edge element has no resource."_s;
+            translated("Edge element has no resource.");
         QTest::newRow("BioPAX unknown target") << u"BioPAX"_s <<
             QByteArray(rdf + "<bp:Complex rdf:ID=\"x\"><bp:component rdf:resource=\"#y\"/></bp:Complex></rdf:RDF>") << // NOLINT modernize-raw-string-literal
-            u"Invalid Edge Target. source node: x, target node: y"_s;
+            translated("Invalid Edge Target. source node: %1, target node: %2").arg(u"x"_s, u"y"_s);
         QTest::newRow("BioPAX mismatched tags") << u"BioPAX"_s <<
             QByteArray(rdf + "<bp:Protein rdf:ID=\"p\"></rdf:RDF>") << // NOLINT modernize-raw-string-literal
-            u"XML parse error: Opening and ending tag mismatch."_s;
+            translated("XML parse error: %1").arg(translated("Opening and ending tag mismatch."));
 
         const QByteArray graphml = "<graphml><graph>";
 
-        QTest::newRow("GraphML empty") << u"GraphML"_s << QByteArray() << u"File is empty."_s;
-        QTest::newRow("GraphML not GraphML") << u"GraphML"_s << QByteArray("<foo/>") << u"graphml header not found."_s;
+        QTest::newRow("GraphML empty") << u"GraphML"_s << QByteArray() << translated("File is empty.");
+        QTest::newRow("GraphML not GraphML") << u"GraphML"_s << QByteArray("<foo/>") <<
+            translated("graphml header not found.");
         QTest::newRow("GraphML node without id") << u"GraphML"_s <<
-            QByteArray(graphml + "<node/></graph></graphml>") << u"Node has no id."_s;
+            QByteArray(graphml + "<node/></graph></graphml>") << translated("Node has no id.");
         QTest::newRow("GraphML duplicate id") << u"GraphML"_s <<
-            QByteArray(graphml + "<node id=\"a\"/><node id=\"a\"/></graph></graphml>") << u"Duplicate node id: a"_s; // NOLINT modernize-raw-string-literal
+            QByteArray(graphml + "<node id=\"a\"/><node id=\"a\"/></graph></graphml>") << translated("Duplicate node id: %1").arg(u"a"_s); // NOLINT modernize-raw-string-literal
         QTest::newRow("GraphML edge without source") << u"GraphML"_s <<
-            QByteArray(graphml + "<node id=\"a\"/><edge target=\"a\"/></graph></graphml>") << u"Edge missing source."_s; // NOLINT modernize-raw-string-literal
+            QByteArray(graphml + "<node id=\"a\"/><edge target=\"a\"/></graph></graphml>") << translated("Edge missing source."); // NOLINT modernize-raw-string-literal
         QTest::newRow("GraphML edge without target") << u"GraphML"_s <<
-            QByteArray(graphml + "<node id=\"a\"/><edge source=\"a\"/></graph></graphml>") << u"Edge missing target."_s; // NOLINT modernize-raw-string-literal
+            QByteArray(graphml + "<node id=\"a\"/><edge source=\"a\"/></graph></graphml>") << translated("Edge missing target."); // NOLINT modernize-raw-string-literal
         QTest::newRow("GraphML edge within a node") << u"GraphML"_s <<
             QByteArray(graphml + "<node id=\"a\"><edge source=\"a\" target=\"a\"/></node></graph></graphml>") << // NOLINT modernize-raw-string-literal
-            u"Node and edge both active: 0 0"_s;
+            translated("Node and edge both active: %1 %2").arg(0).arg(0);
         QTest::newRow("GraphML truncated") << u"GraphML"_s << QByteArray(graphml + "<node id=\"a\"/>") << // NOLINT modernize-raw-string-literal
-            u"XML parse error: Premature end of document."_s;
+            translated("XML parse error: %1").arg(translated("Premature end of document."));
     }
 
     // The reasons given for BioPAX and GraphML files that can't be loaded

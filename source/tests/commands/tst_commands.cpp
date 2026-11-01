@@ -400,7 +400,8 @@ private slots:
         QVERIFY(command.execute());
         auto lines = command.debugDescription().split(u'\n');
         QCOMPARE(lines.size(), 12);
-        QCOMPARE(lines.at(0), u"Edit Attribute count Float"_s);
+        const auto editAttribute = TestEnvironment::translated("Edit Attribute");
+        QCOMPARE(lines.at(0), u"%1 count Float"_s.arg(editAttribute));
         QCOMPARE(lines.at(1), u"  0 -> 100"_s);
         QCOMPARE(lines.at(10), u"  9 -> 109"_s);
         QCOMPARE(lines.at(11), u"  ..."_s);
@@ -415,12 +416,12 @@ private slots:
         edgeEdits.setEdgeValue(model->edgeId(u"n0"_s, u"n1"_s), u"2"_s);
         EditAttributeCommand edgeCommand(&model->graphModel(), u"weight"_s, edgeEdits, ValueType::Unknown, {});
         QVERIFY(edgeCommand.execute());
-        QCOMPARE(edgeCommand.debugDescription(), u"Edit Attribute weight\n  1 -> 2"_s);
+        QCOMPARE(edgeCommand.debugDescription(), u"%1 weight\n  1 -> 2"_s.arg(editAttribute));
 
         // The attribute no longer exists
         RemoveAttributesCommand removeCommand(&model->graphModel(), {u"weight"_s});
         QVERIFY(removeCommand.execute());
-        QCOMPARE(edgeCommand.debugDescription(), u"Edit Attribute weight\n  1 -> 2"_s);
+        QCOMPARE(edgeCommand.debugDescription(), u"%1 weight\n  1 -> 2"_s.arg(editAttribute));
     }
 
     void cloneAttribute()
@@ -437,9 +438,10 @@ private slots:
         });
 
         // As is shown in the command stack, done or undone
-        QCOMPARE(command.debugDescription(), u"Clone Attribute\n  Copy"_s);
+        const auto expected = u"%1\n  Copy"_s.arg(TestEnvironment::translated("Clone Attribute"));
+        QCOMPARE(command.debugDescription(), expected);
         QVERIFY(command.execute());
-        QCOMPARE(command.debugDescription(), u"Clone Attribute\n  Copy"_s);
+        QCOMPARE(command.debugDescription(), expected);
     }
 
     void cloneAttributeOfRemovedNodes()

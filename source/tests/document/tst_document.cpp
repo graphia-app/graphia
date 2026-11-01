@@ -344,8 +344,8 @@ private slots:
 
         const auto componentOf = [this](const QString& name)
         {
-            return u"^%1$"_s.arg(graphModel()->attributeValueByName(u"NodeComponentIdentifier"_s)
-                .stringValueOf(nodeId(name)));
+            const auto attribute = graphModel()->attributeValueByName(u"NodeComponentIdentifier"_s);
+            return u"^%1$"_s.arg(attribute.displayValue(attribute.stringValueOf(nodeId(name))));
         };
 
         QVERIFY(execute([&] { _document->selectByAttributeValue(u"NodeComponentIdentifier"_s, componentOf(u"d"_s)); }));
@@ -529,7 +529,7 @@ private slots:
 
         auto k = _document->transformParameter(u"KNN"_s, u"k"_s);
         QCOMPARE(k.value(u"name"_s).toString(), u"k"_s);
-        QCOMPARE(k.value(u"displayName"_s).toString(), u"k"_s);
+        QCOMPARE(k.value(u"displayName"_s).toString(), TestEnvironment::translated("k"));
         QCOMPARE(k.value(u"valueType"_s).toInt(), static_cast<int>(ValueType::Int));
         QCOMPARE(k.value(u"hasMinimumValue"_s).toBool(), true);
         QCOMPARE(k.value(u"minimumValue"_s).toInt(), 1);
@@ -538,20 +538,21 @@ private slots:
 
         auto rankOrder = _document->transformParameter(u"KNN"_s, u"RankOrder"_s);
         QCOMPARE(rankOrder.value(u"initialIndex"_s).toInt(), 0);
-        QCOMPARE(rankOrder.value(u"displayName"_s).toString(), u"Rank Order"_s);
+        QCOMPARE(rankOrder.value(u"displayName"_s).toString(), TestEnvironment::translated("Rank Order"));
         QVERIFY(_document->transformParameter(u"KNN"_s, u"Not a parameter"_s).isEmpty());
         QVERIFY(_document->transformParameter(u"Not a transform"_s, u"k"_s).isEmpty());
 
         const auto knn = _document->transform(u"KNN"_s);
-        QCOMPARE(knn.value(u"displayName"_s).toString(), u"k-NN"_s);
-        QCOMPARE(knn.value(u"attributeParameterNames"_s).toStringList(), QStringList{u"Ranked Attribute"_s});
+        QCOMPARE(knn.value(u"displayName"_s).toString(), TestEnvironment::translated("k-NN"));
+        QCOMPARE(knn.value(u"attributeParameterNames"_s).toStringList(),
+            QStringList{TestEnvironment::translated("Ranked Attribute")});
         const auto rankedAttribute = knn.value(u"attributeParameters"_s).toList().at(0).toMap();
         QCOMPARE(rankedAttribute.value(u"elementType"_s).toInt(), static_cast<int>(ElementType::Edge));
         QCOMPARE(rankedAttribute.value(u"valueType"_s).toInt(), static_cast<int>(ValueType::Numerical));
 
         const auto parsed = _document->parseGraphTransform(u"RemoveNodes where $score > 3"_s);
         QCOMPARE(parsed.value(u"action"_s).toString(), u"RemoveNodes"_s);
-        QCOMPARE(parsed.value(u"displayName"_s).toString(), u"Remove Nodes"_s);
+        QCOMPARE(parsed.value(u"displayName"_s).toString(), TestEnvironment::translated("Remove Nodes"));
         QVERIFY(_document->parseGraphTransform(u"not a transform"_s).isEmpty());
 
         QVERIFY(execute([this] { _document->update({u"RemoveNodes where $score > 3"_s}); }));
@@ -635,7 +636,10 @@ private slots:
         const auto tabs = write(u"tabs.csv"_s, "Name\ta\tb\nr1\t1\t2\nr2\t3\t4\n");
         QVERIFY(!application->urlTypesOf(tabs).contains(u"CorrelationCSV"_s));
         const auto reasons = application->failureReasons(tabs);
-        QVERIFY(std::ranges::any_of(reasons, [](const auto& reason) { return reason.contains(u"resembles a 'TSV' file"_s); }));
+        const auto resemblesTsv = TestEnvironment::translated("%1 has an extension that indicates it is a '%2', "
+            "however its content resembles a '%3' file.").arg(u"tabs.csv"_s,
+            TestEnvironment::translated("Correlation CSV File"), u"TSV"_s);
+        QVERIFY2(reasons.contains(resemblesTsv), qPrintable(reasons.join(u'\n')));
         QVERIFY(application->failureReasons(write(u"unknown.xyz"_s, "?")).isEmpty());
 
         auto saverNames = [application]
@@ -707,16 +711,16 @@ private slots:
         };
 
         QCOMPARE(model->rowCount({}), static_cast<int>(graphModel()->availableTransformNames().size()));
-        QCOMPARE(valueFor(u"PageRank"_s, "category").toString(), u"Metrics"_s);
+        QCOMPARE(valueFor(u"PageRank"_s, "category").toString(), TestEnvironment::translated("Metrics"));
         QCOMPARE(valueFor(u"PageRank"_s, "isFavourite").toBool(), false);
         QVERIFY(!model->data(model->index(model->rowCount({})), Qt::DisplayRole).isValid());
 
         QSignalSpy modelReset(model.get(), &AvailableTransformsModel::modelReset);
         u::setPref(u"misc/favouriteTransforms"_s, uR"(["PageRank", 1])"_s);
         QVERIFY(QTest::qWaitFor([&] { return !modelReset.isEmpty(); }));
-        QCOMPARE(valueFor(u"PageRank"_s, "category").toString(), u"Favourites"_s);
+        QCOMPARE(valueFor(u"PageRank"_s, "category").toString(), TestEnvironment::translated("Favourites"));
         QCOMPARE(valueFor(u"PageRank"_s, "isFavourite").toBool(), true);
-        QCOMPARE(valueFor(u"Betweenness"_s, "category").toString(), u"Metrics"_s);
+        QCOMPARE(valueFor(u"Betweenness"_s, "category").toString(), TestEnvironment::translated("Metrics"));
 
         // Not JSON
         u::setPref(u"misc/favouriteTransforms"_s, u"PageRank"_s);
@@ -1083,45 +1087,69 @@ private slots:
         QTest::addColumn<QString>("transform");
         QTest::addColumn<QString>("expected");
 
+        // Built as the display text is, from the translations of its parts
+        using TestEnvironment::translated;
+        auto usingAttributes = [](const QString& action, const QString& attributes)
+            { return translated("%1 using %2").arg(action, attributes); };
+        auto withParameters = [](const QString& text, const QStringList& parameters)
+            { return translated("%1 with %2").arg(text, parameters.join(u' ')); };
+        auto parameter = [](const QString& name, const QString& value)
+            { return translated("%1 = %2", "a transform parameter's value").arg(name, value); };
+        auto whereCondition = [](const QString& text, const QString& condition)
+            { return translated("%1 where %2").arg(text, condition); };
+        auto op = [](const char* phrase, const QString& lhs, const QString& rhs)
+            { return translated(phrase).arg(lhs, rhs); };
+        auto pinned = [](const QString& text) { return translated("📌 %1").arg(text); };
+
         QTest::newRow("attributes")
             << u"AverageAttribute using $kind $score"_s
-            << u"Average Attribute using kind score"_s;
+            << usingAttributes(translated("Average Attribute"), u"kind score"_s);
         QTest::newRow("declared attribute and parameter")
             << u"KNN using $NodeDegree with k = 3"_s
-            << u"k-NN using Node Degree with k = 3"_s;
+            << withParameters(usingAttributes(translated("k-NN"), translated("Node Degree")),
+                {parameter(translated("k"), u"3"_s)});
         QTest::newRow("choices")
             << u"KNN using $score with k = 3 RankOrder = Ascending"_s
-            << u"k-NN using score with k = 3 Rank Order = Ascending"_s;
+            << withParameters(usingAttributes(translated("k-NN"), u"score"_s),
+                {parameter(translated("k"), u"3"_s), parameter(translated("Rank Order"), translated("Ascending"))});
         QTest::newRow("choice with a different display value")
             << u"SpanningForest with TraversalOrder = DepthFirst"_s
-            << u"Spanning Forest with Traversal Order = Depth First"_s;
+            << withParameters(translated("Spanning Forest"),
+                {parameter(translated("Traversal Order"), translated("Depth First"))});
         QTest::newRow("float parameter")
             << u"MCLCluster with Granularity = 2.5"_s
-            << u"MCL Cluster with Granularity = 2.5"_s;
+            << withParameters(translated("MCL Cluster"), {parameter(translated("Granularity"), u"2.5"_s)});
         QTest::newRow("string parameter")
             << uR"(CombineAttributes using $kind $score with Name = "Kind and Score" AttributeValue = " ")"_s
-            << uR"(Combine Attributes using kind score with Name = Kind and Score Attribute Value =  )"_s;
+            << withParameters(usingAttributes(translated("Combine Attributes"), u"kind score"_s),
+                {parameter(translated("Name"), u"Kind and Score"_s),
+                parameter(translated("Attribute Value"), u"\x01 \x02"_s)});
         QTest::newRow("pinned")
             << u"[pinned] RemoveLeaves with Limit = 2"_s
-            << u"📌 Remove Leaves with Limit = 2"_s;
+            << pinned(withParameters(translated("Remove Leaves"), {parameter(translated("Limit"), u"2"_s)}));
         QTest::newRow("pinned with condition")
             << u"[pinned] RemoveNodes where $NodeDegree > 1"_s
-            << u"📌 Remove Nodes where Node Degree > 1"_s;
+            << pinned(whereCondition(translated("Remove Nodes"), op("%1 > %2", translated("Node Degree"), u"1"_s)));
         QTest::newRow("numerical ops")
             << u"RemoveNodes where $score < 1 or $score >= 5"_s
-            << u"Remove Nodes where score < 1 or score ≥ 5"_s;
+            << whereCondition(translated("Remove Nodes"), op("%1 or %2",
+                op("%1 < %2", u"score"_s, u"1"_s), op("%1 ≥ %2", u"score"_s, u"5"_s)));
         QTest::newRow("including string ops")
             << uR"(RemoveNodes where $kind includes "a" and $kind excludes "b")"_s
-            << u"Remove Nodes where kind Includes a and kind Excludes b"_s;
+            << whereCondition(translated("Remove Nodes"), op("%1 and %2",
+                op("%1 Includes %2", u"kind"_s, u"a"_s), op("%1 Excludes %2", u"kind"_s, u"b"_s)));
         QTest::newRow("starting and ending string ops")
             << uR"(RemoveNodes where $kind starts "a" or $kind ends "b")"_s
-            << u"Remove Nodes where kind Starts With a or kind Ends With b"_s;
+            << whereCondition(translated("Remove Nodes"), op("%1 or %2",
+                op("%1 Starts With %2", u"kind"_s, u"a"_s), op("%1 Ends With %2", u"kind"_s, u"b"_s)));
         QTest::newRow("regex string ops")
             << uR"(RemoveNodes where $kind matches "^a" or $kind matchesCaseInsensitive "b$")"_s
-            << u"Remove Nodes where kind Matches Regex ^a or kind Matches Case Insensitive Regex b$"_s;
+            << whereCondition(translated("Remove Nodes"), op("%1 or %2",
+                op("%1 Matches Regex %2", u"kind"_s, u"^a"_s),
+                op("%1 Matches Case Insensitive Regex %2", u"kind"_s, u"b$"_s)));
         QTest::newRow("unknown transform and parameter")
             << u"Unknown using $score with Some = 1"_s
-            << u"Unknown using score with Some = 1"_s;
+            << withParameters(usingAttributes(u"Unknown"_s, u"score"_s), {parameter(u"Some"_s, u"1"_s)});
         QTest::newRow("malformed")
             << u"RemoveNodes where"_s
             << QString();
@@ -1145,7 +1173,8 @@ private slots:
             static_cast<int>(ElementType::Edge), static_cast<int>(ValueType::All)));
         QVERIFY(model != nullptr);
         QCOMPARE(model->columnCount({}), 1);
-        QCOMPARE(model->headerData(0, Qt::Horizontal, Qt::DisplayRole).toString(), u"Attribute"_s);
+        QCOMPARE(model->headerData(0, Qt::Horizontal, Qt::DisplayRole).toString(),
+            TestEnvironment::translated("Attribute"));
 
         auto roleFor = [&model](const QByteArray& name) { return model->roleNames().key(name); };
 
@@ -1153,11 +1182,11 @@ private slots:
         QVERIFY(source.isValid());
         QCOMPARE(source.data().toString(), u"score"_s);
         QCOMPARE(model->get(source), u"source.score"_s);
-        QCOMPARE(model->parent(source).data().toString(), u"Source Node"_s);
+        QCOMPARE(model->parent(source).data().toString(), TestEnvironment::translated("Source Node"));
         QCOMPARE(model->data(model->parent(source), roleFor("hasChildren")).toBool(), true);
 
         // The nodes' attributes are an edge's
-        QCOMPARE(model->data(source, roleFor("elementType")).toString(), u"Edge"_s);
+        QCOMPARE(model->data(source, roleFor("elementType")).toString(), TestEnvironment::translated("Edge"));
 
         const auto target = model->find(u"target.kind"_s);
         QVERIFY(target.isValid());
@@ -1167,9 +1196,10 @@ private slots:
         const auto multiplicity = model->find(u"EdgeMultiplicity"_s);
         QVERIFY(multiplicity.isValid());
         QCOMPARE(model->get(multiplicity), u"EdgeMultiplicity"_s);
-        QCOMPARE(model->data(multiplicity, roleFor("elementType")).toString(), u"Edge"_s);
-        QCOMPARE(model->data(multiplicity, roleFor("valueType")).toString(), u"Numerical"_s);
-        QCOMPARE(model->data(multiplicity, roleFor("userDefined")).toString(), u"Calculated"_s);
+        QCOMPARE(model->data(multiplicity, roleFor("elementType")).toString(), TestEnvironment::translated("Edge"));
+        QCOMPARE(model->data(multiplicity, roleFor("valueType")).toString(), TestEnvironment::translated("Numerical"));
+        QCOMPARE(model->data(multiplicity, roleFor("userDefined")).toString(),
+            TestEnvironment::translated("Calculated"));
         QCOMPARE(model->data(multiplicity, roleFor("editable")).toBool(), false);
         QCOMPARE(model->data(multiplicity, roleFor("hasChildren")).toBool(), false);
         QCOMPARE(model->data(multiplicity, roleFor("hasParameter")).toBool(), false);
@@ -1181,12 +1211,12 @@ private slots:
         const auto kind = nodes->find(u"kind"_s);
         QVERIFY(kind.isValid());
         QVERIFY(!nodes->parent(kind).isValid());
-        QCOMPARE(nodes->data(kind, roleFor("valueType")).toString(), u"Textual"_s);
-        QCOMPARE(nodes->data(kind, roleFor("userDefined")).toString(), u"User Defined"_s);
+        QCOMPARE(nodes->data(kind, roleFor("valueType")).toString(), TestEnvironment::translated("Textual"));
+        QCOMPARE(nodes->data(kind, roleFor("userDefined")).toString(), TestEnvironment::translated("User Defined"));
         QCOMPARE(nodes->data(kind, roleFor("editable")).toBool(), true);
         QCOMPARE(nodes->data(kind, roleFor("hasSharedValues")).toBool(), true);
         QCOMPARE(nodes->data(kind, roleFor("searchable")).toBool(), true);
-        QCOMPARE(nodes->data(kind, roleFor("elementType")).toString(), u"Node"_s);
+        QCOMPARE(nodes->data(kind, roleFor("elementType")).toString(), TestEnvironment::translated("Node"));
     }
 
     // A matrix, as the dialog for opening one configures the generic plugin
@@ -1541,7 +1571,8 @@ private slots:
         }));
         QCOMPARE(_document->transforms(), QStringList{u"[locked] RemoveNodes where $score > 3"_s});
         QCOMPARE(graph().numNodes(), 3u);
-        QVERIFY(_document->property("nextUndoAction").toString().endsWith(u"Apply Transform Flags"_s));
+        QCOMPARE(_document->property("nextUndoAction").toString(),
+            TestEnvironment::translated("&Undo %1").arg(TestEnvironment::translated("Apply Transform Flags")));
 
         QVERIFY(execute([this] { _document->undo(); }));
         QCOMPARE(_document->transforms(), QStringList{u"RemoveNodes where $score > 3"_s});
@@ -1637,7 +1668,7 @@ private slots:
 
         QVERIFY(QTest::qWaitFor([this] { return _document->property("commandIsCancellable").toBool(); }, Timeout));
         QVERIFY(_document->busy());
-        QCOMPARE(_document->property("commandVerb").toString(), u"Test Command"_s);
+        QCOMPARE(_document->property("commandVerb").toString(), TestEnvironment::translated("Test Command"));
         QVERIFY(!_document->property("commandIsCancelling").toBool());
 
         _document->cancelCommand();
@@ -1667,10 +1698,12 @@ private slots:
                 u"Error"_s : u"Not an error"_s, info.value(u"alertText"_s).toString());
         };
 
-        QCOMPARE(alert(0), u"Error: Visualisation doesn't support attribute type"_s);
-        QCOMPARE(alert(1), u"Error: Attribute 'nope' doesn't exist"_s);
-        QCOMPARE(alert(2), u"Error: Visualisation channel 'Nope' doesn't exist"_s);
-        QCOMPARE(alert(3), u"Error: Attribute 'NodePageRank' doesn't exist"_s);
+        using TestEnvironment::translated;
+        auto error = [](const QString& text) { return u"Error: %1"_s.arg(text); };
+        QCOMPARE(alert(0), error(translated("Visualisation doesn't support attribute type")));
+        QCOMPARE(alert(1), error(translated("Attribute '%1' doesn't exist").arg(u"nope"_s)));
+        QCOMPARE(alert(2), error(translated("Visualisation channel '%1' doesn't exist").arg(u"Nope"_s)));
+        QCOMPARE(alert(3), error(translated("Attribute '%1' doesn't exist").arg(u"NodePageRank"_s)));
         QCOMPARE(_document->visualisationInfoAtIndex(4).value(u"alertType"_s).toInt(), static_cast<int>(AlertType::None));
     }
 

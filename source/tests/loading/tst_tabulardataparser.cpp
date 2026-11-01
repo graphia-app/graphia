@@ -274,7 +274,8 @@ private slots:
         QVERIFY(parse(parser, write(u"matrix.csv"_s, "a,b\nc,d\n")));
 
         QVERIFY(parser.property("failed").toBool());
-        QCOMPARE(parser.property("failureReason").toString(), u"Matrix has non-numeric values."_s);
+        QCOMPARE(parser.property("failureReason").toString(),
+            TestEnvironment::translated("Matrix has non-numeric values."));
     }
 };
 

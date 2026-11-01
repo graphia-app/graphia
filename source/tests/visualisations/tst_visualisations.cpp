@@ -36,9 +36,10 @@
 #include <QStringList>
 #include <QVariantMap>
 
-#include <array>
 #include <map>
 #include <memory>
+#include <tuple>
+#include <vector>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -279,27 +280,41 @@ private slots:
         const ColorVisualisationChannelFactory colour;
         const TextColorVisualisationChannelFactory textColour;
 
-        const std::array<const VisualisationChannelFactory*, 2> factories{&colour, &textColour};
+        // Each with its descriptions of a gradient and of a palette
+        const std::vector<std::tuple<const VisualisationChannelFactory*, const char*, const char*>> factories
+        {
+            {&colour,
+                "The attribute will be visualised by continuously varying the colour of the %1 using a gradient.",
+                "This visualisation will be applied by assigning a colour to the %1 which represents "
+                "unique values of the attribute."},
+            {&textColour,
+                "The attribute will be visualised by continuously varying the colour of the %1 text "
+                "using a gradient.",
+                "This visualisation will be applied by assigning a colour to the %1 text which represents "
+                "unique values of the attribute."}
+        };
 
-        for(const auto* factory : factories)
+        const auto node = TestEnvironment::translated("Node").toLower();
+        const auto edge = TestEnvironment::translated("Edge").toLower();
+
+        for(const auto& [factory, gradientDescription, paletteDescription] : factories)
         {
             for(auto valueType : {ValueType::Int, ValueType::Float})
             {
                 QCOMPARE(factory->defaultParameters(valueType),
                     (QVariantMap{{u"gradient"_s, u::pref(u"visuals/defaultGradient"_s).toString()}}));
-                QVERIFY(factory->description(ElementType::Node, valueType).contains(u"gradient"_s));
+                QCOMPARE(factory->description(ElementType::Node, valueType),
+                    TestEnvironment::translated(gradientDescription).arg(node));
             }
 
             QCOMPARE(factory->defaultParameters(ValueType::String),
                 (QVariantMap{{u"palette"_s, u::pref(u"visuals/defaultPalette"_s).toString()}}));
-            QVERIFY(factory->description(ElementType::Edge, ValueType::String).contains(u"edge"_s));
+            QCOMPARE(factory->description(ElementType::Edge, ValueType::String),
+                TestEnvironment::translated(paletteDescription).arg(edge));
 
             QVERIFY(factory->defaultParameters(ValueType::Unknown).isEmpty());
             QVERIFY(factory->description(ElementType::Node, ValueType::Unknown).isEmpty());
         }
-
-        QVERIFY(textColour.description(ElementType::Node, ValueType::Float).contains(u"text"_s));
-        QVERIFY(!colour.description(ElementType::Node, ValueType::Float).contains(u"text"_s));
     }
 
     // What the dialog for creating a visualisation asks of each channel
@@ -321,23 +336,30 @@ private slots:
         // A description for each channel, which says when it can't show the attribute
         auto descriptions = graphModel.visualisationDescription(u"kind"_s,
             {u"Colour"_s, u"Size"_s, u"Text"_s, u"SharedText"_s});
+        const auto node = TestEnvironment::translated("Node").toLower();
+        const auto unsupported =
+            TestEnvironment::translated("This visualisation channel is not supported for the attribute type.");
         QCOMPARE(descriptions.size(), 4);
-        QCOMPARE(descriptions.at(0), u"This visualisation will be applied by assigning a colour "
-            "to the node which represents unique values of the attribute."_s);
-        QCOMPARE(descriptions.at(1), u"This visualisation channel is not supported for the attribute type."_s);
-        QCOMPARE(descriptions.at(2), u"The attribute will be visualised as text."_s);
-        QCOMPARE(descriptions.at(3), u"Groups of nodes that share an attribute value will be labelled as such."_s);
+        QCOMPARE(descriptions.at(0), TestEnvironment::translated("This visualisation will be applied by "
+            "assigning a colour to the %1 which represents unique values of the attribute.").arg(node));
+        QCOMPARE(descriptions.at(1), unsupported);
+        QCOMPARE(descriptions.at(2), TestEnvironment::translated("The attribute will be visualised as text."));
+        QCOMPARE(descriptions.at(3),
+            TestEnvironment::translated("Groups of nodes that share an attribute value will be labelled as such."));
 
         descriptions = graphModel.visualisationDescription(u"score"_s,
             {u"Colour"_s, u"Size"_s, u"TextColour"_s, u"TextSize"_s, u"SharedText"_s});
         QCOMPARE(descriptions.size(), 5);
-        QCOMPARE(descriptions.at(0), u"The attribute will be visualised by continuously varying "
-            "the colour of the node using a gradient."_s);
-        QCOMPARE(descriptions.at(1), u"The attribute will be visualised by varying the size of the node."_s);
-        QCOMPARE(descriptions.at(2), u"The attribute will be visualised by continuously varying "
-            "the colour of the node text using a gradient."_s);
-        QCOMPARE(descriptions.at(3), u"The attribute will be visualised by varying the size of the node text."_s);
-        QCOMPARE(descriptions.at(4), u"This visualisation channel is not supported for the attribute type."_s);
+        QCOMPARE(descriptions.at(0), TestEnvironment::translated("The attribute will be visualised by "
+            "continuously varying the colour of the %1 using a gradient.").arg(node));
+        QCOMPARE(descriptions.at(1),
+            TestEnvironment::translated("The attribute will be visualised by varying the size of the %1.").arg(node));
+        QCOMPARE(descriptions.at(2), TestEnvironment::translated("The attribute will be visualised by "
+            "continuously varying the colour of the %1 text using a gradient.").arg(node));
+        QCOMPARE(descriptions.at(3),
+            TestEnvironment::translated("The attribute will be visualised by varying the size of the %1 text.")
+                .arg(node));
+        QCOMPARE(descriptions.at(4), unsupported);
 
         QCOMPARE(graphModel.visualisationDescription(u"missing"_s, {u"Colour"_s}), QStringList{});
         QCOMPARE(graphModel.visualisationDescription(u"score"_s, {u"Unknown"_s}), QStringList{});

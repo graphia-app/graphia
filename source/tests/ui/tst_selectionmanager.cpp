@@ -259,15 +259,15 @@ private slots:
         QCOMPARE(_selectionManager->numNodesSelectedAsString(), QString());
 
         _selectionManager->selectNode(id(u"a"_s));
-        QCOMPARE(_selectionManager->numNodesSelectedAsString(), u"Selected a"_s);
+        QCOMPARE(_selectionManager->numNodesSelectedAsString(), TestEnvironment::translated("Selected %1").arg(u"a"_s));
 
         _selectionManager->selectNode(id(u"b"_s));
-        QCOMPARE(_selectionManager->numNodesSelectedAsString(), u"2 Nodes Selected"_s);
+        QCOMPARE(_selectionManager->numNodesSelectedAsString(), TestEnvironment::translated("%n Nodes Selected", nullptr, 2));
 
         _selectionManager->clearNodeSelection();
         _model->graphModel().setNodeName(id(u"e"_s), {});
         _selectionManager->selectNode(id(u"e"_s));
-        QCOMPARE(_selectionManager->numNodesSelectedAsString(), u"1 Node Selected"_s);
+        QCOMPARE(_selectionManager->numNodesSelectedAsString(), TestEnvironment::translated("1 Node Selected"));
     }
 
     void suppressSignals()

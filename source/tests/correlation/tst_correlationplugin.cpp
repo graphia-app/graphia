@@ -159,6 +159,13 @@ void downgrade(json& data, int version)
         data["pearsonValues"] = values;
     }
 }
+
+// The log's description of the data's position and size in the file
+QString dataFrame(int column, int row, int width, int height)
+{
+    return TestEnvironment::translated("Data Frame: [ Column: %1 Row: %2 Width: %3 Height: %4 ]")
+        .arg(column).arg(row).arg(width).arg(height);
+}
 } // namespace
 
 // The correlation plugin, used through a Document, as in the UI
@@ -699,9 +706,11 @@ private slots:
             return names;
         };
 
+        const auto batchImported = TestEnvironment::translated("Annotation %1 Imported").arg(u"Batch"_s);
+
         QVERIFY(importAnnotations({2}, false));
         QCOMPARE(annotationNames(), (QStringList{u"Batch"_s, u"Kind"_s}));
-        QCOMPARE(_document->property("status").toString(), u"Annotation Batch Imported"_s);
+        QCOMPARE(_document->property("status").toString(), batchImported);
 
         QVERIFY(execute([this] { _document->undo(); }));
         QCOMPARE(annotationNames(), QStringList{u"Kind"_s});
@@ -712,7 +721,7 @@ private slots:
         // Replacing an annotation of the same type, here numbers
         QVERIFY(importAnnotations({2}, true));
         QCOMPARE(annotationNames(), (QStringList{u"Batch"_s, u"Kind"_s}));
-        QCOMPARE(_document->property("status").toString(), u"Annotation Batch Imported"_s);
+        QCOMPARE(_document->property("status").toString(), batchImported);
 
         // Not replacing an existing annotation gives the import a name of its own
         QVERIFY(importAnnotations({1}, false));
@@ -721,6 +730,8 @@ private slots:
     // The data is scaled, normalised, clipped and imputed as the import dialog's options say
     void preprocessing_data()
     {
+        using TestEnvironment::translated;
+
         QTest::addColumn<QVariantMap>("parameters");
         QTest::addColumn<QString>("attribute");
         QTest::addColumn<QString>("row");
@@ -729,14 +740,14 @@ private slots:
 
         // c1 is 1, 2, 6, 1, 6, and c6 is 6, 12, 1, 6, 1
         QTest::newRow("Min/max") << QVariantMap{{u"normalise"_s, u"MinMax"_s}} <<
-            u"DataValue.c1"_s << u"r2"_s << 0.2 << u"Normalisation: Min/Max"_s;
+            u"DataValue.c1"_s << u"r2"_s << 0.2 << translated("Normalisation: Min/Max");
 
         // Half the smallest positive value is added, so that zeros can be logged
         QTest::newRow("Log2") << QVariantMap{{u"scaling"_s, u"Log2"_s}} <<
-            u"DataValue.c1"_s << u"r2"_s << std::log2(2.5) << u"Scaling: Log2(x + ε)"_s;
+            u"DataValue.c1"_s << u"r2"_s << std::log2(2.5) << translated("Scaling: Log2(x + ε)");
 
         QTest::newRow("Clipped") << QVariantMap{{u"clippingType"_s, u"Constant"_s}, {u"clippingValue"_s, 5.0}} <<
-            u"DataValue.c6"_s << u"r2"_s << 5.0 << u"Clipping: Constant (5)"_s;
+            u"DataValue.c6"_s << u"r2"_s << 5.0 << translated("Clipping: Constant (%1)").arg(5);
     }
 
     void preprocessing()
@@ -755,13 +766,16 @@ private slots:
     // Missing values are imputed
     void imputation_data()
     {
+        using TestEnvironment::translated;
+
         QTest::addColumn<QString>("missingDataType");
         QTest::addColumn<double>("value");
         QTest::addColumn<QString>("log");
 
-        QTest::newRow("Constant") << u"Constant"_s << 7.0 << u"Imputation: Constant (7)"_s;
-        QTest::newRow("Column mean") << u"ColumnAverage"_s << 3.0 << u"Imputation: Column Mean"_s;
-        QTest::newRow("Row interpolation") << u"RowInterpolation"_s << 3.0 << u"Imputation: Row Interpolate"_s;
+        auto imputation = [](const QString& method) { return translated("Imputation: %1").arg(method); };
+        QTest::newRow("Constant") << u"Constant"_s << 7.0 << imputation(translated("Constant (%1)").arg(7));
+        QTest::newRow("Column mean") << u"ColumnAverage"_s << 3.0 << imputation(translated("Column Mean"));
+        QTest::newRow("Row interpolation") << u"RowInterpolation"_s << 3.0 << imputation(translated("Row Interpolate"));
     }
 
     void imputation()
@@ -852,10 +866,12 @@ private slots:
         QMetaObject::invokeMethod(model, "columnIsNumerical", Q_RETURN_ARG(bool, isNumerical), Q_ARG(QString, dataColumn));
         QVERIFY(!isNumerical);
 
+        using TestEnvironment::translated;
         const auto log = _document->property("log").toString();
-        QVERIFY(log.contains(u"Data Frame: [ Column: 1 Row: 1 Width: 3 Height: 4 ]"_s));
-        QVERIFY(log.contains(u"Minimum Correlation Value: 0.5"_s));
-        QVERIFY2(log.contains(u"Discrete Correlation Metric: Simple Matching Coefficient"_s), qPrintable(log));
+        QVERIFY(log.contains(dataFrame(1, 1, 3, 4)));
+        QVERIFY(log.contains(translated("Minimum Correlation Value: %1").arg(u"0.5"_s)));
+        QVERIFY2(log.contains(translated("Discrete Correlation Metric: %1")
+            .arg(translated("Simple Matching Coefficient"))), qPrintable(log));
 
         // The data is saved with the Document
         const auto edges = edgeNames();
@@ -881,7 +897,7 @@ private slots:
         QCOMPARE(graphModel()->attributeValueByName(u"Kind"_s).stringValueOf(nodeId(u"c4"_s)), u"y"_s);
         QCOMPARE(plugin()->property("numContinuousColumns").toInt(), 5);
         QCOMPARE(plugin()->property("columnAnnotationNames").toStringList(), QStringList{u"Group"_s});
-        QVERIFY(_document->property("log").toString().contains(u"Transposed"_s));
+        QVERIFY(_document->property("log").toString().contains(TestEnvironment::translated("Transposed")));
     }
 
     // Columns with the same name are made unique
@@ -914,13 +930,13 @@ private slots:
 
         QTest::newRow("position and size") <<
             QVariantMap{{u"x"_s, 2}, {u"y"_s, 2}, {u"width"_s, 6}, {u"height"_s, 5}} << 5 << 6 <<
-            u"Data Frame: [ Column: 2 Row: 2 Width: 6 Height: 5 ]"_s;
+            dataFrame(2, 2, 6, 5);
         QTest::newRow("edges") <<
             QVariantMap{{u"left"_s, 2}, {u"top"_s, 2}, {u"right"_s, 4}, {u"bottom"_s, 6}} << 5 << 3 <<
-            u"Data Frame: [ Column: 2 Row: 2 Width: 3 Height: 5 ]"_s;
+            dataFrame(2, 2, 3, 5);
         QTest::newRow("fewer rows") <<
             QVariantMap{{u"x"_s, 2}, {u"y"_s, 2}, {u"width"_s, 6}, {u"height"_s, 3}} << 3 << 6 <<
-            u"Data Frame: [ Column: 2 Row: 2 Width: 6 Height: 3 ]"_s;
+            dataFrame(2, 2, 6, 3);
     }
 
     void dataRectAsMap()
@@ -1151,24 +1167,26 @@ private slots:
     // What the import dialog shows of each type of correlation
     void correlationInfo_data()
     {
+        using TestEnvironment::translated;
+
         QTest::addColumn<int>("type");
         QTest::addColumn<QString>("name");
         QTest::addColumn<QString>("attributeName");
 
         QTest::newRow("Pearson") << static_cast<int>(CorrelationType::Pearson) <<
-            u"Pearson"_s << u"PearsonCorrelationValue"_s;
+            translated("Pearson") << u"PearsonCorrelationValue"_s;
         QTest::newRow("Spearman") << static_cast<int>(CorrelationType::SpearmanRank) <<
-            u"Spearman Rank"_s << u"SpearmanRankCorrelationValue"_s;
+            translated("Spearman Rank") << u"SpearmanRankCorrelationValue"_s;
         QTest::newRow("Euclidean") << static_cast<int>(CorrelationType::EuclideanSimilarity) <<
-            u"Euclidean Similarity"_s << u"EuclideanSimilarity"_s;
+            translated("Euclidean Similarity") << u"EuclideanSimilarity"_s;
         QTest::newRow("Cosine") << static_cast<int>(CorrelationType::CosineSimilarity) <<
-            u"Cosine Similarity"_s << u"CosineSimilarity"_s;
+            translated("Cosine Similarity") << u"CosineSimilarity"_s;
         QTest::newRow("Bicor") << static_cast<int>(CorrelationType::Bicor) <<
-            u"Bicor"_s << u"BicorCorrelationValue"_s;
+            translated("Bicor") << u"BicorCorrelationValue"_s;
         QTest::newRow("Jaccard") << static_cast<int>(CorrelationType::Jaccard) <<
-            u"Jaccard"_s << u"JaccardCorrelationValue"_s;
+            translated("Jaccard") << u"JaccardCorrelationValue"_s;
         QTest::newRow("SMC") << static_cast<int>(CorrelationType::SMC) <<
-            u"Simple Matching Coefficient"_s << u"SimpleMatchingCoefficient"_s;
+            translated("Simple Matching Coefficient") << u"SimpleMatchingCoefficient"_s;
     }
 
     void correlationInfo()
@@ -1195,8 +1213,10 @@ private slots:
     {
         // A file with no delimiters in it, so of no recognisable type
         const auto reasons = _application->failureReasons(write(u"undelimited.csv"_s, "just some words\n"));
-        QVERIFY2(std::ranges::any_of(reasons, [](const auto& reason)
-            { return reason.contains(u"its content could not be determined"_s); }), qPrintable(reasons.join(u'\n')));
+        const auto undetermined = TestEnvironment::translated("%1 has an extension that indicates it is a '%2', "
+            "however its content could not be determined.").arg(u"undelimited.csv"_s,
+            TestEnvironment::translated("Correlation CSV File"));
+        QVERIFY2(reasons.contains(undetermined), qPrintable(reasons.join(u'\n')));
     }
 
     // A file the parser for its type can't read fails to load
@@ -1208,18 +1228,23 @@ private slots:
     // The log describes how the data was processed
     void preprocessingLog_data()
     {
+        using TestEnvironment::translated;
+
         QTest::addColumn<QVariantMap>("parameters");
         QTest::addColumn<QString>("log");
 
         QTest::newRow("Winsorization") <<
             QVariantMap{{u"clippingType"_s, u"Winsorization"_s}, {u"clippingValue"_s, 90.0}} <<
-            u"Clipping: Winsorization (90 percentile)"_s;
-        QTest::newRow("Log10") << QVariantMap{{u"scaling"_s, u"Log10"_s}} << u"Scaling: Log10(x + ε)"_s;
-        QTest::newRow("AntiLog2") << QVariantMap{{u"scaling"_s, u"AntiLog2"_s}} << u"Scaling: AntiLog2(x)"_s;
-        QTest::newRow("AntiLog10") << QVariantMap{{u"scaling"_s, u"AntiLog10"_s}} << u"Scaling: AntiLog10(x)"_s;
-        QTest::newRow("Mean") << QVariantMap{{u"normalise"_s, u"Mean"_s}} << u"Normalisation: Mean"_s;
-        QTest::newRow("Quantile") << QVariantMap{{u"normalise"_s, u"Quantile"_s}} << u"Normalisation: Quantile"_s;
-        QTest::newRow("Softmax") << QVariantMap{{u"normalise"_s, u"Softmax"_s}} << u"Normalisation: Softmax Scaling"_s;
+            translated("Clipping: Winsorization (%1 percentile)").arg(90);
+        QTest::newRow("Log10") << QVariantMap{{u"scaling"_s, u"Log10"_s}} << translated("Scaling: Log10(x + ε)");
+        QTest::newRow("AntiLog2") << QVariantMap{{u"scaling"_s, u"AntiLog2"_s}} << translated("Scaling: AntiLog2(x)");
+        QTest::newRow("AntiLog10") << QVariantMap{{u"scaling"_s, u"AntiLog10"_s}} <<
+            translated("Scaling: AntiLog10(x)");
+        QTest::newRow("Mean") << QVariantMap{{u"normalise"_s, u"Mean"_s}} << translated("Normalisation: Mean");
+        QTest::newRow("Quantile") << QVariantMap{{u"normalise"_s, u"Quantile"_s}} <<
+            translated("Normalisation: Quantile");
+        QTest::newRow("Softmax") << QVariantMap{{u"normalise"_s, u"Softmax"_s}} <<
+            translated("Normalisation: Softmax Scaling");
     }
 
     void preprocessingLog()

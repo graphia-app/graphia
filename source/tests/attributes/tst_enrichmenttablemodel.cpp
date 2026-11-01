@@ -83,8 +83,8 @@ private slots:
         QCOMPARE(model.columnCount(), static_cast<int>(Results::NumResultColumns));
 
         // The first row is the header, which names the selections generically until they're given names
-        QCOMPARE(model.data(0, Results::SelectionA).toString(), u"Selection A"_s);
-        QCOMPARE(model.data(0, Results::SelectionB).toString(), u"Selection B"_s);
+        QCOMPARE(model.data(0, Results::SelectionA).toString(), TestEnvironment::translated("Selection A"));
+        QCOMPARE(model.data(0, Results::SelectionB).toString(), TestEnvironment::translated("Selection B"));
 
         model.setSelectionDisplayNames(u"Attribute A"_s, u"Attribute B"_s);
         QCOMPARE(model.data(0, Results::SelectionA).toString(), u"Attribute A"_s);

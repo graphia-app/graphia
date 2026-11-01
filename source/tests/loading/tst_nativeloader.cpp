@@ -32,6 +32,7 @@
 
 #include <QTest>
 #include <QByteArray>
+#include <QCoreApplication>
 #include <QFile>
 #include <QString>
 #include <QStringList>
@@ -769,22 +770,26 @@ private slots:
 
         auto nodeNameNotString = body(version);
         nodeNameNotString["nodeNames"].push_back({{"id", 0}, {"value", json::array()}});
+        // What's invalid follows the reason
+        const auto invalidContent = TestEnvironment::translated("Invalid content: %1").arg(QString());
         QTest::newRow("Node name not a string") << nativeFile(header(version), nodeNameNotString) <<
-            u"Invalid content"_s;
+            invalidContent;
 
         auto positionNotNumbers = body(version);
         positionNotNumbers["layout"]["positions"][0]["value"] = {"x", "y", "z"};
         QTest::newRow("Position not numbers") << nativeFile(header(version), positionNotNumbers) <<
-            u"Invalid content"_s;
+            invalidContent;
 
         auto pluginUiDataNumber = body(version);
         pluginUiDataNumber["pluginUiData"] = 1;
         QTest::newRow("Plugin UI data a number") << nativeFile(header(version), pluginUiDataNumber) << QString();
 
         QTest::newRow("Newer version") << nativeFile(header(version + 1), body(version)) <<
-            u"newer version of"_s;
+            TestEnvironment::translated("It was saved using a newer version of %1. "
+                "Please visit the %1 website to upgrade.").arg(QCoreApplication::applicationName());
         QTest::newRow("Newer plugin data version") << nativeFile(header(version, 2), body(version)) <<
-            u"newer version of the plugin"_s;
+            TestEnvironment::translated("Produced using a newer version of the plugin '%1'. Please upgrade.")
+                .arg(_plugin.displayName());
 
         auto tutorial = readFile(QFINDTESTDATA("../../app/examples/Tutorial.graphia"));
         QTest::newRow("Truncated compressed") << tutorial.left(tutorial.size() / 2) << QString();
