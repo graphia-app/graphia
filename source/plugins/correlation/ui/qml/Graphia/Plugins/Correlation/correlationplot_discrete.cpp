@@ -131,8 +131,7 @@ void CorrelationPlot::configureDiscreteAxisRect()
 
             const auto& keys = u::keysFor(m);
             auto value = tr("%1, %2 and %3 more…")
-                .arg(keys.at(0), keys.at(1))
-                .arg(m.size() - 2);
+                .arg(keys.at(0), keys.at(1), QString::number(m.size() - 2));
 
             addBars(value, static_cast<double>(totalSize), Qt::black);
         }

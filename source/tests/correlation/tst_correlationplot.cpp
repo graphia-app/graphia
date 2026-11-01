@@ -1435,12 +1435,12 @@ private slots:
         QCOMPARE(columnNames(), (QStringList{u"c"_s, u"a"_s, u"b"_s}));
     }
 
-    // When there are many values, a column is one bar
+    // When there are many values, a column is one bar, named after the first values as they are
     void manyDiscreteValues()
     {
         QByteArray csv = "Name,a,b\n";
         for(int i = 0; i < 16; i++)
-            csv.append(u"r%1,v%2,w\n"_s.arg(i).arg(i, 2, 10, QChar(u'0')).toUtf8());
+            csv.append("r" + QByteArray::number(i) + ",%3v" + QByteArray::number(i).rightJustified(2, '0') + ",w\n");
 
         QVERIFY(open(csv,
         {
@@ -1454,7 +1454,7 @@ private slots:
         u::iota(rows, 0);
         QVERIFY(createPlot(rows));
 
-        const auto truncated = TestEnvironment::translated("%1, %2 and %3 more…").arg(u"v00"_s, u"v01"_s).arg(14);
+        const auto truncated = TestEnvironment::translated("%1, %2 and %3 more…").arg(u"%3v00"_s, u"%3v01"_s, u"14"_s);
         QCOMPARE(plottableNames<QCPBars>(), (QStringList{truncated, u"w"_s}));
         QCOMPARE(values<QCPBars>(truncated), QStringList{u"16"_s});
     }
