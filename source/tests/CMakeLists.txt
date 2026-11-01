@@ -28,9 +28,13 @@ else()
         Qt6::Svg Qt6::Widgets Qt6::Xml Qt6::Network)
 endif()
 
+# An object library, so that its startup function is linked in without anything referring to it
+add_library(scrambling_translator OBJECT common/scramblingtranslator.cpp)
+target_link_libraries(scrambling_translator PRIVATE Qt6::Core)
+
 function(add_unit_test NAME)
     qt_add_executable(${NAME} ${ARGN})
-    target_link_libraries(${NAME} PRIVATE ${APP_CORE_FOR_TESTS} Qt6::Test)
+    target_link_libraries(${NAME} PRIVATE ${APP_CORE_FOR_TESTS} Qt6::Test scrambling_translator)
 
     add_test(NAME ${NAME} COMMAND ${NAME})
     # Without a console, Qt and QtTest log to the debugger or the journal instead

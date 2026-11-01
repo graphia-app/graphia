@@ -54,6 +54,12 @@ inline void initialise()
     // So that anything random gives the same results every time
     u::setRandomSeed(1);
 }
+
+// Text as the application shows it, through whichever translators are installed
+inline QString translated(const char* sourceText, const char* disambiguation = nullptr, int n = -1)
+{
+    return QCoreApplication::translate("", sourceText, disambiguation, n);
+}
 } // namespace TestEnvironment
 
 #endif // TESTENVIRONMENT_H
