@@ -412,6 +412,8 @@ private slots:
             << u"Score \"raw\""_s << u""_s << u"\"Score \\\"raw\\\"\""_s << u"Score \\raw\\"_s; // NOLINT modernize-raw-string-literal
         QTest::newRow("dot in quotes") << uR"($"a.b".c)"_s << T::None << u"a.b"_s << u"c"_s
             << uR"("a.b".c)"_s << u"a\u2009›\u2009b\u2009›\u2009c"_s;
+        QTest::newRow("not ASCII") << u"$\"新しい属性\""_s << T::None << u"新しい属性"_s << u""_s
+            << u"\"新しい属性\""_s << u"新しい属性"_s;
     }
 
     void parseAttributeName()
@@ -430,6 +432,31 @@ private slots:
 
         QCOMPARE(Attribute::attributeNameForExpression(name), forExpression);
         QCOMPARE(Attribute::prettify(name), prettified);
+    }
+
+    void nameIsValid_data()
+    {
+        QTest::addColumn<QString>("name");
+        QTest::addColumn<bool>("valid");
+
+        QTest::newRow("ASCII") << u"New Attribute"_s << true;
+        QTest::newRow("underscores and digits") << u"_name_2"_s << true;
+        QTest::newRow("accented") << u"Nouvel attribut élevé"_s << true;
+        QTest::newRow("Japanese") << u"新しい属性"_s << true;
+        QTest::newRow("combining marks") << u"नया गुण"_s << true;
+        QTest::newRow("empty") << u""_s << false;
+        QTest::newRow("leading digit") << u"2nd"_s << false;
+        QTest::newRow("leading space") << u" name"_s << false;
+        QTest::newRow("punctuation") << u"a-b"_s << false;
+        QTest::newRow("quote") << u"a\"b"_s << false;
+    }
+
+    void nameIsValid()
+    {
+        QFETCH(const QString, name);
+        QFETCH(const bool, valid);
+
+        QCOMPARE(GraphModel::attributeNameIsValid(name), valid);
     }
 
     void edgeNodesAttribute()
