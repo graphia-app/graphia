@@ -28,6 +28,29 @@
 
 using namespace Qt::Literals::StringLiterals;
 
+QString u::translationLanguage(const QStringList& uiLanguages,
+    const std::function<bool(const QString&)>& loadCatalogue)
+{
+    for(const auto& language : uiLanguages)
+    {
+        const QLocale locale(language);
+
+        if(loadCatalogue(locale.name()))
+            return locale.name();
+
+        // Since en_GB is the source language and thus no translation exists for it,
+        // we won't have been able to successfully load a catalogue for it. The next
+        // step is to fall back to en_US, which we obviously don't want, so if we want
+        // any English that hasn't loaded, we default to not doing any translation.
+        // Note that this will also apply to non-British, non-American Englishes, where
+        // en_GB is typically a better fit, hence the lack of an explicit en_GB check.
+        if(locale.language() == QLocale::English)
+            return {};
+    }
+
+    return {};
+}
+
 // The plugin catalogue is only installed in the language of the app
 void Translator::addPluginCatalogue(const QString& pluginName, const QObject* plugin)
 {
@@ -72,27 +95,11 @@ void u::installTranslator()
 {
     auto translator = std::make_unique<Translator>(QCoreApplication::instance());
 
-    const auto languages = QLocale().uiLanguages();
+    const auto language = translationLanguage(QLocale().uiLanguages(), [&translator](const QString& name)
+        { return translator->load(u":/i18n/graphia_%1"_s.arg(name)); });
 
-    for(const auto& language : languages)
-    {
-        const QLocale locale(language);
-
-        if(translator->load(u":/i18n/graphia_%1"_s.arg(locale.name())))
-        {
-            QCoreApplication::installTranslator(translator.release());
-            return;
-        }
-
-        // Since en_GB is the source language and thus no translation exists for it,
-        // we won't have been able to successfully load a catalogue for it. The next
-        // step is to fall back to en_US, which we obviously don't want, so if we want
-        // any English that hasn't loaded, we default to not doing any translation.
-        // Note that this will also apply to non-British, non-American Englishes, where
-        // en_GB is typically a better fit, hence the lack of an explicit en_GB check.
-        if(locale.language() == QLocale::English)
-            return;
-    }
+    if(!language.isEmpty())
+        QCoreApplication::installTranslator(translator.release());
 }
 
 void u::installPluginTranslator(const QString& pluginName, const QObject* plugin)

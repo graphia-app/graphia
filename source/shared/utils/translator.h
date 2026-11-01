@@ -22,8 +22,10 @@
 
 #include <QReadWriteLock>
 #include <QString>
+#include <QStringList>
 #include <QTranslator>
 
+#include <functional>
 #include <memory>
 #include <vector>
 
@@ -57,6 +59,8 @@ private:
 
 namespace u
 {
+    QString translationLanguage(const QStringList& uiLanguages,
+        const std::function<bool(const QString&)>& loadCatalogue);
     void installTranslator();
     void installPluginTranslator(const QString& pluginName, const QObject* plugin);
 } // namespace u
