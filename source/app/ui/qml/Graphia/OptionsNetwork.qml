@@ -82,12 +82,9 @@ Item
             emailField.text = "";
         }
 
-        if(proxy.type === "disabled")
-            proxyTypeComboBox.currentIndex = proxyTypeComboBox.model.indexOf(qsTr("Disabled"));
-        else if(proxy.type === "http")
-            proxyTypeComboBox.currentIndex = proxyTypeComboBox.model.indexOf(qsTr("HTTP"));
-        else if(proxy.type === "socks5")
-            proxyTypeComboBox.currentIndex = proxyTypeComboBox.model.indexOf(qsTr("SOCKS5"));
+        let proxyTypeIndex = proxyTypeComboBox.indexOfValue(proxy.type);
+        if(proxyTypeIndex >= 0)
+            proxyTypeComboBox.currentIndex = proxyTypeIndex;
     }
 
     ButtonGroup
@@ -236,26 +233,28 @@ Item
             {
                 id: proxyTypeComboBox
 
-                model: [qsTr("Disabled"), qsTr("HTTP"), qsTr("SOCKS5")]
+                model:
+                [
+                    {text: qsTr("Disabled"), value: "disabled"},
+                    {text: qsTr("HTTP"), value: "http"},
+                    {text: qsTr("SOCKS5"), value: "socks5"}
+                ]
+                textRole: "text"
+                valueRole: "value"
 
                 onCurrentIndexChanged:
                 {
-                    let v = model[currentIndex];
+                    let type = model[currentIndex].value;
 
                     if(proxyHostnameTextField.text.length === 0)
                     {
-                        if(v === qsTr("HTTP"))
+                        if(type === "http")
                             proxyPortTextField.text = "8080";
-                        else if(v === qsTr("SOCKS5"))
+                        else if(type === "socks5")
                             proxyPortTextField.text = "1080";
                     }
 
-                    if(v === qsTr("Disabled"))
-                        proxy.type = "disabled";
-                    else if(v === qsTr("HTTP"))
-                        proxy.type = "http";
-                    else if(v === qsTr("SOCKS5"))
-                        proxy.type = "socks5";
+                    proxy.type = type;
                 }
             }
 
