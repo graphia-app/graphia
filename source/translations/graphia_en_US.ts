@@ -581,7 +581,7 @@
         <translation>Loaded from %1, as type %2, using plugin %3 (version %4)</translation>
     </message>
     <message>
-        <location line="+72"/>
+        <location line="+71"/>
         <source>The plugin %1 does not provide a parser for %2. This is probably a bug, please report it to the developers.</source>
         <translation>The plugin %1 does not provide a parser for %2. This is probably a bug, please report it to the developers.</translation>
     </message>
@@ -621,7 +621,7 @@
         <translation>Loaded %1 (%2 nodes, %3 edges, %4 components)</translation>
     </message>
     <message>
-        <location line="+32"/>
+        <location line="+31"/>
         <source>Select All</source>
         <translation>Select All</translation>
     </message>
@@ -4895,21 +4895,6 @@ Supported data types: %2</translation>
         <translation>Branch Removal</translation>
     </message>
     <message>
-        <location filename="../app/ui/visualisations/colorvisualisationchannel.cpp" line="+61"/>
-        <source>The attribute will be visualised by continuously varying the colour of the %1 using a gradient.</source>
-        <translation>The attribute will be visualized by continuously varying the color of the %1 using a gradient.</translation>
-    </message>
-    <message>
-        <location line="+5"/>
-        <source>This visualisation will be applied by assigning a colour to the %1 which represents unique values of the attribute.</source>
-        <translation>This visualization will be applied by assigning a color to the %1 which represents unique values of the attribute.</translation>
-    </message>
-    <message>
-        <location filename="../app/ui/visualisations/sizevisualisationchannel.cpp" line="+32"/>
-        <source>The attribute will be visualised by varying the size of the %1.</source>
-        <translation>The attribute will be visualized by varying the size of the %1.</translation>
-    </message>
-    <message>
         <location filename="../app/ui/visualisations/sharedtextvisualisationchannel.cpp" line="+107"/>
         <source>Groups of nodes that share an attribute value will be labelled as such.</source>
         <translation>Groups of nodes that share an attribute value will be labeled as such.</translation>
@@ -4923,21 +4908,6 @@ Supported data types: %2</translation>
         <location line="+5"/>
         <source>The attribute will be visualised as text.</source>
         <translation>The attribute will be visualized as text.</translation>
-    </message>
-    <message>
-        <location filename="../app/ui/visualisations/textcolorvisualisationchannel.cpp" line="+47"/>
-        <source>The attribute will be visualised by continuously varying the colour of the %1 text using a gradient.</source>
-        <translation>The attribute will be visualized by continuously varying the color of the %1 text using a gradient.</translation>
-    </message>
-    <message>
-        <location line="+5"/>
-        <source>This visualisation will be applied by assigning a colour to the %1 text which represents unique values of the attribute.</source>
-        <translation>This visualization will be applied by assigning a color to the %1 text which represents unique values of the attribute.</translation>
-    </message>
-    <message>
-        <location filename="../app/ui/visualisations/textsizevisualisationchannel.cpp" line="+32"/>
-        <source>The attribute will be visualised by varying the size of the %1 text.</source>
-        <translation>The attribute will be visualized by varying the size of the %1 text.</translation>
     </message>
     <message>
         <location filename="../app/ui/visualisations/visualisationbuilder.cpp" line="+112"/>
@@ -5778,6 +5748,96 @@ Supported data types: %2</translation>
         <location filename="../app/loading/nativeloader.cpp" line="-296"/>
         <source>Invalid content: %1</source>
         <translation>Invalid content: %1</translation>
+    </message>
+    <message>
+        <location filename="../app/ui/visualisations/colorvisualisationchannel.cpp" line="+60"/>
+        <source>The attribute will be visualised by continuously varying the colour of the node using a gradient.</source>
+        <translation>The attribute will be visualized by continuously varying the color of the node using a gradient.</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>The attribute will be visualised by continuously varying the colour of the edge using a gradient.</source>
+        <translation>The attribute will be visualized by continuously varying the color of the edge using a gradient.</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>The attribute will be visualised by continuously varying the colour of the component using a gradient.</source>
+        <translation>The attribute will be visualized by continuously varying the color of the component using a gradient.</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>This visualisation will be applied by assigning a colour to the node which represents unique values of the attribute.</source>
+        <translation>This visualization will be applied by assigning a color to the node which represents unique values of the attribute.</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>This visualisation will be applied by assigning a colour to the edge which represents unique values of the attribute.</source>
+        <translation>This visualization will be applied by assigning a color to the edge which represents unique values of the attribute.</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>This visualisation will be applied by assigning a colour to the component which represents unique values of the attribute.</source>
+        <translation>This visualization will be applied by assigning a color to the component which represents unique values of the attribute.</translation>
+    </message>
+    <message>
+        <location filename="../app/ui/visualisations/sizevisualisationchannel.cpp" line="+32"/>
+        <source>The attribute will be visualised by varying the size of the node.</source>
+        <translation>The attribute will be visualized by varying the size of the node.</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>The attribute will be visualised by varying the size of the edge.</source>
+        <translation>The attribute will be visualized by varying the size of the edge.</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>The attribute will be visualised by varying the size of the component.</source>
+        <translation>The attribute will be visualized by varying the size of the component.</translation>
+    </message>
+    <message>
+        <location filename="../app/ui/visualisations/textcolorvisualisationchannel.cpp" line="+46"/>
+        <source>The attribute will be visualised by continuously varying the colour of the node text using a gradient.</source>
+        <translation>The attribute will be visualized by continuously varying the color of the node text using a gradient.</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>The attribute will be visualised by continuously varying the colour of the edge text using a gradient.</source>
+        <translation>The attribute will be visualized by continuously varying the color of the edge text using a gradient.</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>The attribute will be visualised by continuously varying the colour of the component text using a gradient.</source>
+        <translation>The attribute will be visualized by continuously varying the color of the component text using a gradient.</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>This visualisation will be applied by assigning a colour to the node text which represents unique values of the attribute.</source>
+        <translation>This visualization will be applied by assigning a color to the node text which represents unique values of the attribute.</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>This visualisation will be applied by assigning a colour to the edge text which represents unique values of the attribute.</source>
+        <translation>This visualization will be applied by assigning a color to the edge text which represents unique values of the attribute.</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>This visualisation will be applied by assigning a colour to the component text which represents unique values of the attribute.</source>
+        <translation>This visualization will be applied by assigning a color to the component text which represents unique values of the attribute.</translation>
+    </message>
+    <message>
+        <location filename="../app/ui/visualisations/textsizevisualisationchannel.cpp" line="+32"/>
+        <source>The attribute will be visualised by varying the size of the node text.</source>
+        <translation>The attribute will be visualized by varying the size of the node text.</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>The attribute will be visualised by varying the size of the edge text.</source>
+        <translation>The attribute will be visualized by varying the size of the edge text.</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>The attribute will be visualised by varying the size of the component text.</source>
+        <translation>The attribute will be visualized by varying the size of the component text.</translation>
     </message>
 </context>
 <context>

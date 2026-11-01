@@ -52,20 +52,26 @@ void ColorVisualisationChannel::apply(const QString& value, ElementVisual& eleme
 
 QString ColorVisualisationChannelFactory::description(ElementType elementType, ValueType valueType) const
 {
-    auto elementTypeString = elementTypeAsString(elementType).toLower();
-
     switch(valueType)
     {
     case ValueType::Int:
     case ValueType::Float:
-        return QString(QObject::tr("The attribute will be visualised by "
-                          "continuously varying the colour of the %1 "
-                          "using a gradient.")).arg(elementTypeString);
+        return textForElementType(elementType,
+            QObject::tr("The attribute will be visualised by continuously varying the colour of the "
+                "node using a gradient."),
+            QObject::tr("The attribute will be visualised by continuously varying the colour of the "
+                "edge using a gradient."),
+            QObject::tr("The attribute will be visualised by continuously varying the colour of the "
+                "component using a gradient."));
 
     case ValueType::String:
-        return QString(QObject::tr("This visualisation will be applied by "
-                          "assigning a colour to the %1 which represents "
-                          "unique values of the attribute.")).arg(elementTypeString);
+        return textForElementType(elementType,
+            QObject::tr("This visualisation will be applied by assigning a colour to the node which "
+                "represents unique values of the attribute."),
+            QObject::tr("This visualisation will be applied by assigning a colour to the edge which "
+                "represents unique values of the attribute."),
+            QObject::tr("This visualisation will be applied by assigning a colour to the component "
+                "which represents unique values of the attribute."));
 
     default:
         break;

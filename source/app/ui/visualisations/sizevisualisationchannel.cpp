@@ -28,9 +28,10 @@ void SizeVisualisationChannel::apply(double value, ElementVisual& elementVisual)
 
 QString SizeVisualisationChannelFactory::description(ElementType elementType, ValueType) const
 {
-    auto elementTypeString = elementTypeAsString(elementType).toLower();
-    return QString(QObject::tr("The attribute will be visualised by "
-                      "varying the size of the %1.")).arg(elementTypeString);
+    return textForElementType(elementType,
+        QObject::tr("The attribute will be visualised by varying the size of the node."),
+        QObject::tr("The attribute will be visualised by varying the size of the edge."),
+        QObject::tr("The attribute will be visualised by varying the size of the component."));
 }
 
 std::unique_ptr<VisualisationChannel> SizeVisualisationChannelFactory::create(const VisualisationConfig&) const

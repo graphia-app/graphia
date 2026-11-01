@@ -280,22 +280,20 @@ private slots:
         const ColorVisualisationChannelFactory colour;
         const TextColorVisualisationChannelFactory textColour;
 
-        // Each with its descriptions of a gradient and of a palette
+        // Each with its descriptions of a gradient on nodes and of a palette on edges
         const std::vector<std::tuple<const VisualisationChannelFactory*, const char*, const char*>> factories
         {
             {&colour,
-                "The attribute will be visualised by continuously varying the colour of the %1 using a gradient.",
-                "This visualisation will be applied by assigning a colour to the %1 which represents "
-                "unique values of the attribute."},
+                "The attribute will be visualised by continuously varying the colour of the "
+                "node using a gradient.",
+                "This visualisation will be applied by assigning a colour to the edge "
+                "which represents unique values of the attribute."},
             {&textColour,
-                "The attribute will be visualised by continuously varying the colour of the %1 text "
-                "using a gradient.",
-                "This visualisation will be applied by assigning a colour to the %1 text which represents "
-                "unique values of the attribute."}
+                "The attribute will be visualised by continuously varying the colour of the "
+                "node text using a gradient.",
+                "This visualisation will be applied by assigning a colour to the edge text "
+                "which represents unique values of the attribute."}
         };
-
-        const auto node = TestEnvironment::translated("Node").toLower();
-        const auto edge = TestEnvironment::translated("Edge").toLower();
 
         for(const auto& [factory, gradientDescription, paletteDescription] : factories)
         {
@@ -304,13 +302,13 @@ private slots:
                 QCOMPARE(factory->defaultParameters(valueType),
                     (QVariantMap{{u"gradient"_s, u::pref(u"visuals/defaultGradient"_s).toString()}}));
                 QCOMPARE(factory->description(ElementType::Node, valueType),
-                    TestEnvironment::translated(gradientDescription).arg(node));
+                    TestEnvironment::translated(gradientDescription));
             }
 
             QCOMPARE(factory->defaultParameters(ValueType::String),
                 (QVariantMap{{u"palette"_s, u::pref(u"visuals/defaultPalette"_s).toString()}}));
             QCOMPARE(factory->description(ElementType::Edge, ValueType::String),
-                TestEnvironment::translated(paletteDescription).arg(edge));
+                TestEnvironment::translated(paletteDescription));
 
             QVERIFY(factory->defaultParameters(ValueType::Unknown).isEmpty());
             QVERIFY(factory->description(ElementType::Node, ValueType::Unknown).isEmpty());
@@ -336,12 +334,11 @@ private slots:
         // A description for each channel, which says when it can't show the attribute
         auto descriptions = graphModel.visualisationDescription(u"kind"_s,
             {u"Colour"_s, u"Size"_s, u"Text"_s, u"SharedText"_s});
-        const auto node = TestEnvironment::translated("Node").toLower();
         const auto unsupported =
             TestEnvironment::translated("This visualisation channel is not supported for the attribute type.");
         QCOMPARE(descriptions.size(), 4);
         QCOMPARE(descriptions.at(0), TestEnvironment::translated("This visualisation will be applied by "
-            "assigning a colour to the %1 which represents unique values of the attribute.").arg(node));
+            "assigning a colour to the node which represents unique values of the attribute."));
         QCOMPARE(descriptions.at(1), unsupported);
         QCOMPARE(descriptions.at(2), TestEnvironment::translated("The attribute will be visualised as text."));
         QCOMPARE(descriptions.at(3),
@@ -351,14 +348,13 @@ private slots:
             {u"Colour"_s, u"Size"_s, u"TextColour"_s, u"TextSize"_s, u"SharedText"_s});
         QCOMPARE(descriptions.size(), 5);
         QCOMPARE(descriptions.at(0), TestEnvironment::translated("The attribute will be visualised by "
-            "continuously varying the colour of the %1 using a gradient.").arg(node));
+            "continuously varying the colour of the node using a gradient."));
         QCOMPARE(descriptions.at(1),
-            TestEnvironment::translated("The attribute will be visualised by varying the size of the %1.").arg(node));
+            TestEnvironment::translated("The attribute will be visualised by varying the size of the node."));
         QCOMPARE(descriptions.at(2), TestEnvironment::translated("The attribute will be visualised by "
-            "continuously varying the colour of the %1 text using a gradient.").arg(node));
+            "continuously varying the colour of the node text using a gradient."));
         QCOMPARE(descriptions.at(3),
-            TestEnvironment::translated("The attribute will be visualised by varying the size of the %1 text.")
-                .arg(node));
+            TestEnvironment::translated("The attribute will be visualised by varying the size of the node text."));
         QCOMPARE(descriptions.at(4), unsupported);
 
         QCOMPARE(graphModel.visualisationDescription(u"missing"_s, {u"Colour"_s}), QStringList{});
