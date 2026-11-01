@@ -1,7 +1,7 @@
 name: Build
 on: [push, pull_request]
 env:
-  QT_VERSION: 6.11.2
+  QT_VERSION: 6.12.0
   QT_MODULES: qtwebengine qtwebchannel qtpositioning qtimageformats
   # Qt 6.11 splits the Windows repository into per-compiler folders; support
   # for this is not in an aqtinstall release yet, so pin to a commit that has it
