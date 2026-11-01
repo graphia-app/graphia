@@ -88,7 +88,7 @@ Window
 
     onValuesChanged:
     {
-        // Not Math.min.apply, which throws a RangeError for large arrays (courtesy QTBUG-151133)
+        // Not Math.min.apply, which throws a RangeError for large arrays
         let minimum = Infinity;
         let maximum = -Infinity;
         for(const value of values)
