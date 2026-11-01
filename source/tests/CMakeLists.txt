@@ -36,21 +36,30 @@ function(add_unit_test NAME)
     qt_add_executable(${NAME} ${ARGN})
     target_link_libraries(${NAME} PRIVATE ${APP_CORE_FOR_TESTS} Qt6::Test scrambling_translator)
 
+    # Each test also runs with every translatable string scrambled, which exposes
+    # anything that relies on a translation's text, or on its word order
     add_test(NAME ${NAME} COMMAND ${NAME})
+    add_test(NAME ${NAME}_scrambled COMMAND ${NAME})
+    set(TESTS ${NAME} ${NAME}_scrambled)
+    set_property(TEST ${NAME}_scrambled APPEND PROPERTY ENVIRONMENT "GRAPHIA_SCRAMBLE_TRANSLATIONS=1")
+
     # Without a console, Qt and QtTest log to the debugger or the journal instead
-    set_tests_properties(${NAME} PROPERTIES ENVIRONMENT "QT_FORCE_STDERR_LOGGING=1")
+    set_property(TEST ${TESTS} APPEND PROPERTY ENVIRONMENT "QT_FORCE_STDERR_LOGGING=1")
 
     if(UNIX AND NOT APPLE)
         # The offscreen platform only has OpenGL through GLX, so elsewhere the native one is used
-        set_property(TEST ${NAME} APPEND PROPERTY ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+        set_property(TEST ${TESTS} APPEND PROPERTY ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
     endif()
 
     if(WIN32)
         # Windows has no rpath, so the shared libraries in the root of the build need to be on PATH
-        set_tests_properties(${NAME} PROPERTIES
+        set_tests_properties(${TESTS} PROPERTIES
             ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:${CMAKE_BINARY_DIR}")
     endif()
 endfunction()
+
+# Every scrambled run relies on the translator being installed for it
+add_unit_test(tst_scramblingtranslator i18n/tst_scramblingtranslator.cpp)
 
 add_unit_test(tst_mutablegraph graph/tst_mutablegraph.cpp)
 add_unit_test(tst_graphtransformconfigparser transform/tst_graphtransformconfigparser.cpp)
