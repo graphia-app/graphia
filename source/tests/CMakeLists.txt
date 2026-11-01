@@ -129,6 +129,10 @@ add_unit_test(tst_layoutthread layout/tst_layoutthread.cpp)
 add_unit_test(tst_random utils/tst_random.cpp)
 add_unit_test(tst_nodeattributetablemodel plugins/tst_nodeattributetablemodel.cpp)
 
+# The translation catalogues, as they are in the source tree
+add_unit_test(tst_catalogues i18n/tst_catalogues.cpp)
+target_compile_definitions(tst_catalogues PRIVATE SOURCE_DIR="${CMAKE_SOURCE_DIR}/source")
+
 add_unit_test(tst_opengl rendering/tst_opengl.cpp)
 
 # Headless mode loads the real plugins, from the build directory

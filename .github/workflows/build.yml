@@ -353,6 +353,10 @@ jobs:
       env:
         UBSAN_OPTIONS: print_stacktrace=1
         LLVM_PROFILE_FILE: ${{ github.workspace }}/build/clang/profiles/%m-%p.profraw
+    - name: Translations
+      run: |
+        cmake --build build/clang --target update_translations
+        git diff --exit-code -- '*.ts'
     - name: Coverage
       if: ${{ success() || failure() }}
       run: scripts/coverage.sh
