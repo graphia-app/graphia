@@ -43,3 +43,5 @@ target_link_libraries(${PluginName} PRIVATE
     Qt6::Widgets
     Qt6::Xml
 )
+
+add_plugin_translations(${PluginName})
