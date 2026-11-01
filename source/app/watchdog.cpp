@@ -81,7 +81,7 @@ void WatchdogWorker::showWarning()
         u"-icon"_s << u"Critical"_s <<
         u"-button"_s << u"%1:Reset"_s.arg(waitText) <<
         u"-button"_s << u"%1:Destructive"_s.arg(tr("Close and Report Bug")) <<
-        u"-defaultButton"_s << waitText;
+        u"-defaultButtonRole"_s << u"Reset"_s;
 
     auto* warningProcess = new QProcess(this);
 

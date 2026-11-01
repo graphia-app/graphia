@@ -5709,7 +5709,7 @@ Supported data types: %2</translation>
         <translation>This program is intended for automatically reporting crashes and should not be invoked directly.</translation>
     </message>
     <message>
-        <location filename="../messagebox/main.cpp" line="+115"/>
+        <location filename="../messagebox/main.cpp" line="+123"/>
         <source>Window title.</source>
         <translation>Window title.</translation>
     </message>
@@ -5730,8 +5730,8 @@ Supported data types: %2</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Default button.</source>
-        <translation>Default button.</translation>
+        <source>Role of the default button.</source>
+        <translation>Role of the default button.</translation>
     </message>
     <message>
         <location filename="../updater/main.cpp" line="+109"/>

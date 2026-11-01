@@ -56,16 +56,8 @@ struct Button
     QMessageBox::ButtonRole _role = QMessageBox::InvalidRole;
 };
 
-static Button parseButton(const QString& text)
+static QMessageBox::ButtonRole parseRole(const QString& text)
 {
-    Button button;
-    auto tokens = text.split(':');
-
-    if(tokens.size() != 2)
-        return button;
-
-    button._text = tokens.at(0).trimmed();
-
     QHash<QString, QMessageBox::ButtonRole> roles =
     {
         {u"Accept"_s,      QMessageBox::AcceptRole},
@@ -79,10 +71,24 @@ static Button parseButton(const QString& text)
         {u"Reset"_s,       QMessageBox::ResetRole},
     };
 
-    auto role = tokens.at(1).trimmed();
+    auto role = text.trimmed();
 
     if(roles.contains(role))
-        button._role = roles[role];
+        return roles[role];
+
+    return QMessageBox::InvalidRole;
+}
+
+static Button parseButton(const QString& text)
+{
+    Button button;
+    auto tokens = text.split(':');
+
+    if(tokens.size() != 2)
+        return button;
+
+    button._text = tokens.at(0).trimmed();
+    button._role = parseRole(tokens.at(1));
 
     return button;
 }
@@ -112,8 +118,8 @@ int main(int argc, char *argv[])
     p.addHelpOption();
     p.addOptions(
     {
-        {{"t", "title"},            QObject::tr("Window title."),    "title",           u"MessageBox"_s},
-        {{"q", "text"},             QObject::tr("Window text."),     "text",
+        {{"t", "title"},                QObject::tr("Window title."),                   "title",                u"MessageBox"_s},
+        {{"q", "text"},                 QObject::tr("Window text."),                    "text",
             u"Lorem ipsum dolor sit amet, consectetur adipiscing elit, "
             u"sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. "
             u"Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris "
@@ -121,9 +127,9 @@ int main(int argc, char *argv[])
             u"reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla "
             u"pariatur. Excepteur sint occaecat cupidatat non proident, sunt in "
             u"culpa qui officia deserunt mollit anim id est laborum."_s},
-        {{"i", "icon"},             QObject::tr("Window icon."),     "icon",            u"Question"_s},
-        {{"b", "button"},           QObject::tr("Window button."),   "button",          u"OK:Accept"_s},
-        {{"d", "defaultButton"},    QObject::tr("Default button."),  "defaultButton"},
+        {{"i", "icon"},                 QObject::tr("Window icon."),                    "icon",                 u"Question"_s},
+        {{"b", "button"},               QObject::tr("Window button."),                  "button",               u"OK:Accept"_s},
+        {{"d", "defaultButtonRole"},    QObject::tr("Role of the default button."),     "defaultButtonRole"},
     });
 
     p.process(arguments);
@@ -133,7 +139,7 @@ int main(int argc, char *argv[])
     mb.setWindowTitle(p.value(u"title"_s));
     mb.setText(p.value(u"text"_s));
     mb.setIcon(parseIcon(p.value(u"icon"_s)));
-    auto defaultButtonText = p.value(u"defaultButton"_s);
+    auto defaultButtonRole = parseRole(p.value(u"defaultButtonRole"_s));
 
     const auto buttonTexts = p.values(u"button"_s);
     for(const auto& buttonText : buttonTexts)
@@ -142,7 +148,7 @@ int main(int argc, char *argv[])
 
         auto* pushButton = mb.addButton(button._text, button._role);
 
-        if(defaultButtonText == buttonText)
+        if(defaultButtonRole != QMessageBox::InvalidRole && button._role == defaultButtonRole)
             mb.setDefaultButton(pushButton);
     }
 
