@@ -72,7 +72,11 @@ Item
 
                 text: index >= 0 && !root._modelIsUnset ? instantiator.model[index] : ""
 
-                onTriggered: { root.selectedValue = text; }
+                onTriggered:
+                {
+                    root.selectedValue = text;
+                    root.itemTriggered(index);
+                }
             }
 
             onObjectAdded: (index, object) => { menu.insertItem(index, object); }
@@ -133,4 +137,5 @@ Item
 
     signal clicked(var mouse)
     signal held(var mouse)
+    signal itemTriggered(int index)
 }

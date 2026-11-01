@@ -294,12 +294,10 @@ Rectangle
                         return [qsTr("Default"), ...presetNames];
                     }
 
-                    onSelectedValueChanged:
+                    // The first item is the defaults, whatever the presets are named
+                    onItemTriggered: (index) =>
                     {
-                        if(selectedValue.length === 0)
-                            return;
-
-                        if(!root.layoutPresets.hasOwnProperty(selectedValue))
+                        if(index === 0)
                         {
                             // Reset everything to default
                             for(let layoutSettingName of root.document.layoutSettingNames)
@@ -313,7 +311,7 @@ Rectangle
                         }
                         else
                         {
-                            let preset = root.layoutPresets[selectedValue];
+                            let preset = root.layoutPresets[presetChooser.model[index]];
 
                             for(const [layoutSettingName, presetValue] of Object.entries(preset.layoutSettings))
                                 root.document.setLayoutSettingValue(layoutSettingName, presetValue);
