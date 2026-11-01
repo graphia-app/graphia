@@ -261,6 +261,11 @@ static int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
     ApplicationClass app(argc, argv);
 #endif
 
+    // PlatformMenuItem draws its own shortcuts; Qt 6.12's MenuItem would duplicate them, and
+    // until 6.12.1 hides them on the widest items (QTBUG-151107)
+    // This needs to come after ApplicationClass is initialised, as its contructor sets it
+    ApplicationClass::setAttribute(Qt::AA_DontShowShortcutsInContextMenus);
+
     QCommandLineParser commandLineParser;
 
     commandLineParser.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
