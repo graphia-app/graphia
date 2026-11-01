@@ -64,7 +64,7 @@ public:
             .arg(u::redirectLink("knn", QObject::tr("k-nearest neighbours")));
     }
 
-    QString category() const override { return QObject::tr("Edge Reduction"); }
+    Category category() const override { return Category::EdgeReduction; }
 
     GraphTransformAttributeParameters attributeParameters() const override
     {

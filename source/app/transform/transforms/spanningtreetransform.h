@@ -50,7 +50,7 @@ public:
             .arg(u::redirectLink("spanning_tree", QObject::tr("spanning tree")));
     }
 
-    QString category() const override { return QObject::tr("Structural") ; }
+    Category category() const override { return Category::Structural; }
 
     GraphTransformParameters parameters() const override
     {

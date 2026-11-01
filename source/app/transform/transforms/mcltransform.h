@@ -69,7 +69,7 @@ public:
             .arg(u::redirectLink("mcl", QObject::tr("MCL - Markov Clustering")));
     }
 
-    QString category() const override { return QObject::tr("Clustering"); }
+    Category category() const override { return Category::Clustering; }
 
     GraphTransformParameters parameters() const override
     {

@@ -150,7 +150,9 @@ private slots:
 
         QVERIFY(!factory->displayName().isEmpty());
         QVERIFY(!factory->description().isEmpty());
-        QVERIFY(!factory->category().isEmpty());
+        QVERIFY(factory->category() != GraphTransformFactory::Category::None);
+        QVERIFY(!factory->categoryDisplayName().isEmpty());
+        QVERIFY(!factory->image().endsWith(u"default.svg"_s));
 
         for(const auto& parameter : factory->parameters())
         {

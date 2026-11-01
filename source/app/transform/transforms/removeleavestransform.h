@@ -52,7 +52,7 @@ public:
         return QObject::tr("Remove leaf nodes from the graph.");
     }
 
-    QString category() const override { return QObject::tr("Structural"); }
+    Category category() const override { return Category::Structural; }
 
     GraphTransformParameters parameters() const override
     {
@@ -81,7 +81,7 @@ public:
         return QObject::tr("Remove branches from the graph, leaving only cycles.");
     }
 
-    QString category() const override { return QObject::tr("Structural"); }
+    Category category() const override { return Category::Structural; }
 
     std::unique_ptr<GraphTransform> create(GraphModel& graphModel, const GraphTransformConfig& graphTransformConfig) const override;
 };

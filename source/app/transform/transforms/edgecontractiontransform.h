@@ -56,7 +56,7 @@ public:
             "merging the pairs of nodes that they previously joined.")
             .arg(u::redirectLink("contraction", QObject::tr("Remove edges")));
     }
-    QString category() const override { return QObject::tr("Structural"); }
+    Category category() const override { return Category::Structural; }
     ElementType elementType() const override { return ElementType::Edge; }
     bool requiresCondition() const override { return true; }
 

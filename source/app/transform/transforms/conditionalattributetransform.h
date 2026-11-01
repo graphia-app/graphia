@@ -86,7 +86,7 @@ public:
         return QObject::tr("Create an attribute whose value is the "
             "result of the specified condition.");
     }
-    QString category() const override { return QObject::tr("Attributes"); }
+    Category category() const override { return Category::Attributes; }
     ElementType elementType() const override { return _elementType; }
     bool requiresCondition() const override { return true; }
 

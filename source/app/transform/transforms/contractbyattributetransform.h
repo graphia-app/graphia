@@ -56,7 +56,7 @@ public:
             .arg(u::redirectLink("contraction", QObject::tr("Contract edges")));
     }
 
-    QString category() const override { return QObject::tr("Structural"); }
+    Category category() const override { return Category::Structural; }
 
     GraphTransformAttributeParameters attributeParameters() const override
     {

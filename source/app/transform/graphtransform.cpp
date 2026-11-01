@@ -112,25 +112,34 @@ void GraphTransform::setPhase(const QString& phase)
 
 QString GraphTransformFactory::image() const
 {
-    if(category() == QObject::tr("Attributes"))
-        return u"qrc:///transforms/images/attributes.svg"_s;
-
-    if(category() == QObject::tr("Clustering"))
-        return u"qrc:///transforms/images/clustering.svg"_s;
-
-    if(category() == QObject::tr("Edge Reduction"))
-        return u"qrc:///transforms/images/edgereduction.svg"_s;
-
-    if(category() == QObject::tr("Filters"))
-        return u"qrc:///transforms/images/filters.svg"_s;
-
-    if(category() == QObject::tr("Metrics"))
-        return u"qrc:///transforms/images/metrics.svg"_s;
-
-    if(category() == QObject::tr("Structural"))
-        return u"qrc:///transforms/images/structural.svg"_s;
+    switch(category())
+    {
+    case Category::Attributes:      return u"qrc:///transforms/images/attributes.svg"_s;
+    case Category::Clustering:      return u"qrc:///transforms/images/clustering.svg"_s;
+    case Category::EdgeReduction:   return u"qrc:///transforms/images/edgereduction.svg"_s;
+    case Category::Filters:         return u"qrc:///transforms/images/filters.svg"_s;
+    case Category::Metrics:         return u"qrc:///transforms/images/metrics.svg"_s;
+    case Category::Structural:      return u"qrc:///transforms/images/structural.svg"_s;
+    default: break;
+    }
 
     return u"qrc:///transforms/images/default.svg"_s;
+}
+
+QString GraphTransformFactory::categoryDisplayName() const
+{
+    switch(category())
+    {
+    case Category::Attributes:      return QObject::tr("Attributes");
+    case Category::Clustering:      return QObject::tr("Clustering");
+    case Category::EdgeReduction:   return QObject::tr("Edge Reduction");
+    case Category::Filters:         return QObject::tr("Filters");
+    case Category::Metrics:         return QObject::tr("Metrics");
+    case Category::Structural:      return QObject::tr("Structural");
+    default: break;
+    }
+
+    return {};
 }
 
 GraphTransformAttributeParameter GraphTransformFactory::attributeParameter(const QString& parameterName) const

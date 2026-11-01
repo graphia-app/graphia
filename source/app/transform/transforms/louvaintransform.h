@@ -73,7 +73,7 @@ public:
             .arg(u::redirectLink("louvain", QObject::tr("Louvain Modularity")));
     }
 
-    QString category() const override { return QObject::tr("Clustering"); }
+    Category category() const override { return Category::Clustering; }
 
     GraphTransformParameters parameters() const override
     {

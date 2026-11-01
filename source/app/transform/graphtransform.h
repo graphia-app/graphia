@@ -107,13 +107,25 @@ using DefaultVisualisations = std::vector<DefaultVisualisation>;
 class GraphTransformFactory
 {
 public:
+    enum class Category : unsigned char
+    {
+        None,
+        Attributes,
+        Clustering,
+        EdgeReduction,
+        Filters,
+        Metrics,
+        Structural
+    };
+
     virtual ~GraphTransformFactory() = default;
 
     virtual QString name() const = 0;
     virtual QString displayName() const = 0;
     virtual QString description() const = 0;
     virtual QString image() const;
-    virtual QString category() const { return {}; }
+    virtual Category category() const { return Category::None; }
+    QString categoryDisplayName() const;
     virtual ElementType elementType() const { return ElementType::None; }
     virtual GraphTransformAttributeParameters attributeParameters() const { return {}; }
     GraphTransformAttributeParameter attributeParameter(const QString& parameterName) const;

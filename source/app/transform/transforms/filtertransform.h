@@ -99,7 +99,7 @@ public:
                 QObject::tr("Remove all the edges which match the specified condition."),
                 QObject::tr("Remove all the components which match the specified condition."));
     }
-    QString category() const override { return QObject::tr("Filters"); }
+    Category category() const override { return Category::Filters; }
     ElementType elementType() const override { return _elementType; }
     bool requiresCondition() const override { return true; }
 

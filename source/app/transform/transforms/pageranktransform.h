@@ -62,7 +62,7 @@ public:
             "measure of a node's relative importance in the graph.")
             .arg(u::redirectLink("pagerank", QObject::tr("PageRank")));
     }
-    QString category() const override { return QObject::tr("Metrics"); }
+    Category category() const override { return Category::Metrics; }
     ElementType elementType() const override { return ElementType::None; }
     DefaultVisualisations defaultVisualisations() const override
     {

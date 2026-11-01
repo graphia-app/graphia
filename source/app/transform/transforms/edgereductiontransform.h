@@ -47,7 +47,7 @@ public:
             "percentage of edges, down to a specified minimum, per node.");
     }
 
-    QString category() const override { return QObject::tr("Edge Reduction"); }
+    Category category() const override { return Category::EdgeReduction; }
 
     GraphTransformParameters parameters() const override
     {

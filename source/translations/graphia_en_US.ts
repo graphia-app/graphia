@@ -192,12 +192,11 @@
     <name>AvailableTransformsModel</name>
     <message>
         <location filename="../app/ui/qml/Graphia/availabletransformsmodel.cpp" line="+92"/>
-        <location line="+3"/>
         <source>Favourites</source>
         <translation>Favorites</translation>
     </message>
     <message>
-        <location line="+1"/>
+        <location line="+3"/>
         <source>Uncategorised</source>
         <translation>Uncategorized</translation>
     </message>
@@ -1604,7 +1603,7 @@ Process failed (%1, %2)</translation>
         <translation>Custom</translation>
     </message>
     <message>
-        <location line="+80"/>
+        <location line="+78"/>
         <source>Preset Name</source>
         <translation>Preset Name</translation>
     </message>
@@ -1709,7 +1708,7 @@ Process failed (%1, %2)</translation>
     </message>
     <message>
         <location line="+53"/>
-        <location line="+2744"/>
+        <location line="+2746"/>
         <source>{0} could not be opened:
 
 {1}</source>
@@ -1718,7 +1717,7 @@ Process failed (%1, %2)</translation>
 {1}</translation>
     </message>
     <message>
-        <location line="-2478"/>
+        <location line="-2480"/>
         <source>Error Opening File</source>
         <translation>Error Opening File</translation>
     </message>
@@ -2407,7 +2406,7 @@ Process failed (%1, %2)</translation>
         <translation>Checking For Update:</translation>
     </message>
     <message>
-        <location line="+196"/>
+        <location line="+198"/>
         <source>{0} could not be opened due to an unspecified error.</source>
         <translation>{0} could not be opened due to an unspecified error.</translation>
     </message>
@@ -3174,30 +3173,22 @@ Process failed (%1, %2)</translation>
 <context>
     <name>OptionsNetwork</name>
     <message>
-        <location filename="../app/ui/qml/Graphia/OptionsNetwork.qml" line="+86"/>
-        <location line="+153"/>
-        <location line="+14"/>
+        <location filename="../app/ui/qml/Graphia/OptionsNetwork.qml" line="+238"/>
         <source>Disabled</source>
         <translation>Disabled</translation>
     </message>
     <message>
-        <location line="-165"/>
-        <location line="+151"/>
-        <location line="+8"/>
-        <location line="+8"/>
+        <location line="+1"/>
         <source>HTTP</source>
         <translation>HTTP</translation>
     </message>
     <message>
-        <location line="-165"/>
-        <location line="+149"/>
-        <location line="+10"/>
-        <location line="+8"/>
+        <location line="+1"/>
         <source>SOCKS5</source>
         <translation>SOCKS5</translation>
     </message>
     <message>
-        <location line="-146"/>
+        <location line="-132"/>
         <source>Allow Tracking</source>
         <translation>Allow Tracking</translation>
     </message>
@@ -3242,7 +3233,7 @@ Process failed (%1, %2)</translation>
         <translation>Proxy</translation>
     </message>
     <message>
-        <location line="+43"/>
+        <location line="+45"/>
         <source>Host</source>
         <translation>Host</translation>
     </message>
@@ -3948,7 +3939,7 @@ Supported data types: %2</translation>
     </message>
     <message>
         <location filename="../shared/commands/compoundcommand.h" line="+72"/>
-        <location filename="../app/ui/visualisations/visualisationconfig.cpp" line="+125"/>
+        <location filename="../app/ui/visualisations/visualisationconfig.cpp" line="+126"/>
         <source>, </source>
         <translation>, </translation>
     </message>
@@ -3993,22 +3984,14 @@ Supported data types: %2</translation>
         <translation>3rd edge list column has a non-numeric value.</translation>
     </message>
     <message>
-        <location filename="../app/transform/graphtransform.cpp" line="+118"/>
-        <location filename="../app/transform/transforms/louvaintransform.h" line="+76"/>
-        <location filename="../app/transform/transforms/mcltransform.h" line="+72"/>
+        <location filename="../app/transform/graphtransform.cpp" line="+134"/>
         <source>Clustering</source>
         <translation>Clustering</translation>
     </message>
     <message>
         <location filename="../app/loading/gmlsaver.cpp" line="-76"/>
         <location filename="../app/loading/graphmlsaver.cpp" line="-63"/>
-        <location filename="../app/transform/graphtransform.cpp" line="-3"/>
-        <location filename="../app/transform/transforms/attributesynthesistransform.h" line="+60"/>
-        <location filename="../app/transform/transforms/averageattributetransform.h" line="+59"/>
-        <location filename="../app/transform/transforms/conditionalattributetransform.h" line="+89"/>
-        <location filename="../app/transform/transforms/combineattributestransform.h" line="+59"/>
-        <location filename="../app/transform/transforms/forwardmultielementattributetransform.h" line="+58"/>
-        <location filename="../app/transform/transforms/typecasttransform.h" line="+60"/>
+        <location filename="../app/transform/graphtransform.cpp" line="-1"/>
         <source>Attributes</source>
         <translation>Attributes</translation>
     </message>
@@ -4407,7 +4390,7 @@ Supported data types: %2</translation>
 %1</translation>
     </message>
     <message>
-        <location filename="../app/transform/graphtransform.cpp" line="-72"/>
+        <location filename="../app/transform/graphtransform.cpp" line="-90"/>
         <source>Unknown Attribute: &quot;%1&quot;</source>
         <translation>Unknown Attribute: &quot;%1&quot;</translation>
     </message>
@@ -4417,37 +4400,24 @@ Supported data types: %2</translation>
         <translation>One or more invalid attributes</translation>
     </message>
     <message>
-        <location line="+59"/>
+        <location line="+73"/>
         <location filename="../app/transform/transforms/edgereductiontransform.cpp" line="+34"/>
         <location filename="../app/transform/transforms/edgereductiontransform.h" line="+42"/>
-        <location line="+8"/>
-        <location filename="../app/transform/transforms/knntransform.h" line="+65"/>
-        <location filename="../app/transform/transforms/percentnntransform.h" line="+67"/>
         <source>Edge Reduction</source>
         <translation>Edge Reduction</translation>
     </message>
     <message>
-        <location line="+3"/>
-        <location filename="../app/transform/transforms/filtertransform.h" line="+102"/>
+        <location line="+1"/>
         <source>Filters</source>
         <translation>Filters</translation>
     </message>
     <message>
-        <location line="+3"/>
-        <location filename="../app/transform/transforms/betweennesstransform.h" line="+61"/>
-        <location filename="../app/transform/transforms/eccentricitytransform.h" line="+59"/>
-        <location filename="../app/transform/transforms/pageranktransform.h" line="+65"/>
+        <location line="+1"/>
         <source>Metrics</source>
         <translation>Metrics</translation>
     </message>
     <message>
-        <location line="+3"/>
-        <location filename="../app/transform/transforms/contractbyattributetransform.h" line="+59"/>
-        <location filename="../app/transform/transforms/edgecontractiontransform.h" line="+59"/>
-        <location filename="../app/transform/transforms/separatebyattributetransform.h" line="+56"/>
-        <location filename="../app/transform/transforms/spanningtreetransform.h" line="+53"/>
-        <location filename="../app/transform/transforms/removeleavestransform.h" line="+55"/>
-        <location line="+29"/>
+        <location line="+1"/>
         <source>Structural</source>
         <translation>Structural</translation>
     </message>
@@ -4458,7 +4428,7 @@ Supported data types: %2</translation>
     </message>
     <message>
         <location line="+3"/>
-        <location filename="../app/ui/visualisations/visualisationconfig.cpp" line="-21"/>
+        <location filename="../app/ui/visualisations/visualisationconfig.cpp" line="-22"/>
         <source>%1 using %2</source>
         <translation>%1 using %2</translation>
     </message>
@@ -4657,7 +4627,7 @@ Supported data types: %2</translation>
     </message>
     <message>
         <location line="+7"/>
-        <location filename="../app/transform/transforms/attributesynthesistransform.h" line="-8"/>
+        <location filename="../app/transform/transforms/attributesynthesistransform.h" line="+52"/>
         <source>Attribute Synthesis</source>
         <translation>Attribute Synthesis</translation>
     </message>
@@ -4743,7 +4713,7 @@ Supported data types: %2</translation>
     </message>
     <message>
         <location filename="../app/transform/transforms/combineattributestransform.cpp" line="+12"/>
-        <location filename="../app/transform/transforms/combineattributestransform.h" line="-8"/>
+        <location filename="../app/transform/transforms/combineattributestransform.h" line="+51"/>
         <source>Combine Attributes</source>
         <translation>Combine Attributes</translation>
     </message>
@@ -4764,7 +4734,7 @@ Supported data types: %2</translation>
     </message>
     <message>
         <location filename="../app/transform/transforms/knntransform.cpp" line="-4"/>
-        <location filename="../app/transform/transforms/knntransform.h" line="-13"/>
+        <location filename="../app/transform/transforms/knntransform.h" line="+52"/>
         <source>k-NN</source>
         <translation>k-NN</translation>
     </message>
@@ -4824,7 +4794,7 @@ Supported data types: %2</translation>
     </message>
     <message>
         <location filename="../app/transform/transforms/percentnntransform.cpp" line="-96"/>
-        <location filename="../app/transform/transforms/percentnntransform.h" line="-15"/>
+        <location filename="../app/transform/transforms/percentnntransform.h" line="+52"/>
         <source>%-NN</source>
         <translation>%-NN</translation>
     </message>
@@ -4875,7 +4845,7 @@ Supported data types: %2</translation>
     </message>
     <message>
         <location filename="../app/transform/transforms/typecasttransform.cpp" line="+7"/>
-        <location filename="../app/transform/transforms/typecasttransform.h" line="-8"/>
+        <location filename="../app/transform/transforms/typecasttransform.h" line="+52"/>
         <source>Type Cast</source>
         <translation>Type Cast</translation>
     </message>
@@ -4930,7 +4900,7 @@ Supported data types: %2</translation>
         <translation>No numeric range in one or more components</translation>
     </message>
     <message>
-        <location filename="../app/ui/visualisations/visualisationconfig.cpp" line="+25"/>
+        <location filename="../app/ui/visualisations/visualisationconfig.cpp" line="+26"/>
         <source>Assigned By Quantity</source>
         <translation>Assigned By Quantity</translation>
     </message>
@@ -5002,7 +4972,7 @@ Supported data types: %2</translation>
     </message>
     <message>
         <location line="+10"/>
-        <location filename="../app/transform/transforms/conditionalattributetransform.h" line="+9"/>
+        <location filename="../app/transform/transforms/conditionalattributetransform.h" line="+98"/>
         <location filename="../app/transform/transforms/combineattributestransform.h" line="+32"/>
         <location filename="../app/transform/transforms/typecasttransform.h" line="+34"/>
         <source>Name</source>
@@ -5051,7 +5021,7 @@ Supported data types: %2</translation>
         <translation>The value to assign to the attribute. Capture groups are referenced using \n syntax, where n is the index of the regex capture group.</translation>
     </message>
     <message>
-        <location filename="../app/transform/transforms/averageattributetransform.h" line="-8"/>
+        <location filename="../app/transform/transforms/averageattributetransform.h" line="+51"/>
         <source>Average Attribute</source>
         <translation>Average Attribute</translation>
     </message>
@@ -5082,7 +5052,7 @@ Supported data types: %2</translation>
     </message>
     <message>
         <location filename="../app/transform/transforms/betweennesstransform.cpp" line="-116"/>
-        <location filename="../app/transform/transforms/betweennesstransform.h" line="-13"/>
+        <location filename="../app/transform/transforms/betweennesstransform.h" line="+48"/>
         <source>Betweenness</source>
         <translation>Betweenness</translation>
     </message>
@@ -5122,7 +5092,7 @@ Supported data types: %2</translation>
         <translation>Create an attribute whose value is the result of the specified condition.</translation>
     </message>
     <message>
-        <location filename="../app/transform/transforms/contractbyattributetransform.h" line="-8"/>
+        <location filename="../app/transform/transforms/contractbyattributetransform.h" line="+51"/>
         <source>Contract By Attribute</source>
         <translation>Contract By Attribute</translation>
     </message>
@@ -5138,7 +5108,7 @@ Supported data types: %2</translation>
     </message>
     <message>
         <location line="+10"/>
-        <location filename="../app/transform/transforms/separatebyattributetransform.h" line="+7"/>
+        <location filename="../app/transform/transforms/separatebyattributetransform.h" line="+63"/>
         <source>Node Attribute</source>
         <translation>Node Attribute</translation>
     </message>
@@ -5179,7 +5149,7 @@ Supported data types: %2</translation>
     </message>
     <message>
         <location filename="../app/transform/transforms/eccentricitytransform.cpp" line="-82"/>
-        <location filename="../app/transform/transforms/eccentricitytransform.h" line="-12"/>
+        <location filename="../app/transform/transforms/eccentricitytransform.h" line="+47"/>
         <source>Eccentricity</source>
         <translation>Eccentricity</translation>
     </message>
@@ -5194,7 +5164,7 @@ Supported data types: %2</translation>
         <translation>&lt;a href=&quot;https://graphia.app/redirects/eccentricity&quot;&gt;Eccentricity&lt;/a&gt; calculates the shortest path between every node and assigns the longest path length found for that node. This is a measure of a node&apos;s position within the overall graph structure.</translation>
     </message>
     <message>
-        <location filename="../app/transform/transforms/edgecontractiontransform.h" line="-8"/>
+        <location filename="../app/transform/transforms/edgecontractiontransform.h" line="+51"/>
         <source>Contract Edges</source>
         <translation>Contract Edges</translation>
     </message>
@@ -5209,7 +5179,7 @@ Supported data types: %2</translation>
         <translation>Remove edges</translation>
     </message>
     <message>
-        <location filename="../app/transform/transforms/edgereductiontransform.h" line="-4"/>
+        <location filename="../app/transform/transforms/edgereductiontransform.h" line="+4"/>
         <source>Reduce the complexity of the graph by removing a pseudo-random percentage of edges, down to a specified minimum, per node.</source>
         <translation>Reduce the complexity of the graph by removing a pseudo-random percentage of edges, down to a specified minimum, per node.</translation>
     </message>
@@ -5236,7 +5206,7 @@ Supported data types: %2</translation>
         <translation>The minimum number of edges to retain, per node.</translation>
     </message>
     <message>
-        <location filename="../app/transform/transforms/forwardmultielementattributetransform.h" line="-9"/>
+        <location filename="../app/transform/transforms/forwardmultielementattributetransform.h" line="+49"/>
         <source>Forward Attribute</source>
         <translation>Forward Attribute</translation>
     </message>
@@ -5344,7 +5314,7 @@ Supported data types: %2</translation>
         <translation>Ascending</translation>
     </message>
     <message>
-        <location filename="../app/transform/transforms/louvaintransform.h" line="-25"/>
+        <location filename="../app/transform/transforms/louvaintransform.h" line="+51"/>
         <location line="+6"/>
         <source>Louvain Cluster</source>
         <translation>Louvain Cluster</translation>
@@ -5377,7 +5347,7 @@ Supported data types: %2</translation>
     </message>
     <message>
         <location line="+10"/>
-        <location filename="../app/transform/transforms/mcltransform.h" line="+7"/>
+        <location filename="../app/transform/transforms/mcltransform.h" line="+79"/>
         <source>Granularity</source>
         <translation>Granularity</translation>
     </message>
@@ -5428,7 +5398,7 @@ Supported data types: %2</translation>
         <translation>The percentage of edges to rank and retain, per node.</translation>
     </message>
     <message>
-        <location filename="../app/transform/transforms/filtertransform.h" line="-21"/>
+        <location filename="../app/transform/transforms/filtertransform.h" line="+81"/>
         <source>Keep Nodes</source>
         <translation>Keep Nodes</translation>
     </message>
@@ -5510,7 +5480,7 @@ Supported data types: %2</translation>
     </message>
     <message>
         <location filename="../app/transform/transforms/pageranktransform.cpp" line="-115"/>
-        <location filename="../app/transform/transforms/pageranktransform.h" line="-11"/>
+        <location filename="../app/transform/transforms/pageranktransform.h" line="+54"/>
         <location line="+9"/>
         <source>PageRank</source>
         <translation>PageRank</translation>
@@ -5526,7 +5496,7 @@ Supported data types: %2</translation>
         <translation>Calculate a %1 centrality measurement for each node. This can be viewed as measure of a node&apos;s relative importance in the graph.</translation>
     </message>
     <message>
-        <location filename="../app/transform/transforms/spanningtreetransform.h" line="-8"/>
+        <location filename="../app/transform/transforms/spanningtreetransform.h" line="+45"/>
         <source>Spanning Forest</source>
         <translation>Spanning Forest</translation>
     </message>
@@ -5596,7 +5566,7 @@ Supported data types: %2</translation>
         <translation>String</translation>
     </message>
     <message>
-        <location filename="../app/transform/transforms/removeleavestransform.h" line="-36"/>
+        <location filename="../app/transform/transforms/removeleavestransform.h" line="+48"/>
         <source>Remove Leaves</source>
         <translation>Remove Leaves</translation>
     </message>
@@ -5881,7 +5851,7 @@ Supported data types: %2</translation>
 <context>
     <name>SelectionManager</name>
     <message>
-        <location filename="../app/ui/selectionmanager.cpp" line="+326"/>
+        <location filename="../app/ui/selectionmanager.cpp" line="+325"/>
         <source>Selected %1</source>
         <translation>Selected %1</translation>
     </message>

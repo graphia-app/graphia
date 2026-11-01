@@ -57,7 +57,7 @@ public:
             "an existing source attribute.");
     }
 
-    QString category() const override { return QObject::tr("Attributes"); }
+    Category category() const override { return Category::Attributes; }
 
     GraphTransformAttributeParameters attributeParameters() const override
     {

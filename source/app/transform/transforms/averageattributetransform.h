@@ -56,7 +56,7 @@ public:
             "the values of a numerical attribute, using a categorical attribute.");
     }
 
-    QString category() const override { return QObject::tr("Attributes"); }
+    Category category() const override { return Category::Attributes; }
 
     GraphTransformAttributeParameters attributeParameters() const override
     {

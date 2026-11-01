@@ -91,11 +91,10 @@ QVariant AvailableTransformsModel::data(const QModelIndex& index, int role) cons
             if(u::contains(_favouriteTransforms, transformName))
                 return tr("Favourites");
 
-            // Any invalid category names are counted as "uncategorised"
-            if(transform->category().isEmpty() || transform->category() == tr("Favourites"))
+            if(transform->category() == GraphTransformFactory::Category::None)
                 return tr("Uncategorised");
 
-            return transform->category();
+            return transform->categoryDisplayName();
         }
 
         case Roles::TransformFavouriteRole:

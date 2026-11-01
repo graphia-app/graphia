@@ -55,7 +55,7 @@ public:
             "there are no multi-elements, this transform will have no effect.");
     }
 
-    QString category() const override { return QObject::tr("Attributes"); }
+    Category category() const override { return Category::Attributes; }
 
     GraphTransformAttributeParameters attributeParameters() const override
     {
