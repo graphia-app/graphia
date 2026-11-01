@@ -621,6 +621,26 @@ private slots:
         QCOMPARE(jsonString(pluginUiData["pluginUiKey"]), jsonString("Node Degree"));
     }
 
+    // Before version 9, a vector whose name was taken was shown as a numbered attribute, which
+    // its saved settings are for, whatever the name
+    void legacyNumberedUserDataName()
+    {
+        const int version = 8;
+        auto content = body(version);
+        content["userNodeData"]["vectors"] = json::array({{{"Score %1", {{"values", {"1", "2", "3"}}}}}});
+        content["userNodeData"]["attributes"] = {{"Score %1(1)", {{"description", "Numbered"}}}};
+
+        TestPluginInstance pluginInstance(&_plugin);
+        QString failureReason;
+        auto model = load(nativeFile(header(version), content), pluginInstance, &failureReason);
+        QVERIFY2(model != nullptr, qPrintable(failureReason));
+
+        const auto* score = model->graphModel().attributeByName(u"Score %1(1)"_s);
+        QVERIFY(score != nullptr);
+        QCOMPARE(score->description(), u"Numbered"_s);
+        QCOMPARE(model->nodeNumericValue(u"Score %1(1)"_s, u"b"_s), 2.0);
+    }
+
     // In older files, a backslash in a string only escaped a quote, so other backslashes
     // are escaped when they're upgraded, to keep their meaning
     void legacyBackslashes()

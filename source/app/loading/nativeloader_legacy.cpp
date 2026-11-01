@@ -144,7 +144,7 @@ static std::set<QString> recordUserDataVectorNames(json& jsonUserData)
 
         for(size_t number = 0; number <= jsonSavedAttributes.size(); number++)
         {
-            auto numberedName = number == 0 ? name : u"%1(%2)"_s.arg(name).arg(number);
+            auto numberedName = number == 0 ? name : u"%1(%2)"_s.arg(name, QString::number(number));
 
             if(u::contains(jsonSavedAttributes, numberedName.toStdString()) && !u::contains(attributeNames, numberedName))
             {
