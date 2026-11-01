@@ -82,13 +82,15 @@ static QMessageBox::ButtonRole parseRole(const QString& text)
 static Button parseButton(const QString& text)
 {
     Button button;
-    auto tokens = text.split(':');
 
-    if(tokens.size() != 2)
+    // The role follows the last colon, as the text may contain colons of its own
+    auto separator = text.lastIndexOf(u':');
+
+    if(separator < 0)
         return button;
 
-    button._text = tokens.at(0).trimmed();
-    button._role = parseRole(tokens.at(1));
+    button._text = text.first(separator).trimmed();
+    button._role = parseRole(text.sliced(separator + 1));
 
     return button;
 }
