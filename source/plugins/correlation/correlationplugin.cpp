@@ -544,7 +544,7 @@ void CorrelationPluginInstance::makeDataColumnNamesUnique()
             for(size_t i = 1; i < indexes.size(); i++)
             {
                 auto clashingIndex = indexes.at(i);
-                auto newName = u"%1(%2)"_s.arg(name).arg(i);
+                auto newName = u"%1(%2)"_s.arg(name, QString::number(i));
                 setDataColumnName(clashingIndex, newName);
             }
         }

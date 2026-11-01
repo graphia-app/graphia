@@ -860,6 +860,18 @@ private slots:
         QCOMPARE(this->values(plottableNames().constFirst()), values);
     }
 
+    // Columns with the same name are numbered, whatever the name
+    void duplicateColumnNames()
+    {
+        QVERIFY(open(
+            "Name,c%1,c%1\n"
+            "r1,1,2\n"
+            "r2,2,1\n"));
+
+        QVERIFY(createPlot({0}));
+        QCOMPARE(columnNames(), (QStringList{u"c%1"_s, u"c%1(1)"_s}));
+    }
+
     // The columns in the order hierarchical clustering finds
     void sortingByHierarchicalClustering()
     {
