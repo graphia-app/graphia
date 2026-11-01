@@ -46,7 +46,6 @@ ApplicationWindow
     onYChanged: { if(y < 0 || y >= Screen.desktopAvailableHeight) y = 0; }
 
     title: qsTr("Enrichment Results")
-    flags: (Qt.platform.os === "wasm" ? Qt.WindowTitleHint | Qt.WindowCloseButtonHint : Qt.Window) // QTBUG-126335
     transientParent: null
     color: palette.window
 

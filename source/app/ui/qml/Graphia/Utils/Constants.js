@@ -28,6 +28,4 @@ let toolTipDelay = 750;
 
 let mouseWheelStep = Qt.platform.os === "linux" ? 32 : 8;
 
-let defaultWindowFlags = Qt.Window | Qt.Dialog |
-    // QTBUG-126335:
-    (Qt.platform.os === "wasm" ? Qt.WindowTitleHint | Qt.WindowCloseButtonHint : 0)
+let defaultWindowFlags = Qt.Window | Qt.Dialog;
