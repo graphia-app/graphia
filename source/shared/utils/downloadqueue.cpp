@@ -175,9 +175,7 @@ void DownloadQueue::onReplyReceived(QNetworkReply* reply)
         auto httpCode = static_cast<int>(_reply->error());
         auto networkErrorString = QVariant::fromValue(_reply->error()).toString();
         auto errorString = u"Network Error: %1 (%2/%3)"_s
-            .arg(_reply->errorString())
-            .arg(httpCode)
-            .arg(networkErrorString);
+            .arg(_reply->errorString(), QString::number(httpCode), networkErrorString);
 
 #ifdef Q_OS_WASM
         // A CORS error is reported as a HTTP 339/ProtocolFailure (for now? forever?)
