@@ -114,12 +114,13 @@ class Create
 
         function conditionToTemplate(condition)
         {
-            function templated(text, isName)
+            function templated(side)
             {
                 // As with the action, escape '%' in attribute names
-                if(isName)
-                    return "$" + document.attributeNameForExpression(text).replace(/%/g, "%!");
+                if(condition[side + "IsName"])
+                    return "$" + document.attributeNameForExpression(condition[side]).replace(/%/g, "%!");
 
+                condition[side + "ParameterIndex"] = parameterIndex;
                 return "%" + parameterIndex++;
             }
 
@@ -128,7 +129,7 @@ class Create
             if(typeof condition.lhs === "object")
                 template += "(" + conditionToTemplate(condition.lhs) + ")";
             else
-                template += templated(condition.lhs, condition.lhsIsName);
+                template += templated("lhs");
 
             template += " " + condition.op;
 
@@ -139,7 +140,7 @@ class Create
                 if(typeof condition.rhs === "object")
                     template += "(" + conditionToTemplate(condition.rhs) + ")";
                 else
-                    template += templated(condition.rhs, condition.rhsIsName);
+                    template += templated("rhs");
             }
 
             return template;
@@ -160,14 +161,16 @@ class Create
             for(const attributeName of transform.attributes)
             {
                 let attribute = document.attribute(attributeName);
-                this.template += " $%" + parameterIndex++;
 
                 attributeElements.push(
                     {
                         attributeName: attributeName,
                         elementType: attribute.elementType,
-                        valueType: attribute.valueType
+                        valueType: attribute.valueType,
+                        parameterIndex: parameterIndex
                     });
+
+                this.template += " $%" + parameterIndex++;
             }
 
             this._elements = substituted(displayText.usingAttributes, [this._elements, attributeElements]);
@@ -186,8 +189,10 @@ class Create
                 if(parameterElements.length > 0)
                     appendToElements(parameterElements, " ");
 
+                parameterElements.push({type: "parameter", lhs: parameter.name, lhsIsName: true,
+                    rhs: parameter.value, rhsParameterIndex: parameterIndex});
+
                 this.template += " " + document.stringForExpression(parameter.name) + " = %" + parameterIndex++;
-                parameterElements.push({type: "parameter", lhs: parameter.name, lhsIsName: true, rhs: parameter.value});
             }
 
             this._elements = substituted(displayText.withParameters, [this._elements, parameterElements]);
@@ -223,13 +228,13 @@ class Create
             labelText = "";
         }
 
-        function addParameter(parameterData)
+        function addParameter(parameterData, parameterIndex)
         {
             let parameterObject = createTransformParameter(document,
                 locked ? null : parent, // If locked, still create the object, but don't display it
                 parameterData, onParameterChanged);
 
-            parameters.push(parameterObject);
+            parameters[parameterIndex - 1] = parameterObject;
         }
 
         function nameText(element, name)
@@ -291,7 +296,7 @@ class Create
         }
 
         // An operand is either a name of a parameter or an attribute, or a value
-        function addOperand(element, operand, isName, opposite, oppositeIsName)
+        function addOperand(element, operand, isName, parameterIndex, opposite, oppositeIsName)
         {
             if(isName)
             {
@@ -311,7 +316,7 @@ class Create
             else
                 addLabel();
 
-            addParameter(parameterData);
+            addParameter(parameterData, parameterIndex);
         }
 
         // The element is a parameter or a condition
@@ -323,11 +328,19 @@ class Create
             for(const part of phrase.split(/(%\d+)/))
             {
                 if(part === "%1")
-                    addOperand(element, element.lhs, element.lhsIsName, element.rhs, element.rhsIsName);
+                {
+                    addOperand(element, element.lhs, element.lhsIsName, element.lhsParameterIndex,
+                        element.rhs, element.rhsIsName);
+                }
                 else if(part === "%2" && element.rhs !== undefined)
-                    addOperand(element, element.rhs, element.rhsIsName, element.lhs, element.lhsIsName);
+                {
+                    addOperand(element, element.rhs, element.rhsIsName, element.rhsParameterIndex,
+                        element.lhs, element.lhsIsName);
+                }
                 else if(!/^%\d+$/.test(part))
+                {
                     labelText += part;
+                }
             }
         }
 
@@ -351,7 +364,7 @@ class Create
                     GraphiaSharedTypes.AttributeFlag.DisableDuringTransform,
                     unavailableAttributeNames),
                 initialAttributeName: element.attributeName
-            });
+            }, element.parameterIndex);
         }
 
         for(const element of this._elements)
