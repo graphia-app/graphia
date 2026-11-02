@@ -85,7 +85,6 @@ size_t SelectionManager::numNodesSelected() const
     return _selectedNodeIds.size();
 }
 
-//FIXME http://en.cppreference.com/w/cpp/container/unordered_set/merge will be useful here
 template<typename C> static bool _selectNodes(const GraphModel& graphModel, NodeIdSet& selectedNodeIds,
     NodeIdSet& mask, const C& nodeIds)
 {
@@ -106,7 +105,7 @@ template<typename C> static bool _selectNodes(const GraphModel& graphModel, Node
     }
 
     auto oldSize = selectedNodeIds.size();
-    selectedNodeIds.insert(newSelectedNodeIds.begin(), newSelectedNodeIds.end());
+    selectedNodeIds.merge(newSelectedNodeIds);
     return selectedNodeIds.size() > oldSize;
 }
 
