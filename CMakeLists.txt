@@ -11,22 +11,6 @@ qt_standard_project_setup(REQUIRES 6.11)
 
 include_directories(source)
 
-set(SANITIZERS "" CACHE STRING "Sanitizers to build with, e.g. address;undefined")
-if(SANITIZERS)
-    list(JOIN SANITIZERS "," SANITIZERS_ARGUMENT)
-    if(MSVC)
-        add_compile_options($<$<COMPILE_LANGUAGE:C,CXX>:/fsanitize=${SANITIZERS_ARGUMENT}>)
-    else()
-        add_compile_options(-fsanitize=${SANITIZERS_ARGUMENT} -fno-sanitize-recover=all -fno-omit-frame-pointer)
-        add_link_options(-fsanitize=${SANITIZERS_ARGUMENT})
-    endif()
-endif()
-
-option(ENABLE_STDLIB_ASSERTIONS "Build with the standard library's assertions (libstdc++ only)" OFF)
-if(ENABLE_STDLIB_ASSERTIONS)
-    add_compile_definitions(_GLIBCXX_ASSERTIONS)
-endif()
-
 add_subdirectory(source/thirdparty)
 
 # Clang's source based code coverage, run the tests with LLVM_PROFILE_FILE
