@@ -893,7 +893,7 @@ BaseParameterDialog
                                     visible: clippingTypeComboBox.value === ClippingType.Winsorization
 
                                     editable: true
-                                    Component.onCompleted: { contentItem.selectByMouse = true; }
+                                    Component.onCompleted: { (contentItem as TextInput).selectByMouse = true; }
 
                                     from: 0
                                     to: 100
@@ -1328,7 +1328,7 @@ BaseParameterDialog
                             id: maximumKnnSpinBox
                             visible: filterTypeComboBox.value === CorrelationFilterType.Knn
 
-                            Component.onCompleted: { contentItem.selectByMouse = true; }
+                            Component.onCompleted: { (contentItem as TextInput).selectByMouse = true; }
 
                             implicitWidth: 70
 
@@ -1471,7 +1471,7 @@ BaseParameterDialog
                             id: initialKnnSpinBox
                             visible: filterTypeComboBox.value === CorrelationFilterType.Knn
 
-                            Component.onCompleted: { contentItem.selectByMouse = true; }
+                            Component.onCompleted: { (contentItem as TextInput).selectByMouse = true; }
 
                             implicitWidth: 70
 

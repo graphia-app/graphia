@@ -2832,7 +2832,7 @@ ApplicationWindow
                     let tab = tabComponent.createObject(null, {"mainWindow": mainWindow});
                     tabLayout.insert(index, tab);
 
-                    let button = tabButtonComponent.createObject(tabBar, {"tab": tab});
+                    let button = tabButtonComponent.createObject(tabBar, {"tab": tab}) as TabBarButton;
                     tabBar.insertItem(index, button);
                     tabBar.currentIndex = index;
 

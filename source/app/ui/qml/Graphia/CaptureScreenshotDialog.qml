@@ -236,7 +236,7 @@ Window
                         from: 1
                         to: 99999
                         editable: true
-                        Component.onCompleted: { contentItem.selectByMouse = true; }
+                        Component.onCompleted: { (contentItem as TextInput).selectByMouse = true; }
 
                         onValueChanged: { root.updateValues(pixelWidthSpin); }
                     }
@@ -259,7 +259,7 @@ Window
                         from: 1
                         to: 99999
                         editable: true
-                        Component.onCompleted: { contentItem.selectByMouse = true; }
+                        Component.onCompleted: { (contentItem as TextInput).selectByMouse = true; }
 
                         onValueChanged: { root.updateValues(pixelHeightSpin); }
                     }
@@ -295,7 +295,7 @@ Window
                         from: 1
                         to: 99999
                         editable: true
-                        Component.onCompleted: { contentItem.selectByMouse = true; }
+                        Component.onCompleted: { (contentItem as TextInput).selectByMouse = true; }
 
                         onValueChanged: { root.updateValues(dpiSpin); }
                     }
@@ -312,7 +312,7 @@ Window
                         from: 1
                         to: 99999
                         editable: true
-                        Component.onCompleted: { contentItem.selectByMouse = true; }
+                        Component.onCompleted: { (contentItem as TextInput).selectByMouse = true; }
 
                         onValueChanged: { root.updateValues(printWidthSpin); }
                     }
@@ -335,7 +335,7 @@ Window
                         from: 1
                         to: 99999
                         editable: true
-                        Component.onCompleted: { contentItem.selectByMouse = true; }
+                        Component.onCompleted: { (contentItem as TextInput).selectByMouse = true; }
 
                         onValueChanged: { root.updateValues(printHeightSpin); }
                     }

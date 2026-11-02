@@ -39,7 +39,7 @@ Menu // qmllint disable import
         }
         else if(parent instanceof PlatformMenuItem)
         {
-            parent.hidden = Qt.binding(() => hidden);
+            (parent as PlatformMenuItem).hidden = Qt.binding(() => hidden);
             parent.height = Qt.binding(() => hidden || !parent ? 0 : parent.implicitHeight);
         }
     }

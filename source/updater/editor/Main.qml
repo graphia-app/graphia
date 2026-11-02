@@ -1086,7 +1086,7 @@ ApplicationWindow
                     let tab = tabComponent.createObject(null);
                     tabLayout.insert(tabBar.count, tab);
 
-                    let button = tabButtonComponent.createObject(tabBar);
+                    let button = tabButtonComponent.createObject(tabBar) as TabButton;
                     tabBar.addItem(button);
 
                     button.text = Qt.binding(() =>

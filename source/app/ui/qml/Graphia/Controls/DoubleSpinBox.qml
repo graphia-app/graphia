@@ -99,7 +99,7 @@ Control
         Component.onCompleted:
         {
             value = intValue(root.value);
-            contentItem.selectByMouse = true;
+            (contentItem as TextInput).selectByMouse = true;
         }
 
         onActiveFocusChanged:

@@ -479,8 +479,8 @@ Item
 
                             if(contentItem instanceof Text)
                             {
-                                contentItem.color = contrastBinding;
-                                contentItem.textFormat = Text.StyledText;
+                                (contentItem as Text).color = contrastBinding;
+                                (contentItem as Text).textFormat = Text.StyledText;
                             }
 
                             if(contentItem.text) // qmllint disable missing-property

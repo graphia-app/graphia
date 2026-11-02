@@ -51,8 +51,8 @@ Rectangle
         Component.onCompleted:
         {
             // Make the scrolling behaviour more desktop-y
-            contentItem.boundsBehavior = Flickable.StopAtBounds;
-            contentItem.flickableDirection = Flickable.VerticalFlick;
+            (contentItem as Flickable).boundsBehavior = Flickable.StopAtBounds;
+            (contentItem as Flickable).flickableDirection = Flickable.VerticalFlick;
         }
 
         TextArea
