@@ -30,17 +30,56 @@
 
 #if defined(Q_OS_WIN)
 #include <Windows.h>
+#elif defined(Q_OS_MACOS)
+#include <array>
+#include <sys/types.h>
+#include <sys/sysctl.h>
+#include <unistd.h>
+#elif defined(Q_OS_LINUX)
+#include <QFile>
+#include <QTextStream>
 #endif
 
 namespace u
 {
+inline bool isBeingTraced()
+{
+#if defined(Q_OS_LINUX)
+    QFile statusFile(u"/proc/self/status"_s);
+    if(!statusFile.open(QIODevice::ReadOnly | QIODevice::Text))
+        return false;
+
+    const QString tracerPidKey = u"TracerPid:"_s;
+    QTextStream ts(&statusFile);
+    QString line;
+    while(ts.readLineInto(&line))
+    {
+        if(line.startsWith(tracerPidKey))
+            return line.mid(tracerPidKey.size()).trimmed().toInt() != 0;
+    }
+
+    return false;
+#elif defined(Q_OS_MACOS)
+    std::array<int, 4> mib = {CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid()};
+    struct kinfo_proc info = {};
+    size_t size = sizeof(info);
+
+    if(sysctl(mib.data(), static_cast<u_int>(mib.size()), &info, &size, nullptr, 0) != 0)
+        return false;
+
+    return (info.kp_proc.p_flag & P_TRACED) != 0;
+#else
+    return false;
+#endif
+}
+
 inline bool isDebuggerPresent()
 {
 #if defined(Q_OS_WIN)
     return static_cast<bool>(IsDebuggerPresent());
 #else
-    //FIXME on Linux we could probably use one of the solutions here:
-    // https://stackoverflow.com/questions/3596781/how-to-detect-if-the-current-process-is-being-run-by-gdb
+    if(isBeingTraced())
+        return true;
 
     auto parentProcessName = u::parentProcessName();
     if(!parentProcessName.isEmpty())
