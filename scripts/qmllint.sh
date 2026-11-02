@@ -51,6 +51,11 @@ done | sort -u)
 # do) the remaining files are still linted
 OPTIONS_DIR=$(mktemp -d)
 
+# Use JSON output because of QTBUG-151969
+JSON_TO_TEXT='.files[] | .filename as $FILE | .warnings[] |
+    "\(.type[:1] | ascii_upcase)\(.type[1:]): \($FILE):\(.line):\(.column): " +
+    "\(.message | gsub("\\s*\n\\s*"; " ") | sub("\\s+$"; "")) [\(.id)]"'
+
 for RSP in $(find . -path "*/.rcc/qmllint/*.rsp" \
     -not -name "*_json.rsp" -not -name "*_module.rsp" | sort)
 do
@@ -64,7 +69,7 @@ do
 
     for QML_FILE in $(grep '\.qml$' ${RSP})
     do
-        ${QMLLINT} @${OPTIONS} ${QML_FILE}
+        ${QMLLINT} @${OPTIONS} --json - ${QML_FILE} | jq -r "${JSON_TO_TEXT}"
     done
 done 2>&1 | tee qmllint-${VERSION}.log
 

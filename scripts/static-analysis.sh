@@ -215,7 +215,7 @@ do
 
     qmllint)
       export QMLLINT=${QMLLINT:-qmllint}
-      requireCommand ${QMLLINT} && scripts/qmllint.sh
+      requireCommand ${QMLLINT} && requireCommand jq && scripts/qmllint.sh
       ;;
 
     iwyu)
