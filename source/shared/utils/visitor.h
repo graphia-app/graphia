@@ -33,7 +33,4 @@
 
 template<class... Ts> struct Visitor : Ts... { using Ts::operator()...; };
 
-//FIXME: in theory this deduction guide is unnecssary for C++20, but this doesn't appear to be the case (yet?)
-template<class... Ts> Visitor(Ts...) -> Visitor<Ts...>;
-
 #endif // VISITOR_H
