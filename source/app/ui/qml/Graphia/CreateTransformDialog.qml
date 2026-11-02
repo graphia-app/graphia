@@ -212,7 +212,7 @@ Window
                             root.accept();
                     }
 
-                    TransformListSortMenu { transformsList: transformsList }
+                    TransformListSortMenu { transformsList: parent }
                 }
 
                 Button

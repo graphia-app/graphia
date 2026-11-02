@@ -2773,6 +2773,7 @@ ApplicationWindow
 
             TabUI
             {
+                // qmllint disable id-shadows-member
                 onLoadComplete: (url, success) =>
                 {
                     if(success)
@@ -2798,6 +2799,7 @@ ApplicationWindow
                         onLoadFailure();
                     }
                 }
+                // qmllint enable id-shadows-member
 
                 property var onLoadFailure: function()
                 {
@@ -3151,7 +3153,7 @@ ApplicationWindow
 
     Hubble
     {
-        mainWindow: mainWindow
+        mainWindow: mainWindow // qmllint disable id-shadows-member
         title: qsTr("Resume/Pause Layout")
         alignment: Qt.AlignBottom | Qt.AlignLeft
         edges: Qt.LeftEdge | Qt.TopEdge

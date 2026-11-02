@@ -40,7 +40,7 @@ Item
         if(!model)
             return null;
 
-        return treeView.selectedIndex;
+        return treeBoxView.selectedIndex;
     }
 
     property bool currentIndexIsValid: currentIndex && currentIndex.valid
@@ -80,14 +80,14 @@ Item
 
     property var prettifyFunction: (value) => value
 
-    readonly property double contentWidth: treeView.implicitWidth
-    readonly property double contentHeight: treeView.implicitHeight
+    readonly property double contentWidth: treeBoxView.implicitWidth
+    readonly property double contentHeight: treeBoxView.implicitHeight
 
     onModelChanged:
     {
-        treeView.clearSelection();
+        treeBoxView.clearSelection();
         treeBoxSearch.visible = false;
-        treeView.positionViewAtRow(0, Qt.AlignLeft|Qt.AlignTop, 0.0);
+        treeBoxView.positionViewAtRow(0, Qt.AlignLeft|Qt.AlignTop, 0.0);
     }
 
     function textFor(index)
@@ -125,7 +125,7 @@ Item
                 searchButton.checked = visible;
 
                 if(!visible)
-                    treeView.forceActiveFocus();
+                    treeBoxView.forceActiveFocus();
             }
 
             TreeBoxSearch
@@ -148,7 +148,7 @@ Item
 
             TreeView
             {
-                id: treeView
+                id: treeBoxView
 
                 anchors.fill: parent
                 anchors.margins: outline.outlineWidth
@@ -192,13 +192,13 @@ Item
 
                 function sectionTextFor(row)
                 {
-                    if(treeView.sectionRole < 0)
+                    if(treeBoxView.sectionRole < 0)
                         return "";
 
                     if(!sortFilterProxyModel.sourceModel)
                         return "";
 
-                    let value = model.data(index(row, 0), treeView.sectionRole);
+                    let value = model.data(index(row, 0), treeBoxView.sectionRole);
 
                     if(!value)
                         return "";
@@ -229,7 +229,7 @@ Item
                         if(!isRowLoaded(loadedRow))
                             continue;
 
-                        let delegateItem = treeView.itemAtIndex(index(loadedRow, 0));
+                        let delegateItem = treeBoxView.itemAtIndex(index(loadedRow, 0));
                         if(delegateItem !== null)
                             delegateItem.selected = false; // qmllint disable missing-property
                     }
@@ -244,7 +244,7 @@ Item
 
                         newSelectedValues.push(root.textFor(sourceIndex));
 
-                        let delegateItem = treeView.itemAtIndex(index(row, 0));
+                        let delegateItem = treeBoxView.itemAtIndex(index(row, 0));
                         if(delegateItem !== null)
                             delegateItem.selected = true; // qmllint disable missing-property
                     }
@@ -260,13 +260,13 @@ Item
 
                 function selectionWithRangeAddedRow(row)
                 {
-                    if(treeView.lastSelectedRow < 0)
+                    if(treeBoxView.lastSelectedRow < 0)
                         return [row];
 
-                    let min = Math.min(row, treeView.lastSelectedRow);
-                    let max = Math.max(row, treeView.lastSelectedRow);
+                    let min = Math.min(row, treeBoxView.lastSelectedRow);
+                    let max = Math.max(row, treeBoxView.lastSelectedRow);
 
-                    let newSelectedRows = treeView.selectedRows.slice();
+                    let newSelectedRows = treeBoxView.selectedRows.slice();
 
                     for(let i = min; i <= max; i++)
                     {
@@ -279,7 +279,7 @@ Item
 
                 function selectionWithIndividualAddedRow(row)
                 {
-                    let newSelectedRows = treeView.selectedRows.slice();
+                    let newSelectedRows = treeBoxView.selectedRows.slice();
                     let metaIndex = newSelectedRows.indexOf(row);
 
                     if(metaIndex < 0)
@@ -321,32 +321,32 @@ Item
                 {
                     let newSelectedRows = [];
 
-                    if(root.allowMultipleSelection && (treeView.modifiers & Qt.ShiftModifier))
-                        newSelectedRows = treeView.selectionWithRangeAddedRow(row);
+                    if(root.allowMultipleSelection && (treeBoxView.modifiers & Qt.ShiftModifier))
+                        newSelectedRows = treeBoxView.selectionWithRangeAddedRow(row);
                     else
                         newSelectedRows = [row];
 
-                    treeView.setSelectedRows(newSelectedRows, row);
-                    treeView.positionViewAtRow(row, TableView.Visible);
+                    treeBoxView.setSelectedRows(newSelectedRows, row);
+                    treeBoxView.positionViewAtRow(row, TableView.Visible);
                 }
 
                 Keys.onUpPressed:
                 {
-                    if(treeView.lastSelectedRow === -1)
+                    if(treeBoxView.lastSelectedRow === -1)
                         return;
 
-                    let newRow = (treeView.lastSelectedRow - 1);
+                    let newRow = (treeBoxView.lastSelectedRow - 1);
                     if(newRow >= 0)
                         keyboardSelect(newRow);
                 }
 
                 Keys.onDownPressed:
                 {
-                    if(treeView.lastSelectedRow === -1)
+                    if(treeBoxView.lastSelectedRow === -1)
                         return;
 
-                    let newRow = (treeView.lastSelectedRow + 1);
-                    if(newRow < treeView.rows)
+                    let newRow = (treeBoxView.lastSelectedRow + 1);
+                    if(newRow < treeBoxView.rows)
                         keyboardSelect(newRow);
                 }
 
@@ -398,7 +398,7 @@ Item
 
                     TableView.onReused:
                     {
-                        selected = treeView.selectedRows.includes(model.row);
+                        selected = treeBoxView.selectedRows.includes(model.row);
                     }
 
                     required property int row
@@ -412,8 +412,8 @@ Item
                         if(model.row === 0)
                             return true;
 
-                        let rowSection = treeView.sectionTextFor(model.row);
-                        let rowMinusOneSection = treeView.sectionTextFor(model.row - 1);
+                        let rowSection = treeBoxView.sectionTextFor(model.row);
+                        let rowMinusOneSection = treeBoxView.sectionTextFor(model.row - 1);
 
                         if(!rowSection || !rowMinusOneSection)
                             return false;
@@ -432,7 +432,7 @@ Item
                         font.italic: true
                         color: root.palette.text
 
-                        text: { return treeBoxDelegate.hasSectionRow ? treeView.sectionTextFor(treeBoxDelegate.model.row) : ""; }
+                        text: { return treeBoxDelegate.hasSectionRow ? treeBoxView.sectionTextFor(treeBoxDelegate.model.row) : ""; }
                     }
 
                     color: ControlColors.background
@@ -449,7 +449,7 @@ Item
                         id: treeViewDelegate
 
                         implicitWidth: root.width
-                        rightPadding: treeView.scrollBarWidth
+                        rightPadding: treeBoxView.scrollBarWidth
                         y: treeBoxDelegate.hasSectionRow ? implicitHeight : 0
 
                         current: parent.current
@@ -502,28 +502,28 @@ Item
 
                         property var sourceIndex:
                         {
-                            let sfpmIndex = treeView.index(model.row, model.column);
+                            let sfpmIndex = treeBoxView.index(model.row, model.column);
                             let index = sortFilterProxyModel.mapToSource(sfpmIndex);
                             return index;
                         }
 
                         onPressed:
                         {
-                            treeView.toggleExpanded(row);
+                            treeBoxView.toggleExpanded(row);
 
                             let newSelectedRows = [];
 
                             if(!sourceIndex || !sourceIndex.valid)
                                 return;
 
-                            if(root.allowMultipleSelection && (treeView.modifiers & Qt.ShiftModifier))
-                                newSelectedRows = treeView.selectionWithRangeAddedRow(model.row);
-                            else if(root.allowMultipleSelection && (treeView.modifiers & Qt.ControlModifier))
-                                newSelectedRows = treeView.selectionWithIndividualAddedRow(model.row);
+                            if(root.allowMultipleSelection && (treeBoxView.modifiers & Qt.ShiftModifier))
+                                newSelectedRows = treeBoxView.selectionWithRangeAddedRow(model.row);
+                            else if(root.allowMultipleSelection && (treeBoxView.modifiers & Qt.ControlModifier))
+                                newSelectedRows = treeBoxView.selectionWithIndividualAddedRow(model.row);
                             else
                                 newSelectedRows = [model.row];
 
-                            treeView.setSelectedRows(newSelectedRows, model.row);
+                            treeBoxView.setSelectedRows(newSelectedRows, model.row);
                         }
 
                         onReleased:
@@ -540,7 +540,7 @@ Item
                         onClicked:
                         {
                             // Give the control keyboard focus so that shortcuts work
-                            treeView.forceActiveFocus();
+                            treeBoxView.forceActiveFocus();
 
                             root.clicked(sourceIndex);
                         }
@@ -558,7 +558,7 @@ Item
                 MouseArea
                 {
                     anchors.fill: parent
-                    onWheel: (wheel) => { treeView.flick(0, wheel.angleDelta.y * Constants.mouseWheelStep); }
+                    onWheel: (wheel) => { treeBoxView.flick(0, wheel.angleDelta.y * Constants.mouseWheelStep); }
                 }
 
                 onContentYChanged: { parentGuideTimer.restart(); }
@@ -575,7 +575,7 @@ Item
                 id: searchButton
                 visible: root.showSearch && root.enabled
 
-                anchors.rightMargin: 4 + treeView.scrollBarWidth
+                anchors.rightMargin: 4 + treeBoxView.scrollBarWidth
                 anchors.bottomMargin: 4
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
@@ -598,7 +598,7 @@ Item
                 readonly property int _internalMargin: 4
                 readonly property int _margin: 6
                 readonly property int _idealWidth: parentGuideText.contentWidth + (_internalMargin * 2)
-                readonly property int _maxWidth: treeView.width - (_margin * 2)
+                readonly property int _maxWidth: treeBoxView.width - (_margin * 2)
 
                 implicitWidth: Math.min(_idealWidth, _maxWidth)
                 implicitHeight: parentGuideText.implicitHeight + (_internalMargin * 2)
@@ -643,9 +643,9 @@ Item
                 {
                     let indices = new Set();
 
-                    for(let row = treeView.topRow; row <= treeView.bottomRow; row++)
+                    for(let row = treeBoxView.topRow; row <= treeBoxView.bottomRow; row++)
                     {
-                        let index = treeView.index(row, 0);
+                        let index = treeBoxView.index(row, 0);
                         let sourceIndex = sortFilterProxyModel.mapToSource(index);
 
                         if(!sourceIndex.valid)
@@ -723,22 +723,22 @@ Item
         if(!index.valid)
             return;
 
-        treeView.expandToIndex(index);
+        treeBoxView.expandToIndex(index);
 
         // Do the selection
-        let row = treeView.rowAtIndex(index);
-        treeView.selectRow(row);
+        let row = treeBoxView.rowAtIndex(index);
+        treeBoxView.selectRow(row);
 
         // Scroll so that it's visible
-        treeView.positionViewAtRow(row, Qt.AlignLeft|Qt.AlignVCenter, 0.0);
+        treeBoxView.positionViewAtRow(row, Qt.AlignLeft|Qt.AlignVCenter, 0.0);
     }
 
     function clearSelection()
     {
-        treeView.clearSelection();
+        treeBoxView.clearSelection();
     }
 
-    Keys.forwardTo: [treeView]
+    Keys.forwardTo: [treeBoxView]
 
     property bool _acceptancePending: false
     signal accepted()

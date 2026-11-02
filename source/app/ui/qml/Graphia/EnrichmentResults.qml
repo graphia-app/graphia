@@ -289,8 +289,8 @@ ApplicationWindow
                     id: heatmap
 
                     anchors.fill: parent
-                    anchors.rightMargin: verticalScrollBar.size < 1 ? verticalScrollBar.width : 0
-                    anchors.bottomMargin: horizontalScrollBar.size < 1 ? horizontalScrollBar.height : 0
+                    anchors.rightMargin: verticalHeatmapScrollBar.size < 1 ? verticalHeatmapScrollBar.width : 0
+                    anchors.bottomMargin: horizontalHeatmapScrollBar.size < 1 ? horizontalHeatmapScrollBar.height : 0
 
                     model: root._currentModel
                     elideLabelWidth: 100
@@ -305,26 +305,26 @@ ApplicationWindow
 
                     onRightClick: { plotContextMenu.popup(); }
 
-                    scrollXAmount: horizontalScrollBar.position / (1.0 - horizontalScrollBar.size)
-                    scrollYAmount: verticalScrollBar.position / (1.0 - verticalScrollBar.size)
+                    scrollXAmount: horizontalHeatmapScrollBar.position / (1.0 - horizontalHeatmapScrollBar.size)
+                    scrollYAmount: verticalHeatmapScrollBar.position / (1.0 - verticalHeatmapScrollBar.size)
                 }
 
                 ScrollBar
                 {
-                    id: horizontalScrollBar
+                    id: horizontalHeatmapScrollBar
                     hoverEnabled: true
                     active: hovered || pressed
                     orientation: Qt.Horizontal
                     size: heatmap.horizontalRangeSize
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    anchors.rightMargin: verticalScrollBar.size < 1 ? verticalScrollBar.width : 0
+                    anchors.rightMargin: verticalHeatmapScrollBar.size < 1 ? verticalHeatmapScrollBar.width : 0
                     anchors.bottom: parent.bottom
                 }
 
                 ScrollBar
                 {
-                    id: verticalScrollBar
+                    id: verticalHeatmapScrollBar
                     hoverEnabled: true
                     active: hovered || pressed
                     orientation: Qt.Vertical
@@ -332,13 +332,13 @@ ApplicationWindow
                     anchors.top: parent.top
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom
-                    anchors.bottomMargin: horizontalScrollBar.size < 1 ? horizontalScrollBar.height : 0
+                    anchors.bottomMargin: horizontalHeatmapScrollBar.size < 1 ? horizontalHeatmapScrollBar.height : 0
                 }
 
                 ScrollBarCornerFiller
                 {
-                    horizontalScrollBar: horizontalScrollBar
-                    verticalScrollBar: verticalScrollBar
+                    horizontalScrollBar: horizontalHeatmapScrollBar
+                    verticalScrollBar: verticalHeatmapScrollBar
                 }
             }
 

@@ -1159,7 +1159,7 @@ PluginContent
                         {
                             id: modalControls
 
-                            plot: plot
+                            plot: plot // qmllint disable id-shadows-member
                             selectedRowsDifferFromRowsOfInterest: plot.selectedRowsDifferFromRowsOfInterest
 
                             onShown: { modalControlsPanel.show(); }

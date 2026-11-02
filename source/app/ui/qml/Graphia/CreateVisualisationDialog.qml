@@ -109,7 +109,7 @@ Window
                     root.updateVisualisationExpressions();
                 }
 
-                AttributeListSortMenu { attributeList: attributeList }
+                AttributeListSortMenu { attributeList: parent }
             }
 
             ListBox
