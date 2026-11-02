@@ -12,5 +12,5 @@ qt_add_qml_module(loading_qml
 )
 
 target_link_libraries(loading_qml
-    PRIVATE Qt6::Quick Qt6::Concurrent
+    PRIVATE Qt6::Quick Qt6::Concurrent shared
 )
