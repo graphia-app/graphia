@@ -1071,7 +1071,7 @@ Item
                     else
                         calculatedWidth = calculateMinimumColumnWidth(col);
 
-                    return calculatedWidth;
+                    return Math.ceil(calculatedWidth);
                 }
 
                 function forceLayoutSafe()

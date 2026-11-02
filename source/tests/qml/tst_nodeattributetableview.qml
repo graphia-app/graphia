@@ -291,6 +291,15 @@ TestCase
         verifyAtRightEnd();
     }
 
+    function test_columnSelectionKeepsLastShownColumnInViewWithFractionalWidths()
+    {
+        tableView.userColumnWidths = model.columnNames.map((name, index) => 120.6 + (index * 7.3));
+        tableView.forceLayoutSafe();
+        waitForLayout();
+
+        test_columnSelectionKeepsLastShownColumnInView();
+    }
+
     function test_columnSelectionKeepsShownColumnInViewWhenMostAreHidden()
     {
         view.setHiddenColumns(model.columnNames.slice(5));
