@@ -56,7 +56,7 @@ Item
                     return;
 
                 let visualisation = list.itemAt(visualisationIndex);
-                visualisation.parameters["gradient"] = root.document.writtenString(configuration);
+                visualisation.parameters["gradient"] = root.document.stringForExpression(configuration);
                 visualisation.updateExpression();
             }
 
@@ -69,7 +69,7 @@ Item
             onApplyClicked: (alreadyApplied) =>
             {
                 let visualisation = list.itemAt(visualisationIndex);
-                visualisation.parameters["gradient"] = root.document.writtenString(configuration);
+                visualisation.parameters["gradient"] = root.document.stringForExpression(configuration);
                 visualisation.updateExpression(alreadyApplied);
             }
         }
@@ -91,7 +91,7 @@ Item
                     return;
 
                 let visualisation = list.itemAt(visualisationIndex);
-                visualisation.parameters["palette"] = root.document.writtenString(configuration);
+                visualisation.parameters["palette"] = root.document.stringForExpression(configuration);
                 visualisation.updateExpression();
             }
 
@@ -104,7 +104,7 @@ Item
             onApplyClicked: (alreadyApplied) =>
             {
                 let visualisation = list.itemAt(visualisationIndex);
-                visualisation.parameters["palette"] = root.document.writtenString(configuration);
+                visualisation.parameters["palette"] = root.document.stringForExpression(configuration);
                 visualisation.updateExpression(alreadyApplied);
             }
         }
@@ -126,7 +126,7 @@ Item
                     return;
 
                 let visualisation = list.itemAt(visualisationIndex);
-                visualisation.parameters["mapping"] = root.document.writtenString(configuration);
+                visualisation.parameters["mapping"] = root.document.stringForExpression(configuration);
                 visualisation.updateExpression();
             }
 
@@ -142,7 +142,7 @@ Item
             onApplyClicked: (alreadyApplied) =>
             {
                 let visualisation = list.itemAt(visualisationIndex);
-                visualisation.parameters["mapping"] = root.document.writtenString(configuration);
+                visualisation.parameters["mapping"] = root.document.stringForExpression(configuration);
                 visualisation.updateExpression(alreadyApplied);
             }
         }

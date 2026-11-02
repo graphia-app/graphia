@@ -190,7 +190,7 @@ GridLayout
         function updateValue()
         {
             let storedText = root.storedValueOf?.(text) ?? text;
-            root.value = root.document.writtenString(storedText);
+            root.value = root.document.stringForExpression(storedText);
         }
 
         onTextChanged:
@@ -221,7 +221,7 @@ GridLayout
 
         function updateValue()
         {
-            root.value = root.document.writtenString(currentValue);
+            root.value = root.document.stringForExpression(currentValue);
         }
 
         onCurrentValueChanged: { updateValue(); }
@@ -322,7 +322,7 @@ GridLayout
             if(validatorRegex.length > 0)
                 textFieldValidator.regularExpression = new RegExp(validatorRegex);
 
-            value = root.document.writtenString(initialValue);
+            value = root.document.stringForExpression(initialValue);
             break;
 
         case ValueType.StringList:
@@ -330,7 +330,7 @@ GridLayout
                 displayValue: index < root.displayValues.length ? root.displayValues[index] : choice}));
             comboBox.currentIndex = initialIndex;
 
-            value = root.document.writtenString(comboBox.currentValue);
+            value = root.document.stringForExpression(comboBox.currentValue);
             break;
 
         case ValueType.Attribute:

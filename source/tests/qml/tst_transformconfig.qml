@@ -56,8 +56,8 @@ TestCase
         })
 
         function parseGraphTransform(transform) { return testHelper.parseGraphTransform(transform); }
-        function writtenString(string) { return testHelper.writtenString(string); }
-        function writtenAttributeName(attributeName) { return testHelper.writtenAttributeName(attributeName); }
+        function stringForExpression(string) { return testHelper.stringForExpression(string); }
+        function attributeNameForExpression(attributeName) { return testHelper.attributeNameForExpression(attributeName); }
         function transformDisplayText() { return testHelper.transformDisplayText(); }
         function opDisplayText(op) { return testHelper.opDisplayText(op); }
         function attributeDisplayName(attributeName) { return testHelper.attributeDisplayName(attributeName); }

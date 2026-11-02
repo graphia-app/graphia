@@ -145,7 +145,7 @@ private slots:
     }
 
     // Names, and string values, are only quoted when they aren't identifiers
-    void writtenWithoutUnnecessaryQuotes()
+    void expressionHasNoUnnecessaryQuotes()
     {
         GraphTransformConfigParser parser;
         QVERIFY(parser.parse(uR"("KNN" using $"Node Weight" with "RankOrder" = "Ascending" where $"Kind" == "a b" or $"Kind" == "c")"_s));

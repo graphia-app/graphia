@@ -36,7 +36,7 @@ TestCase
 
         property var defaultParameters: ({})
 
-        function writtenString(string) { return testHelper.writtenString(string); }
+        function stringForExpression(string) { return testHelper.stringForExpression(string); }
 
         function visualisationDefaultParameters(valueType, channelName)
         {

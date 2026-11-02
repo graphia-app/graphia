@@ -336,7 +336,7 @@ QString AvailableAttributesModel::get(const QModelIndex& index) const
     if(item == nullptr)
         return {};
 
-    QString text = LexyConfigGrammar::writtenString(item->value());
+    QString text = LexyConfigGrammar::stringForExpression(item->value());
 
     auto* parent = parentItem(index);
     if(u::contains(_attributeItemsWithParameters, parent))

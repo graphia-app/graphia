@@ -143,26 +143,26 @@ void GraphTransformConfig::setParameterValue(const QString& name,
         _parameters.emplace_back(Parameter{._name = name, ._value = value});
 }
 
-QString GraphTransformConfig::Parameter::valueAsString(NamedBool<"asWritten"> asWritten) const
+QString GraphTransformConfig::Parameter::valueAsString(NamedBool<"forExpression"> forExpression) const
 {
     struct Visitor
     {
-        NamedBool<"asWritten"> _asWritten;
+        NamedBool<"forExpression"> _forExpression;
 
-        explicit Visitor(NamedBool<"asWritten"> asWritten_) : _asWritten(asWritten_) {}
+        explicit Visitor(NamedBool<"forExpression"> forExpression_) : _forExpression(forExpression_) {}
 
         QString operator()(double d) const          { return doubleAsString(d); }
         QString operator()(int i) const             { return QString::number(i); }
         QString operator()(const QString& s) const
         {
-            if(_asWritten)
-                return LexyConfigGrammar::writtenString(s);
+            if(_forExpression)
+                return LexyConfigGrammar::stringForExpression(s);
 
             return s;
         }
     };
 
-    return std::visit(Visitor(asWritten), _value);
+    return std::visit(Visitor(forExpression), _value);
 }
 
 bool GraphTransformConfig::hasCondition() const
@@ -266,7 +266,7 @@ QString GraphTransformConfig::conditionAsString(NamedBool<"forDisplay"> forDispl
                 QString operator()(const int& i) const      { return QString::number(i); }
                 QString operator()(const QString& s) const
                 {
-                    return _forDisplay ? s : LexyConfigGrammar::writtenString(s);
+                    return _forDisplay ? s : LexyConfigGrammar::stringForExpression(s);
                 }
 
                 QString operator()(const AttributeRef& a) const
@@ -277,7 +277,7 @@ QString GraphTransformConfig::conditionAsString(NamedBool<"forDisplay"> forDispl
                             Attribute::fullyQualifiedDisplayName(a._name, [](const QString& name) { return name; });
                     }
 
-                    return u"$%1"_s.arg(Attribute::writtenAttributeName(a._name));
+                    return u"$%1"_s.arg(Attribute::attributeNameForExpression(a._name));
                 }
             };
 
@@ -364,7 +364,7 @@ QVariantMap GraphTransformConfig::asVariantMap(const GraphTransformFactory* fact
     QStringList attributes;
     attributes.reserve(static_cast<int>(_attributes.size()));
     for(const auto& attribute : _attributes)
-        attributes.append(Attribute::writtenAttributeName(attribute));
+        attributes.append(Attribute::attributeNameForExpression(attribute));
     map.insert(u"attributes"_s, attributes);
 
     QVariantList parameters;
@@ -404,14 +404,14 @@ QString GraphTransformConfig::asString(NamedBool<"forDisplay"> forDisplay, const
         s += u"] "_s;
     }
 
-    s += LexyConfigGrammar::writtenString(_action);
+    s += LexyConfigGrammar::stringForExpression(_action);
 
     if(!_attributes.empty())
     {
         s += u" using"_s;
 
         for(const auto& attribute : _attributes)
-            s += u" $%1"_s.arg(Attribute::writtenAttributeName(attribute));
+            s += u" $%1"_s.arg(Attribute::attributeNameForExpression(attribute));
     }
 
     if(!_parameters.empty())
@@ -419,7 +419,8 @@ QString GraphTransformConfig::asString(NamedBool<"forDisplay"> forDisplay, const
         s += u" with"_s;
 
         for(const auto& parameter : _parameters)
-            s += u" %1 = %2"_s.arg(LexyConfigGrammar::writtenString(parameter._name), parameter.valueAsString("asWritten"_yes));
+            s += u" %1 = %2"_s.arg(LexyConfigGrammar::stringForExpression(parameter._name),
+                parameter.valueAsString("forExpression"_yes));
     }
 
     if(hasCondition())

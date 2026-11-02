@@ -41,7 +41,7 @@ struct VisualisationConfig
         ParameterValue _value;
 
         bool operator==(const Parameter& other) const;
-        QString valueAsString(NamedBool<"asWritten"> asWritten = "asWritten"_no) const;
+        QString valueAsString(NamedBool<"forExpression"> forExpression = "forExpression"_no) const;
     };
 
     std::vector<QString> _flags;

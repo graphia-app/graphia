@@ -97,7 +97,7 @@ class Create
 
         // Escape '%' to '%!' so that when the template is actually employed, a literal
         // % isn't potentially misinterpreted as a template substitution parameter
-        this.template = document.writtenString(transform.action).replace(/%/g, "%!");
+        this.template = document.stringForExpression(transform.action).replace(/%/g, "%!");
 
         let displayText = document.transformDisplayText();
 
@@ -118,7 +118,7 @@ class Create
             {
                 // As with the action, escape '%' in attribute names
                 if(isName)
-                    return "$" + document.writtenAttributeName(text).replace(/%/g, "%!");
+                    return "$" + document.attributeNameForExpression(text).replace(/%/g, "%!");
 
                 return "%" + parameterIndex++;
             }
@@ -186,7 +186,7 @@ class Create
                 if(parameterElements.length > 0)
                     appendToElements(parameterElements, " ");
 
-                this.template += " " + document.writtenString(parameter.name) + " = %" + parameterIndex++;
+                this.template += " " + document.stringForExpression(parameter.name) + " = %" + parameterIndex++;
                 parameterElements.push({type: "parameter", lhs: parameter.name, lhsIsName: true, rhs: parameter.value});
             }
 

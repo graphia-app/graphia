@@ -113,14 +113,14 @@ public:
     }
 
     // As the Document functions of the same names
-    Q_INVOKABLE QString writtenString(const QString& string) const
+    Q_INVOKABLE QString stringForExpression(const QString& string) const
     {
-        return LexyConfigGrammar::writtenString(string);
+        return LexyConfigGrammar::stringForExpression(string);
     }
 
-    Q_INVOKABLE QString writtenAttributeName(const QString& attributeName) const
+    Q_INVOKABLE QString attributeNameForExpression(const QString& attributeName) const
     {
-        return Attribute::writtenAttributeName(attributeName);
+        return Attribute::attributeNameForExpression(attributeName);
     }
 
     Q_INVOKABLE QVariantMap transformDisplayText() const

@@ -95,7 +95,7 @@ struct QuotedString : lexy::token_production
 
 // This takes a transform, attribute, parameter, channel name,
 // or string value, and returns it quoted if necessary
-inline QString writtenString(const QString& string)
+inline QString stringForExpression(const QString& string)
 {
     const auto bytes = string.toUtf8();
     const auto input = lexy::string_input<lexy::default_encoding>(

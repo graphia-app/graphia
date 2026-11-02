@@ -465,7 +465,7 @@ Attribute::Name Attribute::parseAttributeName(QString name)
     return {._type = type, ._name = unquoted(name), ._parameter = unquoted(parameter)};
 }
 
-QString Attribute::writtenAttributeName(const QString& name)
+QString Attribute::attributeNameForExpression(const QString& name)
 {
     auto parsedAttributeName = parseAttributeName(name);
 
@@ -479,9 +479,9 @@ QString Attribute::writtenAttributeName(const QString& name)
 
     QString postfix;
     if(!parsedAttributeName._parameter.isEmpty())
-        postfix = u".%1"_s.arg(LexyConfigGrammar::writtenString(parsedAttributeName._parameter));
+        postfix = u".%1"_s.arg(LexyConfigGrammar::stringForExpression(parsedAttributeName._parameter));
 
-    return u"%1%2%3"_s.arg(prefix, LexyConfigGrammar::writtenString(parsedAttributeName._name), postfix);
+    return u"%1%2%3"_s.arg(prefix, LexyConfigGrammar::stringForExpression(parsedAttributeName._name), postfix);
 }
 
 Attribute Attribute::edgeNodesAttribute(const IGraph& graph, const Attribute& nodeAttribute,

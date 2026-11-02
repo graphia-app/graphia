@@ -382,7 +382,7 @@ private slots:
         QTest::addColumn<Attribute::EdgeNodeType>("type");
         QTest::addColumn<QString>("attributeName");
         QTest::addColumn<QString>("parameter");
-        QTest::addColumn<QString>("written");
+        QTest::addColumn<QString>("forExpression");
         QTest::addColumn<QString>("prettified");
 
         using T = Attribute::EdgeNodeType;
@@ -420,7 +420,7 @@ private slots:
         QFETCH(const Attribute::EdgeNodeType, type);
         QFETCH(const QString, attributeName);
         QFETCH(const QString, parameter);
-        QFETCH(const QString, written);
+        QFETCH(const QString, forExpression);
         QFETCH(const QString, prettified);
 
         const auto parsed = Attribute::parseAttributeName(name);
@@ -428,7 +428,7 @@ private slots:
         QCOMPARE(parsed._name, attributeName);
         QCOMPARE(parsed._parameter, parameter);
 
-        QCOMPARE(Attribute::writtenAttributeName(name), written);
+        QCOMPARE(Attribute::attributeNameForExpression(name), forExpression);
         QCOMPARE(Attribute::prettify(name), prettified);
     }
 

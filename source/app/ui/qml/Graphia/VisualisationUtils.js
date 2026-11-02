@@ -30,7 +30,7 @@ function expressionFor(document, attributeName, flags, type, channelName)
     if(flags & GraphiaSharedTypes.AttributeFlag.VisualiseByComponent)
         expression += "[component] ";
 
-    expression += attributeName + " " + document.writtenString(channelName);
+    expression += attributeName + " " + document.stringForExpression(channelName);
 
     let parameters = document.visualisationDefaultParameters(
         type, channelName);
@@ -43,7 +43,7 @@ function expressionFor(document, attributeName, flags, type, channelName)
         {
             let parameter = GraphiaUtils.Utils.sanitiseJson(value);
 
-            expression += " " + document.writtenString(key) + " = " + document.writtenString(parameter);
+            expression += " " + document.stringForExpression(key) + " = " + document.stringForExpression(parameter);
         }
     }
 

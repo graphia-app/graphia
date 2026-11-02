@@ -364,7 +364,7 @@ private slots:
             {u"c"_s, u"y"_s}, {u"d"_s, u"x"_s}, {u"e"_s, u"x"_s}, {u"f"_s, u"x"_s}, {u"g"_s, u"x"_s}});
         model->applyTransforms({});
 
-        visualise(*model, {u"%1 SharedText"_s.arg(Attribute::writtenAttributeName(attributeName))});
+        visualise(*model, {u"%1 SharedText"_s.arg(Attribute::attributeNameForExpression(attributeName))});
 
         QCOMPARE(sharedTextOf(*model), (QStringList{u"x: a b"_s, u"x: d"_s, u"x: e f"_s, u"x: g"_s, u"y: c"_s}));
 

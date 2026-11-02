@@ -98,7 +98,7 @@ struct GraphTransformConfig
         ParameterValue _value = 0;
 
         bool operator==(const Parameter& other) const;
-        QString valueAsString(NamedBool<"asWritten"> asWritten = "asWritten"_no) const;
+        QString valueAsString(NamedBool<"forExpression"> forExpression = "forExpression"_no) const;
     };
 
     std::vector<QString> _flags;

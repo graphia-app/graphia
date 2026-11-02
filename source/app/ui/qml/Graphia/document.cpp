@@ -782,8 +782,8 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
                     const auto& parameterKeys = defaultParameters.keys();
                     for(const auto& key : parameterKeys)
                     {
-                        visualisation += u" %1 = %2"_s.arg(LexyConfigGrammar::writtenString(key),
-                            LexyConfigGrammar::writtenString(defaultParameters.value(key).toString()));
+                        visualisation += u" %1 = %2"_s.arg(LexyConfigGrammar::stringForExpression(key),
+                            LexyConfigGrammar::stringForExpression(defaultParameters.value(key).toString()));
                     }
                 }
             }
@@ -2069,7 +2069,7 @@ QVariantMap Document::transform(const QString& transformName) const
         for(const auto& defaultVisualisation : transformFactory->defaultVisualisations())
         {
             QVariantMap defaultVisualisationMap;
-            auto attributeName = Attribute::writtenAttributeName(defaultVisualisation._attributeName);
+            auto attributeName = Attribute::attributeNameForExpression(defaultVisualisation._attributeName);
             defaultVisualisationMap.insert(u"name"_s, attributeName);
             defaultVisualisationMap.insert(u"displayName"_s, _graphModel->attributeDisplayName(defaultVisualisation._attributeName));
             defaultVisualisationMap.insert(u"flags"_s, static_cast<int>(*defaultVisualisation._attributeFlags));
@@ -2369,14 +2369,14 @@ QVariantMap Document::parseGraphTransform(const QString& transform) const
     return {};
 }
 
-QString Document::writtenString(const QString& string) const
+QString Document::stringForExpression(const QString& string) const
 {
-    return LexyConfigGrammar::writtenString(string);
+    return LexyConfigGrammar::stringForExpression(string);
 }
 
-QString Document::writtenAttributeName(const QString& attributeName) const
+QString Document::attributeNameForExpression(const QString& attributeName) const
 {
-    return Attribute::writtenAttributeName(attributeName);
+    return Attribute::attributeNameForExpression(attributeName);
 }
 
 bool Document::graphTransformIsValid(const QString& transform) const

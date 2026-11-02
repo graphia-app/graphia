@@ -590,7 +590,7 @@ public:
     };
 
     static Name parseAttributeName(QString name);
-    static QString writtenAttributeName(const QString& name);
+    static QString attributeNameForExpression(const QString& name);
     static Attribute edgeNodesAttribute(const IGraph& graph,
         const Attribute& nodeAttribute, EdgeNodeType edgeNodeType);
 

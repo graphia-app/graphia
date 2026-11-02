@@ -39,25 +39,25 @@ bool VisualisationConfig::Parameter::operator==(const VisualisationConfig::Param
             _value == other._value;
 }
 
-QString VisualisationConfig::Parameter::valueAsString(NamedBool<"asWritten"> asWritten) const
+QString VisualisationConfig::Parameter::valueAsString(NamedBool<"forExpression"> forExpression) const
 {
     struct Visitor
     {
-        NamedBool<"asWritten"> _asWritten;
+        NamedBool<"forExpression"> _forExpression;
 
-        explicit Visitor(NamedBool<"asWritten"> asWritten_) : _asWritten(asWritten_) {}
+        explicit Visitor(NamedBool<"forExpression"> forExpression_) : _forExpression(forExpression_) {}
 
         QString operator()(double d) const { return QString::number(d, 'g', QLocale::FloatingPointShortest); }
         QString operator()(const QString& s) const
         {
-            if(_asWritten)
-                return LexyConfigGrammar::writtenString(s);
+            if(_forExpression)
+                return LexyConfigGrammar::stringForExpression(s);
 
             return s;
         }
     };
 
-    return std::visit(Visitor(asWritten), _value);
+    return std::visit(Visitor(forExpression), _value);
 }
 
 QVariantMap VisualisationConfig::asVariantMap() const
@@ -75,7 +75,7 @@ QVariantMap VisualisationConfig::asVariantMap() const
 
     QVariantMap parameters;
     for(const auto& parameter : _parameters)
-        parameters.insert(parameter._name, parameter.valueAsString("asWritten"_yes));
+        parameters.insert(parameter._name, parameter.valueAsString("forExpression"_yes));
     map.insert(u"parameters"_s, parameters);
 
     return map;
@@ -105,14 +105,15 @@ QString VisualisationConfig::asString(NamedBool<"forDisplay"> forDisplay, const 
             factory != nullptr ? factory->displayName() : _channelName);
     }
     else
-        s += u"%1 %2"_s.arg(Attribute::writtenAttributeName(_attributeName), LexyConfigGrammar::writtenString(_channelName));
+        s += u"%1 %2"_s.arg(Attribute::attributeNameForExpression(_attributeName),
+            LexyConfigGrammar::stringForExpression(_channelName));
 
     if(!forDisplay && !_parameters.empty())
     {
         s += u" with "_s;
 
         for(const auto& parameter : _parameters)
-            s += u" %1 = %2"_s.arg(parameter._name, parameter.valueAsString("asWritten"_yes));
+            s += u" %1 = %2"_s.arg(parameter._name, parameter.valueAsString("forExpression"_yes));
     }
 
     if(forDisplay && !_flags.empty())

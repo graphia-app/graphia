@@ -529,8 +529,8 @@ Item
 
         let newAttributeName = attributeList.selectedValue ?
             attributeList.selectedValue :
-            document.writtenAttributeName(root.attributeName);
-        let newExpression = flagsString + newAttributeName + " " + document.writtenString(channel);
+            document.attributeNameForExpression(root.attributeName);
+        let newExpression = flagsString + newAttributeName + " " + document.stringForExpression(channel);
 
         if(Object.keys(parameters).length !== 0)
             newExpression += " with";

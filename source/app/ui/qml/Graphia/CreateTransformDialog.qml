@@ -870,7 +870,7 @@ Window
                                         {
                                             // If the attribute name matches a parameter name, the parameter
                                             // is (probably) the name of a new attribute, so use its value
-                                            return root.document.writtenAttributeName(parameters.valueOf(noQuotesAttributeName));
+                                            return root.document.attributeNameForExpression(parameters.valueOf(noQuotesAttributeName));
                                         }
 
                                         return attributeName;
@@ -975,7 +975,7 @@ Window
 
         if(transformsList.selectedValue !== undefined)
         {
-            expression += root.document.writtenString(transformsList.selectedValue);
+            expression += root.document.stringForExpression(transformsList.selectedValue);
 
             if(root._numAttributeParameters > 0)
             {
@@ -993,7 +993,7 @@ Window
                 expression += " with";
 
                 for(let parameterName of root._transform.parameterNames)
-                    expression += " " + root.document.writtenString(parameterName) + " = " + parameters.valueOf(parameterName);
+                    expression += " " + root.document.stringForExpression(parameterName) + " = " + parameters.valueOf(parameterName);
             }
 
             if(lhsAttributeList.selectedValue !== undefined)
