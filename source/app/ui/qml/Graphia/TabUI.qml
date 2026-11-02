@@ -808,7 +808,7 @@ Item
                     {
                         // Hack the spinner to give it the correct colour for the background
                         if(contentItem.hasOwnProperty("color"))
-                            contentItem.color = Qt.binding(() => _document.contrastingColor);
+                            contentItem.color = Qt.binding(() => _document.contrastingColor); // qmllint disable missing-property
                     }
                 }
             }

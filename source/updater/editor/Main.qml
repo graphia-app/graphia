@@ -714,8 +714,8 @@ ApplicationWindow
                 for(let i = 0; i < osControls.count; i++)
                 {
                     let item = osControls.itemAt(i);
-                    item.osEnabledChecked = false;
-                    item.urlText = "";
+                    item.osEnabledChecked = false; // qmllint disable missing-property
+                    item.urlText = ""; // qmllint disable missing-property
                 }
             }
 

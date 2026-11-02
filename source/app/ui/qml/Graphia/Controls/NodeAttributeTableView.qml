@@ -678,7 +678,7 @@ Item
 
                     onEntered: (drag) =>
                     {
-                        drag.source.target = displayModel.sourceColumnFor(model.column);
+                        drag.source.target = displayModel.sourceColumnFor(model.column); // qmllint disable missing-property
                         tableView.forceLayoutSafe();
                     }
 

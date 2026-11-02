@@ -231,7 +231,7 @@ Item
 
                         let delegateItem = treeView.itemAtIndex(index(loadedRow, 0));
                         if(delegateItem !== null)
-                            delegateItem.selected = false;
+                            delegateItem.selected = false; // qmllint disable missing-property
                     }
 
                     let newSelectedValues = [];
@@ -246,7 +246,7 @@ Item
 
                         let delegateItem = treeView.itemAtIndex(index(row, 0));
                         if(delegateItem !== null)
-                            delegateItem.selected = true;
+                            delegateItem.selected = true; // qmllint disable missing-property
                     }
 
                     root.selectedValues = newSelectedValues;
@@ -484,10 +484,10 @@ Item
                             }
 
                             if(contentItem.text) // qmllint disable missing-property
-                                contentItem.text = Qt.binding(() => root.itemTextDelegateFunction(model));
+                                contentItem.text = Qt.binding(() => root.itemTextDelegateFunction(model)); // qmllint disable missing-property
 
                             if(indicator.color) // qmllint disable missing-property
-                                indicator.color = contrastBinding;
+                                indicator.color = contrastBinding; // qmllint disable missing-property
 
                             for(const child of indicator.children)
                             {

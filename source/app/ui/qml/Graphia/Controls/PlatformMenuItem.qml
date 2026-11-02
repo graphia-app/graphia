@@ -55,6 +55,6 @@ MenuItem // qmllint disable import
             (shortcutLabel.text.length > 0 ? shortcutLabelSpacing + shortcutLabel.implicitWidth : 0) +
             defaultRightPadding);
 
-        contentItem.color = Qt.binding(() => root._textColor);
+        contentItem.color = Qt.binding(() => root._textColor); // qmllint disable missing-property
     }
 }
