@@ -175,7 +175,6 @@ private slots:
         flags.setState(Colour::Green, false);
         QCOMPARE(*flags, Colour::Blue);
 
-        QCOMPARE(Flags<Colour>::combine(Colour::Green, Colour::Blue), Colour::Cyan);
         QVERIFY(Flags<Colour>(Colour::Red, Colour::Green) != Flags<Colour>(Colour::Red)); // clazy:exclude=compare-member-check
         QVERIFY(!(Flags<Colour>(Colour::Cyan) != Flags<Colour>(Colour::Green, Colour::Blue))); // clazy:exclude=compare-member-check
 

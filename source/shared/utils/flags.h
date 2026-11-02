@@ -110,15 +110,6 @@ public:
 
     // NOLINTNEXTLINE clang-analyzer-optin.core.EnumCastOutOfRange
     Enum operator*() const { return static_cast<Enum>(_value); }
-
-    //FIXME: Should be able to replace this with a C++17 template deduction constructor
-    template<typename... Args>
-    static Enum combine(Args... values)
-    {
-        Flags<Enum> flags;
-        flags.set(std::forward<Args>(values)...);
-        return *flags;
-    }
 };
 
 #endif // FLAGS_H
