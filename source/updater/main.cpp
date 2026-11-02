@@ -59,7 +59,7 @@ static QString existingInstallation(const QString& exe)
         return qgetenv("APPIMAGE");
 
     return QFileInfo(exe).absoluteDir().absolutePath();
-#elif defined(Q_OS_MAC)
+#elif defined(Q_OS_MACOS)
     auto exeDir = QFileInfo(exe).absoluteDir();
     exeDir.cdUp(); // Contents
     exeDir.cdUp(); // .app

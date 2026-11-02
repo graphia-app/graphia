@@ -35,7 +35,7 @@ void u::setAppPathName(const QString& exe)
 #if defined(Q_OS_LINUX)
     if(qEnvironmentVariableIsSet("APPIMAGE"))
         appPath = qgetenv("APPIMAGE");
-#elif defined(Q_OS_MAC)
+#elif defined(Q_OS_MACOS)
     auto dir = QFileInfo(exe).absoluteDir();
     dir.cdUp(); // Contents
     dir.cdUp(); // .app
