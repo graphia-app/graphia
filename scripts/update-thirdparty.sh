@@ -61,6 +61,20 @@ cryptopp()
     esac
 }
 
+expat()
+{
+    local url=https://github.com/libexpat/libexpat
+    case $1 in
+        latest) latestTag $url.git '^R_[0-9_]+$' ;;
+        stage)
+            local version=${2#R_}
+            curl -sSLf "$url/releases/download/$2/expat-${version//_/.}.tar.bz2" | \
+                tar xj --strip-components=1 -C "$3"
+            ;;
+        own) echo expat.cmake expat_config.h ;;
+    esac
+}
+
 lexy()
 {
     local url=https://github.com/foonathan/lexy.git
@@ -90,7 +104,7 @@ zlib()
     esac
 }
 
-libraries=(cryptopp lexy xlsxio zlib)
+libraries=(cryptopp expat lexy xlsxio zlib)
 
 # The repository stores thirdparty text with LF endings, which the patches assume
 normaliseLineEndings() # directory

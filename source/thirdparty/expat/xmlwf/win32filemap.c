@@ -7,7 +7,10 @@
                                  |_| XML parser
 
    Copyright (c) 1997-2000 Thai Open Source Software Center Ltd
-   Copyright (c) 2000-2017 Expat development team
+   Copyright (c) 2000      Clark Cooper <coopercc@users.sourceforge.net>
+   Copyright (c) 2002      Fred L. Drake, Jr. <fdrake@users.sourceforge.net>
+   Copyright (c) 2016-2017 Sebastian Pipping <sebastian@pipping.org>
+   Copyright (c) 2022      Martin Ettl <ettl.martin78@googlemail.com>
    Licensed under the MIT license:
 
    Permission is  hereby granted,  free of charge,  to any  person obtaining
@@ -28,20 +31,22 @@
    DAMAGES OR  OTHER LIABILITY, WHETHER  IN AN  ACTION OF CONTRACT,  TORT OR
    OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
    USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+   SPDX-License-Identifier: MIT
 */
 
 #define STRICT 1
 #define WIN32_LEAN_AND_MEAN 1
 
 #ifdef XML_UNICODE_WCHAR_T
-# ifndef XML_UNICODE
-#  define XML_UNICODE
-# endif
+#  ifndef XML_UNICODE
+#    define XML_UNICODE
+#  endif
 #endif
 
 #ifdef XML_UNICODE
-# define UNICODE
-# define _UNICODE
+#  define UNICODE
+#  define _UNICODE
 #endif /* XML_UNICODE */
 #include <windows.h>
 #include <stdio.h>
@@ -53,8 +58,7 @@ static void win32perror(const TCHAR *);
 int
 filemap(const TCHAR *name,
         void (*processor)(const void *, size_t, const TCHAR *, void *arg),
-        void *arg)
-{
+        void *arg) {
   HANDLE f;
   HANDLE m;
   DWORD size;
@@ -62,7 +66,7 @@ filemap(const TCHAR *name,
   void *p;
 
   f = CreateFile(name, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING,
-                          FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+                 FILE_FLAG_SEQUENTIAL_SCAN, NULL);
   if (f == INVALID_HANDLE_VALUE) {
     win32perror(name);
     return 0;
@@ -75,7 +79,7 @@ filemap(const TCHAR *name,
   }
   if (sizeHi || (size > XML_MAX_CHUNK_LEN)) {
     CloseHandle(f);
-    return 2;  /* Cannot be passed to XML_Parse in one go */
+    return 2; /* Cannot be passed to XML_Parse in one go */
   }
   /* CreateFileMapping barfs on zero length files */
   if (size == 0) {
@@ -97,7 +101,7 @@ filemap(const TCHAR *name,
     CloseHandle(f);
     return 0;
   }
-  processor(p, size, name, arg); 
+  processor(p, size, name, arg);
   UnmapViewOfFile(p);
   CloseHandle(m);
   CloseHandle(f);
@@ -105,21 +109,15 @@ filemap(const TCHAR *name,
 }
 
 static void
-win32perror(const TCHAR *s)
-{
-  LPVOID buf;
-  if (FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER
-                    | FORMAT_MESSAGE_FROM_SYSTEM,
-                    NULL,
-                    GetLastError(),
-                    MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                    (LPTSTR) &buf,
-                    0,
+win32perror(const TCHAR *s) {
+  LPVOID buf = NULL;
+  if (FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+                    NULL, GetLastError(),
+                    MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&buf, 0,
                     NULL)) {
     _ftprintf(stderr, _T("%s: %s"), s, buf);
     fflush(stderr);
     LocalFree(buf);
-  }
-  else
+  } else
     _ftprintf(stderr, _T("%s: unknown Windows error\n"), s);
 }

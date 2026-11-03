@@ -7,8 +7,9 @@
                         \___/_/\_\ .__/ \__,_|\__|
                                  |_| XML parser
 
-   Copyright (c) 1997-2000 Thai Open Source Software Center Ltd
-   Copyright (c) 2000-2017 Expat development team
+   Copyright (c) 2002-2004 Fred L. Drake, Jr. <fdrake@users.sourceforge.net>
+   Copyright (c) 2017      Rhodri James <rhodri@wildebeest.org.uk>
+   Copyright (c) 2017-2026 Sebastian Pipping <sebastian@pipping.org>
    Licensed under the MIT license:
 
    Permission is  hereby granted,  free of charge,  to any  person obtaining
@@ -29,25 +30,21 @@
    DAMAGES OR  OTHER LIABILITY, WHETHER  IN AN  ACTION OF CONTRACT,  TORT OR
    OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
    USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+   SPDX-License-Identifier: MIT
 */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #ifndef XML_CHARDATA_H
-#define XML_CHARDATA_H 1
+#  define XML_CHARDATA_H 1
 
-#ifndef XML_VERSION
-#include "expat.h"                      /* need XML_Char */
-#endif
-
+#  ifndef XML_VERSION
+#    include "expat.h" /* need XML_Char */
+#  endif
 
 typedef struct {
-    int count;                          /* # of chars, < 0 if not set */
-    XML_Char data[2048];
+  int count; /* # of chars, < 0 if not set */
+  XML_Char data[2048];
 } CharData;
-
 
 void CharData_Init(CharData *storage);
 
@@ -55,9 +52,4 @@ void CharData_AppendXMLChars(CharData *storage, const XML_Char *s, int len);
 
 int CharData_CheckXMLChars(CharData *storage, const XML_Char *s);
 
-
-#endif  /* XML_CHARDATA_H */
-
-#ifdef __cplusplus
-}
-#endif
+#endif /* XML_CHARDATA_H */

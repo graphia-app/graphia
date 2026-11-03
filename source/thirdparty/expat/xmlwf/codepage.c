@@ -7,7 +7,11 @@
                                  |_| XML parser
 
    Copyright (c) 1997-2000 Thai Open Source Software Center Ltd
-   Copyright (c) 2000-2017 Expat development team
+   Copyright (c) 2000      Clark Cooper <coopercc@users.sourceforge.net>
+   Copyright (c) 2002      Fred L. Drake, Jr. <fdrake@users.sourceforge.net>
+   Copyright (c) 2005-2006 Karl Waclawek <karl@waclawek.net>
+   Copyright (c) 2016-2019 Sebastian Pipping <sebastian@pipping.org>
+   Copyright (c) 2019      David Loffredo <loffredo@steptools.com>
    Licensed under the MIT license:
 
    Permission is  hereby granted,  free of charge,  to any  person obtaining
@@ -28,28 +32,31 @@
    DAMAGES OR  OTHER LIABILITY, WHETHER  IN AN  ACTION OF CONTRACT,  TORT OR
    OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
    USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+   SPDX-License-Identifier: MIT
 */
 
 #include "codepage.h"
-#include "internal.h"  /* for UNUSED_P only */
+#include "internal.h" /* for UNUSED_P only */
 
 #if defined(_WIN32)
-#define STRICT 1
-#define WIN32_LEAN_AND_MEAN 1
+#  define STRICT 1
+#  define WIN32_LEAN_AND_MEAN 1
 
-#include <windows.h>
+#  include <windows.h>
+#endif /* defined(_WIN32) */
 
 int
-codepageMap(int cp, int *map)
-{
+codepageMap(int cp, int *map) {
+#if defined(_WIN32)
   int i;
   CPINFO info;
-  if (!GetCPInfo(cp, &info) || info.MaxCharSize > 2)
+  if (! GetCPInfo(cp, &info) || info.MaxCharSize > 2)
     return 0;
   for (i = 0; i < 256; i++)
     map[i] = -1;
   if (info.MaxCharSize > 1) {
-    for (i = 0; i < MAX_LEADBYTES; i+=2) {
+    for (i = 0; i < MAX_LEADBYTES; i += 2) {
       int j, lim;
       if (info.LeadByte[i] == 0 && info.LeadByte[i + 1] == 0)
         break;
@@ -59,39 +66,35 @@ codepageMap(int cp, int *map)
     }
   }
   for (i = 0; i < 256; i++) {
-   if (map[i] == -1) {
-     char c = (char)i;
-     unsigned short n;
-     if (MultiByteToWideChar(cp, MB_PRECOMPOSED|MB_ERR_INVALID_CHARS,
-                             &c, 1, &n, 1) == 1)
-       map[i] = n;
-   }
+    if (map[i] == -1) {
+      char c = (char)i;
+      unsigned short n;
+      if (MultiByteToWideChar(cp, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, &c, 1,
+                              &n, 1)
+          == 1)
+        map[i] = n;
+    }
   }
   return 1;
+#else
+  UNUSED_P(cp);
+  UNUSED_P(map);
+  return 0;
+#endif
 }
 
 int
-codepageConvert(int cp, const char *p)
-{
+codepageConvert(int cp, const char *p) {
+#if defined(_WIN32)
   unsigned short c;
-  if (MultiByteToWideChar(cp, MB_PRECOMPOSED|MB_ERR_INVALID_CHARS,
-                          p, 2, &c, 1) == 1)
+  if (MultiByteToWideChar(cp, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, p, 2, &c,
+                          1)
+      == 1)
     return c;
   return -1;
-}
-
-#else /* not _WIN32 */
-
-int
-codepageMap(int UNUSED_P(cp), int *UNUSED_P(map))
-{
-  return 0;
-}
-
-int
-codepageConvert(int UNUSED_P(cp), const char *UNUSED_P(p))
-{
+#else
+  UNUSED_P(cp);
+  UNUSED_P(p);
   return -1;
+#endif
 }
-
-#endif /* not _WIN32 */
