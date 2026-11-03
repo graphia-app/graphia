@@ -143,23 +143,13 @@ class TestCorrelationPlot : public DocumentTest
         const QSignalSpy pixmapUpdated(_plot.get(), SIGNAL(pixmapUpdated()));
         fn();
 
-        auto drawn = [&] { return !pixmapUpdated.isEmpty() && !_plot->property("busy").toBool(); };
-        if(!QTest::qWaitFor(drawn, Timeout))
-            return false;
-
-        // It may be drawn again for something else, as when the nodes' colours change, and
-        // then laid out differently, so wait for it to stop being drawn
-        qsizetype count = 0;
-        while(count != pixmapUpdated.count())
+        return QTest::qWaitFor([&]
         {
-            count = pixmapUpdated.count();
-            QTest::qWait(50);
+            bool renderPending = true;
+            QMetaObject::invokeMethod(_plot.get(), "renderPending", Q_RETURN_ARG(bool, renderPending));
 
-            if(!QTest::qWaitFor(drawn, Timeout))
-                return false;
-        }
-
-        return true;
+            return !pixmapUpdated.isEmpty() && !renderPending;
+        }, Timeout);
     }
 
     bool set(const char* name, const QVariant& value)
