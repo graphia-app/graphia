@@ -109,6 +109,7 @@ list(APPEND MISC
     ${CMAKE_CURRENT_LIST_DIR}/scripts/static-analysis.sh
     ${CMAKE_CURRENT_LIST_DIR}/scripts/tidy-headers.sh
     ${CMAKE_CURRENT_LIST_DIR}/scripts/upload-symbols.sh
+    ${CMAKE_CURRENT_LIST_DIR}/scripts/update-thirdparty.sh
 )
 
 list(APPEND MISC
