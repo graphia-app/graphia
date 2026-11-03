@@ -51,7 +51,16 @@ fetch() # url ref destination
 #   own                 globs of the files Graphia adds
 #   notes               what the script can't do for it
 
-libraries=()
+lexy()
+{
+    local url=https://github.com/foonathan/lexy.git
+    case $1 in
+        latest) latestTag $url '^v[0-9.]+$' ;;
+        stage) fetch $url "$2" "$3" ;;
+    esac
+}
+
+libraries=(lexy)
 
 # The repository stores thirdparty text with LF endings, which the patches assume
 normaliseLineEndings() # directory
