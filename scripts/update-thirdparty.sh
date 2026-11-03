@@ -119,6 +119,24 @@ lexy()
     esac
 }
 
+matio()
+{
+    local url=https://github.com/tbeu/matio.git
+    case $1 in
+        latest) latestTag $url '^v[0-9.]+$' ;;
+        stage)
+            fetch $url "$2" "$WORK/upstream"
+            mv "$WORK/upstream/src/"* "$3/"
+            mv "$WORK/upstream/visual_studio/matioConfig.h" "$3/matioConfig_win.h"
+            mv "$WORK/upstream/visual_studio/matio_pubconf.h" "$3/matio_pubconf_win.h"
+            ;;
+        own) echo matio.cmake matioConfig.h matio_pubconf.h matioConfig_{unix,macos}.h \
+            matio_pubconf_{unix,macos}.h ;;
+        notes) echo "regenerate matioConfig_{unix,macos}.h and matio_pubconf_{unix,macos}.h" \
+            "by configuring matio with CMake on each platform" ;;
+    esac
+}
+
 utfcpp()
 {
     local url=https://github.com/nemtrif/utfcpp.git
@@ -148,7 +166,7 @@ zlib()
     esac
 }
 
-libraries=(blaze breakpad cryptopp expat json lexy utfcpp xlsxio zlib)
+libraries=(blaze breakpad cryptopp expat json lexy matio utfcpp xlsxio zlib)
 
 # The repository stores thirdparty text with LF endings, which the patches assume
 normaliseLineEndings() # directory

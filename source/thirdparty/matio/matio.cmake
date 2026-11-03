@@ -14,8 +14,8 @@ list(APPEND SHARED_THIRDPARTY_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/mat73.c
     ${CMAKE_CURRENT_LIST_DIR}/matvar_cell.c
     ${CMAKE_CURRENT_LIST_DIR}/matvar_struct.c
+    ${CMAKE_CURRENT_LIST_DIR}/mcos.c
     ${CMAKE_CURRENT_LIST_DIR}/read_data.c
-    ${CMAKE_CURRENT_LIST_DIR}/snprintf.c
 )
 
 list(APPEND SHARED_THIRDPARTY_HEADERS
@@ -26,4 +26,5 @@ list(APPEND SHARED_THIRDPARTY_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/matio_private.h
     ${CMAKE_CURRENT_LIST_DIR}/matio_pubconf.h
     ${CMAKE_CURRENT_LIST_DIR}/matioConfig.h
+    ${CMAKE_CURRENT_LIST_DIR}/mcos.h
 )

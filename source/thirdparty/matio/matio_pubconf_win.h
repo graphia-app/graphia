@@ -1,28 +1,9 @@
 /*
- * Copyright (c) 2015-2022, The matio contributors
+ * Copyright (c) 2015-2026, The matio contributors
  * Copyright (c) 2010-2014, Christopher C. Hulbert
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SPDX-License-Identifier: BSD-2-Clause
  */
 
 #ifndef MATIO_PUBCONF_H
@@ -32,16 +13,16 @@
 #define MATIO_MAJOR_VERSION 1
 
 /* Matio minor version number */
-#define MATIO_MINOR_VERSION 5
+#define MATIO_MINOR_VERSION 6
 
 /* Matio release level number */
-#define MATIO_RELEASE_LEVEL 23
+#define MATIO_RELEASE_LEVEL 0
 
 /* Matio version number */
-#define MATIO_VERSION 1523
+#define MATIO_VERSION 1600
 
 /* Matio version string */
-#define MATIO_VERSION_STR "1.5.23"
+#define MATIO_VERSION_STR "1.6.0"
 
 /* Default file format */
 #define MAT_FT_DEFAULT MAT_FT_MAT5
@@ -178,5 +159,17 @@ typedef _mat_uint8_t mat_uint8_t;
 #define MATIO_FORMATATTR_PRINTF1
 #define MATIO_FORMATATTR_PRINTF2
 #define MATIO_FORMATATTR_VPRINTF
+
+/*
+  The following macro handles the deprecated attribute.
+*/
+
+#if defined(__GNUC__) || defined(__clang__)
+#define MATIO_DEPRECATED __attribute__((deprecated))
+#elif defined(_MSC_VER)
+#define MATIO_DEPRECATED __declspec(deprecated)
+#else
+#define MATIO_DEPRECATED
+#endif
 
 #endif /* MATIO_PUBCONF_H */

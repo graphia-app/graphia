@@ -17,6 +17,7 @@ Mat_CreateVer
 Mat_Close
 Mat_Open
 Mat_GetDir
+Mat_GetFileAccessMode
 Mat_GetFilename
 Mat_GetHeader
 Mat_GetVersion
@@ -24,6 +25,7 @@ Mat_Rewind
 Mat_VarCalloc
 Mat_VarCreate
 Mat_VarCreateStruct
+Mat_VarCreateStruct2
 Mat_VarDelete
 Mat_VarDuplicate
 Mat_VarFree
@@ -39,6 +41,7 @@ Mat_VarGetStructField
 Mat_VarGetStructFieldnames
 Mat_VarGetStructs
 Mat_VarGetStructsLinear
+Mat_VarGetClassName
 Mat_VarPrint
 Mat_VarRead
 Mat_VarReadData
@@ -46,7 +49,9 @@ Mat_VarReadDataAll
 Mat_VarReadDataLinear
 Mat_VarReadInfo
 Mat_VarReadNext
+Mat_VarReadNextPredicate
 Mat_VarReadNextInfo
+Mat_VarReadNextInfoPredicate
 Mat_VarSetCell
 Mat_VarSetStructFieldByIndex
 Mat_VarSetStructFieldByName

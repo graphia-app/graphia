@@ -1,36 +1,16 @@
-/* src/matioConfig.h.  Generated from matioConfig.h.in by configure.  */
 /*
- * Copyright (c) 2015-2022, The matio contributors
+ * Copyright (c) 2015-2026, The matio contributors
  * Copyright (c) 2012-2014, Christopher C. Hulbert
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SPDX-License-Identifier: BSD-2-Clause
  */
 
 /* Debug enabled */
 /* #undef DEBUG */
 
 /* Extended sparse matrix data types */
-#define EXTENDED_SPARSE /**/
+#define EXTENDED_SPARSE 1
 
 /* Define to dummy `main' function (if any) required to link to the Fortran
    libraries. */
@@ -53,10 +33,10 @@
 #define HAVE_FTELLO 1
 
 /* Define to 1 if you have the `fseeko64' function. */
-#define HAVE_FSEEKO64 1
+/* #undef HAVE_FSEEKO64 */
 
 /* Define to 1 if you have the `ftello64' function. */
-#define HAVE_FTELLO64 1
+/* #undef HAVE_FTELLO64 */
 
 /* Define to 1 if you have the `_fseeki64' function. */
 /* #undef HAVE__FSEEKI64 */
@@ -65,16 +45,19 @@
 /* #undef HAVE__FTELLI64 */
 
 /* Define if 64-bit file address support in 32-bit OS. */
-#define _FILE_OFFSET_BITS 64
+/* #undef _FILE_OFFSET_BITS */
 
 /* Define if 64-bit file address support in 32-bit OS. */
-#define _LARGEFILE64_SOURCE 1
+/* #undef _LARGEFILE64_SOURCE */
 
 /* Define to 1 if you have the `asprintf' function. */
 #define HAVE_ASPRINTF 1
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #define HAVE_DLFCN_H 1
+
+/* Define to 1 if you have the <float.h> header file. */
+#define HAVE_FLOAT_H 1
 
 /* Have HDF5 */
 /* #undef HAVE_HDF5 */
@@ -104,28 +87,28 @@
 #define HAVE_LONG_LONG_INT 1
 
 /* Have MAT int16 */
-#define HAVE_MAT_INT16_T /**/
+#define HAVE_MAT_INT16_T
 
 /* Have MAT int32 */
-#define HAVE_MAT_INT32_T /**/
+#define HAVE_MAT_INT32_T
 
 /* Have MAT int64 */
-#define HAVE_MAT_INT64_T /**/
+#define HAVE_MAT_INT64_T
 
 /* Have MAT int8 */
-#define HAVE_MAT_INT8_T /**/
+#define HAVE_MAT_INT8_T
 
 /* Have MAT uint16 */
-#define HAVE_MAT_UINT16_T /**/
+#define HAVE_MAT_UINT16_T
 
 /* Have MAT uint32 */
-#define HAVE_MAT_UINT32_T /**/
+#define HAVE_MAT_UINT32_T
 
 /* Have MAT uint64 */
-#define HAVE_MAT_UINT64_T /**/
+#define HAVE_MAT_UINT64_T
 
 /* Have MAT uint8 */
-#define HAVE_MAT_UINT8_T /**/
+#define HAVE_MAT_UINT8_T
 
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
@@ -190,27 +173,33 @@
 /* Define to 1 if you have a C99 compliant `vsnprintf' function. */
 #define HAVE_VSNPRINTF 1
 
+/* Define to 1 if you have the `strcasecmp' function. */
+#define HAVE_STRCASECMP 1
+
 /* Have zlib */
 #define HAVE_ZLIB 1
 
 /* Define to 1 if you have the `__va_copy' function or macro. */
-/* #undef HAVE___VA_COPY */
+#define HAVE___VA_COPY 1
 
 /* OS is Linux */
-#define LINUX /**/
+#define LINUX
 
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */
-#define LT_OBJDIR ".libs/"
+/* #undef LT_OBJDIR */
 
 /* MAT v7.3 file support */
 /* #undef MAT73 */
 
+/* MATLAB Class Object System (MCOS) support */
+#define MCOS 1
+
 /* Platform */
-#define MATIO_PLATFORM "x86_64-pc-linux-gnu"
+#define MATIO_PLATFORM "x86_64-pc-Linux"
 
 /* Debug disabled */
-#define NODEBUG /**/
+/* #undef NODEBUG */
 
 /* Fixed types in safe-math.h disabled */
 #define PSNIP_SAFE_NO_FIXED 1
@@ -225,7 +214,7 @@
 #define PACKAGE_NAME "MATIO"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "MATIO 1.5.23"
+#define PACKAGE_STRING "MATIO 1.6.0"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "matio"
@@ -234,7 +223,7 @@
 #define PACKAGE_URL "https://sourceforge.net/projects/matio"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "1.5.23"
+#define PACKAGE_VERSION "1.6.0"
 
 /* The size of `char', as computed by sizeof. */
 #define SIZEOF_CHAR 1
@@ -264,13 +253,13 @@
 #define SIZEOF_VOID_P 8
 
 /* Define to 1 if you have the ANSI C header files. */
-#define STDC_HEADERS 1
+/* #undef STDC_HEADERS */
 
 /* OS is Solaris */
 /* #undef SUN */
 
 /* Version number of package */
-#define VERSION "1.5.23"
+#define VERSION "1.6.0"
 
 /* Z prefix */
 /* #undef Z_PREFIX */

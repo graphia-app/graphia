@@ -1,28 +1,9 @@
 /*
- * Copyright (c) 2015-2022, The matio contributors
+ * Copyright (c) 2015-2026, The matio contributors
  * Copyright (c) 2012-2014, Christopher C. Hulbert
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SPDX-License-Identifier: BSD-2-Clause
  */
 
 #include "matio_private.h"
@@ -39,7 +20,7 @@
  * @return Pointer to the Cell Array Field on success, NULL on error
  */
 matvar_t *
-Mat_VarGetCell(matvar_t *matvar, int index)
+Mat_VarGetCell(const matvar_t *matvar, int index)
 {
     size_t nelems = 1;
     matvar_t *cell = NULL;
@@ -78,9 +59,10 @@ Mat_VarGetCell(matvar_t *matvar, int index)
  * @returns an array of pointers to the cells
  */
 matvar_t **
-Mat_VarGetCells(matvar_t *matvar, int *start, int *stride, int *edge)
+Mat_VarGetCells(const matvar_t *matvar, const int *start, const int *stride, const int *edge)
 {
     int i, j, N, I;
+    size_t ndata;
     size_t idx[10] =
         {
             0,
@@ -94,12 +76,18 @@ Mat_VarGetCells(matvar_t *matvar, int *start, int *stride, int *edge)
            };
     matvar_t **cells;
 
-    if ( matvar == NULL || start == NULL || stride == NULL || edge == NULL ) {
+    if ( matvar == NULL || matvar->data == NULL || start == NULL || stride == NULL ||
+         edge == NULL ) {
         return NULL;
     } else if ( matvar->rank > 9 ) {
         return NULL;
     }
 
+    if ( CheckEdgeOverflow(matvar->rank, edge, 1) ) {
+        return NULL;
+    }
+
+    ndata = matvar->nbytes / sizeof(matvar_t *);
     dimp[0] = matvar->dims[0];
     N = edge[0];
     I = start[0];
@@ -111,8 +99,14 @@ Mat_VarGetCells(matvar_t *matvar, int *start, int *stride, int *edge)
         I += start[i] * dimp[i - 1];
     }
     cells = (matvar_t **)malloc(N * sizeof(matvar_t *));
+    if ( cells == NULL )
+        return NULL;
     for ( i = 0; i < N; i += edge[0] ) {
         for ( j = 0; j < edge[0]; j++ ) {
+            if ( I < 0 || (size_t)I >= ndata ) {
+                free(cells);
+                return NULL;
+            }
             cells[i + j] = *((matvar_t **)matvar->data + I);
             I += stride[0];
         }
@@ -150,15 +144,22 @@ Mat_VarGetCells(matvar_t *matvar, int *start, int *stride, int *edge)
  * @returns an array of pointers to the cells
  */
 matvar_t **
-Mat_VarGetCellsLinear(matvar_t *matvar, int start, int stride, int edge)
+Mat_VarGetCellsLinear(const matvar_t *matvar, int start, int stride, int edge)
 {
     matvar_t **cells = NULL;
 
-    if ( matvar != NULL ) {
+    if ( matvar != NULL && matvar->data != NULL && edge > 0 ) {
         int i, I;
+        size_t ndata = matvar->nbytes / sizeof(matvar_t *);
         cells = (matvar_t **)malloc(edge * sizeof(matvar_t *));
+        if ( cells == NULL )
+            return NULL;
         I = start;
         for ( i = 0; i < edge; i++ ) {
+            if ( I < 0 || (size_t)I >= ndata ) {
+                free(cells);
+                return NULL;
+            }
             cells[i] = *((matvar_t **)matvar->data + I);
             I += stride;
         }

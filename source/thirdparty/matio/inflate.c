@@ -3,30 +3,11 @@
  * @ingroup MAT
  */
 /*
- * Copyright (c) 2015-2022, The matio contributors
+ * Copyright (c) 2015-2026, The matio contributors
  * Copyright (c) 2005-2014, Christopher C. Hulbert
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SPDX-License-Identifier: BSD-2-Clause
  */
 
 #include "matio_private.h"
@@ -62,6 +43,8 @@ InflateSkip(mat_t *mat, z_streamp z, int nBytes, size_t *bytesread)
     if ( !z->avail_in ) {
         size_t nbytes = fread(comp_buf, 1, n, (FILE *)mat->fp);
         if ( 0 == nbytes ) {
+            Mat_Warning("InflateSkip: Unexpected end-of-file: Processed 0 bytes, expected %d bytes",
+                        nBytes);
             return err;
         }
         if ( NULL != bytesread ) {
@@ -72,10 +55,12 @@ InflateSkip(mat_t *mat, z_streamp z, int nBytes, size_t *bytesread)
     }
     z->avail_out = n;
     z->next_out = uncomp_buf;
-    err = inflate(z, Z_FULL_FLUSH);
+    err = inflate(z, Z_NO_FLUSH);
     if ( err == Z_STREAM_END ) {
+        z->next_out = NULL;
         return MATIO_E_NO_ERROR;
     } else if ( err != Z_OK ) {
+        z->next_out = NULL;
         Mat_Critical("InflateSkip: inflate returned %s",
                      zError(err == Z_NEED_DICT ? Z_DATA_ERROR : err));
         return MATIO_E_FILE_FORMAT_VIOLATION;
@@ -103,7 +88,7 @@ InflateSkip(mat_t *mat, z_streamp z, int nBytes, size_t *bytesread)
             z->avail_in = (uInt)nbytes;
             z->next_in = comp_buf;
         }
-        err = inflate(z, Z_FULL_FLUSH);
+        err = inflate(z, Z_NO_FLUSH);
         if ( err == Z_STREAM_END ) {
             err = MATIO_E_NO_ERROR;
             break;
@@ -134,6 +119,8 @@ InflateSkip(mat_t *mat, z_streamp z, int nBytes, size_t *bytesread)
         }
         z->avail_in = 0;
     }
+
+    z->next_out = NULL;
 
     return err;
 }
@@ -267,6 +254,9 @@ Inflate(mat_t *mat, z_streamp z, void *buf, unsigned int nBytes, size_t *bytesre
     if ( !z->avail_in ) {
         size_t nbytes = fread(comp_buf, 1, 1, (FILE *)mat->fp);
         if ( 0 == nbytes ) {
+            Mat_Warning("Inflate: Unexpected end-of-file: Processed 0 bytes, expected %u bytes",
+                        nBytes);
+            memset(buf, 0, nBytes);
             return err;
         }
         if ( NULL != bytesread ) {
@@ -315,10 +305,8 @@ Inflate(mat_t *mat, z_streamp z, void *buf, unsigned int nBytes, size_t *bytesre
     }
 
     if ( z->avail_out && feof((FILE *)mat->fp) ) {
-        Mat_Warning(
-            "Unexpected end-of-file: "
-            "Processed %u bytes, expected %u bytes",
-            nBytes - z->avail_out, nBytes);
+        Mat_Warning("Inflate: Unexpected end-of-file: Processed %u bytes, expected %u bytes",
+                    nBytes - z->avail_out, nBytes);
         memset(buf, 0, nBytes);
     }
 
@@ -354,6 +342,9 @@ InflateData(mat_t *mat, z_streamp z, void *buf, unsigned int nBytes)
     if ( !z->avail_in ) {
         size_t nbytes = fread(comp_buf, 1, n, (FILE *)mat->fp);
         if ( 0 == nbytes ) {
+            Mat_Warning("InflateData: Unexpected end-of-file: Processed 0 bytes, expected %u bytes",
+                        nBytes);
+            memset(buf, 0, nBytes);
             return err;
         }
         bytesread += nbytes;
@@ -362,7 +353,7 @@ InflateData(mat_t *mat, z_streamp z, void *buf, unsigned int nBytes)
     }
     z->avail_out = nBytes;
     z->next_out = ZLIB_BYTE_PTR(buf);
-    err = inflate(z, Z_FULL_FLUSH);
+    err = inflate(z, Z_NO_FLUSH);
     if ( err == Z_STREAM_END ) {
         return MATIO_E_NO_ERROR;
     } else if ( err != Z_OK ) {
@@ -387,7 +378,7 @@ InflateData(mat_t *mat, z_streamp z, void *buf, unsigned int nBytes)
         bytesread += nbytes;
         z->avail_in = (uInt)nbytes;
         z->next_in = comp_buf;
-        err = inflate(z, Z_FULL_FLUSH);
+        err = inflate(z, Z_NO_FLUSH);
         if ( err == Z_STREAM_END ) {
             err = MATIO_E_NO_ERROR;
             break;
@@ -404,7 +395,7 @@ InflateData(mat_t *mat, z_streamp z, void *buf, unsigned int nBytes)
     if ( z->avail_in ) {
         const mat_off_t offset = -(mat_off_t)z->avail_in;
         (void)fseeko((FILE *)mat->fp, offset, SEEK_CUR);
-        bytesread -= z->avail_in;
+        /* bytesread -= z->avail_in; */
         z->avail_in = 0;
     }
 

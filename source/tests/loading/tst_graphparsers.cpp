@@ -144,8 +144,8 @@ CreateMatVarFn structOf(const char* name, const char* fieldName, const CreateMat
     return [=]
     {
         std::array<size_t, 2> dims{1, 1};
-        std::array<const char*, 1> fieldNames{fieldName};
-        auto* variable = Mat_VarCreateStruct(name, 2, dims.data(), fieldNames.data(), 1);
+        std::array<const char*, 2> fieldNames{fieldName, nullptr};
+        auto* variable = Mat_VarCreateStruct2(name, 2, dims.data(), fieldNames.data());
         Mat_VarSetStructFieldByName(variable, fieldName, 0, createField());
         return variable;
     };

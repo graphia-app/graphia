@@ -3,30 +3,11 @@
  * @ingroup MAT
  */
 /*
- * Copyright (c) 2015-2022, The matio contributors
+ * Copyright (c) 2015-2026, The matio contributors
  * Copyright (c) 2005-2014, Christopher C. Hulbert
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SPDX-License-Identifier: BSD-2-Clause
  */
 
 /* FIXME: Implement Unicode support */
@@ -37,6 +18,8 @@
 #include "mat73.h"
 #endif
 #include "safe-math.h"
+#include <assert.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -117,7 +100,7 @@ ReadData(mat_t *mat, matvar_t *matvar)
 }
 
 static void
-Mat_PrintNumber(enum matio_types type, void *data)
+Mat_PrintNumber(enum matio_types type, const void *data)
 {
     switch ( type ) {
         case MAT_T_DOUBLE:
@@ -175,14 +158,245 @@ Mat_PrintNumber(enum matio_types type, void *data)
     }
 }
 
+static void
+Mat_PrintData(int rank, const size_t *_dims, const void *data, enum matio_classes class_type,
+              int isComplex, enum matio_types data_type, size_t nbytes, size_t nelems)
+{
+    size_t i, j;
+    size_t dims[2];
+
+    assert(NULL != data);
+
+    if ( rank > 2 ) {
+        printf("Can't print more than 2 dimensions\n");
+        return;
+    }
+
+    if ( rank < 1 || NULL == _dims )
+        return;
+
+    if ( 1 == rank ) {
+        /* Print as column vector */
+        dims[0] = _dims[0];
+        dims[1] = 1;
+    } else {
+        dims[0] = _dims[0];
+        dims[1] = _dims[1];
+    }
+
+    switch ( class_type ) {
+        case MAT_C_DOUBLE:
+        case MAT_C_SINGLE:
+#ifdef HAVE_MAT_INT64_T
+        case MAT_C_INT64:
+#endif
+#ifdef HAVE_MAT_UINT64_T
+        case MAT_C_UINT64:
+#endif
+        case MAT_C_INT32:
+        case MAT_C_UINT32:
+        case MAT_C_INT16:
+        case MAT_C_UINT16:
+        case MAT_C_INT8:
+        case MAT_C_UINT8: {
+            size_t stride = Mat_SizeOf(data_type);
+            if ( isComplex ) {
+                const mat_complex_split_t *complex_data = (const mat_complex_split_t *)data;
+                const char *rp = (const char *)complex_data->Re;
+                const char *ip = (const char *)complex_data->Im;
+                for ( i = 0; i < dims[0]; i++ ) {
+                    for ( j = 0; j < dims[1]; j++ ) {
+                        size_t idx = dims[0] * j + i;
+                        Mat_PrintNumber(data_type, rp + idx * stride);
+                        printf(" + ");
+                        Mat_PrintNumber(data_type, ip + idx * stride);
+                        printf("i ");
+                    }
+                    printf("\n");
+                }
+            } else {
+                const char *char_data = (const char *)data;
+                for ( i = 0; i < dims[0]; i++ ) {
+                    for ( j = 0; j < dims[1]; j++ ) {
+                        size_t idx = dims[0] * j + i;
+                        Mat_PrintNumber(data_type, char_data + idx * stride);
+                        printf(" ");
+                    }
+                    printf("\n");
+                }
+            }
+            break;
+        }
+        case MAT_C_CHAR: {
+            switch ( data_type ) {
+                case MAT_T_UINT16:
+                case MAT_T_UTF16: {
+                    const mat_uint16_t *uint16_data = (const mat_uint16_t *)data;
+                    for ( i = 0; i < dims[0]; i++ ) {
+                        for ( j = 0; j < dims[1]; j++ ) {
+                            const mat_uint16_t c = uint16_data[j * dims[0] + i];
+#if defined VARPRINT_UTF16
+                            printf("%c%c", c & 0xFF, (c >> 8) & 0xFF);
+#elif defined VARPRINT_UTF16_DECIMAL
+                            Mat_PrintNumber(MAT_T_UINT16, &c);
+                            printf(" ");
+#else
+                            /* Convert to UTF-8 */
+                            if ( c <= 0x7F ) {
+                                printf("%c", c);
+                            } else if ( c <= 0x7FF ) {
+                                printf("%c%c", 0xC0 | (c >> 6), 0x80 | (c & 0x3F));
+                            } else /* if (c <= 0xFFFF) */ {
+                                printf("%c%c%c", 0xE0 | (c >> 12), 0x80 | ((c >> 6) & 0x3F),
+                                       0x80 | (c & 0x3F));
+                            }
+#endif
+                        }
+                        printf("\n");
+                    }
+                    break;
+                }
+                case MAT_T_UTF8: {
+                    const mat_uint8_t *uint8_data = (const mat_uint8_t *)data;
+                    size_t k = 0;
+                    int err = 0;
+                    size_t *idxOffset;
+                    if ( nbytes == 0 ) {
+                        break;
+                    }
+                    idxOffset = (size_t *)calloc(nelems, sizeof(size_t));
+                    if ( idxOffset == NULL ) {
+                        break;
+                    }
+                    for ( i = 0; i < dims[0]; i++ ) {
+                        if ( err ) {
+                            break;
+                        }
+                        for ( j = 0; j < dims[1]; j++ ) {
+                            mat_uint8_t c;
+                            if ( k >= nbytes ) {
+                                break;
+                            }
+                            idxOffset[i * dims[1] + j] = k;
+                            c = uint8_data[k];
+                            if ( c <= 0x7F ) {
+                            } else if ( (c & 0xE0) == 0xC0 ) {
+                                if ( k + 1 < nbytes ) {
+                                    k += 1;
+                                } else {
+                                    err = 1;
+                                    break;
+                                }
+                            } else if ( (c & 0xF0) == 0xE0 ) {
+                                if ( k + 2 < nbytes ) {
+                                    k += 2;
+                                } else {
+                                    err = 1;
+                                    break;
+                                }
+                            } else if ( (c & 0xF8) == 0xF0 ) {
+                                if ( k + 3 < nbytes ) {
+                                    k += 3;
+                                } else {
+                                    err = 1;
+                                    break;
+                                }
+                            }
+                            ++k;
+                        }
+                    }
+                    if ( err ) {
+                        free(idxOffset);
+                        Mat_Message("UTF-8 character data error at index %zu", k);
+                        break;
+                    }
+                    for ( i = 0; i < dims[0]; i++ ) {
+                        for ( j = 0; j < dims[1]; j++ ) {
+                            mat_uint8_t c;
+                            k = idxOffset[j * dims[0] + i];
+                            c = uint8_data[k];
+                            if ( c <= 0x7F ) {
+                                printf("%c", c);
+                            } else if ( (c & 0xE0) == 0xC0 ) {
+                                printf("%c%c", c, uint8_data[k + 1]);
+                            } else if ( (c & 0xF0) == 0xE0 ) {
+                                printf("%c%c%c", c, uint8_data[k + 1], uint8_data[k + 2]);
+                            } else if ( (c & 0xF8) == 0xF0 ) {
+                                printf("%c%c%c%c", c, uint8_data[k + 1], uint8_data[k + 2],
+                                       uint8_data[k + 3]);
+                            }
+                        }
+                        printf("\n");
+                    }
+                    free(idxOffset);
+                    break;
+                }
+                default: {
+                    const char *char_data = (const char *)data;
+                    for ( i = 0; i < dims[0]; i++ ) {
+                        for ( j = 0; j < dims[1]; j++ )
+                            printf("%c", char_data[j * dims[0] + i]);
+                        printf("\n");
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case MAT_C_SPARSE: {
+            mat_sparse_t *sparse;
+            size_t stride = Mat_SizeOf(data_type);
+#if !defined(EXTENDED_SPARSE)
+            if ( MAT_T_DOUBLE != data_type )
+                break;
+#endif
+            sparse = (mat_sparse_t *)data;
+            if ( sparse == NULL || sparse->ndata == 0 || sparse->nir == 0 || sparse->njc == 0 ||
+                 sparse->data == NULL ) {
+                break;
+            }
+            if ( isComplex ) {
+                const mat_complex_split_t *complex_data = (const mat_complex_split_t *)sparse->data;
+                const char *re = (const char *)complex_data->Re;
+                const char *im = (const char *)complex_data->Im;
+                for ( i = 0; i < (size_t)sparse->njc - 1; i++ ) {
+                    for ( j = sparse->jc[i]; j < (size_t)sparse->jc[i + 1] &&
+                                             j < (size_t)sparse->ndata && j < (size_t)sparse->nir;
+                          j++ ) {
+                        printf("    (%u,%" SIZE_T_FMTSTR ")  ", sparse->ir[j] + 1, i + 1);
+                        Mat_PrintNumber(data_type, re + j * stride);
+                        printf(" + ");
+                        Mat_PrintNumber(data_type, im + j * stride);
+                        printf("i\n");
+                    }
+                }
+            } else {
+                const char *sparse_data = (const char *)sparse->data;
+                for ( i = 0; i < (size_t)sparse->njc - 1; i++ ) {
+                    for ( j = sparse->jc[i]; j < (size_t)sparse->jc[i + 1] &&
+                                             j < (size_t)sparse->ndata && j < (size_t)sparse->nir;
+                          j++ ) {
+                        printf("    (%u,%" SIZE_T_FMTSTR ")  ", sparse->ir[j] + 1, i + 1);
+                        Mat_PrintNumber(data_type, sparse_data + j * stride);
+                        printf("\n");
+                    }
+                }
+            }
+            break;
+        }
+        default:
+            break;
+    }
+}
+
 mat_complex_split_t *
-ComplexMalloc(size_t nbytes)
+ComplexCalloc(size_t nbytes)
 {
     mat_complex_split_t *complex_data = (mat_complex_split_t *)malloc(sizeof(*complex_data));
     if ( NULL != complex_data ) {
-        complex_data->Re = malloc(nbytes);
+        complex_data->Re = calloc(nbytes, 1);
         if ( NULL != complex_data->Re ) {
-            complex_data->Im = malloc(nbytes);
+            complex_data->Im = calloc(nbytes, 1);
             if ( NULL == complex_data->Im ) {
                 free(complex_data->Re);
                 free(complex_data);
@@ -309,6 +523,36 @@ Add(size_t *res, size_t a, size_t b)
     return MATIO_E_NO_ERROR;
 }
 
+/** @brief Checks the product of the edge dimensions for overflow
+ *
+ * Validates that each edge is non-negative and that the product of the edge
+ * dimensions does not overflow and stays within @c INT_MAX, so that the result
+ * can be used as an @c int element count.
+ * @param rank Number of dimensions
+ * @param edge Number of elements to read per dimension
+ * @retval 0 on success
+ */
+int
+CheckEdgeOverflow(int rank, const int *edge, size_t extra)
+{
+    int i, err;
+    size_t nElements = 1;
+    for ( i = 0; i < rank; i++ ) {
+        if ( edge[i] < 0 ) {
+            return MATIO_E_BAD_ARGUMENT;
+        }
+        err = Mul(&nElements, nElements, (size_t)edge[i]);
+        if ( err || nElements > (size_t)INT_MAX ) {
+            return MATIO_E_INDEX_TOO_BIG;
+        }
+    }
+    err = Mul(&nElements, nElements, extra);
+    if ( err || nElements > (size_t)INT_MAX ) {
+        return MATIO_E_INDEX_TOO_BIG;
+    }
+    return MATIO_E_NO_ERROR;
+}
+
 /** @brief Read from file and check success
  *
  * @param buf Buffer for reading
@@ -321,17 +565,14 @@ Add(size_t *res, size_t a, size_t b)
 int
 Read(void *buf, size_t size, size_t count, FILE *fp, size_t *bytesread)
 {
-    const size_t readcount = fread(buf, size, count, fp);
-    int err = readcount != count;
+    const size_t readCount = fread(buf, size, count, fp);
+    int err = readCount != count;
     if ( NULL != bytesread ) {
-        *bytesread += readcount * size;
+        *bytesread += readCount * size;
     }
     if ( err ) {
-        Mat_Warning(
-            "Unexpected end-of-file: Read %zu"
-            " bytes, expected %zu"
-            " bytes",
-            readcount * size, count * size);
+        Mat_Warning("Read: Unexpected end-of-file: Read %zu bytes, expected %zu bytes",
+                    readCount * size, count * size);
         memset(buf, 0, count * size);
     }
     return err;
@@ -363,6 +604,40 @@ IsEndOfFile(FILE *fp, mat_off_t *fpos)
         *fpos = fPos;
     }
     return isEOF;
+}
+
+/** @brief Check for End of file
+ *
+ * @param fp File pointer
+ * @param[out] offset Desired offset from current file position
+ * @retval 0 on success
+ */
+int
+CheckSeekFile(FILE *fp, mat_off_t offset)
+{
+    int err;
+    mat_off_t fPos;
+    uint8_t c;
+
+    if ( offset <= 0 ) {
+        return MATIO_E_NO_ERROR;
+    }
+
+    fPos = ftello(fp);
+    if ( fPos == -1L ) {
+        Mat_Critical("Couldn't determine file position");
+        return MATIO_E_GENERIC_READ_ERROR;
+    }
+
+    (void)fseeko(fp, offset - 1, SEEK_CUR);
+    err = 1 != fread(&c, 1, 1, fp);
+    (void)fseeko(fp, fPos, SEEK_SET);
+    if ( err ) {
+        Mat_Critical("Couldn't set file position");
+        return MATIO_E_GENERIC_READ_ERROR;
+    }
+
+    return MATIO_E_NO_ERROR;
 }
 
 /*
@@ -449,7 +724,7 @@ Mat_Open(const char *matname, int mode)
     size_t bytesread = 0;
 
     if ( (mode & 0x01) == MAT_ACC_RDONLY ) {
-#if defined(_WIN32) && defined(_MSC_VER)
+#if defined(_WIN32)
         wchar_t *wname = utf82u(matname);
         if ( NULL != wname ) {
             fp = _wfopen(wname, L"rb");
@@ -458,10 +733,12 @@ Mat_Open(const char *matname, int mode)
 #else
         fp = fopen(matname, "rb");
 #endif
-        if ( !fp )
+        if ( !fp ) {
+            Mat_Warning("Cannot open file \"%s\" in read-only mode", matname);
             return NULL;
+        }
     } else if ( (mode & 0x01) == MAT_ACC_RDWR ) {
-#if defined(_WIN32) && defined(_MSC_VER)
+#if defined(_WIN32)
         wchar_t *wname = utf82u(matname);
         if ( NULL != wname ) {
             fp = _wfopen(wname, L"r+b");
@@ -508,8 +785,12 @@ Mat_Open(const char *matname, int mode)
     mat->num_datasets = 0;
 #if defined(MAT73) && MAT73
     mat->refs_id = -1;
+    mat->ref_depth = 0;
 #endif
     mat->dir = NULL;
+#if defined(MCOS) && MCOS
+    mat->mcos = NULL;
+#endif
 
     bytesread += fread(mat->header, 1, 116, fp);
     mat->header[116] = '\0';
@@ -561,6 +842,7 @@ Mat_Open(const char *matname, int mode)
         mat->next_index = 0;
 #if defined(MAT73) && MAT73
         mat->refs_id = -1;
+        mat->ref_depth = 0;
 #endif
 
         Mat_Rewind(mat);
@@ -603,6 +885,9 @@ Mat_Open(const char *matname, int mode)
             mat = NULL;
         }
 
+        if ( NULL == mat )
+            return mat;
+
         if ( -1 < *(hid_t *)mat->fp ) {
             H5G_info_t group_info;
             herr_t herr;
@@ -613,7 +898,8 @@ Mat_Open(const char *matname, int mode)
                 mat = NULL;
             } else {
                 mat->num_datasets = (size_t)group_info.nlinks;
-                mat->refs_id = -1;
+                mat->refs_id = H5I_INVALID_HID;
+                mat->ref_depth = 0;
             }
         }
 #else
@@ -660,6 +946,12 @@ Mat_Close(mat_t *mat)
             free(mat->header);
         if ( NULL != mat->subsys_offset )
             free(mat->subsys_offset);
+#if defined(MCOS) && MCOS
+        if ( NULL != mat->mcos ) {
+            Mat_MCOS_Free(mat->mcos);
+            mat->mcos = NULL;
+        }
+#endif
         if ( NULL != mat->filename )
             free(mat->filename);
         if ( NULL != mat->dir ) {
@@ -678,6 +970,22 @@ Mat_Close(mat_t *mat)
     return err;
 }
 
+/** @brief Gets the file access mode of the given MAT file
+ *
+ * Gets the file access mode of the given MAT file
+ * @ingroup MAT
+ * @param mat Pointer to the MAT file
+ * @return MAT file access mode
+ */
+enum mat_acc
+Mat_GetFileAccessMode(const mat_t *mat)
+{
+    enum mat_acc mode = MAT_ACC_RDONLY;
+    if ( NULL != mat && (mat->mode & 0x01) == MAT_ACC_RDWR )
+        mode = MAT_ACC_RDWR;
+    return mode;
+}
+
 /** @brief Gets the filename for the given MAT file
  *
  * Gets the filename for the given MAT file
@@ -686,7 +994,7 @@ Mat_Close(mat_t *mat)
  * @return MAT filename
  */
 const char *
-Mat_GetFilename(mat_t *mat)
+Mat_GetFilename(const mat_t *mat)
 {
     const char *filename = NULL;
     if ( NULL != mat )
@@ -702,7 +1010,7 @@ Mat_GetFilename(mat_t *mat)
  * @return MAT header
  */
 const char *
-Mat_GetHeader(mat_t *mat)
+Mat_GetHeader(const mat_t *mat)
 {
     const char *header = NULL;
     if ( NULL != mat )
@@ -718,7 +1026,7 @@ Mat_GetHeader(mat_t *mat)
  * @return MAT file version
  */
 enum mat_ft
-Mat_GetVersion(mat_t *mat)
+Mat_GetVersion(const mat_t *mat)
 {
     enum mat_ft file_type = MAT_FT_UNDEFINED;
     if ( NULL != mat )
@@ -734,7 +1042,7 @@ Mat_GetVersion(mat_t *mat)
  * @param[out] n Number of variables in the given MAT file
  * @return Array of variable names
  */
-char **
+char *const *
 Mat_GetDir(mat_t *mat, size_t *n)
 {
     char **dir = NULL;
@@ -748,37 +1056,18 @@ Mat_GetDir(mat_t *mat, size_t *n)
     }
 
     if ( NULL == mat->dir ) {
-        matvar_t *matvar = NULL;
-
         if ( mat->version == MAT_FT_MAT73 ) {
-            size_t i = 0;
-            size_t fpos = mat->next_index;
-            if ( mat->num_datasets == 0 ) {
+#if defined(MAT73) && MAT73
+            int err = Mat_CalcDir73(mat, n);
+            if ( err ) {
                 *n = 0;
                 return dir;
             }
-            mat->dir = (char **)calloc(mat->num_datasets, sizeof(char *));
-            if ( NULL == mat->dir ) {
-                *n = 0;
-                Mat_Critical("Couldn't allocate memory for the directory");
-                return dir;
-            }
-            mat->next_index = 0;
-            while ( mat->next_index < mat->num_datasets ) {
-                matvar = Mat_VarReadNextInfo(mat);
-                if ( NULL != matvar ) {
-                    if ( NULL != matvar->name ) {
-                        mat->dir[i++] = strdup(matvar->name);
-                    }
-                    Mat_VarFree(matvar);
-                } else {
-                    Mat_Critical("An error occurred in reading the MAT file");
-                    break;
-                }
-            }
-            mat->next_index = fpos;
-            *n = i;
+#else
+            *n = 0;
+#endif
         } else {
+            matvar_t *matvar = NULL;
             mat_off_t fpos = ftello((FILE *)mat->fp);
             if ( fpos == -1L ) {
                 *n = 0;
@@ -792,7 +1081,7 @@ Mat_GetDir(mat_t *mat, size_t *n)
                 if ( NULL != matvar ) {
                     if ( NULL != matvar->name ) {
                         if ( NULL == mat->dir ) {
-                            dir = (char **)malloc(sizeof(char *));
+                            dir = (char **)calloc(1, sizeof(char *));
                         } else {
                             dir = (char **)realloc(mat->dir,
                                                    (mat->num_datasets + 1) * (sizeof(char *)));
@@ -841,14 +1130,12 @@ Mat_Rewind(mat_t *mat)
     int err = MATIO_E_NO_ERROR;
 
     switch ( mat->version ) {
-        case MAT_FT_MAT5:
-            (void)fseeko((FILE *)mat->fp, 128L, SEEK_SET);
-            break;
         case MAT_FT_MAT73:
             mat->next_index = 0;
             break;
         case MAT_FT_MAT4:
-            (void)fseeko((FILE *)mat->fp, 0L, SEEK_SET);
+        case MAT_FT_MAT5:
+            (void)fseeko((FILE *)mat->fp, mat->bof, SEEK_SET);
             break;
         default:
             err = MATIO_E_FAIL_TO_IDENTIFY;
@@ -938,13 +1225,19 @@ Mat_VarCalloc(void)
             matvar = NULL;
         } else {
 #if defined(MAT73) && MAT73
-            matvar->internal->hdf5_name = NULL;
             matvar->internal->hdf5_ref = 0;
-            matvar->internal->id = -1;
+            matvar->internal->id = H5I_INVALID_HID;
 #endif
             matvar->internal->datapos = 0;
             matvar->internal->num_fields = 0;
             matvar->internal->fieldnames = NULL;
+#if defined(MCOS) && MCOS
+            matvar->internal->type_name = NULL;
+            matvar->internal->class_name = NULL;
+            matvar->internal->object_ids = NULL;
+            matvar->internal->class_id = 0;
+            matvar->internal->num_objects = 0;
+#endif
 #if HAVE_ZLIB
             matvar->internal->z = NULL;
             matvar->internal->data = NULL;
@@ -1013,7 +1306,7 @@ Mat_VarCalloc(void)
  */
 matvar_t *
 Mat_VarCreate(const char *name, enum matio_classes class_type, enum matio_types data_type, int rank,
-              size_t *dims, void *data, int opt)
+              const size_t *dims, const void *data, int opt)
 {
     size_t nelems = 1, data_size;
     matvar_t *matvar = NULL;
@@ -1150,46 +1443,59 @@ Mat_VarCreate(const char *name, enum matio_classes class_type, enum matio_types 
         if ( MAT_C_CELL == matvar->class_type && nelems > 0 )
             matvar->data = calloc(nelems, sizeof(matvar_t *));
     } else if ( opt & MAT_F_DONT_COPY_DATA ) {
-        matvar->data = data;
+        matvar->data = (void *)data;
         matvar->mem_conserve = 1;
     } else if ( MAT_C_SPARSE == matvar->class_type ) {
-        mat_sparse_t *sparse_data;
-        const mat_sparse_t *sparse_data_in;
-
-        sparse_data_in = (const mat_sparse_t *)data;
-        sparse_data = (mat_sparse_t *)malloc(sizeof(mat_sparse_t));
+        const mat_sparse_t *sparse_data_in = (const mat_sparse_t *)data;
+        mat_sparse_t *sparse_data = (mat_sparse_t *)malloc(sizeof(mat_sparse_t));
         if ( NULL != sparse_data ) {
             sparse_data->nzmax = sparse_data_in->nzmax;
             sparse_data->nir = sparse_data_in->nir;
             sparse_data->njc = sparse_data_in->njc;
             sparse_data->ndata = sparse_data_in->ndata;
-            sparse_data->ir = (mat_uint32_t *)malloc(sparse_data->nir * sizeof(*sparse_data->ir));
-            if ( NULL != sparse_data->ir )
-                memcpy(sparse_data->ir, sparse_data_in->ir,
-                       sparse_data->nir * sizeof(*sparse_data->ir));
-            sparse_data->jc = (mat_uint32_t *)malloc(sparse_data->njc * sizeof(*sparse_data->jc));
-            if ( NULL != sparse_data->jc )
-                memcpy(sparse_data->jc, sparse_data_in->jc,
-                       sparse_data->njc * sizeof(*sparse_data->jc));
-            if ( matvar->isComplex ) {
-                sparse_data->data = malloc(sizeof(mat_complex_split_t));
-                if ( NULL != sparse_data->data ) {
-                    mat_complex_split_t *complex_data, *complex_data_in;
-                    complex_data = (mat_complex_split_t *)sparse_data->data;
-                    complex_data_in = (mat_complex_split_t *)sparse_data_in->data;
-                    complex_data->Re = malloc(sparse_data->ndata * data_size);
-                    complex_data->Im = malloc(sparse_data->ndata * data_size);
-                    if ( NULL != complex_data->Re )
-                        memcpy(complex_data->Re, complex_data_in->Re,
-                               sparse_data->ndata * data_size);
-                    if ( NULL != complex_data->Im )
-                        memcpy(complex_data->Im, complex_data_in->Im,
+            if ( NULL != sparse_data_in->ir ) {
+                sparse_data->ir =
+                    (mat_uint32_t *)malloc(sparse_data->nir * sizeof(*sparse_data->ir));
+                if ( NULL != sparse_data->ir )
+                    memcpy(sparse_data->ir, sparse_data_in->ir,
+                           sparse_data->nir * sizeof(*sparse_data->ir));
+            } else {
+                sparse_data->ir = NULL;
+            }
+            if ( NULL != sparse_data_in->jc ) {
+                sparse_data->jc =
+                    (mat_uint32_t *)malloc(sparse_data->njc * sizeof(*sparse_data->jc));
+                if ( NULL != sparse_data->jc )
+                    memcpy(sparse_data->jc, sparse_data_in->jc,
+                           sparse_data->njc * sizeof(*sparse_data->jc));
+            } else {
+                sparse_data->jc = NULL;
+            }
+            if ( NULL != sparse_data_in->data ) {
+                if ( matvar->isComplex ) {
+                    sparse_data->data = malloc(sizeof(mat_complex_split_t));
+                    if ( NULL != sparse_data->data ) {
+                        mat_complex_split_t *complex_data =
+                            (mat_complex_split_t *)sparse_data->data;
+                        const mat_complex_split_t *complex_data_in =
+                            (mat_complex_split_t *)sparse_data_in->data;
+                        complex_data->Re = malloc(sparse_data->ndata * data_size);
+                        complex_data->Im = malloc(sparse_data->ndata * data_size);
+                        if ( NULL != complex_data->Re )
+                            memcpy(complex_data->Re, complex_data_in->Re,
+                                   sparse_data->ndata * data_size);
+                        if ( NULL != complex_data->Im )
+                            memcpy(complex_data->Im, complex_data_in->Im,
+                                   sparse_data->ndata * data_size);
+                    }
+                } else {
+                    sparse_data->data = malloc(sparse_data->ndata * data_size);
+                    if ( NULL != sparse_data->data )
+                        memcpy(sparse_data->data, sparse_data_in->data,
                                sparse_data->ndata * data_size);
                 }
             } else {
-                sparse_data->data = malloc(sparse_data->ndata * data_size);
-                if ( NULL != sparse_data->data )
-                    memcpy(sparse_data->data, sparse_data_in->data, sparse_data->ndata * data_size);
+                sparse_data->data = NULL;
             }
         }
         matvar->data = sparse_data;
@@ -1229,26 +1535,28 @@ Mat_CopyFile(const char *src, const char *dst)
 {
     size_t len;
     char buf[BUFSIZ] = {'\0'};
-    FILE *in = NULL;
+    FILE *in;
     FILE *out = NULL;
 
-#if defined(_WIN32) && defined(_MSC_VER)
+#if defined(_WIN32)
     {
         wchar_t *wname = utf82u(src);
         if ( NULL != wname ) {
             in = _wfopen(wname, L"rb");
             free(wname);
+        } else {
+            in = NULL;
         }
     }
 #else
     in = fopen(src, "rb");
 #endif
     if ( in == NULL ) {
-        Mat_Critical("Cannot open file \"%s\" for reading.", src);
+        Mat_Critical("Cannot open file \"%s\" for reading", src);
         return MATIO_E_FILESYSTEM_COULD_NOT_OPEN;
     }
 
-#if defined(_WIN32) && defined(_MSC_VER)
+#if defined(_WIN32)
     {
         wchar_t *wname = utf82u(dst);
         if ( NULL != wname ) {
@@ -1261,7 +1569,7 @@ Mat_CopyFile(const char *src, const char *dst)
 #endif
     if ( out == NULL ) {
         fclose(in);
-        Mat_Critical("Cannot open file \"%s\" for writing.", dst);
+        Mat_Critical("Cannot open file \"%s\" for writing", dst);
         return MATIO_E_FILESYSTEM_COULD_NOT_OPEN;
     }
 
@@ -1269,7 +1577,7 @@ Mat_CopyFile(const char *src, const char *dst)
         if ( len != fwrite(buf, sizeof(char), len, out) ) {
             fclose(in);
             fclose(out);
-            Mat_Critical("Error writing to file \"%s\".", dst);
+            Mat_Critical("Error writing to file \"%s\"", dst);
             return MATIO_E_GENERIC_WRITE_ERROR;
         }
     }
@@ -1294,6 +1602,9 @@ Mat_VarDelete(mat_t *mat, const char *name)
 
     if ( NULL == mat || NULL == name )
         return err;
+
+    if ( (mat->mode & 0x01) == MAT_ACC_RDONLY )
+        return MATIO_E_OPERATION_PROHIBITED_IN_READ_MODE;
 
     if ( NULL != Mat_mktemp(path_buf, dir_buf) ) {
         enum mat_ft mat_file_ver;
@@ -1333,19 +1644,19 @@ Mat_VarDelete(mat_t *mat, const char *name)
             n = tmp->num_datasets;
             Mat_Close(tmp);
 
-            if ( MATIO_E_NO_ERROR == err ) {
+            if ( !err ) {
                 char *new_name = strdup(mat->filename);
 #if defined(MAT73) && MAT73
                 if ( mat_file_ver == MAT_FT_MAT73 ) {
-                    err = Mat_Close73(mat);
+                    /* err = */ Mat_Close73(mat);
                 }
 #endif
                 if ( mat->fp != NULL ) {
                     fclose((FILE *)mat->fp);
                     mat->fp = NULL;
                 }
-
-                if ( (err = Mat_CopyFile(path_buf, new_name)) != MATIO_E_NO_ERROR ) {
+                err = Mat_CopyFile(path_buf, new_name);
+                if ( err ) {
                     if ( NULL != dir ) {
                         size_t i;
                         for ( i = 0; i < n; i++ ) {
@@ -1354,7 +1665,7 @@ Mat_VarDelete(mat_t *mat, const char *name)
                         }
                         free(dir);
                     }
-                    Mat_Critical("Cannot copy file from \"%s\" to \"%s\".", path_buf, new_name);
+                    Mat_Critical("Cannot copy file from \"%s\" to \"%s\"", path_buf, new_name);
                 } else if ( (err = remove(path_buf)) != 0 ) {
                     err = MATIO_E_UNKNOWN_ERROR;
                     if ( NULL != dir ) {
@@ -1365,7 +1676,7 @@ Mat_VarDelete(mat_t *mat, const char *name)
                         }
                         free(dir);
                     }
-                    Mat_Critical("Cannot remove file \"%s\".", path_buf);
+                    Mat_Critical("Cannot remove file \"%s\"", path_buf);
                 } else if ( *dir_buf != '\0' && (err = remove(dir_buf)) != 0 ) {
                     err = MATIO_E_UNKNOWN_ERROR;
                     if ( NULL != dir ) {
@@ -1376,7 +1687,7 @@ Mat_VarDelete(mat_t *mat, const char *name)
                         }
                         free(dir);
                     }
-                    Mat_Critical("Cannot remove directory \"%s\".", dir_buf);
+                    Mat_Critical("Cannot remove directory \"%s\"", dir_buf);
                 } else {
                     tmp = Mat_Open(new_name, mat->mode);
                     if ( NULL != tmp ) {
@@ -1399,23 +1710,23 @@ Mat_VarDelete(mat_t *mat, const char *name)
                         mat->num_datasets = n;
                         mat->dir = dir;
                     } else {
-                        Mat_Critical("Cannot open file \"%s\".", new_name);
+                        Mat_Critical("Cannot open file \"%s\"", new_name);
                         err = MATIO_E_FILESYSTEM_COULD_NOT_OPEN;
                     }
                 }
                 free(new_name);
             } else if ( (err = remove(path_buf)) != 0 ) {
                 err = MATIO_E_UNKNOWN_ERROR;
-                Mat_Critical("Cannot remove file \"%s\".", path_buf);
+                Mat_Critical("Cannot remove file \"%s\"", path_buf);
             } else if ( *dir_buf != '\0' && (err = remove(dir_buf)) != 0 ) {
                 err = MATIO_E_UNKNOWN_ERROR;
-                Mat_Critical("Cannot remove directory \"%s\".", dir_buf);
+                Mat_Critical("Cannot remove directory \"%s\"", dir_buf);
             }
         } else {
             err = MATIO_E_UNKNOWN_ERROR;
         }
     } else {
-        Mat_Critical("Cannot create a unique file name.");
+        Mat_Critical("Cannot create a unique file name");
         err = MATIO_E_FILESYSTEM_COULD_NOT_OPEN_TEMPORARY;
     }
 
@@ -1440,6 +1751,9 @@ Mat_VarDuplicate(const matvar_t *in, int opt)
     matvar_t *out;
     size_t i;
 
+    if ( in == NULL )
+        return NULL;
+
     out = Mat_VarCalloc();
     if ( out == NULL )
         return NULL;
@@ -1463,16 +1777,16 @@ Mat_VarDuplicate(const matvar_t *in, int opt)
     }
 
     out->dims = (size_t *)malloc(in->rank * sizeof(*out->dims));
-    if ( out->dims != NULL )
+    if ( out->dims != NULL && in->dims != NULL )
         memcpy(out->dims, in->dims, in->rank * sizeof(*out->dims));
 
     if ( NULL != in->internal ) {
 #if defined(MAT73) && MAT73
-        if ( NULL != in->internal->hdf5_name )
-            out->internal->hdf5_name = strdup(in->internal->hdf5_name);
-
         out->internal->hdf5_ref = in->internal->hdf5_ref;
         out->internal->id = in->internal->id;
+        if ( out->internal->id >= 0 ) {
+            H5Iinc_ref(out->internal->id);
+        }
 #endif
         out->internal->datapos = in->internal->datapos;
 #if HAVE_ZLIB
@@ -1490,6 +1804,21 @@ Mat_VarDuplicate(const matvar_t *in, int opt)
                 }
             }
         }
+#if defined(MCOS) && MCOS
+        if ( NULL != in->internal->type_name )
+            out->internal->type_name = strdup(in->internal->type_name);
+        if ( NULL != in->internal->class_name )
+            out->internal->class_name = strdup(in->internal->class_name);
+        out->internal->class_id = in->internal->class_id;
+        out->internal->num_objects = in->internal->num_objects;
+        if ( NULL != in->internal->object_ids && in->internal->num_objects > 0 ) {
+            out->internal->object_ids =
+                (mat_uint32_t *)malloc(in->internal->num_objects * sizeof(mat_uint32_t));
+            if ( NULL != out->internal->object_ids )
+                memcpy(out->internal->object_ids, in->internal->object_ids,
+                       in->internal->num_objects * sizeof(mat_uint32_t));
+        }
+#endif
 
 #if HAVE_ZLIB
         if ( in->internal->z != NULL ) {
@@ -1526,7 +1855,8 @@ Mat_VarDuplicate(const matvar_t *in, int opt)
                         out_sparse->data = malloc(sizeof(mat_complex_split_t));
                         if ( out_sparse->data != NULL ) {
                             mat_complex_split_t *out_data = (mat_complex_split_t *)out_sparse->data;
-                            mat_complex_split_t *in_data = (mat_complex_split_t *)in_sparse->data;
+                            const mat_complex_split_t *in_data =
+                                (mat_complex_split_t *)in_sparse->data;
                             out_data->Re = malloc(in_sparse->ndata * Mat_SizeOf(in->data_type));
                             if ( NULL != out_data->Re )
                                 memcpy(out_data->Re, in_data->Re,
@@ -1541,13 +1871,15 @@ Mat_VarDuplicate(const matvar_t *in, int opt)
                         if ( NULL != out_sparse->data )
                             memcpy(out_sparse->data, in_sparse->data,
                                    in_sparse->ndata * Mat_SizeOf(in->data_type));
+                    } else {
+                        out_sparse->data = NULL;
                     }
                 }
             } else if ( out->isComplex ) {
                 out->internal->data = malloc(sizeof(mat_complex_split_t));
                 if ( out->internal->data != NULL ) {
                     mat_complex_split_t *out_data = (mat_complex_split_t *)out->internal->data;
-                    mat_complex_split_t *in_data = (mat_complex_split_t *)in->internal->data;
+                    const mat_complex_split_t *in_data = (mat_complex_split_t *)in->internal->data;
                     out_data->Re = malloc(out->nbytes);
                     if ( NULL != out_data->Re )
                         memcpy(out_data->Re, in_data->Re, out->nbytes);
@@ -1567,31 +1899,23 @@ Mat_VarDuplicate(const matvar_t *in, int opt)
 
     if ( !opt ) {
         out->data = in->data;
-    } else if ( (in->data != NULL) && (in->class_type == MAT_C_STRUCT) ) {
+    } else if ( in->data != NULL &&
+                (in->class_type == MAT_C_STRUCT || in->class_type == MAT_C_CELL ||
+                 in->class_type == MAT_C_FUNCTION || in->class_type == MAT_C_OBJECT) ) {
         out->data = malloc(in->nbytes);
         if ( out->data != NULL && in->data_size > 0 ) {
-            size_t nfields = in->nbytes / in->data_size;
-            matvar_t **infields = (matvar_t **)in->data;
-            matvar_t **outfields = (matvar_t **)out->data;
-            for ( i = 0; i < nfields; i++ ) {
-                outfields[i] = Mat_VarDuplicate(infields[i], opt);
+            const size_t ndata = in->nbytes / in->data_size;
+            const matvar_t *const *indata = (const matvar_t *const *)in->data;
+            const matvar_t **outdata = (const matvar_t **)out->data;
+            for ( i = 0; i < ndata; i++ ) {
+                outdata[i] = Mat_VarDuplicate(indata[i], opt);
             }
         }
-    } else if ( (in->data != NULL) && (in->class_type == MAT_C_CELL) ) {
-        out->data = malloc(in->nbytes);
-        if ( out->data != NULL && in->data_size > 0 ) {
-            size_t nelems = in->nbytes / in->data_size;
-            matvar_t **incells = (matvar_t **)in->data;
-            matvar_t **outcells = (matvar_t **)out->data;
-            for ( i = 0; i < nelems; i++ ) {
-                outcells[i] = Mat_VarDuplicate(incells[i], opt);
-            }
-        }
-    } else if ( (in->data != NULL) && (in->class_type == MAT_C_SPARSE) ) {
+    } else if ( in->data != NULL && in->class_type == MAT_C_SPARSE ) {
         out->data = malloc(sizeof(mat_sparse_t));
         if ( out->data != NULL ) {
             mat_sparse_t *out_sparse = (mat_sparse_t *)out->data;
-            mat_sparse_t *in_sparse = (mat_sparse_t *)in->data;
+            const mat_sparse_t *in_sparse = (mat_sparse_t *)in->data;
             out_sparse->nzmax = in_sparse->nzmax;
             out_sparse->nir = in_sparse->nir;
             out_sparse->ir = (mat_uint32_t *)malloc(in_sparse->nir * sizeof(*out_sparse->ir));
@@ -1606,7 +1930,8 @@ Mat_VarDuplicate(const matvar_t *in, int opt)
                 out_sparse->data = malloc(sizeof(mat_complex_split_t));
                 if ( out_sparse->data != NULL ) {
                     mat_complex_split_t *out_data = (mat_complex_split_t *)out_sparse->data;
-                    mat_complex_split_t *in_data = (mat_complex_split_t *)in_sparse->data;
+                    const mat_complex_split_t *in_data =
+                        (const mat_complex_split_t *)in_sparse->data;
                     out_data->Re = malloc(in_sparse->ndata * Mat_SizeOf(in->data_type));
                     if ( NULL != out_data->Re )
                         memcpy(out_data->Re, in_data->Re,
@@ -1625,12 +1950,12 @@ Mat_VarDuplicate(const matvar_t *in, int opt)
                 out_sparse->data = NULL;
             }
         }
-    } else if ( in->data != NULL ) {
+    } else if ( in->data != NULL && in->nbytes != 0 ) {
         if ( out->isComplex ) {
             out->data = malloc(sizeof(mat_complex_split_t));
             if ( out->data != NULL ) {
                 mat_complex_split_t *out_data = (mat_complex_split_t *)out->data;
-                mat_complex_split_t *in_data = (mat_complex_split_t *)in->data;
+                const mat_complex_split_t *in_data = (const mat_complex_split_t *)in->data;
                 out_data->Re = malloc(out->nbytes);
                 if ( NULL != out_data->Re )
                     memcpy(out_data->Re, in_data->Re, out->nbytes);
@@ -1658,41 +1983,38 @@ Mat_VarDuplicate(const matvar_t *in, int opt)
 void
 Mat_VarFree(matvar_t *matvar)
 {
-    size_t nelems = 0;
-    int err;
-
     if ( NULL == matvar )
         return;
     if ( NULL != matvar->dims ) {
-        nelems = 1;
-        err = Mat_MulDims(matvar, &nelems);
         free(matvar->dims);
-    } else {
-        err = MATIO_E_BAD_ARGUMENT;
     }
     if ( NULL != matvar->data ) {
         switch ( matvar->class_type ) {
             case MAT_C_STRUCT:
                 if ( !matvar->mem_conserve ) {
-                    if ( MATIO_E_NO_ERROR == err ) {
-                        matvar_t **fields = (matvar_t **)matvar->data;
-                        size_t nelems_x_nfields;
-                        err = Mul(&nelems_x_nfields, nelems, matvar->internal->num_fields);
-                        if ( MATIO_E_NO_ERROR == err && nelems_x_nfields > 0 ) {
-                            size_t i;
-                            for ( i = 0; i < nelems_x_nfields; i++ )
-                                Mat_VarFree(fields[i]);
-                        }
+                    matvar_t **fields = (matvar_t **)matvar->data;
+                    size_t nelems_x_nfields = 0;
+                    if ( matvar->data_size > 0 ) {
+                        nelems_x_nfields = matvar->nbytes / matvar->data_size;
+                    }
+                    if ( nelems_x_nfields > 0 ) {
+                        size_t i;
+                        for ( i = 0; i < nelems_x_nfields; i++ )
+                            Mat_VarFree(fields[i]);
                     }
                     free(matvar->data);
                 }
                 break;
             case MAT_C_CELL:
                 if ( !matvar->mem_conserve ) {
-                    if ( MATIO_E_NO_ERROR == err ) {
-                        matvar_t **cells = (matvar_t **)matvar->data;
+                    matvar_t **cells = (matvar_t **)matvar->data;
+                    size_t ncells = 0;
+                    if ( matvar->data_size > 0 ) {
+                        ncells = matvar->nbytes / matvar->data_size;
+                    }
+                    if ( ncells > 0 ) {
                         size_t i;
-                        for ( i = 0; i < nelems; i++ )
+                        for ( i = 0; i < ncells; i++ )
                             Mat_VarFree(cells[i]);
                     }
                     free(matvar->data);
@@ -1735,11 +2057,39 @@ Mat_VarFree(matvar_t *matvar)
                 break;
             case MAT_C_FUNCTION:
                 if ( !matvar->mem_conserve ) {
+                    matvar_t **functions = (matvar_t **)matvar->data;
+                    size_t nfuncs = 0;
+                    if ( matvar->data_size > 0 ) {
+                        nfuncs = matvar->nbytes / matvar->data_size;
+                    }
+                    if ( nfuncs > 0 ) {
+                        size_t i;
+                        for ( i = 0; i < nfuncs; i++ )
+                            Mat_VarFree(functions[i]);
+                    }
                     free(matvar->data);
                 }
                 break;
             case MAT_C_EMPTY:
+                break;
+#if defined(MCOS) && MCOS
             case MAT_C_OBJECT:
+                /* MCOS resolved object: fields like a struct */
+                if ( !matvar->mem_conserve ) {
+                    matvar_t **fields = (matvar_t **)matvar->data;
+                    size_t total = 0;
+                    if ( matvar->data_size > 0 ) {
+                        total = matvar->nbytes / matvar->data_size;
+                    }
+                    if ( NULL != fields && total > 0 ) {
+                        size_t k;
+                        for ( k = 0; k < total; k++ )
+                            Mat_VarFree(fields[k]);
+                    }
+                    free(matvar->data);
+                }
+                break;
+#endif
             case MAT_C_OPAQUE:
                 break;
         }
@@ -1771,37 +2121,19 @@ Mat_VarFree(matvar_t *matvar)
         }
 #endif
 #if defined(MAT73) && MAT73
-        if ( -1 < matvar->internal->id ) {
+        if ( H5I_INVALID_HID != matvar->internal->id ) {
             switch ( H5Iget_type(matvar->internal->id) ) {
                 case H5I_GROUP:
                     H5Gclose(matvar->internal->id);
-                    matvar->internal->id = -1;
+                    matvar->internal->id = H5I_INVALID_HID;
                     break;
                 case H5I_DATASET:
                     H5Dclose(matvar->internal->id);
-                    matvar->internal->id = -1;
+                    matvar->internal->id = H5I_INVALID_HID;
                     break;
                 default:
                     break;
             }
-        }
-        if ( 0 < matvar->internal->hdf5_ref ) {
-            switch ( H5Iget_type(matvar->internal->id) ) {
-                case H5I_GROUP:
-                    H5Gclose(matvar->internal->id);
-                    matvar->internal->hdf5_ref = -1;
-                    break;
-                case H5I_DATASET:
-                    H5Dclose(matvar->internal->id);
-                    matvar->internal->hdf5_ref = -1;
-                    break;
-                default:
-                    break;
-            }
-        }
-        if ( NULL != matvar->internal->hdf5_name ) {
-            free(matvar->internal->hdf5_name);
-            matvar->internal->hdf5_name = NULL;
         }
 #endif
         if ( NULL != matvar->internal->fieldnames && matvar->internal->num_fields > 0 ) {
@@ -1812,6 +2144,14 @@ Mat_VarFree(matvar_t *matvar)
             }
             free(matvar->internal->fieldnames);
         }
+#if defined(MCOS) && MCOS
+        if ( NULL != matvar->internal->type_name )
+            free(matvar->internal->type_name);
+        if ( NULL != matvar->internal->class_name )
+            free(matvar->internal->class_name);
+        if ( NULL != matvar->internal->object_ids )
+            free(matvar->internal->object_ids);
+#endif
         free(matvar->internal);
         matvar->internal = NULL;
     }
@@ -1837,7 +2177,7 @@ Mat_VarFree(matvar_t *matvar)
  * @return Single (linear) subscript
  */
 int
-Mat_CalcSingleSubscript(int rank, int *dims, int *subs)
+Mat_CalcSingleSubscript(int rank, const int *dims, const int *subs)
 {
     int index = 0, i, j, err = MATIO_E_NO_ERROR;
 
@@ -1852,8 +2192,14 @@ Mat_CalcSingleSubscript(int rank, int *dims, int *subs)
             break;
         }
         k--;
-        for ( j = i; j--; )
-            k *= dims[j];
+        for ( j = i; j--; ) {
+            if ( !psnip_safe_int_mul(&k, k, dims[j]) ) {
+                err = MATIO_E_OPERATION_NOT_SUPPORTED;
+                break;
+            }
+        }
+        if ( err )
+            break;
         index += k;
     }
     if ( err )
@@ -1880,7 +2226,7 @@ Mat_CalcSingleSubscript(int rank, int *dims, int *subs)
  * @retval 0 on success
  */
 int
-Mat_CalcSingleSubscript2(int rank, size_t *dims, size_t *subs, size_t *index)
+Mat_CalcSingleSubscript2(int rank, const size_t *dims, const size_t *subs, size_t *index)
 {
     int i, err = MATIO_E_NO_ERROR;
 
@@ -1923,7 +2269,7 @@ Mat_CalcSingleSubscript2(int rank, size_t *dims, size_t *subs, size_t *index)
  * @return Array of dimension subscripts
  */
 int *
-Mat_CalcSubscripts(int rank, int *dims, int index)
+Mat_CalcSubscripts(int rank, const int *dims, int index)
 {
     int i, j, *subs;
     double l;
@@ -1965,7 +2311,7 @@ Mat_CalcSubscripts(int rank, int *dims, int index)
  * @return Array of dimension subscripts
  */
 size_t *
-Mat_CalcSubscripts2(int rank, size_t *dims, size_t index)
+Mat_CalcSubscripts2(int rank, const size_t *dims, size_t index)
 {
     int i;
     size_t *subs;
@@ -1997,7 +2343,7 @@ Mat_CalcSubscripts2(int rank, size_t *dims, size_t index)
  * @returns size of the variable in bytes, or 0 on error
  */
 size_t
-Mat_VarGetSize(matvar_t *matvar)
+Mat_VarGetSize(const matvar_t *matvar)
 {
     int err;
     size_t i;
@@ -2064,7 +2410,7 @@ Mat_VarGetSize(matvar_t *matvar)
             }
         }
     } else if ( matvar->class_type == MAT_C_SPARSE ) {
-        mat_sparse_t *sparse = (mat_sparse_t *)matvar->data;
+        const mat_sparse_t *sparse = (const mat_sparse_t *)matvar->data;
         if ( NULL != sparse ) {
             size_t sparse_size = 0;
             err = Mul(&bytes, sparse->ndata, Mat_SizeOf(matvar->data_type));
@@ -2114,6 +2460,16 @@ Mat_VarGetSize(matvar_t *matvar)
     return bytes;
 }
 
+static const char *
+Mat_VarPrintFieldName(const matvar_t *matvar, size_t field_index)
+{
+    if ( NULL != matvar && NULL != matvar->internal && NULL != matvar->internal->fieldnames &&
+         NULL != matvar->internal->fieldnames[field_index] )
+        return matvar->internal->fieldnames[field_index];
+
+    return "";
+}
+
 /** @brief Prints the variable information
  *
  * Prints to stdout the values of the @ref matvar_t structure
@@ -2122,9 +2478,9 @@ Mat_VarGetSize(matvar_t *matvar)
  * @param printdata set to 1 if the Variables data should be printed, else 0
  */
 void
-Mat_VarPrint(matvar_t *matvar, int printdata)
+Mat_VarPrint(const matvar_t *matvar, int printdata)
 {
-    size_t nelems = 0, i, j;
+    size_t nelems = 0, i;
     const char *class_type_desc[18] = {"Undefined",
                                        "Cell Array",
                                        "Structure",
@@ -2156,7 +2512,7 @@ Mat_VarPrint(matvar_t *matvar, int printdata)
         nelems = 1;
         err = Mat_MulDims(matvar, &nelems);
         printf("Dimensions: %" SIZE_T_FMTSTR, matvar->dims[0]);
-        if ( MATIO_E_NO_ERROR == err ) {
+        if ( !err ) {
             int k;
             for ( k = 1; k < matvar->rank; k++ ) {
                 printf(" x %" SIZE_T_FMTSTR, matvar->dims[k]);
@@ -2169,6 +2525,12 @@ Mat_VarPrint(matvar_t *matvar, int printdata)
         printf(" (complex)");
     else if ( matvar->isLogical )
         printf(" (logical)");
+#if defined(MCOS) && MCOS
+    if ( (matvar->class_type == MAT_C_OPAQUE || matvar->class_type == MAT_C_OBJECT) &&
+         NULL != matvar->internal && NULL != matvar->internal->class_name ) {
+        printf(" [%s]", matvar->internal->class_name);
+    }
+#endif
     printf("\n");
     if ( matvar->data_type ) {
         const char *data_type_desc[25] = {"Unknown",
@@ -2199,34 +2561,67 @@ Mat_VarPrint(matvar_t *matvar, int printdata)
         printf(" Data Type: %s\n", data_type_desc[matvar->data_type]);
     }
 
-    if ( MAT_C_STRUCT == matvar->class_type ) {
+#if defined(MCOS) && MCOS
+    if ( MAT_C_OBJECT == matvar->class_type ) {
+        /* Print MCOS objects like structs */
         matvar_t **fields = (matvar_t **)matvar->data;
         size_t nfields = matvar->internal->num_fields;
         size_t nelems_x_nfields = 1;
-        int err = Mul(&nelems_x_nfields, nelems, nfields);
-        if ( MATIO_E_NO_ERROR == err && nelems_x_nfields > 0 ) {
+        int err2 = Mul(&nelems_x_nfields, nelems, nfields);
+        if ( !err2 && nelems_x_nfields > 0 ) {
             printf("Fields[%" SIZE_T_FMTSTR "] {\n", nelems_x_nfields);
-            for ( i = 0; i < nelems_x_nfields; i++ ) {
-                if ( NULL == fields[i] ) {
-                    printf("      Name: %s\n      Rank: %d\n",
-                           matvar->internal->fieldnames[i % nfields], 0);
-                } else {
-                    Mat_VarPrint(fields[i], printdata);
+            if ( NULL != matvar->internal->fieldnames && NULL != fields ) {
+                for ( i = 0; i < nelems_x_nfields; i++ ) {
+                    if ( NULL == fields[i] ) {
+                        printf("      Name: %s\n      Rank: %d\n",
+                               Mat_VarPrintFieldName(matvar, i % nfields), 0);
+                    } else {
+                        Mat_VarPrint(fields[i], printdata);
+                    }
                 }
             }
             printf("}\n");
         } else {
             printf("Fields[%" SIZE_T_FMTSTR "] {\n", nfields);
             for ( i = 0; i < nfields; i++ )
-                printf("      Name: %s\n      Rank: %d\n", matvar->internal->fieldnames[i], 0);
+                printf("      Name: %s\n      Rank: %d\n", Mat_VarPrintFieldName(matvar, i), 0);
             printf("}\n");
         }
         return;
-    } else if ( matvar->data == NULL || matvar->data_size < 1 ) {
+    }
+#endif
+    if ( MAT_C_STRUCT == matvar->class_type ) {
+        matvar_t **fields = (matvar_t **)matvar->data;
+        size_t nfields = matvar->internal->num_fields;
+        size_t nelems_x_nfields = 1;
+        int err = Mul(&nelems_x_nfields, nelems, nfields);
+        if ( !err && nelems_x_nfields > 0 ) {
+            printf("Fields[%" SIZE_T_FMTSTR "] {\n", nelems_x_nfields);
+            if ( NULL != matvar->internal->fieldnames && NULL != fields ) {
+                for ( i = 0; i < nelems_x_nfields; i++ ) {
+                    if ( NULL == fields[i] ) {
+                        printf("      Name: %s\n      Rank: %d\n",
+                               Mat_VarPrintFieldName(matvar, i % nfields), 0);
+                    } else {
+                        Mat_VarPrint(fields[i], printdata);
+                    }
+                }
+            }
+            printf("}\n");
+        } else {
+            printf("Fields[%" SIZE_T_FMTSTR "] {\n", nfields);
+            for ( i = 0; i < nfields; i++ )
+                printf("      Name: %s\n      Rank: %d\n", Mat_VarPrintFieldName(matvar, i), 0);
+            printf("}\n");
+        }
+        return;
+    }
+    if ( matvar->data == NULL || matvar->data_size < 1 ) {
         if ( printdata )
             printf("{\n}\n");
         return;
-    } else if ( MAT_C_CELL == matvar->class_type ) {
+    }
+    if ( MAT_C_CELL == matvar->class_type ) {
         matvar_t **cells = (matvar_t **)matvar->data;
         nelems = matvar->nbytes / matvar->data_size;
         printf("{\n");
@@ -2234,200 +2629,33 @@ Mat_VarPrint(matvar_t *matvar, int printdata)
             Mat_VarPrint(cells[i], printdata);
         printf("}\n");
         return;
-    } else if ( !printdata ) {
-        return;
     }
+    if ( !printdata )
+        return;
 
     printf("{\n");
-
-    if ( matvar->rank > 2 ) {
-        printf("I can't print more than 2 dimensions\n");
-    } else if ( matvar->rank == 1 && NULL != matvar->dims && matvar->dims[0] > 15 ) {
-        printf("I won't print more than 15 elements in a vector\n");
-    } else if ( matvar->rank == 2 && NULL != matvar->dims ) {
-        switch ( matvar->class_type ) {
-            case MAT_C_DOUBLE:
-            case MAT_C_SINGLE:
-#ifdef HAVE_MAT_INT64_T
-            case MAT_C_INT64:
-#endif
-#ifdef HAVE_MAT_UINT64_T
-            case MAT_C_UINT64:
-#endif
-            case MAT_C_INT32:
-            case MAT_C_UINT32:
-            case MAT_C_INT16:
-            case MAT_C_UINT16:
-            case MAT_C_INT8:
-            case MAT_C_UINT8: {
-                size_t stride = Mat_SizeOf(matvar->data_type);
-                if ( matvar->isComplex ) {
-                    mat_complex_split_t *complex_data = (mat_complex_split_t *)matvar->data;
-                    char *rp = (char *)complex_data->Re;
-                    char *ip = (char *)complex_data->Im;
-                    for ( i = 0; i < matvar->dims[0] && i < 15; i++ ) {
-                        for ( j = 0; j < matvar->dims[1] && j < 15; j++ ) {
-                            size_t idx = matvar->dims[0] * j + i;
-                            Mat_PrintNumber(matvar->data_type, rp + idx * stride);
-                            printf(" + ");
-                            Mat_PrintNumber(matvar->data_type, ip + idx * stride);
-                            printf("i ");
-                        }
-                        if ( j < matvar->dims[1] )
-                            printf("...");
-                        printf("\n");
-                    }
-                    if ( i < matvar->dims[0] )
-                        printf(".\n.\n.\n");
-                } else {
-                    char *data = (char *)matvar->data;
-                    for ( i = 0; i < matvar->dims[0] && i < 15; i++ ) {
-                        for ( j = 0; j < matvar->dims[1] && j < 15; j++ ) {
-                            size_t idx = matvar->dims[0] * j + i;
-                            Mat_PrintNumber(matvar->data_type, data + idx * stride);
-                            printf(" ");
-                        }
-                        if ( j < matvar->dims[1] )
-                            printf("...");
-                        printf("\n");
-                    }
-                    if ( i < matvar->dims[0] )
-                        printf(".\n.\n.\n");
-                }
-                break;
-            }
-            case MAT_C_CHAR: {
-                switch ( matvar->data_type ) {
-                    case MAT_T_UINT16:
-                    case MAT_T_UTF16: {
-                        const mat_uint16_t *data = (const mat_uint16_t *)matvar->data;
-                        for ( i = 0; i < matvar->dims[0]; i++ ) {
-                            for ( j = 0; j < matvar->dims[1]; j++ ) {
-                                const mat_uint16_t c = data[j * matvar->dims[0] + i];
-#if defined VARPRINT_UTF16
-                                printf("%c%c", c & 0xFF, (c >> 8) & 0xFF);
-#elif defined VARPRINT_UTF16_DECIMAL
-                                Mat_PrintNumber(MAT_T_UINT16, &c);
-                                printf(" ");
-#else
-                                /* Convert to UTF-8 */
-                                if ( c <= 0x7F ) {
-                                    printf("%c", c);
-                                } else if ( c <= 0x7FF ) {
-                                    printf("%c%c", 0xC0 | (c >> 6), 0x80 | (c & 0x3F));
-                                } else /* if (c <= 0xFFFF) */ {
-                                    printf("%c%c%c", 0xE0 | (c >> 12), 0x80 | ((c >> 6) & 0x3F),
-                                           0x80 | (c & 0x3F));
-                                }
-#endif
-                            }
-                            printf("\n");
-                        }
-                        break;
-                    }
-                    case MAT_T_UTF8: {
-                        const mat_uint8_t *data = (const mat_uint8_t *)matvar->data;
-                        size_t k = 0;
-                        size_t *idxOffset;
-                        if ( matvar->nbytes == 0 ) {
-                            break;
-                        }
-                        idxOffset = (size_t *)calloc(nelems, sizeof(size_t));
-                        if ( idxOffset == NULL ) {
-                            break;
-                        }
-                        for ( i = 0; i < matvar->dims[0]; i++ ) {
-                            for ( j = 0; j < matvar->dims[1]; j++ ) {
-                                mat_uint8_t c;
-                                if ( k >= matvar->nbytes ) {
-                                    break;
-                                }
-                                idxOffset[i * matvar->dims[1] + j] = k;
-                                c = data[k];
-                                if ( c <= 0x7F ) {
-                                } else if ( (c & 0xE0) == 0xC0 && k + 1 < matvar->nbytes ) {
-                                    k = k + 1;
-                                } else if ( (c & 0xF0) == 0xE0 && k + 2 < matvar->nbytes ) {
-                                    k = k + 2;
-                                } else if ( (c & 0xF8) == 0xF0 && k + 3 < matvar->nbytes ) {
-                                    k = k + 3;
-                                }
-                                ++k;
-                            }
-                        }
-                        for ( i = 0; i < matvar->dims[0]; i++ ) {
-                            for ( j = 0; j < matvar->dims[1]; j++ ) {
-                                mat_uint8_t c;
-                                k = idxOffset[j * matvar->dims[0] + i];
-                                c = data[k];
-                                if ( c <= 0x7F ) {
-                                    printf("%c", c);
-                                } else if ( (c & 0xE0) == 0xC0 ) {
-                                    printf("%c%c", c, data[k + 1]);
-                                } else if ( (c & 0xF0) == 0xE0 ) {
-                                    printf("%c%c%c", c, data[k + 1], data[k + 2]);
-                                } else if ( (c & 0xF8) == 0xF0 ) {
-                                    printf("%c%c%c%c", c, data[k + 1], data[k + 2], data[k + 3]);
-                                }
-                            }
-                            printf("\n");
-                        }
-                        free(idxOffset);
-                        break;
-                    }
-                    default: {
-                        const char *data = (const char *)matvar->data;
-                        for ( i = 0; i < matvar->dims[0]; i++ ) {
-                            for ( j = 0; j < matvar->dims[1]; j++ )
-                                printf("%c", data[j * matvar->dims[0] + i]);
-                            printf("\n");
-                        }
-                        break;
-                    }
-                }
-                break;
-            }
-            case MAT_C_SPARSE: {
-                mat_sparse_t *sparse;
-                size_t stride = Mat_SizeOf(matvar->data_type);
-#if !defined(EXTENDED_SPARSE)
-                if ( MAT_T_DOUBLE != matvar->data_type )
-                    break;
-#endif
-                sparse = (mat_sparse_t *)matvar->data;
-                if ( matvar->isComplex ) {
-                    mat_complex_split_t *complex_data = (mat_complex_split_t *)sparse->data;
-                    char *re = (char *)complex_data->Re;
-                    char *im = (char *)complex_data->Im;
-                    for ( i = 0; i < (size_t)sparse->njc - 1; i++ ) {
-                        for ( j = sparse->jc[i];
-                              j < (size_t)sparse->jc[i + 1] && j < (size_t)sparse->ndata; j++ ) {
-                            printf("    (%u,%" SIZE_T_FMTSTR ")  ", sparse->ir[j] + 1, i + 1);
-                            Mat_PrintNumber(matvar->data_type, re + j * stride);
-                            printf(" + ");
-                            Mat_PrintNumber(matvar->data_type, im + j * stride);
-                            printf("i\n");
-                        }
-                    }
-                } else {
-                    char *data = (char *)sparse->data;
-                    for ( i = 0; i < (size_t)sparse->njc - 1; i++ ) {
-                        for ( j = sparse->jc[i];
-                              j < (size_t)sparse->jc[i + 1] && j < (size_t)sparse->ndata; j++ ) {
-                            printf("    (%u,%" SIZE_T_FMTSTR ")  ", sparse->ir[j] + 1, i + 1);
-                            Mat_PrintNumber(matvar->data_type, data + j * stride);
-                            printf("\n");
-                        }
-                    }
-                }
-                break;
-            } /* case MAT_C_SPARSE: */
-            default:
-                break;
-        } /* switch( matvar->class_type ) */
-    }
-
+    Mat_PrintData(matvar->rank, matvar->dims, matvar->data, matvar->class_type, matvar->isComplex,
+                  matvar->data_type, matvar->nbytes, nelems);
     printf("}\n");
+}
+
+/** @brief Returns the MCOS class name for an opaque/object variable
+ *
+ * @ingroup MAT
+ * @param matvar Pointer to the matvar_t structure
+ * @return Class name string, or NULL if not an MCOS variable
+ */
+const char *
+Mat_VarGetClassName(const matvar_t *matvar)
+{
+#if defined(MCOS) && MCOS
+    if ( matvar == NULL || matvar->internal == NULL )
+        return NULL;
+    return matvar->internal->class_name;
+#else
+    (void)matvar;
+    return NULL;
+#endif
 }
 
 /** @brief Reads MAT variable data from a file
@@ -2444,7 +2672,8 @@ Mat_VarPrint(matvar_t *matvar, int printdata)
  * @retval 0 on success
  */
 int
-Mat_VarReadData(mat_t *mat, matvar_t *matvar, void *data, int *start, int *stride, int *edge)
+Mat_VarReadData(mat_t *mat, matvar_t *matvar, void *data, const int *start, const int *stride,
+                const int *edge)
 {
     int err = MATIO_E_NO_ERROR;
 
@@ -2566,7 +2795,7 @@ Mat_VarReadDataLinear(mat_t *mat, matvar_t *matvar, void *data, int start, int s
 /** @brief Reads the information of the next variable in a MAT file
  *
  * Reads the next variable's information (class,flags-complex/global/logical,
- * rank,dimensions, name, etc) from the Matlab MAT file.  After reading, the MAT
+ * rank,dimensions, name, etc) from the Matlab MAT file. After reading, the MAT
  * file is positioned past the current variable.
  * @ingroup MAT
  * @param mat Pointer to the MAT file
@@ -2575,6 +2804,26 @@ Mat_VarReadDataLinear(mat_t *mat, matvar_t *matvar, void *data, int start, int s
  */
 matvar_t *
 Mat_VarReadNextInfo(mat_t *mat)
+{
+    return Mat_VarReadNextInfoPredicate(mat, NULL, NULL);
+}
+
+/** @brief Reads the information of the next variable in a filtered MAT file
+ *
+ * Reads the next variable's information (class,flags-complex/global/logical,
+ * rank,dimensions, name, etc) from the Matlab MAT file. Calls a user callback
+ * to check where the variable has to be fully read or skipped.
+ * If skipped tries to read next till accepted or EOF.
+ * After reading, the MAT file is positioned past the current variable.
+ * @ingroup MAT
+ * @param mat Pointer to the MAT file
+ * @param pred User callback function
+ * @param user_data User data to be passed to the callback function
+ * @return Pointer to the @ref matvar_t structure containing the MAT
+ * variable information
+ */
+matvar_t *
+Mat_VarReadNextInfoPredicate(mat_t *mat, mat_iter_pred_t pred, const void *user_data)
 {
     matvar_t *matvar;
     if ( mat == NULL )
@@ -2586,7 +2835,7 @@ Mat_VarReadNextInfo(mat_t *mat)
             break;
         case MAT_FT_MAT73:
 #if defined(MAT73) && MAT73
-            matvar = Mat_VarReadNextInfo73(mat);
+            matvar = Mat_VarReadNextInfo73(mat, pred, user_data);
 #else
             matvar = NULL;
 #endif
@@ -2601,6 +2850,15 @@ Mat_VarReadNextInfo(mat_t *mat)
 
     return matvar;
 }
+
+#if defined(MAT73) && MAT73
+static int
+Mat_IteratorNameAcceptor(const char *name, const void *user_data)
+{
+    const char *required_name = (const char *)user_data;
+    return (NULL != name) && (NULL != required_name) && 0 == strcmp(name, required_name);
+}
+#endif
 
 /** @brief Reads the information of a variable with the given name from a MAT file
  *
@@ -2625,6 +2883,13 @@ Mat_VarReadInfo(mat_t *mat, const char *name)
         size_t fpos = mat->next_index;
         mat->next_index = 0;
         while ( NULL == matvar && mat->next_index < mat->num_datasets ) {
+#if defined(MAT73) && MAT73
+            matvar = Mat_VarReadNextInfoPredicate(mat, Mat_IteratorNameAcceptor, name);
+            if ( NULL == matvar ) {
+                Mat_Critical("An error occurred in reading the MAT file");
+                break;
+            }
+#else
             matvar = Mat_VarReadNextInfo(mat);
             if ( matvar != NULL ) {
                 if ( matvar->name == NULL || 0 != strcmp(matvar->name, name) ) {
@@ -2635,6 +2900,7 @@ Mat_VarReadInfo(mat_t *mat, const char *name)
                 Mat_Critical("An error occurred in reading the MAT file");
                 break;
             }
+#endif
         }
         mat->next_index = fpos;
     } else {
@@ -2686,7 +2952,7 @@ Mat_VarRead(mat_t *mat, const char *name)
             return NULL;
         }
         matvar = Mat_VarReadInfo(mat, name);
-        if ( matvar ) {
+        if ( matvar != NULL ) {
             const int err = ReadData(mat, matvar);
             if ( err ) {
                 Mat_VarFree(matvar);
@@ -2698,7 +2964,7 @@ Mat_VarRead(mat_t *mat, const char *name)
         size_t fpos = mat->next_index;
         mat->next_index = 0;
         matvar = Mat_VarReadInfo(mat, name);
-        if ( matvar ) {
+        if ( matvar != NULL ) {
             const int err = ReadData(mat, matvar);
             if ( err ) {
                 Mat_VarFree(matvar);
@@ -2722,27 +2988,52 @@ Mat_VarRead(mat_t *mat, const char *name)
 matvar_t *
 Mat_VarReadNext(mat_t *mat)
 {
-    mat_off_t fpos = 0;
-    matvar_t *matvar;
+    return Mat_VarReadNextPredicate(mat, NULL, NULL);
+}
 
-    if ( mat->version != MAT_FT_MAT73 ) {
-        if ( IsEndOfFile((FILE *)mat->fp, &fpos) )
-            return NULL;
-        if ( fpos == -1L ) {
-            return NULL;
+/** @brief Reads the next variable in a filtered MAT file
+ *
+ * Reads the next variable in the Matlab MAT file. Calls a user callback
+ * to check where the variable has to be fully read of skipped.
+ * If skipped tries to read next till accepted or EOF.
+ *
+ * @ingroup MAT
+ * @param mat Pointer to the MAT file
+ * @return Pointer to the @ref matvar_t structure containing the MAT
+ * variable information
+ */
+matvar_t *
+Mat_VarReadNextPredicate(mat_t *mat, mat_iter_pred_t pred, const void *user_data)
+{
+    mat_off_t fpos = 0;
+    matvar_t *matvar = NULL;
+
+    do {
+        Mat_VarFree(matvar);
+        if ( mat->version != MAT_FT_MAT73 ) {
+            if ( IsEndOfFile((FILE *)mat->fp, &fpos) )
+                return NULL;
+            if ( fpos == -1L ) {
+                return NULL;
+            }
         }
-    }
-    matvar = Mat_VarReadNextInfo(mat);
-    if ( matvar ) {
-        const int err = ReadData(mat, matvar);
-        if ( err ) {
-            Mat_VarFree(matvar);
-            matvar = NULL;
+        matvar = Mat_VarReadNextInfoPredicate(mat, pred, user_data);
+        if ( matvar ) {
+            const int err = ReadData(mat, matvar);
+            if ( err ) {
+                Mat_VarFree(matvar);
+                matvar = NULL;
+                break;
+            }
+        } else {
+            if ( mat->version != MAT_FT_MAT73 ) {
+                /* Reset the file position */
+                (void)fseeko((FILE *)mat->fp, fpos, SEEK_SET);
+            }
+            break;
         }
-    } else if ( mat->version != MAT_FT_MAT73 ) {
-        /* Reset the file position */
-        (void)fseeko((FILE *)mat->fp, fpos, SEEK_SET);
-    }
+    } while ( (NULL != pred) && 0 == pred(matvar->name, user_data) );
+    /* for 7.3 the predicate will be called one extra time */
 
     return matvar;
 }
@@ -2759,7 +3050,7 @@ Mat_VarReadNext(mat_t *mat)
  * @see Mat_VarWrite/Mat_VarWriteAppend
  */
 int
-Mat_VarWriteInfo(mat_t *mat, matvar_t *matvar)
+Mat_VarWriteInfo(const mat_t *mat, matvar_t *matvar)
 {
     Mat_Critical(
         "Mat_VarWriteInfo/Mat_VarWriteData is not supported. "
@@ -2784,7 +3075,8 @@ Mat_VarWriteInfo(mat_t *mat, matvar_t *matvar)
  * @see Mat_VarWrite/Mat_VarWriteAppend
  */
 int
-Mat_VarWriteData(mat_t *mat, matvar_t *matvar, void *data, int *start, int *stride, int *edge)
+Mat_VarWriteData(const mat_t *mat, matvar_t *matvar, void *data, const int *start,
+                 const int *stride, const int *edge)
 {
     Mat_Critical(
         "Mat_VarWriteInfo/Mat_VarWriteData is not supported. "
@@ -2809,6 +3101,7 @@ int
 Mat_VarWrite(mat_t *mat, matvar_t *matvar, enum matio_compression compress)
 {
     int err;
+    mat_off_t subsys_pos = -1L;
 
     if ( NULL == mat || NULL == matvar )
         return MATIO_E_BAD_ARGUMENT;
@@ -2818,15 +3111,21 @@ Mat_VarWrite(mat_t *mat, matvar_t *matvar, enum matio_compression compress)
         (void)Mat_GetDir(mat, &n);
     }
 
-    {
+    if ( NULL != mat->dir && NULL != matvar->name ) {
         /* Error if MAT variable already exists in MAT file */
         size_t i;
         for ( i = 0; i < mat->num_datasets; i++ ) {
             if ( NULL != mat->dir[i] && 0 == strcmp(mat->dir[i], matvar->name) ) {
-                Mat_Critical("Variable %s already exists.", matvar->name);
+                Mat_Critical("Variable %s already exists", matvar->name);
                 return MATIO_E_OUTPUT_BAD_DATA;
             }
         }
+    }
+
+    /* Record the file position for an unnamed variable (MCOS subsystem) */
+    if ( (NULL == matvar->name || '\0' == matvar->name[0]) && mat->version == MAT_FT_MAT5 ) {
+        (void)fseeko((FILE *)mat->fp, 0, SEEK_END);
+        subsys_pos = ftello((FILE *)mat->fp);
     }
 
     if ( mat->version == MAT_FT_MAT5 )
@@ -2842,24 +3141,39 @@ Mat_VarWrite(mat_t *mat, matvar_t *matvar, enum matio_compression compress)
     else
         err = MATIO_E_FAIL_TO_IDENTIFY;
 
-    if ( err == MATIO_E_NO_ERROR ) {
-        /* Update directory */
-        char **dir;
-        if ( NULL == mat->dir ) {
-            dir = (char **)malloc(sizeof(char *));
-        } else {
-            dir = (char **)realloc(mat->dir, (mat->num_datasets + 1) * (sizeof(char *)));
+    if ( !err ) {
+        /* Update subsystem data offset for unnamed variables (MCOS) */
+        if ( subsys_pos > 0 && NULL != mat->subsys_offset ) {
+            mat_off_t save_pos = ftello((FILE *)mat->fp);
+            mat_uint32_t lo = (mat_uint32_t)(subsys_pos & 0xFFFFFFFFU);
+            mat_uint32_t hi = (mat_uint32_t)(((mat_uint64_t)subsys_pos >> 32) & 0xFFFFFFFFU);
+            (void)fseeko((FILE *)mat->fp, 116, SEEK_SET);
+            fwrite(&lo, 4, 1, (FILE *)mat->fp);
+            fwrite(&hi, 4, 1, (FILE *)mat->fp);
+            memcpy(mat->subsys_offset, &lo, 4);
+            memcpy(mat->subsys_offset + 4, &hi, 4);
+            if ( save_pos > 0 )
+                (void)fseeko((FILE *)mat->fp, save_pos, SEEK_SET);
         }
-        if ( NULL != dir ) {
-            mat->dir = dir;
-            if ( NULL != matvar->name ) {
-                mat->dir[mat->num_datasets++] = strdup(matvar->name);
+
+        { /* Update directory */
+            char **dir;
+            if ( NULL == mat->dir ) {
+                dir = (char **)malloc(sizeof(char *));
             } else {
-                mat->dir[mat->num_datasets++] = NULL;
+                dir = (char **)realloc(mat->dir, (mat->num_datasets + 1) * (sizeof(char *)));
             }
-        } else {
-            err = MATIO_E_OUT_OF_MEMORY;
-            Mat_Critical("Couldn't allocate memory for the directory");
+            if ( NULL != dir ) {
+                mat->dir = dir;
+                if ( NULL != matvar->name ) {
+                    mat->dir[mat->num_datasets++] = strdup(matvar->name);
+                } else {
+                    mat->dir[mat->num_datasets++] = NULL;
+                }
+            } else {
+                err = MATIO_E_OUT_OF_MEMORY;
+                Mat_Critical("Couldn't allocate memory for the directory");
+            }
         }
     }
 
@@ -2907,7 +3221,7 @@ Mat_VarWriteAppend(mat_t *mat, matvar_t *matvar, enum matio_compression compress
             }
         }
         err = Mat_VarWriteAppend73(mat, matvar, compress, dim);
-        if ( err == MATIO_E_NO_ERROR && 0 == append ) {
+        if ( !err && 0 == append ) {
             /* Update directory */
             char **dir;
             if ( NULL == mat->dir ) {

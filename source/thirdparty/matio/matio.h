@@ -3,30 +3,11 @@
  * @ingroup MAT
  */
 /*
- * Copyright (c) 2015-2022, The matio contributors
+ * Copyright (c) 2015-2026, The matio contributors
  * Copyright (c) 2005-2014, Christopher C. Hulbert
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SPDX-License-Identifier: BSD-2-Clause
  */
 
 #ifndef MATIO_H
@@ -166,7 +147,7 @@ enum matio_compression
  * @ingroup MAT
  * matio lookup type
  */
-enum
+enum matio_lookup
 {
     MAT_BY_NAME = 1, /**< Lookup by name */
     MAT_BY_INDEX = 2 /**< Lookup by index */
@@ -269,6 +250,12 @@ typedef struct mat_sparse_t
 #define MATIO_E_FILESYSTEM_ERROR_ON_CLOSE 24
 /** @endcond */
 
+/**
+ * User callback for iteration functions.
+ * returns 1 to read, 0 to skip
+ */
+typedef int (*mat_iter_pred_t)(const char *name, const void *user_data);
+
 /* Library function */
 EXTERN void Mat_GetLibraryVersion(int *major, int *minor, int *release);
 
@@ -281,7 +268,8 @@ EXTERN MATIO_NORETURN void Mat_Error(const char *format,
 EXTERN MATIO_NORETURN void Mat_Help(const char *helpstr[]);
 EXTERN int Mat_LogInit(const char *prog_name);
 EXTERN int Mat_LogClose(void);
-EXTERN int Mat_LogInitFunc(const char *prog_name, void (*log_func)(int log_level, char *message));
+EXTERN int Mat_LogInitFunc(const char *prog_name,
+                           void (*log_func)(int log_level, const char *message));
 EXTERN int Mat_Message(const char *format, ...) MATIO_FORMATATTR_PRINTF1;
 EXTERN int Mat_DebugMessage(int level, const char *format, ...) MATIO_FORMATATTR_PRINTF2;
 EXTERN int Mat_VerbMessage(int level, const char *format, ...) MATIO_FORMATATTR_PRINTF2;
@@ -295,47 +283,58 @@ EXTERN size_t Mat_SizeOfClass(int class_type);
 EXTERN mat_t *Mat_CreateVer(const char *matname, const char *hdr_str, enum mat_ft mat_file_ver);
 EXTERN int Mat_Close(mat_t *mat);
 EXTERN mat_t *Mat_Open(const char *matname, int mode);
-EXTERN const char *Mat_GetFilename(mat_t *mat);
-EXTERN const char *Mat_GetHeader(mat_t *mat);
-EXTERN enum mat_ft Mat_GetVersion(mat_t *mat);
-EXTERN char **Mat_GetDir(mat_t *mat, size_t *n);
+EXTERN enum mat_acc Mat_GetFileAccessMode(const mat_t *mat);
+EXTERN const char *Mat_GetFilename(const mat_t *mat);
+EXTERN const char *Mat_GetHeader(const mat_t *mat);
+EXTERN enum mat_ft Mat_GetVersion(const mat_t *mat);
+EXTERN char *const *Mat_GetDir(mat_t *mat, size_t *n);
 EXTERN int Mat_Rewind(mat_t *mat);
 
 /* MAT variable functions */
 EXTERN matvar_t *Mat_VarCalloc(void);
 EXTERN matvar_t *Mat_VarCreate(const char *name, enum matio_classes class_type,
-                               enum matio_types data_type, int rank, size_t *dims, void *data,
-                               int opt);
-EXTERN matvar_t *Mat_VarCreateStruct(const char *name, int rank, size_t *dims, const char **fields,
-                                     unsigned nfields);
+                               enum matio_types data_type, int rank, const size_t *dims,
+                               const void *data, int opt);
+EXTERN MATIO_DEPRECATED matvar_t *Mat_VarCreateStruct(const char *name, int rank,
+                                                      const size_t *dims, const char *const *fields,
+                                                      unsigned nfields);
+EXTERN matvar_t *Mat_VarCreateStruct2(const char *name, int rank, const size_t *dims,
+                                      const char *const *fields);
 EXTERN int Mat_VarDelete(mat_t *mat, const char *name);
 EXTERN matvar_t *Mat_VarDuplicate(const matvar_t *in, int opt);
 EXTERN void Mat_VarFree(matvar_t *matvar);
-EXTERN matvar_t *Mat_VarGetCell(matvar_t *matvar, int index);
-EXTERN matvar_t **Mat_VarGetCells(matvar_t *matvar, int *start, int *stride, int *edge);
-EXTERN matvar_t **Mat_VarGetCellsLinear(matvar_t *matvar, int start, int stride, int edge);
-EXTERN size_t Mat_VarGetSize(matvar_t *matvar);
-EXTERN unsigned Mat_VarGetNumberOfFields(matvar_t *matvar);
+EXTERN matvar_t *Mat_VarGetCell(const matvar_t *matvar, int index);
+EXTERN matvar_t **Mat_VarGetCells(const matvar_t *matvar, const int *start, const int *stride,
+                                  const int *edge);
+EXTERN matvar_t **Mat_VarGetCellsLinear(const matvar_t *matvar, int start, int stride, int edge);
+EXTERN size_t Mat_VarGetSize(const matvar_t *matvar);
+EXTERN unsigned Mat_VarGetNumberOfFields(const matvar_t *matvar);
 EXTERN int Mat_VarAddStructField(matvar_t *matvar, const char *fieldname);
 EXTERN char *const *Mat_VarGetStructFieldnames(const matvar_t *matvar);
-EXTERN matvar_t *Mat_VarGetStructFieldByIndex(matvar_t *matvar, size_t field_index, size_t index);
-EXTERN matvar_t *Mat_VarGetStructFieldByName(matvar_t *matvar, const char *field_name,
+EXTERN matvar_t *Mat_VarGetStructFieldByIndex(const matvar_t *matvar, size_t field_index,
+                                              size_t index);
+EXTERN matvar_t *Mat_VarGetStructFieldByName(const matvar_t *matvar, const char *field_name,
                                              size_t index);
-EXTERN matvar_t *Mat_VarGetStructField(matvar_t *matvar, void *name_or_index, int opt, int index);
-EXTERN matvar_t *Mat_VarGetStructs(matvar_t *matvar, int *start, int *stride, int *edge,
-                                   int copy_fields);
-EXTERN matvar_t *Mat_VarGetStructsLinear(matvar_t *matvar, int start, int stride, int edge,
+EXTERN matvar_t *Mat_VarGetStructField(const matvar_t *matvar, void *name_or_index, int opt,
+                                       int index);
+EXTERN matvar_t *Mat_VarGetStructs(const matvar_t *matvar, const int *start, const int *stride,
+                                   const int *edge, int copy_fields);
+EXTERN matvar_t *Mat_VarGetStructsLinear(const matvar_t *matvar, int start, int stride, int edge,
                                          int copy_fields);
-EXTERN void Mat_VarPrint(matvar_t *matvar, int printdata);
+EXTERN void Mat_VarPrint(const matvar_t *matvar, int printdata);
+EXTERN const char *Mat_VarGetClassName(const matvar_t *matvar);
 EXTERN matvar_t *Mat_VarRead(mat_t *mat, const char *name);
-EXTERN int Mat_VarReadData(mat_t *mat, matvar_t *matvar, void *data, int *start, int *stride,
-                           int *edge);
+EXTERN int Mat_VarReadData(mat_t *mat, matvar_t *matvar, void *data, const int *start,
+                           const int *stride, const int *edge);
 EXTERN int Mat_VarReadDataAll(mat_t *mat, matvar_t *matvar);
 EXTERN int Mat_VarReadDataLinear(mat_t *mat, matvar_t *matvar, void *data, int start, int stride,
                                  int edge);
 EXTERN matvar_t *Mat_VarReadInfo(mat_t *mat, const char *name);
 EXTERN matvar_t *Mat_VarReadNext(mat_t *mat);
+EXTERN matvar_t *Mat_VarReadNextPredicate(mat_t *mat, mat_iter_pred_t pred, const void *user_data);
 EXTERN matvar_t *Mat_VarReadNextInfo(mat_t *mat);
+EXTERN matvar_t *Mat_VarReadNextInfoPredicate(mat_t *mat, mat_iter_pred_t pred,
+                                              const void *user_data);
 EXTERN matvar_t *Mat_VarSetCell(matvar_t *matvar, int index, matvar_t *cell);
 EXTERN matvar_t *Mat_VarSetStructFieldByIndex(matvar_t *matvar, size_t field_index, size_t index,
                                               matvar_t *field);
@@ -344,14 +343,15 @@ EXTERN matvar_t *Mat_VarSetStructFieldByName(matvar_t *matvar, const char *field
 EXTERN int Mat_VarWrite(mat_t *mat, matvar_t *matvar, enum matio_compression compress);
 EXTERN int Mat_VarWriteAppend(mat_t *mat, matvar_t *matvar, enum matio_compression compress,
                               int dim);
-EXTERN int Mat_VarWriteInfo(mat_t *mat, matvar_t *matvar);
-EXTERN int Mat_VarWriteData(mat_t *mat, matvar_t *matvar, void *data, int *start, int *stride,
-                            int *edge);
+EXTERN int Mat_VarWriteInfo(const mat_t *mat, matvar_t *matvar);
+EXTERN int Mat_VarWriteData(const mat_t *mat, matvar_t *matvar, void *data, const int *start,
+                            const int *stride, const int *edge);
 
 /* Other functions */
-EXTERN int Mat_CalcSingleSubscript(int rank, int *dims, int *subs);
-EXTERN int Mat_CalcSingleSubscript2(int rank, size_t *dims, size_t *subs, size_t *index);
-EXTERN int *Mat_CalcSubscripts(int rank, int *dims, int index);
-EXTERN size_t *Mat_CalcSubscripts2(int rank, size_t *dims, size_t index);
+EXTERN int Mat_CalcSingleSubscript(int rank, const int *dims, const int *subs);
+EXTERN int Mat_CalcSingleSubscript2(int rank, const size_t *dims, const size_t *subs,
+                                    size_t *index);
+EXTERN int *Mat_CalcSubscripts(int rank, const int *dims, int index);
+EXTERN size_t *Mat_CalcSubscripts2(int rank, const size_t *dims, size_t index);
 
 #endif

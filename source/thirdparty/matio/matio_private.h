@@ -1,28 +1,9 @@
 /*
- * Copyright (c) 2015-2022, The matio contributors
+ * Copyright (c) 2015-2026, The matio contributors
  * Copyright (c) 2008-2014, Christopher C. Hulbert
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SPDX-License-Identifier: BSD-2-Clause
  */
 
 #ifndef MATIO_PRIVATE_H
@@ -41,18 +22,19 @@
 #endif
 
 #if defined(__BORLANDC__) || defined(__MINGW32__) || defined(_MSC_VER)
-#define mat_off_t __int64
 #if defined(_MSC_VER) && defined(HAVE__FSEEKI64) && defined(HAVE__FTELLI64)
 #define MATIO_LFS
+#define mat_off_t __int64
 #define fseeko _fseeki64
 #define ftello _ftelli64
 #elif defined(__BORLANDC__) && defined(HAVE__FSEEKI64) && defined(HAVE__FTELLI64)
 #define MATIO_LFS
+#define mat_off_t __int64
 #define fseeko _fseeki64
 #define ftello _ftelli64
-#elif !defined(HAVE_FSEEKO) && !defined(HAVE_FTELLO) && defined(HAVE_FSEEKO64) && \
-    defined(HAVE_FTELLO64)
+#elif defined(HAVE_FSEEKO64) && defined(HAVE_FTELLO64)
 #define MATIO_LFS
+#define mat_off_t __int64
 #define fseeko fseeko64
 #define ftello ftello64
 #endif
@@ -94,6 +76,28 @@
 #define CAT_(X, Y) X##Y
 #define CAT(X, Y) CAT_(X, Y)
 
+#if defined(__GLIBC__)
+#if ( __BYTE_ORDER == __BIG_ENDIAN )
+#define MATIO_BE
+#elif (__BYTE_ORDER == __LITTLE_ENDIAN)
+#define MATIO_LE
+#endif
+#elif defined(_BIG_ENDIAN) && !defined(_LITTLE_ENDIAN)
+#define MATIO_BE
+#elif defined(_LITTLE_ENDIAN) && !defined(_BIG_ENDIAN)
+#define MATIO_LE
+#elif defined(__sparc) || defined(__sparc__) || defined(_POWER) || defined(__powerpc__) || \
+    defined(__ppc__) || defined(__hpux) || defined(_MIPSEB) || defined(_POWER) ||          \
+    defined(__s390__)
+#define MATIO_BE
+#elif defined(__i386__) || defined(__alpha__) || defined(__ia64) || defined(__ia64__) ||      \
+    defined(_M_IX86) || defined(_M_IA64) || defined(_M_ALPHA) || defined(__amd64) ||          \
+    defined(__amd64__) || defined(_M_AMD64) || defined(__x86_64) || defined(__x86_64__) ||    \
+    defined(_M_X64) || defined(__bfin__) || defined(__loongarch64) || defined(__aarch64__) || \
+    defined(_M_ARM64) || defined(_M_ARM)
+#define MATIO_LE
+#endif
+
 /** @if mat_devman
  * @brief Matlab MAT File information
  *
@@ -115,8 +119,12 @@ struct _mat_t
     size_t num_datasets; /**< Number of datasets in the file */
 #if defined(MAT73) && MAT73
     hid_t refs_id; /**< Id of the /#refs# group in HDF5 */
+    int ref_depth; /**< Current recursion depth when reading references */
 #endif
     char **dir; /**< Names of the datasets in the file */
+#if defined(MCOS) && MCOS
+    void *mcos; /**< Parsed MCOS subsystem data (lazy, may be NULL) */
+#endif
 };
 
 /** @if mat_devman
@@ -127,13 +135,19 @@ struct _mat_t
 struct matvar_internal
 {
 #if defined(MAT73) && MAT73
-    char *hdf5_name;     /**< Name */
     hobj_ref_t hdf5_ref; /**< Reference */
     hid_t id;            /**< Id */
 #endif
     mat_off_t datapos;   /**< Offset from the beginning of the MAT file to the data */
     unsigned num_fields; /**< Number of fields */
     char **fieldnames;   /**< Pointer to fieldnames */
+#if defined(MCOS) && MCOS
+    char *type_name;          /**< Type system name for opaque types (e.g. "MCOS") */
+    char *class_name;         /**< Class name for opaque types (e.g. "table") */
+    mat_uint32_t *object_ids; /**< Object IDs for MCOS opaque variables */
+    mat_uint32_t class_id;    /**< Class ID for MCOS opaque variables */
+    size_t num_objects;       /**< Number of object IDs */
+#endif
 #if HAVE_ZLIB
     z_streamp z; /**< zlib compression state */
     void *data;  /**< Inflated data array */
@@ -181,32 +195,29 @@ EXTERN mat_int16_t Mat_int16Swap(mat_int16_t *a);
 EXTERN mat_uint16_t Mat_uint16Swap(mat_uint16_t *a);
 
 /* read_data.c */
-EXTERN size_t ReadDoubleData(mat_t *mat, double *data, enum matio_types data_type, size_t len);
-EXTERN size_t ReadSingleData(mat_t *mat, float *data, enum matio_types data_type, size_t len);
+EXTERN int ReadDoubleData(mat_t *mat, double *data, enum matio_types data_type, size_t len);
+EXTERN int ReadSingleData(mat_t *mat, float *data, enum matio_types data_type, size_t len);
 #ifdef HAVE_MAT_INT64_T
-EXTERN size_t ReadInt64Data(mat_t *mat, mat_int64_t *data, enum matio_types data_type, size_t len);
+EXTERN int ReadInt64Data(mat_t *mat, mat_int64_t *data, enum matio_types data_type, size_t len);
 #endif /* HAVE_MAT_INT64_T */
 #ifdef HAVE_MAT_UINT64_T
-EXTERN size_t ReadUInt64Data(mat_t *mat, mat_uint64_t *data, enum matio_types data_type,
-                             size_t len);
+EXTERN int ReadUInt64Data(mat_t *mat, mat_uint64_t *data, enum matio_types data_type, size_t len);
 #endif /* HAVE_MAT_UINT64_T */
-EXTERN size_t ReadInt32Data(mat_t *mat, mat_int32_t *data, enum matio_types data_type, size_t len);
-EXTERN size_t ReadUInt32Data(mat_t *mat, mat_uint32_t *data, enum matio_types data_type,
-                             size_t len);
-EXTERN size_t ReadInt16Data(mat_t *mat, mat_int16_t *data, enum matio_types data_type, size_t len);
-EXTERN size_t ReadUInt16Data(mat_t *mat, mat_uint16_t *data, enum matio_types data_type,
-                             size_t len);
-EXTERN size_t ReadInt8Data(mat_t *mat, mat_int8_t *data, enum matio_types data_type, size_t len);
-EXTERN size_t ReadUInt8Data(mat_t *mat, mat_uint8_t *data, enum matio_types data_type, size_t len);
-EXTERN size_t ReadCharData(mat_t *mat, void *_data, enum matio_types data_type, size_t len);
+EXTERN int ReadInt32Data(mat_t *mat, mat_int32_t *data, enum matio_types data_type, size_t len);
+EXTERN int ReadUInt32Data(mat_t *mat, mat_uint32_t *data, enum matio_types data_type, size_t len);
+EXTERN int ReadInt16Data(mat_t *mat, mat_int16_t *data, enum matio_types data_type, size_t len);
+EXTERN int ReadUInt16Data(mat_t *mat, mat_uint16_t *data, enum matio_types data_type, size_t len);
+EXTERN int ReadInt8Data(mat_t *mat, mat_int8_t *data, enum matio_types data_type, size_t len);
+EXTERN int ReadUInt8Data(mat_t *mat, mat_uint8_t *data, enum matio_types data_type, size_t len);
+EXTERN int ReadCharData(mat_t *mat, void *_data, enum matio_types data_type, size_t len);
 EXTERN int ReadDataSlab1(mat_t *mat, void *data, enum matio_classes class_type,
                          enum matio_types data_type, int start, int stride, int edge);
 EXTERN int ReadDataSlab2(mat_t *mat, void *data, enum matio_classes class_type,
-                         enum matio_types data_type, size_t *dims, int *start, int *stride,
-                         int *edge);
+                         enum matio_types data_type, const size_t *dims, const int *start,
+                         const int *stride, const int *edge);
 EXTERN int ReadDataSlabN(mat_t *mat, void *data, enum matio_classes class_type,
-                         enum matio_types data_type, int rank, size_t *dims, int *start,
-                         int *stride, int *edge);
+                         enum matio_types data_type, int rank, const size_t *dims, const int *start,
+                         const int *stride, const int *edge);
 #if HAVE_ZLIB
 EXTERN int ReadCompressedDoubleData(mat_t *mat, z_streamp z, double *data,
                                     enum matio_types data_type, int len);
@@ -239,10 +250,12 @@ EXTERN int ReadCompressedDataSlab1(mat_t *mat, z_streamp z, void *data,
                                    int start, int stride, int edge);
 EXTERN int ReadCompressedDataSlab2(mat_t *mat, z_streamp z, void *data,
                                    enum matio_classes class_type, enum matio_types data_type,
-                                   size_t *dims, int *start, int *stride, int *edge);
+                                   const size_t *dims, const int *start, const int *stride,
+                                   const int *edge);
 EXTERN int ReadCompressedDataSlabN(mat_t *mat, z_streamp z, void *data,
                                    enum matio_classes class_type, enum matio_types data_type,
-                                   int rank, size_t *dims, int *start, int *stride, int *edge);
+                                   int rank, const size_t *dims, const int *start,
+                                   const int *stride, const int *edge);
 
 /* inflate.c */
 EXTERN int InflateSkip(mat_t *mat, z_streamp z, int nBytes, size_t *bytesread);
@@ -254,7 +267,7 @@ EXTERN int InflateData(mat_t *mat, z_streamp z, void *buf, unsigned int nBytes);
 #endif
 
 /* mat.c */
-EXTERN mat_complex_split_t *ComplexMalloc(size_t nbytes);
+EXTERN mat_complex_split_t *ComplexCalloc(size_t nbytes);
 EXTERN void ComplexFree(mat_complex_split_t *complex_data);
 EXTERN enum matio_types ClassType2DataType(enum matio_classes class_type);
 EXTERN int Add(size_t *res, size_t a, size_t b);
@@ -262,10 +275,24 @@ EXTERN int Mul(size_t *res, size_t a, size_t b);
 EXTERN int Mat_MulDims(const matvar_t *matvar, size_t *nelems);
 EXTERN int Read(void *buf, size_t size, size_t count, FILE *fp, size_t *bytesread);
 EXTERN int IsEndOfFile(FILE *fp, mat_off_t *fpos);
+EXTERN int CheckSeekFile(FILE *fp, mat_off_t offset);
+EXTERN int CheckEdgeOverflow(int rank, const int *edge, size_t extra);
 
 /* io.c */
-#if defined(_WIN32) && defined(_MSC_VER)
+#if defined(_WIN32)
 EXTERN wchar_t *utf82u(const char *src);
+#endif
+
+/* mcos.c */
+#if defined(MCOS) && MCOS
+#define MCOS_REF_VALUE 0xDD000000U
+EXTERN int ParseOpaqueMetadata(const mat_uint32_t *meta, size_t meta_nvals, matvar_t *matvar);
+EXTERN int Mat_MCOS_Read5(mat_t *mat, matvar_t *matvar);
+EXTERN int Mat_MCOS_Read73(mat_t *mat, matvar_t *matvar);
+EXTERN void Mat_MCOS_Free(void *mcos);
+#endif
+#if defined(MAT73) && MAT73
+EXTERN matvar_t *Mat_VarReadFromH5Ref(mat_t *mat, hid_t container_id, hobj_ref_t ref);
 #endif
 
 #endif

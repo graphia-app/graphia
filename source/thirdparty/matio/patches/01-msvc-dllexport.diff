@@ -1,0 +1,24 @@
+diff --git a/source/thirdparty/matio/matio.h b/source/thirdparty/matio/matio.h
+index 3e6d7de98..6be7b0b05 100644
+--- a/source/thirdparty/matio/matio.h
++++ b/source/thirdparty/matio/matio.h
+@@ -38,9 +38,17 @@
+ #include <stdarg.h>
+ 
+ #ifdef __cplusplus
+-#define EXTERN extern "C"
++#   ifdef _MSC_VER
++#       define EXTERN extern "C" __declspec(dllexport)
++#   else
++#       define EXTERN extern "C"
++#   endif
+ #else
+-#define EXTERN extern
++#   ifdef _MSC_VER
++#       define EXTERN extern __declspec(dllexport)
++#   else
++#       define EXTERN extern
++#   endif
+ #endif
+ 
+ /** @defgroup MAT Matlab MAT File I/O Library */

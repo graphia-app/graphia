@@ -2,34 +2,15 @@
  * MAT File I/O Utility Functions
  */
 /*
- * Copyright (c) 2015-2022, The matio contributors
+ * Copyright (c) 2015-2026, The matio contributors
  * Copyright (c) 2005-2014, Christopher C. Hulbert
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SPDX-License-Identifier: BSD-2-Clause
  */
 
 #include "matio_private.h"
-#if defined(_WIN32) && defined(_MSC_VER)
+#if defined(_WIN32)
 #define WIN32_LEAN_AND_MEAN
 #define NOGDI
 #include <Windows.h>
@@ -45,7 +26,7 @@
 #define va_copy(d, s) memcpy(&(d), &(s), sizeof(va_list))
 #endif
 
-static void (*logfunc)(int log_level, char *message) = NULL;
+static void (*logfunc)(int log_level, const char *message) = NULL;
 static const char *progname = NULL;
 static char *strdup_vprintf(const char *format, va_list ap) MATIO_FORMATATTR_VPRINTF;
 
@@ -59,23 +40,43 @@ static char *strdup_vprintf(const char *format, va_list ap) MATIO_FORMATATTR_VPR
 static char *
 strdup_vprintf(const char *format, va_list ap)
 {
-    va_list ap2;
     int size;
     char *buffer;
+    size_t need;
 
-    va_copy(ap2, ap);
-    size = mat_vsnprintf(NULL, 0, format, ap2) + 1;
-    va_end(ap2);
+    {
+        va_list ap2;
+        va_copy(ap2, ap);
+        size = mat_vsnprintf(NULL, 0, format, ap2);
+        va_end(ap2);
+    }
 
-    buffer = (char *)malloc(size + 1);
-    if ( !buffer )
+    if ( size < 0 )
         return NULL;
 
-    mat_vsnprintf(buffer, size, format, ap);
+    need = (size_t)size + 1;
+    if ( need > (1ULL << 30) )
+        return NULL;
+
+    buffer = (char *)malloc(need);
+    if ( NULL == buffer )
+        return NULL;
+
+    {
+        va_list ap2;
+        int written;
+        va_copy(ap2, ap);
+        written = mat_vsnprintf(buffer, need, format, ap2);
+        va_end(ap2);
+        if ( written < 0 || (size_t)written >= need ) {
+            free(buffer);
+            return NULL;
+        }
+    }
     return buffer;
 }
 
-#if defined(_WIN32) && defined(_MSC_VER)
+#if defined(_WIN32)
 /** @brief Convert from narrow UTF-8 string to wide string
  *
  * @ingroup mat_util
@@ -122,7 +123,7 @@ utf82u(const char *src)
  * @param message logging message
  */
 static void
-mat_logfunc(int log_level, char *message)
+mat_logfunc(int log_level, const char *message)
 {
     if ( progname ) {
         if ( log_level & MATIO_LOG_LEVEL_CRITICAL ) {
@@ -181,8 +182,12 @@ mat_log(int loglevel, const char *format, va_list ap)
     if ( !logfunc )
         return;
     buffer = strdup_vprintf(format, ap);
-    (*logfunc)(loglevel, buffer);
-    free(buffer);
+    if ( NULL == buffer ) {
+        (*logfunc)(loglevel, format);
+    } else {
+        (*logfunc)(loglevel, buffer);
+        free(buffer);
+    }
 }
 
 #if defined(MAT73) && MAT73
@@ -439,7 +444,7 @@ Mat_LogClose(void)
  *
  * @ingroup mat_util
  * @param prog_name Name of the program initializing the logging functions
- * @return 0 on success
+ * @retval 0 on success
  */
 int
 Mat_LogInit(const char *prog_name)
@@ -460,10 +465,10 @@ Mat_LogInit(const char *prog_name)
  * @ingroup mat_util
  * @param prog_name Name of the program initializing the logging functions
  * @param log_func pointer to the function to do the logging
- * @return 0 on success
+ * @retval 0 on success
  */
 int
-Mat_LogInitFunc(const char *prog_name, void (*log_func)(int log_level, char *message))
+Mat_LogInitFunc(const char *prog_name, void (*log_func)(int log_level, const char *message))
 {
     logfunc = log_func;
     progname = prog_name;
