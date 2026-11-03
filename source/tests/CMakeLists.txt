@@ -10,8 +10,9 @@ if(NOT EMSCRIPTEN)
     find_package(Qt6 REQUIRED COMPONENTS WebEngineQuick)
 endif()
 
-if(WIN32)
-    # A DLL exports only what is marked for export, so each test links its own copy
+if(WIN32 OR EMSCRIPTEN)
+    # A DLL exports only what is marked for export, and wasm has no shared libraries,
+    # so each test links its own copy
     set(APP_CORE_FOR_TESTS app_core)
 else()
     # One copy of the application's code for all the tests, rather than one in each
@@ -33,8 +34,30 @@ add_library(scrambling_translator OBJECT common/scramblingtranslator.cpp)
 target_link_libraries(scrambling_translator PRIVATE Qt6::Core)
 
 function(add_unit_test NAME)
-    qt_add_executable(${NAME} ${ARGN})
+    cmake_parse_arguments(PARSE_ARGV 1 UNIT_TEST "NO_WASM" "" "")
+    set(SOURCES ${UNIT_TEST_UNPARSED_ARGUMENTS})
+
+    qt_add_executable(${NAME} ${SOURCES})
     target_link_libraries(${NAME} PRIVATE ${APP_CORE_FOR_TESTS} Qt6::Test scrambling_translator)
+
+    if(EMSCRIPTEN)
+        # The wasm platform needs a browser, so under node only tests without a GUI can run
+        list(GET SOURCES 0 MAIN_SOURCE)
+        file(STRINGS ${MAIN_SOURCE} GUILESS_MAIN REGEX "QTEST_GUILESS_MAIN")
+        if(UNIT_TEST_NO_WASM OR NOT GUILESS_MAIN)
+            set_target_properties(${NAME} PROPERTIES EXCLUDE_FROM_ALL ON)
+            return()
+        endif()
+
+        # The host's filesystem holds the test data, and ctest needs main's exit code
+        target_link_options(${NAME} PRIVATE -sNODERAWFS=1 -sEXIT_RUNTIME=1)
+
+        # wasm-opt's release passes take most of each test's link time
+        target_link_options(${NAME} PRIVATE -O1)
+        set_target_properties(${NAME} PROPERTIES
+            QT_WASM_EXTRA_EXPORTED_METHODS ENV
+            CROSSCOMPILING_EMULATOR "${CMAKE_CROSSCOMPILING_EMULATOR};${CMAKE_CURRENT_SOURCE_DIR}/run-wasm-test.js")
+    endif()
 
     # Each test also runs with every translatable string scrambled, which exposes
     # anything that relies on a translation's text, or on its word order
@@ -117,10 +140,12 @@ add_unit_test(tst_preferences ui/tst_preferences.cpp)
 add_unit_test(tst_commandmanager commands/tst_commandmanager.cpp)
 add_unit_test(tst_graphsizeestimate loading/tst_graphsizeestimate.cpp)
 add_unit_test(tst_geometry maths/tst_geometry.cpp)
-add_unit_test(tst_crypto utils/tst_crypto.cpp)
+# Only the updater uses the cryptography, and the web build has no updater
+add_unit_test(tst_crypto NO_WASM utils/tst_crypto.cpp)
 add_unit_test(tst_plots ui/tst_plots.cpp)
 target_link_libraries(tst_crypto PRIVATE thirdparty_static thirdparty)
-add_unit_test(tst_updates utils/tst_updates.cpp)
+# The web build has no updater
+add_unit_test(tst_updates NO_WASM utils/tst_updates.cpp)
 target_link_libraries(tst_updates PRIVATE thirdparty_static thirdparty)
 add_unit_test(tst_selectionmanager ui/tst_selectionmanager.cpp)
 add_unit_test(tst_layout layout/tst_layout.cpp)

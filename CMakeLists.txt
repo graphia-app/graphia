@@ -42,11 +42,7 @@ if(NOT EMSCRIPTEN)
     add_subdirectory(source/updater/editor)
 endif()
 
-if(NOT EMSCRIPTEN)
-    option(BUILD_TESTS "Build the unit tests" OFF)
-else()
-    set(BUILD_TESTS OFF)
-endif()
+option(BUILD_TESTS "Build the unit tests" OFF)
 
 if(BUILD_TESTS)
     enable_testing()
