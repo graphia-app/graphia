@@ -108,7 +108,7 @@ TestCase
         for(let i = 0; i < 30; i++)
         {
             horizontalScrollBar.position = 0;
-            wait(20);
+            waitForLayout();
         }
     }
 
@@ -117,7 +117,7 @@ TestCase
         for(let i = 0; i < 30; i++)
         {
             horizontalScrollBar.position = 1 - horizontalScrollBar.size;
-            wait(20);
+            waitForLayout();
         }
     }
 
@@ -126,10 +126,8 @@ TestCase
         for(let i = 0; i < 200; i++)
         {
             mouseWheel(view, view.width * 0.5, view.height * 0.5, xDelta, 0);
-            wait(10);
+            waitForLayout();
         }
-
-        wait(500);
     }
 
     function test_scrollBarReachesBothEnds()
@@ -159,7 +157,7 @@ TestCase
         do
         {
             view.width += 20;
-            wait(20);
+            waitForLayout();
         }
         while(headerItem(lastColumn) === null);
 
@@ -168,14 +166,14 @@ TestCase
         while(view.width > narrowerWidth)
         {
             view.width -= 20;
-            wait(20);
+            waitForLayout();
         }
 
         // In steps, as when dragged by hand
         while(horizontalScrollBar.position > 0)
         {
             horizontalScrollBar.position = Math.max(horizontalScrollBar.position - 0.01, 0);
-            wait(20);
+            waitForLayout();
         }
 
         dragScrollBarToLeft();
