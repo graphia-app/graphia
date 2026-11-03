@@ -339,11 +339,11 @@ private slots:
 
         // Nothing matches, or there's no such attribute, so nothing is selected
         _document->selectByAttributeValue(u"kind"_s, u"z"_s);
-        QVERIFY(QTest::qWaitFor([this] { return selected().isEmpty(); }));
+        QVERIFY(QTest::qWaitFor([this] { return selected().isEmpty(); }, Timeout));
 
         QVERIFY(execute([this] { _document->selectAll(); }));
         _document->selectByAttributeValue(u"Not an attribute"_s, u"x"_s);
-        QVERIFY(QTest::qWaitFor([this] { return selected().isEmpty(); }));
+        QVERIFY(QTest::qWaitFor([this] { return selected().isEmpty(); }, Timeout));
     }
 
     // Selecting by the values an attribute shows, rather than those it stores
@@ -362,7 +362,7 @@ private slots:
 
         // An invalid regex matches nothing
         _document->selectByAttributeValue(u"NodeComponentIdentifier"_s, u"[Component"_s);
-        QVERIFY(QTest::qWaitFor([this] { return selected().isEmpty(); }));
+        QVERIFY(QTest::qWaitFor([this] { return selected().isEmpty(); }, Timeout));
     }
 
     // Stepping between components, as the toolbar's buttons do; there's no renderer here
@@ -726,7 +726,7 @@ private slots:
 
         QSignalSpy modelReset(model.get(), &AvailableTransformsModel::modelReset);
         u::setPref(u"misc/favouriteTransforms"_s, uR"(["PageRank", 1])"_s);
-        QVERIFY(QTest::qWaitFor([&] { return !modelReset.isEmpty(); }));
+        QVERIFY(QTest::qWaitFor([&] { return !modelReset.isEmpty(); }, Timeout));
         QCOMPARE(valueFor(u"PageRank"_s, "category").toString(), TestEnvironment::translated("Favourites"));
         QCOMPARE(valueFor(u"PageRank"_s, "isFavourite").toBool(), true);
         QCOMPARE(valueFor(u"Betweenness"_s, "category").toString(), TestEnvironment::translated("Metrics"));
@@ -737,7 +737,7 @@ private slots:
         QCOMPARE(valueFor(u"PageRank"_s, "isFavourite").toBool(), true);
 
         u::setPref(u"misc/favouriteTransforms"_s, u"[]"_s);
-        QVERIFY(QTest::qWaitFor([&] { return modelReset.count() == 2; }));
+        QVERIFY(QTest::qWaitFor([&] { return modelReset.count() == 2; }, Timeout));
         QCOMPARE(valueFor(u"PageRank"_s, "isFavourite").toBool(), false);
     }
 
@@ -785,7 +785,7 @@ private slots:
         QCOMPARE(channels(), (QStringList{u"Colour"_s, u"Text"_s, u"Size"_s}));
 
         _document->moveVisualisation(0, 2);
-        QVERIFY(QTest::qWaitFor([&] { return channels() == QStringList{u"Text"_s, u"Size"_s, u"Colour"_s}; }));
+        QVERIFY(QTest::qWaitFor([&] { return channels() == QStringList{u"Text"_s, u"Size"_s, u"Colour"_s}; }, Timeout));
         QVERIFY(waitForCommands());
 
         QVERIFY(execute([this] { _document->undo(); }));
