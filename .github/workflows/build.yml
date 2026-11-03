@@ -305,6 +305,8 @@ jobs:
         scripts/wasm-build.sh
       env:
         UNITY_BUILD: OFF
+    - name: Test
+      run: ctest --test-dir build/wasm --output-on-failure
     - name: Archive
       run: |
         installers/wasm/build.sh

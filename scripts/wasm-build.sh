@@ -37,6 +37,15 @@ BUILD_DIR="build/wasm"
 
 emcc --version
 
+# The unit tests run under node, and Qt's runtime needs a version with navigator
+if [ -z "${EMSDK_NODE}" ]
+then
+  echo "EMSDK_NODE is not set"
+  exit 1
+fi
+
+"${EMSDK_NODE}" --version
+
 rm -rf ${BUILD_DIR}
 mkdir -p ${BUILD_DIR}
 
@@ -46,6 +55,8 @@ mkdir -p ${BUILD_DIR}
   cmake -DCMAKE_UNITY_BUILD=${UNITY_BUILD} \
     -DQT_HOST_PATH=$(realpath ${QT_ROOT_DIR}/../gcc_64) \
     -DCMAKE_TOOLCHAIN_FILE:FILEPATH=${QT_ROOT_DIR}/lib/cmake/Qt6/qt.toolchain.cmake \
+    -DBUILD_TESTS=ON \
+    -DCMAKE_CROSSCOMPILING_EMULATOR="${EMSDK_NODE}" \
     -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -GNinja ../.. || exit $?
   cat variables.sh
   . variables.sh
