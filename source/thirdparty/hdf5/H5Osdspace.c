@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -17,8 +17,6 @@
 #include "H5Dprivate.h"  /* Datasets				*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5FLprivate.h" /* Free lists                           */
-#include "H5Gprivate.h"  /* Groups			  	*/
-#include "H5MMprivate.h" /* Memory management			*/
 #include "H5Opkg.h"      /* Object headers		  	*/
 #include "H5Spkg.h"      /* Dataspaces 				*/
 
@@ -177,29 +175,31 @@ H5O__sdspace_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UN
 
     /* Decode dimension sizes */
     if (sdim->rank > 0) {
-
-        /* Sizes */
-
         /* Check that we have space to decode sdim->rank values */
         if (H5_IS_BUFFER_OVERFLOW(p, (H5F_sizeof_size(f) * sdim->rank), p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
 
+        /* Sizes */
         if (NULL == (sdim->size = (hsize_t *)H5FL_ARR_MALLOC(hsize_t, (size_t)sdim->rank)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "memory allocation failed");
         for (i = 0; i < sdim->rank; i++)
             H5F_DECODE_LENGTH(f, p, sdim->size[i]);
 
-        /* Max sizes */
-
         if (flags & H5S_VALID_MAX) {
-            if (NULL == (sdim->max = (hsize_t *)H5FL_ARR_MALLOC(hsize_t, (size_t)sdim->rank)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "memory allocation failed");
-
             /* Check that we have space to decode sdim->rank values */
             if (H5_IS_BUFFER_OVERFLOW(p, (H5F_sizeof_size(f) * sdim->rank), p_end))
                 HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-            for (i = 0; i < sdim->rank; i++)
+
+            /* Max sizes */
+            if (NULL == (sdim->max = (hsize_t *)H5FL_ARR_MALLOC(hsize_t, (size_t)sdim->rank)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "memory allocation failed");
+            for (i = 0; i < sdim->rank; i++) {
                 H5F_DECODE_LENGTH(f, p, sdim->max[i]);
+                if (sdim->size[i] > sdim->max[i])
+                    HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
+                                "dataspace dim %u size of %llu is greater than maxdim size of %llu", i,
+                                (unsigned long long)sdim->size[i], (unsigned long long)sdim->max[i]);
+            }
         }
 
         /* NOTE: The version 1 permutation indexes were never implemented so

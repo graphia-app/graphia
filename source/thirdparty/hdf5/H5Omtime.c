@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -19,17 +19,17 @@
 #include "H5private.h"   /* Generic Functions			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5FLprivate.h" /* Free lists                           */
-#include "H5MMprivate.h" /* Memory management			*/
 #include "H5Opkg.h"      /* Object headers			*/
 
 static void  *H5O__mtime_new_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
                                     size_t p_size, const uint8_t *p);
-static herr_t H5O__mtime_new_encode(H5F_t *f, bool disable_shared, uint8_t *p, const void *_mesg);
+static herr_t H5O__mtime_new_encode(H5F_t *f, bool disable_shared, size_t H5_ATTR_UNUSED p_size, uint8_t *p,
+                                    const void *_mesg);
 static size_t H5O__mtime_new_size(const H5F_t *f, bool disable_shared, const void *_mesg);
 
 static void  *H5O__mtime_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
                                 size_t p_size, const uint8_t *p);
-static herr_t H5O__mtime_encode(H5F_t *f, bool disable_shared, uint8_t *p, const void *_mesg);
+static herr_t H5O__mtime_encode(H5F_t *f, bool disable_shared, size_t p_size, uint8_t *p, const void *_mesg);
 static void  *H5O__mtime_copy(const void *_mesg, void *_dest);
 static size_t H5O__mtime_size(const H5F_t *f, bool disable_shared, const void *_mesg);
 static herr_t H5O__mtime_free(void *_mesg);
@@ -221,8 +221,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__mtime_new_encode(H5F_t H5_ATTR_UNUSED *f, bool H5_ATTR_UNUSED disable_shared, uint8_t *p,
-                      const void *_mesg)
+H5O__mtime_new_encode(H5F_t H5_ATTR_UNUSED *f, bool H5_ATTR_UNUSED disable_shared,
+                      size_t H5_ATTR_UNUSED p_size, uint8_t *p, const void *_mesg)
 {
     const time_t *mesg = (const time_t *)_mesg;
 
@@ -257,7 +257,8 @@ H5O__mtime_new_encode(H5F_t H5_ATTR_UNUSED *f, bool H5_ATTR_UNUSED disable_share
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__mtime_encode(H5F_t H5_ATTR_UNUSED *f, bool H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O__mtime_encode(H5F_t H5_ATTR_UNUSED *f, bool H5_ATTR_UNUSED disable_shared, size_t p_size, uint8_t *p,
+                  const void *_mesg)
 {
     const time_t *mesg = (const time_t *)_mesg;
     struct tm    *tm;
@@ -270,9 +271,9 @@ H5O__mtime_encode(H5F_t H5_ATTR_UNUSED *f, bool H5_ATTR_UNUSED disable_shared, u
     assert(mesg);
 
     /* encode */
-    tm = HDgmtime(mesg);
-    HDsprintf((char *)p, "%04d%02d%02d%02d%02d%02d", 1900 + tm->tm_year, 1 + tm->tm_mon, tm->tm_mday,
-              tm->tm_hour, tm->tm_min, tm->tm_sec);
+    tm = gmtime(mesg);
+    snprintf((char *)p, p_size, "%04d%02d%02d%02d%02d%02d", 1900 + tm->tm_year, 1 + tm->tm_mon, tm->tm_mday,
+             tm->tm_hour, tm->tm_min, tm->tm_sec);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__mtime_encode() */
@@ -414,9 +415,9 @@ H5O__mtime_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int i
     assert(fwidth >= 0);
 
     /* debug */
-    tm = HDlocaltime(mesg);
+    tm = localtime(mesg);
 
-    HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
+    strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Time:", buf);
 
     FUNC_LEAVE_NOAPI(SUCCEED)

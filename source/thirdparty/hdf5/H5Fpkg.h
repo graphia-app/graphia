@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -130,6 +130,10 @@
 #define H5F_SUPERBLOCK_SIZE(s)                                                                               \
     (H5F_SUPERBLOCK_FIXED_SIZE +                                                                             \
      H5F_SUPERBLOCK_VARLEN_SIZE((s)->super_vers, (s)->sizeof_addr, (s)->sizeof_size))
+
+/* Optimistic read size for superblock */
+/* Size of a v2+ superblock, w/8-byte addresses & lengths */
+#define H5F_SUPERBLOCK_SPEC_READ_SIZE (H5F_SUPERBLOCK_FIXED_SIZE + H5F_SUPERBLOCK_VARLEN_SIZE(2, 8, 8))
 
 /* For superblock version 0 & 1:
    Offset to the file consistency flags (status_flags) in the superblock (excluding H5F_SUPERBLOCK_FIXED_SIZE)
@@ -293,21 +297,22 @@ struct H5F_shared_t {
     hsize_t  threshold;      /* Threshold for alignment		*/
     hsize_t  alignment;      /* Alignment				*/
     unsigned gc_ref;         /* Garbage-collect references?		*/
-    H5F_libver_t         low_bound;         /* The 'low' bound of library format versions */
-    H5F_libver_t         high_bound;        /* The 'high' bound of library format versions */
-    bool                 store_msg_crt_idx; /* Store creation index for object header messages?	*/
-    unsigned             ncwfs;             /* Num entries on cwfs list		*/
-    struct H5HG_heap_t **cwfs;              /* Global heap cache			*/
-    struct H5G_t        *root_grp;          /* Open root group			*/
-    H5FO_t              *open_objs;         /* Open objects in file                 */
-    H5UC_t              *grp_btree_shared;  /* Ref-counted group B-tree node info   */
-    bool                 use_file_locking;  /* Whether or not to use file locking */
-    bool                 closing;           /* File is in the process of being closed */
+    H5F_libver_t         low_bound;             /* The 'low' bound of library format versions */
+    H5F_libver_t         high_bound;            /* The 'high' bound of library format versions */
+    bool                 store_msg_crt_idx;     /* Store creation index for object header messages?	*/
+    unsigned             ncwfs;                 /* Num entries on cwfs list		*/
+    struct H5HG_heap_t **cwfs;                  /* Global heap cache			*/
+    struct H5G_t        *root_grp;              /* Open root group			*/
+    H5FO_t              *open_objs;             /* Open objects in file                 */
+    H5UC_t              *grp_btree_shared;      /* Ref-counted group B-tree node info   */
+    bool                 use_file_locking;      /* Whether or not to use file locking */
+    bool                 ignore_disabled_locks; /* Whether or not to ignore disabled file locking */
+    bool                 closing;               /* File is in the process of being closed */
+    uint64_t             rfic_flags;            /* Relaxed file integrity check (RFIC) flags */
 
     /* Cached VOL connector ID & info */
-    hid_t               vol_id;   /* ID of VOL connector for the container */
-    const H5VL_class_t *vol_cls;  /* Pointer to VOL connector class for the container */
-    void               *vol_info; /* Copy of VOL connector info for container */
+    H5VL_connector_t *vol_conn; /* VOL connector for the container */
+    void             *vol_info; /* Copy of VOL connector info for container */
 
     /* File space allocation information */
     H5F_fspace_strategy_t fs_strategy;  /* File space handling strategy	*/
@@ -391,9 +396,11 @@ H5FL_EXTERN(H5F_t);
 H5FL_EXTERN(H5F_shared_t);
 
 /* Whether or not to use file locking (based on the environment variable)
- * FAIL means ignore the environment variable.
+ * and whether or not to ignore disabled file locking. FAIL means ignore
+ * the environment variable.
  */
 H5_DLLVAR htri_t use_locks_env_g;
+H5_DLLVAR htri_t ignore_disabled_locks_g;
 
 /******************************/
 /* Package Private Prototypes */
@@ -403,7 +410,7 @@ H5_DLLVAR htri_t use_locks_env_g;
 H5_DLL herr_t H5F__post_open(H5F_t *f);
 H5_DLL H5F_t *H5F__reopen(H5F_t *f);
 H5_DLL herr_t H5F__flush(H5F_t *f);
-H5_DLL htri_t H5F__is_hdf5(const char *name, hid_t fapl_id);
+H5_DLL herr_t H5F__is_hdf5(const char *name, hid_t fapl_id, bool *is_hdf5);
 H5_DLL herr_t H5F__get_file_image(H5F_t *f, void *buf_ptr, size_t buf_len, size_t *image_len);
 H5_DLL herr_t H5F__get_info(H5F_t *f, H5F_info2_t *finfo);
 H5_DLL herr_t H5F__format_convert(H5F_t *f);
@@ -411,7 +418,7 @@ H5_DLL herr_t H5F__start_swmr_write(H5F_t *f);
 H5_DLL herr_t H5F__close(H5F_t *f);
 H5_DLL herr_t H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high);
 H5_DLL herr_t H5F__get_cont_info(const H5F_t *f, H5VL_file_cont_info_t *info);
-H5_DLL herr_t H5F__parse_file_lock_env_var(htri_t *use_locks);
+H5_DLL herr_t H5F__parse_file_lock_env_var(htri_t *use_locks, htri_t *ignore_disabled_locks);
 H5_DLL herr_t H5F__delete(const char *filename, hid_t fapl_id);
 
 /* File mount related routines */
@@ -437,7 +444,7 @@ H5_DLL herr_t H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr
                                const void *buf);
 H5_DLL herr_t H5F__accum_free(H5F_shared_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size);
 H5_DLL herr_t H5F__accum_flush(H5F_shared_t *f_sh);
-H5_DLL herr_t H5F__accum_reset(H5F_shared_t *f_sh, bool flush);
+H5_DLL herr_t H5F__accum_reset(H5F_shared_t *f_sh, bool flush, bool force);
 
 /* Shared file list related routines */
 H5_DLL herr_t        H5F__sfile_add(H5F_shared_t *shared);
@@ -452,11 +459,12 @@ H5_DLL herr_t H5F__set_mpi_atomicity(H5F_t *file, bool flag);
 
 /* External file cache routines */
 H5_DLL H5F_efc_t *H5F__efc_create(unsigned max_nfiles);
-H5_DLL H5F_t   *H5F__efc_open(H5F_efc_t *efc, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
-H5_DLL unsigned H5F__efc_max_nfiles(H5F_efc_t *efc);
-H5_DLL herr_t   H5F__efc_release(H5F_efc_t *efc);
-H5_DLL herr_t   H5F__efc_destroy(H5F_efc_t *efc);
-H5_DLL herr_t   H5F__efc_try_close(H5F_t *f);
+H5_DLL herr_t     H5F__efc_open(bool try, H5F_efc_t *efc, H5F_t **file, const char *name, unsigned flags,
+                                hid_t fcpl_id, hid_t fapl_id);
+H5_DLL unsigned   H5F__efc_max_nfiles(H5F_efc_t *efc);
+H5_DLL herr_t     H5F__efc_release(H5F_efc_t *efc);
+H5_DLL herr_t     H5F__efc_destroy(H5F_efc_t *efc);
+H5_DLL herr_t     H5F__efc_try_close(H5F_t *f);
 
 /* Space allocation routines */
 H5_DLL haddr_t H5F__alloc(H5F_t *f, H5F_mem_t type, hsize_t size, haddr_t *frag_addr, hsize_t *frag_size);

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -26,8 +26,8 @@
 #include "H5Bprivate.h"
 
 /* Other private headers needed by this file */
-#include "H5ACprivate.h" /* Metadata cache            */
-#include "H5FLprivate.h" /* Free Lists                           */
+#include "H5ACprivate.h" /* Metadata cache          */
+#include "H5FLprivate.h" /* Free Lists              */
 
 /**************************/
 /* Package Private Macros */
@@ -35,13 +35,20 @@
 
 /* Get the native key at a given index */
 #define H5B_NKEY(b, shared, idx) ((b)->native + (shared)->nkey[(idx)])
-#define LEVEL_BITS               8 /* # of bits for node level: 1 byte */
+
+/* # of bits for node level: 1 byte */
+#define LEVEL_BITS 8
+
+/* Indicates that the level of the current node is unknown.  When the level
+ * is known, it can be used to detect corrupted level during decoding
+ */
+#define H5B_UNKNOWN_NODELEVEL -1
 
 /****************************/
 /* Package Private Typedefs */
 /****************************/
 
-/* The B-tree node as stored in memory...  */
+/* The B-tree node as stored in memory */
 typedef struct H5B_t {
     H5AC_info_t cache_info; /* Information for H5AC cache functions */
                             /* MUST be first field in structure */
@@ -58,6 +65,7 @@ typedef struct H5B_t {
 typedef struct H5B_cache_ud_t {
     H5F_t                    *f;         /* File that B-tree node is within */
     const struct H5B_class_t *type;      /* Type of tree */
+    int                       exp_level; /* Expected level of the current node */
     H5UC_t                   *rc_shared; /* Ref-counted shared info */
 } H5B_cache_ud_t;
 
@@ -78,8 +86,8 @@ H5FL_EXTERN(H5B_t);
 /* Package Private Prototypes */
 /******************************/
 H5_DLL herr_t H5B__node_dest(H5B_t *bt);
-#ifdef H5B_DEBUG
-herr_t H5B__assert(H5F_t *f, haddr_t addr, const H5B_class_t *type, void *udata);
-#endif
+
+/* For debugging */
+H5_DLL herr_t H5B__verify_structure(H5F_t *f, haddr_t addr, const H5B_class_t *type, void *udata);
 
 #endif /*H5Bpkg_H*/

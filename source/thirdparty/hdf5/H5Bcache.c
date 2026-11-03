@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -31,6 +31,7 @@
 #include "H5private.h"   /* Generic Functions			*/
 #include "H5Bpkg.h"      /* B-link trees				*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5MMprivate.h" /* Memory management			*/
 
 /****************/
@@ -169,6 +170,11 @@ H5B__cache_deserialize(const void *_image, size_t len, void *_udata, bool H5_ATT
         HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "incorrect B-tree node type");
     bt->level = *image++;
 
+    /* Check in case of level is corrupted, if expected level is known */
+    if (udata->exp_level != H5B_UNKNOWN_NODELEVEL)
+        if (bt->level != (unsigned)udata->exp_level)
+            HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "level is not as expected, possibly corrupted");
+
     /* Entries used */
     if (H5_IS_BUFFER_OVERFLOW(image, 2, p_end))
         HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
@@ -289,7 +295,7 @@ H5B__cache_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED len, vo
     *image++ = (uint8_t)shared->type->id;
 
     /* 2^8 limit: only 1 byte is used to store node level */
-    if (bt->level >= HDpow(2, LEVEL_BITS))
+    if (bt->level >= pow(2, LEVEL_BITS))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode node level");
 
     H5_CHECK_OVERFLOW(bt->level, unsigned, uint8_t);

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -33,7 +33,8 @@
 /* PRIVATE PROTOTYPES */
 static void  *H5O__linfo_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
                                 size_t p_size, const uint8_t *p);
-static herr_t H5O__linfo_encode(H5F_t *f, bool disable_shared, uint8_t *p, const void *_mesg);
+static herr_t H5O__linfo_encode(H5F_t *f, bool disable_shared, size_t H5_ATTR_UNUSED p_size, uint8_t *p,
+                                const void *_mesg);
 static void  *H5O__linfo_copy(const void *_mesg, void *_dest);
 static size_t H5O__linfo_size(const H5F_t *f, bool disable_shared, const void *_mesg);
 static herr_t H5O__linfo_free(void *_mesg);
@@ -139,6 +140,9 @@ H5O__linfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
         if (H5_IS_BUFFER_OVERFLOW(p, 8, p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
         INT64DECODE(p, linfo->max_corder);
+        if (linfo->max_corder < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
+                        "invalid max creation order value for message: %" PRId64, linfo->max_corder);
     }
     else
         linfo->max_corder = 0;
@@ -155,8 +159,10 @@ H5O__linfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
 
     /* Address of v2 B-tree to index creation order of links, if there is one */
     if (linfo->index_corder) {
+        H5_WARN_USELESS_COMPARISON_OFF
         if (H5_IS_BUFFER_OVERFLOW(p, addr_size, p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+        H5_WARN_USELESS_COMPARISON_ON
         H5F_addr_decode(f, &p, &(linfo->corder_bt2_addr));
     }
     else
@@ -183,7 +189,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__linfo_encode(H5F_t *f, bool H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O__linfo_encode(H5F_t *f, bool H5_ATTR_UNUSED disable_shared, size_t H5_ATTR_UNUSED p_size, uint8_t *p,
+                  const void *_mesg)
 {
     const H5O_linfo_t *linfo = (const H5O_linfo_t *)_mesg;
     unsigned char      index_flags; /* Flags for encoding link index info */

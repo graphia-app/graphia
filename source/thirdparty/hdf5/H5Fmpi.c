@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -97,11 +97,10 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5F_mpi_get_comm
  *
- * Purpose:     Retrieves the file's communicator
+ * Purpose:     Retrieves the file's MPI_Comm communicator object
  *
- * Return:      Success:    The communicator (non-negative)
- *
- *              Failure:    Negative
+ * Return:      Success:    The communicator object
+ *              Failure:    MPI_COMM_NULL
  *
  *-------------------------------------------------------------------------
  */
@@ -121,6 +120,33 @@ H5F_mpi_get_comm(const H5F_t *f)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_mpi_get_comm() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_mpi_get_info
+ *
+ * Purpose:     Retrieves the file's MPI_Info info object
+ *
+ * Return:      Success:    The info object
+ *              Failure:    MPI_INFO_NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+MPI_Info
+H5F_mpi_get_info(const H5F_t *f)
+{
+    MPI_Info ret_value = MPI_INFO_NULL;
+
+    FUNC_ENTER_NOAPI(MPI_INFO_NULL)
+
+    assert(f && f->shared);
+
+    /* Dispatch to driver */
+    if ((ret_value = H5FD_mpi_get_info(f->shared->lf)) == MPI_INFO_NULL)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, MPI_INFO_NULL, "driver get_info request failed");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_mpi_get_info() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_shared_mpi_get_size
@@ -221,7 +247,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag)
+H5Fset_mpi_atomicity(hid_t file_id, bool flag)
 {
     H5VL_object_t                   *vol_obj;             /* File info */
     H5VL_optional_args_t             vol_cb_args;         /* Arguments to VOL callback */
@@ -229,7 +255,6 @@ H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag)
     herr_t                           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ib", file_id, flag);
 
     /* Get the file object */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -258,7 +283,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__get_mpi_atomicity(const H5F_t *file, hbool_t *flag)
+H5F__get_mpi_atomicity(const H5F_t *file, bool *flag)
 {
     herr_t ret_value = SUCCEED;
 
@@ -300,7 +325,6 @@ H5Fget_mpi_atomicity(hid_t file_id, bool *flag /*out*/)
     herr_t                           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", file_id, flag);
 
     /* Get the file object */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
@@ -371,7 +395,7 @@ H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm)
         unsigned long      driver_feat_flags;
         H5FD_class_t      *driver_class = NULL;
 
-        if (NULL == (plist = H5P_object_verify(acspl_id, H5P_FILE_ACCESS)))
+        if (NULL == (plist = H5P_object_verify(acspl_id, H5P_FILE_ACCESS, true)))
             HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "not a file access list");
 
         if (H5P_peek(plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
@@ -408,15 +432,38 @@ done:
 bool
 H5F_get_coll_metadata_reads(const H5F_t *file)
 {
-    H5P_coll_md_read_flag_t file_flag = H5P_USER_FALSE;
-    bool                    ret_value = false;
-
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(file && file->shared);
 
+    FUNC_LEAVE_NOAPI(H5F_shared_get_coll_metadata_reads(file->shared));
+} /* end H5F_get_coll_metadata_reads() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_shared_get_coll_metadata_reads
+ *
+ * Purpose:     Determines whether collective metadata reads should be
+ *              performed. This routine is meant to be the single source of
+ *              truth for the collective metadata reads status, as it
+ *              coordinates between the file-global flag and the flag set
+ *              for the current operation in the current API context.
+ *
+ * Return:      true/false (can't fail)
+ *
+ *-------------------------------------------------------------------------
+ */
+bool
+H5F_shared_get_coll_metadata_reads(const H5F_shared_t *f_sh)
+{
+    H5P_coll_md_read_flag_t file_flag = H5P_USER_FALSE;
+    bool                    ret_value = false;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    assert(f_sh);
+
     /* Retrieve the file-global flag */
-    file_flag = H5F_COLL_MD_READ(file);
+    file_flag = H5F_SHARED_COLL_MD_READ(f_sh);
 
     /* If file flag is set to H5P_FORCE_FALSE, exit early
      * with false, since collective metadata reads have
@@ -442,7 +489,7 @@ H5F_get_coll_metadata_reads(const H5F_t *file)
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_get_coll_metadata_reads() */
+} /* end H5F_shared_get_coll_metadata_reads() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_set_coll_metadata_reads
@@ -489,7 +536,7 @@ H5F_set_coll_metadata_reads(H5F_t *file, H5P_coll_md_read_flag_t *file_flag, boo
     H5P_coll_md_read_flag_t prev_file_flag    = H5P_USER_FALSE;
     bool                    prev_context_flag = false;
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(file && file->shared);
     assert(file_flag);

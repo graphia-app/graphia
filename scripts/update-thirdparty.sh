@@ -101,6 +101,18 @@ expat()
     esac
 }
 
+hdf5()
+{
+    local url=https://github.com/HDFGroup/hdf5.git
+    case $1 in
+        latest) latestTag $url '^hdf5_[0-9]+\.[0-9]+\.[0-9]+$' ;;
+        stage) fetch $url "$2" "$WORK/upstream"; mv "$WORK/upstream/src/"* "$3/" ;;
+        own) echo hdf5.cmake H5pubconf*.h H5build_settings_*.c ;;
+        notes) echo "regenerate H5pubconf_*.h and H5build_settings_*.c by configuring" \
+            "HDF5 with CMake on each platform" ;;
+    esac
+}
+
 json()
 {
     local url=https://github.com/nlohmann/json.git
@@ -166,7 +178,7 @@ zlib()
     esac
 }
 
-libraries=(blaze breakpad cryptopp expat json lexy matio utfcpp xlsxio zlib)
+libraries=(blaze breakpad cryptopp expat hdf5 json lexy matio utfcpp xlsxio zlib)
 
 # The repository stores thirdparty text with LF endings, which the patches assume
 normaliseLineEndings() # directory

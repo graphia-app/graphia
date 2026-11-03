@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -78,9 +78,9 @@
  * These flags determine which fields will be filled in the H5O_info_t
  * struct.
  */
-#define H5O_INFO_BASIC     0x0001u /**< Fill in the fileno, addr, type, and rc fields */
-#define H5O_INFO_TIME      0x0002u /**< Fill in the atime, mtime, ctime, and btime fields */
-#define H5O_INFO_NUM_ATTRS 0x0004u /**< Fill in the num_attrs field */
+#define H5O_INFO_BASIC     0x0001u /**< Fill in the fileno, addr, type, and rc fields \since 1.10.3 */
+#define H5O_INFO_TIME      0x0002u /**< Fill in the atime, mtime, ctime, and btime fields \since 1.10.3 */
+#define H5O_INFO_NUM_ATTRS 0x0004u /**< Fill in the num_attrs field \since 1.10.3 */
 #define H5O_INFO_ALL       (H5O_INFO_BASIC | H5O_INFO_TIME | H5O_INFO_NUM_ATTRS)
 
 //! <!-- [H5O_native_info_fields_snip] -->
@@ -88,8 +88,8 @@
  * Flags for H5Oget_native_info().  These flags determine which fields will be
  * filled in the \ref H5O_native_info_t struct.
  */
-#define H5O_NATIVE_INFO_HDR       0x0008u /**< Fill in the hdr field */
-#define H5O_NATIVE_INFO_META_SIZE 0x0010u /**< Fill in the meta_size field */
+#define H5O_NATIVE_INFO_HDR       0x0008u /**< Fill in the hdr field \since 1.12.0 */
+#define H5O_NATIVE_INFO_META_SIZE 0x0010u /**< Fill in the meta_size field \since 1.12.0 */
 #define H5O_NATIVE_INFO_ALL       (H5O_NATIVE_INFO_HDR | H5O_NATIVE_INFO_META_SIZE)
 //! <!-- [H5O_native_info_fields_snip] -->
 
@@ -143,15 +143,16 @@ typedef struct H5O_hdr_info_t {
  * (For H5Oget_info(), H5Oget_info_by_name(), H5Oget_info_by_idx() version 3)
  */
 typedef struct H5O_info2_t {
-    unsigned long fileno;    /**< File number that object is located in */
-    H5O_token_t   token;     /**< Token representing the object        */
-    H5O_type_t    type;      /**< Basic object type (group, dataset, etc.) */
-    unsigned      rc;        /**< Reference count of object            */
-    time_t        atime;     /**< Access time                          */
-    time_t        mtime;     /**< Modification time                    */
-    time_t        ctime;     /**< Change time                          */
-    time_t        btime;     /**< Birth time                           */
-    hsize_t       num_attrs; /**< Number of attributes attached to object   */
+    unsigned long
+        fileno; /**< File number that object is located in. Constant across multiple opens of the same file */
+    H5O_token_t token;     /**< Token representing the object        */
+    H5O_type_t  type;      /**< Basic object type (group, dataset, etc.) */
+    unsigned    rc;        /**< Reference count of object            */
+    time_t      atime;     /**< Access time                          */
+    time_t      mtime;     /**< Modification time                    */
+    time_t      ctime;     /**< Change time                          */
+    time_t      btime;     /**< Birth time                           */
+    hsize_t     num_attrs; /**< Number of attributes attached to object   */
 } H5O_info2_t;
 //! <!-- [H5O_info2_t_snip] -->
 
@@ -187,6 +188,8 @@ typedef uint32_t H5O_msg_crt_idx_t;
  *                        in processing the object; a pass-through of the \c op_data
  *                        pointer provided with the H5Ovisit3() function call
  * \return \herr_t_iter
+ *
+ * \since 1.12.0
  *
  */
 typedef herr_t (*H5O_iterate2_t)(hid_t obj, const char *name, const H5O_info2_t *info, void *op_data);
@@ -231,7 +234,7 @@ extern "C" {
  * \param[in] name Path to the object; relative to \p loc_id
  * \lapl_id
  *
- * \return \hid_tv{object}
+ * \return \hid_ti{object}
  *
  * \details H5Oopen() opens a group, dataset, or committed (named) datatype
  *          specified by a location, \p loc_id, and a path name, \p name, in an HDF5 file.
@@ -273,7 +276,7 @@ H5_DLL hid_t H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id);
 H5_DLL hid_t H5Oopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                            const char *name, hid_t lapl_id, hid_t es_id);
 #else
-H5_DLL hid_t  H5Oopen_async(hid_t loc_id, const char *name, hid_t lapl_id, hid_t es_id);
+H5_DLL hid_t H5Oopen_async(hid_t loc_id, const char *name, hid_t lapl_id, hid_t es_id);
 #endif
 
 /**
@@ -308,7 +311,7 @@ H5_DLL hid_t H5Oopen_by_token(hid_t loc_id, H5O_token_t token);
  * \param[in] n Object to open
  * \lapl_id
  *
- * \return \hid_tv{object}
+ * \return \hid_ti{object}
  *
  * \details H5Oopen_by_idx() opens the nth object in the group specified by \p loc_id
  *          and \p group_name.
@@ -362,8 +365,8 @@ H5_DLL hid_t H5Oopen_by_idx_async(const char *app_file, const char *app_func, un
                                   const char *group_name, H5_index_t idx_type, H5_iter_order_t order,
                                   hsize_t n, hid_t lapl_id, hid_t es_id);
 #else
-H5_DLL hid_t  H5Oopen_by_idx_async(hid_t loc_id, const char *group_name, H5_index_t idx_type,
-                                   H5_iter_order_t order, hsize_t n, hid_t lapl_id, hid_t es_id);
+H5_DLL hid_t H5Oopen_by_idx_async(hid_t loc_id, const char *group_name, H5_index_t idx_type,
+                                  H5_iter_order_t order, hsize_t n, hid_t lapl_id, hid_t es_id);
 #endif
 
 /**
@@ -920,7 +923,7 @@ H5_DLL herr_t H5Odecr_refcount(hid_t object_id);
  *          - H5Pset_copy_object()
  *          - H5Pset_create_intermediate_group()
  *          - H5Pset_mcdt_search_cb()
- *      - Copying Committed Datatypes with #H5Ocopy - A comprehensive
+ *      - \ref copying_committed - A comprehensive
  *        discussion of copying committed datatypes (PDF) in
  *        Advanced Topics in HDF5
  *
@@ -1205,6 +1208,8 @@ H5_DLL ssize_t H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comm
  *          group change during the iteration, the resulting behavior
  *          is undefined.
  *
+ * \callback_note
+ *
  * \par Example
  *      An example snippet from test/links.c:
  *      \snippet links.c H5Ovisit3_snip
@@ -1307,6 +1312,8 @@ H5_DLL herr_t H5Ovisit3(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order
  *          successfully, every link or object below the specified point
  *          in the file has been presented to the application for whatever
  *          processing the application requires.
+ *
+ * \callback_note
  *
  * \par Example
  *      An example snippet from test/links.c:
@@ -1556,7 +1563,7 @@ H5_DLL herr_t H5Oenable_mdc_flushes(hid_t object_id);
  * \since 1.10.0
  *
  */
-H5_DLL herr_t H5Oare_mdc_flushes_disabled(hid_t object_id, hbool_t *are_disabled);
+H5_DLL herr_t H5Oare_mdc_flushes_disabled(hid_t object_id, bool *are_disabled);
 
 /**
  *-------------------------------------------------------------------------
@@ -1717,7 +1724,8 @@ typedef struct H5O_stat_t {
  * H5Oget_info_by_idx() versions 1 & 2.)
  */
 typedef struct H5O_info1_t {
-    unsigned long  fileno;    /**< File number that object is located in */
+    unsigned long
+        fileno; /**< File number that object is located in. Constant across multiple opens of the same file */
     haddr_t        addr;      /**< Object address in file                */
     H5O_type_t     type;      /**< Basic object type (group, dataset, etc.) */
     unsigned       rc;        /**< Reference count of object    */
@@ -1748,6 +1756,8 @@ typedef struct H5O_info1_t {
  *                        in processing the object
  * \return \herr_t_iter
  *
+ * \since 1.8.0
+ *
  */
 typedef herr_t (*H5O_iterate1_t)(hid_t obj, const char *name, const H5O_info1_t *info, void *op_data);
 //! <!-- [H5O_iterate1_t_snip] -->
@@ -1763,7 +1773,7 @@ typedef herr_t (*H5O_iterate1_t)(hid_t obj, const char *name, const H5O_info1_t 
  * \fgdta_loc_obj_id{loc_id}
  * \param[in] addr Object's address in the file
  *
- * \return \hid_tv{object}
+ * \return \hid_ti{object}
  *
  * \deprecated As of HDF5-1.12 this function has been deprecated in favor of
  *             the function H5Oopen_by_token().
@@ -2248,6 +2258,8 @@ H5_DLL herr_t H5Ovisit1(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order
  *          in the file has been presented to the application for whatever
  *          processing the application requires.
  *
+ * \callback_note
+ *
  * \version 1.10.5 The macro #H5Ovisit_by_name was removed and the function
  *          H5Ovisit_by_name1() was copied to #H5Ovisit_by_name.
  * \version 1.10.3 The H5Ovisit_by_name() function was renamed to H5Ovisit_by_name1(),
@@ -2340,6 +2352,7 @@ H5_DLL herr_t H5Ovisit_by_name1(hid_t loc_id, const char *obj_name, H5_index_t i
  *          group change during the iteration, the resulting behavior
  *          is undefined.
  *
+ * \callback_note
  *
  * \since 1.10.3
  *
@@ -2449,6 +2462,8 @@ H5_DLL herr_t H5Ovisit2(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order
  *          successfully, every link or object below the specified point
  *          in the file has been presented to the application for whatever
  *          processing the application requires.
+ *
+ * \callback_note
  *
  * \since 1.10.3
  *

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -31,7 +31,8 @@
 /* PRIVATE PROTOTYPES */
 static void  *H5O__ainfo_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
                                 size_t p_size, const uint8_t *p);
-static herr_t H5O__ainfo_encode(H5F_t *f, bool disable_shared, uint8_t *p, const void *_mesg);
+static herr_t H5O__ainfo_encode(H5F_t *f, bool disable_shared, size_t H5_ATTR_UNUSED p_size, uint8_t *p,
+                                const void *_mesg);
 static void  *H5O__ainfo_copy(const void *_mesg, void *_dest);
 static size_t H5O__ainfo_size(const H5F_t *f, bool disable_shared, const void *_mesg);
 static herr_t H5O__ainfo_free(void *_mesg);
@@ -137,19 +138,25 @@ H5O__ainfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
         ainfo->max_crt_idx = H5O_MAX_CRT_ORDER_IDX;
 
     /* Address of fractal heap to store "dense" attributes */
+    H5_WARN_USELESS_COMPARISON_OFF
     if (H5_IS_BUFFER_OVERFLOW(p, sizeof_addr, p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+    H5_WARN_USELESS_COMPARISON_ON
     H5F_addr_decode(f, &p, &(ainfo->fheap_addr));
 
     /* Address of v2 B-tree to index names of attributes (names are always indexed) */
+    H5_WARN_USELESS_COMPARISON_OFF
     if (H5_IS_BUFFER_OVERFLOW(p, sizeof_addr, p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+    H5_WARN_USELESS_COMPARISON_ON
     H5F_addr_decode(f, &p, &(ainfo->name_bt2_addr));
 
     /* Address of v2 B-tree to index creation order of links, if there is one */
     if (ainfo->index_corder) {
+        H5_WARN_USELESS_COMPARISON_OFF
         if (H5_IS_BUFFER_OVERFLOW(p, sizeof_addr, p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+        H5_WARN_USELESS_COMPARISON_ON
         H5F_addr_decode(f, &p, &(ainfo->corder_bt2_addr));
     }
     else
@@ -175,7 +182,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__ainfo_encode(H5F_t *f, bool H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O__ainfo_encode(H5F_t *f, bool H5_ATTR_UNUSED disable_shared, size_t H5_ATTR_UNUSED p_size, uint8_t *p,
+                  const void *_mesg)
 {
     const H5O_ainfo_t *ainfo = (const H5O_ainfo_t *)_mesg;
     unsigned char      flags; /* Flags for encoding attribute info */

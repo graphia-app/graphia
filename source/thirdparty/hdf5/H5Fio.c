@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -32,7 +32,6 @@
 #include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5Fpkg.h"      /* File access				*/
 #include "H5FDprivate.h" /* File drivers				*/
-#include "H5Iprivate.h"  /* IDs			  		*/
 #include "H5PBprivate.h" /* Page Buffer				*/
 
 /****************/
@@ -423,7 +422,7 @@ H5F_flush_tagged_metadata(H5F_t *f, haddr_t tag)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush tagged metadata");
 
     /* Flush and reset the accumulator */
-    if (H5F__accum_reset(f->shared, true) < 0)
+    if (H5F__accum_reset(f->shared, true, false) < 0)
         HGOTO_ERROR(H5E_IO, H5E_CANTRESET, FAIL, "can't reset accumulator");
 
     /* Flush file buffers to disk. */
@@ -499,11 +498,17 @@ done:
 herr_t
 H5F_get_checksums(const uint8_t *buf, size_t buf_size, uint32_t *s_chksum /*out*/, uint32_t *c_chksum /*out*/)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
     assert(buf);
     assert(buf_size);
+
+    /* Check for buffer size smaller than H5_SIZEOF_CHKSUM */
+    if (buf_size < H5_SIZEOF_CHKSUM)
+        HGOTO_ERROR(H5E_IO, H5E_BADVALUE, FAIL, "checksum buffer is smaller than expected");
 
     /* Return the stored checksum */
     if (s_chksum) {
@@ -520,5 +525,6 @@ H5F_get_checksums(const uint8_t *buf, size_t buf_size, uint32_t *s_chksum /*out*
     if (c_chksum)
         *c_chksum = H5_checksum_metadata(buf, buf_size - H5_SIZEOF_CHKSUM, 0);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_chksums() */

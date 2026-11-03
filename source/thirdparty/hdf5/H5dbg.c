@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -102,30 +102,30 @@ H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf, const uint8_t *mark
                 fprintf(stream, "   ");
 
             if (7 == v)
-                HDfputc(' ', stream);
+                fputc(' ', stream);
         } /* end for */
-        HDfputc(' ', stream);
+        fputc(' ', stream);
 
         /* Print the character values */
         for (v = 0; v < 16; v++) {
             if (u + v < buf_size) {
                 if (marker[u + v])
-                    HDfputc(' ', stream);
+                    fputc(' ', stream);
                 else {
                     c = buf[buf_offset + u + v];
 
                     if (isprint(c))
-                        HDfputc(c, stream);
+                        fputc(c, stream);
                     else
-                        HDfputc('.', stream);
+                        fputc('.', stream);
                 } /* end else */
             }     /* end if */
 
             if (7 == v)
-                HDfputc(' ', stream);
+                fputc(' ', stream);
         } /* end for */
 
-        HDfputc('\n', stream);
+        fputc('\n', stream);
     } /* end for */
 
     FUNC_LEAVE_NOAPI(SUCCEED)

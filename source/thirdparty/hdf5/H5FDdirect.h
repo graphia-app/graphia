@@ -4,38 +4,58 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose:	The public header file for the direct driver.
+ * Purpose:	The public header file for the direct virtual file driver (VFD)
  */
 #ifndef H5FDdirect_H
 #define H5FDdirect_H
 
+/* Public header files */
+#include "H5FDpublic.h" /* File drivers             */
+
 #ifdef H5_HAVE_DIRECT
-#define H5FD_DIRECT       (H5FDperform_init(H5FD_direct_init))
+
+/** ID for the direct VFD */
+#define H5FD_DIRECT (H5OPEN H5FD_DIRECT_id_g)
+
+/** Identifier for the direct VFD \since 1.14.0 */
 #define H5FD_DIRECT_VALUE H5_VFD_DIRECT
+
 #else
+
+/** Initializer for the direct VFD (disabled) */
 #define H5FD_DIRECT       (H5I_INVALID_HID)
+
+/** Identifier for the direct VFD (disabled) */
 #define H5FD_DIRECT_VALUE H5_VFD_INVALID
+
 #endif /* H5_HAVE_DIRECT */
+
+/** Default value for memory boundary */
+#define MBOUNDARY_DEF 4096
+
+/** Default value for file block size */
+#define FBSIZE_DEF 4096
+
+/** Default value for maximum copy buffer size */
+#define CBSIZE_DEF (16 * 1024 * 1024)
 
 #ifdef H5_HAVE_DIRECT
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Default values for memory boundary, file block size, and maximal copy buffer size.
- * Application can set these values through the function H5Pset_fapl_direct. */
-#define MBOUNDARY_DEF 4096
-#define FBSIZE_DEF    4096
-#define CBSIZE_DEF    16 * 1024 * 1024
-
-H5_DLL hid_t H5FD_direct_init(void);
+/** @private
+ *
+ * \brief ID for the direct VFD
+ */
+H5_DLLVAR hid_t H5FD_DIRECT_id_g;
 
 /**
  * \ingroup FAPL

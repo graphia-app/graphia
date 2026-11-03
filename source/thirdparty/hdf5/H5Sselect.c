@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -81,11 +81,6 @@ H5FL_SEQ_EXTERN(hsize_t);
     Non-negative on success/Negative on failure
  DESCRIPTION
     Sets the selection offset for the dataspace
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
-    Only works for simple dataspaces currently
- EXAMPLES
- REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
 H5S_select_offset(H5S_t *space, const hssize_t *offset)
@@ -95,10 +90,14 @@ H5S_select_offset(H5S_t *space, const hssize_t *offset)
     /* Check args */
     assert(space);
     assert(0 < space->extent.rank && space->extent.rank <= H5S_MAX_RANK);
-    assert(offset);
 
-    /* Copy the offset over */
-    H5MM_memcpy(space->select.offset, offset, sizeof(hssize_t) * space->extent.rank);
+    /* Copy the offset over. As a special case, when offset is NULL, we
+     * reset all dimensions to zero.
+     */
+    if (offset)
+        H5MM_memcpy(space->select.offset, offset, sizeof(hssize_t) * space->extent.rank);
+    else
+        memset(space->select.offset, 0, sizeof(hssize_t) * space->extent.rank);
 
     /* Indicate that the offset was changed */
     space->select.offset_changed = true;
@@ -129,16 +128,15 @@ H5Soffset_simple(hid_t space_id, const hssize_t *offset)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Hs", space_id, offset);
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "not a dataspace");
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADID, FAIL, "not a dataspace");
     if (space->extent.rank == 0 ||
         (H5S_GET_EXTENT_TYPE(space) == H5S_SCALAR || H5S_GET_EXTENT_TYPE(space) == H5S_NULL))
-        HGOTO_ERROR(H5E_ID, H5E_UNSUPPORTED, FAIL, "can't set offset on scalar or null dataspace");
-    if (offset == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no offset specified");
+        HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "can't set offset on scalar or null dataspace");
+
+    /* offset can be NULL (resets all dims to zero) */
 
     /* Set the selection offset */
     if (H5S_select_offset(space, offset) < 0)
@@ -177,7 +175,6 @@ H5Sselect_copy(hid_t dst_id, hid_t src_id)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ii", dst_id, src_id);
 
     /* Check args */
     if (NULL == (src = (H5S_t *)H5I_object_verify(src_id, H5I_DATASPACE)))
@@ -221,7 +218,9 @@ done:
 herr_t
 H5S_select_copy(H5S_t *dst, const H5S_t *src, bool share_selection)
 {
-    herr_t ret_value = FAIL; /* Return value */
+    H5S_t  tmp_space;
+    bool   copied_space = false;
+    herr_t ret_value    = FAIL; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -229,18 +228,29 @@ H5S_select_copy(H5S_t *dst, const H5S_t *src, bool share_selection)
     assert(dst);
     assert(src);
 
+    tmp_space = *dst;
+
+    /* Copy regular fields */
+    tmp_space.select = src->select;
+
+    /* Perform correct type of copy based on the type of selection */
+    if ((ret_value = (*src->select.type->copy)(&tmp_space, src, share_selection)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy selection specific information");
+    copied_space = true;
+
     /* Release the current selection */
     if (H5S_SELECT_RELEASE(dst) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection");
 
-    /* Copy regular fields */
-    dst->select = src->select;
-
-    /* Perform correct type of copy based on the type of selection */
-    if ((ret_value = (*src->select.type->copy)(dst, src, share_selection)) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy selection specific information");
+    *dst = tmp_space;
 
 done:
+
+    if (ret_value < 0) {
+        if (copied_space && H5S_SELECT_RELEASE(&tmp_space) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection");
+    }
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_select_copy() */
 
@@ -367,7 +377,6 @@ H5Sget_select_npoints(hid_t spaceid)
     hssize_t ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("Hs", "i", spaceid);
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
@@ -417,7 +426,7 @@ H5S_get_select_npoints(const H5S_t *space)
     Check whether the selection fits within the extent, with the current
     offset defined.
  USAGE
-    htri_t H5Sselect_void(dsid)
+    htri_t H5Sselect_valid(dsid)
         hid_t dsid;             IN: Dataspace ID to query
  RETURNS
     true if the selection fits within the extent, false if it does not and
@@ -437,7 +446,6 @@ H5Sselect_valid(hid_t spaceid)
     htri_t ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("t", "i", spaceid);
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
@@ -456,7 +464,7 @@ done:
     Check whether the selection fits within the extent, with the current
     offset defined.
  USAGE
-    htri_t H5S_select_void(space)
+    htri_t H5S_select_valid(space)
         H5S_t *space;           IN: Dataspace to query
  RETURNS
     true if the selection fits within the extent, false if it does not and
@@ -596,7 +604,6 @@ H5Sget_select_bounds(hid_t spaceid, hsize_t start[] /*out*/, hsize_t end[] /*out
     herr_t ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ixx", spaceid, start, end);
 
     /* Check args */
     if (start == NULL || end == NULL)
@@ -927,7 +934,7 @@ H5S_select_adjust_u(H5S_t *space, const hsize_t *offset)
  PURPOSE
     Adjust a selection by subtracting an offset
  USAGE
-    herr_t H5S_select_adjust_u(space, offset)
+    herr_t H5S_select_adjust_s(space, offset)
         H5S_t *space;           IN/OUT: Pointer to dataspace to adjust
         const hssize_t *offset; IN: Offset to subtract
  RETURNS
@@ -987,7 +994,6 @@ H5Sselect_adjust(hid_t space_id, const hssize_t *offset)
     herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Hs", space_id, offset);
 
     if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "not a dataspace");
@@ -1456,8 +1462,14 @@ H5S_select_iterate(void *buf, const H5T_t *type, H5S_t *space, const H5S_sel_ite
                 /* Check which type of callback to make */
                 switch (op->op_type) {
                     case H5S_SEL_ITER_OP_APP:
-                        /* Make the application callback */
-                        user_ret = (op->u.app_op.op)(loc, op->u.app_op.type_id, ndims, coords, op_data);
+                        /* Prepare & restore library for user callback */
+                        H5_BEFORE_USER_CB(H5_ITER_ERROR)
+                            {
+                                /* Make the application callback */
+                                user_ret =
+                                    (op->u.app_op.op)(loc, op->u.app_op.type_id, ndims, coords, op_data);
+                            }
+                        H5_AFTER_USER_CB(H5_ITER_ERROR)
                         break;
 
                     case H5S_SEL_ITER_OP_LIB:
@@ -1526,7 +1538,6 @@ H5Sget_select_type(hid_t space_id)
     H5S_sel_type ret_value; /* Return value */
 
     FUNC_ENTER_API(H5S_SEL_ERROR)
-    H5TRACE1("St", "i", space_id);
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -1884,7 +1895,6 @@ H5Sselect_shape_same(hid_t space1_id, hid_t space2_id)
     htri_t ret_value;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("t", "ii", space1_id, space2_id);
 
     if (NULL == (space1 = (H5S_t *)H5I_object_verify(space1_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "not a dataspace");
@@ -1946,7 +1956,7 @@ H5S_select_intersect_block(H5S_t *space, const hsize_t *start, const hsize_t *en
         /* Loop over selection bounds and block, checking for overlap */
         for (u = 0; u < space->extent.rank; u++)
             /* If selection bounds & block don't overlap, can leave now */
-            if (!H5S_RANGE_OVERLAP(low[u], high[u], start[u], end[u]))
+            if (!H5_RANGE_OVERLAP(low[u], high[u], start[u], end[u]))
                 HGOTO_DONE(false);
     } /* end if */
 
@@ -1988,7 +1998,6 @@ H5Sselect_intersect_block(hid_t space_id, const hsize_t *start, const hsize_t *e
     htri_t   ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("t", "i*h*h", space_id, start, end);
 
     /* Check arguments */
     if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -2579,11 +2588,11 @@ H5S_select_project_intersection(H5S_t *src_space, H5S_t *dst_space, H5S_t *src_i
                     /* Advance iterators */
                     if (H5S_SELECT_ITER_NEXT(ss_iter, 1) < 0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTNEXT, FAIL,
-                                    "can't advacne source selection iterator");
+                                    "can't advance source selection iterator");
                     ss_iter->elmt_left--;
                     if (H5S_SELECT_ITER_NEXT(ds_iter, 1) < 0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTNEXT, FAIL,
-                                    "can't advacne destination selection iterator");
+                                    "can't advance destination selection iterator");
                     ds_iter->elmt_left--;
                 } while (ss_iter->elmt_left > 0);
                 assert(H5S_SELECT_ITER_NELMTS(ds_iter) == 0);
@@ -2665,40 +2674,39 @@ H5Sselect_project_intersection(hid_t src_space_id, hid_t dst_space_id, hid_t src
     H5S_t *proj_space = NULL;                           /* Output dataspace */
     hid_t  ret_value;                                   /* Return value */
 
-    FUNC_ENTER_API(FAIL)
-    H5TRACE3("i", "iii", src_space_id, dst_space_id, src_intersect_space_id);
+    FUNC_ENTER_API(H5I_INVALID_HID)
 
     /* Check args */
     if (NULL == (src_space = (H5S_t *)H5I_object_verify(src_space_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "not a dataspace");
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, H5I_INVALID_HID, "not a dataspace");
     if (NULL == (dst_space = (H5S_t *)H5I_object_verify(dst_space_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "not a dataspace");
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, H5I_INVALID_HID, "not a dataspace");
     if (NULL == (src_intersect_space = (H5S_t *)H5I_object_verify(src_intersect_space_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "not a dataspace");
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, H5I_INVALID_HID, "not a dataspace");
 
     /* Check numbers of points selected matches in source and destination */
     if (H5S_GET_SELECT_NPOINTS(src_space) != H5S_GET_SELECT_NPOINTS(dst_space))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL,
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, H5I_INVALID_HID,
                     "number of points selected in source space does not match that in destination space");
 
     /* Check numbers of dimensions matches in source and source intersect spaces
      */
     if (H5S_GET_EXTENT_NDIMS(src_space) != H5S_GET_EXTENT_NDIMS(src_intersect_space))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL,
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, H5I_INVALID_HID,
                     "rank of source space does not match rank of source intersect space");
 
     /* Perform operation */
     if (H5S_select_project_intersection(src_space, dst_space, src_intersect_space, &proj_space, false) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "can't project dataspace intersection");
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, H5I_INVALID_HID, "can't project dataspace intersection");
 
     /* Register */
     if ((ret_value = H5I_register(H5I_DATASPACE, proj_space, true)) < 0)
-        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID");
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace ID");
 
 done:
     if (ret_value < 0)
         if (proj_space && H5S_close(proj_space) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace");
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, H5I_INVALID_HID, "unable to release dataspace");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Sselect_project_intersection() */
@@ -2797,8 +2805,8 @@ done:
  PURPOSE
     Create a dataspace selection iterator for a dataspace's selection
  USAGE
-    hid_t H5Ssel_iter_create(space)
-        hid_t   space;  IN: ID of the dataspace with selection to iterate over
+    hid_t H5Ssel_iter_create(space,elmt_size,flags)
+        hid_t   space;     IN: ID of the dataspace with selection to iterate over
  RETURNS
     Valid dataspace selection iterator ID on success, H5I_INVALID_HID on failure
  DESCRIPTION
@@ -2818,7 +2826,6 @@ H5Ssel_iter_create(hid_t space_id, size_t elmt_size, unsigned flags)
     hid_t           ret_value; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE3("i", "izIu", space_id, elmt_size, flags);
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -2901,7 +2908,6 @@ H5Ssel_iter_get_seq_list(hid_t sel_iter_id, size_t maxseq, size_t maxelmts, size
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "izzxxxx", sel_iter_id, maxseq, maxelmts, nseq, nelmts, off, len);
 
     /* Check args */
     if (NULL == (sel_iter = (H5S_sel_iter_t *)H5I_object_verify(sel_iter_id, H5I_SPACE_SEL_ITER)))
@@ -3010,7 +3016,7 @@ done:
  PURPOSE
     Resets a dataspace selection iterator back to an initial state.
  USAGE
-    herr_t H5Ssel_iter_reset(sel_iter_id)
+    herr_t H5Ssel_iter_reset(sel_iter_id,space_id)
         hid_t   sel_iter_id;  IN: ID of the dataspace selection iterator to
                                   reset
         hid_t   space_id;     IN: ID of the dataspace with selection to
@@ -3033,7 +3039,6 @@ H5Ssel_iter_reset(hid_t sel_iter_id, hid_t space_id)
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ii", sel_iter_id, space_id);
 
     /* Check args */
     if (NULL == (sel_iter = (H5S_sel_iter_t *)H5I_object_verify(sel_iter_id, H5I_SPACE_SEL_ITER)))
@@ -3137,7 +3142,6 @@ H5Ssel_iter_close(hid_t sel_iter_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", sel_iter_id);
 
     /* Check args */
     if (NULL == H5I_object_verify(sel_iter_id, H5I_SPACE_SEL_ITER))

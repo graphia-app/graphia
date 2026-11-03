@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -17,7 +17,6 @@
 #include "H5Iprivate.h"  /* IDs			  		*/
 #include "H5MMprivate.h" /* Memory management			*/
 #include "H5Ppublic.h"   /* Property lists			*/
-#include "H5Oprivate.h"  /* Object headers                       */
 #include "H5Sprivate.h"  /* Dataspaces         			*/
 #include "H5Tprivate.h"  /* Datatypes         			*/
 #include "H5Zpkg.h"      /* Data filters				*/
@@ -247,6 +246,7 @@ H5Z__calc_parms_array(const H5T_t *type, size_t *cd_values_actual_nparms)
         case H5T_REFERENCE:
         case H5T_ENUM:
         case H5T_VLEN:
+        case H5T_COMPLEX:
             /* Other datatype classes: nbit does no compression */
             H5Z__calc_parms_nooptype(cd_values_actual_nparms);
             break;
@@ -341,6 +341,7 @@ H5Z__calc_parms_compound(const H5T_t *type, size_t *cd_values_actual_nparms)
             case H5T_REFERENCE:
             case H5T_ENUM:
             case H5T_VLEN:
+            case H5T_COMPLEX:
                 /* Other datatype classes: nbit does no compression */
                 H5Z__calc_parms_nooptype(cd_values_actual_nparms);
                 break;
@@ -571,6 +572,7 @@ H5Z__set_parms_array(const H5T_t *type, unsigned *cd_values_index, unsigned cd_v
         case H5T_OPAQUE:
         case H5T_REFERENCE:
         case H5T_ENUM:
+        case H5T_COMPLEX:
             if (H5Z__set_parms_nooptype(dtype_base, cd_values_index, cd_values) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype");
             break;
@@ -708,6 +710,7 @@ H5Z__set_parms_compound(const H5T_t *type, unsigned *cd_values_index, unsigned c
             case H5T_OPAQUE:
             case H5T_REFERENCE:
             case H5T_ENUM:
+            case H5T_COMPLEX:
                 /* other datatype that nbit does no compression */
                 if (H5Z__set_parms_nooptype(dtype_member, cd_values_index, cd_values) < 0)
                     HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype");
@@ -801,6 +804,7 @@ H5Z__set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
         case H5T_REFERENCE:
         case H5T_ENUM:
         case H5T_VLEN:
+        case H5T_COMPLEX:
             /* No need to calculate other datatypes at top level */
             break;
 
@@ -821,7 +825,7 @@ H5Z__set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for cd_values[]");
 
     /* Get the plist structure */
-    if (NULL == (dcpl_plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE)))
+    if (NULL == (dcpl_plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get the filter's current parameters */
@@ -873,6 +877,7 @@ H5Z__set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
         case H5T_REFERENCE:
         case H5T_ENUM:
         case H5T_VLEN:
+        case H5T_COMPLEX:
             /* No need to set parameters for other datatypes at top level */
             break;
 
@@ -948,8 +953,10 @@ H5Z__filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], s
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for nbit decompression");
 
         /* decompress the buffer */
-        if (H5Z__nbit_decompress(outbuf, d_nelmts, (unsigned char *)*buf, cd_values) < 0)
+        if (H5Z__nbit_decompress(outbuf, d_nelmts, (unsigned char *)*buf, cd_values) < 0) {
+            H5MM_xfree(outbuf);
             HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, 0, "can't decompress buffer");
+        }
     } /* end if */
     /* output; compress */
     else {
@@ -1181,7 +1188,7 @@ static herr_t
 H5Z__nbit_decompress_one_compound(unsigned char *data, size_t data_offset, unsigned char *buffer, size_t *j,
                                   size_t *buf_len, const unsigned parms[], unsigned *parms_index)
 {
-    unsigned     i, nmembers, member_offset, member_class, member_size, used_size = 0, size;
+    unsigned     i, nmembers, member_offset, member_class, member_size, used_size = 0, prev_used_size, size;
     parms_atomic p;
     herr_t       ret_value = SUCCEED; /* Return value */
 
@@ -1195,10 +1202,15 @@ H5Z__nbit_decompress_one_compound(unsigned char *data, size_t data_offset, unsig
         member_class  = parms[(*parms_index)++];
 
         /* Check for overflow */
-        member_size = parms[*parms_index];
+        member_size    = parms[*parms_index];
+        prev_used_size = used_size;
         used_size += member_size;
         if (used_size > size)
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "compound member offset overflowed compound size");
+            HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL, "compound member size overflowed compound size");
+        if (used_size <= prev_used_size)
+            HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL, "compound member size overflowed compound size");
+        if ((member_offset + member_size) > size)
+            HGOTO_ERROR(H5E_PLINE, H5E_BADRANGE, FAIL, "compound member offset overflowed compound size");
         switch (member_class) {
             case H5Z_NBIT_ATOMIC:
                 p.size = member_size;

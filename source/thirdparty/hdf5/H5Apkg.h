@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -145,8 +145,9 @@ typedef struct H5A_bt2_ud_ins_t {
 
 /* Data structure to hold table of attributes for an object */
 typedef struct {
-    size_t  nattrs; /* # of attributes in table */
-    H5A_t **attrs;  /* Pointer to array of attribute pointers */
+    size_t  num_attrs; /* Curr. # of attributes in table */
+    size_t  max_attrs; /* Max. # of attributes in table */
+    H5A_t **attrs;     /* Pointer to array of attribute pointers */
 } H5A_attr_table_t;
 
 /*****************************/

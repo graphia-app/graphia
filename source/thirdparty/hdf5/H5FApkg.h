@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -120,7 +120,7 @@ typedef struct H5FA_hdr_t {
     haddr_t dblk_addr; /* Address of Fixed Array Data block */
 
     /* Statistics for Fixed Array (stored in header) */
-    H5FA_stat_t stats; /* Statistcs for Fixed Array */
+    H5FA_stat_t stats; /* Statistics for Fixed Array */
 
     /* Computed/cached values (not stored in header) */
     size_t  rc;             /* Reference count of the header                                */

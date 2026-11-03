@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -235,12 +235,13 @@ const H5S_select_class_t H5S_sel_hyper[1] = {{
 }};
 
 /* Format version bounds for dataspace hyperslab selection */
-const unsigned H5O_sds_hyper_ver_bounds[] = {
+static const unsigned H5O_sds_hyper_ver_bounds[] = {
     H5S_HYPER_VERSION_1, /* H5F_LIBVER_EARLIEST */
     H5S_HYPER_VERSION_1, /* H5F_LIBVER_V18 */
     H5S_HYPER_VERSION_2, /* H5F_LIBVER_V110 */
     H5S_HYPER_VERSION_3, /* H5F_LIBVER_V112 */
     H5S_HYPER_VERSION_3, /* H5F_LIBVER_V114 */
+    H5S_HYPER_VERSION_3, /* H5F_LIBVER_V200 */
     H5S_HYPER_VERSION_3  /* H5F_LIBVER_LATEST */
 };
 
@@ -267,7 +268,7 @@ static const H5S_sel_iter_class_t H5S_sel_iter_hyper[1] = {{
 static const hsize_t H5S_hyper_zeros_g[H5S_MAX_RANK] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                                                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 static const hsize_t H5S_hyper_ones_g[H5S_MAX_RANK]  = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                                                       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+                                                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
 /* Declare a free list to manage the H5S_hyper_sel_t struct */
 H5FL_DEFINE_STATIC(H5S_hyper_sel_t);
@@ -2826,8 +2827,10 @@ H5S__hyper_new_span_info(unsigned rank)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    assert(rank > 0);
     assert(rank <= H5S_MAX_RANK);
+
+    if (rank == 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, NULL, "dataspace has invalid extent");
 
     /* Allocate a new span info node */
     if (NULL == (ret_value = (H5S_hyper_span_info_t *)H5FL_ARR_CALLOC(hbounds_t, rank * 2)))
@@ -3203,7 +3206,7 @@ done:
 static herr_t
 H5S__hyper_copy(H5S_t *dst, const H5S_t *src, bool share_selection)
 {
-    H5S_hyper_sel_t       *dst_hslab;           /* Pointer to destination hyperslab info */
+    H5S_hyper_sel_t       *dst_hslab = NULL;    /* Pointer to destination hyperslab info */
     const H5S_hyper_sel_t *src_hslab;           /* Pointer to source hyperslab info */
     herr_t                 ret_value = SUCCEED; /* Return value */
 
@@ -3214,11 +3217,11 @@ H5S__hyper_copy(H5S_t *dst, const H5S_t *src, bool share_selection)
     assert(dst);
 
     /* Allocate space for the hyperslab selection information */
-    if (NULL == (dst->select.sel_info.hslab = H5FL_MALLOC(H5S_hyper_sel_t)))
+    if (NULL == (dst_hslab = H5FL_MALLOC(H5S_hyper_sel_t)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate hyperslab info");
+    dst_hslab->span_lst = NULL;
 
     /* Set temporary pointers */
-    dst_hslab = dst->select.sel_info.hslab;
     src_hslab = src->select.sel_info.hslab;
 
     /* Copy the hyperslab information */
@@ -3228,25 +3231,38 @@ H5S__hyper_copy(H5S_t *dst, const H5S_t *src, bool share_selection)
 
     /* Check if there is hyperslab span information to copy */
     /* (Regular hyperslab information is copied with the selection structure) */
-    if (src->select.sel_info.hslab->span_lst != NULL) {
+    if (src_hslab->span_lst != NULL) {
         if (share_selection) {
             /* Share the source's span tree by incrementing the reference count on it */
-            dst->select.sel_info.hslab->span_lst = src->select.sel_info.hslab->span_lst;
-            dst->select.sel_info.hslab->span_lst->count++;
+            dst_hslab->span_lst = src_hslab->span_lst;
+            dst_hslab->span_lst->count++;
         } /* end if */
-        else
+        else {
             /* Copy the hyperslab span information */
-            dst->select.sel_info.hslab->span_lst =
-                H5S__hyper_copy_span(src->select.sel_info.hslab->span_lst, src->extent.rank);
+            dst_hslab->span_lst = H5S__hyper_copy_span(src_hslab->span_lst, src->extent.rank);
+            if (NULL == dst_hslab->span_lst)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy hyperslab span information");
+        }
     } /* end if */
     else
-        dst->select.sel_info.hslab->span_lst = NULL;
+        dst_hslab->span_lst = NULL;
 
     /* Copy the unlimited dimension info */
     dst_hslab->unlim_dim          = src_hslab->unlim_dim;
     dst_hslab->num_elem_non_unlim = src_hslab->num_elem_non_unlim;
 
+    dst->select.sel_info.hslab = dst_hslab;
+
 done:
+    if (ret_value < 0) {
+        if (dst_hslab) {
+            if (dst_hslab->span_lst && H5S__hyper_free_span_info(dst_hslab->span_lst) < 0)
+                HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free hyperslab span information");
+
+            H5FL_FREE(H5S_hyper_sel_t, dst_hslab);
+        }
+    }
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_copy() */
 
@@ -3280,6 +3296,14 @@ H5S__hyper_is_valid(const H5S_t *space)
     FUNC_ENTER_PACKAGE_NOERR
 
     assert(space);
+
+    /* Check if dataspace has scalar or null extent, which are
+     * both unsupported by hyperslab selections
+     */
+    if (H5S_SCALAR == H5S_GET_EXTENT_TYPE(space))
+        HGOTO_DONE(false);
+    if (H5S_NULL == H5S_GET_EXTENT_TYPE(space))
+        HGOTO_DONE(false);
 
     /* Check for unlimited selection */
     if (space->select.sel_info.hslab->unlim_dim >= 0)
@@ -3482,7 +3506,6 @@ H5Sget_select_hyper_nblocks(hid_t spaceid)
     hssize_t ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("Hs", "i", spaceid);
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
@@ -3724,10 +3747,10 @@ done:
 static hssize_t
 H5S__hyper_serial_size(H5S_t *space)
 {
-    hsize_t  block_count = 0; /* block counter for regular hyperslabs */
-    uint32_t version;         /* Version number */
-    uint8_t  enc_size;        /* Encoded size of hyperslab selection info */
-    hssize_t ret_value = -1;  /* return value */
+    hsize_t  block_count = 0;        /* block counter for regular hyperslabs */
+    uint32_t version     = UINT_MAX; /* Version number */
+    uint8_t  enc_size;               /* Encoded size of hyperslab selection info */
+    hssize_t ret_value = -1;         /* return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -4637,11 +4660,15 @@ H5S__get_select_hyper_blocklist(H5S_t *space, hsize_t startblock, hsize_t numblo
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     assert(space);
     assert(buf);
     assert(space->select.sel_info.hslab->unlim_dim < 0);
+
+    if (space->extent.rank == 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL,
+                    "dataspace has invalid extent for hyperslab selection");
 
     /* Attempt to rebuild diminfo if it is invalid and has not been confirmed
      * to be impossible.
@@ -4780,6 +4807,7 @@ H5S__get_select_hyper_blocklist(H5S_t *space, hsize_t startblock, hsize_t numblo
                                               &startblock, &numblocks, &buf);
     } /* end else */
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__get_select_hyper_blocklist() */
 
@@ -4821,7 +4849,6 @@ H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock, hsize_t numbloc
     herr_t ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "ihhx", spaceid, startblock, numblocks, buf);
 
     /* Check args */
     if (buf == NULL)
@@ -7724,7 +7751,7 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                         /* Keep going, nothing to split off */
                     } /* end else */
 
-                    /* Check for overlaps between span 'a' and midle of span 'b' */
+                    /* Check for overlaps between span 'a' and middle of span 'b' */
 
                     /* Make certain both spans either have a down span or both don't have one */
                     assert((span_a->down != NULL && span_b->down != NULL) ||
@@ -8604,11 +8631,13 @@ H5S__hyper_make_spans(unsigned rank, const hsize_t *start, const hsize_t *stride
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    assert(rank > 0);
     assert(start);
     assert(stride);
     assert(count);
     assert(block);
+
+    if (rank == 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, NULL, "dataspace has invalid extent");
 
     /* Start creating spans in fastest changing dimension */
     for (i = (int)(rank - 1); i >= 0; i--) {
@@ -9178,8 +9207,8 @@ H5S__check_spans_overlap(const H5S_hyper_span_info_t *spans1, const H5S_hyper_sp
     assert(spans2);
 
     /* Use low & high bounds to try to avoid spinning through the span lists */
-    if (H5S_RANGE_OVERLAP(spans1->low_bounds[0], spans1->high_bounds[0], spans2->low_bounds[0],
-                          spans2->high_bounds[0])) {
+    if (H5_RANGE_OVERLAP(spans1->low_bounds[0], spans1->high_bounds[0], spans2->low_bounds[0],
+                         spans2->high_bounds[0])) {
         H5S_hyper_span_t *span1, *span2; /* Hyperslab spans */
 
         /* Walk over spans, comparing them for overlap */
@@ -9187,7 +9216,7 @@ H5S__check_spans_overlap(const H5S_hyper_span_info_t *spans1, const H5S_hyper_sp
         span2 = spans2->head;
         while (span1 && span2) {
             /* Check current two spans for overlap */
-            if (H5S_RANGE_OVERLAP(span1->low, span1->high, span2->low, span2->high)) {
+            if (H5_RANGE_OVERLAP(span1->low, span1->high, span2->low, span2->high)) {
                 /* Check for spans in lowest dimension already */
                 if (span1->down) {
                     /* Sanity check */
@@ -9765,8 +9794,8 @@ H5S__hyper_regular_and_single_block(H5S_t *space, const hsize_t start[], const h
             block_end  = (start[u] + block[u]) - 1;
 
             /* Check for overlap */
-            if (!H5S_RANGE_OVERLAP(space->select.sel_info.hslab->diminfo.opt[u].start, select_end, start[u],
-                                   block_end)) {
+            if (!H5_RANGE_OVERLAP(space->select.sel_info.hslab->diminfo.opt[u].start, select_end, start[u],
+                                  block_end)) {
                 overlap = false;
                 break;
             } /* end if */
@@ -9812,8 +9841,8 @@ H5S__hyper_regular_and_single_block(H5S_t *space, const hsize_t start[], const h
             block_end  = (start[u] + block[u]) - 1;
 
             /* Check for overlap */
-            if (!H5S_RANGE_OVERLAP(space->select.sel_info.hslab->diminfo.opt[u].start, select_end, start[u],
-                                   block_end)) {
+            if (!H5_RANGE_OVERLAP(space->select.sel_info.hslab->diminfo.opt[u].start, select_end, start[u],
+                                  block_end)) {
                 overlap = false;
                 break;
             } /* end if */
@@ -10300,7 +10329,6 @@ H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_t start[], con
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "iSs*h*h*h*h", space_id, op, start, stride, count, block);
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -10446,7 +10474,7 @@ H5S_combine_hyperslab(const H5S_t *old_space, H5S_seloper_t op, const hsize_t st
         } /* end for */
 
         /* Check bound box of both spaces to see if they overlap */
-        if (H5S_RANGE_OVERLAP(old_low_bounds[0], old_high_bounds[0], new_low_bounds[0], new_high_bounds[0]))
+        if (H5_RANGE_OVERLAP(old_low_bounds[0], old_high_bounds[0], new_low_bounds[0], new_high_bounds[0]))
             overlapped = true;
 
         /* Non-overlapping situations can be handled in special ways */
@@ -10625,7 +10653,6 @@ H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_t start[], co
     hid_t  ret_value;        /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE6("i", "iSs*h*h*h*h", space_id, op, start, stride, count, block);
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -10702,7 +10729,8 @@ H5S__combine_select(H5S_t *space1, H5S_seloper_t op, H5S_t *space2)
     } /* end else */
 
     /* Set unlim_dim */
-    new_space->select.sel_info.hslab->unlim_dim = -1;
+    if (H5S_SEL_HYPERSLABS == H5S_GET_SELECT_TYPE(new_space))
+        new_space->select.sel_info.hslab->unlim_dim = -1;
 
     /* Set return value */
     ret_value = new_space;
@@ -10745,7 +10773,6 @@ H5Scombine_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id)
     hid_t  ret_value;        /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE3("i", "iSsi", space1_id, op, space2_id);
 
     /* Check args */
     if (NULL == (space1 = (H5S_t *)H5I_object_verify(space1_id, H5I_DATASPACE)))
@@ -10875,7 +10902,6 @@ H5Smodify_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "iSsi", space1_id, op, space2_id);
 
     /* Check args */
     if (NULL == (space1 = (H5S_t *)H5I_object_verify(space1_id, H5I_DATASPACE)))
@@ -11415,8 +11441,8 @@ H5S__hyper_proj_int_iterate(H5S_hyper_span_info_t *ss_span_info, const H5S_hyper
     /* Check for non-overlapping bounds */
     check_intersect = true;
     for (u = 0; u < (udata->ss_rank - depth); u++)
-        if (!H5S_RANGE_OVERLAP(ss_span_info->low_bounds[u], ss_span_info->high_bounds[u],
-                               sis_span_info->low_bounds[u], sis_span_info->high_bounds[u])) {
+        if (!H5_RANGE_OVERLAP(ss_span_info->low_bounds[u], ss_span_info->high_bounds[u],
+                              sis_span_info->low_bounds[u], sis_span_info->high_bounds[u])) {
             check_intersect = false;
             break;
         } /* end if */
@@ -11441,7 +11467,7 @@ H5S__hyper_proj_int_iterate(H5S_hyper_span_info_t *ss_span_info, const H5S_hyper
             /* Main loop */
             do {
                 /* Check if spans overlap */
-                if (H5S_RANGE_OVERLAP(ss_low, ss_span->high, sis_low, sis_span->high)) {
+                if (H5_RANGE_OVERLAP(ss_low, ss_span->high, sis_low, sis_span->high)) {
                     high = MIN(ss_span->high, sis_span->high);
                     if (ss_span->down) {
                         /* Add skipped elements if there's a pre-gap */
@@ -12104,7 +12130,7 @@ H5S_hyper_get_clip_extent(const H5S_t *clip_space, const H5S_t *match_space, boo
     hsize_t num_slices;    /* Number of slices in unlimited dimension */
     hsize_t ret_value = 0; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(0)
 
     /* Check parameters */
     assert(clip_space);
@@ -12126,6 +12152,7 @@ H5S_hyper_get_clip_extent(const H5S_t *clip_space, const H5S_t *match_space, boo
     /* Call "real" get_clip_extent function */
     ret_value = H5S__hyper_get_clip_extent_real(clip_space, num_slices, incl_trail);
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_hyper_get_clip_extent() */
 
@@ -12161,7 +12188,7 @@ H5S_hyper_get_clip_extent_match(const H5S_t *clip_space, const H5S_t *match_spac
     hsize_t num_slices; /* Number of slices in unlimited dimension */
     hsize_t ret_value = 0; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(0)
 
     /* Check parameters */
     assert(clip_space);
@@ -12207,6 +12234,7 @@ H5S_hyper_get_clip_extent_match(const H5S_t *clip_space, const H5S_t *match_spac
     /* Call "real" get_clip_extent function */
     ret_value = H5S__hyper_get_clip_extent_real(clip_space, num_slices, incl_trail);
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_hyper_get_clip_extent_match() */
 
@@ -12322,7 +12350,7 @@ H5S_hyper_get_first_inc_block(const H5S_t *space, hsize_t clip_size, bool *parti
     H5S_hyper_dim_t *diminfo; /* Convenience pointer to diminfo in unlimited dimension */
     hsize_t          ret_value = 0;
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(0)
 
     /* Check parameters */
     assert(space);
@@ -12337,7 +12365,7 @@ H5S_hyper_get_first_inc_block(const H5S_t *space, hsize_t clip_size, bool *parti
     if (diminfo->start >= clip_size) {
         ret_value = 0;
         if (partial)
-            partial = false;
+            *partial = false;
     } /* end if */
     else {
         /* Calculate index of first incomplete block */
@@ -12352,6 +12380,7 @@ H5S_hyper_get_first_inc_block(const H5S_t *space, hsize_t clip_size, bool *parti
         } /* end if */
     }     /* end else */
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_hyper_get_first_inc_block */
 
@@ -12382,7 +12411,6 @@ H5Sis_regular_hyperslab(hid_t spaceid)
     htri_t ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("t", "i", spaceid);
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
@@ -12431,7 +12459,6 @@ H5Sget_regular_hyperslab(hid_t spaceid, hsize_t start[] /*out*/, hsize_t stride[
     herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "ixxxx", spaceid, start, stride, count, block);
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))

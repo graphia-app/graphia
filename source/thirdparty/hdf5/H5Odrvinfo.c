@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -23,7 +23,8 @@
 
 static void  *H5O__drvinfo_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
                                   size_t p_size, const uint8_t *p);
-static herr_t H5O__drvinfo_encode(H5F_t *f, bool disable_shared, uint8_t *p, const void *_mesg);
+static herr_t H5O__drvinfo_encode(H5F_t *f, bool disable_shared, size_t H5_ATTR_UNUSED p_size, uint8_t *p,
+                                  const void *_mesg);
 static void  *H5O__drvinfo_copy(const void *_mesg, void *_dest);
 static size_t H5O__drvinfo_size(const H5F_t *f, bool disable_shared, const void *_mesg);
 static herr_t H5O__drvinfo_reset(void *_mesg);
@@ -135,8 +136,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__drvinfo_encode(H5F_t H5_ATTR_UNUSED *f, bool H5_ATTR_UNUSED disable_shared, uint8_t *p,
-                    const void *_mesg)
+H5O__drvinfo_encode(H5F_t H5_ATTR_UNUSED *f, bool H5_ATTR_UNUSED disable_shared, size_t H5_ATTR_UNUSED p_size,
+                    uint8_t *p, const void *_mesg)
 {
     const H5O_drvinfo_t *mesg = (const H5O_drvinfo_t *)_mesg;
 

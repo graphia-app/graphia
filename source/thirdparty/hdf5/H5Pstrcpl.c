@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -31,7 +31,6 @@
 #include "H5private.h"  /* Generic Functions			*/
 #include "H5Eprivate.h" /* Error handling		  	*/
 #include "H5Fprivate.h" /* Files */
-#include "H5Iprivate.h" /* IDs			  		*/
 #include "H5Ppkg.h"     /* Property lists		  	*/
 
 /****************/
@@ -141,14 +140,13 @@ H5Pset_char_encoding(hid_t plist_id, H5T_cset_t encoding)
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iTc", plist_id, encoding);
 
     /* Check arguments */
     if (encoding <= H5T_CSET_ERROR || encoding >= H5T_NCSET)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "character encoding is not valid");
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_STRING_CREATE)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_STRING_CREATE, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Set the character encoding */
@@ -175,10 +173,9 @@ H5Pget_char_encoding(hid_t plist_id, H5T_cset_t *encoding /*out*/)
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", plist_id, encoding);
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_STRING_CREATE)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_STRING_CREATE, true)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get value */

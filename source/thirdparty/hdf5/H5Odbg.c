@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -32,7 +32,6 @@
 #include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5MMprivate.h" /* Memory management			*/
 #include "H5Opkg.h"      /* Object headers			*/
-#include "H5Ppublic.h"   /* Property Lists			*/
 
 /****************/
 /* Local Macros */
@@ -88,6 +87,10 @@ H5O__assert(const H5O_t *oh)
 
     FUNC_ENTER_PACKAGE_NOERR
 
+    assert(oh);
+    assert(oh->chunk || oh->nchunks == 0);
+    assert(oh->mesg || oh->nmesgs == 0);
+
     /* Initialize the tracking variables */
     hdr_size   = 0;
     meta_space = (size_t)H5O_SIZEOF_HDR(oh) + (size_t)(H5O_SIZEOF_CHKHDR_OH(oh) * (oh->nchunks - 1));
@@ -140,6 +143,8 @@ H5O__assert(const H5O_t *oh)
     for (u = 0, curr_msg = &oh->mesg[0]; u < oh->nmesgs; u++, curr_msg++) {
         uint8_t H5_ATTR_NDEBUG_UNUSED *curr_hdr;      /* Start of current message header */
         size_t                         curr_tot_size; /* Total size of current message (including header) */
+
+        assert(curr_msg->type);
 
         curr_hdr      = curr_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh);
         curr_tot_size = curr_msg->raw_size + (size_t)H5O_SIZEOF_MSGHDR_OH(oh);
@@ -308,17 +313,17 @@ H5O__debug_real(H5F_t *f, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int
             char       buf[128]; /* Buffer for formatting time info */
 
             /* Time fields */
-            tm = HDlocaltime(&oh->atime);
-            HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
+            tm = localtime(&oh->atime);
+            strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
             fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Access Time:", buf);
-            tm = HDlocaltime(&oh->mtime);
-            HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
+            tm = localtime(&oh->mtime);
+            strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
             fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Modification Time:", buf);
-            tm = HDlocaltime(&oh->ctime);
-            HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
+            tm = localtime(&oh->ctime);
+            strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
             fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Change Time:", buf);
-            tm = HDlocaltime(&oh->btime);
-            HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
+            tm = localtime(&oh->btime);
+            strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
             fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Birth Time:", buf);
         } /* end if */
 

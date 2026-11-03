@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -78,42 +78,42 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
     H5I_type_t        type   = *(H5I_type_t *)_udata;  /* User data */
     const H5G_name_t *path   = NULL;                   /* Path to file object */
     void             *object = NULL;                   /* Pointer to VOL connector object */
+    bool              is_native;                       /* Whether an object using the native VOL connector */
 
     FUNC_ENTER_PACKAGE_NOERR
 
     fprintf(stderr, "         id = %" PRIdHID "\n", info->id);
     fprintf(stderr, "         count = %u\n", info->count);
-    fprintf(stderr, "         obj   = 0x%8p\n", info->object);
+    fprintf(stderr, "         obj   = 0x%8p\n", info->u.c_object);
     fprintf(stderr, "         marked = %d\n", info->marked);
 
     /* Get the group location, so we get get the name */
     switch (type) {
         case H5I_GROUP: {
-            const H5VL_object_t *vol_obj = (const H5VL_object_t *)info->object;
+            const H5VL_object_t *vol_obj = (const H5VL_object_t *)info->u.c_object;
 
-            object = H5VL_object_data(vol_obj);
-            if (H5_VOL_NATIVE == vol_obj->connector->cls->value)
+            is_native = false;
+            H5VL_object_is_native(vol_obj, &is_native);
+            if (is_native)
                 path = H5G_nameof(object);
             break;
         }
 
         case H5I_DATASET: {
-            const H5VL_object_t *vol_obj = (const H5VL_object_t *)info->object;
+            const H5VL_object_t *vol_obj = (const H5VL_object_t *)info->u.c_object;
 
-            object = H5VL_object_data(vol_obj);
-            if (H5_VOL_NATIVE == vol_obj->connector->cls->value)
+            is_native = false;
+            H5VL_object_is_native(vol_obj, &is_native);
+            if (is_native)
                 path = H5D_nameof(object);
             break;
         }
 
         case H5I_DATATYPE: {
-            const H5T_t *dt = (const H5T_t *)info->object;
+            H5T_t *dt = info->u.object;
 
-            H5_GCC_CLANG_DIAG_OFF("cast-qual")
-            object = (void *)H5T_get_actual_type((H5T_t *)dt);
-            H5_GCC_CLANG_DIAG_ON("cast-qual")
-
-            path = H5T_nameof(object);
+            object = H5T_get_actual_type((H5T_t *)dt);
+            path   = H5T_nameof(object);
             break;
         }
 

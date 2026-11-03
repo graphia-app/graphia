@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -233,7 +233,7 @@ H5G_loc_real(void *obj, H5I_type_t type, H5G_loc_t *loc)
         case H5I_BADID:
         case H5I_NTYPES:
         default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid location ID");
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid location type");
     } /* end switch */
 
 done:
@@ -410,8 +410,11 @@ H5G_loc_find(const H5G_loc_t *loc, const char *name, H5G_loc_t *obj_loc /*out*/)
 
     /* Check args. */
     assert(loc);
-    assert(name && *name);
+    assert(name);
     assert(obj_loc);
+
+    if (!*name)
+        HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "invalid object name");
 
     /* Set up user data for locating object */
     udata.loc = obj_loc;
@@ -553,7 +556,7 @@ H5G__loc_insert(H5G_loc_t *grp_loc, char *name, H5G_loc_t *obj_loc, H5O_type_t o
     lnk.u.hard.addr  = obj_loc->oloc->addr;
 
     /* Insert new group into current group's symbol table */
-    if (H5G_obj_insert(grp_loc->oloc, name, &lnk, true, obj_type, crt_info) < 0)
+    if (H5G_obj_insert(grp_loc->oloc, &lnk, true, obj_type, crt_info) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert object");
 
     /* Set the name of the object location */
@@ -578,17 +581,13 @@ H5G__loc_exists_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATTR_
                    const H5O_link_t H5_ATTR_UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata /*in,out*/,
                    H5G_own_loc_t *own_loc /*out*/)
 {
-    bool  *exists    = (bool *)_udata; /* User data passed in */
-    herr_t ret_value = SUCCEED;        /* Return value */
+    bool *exists = (bool *)_udata; /* User data passed in */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check if the name in this group resolved to a valid object */
     if (obj_loc == NULL)
-        if (lnk)
-            *exists = false;
-        else
-            HGOTO_ERROR(H5E_SYM, H5E_INTERNAL, FAIL, "no object or link info?");
+        *exists = false;
     else
         *exists = true;
 
@@ -596,8 +595,7 @@ H5G__loc_exists_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATTR_
      * location for the object */
     *own_loc = H5G_OWN_NONE;
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G__loc_exists_cb() */
 
 /*-------------------------------------------------------------------------
@@ -605,8 +603,7 @@ done:
  *
  * Purpose:	Check if an object actually exists at a location
  *
- * Return:	Success:	true/false
- * 		Failure:	Negative
+ * Return:	Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -644,24 +641,21 @@ H5G__loc_addr_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATTR_UN
                  const H5O_link_t H5_ATTR_UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata /*in,out*/,
                  H5G_own_loc_t *own_loc /*out*/)
 {
-    haddr_t *udata     = (haddr_t *)_udata; /* User data passed in */
-    herr_t   ret_value = SUCCEED;           /* Return value */
+    haddr_t *udata = (haddr_t *)_udata; /* User data passed in */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check if the name in this group resolved to a valid link */
     if (obj_loc == NULL)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist");
+        *udata = HADDR_UNDEF; /* No object found */
+    else
+        *udata = obj_loc->oloc->addr; /* Set address of object */
 
-    /* Set address of object */
-    *udata = obj_loc->oloc->addr;
-
-done:
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */
     *own_loc = H5G_OWN_NONE;
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G__loc_addr_cb() */
 
 /*-------------------------------------------------------------------------
@@ -871,7 +865,7 @@ H5G__loc_set_comment_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_
 
     /* Add the new message */
     if (udata->comment && *udata->comment) {
-        if (NULL == (comment.s = HDstrdup(udata->comment)))
+        if (NULL == (comment.s = strdup(udata->comment)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't copy group comment");
         if (H5O_msg_create(obj_loc->oloc, H5O_NAME_ID, 0, H5O_UPDATE_TIME, &comment) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to set comment object header message");
@@ -953,8 +947,8 @@ H5G__loc_get_comment_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_
     }
     else {
         if (udata->comment && udata->bufsize)
-            HDstrncpy(udata->comment, comment.s, udata->bufsize);
-        udata->comment_size = HDstrlen(comment.s);
+            strncpy(udata->comment, comment.s, udata->bufsize);
+        udata->comment_size = strlen(comment.s);
         H5O_msg_reset(H5O_NAME_ID, &comment);
     }
 

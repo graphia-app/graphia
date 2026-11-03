@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -32,6 +32,7 @@
 #include "H5ACprivate.h" /* Metadata Cache               */
 #include "H5Cpkg.h"      /* Cache                        */
 #include "H5Eprivate.h"  /* Error Handling               */
+#include "H5SLprivate.h" /* Skip Lists                               */
 
 /****************/
 /* Local Macros */
@@ -317,10 +318,10 @@ H5C_set_prefix(H5C_t *cache_ptr, char *prefix)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if (cache_ptr == NULL || prefix == NULL || HDstrlen(prefix) >= H5C__PREFIX_LEN)
+    if (cache_ptr == NULL || prefix == NULL || strlen(prefix) >= H5C__PREFIX_LEN)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad param(s) on entry");
 
-    HDstrncpy(&(cache_ptr->prefix[0]), prefix, (size_t)(H5C__PREFIX_LEN));
+    strncpy(&(cache_ptr->prefix[0]), prefix, (size_t)(H5C__PREFIX_LEN));
 
     cache_ptr->prefix[H5C__PREFIX_LEN - 1] = '\0';
 
@@ -674,7 +675,7 @@ void
 H5C_stats__reset(H5C_t *cache_ptr)
 #else /* NDEBUG */
 #if H5C_COLLECT_CACHE_STATS
-H5C_stats__reset(H5C_t                            *cache_ptr)
+H5C_stats__reset(H5C_t *cache_ptr)
 #else  /* H5C_COLLECT_CACHE_STATS */
 H5C_stats__reset(H5C_t H5_ATTR_UNUSED *cache_ptr)
 #endif /* H5C_COLLECT_CACHE_STATS */

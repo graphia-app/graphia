@@ -4,19 +4,28 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose: The public header file for the Windows driver
+ * Purpose:	The public header file for the Windows virtual file driver (VFD)
+ *
+ *          This VFD uses no Win32 API calls directly (though it may be
+ *          rewritten to do so in the future). It is currently defined to
+ *          be the sec2 VFD.
  */
 #ifndef H5FDwindows_H
 #define H5FDwindows_H
 
-#define H5FD_WINDOWS (H5FD_sec2_init())
+/* Public header files */
+#include "H5FDpublic.h" /* File drivers             */
+#include "H5FDsec2.h"   /* sec2 driver              */
+
+/** ID for the windows VFD */
+#define H5FD_WINDOWS (H5OPEN H5FD_SEC2_id_g)
 
 #ifdef __cplusplus
 extern "C" {

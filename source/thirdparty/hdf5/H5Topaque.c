@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -39,7 +39,6 @@ H5Tset_tag(hid_t type_id, const char *tag)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*s", type_id, tag);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -52,7 +51,7 @@ H5Tset_tag(hid_t type_id, const char *tag)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an opaque data type");
     if (!tag)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no tag");
-    if (HDstrlen(tag) >= H5T_OPAQUE_TAG_MAX)
+    if (strlen(tag) >= H5T_OPAQUE_TAG_MAX)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "tag too long");
 
     /* Commit */
@@ -73,14 +72,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-char *
+H5_ATTR_MALLOC char *
 H5Tget_tag(hid_t type_id)
 {
     H5T_t *dt = NULL;
     char  *ret_value;
 
     FUNC_ENTER_API(NULL)
-    H5TRACE1("*s", "i", type_id);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))

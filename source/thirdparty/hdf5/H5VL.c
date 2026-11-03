@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -27,16 +27,15 @@
 /* Headers */
 /***********/
 
-#include "H5private.h"   /* Generic Functions                    */
-#include "H5CXprivate.h" /* API Contexts                         */
-#include "H5Eprivate.h"  /* Error handling                       */
-#include "H5Iprivate.h"  /* IDs                                  */
-#include "H5Pprivate.h"  /* Property lists                       */
-#include "H5Tprivate.h"  /* Datatypes                            */
-#include "H5VLpkg.h"     /* Virtual Object Layer                 */
+#include "H5private.h"  /* Generic Functions                    */
+#include "H5Eprivate.h" /* Error handling                       */
+#include "H5Iprivate.h" /* IDs                                  */
+#include "H5Pprivate.h" /* Property lists                       */
+#include "H5Tprivate.h" /* Datatypes                            */
+#include "H5VLpkg.h"    /* Virtual Object Layer                 */
 
 /* VOL connectors */
-#include "H5VLnative.h" /* Native VOL connector                 */
+#include "H5VLnative_private.h" /* Native VOL connector                 */
 
 /****************/
 /* Local Macros */
@@ -82,10 +81,10 @@
 hid_t
 H5VLregister_connector(const H5VL_class_t *cls, hid_t vipl_id)
 {
-    hid_t ret_value = H5I_INVALID_HID; /* Return value */
+    H5VL_connector_t *connector = NULL;
+    hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE2("i", "*#i", cls, vipl_id);
 
     /* Check VOL initialization property list */
     if (H5P_DEFAULT == vipl_id)
@@ -94,10 +93,20 @@ H5VLregister_connector(const H5VL_class_t *cls, hid_t vipl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a VOL initialize property list");
 
     /* Register connector */
-    if ((ret_value = H5VL__register_connector_by_class(cls, true, vipl_id)) < 0)
+    if (NULL == (connector = H5VL__register_connector_by_class(cls, vipl_id)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL class");
+
+    /* Get ID for connector */
+    if ((ret_value = H5I_register(H5I_VOL, connector, true)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL connector");
 
 done:
+    if (ret_value < 0)
+        /* Decrement refcount on connector */
+        if (connector && H5VL_conn_dec_rc(connector) < 0)
+            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID,
+                        "unable to decrement ref count on VOL connector");
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5VLregister_connector() */
 
@@ -121,15 +130,15 @@ done:
 hid_t
 H5VLregister_connector_by_name(const char *name, hid_t vipl_id)
 {
-    hid_t ret_value = H5I_INVALID_HID; /* Return value */
+    H5VL_connector_t *connector = NULL;
+    hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE2("i", "*si", name, vipl_id);
 
     /* Check arguments */
     if (!name)
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID, "null VOL connector name is disallowed");
-    if (0 == HDstrlen(name))
+    if (0 == strlen(name))
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID,
                     "zero-length VOL connector name is disallowed");
 
@@ -140,10 +149,20 @@ H5VLregister_connector_by_name(const char *name, hid_t vipl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a VOL initialize property list");
 
     /* Register connector */
-    if ((ret_value = H5VL__register_connector_by_name(name, true, vipl_id)) < 0)
+    if (NULL == (connector = H5VL__register_connector_by_name(name, vipl_id)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL connector");
 
+    /* Get ID for connector */
+    if ((ret_value = H5I_register(H5I_VOL, connector, true)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL connector ID");
+
 done:
+    if (ret_value < 0)
+        /* Decrement refcount on connector */
+        if (connector && H5VL_conn_dec_rc(connector) < 0)
+            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID,
+                        "unable to decrement ref count on VOL connector");
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5VLregister_connector_by_name() */
 
@@ -167,10 +186,10 @@ done:
 hid_t
 H5VLregister_connector_by_value(H5VL_class_value_t value, hid_t vipl_id)
 {
-    hid_t ret_value = H5I_INVALID_HID; /* Return value */
+    H5VL_connector_t *connector = NULL;
+    hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE2("i", "VCi", value, vipl_id);
 
     /* Check arguments */
     if (value < 0)
@@ -184,10 +203,20 @@ H5VLregister_connector_by_value(H5VL_class_value_t value, hid_t vipl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a VOL initialize property list");
 
     /* Register connector */
-    if ((ret_value = H5VL__register_connector_by_value(value, true, vipl_id)) < 0)
+    if (NULL == (connector = H5VL__register_connector_by_value(value, vipl_id)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL connector");
 
+    /* Get ID for connector */
+    if ((ret_value = H5I_register(H5I_VOL, connector, true)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL connector ID");
+
 done:
+    if (ret_value < 0)
+        /* Decrement refcount on connector */
+        if (connector && H5VL_conn_dec_rc(connector) < 0)
+            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID,
+                        "unable to decrement ref count on VOL connector");
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5VLregister_connector_by_value() */
 
@@ -209,7 +238,6 @@ H5VLis_connector_registered_by_name(const char *name)
     htri_t ret_value = false; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("t", "*s", name);
 
     /* Check if connector with this name is registered */
     if ((ret_value = H5VL__is_connector_registered_by_name(name)) < 0)
@@ -237,7 +265,6 @@ H5VLis_connector_registered_by_value(H5VL_class_value_t connector_value)
     htri_t ret_value = false;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("t", "VC", connector_value);
 
     /* Check if connector with this value is registered */
     if ((ret_value = H5VL__is_connector_registered_by_value(connector_value)) < 0)
@@ -262,14 +289,18 @@ done:
 hid_t
 H5VLget_connector_id(hid_t obj_id)
 {
-    hid_t ret_value = H5I_INVALID_HID; /* Return value */
+    H5VL_object_t *vol_obj   = NULL;
+    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "i", obj_id);
 
-    /* Get connector ID */
-    if ((ret_value = H5VL__get_connector_id(obj_id, true)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL id");
+    /* Get the underlying VOL object for the object ID */
+    if (NULL == (vol_obj = H5VL_vol_object(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
+
+    /* Register an ID for the connector */
+    if ((ret_value = H5VL_conn_register(vol_obj->connector)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "can't get VOL ID");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -292,16 +323,26 @@ done:
 hid_t
 H5VLget_connector_id_by_name(const char *name)
 {
-    hid_t ret_value = H5I_INVALID_HID; /* Return value */
+    H5VL_connector_t *connector = NULL;
+    hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "*s", name);
 
     /* Get connector ID with this name */
-    if ((ret_value = H5VL__get_connector_id_by_name(name, true)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL id");
+    if (NULL == (connector = H5VL__get_connector_by_name(name)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL connector");
+
+    /* Get ID for connector */
+    if ((ret_value = H5I_register(H5I_VOL, connector, true)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL connector ID");
 
 done:
+    if (ret_value < 0)
+        /* Decrement refcount on connector */
+        if (connector && H5VL_conn_dec_rc(connector) < 0)
+            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID,
+                        "unable to decrement ref count on VOL connector");
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5VLget_connector_id_by_name() */
 
@@ -322,80 +363,28 @@ done:
 hid_t
 H5VLget_connector_id_by_value(H5VL_class_value_t connector_value)
 {
-    hid_t ret_value = H5I_INVALID_HID; /* Return value */
+    H5VL_connector_t *connector = NULL;
+    hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "VC", connector_value);
 
     /* Get connector ID with this value */
-    if ((ret_value = H5VL__get_connector_id_by_value(connector_value, true)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL id");
+    if (NULL == (connector = H5VL__get_connector_by_value(connector_value)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL connector");
+
+    /* Get ID for connector */
+    if ((ret_value = H5I_register(H5I_VOL, connector, true)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL connector ID");
 
 done:
+    if (ret_value < 0)
+        /* Decrement refcount on connector */
+        if (connector && H5VL_conn_dec_rc(connector) < 0)
+            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID,
+                        "unable to decrement ref count on VOL connector");
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5VLget_connector_id_by_value() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5VLpeek_connector_id_by_name
- *
- * Purpose:     Retrieves the ID for a registered VOL connector.
- *
- * Return:      A valid VOL connector ID if a connector by that name has
- *              been registered. This ID is *not* owned by the caller and
- *              H5VLclose() should not be called.  Intended for use by VOL
- *              connectors to find their own ID.
- *
- *              H5I_INVALID_HID on error or if a VOL connector of that
- *              name has not been registered.
- *
- *-------------------------------------------------------------------------
- */
-hid_t
-H5VLpeek_connector_id_by_name(const char *name)
-{
-    hid_t ret_value = H5I_INVALID_HID; /* Return value */
-
-    FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "*s", name);
-
-    /* Get connector ID with this name */
-    if ((ret_value = H5VL__peek_connector_id_by_name(name)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL id");
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5VLpeek_connector_id_by_name() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5VLpeek_connector_id_by_value
- *
- * Purpose:     Retrieves the ID for a registered VOL connector.
- *
- * Return:      A valid VOL connector ID if a connector with that value
- *              has been registered. This ID is *not* owned by the caller
- *              and H5VLclose() should not be called.  Intended for use by
- *              VOL connectors to find their own ID.
- *
- *              H5I_INVALID_HID on error or if a VOL connector with that
- *              value has not been registered.
- *
- *-------------------------------------------------------------------------
- */
-hid_t
-H5VLpeek_connector_id_by_value(H5VL_class_value_t value)
-{
-    hid_t ret_value = H5I_INVALID_HID; /* Return value */
-
-    FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "VC", value);
-
-    /* Get connector ID with this value */
-    if ((ret_value = H5VL__peek_connector_id_by_value(value)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL id");
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5VLpeek_connector_id_by_value() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VLget_connector_name
@@ -417,14 +406,17 @@ done:
 ssize_t
 H5VLget_connector_name(hid_t obj_id, char *name /*out*/, size_t size)
 {
-    ssize_t ret_value = -1;
+    H5VL_object_t *vol_obj;
+    ssize_t        ret_value = -1;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("Zs", "ixz", obj_id, name, size);
+
+    /* Get the object pointer */
+    if (NULL == (vol_obj = H5VL_vol_object(obj_id)))
+        HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, FAIL, "invalid VOL identifier");
 
     /* Call internal routine */
-    if ((ret_value = H5VL__get_connector_name(obj_id, name, size)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "Can't get connector name");
+    ret_value = (ssize_t)H5VL__get_connector_name(vol_obj->connector, name, size);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -449,7 +441,6 @@ H5VLclose(hid_t vol_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", vol_id);
 
     /* Check args */
     if (NULL == H5I_object_verify(vol_id, H5I_VOL))
@@ -475,7 +466,6 @@ done:
  *              to do so are considered an error.
  *
  * Return:      Success:    Non-negative
- *
  *              Failure:    Negative
  *
  *-------------------------------------------------------------------------
@@ -483,31 +473,28 @@ done:
 herr_t
 H5VLunregister_connector(hid_t vol_id)
 {
-    hid_t  native_id = H5I_INVALID_HID;
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5VL_connector_t *native, *connector;
+    int               cmp_value;           /* Comparison result */
+    herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", vol_id);
 
     /* Check arguments */
-    if (NULL == H5I_object_verify(vol_id, H5I_VOL))
+    if (NULL == (connector = H5I_object_verify(vol_id, H5I_VOL)))
         HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, FAIL, "not a VOL connector ID");
 
     /* For the time being, we disallow unregistering the native VOL connector */
-    if (H5I_INVALID_HID == (native_id = H5VL__get_connector_id_by_name(H5VL_NATIVE_NAME, false)))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to find the native VOL connector ID");
-    if (vol_id == native_id)
+    native = H5VL_NATIVE_conn_g;
+    if (H5VL_cmp_connector_cls(&cmp_value, connector->cls, native->cls) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCOMPARE, FAIL, "can't compare connector classes");
+    if (0 == cmp_value)
         HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "unregistering the native VOL connector is not allowed");
 
-    /* The H5VL_class_t struct will be freed by this function */
+    /* The H5VL_connector_t struct will be freed by this function */
     if (H5I_dec_app_ref(vol_id) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to unregister VOL connector");
 
 done:
-    if (native_id != H5I_INVALID_HID)
-        if (H5I_dec_ref(native_id) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement count on native_id");
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5VLunregister_connector() */
 
@@ -528,20 +515,19 @@ done:
 herr_t
 H5VLcmp_connector_cls(int *cmp, hid_t connector_id1, hid_t connector_id2)
 {
-    H5VL_class_t *cls1, *cls2;         /* connectors for IDs */
-    herr_t        ret_value = SUCCEED; /* Return value */
+    H5VL_connector_t *conn1, *conn2;       /* Connectors for IDs */
+    herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "*Isii", cmp, connector_id1, connector_id2);
 
     /* Check args and get class pointers */
-    if (NULL == (cls1 = (H5VL_class_t *)H5I_object_verify(connector_id1, H5I_VOL)))
+    if (NULL == (conn1 = H5I_object_verify(connector_id1, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID");
-    if (NULL == (cls2 = (H5VL_class_t *)H5I_object_verify(connector_id2, H5I_VOL)))
+    if (NULL == (conn2 = H5I_object_verify(connector_id2, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID");
 
     /* Compare the two VOL connector classes */
-    if (H5VL_cmp_connector_cls(cmp, cls1, cls2) < 0)
+    if (H5VL_cmp_connector_cls(cmp, conn1->cls, conn2->cls) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCOMPARE, FAIL, "can't compare connector classes");
 
 done:
@@ -573,7 +559,6 @@ H5VLwrap_register(void *obj, H5I_type_t type)
 
     /* Use FUNC_ENTER_API_NOINIT here, so the API context doesn't get reset */
     FUNC_ENTER_API_NOINIT
-    H5TRACE2("i", "*xIt", obj, type);
 
     /* Check args */
     /* Use a switch here for (hopefully) better performance than a series of
@@ -636,7 +621,6 @@ H5VLobject(hid_t id)
     void *ret_value; /* Return value */
 
     FUNC_ENTER_API(NULL)
-    H5TRACE1("*x", "i", id);
 
     /* Retrieve the object pointer for the ID */
     if (NULL == (ret_value = H5VL_object(id)))
@@ -657,13 +641,12 @@ done:
  *---------------------------------------------------------------------------
  */
 herr_t
-H5VLobject_is_native(hid_t obj_id, hbool_t *is_native)
+H5VLobject_is_native(hid_t obj_id, bool *is_native)
 {
     H5VL_object_t *vol_obj   = NULL;
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*b", obj_id, is_native);
 
     if (!is_native)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "`is_native` argument is NULL");
@@ -692,45 +675,47 @@ done:
 hid_t
 H5VLget_file_type(void *file_obj, hid_t connector_id, hid_t dtype_id)
 {
-    H5T_t         *dtype;               /* unregistered type       */
-    H5T_t         *file_type    = NULL; /* copied file type        */
-    hid_t          file_type_id = -1;   /* copied file type id     */
-    H5VL_object_t *file_vol_obj = NULL; /* VOL object for file     */
-    hid_t          ret_value    = -1;   /* Return value            */
+    H5T_t            *dtype;               /* unregistered type       */
+    H5T_t            *file_type    = NULL; /* copied file type        */
+    hid_t             file_type_id = -1;   /* copied file type id     */
+    H5VL_connector_t *connector;           /* VOL connector */
+    H5VL_object_t    *file_vol_obj = NULL; /* VOL object for file     */
+    hid_t             ret_value    = -1;   /* Return value            */
 
-    FUNC_ENTER_API(FAIL)
-    H5TRACE3("i", "*xii", file_obj, connector_id, dtype_id);
+    FUNC_ENTER_API(H5I_INVALID_HID)
 
     /* Check args */
     if (!file_obj)
-        HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL, "no file object supplied");
-    if (NULL == (dtype = (H5T_t *)H5I_object_verify(dtype_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID, "no file object supplied");
+    if (NULL == (dtype = H5I_object_verify(dtype_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    if (NULL == (connector = H5I_object_verify(connector_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file VOL ID");
 
     /* Create VOL object for file if necessary (force_conv will be true if and
      * only if file needs to be passed to H5T_set_loc) */
-    if (H5T_GET_FORCE_CONV(dtype) &&
-        (NULL == (file_vol_obj = H5VL_create_object_using_vol_id(H5I_FILE, file_obj, connector_id))))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, FAIL, "can't create VOL object");
+    if (H5T_GET_FORCE_CONV(dtype))
+        if (NULL == (file_vol_obj = H5VL_new_vol_obj(H5I_FILE, file_obj, connector, true)))
+            HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, FAIL, "can't create VOL object");
 
     /* Copy the datatype */
     if (NULL == (file_type = H5T_copy(dtype, H5T_COPY_TRANSIENT)))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTCOPY, FAIL, "unable to copy datatype");
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCOPY, H5I_INVALID_HID, "unable to copy datatype");
 
     /* Register file type id */
     if ((file_type_id = H5I_register(H5I_DATATYPE, file_type, false)) < 0) {
         (void)H5T_close_real(file_type);
-        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "unable to register file datatype");
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file datatype");
     } /* end if */
 
     /* Set the location of the datatype to be in the file */
     if (H5T_set_loc(file_type, file_vol_obj, H5T_LOC_DISK) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't set datatype location");
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, H5I_INVALID_HID, "can't set datatype location");
 
     /* Release our reference to file_type */
     if (file_vol_obj) {
         if (H5VL_free_object(file_vol_obj) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to free VOL object");
+            HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID, "unable to free VOL object");
         file_vol_obj = NULL;
     } /* end if */
 
@@ -741,9 +726,9 @@ done:
     /* Cleanup on error */
     if (ret_value < 0) {
         if (file_vol_obj && H5VL_free_object(file_vol_obj) < 0)
-            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to free VOL object");
+            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID, "unable to free VOL object");
         if (file_type_id >= 0 && H5I_dec_ref(file_type_id) < 0)
-            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to close file datatype");
+            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID, "unable to close file datatype");
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)
@@ -770,7 +755,6 @@ H5VLretrieve_lib_state(void **state /*out*/)
 
     /* Must use this, to avoid modifying the API context stack in FUNC_ENTER */
     FUNC_ENTER_API_NOINIT
-    H5TRACE1("e", "x", state);
 
     /* Check args */
     if (NULL == state)
@@ -784,35 +768,25 @@ done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* H5VLretrieve_lib_state() */
 
-/*---------------------------------------------------------------------------
- * Function:    H5VLstart_lib_state
- *
- * Purpose:     Opens a new internal state for the HDF5 library.
- *
- * Note:        This routine is _only_ for HDF5 VOL connector authors!  It is
- *              _not_ part of the public API for HDF5 application developers.
- *
- * Return:      Success:    Non-negative
- *              Failure:    Negative
- *
- *---------------------------------------------------------------------------
- */
 herr_t
-H5VLstart_lib_state(void)
+H5VLopen_lib_context(void **context)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     /* Must use this, to avoid modifying the API context stack in FUNC_ENTER */
     FUNC_ENTER_API_NOINIT
-    H5TRACE0("e", "");
+
+    /* Check args */
+    if (NULL == context)
+        HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "invalid context pointer");
 
     /* Start a new library state */
-    if (H5VL_start_lib_state() < 0)
+    if (H5VL_start_lib_state(context) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't start new library state");
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
-} /* H5VLstart_lib_state() */
+} /* H5VLopen_lib_context() */
 
 /*---------------------------------------------------------------------------
  * Function:    H5VLrestore_lib_state
@@ -834,7 +808,6 @@ H5VLrestore_lib_state(const void *state)
 
     /* Must use this, to avoid modifying the API context stack in FUNC_ENTER */
     FUNC_ENTER_API_NOINIT
-    H5TRACE1("e", "*x", state);
 
     /* Check args */
     if (NULL == state)
@@ -848,40 +821,25 @@ done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* H5VLrestore_lib_state() */
 
-/*---------------------------------------------------------------------------
- * Function:    H5VLfinish_lib_state
- *
- * Purpose:     Closes the internal state of the HDF5 library, undoing the
- *              affects of H5VLstart_lib_state.
- *
- * Note:        This routine is _only_ for HDF5 VOL connector authors!  It is
- *              _not_ part of the public API for HDF5 application developers.
- *
- * Note:        This routine must be called as a "pair" with
- *              H5VLstart_lib_state.  It can be called before / after /
- *              independently of H5VLfree_lib_state.
- *
- * Return:      Success:    Non-negative
- *              Failure:    Negative
- *
- *---------------------------------------------------------------------------
- */
 herr_t
-H5VLfinish_lib_state(void)
+H5VLclose_lib_context(void *context)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     /* Must use this, to avoid modifying the API context stack in FUNC_ENTER */
     FUNC_ENTER_API_NOINIT
-    H5TRACE0("e", "");
+
+    /* Check args */
+    if (NULL == context)
+        HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "invalid context pointer");
 
     /* Reset the library state */
-    if (H5VL_finish_lib_state() < 0)
+    if (H5VL_finish_lib_state(context) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset library state");
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
-} /* H5VLfinish_lib_state() */
+} /* H5VLclose_lib_context() */
 
 /*---------------------------------------------------------------------------
  * Function:    H5VLfree_lib_state
@@ -905,7 +863,6 @@ H5VLfree_lib_state(void *state)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "*x", state);
 
     /* Check args */
     if (NULL == state)
@@ -938,7 +895,6 @@ H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_type, uint64_t 
     herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "iVSIsx", obj_id, subcls, opt_type, flags);
 
     /* Check args */
     if (NULL == flags)
@@ -989,7 +945,6 @@ H5VLregister_opt_operation(H5VL_subclass_t subcls, const char *op_name, int *op_
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "VS*sx", subcls, op_name, op_val);
 
     /* Check args */
     if (NULL == op_val)
@@ -1028,7 +983,6 @@ H5VLfind_opt_operation(H5VL_subclass_t subcls, const char *op_name, int *op_val 
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "VS*sx", subcls, op_name, op_val);
 
     /* Check args */
     if (NULL == op_val)
@@ -1066,7 +1020,6 @@ H5VLunregister_opt_operation(H5VL_subclass_t subcls, const char *op_name)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "VS*s", subcls, op_name);
 
     /* Check args */
     if (NULL == op_name)

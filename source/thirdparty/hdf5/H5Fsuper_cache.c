@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -35,9 +35,7 @@
 #include "H5FDprivate.h" /* File drivers				*/
 #include "H5FLprivate.h" /* Free Lists                           */
 #include "H5Gpkg.h"      /* Groups		  		*/
-#include "H5Iprivate.h"  /* IDs			  		*/
 #include "H5MMprivate.h" /* Memory management                    */
-#include "H5Pprivate.h"  /* Property lists			*/
 
 /****************/
 /* Local Macros */
@@ -308,8 +306,7 @@ H5F__cache_superblock_get_initial_load_size(void H5_ATTR_UNUSED *_udata, size_t 
     assert(image_len);
 
     /* Set the initial image length size */
-    *image_len = H5F_SUPERBLOCK_FIXED_SIZE + /* Fixed size of superblock */
-                 H5F_SUPERBLOCK_MINIMAL_VARLEN_SIZE;
+    *image_len = H5F_SUPERBLOCK_SPEC_READ_SIZE;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5F__cache_superblock_get_initial_load_size() */
@@ -373,7 +370,7 @@ H5F__cache_superblock_verify_chksum(const void *_image, size_t len, void *_udata
     uint32_t                   computed_chksum; /* Computed metadata checksum value */
     htri_t                     ret_value = true;
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     assert(image);
     assert(udata);
@@ -382,12 +379,14 @@ H5F__cache_superblock_verify_chksum(const void *_image, size_t len, void *_udata
     if (udata->super_vers >= HDF5_SUPERBLOCK_VERSION_2) {
 
         /* Get stored and computed checksums */
-        H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
+        if (H5F_get_checksums(image, len, &stored_chksum, &computed_chksum) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get checksums");
 
         if (stored_chksum != computed_chksum)
             ret_value = false;
     }
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__cache_superblock_verify_chksum() */
 

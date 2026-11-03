@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -56,10 +56,13 @@
 
 /* ID information structure used */
 typedef struct H5I_id_info_t {
-    hid_t       id;        /* ID for this info */
-    unsigned    count;     /* Ref. count for this ID */
-    unsigned    app_count; /* Ref. count of application visible IDs */
-    const void *object;    /* Pointer associated with the ID */
+    hid_t    id;        /* ID for this info */
+    unsigned count;     /* Ref. count for this ID */
+    unsigned app_count; /* Ref. count of application visible IDs */
+    union {
+        const void *c_object; /* Const pointer associated with the ID */
+        void       *object;   /* Pointer associated with the ID */
+    } u;
 
     /* Future ID info */
     bool                      is_future;  /* Whether this ID represents a future object */
@@ -103,6 +106,7 @@ H5_DLLVAR int H5I_next_type_g;
 
 H5_DLL hid_t          H5I__register(H5I_type_t type, const void *object, bool app_ref,
                                     H5I_future_realize_func_t realize_cb, H5I_future_discard_func_t discard_cb);
+H5_DLL H5I_type_t     H5I__register_type_common(unsigned reserved, H5I_free_t free_func);
 H5_DLL int            H5I__destroy_type(H5I_type_t type);
 H5_DLL void          *H5I__remove_verify(hid_t id, H5I_type_t type);
 H5_DLL int            H5I__inc_type_ref(H5I_type_t type);

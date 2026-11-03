@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -14,7 +14,6 @@
 
 #include "H5private.h"   /* Generic Functions			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Fprivate.h"  /* File access                          */
 #include "H5MMprivate.h" /* Memory management			*/
 #include "H5Zpkg.h"      /* Data filters				*/
 
@@ -104,7 +103,7 @@ H5Z__filter_fletcher32(unsigned flags, size_t H5_ATTR_UNUSED cd_nelmts,
         }
 
         /* Set return values */
-        /* (Re-use the input buffer, just note that the size is smaller by the size of the checksum) */
+        /* (Reuse the input buffer, just note that the size is smaller by the size of the checksum) */
         ret_value = nbytes - FLETCHER_LEN;
     }
     else {                  /* Write */

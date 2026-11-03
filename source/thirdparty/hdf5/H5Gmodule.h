@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -22,10 +22,13 @@
  *      reporting macros.
  */
 #define H5G_MODULE
-#define H5_MY_PKG     H5G
-#define H5_MY_PKG_ERR H5E_SYM
+#define H5_MY_PKG      H5G
+#define H5_MY_PKG_INIT YES
 
 /**  \page H5G_UG HDF5 Groups
+ *
+ * Navigate back: \ref index "Main" / \ref UG
+ * <hr>
  *
  * \section sec_group HDF5 Groups
  * \subsection subsec_group_intro Introduction
@@ -199,11 +202,11 @@
  * slash is a always a member of the component indicated by the link name preceding that slash.
  *
  * The first component in the path name may be any of the following:
- * \li The special character dot (., a period), indicating the current group
+ * \li The special character dot (., a single period), indicating the current group
  * \li The special character slash (/), indicating the root group
  * \li Any member of the current group
  *
- * Component link names may be any string of ASCII characters not containing a slash or a dot
+ * Component link names may be any string of ASCII characters not containing a slash or a single dot
  * (/ and ., which are reserved as noted above). However, users are advised to avoid the use of
  * punctuation and non-printing characters, as they may create problems for other software. The
  * figure below provides a BNF grammar for HDF5 path names.
@@ -316,15 +319,12 @@
  * stored in either the original indexed format or the compact-or-indexed format.
  *
  * \subsection subsec_group_h5dump Using h5dump
- * You can use h5dump, the command-line utility distributed with HDF5, to examine a file for
+ * You can use \ref sec_cltools_h5dump, the command-line utility distributed with HDF5, to examine a file for
  * purposes either of determining where to create an object within an HDF5 file or to verify that
  * you have created an object in the intended place.
  *
- * In the case of the new group created later in this chapter, the following h5dump command will
- * display the contents of FileA.h5:
- * \code
- * h5dump FileA.h5
- * \endcode
+ * In the case of the new group created later in this chapter, the following \ref sec_cltools_h5dump command
+ * will display the contents of FileA.h5: \code h5dump FileA.h5 \endcode
  *
  * For more information, @see @ref subsubsec_group_program_create.
  *
@@ -341,9 +341,9 @@
  * }
  * \endcode
  *
- * h5dump is described on the “HDF5 Tools” page of the \ref RM.
+ * \ref sec_cltools_h5dump is described on the \ref sec_cltools page of the \ref UG.
  *
- * The HDF5 DDL grammar is described in the @ref DDLBNF110.
+ * The HDF5 DDL grammar is described in the @ref DDLBNF200.
  *
  * \subsection subsec_group_function Group Function Summaries
  * Functions that can be used with groups (\ref H5G functions) and property list functions that can used
@@ -415,7 +415,6 @@
  * <td>#H5Lcreate_ud</td>
  * <td>Creates a link of a user-defined type.</td>
  * </tr>
- * </tr>
  * <tr>
  * <td>#H5Lget_val</td>
  * <td>Returns the value of a symbolic link. Replaces H5Gget_linkval.</td>
@@ -477,7 +476,9 @@
  * </tr>
  * </table>
  *
+ * <div>
  * \snippet{doc} tables/propertyLists.dox gcpl_table
+ * </div>
  *
  * <table>
  * <caption>Other external link functions</caption>
@@ -720,7 +721,7 @@
  *
  * <h4>Mounting a File</h4>
  * An external link is a permanent connection between two files. A temporary connection can be set
- * up with the #H5Fmount function. For more information, @see sec_file.
+ * up with the #H5Fmount function. For more information, @see \ref sec_file.
  * For more information, see the #H5Fmount function in the \ref RM.
  *
  * \subsubsection subsubsec_group_program_info Discovering Information about Objects
@@ -773,8 +774,8 @@
  * \image html Groups_fig9_aa.gif "c) A link named dset2 to the same dataset is created in /group2."
  * </td>
  * <td>
- * \image html Groups_fig9_bb.gif "d) The link from /group1 to dset1 is removed. The dataset is
- * still in the file, but can be accessed only as /group2/dset2."
+ * \image html Groups_fig9_bb.gif "d) The link from /group1 to dset1 is removed."
+ * The dataset is still in the file, but can be accessed only as /group2/dset2.
  * </td>
  * </tr>
  * </table>
@@ -809,8 +810,7 @@
  * </tr>
  * <tr>
  * <td>
- * \image html Groups_fig10_c.gif "c) dset1 has three names: /group1/dset1, /group2/dset2, and
- * /group1/GXX/dset2."
+ * \image html Groups_fig10_c.gif "c) dset1 has 3 names: /group1/dset1, /group2/dset2, and /group1/GXX/dset2."
  * </td>
  * <td>
  * \image html Groups_fig10_d.gif "d) dset1 has an infinite number of available path names."
@@ -850,6 +850,9 @@
  * </table>
  *
  * Previous Chapter \ref sec_file - Next Chapter \ref sec_dataset
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG
  *
  */
 

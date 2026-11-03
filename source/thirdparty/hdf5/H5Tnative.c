@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -18,10 +18,8 @@
 #include "H5Tmodule.h" /* This source code file is part of the H5T module */
 
 #include "H5private.h"   /* Generic Functions            */
-#include "H5CXprivate.h" /* API Contexts                         */
 #include "H5Eprivate.h"  /* Error handling              */
 #include "H5Iprivate.h"  /* IDs                      */
-#include "H5Pprivate.h"  /* Property lists            */
 #include "H5MMprivate.h" /* Memory management            */
 #include "H5Tpkg.h"      /* Datatypes                */
 
@@ -30,7 +28,7 @@ static H5T_t *H5T__get_native_type(H5T_t *dt, H5T_direction_t direction, size_t 
                                    size_t *comp_size);
 static H5T_t *H5T__get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction,
                                       size_t *struct_align, size_t *offset, size_t *comp_size);
-static H5T_t *H5T__get_native_float(size_t size, H5T_direction_t direction, size_t *struct_align,
+static H5T_t *H5T__get_native_float(const H5T_t *dtype, H5T_direction_t direction, size_t *struct_align,
                                     size_t *offset, size_t *comp_size);
 static H5T_t *H5T__get_native_bitfield(size_t prec, H5T_direction_t direction, size_t *struct_align,
                                        size_t *offset, size_t *comp_size);
@@ -50,9 +48,14 @@ static herr_t H5T__cmp_offset(size_t *comp_size, size_t *offset, size_t elem_siz
  *                      H5T_NATIVE_LONG         H5T_NATIVE_ULONG
  *                      H5T_NATIVE_LLONG        H5T_NATIVE_ULLONG
  *
+ *                      H5T_NATIVE_FLOAT16 (if available)
  *                      H5T_NATIVE_FLOAT
  *                      H5T_NATIVE_DOUBLE
  *                      H5T_NATIVE_LDOUBLE
+ *
+ *                      H5T_NATIVE_FLOAT_COMPLEX (if available)
+ *                      H5T_NATIVE_DOUBLE_COMPLEX (if available)
+ *                      H5T_NATIVE_LDOUBLE_COMPLEX (if available)
  *
  *              Compound, array, enum, and VL types all choose among these
  *              types for their members.  Time, Bitfield, Opaque, Reference
@@ -73,7 +76,6 @@ H5Tget_native_type(hid_t type_id, H5T_direction_t direction)
     hid_t  ret_value;        /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE2("i", "iTd", type_id, direction);
 
     /* Check arguments */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -159,7 +161,8 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
         break;
 
         case H5T_FLOAT:
-            if (NULL == (ret_value = H5T__get_native_float(size, direction, struct_align, offset, comp_size)))
+            if (NULL ==
+                (ret_value = H5T__get_native_float(dtype, direction, struct_align, offset, comp_size)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve float type");
 
             break;
@@ -332,7 +335,6 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
 
         case H5T_ENUM: {
             H5T_path_t *tpath; /* Type conversion info    */
-            hid_t       super_type_id, nat_super_type_id;
 
             /* Don't need to do anything special for alignment, offset since the ENUM type usually is integer.
              */
@@ -343,11 +345,6 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
             if (NULL == (nat_super_type =
                              H5T__get_native_type(super_type, direction, struct_align, offset, comp_size)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "base native type retrieval failed");
-
-            if ((super_type_id = H5I_register(H5I_DATATYPE, super_type, false)) < 0)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot register datatype");
-            if ((nat_super_type_id = H5I_register(H5I_DATATYPE, nat_super_type, false)) < 0)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot register datatype");
 
             /* Allocate room for the enum values */
             if (NULL == (tmp_memb_value = H5MM_calloc(H5T_get_size(super_type))))
@@ -375,7 +372,7 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get member value");
                 H5MM_memcpy(memb_value, tmp_memb_value, H5T_get_size(super_type));
 
-                if (H5T_convert(tpath, super_type_id, nat_super_type_id, (size_t)1, (size_t)0, (size_t)0,
+                if (H5T_convert(tpath, super_type, nat_super_type, (size_t)1, (size_t)0, (size_t)0,
                                 memb_value, NULL) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get member value");
 
@@ -386,12 +383,10 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
             memb_value     = H5MM_xfree(memb_value);
             tmp_memb_value = H5MM_xfree(tmp_memb_value);
 
-            /* Close base type */
-            if (H5I_dec_app_ref(nat_super_type_id) < 0)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot close datatype");
-            /* Close super type */
-            if (H5I_dec_app_ref(super_type_id) < 0)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot close datatype");
+            if (H5T_close(nat_super_type) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "can't close datatype");
+            if (H5T_close(super_type) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "can't close datatype");
 
             ret_value = new_type;
         } /* end case */
@@ -450,7 +445,7 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
             size_t vl_size    = 0;
             size_t super_size = 0;
 
-            /* Retrieve base type for array type */
+            /* Retrieve base type for variable-length type */
             if (NULL == (super_type = H5T_get_super(dtype)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to get parent type for VL type");
             /* Don't need alignment, offset information if this VL isn't a field of compound type.  If it
@@ -463,7 +458,7 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
             if (H5T_close_real(super_type) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_CLOSEERROR, NULL, "cannot close datatype");
 
-            /* Create a new array type based on native type */
+            /* Create a new variable-length type based on native type */
             if (NULL == (new_type = H5T__vlen_create(nat_super_type)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to create VL type");
 
@@ -476,6 +471,38 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
             vl_size  = sizeof(hvl_t);
 
             if (H5T__cmp_offset(comp_size, offset, vl_size, (size_t)1, vl_align, struct_align) < 0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot compute compound offset");
+
+            ret_value = new_type;
+        } /* end case */
+        break;
+
+        case H5T_COMPLEX: {
+            size_t super_offset = 0;
+            size_t super_size   = 0;
+            size_t super_align  = 0;
+
+            /* Retrieve base type for complex number type */
+            if (NULL == (super_type = H5T_get_super(dtype)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to get parent type for complex number type");
+
+            if (NULL == (nat_super_type = H5T__get_native_type(super_type, direction, &super_align,
+                                                               &super_offset, &super_size)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "parent native type retrieval failed");
+
+            /* Close super type */
+            if (H5T_close_real(super_type) < 0)
+                HGOTO_ERROR(H5E_ARGS, H5E_CLOSEERROR, NULL, "cannot close datatype");
+
+            /* Create a new complex number type based on native type */
+            if (NULL == (new_type = H5T__complex_create(nat_super_type)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to create complex number type");
+
+            /* Close base type */
+            if (H5T_close_real(nat_super_type) < 0)
+                HGOTO_ERROR(H5E_ARGS, H5E_CLOSEERROR, NULL, "cannot close datatype");
+
+            if (H5T__cmp_offset(comp_size, offset, new_type->shared->size, 1, super_align, struct_align) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot compute compound offset");
 
             ret_value = new_type;
@@ -519,14 +546,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__get_native_type() */
 
-/* Disable warning for intentional identical branches here -QAK */
-/*
- *       This pragma only needs to surround the "duplicated branches" in
- *       the code below, but early (4.4.7, at least) gcc only allows
- *       diagnostic pragmas to be toggled outside of functions.
- */
-H5_GCC_DIAG_OFF("duplicated-branches")
-
 /*-------------------------------------------------------------------------
  * Function:    H5T__get_native_integer
  *
@@ -558,6 +577,7 @@ H5T__get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction,
 
     FUNC_ENTER_PACKAGE
 
+    H5_WARN_DUPLICATED_BRANCHES_OFF
     if (direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) {
         if (prec <= H5T_get_precision((H5T_t *)H5I_object(H5T_NATIVE_SCHAR_g))) {
             match       = H5T_NATIVE_INT_MATCH_CHAR;
@@ -579,7 +599,7 @@ H5T__get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction,
             match       = H5T_NATIVE_INT_MATCH_LLONG;
             native_size = sizeof(long long);
         }
-        else { /* If no native type matches the querried datatype, simply choose the type of biggest size. */
+        else { /* If no native type matches the queried datatype, simply choose the type of biggest size. */
             match       = H5T_NATIVE_INT_MATCH_LLONG;
             native_size = sizeof(long long);
         }
@@ -606,6 +626,7 @@ H5T__get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction,
             native_size = sizeof(char);
         }
     }
+    H5_WARN_DUPLICATED_BRANCHES_ON
 
     /* Set the appropriate native datatype information */
     switch (match) {
@@ -673,15 +694,6 @@ H5T__get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__get_native_integer() */
-H5_GCC_DIAG_ON("duplicated-branches")
-
-/* Disable warning for intentional identical branches here -QAK */
-/*
- *       This pragma only needs to surround the "duplicated branches" in
- *       the code below, but early (4.4.7, at least) gcc only allows
- *       diagnostic pragmas to be toggled outside of functions.
- */
-H5_GCC_DIAG_OFF("duplicated-branches")
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__get_native_float
@@ -695,14 +707,16 @@ H5_GCC_DIAG_OFF("duplicated-branches")
  *-------------------------------------------------------------------------
  */
 static H5T_t *
-H5T__get_native_float(size_t size, H5T_direction_t direction, size_t *struct_align, size_t *offset,
+H5T__get_native_float(const H5T_t *dtype, H5T_direction_t direction, size_t *struct_align, size_t *offset,
                       size_t *comp_size)
 {
     H5T_t *dt          = NULL; /* Appropriate native datatype to copy */
     hid_t  tid         = (-1); /* Datatype ID of appropriate native datatype */
+    size_t size        = 0;    /* Size of datatype to make native */
     size_t align       = 0;    /* Alignment necessary for native datatype */
     size_t native_size = 0;    /* Datatype size of the native type */
     enum match_type {          /* The different kinds of floating point types we can match */
+                      H5T_NATIVE_FLOAT_MATCH_FLOAT16,
                       H5T_NATIVE_FLOAT_MATCH_FLOAT,
                       H5T_NATIVE_FLOAT_MATCH_DOUBLE,
                       H5T_NATIVE_FLOAT_MATCH_LDOUBLE,
@@ -712,10 +726,87 @@ H5T__get_native_float(size_t size, H5T_direction_t direction, size_t *struct_ali
 
     FUNC_ENTER_PACKAGE
 
-    assert(size > 0);
+    if (0 == (size = H5T_get_size(dtype)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid size");
 
+    H5_WARN_DUPLICATED_BRANCHES_OFF
     if (direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) {
-        if (size <= sizeof(float)) {
+        if (size == 1) {
+#ifdef H5_HAVE__FLOAT16
+            /*
+             * When _Float16 support is available, map specific types to
+             * the native _Float16 type and all other types of this size
+             * group without a specific carve-out to the native float type.
+             */
+            H5T_t *f8_e4m3_dt = NULL; /* Datatype for FP8 E4M3 */
+            H5T_t *f8_e5m2_dt = NULL; /* Datatype for FP8 E5M2 */
+            H5T_t *f6_e2m3_dt = NULL; /* Datatype for FP6 E2M3 */
+            H5T_t *f6_e3m2_dt = NULL; /* Datatype for FP6 E3M2 */
+            H5T_t *f4_e2m1_dt = NULL; /* Datatype for FP4 E2M1 */
+
+            if (NULL == (f8_e4m3_dt = H5I_object(H5T_FLOAT_F8E4M3)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+            if (NULL == (f8_e5m2_dt = H5I_object(H5T_FLOAT_F8E5M2)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+            if (NULL == (f6_e2m3_dt = H5I_object(H5T_FLOAT_F6E2M3)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+            if (NULL == (f6_e3m2_dt = H5I_object(H5T_FLOAT_F6E3M2)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+            if (NULL == (f4_e2m1_dt = H5I_object(H5T_FLOAT_F4E2M1)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+
+            if (0 == H5T_cmp(dtype, f8_e4m3_dt, false) || 0 == H5T_cmp(dtype, f8_e5m2_dt, false) ||
+                0 == H5T_cmp(dtype, f6_e2m3_dt, false) || 0 == H5T_cmp(dtype, f6_e3m2_dt, false) ||
+                0 == H5T_cmp(dtype, f4_e2m1_dt, false)) {
+                match       = H5T_NATIVE_FLOAT_MATCH_FLOAT16;
+                native_size = sizeof(H5__Float16);
+            }
+            else {
+                match       = H5T_NATIVE_FLOAT_MATCH_FLOAT;
+                native_size = sizeof(float);
+            }
+#else
+            /* When _Float16 support is not available, just map all types of
+             * this size group without a specific carve-out to the native
+             * float type.
+             */
+            match       = H5T_NATIVE_FLOAT_MATCH_FLOAT;
+            native_size = sizeof(float);
+#endif
+        }
+        else if (size == 2) {
+#ifdef H5_HAVE__FLOAT16
+            /*
+             * When _Float16 support is available, map _Float16-like types
+             * to the native type and all other types of this size group
+             * without a specific carve-out to the native float type.
+             */
+            H5T_t *f16_le_dt = NULL; /* Datatype for little-endian float16 */
+            H5T_t *f16_be_dt = NULL; /* Datatype for big-endian float16 */
+
+            if (NULL == (f16_le_dt = H5I_object(H5T_IEEE_F16LE)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+            if (NULL == (f16_be_dt = H5I_object(H5T_IEEE_F16BE)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+
+            if (0 == H5T_cmp(dtype, f16_le_dt, false) || 0 == H5T_cmp(dtype, f16_be_dt, false)) {
+                match       = H5T_NATIVE_FLOAT_MATCH_FLOAT16;
+                native_size = sizeof(H5__Float16);
+            }
+            else {
+                match       = H5T_NATIVE_FLOAT_MATCH_FLOAT;
+                native_size = sizeof(float);
+            }
+#else
+            /* When _Float16 support is not available, just map all types of
+             * this size group without a specific carve-out to the native
+             * float type.
+             */
+            match       = H5T_NATIVE_FLOAT_MATCH_FLOAT;
+            native_size = sizeof(float);
+#endif
+        }
+        else if (size <= sizeof(float)) {
             match       = H5T_NATIVE_FLOAT_MATCH_FLOAT;
             native_size = sizeof(float);
         }
@@ -742,13 +833,87 @@ H5T__get_native_float(size_t size, H5T_direction_t direction, size_t *struct_ali
             native_size = sizeof(double);
         }
         else {
+#ifdef H5_HAVE__FLOAT16
+            if (size > sizeof(H5__Float16)) {
+                match       = H5T_NATIVE_FLOAT_MATCH_FLOAT;
+                native_size = sizeof(float);
+            }
+            else if (size > 1) {
+                /*
+                 * When _Float16 support is available, map _Float16-like types
+                 * to the native type and all other types of this size group
+                 * without a specific carve-out to the native float type.
+                 */
+                H5T_t *f16_le_dt = NULL; /* Datatype for little-endian float16 */
+                H5T_t *f16_be_dt = NULL; /* Datatype for big-endian float16 */
+
+                if (NULL == (f16_le_dt = H5I_object(H5T_IEEE_F16LE)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+                if (NULL == (f16_be_dt = H5I_object(H5T_IEEE_F16BE)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+
+                if (0 == H5T_cmp(dtype, f16_le_dt, false) || 0 == H5T_cmp(dtype, f16_be_dt, false)) {
+                    match       = H5T_NATIVE_FLOAT_MATCH_FLOAT16;
+                    native_size = sizeof(H5__Float16);
+                }
+                else {
+                    match       = H5T_NATIVE_FLOAT_MATCH_FLOAT;
+                    native_size = sizeof(float);
+                }
+            }
+            else {
+                /*
+                 * When _Float16 support is available, map specific types to
+                 * the native _Float16 type and all other types of this size
+                 * group without a specific carve-out to the native float type.
+                 */
+                H5T_t *f8_e4m3_dt = NULL; /* Datatype for FP8 E4M3 */
+                H5T_t *f8_e5m2_dt = NULL; /* Datatype for FP8 E5M2 */
+                H5T_t *f6_e2m3_dt = NULL; /* Datatype for FP6 E2M3 */
+                H5T_t *f6_e3m2_dt = NULL; /* Datatype for FP6 E3M2 */
+                H5T_t *f4_e2m1_dt = NULL; /* Datatype for FP4 E2M1 */
+
+                if (NULL == (f8_e4m3_dt = H5I_object(H5T_FLOAT_F8E4M3)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+                if (NULL == (f8_e5m2_dt = H5I_object(H5T_FLOAT_F8E5M2)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+                if (NULL == (f6_e2m3_dt = H5I_object(H5T_FLOAT_F6E2M3)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+                if (NULL == (f6_e3m2_dt = H5I_object(H5T_FLOAT_F6E3M2)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+                if (NULL == (f4_e2m1_dt = H5I_object(H5T_FLOAT_F4E2M1)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+
+                if (0 == H5T_cmp(dtype, f8_e4m3_dt, false) || 0 == H5T_cmp(dtype, f8_e5m2_dt, false) ||
+                    0 == H5T_cmp(dtype, f6_e2m3_dt, false) || 0 == H5T_cmp(dtype, f6_e3m2_dt, false) ||
+                    0 == H5T_cmp(dtype, f4_e2m1_dt, false)) {
+                    match       = H5T_NATIVE_FLOAT_MATCH_FLOAT16;
+                    native_size = sizeof(H5__Float16);
+                }
+                else {
+                    match       = H5T_NATIVE_FLOAT_MATCH_FLOAT;
+                    native_size = sizeof(float);
+                }
+            }
+#else
+            /* When _Float16 support is not available, just map all types of
+             * this size group without a specific carve-out to the native
+             * float type.
+             */
             match       = H5T_NATIVE_FLOAT_MATCH_FLOAT;
             native_size = sizeof(float);
+#endif
         }
     }
+    H5_WARN_DUPLICATED_BRANCHES_ON
 
     /* Set the appropriate native floating point information */
     switch (match) {
+        case H5T_NATIVE_FLOAT_MATCH_FLOAT16:
+            tid   = H5T_NATIVE_FLOAT16;
+            align = H5T_NATIVE_FLOAT16_ALIGN_g;
+            break;
+
         case H5T_NATIVE_FLOAT_MATCH_FLOAT:
             tid   = H5T_NATIVE_FLOAT;
             align = H5T_NATIVE_FLOAT_ALIGN_g;
@@ -783,15 +948,6 @@ H5T__get_native_float(size_t size, H5T_direction_t direction, size_t *struct_ali
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__get_native_float() */
-H5_GCC_DIAG_ON("duplicated-branches")
-
-/* Disable warning for intentional identical branches here -QAK */
-/*
- *       This pragma only needs to surround the "duplicated branches" in
- *       the code below, but early (4.4.7, at least) gcc only allows
- *       diagnostic pragmas to be toggled outside of functions.
- */
-H5_GCC_DIAG_OFF("duplicated-branches")
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__get_native_bitfield
@@ -817,6 +973,7 @@ H5T__get_native_bitfield(size_t prec, H5T_direction_t direction, size_t *struct_
 
     FUNC_ENTER_PACKAGE
 
+    H5_WARN_DUPLICATED_BRANCHES_OFF
     if (direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) {
         if (prec <= H5T_get_precision((H5T_t *)H5I_object(H5T_NATIVE_B8_g))) {
             tid         = H5T_NATIVE_B8;
@@ -838,7 +995,7 @@ H5T__get_native_bitfield(size_t prec, H5T_direction_t direction, size_t *struct_
             native_size = 8;
             align       = H5T_NATIVE_UINT64_ALIGN_g;
         }
-        else { /* If no native type matches the querried datatype, simply choose the type of biggest size. */
+        else { /* If no native type matches the queried datatype, simply choose the type of biggest size. */
             tid         = H5T_NATIVE_B64;
             native_size = 8;
             align       = H5T_NATIVE_UINT64_ALIGN_g;
@@ -866,6 +1023,7 @@ H5T__get_native_bitfield(size_t prec, H5T_direction_t direction, size_t *struct_
             align       = H5T_NATIVE_UINT8_ALIGN_g;
         }
     }
+    H5_WARN_DUPLICATED_BRANCHES_ON
 
     /* Create new native type */
     assert(tid >= 0);
@@ -882,7 +1040,6 @@ H5T__get_native_bitfield(size_t prec, H5T_direction_t direction, size_t *struct_
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__get_native_bitfield() */
-H5_GCC_DIAG_ON("duplicated-branches")
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__cmp_offset
@@ -1253,3 +1410,101 @@ H5T__init_native_internal(void)
 
     return SUCCEED;
 }
+
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+/*-------------------------------------------------------------------------
+ * Function:    H5T__init_native_complex_types
+ *
+ * Purpose:     Initializes native complex number datatypes
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T__init_native_complex_types(void)
+{
+    H5T_t *native_float   = NULL; /* Datatype structure for native float */
+    H5T_t *native_double  = NULL; /* Datatype structure for native double */
+    H5T_t *native_ldouble = NULL; /* Datatype structure for native long double */
+    H5T_t *dt             = NULL;
+    herr_t ret_value      = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    /* Assumes that native floating-point types are already initialized */
+    assert(H5T_NATIVE_FLOAT_g != H5I_INVALID_HID);
+    assert(H5T_NATIVE_DOUBLE_g != H5I_INVALID_HID);
+    assert(H5T_NATIVE_LDOUBLE_g != H5I_INVALID_HID);
+
+    /* Declare structure for finding alignment of each type */
+    typedef struct {
+        struct {
+            char             c;
+            H5_float_complex x;
+        } FLOAT_COMPLEX;
+        struct {
+            char              c;
+            H5_double_complex x;
+        } DOUBLE_COMPLEX;
+        struct {
+            char               c;
+            H5_ldouble_complex x;
+        } LDOUBLE_COMPLEX;
+    } alignments_t;
+
+    if (NULL == (native_float = (H5T_t *)H5I_object(H5T_NATIVE_FLOAT_g)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get datatype structure for native float type");
+    if (NULL == (native_double = (H5T_t *)H5I_object(H5T_NATIVE_DOUBLE_g)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get datatype structure for native double type");
+    if (NULL == (native_ldouble = (H5T_t *)H5I_object(H5T_NATIVE_LDOUBLE_g)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get datatype structure for native long double type");
+
+    /* H5T_NATIVE_FLOAT_COMPLEX */
+
+    if (NULL == (dt = H5T__complex_create(native_float)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't create native float complex datatype");
+    dt->shared->state = H5T_STATE_IMMUTABLE;
+
+    /* Register the type and set global variables */
+    if ((H5T_NATIVE_FLOAT_COMPLEX_g = H5I_register(H5I_DATATYPE, dt, false)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't register ID for native float complex datatype");
+    H5T_NATIVE_FLOAT_COMPLEX_ALIGN_g = TAG_ALIGNMENT(FLOAT_COMPLEX);
+
+    dt = NULL;
+
+    /* H5T_NATIVE_DOUBLE_COMPLEX */
+
+    if (NULL == (dt = H5T__complex_create(native_double)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't create native double complex datatype");
+    dt->shared->state = H5T_STATE_IMMUTABLE;
+
+    /* Register the type and set global variables */
+    if ((H5T_NATIVE_DOUBLE_COMPLEX_g = H5I_register(H5I_DATATYPE, dt, false)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't register ID for native double complex datatype");
+    H5T_NATIVE_DOUBLE_COMPLEX_ALIGN_g = TAG_ALIGNMENT(DOUBLE_COMPLEX);
+
+    dt = NULL;
+
+    /* H5T_NATIVE_LDOUBLE_COMPLEX */
+
+    if (NULL == (dt = H5T__complex_create(native_ldouble)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't create native long double complex datatype");
+    dt->shared->state = H5T_STATE_IMMUTABLE;
+
+    /* Register the type and set global variables */
+    if ((H5T_NATIVE_LDOUBLE_COMPLEX_g = H5I_register(H5I_DATATYPE, dt, false)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+                    "can't register ID for native long double complex datatype");
+    H5T_NATIVE_LDOUBLE_COMPLEX_ALIGN_g = TAG_ALIGNMENT(LDOUBLE_COMPLEX);
+
+    dt = NULL;
+
+done:
+    if (ret_value < 0) {
+        if (dt && (H5T_close(dt) < 0))
+            HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "can't close datatype");
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+#endif

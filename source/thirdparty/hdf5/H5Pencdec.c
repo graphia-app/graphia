@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -25,7 +25,6 @@
 /***********/
 #include "H5private.h"   /* Generic Functions			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Fprivate.h"  /* Files		  	        */
 #include "H5Iprivate.h"  /* IDs			  		*/
 #include "H5MMprivate.h" /* Memory management			*/
 #include "H5Ppkg.h"      /* Property lists		  	*/
@@ -273,6 +272,41 @@ H5P__encode_double(const void *value, void **_pp, size_t *size)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__encode_double() */
 
+/*-------------------------------------------------------------------------
+ * Function:       H5P__encode_uint64_t
+ *
+ * Purpose:        Generic encoding callback routine for 'uint64_t' properties.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5P__encode_uint64_t(const void *value, void **_pp, size_t *size)
+{
+    uint8_t **pp = (uint8_t **)_pp;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity checks */
+    assert(value);
+    assert(size);
+
+    if (NULL != *pp) {
+        /* Encode the size */
+        *(*pp)++ = (uint8_t)sizeof(uint64_t);
+
+        /* Encode the value */
+        UINT64ENCODE(*pp, *(const unsigned *)value);
+    } /* end if */
+
+    /* Set size needed for encoding */
+    *size += (1 + sizeof(uint64_t));
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__encode_uint64_t() */
+
 /*--------------------------------------------------------------------------
  NAME
     H5P__encode_cb
@@ -311,16 +345,22 @@ H5P__encode_cb(H5P_genprop_t *prop, void *_udata)
         size_t prop_value_len; /* Encoded size of property's value */
 
         /* Encode (or not, if the 'encode' flag is off) the property's name */
-        prop_name_len = HDstrlen(prop->name) + 1;
+        prop_name_len = strlen(prop->name) + 1;
         if (udata->encode) {
-            HDstrcpy((char *)*(udata->pp), prop->name);
+            strcpy((char *)*(udata->pp), prop->name);
             *(uint8_t **)(udata->pp) += prop_name_len;
         } /* end if */
         *(udata->enc_size_ptr) += prop_name_len;
 
-        /* Encode (or not, if *(udata->pp) is NULL) the property value */
-        prop_value_len = 0;
-        if ((prop->encode)(prop->value, udata->pp, &prop_value_len) < 0)
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB(H5_ITER_ERROR)
+            {
+                /* Encode (or not, if *(udata->pp) is NULL) the property value */
+                prop_value_len = 0;
+                ret_value      = (prop->encode)(prop->value, udata->pp, &prop_value_len);
+            }
+        H5_AFTER_USER_CB(H5_ITER_ERROR)
+        if (ret_value < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, H5_ITER_ERROR, "property encoding routine failed");
         *(udata->enc_size_ptr) += prop_value_len;
     } /* end if */
@@ -613,6 +653,42 @@ done:
 } /* end H5P__decode_double() */
 
 /*-------------------------------------------------------------------------
+ * Function:       H5P__decode_uint64_t
+ *
+ * Purpose:        Generic decoding callback routine for 'uint64_t' properties.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5P__decode_uint64_t(const void **_pp, void *_value)
+{
+    uint64_t       *value = (uint64_t *)_value; /* Property value to return */
+    const uint8_t **pp    = (const uint8_t **)_pp;
+    unsigned        enc_size;            /* Size of encoded property */
+    herr_t          ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity checks */
+    assert(pp);
+    assert(*pp);
+    assert(value);
+
+    /* Decode the size */
+    enc_size = *(*pp)++;
+    if (enc_size != sizeof(uint64_t))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "uint64_t value can't be decoded");
+
+    UINT64DECODE(*pp, *value);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__decode_uint64_t() */
+
+/*-------------------------------------------------------------------------
  NAME
     H5P__decode
  PURPOSE
@@ -683,7 +759,7 @@ H5P__decode(const void *buf)
 
         /* Get property list name */
         name = (const char *)p;
-        p += HDstrlen(name) + 1;
+        p += strlen(name) + 1;
 
         /* Find property with name */
         if (NULL == (prop = H5P__find_prop_plist(plist, name)))
@@ -698,7 +774,13 @@ H5P__decode(const void *buf)
 
         /* Decode serialized value */
         if (prop->decode) {
-            if ((prop->decode)((const void **)&p, value_buf) < 0)
+            /* Prepare & restore library for user callback */
+            H5_BEFORE_USER_CB(FAIL)
+                {
+                    ret_value = (prop->decode)((const void **)&p, value_buf);
+                }
+            H5_AFTER_USER_CB(FAIL)
+            if (ret_value < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL,
                             "property decoding routine failed, property: '%s'", name);
         } /* end if */

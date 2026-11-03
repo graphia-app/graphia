@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -35,7 +35,6 @@
 #include "H5Eprivate.h"  /* Error handling               */
 #include "H5MMprivate.h" /* Memory management            */
 #include "H5PLpkg.h"     /* Plugin                       */
-#include "H5Zprivate.h"  /* Filter pipeline              */
 
 /****************/
 /* Local Macros */
@@ -239,10 +238,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* See the other use of H5PL_GET_LIB_FUNC() for an explanation
- * for why we disable -Wpedantic here.
- */
-H5_GCC_CLANG_DIAG_OFF("pedantic")
 herr_t
 H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, bool *found, const void **plugin_info)
 {
@@ -284,7 +279,7 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, bool *foun
                         continue;
 
                     /* Check if specified VOL connector name matches cache entry's name */
-                    if (!HDstrcmp(search_params->key->vol.u.name, H5PL_cache_g[u].key.vol.u.name))
+                    if (!strcmp(search_params->key->vol.u.name, H5PL_cache_g[u].key.vol.u.name))
                         matched = true;
                 }
                 else {
@@ -308,7 +303,7 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, bool *foun
                         continue;
 
                     /* Check if specified VFD name matches cache entry's name */
-                    if (!HDstrcmp(search_params->key->vfd.u.name, H5PL_cache_g[u].key.vfd.u.name))
+                    if (!strcmp(search_params->key->vfd.u.name, H5PL_cache_g[u].key.vfd.u.name))
                         matched = true;
                 }
                 else {
@@ -339,9 +334,11 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, bool *foun
             const void            *info;
 
             /* Get the "get plugin info" function from the plugin. */
+            H5_WARN_OBJ_FXN_POINTER_CONVERSION_OFF
             if (NULL == (get_plugin_info_function = (H5PL_get_plugin_info_t)H5PL_GET_LIB_FUNC(
                              H5PL_cache_g[u].handle, "H5PLget_plugin_info")))
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get function for H5PLget_plugin_info");
+            H5_WARN_OBJ_FXN_POINTER_CONVERSION_ON
 
             /* Call the "get plugin info" function */
             if (NULL == (info = (*get_plugin_info_function)()))
@@ -359,4 +356,3 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, bool *foun
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__find_plugin_in_cache() */
-H5_GCC_CLANG_DIAG_ON("pedantic")

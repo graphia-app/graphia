@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -12,8 +12,7 @@
 
 #include "H5private.h"
 
-H5_GCC_DIAG_OFF("larger-than=")
-H5_CLANG_DIAG_OFF("overlength-strings")
+H5_WARN_LARGE_STACK_OBJECTS_OFF
 
 const char H5build_settings[]=
     "       SUMMARY OF THE HDF5 CONFIGURATION\n"
@@ -21,13 +20,13 @@ const char H5build_settings[]=
     "\n"
     "General Information:\n"
     "-------------------\n"
-    "                   HDF5 Version: 1.15.0\n"
-    "                  Configured on: 2023-09-13\n"
-    "                  Configured by: Unix Makefiles\n"
-    "                    Host system: Linux-5.4.0-162-generic\n"
+    "                   HDF5 Version: 2.1.0\n"
+    "                  Configured on: 2026-11-03\n"
+    "                  Configured by: Ninja\n"
+    "                    Host system: Linux-6.12.107+deb13-amd64\n"
     "              Uname information: Linux\n"
     "                       Byte sex: \n"
-    "             Installation point: /usr/local/HDF_Group/HDF5/1.15.0\n"
+    "             Installation point: /usr/local/HDF_Group/HDF5/2.1.0\n"
     "\n"
     "Compiling Options:\n"
     "------------------\n"
@@ -44,7 +43,7 @@ const char H5build_settings[]=
     "                        LDFLAGS: \n"
     "                     H5_LDFLAGS: \n"
     "                     AM_LDFLAGS: \n"
-    "                Extra libraries: m;dl\n"
+    "                Extra libraries: m;dl;Threads::Threads\n"
     "                       Archiver: /usr/bin/ar\n"
     "                       AR_FLAGS: \n"
     "                         Ranlib: /usr/bin/ranlib\n"
@@ -52,35 +51,35 @@ const char H5build_settings[]=
     "Languages:\n"
     "----------\n"
     "                              C: YES\n"
-    "                     C Compiler: /usr/bin/cc 9.4.0\n"
+    "                     C Compiler: /usr/bin/cc 14.2.0\n"
     "                       CPPFLAGS: \n"
     "                    H5_CPPFLAGS: \n"
     "                    AM_CPPFLAGS: \n"
-    "                        C Flags:   -std=c99  -fstdarg-opt -fmessage-length=0\n"
-    "                     H5 C Flags: -Wall;-Wcast-qual;-Wconversion;-Wextra;-Wfloat-equal;-Wformat=2;-Winit-self;-Winvalid-pch;-Wmissing-include-dirs;-Wshadow;-Wundef;-Wwrite-strings;-pedantic;-Wno-c++-compat;-Wbad-function-cast;-Wcast-align;-Wformat;-Wimplicit-function-declaration;-Wint-to-pointer-cast;-Wmissing-declarations;-Wmissing-prototypes;-Wnested-externs;-Wold-style-definition;-Wpacked;-Wpointer-sign;-Wpointer-to-int-cast;-Wredundant-decls;-Wstrict-prototypes;-Wswitch;-Wunused-but-set-variable;-Wunused-variable;-Wunused-function;-Wunused-parameter;-finline-functions;-Wno-aggregate-return;-Wno-inline;-Wno-missing-format-attribute;-Wno-missing-noreturn;-Wno-overlength-strings;-Wlarger-than=2560;-Wlogical-op;-Wframe-larger-than=16384;-Wpacked-bitfield-compat;-Wsync-nand;-Wno-unsuffixed-float-constants;-Wdouble-promotion;-Wtrampolines;-Wstack-usage=8192;-Wmaybe-uninitialized;-Wno-jump-misses-init;-Wstrict-overflow=2;-Wno-suggest-attribute=const;-Wno-suggest-attribute=noreturn;-Wno-suggest-attribute=pure;-Wno-suggest-attribute=format;-Wdate-time;-Warray-bounds=2;-Wc99-c11-compat;-Wincompatible-pointer-types;-Wint-conversion;-Wshadow;-Wduplicated-cond;-Whsa;-Wnormalized;-Wnull-dereference;-Wunused-const-variable;-Walloca;-Walloc-zero;-Wduplicated-branches;-Wformat-overflow=2;-Wformat-truncation=1;-Wrestrict;-Wattribute-alias;-Wcast-align=strict;-Wshift-overflow=2;-Wcast-function-type;-Wmaybe-uninitialized;-Wno-suggest-attribute=cold;-Wno-suggest-attribute=malloc;-Wattribute-alias=2;-Wmissing-profile;-Wc11-c2x-compat\n"
+    "                        C Flags:   -std=c11  -fstdarg-opt -fdiagnostics-urls=never -fno-diagnostics-color -fmessage-length=0 -O3 -DNDEBUG\n"
+    "                     H5 C Flags: -Wall;-Wcast-qual;-Wconversion;-Wextra;-Wfloat-equal;-Wformat=2;-Wformat-nonliteral;-Winit-self;-Winvalid-pch;-Wmissing-include-dirs;-Wshadow;-Wundef;-Wwrite-strings;-pedantic;-Wno-c++-compat;-Wbad-function-cast;-Wcast-align;-Wformat;-Wimplicit-function-declaration;-Wint-to-pointer-cast;-Wmissing-declarations;-Wmissing-prototypes;-Wnested-externs;-Wold-style-definition;-Wpacked;-Wpointer-sign;-Wpointer-to-int-cast;-Wredundant-decls;-Wstrict-prototypes;-Wswitch;-Wunused-but-set-variable;-Wunused-variable;-Wunused-function;-Wunused-parameter;-finline-functions;-Wno-aggregate-return;-Wno-inline;-Wno-missing-format-attribute;-Wno-missing-noreturn;-Wno-overlength-strings;-Wlarger-than=2584;-Wlogical-op;-Wframe-larger-than=16384;-Wpacked-bitfield-compat;-Wsync-nand;-Wno-unsuffixed-float-constants;-Wdouble-promotion;-Wtrampolines;-Wstack-usage=8192;-Wmaybe-uninitialized;-Wno-jump-misses-init;-Wstrict-overflow=2;-Wno-suggest-attribute=const;-Wno-suggest-attribute=noreturn;-Wno-suggest-attribute=pure;-Wno-suggest-attribute=format;-Wdate-time;-Warray-bounds=2;-Wincompatible-pointer-types;-Wint-conversion;-Wshadow;-Wduplicated-cond;-Whsa;-Wnormalized;-Wnull-dereference;-Wunused-const-variable;-Walloca;-Walloc-zero;-Wduplicated-branches;-Wformat-overflow=2;-Wformat-truncation=1;-Wrestrict;-Wattribute-alias;-Wshift-overflow=2;-Wcast-function-type;-Wmaybe-uninitialized;-Wcast-align=strict;-Wno-suggest-attribute=cold;-Wno-suggest-attribute=malloc;-Wattribute-alias=2;-Wmissing-profile;-Wc11-c2x-compat\n"
     "                     AM C Flags: \n"
     "               Shared C Library: YES\n"
     "               Static C Library: YES\n"
     "\n"
     "\n"
-    "                        Fortran: \n"
+    "                        Fortran: OFF\n"
     "               Fortran Compiler:  \n"
-    "                  Fortran Flags: \n"
+    "                  Fortran Flags:  \n"
     "               H5 Fortran Flags: \n"
     "               AM Fortran Flags: \n"
     "         Shared Fortran Library: YES\n"
     "         Static Fortran Library: YES\n"
-    "               Module Directory: /home/tim/sources/hdf5/build/mod\n"
+    "               Module Directory: \n"
     "\n"
-    "                            C++: \n"
+    "                            C++: OFF\n"
     "                   C++ Compiler:  \n"
-    "                      C++ Flags: \n"
+    "                      C++ Flags:  \n"
     "                   H5 C++ Flags: \n"
     "                   AM C++ Flags: \n"
     "             Shared C++ Library: YES\n"
     "             Static C++ Library: YES\n"
     "\n"
-    "                           Java: \n"
+    "                           Java: OFF\n"
     "                  Java Compiler:  \n"
     "\n"
     "\n"
@@ -89,15 +88,16 @@ const char H5build_settings[]=
     "                     Parallel HDF5: OFF\n"
     "  Parallel Filtered Dataset Writes: \n"
     "                Large Parallel I/O: \n"
-    "                High-level library: \n"
+    "                High-level library: OFF\n"
     "Dimension scales w/ new references: \n"
-    "                  Build HDF5 Tests: \n"
-    "                  Build HDF5 Tools: \n"
-    "                   Build GIF Tools: \n"
+    "                  Build HDF5 Tests: OFF\n"
+    "                  Build HDF5 Tools: OFF\n"
     "                      Threadsafety: OFF\n"
-    "               Default API mapping: v116\n"
+    "                       Concurrency: OFF\n"
+    "               Default API mapping: v200\n"
     "    With deprecated public symbols: ON\n"
     "            I/O filters (external):  DEFLATE\n"
+    "                  _Float16 support: OFF\n"
     "                     Map (H5M) API: \n"
     "                        Direct VFD: \n"
     "                        Mirror VFD: \n"
@@ -107,11 +107,9 @@ const char H5build_settings[]=
     "    Packages w/ extra debug output: \n"
     "                       API tracing: OFF\n"
     "              Using memory checker: OFF\n"
-    "            Function stack tracing: OFF\n"
     "                  Use file locking: best-effort\n"
     "         Strict file format checks: OFF\n"
     "      Optimization instrumentation: \n"
 ;
 
-H5_GCC_DIAG_ON("larger-than=")
-H5_CLANG_DIAG_OFF("overlength-strings")
+H5_WARN_LARGE_STACK_OBJECTS_ON

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -31,7 +31,6 @@
 #include "H5private.h"  /* Generic Functions                        */
 #include "H5Eprivate.h" /* Error handling                           */
 #include "H5Gprivate.h" /* Groups                                   */
-#include "H5Iprivate.h" /* IDs                                      */
 #include "H5Oprivate.h" /* Object headers                           */
 #include "H5Ppkg.h"     /* Property lists                           */
 
@@ -150,10 +149,9 @@ H5Pset_local_heap_size_hint(hid_t plist_id, size_t size_hint)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iz", plist_id, size_hint);
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get value */
@@ -187,14 +185,13 @@ H5Pget_local_heap_size_hint(hid_t plist_id, size_t *size_hint /*out*/)
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", plist_id, size_hint);
 
     if (size_hint) {
         H5P_genplist_t *plist; /* Property list pointer */
         H5O_ginfo_t     ginfo; /* Group information structure */
 
         /* Get the plist structure */
-        if (NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
+        if (NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE, true)))
             HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
         /* Get value */
@@ -232,7 +229,6 @@ H5Pset_link_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dens
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "iIuIu", plist_id, max_compact, min_dense);
 
     /* Range check values */
     if (max_compact < min_dense)
@@ -243,7 +239,7 @@ H5Pset_link_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dens
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "min dense value must be < 65536");
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get group info */
@@ -282,7 +278,6 @@ H5Pget_link_phase_change(hid_t plist_id, unsigned *max_compact /*out*/, unsigned
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ixx", plist_id, max_compact, min_dense);
 
     /* Get values */
     if (max_compact || min_dense) {
@@ -290,7 +285,7 @@ H5Pget_link_phase_change(hid_t plist_id, unsigned *max_compact /*out*/, unsigned
         H5O_ginfo_t     ginfo; /* Group information structure */
 
         /* Get the plist structure */
-        if (NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
+        if (NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE, true)))
             HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
         /* Get group info */
@@ -332,7 +327,6 @@ H5Pset_est_link_info(hid_t plist_id, unsigned est_num_entries, unsigned est_name
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "iIuIu", plist_id, est_num_entries, est_name_len);
 
     /* Range check values */
     if (est_num_entries > 65535)
@@ -341,7 +335,7 @@ H5Pset_est_link_info(hid_t plist_id, unsigned est_num_entries, unsigned est_name
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "est. name length must be < 65536");
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get group info */
@@ -380,7 +374,6 @@ H5Pget_est_link_info(hid_t plist_id, unsigned *est_num_entries /*out*/, unsigned
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ixx", plist_id, est_num_entries, est_name_len);
 
     /* Get values */
     if (est_num_entries || est_name_len) {
@@ -388,7 +381,7 @@ H5Pget_est_link_info(hid_t plist_id, unsigned *est_num_entries /*out*/, unsigned
         H5O_ginfo_t     ginfo; /* Group information structure */
 
         /* Get the plist structure */
-        if (NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
+        if (NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE, true)))
             HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
         /* Get group info */
@@ -422,14 +415,13 @@ H5Pset_link_creation_order(hid_t plist_id, unsigned crt_order_flags)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iIu", plist_id, crt_order_flags);
 
     /* Check for bad combination of flags */
     if (!(crt_order_flags & H5P_CRT_ORDER_TRACKED) && (crt_order_flags & H5P_CRT_ORDER_INDEXED))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "tracking creation order is required for index");
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get link info */
@@ -464,7 +456,6 @@ H5Pget_link_creation_order(hid_t plist_id, unsigned *crt_order_flags /*out*/)
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", plist_id, crt_order_flags);
 
     /* Get values */
     if (crt_order_flags) {
@@ -475,7 +466,7 @@ H5Pget_link_creation_order(hid_t plist_id, unsigned *crt_order_flags /*out*/)
         *crt_order_flags = 0;
 
         /* Get the plist structure */
-        if (NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
+        if (NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE, true)))
             HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
         /* Get link info */
@@ -494,7 +485,7 @@ done:
  * Function:       H5P__gcrt_group_info_enc
  *
  * Purpose:        Callback routine which is called whenever the group
- *                 property in the dataset access property list is
+ *                 info property in the dataset access property list is
  *                 encoded.
  *
  * Return:	   Success:	Non-negative
@@ -573,7 +564,7 @@ H5P__gcrt_group_info_dec(const void **_pp, void *_value)
  * Function:       H5P__gcrt_link_info_enc
  *
  * Purpose:        Callback routine which is called whenever the link
- *                 property in the dataset access property list is
+ *                 info property in the dataset access property list is
  *                 encoded.
  *
  * Return:	   Success:	Non-negative

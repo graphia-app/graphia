@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -212,8 +212,9 @@ done:
 herr_t
 H5FD_read(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, void *buf /*out*/)
 {
-    hid_t  dxpl_id   = H5I_INVALID_HID; /* DXPL for operation */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    hid_t    dxpl_id = H5I_INVALID_HID; /* DXPL for operation */
+    uint32_t actual_selection_io_mode;
+    herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -244,7 +245,13 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, void *buf /*
     if (!(file->access_flags & H5F_ACC_SWMR_READ)) {
         haddr_t eoa;
 
-        if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB(FAIL)
+            {
+                eoa = (file->cls->get_eoa)(file, type);
+            }
+        H5_AFTER_USER_CB(FAIL)
+        if (!H5_addr_defined(eoa))
             HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed");
 
         if ((addr + file->base_addr + size) > eoa)
@@ -253,9 +260,22 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, void *buf /*
                         (unsigned long long)eoa);
     }
 
-    /* Dispatch to driver */
-    if ((file->cls->read)(file, type, dxpl_id, addr + file->base_addr, size, buf) < 0)
+    /* Prepare & restore library for user callback */
+    H5_BEFORE_USER_CB(FAIL)
+        {
+            /* Dispatch to driver */
+            ret_value = (file->cls->read)(file, type, dxpl_id, addr + file->base_addr, size, buf);
+        }
+    H5_AFTER_USER_CB(FAIL)
+    if (ret_value < 0)
         HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed");
+
+    /* Set actual selection I/O, if this is a raw data operation */
+    if (type == H5FD_MEM_DRAW) {
+        H5CX_get_actual_selection_io_mode(&actual_selection_io_mode);
+        actual_selection_io_mode |= H5D_SCALAR_IO;
+        H5CX_set_actual_selection_io_mode(actual_selection_io_mode);
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -273,9 +293,10 @@ done:
 herr_t
 H5FD_write(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, const void *buf)
 {
-    hid_t   dxpl_id;                 /* DXPL for operation */
-    haddr_t eoa       = HADDR_UNDEF; /* EOA for file */
-    herr_t  ret_value = SUCCEED;     /* Return value */
+    hid_t    dxpl_id;           /* DXPL for operation */
+    haddr_t  eoa = HADDR_UNDEF; /* EOA for file */
+    uint32_t actual_selection_io_mode;
+    herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -297,16 +318,35 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, const void 
         HGOTO_DONE(SUCCEED);
 #endif /* H5_HAVE_PARALLEL */
 
-    if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
+    /* Prepare & restore library for user callback */
+    H5_BEFORE_USER_CB(FAIL)
+        {
+            eoa = (file->cls->get_eoa)(file, type);
+        }
+    H5_AFTER_USER_CB(FAIL)
+    if (!H5_addr_defined(eoa))
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed");
     if ((addr + file->base_addr + size) > eoa)
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size=%llu, eoa=%llu",
                     (unsigned long long)(addr + file->base_addr), (unsigned long long)size,
                     (unsigned long long)eoa);
 
-    /* Dispatch to driver */
-    if ((file->cls->write)(file, type, dxpl_id, addr + file->base_addr, size, buf) < 0)
+    /* Prepare & restore library for user callback */
+    H5_BEFORE_USER_CB(FAIL)
+        {
+            /* Dispatch to driver */
+            ret_value = (file->cls->write)(file, type, dxpl_id, addr + file->base_addr, size, buf);
+        }
+    H5_AFTER_USER_CB(FAIL)
+    if (ret_value < 0)
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write request failed");
+
+    /* Set actual selection I/O, if this is a raw data operation */
+    if (type == H5FD_MEM_DRAW) {
+        H5CX_get_actual_selection_io_mode(&actual_selection_io_mode);
+        actual_selection_io_mode |= H5D_SCALAR_IO;
+        H5CX_set_actual_selection_io_mode(actual_selection_io_mode);
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -360,6 +400,7 @@ H5FD_read_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addrs
     size_t     size      = 0;
     H5FD_mem_t type      = H5FD_MEM_DEFAULT;
     hid_t      dxpl_id   = H5I_INVALID_HID; /* DXPL for operation */
+    bool       is_raw    = false;           /* Does this include raw data */
     herr_t     ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -387,20 +428,16 @@ H5FD_read_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addrs
      * Do not return early for Parallel mode since the I/O could be a
      * collective transfer.
      */
-    if (0 == count) {
+    if (0 == count)
         HGOTO_DONE(SUCCEED);
-    }
 #endif /* H5_HAVE_PARALLEL */
 
     if (file->base_addr > 0) {
-
         /* apply the base_addr offset to the addrs array.  Must undo before
          * we return.
          */
-        for (i = 0; i < count; i++) {
-
+        for (i = 0; i < count; i++)
             addrs[i] += file->base_addr;
-        }
         addrs_cooked = true;
     }
 
@@ -417,94 +454,111 @@ H5FD_read_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addrs
         extend_types = false;
 
         for (i = 0; i < count; i++) {
-
             if (!extend_sizes) {
-
                 if (sizes[i] == 0) {
-
                     extend_sizes = true;
                     size         = sizes[i - 1];
                 }
-                else {
-
+                else
                     size = sizes[i];
-                }
             }
 
             if (!extend_types) {
-
                 if (types[i] == H5FD_MEM_NOLIST) {
-
                     extend_types = true;
                     type         = types[i - 1];
                 }
                 else {
-
                     type = types[i];
+
+                    /* Check for raw data operation */
+                    if (type == H5FD_MEM_DRAW)
+                        is_raw = true;
                 }
             }
 
-            if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
+            /* Prepare & restore library for user callback */
+            H5_BEFORE_USER_CB(FAIL)
+                {
+                    eoa = (file->cls->get_eoa)(file, type);
+                }
+            H5_AFTER_USER_CB(FAIL)
+            if (!H5_addr_defined(eoa))
                 HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed");
 
             if ((addrs[i] + size) > eoa)
-
                 HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL,
                             "addr overflow, addrs[%d] = %llu, sizes[%d] = %llu, eoa = %llu", (int)i,
                             (unsigned long long)(addrs[i]), (int)i, (unsigned long long)size,
                             (unsigned long long)eoa);
         }
     }
+    else
+        /* We must still check if this is a raw data read */
+        for (i = 0; i < count && types[i] != H5FD_MEM_NOLIST; i++)
+            if (types[i] == H5FD_MEM_DRAW) {
+                is_raw = true;
+                break;
+            }
 
     /* if the underlying VFD supports vector read, make the call */
     if (file->cls->read_vector) {
-
-        if ((file->cls->read_vector)(file, dxpl_id, count, types, addrs, sizes, bufs) < 0)
-
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB(FAIL)
+            {
+                ret_value = (file->cls->read_vector)(file, dxpl_id, count, types, addrs, sizes, bufs);
+            }
+        H5_AFTER_USER_CB(FAIL)
+        if (ret_value < 0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read vector request failed");
+
+        /* Set actual selection I/O mode, if this is a raw data operation */
+        if (is_raw) {
+            uint32_t actual_selection_io_mode;
+
+            H5CX_get_actual_selection_io_mode(&actual_selection_io_mode);
+            actual_selection_io_mode |= H5D_VECTOR_IO;
+            H5CX_set_actual_selection_io_mode(actual_selection_io_mode);
+        }
     }
     else {
-
         /* otherwise, implement the vector read as a sequence of regular
          * read calls.
          */
         extend_sizes = false;
         extend_types = false;
         uint32_t no_selection_io_cause;
+        uint32_t actual_selection_io_mode;
 
         for (i = 0; i < count; i++) {
-
             /* we have already verified that sizes[0] != 0 and
              * types[0] != H5FD_MEM_NOLIST
              */
-
             if (!extend_sizes) {
-
                 if (sizes[i] == 0) {
-
                     extend_sizes = true;
                     size         = sizes[i - 1];
                 }
-                else {
-
+                else
                     size = sizes[i];
-                }
             }
 
             if (!extend_types) {
-
                 if (types[i] == H5FD_MEM_NOLIST) {
-
                     extend_types = true;
                     type         = types[i - 1];
                 }
-                else {
-
+                else
                     type = types[i];
-                }
             }
 
-            if ((file->cls->read)(file, type, dxpl_id, addrs[i], size, bufs[i]) < 0)
+            /* Prepare & restore library for user callback */
+            H5_BEFORE_USER_CB(FAIL)
+                {
+                    ret_value = (file->cls->read)(file, type, dxpl_id, addrs[i], size, bufs[i]);
+                }
+            H5_AFTER_USER_CB(FAIL)
+            if (ret_value < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed");
         }
 
@@ -512,19 +566,23 @@ H5FD_read_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addrs
         H5CX_get_no_selection_io_cause(&no_selection_io_cause);
         no_selection_io_cause |= H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB;
         H5CX_set_no_selection_io_cause(no_selection_io_cause);
+
+        /* Set actual selection I/O mode, if this is a raw data operation */
+        if (is_raw) {
+            H5CX_get_actual_selection_io_mode(&actual_selection_io_mode);
+            actual_selection_io_mode |= H5D_SCALAR_IO;
+            H5CX_set_actual_selection_io_mode(actual_selection_io_mode);
+        }
     }
 
 done:
     /* undo the base addr offset to the addrs array if necessary */
     if (addrs_cooked) {
-
         assert(file->base_addr > 0);
-
-        for (i = 0; i < count; i++) {
-
+        for (i = 0; i < count; i++)
             addrs[i] -= file->base_addr;
-        }
     }
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_read_vector() */
 
@@ -575,6 +633,7 @@ H5FD_write_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addr
     H5FD_mem_t type = H5FD_MEM_DEFAULT;
     hid_t      dxpl_id;                 /* DXPL for operation */
     haddr_t    eoa       = HADDR_UNDEF; /* EOA for file */
+    bool       is_raw    = false;       /* Does this include raw data */
     herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -607,14 +666,11 @@ H5FD_write_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addr
 #endif /* H5_HAVE_PARALLEL */
 
     if (file->base_addr > 0) {
-
         /* apply the base_addr offset to the addrs array.  Must undo before
          * we return.
          */
-        for (i = 0; i < count; i++) {
-
+        for (i = 0; i < count; i++)
             addrs[i] += file->base_addr;
-        }
         addrs_cooked = true;
     }
 
@@ -622,51 +678,64 @@ H5FD_write_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addr
     extend_types = false;
 
     for (i = 0; i < count; i++) {
-
         if (!extend_sizes) {
-
             if (sizes[i] == 0) {
-
                 extend_sizes = true;
                 size         = sizes[i - 1];
             }
-            else {
-
+            else
                 size = sizes[i];
-            }
         }
 
         if (!extend_types) {
-
             if (types[i] == H5FD_MEM_NOLIST) {
-
                 extend_types = true;
                 type         = types[i - 1];
             }
             else {
-
                 type = types[i];
+
+                /* Check for raw data operation */
+                if (type == H5FD_MEM_DRAW)
+                    is_raw = true;
             }
         }
 
-        if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
-
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB(FAIL)
+            {
+                eoa = (file->cls->get_eoa)(file, type);
+            }
+        H5_AFTER_USER_CB(FAIL)
+        if (!H5_addr_defined(eoa))
             HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed");
 
         if ((addrs[i] + size) > eoa)
-
-            HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addrs[%d] = %llu, sizes[%d] = %llu, \
-                        eoa = %llu",
-                        (int)i, (unsigned long long)(addrs[i]), (int)i, (unsigned long long)size,
+            HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL,
+                        "addr overflow, addrs[%d] = %llu, sizes[%d] = %llu, eoa = %llu", (int)i,
+                        (unsigned long long)(addrs[i]), (int)i, (unsigned long long)size,
                         (unsigned long long)eoa);
     }
 
     /* if the underlying VFD supports vector write, make the call */
     if (file->cls->write_vector) {
-
-        if ((file->cls->write_vector)(file, dxpl_id, count, types, addrs, sizes, bufs) < 0)
-
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB(FAIL)
+            {
+                ret_value = (file->cls->write_vector)(file, dxpl_id, count, types, addrs, sizes, bufs);
+            }
+        H5_AFTER_USER_CB(FAIL)
+        if (ret_value < 0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write vector request failed");
+
+        /* Set actual selection I/O mode, if this is a raw data operation */
+        if (is_raw) {
+            uint32_t actual_selection_io_mode;
+
+            H5CX_get_actual_selection_io_mode(&actual_selection_io_mode);
+            actual_selection_io_mode |= H5D_VECTOR_IO;
+            H5CX_set_actual_selection_io_mode(actual_selection_io_mode);
+        }
     }
     else {
         /* otherwise, implement the vector write as a sequence of regular
@@ -675,40 +744,37 @@ H5FD_write_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addr
         extend_sizes = false;
         extend_types = false;
         uint32_t no_selection_io_cause;
+        uint32_t actual_selection_io_mode;
 
         for (i = 0; i < count; i++) {
-
             /* we have already verified that sizes[0] != 0 and
              * types[0] != H5FD_MEM_NOLIST
              */
-
             if (!extend_sizes) {
-
                 if (sizes[i] == 0) {
-
                     extend_sizes = true;
                     size         = sizes[i - 1];
                 }
-                else {
-
+                else
                     size = sizes[i];
-                }
             }
 
             if (!extend_types) {
-
                 if (types[i] == H5FD_MEM_NOLIST) {
-
                     extend_types = true;
                     type         = types[i - 1];
                 }
-                else {
-
+                else
                     type = types[i];
-                }
             }
 
-            if ((file->cls->write)(file, type, dxpl_id, addrs[i], size, bufs[i]) < 0)
+            /* Prepare & restore library for user callback */
+            H5_BEFORE_USER_CB(FAIL)
+                {
+                    ret_value = (file->cls->write)(file, type, dxpl_id, addrs[i], size, bufs[i]);
+                }
+            H5_AFTER_USER_CB(FAIL)
+            if (ret_value < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver write request failed");
         }
 
@@ -716,19 +782,23 @@ H5FD_write_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addr
         H5CX_get_no_selection_io_cause(&no_selection_io_cause);
         no_selection_io_cause |= H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB;
         H5CX_set_no_selection_io_cause(no_selection_io_cause);
+
+        /* Set actual selection I/O mode, if this is a raw data operation */
+        if (is_raw) {
+            H5CX_get_actual_selection_io_mode(&actual_selection_io_mode);
+            actual_selection_io_mode |= H5D_SCALAR_IO;
+            H5CX_set_actual_selection_io_mode(actual_selection_io_mode);
+        }
     }
 
 done:
     /* undo the base addr offset to the addrs array if necessary */
     if (addrs_cooked) {
-
         assert(file->base_addr > 0);
-
-        for (i = 0; i < count; i++) {
-
+        for (i = 0; i < count; i++)
             addrs[i] -= file->base_addr;
-        }
     }
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_write_vector() */
 
@@ -787,7 +857,7 @@ H5FD__read_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t
     size_t          vec_arr_nused  = 0;
     herr_t          ret_value      = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     assert(file);
@@ -957,11 +1027,18 @@ H5FD__read_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t
                 vec_bufs[vec_arr_nused] = (void *)((uint8_t *)buf + mem_off[mem_seq_i]);
                 vec_arr_nused++;
             }
-            else
-                /* Issue scalar read call */
-                if ((file->cls->read)(file, type, dxpl_id, offsets[i] + file_off[file_seq_i], io_len,
-                                      (void *)((uint8_t *)buf + mem_off[mem_seq_i])) < 0)
+            else {
+                /* Prepare & restore library for user callback */
+                H5_BEFORE_USER_CB(FAIL)
+                    {
+                        /* Issue scalar read call */
+                        ret_value = (file->cls->read)(file, type, dxpl_id, offsets[i] + file_off[file_seq_i],
+                                                      io_len, (void *)((uint8_t *)buf + mem_off[mem_seq_i]));
+                    }
+                H5_AFTER_USER_CB(FAIL)
+                if (ret_value < 0)
                     HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed");
+            }
 
             /* Update file sequence */
             if (io_len == file_len[file_seq_i])
@@ -996,18 +1073,41 @@ H5FD__read_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t
 
     /* Issue vector read call if appropriate */
     if (use_vector) {
+        uint32_t actual_selection_io_mode;
+
         H5_CHECK_OVERFLOW(vec_arr_nused, size_t, uint32_t);
-        if ((file->cls->read_vector)(file, dxpl_id, (uint32_t)vec_arr_nused, types, addrs, sizes, vec_bufs) <
-            0)
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB(FAIL)
+            {
+                ret_value = (file->cls->read_vector)(file, dxpl_id, (uint32_t)vec_arr_nused, types, addrs,
+                                                     sizes, vec_bufs);
+            }
+        H5_AFTER_USER_CB(FAIL)
+        if (ret_value < 0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read vector request failed");
+
+        /* Set actual selection I/O, if this is a raw data operation */
+        if (type == H5FD_MEM_DRAW && count > 0) {
+            H5CX_get_actual_selection_io_mode(&actual_selection_io_mode);
+            actual_selection_io_mode |= H5D_VECTOR_IO;
+            H5CX_set_actual_selection_io_mode(actual_selection_io_mode);
+        }
     }
-    else {
+    else if (count > 0) {
         uint32_t no_selection_io_cause;
+        uint32_t actual_selection_io_mode;
 
         /* Add H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB to no selection I/O cause */
         H5CX_get_no_selection_io_cause(&no_selection_io_cause);
         no_selection_io_cause |= H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB;
         H5CX_set_no_selection_io_cause(no_selection_io_cause);
+
+        /* Set actual selection I/O, if this is a raw data operation */
+        if (type == H5FD_MEM_DRAW) {
+            H5CX_get_actual_selection_io_mode(&actual_selection_io_mode);
+            actual_selection_io_mode |= H5D_SCALAR_IO;
+            H5CX_set_actual_selection_io_mode(actual_selection_io_mode);
+        }
     }
 
 done:
@@ -1117,20 +1217,16 @@ H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_s
      * Do not return early for Parallel mode since the I/O could be a
      * collective transfer.
      */
-    if (0 == count) {
+    if (0 == count)
         HGOTO_DONE(SUCCEED);
-    }
 #endif /* H5_HAVE_PARALLEL */
 
     if (file->base_addr > 0) {
-
         /* apply the base_addr offset to the offsets array.  Must undo before
          * we return.
          */
-        for (i = 0; i < count; i++) {
-
+        for (i = 0; i < count; i++)
             offsets[i] += file->base_addr;
-        }
         offsets_cooked = true;
     }
 
@@ -1147,20 +1243,25 @@ H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_s
     if (!(file->access_flags & H5F_ACC_SWMR_READ)) {
         haddr_t eoa;
 
-        if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB(FAIL)
+            {
+                eoa = (file->cls->get_eoa)(file, type);
+            }
+        H5_AFTER_USER_CB(FAIL)
+        if (!H5_addr_defined(eoa))
             HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed");
 
-        for (i = 0; i < count; i++) {
-
+        for (i = 0; i < count; i++)
             if ((offsets[i]) > eoa)
-
                 HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, offsets[%d] = %llu, eoa = %llu",
                             (int)i, (unsigned long long)(offsets[i]), (unsigned long long)eoa);
-        }
     }
 
     /* if the underlying VFD supports selection read, make the call */
     if (file->cls->read_selection) {
+        uint32_t actual_selection_io_mode;
+
         /* Allocate array of space IDs if necessary, otherwise use local
          * buffers */
         if (count > sizeof(mem_space_ids_local) / sizeof(mem_space_ids_local[0])) {
@@ -1183,9 +1284,22 @@ H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_s
             }
         }
 
-        if ((file->cls->read_selection)(file, type, dxpl_id, count, mem_space_ids, file_space_ids, offsets,
-                                        element_sizes, bufs) < 0)
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB(FAIL)
+            {
+                ret_value = (file->cls->read_selection)(file, type, dxpl_id, count, mem_space_ids,
+                                                        file_space_ids, offsets, element_sizes, bufs);
+            }
+        H5_AFTER_USER_CB(FAIL)
+        if (ret_value < 0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read selection request failed");
+
+        /* Set actual selection I/O, if this is a raw data operation */
+        if (type == H5FD_MEM_DRAW) {
+            H5CX_get_actual_selection_io_mode(&actual_selection_io_mode);
+            actual_selection_io_mode |= H5D_SELECTION_IO;
+            H5CX_set_actual_selection_io_mode(actual_selection_io_mode);
+        }
     }
     else
         /* Otherwise, implement the selection read as a sequence of regular
@@ -1198,13 +1312,9 @@ H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_s
 done:
     /* undo the base addr offset to the offsets array if necessary */
     if (offsets_cooked) {
-
         assert(file->base_addr > 0);
-
-        for (i = 0; i < count; i++) {
-
+        for (i = 0; i < count; i++)
             offsets[i] -= file->base_addr;
-        }
     }
 
     /* Cleanup dataspace arrays.  Use H5I_remove() so we only close the IDs and
@@ -1290,23 +1400,19 @@ H5FD_read_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_t
      * Do not return early for Parallel mode since the I/O could be a
      * collective transfer.
      */
-    if (0 == count) {
+    if (0 == count)
         HGOTO_DONE(SUCCEED);
-    }
 #endif /* H5_HAVE_PARALLEL */
 
     skip_selection_cb = skip_cb & SKIP_SELECTION_CB;
     skip_vector_cb    = skip_cb & SKIP_VECTOR_CB;
 
     if (file->base_addr > 0) {
-
         /* apply the base_addr offset to the offsets array.  Must undo before
          * we return.
          */
-        for (i = 0; i < count; i++) {
-
+        for (i = 0; i < count; i++)
             offsets[i] += file->base_addr;
-        }
         offsets_cooked = true;
     }
 
@@ -1323,23 +1429,41 @@ H5FD_read_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_t
     if (!(file->access_flags & H5F_ACC_SWMR_READ)) {
         haddr_t eoa;
 
-        if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB(FAIL)
+            {
+                eoa = (file->cls->get_eoa)(file, type);
+            }
+        H5_AFTER_USER_CB(FAIL)
+        if (!H5_addr_defined(eoa))
             HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed");
 
-        for (i = 0; i < count; i++) {
-
+        for (i = 0; i < count; i++)
             if ((offsets[i]) > eoa)
-
                 HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, offsets[%d] = %llu, eoa = %llu",
                             (int)i, (unsigned long long)(offsets[i]), (unsigned long long)eoa);
-        }
     }
 
     /* if the underlying VFD supports selection read, make the call */
     if (!skip_selection_cb && file->cls->read_selection) {
-        if ((file->cls->read_selection)(file, type, dxpl_id, count, mem_space_ids, file_space_ids, offsets,
-                                        element_sizes, bufs) < 0)
+        uint32_t actual_selection_io_mode;
+
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB(FAIL)
+            {
+                ret_value = (file->cls->read_selection)(file, type, dxpl_id, count, mem_space_ids,
+                                                        file_space_ids, offsets, element_sizes, bufs);
+            }
+        H5_AFTER_USER_CB(FAIL)
+        if (ret_value < 0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read selection request failed");
+
+        /* Set actual selection I/O, if this is a raw data operation */
+        if (type == H5FD_MEM_DRAW) {
+            H5CX_get_actual_selection_io_mode(&actual_selection_io_mode);
+            actual_selection_io_mode |= H5D_SELECTION_IO;
+            H5CX_set_actual_selection_io_mode(actual_selection_io_mode);
+        }
     }
     else {
         /* Otherwise, implement the selection read as a sequence of regular
@@ -1373,13 +1497,9 @@ H5FD_read_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_t
 done:
     /* undo the base addr offset to the offsets array if necessary */
     if (offsets_cooked) {
-
         assert(file->base_addr > 0);
-
-        for (i = 0; i < count; i++) {
-
+        for (i = 0; i < count; i++)
             offsets[i] -= file->base_addr;
-        }
     }
 
     /* Cleanup dataspace arrays */
@@ -1444,7 +1564,7 @@ H5FD__write_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_
     size_t          vec_arr_nused  = 0;
     herr_t          ret_value      = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     assert(file);
@@ -1473,34 +1593,24 @@ H5FD__write_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_
 
     /* Loop over dataspaces */
     for (i = 0; i < count; i++) {
-
         /* we have already verified that element_sizes[0] != 0 and bufs[0]
          * != NULL */
-
         if (!extend_sizes) {
-
             if (element_sizes[i] == 0) {
-
                 extend_sizes = true;
                 element_size = element_sizes[i - 1];
             }
-            else {
-
+            else
                 element_size = element_sizes[i];
-            }
         }
 
         if (!extend_bufs) {
-
             if (bufs[i] == NULL) {
-
                 extend_bufs = true;
                 buf         = bufs[i - 1];
             }
-            else {
-
+            else
                 buf = bufs[i];
-            }
         }
 
         /* Initialize sequence lists for memory and file spaces */
@@ -1614,11 +1724,19 @@ H5FD__write_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_
                 vec_bufs[vec_arr_nused] = (const void *)((const uint8_t *)buf + mem_off[mem_seq_i]);
                 vec_arr_nused++;
             }
-            else
-                /* Issue scalar write call */
-                if ((file->cls->write)(file, type, dxpl_id, offsets[i] + file_off[file_seq_i], io_len,
-                                       (const void *)((const uint8_t *)buf + mem_off[mem_seq_i])) < 0)
+            else {
+                /* Prepare & restore library for user callback */
+                H5_BEFORE_USER_CB(FAIL)
+                    {
+                        /* Issue scalar write call */
+                        ret_value =
+                            (file->cls->write)(file, type, dxpl_id, offsets[i] + file_off[file_seq_i], io_len,
+                                               (const void *)((const uint8_t *)buf + mem_off[mem_seq_i]));
+                    }
+                H5_AFTER_USER_CB(FAIL)
+                if (ret_value < 0)
                     HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write request failed");
+            }
 
             /* Update file sequence */
             if (io_len == file_len[file_seq_i])
@@ -1653,18 +1771,41 @@ H5FD__write_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_
 
     /* Issue vector write call if appropriate */
     if (use_vector) {
+        uint32_t actual_selection_io_mode;
+
         H5_CHECK_OVERFLOW(vec_arr_nused, size_t, uint32_t);
-        if ((file->cls->write_vector)(file, dxpl_id, (uint32_t)vec_arr_nused, types, addrs, sizes, vec_bufs) <
-            0)
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB(FAIL)
+            {
+                ret_value = (file->cls->write_vector)(file, dxpl_id, (uint32_t)vec_arr_nused, types, addrs,
+                                                      sizes, vec_bufs);
+            }
+        H5_AFTER_USER_CB(FAIL)
+        if (ret_value < 0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write vector request failed");
+
+        /* Set actual selection I/O, if this is a raw data operation */
+        if (type == H5FD_MEM_DRAW && count > 0) {
+            H5CX_get_actual_selection_io_mode(&actual_selection_io_mode);
+            actual_selection_io_mode |= H5D_VECTOR_IO;
+            H5CX_set_actual_selection_io_mode(actual_selection_io_mode);
+        }
     }
-    else {
+    else if (count > 0) {
         uint32_t no_selection_io_cause;
+        uint32_t actual_selection_io_mode;
 
         /* Add H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB to no selection I/O cause */
         H5CX_get_no_selection_io_cause(&no_selection_io_cause);
         no_selection_io_cause |= H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB;
         H5CX_set_no_selection_io_cause(no_selection_io_cause);
+
+        /* Set actual selection I/O, if this is a raw data operation */
+        if (type == H5FD_MEM_DRAW) {
+            H5CX_get_actual_selection_io_mode(&actual_selection_io_mode);
+            actual_selection_io_mode |= H5D_SCALAR_IO;
+            H5CX_set_actual_selection_io_mode(actual_selection_io_mode);
+        }
     }
 
 done:
@@ -1742,8 +1883,9 @@ H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_
     hid_t   *mem_space_ids = mem_space_ids_local;
     hid_t    file_space_ids_local[H5FD_LOCAL_SEL_ARR_LEN];
     hid_t   *file_space_ids = file_space_ids_local;
-    uint32_t num_spaces     = 0;
-    hid_t    dxpl_id        = H5I_INVALID_HID; /* DXPL for operation */
+    haddr_t  eoa;
+    uint32_t num_spaces = 0;
+    hid_t    dxpl_id    = H5I_INVALID_HID; /* DXPL for operation */
     uint32_t i;
     herr_t   ret_value = SUCCEED; /* Return value */
 
@@ -1772,20 +1914,16 @@ H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_
      * Do not return early for Parallel mode since the I/O could be a
      * collective transfer.
      */
-    if (0 == count) {
+    if (0 == count)
         HGOTO_DONE(SUCCEED);
-    }
 #endif /* H5_HAVE_PARALLEL */
 
     if (file->base_addr > 0) {
-
         /* apply the base_addr offset to the offsets array.  Must undo before
          * we return.
          */
-        for (i = 0; i < count; i++) {
-
+        for (i = 0; i < count; i++)
             offsets[i] += file->base_addr;
-        }
         offsets_cooked = true;
     }
 
@@ -1793,23 +1931,24 @@ H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_
      * looking into the highest offset in the selection (different from the
      * bounds) is potentially expensive.
      */
-    {
-        haddr_t eoa;
-
-        if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed");
-
-        for (i = 0; i < count; i++) {
-
-            if ((offsets[i]) > eoa)
-
-                HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, offsets[%d] = %llu, eoa = %llu",
-                            (int)i, (unsigned long long)(offsets[i]), (unsigned long long)eoa);
+    /* Prepare & restore library for user callback */
+    H5_BEFORE_USER_CB(FAIL)
+        {
+            eoa = (file->cls->get_eoa)(file, type);
         }
-    }
+    H5_AFTER_USER_CB(FAIL)
+    if (!H5_addr_defined(eoa))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed");
+
+    for (i = 0; i < count; i++)
+        if ((offsets[i]) > eoa)
+            HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, offsets[%d] = %llu, eoa = %llu", (int)i,
+                        (unsigned long long)(offsets[i]), (unsigned long long)eoa);
 
     /* if the underlying VFD supports selection write, make the call */
     if (file->cls->write_selection) {
+        uint32_t actual_selection_io_mode;
+
         /* Allocate array of space IDs if necessary, otherwise use local
          * buffers */
         if (count > sizeof(mem_space_ids_local) / sizeof(mem_space_ids_local[0])) {
@@ -1832,9 +1971,22 @@ H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_
             }
         }
 
-        if ((file->cls->write_selection)(file, type, dxpl_id, count, mem_space_ids, file_space_ids, offsets,
-                                         element_sizes, bufs) < 0)
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB(FAIL)
+            {
+                ret_value = (file->cls->write_selection)(file, type, dxpl_id, count, mem_space_ids,
+                                                         file_space_ids, offsets, element_sizes, bufs);
+            }
+        H5_AFTER_USER_CB(FAIL)
+        if (ret_value < 0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write selection request failed");
+
+        /* Set actual selection I/O, if this is a raw data operation */
+        if (type == H5FD_MEM_DRAW) {
+            H5CX_get_actual_selection_io_mode(&actual_selection_io_mode);
+            actual_selection_io_mode |= H5D_SELECTION_IO;
+            H5CX_set_actual_selection_io_mode(actual_selection_io_mode);
+        }
     }
     else
         /* Otherwise, implement the selection write as a sequence of regular
@@ -1848,13 +2000,9 @@ H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_
 done:
     /* undo the base addr offset to the offsets array if necessary */
     if (offsets_cooked) {
-
         assert(file->base_addr > 0);
-
-        for (i = 0; i < count; i++) {
-
+        for (i = 0; i < count; i++)
             offsets[i] -= file->base_addr;
-        }
     }
 
     /* Cleanup dataspace arrays.  Use H5I_remove() so we only close the IDs and
@@ -1907,7 +2055,8 @@ H5FD_write_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_
     H5S_t  **mem_spaces = mem_spaces_local;
     H5S_t   *file_spaces_local[H5FD_LOCAL_SEL_ARR_LEN];
     H5S_t  **file_spaces = file_spaces_local;
-    hid_t    dxpl_id     = H5I_INVALID_HID; /* DXPL for operation */
+    haddr_t  eoa;
+    hid_t    dxpl_id = H5I_INVALID_HID; /* DXPL for operation */
     uint32_t i;
     uint32_t skip_selection_cb;
     uint32_t skip_vector_cb;
@@ -1938,23 +2087,19 @@ H5FD_write_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_
      * Do not return early for Parallel mode since the I/O could be a
      * collective transfer.
      */
-    if (0 == count) {
+    if (0 == count)
         HGOTO_DONE(SUCCEED);
-    }
 #endif /* H5_HAVE_PARALLEL */
 
     skip_selection_cb = skip_cb & SKIP_SELECTION_CB;
     skip_vector_cb    = skip_cb & SKIP_VECTOR_CB;
 
     if (file->base_addr > 0) {
-
         /* apply the base_addr offset to the offsets array.  Must undo before
          * we return.
          */
-        for (i = 0; i < count; i++) {
-
+        for (i = 0; i < count; i++)
             offsets[i] += file->base_addr;
-        }
         offsets_cooked = true;
     }
 
@@ -1962,26 +2107,40 @@ H5FD_write_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_
      * looking into the highest offset in the selection (different from the
      * bounds) is potentially expensive.
      */
-    {
-        haddr_t eoa;
-
-        if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed");
-
-        for (i = 0; i < count; i++) {
-
-            if ((offsets[i]) > eoa)
-
-                HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, offsets[%d] = %llu, eoa = %llu",
-                            (int)i, (unsigned long long)(offsets[i]), (unsigned long long)eoa);
+    /* Prepare & restore library for user callback */
+    H5_BEFORE_USER_CB(FAIL)
+        {
+            eoa = (file->cls->get_eoa)(file, type);
         }
-    }
+    H5_AFTER_USER_CB(FAIL)
+    if (!H5_addr_defined(eoa))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed");
+
+    for (i = 0; i < count; i++)
+        if ((offsets[i]) > eoa)
+            HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, offsets[%d] = %llu, eoa = %llu", (int)i,
+                        (unsigned long long)(offsets[i]), (unsigned long long)eoa);
 
     /* if the underlying VFD supports selection write, make the call */
     if (!skip_selection_cb && file->cls->write_selection) {
-        if ((file->cls->write_selection)(file, type, dxpl_id, count, mem_space_ids, file_space_ids, offsets,
-                                         element_sizes, bufs) < 0)
+        uint32_t actual_selection_io_mode;
+
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB(FAIL)
+            {
+                ret_value = (file->cls->write_selection)(file, type, dxpl_id, count, mem_space_ids,
+                                                         file_space_ids, offsets, element_sizes, bufs);
+            }
+        H5_AFTER_USER_CB(FAIL)
+        if (ret_value < 0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write selection request failed");
+
+        /* Set actual selection I/O, if this is a raw data operation */
+        if (type == H5FD_MEM_DRAW) {
+            H5CX_get_actual_selection_io_mode(&actual_selection_io_mode);
+            actual_selection_io_mode |= H5D_SELECTION_IO;
+            H5CX_set_actual_selection_io_mode(actual_selection_io_mode);
+        }
     }
     else {
         /* Otherwise, implement the selection write as a sequence of regular
@@ -2006,7 +2165,6 @@ H5FD_write_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_
         }
 
         /* Translate to vector or scalar I/O */
-
         if (H5FD__write_selection_translate(skip_vector_cb, file, type, dxpl_id, count, mem_spaces,
                                             file_spaces, offsets, element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "translation to vector or scalar write failed");
@@ -2015,13 +2173,9 @@ H5FD_write_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_
 done:
     /* undo the base addr offset to the offsets array if necessary */
     if (offsets_cooked) {
-
         assert(file->base_addr > 0);
-
-        for (i = 0; i < count; i++) {
-
+        for (i = 0; i < count; i++)
             offsets[i] -= file->base_addr;
-        }
     }
 
     /* Cleanup dataspace arrays */
@@ -2260,8 +2414,14 @@ H5FD_set_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t addr)
     assert(file && file->cls);
     assert(H5_addr_defined(addr) && addr <= file->maxaddr);
 
-    /* Dispatch to driver, convert to absolute address */
-    if ((file->cls->set_eoa)(file, type, addr + file->base_addr) < 0)
+    /* Prepare & restore library for user callback */
+    H5_BEFORE_USER_CB(FAIL)
+        {
+            /* Dispatch to driver, convert to absolute address */
+            ret_value = (file->cls->set_eoa)(file, type, addr + file->base_addr);
+        }
+    H5_AFTER_USER_CB(FAIL)
+    if (ret_value < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver set_eoa request failed");
 
 done:
@@ -2293,8 +2453,14 @@ H5FD_get_eoa(const H5FD_t *file, H5FD_mem_t type)
 
     assert(file && file->cls);
 
-    /* Dispatch to driver */
-    if (HADDR_UNDEF == (ret_value = (file->cls->get_eoa)(file, type)))
+    /* Prepare & restore library for user callback */
+    H5_BEFORE_USER_CB(HADDR_UNDEF)
+        {
+            /* Dispatch to driver */
+            ret_value = (file->cls->get_eoa)(file, type);
+        }
+    H5_AFTER_USER_CB(HADDR_UNDEF)
+    if (!H5_addr_defined(ret_value))
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "driver get_eoa request failed");
 
     /* Adjust for base address in file (convert to relative address) */
@@ -2331,7 +2497,13 @@ H5FD_get_eof(const H5FD_t *file, H5FD_mem_t type)
 
     /* Dispatch to driver */
     if (file->cls->get_eof) {
-        if (HADDR_UNDEF == (ret_value = (file->cls->get_eof)(file, type)))
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB(HADDR_UNDEF)
+            {
+                ret_value = (file->cls->get_eof)(file, type);
+            }
+        H5_AFTER_USER_CB(HADDR_UNDEF)
+        if (!H5_addr_defined(ret_value))
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, HADDR_UNDEF, "driver get_eof request failed");
     }
     else
@@ -2367,8 +2539,14 @@ H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags /*out*/)
     assert(flags);
 
     /* Check for the driver to query and then query it */
-    if (driver->query)
-        ret_value = (driver->query)(NULL, flags);
+    if (driver->query) {
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB_NOERR(FAIL)
+            {
+                ret_value = (driver->query)(NULL, flags);
+            }
+        H5_AFTER_USER_CB_NOERR(FAIL)
+    }
     else
         *flags = 0;
 
@@ -2881,8 +3059,14 @@ H5FD_delete(const char *filename, hid_t fapl_id)
     if (NULL == driver->del)
         HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "file driver has no 'del' method");
 
-    /* Dispatch to file driver */
-    if ((driver->del)(filename, fapl_id))
+    /* Prepare & restore library for user callback */
+    H5_BEFORE_USER_CB(FAIL)
+        {
+            /* Dispatch to file driver */
+            ret_value = (driver->del)(filename, fapl_id);
+        }
+    H5_AFTER_USER_CB(FAIL)
+    if (ret_value < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTDELETEFILE, FAIL, "delete failed");
 
 done:
@@ -2911,7 +3095,7 @@ H5FD_check_plugin_load(const H5FD_class_t *cls, const H5PL_key_t *key, bool *suc
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
     assert(cls);
@@ -2921,7 +3105,7 @@ H5FD_check_plugin_load(const H5FD_class_t *cls, const H5PL_key_t *key, bool *suc
     /* Which kind of key are we looking for? */
     if (key->vfd.kind == H5FD_GET_DRIVER_BY_NAME) {
         /* Check if plugin name matches VFD class name */
-        if (cls->name && !HDstrcmp(cls->name, key->vfd.u.name))
+        if (cls->name && !strcmp(cls->name, key->vfd.u.name))
             *success = true;
     }
     else {
@@ -2933,6 +3117,7 @@ H5FD_check_plugin_load(const H5FD_class_t *cls, const H5PL_key_t *key, bool *suc
             *success = true;
     }
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_check_plugin_load() */
 
@@ -2957,7 +3142,7 @@ H5FD__get_driver_cb(void *obj, hid_t id, void *_op_data)
     FUNC_ENTER_PACKAGE_NOERR
 
     if (H5FD_GET_DRIVER_BY_NAME == op_data->key.kind) {
-        if (0 == HDstrcmp(cls->name, op_data->key.u.name)) {
+        if (0 == strcmp(cls->name, op_data->key.u.name)) {
             op_data->found_id = id;
             ret_value         = H5_ITER_STOP;
         } /* end if */

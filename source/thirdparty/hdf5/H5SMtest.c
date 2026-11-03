@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -24,7 +24,6 @@
 #include "H5ACprivate.h" /* Metadata cache			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5Fprivate.h"  /* File access                          */
-#include "H5FLprivate.h" /* Free Lists                           */
 #include "H5SMpkg.h"     /* Shared object header messages        */
 
 /****************/
@@ -87,7 +86,9 @@ H5SM__get_mesg_count_test(H5F_t *f, unsigned type_id, size_t *mesg_count)
             HGOTO_ERROR(H5E_SOHM, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table");
 
         /* Find the correct index for this message type */
-        if ((index_num = H5SM__get_index(table, type_id)) < 0)
+        if (H5SM__get_index(table, type_id, &index_num) < 0)
+            HGOTO_ERROR(H5E_SOHM, H5E_CANTGET, FAIL, "unable to check for SOHM index");
+        if (index_num < 0)
             HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "unable to find correct SOHM index");
         header = &(table->indexes[index_num]);
 

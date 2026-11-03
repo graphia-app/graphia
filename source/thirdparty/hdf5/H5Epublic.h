@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -21,7 +21,7 @@
 #include "H5public.h"  /* Generic Functions                        */
 #include "H5Ipublic.h" /* Identifiers                              */
 
-/* Value for the default error stack */
+/** Value for the default error stack \since 1.8.0 */
 #define H5E_DEFAULT 0 /* (hid_t) */
 
 /**
@@ -49,14 +49,6 @@ typedef struct H5E_error2_t {
     /**< Optional supplied description      */
 } H5E_error2_t;
 
-/* When this header is included from a private header, don't make calls to H5open() */
-#undef H5OPEN
-#ifndef H5private_H
-#define H5OPEN H5open(),
-#else /* H5private_H */
-#define H5OPEN
-#endif /* H5private_H */
-
 /* HDF5 error class */
 /* Extern "C" block needed to compile C++ filter plugins with some compilers */
 #ifdef __cplusplus
@@ -77,11 +69,12 @@ H5_DLLVAR hid_t H5E_ERR_CLS_g;
  * trying something that's likely or expected to fail.  The code to try can
  * be nested between calls to H5Eget_auto() and H5Eset_auto(), but it's
  * easier just to use this macro like:
+ *
  *     H5E_BEGIN_TRY {
  *        ...stuff here that's likely to fail...
  *      } H5E_END_TRY
  *
- * Warning: don't break, return, or longjmp() from the body of the loop or
+ * Warning: don't break, return, or longjmp() from the block of code or
  *        the error reporting won't be properly restored!
  *
  * These two macros still use the old API functions for backward compatibility
@@ -176,6 +169,9 @@ extern "C" {
  * \param[in] client_data Pointer to client data in the format expected by the
  *                        user-defined function
  * \return \herr_t
+ *
+ * \since 1.8.0
+ *
  */
 typedef herr_t (*H5E_walk2_t)(unsigned n, const H5E_error2_t *err_desc, void *client_data);
 //! <!-- [H5E_walk2_t_snip] -->
@@ -188,6 +184,9 @@ typedef herr_t (*H5E_walk2_t)(unsigned n, const H5E_error2_t *err_desc, void *cl
  * \param[in] client_data Pointer to client data in the format expected by the
  *                        user-defined function
  * \return \herr_t
+ *
+ * \since 1.8.0
+ *
  */
 typedef herr_t (*H5E_auto2_t)(hid_t estack, void *client_data);
 //! <!-- [H5E_auto2_t_snip] -->
@@ -250,12 +249,12 @@ H5_DLL herr_t H5Eclose_msg(hid_t err_id);
  * --------------------------------------------------------------------------
  * \ingroup H5E
  *
- * \brief Adds a major error message to an error class
+ * \brief Adds a major or minor error message to an error class
  *
  * \param[in] cls An error class identifier
  * \param[in] msg_type The type of the error message
- * \param[in] msg Major error message
- * \return \herr_t
+ * \param[in] msg Error message
+ * \return An error ID (success), H5I_INVALID_HID (failure)
  *
  * \details H5Ecreate_msg() adds an error message to an error class defined by
  *          client library or application program. The error message can be
@@ -315,7 +314,72 @@ H5_DLL hid_t H5Eget_current_stack(void);
  *
  * \since 1.14.0
  */
-H5_DLL herr_t H5Eappend_stack(hid_t dst_stack_id, hid_t src_stack_id, hbool_t close_source_stack);
+H5_DLL herr_t H5Eappend_stack(hid_t dst_stack_id, hid_t src_stack_id, bool close_source_stack);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5E
+ *
+ * \brief * Check if pushing errors on an error stack is paused
+ *
+ * \estack_id{stack_id}
+ * \param[out] is_paused Flag whether stack is paused
+ * \return \herr_t
+ *
+ * \details H5Eis_paused() can be used within HDF5 VOL connectors and other
+ *          dynamically loaded components to check if the HDF5 library, or other
+ *          component has paused pushing error on the default error stack or
+ *          an application stack.
+ *
+ *          The library may pause pushing errors on the default error stack
+ *          when performing "speculative" operations, such as testing for the
+ *          existence of something that could be located at one of many
+ *          locations. \p stack_id is the error stack to query, and the value
+ *          pointed to by \p is_paused is set to TRUE/FALSE.
+ *
+ *          If an error occurs while attempting to query the status of \p stack_id,
+ *          the value pointed to by \p is_paused is unchanged.
+ *
+ * \since 1.14.5
+ */
+H5_DLL herr_t H5Eis_paused(hid_t stack_id, bool *is_paused);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5E
+ *
+ * \brief * Pause pushing errors on an error stack
+ *
+ * \estack_id{stack_id}
+ * \return \herr_t
+ *
+ * \details H5Epause_stack() pauses pushing errors on an error stack.  Pushing
+ *          an error on a paused error stack will be ignored (not fail).
+ *
+ *          H5Eresume_stack() is used to allow errors to be pushed on a stack.
+ *          Calls to H5Epause_stack() and H5Eresume_stack() must be matched.
+ *
+ *          Calls to H5Epause_stack()/H5Eresume_stack() may be nested.
+ *
+ * \since 1.14.5
+ */
+H5_DLL herr_t H5Epause_stack(hid_t stack_id);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5E
+ *
+ * \brief * Resume pushing errors on an error stack
+ *
+ * \estack_id{stack_id}
+ * \return \herr_t
+ *
+ * \details H5Eresume_stack() resumes pushing errors on an error stack.
+ *
+ *          Calls to H5Epause_stack() and H5Eresume_stack() must be matched.
+ *
+ *          Calls to H5Epause_stack()/H5Eresume_stack() may be nested.
+ *
+ * \since 1.14.5
+ */
+H5_DLL herr_t H5Eresume_stack(hid_t stack_id);
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5E
@@ -348,9 +412,11 @@ H5_DLL herr_t H5Eclose_stack(hid_t stack_id);
  *          by the class identifier. If a non-NULL pointer is passed in for \p
  *          name and \p size is greater than zero, the class name of \p size
  *          long is returned. The length of the error class name is also
- *          returned. If NULL is passed in as \p name, only the length of class
- *          name is returned. If zero is returned, it means no name. The user is
- *          responsible for allocating sufficient buffer space for the name.
+ *          returned.
+ *
+ *          \details_namelen{error class,H5Eget_class_name}
+ *
+ *          If zero is returned, it means the error class has no name.
  *
  * \since 1.8.0
  */
@@ -625,7 +691,7 @@ H5_DLL herr_t H5Eauto_is_v2(hid_t err_stack, unsigned *is_stack);
  * \brief Retrieves an error message
  *
  * \param[in] msg_id Error message identifier
- * \param[out] type The type of the error message Valid values are #H5E_MAJOR
+ * \param[out] type The type of the error message. Valid values are #H5E_MAJOR
  *                  and #H5E_MINOR.
  * \param[out] msg Error message buffer
  * \param[in] size The length of error message to be returned by this function
@@ -651,7 +717,8 @@ H5_DLL ssize_t H5Eget_msg(hid_t msg_id, H5E_type_t *type, char *msg, size_t size
  * \brief Retrieves the number of error messages in an error stack
  *
  * \estack_id{error_stack_id}
- * \return Returns a non-negative value on success; otherwise returns a negative value.
+ * \return Returns number of error messages in an error stack on
+ *         success; otherwise returns a negative value.
  *
  * \details H5Eget_num() retrieves the number of error records in the error
  *          stack specified by \p error_stack_id (including major, minor
@@ -697,6 +764,9 @@ typedef struct H5E_error1_t {
  * \param[in] client_data Pointer to client data in the format expected by the
  *                        user-defined function
  * \return \herr_t
+ *
+ * \since 1.0.0
+ *
  */
 typedef herr_t (*H5E_walk1_t)(int n, H5E_error1_t *err_desc, void *client_data);
 //! <!-- [H5E_walk1_t_snip] -->
@@ -708,6 +778,9 @@ typedef herr_t (*H5E_walk1_t)(int n, H5E_error1_t *err_desc, void *client_data);
  * \param[in] client_data Pointer to client data in the format expected by the
  *                        user-defined function
  * \return \herr_t
+ *
+ * \since 1.0.0
+ *
  */
 typedef herr_t (*H5E_auto1_t)(void *client_data);
 //! <!-- [H5E_auto1_t_snip] -->
@@ -727,6 +800,8 @@ typedef herr_t (*H5E_auto1_t)(void *client_data);
  * \details H5Eclear1() clears the error stack for the current thread.\n
  *          The stack is also cleared whenever an API function is called, with
  *          certain exceptions (for instance, H5Eprint1()).
+ *
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Eclear1(void);
@@ -771,6 +846,8 @@ H5_DLL herr_t H5Eclear1(void);
  *          the traversal functions are the library's default H5Eprint1() or
  *          H5Eprint2(), mixing H5Eset_auto1() and H5Eget_auto2() or mixing
  *          H5Eset_auto2() and H5Eget_auto1() does not fail.
+ *
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Eget_auto1(H5E_auto1_t *func, void **client_data);
@@ -826,6 +903,8 @@ H5_DLL herr_t H5Epush1(const char *file, const char *func, unsigned line, H5E_ma
  *          that prints error messages. Users are encouraged to write their own
  *          more specific error handlers.
  *
+ * \since 1.0.0
+ *
  */
 H5_DLL herr_t H5Eprint1(FILE *stream);
 /**
@@ -856,6 +935,8 @@ H5_DLL herr_t H5Eprint1(FILE *stream);
  *
  *          Automatic stack traversal is always in the #H5E_WALK_DOWNWARD
  *          direction.
+ *
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Eset_auto1(H5E_auto1_t func, void *client_data);
@@ -890,6 +971,8 @@ H5_DLL herr_t H5Eset_auto1(H5E_auto1_t func, void *client_data);
  *          is as follows:
  *          \snippet this H5E_walk1_t_snip
  *
+ * \since 1.0.0
+ *
  */
 H5_DLL herr_t H5Ewalk1(H5E_direction_t direction, H5E_walk1_t func, void *client_data);
 /**
@@ -900,7 +983,7 @@ H5_DLL herr_t H5Ewalk1(H5E_direction_t direction, H5E_walk1_t func, void *client
  *        error number
  *
  * \param[in] maj Major error number
- * \return \herr_t
+ * \return Pointer to the message (success), or NULL (failure)
  *
  * \deprecated 1.8.0 Function deprecated in this release.
  *
@@ -910,6 +993,8 @@ H5_DLL herr_t H5Ewalk1(H5E_direction_t direction, H5E_walk1_t func, void *client
  * \attention This function returns a dynamically allocated string (\c char
  *            array). An application calling this function must free the memory
  *            associated with the return value to prevent a memory leak.
+ *
+ * \since 1.0.0
  *
  */
 H5_DLL char *H5Eget_major(H5E_major_t maj);
@@ -921,7 +1006,7 @@ H5_DLL char *H5Eget_major(H5E_major_t maj);
  *        error number
  *
  * \param[in] min Minor error number
- * \return \herr_t
+ * \return Pointer to the message (success), or NULL (failure)
  *
  * \deprecated 1.8.0 Function deprecated and return type changed in this release.
  *
@@ -933,6 +1018,8 @@ H5_DLL char *H5Eget_major(H5E_major_t maj);
  *            function from an HDF5 library of Release 1.8.0 or later must free
  *            the memory associated with the return value to prevent a memory
  *            leak. This is a change from the 1.6.x release series.
+ *
+ * \since 1.0.0
  *
  */
 H5_DLL char *H5Eget_minor(H5E_minor_t min);

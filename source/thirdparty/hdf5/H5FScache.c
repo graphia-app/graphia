@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -35,8 +35,8 @@
 #include "H5FSpkg.h"     /* File free space			*/
 #include "H5MFprivate.h" /* File memory management		*/
 #include "H5MMprivate.h" /* Memory management			*/
+#include "H5SLprivate.h" /* Skip Lists                               */
 #include "H5VMprivate.h" /* Vectors and arrays 			*/
-#include "H5WBprivate.h" /* Wrapped Buffers                      */
 
 /****************/
 /* Local Macros */
@@ -184,17 +184,19 @@ H5FS__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSE
     uint32_t       computed_chksum;                 /* Computed metadata checksum value */
     htri_t         ret_value = true;                /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     assert(image);
 
     /* Get stored and computed checksums */
-    H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
+    if (H5F_get_checksums(image, len, &stored_chksum, &computed_chksum) < 0)
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "can't get checksums");
 
     if (stored_chksum != computed_chksum)
         ret_value = false;
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FS__cache_hdr_verify_chksum() */
 
@@ -764,7 +766,7 @@ H5FS__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
     H5FS_t *fspace    = (H5FS_t *)_thing; /* Pointer to the object */
     herr_t  ret_value = SUCCEED;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     assert(fspace);
@@ -887,17 +889,19 @@ H5FS__cache_sinfo_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNU
     uint32_t       computed_chksum;                 /* Computed metadata checksum value */
     htri_t         ret_value = true;                /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     assert(image);
 
     /* Get stored and computed checksums */
-    H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
+    if (H5F_get_checksums(image, len, &stored_chksum, &computed_chksum) < 0)
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "can't get checksums");
 
     if (stored_chksum != computed_chksum)
         ret_value = false;
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FS__cache_sinfo_verify_chksum() */
 
@@ -1020,7 +1024,7 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
 
                 /* Insert section in free space manager, unless requested not to */
                 if (!(des_flags & H5FS_DESERIALIZE_NO_ADD))
-                    if (H5FS_sect_add(udata->f, fspace, new_sect, H5FS_ADD_DESERIALIZING, udata) < 0)
+                    if (H5FS_sect_add(udata->f, fspace, new_sect, H5FS_ADD_DESERIALIZING, udata, NULL) < 0)
                         HGOTO_ERROR(H5E_FSPACE, H5E_CANTINSERT, NULL,
                                     "can't add section to free space manager");
             } /* end for */

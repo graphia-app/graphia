@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -25,7 +25,6 @@
 /* Headers */
 /***********/
 #include "H5private.h"   /*generic functions			  */
-#include "H5CXprivate.h" /*API Contexts                            */
 #include "H5Eprivate.h"  /*error handling			  */
 #include "H5Iprivate.h"  /*ID functions		   		  */
 #include "H5MMprivate.h" /*memory management			  */
@@ -88,7 +87,6 @@ H5Tget_member_offset(hid_t type_id, unsigned membno)
     size_t ret_value; /* Return value */
 
     FUNC_ENTER_API(0)
-    H5TRACE2("z", "iIu", type_id, membno);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)) || H5T_COMPOUND != dt->shared->type)
@@ -148,7 +146,6 @@ H5Tget_member_class(hid_t type_id, unsigned membno)
     H5T_class_t ret_value; /* Return value */
 
     FUNC_ENTER_API(H5T_NO_CLASS)
-    H5TRACE2("Tt", "iIu", type_id, membno);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)) || H5T_COMPOUND != dt->shared->type)
@@ -188,7 +185,6 @@ H5Tget_member_type(hid_t type_id, unsigned membno)
     hid_t  ret_value;      /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE2("i", "iIu", type_id, membno);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)) || H5T_COMPOUND != dt->shared->type)
@@ -325,7 +321,6 @@ H5Tinsert(hid_t parent_id, const char *name, size_t offset, hid_t member_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "i*szi", parent_id, name, offset, member_id);
 
     /* Check args */
     if (parent_id == member_id)
@@ -365,7 +360,6 @@ H5Tpack(hid_t type_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", type_id);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)) ||
@@ -410,7 +404,7 @@ H5T__insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
 
     /* Does NAME already exist in PARENT? */
     for (i = 0; i < parent->shared->u.compnd.nmembs; i++)
-        if (!HDstrcmp(parent->shared->u.compnd.memb[i].name, name))
+        if (!strcmp(parent->shared->u.compnd.memb[i].name, name))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "member name is not unique");
 
     /* Does the new member overlap any existing member ? */
@@ -509,6 +503,8 @@ H5T__pack(const H5T_t *dt)
             /* Adjust size of datatype appropriately */
             if (dt->shared->type == H5T_ARRAY)
                 dt->shared->size = dt->shared->parent->shared->size * dt->shared->u.array.nelem;
+            else if (dt->shared->type == H5T_COMPLEX)
+                dt->shared->size = 2 * dt->shared->parent->shared->size;
             else if (dt->shared->type != H5T_VLEN)
                 dt->shared->size = dt->shared->parent->shared->size;
         } /* end if */

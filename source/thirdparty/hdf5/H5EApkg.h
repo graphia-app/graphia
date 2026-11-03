@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -27,6 +27,7 @@
 
 /* Other private headers needed by this file */
 #include "H5FLprivate.h" /* Free Lists                           */
+#include "H5VMprivate.h" /* Vectors and arrays 			*/
 
 /**************************/
 /* Package Private Macros */
@@ -389,7 +390,7 @@ H5_DLL herr_t H5EA__destroy_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t 
 H5_DLL H5EA_hdr_t *H5EA__hdr_alloc(H5F_t *f);
 H5_DLL herr_t      H5EA__hdr_init(H5EA_hdr_t *hdr, void *ctx_udata);
 H5_DLL haddr_t     H5EA__hdr_create(H5F_t *f, const H5EA_create_t *cparam, void *ctx_udata);
-H5_DLL void       *H5EA__hdr_alloc_elmts(H5EA_hdr_t *hdr, size_t nelmts);
+H5_DLL void       *H5EA__hdr_alloc_elmts(H5EA_hdr_t *hdr, size_t nelmts) H5_ATTR_MALLOC;
 H5_DLL herr_t      H5EA__hdr_free_elmts(H5EA_hdr_t *hdr, size_t nelmts, void *elmts);
 H5_DLL herr_t      H5EA__hdr_incr(H5EA_hdr_t *hdr);
 H5_DLL herr_t      H5EA__hdr_decr(H5EA_hdr_t *hdr);

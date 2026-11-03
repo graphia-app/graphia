@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -109,24 +109,20 @@ typedef struct {
 /* Local Prototypes */
 /********************/
 static herr_t H5O__attr_to_dense_cb(H5O_t *oh, H5O_mesg_t *mesg, unsigned H5_ATTR_UNUSED sequence,
-                                    unsigned *oh_modified, void *_udata);
+                                    void *_udata);
 static htri_t H5O__attr_find_opened_attr(const H5O_loc_t *loc, H5A_t **attr, const char *name_to_open);
-static herr_t H5O__attr_open_cb(H5O_t *oh, H5O_mesg_t *mesg, unsigned sequence,
-                                unsigned H5_ATTR_UNUSED *oh_modified, void *_udata);
+static herr_t H5O__attr_open_cb(H5O_t *oh, H5O_mesg_t *mesg, unsigned sequence, void *_udata);
 static herr_t H5O__attr_open_by_idx_cb(const H5A_t *attr, void *_ret_attr);
-static herr_t H5O__attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg, unsigned H5_ATTR_UNUSED sequence,
-                                 unsigned *oh_modified, void *_udata);
+static herr_t H5O__attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg, unsigned H5_ATTR_UNUSED sequence, void *_udata);
 static herr_t H5O__attr_rename_chk_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg,
-                                      unsigned H5_ATTR_UNUSED sequence, unsigned H5_ATTR_UNUSED *oh_modified,
-                                      void *_udata);
+                                      unsigned H5_ATTR_UNUSED sequence, void *_udata);
 static herr_t H5O__attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg, unsigned H5_ATTR_UNUSED sequence,
-                                      unsigned *oh_modified, void *_udata);
+                                      void *_udata);
 static herr_t H5O__attr_remove_update(const H5O_loc_t *loc, H5O_t *oh, H5O_ainfo_t *ainfo);
 static herr_t H5O__attr_remove_cb(H5O_t *oh, H5O_mesg_t *mesg, unsigned H5_ATTR_UNUSED sequence,
-                                  unsigned *oh_modified, void *_udata);
-static herr_t H5O__attr_exists_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg,
-                                  unsigned H5_ATTR_UNUSED sequence, unsigned H5_ATTR_UNUSED *oh_modified,
                                   void *_udata);
+static herr_t H5O__attr_exists_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg,
+                                  unsigned H5_ATTR_UNUSED sequence, void *_udata);
 
 /*********************/
 /* Package Variables */
@@ -152,7 +148,7 @@ static herr_t H5O__attr_exists_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg,
  */
 static herr_t
 H5O__attr_to_dense_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR_UNUSED sequence,
-                      unsigned *oh_modified, void *_udata /*in,out*/)
+                      void *_udata /*in,out*/)
 {
     H5O_iter_cvt_t *udata     = (H5O_iter_cvt_t *)_udata; /* Operator user data */
     H5A_t          *attr      = (H5A_t *)mesg->native;    /* Pointer to attribute to insert */
@@ -178,7 +174,7 @@ H5O__attr_to_dense_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR_U
         HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to convert into null message");
 
     /* Indicate that the object header was modified */
-    *oh_modified = H5O_MODIFY_CONDENSE;
+    oh->mesgs_modified = H5O_MODIFY_CONDENSE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -201,7 +197,7 @@ H5O__attr_create(const H5O_loc_t *loc, H5A_t *attr)
     htri_t      shared_mesg;         /* Should this message be stored in the Shared Message table? */
     herr_t      ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     assert(loc);
@@ -210,6 +206,13 @@ H5O__attr_create(const H5O_loc_t *loc, H5A_t *attr)
     /* Pin the object header */
     if (NULL == (oh = H5O_pin(loc)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTPIN, FAIL, "unable to pin object header");
+
+    /* Check for creating attribute with unusual datatype */
+    if (!(H5O_has_chksum(oh) || (H5F_RFIC_FLAGS(loc->file) & H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS)) &&
+        H5T_is_numeric_with_unusual_unused_bits(attr->shared->dt))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL,
+                    "creating attribute with unusual datatype, see documentation for "
+                    "H5Pset_relax_file_integrity_checks for details.");
 
     /* Check if this object already has attribute information */
     if (oh->version > H5O_VERSION_1) {
@@ -387,8 +390,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__attr_open_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned sequence,
-                  unsigned H5_ATTR_UNUSED *oh_modified, void *_udata /*in,out*/)
+H5O__attr_open_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned sequence, void *_udata /*in,out*/)
 {
     H5O_iter_opn_t *udata     = (H5O_iter_opn_t *)_udata; /* Operator user data */
     herr_t          ret_value = H5_ITER_CONT;             /* Return value */
@@ -401,7 +403,7 @@ H5O__attr_open_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned sequence,
     assert(!udata->attr);
 
     /* Check for correct attribute message to modify */
-    if (HDstrcmp(((H5A_t *)mesg->native)->shared->name, udata->name) == 0) {
+    if (strcmp(((H5A_t *)mesg->native)->shared->name, udata->name) == 0) {
         /* Make a copy of the attribute to return */
         if (NULL == (udata->attr = H5A__copy(NULL, (H5A_t *)mesg->native)))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "unable to copy attribute");
@@ -673,7 +675,7 @@ H5O__attr_find_opened_attr(const H5O_loc_t *loc, H5A_t **attr, const char *name_
              *  address to which the attribute is attached, and file serial
              *  number should all match.
              */
-            if (!HDstrcmp(name_to_open, (*attr)->shared->name) && loc->addr == (*attr)->oloc.addr &&
+            if (!strcmp(name_to_open, (*attr)->shared->name) && loc->addr == (*attr)->oloc.addr &&
                 loc_fnum == attr_fnum) {
                 ret_value = true;
                 break;
@@ -769,7 +771,7 @@ done:
  */
 static herr_t
 H5O__attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR_UNUSED sequence,
-                   unsigned *oh_modified, void *_udata /*in,out*/)
+                   void *_udata /*in,out*/)
 {
     H5O_iter_wrt_t    *udata       = (H5O_iter_wrt_t *)_udata; /* Operator user data */
     H5O_chunk_proxy_t *chk_proxy   = NULL;                     /* Chunk that message is in */
@@ -784,7 +786,7 @@ H5O__attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR_UNUS
     assert(!udata->found);
 
     /* Check for correct attribute message to modify */
-    if (0 == HDstrcmp(((H5A_t *)mesg->native)->shared->name, udata->attr->shared->name)) {
+    if (0 == strcmp(((H5A_t *)mesg->native)->shared->name, udata->attr->shared->name)) {
         /* Protect chunk */
         if (NULL == (chk_proxy = H5O__chunk_protect(udata->f, oh, mesg->chunkno)))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, H5_ITER_ERROR, "unable to load object header chunk");
@@ -821,7 +823,7 @@ H5O__attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR_UNUS
                             "unable to update attribute in shared storage");
 
         /* Indicate that the object header was modified */
-        *oh_modified = H5O_MODIFY;
+        oh->mesgs_modified = H5O_MODIFY;
 
         /* Indicate that the attribute was found */
         udata->found = true;
@@ -921,8 +923,7 @@ done:
  */
 static herr_t
 H5O__attr_rename_chk_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg /*in,out*/,
-                        unsigned H5_ATTR_UNUSED sequence, unsigned H5_ATTR_UNUSED *oh_modified,
-                        void *_udata /*in,out*/)
+                        unsigned H5_ATTR_UNUSED sequence, void *_udata /*in,out*/)
 {
     H5O_iter_ren_t *udata     = (H5O_iter_ren_t *)_udata; /* Operator user data */
     herr_t          ret_value = H5_ITER_CONT;             /* Return value */
@@ -935,7 +936,7 @@ H5O__attr_rename_chk_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg /*in,out*/,
     assert(!udata->found);
 
     /* Check for existing attribute with new name */
-    if (HDstrcmp(((H5A_t *)mesg->native)->shared->name, udata->new_name) == 0) {
+    if (strcmp(((H5A_t *)mesg->native)->shared->name, udata->new_name) == 0) {
         /* Indicate that we found an existing attribute with the new name*/
         udata->found = true;
 
@@ -963,7 +964,7 @@ H5O__attr_rename_chk_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg /*in,out*/,
  */
 static herr_t
 H5O__attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR_UNUSED sequence,
-                        unsigned *oh_modified, void *_udata /*in,out*/)
+                        void *_udata /*in,out*/)
 {
     H5O_iter_ren_t    *udata       = (H5O_iter_ren_t *)_udata; /* Operator user data */
     H5O_chunk_proxy_t *chk_proxy   = NULL;                     /* Chunk that message is in */
@@ -978,7 +979,7 @@ H5O__attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR
     assert(!udata->found);
 
     /* Find correct attribute message to rename */
-    if (HDstrcmp(((H5A_t *)mesg->native)->shared->name, udata->old_name) == 0) {
+    if (strcmp(((H5A_t *)mesg->native)->shared->name, udata->old_name) == 0) {
         unsigned old_version = ((H5A_t *)mesg->native)->shared->version; /* Old version of the attribute */
 
         /* Protect chunk */
@@ -1015,7 +1016,7 @@ H5O__attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR
             assert(H5O_msg_is_shared(H5O_ATTR_ID, (H5A_t *)mesg->native) == false);
 
             /* Check for attribute message changing size */
-            if (HDstrlen(udata->new_name) != HDstrlen(udata->old_name) ||
+            if (strlen(udata->new_name) != strlen(udata->old_name) ||
                 old_version != ((H5A_t *)mesg->native)->shared->version) {
                 H5A_t *attr; /* Attribute to re-add */
 
@@ -1040,7 +1041,7 @@ H5O__attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, H5_ITER_ERROR,
                                 "unable to release previous attribute");
 
-                *oh_modified = H5O_MODIFY_CONDENSE;
+                oh->mesgs_modified = H5O_MODIFY_CONDENSE;
 
                 /* Append renamed attribute to object header */
                 /* (Don't let it become shared) */
@@ -1058,7 +1059,7 @@ H5O__attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR
         }     /* end else */
 
         /* Indicate that the object header was modified */
-        *oh_modified |= H5O_MODIFY;
+        oh->mesgs_modified |= H5O_MODIFY;
 
         /* Indicate that we found an existing attribute with the old name */
         udata->found = true;
@@ -1171,10 +1172,10 @@ herr_t
 H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, H5_index_t idx_type, H5_iter_order_t order,
                       hsize_t skip, hsize_t *last_attr, const H5A_attr_iter_op_t *attr_op, void *op_data)
 {
-    H5O_t           *oh = NULL;             /* Pointer to actual object header */
-    H5O_ainfo_t      ainfo;                 /* Attribute information for object */
-    H5A_attr_table_t atable    = {0, NULL}; /* Table of attributes */
-    herr_t           ret_value = FAIL;      /* Return value */
+    H5O_t           *oh = NULL;                /* Pointer to actual object header */
+    H5O_ainfo_t      ainfo;                    /* Attribute information for object */
+    H5A_attr_table_t atable    = {0, 0, NULL}; /* Table of attributes */
+    herr_t           ret_value = FAIL;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_TAG(loc->addr)
 
@@ -1223,7 +1224,7 @@ H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, H5_index_t idx_type, H
         oh = NULL;
 
         /* Check for skipping too many attributes */
-        if (skip > 0 && skip >= atable.nattrs)
+        if (skip > 0 && skip >= atable.num_attrs)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified");
 
         /* Iterate over attributes in table */
@@ -1293,8 +1294,8 @@ done:
 static herr_t
 H5O__attr_remove_update(const H5O_loc_t *loc, H5O_t *oh, H5O_ainfo_t *ainfo)
 {
-    H5A_attr_table_t atable    = {0, NULL}; /* Table of attributes */
-    herr_t           ret_value = SUCCEED;   /* Return value */
+    H5A_attr_table_t atable    = {0, 0, NULL}; /* Table of attributes */
+    herr_t           ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1408,7 +1409,7 @@ done:
  */
 static herr_t
 H5O__attr_remove_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR_UNUSED sequence,
-                    unsigned *oh_modified, void *_udata /*in,out*/)
+                    void *_udata /*in,out*/)
 {
     H5O_iter_rm_t *udata     = (H5O_iter_rm_t *)_udata; /* Operator user data */
     herr_t         ret_value = H5_ITER_CONT;            /* Return value */
@@ -1421,13 +1422,13 @@ H5O__attr_remove_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR_UNU
     assert(!udata->found);
 
     /* Check for correct attribute message to modify */
-    if (HDstrcmp(((H5A_t *)mesg->native)->shared->name, udata->name) == 0) {
+    if (strcmp(((H5A_t *)mesg->native)->shared->name, udata->name) == 0) {
         /* Convert message into a null message (i.e. delete it) */
         if (H5O__release_mesg(udata->f, oh, mesg, true) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to convert into null message");
 
         /* Indicate that the object header was modified */
-        *oh_modified = H5O_MODIFY_CONDENSE;
+        oh->mesgs_modified = H5O_MODIFY_CONDENSE;
 
         /* Indicate that this message is the attribute to be deleted */
         udata->found = true;
@@ -1530,11 +1531,11 @@ done:
 herr_t
 H5O__attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type, H5_iter_order_t order, hsize_t n)
 {
-    H5O_t           *oh = NULL;                /* Pointer to actual object header */
-    H5O_ainfo_t      ainfo;                    /* Attribute information for object */
-    htri_t           ainfo_exists = false;     /* Whether the attribute info exists in the file */
-    H5A_attr_table_t atable       = {0, NULL}; /* Table of attributes */
-    herr_t           ret_value    = SUCCEED;   /* Return value */
+    H5O_t           *oh = NULL;                   /* Pointer to actual object header */
+    H5O_ainfo_t      ainfo;                       /* Attribute information for object */
+    htri_t           ainfo_exists = false;        /* Whether the attribute info exists in the file */
+    H5A_attr_table_t atable       = {0, 0, NULL}; /* Table of attributes */
+    herr_t           ret_value    = SUCCEED;      /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(loc->addr)
 
@@ -1568,7 +1569,7 @@ H5O__attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type, H5_iter_order
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "error building attribute table");
 
         /* Check for skipping too many attributes */
-        if (n >= atable.nattrs)
+        if (n >= atable.num_attrs)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified");
 
         /* Set up user data for callback, to remove the attribute by name */
@@ -1667,7 +1668,7 @@ done:
  */
 static herr_t
 H5O__attr_exists_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR_UNUSED sequence,
-                    unsigned H5_ATTR_UNUSED *oh_modified, void *_udata /*in,out*/)
+                    void *_udata /*in,out*/)
 {
     H5O_iter_xst_t *udata     = (H5O_iter_xst_t *)_udata; /* Operator user data */
     herr_t          ret_value = H5_ITER_CONT;             /* Return value */
@@ -1679,7 +1680,7 @@ H5O__attr_exists_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg /*in,out*/, unsig
     assert(udata->exists && !*udata->exists);
 
     /* Check for correct attribute message */
-    if (HDstrcmp(((H5A_t *)mesg->native)->shared->name, udata->name) == 0) {
+    if (strcmp(((H5A_t *)mesg->native)->shared->name, udata->name) == 0) {
         /* Indicate that this message is the attribute sought */
         *udata->exists = true;
 

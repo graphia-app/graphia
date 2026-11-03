@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -20,18 +20,14 @@
 /* Headers */
 /***********/
 #include "H5private.h"   /* Generic Functions                        */
-#include "H5ACprivate.h" /* Metadata cache                           */
 #include "H5CXprivate.h" /* API Contexts                             */
-#include "H5Dprivate.h"  /* Datasets                                 */
 #include "H5Eprivate.h"  /* Error handling                           */
-#include "H5Gprivate.h"  /* Groups                                   */
 #include "H5HGprivate.h" /* Global Heaps                             */
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5MMprivate.h" /* Memory management                        */
 #include "H5Oprivate.h"  /* Object headers                           */
 #include "H5Rpkg.h"      /* References                               */
 #include "H5Sprivate.h"  /* Dataspaces                               */
-#include "H5Tprivate.h"  /* Datatypes                                */
 
 #include "H5VLnative_private.h" /* Native VOL connector                     */
 
@@ -102,14 +98,13 @@ H5R__print_token(const H5O_token_t token)
     static char string[64];
 
     /* Print the raw token. */
-    HDsnprintf(string, 64, "%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X",
-               (unsigned char)token.__data[15], (unsigned char)token.__data[14],
-               (unsigned char)token.__data[13], (unsigned char)token.__data[12],
-               (unsigned char)token.__data[11], (unsigned char)token.__data[10],
-               (unsigned char)token.__data[9], (unsigned char)token.__data[8], (unsigned char)token.__data[7],
-               (unsigned char)token.__data[6], (unsigned char)token.__data[5], (unsigned char)token.__data[4],
-               (unsigned char)token.__data[3], (unsigned char)token.__data[2], (unsigned char)token.__data[1],
-               (unsigned char)token.__data[0]);
+    snprintf(string, 64, "%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X",
+             (unsigned char)token.__data[15], (unsigned char)token.__data[14],
+             (unsigned char)token.__data[13], (unsigned char)token.__data[12],
+             (unsigned char)token.__data[11], (unsigned char)token.__data[10], (unsigned char)token.__data[9],
+             (unsigned char)token.__data[8], (unsigned char)token.__data[7], (unsigned char)token.__data[6],
+             (unsigned char)token.__data[5], (unsigned char)token.__data[4], (unsigned char)token.__data[3],
+             (unsigned char)token.__data[2], (unsigned char)token.__data[1], (unsigned char)token.__data[0]);
 
     return string;
 }
@@ -140,6 +135,9 @@ static herr_t H5R__decode_string(const unsigned char *buf, size_t *nbytes, char 
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+bool H5_PKG_INIT_VAR = false;
+
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -148,27 +146,26 @@ static herr_t H5R__decode_string(const unsigned char *buf, size_t *nbytes, char 
 /* Local Variables */
 /*******************/
 
-/*-------------------------------------------------------------------------
- * Function:    H5R_init
- *
- * Purpose:     Initialize the interface from some other layer.
- *
- * Return:      Success:        non-negative
- *              Failure:        negative
- *-------------------------------------------------------------------------
- */
+/*--------------------------------------------------------------------------
+NAME
+   H5R__init_package -- Initialize interface-specific information
+USAGE
+    herr_t H5R__init_package()
+RETURNS
+    Non-negative on success/Negative on failure
+DESCRIPTION
+    Initializes any interface-specific data or routines.
+--------------------------------------------------------------------------*/
 herr_t
-H5R_init(void)
+H5R__init_package(void)
 {
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check, if assert fails, H5R_REF_BUF_SIZE must be increased */
     HDcompile_assert(sizeof(H5R_ref_priv_t) <= H5R_REF_BUF_SIZE);
 
-    FUNC_LEAVE_NOAPI(ret_value)
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5R__init_package() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5R__create_object
@@ -279,13 +276,13 @@ H5R__create_attr(const H5O_token_t *obj_token, size_t token_size, const char *at
     assert(ref);
 
     /* Make sure that attribute name is not longer than supported encode size */
-    if (HDstrlen(attr_name) > H5R_MAX_STRING_LEN)
+    if (strlen(attr_name) > H5R_MAX_STRING_LEN)
         HGOTO_ERROR(H5E_REFERENCE, H5E_ARGS, FAIL, "attribute name too long (%d > %d)",
-                    (int)HDstrlen(attr_name), H5R_MAX_STRING_LEN);
+                    (int)strlen(attr_name), H5R_MAX_STRING_LEN);
 
     /* Create new reference */
     ref->info.obj.filename = NULL;
-    if (NULL == (ref->info.attr.name = HDstrdup(attr_name)))
+    if (NULL == (ref->info.attr.name = strdup(attr_name)))
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCOPY, FAIL, "Cannot copy attribute name");
 
     ref->loc_id = H5I_INVALID_HID;
@@ -489,12 +486,12 @@ H5R__reopen_file(H5R_ref_priv_t *ref, hid_t fapl_id)
 
     /* Open the file */
     /* (Must open file read-write to allow for object modifications) */
-    if (NULL == (new_file = H5VL_file_open(&connector_prop, H5R_REF_FILENAME(ref), H5F_ACC_RDWR, fapl_id,
-                                           H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if (NULL == (new_file = H5VL_file_open(connector_prop.connector, H5R_REF_FILENAME(ref), H5F_ACC_RDWR,
+                                           fapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to open file");
 
     /* Get an ID for the file */
-    if ((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, true)) < 0)
+    if ((ret_value = H5VL_register(H5I_FILE, new_file, connector_prop.connector, true)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file handle");
 
     /* Get the file object */
@@ -583,7 +580,7 @@ H5R__equal(const H5R_ref_priv_t *ref1, const H5R_ref_priv_t *ref2)
         ((NULL == ref1->info.obj.filename) && ref2->info.obj.filename))
         HGOTO_DONE(false);
     if (ref1->info.obj.filename && ref1->info.obj.filename &&
-        (0 != HDstrcmp(ref1->info.obj.filename, ref2->info.obj.filename)))
+        (0 != strcmp(ref1->info.obj.filename, ref2->info.obj.filename)))
         HGOTO_DONE(false);
 
     switch (ref1->type) {
@@ -595,7 +592,7 @@ H5R__equal(const H5R_ref_priv_t *ref1, const H5R_ref_priv_t *ref2)
             break;
         case H5R_ATTR:
             assert(ref1->info.attr.name && ref2->info.attr.name);
-            if (0 != HDstrcmp(ref1->info.attr.name, ref2->info.attr.name))
+            if (0 != strcmp(ref1->info.attr.name, ref2->info.attr.name))
                 HGOTO_DONE(false);
             break;
         case H5R_OBJECT1:
@@ -644,7 +641,7 @@ H5R__copy(const H5R_ref_priv_t *src_ref, H5R_ref_priv_t *dst_ref)
                 HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCOPY, FAIL, "unable to copy dataspace");
             break;
         case H5R_ATTR:
-            if (NULL == (dst_ref->info.attr.name = HDstrdup(src_ref->info.attr.name)))
+            if (NULL == (dst_ref->info.attr.name = strdup(src_ref->info.attr.name)))
                 HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCOPY, FAIL, "Cannot copy attribute name");
             break;
         case H5R_OBJECT1:
@@ -662,7 +659,7 @@ H5R__copy(const H5R_ref_priv_t *src_ref, H5R_ref_priv_t *dst_ref)
     if (src_ref->loc_id == H5I_INVALID_HID) {
         assert(src_ref->info.obj.filename);
 
-        if (NULL == (dst_ref->info.obj.filename = HDstrdup(src_ref->info.obj.filename)))
+        if (NULL == (dst_ref->info.obj.filename = strdup(src_ref->info.obj.filename)))
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCOPY, FAIL, "Cannot copy filename");
         dst_ref->loc_id = H5I_INVALID_HID;
     }
@@ -795,7 +792,7 @@ H5R__get_file_name(const H5R_ref_priv_t *ref, char *buf, size_t size)
         HGOTO_ERROR(H5E_REFERENCE, H5E_ARGS, (-1), "no filename available for that reference");
 
     /* Get the file name length */
-    copy_len = HDstrlen(ref->info.obj.filename);
+    copy_len = strlen(ref->info.obj.filename);
     assert(copy_len <= H5R_MAX_STRING_LEN);
 
     /* Copy the file name */
@@ -832,7 +829,7 @@ H5R__get_attr_name(const H5R_ref_priv_t *ref, char *buf, size_t size)
     assert(ref->type == H5R_ATTR);
 
     /* Get the attribute name length */
-    attr_name_len = HDstrlen(ref->info.attr.name);
+    attr_name_len = strlen(ref->info.attr.name);
     assert(attr_name_len <= H5R_MAX_STRING_LEN);
 
     /* Get the attribute name */
@@ -842,7 +839,7 @@ H5R__get_attr_name(const H5R_ref_priv_t *ref, char *buf, size_t size)
         buf[copy_len] = '\0';
     }
 
-    ret_value = (ssize_t)(attr_name_len + 1);
+    ret_value = (ssize_t)(attr_name_len);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__get_attr_name() */
@@ -961,7 +958,10 @@ H5R__decode(const unsigned char *buf, size_t *nbytes, H5R_ref_priv_t *ref)
     const uint8_t *p        = (const uint8_t *)buf;
     size_t         buf_size = 0, decode_size = 0;
     uint8_t        flags;
-    herr_t         ret_value = SUCCEED;
+    bool           decoded_filename  = false; /* Whether filename was decoded, for error handling */
+    bool           decoded_attrname  = false; /* Whether attribute name was decoded, for error handling */
+    bool           decoded_dataspace = false; /* Whether dataspace was decoded, for error handling */
+    herr_t         ret_value         = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -995,6 +995,7 @@ H5R__decode(const unsigned char *buf, size_t *nbytes, H5R_ref_priv_t *ref)
         /* Decode file name */
         H5R_DECODE(H5R__decode_string, &ref->info.obj.filename, p, buf_size, decode_size,
                    "Cannot decode filename");
+        decoded_filename = true;
     }
     else
         ref->info.obj.filename = NULL;
@@ -1002,22 +1003,28 @@ H5R__decode(const unsigned char *buf, size_t *nbytes, H5R_ref_priv_t *ref)
     switch (ref->type) {
         case H5R_OBJECT2:
             break;
+
         case H5R_DATASET_REGION2:
             /* Decode dataspace */
             H5R_DECODE(H5R__decode_region, &ref->info.reg.space, p, buf_size, decode_size,
                        "Cannot decode region");
+            decoded_dataspace = true;
             break;
+
         case H5R_ATTR:
             /* Decode attribute name */
             H5R_DECODE(H5R__decode_string, &ref->info.attr.name, p, buf_size, decode_size,
                        "Cannot decode attribute name");
+            decoded_attrname = true;
             break;
+
         case H5R_OBJECT1:
         case H5R_DATASET_REGION1:
         case H5R_BADTYPE:
         case H5R_MAXTYPE:
             assert("invalid reference type" && 0);
             HGOTO_ERROR(H5E_REFERENCE, H5E_UNSUPPORTED, FAIL, "internal error (invalid reference type)");
+
         default:
             assert("unknown reference type" && 0);
             HGOTO_ERROR(H5E_REFERENCE, H5E_UNSUPPORTED, FAIL, "internal error (unknown reference type)");
@@ -1036,6 +1043,22 @@ H5R__decode(const unsigned char *buf, size_t *nbytes, H5R_ref_priv_t *ref)
     *nbytes = decode_size;
 
 done:
+    if (ret_value < 0) {
+        if (decoded_filename) {
+            H5MM_xfree(ref->info.obj.filename);
+            ref->info.obj.filename = NULL;
+        }
+        if (decoded_attrname) {
+            H5MM_xfree(ref->info.attr.name);
+            ref->info.attr.name = NULL;
+        }
+        if (decoded_dataspace) {
+            if (H5S_close(ref->info.reg.space) < 0)
+                HDONE_ERROR(H5E_REFERENCE, H5E_CLOSEERROR, FAIL, "unable to release dataspace");
+            ref->info.reg.space = NULL;
+        }
+    }
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__decode() */
 
@@ -1180,7 +1203,7 @@ H5R__decode_region(const unsigned char *buf, size_t *nbytes, H5S_t **space_ptr)
     const uint8_t *p_end    = p + *nbytes - 1;
     size_t         buf_size = 0;
     unsigned       rank;
-    H5S_t         *space;
+    H5S_t         *space     = NULL;
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
@@ -1221,6 +1244,10 @@ H5R__decode_region(const unsigned char *buf, size_t *nbytes, H5S_t **space_ptr)
     *space_ptr = space;
 
 done:
+    if (ret_value < 0)
+        if (space && H5S_close(space) < 0)
+            HDONE_ERROR(H5E_REFERENCE, H5E_CLOSEERROR, FAIL, "unable to release dataspace");
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__decode_region() */
 
@@ -1245,7 +1272,7 @@ H5R__encode_string(const char *string, unsigned char *buf, size_t *nalloc)
     assert(nalloc);
 
     /* Get the amount of space required to serialize the string */
-    string_len = HDstrlen(string);
+    string_len = strlen(string);
     if (string_len > H5R_MAX_STRING_LEN)
         HGOTO_ERROR(H5E_REFERENCE, H5E_ARGS, FAIL, "string too long");
 

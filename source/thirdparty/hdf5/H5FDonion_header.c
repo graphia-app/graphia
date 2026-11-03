@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -16,13 +16,11 @@
  * Purpose:     Code for the onion file's header
  */
 
-/* This source code file is part of the H5FD driver module */
-#include "H5FDdrvr_module.h"
+#include "H5FDmodule.h" /* This source code file is part of the H5FD module */
 
 #include "H5private.h"      /* Generic Functions                        */
 #include "H5Eprivate.h"     /* Error handling                           */
-#include "H5FDprivate.h"    /* File drivers                             */
-#include "H5FDonion.h"      /* Onion file driver                        */
+#include "H5FDpkg.h"        /* File drivers                             */
 #include "H5FDonion_priv.h" /* Onion file driver internals              */
 #include "H5MMprivate.h"    /* Memory management                        */
 
@@ -134,7 +132,7 @@ H5FD__onion_header_decode(unsigned char *buf, H5FD_onion_header_t *header)
     assert(header != NULL);
     assert(H5FD_ONION_HEADER_VERSION_CURR == header->version);
 
-    if (HDstrncmp((const char *)buf, H5FD_ONION_HEADER_SIGNATURE, 4))
+    if (strncmp((const char *)buf, H5FD_ONION_HEADER_SIGNATURE, 4))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid header signature");
 
     if (buf[4] != H5FD_ONION_HEADER_VERSION_CURR)

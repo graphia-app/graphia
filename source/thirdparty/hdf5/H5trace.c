@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -23,7 +23,7 @@
 /* Module Setup */
 /****************/
 #include "H5module.h" /* This source code file is part of the H5 module */
-#define H5I_FRIEND    /*suppress error about including H5Ipkg      */
+#define H5I_FRIEND    /* Suppress error about including H5Ipkg */
 
 /***********/
 /* Headers */
@@ -40,7 +40,7 @@
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
 #ifdef H5_HAVE_PARALLEL
-/* datatypes of predefined drivers needed by H5_trace() */
+/* Datatypes of predefined drivers needed by H5_trace() */
 #include "H5FDmpio.h"
 #endif /* H5_HAVE_PARALLEL */
 
@@ -79,7 +79,7 @@ static herr_t H5_trace_args_close_degree(H5RS_str_t *rs, H5F_close_degree_t degr
  * Function:    H5_trace_args_bool
  *
  * Purpose:     This routine formats an bool and adds the output to
- *		the refcounted string (RS) argument.
+ *              the refcounted string (RS) argument.
  *
  * Return:      SUCCEED / FAIL
  *
@@ -104,7 +104,7 @@ H5_trace_args_bool(H5RS_str_t *rs, bool val)
  * Function:    H5_trace_args_cset
  *
  * Purpose:     This routine formats an H5T_cset_t and adds the output to
- *		the refcounted string (RS) argument.
+ *              the refcounted string (RS) argument.
  *
  * Return:      SUCCEED / FAIL
  *
@@ -148,7 +148,7 @@ H5_trace_args_cset(H5RS_str_t *rs, H5T_cset_t cset)
         default:
             H5RS_asprintf_cat(rs, "%ld", (long)cset);
             break;
-    } /* end switch */
+    }
 
     return SUCCEED;
 } /* end H5_trace_args_cset() */
@@ -197,14 +197,14 @@ H5_trace_args_close_degree(H5RS_str_t *rs, H5F_close_degree_t degree)
  * Function:    H5_trace_args
  *
  * Purpose:     This routine formats a set of function arguments, placing the
- *		resulting string in the refcounted string (RS) argument.
+ *              resulting string in the refcounted string (RS) argument.
  *
- *		The TYPE argument is a string which gives the type of each of
+ *              The TYPE argument is a string which gives the type of each of
  *              the following argument pairs.  Each type begins with zero or
- *		more asterisks (one for each level of indirection, although
- *		some types have one level of indirection already implied)
- *		followed by either one letter (lower case) or two letters
- *		(first one uppercase).
+ *              more asterisks (one for each level of indirection, although
+ *              some types have one level of indirection already implied)
+ *              followed by either one letter (lower case) or two letters
+ *              (first one uppercase).
  *
  *              The variable argument list consists of pairs of values. Each
  *              pair is a string which is the formal argument name in the
@@ -250,7 +250,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                 type = rest + 1;
             }
             else {
-                rest = (char *)HDstrchr(type, ']');
+                rest = (char *)strchr(type, ']');
                 assert(rest);
                 type      = rest + 1;
                 asize_idx = -1;
@@ -1452,8 +1452,8 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5F_LIBVER_V114");
                                     break;
 
-                                case H5F_LIBVER_V116:
-                                    HDcompile_assert(H5F_LIBVER_LATEST == H5F_LIBVER_V116);
+                                case H5F_LIBVER_V200:
+                                    HDcompile_assert(H5F_LIBVER_LATEST == H5F_LIBVER_V200);
                                     H5RS_acat(rs, "H5F_LIBVER_LATEST");
                                     break;
 
@@ -1480,8 +1480,40 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                             H5G_iterate_t git = (H5G_iterate_t)va_arg(ap, H5G_iterate_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)git);
-                        } /* end block */
-                        break;
+                        } break;
+
+                        case 'I': /* H5G_info_t */
+                        {
+                            H5G_info_t ginfo = va_arg(ap, H5G_info_t);
+
+                            H5RS_acat(rs, "{");
+                            switch (ginfo.storage_type) {
+                                case H5G_STORAGE_TYPE_UNKNOWN:
+                                    H5RS_asprintf_cat(rs, "H5G_STORAGE_TYPE_UNKNOWN");
+                                    break;
+
+                                case H5G_STORAGE_TYPE_SYMBOL_TABLE:
+                                    H5RS_asprintf_cat(rs, "H5G_STORAGE_TYPE_SYMBOL_TABLE");
+                                    break;
+
+                                case H5G_STORAGE_TYPE_COMPACT:
+                                    H5RS_asprintf_cat(rs, "H5G_STORAGE_TYPE_COMPACT");
+                                    break;
+
+                                case H5G_STORAGE_TYPE_DENSE:
+                                    H5RS_asprintf_cat(rs, "H5G_STORAGE_TYPE_DENSE");
+                                    break;
+
+                                default:
+                                    H5RS_asprintf_cat(rs, "%ld", (long)ginfo.storage_type);
+                                    break;
+                            }
+                            H5RS_asprintf_cat(rs, ", ");
+                            H5RS_asprintf_cat(rs, "%" PRIuHSIZE ", ", ginfo.nlinks);
+                            H5RS_asprintf_cat(rs, "%" PRId64 ", ", ginfo.max_corder);
+                            H5_trace_args_bool(rs, ginfo.mounted);
+                            H5RS_asprintf_cat(rs, "}");
+                        } break;
 
                         case 'o': /* H5G_obj_t */
                         {
@@ -1625,12 +1657,28 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5T_NATIVE_LLONG");
                                 else if (obj == H5T_NATIVE_ULLONG_g)
                                     H5RS_acat(rs, "H5T_NATIVE_ULLONG");
+#ifdef H5_HAVE__FLOAT16
+                                else if (obj == H5T_NATIVE_FLOAT16_g)
+                                    H5RS_acat(rs, "H5T_NATIVE_FLOAT16");
+#endif
                                 else if (obj == H5T_NATIVE_FLOAT_g)
                                     H5RS_acat(rs, "H5T_NATIVE_FLOAT");
                                 else if (obj == H5T_NATIVE_DOUBLE_g)
                                     H5RS_acat(rs, "H5T_NATIVE_DOUBLE");
                                 else if (obj == H5T_NATIVE_LDOUBLE_g)
                                     H5RS_acat(rs, "H5T_NATIVE_LDOUBLE");
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+                                else if (obj == H5T_NATIVE_FLOAT_COMPLEX_g)
+                                    H5RS_acat(rs, "H5T_NATIVE_FLOAT_COMPLEX");
+                                else if (obj == H5T_NATIVE_DOUBLE_COMPLEX_g)
+                                    H5RS_acat(rs, "H5T_NATIVE_DOUBLE_COMPLEX");
+                                else if (obj == H5T_NATIVE_LDOUBLE_COMPLEX_g)
+                                    H5RS_acat(rs, "H5T_NATIVE_LDOUBLE_COMPLEX");
+#endif
+                                else if (obj == H5T_IEEE_F16BE_g)
+                                    H5RS_acat(rs, "H5T_IEEE_F16BE");
+                                else if (obj == H5T_IEEE_F16LE_g)
+                                    H5RS_acat(rs, "H5T_IEEE_F16LE");
                                 else if (obj == H5T_IEEE_F32BE_g)
                                     H5RS_acat(rs, "H5T_IEEE_F32BE");
                                 else if (obj == H5T_IEEE_F32LE_g)
@@ -1639,6 +1687,32 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5T_IEEE_F64BE");
                                 else if (obj == H5T_IEEE_F64LE_g)
                                     H5RS_acat(rs, "H5T_IEEE_F64LE");
+                                else if (obj == H5T_FLOAT_BFLOAT16BE_g)
+                                    H5RS_acat(rs, "H5T_FLOAT_BFLOAT16BE");
+                                else if (obj == H5T_FLOAT_BFLOAT16LE_g)
+                                    H5RS_acat(rs, "H5T_FLOAT_BFLOAT16LE");
+                                else if (obj == H5T_FLOAT_F8E4M3_g)
+                                    H5RS_acat(rs, "H5T_FLOAT_F8E4M3");
+                                else if (obj == H5T_FLOAT_F8E5M2_g)
+                                    H5RS_acat(rs, "H5T_FLOAT_F8E5M2");
+                                else if (obj == H5T_FLOAT_F6E2M3_g)
+                                    H5RS_acat(rs, "H5T_FLOAT_F6E2M3");
+                                else if (obj == H5T_FLOAT_F6E3M2_g)
+                                    H5RS_acat(rs, "H5T_FLOAT_F6E3M2");
+                                else if (obj == H5T_FLOAT_F4E2M1_g)
+                                    H5RS_acat(rs, "H5T_FLOAT_F4E2M1");
+                                else if (obj == H5T_COMPLEX_IEEE_F16BE_g)
+                                    H5RS_acat(rs, "H5T_COMPLEX_IEEE_F16BE");
+                                else if (obj == H5T_COMPLEX_IEEE_F16LE_g)
+                                    H5RS_acat(rs, "H5T_COMPLEX_IEEE_F16LE");
+                                else if (obj == H5T_COMPLEX_IEEE_F32BE_g)
+                                    H5RS_acat(rs, "H5T_COMPLEX_IEEE_F32BE");
+                                else if (obj == H5T_COMPLEX_IEEE_F32LE_g)
+                                    H5RS_acat(rs, "H5T_COMPLEX_IEEE_F32LE");
+                                else if (obj == H5T_COMPLEX_IEEE_F64BE_g)
+                                    H5RS_acat(rs, "H5T_COMPLEX_IEEE_F64BE");
+                                else if (obj == H5T_COMPLEX_IEEE_F64LE_g)
+                                    H5RS_acat(rs, "H5T_COMPLEX_IEEE_F64LE");
                                 else if (obj == H5T_STD_I8BE_g)
                                     H5RS_acat(rs, "H5T_STD_I8BE");
                                 else if (obj == H5T_STD_I8LE_g)
@@ -2822,6 +2896,10 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                                 case H5T_ARRAY:
                                     H5RS_acat(rs, "H5T_ARRAY");
+                                    break;
+
+                                case H5T_COMPLEX:
+                                    H5RS_acat(rs, "H5T_COMPLEX");
                                     break;
 
                                 case H5T_NCLASSES:
@@ -4025,8 +4103,8 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
 
                 H5_timer_get_times(function_timer, &function_times);
                 H5_timer_get_times(running_timer, &running_times);
-                HDsnprintf(tmp, sizeof(tmp), "%.6f", (function_times.elapsed - running_times.elapsed));
-                H5RS_asprintf_cat(rs, " %*s ", (int)HDstrlen(tmp), "");
+                snprintf(tmp, sizeof(tmp), "%.6f", (function_times.elapsed - running_times.elapsed));
+                H5RS_asprintf_cat(rs, " %*s ", (int)strlen(tmp), "");
             }
             for (i = 0; i < current_depth; i++)
                 H5RS_aputc(rs, '+');
@@ -4069,7 +4147,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
         last_call_depth = current_depth++;
         H5RS_acat(rs, ")");
     }
-    HDfputs(H5RS_get_str(rs), out);
+    fputs(H5RS_get_str(rs), out);
     fflush(out);
     H5RS_decr(rs);
 

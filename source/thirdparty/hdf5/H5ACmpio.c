@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -35,8 +35,10 @@
 #include "H5Cprivate.h"  /* Cache                                */
 #include "H5CXprivate.h" /* API Contexts                         */
 #include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5Fpkg.h"      /* Files				*/
 #include "H5MMprivate.h" /* Memory management                    */
+#include "H5SLprivate.h" /* Skip Lists                               */
 
 #ifdef H5_HAVE_PARALLEL
 
@@ -971,7 +973,7 @@ done:
  *		dirty bytes count.
  *
  *		The rank 0 process then removes any references to the
- *		entry under its old address from the cleands and dirtied
+ *		entry under its old address from the clean and dirtied
  *		lists, and inserts an entry in the dirtied list under the
  *		new address.
  *
@@ -1132,7 +1134,7 @@ done:
  *
  *		2) Apply the candidate entry list.
  *
- *		3) Particpate in a closing barrier.
+ *		3) Participate in a closing barrier.
  *
  *		4) Remove from the dirty list (d_slist_ptr) and from the
  *		   flushed and still clean entries list (c_slist_ptr),
@@ -1149,7 +1151,7 @@ done:
  *
  *		2) Apply the candidate entry list.
  *
- *		3) Particpate in a closing barrier.
+ *		3) Participate in a closing barrier.
  *
  * Return:      Success:        non-negative
  *
@@ -2022,8 +2024,8 @@ H5AC__run_sync_point(H5F_t *f, int sync_point_op)
            (sync_point_op == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED));
 
 #ifdef H5AC_DEBUG_DIRTY_BYTES_CREATION
-    fprintf(stdout, "%d:%s...:%u: (u/uu/i/iu/m/mu) = %zu/%u/%zu/%u/%zu/%u\n", aux_ptr->mpi_rank,
-            __func__ aux_ptr->dirty_bytes_propagations, aux_ptr->unprotect_dirty_bytes,
+    fprintf(stdout, "%d:%s...:%u: (u/uu/i/iu/m/mu) = %zu/%u/%zu/%u/%zu/%u\n", aux_ptr->mpi_rank, __func__,
+            aux_ptr->dirty_bytes_propagations, aux_ptr->unprotect_dirty_bytes,
             aux_ptr->unprotect_dirty_bytes_updates, aux_ptr->insert_dirty_bytes,
             aux_ptr->insert_dirty_bytes_updates, aux_ptr->move_dirty_bytes,
             aux_ptr->move_dirty_bytes_updates);

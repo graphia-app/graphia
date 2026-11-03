@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -28,13 +28,12 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5private.h"   /* Generic Functions                    */
+#include "H5Eprivate.h"  /* Error handling		  	 */
 #include "H5Fprivate.h"  /* File access                          */
 #include "H5FLprivate.h" /* Free Lists                           */
-#include "H5MFprivate.h" /* File memory management		*/
-#include "H5MMprivate.h" /* Memory management			*/
+#include "H5MMprivate.h" /* Memory management			 */
 #include "H5SMpkg.h"     /* Shared object header messages        */
-#include "H5WBprivate.h" /* Wrapped Buffers                      */
 
 /****************/
 /* Local Macros */
@@ -158,17 +157,19 @@ H5SM__cache_table_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNU
     uint32_t       computed_chksum;                 /* Computed metadata checksum value */
     htri_t         ret_value = true;                /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     assert(image);
 
     /* Get stored and computed checksums */
-    H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
+    if (H5F_get_checksums(image, len, &stored_chksum, &computed_chksum) < 0)
+        HGOTO_ERROR(H5E_SOHM, H5E_CANTGET, FAIL, "can't get checksums");
 
     if (stored_chksum != computed_chksum)
         ret_value = false;
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM__cache_table_verify_chksum() */
 
@@ -482,7 +483,7 @@ H5SM__cache_list_verify_chksum(const void *_image, size_t H5_ATTR_UNUSED len, vo
     uint32_t              computed_chksum;  /* Computed metadata checksum value */
     htri_t                ret_value = true; /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     assert(image);
@@ -492,11 +493,13 @@ H5SM__cache_list_verify_chksum(const void *_image, size_t H5_ATTR_UNUSED len, vo
     chk_size = H5SM_LIST_SIZE(udata->f, udata->header->num_messages);
 
     /* Get stored and computed checksums */
-    H5F_get_checksums(image, chk_size, &stored_chksum, &computed_chksum);
+    if (H5F_get_checksums(image, chk_size, &stored_chksum, &computed_chksum) < 0)
+        HGOTO_ERROR(H5E_SOHM, H5E_CANTGET, FAIL, "can't get checksums");
 
     if (stored_chksum != computed_chksum)
         ret_value = false;
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM__cache_list_verify_chksum() */
 

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -229,7 +229,7 @@ H5EA__iblock_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int inde
         fprintf(stream, "%*sData Block Addresses in Index Block:\n", indent, "");
         for (u = 0; u < iblock->ndblk_addrs; u++) {
             /* Print address */
-            HDsnprintf(temp_str, sizeof(temp_str), "Address #%u:", u);
+            snprintf(temp_str, sizeof(temp_str), "Address #%u:", u);
             fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", (indent + 3), "", MAX(0, (fwidth - 3)), temp_str,
                     iblock->dblk_addrs[u]);
         } /* end for */
@@ -244,7 +244,7 @@ H5EA__iblock_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int inde
         fprintf(stream, "%*sSuper Block Addresses in Index Block:\n", indent, "");
         for (u = 0; u < iblock->nsblk_addrs; u++) {
             /* Print address */
-            HDsnprintf(temp_str, sizeof(temp_str), "Address #%u:", u);
+            snprintf(temp_str, sizeof(temp_str), "Address #%u:", u);
             fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", (indent + 3), "", MAX(0, (fwidth - 3)), temp_str,
                     iblock->sblk_addrs[u]);
         } /* end for */
@@ -331,7 +331,7 @@ H5EA__sblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
         fprintf(stream, "%*sData Block Addresses in Super Block:\n", indent, "");
         for (u = 0; u < sblock->ndblks; u++) {
             /* Print address */
-            HDsnprintf(temp_str, sizeof(temp_str), "Address #%u:", u);
+            snprintf(temp_str, sizeof(temp_str), "Address #%u:", u);
             fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", (indent + 3), "", MAX(0, (fwidth - 3)), temp_str,
                     sblock->dblk_addrs[u]);
         } /* end for */

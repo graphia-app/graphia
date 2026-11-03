@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -61,7 +61,7 @@
 /*******************/
 
 /*-------------------------------------------------------------------------
- * Function:    H5T__print_stats
+ * Function:    H5T__print_path_stats
  *
  * Purpose:     Print statistics about a conversion path.  Statistics are
  *              printed only if all the following conditions are true:
@@ -80,7 +80,7 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T__print_stats(H5T_path_t H5_ATTR_UNUSED *path, int H5_ATTR_UNUSED *nprint /*in,out*/)
+H5T__print_path_stats(H5T_path_t H5_ATTR_UNUSED *path, int H5_ATTR_UNUSED *nprint /*in,out*/)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -124,7 +124,7 @@ H5T__print_stats(H5T_path_t H5_ATTR_UNUSED *path, int H5_ATTR_UNUSED *nprint /*i
 #endif
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5T__print_stats() */
+} /* end H5T__print_path_stats() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5T_debug
@@ -182,6 +182,31 @@ H5T_debug(const H5T_t *dt, FILE *stream)
             s1 = "struct";
             break;
 
+        case H5T_REFERENCE:
+            switch (dt->shared->u.atomic.u.r.rtype) {
+                case H5R_OBJECT1:
+                    s1 = "object reference (old)";
+                    break;
+                case H5R_OBJECT2:
+                    s1 = "object reference (new)";
+                    break;
+                case H5R_DATASET_REGION1:
+                    s1 = "region reference (old)";
+                    break;
+                case H5R_DATASET_REGION2:
+                    s1 = "region reference (new)";
+                    break;
+                case H5R_ATTR:
+                    s1 = "attribute reference";
+                    break;
+                case H5R_BADTYPE:
+                case H5R_MAXTYPE:
+                default:
+                    s1 = "invalid reference";
+                    break;
+            }
+            break;
+
         case H5T_ENUM:
             s1 = "enum";
             break;
@@ -193,8 +218,14 @@ H5T_debug(const H5T_t *dt, FILE *stream)
                 s1 = "vlen";
             break;
 
-        case H5T_REFERENCE:
         case H5T_ARRAY:
+            s1 = "array";
+            break;
+
+        case H5T_COMPLEX:
+            s1 = "complex number";
+            break;
+
         case H5T_NCLASSES:
         default:
             s1 = "";
@@ -342,6 +373,7 @@ H5T_debug(const H5T_t *dt, FILE *stream)
             case H5T_ENUM:
             case H5T_VLEN:
             case H5T_ARRAY:
+            case H5T_COMPLEX:
             case H5T_NCLASSES:
             default:
                 /* No additional info */
@@ -406,6 +438,23 @@ H5T_debug(const H5T_t *dt, FILE *stream)
     }
     else if (H5T_OPAQUE == dt->shared->type) {
         fprintf(stream, ", tag=\"%s\"", dt->shared->u.opaque.tag);
+    }
+    else if (H5T_COMPLEX == dt->shared->type) {
+        fprintf(stream, ", homogeneous");
+        switch (dt->shared->u.cplx.form) {
+            case H5T_COMPLEX_RECTANGULAR:
+                fprintf(stream, ", rectangular form");
+                break;
+            case H5T_COMPLEX_POLAR:
+                fprintf(stream, ", polar form");
+                break;
+            case H5T_COMPLEX_EXPONENTIAL:
+                fprintf(stream, ", exponential form");
+                break;
+            default:
+                fprintf(stream, ", invalid form");
+                break;
+        }
     }
     else {
         /* Unknown */

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -88,15 +88,6 @@
 /* Maximum dimension size (highest value that is not a special value e.g.
  * H5S_UNLIMITED) */
 #define H5S_MAX_SIZE ((hsize_t)(hssize_t)(-2))
-
-/* Macro for checking if two ranges overlap one another */
-/*
- * Check for the inverse of whether the ranges are disjoint.  If they are
- * disjoint, then the low bound of one of the ranges must be greater than the
- * high bound of the other.
- */
-/* (Assumes that low & high bounds are _inclusive_) */
-#define H5S_RANGE_OVERLAP(L1, H1, L2, H2) (!((L1) > (H2) || (L2) > (H1)))
 
 /*
  * Dataspace extent information
@@ -391,7 +382,7 @@ H5_DLLVAR const H5S_select_class_t H5S_sel_none[1];
 H5_DLLVAR const H5S_select_class_t H5S_sel_point[1];
 
 /* Array of versions for Dataspace */
-H5_DLLVAR const unsigned H5O_sdspace_ver_bounds[H5F_LIBVER_NBOUNDS];
+H5_DLLVAR const unsigned H5O_sdspace_ver_bounds[H5F_LIBVER_NBOUNDS + 1];
 
 /* Extent functions */
 H5_DLL herr_t H5S__extent_release(H5S_extent_t *extent);
@@ -413,6 +404,7 @@ H5_DLL herr_t H5S__get_rebuild_status_test(hid_t space_id, H5S_diminfo_valid_t *
                                            H5S_diminfo_valid_t *status2);
 H5_DLL herr_t H5S__get_diminfo_status_test(hid_t space_id, H5S_diminfo_valid_t *status);
 H5_DLL htri_t H5S__internal_consistency_test(hid_t space_id);
+H5_DLL herr_t H5S__verify_offsets(hid_t space_id, const hssize_t *offset);
 #endif /* H5S_TESTING */
 
 #endif /*H5Spkg_H*/

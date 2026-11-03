@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -31,11 +31,10 @@
 #include "H5private.h"   /* Generic Functions			*/
 #include "H5ACprivate.h" /* Metadata cache			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5HFpkg.h"     /* Fractal heaps			*/
 #include "H5MFprivate.h" /* File memory management		*/
 #include "H5MMprivate.h" /* Memory management			*/
-#include "H5VMprivate.h" /* Vectors and arrays 			*/
-#include "H5WBprivate.h" /* Wrapped Buffers                      */
 
 /****************/
 /* Local Macros */
@@ -413,17 +412,19 @@ H5HF__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSE
     uint32_t       computed_chksum;                 /* Computed metadata checksum value */
     htri_t         ret_value = true;                /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     assert(image);
 
     /* Get stored and computed checksums */
-    H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
+    if (H5F_get_checksums(image, len, &stored_chksum, &computed_chksum) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get checksums");
 
     if (stored_chksum != computed_chksum)
         ret_value = false;
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__cache_hdr_verify_chksum() */
 
@@ -707,11 +708,9 @@ H5HF__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UN
     assert(len == hdr->heap_size);
 
     /* Set the shared heap header's file context for this operation */
-    H5_GCC_DIAG_OFF("discarded-qualifiers")
-    H5_CLANG_DIAG_OFF("incompatible-pointer-types-discards-qualifiers")
-    hdr->f = f;
-    H5_GCC_DIAG_ON("discarded-qualifiers")
-    H5_CLANG_DIAG_ON("incompatible-pointer-types-discards-qualifiers")
+    H5_WARN_CAST_AWAY_CONST_OFF
+    hdr->f = (H5F_t *)f;
+    H5_WARN_CAST_AWAY_CONST_ON
 
     /* Magic number */
     H5MM_memcpy(image, H5HF_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC);
@@ -868,17 +867,19 @@ H5HF__cache_iblock_verify_chksum(const void *_image, size_t len, void H5_ATTR_UN
     uint32_t       computed_chksum;                 /* Computed metadata checksum value */
     htri_t         ret_value = true;                /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     assert(image);
 
     /* Get stored and computed checksums */
-    H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
+    if (H5F_get_checksums(image, len, &stored_chksum, &computed_chksum) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get checksums");
 
     if (stored_chksum != computed_chksum)
         ret_value = false;
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__cache_iblock_verify_chksum() */
 
@@ -1269,11 +1270,9 @@ H5HF__cache_iblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG
     hdr = iblock->hdr;
 
     /* Set the shared heap header's file context for this operation */
-    H5_GCC_DIAG_OFF("discarded-qualifiers")
-    H5_CLANG_DIAG_OFF("incompatible-pointer-types-discards-qualifiers")
-    hdr->f = f;
-    H5_GCC_DIAG_ON("discarded-qualifiers")
-    H5_CLANG_DIAG_ON("incompatible-pointer-types-discards-qualifiers")
+    H5_WARN_CAST_AWAY_CONST_OFF
+    hdr->f = (H5F_t *)f;
+    H5_WARN_CAST_AWAY_CONST_ON
 
     /* Magic number */
     H5MM_memcpy(image, H5HF_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC);
@@ -1588,9 +1587,9 @@ H5HF__cache_dblock_verify_chksum(const void *_image, size_t len, void *_udata)
         /* If the data are unfiltered, we just point to the image, which we
          * never modify. Casting away const is okay here.
          */
-        H5_GCC_CLANG_DIAG_OFF("cast-qual")
+        H5_WARN_CAST_AWAY_CONST_OFF
         read_buf = (void *)image;
-        H5_GCC_CLANG_DIAG_OFF("cast-qual")
+        H5_WARN_CAST_AWAY_CONST_ON
     }
 
     /* Decode checksum */
@@ -2521,7 +2520,7 @@ H5HF__cache_dblock_fsf_size(const void *_thing, hsize_t *fsf_size)
  *		Further, metadata cache entries are now allowed to have
  *		multiple flush dependency parents.
  *
- *		This means that the fractal heap is no longer ncessarily
+ *		This means that the fractal heap is no longer necessarily
  *		flushed from the bottom up.
  *
  *		For example, it is now possible for a dirty fractal heap
@@ -2881,7 +2880,7 @@ done:
  *		Further, metadata cache entries are now allowed to have
  *		multiple flush dependency parents.
  *
- *		This means that the fractal heap is no longer ncessarily
+ *		This means that the fractal heap is no longer necessarily
  *		flushed from the bottom up.
  *
  *		For example, it is now possible for a dirty fractal heap
@@ -2994,7 +2993,7 @@ done:
  *		Further, metadata cache entries are now allowed to have
  *		multiple flush dependency parents.
  *
- *		This means that the fractal heap is no longer ncessarily
+ *		This means that the fractal heap is no longer necessarily
  *		flushed from the bottom up.
  *
  *		For example, it is now possible for a dirty fractal heap
@@ -3153,7 +3152,7 @@ done:
  *		Further, metadata cache entries are now allowed to have
  *		multiple flush dependency parents.
  *
- *		This means that the fractal heap is no longer ncessarily
+ *		This means that the fractal heap is no longer necessarily
  *		flushed from the bottom up.
  *
  *		For example, it is now possible for a dirty fractal heap

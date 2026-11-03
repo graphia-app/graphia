@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -30,6 +30,7 @@
 /***********/
 #include "H5private.h"   /* Generic Functions                        */
 #include "H5Eprivate.h"  /* Error handling                           */
+#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5FOprivate.h" /* File objects                             */
 #include "H5Gpkg.h"      /* Groups                                   */
 #include "H5Iprivate.h"  /* IDs                                      */
@@ -88,6 +89,9 @@ static herr_t H5G__close_cb(H5VL_object_t *grp_vol_obj, void **request);
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+bool H5_PKG_INIT_VAR = false;
+
 /* Declare a free list to manage the H5G_t struct */
 H5FL_DEFINE(H5G_t);
 H5FL_DEFINE(H5G_shared_t);
@@ -111,6 +115,9 @@ static const H5I_class_t H5I_GROUP_CLS[1] = {{
     (H5I_free_t)H5G__close_cb /* Callback routine for closing objects of this class */
 }};
 
+/* Flag indicating "top" of interface has been initialized */
+static bool H5G_top_package_initialize_s = false;
+
 /*-------------------------------------------------------------------------
  * Function: H5G_init
  *
@@ -127,13 +134,48 @@ H5G_init(void)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
-    /* Initialize the ID group for the group IDs */
-    if (H5I_register_type(H5I_GROUP_CLS) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to initialize interface");
+    /* FUNC_ENTER() does all the work */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_init() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G__init_package
+ *
+ * Purpose:	Initializes the H5G interface.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		Monday, January	 5, 1998
+ *
+ * Notes:       The group creation properties are registered in the property
+ *              list interface initialization routine (H5P_init_package)
+ *              so that the file creation property class can inherit from it
+ *              correctly. (Which allows the file creation property list to
+ *              control the group creation properties of the root group of
+ *              a file) QAK - 24/10/2005
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G__init_package(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Initialize the ID group for the group IDs */
+    if (H5I_register_type(H5I_GROUP_CLS) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to initialize interface");
+
+    /* Mark "top" of interface as initialized, too */
+    H5G_top_package_initialize_s = true;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G__init_package() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_top_term_package
@@ -153,10 +195,16 @@ H5G_top_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5I_nmembers(H5I_GROUP) > 0) {
-        (void)H5I_clear_type(H5I_GROUP, false, false);
-        n++;
-    }
+    if (H5G_top_package_initialize_s) {
+        if (H5I_nmembers(H5I_GROUP) > 0) {
+            (void)H5I_clear_type(H5I_GROUP, false, false);
+            n++;
+        }
+
+        /* Mark closed */
+        if (0 == n)
+            H5G_top_package_initialize_s = false;
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5G_top_term_package() */
@@ -182,11 +230,18 @@ H5G_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Sanity checks */
-    assert(0 == H5I_nmembers(H5I_GROUP));
+    if (H5_PKG_INIT_VAR) {
+        /* Sanity checks */
+        assert(0 == H5I_nmembers(H5I_GROUP));
+        assert(false == H5G_top_package_initialize_s);
 
-    /* Destroy the group object id group */
-    n += (H5I_dec_type_ref(H5I_GROUP) > 0);
+        /* Destroy the group object id group */
+        n += (H5I_dec_type_ref(H5I_GROUP) > 0);
+
+        /* Mark closed */
+        if (0 == n)
+            H5_PKG_INIT_VAR = false;
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5G_term_package() */
@@ -436,10 +491,6 @@ H5G_open(const H5G_loc_t *loc)
 
     /* Check if group was already open */
     if ((shared_fo = (H5G_shared_t *)H5FO_opened(grp->oloc.file, grp->oloc.addr)) == NULL) {
-
-        /* Clear any errors from H5FO_opened() */
-        H5E_clear_stack(NULL);
-
         /* Open the group object */
         if (H5G__open_oid(grp) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "not found");
@@ -505,7 +556,8 @@ static herr_t
 H5G__open_oid(H5G_t *grp)
 {
     bool   obj_opened = false;
-    herr_t ret_value  = SUCCEED;
+    htri_t msg_exists;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -522,8 +574,14 @@ H5G__open_oid(H5G_t *grp)
     obj_opened = true;
 
     /* Check if this object has the right message(s) to be treated as a group */
-    if ((H5O_msg_exists(&(grp->oloc), H5O_STAB_ID) <= 0) && (H5O_msg_exists(&(grp->oloc), H5O_LINFO_ID) <= 0))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "not a group");
+    if ((msg_exists = H5O_msg_exists(&(grp->oloc), H5O_STAB_ID)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't check if symbol table message exists");
+    if (!msg_exists) {
+        if ((msg_exists = H5O_msg_exists(&(grp->oloc), H5O_LINFO_ID)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't check if link info message exists");
+        if (!msg_exists)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "not a group");
+    }
 
 done:
     if (ret_value < 0) {
@@ -799,8 +857,13 @@ H5G__iterate_cb(const H5O_link_t *lnk, void *_udata)
     switch (udata->lnk_op.op_type) {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
         case H5G_LINK_OP_OLD:
-            /* Make the old-type application callback */
-            ret_value = (udata->lnk_op.op_func.op_old)(udata->gid, lnk->name, udata->op_data);
+            /* Prepare & restore library for user callback */
+            H5_BEFORE_USER_CB(H5_ITER_ERROR)
+                {
+                    /* Make the old-type application callback */
+                    ret_value = (udata->lnk_op.op_func.op_old)(udata->gid, lnk->name, udata->op_data);
+                }
+            H5_AFTER_USER_CB(H5_ITER_ERROR)
             break;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
@@ -811,8 +874,13 @@ H5G__iterate_cb(const H5O_link_t *lnk, void *_udata)
             if (H5G_link_to_info(udata->link_loc, lnk, &info) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5_ITER_ERROR, "unable to get info for link");
 
-            /* Make the application callback */
-            ret_value = (udata->lnk_op.op_func.op_new)(udata->gid, lnk->name, &info, udata->op_data);
+            /* Prepare & restore library for user callback */
+            H5_BEFORE_USER_CB(H5_ITER_ERROR)
+                {
+                    /* Make the application callback */
+                    ret_value = (udata->lnk_op.op_func.op_new)(udata->gid, lnk->name, &info, udata->op_data);
+                }
+            H5_AFTER_USER_CB(H5_ITER_ERROR)
         } break;
 
         default:
@@ -931,7 +999,7 @@ H5G__visit_cb(const H5O_link_t *lnk, void *_udata)
 
     /* Check if we will need more space to store this link's relative path */
     /* ("+2" is for string terminator and possible '/' for group separator later) */
-    link_name_len = HDstrlen(lnk->name);
+    link_name_len = strlen(lnk->name);
     len_needed    = udata->curr_path_len + link_name_len + 2;
     if (len_needed > udata->path_buf_size) {
         void *new_path; /* Pointer to new path buffer */
@@ -945,15 +1013,20 @@ H5G__visit_cb(const H5O_link_t *lnk, void *_udata)
 
     /* Build the link's relative path name */
     assert(udata->path[old_path_len] == '\0');
-    HDstrncpy(&(udata->path[old_path_len]), lnk->name, link_name_len + 1);
+    strncpy(&(udata->path[old_path_len]), lnk->name, link_name_len + 1);
     udata->curr_path_len += link_name_len;
 
     /* Construct the link info from the link message */
     if (H5G_link_to_info(udata->curr_loc->oloc, lnk, &info) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5_ITER_ERROR, "unable to get info for link");
 
-    /* Make the application callback */
-    ret_value = (udata->op)(udata->gid, udata->path, &info, udata->op_data);
+    /* Prepare & restore library for user callback */
+    H5_BEFORE_USER_CB(H5_ITER_ERROR)
+        {
+            /* Make the application callback */
+            ret_value = (udata->op)(udata->gid, udata->path, &info, udata->op_data);
+        }
+    H5_AFTER_USER_CB(H5_ITER_ERROR)
 
     /* Check for doing more work */
     if (ret_value == H5_ITER_CONT && lnk->type == H5L_TYPE_HARD) {
@@ -1008,7 +1081,7 @@ H5G__visit_cb(const H5O_link_t *lnk, void *_udata)
 
                 /* Add the path separator to the current path */
                 assert(udata->path[udata->curr_path_len] == '\0');
-                HDstrncpy(&(udata->path[udata->curr_path_len]), "/", (size_t)2);
+                strncpy(&(udata->path[udata->curr_path_len]), "/", (size_t)2);
                 udata->curr_path_len++;
 
                 /* Attempt to get the link info for this group */
@@ -1376,3 +1449,24 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__get_info_by_idx() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5G_get_gcpl_id
+ *
+ * Purpose:  Quick and dirty routine to retrieve the
+ *           gcpl_id (group creation property list) from the
+ *           group creation operation struct
+ *
+ * Return:   'gcpl_id' on success/abort on failure (shouldn't fail)
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5G_get_gcpl_id(const H5G_obj_create_t *g)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    assert(g);
+
+    FUNC_LEAVE_NOAPI(g->gcpl_id);
+} /* end H5G_get_gcpl_id() */

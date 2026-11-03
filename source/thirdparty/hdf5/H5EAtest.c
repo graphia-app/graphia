@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -301,7 +301,7 @@ H5EA__test_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *
     assert(elmt);
 
     /* Print element */
-    HDsnprintf(temp_str, sizeof(temp_str), "Element #%llu:", (unsigned long long)idx);
+    snprintf(temp_str, sizeof(temp_str), "Element #%llu:", (unsigned long long)idx);
     fprintf(stream, "%*s%-*s %llu\n", indent, "", fwidth, temp_str,
             (unsigned long long)*(const uint64_t *)elmt);
 

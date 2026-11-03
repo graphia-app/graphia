@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -32,7 +32,8 @@
 /* PRIVATE PROTOTYPES */
 static void *H5O__stab_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags, size_t p_size,
                               const uint8_t *p);
-static herr_t H5O__stab_encode(H5F_t *f, bool disable_shared, uint8_t *p, const void *_mesg);
+static herr_t H5O__stab_encode(H5F_t *f, bool disable_shared, size_t H5_ATTR_UNUSED p_size, uint8_t *p,
+                               const void *_mesg);
 static void  *H5O__stab_copy(const void *_mesg, void *_dest);
 static size_t H5O__stab_size(const H5F_t *f, bool disable_shared, const void *_mesg);
 static herr_t H5O__stab_free(void *_mesg);
@@ -123,7 +124,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__stab_encode(H5F_t *f, bool H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O__stab_encode(H5F_t *f, bool H5_ATTR_UNUSED disable_shared, size_t H5_ATTR_UNUSED p_size, uint8_t *p,
+                 const void *_mesg)
 {
     const H5O_stab_t *stab = (const H5O_stab_t *)_mesg;
 
@@ -329,6 +331,7 @@ H5O__stab_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_lo
     const H5O_stab_t *stab_src = (const H5O_stab_t *)mesg_src;
     H5O_stab_t       *stab_dst = (H5O_stab_t *)mesg_dst;
     H5G_bt_it_cpy_t   udata;               /* B-tree user data */
+    H5HL_t           *heap      = NULL;    /* Pointer to source group's heap */
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -344,18 +347,26 @@ H5O__stab_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_lo
     if (cpy_info->max_depth >= 0 && cpy_info->curr_depth >= cpy_info->max_depth)
         HGOTO_DONE(SUCCEED);
 
+    /* Get the heap for the copy*/
+    if (NULL == (heap = H5HL_protect(src_oloc->file, stab_src->heap_addr, H5AC__READ_ONLY_FLAG)))
+        HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to protect local heap");
+
     /* Set up B-tree iteration user data */
-    udata.src_oloc      = src_oloc;
-    udata.src_heap_addr = stab_src->heap_addr;
-    udata.dst_file      = dst_oloc->file;
-    udata.dst_stab      = stab_dst;
-    udata.cpy_info      = cpy_info;
+    udata.src_oloc       = src_oloc;
+    udata.src_heap       = heap;
+    udata.src_block_size = H5HL_heap_get_size(heap);
+    udata.dst_file       = dst_oloc->file;
+    udata.dst_stab       = stab_dst;
+    udata.cpy_info       = cpy_info;
 
     /* Iterate over objects in group, copying them */
     if ((H5B_iterate(src_oloc->file, H5B_SNODE, stab_src->btree_addr, H5G__node_copy, &udata)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "iteration operator failed");
 
 done:
+    if (heap && H5HL_unprotect(heap) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTUNPROTECT, FAIL, "unable to unprotect local heap");
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O__stab_post_copy_file() */
 

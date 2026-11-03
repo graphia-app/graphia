@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -372,9 +372,8 @@ H5F_get_fcpl(const H5F_t *f)
 /*-------------------------------------------------------------------------
  * Function: H5F_sizeof_addr
  *
- * Purpose:  Quick and dirty routine to retrieve the size of the file's size_t
- *           (Mainly added to stop non-file routines from poking about in the
- *           H5F_t data structure)
+ * Purpose:  Quick and dirty routine to retrieve the size of the file's size
+ *           of addresses
  *
  * Return:   'sizeof_addr' on success/abort on failure (shouldn't fail)
  *-------------------------------------------------------------------------
@@ -394,9 +393,8 @@ H5F_sizeof_addr(const H5F_t *f)
 /*-------------------------------------------------------------------------
  * Function: H5F_sizeof_size
  *
- * Purpose:  Quick and dirty routine to retrieve the size of the file's off_t
- *           (Mainly added to stop non-file routines from poking about in the
- *           H5F_t data structure)
+ * Purpose:  Quick and dirty routine to retrieve the size of the file's size
+ *           of sizes
  *
  * Return:   'sizeof_size' on success/abort on failure (shouldn't fail)
  *-------------------------------------------------------------------------
@@ -517,7 +515,7 @@ H5F_get_min_dset_ohdr(const H5F_t *f)
 } /* end H5F_get_min_dset_ohdr */
 
 /*-------------------------------------------------------------------------
- * Function: H5F_Kvalue
+ * Function: H5F_kvalue
  *
  * Purpose:  Replaced a macro to retrieve a B-tree key value for a certain
  *           type, now that the generic properties are being used to store
@@ -529,7 +527,7 @@ H5F_get_min_dset_ohdr(const H5F_t *f)
  *-------------------------------------------------------------------------
  */
 unsigned
-H5F_Kvalue(const H5F_t *f, const H5B_class_t *type)
+H5F_kvalue(const H5F_t *f, const H5B_class_t *type)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -540,7 +538,7 @@ H5F_Kvalue(const H5F_t *f, const H5B_class_t *type)
     assert(type);
 
     FUNC_LEAVE_NOAPI(f->shared->sblock->btree_k[type->id])
-} /* end H5F_Kvalue() */
+} /* end H5F_kvalue() */
 
 /*-------------------------------------------------------------------------
  * Function: H5F_get_nrefs
@@ -1054,10 +1052,30 @@ H5F_coll_md_read(const H5F_t *f)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    assert(f);
+    assert(f && f->shared);
 
     FUNC_LEAVE_NOAPI(f->shared->coll_md_read)
 } /* end H5F_coll_md_read() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5F_shared_coll_md_read
+ *
+ * Purpose:  Retrieve the 'collective metadata reads' flag for the file.
+ *
+ * Return:   Success:    Non-negative, the 'collective metadata reads' flag
+ *           Failure:    (can't happen)
+ *-------------------------------------------------------------------------
+ */
+H5P_coll_md_read_flag_t
+H5F_shared_coll_md_read(const H5F_shared_t *f_sh)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    assert(f_sh);
+
+    FUNC_LEAVE_NOAPI(f_sh->coll_md_read)
+} /* end H5F_shared_coll_md_read() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_shared_get_mpi_file_sync_required
@@ -1263,26 +1281,6 @@ H5F_get_null_fsm_addr(const H5F_t *f)
 } /* end H5F_get_null_fsm_addr() */
 
 /*-------------------------------------------------------------------------
- * Function: H5F_get_vol_cls
- *
- * Purpose:  Get the VOL class for the file
- *
- * Return:   VOL class pointer for file, can't fail
- *
- *-------------------------------------------------------------------------
- */
-const H5VL_class_t *
-H5F_get_vol_cls(const H5F_t *f)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    assert(f);
-    assert(f->shared);
-
-    FUNC_LEAVE_NOAPI(f->shared->vol_cls)
-} /* end H5F_get_vol_cls */
-
-/*-------------------------------------------------------------------------
  * Function: H5F_get_vol_obj
  *
  * Purpose:  Get the VOL object for the file
@@ -1336,16 +1334,16 @@ done:
 } /* end H5F_get_cont_info */
 
 /*-------------------------------------------------------------------------
- * Function: H5F_get_file_locking
+ * Function: H5F_get_use_file_locking
  *
- * Purpose:  Get the file locking flag for the file
+ * Purpose:  Get the 'use file locking' flag for the file
  *
  * Return:   true/false
  *
  *-------------------------------------------------------------------------
  */
 bool
-H5F_get_file_locking(const H5F_t *f)
+H5F_get_use_file_locking(const H5F_t *f)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1353,7 +1351,7 @@ H5F_get_file_locking(const H5F_t *f)
     assert(f->shared);
 
     FUNC_LEAVE_NOAPI(f->shared->use_file_locking)
-} /* end H5F_get_file_locking */
+} /* end H5F_get_use_file_locking */
 
 /*-------------------------------------------------------------------------
  * Function: H5F_has_vector_select_io
@@ -1367,7 +1365,7 @@ H5F_get_file_locking(const H5F_t *f)
 bool
 H5F_has_vector_select_io(const H5F_t *f, bool is_write)
 {
-    bool ret_value; /* Return value */
+    bool ret_value = false; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1381,3 +1379,23 @@ H5F_has_vector_select_io(const H5F_t *f, bool is_write)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_has_vector_select_io */
+
+/*-------------------------------------------------------------------------
+ * Function: H5F_get_rfic_flags
+ *
+ * Purpose:  Get the relaxed file integrity checks (RFIC) flags for the file
+ *
+ * Return:   RFIC flags for a file on success (which can be 0), can't fail
+ *
+ *-------------------------------------------------------------------------
+ */
+uint64_t
+H5F_get_rfic_flags(const H5F_t *f)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    assert(f);
+    assert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->rfic_flags)
+} /* end H5F_get_rfic_flags */

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -76,7 +76,7 @@ H5HL_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
     for (free_block = 0, freelist = h->freelist; freelist; freelist = freelist->next, free_block++) {
         char temp_str[32];
 
-        HDsnprintf(temp_str, sizeof(temp_str), "Block #%d:", free_block);
+        snprintf(temp_str, sizeof(temp_str), "Block #%d:", free_block);
         fprintf(stream, "%*s%-*s %8zu, %8zu\n", indent + 3, "", MAX(0, fwidth - 9), temp_str,
                 freelist->offset, freelist->size);
         if ((freelist->offset + freelist->size) > h->dblk_size)

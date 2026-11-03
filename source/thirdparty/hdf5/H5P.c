@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -52,6 +52,9 @@ typedef struct {
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+bool H5_PKG_INIT_VAR = false;
+
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -88,7 +91,6 @@ H5Pcopy(hid_t id)
     hid_t ret_value = H5I_INVALID_HID; /* return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "i", id);
 
     if (H5P_DEFAULT == id)
         HGOTO_DONE(H5P_DEFAULT);
@@ -168,8 +170,6 @@ H5Pcreate_class(hid_t parent, const char *name, H5P_cls_create_func_t cls_create
     hid_t           ret_value = H5I_INVALID_HID; /* Return value		   */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE8("i", "i*sPc*xPo*xPl*x", parent, name, cls_create, create_data, cls_copy, copy_data, cls_close,
-             close_data);
 
     /* Check arguments. */
     if (H5P_DEFAULT != parent && (H5I_GENPROP_CLS != H5I_get_type(parent)))
@@ -231,7 +231,6 @@ H5Pcreate(hid_t cls_id)
     hid_t           ret_value = H5I_INVALID_HID; /* return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "i", cls_id);
 
     /* Check arguments. */
     if (NULL == (pclass = (H5P_genclass_t *)H5I_object_verify(cls_id, H5I_GENPROP_CLS)))
@@ -327,8 +326,8 @@ done:
     routine returns an error value.
 
         The 'delete' callback is called when a property is deleted from a
-    property list.  H5P_prp_del_func_t is defined as:
-        typedef herr_t (*H5P_prp_del_func_t)(hid_t prop_id, const char *name,
+    property list.  H5P_prp_delete_func_t is defined as:
+        typedef herr_t (*H5P_prp_delete_func_t)(hid_t prop_id, const char *name,
             size_t size, void *value);
     where the parameters to the callback function are:
         hid_t prop_id;      IN: The ID of the property list the property is deleted from.
@@ -409,8 +408,6 @@ H5Pregister2(hid_t cls_id, const char *name, size_t size, void *def_value, H5P_p
     herr_t          ret_value;   /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE11("e", "i*sz*xPCPSPGPDPOPMPL", cls_id, name, size, def_value, prp_create, prp_set, prp_get,
-              prp_delete, prp_copy, prp_cmp, prp_close);
 
     /* Check arguments. */
     if (NULL == (pclass = (H5P_genclass_t *)H5I_object_verify(cls_id, H5I_GENPROP_CLS)))
@@ -508,8 +505,8 @@ done:
     routine returns an error value.
 
         The 'delete' callback is called when a property is deleted from a
-    property list.  H5P_prp_del_func_t is defined as:
-        typedef herr_t (*H5P_prp_del_func_t)(hid_t prop_id, const char *name,
+    property list.  H5P_prp_delete_func_t is defined as:
+        typedef herr_t (*H5P_prp_delete_func_t)(hid_t prop_id, const char *name,
             size_t size, void *value);
     where the parameters to the callback function are:
         hid_t prop_id;      IN: The ID of the property list the property is deleted from.
@@ -593,8 +590,6 @@ H5Pinsert2(hid_t plist_id, const char *name, size_t size, void *value, H5P_prp_s
     herr_t          ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE10("e", "i*sz*xPSPGPDPOPMPL", plist_id, name, size, value, prp_set, prp_get, prp_delete, prp_copy,
-              prp_cmp, prp_close);
 
     /* Check arguments. */
     if (NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
@@ -651,7 +646,6 @@ H5Pset(hid_t plist_id, const char *name, const void *value)
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*s*x", plist_id, name, value);
 
     /* Check arguments. */
     if (NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
@@ -699,7 +693,6 @@ H5Pexist(hid_t id, const char *name)
     htri_t          ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("t", "i*s", id, name);
 
     /* Check arguments. */
     if (H5I_GENPROP_LST != H5I_get_type(id) && H5I_GENPROP_CLS != H5I_get_type(id))
@@ -758,7 +751,6 @@ H5Pget_size(hid_t id, const char *name, size_t *size /*out*/)
     herr_t          ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*sx", id, name, size);
 
     /* Check arguments. */
     if (H5I_GENPROP_LST != H5I_get_type(id) && H5I_GENPROP_CLS != H5I_get_type(id))
@@ -799,7 +791,7 @@ done:
     The encoding of property values will be done according to the file format
     setting in fapl_id.
  USAGE
-    herr_t H5Pencode(plist_id, buf, nalloc, fapl_id)
+    herr_t H5Pencode2(plist_id, buf, nalloc, fapl_id)
         hid_t plist_id;         IN: Identifier to property list to encode
         void *buf:              OUT: buffer to gold the encoded plist
         size_t *nalloc;         IN/OUT: size of buffer needed to encode plist
@@ -822,7 +814,6 @@ H5Pencode2(hid_t plist_id, void *buf, size_t *nalloc, hid_t fapl_id)
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "i*x*zi", plist_id, buf, nalloc, fapl_id);
 
     /* Check arguments. */
     if (NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
@@ -869,7 +860,6 @@ H5Pdecode(const void *buf)
     hid_t ret_value = H5I_INVALID_HID; /* return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "*x", buf);
 
     /* Call the internal decode routine */
     if ((ret_value = H5P__decode(buf)) < 0)
@@ -907,7 +897,6 @@ H5Pget_class(hid_t plist_id)
     hid_t           ret_value = H5I_INVALID_HID; /* return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "i", plist_id);
 
     /* Check arguments. */
     if (NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
@@ -963,7 +952,6 @@ H5Pget_nprops(hid_t id, size_t *nprops /*out*/)
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", id, nprops);
 
     /* Check arguments. */
     if (H5I_GENPROP_LST != H5I_get_type(id) && H5I_GENPROP_CLS != H5I_get_type(id))
@@ -1017,7 +1005,6 @@ H5Pequal(hid_t id1, hid_t id2)
     htri_t ret_value = false; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("t", "ii", id1, id2);
 
     /* Check arguments. */
     if ((H5I_GENPROP_LST != H5I_get_type(id1) && H5I_GENPROP_CLS != H5I_get_type(id1)) ||
@@ -1077,7 +1064,6 @@ H5Pisa_class(hid_t plist_id, hid_t pclass_id)
     htri_t ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("t", "ii", plist_id, pclass_id);
 
     /* Check arguments. */
     if (H5I_GENPROP_LST != H5I_get_type(plist_id))
@@ -1194,7 +1180,6 @@ H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func, void *iter_data)
     int           ret_value;    /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("Is", "i*IsPi*x", id, idx, iter_func, iter_data);
 
     /* Check arguments. */
     if (H5I_GENPROP_LST != H5I_get_type(id) && H5I_GENPROP_CLS != H5I_get_type(id))
@@ -1263,7 +1248,6 @@ H5Pget(hid_t plist_id, const char *name, void *value /*out*/)
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*sx", plist_id, name, value);
 
     /* Check arguments. */
     if (NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
@@ -1314,7 +1298,6 @@ H5Premove(hid_t plist_id, const char *name)
     herr_t          ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*s", plist_id, name);
 
     /* Check arguments. */
     if (NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
@@ -1351,8 +1334,8 @@ done:
     property information will be copied from the source class into the
     destination class.
 
-    If a property is copied from one list to another, the property will be
-    first deleted from the destination list (generating a call to the 'close'
+    If a property is copied from one list to another list that already contains the property,
+    the property will be first deleted from the destination list (generating a call to the 'del'
     callback for the property, if one exists) and then the property is copied
     from the source list to the destination list (generating a call to the
     'copy' callback for the property, if one exists).
@@ -1375,7 +1358,6 @@ H5Pcopy_prop(hid_t dst_id, hid_t src_id, const char *name)
     herr_t     ret_value = SUCCEED;      /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ii*s", dst_id, src_id, name);
 
     /* Check arguments. */
     if ((src_id_type = H5I_get_type(src_id)) < 0)
@@ -1418,8 +1400,10 @@ done:
     Returns non-negative on success, negative on failure.
  DESCRIPTION
         Removes a property from a property list class.  Future property lists
-    created of that class will not contain this property.  Existing property
-    lists containing this property are not affected.
+    created of that class will not contain this property. Existing property lists
+    which still use the default value for this property will have this property removed.
+    Existing property lists which have modified this property will not be affected.
+
 
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -1433,7 +1417,6 @@ H5Punregister(hid_t pclass_id, const char *name)
     herr_t          ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*s", pclass_id, name);
 
     /* Check arguments. */
     if (NULL == (pclass = (H5P_genclass_t *)H5I_object_verify(pclass_id, H5I_GENPROP_CLS)))
@@ -1441,7 +1424,7 @@ H5Punregister(hid_t pclass_id, const char *name)
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property name");
 
-    /* Remove the property list from class */
+    /* Remove the property from property list class */
     if ((ret_value = H5P__unregister(pclass, name)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to remove property from class");
 
@@ -1476,7 +1459,6 @@ H5Pclose(hid_t plist_id)
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", plist_id);
 
     /* Allow default property lists to pass through without throwing an error */
     if (H5P_DEFAULT != plist_id) {
@@ -1513,14 +1495,13 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-char *
+H5_ATTR_MALLOC char *
 H5Pget_class_name(hid_t pclass_id)
 {
     H5P_genclass_t *pclass;    /* Property class to query */
     char           *ret_value; /* return value */
 
     FUNC_ENTER_API(NULL)
-    H5TRACE1("*s", "i", pclass_id);
 
     /* Check arguments. */
     if (NULL == (pclass = (H5P_genclass_t *)H5I_object_verify(pclass_id, H5I_GENPROP_CLS)))
@@ -1561,7 +1542,6 @@ H5Pget_class_parent(hid_t pclass_id)
     hid_t           ret_value = H5I_INVALID_HID; /* return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "i", pclass_id);
 
     /* Check arguments. */
     if (NULL == (pclass = (H5P_genclass_t *)H5I_object_verify(pclass_id, H5I_GENPROP_CLS)))
@@ -1610,7 +1590,6 @@ H5Pclose_class(hid_t cls_id)
     herr_t ret_value = SUCCEED; /* Return value			*/
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", cls_id);
 
     /* Check arguments */
     if (H5I_GENPROP_CLS != H5I_get_type(cls_id))

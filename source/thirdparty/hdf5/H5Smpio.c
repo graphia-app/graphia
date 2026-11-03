@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -197,13 +197,9 @@ H5S__mpio_create_point_datatype(size_t elmt_size, hsize_t num_points, MPI_Aint *
     int          *inner_blocks      = NULL;  /* Arrays for MPI datatypes when "large" datatype needed */
     MPI_Aint     *inner_disps       = NULL;
     MPI_Datatype *inner_types       = NULL;
-#if MPI_VERSION < 3
-    int    *blocks = NULL; /* Array of block sizes for MPI hindexed create call */
-    hsize_t u;             /* Local index variable */
-#endif
-    hsize_t bigio_count;         /* Transition point to create derived type */
-    int     mpi_code;            /* MPI error code */
-    herr_t  ret_value = SUCCEED; /* Return value */
+    hsize_t       bigio_count;         /* Transition point to create derived type */
+    int           mpi_code;            /* MPI error code */
+    herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -216,24 +212,10 @@ H5S__mpio_create_point_datatype(size_t elmt_size, hsize_t num_points, MPI_Aint *
 
     /* Check whether standard or BIGIO processing will be employeed */
     if (bigio_count >= num_points) {
-#if H5_CHECK_MPI_VERSION(3, 0)
         /* Create an MPI datatype for the whole point selection */
         if (MPI_SUCCESS !=
             (mpi_code = MPI_Type_create_hindexed_block((int)num_points, 1, disp, elmt_type, new_type)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_indexed_block failed", mpi_code)
-#else
-        /* Allocate block sizes for MPI datatype call */
-        if (NULL == (blocks = (int *)H5MM_malloc(sizeof(int) * num_points)))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of blocks");
-
-        for (u = 0; u < num_points; u++)
-            blocks[u] = 1;
-
-        /* Create an MPI datatype for the whole point selection */
-        if (MPI_SUCCESS !=
-            (mpi_code = MPI_Type_create_hindexed((int)num_points, blocks, disp, elmt_type, new_type)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
-#endif
 
         /* Commit MPI datatype for later use */
         if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(new_type)))
@@ -267,43 +249,20 @@ H5S__mpio_create_point_datatype(size_t elmt_size, hsize_t num_points, MPI_Aint *
         if (NULL == (inner_disps = (MPI_Aint *)H5MM_malloc(sizeof(MPI_Aint) * (size_t)total_types)))
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of blocks");
 
-#if MPI_VERSION < 3
-        /* Allocate block sizes for MPI datatype call */
-        if (NULL == (blocks = (int *)H5MM_malloc(sizeof(int) * bigio_count)))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of blocks");
-
-        for (u = 0; u < bigio_count; u++)
-            blocks[u] = 1;
-#endif
-
         for (i = 0; i < num_big_types; i++) {
-#if H5_CHECK_MPI_VERSION(3, 0)
             if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed_block((int)bigio_count, 1,
                                                                           &disp[(hsize_t)i * bigio_count],
                                                                           elmt_type, &inner_types[i])))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed_block failed", mpi_code);
-#else
-            if (MPI_SUCCESS !=
-                (mpi_code = MPI_Type_create_hindexed((int)bigio_count, blocks, &disp[i * bigio_count],
-                                                     elmt_type, &inner_types[i])))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
-#endif
             inner_blocks[i] = 1;
             inner_disps[i]  = 0;
         } /* end for*/
 
         if (remaining_points) {
-#if H5_CHECK_MPI_VERSION(3, 0)
             if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed_block(
                                     remaining_points, 1, &disp[(hsize_t)num_big_types * bigio_count],
                                     elmt_type, &inner_types[num_big_types])))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed_block failed", mpi_code);
-#else
-            if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed((int)remaining_points, blocks,
-                                                                    &disp[num_big_types * bigio_count],
-                                                                    elmt_type, &inner_types[num_big_types])))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
-#endif
             inner_blocks[num_big_types] = 1;
             inner_disps[num_big_types]  = 0;
         }
@@ -323,10 +282,6 @@ H5S__mpio_create_point_datatype(size_t elmt_size, hsize_t num_points, MPI_Aint *
 done:
     if (elmt_type_created)
         MPI_Type_free(&elmt_type);
-#if MPI_VERSION < 3
-    if (blocks)
-        H5MM_free(blocks);
-#endif
     if (inner_types)
         H5MM_free(inner_types);
     if (inner_blocks)
@@ -690,10 +645,7 @@ H5S__mpio_reg_hyper_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
     if (sel_iter->u.hyp.iter_rank != 0 && sel_iter->u.hyp.iter_rank < space->extent.rank) {
         /* Flattened selection */
         rank = sel_iter->u.hyp.iter_rank;
-#ifdef H5S_DEBUG
-        if (H5DEBUG(S))
-            fprintf(H5DEBUG(S), "%s: Flattened selection\n", __func__);
-#endif
+
         for (u = 0; u < rank; ++u) {
             H5_CHECK_OVERFLOW(diminfo[u].start, hsize_t, hssize_t);
             d[u].start = (hssize_t)diminfo[u].start + sel_iter->u.hyp.sel_off[u];
@@ -702,32 +654,16 @@ H5S__mpio_reg_hyper_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
             d[u].count = diminfo[u].count;
             d[u].xtent = sel_iter->u.hyp.size[u];
 
-#ifdef H5S_DEBUG
-            if (H5DEBUG(S)) {
-                fprintf(H5DEBUG(S),
-                        "%s: start=%" PRIdHSIZE "  stride=%" PRIuHSIZE "  count=%" PRIuHSIZE
-                        "  block=%" PRIuHSIZE "  xtent=%" PRIuHSIZE,
-                        __func__, d[u].start, d[u].strid, d[u].count, d[u].block, d[u].xtent);
-                if (u == 0)
-                    fprintf(H5DEBUG(S), "  rank=%u\n", rank);
-                else
-                    fprintf(H5DEBUG(S), "\n");
-            }
-#endif
-
             /* Sanity check */
             assert(d[u].block > 0);
             assert(d[u].count > 0);
             assert(d[u].xtent > 0);
-        } /* end for */
-    }     /* end if */
+        }
+    }
     else {
         /* Non-flattened selection */
         rank = space->extent.rank;
-#ifdef H5S_DEBUG
-        if (H5DEBUG(S))
-            fprintf(H5DEBUG(S), "%s: Non-flattened selection\n", __func__);
-#endif
+
         for (u = 0; u < rank; ++u) {
             H5_CHECK_OVERFLOW(diminfo[u].start, hsize_t, hssize_t);
             d[u].start = (hssize_t)diminfo[u].start + space->select.offset[u];
@@ -736,25 +672,12 @@ H5S__mpio_reg_hyper_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
             d[u].count = diminfo[u].count;
             d[u].xtent = space->extent.size[u];
 
-#ifdef H5S_DEBUG
-            if (H5DEBUG(S)) {
-                fprintf(H5DEBUG(S),
-                        "%s: start=%" PRIdHSIZE "  stride=%" PRIuHSIZE "  count=%" PRIuHSIZE
-                        "  block=%" PRIuHSIZE "  xtent=%" PRIuHSIZE,
-                        __func__, d[u].start, d[u].strid, d[u].count, d[u].block, d[u].xtent);
-                if (u == 0)
-                    fprintf(H5DEBUG(S), "  rank=%u\n", rank);
-                else
-                    fprintf(H5DEBUG(S), "\n");
-            }
-#endif
-
             /* Sanity check */
             assert(d[u].block > 0);
             assert(d[u].count > 0);
             assert(d[u].xtent > 0);
-        } /* end for */
-    }     /* end else */
+        }
+    }
 
     /**********************************************************************
         Compute array "offset[rank]" which gives the offsets for a multi-
@@ -762,22 +685,11 @@ H5S__mpio_reg_hyper_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
     **********************************************************************/
     offset[rank - 1]    = 1;
     max_xtent[rank - 1] = d[rank - 1].xtent;
-#ifdef H5S_DEBUG
-    if (H5DEBUG(S)) {
-        i = ((int)rank) - 1;
-        fprintf(H5DEBUG(S), " offset[%2d]=%" PRIuHSIZE "; max_xtent[%2d]=%" PRIuHSIZE "\n", i, offset[i], i,
-                max_xtent[i]);
-    }
-#endif
+
     for (i = ((int)rank) - 2; i >= 0; --i) {
         offset[i]    = offset[i + 1] * d[i + 1].xtent;
         max_xtent[i] = max_xtent[i + 1] * d[i].xtent;
-#ifdef H5S_DEBUG
-        if (H5DEBUG(S))
-            fprintf(H5DEBUG(S), " offset[%2d]=%" PRIuHSIZE "; max_xtent[%2d]=%" PRIuHSIZE "\n", i, offset[i],
-                    i, max_xtent[i]);
-#endif
-    } /* end for */
+    }
 
     /*  Create a type covering the selected hyperslab.
      *  Multidimensional dataspaces are stored in row-major order.
@@ -785,16 +697,9 @@ H5S__mpio_reg_hyper_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
      *  fastest-changing (i.e., inner) dimension * to the slowest (outer).
      */
 
-/*******************************************************
- *  Construct contig type for inner contig dims:
- *******************************************************/
-#ifdef H5S_DEBUG
-    if (H5DEBUG(S)) {
-        fprintf(H5DEBUG(S), "%s: Making contig type %zu MPI_BYTEs\n", __func__, elmt_size);
-        for (i = ((int)rank) - 1; i >= 0; --i)
-            fprintf(H5DEBUG(S), "d[%d].xtent=%" PRIuHSIZE "\n", i, d[i].xtent);
-    }
-#endif
+    /*******************************************************
+     *  Construct contig type for inner contig dims:
+     *******************************************************/
 
     /* LARGE_DATATYPE::
      * Check if the number of elements to form the inner type fits into a 32 bit integer.
@@ -818,19 +723,7 @@ H5S__mpio_reg_hyper_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
      *  from the inside out:
      *******************************************************/
     for (i = ((int)rank) - 1; i >= 0; --i) {
-#ifdef H5S_DEBUG
-        if (H5DEBUG(S))
-            fprintf(H5DEBUG(S),
-                    "%s: Dimension i=%d \n"
-                    "start=%" PRIdHSIZE " count=%" PRIuHSIZE " block=%" PRIuHSIZE " stride=%" PRIuHSIZE
-                    ", xtent=%" PRIuHSIZE " max_xtent=%" PRIuHSIZE "\n",
-                    __func__, i, d[i].start, d[i].count, d[i].block, d[i].strid, d[i].xtent, max_xtent[i]);
-#endif
 
-#ifdef H5S_DEBUG
-        if (H5DEBUG(S))
-            fprintf(H5DEBUG(S), "%s: i=%d  Making vector-type \n", __func__, i);
-#endif
         /****************************************
          * Build vector type of the selection.
          ****************************************/
@@ -964,11 +857,6 @@ done:
         sel_iter = H5FL_FREE(H5S_sel_iter_t, sel_iter);
     }
 
-#ifdef H5S_DEBUG
-    if (H5DEBUG(S))
-        fprintf(H5DEBUG(S), "Leave %s, count=%d  is_derived_type=%s\n", __func__, *count,
-                (*is_derived_type) ? "TRUE" : "FALSE");
-#endif
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__mpio_reg_hyper_type() */
 
@@ -1034,7 +922,7 @@ H5S__mpio_span_hyper_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *ne
                              &type_list, 0, op_gen) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't obtain MPI derived data type");
     if (MPI_SUCCESS != (mpi_code = MPI_Type_dup(span_type, new_type)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Type_dup failed", mpi_code)
     if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(new_type)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
 

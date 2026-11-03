@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -19,14 +19,12 @@
  *-------------------------------------------------------------------------
  */
 
-#define H5G_FRIEND     /*suppress error about including H5Gpkg   */
 #define H5L_FRIEND     /*suppress error about including H5Lpkg	  */
 #include "H5Omodule.h" /* This source code file is part of the H5O module */
 
 #include "H5private.h"   /* Generic Functions			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5FLprivate.h" /* Free lists                           */
-#include "H5Gpkg.h"      /* Groups		  		*/
 #include "H5Iprivate.h"  /* IDs                                  */
 #include "H5Lpkg.h"      /* Links                                */
 #include "H5MMprivate.h" /* Memory management			*/
@@ -35,7 +33,8 @@
 /* PRIVATE PROTOTYPES */
 static void *H5O__link_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags, size_t p_size,
                               const uint8_t *p);
-static herr_t H5O__link_encode(H5F_t *f, bool disable_shared, uint8_t *p, const void *_mesg);
+static herr_t H5O__link_encode(H5F_t *f, bool disable_shared, size_t H5_ATTR_UNUSED p_size, uint8_t *p,
+                               const void *_mesg);
 static void  *H5O__link_copy(const void *_mesg, void *_dest);
 static size_t H5O__link_size(const H5F_t *f, bool disable_shared, const void *_mesg);
 static herr_t H5O__link_reset(void *_mesg);
@@ -289,7 +288,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__link_encode(H5F_t *f, bool H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O__link_encode(H5F_t *f, bool H5_ATTR_UNUSED disable_shared, size_t H5_ATTR_UNUSED p_size, uint8_t *p,
+                 const void *_mesg)
 {
     const H5O_link_t *lnk = (const H5O_link_t *)_mesg;
     uint64_t          len;        /* Length of a string in the message */
@@ -303,7 +303,7 @@ H5O__link_encode(H5F_t *f, bool H5_ATTR_UNUSED disable_shared, uint8_t *p, const
     assert(lnk);
 
     /* Get length of link's name */
-    len = (uint64_t)HDstrlen(lnk->name);
+    len = (uint64_t)strlen(lnk->name);
     assert(len > 0);
 
     /* encode */
@@ -370,7 +370,7 @@ H5O__link_encode(H5F_t *f, bool H5_ATTR_UNUSED disable_shared, uint8_t *p, const
 
         case H5L_TYPE_SOFT:
             /* Store the link value */
-            len = (uint16_t)HDstrlen(lnk->u.soft.name);
+            len = (uint16_t)strlen(lnk->u.soft.name);
             assert(len > 0);
             UINT16ENCODE(p, len);
             H5MM_memcpy(p, lnk->u.soft.name, (size_t)len);
@@ -486,7 +486,7 @@ H5O__link_size(const H5F_t *f, bool H5_ATTR_UNUSED disable_shared, const void *_
     HDcompile_assert(sizeof(uint64_t) >= sizeof(size_t));
 
     /* Get name's length */
-    name_len = (uint64_t)HDstrlen(lnk->name);
+    name_len = (uint64_t)strlen(lnk->name);
 
     /* Determine correct value for name size bits */
     if (name_len > 4294967295)
@@ -514,8 +514,8 @@ H5O__link_size(const H5F_t *f, bool H5_ATTR_UNUSED disable_shared, const void *_
             break;
 
         case H5L_TYPE_SOFT:
-            ret_value += 2 +                         /* Link value length */
-                         HDstrlen(lnk->u.soft.name); /* Link value */
+            ret_value += 2 +                       /* Link value length */
+                         strlen(lnk->u.soft.name); /* Link value */
             break;
 
         case H5L_TYPE_ERROR:
@@ -636,8 +636,14 @@ H5O_link_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
             if ((file_id = H5F_get_id(f)) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to get file ID");
 
-            /* Call user-defined link's 'delete' callback */
-            if ((link_class->del_func)(lnk->name, file_id, lnk->u.ud.udata, lnk->u.ud.size) < 0)
+            /* Prepare & restore library for user callback */
+            H5_BEFORE_USER_CB(FAIL)
+                {
+                    /* Call user-defined link's 'delete' callback */
+                    ret_value = (link_class->del_func)(lnk->name, file_id, lnk->u.ud.udata, lnk->u.ud.size);
+                }
+            H5_AFTER_USER_CB(FAIL)
+            if (ret_value < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CALLBACK, FAIL, "link deletion callback returned failure");
         } /* end if */
     }     /* end if */
@@ -816,7 +822,7 @@ H5O__link_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int in
             if (lnk->type >= H5L_TYPE_UD_MIN) {
                 if (lnk->type == H5L_TYPE_EXTERNAL) {
                     const char *objname =
-                        (const char *)lnk->u.ud.udata + (HDstrlen((const char *)lnk->u.ud.udata) + 1);
+                        (const char *)lnk->u.ud.udata + (strlen((const char *)lnk->u.ud.udata) + 1);
 
                     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                             "External File Name:", (const char *)lnk->u.ud.udata);

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -16,13 +16,11 @@
  * Purpose:     Code for the archival and revision indexes
  */
 
-/* This source code file is part of the H5FD driver module */
-#include "H5FDdrvr_module.h"
+#include "H5FDmodule.h" /* This source code file is part of the H5FD module */
 
 #include "H5private.h"      /* Generic Functions                        */
 #include "H5Eprivate.h"     /* Error handling                           */
-#include "H5FDprivate.h"    /* File drivers                             */
-#include "H5FDonion.h"      /* Onion file driver                        */
+#include "H5FDpkg.h"        /* File drivers                             */
 #include "H5FDonion_priv.h" /* Onion file driver internals              */
 #include "H5MMprivate.h"    /* Memory management                        */
 
@@ -439,7 +437,7 @@ done:
  *              checksum value will change.
  *
  *              Entry data is copied into separate memory region; user pointer
- *              can be safley re-used or discarded after operation.
+ *              can be safley reused or discarded after operation.
  *
  * Return:      SUCCEED/FAIL
  *-----------------------------------------------------------------------------
@@ -604,7 +602,7 @@ H5FD__onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_recor
     assert(H5FD_ONION_REVISION_RECORD_VERSION_CURR == record->version);
     assert(H5FD_ONION_ARCHIVAL_INDEX_VERSION_CURR == record->archival_index.version);
 
-    if (HDstrncmp((const char *)buf, H5FD_ONION_REVISION_RECORD_SIGNATURE, 4))
+    if (strncmp((const char *)buf, H5FD_ONION_REVISION_RECORD_SIGNATURE, 4))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid signature");
 
     if (H5FD_ONION_REVISION_RECORD_VERSION_CURR != buf[4])

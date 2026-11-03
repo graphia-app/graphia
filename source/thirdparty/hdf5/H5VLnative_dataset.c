@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -97,6 +97,16 @@ H5VL__native_dataset_io_setup(size_t count, void *obj[], hid_t mem_type_id[], hi
 
     /* Iterate over datasets */
     for (i = 0; i < count; i++) {
+        /* Initialize fields not set here to prevent use of uninitialized */
+        memset(&dinfo[i].layout_ops, 0, sizeof(dinfo[i].layout_ops));
+        memset(&dinfo[i].io_ops, 0, sizeof(dinfo[i].io_ops));
+        memset(&dinfo[i].layout_io_info, 0, sizeof(dinfo[i].layout_io_info));
+        memset(&dinfo[i].type_info, 0, sizeof(dinfo[i].type_info));
+        dinfo[i].store   = NULL;
+        dinfo[i].layout  = NULL;
+        dinfo[i].nelmts  = 0;
+        dinfo[i].skip_io = false;
+
         /* Set up dset */
         dinfo[i].dset = (H5D_t *)obj[i];
         assert(dinfo[i].dset);
@@ -109,7 +119,8 @@ H5VL__native_dataset_io_setup(size_t count, void *obj[], hid_t mem_type_id[], hi
                         "different files detected in multi dataset I/O request");
 
         /* Set up memory type */
-        dinfo[i].mem_type_id = mem_type_id[i];
+        if (NULL == (dinfo[i].mem_type = (const H5T_t *)H5I_object_verify(mem_type_id[i], H5I_DATATYPE)))
+            HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "invalid datatype");
 
         /* Set up file dataspace */
         if (H5S_ALL == file_space_id[i])
@@ -122,7 +133,7 @@ H5VL__native_dataset_io_setup(size_t count, void *obj[], hid_t mem_type_id[], hi
             H5S_t          *space; /* Dataspace to hold selection */
 
             /* Get the plist structure */
-            if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+            if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER, true)))
                 HGOTO_ERROR(H5E_DATASET, H5E_BADID, FAIL, "bad dataset transfer property list");
 
             /* Get a pointer to the file space in the property list */
@@ -721,8 +732,8 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "failure to copy offset array");
 
             /* Read the raw chunk */
-            if (H5D__chunk_direct_read(dset, offset_copy, &chunk_read_args->filters, chunk_read_args->buf) <
-                0)
+            if (H5D__chunk_direct_read(dset, offset_copy, &chunk_read_args->filters, chunk_read_args->buf,
+                                       chunk_read_args->buf_size) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read unprocessed chunk data");
 
             break;

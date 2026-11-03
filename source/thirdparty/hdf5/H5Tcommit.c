@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -25,7 +25,6 @@
 /* Headers */
 /***********/
 #include "H5private.h"   /* Generic Functions                        */
-#include "H5ACprivate.h" /* Metadata cache                           */
 #include "H5CXprivate.h" /* API Contexts                             */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5ESprivate.h" /* Event Sets                               */
@@ -60,6 +59,7 @@ static herr_t H5T__commit_api_common(hid_t loc_id, const char *name, hid_t type_
 static hid_t  H5T__open_api_common(hid_t loc_id, const char *name, hid_t tapl_id, void **token_ptr,
                                    H5VL_object_t **_vol_obj_ptr);
 static H5T_t *H5T__open_oid(const H5G_loc_t *loc);
+static herr_t H5T_destruct_datatype(void *datatype, H5VL_connector_t *vol_connector);
 
 /*********************/
 /* Public Variables */
@@ -76,12 +76,6 @@ static H5T_t *H5T__open_oid(const H5G_loc_t *loc);
 /*******************/
 /* Local Variables */
 /*******************/
-
-/* Declare a free list to manage the H5VL_t struct */
-H5FL_EXTERN(H5VL_t);
-
-/* Declare a free list to manage the H5VL_object_t struct */
-H5FL_EXTERN(H5VL_object_t);
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__commit_api_common
@@ -142,7 +136,7 @@ H5T__commit_api_common(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype");
 
     /* Set up VOL object */
-    if (NULL == (new_obj = H5VL_create_object(data, (*vol_obj_ptr)->connector)))
+    if (NULL == (new_obj = H5VL_create_object(data, H5VL_OBJ_CONNECTOR(*vol_obj_ptr))))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "can't create VOL object for committed datatype");
 
     /* Set the committed type object to the VOL connector pointer in the H5T_t struct */
@@ -168,7 +162,6 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id, hid_t t
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "i*siiii", loc_id, name, type_id, lcpl_id, tcpl_id, tapl_id);
 
     /* Commit the dataset synchronously */
     if ((ret_value = H5T__commit_api_common(loc_id, name, type_id, lcpl_id, tcpl_id, tapl_id, NULL, NULL)) <
@@ -198,8 +191,6 @@ H5Tcommit_async(const char *app_file, const char *app_func, unsigned app_line, h
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE10("e", "*s*sIui*siiiii", app_file, app_func, app_line, loc_id, name, type_id, lcpl_id, tcpl_id,
-              tapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -213,7 +204,7 @@ H5Tcommit_async(const char *app_file, const char *app_func, unsigned app_line, h
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         /* clang-format off */
-        if (H5ES_insert(es_id, vol_obj->connector, token,
+        if (H5ES_insert(es_id, H5VL_OBJ_CONNECTOR(vol_obj), token,
                         H5ARG_TRACE10(__func__, "*s*sIui*siiiii", app_file, app_func, app_line, loc_id, name, type_id, lcpl_id, tcpl_id, tapl_id, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "can't insert token into event set");
@@ -325,7 +316,6 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "iiii", loc_id, type_id, tcpl_id, tapl_id);
 
     /* Check arguments */
     if (NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -353,7 +343,7 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* Get the file object */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
+    if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier");
 
     /* Commit the datatype */
@@ -362,7 +352,7 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype");
 
     /* Setup VOL object */
-    if (NULL == (new_obj = H5VL_create_object(dt, vol_obj->connector)))
+    if (NULL == (new_obj = H5VL_create_object(dt, H5VL_OBJ_CONNECTOR(vol_obj))))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "can't create VOL object for committed datatype");
 
     /* Set the committed type object to the VOL connector pointer in the H5T_t struct */
@@ -425,11 +415,13 @@ done:
 herr_t
 H5T__commit(H5F_t *file, H5T_t *type, hid_t tcpl_id)
 {
-    H5O_loc_t  temp_oloc;           /* Temporary object header location */
-    H5G_name_t temp_path;           /* Temporary path */
-    bool       loc_init = false;    /* Have temp_oloc and temp_path been initialized? */
-    size_t     dtype_size;          /* Size of the datatype message */
-    herr_t     ret_value = SUCCEED; /* Return value */
+    H5O_t     *oh = NULL;            /* Pointer to actual object header */
+    H5O_loc_t  temp_oloc;            /* Temporary object header location */
+    H5G_name_t temp_path;            /* Temporary path */
+    bool       loc_init     = false; /* Have temp_oloc and temp_path been initialized? */
+    bool       ohdr_created = false; /* Has the object header been created yet? */
+    size_t     dtype_size;           /* Size of the datatype message */
+    herr_t     ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -482,9 +474,23 @@ H5T__commit(H5F_t *file, H5T_t *type, hid_t tcpl_id)
      */
     if (H5O_create(file, dtype_size, (size_t)1, tcpl_id, &temp_oloc) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to create datatype object header");
-    if (H5O_msg_create(&temp_oloc, H5O_DTYPE_ID, H5O_MSG_FLAG_CONSTANT | H5O_MSG_FLAG_DONTSHARE,
-                       H5O_UPDATE_TIME, type) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to update type header message");
+    ohdr_created = true;
+
+    /* Pin the object header */
+    if (NULL == (oh = H5O_pin(&temp_oloc)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTPIN, FAIL, "unable to pin object header");
+
+    /* Check for creating committed datatype with unusual datatype */
+    if (!(H5O_has_chksum(oh) || (H5F_RFIC_FLAGS(file) & H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS)) &&
+        H5T_is_numeric_with_unusual_unused_bits(type))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+                    "creating committed datatype with unusual datatype, see documentation for "
+                    "H5Pset_relax_file_integrity_checks for details.");
+
+    /* Insert the datatype message */
+    if (H5O_msg_append_oh(file, oh, H5O_DTYPE_ID, H5O_MSG_FLAG_CONSTANT | H5O_MSG_FLAG_DONTSHARE,
+                          H5O_UPDATE_TIME, type) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to insert type header message");
 
     /* Copy the new object header's location into the datatype, taking ownership of it */
     if (H5O_loc_copy_shallow(&(type->oloc), &temp_oloc) < 0)
@@ -511,23 +517,39 @@ H5T__commit(H5F_t *file, H5T_t *type, hid_t tcpl_id)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "cannot mark datatype in memory");
 
 done:
+    if (oh && H5O_unpin(oh) < 0)
+        HDONE_ERROR(H5E_DATATYPE, H5E_CANTUNPIN, FAIL, "unable to unpin object header");
+
     if (ret_value < 0) {
+        /* Close & delete the object header on failure */
+        if (ohdr_created) {
+            H5O_loc_t *oloc_ptr; /* Pointer to object header location */
+
+            /* Point at correct object header location, depending on state when failure occurred */
+            if (loc_init)
+                oloc_ptr = &temp_oloc;
+            else
+                oloc_ptr = &(type->oloc);
+            if (H5O_dec_rc_by_loc(oloc_ptr) < 0)
+                HDONE_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL,
+                            "unable to decrement refcount on newly created object");
+            if (H5O_close(oloc_ptr, NULL) < 0)
+                HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to release object header");
+            if (H5O_delete(file, oloc_ptr->addr) < 0)
+                HDONE_ERROR(H5E_DATATYPE, H5E_CANTDELETE, FAIL, "unable to delete object header");
+        }
+
+        /* Release the location info, if the datatype doesn't own it */
         if (loc_init) {
             H5O_loc_free(&temp_oloc);
             H5G_name_free(&temp_path);
-        } /* end if */
+        }
+
+        /* Reset the shared state for the datatype */
         if ((type->shared->state == H5T_STATE_TRANSIENT || type->shared->state == H5T_STATE_RDONLY) &&
-            (type->sh_loc.type == H5O_SHARE_TYPE_COMMITTED)) {
-            if (H5O_dec_rc_by_loc(&(type->oloc)) < 0)
-                HDONE_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL,
-                            "unable to decrement refcount on newly created object");
-            if (H5O_close(&(type->oloc), NULL) < 0)
-                HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to release object header");
-            if (H5O_delete(file, type->sh_loc.u.loc.oh_addr) < 0)
-                HDONE_ERROR(H5E_DATATYPE, H5E_CANTDELETE, FAIL, "unable to delete object header");
+            (type->sh_loc.type == H5O_SHARE_TYPE_COMMITTED))
             type->sh_loc.type = H5O_SHARE_TYPE_UNSHARED;
-        } /* end if */
-    }     /* end if */
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5T__commit() */
@@ -548,7 +570,6 @@ H5Tcommitted(hid_t type_id)
     htri_t ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("t", "i", type_id);
 
     /* Check arguments */
     if (NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -630,13 +651,13 @@ H5T__open_api_common(hid_t loc_id, const char *name, hid_t tapl_id, void **token
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open named datatype");
 
     /* Register the type and return the ID */
-    if ((ret_value = H5VL_register(H5I_DATATYPE, dt, (*vol_obj_ptr)->connector, true)) < 0)
+    if ((ret_value = H5VL_register(H5I_DATATYPE, dt, H5VL_OBJ_CONNECTOR(*vol_obj_ptr), true)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register named datatype");
 
 done:
     /* Cleanup on error */
     if (H5I_INVALID_HID == ret_value)
-        if (dt && H5VL_datatype_close(*vol_obj_ptr, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        if (dt && H5T_destruct_datatype(dt, H5VL_OBJ_CONNECTOR(*vol_obj_ptr)) < 0)
             HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release datatype");
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -660,7 +681,6 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE3("i", "i*si", loc_id, name, tapl_id);
 
     /* Open the datatype synchronously */
     if ((ret_value = H5T__open_api_common(loc_id, name, tapl_id, NULL, NULL)) < 0)
@@ -691,7 +711,6 @@ H5Topen_async(const char *app_file, const char *app_func, unsigned app_line, hid
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE7("i", "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, tapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -705,7 +724,7 @@ H5Topen_async(const char *app_file, const char *app_func, unsigned app_line, hid
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         /* clang-format off */
-        if (H5ES_insert(es_id, vol_obj->connector, token,
+        if (H5ES_insert(es_id, H5VL_OBJ_CONNECTOR(vol_obj), token,
                         H5ARG_TRACE7(__func__, "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, tapl_id, es_id)) < 0) {
             /* clang-format on */
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
@@ -742,7 +761,6 @@ H5Tget_create_plist(hid_t dtype_id)
     hid_t  ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE1("i", "i", dtype_id);
 
     /* Check arguments */
     if (NULL == (type = (H5T_t *)H5I_object_verify(dtype_id, H5I_DATATYPE)))
@@ -802,7 +820,6 @@ H5Tflush(hid_t type_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", type_id);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -846,7 +863,6 @@ H5Trefresh(hid_t type_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", type_id);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -1015,9 +1031,6 @@ H5T_open(const H5G_loc_t *loc)
 
     /* Check if datatype was already open */
     if (NULL == (shared_fo = (H5T_shared_t *)H5FO_opened(loc->oloc->file, loc->oloc->addr))) {
-        /* Clear any errors from H5FO_opened() */
-        H5E_clear_stack(NULL);
-
         /* Open the datatype object */
         if (NULL == (dt = H5T__open_oid(loc)))
             HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL, "not found");
@@ -1243,6 +1256,41 @@ done:
 } /* end H5T_construct_datatype() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5T_destruct_datatype
+ *
+ * Purpose:     Helper function to free a committed datatype object that
+ *              hasn't yet been wrapped within a VOL object. This usually
+ *              happens when a failure occurs during opening a committed
+ *              datatype. When this happens, the datatype must be wrapped
+ *              inside a temporary VOL object in order to route the close
+ *              operation through the stack of VOL connectors.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5T_destruct_datatype(void *datatype, H5VL_connector_t *vol_connector)
+{
+    H5VL_object_t *vol_obj   = NULL;
+    herr_t         ret_value = FAIL;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if (NULL == (vol_obj = H5VL_create_object(datatype, vol_connector)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "can't create VOL object for committed datatype");
+
+    if (H5VL_datatype_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to release datatype");
+
+done:
+    if (vol_obj && H5VL_free_object(vol_obj) < 0)
+        HDONE_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "can't free VOL object");
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_destruct_datatype() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5T_get_named_type
  *
  * Purpose:     Returns the VOL object for the named datatype if it exists
@@ -1296,7 +1344,7 @@ H5T_get_actual_type(H5T_t *dt)
 /*-------------------------------------------------------------------------
  * Function:    H5T_save_refresh_state
  *
- * Purpose:     Save state for datatype reconstuction after a refresh.
+ * Purpose:     Save state for datatype reconstruction after a refresh.
  *
  * Return:      SUCCEED/FAIL
  *
@@ -1336,7 +1384,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5T_restore_refresh_state
  *
- * Purpose:     Restore state for datatype reconstuction after a refresh.
+ * Purpose:     Restore state for datatype reconstruction after a refresh.
  *
  * Return:      SUCCEED/FAIL
  *

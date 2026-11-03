@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -29,7 +29,7 @@
 #include "H5Cprivate.h"  /* Cache                                    */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Fpkg.h"      /* Files                                    */
-#include "H5Gprivate.h"  /* Groups                                   */
+#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5MFprivate.h" /* File memory management                   */
 #include "H5Pprivate.h"  /* Property lists                           */
@@ -90,7 +90,7 @@ H5VL__native_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t 
     flags |= H5F_ACC_RDWR | H5F_ACC_CREAT;
 
     /* Create the file */
-    if (NULL == (new_file = H5F_open(name, flags, fcpl_id, fapl_id)))
+    if (H5F_open(false, &new_file, name, flags, fcpl_id, fapl_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create file");
     new_file->id_exists = true;
 
@@ -124,7 +124,7 @@ H5VL__native_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t H5
     FUNC_ENTER_PACKAGE
 
     /* Open the file */
-    if (NULL == (new_file = H5F_open(name, flags, H5P_FILE_CREATE_DEFAULT, fapl_id)))
+    if (H5F_open(false, &new_file, name, flags, H5P_FILE_CREATE_DEFAULT, fapl_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file");
     new_file->id_exists = true;
 
@@ -231,12 +231,12 @@ H5VL__native_file_get(void *obj, H5VL_file_get_args_t *args, hid_t H5_ATTR_UNUSE
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object");
 
             /* Get length of file name */
-            *file_args->file_name_len = HDstrlen(H5F_OPEN_NAME(f));
+            *file_args->file_name_len = strlen(H5F_OPEN_NAME(f));
 
             /* Populate buffer with name, if given */
             if (file_args->buf) {
-                HDstrncpy(file_args->buf, H5F_OPEN_NAME(f),
-                          MIN(*file_args->file_name_len + 1, file_args->buf_size));
+                strncpy(file_args->buf, H5F_OPEN_NAME(f),
+                        MIN(*file_args->file_name_len + 1, file_args->buf_size));
                 if (*file_args->file_name_len >= file_args->buf_size)
                     file_args->buf[file_args->buf_size - 1] = '\0';
             } /* end if */
@@ -339,14 +339,9 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_args_t *args, hid_t H5_
 
         /* H5Fis_accessible */
         case H5VL_FILE_IS_ACCESSIBLE: {
-            htri_t result;
-
-            if ((result = H5F__is_hdf5(args->args.is_accessible.filename, args->args.is_accessible.fapl_id)) <
-                0)
+            if (H5F__is_hdf5(args->args.is_accessible.filename, args->args.is_accessible.fapl_id,
+                             args->args.is_accessible.accessible) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "error in HDF5 file check");
-
-            /* Set 'out' value */
-            *args->args.is_accessible.accessible = (bool)result;
 
             break;
         }

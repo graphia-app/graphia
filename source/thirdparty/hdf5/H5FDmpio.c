@@ -4,44 +4,50 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose:     This is the MPI-2 I/O driver.
+ * Purpose:     This is the MPI I/O driver.
  */
 
-#include "H5FDdrvr_module.h" /* This source code file is part of the H5FD driver module */
+#include "H5FDmodule.h" /* This source code file is part of the H5FD module */
 
-#include "H5private.h"   /* Generic Functions                    */
+#include "H5private.h" /* Generic Functions                    */
+
+#ifdef H5_HAVE_PARALLEL
+
 #include "H5CXprivate.h" /* API Contexts                         */
 #include "H5Dprivate.h"  /* Dataset functions                    */
 #include "H5Eprivate.h"  /* Error handling                       */
 #include "H5Fprivate.h"  /* File access                          */
-#include "H5FDprivate.h" /* File drivers                         */
 #include "H5FDmpi.h"     /* MPI-based file drivers               */
+#include "H5FDpkg.h"     /* File drivers                         */
 #include "H5Iprivate.h"  /* IDs                                  */
 #include "H5MMprivate.h" /* Memory management                    */
 #include "H5Pprivate.h"  /* Property lists                       */
-
-#ifdef H5_HAVE_PARALLEL
 
 /*
  * The driver identification number, initialized at runtime if H5_HAVE_PARALLEL
  * is defined. This allows applications to still have the H5FD_MPIO
  * "constants" in their source code.
  */
-static hid_t H5FD_MPIO_g = 0;
+hid_t H5FD_MPIO_id_g = H5I_INVALID_HID;
+
+/* Flag to indicate whether global driver resources & settings have been
+ *      initialized.
+ */
+static bool H5FD_mpio_init_s = false;
 
 /* Whether to allow collective I/O operations */
 /* (Can be changed by setting "HDF5_MPI_OPT_TYPES" environment variable to '0' or '1') */
-hbool_t H5FD_mpi_opt_types_g = true;
+bool H5FD_mpi_opt_types_g = true;
 
 /* Whether the driver initialized MPI on its own */
-static bool H5FD_mpi_self_initialized = false;
+static bool H5FD_mpi_self_initialized_s = false;
 
 /*
  * The view is set to this value
@@ -106,7 +112,7 @@ static herr_t H5FD__mpio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, co
 /* Other functions */
 static herr_t H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
                                             size_t sizes[], H5_flexible_const_ptr_t bufs[],
-                                            haddr_t *s_addrs[], size_t *s_sizes[],
+                                            haddr_t *s_addrs[], size_t *s_sizes[], uint32_t *s_sizes_len,
                                             H5_flexible_const_ptr_t *s_bufs[], bool *vector_was_sorted,
                                             MPI_Offset *mpi_off, H5_flexible_const_ptr_t *mpi_bufs_base,
                                             int *size_i, MPI_Datatype *buf_type, bool *buf_type_created,
@@ -256,79 +262,110 @@ H5FD__mem_t_to_str(H5FD_mem_t mem_type)
 #endif /* H5FDmpio_DEBUG */
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_mpio_init
+ * Function:    H5FD__mpio_register
  *
- * Purpose:     Initialize this driver by registering the driver with the
- *              library.
+ * Purpose:     Register the driver with the library.
  *
- * Return:      Success:    The driver ID for the mpio driver
- *              Failure:    H5I_INVALID_HID
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
-hid_t
-H5FD_mpio_init(void)
+herr_t
+H5FD__mpio_register(void)
 {
-    static int H5FD_mpio_Debug_inited = 0;
-    char      *env                    = NULL;
-    hid_t      ret_value              = H5I_INVALID_HID; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
+    FUNC_ENTER_PACKAGE
 
     /* Register the MPI-IO VFD, if it isn't already */
-    if (H5I_VFL != H5I_get_type(H5FD_MPIO_g)) {
-        H5FD_MPIO_g = H5FD_register((const H5FD_class_t *)&H5FD_mpio_g, sizeof(H5FD_class_t), false);
-
-        /* Check if MPI driver has been loaded dynamically */
-        env = HDgetenv(HDF5_DRIVER);
-        if (env && !HDstrcmp(env, "mpio")) {
-            int mpi_initialized = 0;
-
-            /* Initialize MPI if not already initialized */
-            if (MPI_SUCCESS != MPI_Initialized(&mpi_initialized))
-                HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, H5I_INVALID_HID, "can't check if MPI is initialized");
-            if (!mpi_initialized) {
-                if (MPI_SUCCESS != MPI_Init(NULL, NULL))
-                    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID, "can't initialize MPI");
-                H5FD_mpi_self_initialized = true;
-            }
-        }
-    }
-
-    if (!H5FD_mpio_Debug_inited) {
-        const char *s; /* String for environment variables */
-
-        /* Allow MPI buf-and-file-type optimizations? */
-        s = HDgetenv("HDF5_MPI_OPT_TYPES");
-        if (s && isdigit(*s))
-            H5FD_mpi_opt_types_g = (0 == strtol(s, NULL, 0)) ? false : true;
-
-#ifdef H5FDmpio_DEBUG
-        /* Clear the flag buffer */
-        memset(H5FD_mpio_debug_flags_s, 0, sizeof(H5FD_mpio_debug_flags_s));
-
-        /* Retrieve MPI-IO debugging environment variable */
-        s = HDgetenv("H5FD_mpio_Debug");
-        if (s)
-            H5FD__mpio_parse_debug_str(s);
-#endif /* H5FDmpio_DEBUG */
-
-        H5FD_mpio_Debug_inited++;
-    } /* end if */
-
-    /* Set return value */
-    ret_value = H5FD_MPIO_g;
+    if (H5I_VFL != H5I_get_type(H5FD_MPIO_id_g))
+        if ((H5FD_MPIO_id_g = H5FD_register(&H5FD_mpio_g, sizeof(H5FD_class_t), false)) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, FAIL, "unable to register mpio driver");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_mpio_init() */
+} /* end H5FD__mpio_register() */
+
+/*---------------------------------------------------------------------------
+ * Function:    H5FD__mpio_unregister
+ *
+ * Purpose:     Reset library driver info.
+ *
+ * Returns:     SUCCEED (Can't fail)
+ *
+ *---------------------------------------------------------------------------
+ */
+herr_t
+H5FD__mpio_unregister(void)
+{
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Reset VFL ID */
+    H5FD_MPIO_id_g = H5I_INVALID_HID;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5FD__mpio_unregister() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__mpio_init
+ *
+ * Purpose:     Singleton to initialize global driver settings & resources.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__mpio_init(void)
+{
+    char  *env       = NULL;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Check if MPI driver has been loaded dynamically */
+    env = getenv(HDF5_DRIVER);
+    if (env && !strcmp(env, "mpio")) {
+        int mpi_initialized = 0;
+
+        /* Initialize MPI if not already initialized */
+        if (MPI_SUCCESS != MPI_Initialized(&mpi_initialized))
+            HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "can't check if MPI is initialized");
+        if (!mpi_initialized) {
+            if (MPI_SUCCESS != MPI_Init(NULL, NULL))
+                HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize MPI");
+            H5FD_mpi_self_initialized_s = true;
+        }
+    }
+
+    /* Allow MPI buf-and-file-type optimizations? */
+    env = getenv("HDF5_MPI_OPT_TYPES");
+    if (env && isdigit(*env))
+        H5FD_mpi_opt_types_g = (0 == strtol(env, NULL, 0)) ? false : true;
+
+#ifdef H5FDmpio_DEBUG
+    /* Clear the flag buffer */
+    memset(H5FD_mpio_debug_flags_s, 0, sizeof(H5FD_mpio_debug_flags_s));
+
+    /* Retrieve MPI-IO debugging environment variable */
+    env = getenv("H5FD_mpio_Debug");
+    if (env)
+        H5FD__mpio_parse_debug_str(env);
+#endif /* H5FDmpio_DEBUG */
+
+    /* Indicate that driver is set up */
+    H5FD_mpio_init_s = true;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__mpio_init() */
 
 /*---------------------------------------------------------------------------
  * Function:    H5FD__mpio_term
  *
  * Purpose:     Shut down the VFD
  *
- * Returns:     Non-negative on success or negative on failure
+ * Returns:     SUCCEED (Can't fail)
  *
  *---------------------------------------------------------------------------
  */
@@ -338,18 +375,15 @@ H5FD__mpio_term(void)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Terminate MPI if the driver initialized it */
-    if (H5FD_mpi_self_initialized) {
+    if (H5FD_mpi_self_initialized_s) {
         int mpi_finalized = 0;
 
         MPI_Finalized(&mpi_finalized);
         if (!mpi_finalized)
             MPI_Finalize();
 
-        H5FD_mpi_self_initialized = false;
+        H5FD_mpi_self_initialized_s = false;
     }
-
-    /* Reset VFL ID */
-    H5FD_MPIO_g = 0;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD__mpio_term() */
@@ -363,12 +397,12 @@ H5FD__mpio_term(void)
  *              only in the parallel HDF5 library and is not collective.
  *
  *              comm is the MPI communicator to be used for file open as
- *              defined in MPI_FILE_OPEN of MPI-2. This function makes a
+ *              defined in MPI_FILE_OPEN of MPI. This function makes a
  *              duplicate of comm. Any modification to comm after this function
  *              call returns has no effect on the access property list.
  *
  *              info is the MPI Info object to be used for file open as
- *              defined in MPI_FILE_OPEN of MPI-2. This function makes a
+ *              defined in MPI_FILE_OPEN of MPI. This function makes a
  *              duplicate of info. Any modification to info after this
  *              function call returns has no effect on the access property
  *              list.
@@ -389,15 +423,19 @@ H5Pset_fapl_mpio(hid_t fapl_id, MPI_Comm comm, MPI_Info info)
     herr_t          ret_value;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "iMcMi", fapl_id, comm, info);
 
     /* Check arguments */
     if (fapl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list");
-    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, false)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list");
     if (MPI_COMM_NULL == comm)
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "MPI_COMM_NULL is not a valid communicator");
+
+    /* Initialize driver, if it's not yet */
+    if (!H5FD_mpio_init_s)
+        if (H5FD__mpio_init() < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize driver");
 
     /* Set the MPI communicator and info object */
     if (H5P_set(plist, H5F_ACS_MPI_PARAMS_COMM_NAME, &comm) < 0)
@@ -439,7 +477,6 @@ H5Pget_fapl_mpio(hid_t fapl_id, MPI_Comm *comm /*out*/, MPI_Info *info /*out*/)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ixx", fapl_id, comm, info);
 
     /* Set comm and info in case we have problems */
     if (comm)
@@ -448,10 +485,15 @@ H5Pget_fapl_mpio(hid_t fapl_id, MPI_Comm *comm /*out*/, MPI_Info *info /*out*/)
         *info = MPI_INFO_NULL;
 
     /* Check arguments */
-    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, true)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list");
     if (H5FD_MPIO != H5P_peek_driver(plist))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "VFL driver is not MPI-I/O");
+
+    /* Initialize driver, if it's not yet */
+    if (!H5FD_mpio_init_s)
+        if (H5FD__mpio_init() < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize driver");
 
     /* Get the MPI communicator and info object */
     if (comm)
@@ -503,15 +545,19 @@ H5Pset_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iDt", dxpl_id, xfer_mode);
 
     /* Check arguments */
     if (dxpl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list");
-    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER, false)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
     if (H5FD_MPIO_INDEPENDENT != xfer_mode && H5FD_MPIO_COLLECTIVE != xfer_mode)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "incorrect xfer_mode");
+
+    /* Initialize driver, if it's not yet */
+    if (!H5FD_mpio_init_s)
+        if (H5FD__mpio_init() < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize driver");
 
     /* Set the transfer mode */
     if (H5P_set(plist, H5D_XFER_IO_XFER_MODE_NAME, &xfer_mode) < 0)
@@ -541,11 +587,15 @@ H5Pget_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t *xfer_mode /*out*/)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", dxpl_id, xfer_mode);
 
     /* Check arguments */
-    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER, true)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
+
+    /* Initialize driver, if it's not yet */
+    if (!H5FD_mpio_init_s)
+        if (H5FD__mpio_init() < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize driver");
 
     /* Get the transfer mode */
     if (xfer_mode)
@@ -559,13 +609,13 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_dxpl_mpio_collective_opt
  *
- * Purpose:     To set a flag to choose linked chunk I/O or multi-chunk I/O
- *              without involving decision-making inside HDF5
- *
- * Note:        The library will do linked chunk I/O or multi-chunk I/O without
- *              involving communications for decision-making process.
- *              The library won't behave as it asks for only when we find
- *              that the low-level MPI-IO package doesn't support this.
+ * Purpose:     Set the data transfer property list DXPL_ID to use transfer
+ *              mode OPT_MODE during I/O. This allows the application to
+ *              specify collective I/O at the HDF5 interface level (with
+ *              the H5Pset_dxpl_mpio routine), while controlling whether
+ *              the actual I/O is performed collectively (e.g., via
+ *              MPI_File_write_at_all) or independently (e.g., via
+ *              MPI_File_write_at).
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
@@ -579,13 +629,17 @@ H5Pset_dxpl_mpio_collective_opt(hid_t dxpl_id, H5FD_mpio_collective_opt_t opt_mo
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iDc", dxpl_id, opt_mode);
 
     /* Check arguments */
     if (dxpl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list");
-    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER, false)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
+
+    /* Initialize driver, if it's not yet */
+    if (!H5FD_mpio_init_s)
+        if (H5FD__mpio_init() < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize driver");
 
     /* Set the transfer mode */
     if (H5P_set(plist, H5D_XFER_MPIO_COLLECTIVE_OPT_NAME, &opt_mode) < 0)
@@ -618,13 +672,17 @@ H5Pset_dxpl_mpio_chunk_opt(hid_t dxpl_id, H5FD_mpio_chunk_opt_t opt_mode)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iDh", dxpl_id, opt_mode);
 
     /* Check arguments */
     if (dxpl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list");
-    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER, false)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
+
+    /* Initialize driver, if it's not yet */
+    if (!H5FD_mpio_init_s)
+        if (H5FD__mpio_init() < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize driver");
 
     /* Set the transfer mode */
     if (H5P_set(plist, H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME, &opt_mode) < 0)
@@ -655,13 +713,17 @@ H5Pset_dxpl_mpio_chunk_opt_num(hid_t dxpl_id, unsigned num_chunk_per_proc)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iIu", dxpl_id, num_chunk_per_proc);
 
     /* Check arguments */
     if (dxpl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list");
-    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER, false)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
+
+    /* Initialize driver, if it's not yet */
+    if (!H5FD_mpio_init_s)
+        if (H5FD__mpio_init() < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize driver");
 
     /* Set the transfer mode */
     if (H5P_set(plist, H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME, &num_chunk_per_proc) < 0)
@@ -695,13 +757,17 @@ H5Pset_dxpl_mpio_chunk_opt_ratio(hid_t dxpl_id, unsigned percent_num_proc_per_ch
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iIu", dxpl_id, percent_num_proc_per_chunk);
 
     /* Check arguments */
     if (dxpl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list");
-    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER, false)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
+
+    /* Initialize driver, if it's not yet */
+    if (!H5FD_mpio_init_s)
+        if (H5FD__mpio_init() < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize driver");
 
     /* Set the transfer mode */
     if (H5P_set(plist, H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME, &percent_num_proc_per_chunk) < 0)
@@ -832,11 +898,16 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
 
     FUNC_ENTER_PACKAGE
 
+    /* Initialize driver, if it's not yet */
+    if (!H5FD_mpio_init_s)
+        if (H5FD__mpio_init() < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "can't initialize driver");
+
     /* Get a pointer to the fapl */
-    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, true)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
 
-    if (H5FD_mpi_self_initialized) {
+    if (H5FD_mpi_self_initialized_s) {
         comm = MPI_COMM_WORLD;
     }
     else {
@@ -906,7 +977,7 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
 
             /* copy over each hint */
             for (i = 0; i < nkeys; i++) {
-                char key[MPI_MAX_INFO_KEY], value[MPI_MAX_INFO_VAL];
+                char key[MPI_MAX_INFO_KEY], value[MPI_MAX_INFO_VAL + 1];
                 int  valuelen, flag;
 
                 /* retrieve the nth hint */
@@ -916,7 +987,7 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
                 if (MPI_SUCCESS != (mpi_code = MPI_Info_get_valuelen(info_used, key, &valuelen, &flag)))
                     HMPI_GOTO_ERROR(NULL, "MPI_Info_get_valuelen failed", mpi_code)
                 /* retrieve the value of nth hint */
-                if (MPI_SUCCESS != (mpi_code = MPI_Info_get(info_used, key, valuelen + 1, value, &flag)))
+                if (MPI_SUCCESS != (mpi_code = MPI_Info_get(info_used, key, valuelen, value, &flag)))
                     HMPI_GOTO_ERROR(NULL, "MPI_Info_get failed", mpi_code)
 
                 /* copy the hint into info */
@@ -946,7 +1017,7 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
     if (H5_mpio_get_file_sync_required(fh, &file->mpi_file_sync_required) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "unable to get mpi_file_sync_required hint");
 
-    /* Only processor p0 will get the filesize and broadcast it. */
+    /* Only processor p0 will get the file size and broadcast it. */
     if (mpi_rank == 0) {
         /* If MPI_File_get_size fails, broadcast file size as -1 to signal error */
         if (MPI_SUCCESS != (mpi_code = MPI_File_get_size(fh, &file_size)))
@@ -1222,20 +1293,13 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     MPI_Status   mpi_stat;            /* Status from I/O operation */
     MPI_Datatype buf_type = MPI_BYTE; /* MPI description of the selection in memory */
     int          size_i;              /* Integer copy of 'size' to read */
-#if H5_CHECK_MPI_VERSION(3, 0)
-    MPI_Count bytes_read = 0; /* Number of bytes read in */
-    MPI_Count type_size;      /* MPI datatype used for I/O's size */
-    MPI_Count io_size;        /* Actual number of bytes requested */
-    MPI_Count n;
-#else
-    int bytes_read = 0; /* Number of bytes read in */
-    int type_size;      /* MPI datatype used for I/O's size */
-    int io_size;        /* Actual number of bytes requested */
-    int n;
-#endif
-    bool use_view_this_time = false;
-    bool derived_type       = false;
-    bool rank0_bcast        = false; /* If read-with-rank0-and-bcast flag was used */
+    MPI_Count    bytes_read = 0;      /* Number of bytes read in */
+    MPI_Count    type_size;           /* MPI datatype used for I/O's size */
+    MPI_Count    io_size;             /* Actual number of bytes requested */
+    MPI_Count    n;
+    bool         use_view_this_time = false;
+    bool         derived_type       = false;
+    bool         rank0_bcast        = false; /* If read-with-rank0-and-bcast flag was used */
 #ifdef H5FDmpio_DEBUG
     bool H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
     bool H5FD_mpio_debug_r_flag = (H5FD_mpio_debug_flags_s[(int)'r'] && H5FD_MPIO_TRACE_THIS_RANK(file));
@@ -1283,7 +1347,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
             /* Remember that views are used */
             use_view_this_time = true;
 
-            /* Prepare for a full-blown xfer using btype, ftype, and disp */
+            /* Prepare for a full-blown xfer using btype, ftype, and displacement */
             if (H5CX_get_mpi_coll_datatypes(&buf_type, &file_type) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O datatypes");
 
@@ -1393,18 +1457,14 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     /* Only retrieve bytes read if this rank _actually_ participated in I/O */
     if (!rank0_bcast || (rank0_bcast && file->mpi_rank == 0)) {
         /* How many bytes were actually read? */
-#if H5_CHECK_MPI_VERSION(3, 0)
         if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, buf_type, &bytes_read))) {
-#else
-        if (MPI_SUCCESS != (mpi_code = MPI_Get_elements(&mpi_stat, MPI_BYTE, &bytes_read))) {
-#endif
             if (rank0_bcast && file->mpi_rank == 0) {
                 /* If MPI_Get_elements(_x) fails for a rank 0 bcast strategy,
                  * push an error, but continue to participate in the following
                  * MPI_Bcast.
                  */
                 bytes_read = -1;
-                HMPI_DONE_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
+                HMPI_DONE_ERROR(FAIL, "MPI_Get_elements failed for rank 0", mpi_code)
             }
             else
                 HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
@@ -1418,19 +1478,11 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
      *          of the data.  (QAK - 2019/1/2)
      */
     if (rank0_bcast)
-#if H5_CHECK_MPI_VERSION(3, 0)
         if (MPI_SUCCESS != MPI_Bcast(&bytes_read, 1, MPI_COUNT, 0, file->comm))
-#else
-        if (MPI_SUCCESS != MPI_Bcast(&bytes_read, 1, MPI_INT, 0, file->comm))
-#endif
             HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", 0)
 
-            /* Get the type's size */
-#if H5_CHECK_MPI_VERSION(3, 0)
+    /* Get the type's size */
     if (MPI_SUCCESS != (mpi_code = MPI_Type_size_x(buf_type, &type_size)))
-#else
-    if (MPI_SUCCESS != (mpi_code = MPI_Type_size(buf_type, &type_size)))
-#endif
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_size failed", mpi_code)
 
     /* Compute the actual number of bytes requested */
@@ -1486,19 +1538,13 @@ static herr_t
 H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr, size_t size,
                  const void *buf)
 {
-    H5FD_mpio_t *file = (H5FD_mpio_t *)_file;
-    MPI_Offset   mpi_off;
-    MPI_Status   mpi_stat;            /* Status from I/O operation */
-    MPI_Datatype buf_type = MPI_BYTE; /* MPI description of the selection in memory */
-#if H5_CHECK_MPI_VERSION(3, 0)
-    MPI_Count bytes_written;
-    MPI_Count type_size; /* MPI datatype used for I/O's size */
-    MPI_Count io_size;   /* Actual number of bytes requested */
-#else
-    int bytes_written;
-    int type_size; /* MPI datatype used for I/O's size */
-    int io_size;   /* Actual number of bytes requested */
-#endif
+    H5FD_mpio_t     *file = (H5FD_mpio_t *)_file;
+    MPI_Offset       mpi_off;
+    MPI_Status       mpi_stat;            /* Status from I/O operation */
+    MPI_Datatype     buf_type = MPI_BYTE; /* MPI description of the selection in memory */
+    MPI_Count        bytes_written;
+    MPI_Count        type_size; /* MPI datatype used for I/O's size */
+    MPI_Count        io_size;   /* Actual number of bytes requested */
     int              size_i;
     bool             use_view_this_time = false;
     bool             derived_type       = false;
@@ -1642,19 +1688,11 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
     } /* end else */
 
     /* How many bytes were actually written? */
-#if H5_CHECK_MPI_VERSION(3, 0)
     if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, buf_type, &bytes_written)))
-#else
-    if (MPI_SUCCESS != (mpi_code = MPI_Get_elements(&mpi_stat, MPI_BYTE, &bytes_written)))
-#endif
         HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
 
-        /* Get the type's size */
-#if H5_CHECK_MPI_VERSION(3, 0)
+    /* Get the type's size */
     if (MPI_SUCCESS != (mpi_code = MPI_Type_size_x(buf_type, &type_size)))
-#else
-    if (MPI_SUCCESS != (mpi_code = MPI_Type_size(buf_type, &type_size)))
-#endif
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_size failed", mpi_code)
 
     /* Compute the actual number of bytes requested */
@@ -1708,7 +1746,8 @@ done:
 static herr_t
 H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[], size_t sizes[],
                               H5_flexible_const_ptr_t bufs[], haddr_t *s_addrs[], size_t *s_sizes[],
-                              H5_flexible_const_ptr_t *s_bufs[], bool *vector_was_sorted, MPI_Offset *mpi_off,
+                              uint32_t *s_sizes_len, H5_flexible_const_ptr_t *s_bufs[],
+                              bool *vector_was_sorted, MPI_Offset *mpi_off,
                               H5_flexible_const_ptr_t *mpi_bufs_base, int *size_i, MPI_Datatype *buf_type,
                               bool *buf_type_created, MPI_Datatype *file_type, bool *file_type_created,
                               char *unused)
@@ -1748,6 +1787,10 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
 
     /* Get bio I/O transition point (may be lower than 2G for testing) */
     bigio_count = H5_mpi_get_bigio_count();
+
+    /* Start with s_sizes_len at count */
+    if (s_sizes_len)
+        *s_sizes_len = count;
 
     if (count == 1) {
         /* Single block.  Just use a series of MPI_BYTEs for the file view.
@@ -1840,9 +1883,14 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
             /* Determine size of this vector element */
             if (!fixed_size) {
                 if ((*s_sizes)[i] == 0) {
-                    assert(vector_was_sorted);
+                    assert(*vector_was_sorted);
+                    assert(i > 0);
                     fixed_size = true;
                     size       = sizes[i - 1];
+
+                    /* Return the used length of the s_sizes buffer */
+                    if (s_sizes_len)
+                        *s_sizes_len = (uint32_t)i;
                 }
                 else {
                     size = (*s_sizes)[i];
@@ -1858,7 +1906,7 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
                 HMPI_GOTO_ERROR(FAIL, "MPI_Get_address for s_bufs[] - mpi_bufs_base failed", mpi_code)
 
                 /*... and then subtract mpi_bufs_base_Aint from it. */
-#if ((MPI_VERSION > 3) || ((MPI_VERSION == 3) && (MPI_SUBVERSION >= 1)))
+#if H5_CHECK_MPI_VERSION(3, 1)
             mpi_bufs[i] = MPI_Aint_diff(mpi_bufs[i], mpi_bufs_base_Aint);
 #else
             mpi_bufs[i] = mpi_bufs[i] - mpi_bufs_base_Aint;
@@ -1982,7 +2030,7 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
 
 done:
     /* free sorted vectors if they exist */
-    if (!vector_was_sorted)
+    if (!*vector_was_sorted)
         if (s_types) {
             free(s_types);
             s_types = NULL;
@@ -2032,7 +2080,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD__mpio_read_vector()
  *
- * Purpose:     The behaviour of this function dependes on the value of
+ * Purpose:     The behavior of this function depends on the value of
  *              the io_xfer_mode obtained from the context.
  *
  *              If it is H5FD_MPIO_COLLECTIVE, this is a collective
@@ -2085,18 +2133,11 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
     H5FD_mpio_xfer_t           xfer_mode;     /* I/O transfer mode */
     H5FD_mpio_collective_opt_t coll_opt_mode; /* whether we are doing collective or independent I/O */
     int                        size_i;
-#if MPI_VERSION >= 3
-    MPI_Count bytes_read = 0; /* Number of bytes read in */
-    MPI_Count type_size;      /* MPI datatype used for I/O's size */
-    MPI_Count io_size;        /* Actual number of bytes requested */
-    MPI_Count n;
-#else
-    int bytes_read = 0; /* Number of bytes read in */
-    int type_size;      /* MPI datatype used for I/O's size */
-    int io_size;        /* Actual number of bytes requested */
-    int n;
-#endif
-    bool rank0_bcast = false; /* If read-with-rank0-and-bcast flag was used */
+    MPI_Count                  bytes_read = 0; /* Number of bytes read in */
+    MPI_Count                  type_size;      /* MPI datatype used for I/O's size */
+    MPI_Count                  io_size;        /* Actual number of bytes requested */
+    MPI_Count                  n;
+    bool                       rank0_bcast = false; /* If read-with-rank0-and-bcast flag was used */
 #ifdef H5FDmpio_DEBUG
     bool H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
     bool H5FD_mpio_debug_r_flag = (H5FD_mpio_debug_flags_s[(int)'r'] && H5FD_MPIO_TRACE_THIS_RANK(file));
@@ -2138,7 +2179,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
     if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
         /* Build MPI types, etc. */
         if (H5FD__mpio_vector_build_types(count, types, addrs, sizes, (H5_flexible_const_ptr_t *)bufs,
-                                          &s_addrs, &s_sizes, (H5_flexible_const_ptr_t **)&s_bufs,
+                                          &s_addrs, &s_sizes, NULL, (H5_flexible_const_ptr_t **)&s_bufs,
                                           &vector_was_sorted, &mpi_off,
                                           (H5_flexible_const_ptr_t *)&mpi_bufs_base, &size_i, &buf_type,
                                           &buf_type_created, &file_type, &file_type_created, &unused) < 0)
@@ -2226,11 +2267,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
         /* Only retrieve bytes read if this rank _actually_ participated in I/O */
         if (!rank0_bcast || (rank0_bcast && file->mpi_rank == 0)) {
             /* How many bytes were actually read? */
-#if MPI_VERSION >= 3
             if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, buf_type, &bytes_read)))
-#else
-            if (MPI_SUCCESS != (mpi_code = MPI_Get_elements(&mpi_stat, MPI_BYTE, &bytes_read)))
-#endif
                 HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
         } /* end if */
 
@@ -2243,19 +2280,11 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
          *          the bcast.  (NAF - 2021/9/15)
          */
         if (rank0_bcast)
-#if MPI_VERSION >= 3
             if (MPI_SUCCESS != MPI_Bcast(&bytes_read, 1, MPI_COUNT, 0, file->comm))
-#else
-            if (MPI_SUCCESS != MPI_Bcast(&bytes_read, 1, MPI_INT, 0, file->comm))
-#endif
                 HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", 0)
 
-                /* Get the type's size */
-#if MPI_VERSION >= 3
+        /* Get the type's size */
         if (MPI_SUCCESS != (mpi_code = MPI_Type_size_x(buf_type, &type_size)))
-#else
-        if (MPI_SUCCESS != (mpi_code = MPI_Type_size(buf_type, &type_size)))
-#endif
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_size failed", mpi_code)
 
         /* Compute the actual number of bytes requested */
@@ -2275,13 +2304,8 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
             do {
                 assert(i >= 0);
 
-#if MPI_VERSION >= 3
                 io_size    = MIN(n, (MPI_Count)s_sizes[i]);
                 bytes_read = (MPI_Count)s_sizes[i] - io_size;
-#else
-                io_size    = MIN(n, (int)s_sizes[i]);
-                bytes_read = (int)s_sizes[i] - io_size;
-#endif
                 assert(bytes_read >= 0);
 
                 memset((char *)s_bufs[i] + bytes_read, 0, (size_t)io_size);
@@ -2359,20 +2383,12 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
 
                     HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mpi_code)
 
-                    /* How many bytes were actually read? */
-#if MPI_VERSION >= 3
+                /* How many bytes were actually read? */
                 if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, MPI_BYTE, &bytes_read)))
-#else
-                if (MPI_SUCCESS != (mpi_code = MPI_Get_elements(&mpi_stat, MPI_BYTE, &bytes_read)))
-#endif
                     HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
 
-                    /* Compute the actual number of bytes requested */
-#if MPI_VERSION >= 3
+                /* Compute the actual number of bytes requested */
                 io_size = (MPI_Count)size;
-#else
-                io_size = (int)size;
-#endif
 
                 /* Check for read failure */
                 if (bytes_read < 0 || bytes_read > io_size)
@@ -2432,7 +2448,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD__mpio_write_vector
  *
- * Purpose:     The behaviour of this function dependes on the value of
+ * Purpose:     The behavior of this function depends on the value of
  *              the io_xfer_mode obtained from the context.
  *
  *              If it is H5FD_MPIO_COLLECTIVE, this is a collective
@@ -2529,17 +2545,21 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode");
 
     if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
+        uint32_t s_sizes_len;
+
         /* Build MPI types, etc. */
         if (H5FD__mpio_vector_build_types(count, types, addrs, sizes, (H5_flexible_const_ptr_t *)bufs,
-                                          &s_addrs, &s_sizes, (H5_flexible_const_ptr_t **)&s_bufs,
-                                          &vector_was_sorted, &mpi_off,
+                                          &s_addrs, &s_sizes, &s_sizes_len,
+                                          (H5_flexible_const_ptr_t **)&s_bufs, &vector_was_sorted, &mpi_off,
                                           (H5_flexible_const_ptr_t *)&mpi_bufs_base, &size_i, &buf_type,
                                           &buf_type_created, &file_type, &file_type_created, &unused) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't build MPI datatypes for I/O");
 
-        /* Compute max addr writted to */
+        /* Compute max address written to.  Note s_sizes is indexed according to the length of that array as
+         * reported by H5FD__mpio_vector_build_types(), which may be shorter if using the compressed arrays
+         * feature. */
         if (count > 0)
-            max_addr = s_addrs[count - 1] + (haddr_t)(s_sizes[count - 1]);
+            max_addr = s_addrs[count - 1] + (haddr_t)(s_sizes[s_sizes_len - 1]);
 
         /* free sorted vectors if they exist */
         if (!vector_was_sorted) {
@@ -2694,7 +2714,7 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
      */
     file->eof = HADDR_UNDEF;
 
-    /* check to see if the local eof has changed been extended, and update if so */
+    /* check to see if the local eof has been extended, and update if so */
     if (max_addr > file->local_eof)
         file->local_eof = max_addr;
 
@@ -2954,7 +2974,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD__mpio_read_selection
  *
- * Purpose:     The behaviour of this function dependes on the value of
+ * Purpose:     The behavior of this function depends on the value of
  *              the transfer mode obtained from the context.
  *
  *              If the transfer mode is H5FD_MPIO_COLLECTIVE:
@@ -3008,18 +3028,11 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
     void    *mpi_bufs_base = NULL;
     char     unused        = 0; /* Unused, except for non-NULL pointer value */
 
-#if H5_CHECK_MPI_VERSION(3, 0)
     MPI_Count bytes_read = 0; /* Number of bytes read in */
     MPI_Count type_size;      /* MPI datatype used for I/O's size */
     MPI_Count io_size;        /* Actual number of bytes requested */
     MPI_Count n;
-#else
-    int bytes_read = 0; /* Number of bytes read in */
-    int type_size;      /* MPI datatype used for I/O's size */
-    int io_size;        /* Actual number of bytes requested */
-    int n;
-#endif
-    bool rank0_bcast = false; /* If read-with-rank0-and-bcast flag was used */
+    bool      rank0_bcast = false; /* If read-with-rank0-and-bcast flag was used */
 #ifdef H5FDmpio_DEBUG
     bool H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
     bool H5FD_mpio_debug_r_flag = (H5FD_mpio_debug_flags_s[(int)'r'] && H5FD_MPIO_TRACE_THIS_RANK(file));
@@ -3097,9 +3110,9 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
              * s_bufs[] to find the smallest value, and choose that for
              * mpi_bufs_base.
              */
-            j = 0; /* guess at the index of the smallest value of s_bufs[] */
 
-            if (s_bufs[j + 1].vp != NULL) {
+            j = 0; /* guess at the index of the smallest value of s_bufs[] */
+            if ((count > 1) && (s_bufs[1].vp != NULL)) {
                 for (i = 1; i < count; i++)
                     if (s_bufs[i].vp < s_bufs[j].vp)
                         j = i;
@@ -3209,11 +3222,7 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
         /* Only retrieve bytes read if this rank _actually_ participated in I/O */
         if (!rank0_bcast || (rank0_bcast && file->mpi_rank == 0)) {
             /* How many bytes were actually read? */
-#if H5_CHECK_MPI_VERSION(3, 0)
             if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, final_mtype, &bytes_read))) {
-#else
-            if (MPI_SUCCESS != (mpi_code = MPI_Get_elements(&mpi_stat, MPI_BYTE, &bytes_read))) {
-#endif
                 if (rank0_bcast && file->mpi_rank == 0) {
                     /* If MPI_Get_elements(_x) fails for a rank 0 bcast strategy,
                      * push an error, but continue to participate in the following
@@ -3234,19 +3243,11 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
          *          of the data.  (QAK - 2019/1/2)
          */
         if (rank0_bcast)
-#if H5_CHECK_MPI_VERSION(3, 0)
             if (MPI_SUCCESS != MPI_Bcast(&bytes_read, 1, MPI_COUNT, 0, file->comm))
-#else
-            if (MPI_SUCCESS != MPI_Bcast(&bytes_read, 1, MPI_INT, 0, file->comm))
-#endif
                 HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", 0);
 
-                /* Get the type's size */
-#if H5_CHECK_MPI_VERSION(3, 0)
+        /* Get the type's size */
         if (MPI_SUCCESS != (mpi_code = MPI_Type_size_x(final_mtype, &type_size)))
-#else
-        if (MPI_SUCCESS != (mpi_code = MPI_Type_size(final_mtype, &type_size)))
-#endif
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_size failed", mpi_code);
 
         /* Compute the actual number of bytes requested */
@@ -3325,7 +3326,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD__mpio_write_selection
  *
- * Purpose:     The behaviour of this function dependes on the value of
+ * Purpose:     The behavior of this function depends on the value of
  *              the transfer mode obtained from the context.
  *
  *              If the transfer mode is H5FD_MPIO_COLLECTIVE:
@@ -3382,15 +3383,9 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
     char                    unused        = 0; /* Unused, except for non-NULL pointer value */
     H5_flexible_const_ptr_t mbb;
 
-#if H5_CHECK_MPI_VERSION(3, 0)
     MPI_Count bytes_written;
     MPI_Count type_size; /* MPI datatype used for I/O's size */
     MPI_Count io_size;   /* Actual number of bytes requested */
-#else
-    int bytes_written;
-    int type_size; /* MPI datatype used for I/O's size */
-    int io_size;   /* Actual number of bytes requested */
-#endif
 
 #ifdef H5FDmpio_DEBUG
     bool H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
@@ -3465,9 +3460,9 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
              * s_bufs[] to find the smallest value, and choose that for
              * mpi_bufs_base.
              */
-            j = 0; /* guess at the index of the smallest value of s_bufs[] */
 
-            if (s_bufs[j + 1].cvp != NULL) {
+            j = 0; /* guess at the index of the smallest value of s_bufs[] */
+            if ((count > 1) && (s_bufs[1].cvp != NULL)) {
                 for (i = 1; i < count; i++)
                     if (s_bufs[i].cvp < s_bufs[j].cvp)
                         j = i;
@@ -3559,20 +3554,12 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
                                                          H5FD_mpi_native_g, file->info)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code);
 
-            /* How many bytes were actually written */
-#if H5_CHECK_MPI_VERSION(3, 0)
+        /* How many bytes were actually written */
         if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, final_mtype, &bytes_written)))
-#else
-        if (MPI_SUCCESS != (mpi_code = MPI_Get_elements(&mpi_stat, MPI_BYTE, &bytes_written)))
-#endif
             HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code);
 
-            /* Get the type's size */
-#if H5_CHECK_MPI_VERSION(3, 0)
+        /* Get the type's size */
         if (MPI_SUCCESS != (mpi_code = MPI_Type_size_x(final_mtype, &type_size)))
-#else
-        if (MPI_SUCCESS != (mpi_code = MPI_Type_size(final_mtype, &type_size)))
-#endif
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_size failed", mpi_code);
 
         /* Compute the actual number of bytes requested */
@@ -3744,7 +3731,7 @@ H5FD__mpio_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool H5_ATTR_UN
 
         /* In principle, it is possible for the size returned by the
          * call to MPI_File_get_size() to depend on whether writes from
-         * all proceeses have completed at the time process 0 makes the
+         * all processes have completed at the time process 0 makes the
          * call.
          *
          * In practice, most (all?) truncate calls will come after a barrier
@@ -3830,11 +3817,16 @@ H5FD__mpio_delete(const char *filename, hid_t fapl_id)
 
     assert(filename);
 
-    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+    /* Initialize driver, if it's not yet */
+    if (!H5FD_mpio_init_s)
+        if (H5FD__mpio_init() < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize driver");
+
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, true)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
     assert(H5FD_MPIO == H5P_peek_driver(plist));
 
-    if (H5FD_mpi_self_initialized) {
+    if (H5FD_mpi_self_initialized_s) {
         comm = MPI_COMM_WORLD;
     }
     else {
@@ -3893,6 +3885,7 @@ done:
  *              At present, the supported op codes are:
  *
  *                  H5FD_CTL_GET_MPI_COMMUNICATOR_OPCODE
+ *                  H5FD_CTL_GET_MPI_INFO_OPCODE
  *                  H5FD_CTL_GET_MPI_RANK_OPCODE
  *                  H5FD_CTL_GET_MPI_SIZE_OPCODE
  *                  H5FD_CTL_GET_MPI_FILE_SYNC_OPCODE
@@ -3911,7 +3904,7 @@ H5FD__mpio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_AT
     H5FD_mpio_t *file      = (H5FD_mpio_t *)_file;
     herr_t       ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     assert(file);
@@ -3923,6 +3916,12 @@ H5FD__mpio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_AT
             assert(output);
             assert(*output);
             **((MPI_Comm **)output) = file->comm;
+            break;
+
+        case H5FD_CTL_GET_MPI_INFO_OPCODE:
+            assert(output);
+            assert(*output);
+            **((MPI_Info **)output) = file->info;
             break;
 
         case H5FD_CTL_GET_MPI_RANK_OPCODE:

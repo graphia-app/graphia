@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -36,6 +36,7 @@
 #include "H5private.h"   /* Generic Functions			*/
 #include "H5B2pkg.h"     /* v2 B-trees				*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5MMprivate.h" /* Memory management			*/
 
 /****************/
@@ -57,6 +58,9 @@
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Package initialization variable */
+bool H5_PKG_INIT_VAR = false;
 
 /* v2 B-tree client ID to class mapping */
 
@@ -1114,7 +1118,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B2_modify(H5B2_t *bt2, void *udata, H5B2_modify_t op, void *op_data)
+H5B2_modify(H5B2_t *bt2, void *udata, bool try, H5B2_modify_t op, void *op_data)
 {
     H5B2_hdr_t     *hdr;                 /* Pointer to the B-tree header */
     H5B2_node_ptr_t curr_node_ptr;       /* Node pointer info for current node */
@@ -1141,8 +1145,13 @@ H5B2_modify(H5B2_t *bt2, void *udata, H5B2_modify_t op, void *op_data)
     curr_node_ptr = hdr->root;
 
     /* Check for empty tree */
-    if (0 == curr_node_ptr.node_nrec)
-        HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "B-tree has no records");
+    if (0 == curr_node_ptr.node_nrec) {
+        /* Don't fail if the caller set the 'try' flag */
+        if (try)
+            HGOTO_DONE(SUCCEED);
+        else
+            HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "B-tree has no records");
+    } /* end if */
 
     /* Current depth of the tree */
     depth = hdr->depth;
@@ -1276,11 +1285,11 @@ H5B2_modify(H5B2_t *bt2, void *udata, H5B2_modify_t op, void *op_data)
             if (H5AC_unprotect(hdr->f, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node");
 
-            /* Note: don't push error on stack, leave that to next higher level,
-             *       since many times the B-tree is searched in order to determine
-             *       if an object exists in the B-tree or not.
-             */
-            HGOTO_DONE(FAIL);
+            /* Don't fail if the caller set the 'try' flag */
+            if (try)
+                HGOTO_DONE(SUCCEED);
+            else
+                HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "record not found");
         }
         else {
             /* Make callback for current record */

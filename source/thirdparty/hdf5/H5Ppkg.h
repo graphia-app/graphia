@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -58,11 +58,15 @@ typedef enum {
 /* Define structure to hold property information */
 typedef struct H5P_genprop_t {
     /* Values for this property */
-    char             *name;        /* Name of property */
-    size_t            size;        /* Size of property value */
-    void             *value;       /* Pointer to property value */
-    H5P_prop_within_t type;        /* Type of object the property is within */
-    bool              shared_name; /* Whether the name is shared or not */
+    char             *name;  /* Name of property */
+    size_t            size;  /* Size of property value */
+    void             *value; /* Pointer to property value */
+    H5P_prop_within_t type;  /* Type of object the property is within */
+    bool shared_name; /* Whether the name buffer is owned by a different property. Names are only shared when
+                         duplicating a property from a class to a list, or when duplicating a property with a
+                         shared name from one list to another. The property that owns the name frees it when
+                         that property is closed. The name is guaranteed to stay allocated as long as other
+                         properties share it due to reference counting on property lists classes. */
 
     /* Callback function pointers & info */
     H5P_prp_create_func_t  create; /* Function to call when a property is created */
@@ -104,10 +108,10 @@ struct H5P_genclass_t {
 struct H5P_genplist_t {
     H5P_genclass_t *pclass;     /* Pointer to class info */
     hid_t           plist_id;   /* Copy of the property list ID (for use in close callback) */
-    size_t          nprops;     /* Number of properties in class */
+    size_t          nprops;     /* Number of properties in this list */
     bool            class_init; /* Whether the class initialization callback finished successfully */
     H5SL_t         *del;        /* Skip list containing names of deleted properties */
-    H5SL_t         *props;      /* Skip list containing properties */
+    H5SL_t         *props;      /* Skip list containing properties modified from the parent class */
 };
 
 /* Property list/class iterator callback function pointer */
@@ -175,17 +179,25 @@ H5_DLL herr_t H5P__encode_unsigned(const void *value, void **_pp, size_t *size);
 H5_DLL herr_t H5P__encode_uint8_t(const void *value, void **_pp, size_t *size);
 H5_DLL herr_t H5P__encode_bool(const void *value, void **_pp, size_t *size);
 H5_DLL herr_t H5P__encode_double(const void *value, void **_pp, size_t *size);
+H5_DLL herr_t H5P__encode_uint64_t(const void *value, void **_pp, size_t *size);
 H5_DLL herr_t H5P__decode_hsize_t(const void **_pp, void *value);
 H5_DLL herr_t H5P__decode_size_t(const void **_pp, void *value);
 H5_DLL herr_t H5P__decode_unsigned(const void **_pp, void *value);
 H5_DLL herr_t H5P__decode_uint8_t(const void **_pp, void *value);
 H5_DLL herr_t H5P__decode_bool(const void **_pp, void *value);
 H5_DLL herr_t H5P__decode_double(const void **_pp, void *value);
+H5_DLL herr_t H5P__decode_uint64_t(const void **_pp, void *value);
 H5_DLL herr_t H5P__encode_coll_md_read_flag_t(const void *value, void **_pp, size_t *size);
 H5_DLL herr_t H5P__decode_coll_md_read_flag_t(const void **_pp, void *value);
 
 /* Private FAPL routines */
 H5_DLL herr_t H5P__facc_set_def_driver(void);
+
+/* Private FCPL routines */
+H5_DLL herr_t H5P__get_file_space_strategy(H5P_genplist_t *plist, H5F_fspace_strategy_t *strategy,
+                                           bool *persist, hsize_t *threshold);
+H5_DLL herr_t H5P__set_file_space_strategy(H5P_genplist_t *plist, H5F_fspace_strategy_t strategy,
+                                           bool persist, hsize_t threshold);
 
 /* Private OCPL routines */
 H5_DLL herr_t H5P__get_filter(const struct H5Z_filter_info_t *filter, unsigned int *flags, size_t *cd_nelmts,

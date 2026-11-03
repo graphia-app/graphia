@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -20,7 +20,6 @@
 /****************/
 
 #include "H5Tmodule.h" /* This source code file is part of the H5T module */
-#define H5F_FRIEND     /*suppress error about including H5Fpkg   */
 
 /***********/
 /* Headers */
@@ -28,7 +27,6 @@
 #include "H5private.h"   /* Generic Functions    */
 #include "H5CXprivate.h" /* API Contexts         */
 #include "H5Eprivate.h"  /* Error handling       */
-#include "H5Fpkg.h"      /* File                 */
 #include "H5Iprivate.h"  /* IDs                  */
 #include "H5MMprivate.h" /* Memory management    */
 #include "H5Tpkg.h"      /* Datatypes            */
@@ -127,14 +125,13 @@ static const H5T_vlen_class_t H5T_vlen_disk_g = {
 };
 
 /*-------------------------------------------------------------------------
- * Function:	H5Tvlen_create
+ * Function:    H5Tvlen_create
  *
- * Purpose:	Create a new variable-length datatype based on the specified
- *		BASE_TYPE.
+ * Purpose:     Create a new variable-length datatype based on the
+ *              specified base datatype ID.
  *
- * Return:	Success:	ID of new VL datatype
- *
- *		Failure:	Negative
+ * Return:      Success:    ID of new VL datatype
+ *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
  */
@@ -145,34 +142,32 @@ H5Tvlen_create(hid_t base_id)
     H5T_t *dt   = NULL; /*new datatype	*/
     hid_t  ret_value;   /*return value			*/
 
-    FUNC_ENTER_API(FAIL)
-    H5TRACE1("i", "i", base_id);
+    FUNC_ENTER_API(H5I_INVALID_HID)
 
     /* Check args */
     if (NULL == (base = (H5T_t *)H5I_object_verify(base_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not an valid base datatype");
 
     /* Create up VL datatype */
     if ((dt = H5T__vlen_create(base)) == NULL)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid VL location");
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5I_INVALID_HID, "invalid VL location");
 
     /* Register the type */
     if ((ret_value = H5I_register(H5I_DATATYPE, dt, true)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype");
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register datatype");
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tvlen_create() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5T__vlen_create
+ * Function:    H5T__vlen_create
  *
- * Purpose:	Create a new variable-length datatype based on the specified
- *		BASE_TYPE.
+ * Purpose:     Create a new variable-length datatype based on the
+ *              specified base datatype.
  *
- * Return:	Success:	new VL datatype
- *
- *		Failure:	NULL
+ * Return:      Success:    new VL datatype
+ *              Failure:    NULL
  *
  *-------------------------------------------------------------------------
  */
@@ -334,7 +329,7 @@ H5T__vlen_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
                 /* MAXLOC is invalid */
             default:
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADRANGE, FAIL, "invalid VL datatype location");
-        } /* end switch */ /*lint !e788 All appropriate cases are covered */
+        } /* end switch */
 
         /* Indicate that the location changed */
         ret_value = true;
@@ -503,9 +498,15 @@ H5T__vlen_mem_seq_write(H5VL_object_t H5_ATTR_UNUSED *file, const H5T_vlen_alloc
     if (seq_len) {
         size_t len = seq_len * base_size; /* Sequence size */
 
-        /* Use the user's memory allocation routine is one is defined */
+        /* Use the user's memory allocation routine if one is defined */
         if (vl_alloc_info->alloc_func != NULL) {
-            if (NULL == (vl.p = (vl_alloc_info->alloc_func)(len, vl_alloc_info->alloc_info)))
+            /* Prepare & restore library for user callback */
+            H5_BEFORE_USER_CB(FAIL)
+                {
+                    vl.p = (vl_alloc_info->alloc_func)(len, vl_alloc_info->alloc_info);
+                }
+            H5_AFTER_USER_CB(FAIL)
+            if (NULL == vl.p)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL,
                             "application memory allocation routine failed for VL data");
         }    /* end if */
@@ -550,7 +551,7 @@ H5T__vlen_mem_str_getlen(H5VL_object_t H5_ATTR_UNUSED *file, const void *_vl, si
     /* Copy to ensure correct alignment */
     H5MM_memcpy(&s, _vl, sizeof(char *));
 
-    *len = HDstrlen(s);
+    *len = strlen(s);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5T__vlen_mem_str_getlen() */
@@ -622,7 +623,7 @@ H5T__vlen_mem_str_setnull(H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, void H5
     /* Set pointer in user's buffer with memcpy, to avoid alignment issues */
     H5MM_memcpy(_vl, &t, sizeof(char *));
 
-    FUNC_LEAVE_NOAPI(SUCCEED) /*lint !e429 The pointer in 't' has been copied */
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5T__vlen_mem_str_setnull() */
 
 /*-------------------------------------------------------------------------
@@ -677,8 +678,13 @@ H5T__vlen_mem_str_write(H5VL_object_t H5_ATTR_UNUSED *file, const H5T_vlen_alloc
 
     /* Use the user's memory allocation routine if one is defined */
     if (vl_alloc_info->alloc_func != NULL) {
-        if (NULL ==
-            (t = (char *)(vl_alloc_info->alloc_func)((seq_len + 1) * base_size, vl_alloc_info->alloc_info)))
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB(FAIL)
+            {
+                t = (vl_alloc_info->alloc_func)((seq_len + 1) * base_size, vl_alloc_info->alloc_info);
+            }
+        H5_AFTER_USER_CB(FAIL)
+        if (NULL == t)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL,
                         "application memory allocation routine failed for VL data");
     }    /* end if */
@@ -695,7 +701,7 @@ H5T__vlen_mem_str_write(H5VL_object_t H5_ATTR_UNUSED *file, const H5T_vlen_alloc
     H5MM_memcpy(_vl, &t, sizeof(char *));
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value) /*lint !e429 The pointer in 't' has been copied */
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__vlen_mem_str_write() */
 
 /*-------------------------------------------------------------------------
@@ -937,7 +943,7 @@ H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info
     void       *free_info;           /* Free info */
     herr_t      ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     assert(elem);
@@ -951,7 +957,7 @@ H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info
     switch (dt->shared->type) {
         case H5T_ARRAY:
             /* Recurse on each element, if the array's base type is array, VL, enum or compound */
-            if (H5T_IS_COMPLEX(dt->shared->parent->shared->type)) {
+            if (H5T_IS_COMPOSITE(dt->shared->parent->shared->type)) {
                 void *off; /* offset of field */
 
                 /* Calculate the offset member and recurse on it */
@@ -967,7 +973,7 @@ H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info
             /* Check each field and recurse on VL, compound, enum or array ones */
             for (u = 0; u < dt->shared->u.compnd.nmembs; u++) {
                 /* Recurse if it's VL, compound, enum or array */
-                if (H5T_IS_COMPLEX(dt->shared->u.compnd.memb[u].type->shared->type)) {
+                if (H5T_IS_COMPOSITE(dt->shared->u.compnd.memb[u].type->shared->type)) {
                     void *off; /* offset of field */
 
                     /* Calculate the offset member and recurse on it */
@@ -986,7 +992,7 @@ H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info
                 /* Check if there is anything actually in this sequence */
                 if (vl->len != 0) {
                     /* Recurse if it's VL, array, enum or compound */
-                    if (H5T_IS_COMPLEX(dt->shared->parent->shared->type)) {
+                    if (H5T_IS_COMPOSITE(dt->shared->parent->shared->type)) {
                         void *off; /* offset of field */
 
                         /* Calculate the offset of each array element and recurse on it */
@@ -1025,6 +1031,7 @@ H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info
         case H5T_BITFIELD:
         case H5T_OPAQUE:
         case H5T_ENUM:
+        case H5T_COMPLEX:
             break;
 
         /* Should never have these values */
@@ -1035,7 +1042,7 @@ H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info
             HGOTO_ERROR(H5E_DATATYPE, H5E_BADRANGE, FAIL, "invalid VL datatype class");
             break;
 
-    } /* end switch */ /*lint !e788 All appropriate cases are covered */
+    } /* end switch */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1055,7 +1062,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_vlen_reclaim_elmt(void *elem, H5T_t *dt)
+H5T_vlen_reclaim_elmt(void *elem, const H5T_t *dt)
 {
     H5T_vlen_alloc_info_t vl_alloc_info;       /* VL allocation info */
     herr_t                ret_value = SUCCEED; /* return value */

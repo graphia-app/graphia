@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -25,7 +25,7 @@
 
 #include "H5ACpublic.h" /*public prototypes            */
 
-/* Pivate headers needed by this header */
+/* Private headers needed by this header */
 #include "H5private.h"   /* Generic Functions            */
 #include "H5Cprivate.h"  /* Cache                */
 #include "H5Fprivate.h"  /* File access                */
@@ -312,14 +312,12 @@ typedef struct H5AC_proxy_entry_t {
  */
 
 #define H5AC__NO_FLAGS_SET                H5C__NO_FLAGS_SET
-#define H5AC__SET_FLUSH_MARKER_FLAG       H5C__SET_FLUSH_MARKER_FLAG
 #define H5AC__DELETED_FLAG                H5C__DELETED_FLAG
 #define H5AC__DIRTIED_FLAG                H5C__DIRTIED_FLAG
 #define H5AC__PIN_ENTRY_FLAG              H5C__PIN_ENTRY_FLAG
 #define H5AC__UNPIN_ENTRY_FLAG            H5C__UNPIN_ENTRY_FLAG
 #define H5AC__FLUSH_INVALIDATE_FLAG       H5C__FLUSH_INVALIDATE_FLAG
 #define H5AC__FLUSH_CLEAR_ONLY_FLAG       H5C__FLUSH_CLEAR_ONLY_FLAG
-#define H5AC__FLUSH_MARKED_ENTRIES_FLAG   H5C__FLUSH_MARKED_ENTRIES_FLAG
 #define H5AC__FLUSH_IGNORE_PROTECTED_FLAG H5C__FLUSH_IGNORE_PROTECTED_FLAG
 #define H5AC__READ_ONLY_FLAG              H5C__READ_ONLY_FLAG
 #define H5AC__FREE_FILE_SPACE_FLAG        H5C__FREE_FILE_SPACE_FLAG

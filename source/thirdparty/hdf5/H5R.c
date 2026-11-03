@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -28,7 +28,6 @@
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5ESprivate.h" /* Event Sets                               */
 #include "H5Iprivate.h"  /* IDs                                      */
-#include "H5MMprivate.h" /* Memory management                        */
 #include "H5Rpkg.h"      /* References                               */
 #include "H5Sprivate.h"  /* Dataspaces                               */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
@@ -90,7 +89,6 @@ H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id, H5R_ref_t *ref_p
     herr_t                      ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "i*si*Rr", loc_id, name, oapl_id, ref_ptr);
 
     /* Check args */
     if (ref_ptr == NULL)
@@ -187,7 +185,6 @@ H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id, hid_t oapl_id, 
     herr_t                      ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*sii*Rr", loc_id, name, space_id, oapl_id, ref_ptr);
 
     /* Check args */
     if (ref_ptr == NULL)
@@ -287,7 +284,6 @@ H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_name, hid_t oapl
     herr_t                      ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*s*si*Rr", loc_id, name, attr_name, oapl_id, ref_ptr);
 
     /* Check args */
     if (ref_ptr == NULL)
@@ -376,7 +372,6 @@ H5Rdestroy(H5R_ref_t *ref_ptr)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "*Rr", ref_ptr);
 
     /* Check args */
     if (NULL == ref_ptr)
@@ -409,7 +404,6 @@ H5Rget_type(const H5R_ref_t *ref_ptr)
     H5R_type_t ret_value; /* Return value */
 
     FUNC_ENTER_API(H5R_BADTYPE)
-    H5TRACE1("Rt", "*Rr", ref_ptr);
 
     /* Check args */
     if (NULL == ref_ptr)
@@ -439,14 +433,13 @@ H5Requal(const H5R_ref_t *ref1_ptr, const H5R_ref_t *ref2_ptr)
     htri_t ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("t", "*Rr*Rr", ref1_ptr, ref2_ptr);
 
     /* Check args */
     if (!ref1_ptr || !ref2_ptr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer");
 
     /* Compare references */
-    if ((ret_value = H5R__equal((const H5R_ref_priv_t *)ref2_ptr, (const H5R_ref_priv_t *)ref2_ptr)) < 0)
+    if ((ret_value = H5R__equal((const H5R_ref_priv_t *)ref1_ptr, (const H5R_ref_priv_t *)ref2_ptr)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCOMPARE, FAIL, "cannot compare references");
 
 done:
@@ -468,7 +461,6 @@ H5Rcopy(const H5R_ref_t *src_ref_ptr, H5R_ref_t *dst_ref_ptr)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "*Rr*Rr", src_ref_ptr, dst_ref_ptr);
 
     /* Check args */
     if (NULL == src_ref_ptr || NULL == dst_ref_ptr)
@@ -543,7 +535,7 @@ H5R__open_object_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, vo
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object by token");
 
     /* Register object */
-    if ((ret_value = H5VL_register(opened_type, opened_obj, (*vol_obj_ptr)->connector, true)) < 0)
+    if ((ret_value = H5VL_register(opened_type, opened_obj, H5VL_OBJ_CONNECTOR(*vol_obj_ptr), true)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register object handle");
 
 done:
@@ -566,7 +558,6 @@ H5Ropen_object(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id)
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE3("i", "*Rrii", ref_ptr, rapl_id, oapl_id);
 
     /* Open the dataset synchronously */
     if ((ret_value = H5R__open_object_api_common(ref_ptr, rapl_id, oapl_id, NULL, NULL)) < 0)
@@ -595,7 +586,6 @@ H5Ropen_object_async(const char *app_file, const char *app_func, unsigned app_li
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE7("i", "*s*sIu*Rriii", app_file, app_func, app_line, ref_ptr, rapl_id, oapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -608,7 +598,7 @@ H5Ropen_object_async(const char *app_file, const char *app_func, unsigned app_li
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         /* clang-format off */
-        if (H5ES_insert(es_id, vol_obj->connector, token,
+        if (H5ES_insert(es_id, H5VL_OBJ_CONNECTOR(vol_obj), token,
                         H5ARG_TRACE7(__func__, "*s*sIu*Rriii", app_file, app_func, app_line, ref_ptr, rapl_id, oapl_id, es_id)) < 0) {
             /* clang-format on */
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
@@ -682,7 +672,7 @@ H5R__open_region_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, vo
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object by token");
 
     /* Register object */
-    if ((opened_obj_id = H5VL_register(opened_type, opened_obj, (*vol_obj_ptr)->connector, false)) < 0)
+    if ((opened_obj_id = H5VL_register(opened_type, opened_obj, H5VL_OBJ_CONNECTOR(*vol_obj_ptr), false)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register object handle");
 
     /* Get VOL object object */
@@ -734,7 +724,6 @@ H5Ropen_region(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id)
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE3("i", "*Rrii", ref_ptr, rapl_id, oapl_id);
 
     /* Open the region synchronously */
     if ((ret_value = H5R__open_region_api_common(ref_ptr, rapl_id, oapl_id, NULL, NULL)) < 0)
@@ -763,7 +752,6 @@ H5Ropen_region_async(const char *app_file, const char *app_func, unsigned app_li
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE7("i", "*s*sIu*Rriii", app_file, app_func, app_line, ref_ptr, rapl_id, oapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -776,7 +764,7 @@ H5Ropen_region_async(const char *app_file, const char *app_func, unsigned app_li
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         /* clang-format off */
-        if (H5ES_insert(es_id, vol_obj->connector, token,
+        if (H5ES_insert(es_id, H5VL_OBJ_CONNECTOR(vol_obj), token,
                         H5ARG_TRACE7(__func__, "*s*sIu*Rriii", app_file, app_func, app_line, ref_ptr, rapl_id, oapl_id, es_id)) < 0) {
             /* clang-format on */
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
@@ -852,7 +840,7 @@ H5R__open_attr_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id, void
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object by token");
 
     /* Register object */
-    if ((opened_obj_id = H5VL_register(opened_type, opened_obj, (*vol_obj_ptr)->connector, false)) < 0)
+    if ((opened_obj_id = H5VL_register(opened_type, opened_obj, H5VL_OBJ_CONNECTOR(*vol_obj_ptr), false)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register object handle");
 
     /* Verify access property list and set up collective metadata if appropriate */
@@ -875,7 +863,7 @@ H5R__open_attr_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id, void
                     H5R_REF_ATTRNAME((const H5R_ref_priv_t *)ref_ptr));
 
     /* Register the attribute and get an ID for it */
-    if ((ret_value = H5VL_register(H5I_ATTR, opened_attr, (*vol_obj_ptr)->connector, true)) < 0)
+    if ((ret_value = H5VL_register(H5I_ATTR, opened_attr, H5VL_OBJ_CONNECTOR(*vol_obj_ptr), true)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register attribute handle");
 
 done:
@@ -904,7 +892,6 @@ H5Ropen_attr(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id)
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE3("i", "*Rrii", ref_ptr, rapl_id, aapl_id);
 
     /* Open the attribute synchronously */
     if ((ret_value = H5R__open_attr_api_common(ref_ptr, rapl_id, aapl_id, NULL, NULL)) < 0)
@@ -933,7 +920,6 @@ H5Ropen_attr_async(const char *app_file, const char *app_func, unsigned app_line
     hid_t          ret_value;                   /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE7("i", "*s*sIu*Rriii", app_file, app_func, app_line, ref_ptr, rapl_id, aapl_id, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -946,7 +932,7 @@ H5Ropen_attr_async(const char *app_file, const char *app_func, unsigned app_line
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         /* clang-format off */
-        if (H5ES_insert(es_id, vol_obj->connector, token,
+        if (H5ES_insert(es_id, H5VL_OBJ_CONNECTOR(vol_obj), token,
                         H5ARG_TRACE7(__func__, "*s*sIu*Rriii", app_file, app_func, app_line, ref_ptr, rapl_id, aapl_id, es_id)) < 0) {
             /* clang-format on */
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
@@ -980,7 +966,6 @@ H5Rget_obj_type3(H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *obj_type /*out*/
     herr_t                 ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "*Rrix", ref_ptr, rapl_id, obj_type);
 
     /* Check args */
     if (ref_ptr == NULL)
@@ -1028,8 +1013,23 @@ done:
  * Purpose:     Given a reference to some object, determine a file name of the
  *              object located into.
  *
- * Return:      Non-negative length of the path on success / -1 on failure
+ * Description:
+ *              When 'buf' is non-NULL:
+ *                - if 'size' > 0: writes up to 'size' bytes into the buffer
+ *                  (including null terminator) and returns the actual length
+ *                  of the name (excluding null terminator).
+ *                - if 'size' == 0: treats the call as length query, does not
+ *                  write anything to the buffer (not even a null terminator), and
+ *                  returns the actual length of the name (excluding null terminator).
  *
+ *              When 'buf' is NULL: does not write anything regardless of 'size'
+ *              and returns the actual length of the name (excluding null terminator).
+ *
+ *              On error, the buffer is unchanged and the function returns
+ *              a negative value.
+ *
+ * Return:      Success:    The length of the name (excluding null terminator)
+ *              Failure:    Negative
  *-------------------------------------------------------------------------
  */
 ssize_t
@@ -1039,7 +1039,6 @@ H5Rget_file_name(const H5R_ref_t *ref_ptr, char *buf /*out*/, size_t size)
     ssize_t ret_value; /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE3("Zs", "*Rrxz", ref_ptr, buf, size);
 
     /* Check args */
     if (ref_ptr == NULL)
@@ -1047,6 +1046,10 @@ H5Rget_file_name(const H5R_ref_t *ref_ptr, char *buf /*out*/, size_t size)
     if (H5R__get_type((const H5R_ref_priv_t *)ref_ptr) <= H5R_BADTYPE ||
         H5R__get_type((const H5R_ref_priv_t *)ref_ptr) >= H5R_MAXTYPE)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "invalid reference type");
+
+    /* If buffer size is zero, treat as length query and do not write, even a '\0' */
+    if (buf && size == 0)
+        buf = NULL;
 
     /* Get name */
     if (H5I_INVALID_HID == (loc_id = H5R__get_loc_id((const H5R_ref_priv_t *)ref_ptr))) {
@@ -1089,6 +1092,21 @@ done:
  * Purpose:     Given a reference to some object, determine a path to the
  *              object referenced in the file.
  *
+ * Description:
+ *              When 'buf' is non-NULL:
+ *                - if 'size' > 0: writes up to 'size' bytes into the buffer
+ *                  (including null terminator) and returns the actual length
+ *                  of the name (excluding null terminator).
+ *                - if 'size' == 0: treats the call as length query, does not
+ *                  write anything to the buffer (not even a null terminator), and
+ *                  returns the actual length of the name (excluding null terminator).
+ *
+ *              When 'buf' is NULL: does not write anything regardless of 'size'
+ *              and returns the actual length of the name (excluding null terminator).
+ *
+ *              On error, the buffer is unchanged and the function returns
+ *              a negative value.
+ *
  * Return:      Non-negative length of the path on success / -1 on failure
  *
  *-------------------------------------------------------------------------
@@ -1105,7 +1123,6 @@ H5Rget_obj_name(H5R_ref_t *ref_ptr, hid_t rapl_id, char *buf /*out*/, size_t siz
     ssize_t                ret_value    = 0;   /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE4("Zs", "*Rrixz", ref_ptr, rapl_id, buf, size);
 
     /* Check args */
     if (ref_ptr == NULL)
@@ -1115,6 +1132,10 @@ H5Rget_obj_name(H5R_ref_t *ref_ptr, hid_t rapl_id, char *buf /*out*/, size_t siz
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "invalid reference type");
     if (rapl_id < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "not a property list");
+
+    /* If buffer size is zero, treat as length query and do not write, even a '\0' */
+    if (buf && size == 0)
+        buf = NULL;
 
     /* Retrieve loc_id from reference */
     if (H5I_INVALID_HID == (loc_id = H5R__get_loc_id((const H5R_ref_priv_t *)ref_ptr)))
@@ -1157,6 +1178,21 @@ done:
  *
  * Purpose:     Given a reference to some attribute, determine its name.
  *
+ * Description:
+ *              When 'buf' is non-NULL:
+ *                - if 'size' > 0: writes up to 'size' bytes into the buffer
+ *                  (including null terminator) and returns the actual length
+ *                  of the name (excluding null terminator).
+ *                - if 'size' == 0: treats the call as length query, does not
+ *                  write anything to the buffer (not even a null terminator), and
+ *                  returns the actual length of the name (excluding null terminator).
+ *
+ *              When 'buf' is NULL: does not write anything regardless of 'size'
+ *              and returns the actual length of the name (excluding null terminator).
+ *
+ *              On error, the buffer is unchanged and the function returns
+ *              a negative value.
+ *
  * Return:      Non-negative length of the path on success / -1 on failure
  *
  *-------------------------------------------------------------------------
@@ -1167,13 +1203,16 @@ H5Rget_attr_name(const H5R_ref_t *ref_ptr, char *buf /*out*/, size_t size)
     ssize_t ret_value; /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE3("Zs", "*Rrxz", ref_ptr, buf, size);
 
     /* Check args */
     if (ref_ptr == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "invalid reference pointer");
     if (H5R__get_type((const H5R_ref_priv_t *)ref_ptr) != H5R_ATTR)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "invalid reference type");
+
+    /* If buffer size is zero, treat as length query and do not write, even a '\0' */
+    if (buf && size == 0)
+        buf = NULL;
 
     /* Get attribute name */
     if ((ret_value = H5R__get_attr_name((const H5R_ref_priv_t *)ref_ptr, buf, size)) < 0)

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -32,7 +32,6 @@
 #include "H5Dprivate.h"  /* Datasets				*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5Fprivate.h"  /* File access				*/
-#include "H5FLprivate.h" /* Free Lists                           */
 #include "H5Gpkg.h"      /* Groups		  		*/
 #include "H5Iprivate.h"  /* IDs			  		*/
 #include "H5Lprivate.h"  /* Links                                */
@@ -116,7 +115,7 @@ H5G__component(const char *name, size_t *size_p)
     while ('/' == *name)
         name++;
     if (size_p)
-        *size_p = HDstrcspn(name, "/");
+        *size_p = strcspn(name, "/");
 
     FUNC_LEAVE_NOAPI(name)
 } /* end H5G__component() */
@@ -135,10 +134,10 @@ H5G__component(const char *name, size_t *size_p)
 char *
 H5G_normalize(const char *name)
 {
-    char    *norm;             /* Pointer to the normalized string */
-    size_t   s, d;             /* Positions within the strings */
-    unsigned last_slash;       /* Flag to indicate last character was a slash */
-    char    *ret_value = NULL; /* Return value */
+    char  *norm;             /* Pointer to the normalized string */
+    size_t s, d;             /* Positions within the strings */
+    bool   last_slash;       /* Flag to indicate last character was a slash */
+    char  *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -147,22 +146,22 @@ H5G_normalize(const char *name)
 
     /* Duplicate the name, to return */
     if (NULL == (norm = H5MM_strdup(name)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for normalized string");
+        HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, NULL, "memory allocation failed for normalized string");
 
     /* Walk through the characters, omitting duplicated '/'s */
     s = d      = 0;
-    last_slash = 0;
+    last_slash = false;
     while (name[s] != '\0') {
         if (name[s] == '/')
             if (last_slash)
                 ;
             else {
                 norm[d++]  = name[s];
-                last_slash = 1;
+                last_slash = true;
             } /* end else */
         else {
             norm[d++]  = name[s];
-            last_slash = 0;
+            last_slash = false;
         } /* end else */
         s++;
     } /* end while */
@@ -200,24 +199,30 @@ H5G__common_path(const H5RS_str_t *fullpath_r, const H5RS_str_t *prefix_r)
     size_t      nchars1, nchars2;  /* Number of characters in components */
     htri_t      ret_value = false; /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     /* Get component of each name */
-    fullpath = H5RS_get_str(fullpath_r);
-    assert(fullpath);
-    fullpath = H5G__component(fullpath, &nchars1);
-    assert(fullpath);
-    prefix = H5RS_get_str(prefix_r);
-    assert(prefix);
-    prefix = H5G__component(prefix, &nchars2);
-    assert(prefix);
+    if (NULL == (fullpath = H5RS_get_str(fullpath_r)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve full path");
+    nchars1 = SIZE_MAX;
+    if (NULL == (fullpath = H5G__component(fullpath, &nchars1)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve pointer to path component");
+    if (SIZE_MAX == nchars1)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve component length");
+    if (NULL == (prefix = H5RS_get_str(prefix_r)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve path prefix");
+    nchars2 = SIZE_MAX;
+    if (NULL == (prefix = H5G__component(prefix, &nchars2)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve pointer to path component");
+    if (SIZE_MAX == nchars2)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve component length");
 
     /* Check if we have a real string for each component */
     while (*fullpath && *prefix) {
         /* Check that the components we found are the same length */
         if (nchars1 == nchars2) {
             /* Check that the two components are equal */
-            if (HDstrncmp(fullpath, prefix, nchars1) == 0) {
+            if (strncmp(fullpath, prefix, nchars1) == 0) {
                 /* Advance the pointers in the names */
                 fullpath += nchars1;
                 prefix += nchars2;
@@ -227,6 +232,15 @@ H5G__common_path(const H5RS_str_t *fullpath_r, const H5RS_str_t *prefix_r)
                 assert(fullpath);
                 prefix = H5G__component(prefix, &nchars2);
                 assert(prefix);
+                if (NULL == (fullpath = H5G__component(fullpath, &nchars1)))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve pointer to path component");
+                if (SIZE_MAX == nchars1)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve component length");
+                nchars2 = SIZE_MAX;
+                if (NULL == (prefix = H5G__component(prefix, &nchars2)))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve pointer to path component");
+                if (SIZE_MAX == nchars2)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve component length");
             } /* end if */
             else
                 HGOTO_DONE(false);
@@ -266,7 +280,7 @@ H5G__build_fullpath(const char *prefix, const char *name)
     /* Create full path */
     if (NULL == (ret_value = H5RS_create(prefix)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, NULL, "can't create ref-counted string");
-    if (prefix[HDstrlen(prefix) - 1] != '/')
+    if (prefix[strlen(prefix) - 1] != '/')
         H5RS_aputc(ret_value, '/'); /* Add separator, if the prefix doesn't end in one */
     H5RS_acat(ret_value, name);
 
@@ -418,9 +432,9 @@ H5G_name_copy(H5G_name_t *dst, const H5G_name_t *src, H5_copy_depth_t depth)
         dst->user_path_r = H5RS_dup(src->user_path_r);
     }
     else {
-        H5_GCC_CLANG_DIAG_OFF("cast-qual")
+        H5_WARN_CAST_AWAY_CONST_OFF
         H5G_name_reset((H5G_name_t *)src);
-        H5_GCC_CLANG_DIAG_ON("cast-qual")
+        H5_WARN_CAST_AWAY_CONST_ON
     }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -455,7 +469,7 @@ H5G_get_name(const H5G_loc_t *loc, char *name /*out*/, size_t size, size_t *name
         len = H5RS_len(loc->path->user_path_r);
 
         if (name) {
-            HDstrncpy(name, H5RS_get_str(loc->path->user_path_r), MIN((len + 1), size));
+            strncpy(name, H5RS_get_str(loc->path->user_path_r), MIN((len + 1), size));
             if (len >= size)
                 name[size - 1] = '\0';
         } /* end if */
@@ -570,8 +584,8 @@ H5G__name_move_path(H5RS_str_t **path_r_ptr, const char *full_suffix, const char
     assert(path);
 
     /* Check if path needs to be updated */
-    full_suffix_len = HDstrlen(full_suffix);
-    path_len        = HDstrlen(path);
+    full_suffix_len = strlen(full_suffix);
+    path_len        = strlen(path);
     if (full_suffix_len < path_len) {
         const char *dst_suffix;        /* Destination suffix that changes */
         const char *src_suffix;        /* Source suffix that changes */
@@ -603,7 +617,7 @@ H5G__name_move_path(H5RS_str_t **path_r_ptr, const char *full_suffix, const char
 
         /* Compute path prefix before src suffix */
         path_prefix2     = path;
-        path_prefix2_len = path_prefix_len - HDstrlen(src_suffix);
+        path_prefix2_len = path_prefix_len - strlen(src_suffix);
 
         /* Allocate new ref-counted string */
         if (NULL == (rs = H5RS_create(NULL)))
@@ -781,7 +795,7 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
                 src_path  = H5RS_get_str(names->src_full_path_r);
 
                 /* Construct full path suffix */
-                full_suffix = full_path + HDstrlen(src_path);
+                full_suffix = full_path + strlen(src_path);
 
                 /* Create new full path suffix */
                 if (NULL == (rs = H5RS_create(full_suffix)))
@@ -848,7 +862,7 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
                 assert(*dst_path == '/');
 
                 /* Get pointer to "full suffix" */
-                full_suffix = full_path + HDstrlen(src_path);
+                full_suffix = full_path + strlen(src_path);
 
                 /* Update the user path, if one exists */
                 if (obj_path->user_path_r)
@@ -1141,16 +1155,16 @@ H5G_get_name_by_addr(H5F_t *f, const H5O_loc_t *loc, char *name, size_t size, si
     /* Check for finding the object */
     if (found_obj) {
         /* Set the length of the full path */
-        len = HDstrlen(udata.path) + 1; /* Length of path + 1 (for "/") */
+        len = strlen(udata.path) + 1; /* Length of path + 1 (for "/") */
 
         /* If there's a buffer provided, copy into it, up to the limit of its size */
         if (name) {
             /* Copy the initial path separator */
-            HDstrncpy(name, "/", (size_t)2);
+            strncpy(name, "/", (size_t)2);
 
             /* Append the rest of the path */
             /* (less one character, for the initial path separator) */
-            HDstrncat(name, udata.path, (size - 2));
+            strncat(name, udata.path, (size - 2));
             if (len >= size)
                 name[size - 1] = '\0';
         } /* end if */

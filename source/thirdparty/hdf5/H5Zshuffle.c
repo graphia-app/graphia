@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -64,7 +64,7 @@ H5Z__set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSED space_
     FUNC_ENTER_PACKAGE
 
     /* Get the plist structure */
-    if (NULL == (dcpl_plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE)))
+    if (NULL == (dcpl_plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get datatype */
@@ -208,7 +208,7 @@ H5Z__filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
             /* Add leftover to the end of data */
             if (leftover > 0) {
                 /* Adjust back to end of shuffled bytes */
-                _dest -= (bytesoftype - 1); /*lint !e794 _dest is initialized */
+                _dest -= (bytesoftype - 1);
                 H5MM_memcpy((void *)_dest, (void *)_src, leftover);
             }
         } /* end if */
@@ -279,7 +279,7 @@ H5Z__filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
             /* Add leftover to the end of data */
             if (leftover > 0) {
                 /* Adjust back to end of shuffled bytes */
-                _src -= (bytesoftype - 1); /*lint !e794 _src is initialized */
+                _src -= (bytesoftype - 1);
                 H5MM_memcpy((void *)_dest, (void *)_src, leftover);
             }
         } /* end else */

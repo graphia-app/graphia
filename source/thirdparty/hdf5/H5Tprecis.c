@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -47,7 +47,6 @@ H5Tget_precision(hid_t type_id)
     size_t ret_value;
 
     FUNC_ENTER_API(0)
-    H5TRACE1("z", "i", type_id);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -124,7 +123,6 @@ H5Tset_precision(hid_t type_id, size_t prec)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iz", type_id, prec);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -195,6 +193,8 @@ H5T__set_precision(const H5T_t *dt, size_t prec)
         /* Adjust size of datatype appropriately */
         if (dt->shared->type == H5T_ARRAY)
             dt->shared->size = dt->shared->parent->shared->size * dt->shared->u.array.nelem;
+        else if (dt->shared->type == H5T_COMPLEX)
+            dt->shared->size = 2 * dt->shared->parent->shared->size;
         else if (dt->shared->type != H5T_VLEN)
             dt->shared->size = dt->shared->parent->shared->size;
     }
@@ -239,6 +239,7 @@ H5T__set_precision(const H5T_t *dt, size_t prec)
                 case H5T_ENUM:
                 case H5T_VLEN:
                 case H5T_ARRAY:
+                case H5T_COMPLEX:
                 case H5T_NCLASSES:
                 default:
                     HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "operation not defined for datatype class");

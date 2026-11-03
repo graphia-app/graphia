@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -17,6 +17,7 @@
 #include "H5private.h"   /* Generic Functions			*/
 #include "H5Apkg.h"      /* Attributes				*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5MMprivate.h" /* Memory management			*/
 #include "H5Opkg.h"      /* Object headers			*/
 #include "H5Spkg.h"      /* Dataspaces				*/
@@ -166,6 +167,11 @@ H5O__attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags, u
     if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     UINT16DECODE(p, name_len); /* Including null */
+
+    /* Verify that retrieved name length (including null byte) is valid */
+    if (name_len <= 1)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "decoded name length is invalid");
+
     if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     UINT16DECODE(p, attr->shared->dt_size);
@@ -189,11 +195,12 @@ H5O__attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags, u
      */
     if (H5_IS_BUFFER_OVERFLOW(p, name_len, p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+
     if (NULL == (attr->shared->name = H5MM_strndup((const char *)p, name_len - 1)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Make an attempt to detect corrupted name or name length - HDFFV-10588 */
-    if (name_len != (HDstrnlen(attr->shared->name, name_len) + 1))
+    if (name_len != (strnlen(attr->shared->name, name_len) + 1))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "attribute name has different length than stored length");
 
     /* Determine pointer movement and check if it's valid */
@@ -360,7 +367,7 @@ H5O__attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
      * encoded lengths are exact but we pad each part except the data to be a
      * multiple of eight bytes (in the first version).
      */
-    name_len = HDstrlen(attr->shared->name) + 1;
+    name_len = strlen(attr->shared->name) + 1;
     UINT16ENCODE(p, name_len);
     UINT16ENCODE(p, attr->shared->dt_size);
     UINT16ENCODE(p, attr->shared->ds_size);
@@ -380,7 +387,7 @@ H5O__attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
         p += name_len;
 
     /* encode the attribute datatype */
-    if ((H5O_MSG_DTYPE->encode)(f, false, p, attr->shared->dt) < 0)
+    if ((H5O_MSG_DTYPE->encode)(f, false, SIZE_MAX, p, attr->shared->dt) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode attribute datatype");
 
     if (attr->shared->version < H5O_ATTR_VERSION_2) {
@@ -391,7 +398,7 @@ H5O__attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
         p += attr->shared->dt_size;
 
     /* encode the attribute dataspace */
-    if ((H5O_MSG_SDSPACE->encode)(f, false, p, &(attr->shared->ds->extent)) < 0)
+    if ((H5O_MSG_SDSPACE->encode)(f, false, SIZE_MAX, p, &(attr->shared->ds->extent)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode attribute dataspace");
 
     if (attr->shared->version < H5O_ATTR_VERSION_2) {
@@ -479,7 +486,7 @@ H5O__attr_size(const H5F_t H5_ATTR_UNUSED *f, const void *_mesg)
                 2;  /*space size		*/
 
     /* Length of attribute name */
-    name_len = HDstrlen(attr->shared->name) + 1;
+    name_len = strlen(attr->shared->name) + 1;
 
     /* Version-specific size information */
     if (attr->shared->version == H5O_ATTR_VERSION_1)
@@ -563,7 +570,7 @@ H5O__attr_delete(H5F_t *f, H5O_t *oh, void *_mesg)
     H5A_t *attr      = (H5A_t *)_mesg;
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     assert(f);
@@ -831,13 +838,13 @@ H5O__attr_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidt
         case H5T_CSET_RESERVED_13:
         case H5T_CSET_RESERVED_14:
         case H5T_CSET_RESERVED_15:
-            HDsnprintf(buf, sizeof(buf), "H5T_CSET_RESERVED_%d", (int)(mesg->shared->encoding));
+            snprintf(buf, sizeof(buf), "H5T_CSET_RESERVED_%d", (int)(mesg->shared->encoding));
             s = buf;
             break;
 
         case H5T_CSET_ERROR:
         default:
-            HDsnprintf(buf, sizeof(buf), "Unknown character set: %d", (int)(mesg->shared->encoding));
+            snprintf(buf, sizeof(buf), "Unknown character set: %d", (int)(mesg->shared->encoding));
             s = buf;
             break;
     } /* end switch */

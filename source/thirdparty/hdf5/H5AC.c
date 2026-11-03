@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -40,7 +40,7 @@
 #include "H5CXprivate.h" /* API Contexts                             */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Fpkg.h"      /* Files                                    */
-#include "H5Iprivate.h"  /* IDs                                      */
+#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5Pprivate.h"  /* Property lists                           */
 #include "H5SLprivate.h" /* Skip Lists                               */
 
@@ -66,6 +66,9 @@ static herr_t H5AC__verify_tag(const H5AC_class_t *type);
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Package initialization variable */
+bool H5_PKG_INIT_VAR = false;
 
 /*****************************/
 /* Library Private Variables */
@@ -134,7 +137,26 @@ H5AC_init(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
+    /* FUNC_ENTER() does all the work */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5AC_init() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC__init_package
+ *
+ * Purpose:     Initialize interface-specific information
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC__init_package(void)
+{
+    FUNC_ENTER_PACKAGE_NOERR
 
 #ifdef H5_HAVE_PARALLEL
     /* check whether to enable strict collective function calling
@@ -143,7 +165,7 @@ H5AC_init(void)
     {
         const char *s; /* String for environment variables */
 
-        s = HDgetenv("H5_COLL_API_SANITY_CHECK");
+        s = getenv("H5_COLL_API_SANITY_CHECK");
         if (s && isdigit(*s)) {
             long env_val               = strtol(s, NULL, 0);
             H5_coll_api_sanity_check_g = (0 == env_val) ? false : true;
@@ -151,8 +173,8 @@ H5AC_init(void)
     }
 #endif /* H5_HAVE_PARALLEL */
 
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5AC_init() */
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5AC__init_package() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5AC_term_package
@@ -169,6 +191,10 @@ int
 H5AC_term_package(void)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if (H5_PKG_INIT_VAR)
+        /* Reset interface initialization flag */
+        H5_PKG_INIT_VAR = false;
 
     FUNC_LEAVE_NOAPI(0)
 } /* end H5AC_term_package() */
@@ -288,7 +314,7 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
         aux_ptr->sync_point_done     = NULL;
         aux_ptr->p0_image_len        = 0;
 
-        HDsnprintf(prefix, sizeof(prefix), "%d:", mpi_rank);
+        snprintf(prefix, sizeof(prefix), "%d:", mpi_rank);
 
         if (mpi_rank == 0) {
             if (NULL == (aux_ptr->d_slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)))
@@ -459,7 +485,7 @@ H5AC_dest(H5F_t *f)
          */
         if (H5F_ACC_RDWR & H5F_INTENT(f)) {
             /* enable and load the skip list */
-            if (H5C_set_slist_enabled(f->shared->cache, true, false) < 0)
+            if (H5C_set_slist_enabled(f->shared->cache, true, true) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't enable skip list");
 
             if (H5AC__flush_entries(f) < 0)
@@ -1127,7 +1153,7 @@ H5AC_prep_for_file_flush(H5F_t *f)
     assert(f->shared);
     assert(f->shared->cache);
 
-    if (H5C_set_slist_enabled(f->shared->cache, true, false) < 0)
+    if (H5C_set_slist_enabled(f->shared->cache, true, true) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't enable skip list");
 
 done:
@@ -1874,7 +1900,7 @@ H5AC_validate_config(const H5AC_cache_config_t *config_ptr)
          * open the file, so we will content ourselves with a couple of
          * sanity checks on the length of the file name.
          */
-        name_len = HDstrlen(config_ptr->trace_file_name);
+        name_len = strlen(config_ptr->trace_file_name);
         if (name_len == 0)
             HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "config_ptr->trace_file_name is empty");
         else if (name_len > H5AC__MAX_TRACE_FILE_NAME_LEN)

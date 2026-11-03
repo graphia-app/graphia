@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -33,6 +33,7 @@
 #include "H5private.h"   /* Generic Functions			*/
 #include "H5Apkg.h"      /* Attributes	  			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5MMprivate.h" /* Memory management			*/
 #include "H5Opkg.h"      /* Object headers			*/
 #include "H5SMprivate.h" /* Shared object header messages        */
@@ -369,7 +370,7 @@ H5A__dense_open(H5F_t *f, const H5O_ainfo_t *ainfo, const char *name)
     udata.fheap         = fheap;
     udata.shared_fheap  = shared_fheap;
     udata.name          = name;
-    udata.name_hash     = H5_checksum_lookup3(name, HDstrlen(name), 0);
+    udata.name_hash     = H5_checksum_lookup3(name, strlen(name), 0);
     udata.flags         = 0;
     udata.corder        = 0;
     udata.found_op      = H5A__dense_fnd_cb; /* v2 B-tree comparison callback */
@@ -507,7 +508,7 @@ H5A__dense_insert(H5F_t *f, const H5O_ainfo_t *ainfo, H5A_t *attr)
     udata.common.fheap        = fheap;
     udata.common.shared_fheap = shared_fheap;
     udata.common.name         = attr->shared->name;
-    udata.common.name_hash    = H5_checksum_lookup3(attr->shared->name, HDstrlen(attr->shared->name), 0);
+    udata.common.name_hash    = H5_checksum_lookup3(attr->shared->name, strlen(attr->shared->name), 0);
     H5_CHECKED_ASSIGN(udata.common.flags, uint8_t, mesg_flags, unsigned);
     udata.common.corder        = attr->shared->crt_idx;
     udata.common.found_op      = NULL;
@@ -632,8 +633,8 @@ H5A__dense_write_bt2_cb(void *_record, void *_op_data, bool *changed)
             udata.found_op_data = NULL;
 
             /* Modify record for creation order index */
-            if (H5B2_modify(bt2_corder, &udata, H5A__dense_write_bt2_cb2, &op_data->attr->sh_loc.u.heap_id) <
-                0)
+            if (H5B2_modify(bt2_corder, &udata, false, H5A__dense_write_bt2_cb2,
+                            &op_data->attr->sh_loc.u.heap_id) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "unable to modify record in v2 B-tree");
         } /* end if */
 
@@ -748,7 +749,7 @@ H5A__dense_write(H5F_t *f, const H5O_ainfo_t *ainfo, H5A_t *attr)
     udata.fheap         = fheap;
     udata.shared_fheap  = shared_fheap;
     udata.name          = attr->shared->name;
-    udata.name_hash     = H5_checksum_lookup3(attr->shared->name, HDstrlen(attr->shared->name), 0);
+    udata.name_hash     = H5_checksum_lookup3(attr->shared->name, strlen(attr->shared->name), 0);
     udata.flags         = 0;
     udata.corder        = 0;
     udata.found_op      = NULL;
@@ -762,7 +763,7 @@ H5A__dense_write(H5F_t *f, const H5O_ainfo_t *ainfo, H5A_t *attr)
     op_data.corder_bt2_addr = ainfo->corder_bt2_addr;
 
     /* Modify attribute through 'name' tracking v2 B-tree */
-    if (H5B2_modify(bt2_name, &udata, H5A__dense_write_bt2_cb, &op_data) < 0)
+    if (H5B2_modify(bt2_name, &udata, false, H5A__dense_write_bt2_cb, &op_data) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "unable to modify record in v2 B-tree");
 
 done:
@@ -838,6 +839,7 @@ H5A__dense_rename(H5F_t *f, const H5O_ainfo_t *ainfo, const char *old_name, cons
     htri_t              attr_sharable;       /* Flag indicating attributes are shareable */
     htri_t              shared_mesg;         /* Should this message be stored in the Shared Message table? */
     bool                attr_exists;         /* Attribute exists in v2 B-tree */
+    H5O_ainfo_t         tainfo    = *ainfo;  /* Copy of ainfo */
     herr_t              ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -881,7 +883,7 @@ H5A__dense_rename(H5F_t *f, const H5O_ainfo_t *ainfo, const char *old_name, cons
     udata.fheap         = fheap;
     udata.shared_fheap  = shared_fheap;
     udata.name          = old_name;
-    udata.name_hash     = H5_checksum_lookup3(old_name, HDstrlen(old_name), 0);
+    udata.name_hash     = H5_checksum_lookup3(old_name, strlen(old_name), 0);
     udata.flags         = 0;
     udata.corder        = 0;
     udata.found_op      = H5A__dense_fnd_cb; /* v2 B-tree comparison callback */
@@ -976,8 +978,12 @@ H5A__dense_rename(H5F_t *f, const H5O_ainfo_t *ainfo, const char *old_name, cons
     else if (shared_mesg < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "error determining if message should be shared");
 
-    /* Delete old attribute from dense storage */
-    if (H5A__dense_remove(f, ainfo, old_name) < 0)
+    /* Deactivate the field so that H5A__dense_remove() won't delete the new renamed attribute
+       that was just added to the creation order index v2 B-tree via H5A__dense_insert() */
+    tainfo.corder_bt2_addr = HADDR_UNDEF;
+
+    /* Only delete the old attribute (before rename) from the name index v2 B-tree */
+    if (H5A__dense_remove(f, (const H5O_ainfo_t *)&tainfo, old_name) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute in dense storage");
 
 done:
@@ -1047,17 +1053,27 @@ H5A__dense_iterate_bt2_cb(const void *_record, void *_bt2_udata)
                 if (H5A__get_info(fh_udata.attr, &ainfo) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, H5_ITER_ERROR, "unable to get attribute info");
 
-                /* Make the application callback */
-                ret_value = (bt2_udata->attr_op->u.app_op2)(bt2_udata->loc_id, fh_udata.attr->shared->name,
-                                                            &ainfo, bt2_udata->op_data);
+                /* Prepare & restore library for user callback */
+                H5_BEFORE_USER_CB(H5_ITER_ERROR)
+                    {
+                        /* Make the application callback */
+                        ret_value = (bt2_udata->attr_op->u.app_op2)(
+                            bt2_udata->loc_id, fh_udata.attr->shared->name, &ainfo, bt2_udata->op_data);
+                    }
+                H5_AFTER_USER_CB(H5_ITER_ERROR)
                 break;
             }
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
             case H5A_ATTR_OP_APP:
-                /* Make the application callback */
-                ret_value = (bt2_udata->attr_op->u.app_op)(bt2_udata->loc_id, fh_udata.attr->shared->name,
-                                                           bt2_udata->op_data);
+                /* Prepare & restore library for user callback */
+                H5_BEFORE_USER_CB(H5_ITER_ERROR)
+                    {
+                        /* Make the application callback */
+                        ret_value = (bt2_udata->attr_op->u.app_op)(
+                            bt2_udata->loc_id, fh_udata.attr->shared->name, bt2_udata->op_data);
+                    }
+                H5_AFTER_USER_CB(H5_ITER_ERROR)
                 break;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
@@ -1103,12 +1119,12 @@ H5A__dense_iterate(H5F_t *f, hid_t loc_id, const H5O_ainfo_t *ainfo, H5_index_t 
                    H5_iter_order_t order, hsize_t skip, hsize_t *last_attr, const H5A_attr_iter_op_t *attr_op,
                    void *op_data)
 {
-    H5HF_t          *fheap        = NULL;      /* Fractal heap handle */
-    H5HF_t          *shared_fheap = NULL;      /* Fractal heap handle for shared header messages */
-    H5A_attr_table_t atable       = {0, NULL}; /* Table of attributes */
-    H5B2_t          *bt2          = NULL;      /* v2 B-tree handle for index */
-    haddr_t          bt2_addr;                 /* Address of v2 B-tree to use for lookup */
-    herr_t           ret_value = FAIL;         /* Return value */
+    H5HF_t          *fheap        = NULL;         /* Fractal heap handle */
+    H5HF_t          *shared_fheap = NULL;         /* Fractal heap handle for shared header messages */
+    H5A_attr_table_t atable       = {0, 0, NULL}; /* Table of attributes */
+    H5B2_t          *bt2          = NULL;         /* v2 B-tree handle for index */
+    haddr_t          bt2_addr;                    /* Address of v2 B-tree to use for lookup */
+    herr_t           ret_value = FAIL;            /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1339,7 +1355,7 @@ H5A__dense_remove(H5F_t *f, const H5O_ainfo_t *ainfo, const char *name)
     udata.common.fheap         = fheap;
     udata.common.shared_fheap  = shared_fheap;
     udata.common.name          = name;
-    udata.common.name_hash     = H5_checksum_lookup3(name, HDstrlen(name), 0);
+    udata.common.name_hash     = H5_checksum_lookup3(name, strlen(name), 0);
     udata.common.found_op      = H5A__dense_fnd_cb; /* v2 B-tree comparison callback */
     udata.common.found_op_data = &attr_copy;
     udata.corder_bt2_addr      = ainfo->corder_bt2_addr;
@@ -1432,7 +1448,7 @@ H5A__dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
             other_bt2_udata.shared_fheap = bt2_udata->shared_fheap;
             other_bt2_udata.name         = fh_udata.attr->shared->name;
             other_bt2_udata.name_hash =
-                H5_checksum_lookup3(fh_udata.attr->shared->name, HDstrlen(fh_udata.attr->shared->name), 0);
+                H5_checksum_lookup3(fh_udata.attr->shared->name, strlen(fh_udata.attr->shared->name), 0);
             other_bt2_udata.found_op      = NULL;
             other_bt2_udata.found_op_data = NULL;
         } /* end else */
@@ -1498,12 +1514,12 @@ herr_t
 H5A__dense_remove_by_idx(H5F_t *f, const H5O_ainfo_t *ainfo, H5_index_t idx_type, H5_iter_order_t order,
                          hsize_t n)
 {
-    H5HF_t          *fheap        = NULL;      /* Fractal heap handle */
-    H5HF_t          *shared_fheap = NULL;      /* Fractal heap handle for shared header messages */
-    H5A_attr_table_t atable       = {0, NULL}; /* Table of attributes */
-    H5B2_t          *bt2          = NULL;      /* v2 B-tree handle for index */
-    haddr_t          bt2_addr;                 /* Address of v2 B-tree to use for operation */
-    herr_t           ret_value = SUCCEED;      /* Return value */
+    H5HF_t          *fheap        = NULL;         /* Fractal heap handle */
+    H5HF_t          *shared_fheap = NULL;         /* Fractal heap handle for shared header messages */
+    H5A_attr_table_t atable       = {0, 0, NULL}; /* Table of attributes */
+    H5B2_t          *bt2          = NULL;         /* v2 B-tree handle for index */
+    haddr_t          bt2_addr;                    /* Address of v2 B-tree to use for operation */
+    herr_t           ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1585,7 +1601,7 @@ H5A__dense_remove_by_idx(H5F_t *f, const H5O_ainfo_t *ainfo, H5_index_t idx_type
             HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "error building table of attributes");
 
         /* Check for skipping too many attributes */
-        if (n >= atable.nattrs)
+        if (n >= atable.num_attrs)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified");
 
         /* Delete appropriate attribute from dense storage */
@@ -1668,7 +1684,7 @@ H5A__dense_exists(H5F_t *f, const H5O_ainfo_t *ainfo, const char *name, bool *at
     udata.fheap         = fheap;
     udata.shared_fheap  = shared_fheap;
     udata.name          = name;
-    udata.name_hash     = H5_checksum_lookup3(name, HDstrlen(name), 0);
+    udata.name_hash     = H5_checksum_lookup3(name, strlen(name), 0);
     udata.flags         = 0;
     udata.corder        = 0;
     udata.found_op      = NULL; /* v2 B-tree comparison callback */
