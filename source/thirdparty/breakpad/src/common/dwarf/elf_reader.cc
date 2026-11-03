@@ -30,6 +30,10 @@
 #define _GNU_SOURCE  // needed for pread()
 #endif
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>  // Must come first
+#endif
+
 #include <fcntl.h>
 #include <limits.h>
 #include <string.h>
@@ -39,9 +43,9 @@
 #include <unistd.h>
 
 #include <algorithm>
-#include <cstring>
 #include <map>
 #include <string>
+#include <string_view>
 #include <vector>
 // TODO(saugustine): Add support for compressed debug.
 // Also need to add configure tests for zlib.
@@ -106,6 +110,12 @@ const int kAARCH64PLT0Size = 0x20;
 
 // Suffix for PLT functions when it needs to be explicitly identified as such.
 const char kPLTFunctionSuffix[] = "@plt";
+
+// Replace callsites of this function to std::string_view::starts_with after
+// adopting C++20.
+bool StringViewStartsWith(std::string_view sv, std::string_view prefix) {
+  return sv.compare(0, prefix.size(), prefix) == 0;
+}
 
 }  // namespace
 
@@ -183,7 +193,7 @@ class Elf64 {
 template<class ElfArch>
 class ElfSectionReader {
  public:
-  ElfSectionReader(const char* name, const string& path, int fd,
+  ElfSectionReader(const char* cname, const string& path, int fd,
                    const typename ElfArch::Shdr& section_header)
       : contents_aligned_(NULL),
         contents_(NULL),
@@ -198,8 +208,8 @@ class ElfSectionReader {
     if (header_.sh_type == SHT_NOBITS || header_.sh_size == 0)
       return;
     // extra sh_type check for string table.
-    if ((std::strcmp(name, ".strtab") == 0 ||
-         std::strcmp(name, ".shstrtab") == 0) &&
+    std::string_view name{cname};
+    if ((name == ".strtab" || name == ".shstrtab") &&
         header_.sh_type != SHT_STRTAB) {
       fprintf(stderr,
               "Invalid sh_type for string table section: expected "
@@ -215,7 +225,7 @@ class ElfSectionReader {
                 (header_.sh_offset - offset_aligned);
 
     // Check for and handle any compressed contents.
-    //if (strncmp(name, ".zdebug_", strlen(".zdebug_")) == 0)
+    //if (StringViewStartsWith(name, ".zdebug_"))
     //  DecompressZlibContents();
     // TODO(saugustine): Add support for proposed elf-section flag
     // "SHF_COMPRESS".
@@ -359,8 +369,8 @@ class ElfReaderImpl {
       // "opd_section_" must always be checked for NULL before use.
       opd_section_ = GetSectionInfoByName(".opd", &opd_info_);
       for (unsigned int k = 0u; k < GetNumSections(); ++k) {
-        const char* name = GetSectionName(section_headers_[k].sh_name);
-        if (strncmp(name, ".text", strlen(".text")) == 0) {
+        std::string_view name{GetSectionName(section_headers_[k].sh_name)};
+        if (StringViewStartsWith(name, ".text")) {
           base_for_text_ =
               section_headers_[k].sh_addr - section_headers_[k].sh_offset;
           break;
@@ -809,9 +819,11 @@ class ElfReaderImpl {
     // Debug sections are likely to be near the end, so reverse the
     // direction of iteration.
     for (int k = GetNumSections() - 1; k >= 0; --k) {
-      const char* name = GetSectionName(section_headers_[k].sh_name);
-      if (strncmp(name, ".debug", strlen(".debug")) == 0) return true;
-      if (strncmp(name, ".zdebug", strlen(".zdebug")) == 0) return true;
+      std::string_view name{GetSectionName(section_headers_[k].sh_name)};
+      if (StringViewStartsWith(name, ".debug") ||
+          StringViewStartsWith(name, ".zdebug")) {
+        return true;
+      }
     }
     return false;
   }
@@ -1213,11 +1225,15 @@ const char* ElfReader::GetSectionInfoByName(const string& section_name,
   }
 }
 
-bool ElfReader::SectionNamesMatch(const string& name, const string& sh_name) {
-  if ((name.find(".debug_", 0) == 0) && (sh_name.find(".zdebug_", 0) == 0)) {
-    const string name_suffix(name, strlen(".debug_"));
-    const string sh_name_suffix(sh_name, strlen(".zdebug_"));
-    return name_suffix == sh_name_suffix;
+bool ElfReader::SectionNamesMatch(std::string_view name,
+                                  std::string_view sh_name) {
+  std::string_view debug_prefix{".debug_"};
+  std::string_view zdebug_prefix{".zdebug_"};
+  if (StringViewStartsWith(name, debug_prefix) &&
+      StringViewStartsWith(sh_name, zdebug_prefix)) {
+    name.remove_prefix(debug_prefix.length());
+    sh_name.remove_prefix(zdebug_prefix.length());
+    return name == sh_name;
   }
   return name == sh_name;
 }

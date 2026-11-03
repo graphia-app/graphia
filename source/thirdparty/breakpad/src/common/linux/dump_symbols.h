@@ -46,13 +46,16 @@ namespace google_breakpad {
 class Module;
 
 struct DumpOptions {
-  DumpOptions(SymbolData symbol_data, bool handle_inter_cu_refs)
+  DumpOptions(SymbolData symbol_data,
+              bool handle_inter_cu_refs,
+              bool enable_multiple_field)
       : symbol_data(symbol_data),
-        handle_inter_cu_refs(handle_inter_cu_refs) {
-  }
+        handle_inter_cu_refs(handle_inter_cu_refs),
+        enable_multiple_field(enable_multiple_field) {}
 
   SymbolData symbol_data;
   bool handle_inter_cu_refs;
+  bool enable_multiple_field;
 };
 
 // Find all the debugging information in OBJ_FILE, an ELF executable

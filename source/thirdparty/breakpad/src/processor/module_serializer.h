@@ -36,6 +36,7 @@
 #ifndef PROCESSOR_MODULE_SERIALIZER_H__
 #define PROCESSOR_MODULE_SERIALIZER_H__
 
+#include <cstdint>
 #include <map>
 #include <string>
 
@@ -72,13 +73,13 @@ class ModuleSerializer {
   // Caller takes the ownership of the memory chunk (allocated on heap), and
   // owner should call delete [] to free the memory after use.
   char* Serialize(const BasicSourceLineResolver::Module& module,
-                  unsigned int* size = NULL);
+                  size_t* size = nullptr);
 
   // Given the string format symbol_data, produces a chunk of serialized data.
   // Caller takes ownership of the serialized data (on heap), and owner should
   // call delete [] to free the memory after use.
   char* SerializeSymbolFileData(const string& symbol_data,
-                                unsigned int* size = NULL);
+                                size_t* size = nullptr);
 
   // Serializes one loaded module with given moduleid in the basic source line
   // resolver, and loads the serialized data into the fast source line resolver.
@@ -110,7 +111,7 @@ class ModuleSerializer {
       FastSourceLineResolver::Module::kNumberMaps_;
 
   // Memory sizes required to serialize map components in Module.
-  uint32_t map_sizes_[kNumberMaps_];
+  uint64_t map_sizes_[kNumberMaps_];
 
   // Serializers for each individual map component in Module class.
   StdMapSerializer<int, string> files_serializer_;

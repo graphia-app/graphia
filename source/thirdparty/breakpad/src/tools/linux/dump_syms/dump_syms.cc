@@ -26,6 +26,10 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>  // Must come first
+#endif
+
 #include <paths.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -56,6 +60,9 @@ int usage(const char* self) {
   fprintf(stderr, "  -n <name>   Use specified name for name of the object\n");
   fprintf(stderr, "  -o <os>     Use specified name for the "
                                  "operating system\n");
+  fprintf(stderr, "  -m          Enable writing the optional 'm' field on FUNC "
+                                 "and PUBLIC, denoting multiple symbols for "
+                                 "the address.\n");
   return 1;
 }
 
@@ -67,6 +74,7 @@ int main(int argc, char** argv) {
   bool handle_inlines = false;
   bool handle_inter_cu_refs = true;
   bool log_to_stderr = false;
+  bool enable_multiple_field = false;
   std::string obj_name;
   const char* obj_os = "Linux";
   int arg_index = 1;
@@ -96,6 +104,8 @@ int main(int argc, char** argv) {
       }
       obj_os = argv[arg_index + 1];
       ++arg_index;
+    } else if (strcmp("-m", argv[arg_index]) == 0) {
+      enable_multiple_field = true;
     } else {
       printf("2.4 %s\n", argv[arg_index]);
       return usage(argv[0]);
@@ -132,7 +142,8 @@ int main(int argc, char** argv) {
   } else {
     SymbolData symbol_data = (handle_inlines ? INLINES : NO_DATA) |
                              (cfi ? CFI : NO_DATA) | SYMBOLS_AND_FILES;
-    google_breakpad::DumpOptions options(symbol_data, handle_inter_cu_refs);
+    google_breakpad::DumpOptions options(symbol_data, handle_inter_cu_refs,
+                                         enable_multiple_field);
     if (!WriteSymbolFile(binary, obj_name, obj_os, debug_dirs, options,
                          std::cout)) {
       fprintf(saved_stderr, "Failed to write symbol file.\n");

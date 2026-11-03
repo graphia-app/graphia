@@ -29,6 +29,10 @@
 // Unit test for MinidumpProcessor.  Uses a pre-generated minidump and
 // corresponding symbol file, and checks the stack frames for correctness.
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>  // Must come first
+#endif
+
 #include <stdlib.h>
 
 #include <string>
@@ -760,6 +764,29 @@ TEST_F(MinidumpProcessorTest, Test32BitCrashingAddress) {
   ASSERT_EQ(state.crash_address(), 0x45U);
 }
 
+TEST_F(MinidumpProcessorTest, TestXStateX86ContextMinidump) {
+  // This tests if we can passively process a minidump with cet registers in its
+  // context. Dump is captured from a toy executable and is readable by windbg.
+  MinidumpProcessor processor(nullptr, nullptr /*&supplier, &resolver*/);
+
+  string minidump_file = GetTestDataPath()
+                         + "tiny-exe-with-cet-xsave-x86.dmp";
+
+  ProcessState state;
+  ASSERT_EQ(processor.Process(minidump_file, &state),
+            google_breakpad::PROCESS_OK);
+  ASSERT_EQ(state.system_info()->os, "Windows NT");
+  ASSERT_EQ(state.system_info()->os_version, "10.0.22631 ");
+  ASSERT_EQ(state.system_info()->cpu, "x86");
+  ASSERT_EQ(state.system_info()->cpu_info,
+            "GenuineIntel family 6 model 151 stepping 2");
+  ASSERT_FALSE(state.crashed());
+  ASSERT_EQ(state.threads()->size(), size_t(3));
+
+  // TODO: verify cetumsr and cetussp once these are supported by
+  // breakpad.
+}
+
 TEST_F(MinidumpProcessorTest, TestXStateAmd64ContextMinidump) {
   // This tests if we can passively process a minidump with cet registers in its
   // context. Dump is captured from a toy executable and is readable by windbg.
@@ -798,6 +825,25 @@ TEST_F(MinidumpProcessorTest, TestFastFailException) {
   ASSERT_EQ(state.threads()->size(), size_t(4));
   ASSERT_EQ(state.crash_reason(), "FAST_FAIL_FATAL_APP_EXIT");
 }
+
+#ifdef __linux__
+TEST_F(MinidumpProcessorTest, TestNonCanonicalAddress) {
+  // This tests if we can correctly fixup non-canonical address GPF fault
+  // addresses.
+  // Dump is captured from a toy executable and is readable by windbg.
+  MinidumpProcessor processor(nullptr, nullptr /*&supplier, &resolver*/);
+  processor.set_enable_objdump(true);
+
+  string minidump_file = GetTestDataPath()
+                         + "write_av_non_canonical.dmp";
+
+  ProcessState state;
+  ASSERT_EQ(processor.Process(minidump_file, &state),
+            google_breakpad::PROCESS_OK);
+  ASSERT_TRUE(state.crashed());
+  ASSERT_EQ(state.crash_address(), 0xfefefefefefefefeU);
+}
+#endif // __linux__
 
 }  // namespace
 

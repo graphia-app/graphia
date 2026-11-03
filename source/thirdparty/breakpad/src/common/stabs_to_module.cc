@@ -30,12 +30,18 @@
 
 // dump_stabs.cc --- implement the StabsToModule class.
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>  // Must come first
+#endif
+
 #include <assert.h>
 #include <cxxabi.h>
 #include <stdarg.h>
 #include <stdio.h>
 
 #include <algorithm>
+#include <memory>
+#include <utility>
 
 #include "common/stabs_to_module.h"
 #include "common/using_std_string.h"
@@ -132,7 +138,7 @@ bool StabsToModule::Line(uint64_t address, const char *name, int number) {
 }
 
 bool StabsToModule::Extern(const string& name, uint64_t address) {
-  Module::Extern *ext = new Module::Extern(address);
+  auto ext = std::make_unique<Module::Extern>(address);
   // Older libstdc++ demangle implementations can crash on unexpected
   // input, so be careful about what gets passed in.
   if (name.compare(0, 3, "__Z") == 0) {
@@ -142,7 +148,7 @@ bool StabsToModule::Extern(const string& name, uint64_t address) {
   } else {
     ext->name = name;
   }
-  module_->AddExtern(ext);
+  module_->AddExtern(std::move(ext));
   return true;
 }
 

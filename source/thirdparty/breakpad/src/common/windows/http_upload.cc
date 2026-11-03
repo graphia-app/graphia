@@ -26,6 +26,10 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>  // Must come first
+#endif
+
 #include <assert.h>
 
 // Disable exception handler warnings.
@@ -390,7 +394,6 @@ namespace {
     if (!contents.empty()) {
       request_body->append(&(contents[0]), contents.size());
     }
-    request_body->append("\r\n");
 
     return true;
   }

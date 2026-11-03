@@ -81,6 +81,7 @@ if(NOT EMSCRIPTEN)
                 ${CMAKE_CURRENT_LIST_DIR}/src/common/mac/string_utilities.cc
                 ${CMAKE_CURRENT_LIST_DIR}/src/common/mac/bootstrap_compat.cc
                 ${CMAKE_CURRENT_LIST_DIR}/src/common/mac/macho_walker.cc
+                ${CMAKE_CURRENT_LIST_DIR}/src/common/mac/arch_utilities.cc
                 ${CMAKE_CURRENT_LIST_DIR}/src/common/mac/MachIPC.mm
             )
         else()
@@ -106,6 +107,9 @@ if(NOT EMSCRIPTEN)
                 ${CMAKE_CURRENT_LIST_DIR}/src/common/linux/linux_libc_support.cc
                 ${CMAKE_CURRENT_LIST_DIR}/src/common/linux/memory_mapped_file.cc
                 ${CMAKE_CURRENT_LIST_DIR}/src/common/linux/safe_readlink.cc
+                ${CMAKE_CURRENT_LIST_DIR}/src/common/linux/scoped_pipe.cc
+                ${CMAKE_CURRENT_LIST_DIR}/src/common/linux/scoped_tmpfile.cc
+                ${CMAKE_CURRENT_LIST_DIR}/src/processor/disassembler_objdump.cc
             )
         endif()
     endif()

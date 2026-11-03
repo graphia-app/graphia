@@ -30,6 +30,10 @@
 
 // dump_stabs_unittest.cc: Unit tests for StabsToModule.
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>  // Must come first
+#endif
+
 #include <vector>
 
 #include "breakpad_googletest_includes.h"
@@ -210,10 +214,9 @@ TEST(FunctionNames, Mangled) {
   Module::Function *function = functions[0];
   // This is GCC-specific, but we shouldn't be seeing STABS data anywhere
   // but Linux.
-  EXPECT_STREQ("std::vector<unsigned long long, "
-               "std::allocator<unsigned long long> >::"
-               "push_back(unsigned long long const&)",
-               function->name.str().c_str());
+  EXPECT_THAT(function->name.str(), ::testing::ContainsRegex(
+    "std::vector<unsigned long long, std::allocator<unsigned long long>\\s?>::"
+    "push_back\\(unsigned long long const&\\)"));
   EXPECT_EQ(0xf2cfda63cef7f46dLL, function->address);
   EXPECT_LT(0U, function->ranges[0].size); // should have used dummy size
   EXPECT_EQ(0U, function->parameter_size);

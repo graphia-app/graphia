@@ -32,10 +32,15 @@
 //
 // Author: Mark Mentovai
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>  // Must come first
+#endif
+
 #include "google_breakpad/processor/minidump.h"
 
 #include <assert.h>
 #include <fcntl.h>
+#include <inttypes.h>
 #include <stddef.h>
 #include <string.h>
 #include <time.h>
@@ -70,6 +75,11 @@ using std::numeric_limits;
 using std::vector;
 
 namespace {
+
+// Limit arrived at by adding up possible states in Intel Ch. 13.5 X-SAVE
+// MANAGED STATE
+// (~ 3680 bytes) plus some extra for the future.
+const uint32_t kMaxXSaveAreaSize = 16384;
 
 // Returns true iff |context_size| matches exactly one of the sizes of the
 // various MDRawContext* types.
@@ -213,6 +223,12 @@ inline void Swap(MDXStateConfigFeatureMscInfo* xstate_feature_info) {
 inline void Swap(MDRawSimpleStringDictionaryEntry* entry) {
   Swap(&entry->key);
   Swap(&entry->value);
+}
+
+inline void Swap(MDRawCrashpadAnnotation* annotation) {
+  Swap(&annotation->name);
+  Swap(&annotation->type);
+  Swap(&annotation->value);
 }
 
 inline void Swap(uint16_t* data, size_t size_in_bytes) {
@@ -496,6 +512,10 @@ bool MinidumpContext::Read(uint32_t expected_size) {
     // sizeof(MDRawContextAMD64). For now we skip this extended data.
     if (expected_size > sizeof(MDRawContextAMD64)) {
       size_t bytes_left = expected_size - sizeof(MDRawContextAMD64);
+      if (bytes_left > kMaxXSaveAreaSize) {
+        BPLOG(ERROR) << "MinidumpContext oversized xstate area";
+        return false;
+      }
       std::vector<uint8_t> xstate(bytes_left);
       if (!minidump_->ReadBytes(xstate.data(),
                                 bytes_left)) {
@@ -797,9 +817,19 @@ bool MinidumpContext::Read(uint32_t expected_size) {
     switch (cpu_type) {
       case MD_CONTEXT_X86: {
         if (expected_size != sizeof(MDRawContextX86)) {
-          BPLOG(ERROR) << "MinidumpContext x86 size mismatch, " <<
-            expected_size << " != " << sizeof(MDRawContextX86);
-          return false;
+          // Context may include xsave registers and so be larger than
+          // sizeof(MDRawContextX86). For now we skip this extended data.
+          if (context_flags & MD_CONTEXT_X86_XSTATE) {
+            size_t bytes_left = expected_size - sizeof(MDRawContextX86);
+            if (bytes_left > kMaxXSaveAreaSize) {
+              BPLOG(ERROR) << "MinidumpContext oversized xstate area";
+              return false;
+            }
+          } else {
+            BPLOG(ERROR) << "MinidumpContext x86 size mismatch, "
+                         << expected_size << " != " << sizeof(MDRawContextX86);
+            return false;
+          }
         }
 
         scoped_ptr<MDRawContextX86> context_x86(new MDRawContextX86());
@@ -864,6 +894,12 @@ bool MinidumpContext::Read(uint32_t expected_size) {
         }
 
         SetContextX86(context_x86.release());
+
+        // Skip extended xstate data if present in X86 context.
+        if (context_flags & MD_CONTEXT_X86_XSTATE) {
+          minidump_->SeekSet((minidump_->Tell() - sizeof(MDRawContextX86)) +
+                             expected_size);
+        }
 
         break;
       }
@@ -1239,12 +1275,11 @@ bool MinidumpContext::Read(uint32_t expected_size) {
           Swap(&context_riscv->t5);
           Swap(&context_riscv->t6);
 
-          for (int fpr_index = 0;
-               fpr_index < MD_FLOATINGSAVEAREA_RISCV_FPR_COUNT;
+          for (int fpr_index = 0; fpr_index < MD_CONTEXT_RISCV_FPR_COUNT;
                ++fpr_index) {
-            Swap(&context_riscv->float_save.regs[fpr_index]);
+            Swap(&context_riscv->fpregs[fpr_index]);
           }
-          Swap(&context_riscv->float_save.fpcsr);
+          Swap(&context_riscv->fcsr);
         }
         SetContextRISCV(context_riscv.release());
 
@@ -1318,12 +1353,11 @@ bool MinidumpContext::Read(uint32_t expected_size) {
           Swap(&context_riscv64->t5);
           Swap(&context_riscv64->t6);
 
-          for (int fpr_index = 0;
-               fpr_index < MD_FLOATINGSAVEAREA_RISCV_FPR_COUNT;
+          for (int fpr_index = 0; fpr_index < MD_CONTEXT_RISCV_FPR_COUNT;
                ++fpr_index) {
-            Swap(&context_riscv64->float_save.regs[fpr_index]);
+            Swap(&context_riscv64->fpregs[fpr_index]);
           }
-          Swap(&context_riscv64->float_save.fpcsr);
+          Swap(&context_riscv64->fcsr);
         }
         SetContextRISCV64(context_riscv64.release());
 
@@ -5260,6 +5294,7 @@ MinidumpCrashpadInfo::MinidumpCrashpadInfo(Minidump* minidump)
       module_crashpad_info_(),
       module_crashpad_info_list_annotations_(),
       module_crashpad_info_simple_annotations_(),
+      module_crashpad_info_annotation_objects_(),
       simple_annotations_() {
 }
 
@@ -5267,15 +5302,51 @@ MinidumpCrashpadInfo::MinidumpCrashpadInfo(Minidump* minidump)
 bool MinidumpCrashpadInfo::Read(uint32_t expected_size) {
   valid_ = false;
 
-  if (expected_size != sizeof(crashpad_info_)) {
-    BPLOG(ERROR) << "MinidumpCrashpadInfo size mismatch, " << expected_size <<
-                    " != " << sizeof(crashpad_info_);
+  // Support old minidumps that do not implement newer crashpad_info_
+  // fields, currently limited to the address mask.
+  static_assert(sizeof(crashpad_info_) == 64,
+                "Updated ::Read for new crashpad_info field.");
+
+  constexpr size_t crashpad_info_min_size =
+      offsetof(decltype(crashpad_info_), reserved);
+  if (expected_size < crashpad_info_min_size) {
+    BPLOG(ERROR) << "MinidumpCrashpadInfo size mismatch, " << expected_size
+                 << " < " << crashpad_info_min_size;
     return false;
   }
 
-  if (!minidump_->ReadBytes(&crashpad_info_, sizeof(crashpad_info_))) {
+  if (!minidump_->ReadBytes(&crashpad_info_, crashpad_info_min_size)) {
     BPLOG(ERROR) << "MinidumpCrashpadInfo cannot read Crashpad info";
     return false;
+  }
+  expected_size -= crashpad_info_min_size;
+
+  // Read `reserved` if available.
+  size_t crashpad_reserved_size = sizeof(crashpad_info_.reserved);
+  if (expected_size >= crashpad_reserved_size) {
+    if (!minidump_->ReadBytes(
+            &crashpad_info_.reserved,
+            crashpad_reserved_size)) {
+      BPLOG(ERROR) << "MinidumpCrashpadInfo cannot read reserved";
+      return false;
+    }
+    expected_size -= crashpad_reserved_size;
+  } else {
+    crashpad_info_.reserved = 0;
+  }
+
+  // Read `address_mask` if available.
+  size_t crashpad_address_mask_size = sizeof(crashpad_info_.address_mask);
+  if (expected_size >= crashpad_address_mask_size) {
+    if (!minidump_->ReadBytes(
+            &crashpad_info_.address_mask,
+            crashpad_address_mask_size)) {
+      BPLOG(ERROR) << "MinidumpCrashpadInfo cannot read address mask";
+      return false;
+    }
+    expected_size -= crashpad_address_mask_size;
+  } else {
+    crashpad_info_.address_mask = 0;
   }
 
   if (minidump_->swap()) {
@@ -5284,6 +5355,8 @@ bool MinidumpCrashpadInfo::Read(uint32_t expected_size) {
     Swap(&crashpad_info_.client_id);
     Swap(&crashpad_info_.simple_annotations);
     Swap(&crashpad_info_.module_list);
+    Swap(&crashpad_info_.reserved);
+    Swap(&crashpad_info_.address_mask);
   }
 
   if (crashpad_info_.simple_annotations.data_size) {
@@ -5347,6 +5420,7 @@ bool MinidumpCrashpadInfo::Read(uint32_t expected_size) {
         Swap(&module_crashpad_info.version);
         Swap(&module_crashpad_info.list_annotations);
         Swap(&module_crashpad_info.simple_annotations);
+        Swap(&module_crashpad_info.annotation_objects);
       }
 
       std::vector<std::string> list_annotations;
@@ -5371,11 +5445,23 @@ bool MinidumpCrashpadInfo::Read(uint32_t expected_size) {
         }
       }
 
+      std::vector<MinidumpCrashpadInfo::AnnotationObject> annotation_objects;
+      if (module_crashpad_info.annotation_objects.data_size) {
+        if (!minidump_->ReadCrashpadAnnotationsList(
+                module_crashpad_info.annotation_objects.rva,
+                &annotation_objects)) {
+          BPLOG(ERROR)
+              << "MinidumpCrashpadInfo cannot read Crashpad annotations list";
+          return false;
+        }
+      }
+
       module_crashpad_info_links_.push_back(
           module_crashpad_info_links[index].minidump_module_list_index);
       module_crashpad_info_.push_back(module_crashpad_info);
       module_crashpad_info_list_annotations_.push_back(list_annotations);
       module_crashpad_info_simple_annotations_.push_back(simple_annotations);
+      module_crashpad_info_annotation_objects_.push_back(annotation_objects);
     }
   }
 
@@ -5420,6 +5506,28 @@ void MinidumpCrashpadInfo::Print() {
       printf("  module_list[%d].simple_annotations[\"%s\"] = %s\n",
              module_index, annot.first.c_str(), annot.second.c_str());
     }
+    const auto& crashpad_annots =
+        module_crashpad_info_annotation_objects_[module_index];
+    for (const AnnotationObject& annot : crashpad_annots) {
+      std::string str_value;
+      if (annot.type == 1) {
+        // Value represents a C-style string.
+        for (const uint8_t& v : annot.value) {
+          str_value.append(1, static_cast<char>(v));
+        }
+      } else {
+        // Value represents something else.
+        char buffer[3];
+        for (const uint8_t& v : annot.value) {
+          snprintf(buffer, sizeof(buffer), "%02X", v);
+          str_value.append(buffer);
+        }
+      }
+      printf(
+          "  module_list[%d].crashpad_annotations[\"%s\"] (type = %u) = %s\n",
+          module_index, annot.name.c_str(), annot.type, str_value.c_str());
+    }
+    printf("  address_mask = %" PRIu64 "\n", crashpad_info_.address_mask);
   }
 
   printf("\n");
@@ -6225,6 +6333,73 @@ bool Minidump::ReadSimpleStringDictionary(
   return true;
 }
 
+bool Minidump::ReadCrashpadAnnotationsList(
+    off_t offset,
+    std::vector<MinidumpCrashpadInfo::AnnotationObject>* annotations_list) {
+  annotations_list->clear();
+
+  if (!SeekSet(offset)) {
+    BPLOG(ERROR) << "Minidump cannot seek to annotations_list";
+    return false;
+  }
+
+  uint32_t count;
+  if (!ReadBytes(&count, sizeof(count))) {
+    BPLOG(ERROR) << "Minidump cannot read annotations_list count";
+    return false;
+  }
+
+  if (swap_) {
+    Swap(&count);
+  }
+
+  scoped_array<MDRawCrashpadAnnotation> objects(
+      new MDRawCrashpadAnnotation[count]);
+
+  // Read the entire array in one fell swoop, instead of reading one entry
+  // at a time in the loop.
+  if (!ReadBytes(&objects[0], sizeof(MDRawCrashpadAnnotation) * count)) {
+    BPLOG(ERROR) << "Minidump could not read annotations_list";
+    return false;
+  }
+
+  for (uint32_t index = 0; index < count; ++index) {
+    MDRawCrashpadAnnotation annotation = objects[index];
+
+    if (swap_) {
+      Swap(&annotation);
+    }
+
+    string name;
+    if (!ReadUTF8String(annotation.name, &name)) {
+      BPLOG(ERROR) << "Minidump could not read annotation name";
+      return false;
+    }
+
+    if (!SeekSet(annotation.value)) {
+      BPLOG(ERROR) << "Minidump cannot seek to annotations value";
+      return false;
+    }
+
+    uint32_t value_length;
+    if (!ReadBytes(&value_length, sizeof(value_length))) {
+      BPLOG(ERROR) << "Minidump could not read annotation value length";
+      return false;
+    }
+
+    std::vector<uint8_t> value_data(value_length);
+    if (!ReadBytes(value_data.data(), value_length)) {
+      BPLOG(ERROR) << "Minidump could not read annotation value";
+      return false;
+    }
+
+    MinidumpCrashpadInfo::AnnotationObject object = {annotation.type, name,
+                                                     value_data};
+    annotations_list->push_back(object);
+  }
+
+  return true;
+}
 
 bool Minidump::SeekToStreamType(uint32_t  stream_type,
                                 uint32_t* stream_length) {

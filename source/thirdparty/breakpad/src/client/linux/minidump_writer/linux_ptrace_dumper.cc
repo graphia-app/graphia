@@ -35,6 +35,10 @@
 // rules apply as detailed at the top of minidump_writer.h: no libc calls and
 // use the alternative allocator.
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>  // Must come first
+#endif
+
 #include "client/linux/minidump_writer/linux_ptrace_dumper.h"
 
 #include <asm/ptrace.h>
@@ -57,6 +61,20 @@
 #include "client/linux/minidump_writer/line_reader.h"
 #include "common/linux/linux_libc_support.h"
 #include "third_party/lss/linux_syscall_support.h"
+
+#if defined(__arm__)
+/*
+ * https://elixir.bootlin.com/linux/v6.8-rc2/source/arch/arm/include/asm/user.h#L81
+ * User specific VFP registers. If only VFPv2 is present, registers 16 to 31
+ * are ignored by the ptrace system call and the signal handler.
+ */
+typedef struct {
+  unsigned long long fpregs[32];
+  unsigned long fpscr;
+// Kernel just appends fpscr to the copy of fpregs, so we need to force
+// compiler to build the same layout.
+} __attribute__((packed, aligned(4))) user_vfp_t;
+#endif  // defined(__arm__)
 
 // Suspends a thread by attaching to it.
 static bool SuspendThread(pid_t pid) {
@@ -148,6 +166,24 @@ bool LinuxPtraceDumper::CopyFromProcess(void* dest, pid_t child,
   return true;
 }
 
+// This read VFP registers via either PTRACE_GETREGSET or PTRACE_GETREGS
+#if defined(__arm__)
+static bool ReadVFPRegistersArm32(pid_t tid, struct iovec* io) {
+#ifdef PTRACE_GETREGSET
+  if (sys_ptrace(PTRACE_GETREGSET, tid, reinterpret_cast<void*>(NT_ARM_VFP),
+                 io) == 0 && io->iov_len == sizeof(user_vfp_t)) {
+    return true;
+  }
+#endif  // PTRACE_GETREGSET
+#ifdef PTRACE_GETVFPREGS
+  if (sys_ptrace(PTRACE_GETVFPREGS, tid, nullptr, io->iov_base) == 0) {
+    return true;
+  }
+#endif  // PTRACE_GETVFPREGS
+  return false;
+}
+#endif  // defined(__arm__)
+
 bool LinuxPtraceDumper::ReadRegisterSet(ThreadInfo* info, pid_t tid)
 {
 #ifdef PTRACE_GETREGSET
@@ -159,7 +195,24 @@ bool LinuxPtraceDumper::ReadRegisterSet(ThreadInfo* info, pid_t tid)
 
   info->GetFloatingPointRegisters(&io.iov_base, &io.iov_len);
   if (sys_ptrace(PTRACE_GETREGSET, tid, (void*)NT_FPREGSET, (void*)&io) == -1) {
-    return false;
+  // We are going to check if we can read VFP registers on ARM32.
+  // Currently breakpad does not support VFP registers to be a part of minidump,
+  // so this is only to confirm that we can actually read FP registers.
+  // That is needed to prevent a false-positive minidumps failures with ARM32
+  // binaries running on top of ARM64 Linux kernels.
+#if defined(__arm__)
+    switch (errno) {
+      case EIO:
+      case EINVAL:
+        user_vfp_t vfp;
+        struct iovec io;
+        io.iov_base = &vfp;
+        io.iov_len = sizeof(vfp);
+        return ReadVFPRegistersArm32(tid, &io);
+      default:
+        return false;
+    }
+#endif  // defined(__arm__)
   }
   return true;
 #else
@@ -175,6 +228,13 @@ bool LinuxPtraceDumper::ReadRegisters(ThreadInfo* info, pid_t tid) {
     return false;
   }
 
+  // When running on arm processors the binary may be built with softfp or
+  // hardfp. If built with softfp we have no hardware registers to read from,
+  // so the following read will always fail. gcc defines __SOFTFP__ macro,
+  // clang13 does not do so. see: https://reviews.llvm.org/D135680.
+  // If you are using clang and the macro is NOT defined, please include the
+  // macro define for applicable targets.
+#if !defined(__SOFTFP__)
 #if !(defined(__ANDROID__) && defined(__ARM_EABI__))
   // When running an arm build on an arm64 device, attempting to get the
   // floating point registers fails. On Android, the floating point registers
@@ -183,9 +243,27 @@ bool LinuxPtraceDumper::ReadRegisters(ThreadInfo* info, pid_t tid) {
   void* fp_addr;
   info->GetFloatingPointRegisters(&fp_addr, NULL);
   if (sys_ptrace(PTRACE_GETFPREGS, tid, NULL, fp_addr) == -1) {
-    return false;
+  // We are going to check if we can read VFP registers on ARM32.
+  // Currently breakpad does not support VFP registers to be a part of minidump,
+  // so this is only to confirm that we can actually read FP registers.
+  // That is needed to prevent a false-positive minidumps failures with ARM32
+  // binaries running on top of ARM64 Linux kernels.
+#if defined(__arm__)
+    switch (errno) {
+      case EIO:
+      case EINVAL:
+        user_vfp_t vfp;
+        struct iovec io;
+        io.iov_base = &vfp;
+        io.iov_len = sizeof(vfp);
+        return ReadVFPRegistersArm32(tid, &io);
+      default:
+        return false;
+    }
+#endif  // defined(__arm__)
   }
 #endif  // !(defined(__ANDROID__) && defined(__ARM_EABI__))
+#endif  // !defined(__SOFTFP__)
   return true;
 #else  // PTRACE_GETREGS
   return false;

@@ -40,6 +40,39 @@
 
 namespace google_breakpad {
 
+typedef struct Elf32_Chdr {
+  typedef Elf32_Word Type;
+  typedef Elf32_Word Size;
+  typedef Elf32_Addr Addr;
+
+  static_assert(sizeof (Type) == 4);
+  static_assert(sizeof (Size) == 4);
+  static_assert(sizeof (Addr) == 4);
+
+  Type ch_type;       // Compression type
+  Size ch_size;       // Uncompressed data size in bytes
+  Addr ch_addralign;  // Uncompressed data alignment
+} Elf32_Chdr;
+
+static_assert(sizeof (Elf32_Chdr) == 12);
+
+typedef struct Elf64_Chdr {
+  typedef Elf64_Word  Type;
+  typedef Elf64_Xword Size;
+  typedef Elf64_Addr  Addr;
+
+  static_assert(sizeof (Type) == 4);
+  static_assert(sizeof (Size) == 8);
+  static_assert(sizeof (Addr) == 8);
+
+  Type ch_type;       // Compression type
+  Type ch_reserved;   // Padding
+  Size ch_size;       // Uncompressed data size in bytes
+  Addr ch_addralign;  // Uncompressed data alignment
+} Elf64_Chdr;
+
+static_assert(sizeof (Elf64_Chdr) == 24);
+
 // Traits classes so consumers can write templatized code to deal
 // with specific ELF bits.
 struct ElfClass32 {
@@ -49,6 +82,7 @@ struct ElfClass32 {
   typedef Elf32_Nhdr Nhdr;
   typedef Elf32_Phdr Phdr;
   typedef Elf32_Shdr Shdr;
+  typedef Elf32_Chdr Chdr;
   typedef Elf32_Half Half;
   typedef Elf32_Off Off;
   typedef Elf32_Sym Sym;
@@ -67,6 +101,7 @@ struct ElfClass64 {
   typedef Elf64_Nhdr Nhdr;
   typedef Elf64_Phdr Phdr;
   typedef Elf64_Shdr Shdr;
+  typedef Elf64_Chdr Chdr;
   typedef Elf64_Half Half;
   typedef Elf64_Off Off;
   typedef Elf64_Sym Sym;

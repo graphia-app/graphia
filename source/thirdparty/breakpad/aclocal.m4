@@ -14,8 +14,8 @@
 m4_ifndef([AC_CONFIG_MACRO_DIRS], [m4_defun([_AM_CONFIG_MACRO_DIRS], [])m4_defun([AC_CONFIG_MACRO_DIRS], [_AM_CONFIG_MACRO_DIRS($@)])])
 m4_ifndef([AC_AUTOCONF_VERSION],
   [m4_copy([m4_PACKAGE_VERSION], [AC_AUTOCONF_VERSION])])dnl
-m4_if(m4_defn([AC_AUTOCONF_VERSION]), [2.69],,
-[m4_warning([this file was generated for autoconf 2.69.
+m4_if(m4_defn([AC_AUTOCONF_VERSION]), [2.71],,
+[m4_warning([this file was generated for autoconf 2.71.
 You have another version of autoconf.  It may work, but is not guaranteed to.
 If you have problems, you may need to regenerate the build system entirely.
 To do so, use the procedure documented by the package, typically 'autoreconf'.])])
@@ -847,35 +847,6 @@ else
   AC_MSG_WARN(['missing' script is too old or missing])
 fi
 ])
-
-#  -*- Autoconf -*-
-# Obsolete and "removed" macros, that must however still report explicit
-# error messages when used, to smooth transition.
-#
-# Copyright (C) 1996-2021 Free Software Foundation, Inc.
-#
-# This file is free software; the Free Software Foundation
-# gives unlimited permission to copy and/or distribute it,
-# with or without modifications, as long as this notice is preserved.
-
-AC_DEFUN([AM_CONFIG_HEADER],
-[AC_DIAGNOSE([obsolete],
-['$0': this macro is obsolete.
-You should use the 'AC][_CONFIG_HEADERS' macro instead.])dnl
-AC_CONFIG_HEADERS($@)])
-
-AC_DEFUN([AM_PROG_CC_STDC],
-[AC_PROG_CC
-am_cv_prog_cc_stdc=$ac_cv_prog_cc_stdc
-AC_DIAGNOSE([obsolete],
-['$0': this macro is obsolete.
-You should simply use the 'AC][_PROG_CC' macro instead.
-Also, your code should no longer depend upon 'am_cv_prog_cc_stdc',
-but upon 'ac_cv_prog_cc_stdc'.])])
-
-AC_DEFUN([AM_C_PROTOTYPES],
-         [AC_FATAL([automatic de-ANSI-fication support has been removed])])
-AU_DEFUN([fp_C_PROTOTYPES], [AM_C_PROTOTYPES])
 
 # Helper functions for option handling.                     -*- Autoconf -*-
 

@@ -101,8 +101,10 @@ class MinidumpProcessor {
   // exception, if this information is available.  This will be a code
   // address when the crash was caused by problems such as illegal
   // instructions or divisions by zero, or a data address when the crash
-  // was caused by a memory access violation.
-  static string GetCrashReason(Minidump* dump, uint64_t* address);
+  // was caused by a memory access violation. If enable_objdump is set, this
+  // may use disassembly to compute the faulting address.
+  static string GetCrashReason(Minidump* dump, uint64_t* address,
+                               bool enable_objdump);
 
   // This function returns true if the passed-in error code is
   // something unrecoverable(i.e. retry should not happen).  For
@@ -124,7 +126,17 @@ class MinidumpProcessor {
   // does not exist or cannot be determined.
   static string GetAssertion(Minidump* dump);
 
+  // Sets the flag to enable/disable use of objdump during normal crash
+  // processing. This is independent from the flag for use of objdump during
+  // exploitability analysis.
   void set_enable_objdump(bool enabled) { enable_objdump_ = enabled; }
+
+  // Sets the flag to enable/disable use of objdump during exploitability
+  // analysis. This is independent from the flag for use of objdump during
+  // normal crash processing.
+  void set_enable_objdump_for_exploitability(bool enabled) {
+    enable_objdump_for_exploitability_ = enabled;
+  }
 
  private:
   StackFrameSymbolizer* frame_symbolizer_;
@@ -136,9 +148,15 @@ class MinidumpProcessor {
   // memory corruption issue.
   bool enable_exploitability_;
 
-  // This flag permits the exploitability scanner to shell out to objdump
-  // for purposes of disassembly.
+  // This flag permits the processor to shell out to objdump for purposes of
+  // disassembly during normal crash processing, but not during exploitability
+  // analysis.
   bool enable_objdump_;
+
+  // This flag permits the exploitability scanner to shell out to objdump for
+  // purposes of disassembly. This results in significantly more overhead than
+  // the enable_objdump_ flag.
+  bool enable_objdump_for_exploitability_;
 };
 
 }  // namespace google_breakpad

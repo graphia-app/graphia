@@ -60,6 +60,23 @@ blaze()
     esac
 }
 
+breakpad()
+{
+    local url=https://chromium.googlesource.com/breakpad/breakpad
+    case $1 in
+        latest) latestTag $url '^v[0-9.]+$' ;;
+        stage)
+            fetch $url "$2" "$3"
+            local lssUrl lssRevision
+            lssUrl=https://chromium.googlesource.com/linux-syscall-support
+            lssRevision=$(grep -A2 '"src/src/third_party/lss"' "$3/DEPS" | \
+                grep -oE '@[0-9a-f]{40}' | tr -d @)
+            fetch $lssUrl "$lssRevision" "$3/src/third_party/lss"
+            ;;
+        own) echo breakpad.cmake crashhandler.* exceptionrecord.h ;;
+    esac
+}
+
 cryptopp()
 {
     local url=https://github.com/weidai11/cryptopp.git
@@ -131,7 +148,7 @@ zlib()
     esac
 }
 
-libraries=(blaze cryptopp expat json lexy utfcpp xlsxio zlib)
+libraries=(blaze breakpad cryptopp expat json lexy utfcpp xlsxio zlib)
 
 # The repository stores thirdparty text with LF endings, which the patches assume
 normaliseLineEndings() # directory

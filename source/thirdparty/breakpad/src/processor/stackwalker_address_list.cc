@@ -32,6 +32,10 @@
 //
 // Author: Chris Hamilton <chrisha@chromium.org>
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>  // Must come first
+#endif
+
 #include <assert.h>
 
 #include <vector>
@@ -52,7 +56,8 @@ StackwalkerAddressList::StackwalkerAddressList(
     StackFrameSymbolizer* frame_symbolizer)
     : Stackwalker(NULL, NULL, modules, frame_symbolizer),
       frames_(frames),
-      frame_count_(frame_count) {
+      frame_count_(frame_count),
+      next_frame_index_(0) {
   assert(frames);
   assert(frame_symbolizer);
 }
@@ -64,26 +69,22 @@ StackFrame* StackwalkerAddressList::GetContextFrame() {
   StackFrame* frame = new StackFrame();
   frame->instruction = frames_[0];
   frame->trust = StackFrame::FRAME_TRUST_PREWALKED;
+
+  next_frame_index_ = 1;
+
   return frame;
 }
 
-StackFrame* StackwalkerAddressList::GetCallerFrame(const CallStack* stack,
+StackFrame* StackwalkerAddressList::GetCallerFrame(const CallStack*,
                                                    bool stack_scan_allowed) {
-  if (!stack) {
-    BPLOG(ERROR) << "Can't get caller frame without stack";
-    return NULL;
-  }
-
-  size_t frame_index = stack->frames()->size();
-
   // There are no more frames to fetch.
-  if (frame_index >= frame_count_)
+  if (next_frame_index_ >= frame_count_)
     return NULL;
 
   // All frames have the highest level of trust because they were
   // explicitly provided.
   StackFrame* frame = new StackFrame();
-  frame->instruction = frames_[frame_index];
+  frame->instruction = frames_[next_frame_index_++];
   frame->trust = StackFrame::FRAME_TRUST_PREWALKED;
   return frame;
 }

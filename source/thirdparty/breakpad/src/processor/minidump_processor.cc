@@ -26,11 +26,16 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>  // Must come first
+#endif
+
 #include "google_breakpad/processor/minidump_processor.h"
 
 #include <assert.h>
 
 #include <algorithm>
+#include <limits>
 #include <map>
 #include <string>
 #include <utility>
@@ -47,6 +52,10 @@
 #include "processor/stackwalker_x86.h"
 #include "processor/symbolic_constants_win.h"
 
+#ifdef __linux__
+#include "processor/disassembler_objdump.h"
+#endif
+
 namespace google_breakpad {
 
 MinidumpProcessor::MinidumpProcessor(SymbolSupplier* supplier,
@@ -54,7 +63,8 @@ MinidumpProcessor::MinidumpProcessor(SymbolSupplier* supplier,
     : frame_symbolizer_(new StackFrameSymbolizer(supplier, resolver)),
       own_frame_symbolizer_(true),
       enable_exploitability_(false),
-      enable_objdump_(false) {
+      enable_objdump_(false),
+      enable_objdump_for_exploitability_(false) {
 }
 
 MinidumpProcessor::MinidumpProcessor(SymbolSupplier* supplier,
@@ -63,7 +73,8 @@ MinidumpProcessor::MinidumpProcessor(SymbolSupplier* supplier,
     : frame_symbolizer_(new StackFrameSymbolizer(supplier, resolver)),
       own_frame_symbolizer_(true),
       enable_exploitability_(enable_exploitability),
-      enable_objdump_(false) {
+      enable_objdump_(false),
+      enable_objdump_for_exploitability_(false) {
 }
 
 MinidumpProcessor::MinidumpProcessor(StackFrameSymbolizer* frame_symbolizer,
@@ -71,7 +82,8 @@ MinidumpProcessor::MinidumpProcessor(StackFrameSymbolizer* frame_symbolizer,
     : frame_symbolizer_(frame_symbolizer),
       own_frame_symbolizer_(false),
       enable_exploitability_(enable_exploitability),
-      enable_objdump_(false) {
+      enable_objdump_(false),
+      enable_objdump_for_exploitability_(false) {
   assert(frame_symbolizer_);
 }
 
@@ -117,7 +129,7 @@ ProcessResult MinidumpProcessor::Process(
     has_requesting_thread = exception->GetThreadID(&requesting_thread_id);
 
     process_state->crash_reason_ = GetCrashReason(
-        dump, &process_state->crash_address_);
+        dump, &process_state->crash_address_, enable_objdump_);
 
     process_state->exception_record_.set_code(
         exception->exception()->exception_record.exception_code,
@@ -366,9 +378,8 @@ ProcessResult MinidumpProcessor::Process(
   // rating.
   if (enable_exploitability_) {
     scoped_ptr<Exploitability> exploitability(
-        Exploitability::ExploitabilityForPlatform(dump,
-                                                  process_state,
-                                                  enable_objdump_));
+        Exploitability::ExploitabilityForPlatform(
+          dump, process_state, enable_objdump_for_exploitability_));
     // The engine will be null if the platform is not supported
     if (exploitability != NULL) {
       process_state->exploitability_ = exploitability->CheckExploitability();
@@ -624,6 +635,16 @@ bool MinidumpProcessor::GetCPUInfo(Minidump* dump, SystemInfo* info) {
       break;
     }
 
+    case MD_CPU_ARCHITECTURE_RISCV: {
+      info->cpu = "riscv";
+      break;
+    }
+
+    case MD_CPU_ARCHITECTURE_RISCV64: {
+      info->cpu = "riscv64";
+      break;
+    }
+
     default: {
       // Assign the numeric architecture ID into the CPU string.
       char cpu_string[7];
@@ -758,8 +779,85 @@ bool MinidumpProcessor::GetProcessCreateTime(Minidump* dump,
   return true;
 }
 
+#ifdef __linux__
+
+static bool IsCanonicalAddress(uint64_t address) {
+  uint64_t sign_bit = (address >> 63) & 1;
+  for (int shift = 48; shift < 63; ++shift) {
+    if (sign_bit != ((address >> shift) & 1)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+static void CalculateFaultAddressFromInstruction(Minidump* dump,
+                                                 uint64_t* address) {
+  MinidumpException* exception = dump->GetException();
+  if (exception == NULL) {
+    BPLOG(INFO) << "Failed to get exception.";
+    return;
+  }
+
+  MinidumpContext* context = exception->GetContext();
+  if (context == NULL) {
+    BPLOG(INFO) << "Failed to get exception context.";
+    return;
+  }
+
+  uint64_t instruction_ptr = 0;
+  if (!context->GetInstructionPointer(&instruction_ptr)) {
+    BPLOG(INFO) << "Failed to get instruction pointer.";
+    return;
+  }
+
+  // Get memory region containing instruction pointer.
+  MinidumpMemoryList* memory_list = dump->GetMemoryList();
+  MinidumpMemoryRegion* memory_region =
+    memory_list ?
+    memory_list->GetMemoryRegionForAddress(instruction_ptr) : NULL;
+  if (!memory_region) {
+    BPLOG(INFO) << "No memory region around instruction pointer.";
+    return;
+  }
+
+  DisassemblerObjdump disassembler(context->GetContextCPU(), memory_region,
+                                   instruction_ptr);
+  fprintf(stderr, "%s %s %s\n", disassembler.operation().c_str(),
+    disassembler.src().c_str(), disassembler.dest().c_str());
+  if (!disassembler.IsValid()) {
+    BPLOG(INFO) << "Disassembling fault instruction failed.";
+    return;
+  }
+
+  // It's possible that we reach here when the faulting address is already
+  // correct, so we only update it if we find that at least one of the src/dest
+  // addresses is non-canonical. If both are non-canonical, we arbitrarily set
+  // it to the larger of the two, as this is more likely to be a known poison
+  // value.
+
+  bool valid_read, valid_write;
+  uint64_t read_address, write_address;
+
+  valid_read = disassembler.CalculateSrcAddress(*context, read_address);
+  valid_read &= !IsCanonicalAddress(read_address);
+
+  valid_write = disassembler.CalculateDestAddress(*context, write_address);
+  valid_write &= !IsCanonicalAddress(write_address);
+
+  if (valid_read && valid_write) {
+    *address = read_address > write_address ? read_address : write_address;
+  } else if (valid_read) {
+    *address = read_address;
+  } else if (valid_write) {
+    *address = write_address;
+  }
+}
+#endif // __linux__
+
 // static
-string MinidumpProcessor::GetCrashReason(Minidump* dump, uint64_t* address) {
+string MinidumpProcessor::GetCrashReason(Minidump* dump, uint64_t* address,
+                                         bool enable_objdump) {
   MinidumpException* exception = dump->GetException();
   if (!exception)
     return "";
@@ -1165,6 +1263,14 @@ string MinidumpProcessor::GetCrashReason(Minidump* dump, uint64_t* address) {
           break;
         case MD_EXCEPTION_MAC_RPC_ALERT:
           reason = "EXC_RPC_ALERT / ";
+          reason.append(flags_string);
+          break;
+        case MD_EXCEPTION_MAC_RESOURCE:
+          reason = "EXC_RESOURCE / ";
+          reason.append(flags_string);
+          break;
+        case MD_EXCEPTION_MAC_GUARD:
+          reason = "EXC_GUARD / ";
           reason.append(flags_string);
           break;
         case MD_EXCEPTION_MAC_SIMULATED:
@@ -1692,6 +1798,21 @@ string MinidumpProcessor::GetCrashReason(Minidump* dump, uint64_t* address) {
             case MD_EXCEPTION_FLAG_LIN_SEGV_PKUERR:
               reason.append("SEGV_PKUERR");
               break;
+            case MD_EXCEPTION_FLAG_LIN_SEGV_ACCADI:
+              reason.append("SEGV_ACCADI");
+              break;
+            case MD_EXCEPTION_FLAG_LIN_SEGV_ADIDERR:
+              reason.append("SEGV_ADIDERR");
+              break;
+            case MD_EXCEPTION_FLAG_LIN_SEGV_ADIPERR:
+              reason.append("SEGV_ADIPERR");
+              break;
+            case MD_EXCEPTION_FLAG_LIN_SEGV_MTEAERR:
+              reason.append("SEGV_MTEAERR");
+              break;
+            case MD_EXCEPTION_FLAG_LIN_SEGV_MTESERR:
+              reason.append("SEGV_MTESERR");
+              break;
             default:
               reason.append(flags_string);
               BPLOG(INFO) << "Unknown exception reason " << reason;
@@ -1985,6 +2106,17 @@ string MinidumpProcessor::GetCrashReason(Minidump* dump, uint64_t* address) {
     *address = GetAddressForArchitecture(
       static_cast<MDCPUArchitecture>(raw_system_info->processor_architecture),
       *address);
+
+#ifdef __linux__
+    // For invalid accesses to non-canonical addresses, amd64 cpus don't provide
+    // the fault address, so recover it from the disassembly and register state
+    // if possible.
+    if (enable_objdump
+        && raw_system_info->processor_architecture == MD_CPU_ARCHITECTURE_AMD64
+        && std::numeric_limits<uint64_t>::max() == *address) {
+      CalculateFaultAddressFromInstruction(dump, address);
+    }
+#endif // __linux__
   }
 
   return reason;

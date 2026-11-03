@@ -27,9 +27,9 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-AC_PREREQ(2.69)
+AC_PREREQ([2.71])
 
-AC_INIT(breakpad, 0.1, google-breakpad-dev@googlegroups.com)
+AC_INIT([breakpad],[0.1],[google-breakpad-dev@googlegroups.com])
 dnl Sanity check: the argument is just a file that should exist.
 AC_CONFIG_SRCDIR(README.md)
 AC_CONFIG_AUX_DIR(autotools)
@@ -37,7 +37,7 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_CANONICAL_HOST
 
 AM_INIT_AUTOMAKE(subdir-objects tar-ustar 1.13)
-AM_CONFIG_HEADER(src/config.h)
+AC_CONFIG_HEADERS(src/config.h)
 AM_MAINTAINER_MODE
 
 AM_PROG_AR
@@ -59,7 +59,6 @@ if test "x$enable_m32" = xyes; then
   CXXFLAGS="${CXXFLAGS} -m32"
 fi
 
-AC_HEADER_STDC
 AC_SYS_LARGEFILE
 AX_PTHREAD
 AC_CHECK_HEADERS([a.out.h sys/mman.h sys/random.h])
@@ -67,7 +66,7 @@ AC_CHECK_FUNCS([arc4random getcontext getrandom memfd_create])
 AM_CONDITIONAL([HAVE_GETCONTEXT], [test "x$ac_cv_func_getcontext" = xyes])
 AM_CONDITIONAL([HAVE_MEMFD_CREATE], [test "x$ac_cv_func_memfd_create" = xyes])
 
-AX_CXX_COMPILE_STDCXX(11, noext, mandatory)
+AX_CXX_COMPILE_STDCXX(17, , mandatory)
 
 dnl Test supported warning flags.
 WARN_CXXFLAGS=
@@ -212,6 +211,17 @@ fi
 
 AC_ARG_VAR([RUSTC_DEMANGLE_CFLAGS], [Compiler flags for rustc-demangle])
 AC_ARG_VAR([RUSTC_DEMANGLE_LIBS], [Linker flags for rustc-demangle])
+
+AC_ARG_ENABLE(zstd,
+              AS_HELP_STRING([--enable-zstd],
+                             [Enable decompression of ELF sections with zstd]),,
+              [enable_zstd=no])
+if test "x${enable_zstd}" != xno; then
+  AC_CHECK_LIB(zstd, ZSTD_decompress, [],
+               [AC_MSG_ERROR([zstd library not found.])])
+  AC_CHECK_HEADER(zstd.h, [],
+                  [AC_MSG_ERROR([zstd header not found.])])
+fi
 
 AC_ARG_WITH(tests-as-root,
             AS_HELP_STRING([--with-tests-as-root],

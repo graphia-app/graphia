@@ -26,6 +26,10 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>  // Must come first
+#endif
+
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -35,22 +39,13 @@
 
 #include "breakpad_googletest_includes.h"
 #include "client/linux/minidump_writer/cpu_set.h"
-#include "common/linux/tests/auto_testfile.h"
+#include "common/linux/scoped_tmpfile.h"
 
 using namespace google_breakpad;
 
 namespace {
 
 typedef testing::Test CpuSetTest;
-
-// Helper class to write test text file to a temporary file and return
-// its file descriptor.
-class ScopedTestFile : public AutoTestFile {
-public:
-  explicit ScopedTestFile(const char* text)
-    : AutoTestFile("cpu_set", text) {
-  }
-};
 
 }
 
@@ -60,8 +55,8 @@ TEST(CpuSetTest, EmptyCount) {
 }
 
 TEST(CpuSetTest, OneCpu) {
-  ScopedTestFile file("10");
-  ASSERT_TRUE(file.IsOk());
+  ScopedTmpFile file;
+  ASSERT_TRUE(file.InitString("10"));
 
   CpuSet set;
   ASSERT_TRUE(set.ParseSysFile(file.GetFd()));
@@ -69,8 +64,8 @@ TEST(CpuSetTest, OneCpu) {
 }
 
 TEST(CpuSetTest, OneCpuTerminated) {
-  ScopedTestFile file("10\n");
-  ASSERT_TRUE(file.IsOk());
+  ScopedTmpFile file;
+  ASSERT_TRUE(file.InitString("10\n"));
 
   CpuSet set;
   ASSERT_TRUE(set.ParseSysFile(file.GetFd()));
@@ -78,8 +73,8 @@ TEST(CpuSetTest, OneCpuTerminated) {
 }
 
 TEST(CpuSetTest, TwoCpusWithComma) {
-  ScopedTestFile file("1,10");
-  ASSERT_TRUE(file.IsOk());
+  ScopedTmpFile file;
+  ASSERT_TRUE(file.InitString("1,10"));
 
   CpuSet set;
   ASSERT_TRUE(set.ParseSysFile(file.GetFd()));
@@ -87,8 +82,8 @@ TEST(CpuSetTest, TwoCpusWithComma) {
 }
 
 TEST(CpuSetTest, TwoCpusWithRange) {
-  ScopedTestFile file("1-2");
-  ASSERT_TRUE(file.IsOk());
+  ScopedTmpFile file;
+  ASSERT_TRUE(file.InitString("1-2"));
 
   CpuSet set;
   ASSERT_TRUE(set.ParseSysFile(file.GetFd()));
@@ -96,8 +91,8 @@ TEST(CpuSetTest, TwoCpusWithRange) {
 }
 
 TEST(CpuSetTest, TenCpusWithRange) {
-  ScopedTestFile file("9-18");
-  ASSERT_TRUE(file.IsOk());
+  ScopedTmpFile file;
+  ASSERT_TRUE(file.InitString("9-18"));
 
   CpuSet set;
   ASSERT_TRUE(set.ParseSysFile(file.GetFd()));
@@ -105,8 +100,8 @@ TEST(CpuSetTest, TenCpusWithRange) {
 }
 
 TEST(CpuSetTest, MultiItems) {
-  ScopedTestFile file("0, 2-4, 128");
-  ASSERT_TRUE(file.IsOk());
+  ScopedTmpFile file;
+  ASSERT_TRUE(file.InitString("0, 2-4, 128"));
 
   CpuSet set;
   ASSERT_TRUE(set.ParseSysFile(file.GetFd()));
@@ -114,14 +109,16 @@ TEST(CpuSetTest, MultiItems) {
 }
 
 TEST(CpuSetTest, IntersectWith) {
-  ScopedTestFile file1("9-19");
-  ASSERT_TRUE(file1.IsOk());
+  ScopedTmpFile file1;
+  ASSERT_TRUE(file1.InitString("9-19"));
+
   CpuSet set1;
   ASSERT_TRUE(set1.ParseSysFile(file1.GetFd()));
   ASSERT_EQ(11, set1.GetCount());
 
-  ScopedTestFile file2("16-24");
-  ASSERT_TRUE(file2.IsOk());
+  ScopedTmpFile file2;
+  ASSERT_TRUE(file2.InitString("16-24"));
+
   CpuSet set2;
   ASSERT_TRUE(set2.ParseSysFile(file2.GetFd()));
   ASSERT_EQ(9, set2.GetCount());
@@ -132,8 +129,9 @@ TEST(CpuSetTest, IntersectWith) {
 }
 
 TEST(CpuSetTest, SelfIntersection) {
-  ScopedTestFile file1("9-19");
-  ASSERT_TRUE(file1.IsOk());
+  ScopedTmpFile file1;
+  ASSERT_TRUE(file1.InitString("9-19"));
+
   CpuSet set1;
   ASSERT_TRUE(set1.ParseSysFile(file1.GetFd()));
   ASSERT_EQ(11, set1.GetCount());
@@ -143,14 +141,16 @@ TEST(CpuSetTest, SelfIntersection) {
 }
 
 TEST(CpuSetTest, EmptyIntersection) {
-  ScopedTestFile file1("0-19");
-  ASSERT_TRUE(file1.IsOk());
+  ScopedTmpFile file1;
+  ASSERT_TRUE(file1.InitString("0-19"));
+
   CpuSet set1;
   ASSERT_TRUE(set1.ParseSysFile(file1.GetFd()));
   ASSERT_EQ(20, set1.GetCount());
 
-  ScopedTestFile file2("20-39");
-  ASSERT_TRUE(file2.IsOk());
+  ScopedTmpFile file2;
+  ASSERT_TRUE(file2.InitString("20-39"));
+
   CpuSet set2;
   ASSERT_TRUE(set2.ParseSysFile(file2.GetFd()));
   ASSERT_EQ(20, set2.GetCount());
