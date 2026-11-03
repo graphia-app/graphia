@@ -121,7 +121,8 @@ void CommandManager::executeReal(ICommandPtr command, CommandAction action)
 
     auto* commandPtr = command.get();
     auto verb = command->verb();
-    doCommand(commandPtr, verb, [this, command = std::move(command), action]() mutable
+    auto maxUndoLevels = u::pref(u"misc/maxUndoLevels"_s).toInt();
+    doCommand(commandPtr, verb, [this, command = std::move(command), action, maxUndoLevels]() mutable
     {
         const std::unique_lock<std::recursive_mutex> lock(_mutex);
 
@@ -155,7 +156,6 @@ void CommandManager::executeReal(ICommandPtr command, CommandAction action)
 
                 _stack.push_back(std::move(command));
 
-                auto maxUndoLevels = u::pref(u"misc/maxUndoLevels"_s).toInt();
                 if(maxUndoLevels > 0)
                 {
                     // Lose commands at the bottom of the stack until
