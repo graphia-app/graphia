@@ -93,6 +93,15 @@ lexy()
     esac
 }
 
+utfcpp()
+{
+    local url=https://github.com/nemtrif/utfcpp.git
+    case $1 in
+        latest) latestTag $url '^v[0-9.]+$' ;;
+        stage) fetch $url "$2" "$3" ;;
+    esac
+}
+
 xlsxio()
 {
     local url=https://github.com/brechtsanders/xlsxio.git
@@ -113,7 +122,7 @@ zlib()
     esac
 }
 
-libraries=(cryptopp expat json lexy xlsxio zlib)
+libraries=(cryptopp expat json lexy utfcpp xlsxio zlib)
 
 # The repository stores thirdparty text with LF endings, which the patches assume
 normaliseLineEndings() # directory
