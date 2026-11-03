@@ -13,7 +13,7 @@ qt_standard_project_setup(REQUIRES 6.11
 
 set(SHARED_I18N_OPTIONS
     NO_GENERATE_PLURALS_TS_FILE
-    LUPDATE_OPTIONS -no-obsolete -locations relative)
+    LUPDATE_OPTIONS -no-obsolete -locations none)
 
 include_directories(source)
 
