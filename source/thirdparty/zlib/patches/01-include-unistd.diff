@@ -1,0 +1,13 @@
+diff --git a/source/thirdparty/zlib/gzguts.h b/source/thirdparty/zlib/gzguts.h
+index 266305deb..773c8e89a 100644
+--- a/source/thirdparty/zlib/gzguts.h
++++ b/source/thirdparty/zlib/gzguts.h
+@@ -49,6 +49,8 @@
+ #if defined(__TURBOC__) || defined(_MSC_VER) || defined(_WIN32)
+ #  include <io.h>
+ #  include <sys/stat.h>
++#else
++#  include <unistd.h>
+ #endif
+ 
+ #if defined(_WIN32) && !defined(WIDECHAR)

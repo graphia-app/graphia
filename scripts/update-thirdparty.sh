@@ -60,7 +60,17 @@ lexy()
     esac
 }
 
-libraries=(lexy)
+zlib()
+{
+    local url=https://github.com/madler/zlib.git
+    case $1 in
+        latest) latestTag $url '^v[0-9.]+$' ;;
+        stage) fetch $url "$2" "$3" ;;
+        own) echo zlib.cmake ;;
+    esac
+}
+
+libraries=(lexy zlib)
 
 # The repository stores thirdparty text with LF endings, which the patches assume
 normaliseLineEndings() # directory
