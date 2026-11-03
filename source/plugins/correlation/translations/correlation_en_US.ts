@@ -752,7 +752,7 @@
 <context>
     <name>CorrelationPlot</name>
     <message>
-        <location filename="../ui/qml/Graphia/Plugins/Correlation/correlationplot.cpp" line="+716"/>
+        <location filename="../ui/qml/Graphia/Plugins/Correlation/correlationplot.cpp" line="+722"/>
         <source>1 column</source>
         <translation>1 column</translation>
     </message>
@@ -775,7 +775,7 @@
         <translation>…and %1 more</translation>
     </message>
     <message>
-        <location line="+802"/>
+        <location line="+807"/>
         <source>Resize To Expose Column Information</source>
         <translation>Resize To Expose Column Information</translation>
     </message>
