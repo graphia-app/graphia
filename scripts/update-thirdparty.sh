@@ -75,6 +75,15 @@ expat()
     esac
 }
 
+json()
+{
+    local url=https://github.com/nlohmann/json.git
+    case $1 in
+        latest) latestTag $url '^v[0-9.]+$' ;;
+        stage) fetch $url "$2" "$WORK/upstream"; mv "$WORK/upstream/single_include/nlohmann/"* "$3/" ;;
+    esac
+}
+
 lexy()
 {
     local url=https://github.com/foonathan/lexy.git
@@ -104,7 +113,7 @@ zlib()
     esac
 }
 
-libraries=(cryptopp expat lexy xlsxio zlib)
+libraries=(cryptopp expat json lexy xlsxio zlib)
 
 # The repository stores thirdparty text with LF endings, which the patches assume
 normaliseLineEndings() # directory
