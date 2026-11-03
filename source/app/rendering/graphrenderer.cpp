@@ -1019,37 +1019,47 @@ void GraphRenderer::processEventQueue()
         auto e = std::move(_eventQueue.front());
         _eventQueue.pop();
 
-        auto* mouseEvent = dynamic_cast<QMouseEvent*>(e.get());
+        // You might expect mouse button events to be delivered as QMouseEvents,
+        // and for the most part they are, except when a touchscreen device is
+        // used to generate them, specifically a touchscreen laptop. Under this
+        // regime, we seem to only get QSinglePointEvents. This is a base for
+        // QMouseEvent, so we get the same information we need for both cases.
+        auto* singlePointEvent = dynamic_cast<QSinglePointEvent*>(e.get());
         auto* wheelEvent = dynamic_cast<QWheelEvent*>(e.get());
         auto* nativeEvent = dynamic_cast<QNativeGestureEvent*>(e.get());
 
         switch(e->type())
         {
         case QEvent::Type::MouseButtonPress:
-            _interactor->mousePressEvent(mouseEvent->pos() * _devicePixelRatio,
-                mouseEvent->modifiers(), mouseEvent->button());
+            Q_ASSERT(singlePointEvent != nullptr);
+            _interactor->mousePressEvent(singlePointEvent->position().toPoint() * _devicePixelRatio,
+                singlePointEvent->modifiers(), singlePointEvent->button());
 
             break;
 
         case QEvent::Type::MouseButtonRelease:
-            _interactor->mouseReleaseEvent(mouseEvent->pos() * _devicePixelRatio,
-                mouseEvent->modifiers(), mouseEvent->button());
+            Q_ASSERT(singlePointEvent != nullptr);
+            _interactor->mouseReleaseEvent(singlePointEvent->position().toPoint() * _devicePixelRatio,
+                singlePointEvent->modifiers(), singlePointEvent->button());
 
             break;
 
         case QEvent::Type::MouseMove:
-            _interactor->mouseMoveEvent(mouseEvent->pos() * _devicePixelRatio,
-                mouseEvent->modifiers(), mouseEvent->button());
+            Q_ASSERT(singlePointEvent != nullptr);
+            _interactor->mouseMoveEvent(singlePointEvent->position().toPoint() * _devicePixelRatio,
+                singlePointEvent->modifiers(), singlePointEvent->button());
 
             break;
 
         case QEvent::Type::MouseButtonDblClick:
-            _interactor->mouseDoubleClickEvent(mouseEvent->pos() * _devicePixelRatio,
-                mouseEvent->modifiers(), mouseEvent->button());
+            Q_ASSERT(singlePointEvent != nullptr);
+            _interactor->mouseDoubleClickEvent(singlePointEvent->position().toPoint() * _devicePixelRatio,
+                singlePointEvent->modifiers(), singlePointEvent->button());
 
             break;
 
         case QEvent::Type::Wheel:
+            Q_ASSERT(wheelEvent != nullptr);
             switch(wheelEvent->deviceType())
             {
             case QInputDevice::DeviceType::Mouse:
@@ -1080,6 +1090,7 @@ void GraphRenderer::processEventQueue()
             break;
 
         case QEvent::Type::NativeGesture:
+            Q_ASSERT(nativeEvent != nullptr);
             if(nativeEvent->gestureType() == Qt::ZoomNativeGesture)
             {
                 _interactor->zoomGestureEvent(
