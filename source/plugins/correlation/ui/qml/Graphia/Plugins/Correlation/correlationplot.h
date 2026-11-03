@@ -172,12 +172,13 @@ private:
 
     std::atomic_bool _updateQueued = false;
     CorrelationPlotUpdateType _updateType = CorrelationPlotUpdateType::None;
+    size_t _undrawnRenderRequests = 0;
 
     Q_INVOKABLE void renderPixmap();
 
 signals:
     void busyChanged();
-    void pixmapUpdated(QPixmap pixmap);
+    void pixmapUpdated(QPixmap pixmap, size_t renderRequestsDrawn);
     void zoomedChanged();
 };
 
@@ -245,6 +246,7 @@ public:
         const QString& extension, const QString& attributeName);
     Q_INVOKABLE void sortBy(int type, const QString& text = {});
     Q_INVOKABLE void resetZoom();
+    Q_INVOKABLE bool renderPending() const;
 
     Q_INVOKABLE void showAllColumnAnnotations();
     Q_INVOKABLE void hideAllColumnAnnotations();
@@ -380,6 +382,7 @@ private:
     CorrelationPlotWorker* _worker = nullptr;
 
     QPixmap _pixmap;
+    size_t _renderRequestsInFlight = 0;
 
     size_t numColumns() const;
     size_t numVisibleColumns() const;
@@ -483,7 +486,7 @@ private:
         const QColor& color = {}, const QString& text = {});
 
 private slots:
-    void onPixmapUpdated(const QPixmap& pixmap);
+    void onPixmapUpdated(const QPixmap& pixmap, size_t renderRequestsDrawn);
     void updatePlotSize();
     bool updateTooltip();
 

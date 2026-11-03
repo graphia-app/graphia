@@ -40,6 +40,7 @@
 #include <algorithm>
 #include <iterator>
 #include <memory>
+#include <utility>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -202,6 +203,7 @@ void CorrelationPlotWorker::pan(QCPAxis* axis, double delta)
 void CorrelationPlotWorker::updatePixmap(CorrelationPlotUpdateType updateType)
 {
     _updateType = std::max(updateType, _updateType);
+    _undrawnRenderRequests++;
 
     // Avoid queueing up multiple redundant updates
     if(_updateQueued)
@@ -324,7 +326,7 @@ void CorrelationPlotWorker::renderPixmap()
     // Ensure lock is released before receivers of pixmapUpdated are notified
     lock.unlock();
 
-    emit pixmapUpdated(pixmap);
+    emit pixmapUpdated(pixmap, std::exchange(_undrawnRenderRequests, 0));
 }
 
 CorrelationPlot::CorrelationPlot(QQuickItem* parent) :
@@ -419,6 +421,8 @@ CorrelationPlot::~CorrelationPlot()
 
 void CorrelationPlot::updatePixmap(CorrelationPlotUpdateType updateType)
 {
+    _renderRequestsInFlight++;
+
     QMetaObject::invokeMethod(_worker, "updatePixmap", Qt::QueuedConnection,
         Q_ARG(CorrelationPlotUpdateType, updateType));
 }
@@ -495,8 +499,10 @@ void CorrelationPlot::paint(QPainter* painter)
     }
 }
 
-void CorrelationPlot::onPixmapUpdated(const QPixmap& pixmap)
+void CorrelationPlot::onPixmapUpdated(const QPixmap& pixmap, size_t renderRequestsDrawn)
 {
+    _renderRequestsInFlight -= renderRequestsDrawn;
+
     if(!pixmap.isNull())
     {
         _pixmap = pixmap;
@@ -1561,6 +1567,11 @@ void CorrelationPlot::resetZoom()
 
     QMetaObject::invokeMethod(_worker, "resetZoom", Qt::QueuedConnection);
     updatePixmap(CorrelationPlotUpdateType::Render);
+}
+
+bool CorrelationPlot::renderPending() const
+{
+    return _renderRequestsInFlight > 0;
 }
 
 void CorrelationPlot::setColumnSortOrders(const QVector<QVariantMap>& columnSortOrders) // clazy:exclude=qproperty-type-mismatch
