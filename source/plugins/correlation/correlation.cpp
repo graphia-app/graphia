@@ -291,7 +291,7 @@ public:
     static QString attributeDescription()
     {
         return QObject::tr("The %1 is an indication of "
-            "the monotomic relationship between two variables.")
+            "the monotonic relationship between two variables.")
             .arg(u::redirectLink("spearman", QObject::tr("Spearman Rank Correlation Coefficient")));
     }
 };

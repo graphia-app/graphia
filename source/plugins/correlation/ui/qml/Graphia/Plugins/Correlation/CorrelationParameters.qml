@@ -490,7 +490,7 @@ BaseParameterDialog
                         if(dataTypeComboBox.value === CorrelationDataType.Discrete && tabularDataParser.dataRect.appearsToBeContinuous)
                         {
                             return qsTr("<font color=\"red\">WARNING: the selected dataframe appears " +
-                                "to contain contiguous data; interpreting it as discrete may " +
+                                "to contain continuous data; interpreting it as discrete may " +
                                 "result in only a low level of correlation.</font>");
                         }
 
@@ -1025,7 +1025,7 @@ BaseParameterDialog
 
                                     Text
                                     {
-                                        text: qsTr("Raise <i>x</i> to the power of <i>b</i>, where <i>x</i> is the input data.");
+                                        text: qsTr("Raise <i>b</i> to the power of <i>x</i>, where <i>x</i> is the input data.");
                                         wrapMode: Text.WordWrap
                                         Layout.fillWidth: true
                                     }

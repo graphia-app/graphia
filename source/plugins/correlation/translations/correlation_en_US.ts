@@ -122,8 +122,8 @@
     </message>
     <message>
         <location line="+79"/>
-        <source>&lt;font color=&quot;red&quot;&gt;WARNING: the selected dataframe appears to contain contiguous data; interpreting it as discrete may result in only a low level of correlation.&lt;/font&gt;</source>
-        <translation>&lt;font color=&quot;red&quot;&gt;WARNING: the selected dataframe appears to contain contiguous data; interpreting it as discrete may result in only a low level of correlation.&lt;/font&gt;</translation>
+        <source>&lt;font color=&quot;red&quot;&gt;WARNING: the selected dataframe appears to contain continuous data; interpreting it as discrete may result in only a low level of correlation.&lt;/font&gt;</source>
+        <translation>&lt;font color=&quot;red&quot;&gt;WARNING: the selected dataframe appears to contain continuous data; interpreting it as discrete may result in only a low level of correlation.&lt;/font&gt;</translation>
     </message>
     <message>
         <location line="+13"/>
@@ -374,8 +374,8 @@
     </message>
     <message>
         <location line="+7"/>
-        <source>Raise &lt;i&gt;x&lt;/i&gt; to the power of &lt;i&gt;b&lt;/i&gt;, where &lt;i&gt;x&lt;/i&gt; is the input data.</source>
-        <translation>Raise &lt;i&gt;x&lt;/i&gt; to the power of &lt;i&gt;b&lt;/i&gt;, where &lt;i&gt;x&lt;/i&gt; is the input data.</translation>
+        <source>Raise &lt;i&gt;b&lt;/i&gt; to the power of &lt;i&gt;x&lt;/i&gt;, where &lt;i&gt;x&lt;/i&gt; is the input data.</source>
+        <translation>Raise &lt;i&gt;b&lt;/i&gt; to the power of &lt;i&gt;x&lt;/i&gt;, where &lt;i&gt;x&lt;/i&gt; is the input data.</translation>
     </message>
     <message>
         <location line="+7"/>
@@ -1641,8 +1641,8 @@
     </message>
     <message>
         <location line="+3"/>
-        <source>The %1 is an indication of the monotomic relationship between two variables.</source>
-        <translation>The %1 is an indication of the monotomic relationship between two variables.</translation>
+        <source>The %1 is an indication of the monotonic relationship between two variables.</source>
+        <translation>The %1 is an indication of the monotonic relationship between two variables.</translation>
     </message>
     <message>
         <location line="+2"/>
