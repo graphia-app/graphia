@@ -48,6 +48,14 @@ qt_add_library(thirdparty ${LINK_TYPE}
 
 target_link_libraries(thirdparty PRIVATE ${CMAKE_DL_LIBS})
 
+if(MSVC AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    # Crypto++ divides 128 bit integers, which clang-cl leaves to compiler-rt
+    execute_process(COMMAND ${CMAKE_CXX_COMPILER} /clang:--rtlib=compiler-rt /clang:-print-libgcc-file-name
+        OUTPUT_VARIABLE CLANG_BUILTINS_LIBRARY OUTPUT_STRIP_TRAILING_WHITESPACE)
+    target_link_libraries(thirdparty PRIVATE ${CLANG_BUILTINS_LIBRARY})
+    target_link_libraries(thirdparty_static PRIVATE ${CLANG_BUILTINS_LIBRARY})
+endif()
+
 # Disable unity build for third party files
 foreach(FILE IN LISTS STATIC_THIRDPARTY_SOURCES)
     set_property(SOURCE ${FILE} PROPERTY SKIP_UNITY_BUILD_INCLUSION ON)

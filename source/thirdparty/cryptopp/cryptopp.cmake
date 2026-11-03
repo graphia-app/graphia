@@ -21,6 +21,7 @@ list(APPEND STATIC_THIRDPARTY_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/oaep.cpp
     ${CMAKE_CURRENT_LIST_DIR}/osrng.cpp
     ${CMAKE_CURRENT_LIST_DIR}/pkcspad.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/primetab.cpp
     ${CMAKE_CURRENT_LIST_DIR}/pssr.cpp
     ${CMAKE_CURRENT_LIST_DIR}/pubkey.cpp
     ${CMAKE_CURRENT_LIST_DIR}/queue.cpp
@@ -42,3 +43,8 @@ list(APPEND STATIC_THIRDPARTY_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/sha.cpp
     ${CMAKE_CURRENT_LIST_DIR}/sha3.cpp
 )
+
+if(MSVC)
+    # cpu.cpp calls CPUID64 and XGETBV64, which are defined here
+    list(APPEND STATIC_THIRDPARTY_SOURCES ${CMAKE_CURRENT_LIST_DIR}/x64dll.asm)
+endif()

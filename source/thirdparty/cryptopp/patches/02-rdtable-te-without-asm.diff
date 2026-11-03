@@ -1,0 +1,16 @@
+diff --git a/source/thirdparty/cryptopp/rijndael.cpp b/source/thirdparty/cryptopp/rijndael.cpp
+index f7ab9eeb8..e3b36cd89 100644
+--- a/source/thirdparty/cryptopp/rijndael.cpp
++++ b/source/thirdparty/cryptopp/rijndael.cpp
+@@ -125,6 +125,11 @@ CRYPTOPP_ALIGN_DATA(16) static word32 Te[256*4];
+ CRYPTOPP_ALIGN_DATA(16) static word32 Td[256*4];
+ #endif // CRYPTOPP_ALLOW_RIJNDAEL_UNALIGNED_DATA_ACCESS
+ 
++// Unused; x64dll.asm, which cpu.cpp needs on MSVC-style x64, references it
++#if defined(_M_X64) && defined(CRYPTOPP_MS_STYLE_INLINE_ASSEMBLY) && !defined(CRYPTOPP_X64_MASM_AVAILABLE)
++namespace rdtable {CRYPTOPP_ALIGN_DATA(16) word64 Te[256+2];}
++#endif
++
+ static volatile bool s_TeFilled = false, s_TdFilled = false;
+ 
+ ANONYMOUS_NAMESPACE_BEGIN

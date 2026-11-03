@@ -90,7 +90,7 @@ being unloaded from L1 cache, until that round is finished.
 
 // VS2017 and global optimization bug. Also see
 // https://github.com/weidai11/cryptopp/issues/649
-#if (_MSC_VER >= 1910) && (_MSC_VER <= 1916)
+#if (CRYPTOPP_MSC_VERSION >= 1910) && (CRYPTOPP_MSC_VERSION <= 1916)
 # ifndef CRYPTOPP_DEBUG
 #  pragma optimize("", off)
 #  pragma optimize("ts", on)
@@ -124,6 +124,11 @@ namespace rdtable {CRYPTOPP_ALIGN_DATA(16) word64 Te[256+2];}
 CRYPTOPP_ALIGN_DATA(16) static word32 Te[256*4];
 CRYPTOPP_ALIGN_DATA(16) static word32 Td[256*4];
 #endif // CRYPTOPP_ALLOW_RIJNDAEL_UNALIGNED_DATA_ACCESS
+
+// Unused; x64dll.asm, which cpu.cpp needs on MSVC-style x64, references it
+#if defined(_M_X64) && defined(CRYPTOPP_MS_STYLE_INLINE_ASSEMBLY) && !defined(CRYPTOPP_X64_MASM_AVAILABLE)
+namespace rdtable {CRYPTOPP_ALIGN_DATA(16) word64 Te[256+2];}
+#endif
 
 static volatile bool s_TeFilled = false, s_TdFilled = false;
 
@@ -422,7 +427,7 @@ void Rijndael::Base::UncheckedSetKey(const byte *userKey, unsigned int keyLen, c
 	m_key.New(4*(m_rounds+1));
 	word32 *rk = m_key;
 
-#if (CRYPTOPP_AESNI_AVAILABLE && CRYPTOPP_SSE41_AVAILABLE && (!defined(_MSC_VER) || _MSC_VER >= 1600 || CRYPTOPP_BOOL_X86 || CRYPTOPP_BOOL_X32))
+#if (CRYPTOPP_AESNI_AVAILABLE && CRYPTOPP_SSE41_AVAILABLE && (!defined(CRYPTOPP_MSC_VERSION) || CRYPTOPP_MSC_VERSION >= 1600 || CRYPTOPP_BOOL_X86 || CRYPTOPP_BOOL_X32))
 	// MSVC 2008 SP1 generates bad code for _mm_extract_epi32() when compiling for X64
 	if (HasAESNI() && HasSSE41())
 	{
@@ -1204,7 +1209,7 @@ CRYPTOPP_NAKED void CRYPTOPP_FASTCALL Rijndael_Enc_AdvancedProcessBlocks_SSE2(vo
 #endif
 	AS_POP_IF86(bp)
 	AS_POP_IF86(bx)
-#if defined(_MSC_VER) && CRYPTOPP_BOOL_X86
+#if defined(CRYPTOPP_MSC_VERSION) && CRYPTOPP_BOOL_X86
 	AS_POP_IF86(di)
 	AS_POP_IF86(si)
 	AS1(ret)

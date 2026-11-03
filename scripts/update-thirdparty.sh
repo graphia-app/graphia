@@ -51,6 +51,16 @@ fetch() # url ref destination
 #   own                 globs of the files Graphia adds
 #   notes               what the script can't do for it
 
+cryptopp()
+{
+    local url=https://github.com/weidai11/cryptopp.git
+    case $1 in
+        latest) latestTag $url '^CRYPTOPP_[0-9_]+$' ;;
+        stage) fetch $url "$2" "$3" ;;
+        own) echo cryptopp.cmake ;;
+    esac
+}
+
 lexy()
 {
     local url=https://github.com/foonathan/lexy.git
@@ -80,7 +90,7 @@ zlib()
     esac
 }
 
-libraries=(lexy xlsxio zlib)
+libraries=(cryptopp lexy xlsxio zlib)
 
 # The repository stores thirdparty text with LF endings, which the patches assume
 normaliseLineEndings() # directory

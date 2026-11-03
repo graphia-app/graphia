@@ -1,0 +1,13 @@
+diff --git a/source/thirdparty/cryptopp/config_os.h b/source/thirdparty/cryptopp/config_os.h
+index 0994563a4..1a636c344 100644
+--- a/source/thirdparty/cryptopp/config_os.h
++++ b/source/thirdparty/cryptopp/config_os.h
+@@ -30,7 +30,7 @@
+ // The problems with Clang pretending to be other compilers is
+ // discussed at http://github.com/weidai11/cryptopp/issues/147.
+ #if (defined(_MSC_VER) && defined(__clang__))
+-# error: "Unsupported configuration"
++//# error: "Unsupported configuration"
+ #endif
+ 
+ // Windows platform

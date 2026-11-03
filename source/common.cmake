@@ -99,7 +99,7 @@ if(MSVC)
 
     # Assembler
     ENABLE_LANGUAGE(ASM_MASM)
-    set(CMAKE_ASM_MASM_FLAGS "/nologo /D_M_X64 /W3 /Cx /Z7")
+    set(CMAKE_ASM_MASM_FLAGS "/nologo /D_M_X64 /W3 /Cx /Zi")
 endif()
 
 set(SANITIZERS "" CACHE STRING "Sanitizers to build with, e.g. address;undefined")
