@@ -177,19 +177,6 @@ private slots:
         QVERIFY(u::rsaSignString("text", path(u"a.public.der"_s)).empty());
     }
 
-    void rsaEncrypt()
-    {
-        auto a = u::rsaEncryptString("secret", path(u"a.public.der"_s));
-        auto b = u::rsaEncryptString("secret", path(u"a.public.der"_s));
-
-        // As hex, a byte per 8 bits of the key
-        QVERIFY(u::isHex(a));
-        QCOMPARE(a.size(), 2u * (1024u / 8u));
-
-        // OAEP padding is random
-        QVERIFY(a != b);
-    }
-
     void aes()
     {
         const auto key = u::generateAesKey();

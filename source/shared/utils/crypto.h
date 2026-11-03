@@ -53,9 +53,6 @@ namespace u
         const std::string& publicKeyFileName, std::string* message = nullptr);
     bool rsaVerifySignature(const std::string& signaturePlusString,
         const std::string& publicKeyFileName, std::string* message = nullptr);
-
-    std::string rsaEncryptString(const std::string& string,
-        const std::string& publicKeyFileName);
 } // namespace u
 
 #endif // CRYPTO_H

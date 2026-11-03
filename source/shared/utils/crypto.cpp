@@ -184,20 +184,3 @@ bool u::rsaVerifySignature(const std::string& signaturePlusString,
 
     return true;
 }
-
-std::string u::rsaEncryptString(const std::string& string, const std::string& publicKeyFileName)
-{
-    auto publicKey = loadKey<CryptoPP::RSA::PublicKey>(publicKeyFileName);
-    const CryptoPP::RSAES_OAEP_SHA_Encryptor rsaEncryptor(publicKey);
-
-    CryptoPP::AutoSeededRandomPool rng;
-    std::vector<CryptoPP::byte> cipher(rsaEncryptor.FixedCiphertextLength());
-
-    auto* sink = new CryptoPP::ArraySink(cipher.data(), cipher.size());
-    auto* filter = new CryptoPP::PK_EncryptorFilter(rng, rsaEncryptor, sink);
-
-    const CryptoPP::StringSource ss(string, true, filter);
-    Q_UNUSED(ss);
-
-    return u::bytesToHex(cipher);
-}
