@@ -3,7 +3,7 @@
 //  \file blaze/util/constraints/Arithmetic.h
 //  \brief Constraint on the data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -59,7 +59,7 @@ namespace blaze {
 // created.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_ARITHMETIC_TYPE(T) \
-   static_assert( ::blaze::IsArithmetic<T>::value, "Non-arithmetic type detected" )
+   static_assert( ::blaze::IsArithmetic_v<T>, "Non-arithmetic type detected" )
 //*************************************************************************************************
 
 
@@ -78,7 +78,7 @@ namespace blaze {
 // In case the given data type \a T is an arithmetic data type, a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_ARITHMETIC_TYPE(T) \
-   static_assert( !::blaze::IsArithmetic<T>::value, "Arithmetic type detected" )
+   static_assert( !::blaze::IsArithmetic_v<T>, "Arithmetic type detected" )
 //*************************************************************************************************
 
 } // namespace blaze

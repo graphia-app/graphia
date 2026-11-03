@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/MakeSigned.h
 //  \brief Header file for the MakeSigned type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -75,7 +75,7 @@ struct MakeSigned
  public:
    //**********************************************************************************************
    /*! \cond BLAZE_INTERNAL */
-   typedef typename std::make_signed<T>::type  Type;
+   using Type = typename std::make_signed<T>::type;
    /*! \endcond */
    //**********************************************************************************************
 };
@@ -86,17 +86,17 @@ struct MakeSigned
 /*!\brief Auxiliary alias declaration for the MakeSigned type trait.
 // \ingroup type_traits
 //
-// The MakeSigned_ alias declaration provides a convenient shortcut to access the nested \a Type
+// The MakeSigned_t alias declaration provides a convenient shortcut to access the nested \a Type
 // of the MakeSigned class template. For instance, given the type \a T the following two type
 // definitions are identical:
 
    \code
-   using Type1 = typename MakeSigned<T>::Type;
-   using Type2 = MakeSigned_<T>;
+   using Type1 = typename blaze::MakeSigned<T>::Type;
+   using Type2 = blaze::MakeSigned_t<T>;
    \endcode
 */
 template< typename T >
-using MakeSigned_ = typename MakeSigned<T>::Type;
+using MakeSigned_t = typename MakeSigned<T>::Type;
 //*************************************************************************************************
 
 } // namespace blaze

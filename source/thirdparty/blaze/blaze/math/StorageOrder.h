@@ -3,7 +3,7 @@
 //  \file blaze/math/StorageOrder.h
 //  \brief Header file for the matrix storage order types
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -68,7 +68,7 @@ namespace blaze {
    blaze::StaticMatrix<int,2UL,3UL,rowMajor> A( { { 1, 2, 3 }, { 4, 5, 6 } } );
    \endcode
 */
-const bool rowMajor = false;
+constexpr bool rowMajor = false;
 //*************************************************************************************************
 
 
@@ -96,7 +96,7 @@ const bool rowMajor = false;
    blaze::StaticMatrix<int,2UL,3UL,columnMajor> A( { { 1, 2, 3 }, { 4, 5, 6 } } );
    \endcode
 */
-const bool columnMajor = true;
+constexpr bool columnMajor = true;
 //*************************************************************************************************
 
 } // namespace blaze

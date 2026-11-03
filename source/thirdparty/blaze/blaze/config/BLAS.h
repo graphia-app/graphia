@@ -3,7 +3,7 @@
 //  \file blaze/config/BLAS.h
 //  \brief Configuration of the BLAS mode
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -49,48 +49,58 @@
 //  - Disabled: \b 0
 //  - Enabled : \b 1
 //
-// Note that changing the setting of the BLAS mode requires a recompilation of all code using
-// the Blaze library.
+// \warning Changing the setting of the BLAS mode requires a recompilation of all code using
+// the Blaze library!
+//
+// \note It is possible to (de-)activate the BLAS mode via command line or by defining this
+// symbol manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_BLAS_MODE=1 ...
+   \endcode
+
+   \code
+   #define BLAZE_BLAS_MODE 1
+   #include <blaze/Blaze.h>
+   \endcode
 */
+#ifndef BLAZE_BLAS_MODE
 #define BLAZE_BLAS_MODE 0
+#endif
 //*************************************************************************************************
 
 
 //*************************************************************************************************
-/*!\brief Compilation switch for the BLAS matrix/vector multiplication kernels (gemv).
+/*!\brief Compilation switch for the BLAS 64-bit support.
 // \ingroup config
 //
-// This compilation switch enables/disables the BLAS matrix/vector multiplication kernels. If the
-// switch is enabled, multiplications between dense matrices and dense vectors are computed by
-// BLAS kernels, if it is disabled the multiplications are handled by the default Blaze kernels.
+// This compilation switch enables/disables 64-bit BLAS and LAPACK support. In case the 64-bit
+// BLAS mode is enabled, \c blaze::blas_int_t, which is used in the BLAS and LAPACK wrapper
+// functions, is a 64-bit signed integral type. In case the 64-bit BLAS mode is disabled,
+// \c blaze::blas_int_t is a 32-bit signed integral type.
 //
 // Possible settings for the switch:
-//  - Disabled: \b 0 (default)
-//  - Enabled : \b 1
+//  - 32-bit BLAS/LAPACK: \b 0 (default)
+//  - 64-bit BLAS/LAPACK: \b 1
 //
-// Note that changing the setting of this compilation switch requires a recompilation of all code
-// using the Blaze library.
-*/
-#define BLAZE_USE_BLAS_MATRIX_VECTOR_MULTIPLICATION 0
-//*************************************************************************************************
+// \warning Changing the setting of the BLAS mode requires a recompilation of all code using the
+// Blaze library!
+//
+// \note It is possible to (de-)activate the 64-bit BLAS mode via command line or by defining
+// this symbol manually before including any Blaze header file:
 
+   \code
+   g++ ... -DBLAZE_BLAS_IS_64BIT=1 ...
+   \endcode
 
-//*************************************************************************************************
-/*!\brief Compilation switch for the BLAS matrix/matrix multiplication kernels (gemv).
-// \ingroup config
-//
-// This compilation switch enables/disables the BLAS matrix/matrix multiplication kernels. If the
-// switch is enabled, multiplications between dense matrices are computed by BLAS kernels, if it
-// is disabled the multiplications are handled by the default Blaze kernels.
-//
-// Possible settings for the switch:
-//  - Disabled: \b 0
-//  - Enabled : \b 1 (default)
-//
-// Note that changing the setting of this compilation switch requires a recompilation of all code
-// using the Blaze library.
+   \code
+   #define BLAZE_BLAS_IS_64BIT 1
+   #include <blaze/Blaze.h>
+   \endcode
 */
-#define BLAZE_USE_BLAS_MATRIX_MATRIX_MULTIPLICATION 1
+#ifndef BLAZE_BLAS_IS_64BIT
+#define BLAZE_BLAS_IS_64BIT 0
+#endif
 //*************************************************************************************************
 
 
@@ -107,15 +117,95 @@
 //  - BLAS library is not parallelized: \b 0 (default)
 //  - BLAS library is parallelized    : \b 1
 //
-// Note that changing the setting of the BLAS mode requires a recompilation of all code using the
-// Blaze library.
+// \warning Changing the setting of the BLAS mode requires a recompilation of all code using the
+// Blaze library!
+//
+// \note It is possible to (de-)activate the parallel BLAS mode via command line or by defining
+// this symbol manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_BLAS_IS_PARALLEL=1 ...
+   \endcode
+
+   \code
+   #define BLAZE_BLAS_IS_PARALLEL 1
+   #include <blaze/Blaze.h>
+   \endcode
 */
+#ifndef BLAZE_BLAS_IS_PARALLEL
 #define BLAZE_BLAS_IS_PARALLEL 0
+#endif
 //*************************************************************************************************
 
 
 //*************************************************************************************************
-/*!\brief Compilation switch for the  of the BLAS include file.
+/*!\brief Compilation switch for the BLAS matrix/vector multiplication kernels (gemv).
+// \ingroup config
+//
+// This compilation switch enables/disables the BLAS matrix/vector multiplication kernels. If the
+// switch is enabled, multiplications between dense matrices and dense vectors are computed by
+// BLAS kernels, if it is disabled the multiplications are handled by the default Blaze kernels.
+//
+// Possible settings for the switch:
+//  - Disabled: \b 0 (default)
+//  - Enabled : \b 1
+//
+// \warning Changing the setting of this compilation switch requires a recompilation of all code
+// using the Blaze library!
+//
+// \note It is possible to (de-)activate the use of the BLAS matrix/vector multiplication kernels
+// via command line or by defining this symbol manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_USE_BLAS_MATRIX_VECTOR_MULTIPLICATION=1 ...
+   \endcode
+
+   \code
+   #define BLAZE_USE_BLAS_MATRIX_VECTOR_MULTIPLICATION 1
+   #include <blaze/Blaze.h>
+   \endcode
+*/
+#ifndef BLAZE_USE_BLAS_MATRIX_VECTOR_MULTIPLICATION
+#define BLAZE_USE_BLAS_MATRIX_VECTOR_MULTIPLICATION 0
+#endif
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Compilation switch for the BLAS matrix/matrix multiplication kernels (gemv).
+// \ingroup config
+//
+// This compilation switch enables/disables the BLAS matrix/matrix multiplication kernels. If the
+// switch is enabled, multiplications between dense matrices are computed by BLAS kernels, if it
+// is disabled the multiplications are handled by the default Blaze kernels.
+//
+// Possible settings for the switch:
+//  - Disabled: \b 0
+//  - Enabled : \b 1 (default)
+//
+// \warning Changing the setting of this compilation switch requires a recompilation of all code
+// code using the Blaze library!
+//
+// \note It is possible to (de-)activate the use of the BLAS matrix/matrix multiplication kernels
+// via command line or by defining this symbol manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_USE_BLAS_MATRIX_MATRIX_MULTIPLICATION=1 ...
+   \endcode
+
+   \code
+   #define BLAZE_USE_BLAS_MATRIX_MATRIX_MULTIPLICATION 1
+   #include <blaze/Blaze.h>
+   \endcode
+*/
+#ifndef BLAZE_USE_BLAS_MATRIX_MATRIX_MULTIPLICATION
+#define BLAZE_USE_BLAS_MATRIX_MATRIX_MULTIPLICATION 1
+#endif
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Compilation switch for the BLAS include file.
 // \ingroup config
 //
 // This compilation switch specifies the name of the BLAS include file. By default, the header
@@ -123,8 +213,22 @@
 // differs (as for instance in case of the MKL the file is called \c <mkl_cblas.h>) this switch
 // needs to be adapted accordingly.
 //
-// Note that changing the name of the BLAS include file requires a recompilation of all code using
-// the Blaze library.
+// \warning Changing the name of the BLAS include file requires a recompilation of all code using
+// the Blaze library!
+//
+// \note It is possible to specify the BLAS include file via command line or by defining this
+// symbol manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_BLAS_INCLUDE_FILE="<cblas.h>" ...
+   \endcode
+
+   \code
+   #define BLAZE_BLAS_INCLUDE_FILE <cblas.h>
+   #include <blaze/Blaze.h>
+   \endcode
 */
+#ifndef BLAZE_BLAS_INCLUDE_FILE
 #define BLAZE_BLAS_INCLUDE_FILE <cblas.h>
+#endif
 //*************************************************************************************************

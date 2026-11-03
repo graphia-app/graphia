@@ -3,7 +3,7 @@
 //  \file blaze/util/constraints/Void.h
 //  \brief Constraint on the data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -58,7 +58,7 @@ namespace blaze {
 // In case the given data type is not \a void, a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_VOID(T) \
-   static_assert( ::blaze::IsVoid<T>::value, "Non-void type detected" )
+   static_assert( ::blaze::IsVoid_v<T>, "Non-void type detected" )
 //*************************************************************************************************
 
 
@@ -77,7 +77,7 @@ namespace blaze {
 // In case the given data type is \a void, a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_VOID(T) \
-   static_assert( !::blaze::IsVoid<T>::value, "Void type detected" )
+   static_assert( !::blaze::IsVoid_v<T>, "Void type detected" )
 //*************************************************************************************************
 
 } // namespace blaze

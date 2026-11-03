@@ -3,7 +3,7 @@
 //  \file blaze/math/lapack/clapack/geqp3.h
 //  \brief Header file for the CLAPACK geqp3 wrapper functions
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -36,6 +36,14 @@
 #define _BLAZE_MATH_LAPACK_CLAPACK_GEQP3_H_
 
 
+//*************************************************************************************************
+// Includes
+//*************************************************************************************************
+
+#include <blaze/math/blas/Types.h>
+#include <blaze/util/StaticAssert.h>
+
+
 //=================================================================================================
 //
 //  LAPACK FORWARD DECLARATIONS
@@ -44,12 +52,18 @@
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
+#if !defined(INTEL_MKL_VERSION)
 extern "C" {
 
-void sgeqp3_( int* m, int* n, float*  A, int* lda, int* jpvt, float*  tau, float*  work, int* lwork, int* info );
-void dgeqp3_( int* m, int* n, double* A, int* lda, int* jpvt, double* tau, double* work, int* lwork, int* info );
+void sgeqp3_( blaze::blas_int_t* m, blaze::blas_int_t* n, float* A, blaze::blas_int_t* lda,
+              blaze::blas_int_t* jpvt, float* tau, float* work, blaze::blas_int_t* lwork,
+              blaze::blas_int_t* info );
+void dgeqp3_( blaze::blas_int_t* m, blaze::blas_int_t* n, double* A, blaze::blas_int_t* lda,
+              blaze::blas_int_t* jpvt, double* tau, double* work, blaze::blas_int_t* lwork,
+              blaze::blas_int_t* info );
 
 }
+#endif
 /*! \endcond */
 //*************************************************************************************************
 
@@ -67,11 +81,11 @@ namespace blaze {
 //*************************************************************************************************
 /*!\name LAPACK QR decomposition functions (geqp3) */
 //@{
-inline void geqp3( int m, int n, float* A, int lda, int* jpvt, float* tau,
-                   float* work, int lwork, int* info );
+void geqp3( blas_int_t m, blas_int_t n, float* A, blas_int_t lda, blas_int_t* jpvt,
+            float* tau, float* work, blas_int_t lwork, blas_int_t* info );
 
-inline void geqp3( int m, int n, double* A, int lda, int* jpvt, double* tau,
-                   double* work, int lwork, int* info );
+void geqp3( blas_int_t m, blas_int_t n, double* A, blas_int_t lda, blas_int_t* jpvt,
+            double* tau, double* work, blas_int_t lwork, blas_int_t* info );
 //@}
 //*************************************************************************************************
 
@@ -126,9 +140,13 @@ inline void geqp3( int m, int n, double* A, int lda, int* jpvt, double* tau,
 // is available and linked to the executable. Otherwise a call to this function will result in a
 // linker error.
 */
-inline void geqp3( int m, int n, float* A, int lda, int* jpvt, float* tau,
-                   float* work, int lwork, int* info )
+inline void geqp3( blas_int_t m, blas_int_t n, float* A, blas_int_t lda, blas_int_t* jpvt,
+                   float* tau, float* work, blas_int_t lwork, blas_int_t* info )
 {
+#if defined(INTEL_MKL_VERSION)
+   BLAZE_STATIC_ASSERT( sizeof( MKL_INT ) == sizeof( blas_int_t ) );
+#endif
+
    sgeqp3_( &m, &n, A, &lda, jpvt, tau, work, &lwork, info );
 }
 //*************************************************************************************************
@@ -184,9 +202,13 @@ inline void geqp3( int m, int n, float* A, int lda, int* jpvt, float* tau,
 // is available and linked to the executable. Otherwise a call to this function will result in a
 // linker error.
 */
-inline void geqp3( int m, int n, double* A, int lda, int* jpvt, double* tau,
-                   double* work, int lwork, int* info )
+inline void geqp3( blas_int_t m, blas_int_t n, double* A, blas_int_t lda, blas_int_t* jpvt,
+                   double* tau, double* work, blas_int_t lwork, blas_int_t* info )
 {
+#if defined(INTEL_MKL_VERSION)
+   BLAZE_STATIC_ASSERT( sizeof( MKL_INT ) == sizeof( blas_int_t ) );
+#endif
+
    dgeqp3_( &m, &n, A, &lda, jpvt, tau, work, &lwork, info );
 }
 //*************************************************************************************************

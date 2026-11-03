@@ -3,7 +3,7 @@
 //  \file blaze/math/expressions/View.h
 //  \brief Header file for the View base class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -57,11 +57,13 @@ namespace blaze {
 //
 // The View class serves as a tag for all views (subvectors, submatrices, rows, columns, ...).
 // All classes that represent a view and that are used within the expression template environment
-// of the Blaze library have to derive from this class in order to qualify as a view. Only in
-// case a class is derived from the View base class, the IsView type trait recognizes the class
-// as valid view.
+// of the Blaze library have to derive publicly from this class in order to qualify as a view.
+// Only in case a class is derived publicly from the View base class, the IsView type trait
+// recognizes the class as valid view.
 */
-struct View : private Expression
+template< typename T >  // Base type of the expression
+struct View
+   : public Expression<T>
 {};
 //*************************************************************************************************
 

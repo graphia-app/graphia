@@ -3,7 +3,7 @@
 //  \file blaze/util/constraints/Convertible.h
 //  \brief Constraint on the pointer relationship
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -58,7 +58,7 @@ namespace blaze {
 // In case \a FROM is not convertible to \a TO, a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_CONVERTIBLE(FROM,TO) \
-   static_assert( ::blaze::IsConvertible<FROM,TO>::value, "Inconvertible type detected" )
+   static_assert( ::blaze::IsConvertible_v<FROM,TO>, "Inconvertible type detected" )
 //*************************************************************************************************
 
 
@@ -77,7 +77,7 @@ namespace blaze {
 // In case \a FROM is convertible to \a TO, a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_CONVERTIBLE(FROM,TO) \
-   static_assert( !::blaze::IsConvertible<FROM,TO>::value, "Convertible type detected" )
+   static_assert( !::blaze::IsConvertible_v<FROM,TO>, "Convertible type detected" )
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/Any.h
 //  \brief Header file for the Any type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -60,7 +60,7 @@ namespace blaze {
 // at least one of the given types \a Ts. If the expression
 
    \code
-   Or< TypeTrait<Ts>... >::value
+   Or_t< TypeTrait<Ts>... >::value
    \endcode
 
 // evaluates to \a true, the \a value member constant is set to \a true, the nested type definition
@@ -76,9 +76,34 @@ namespace blaze {
    blaze::Any< IsCharacter, int, double >          // Is derived from FalseType
    \endcode
 */
-template< template< typename > class TypeTrait, typename... Ts >
-struct Any : public BoolConstant< Or< TypeTrait<Ts>... >::value >
+template< template< typename > class TypeTrait  // Type trait to be evaluated on all operands
+        , typename T1                           // Type of the first mandatory operand
+        , typename T2                           // Type of the second mandatory operand
+        , typename... Ts >                      // Types of the optional operands
+struct Any
+   : public BoolConstant< Or_t< TypeTrait<T1>, TypeTrait<T2>, TypeTrait<Ts>... >::value >
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the Any type trait.
+// \ingroup type_traits
+//
+// The Any_v variable template provides a convenient shortcut to access the nested \a value
+// of the Any class template. For instance, given the type trait \a TypeTrait and the two
+// types \a T1 and \a T2 the following two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::Any<TypeTrait,T1,T2>::value;
+   constexpr bool value2 = blaze::Any_v<TypeTrait,T1,T2>;
+   \endcode
+*/
+template< template< typename > class TypeTrait  // Type trait to be evaluated on all operands
+        , typename T1                           // Type of the first mandatory operand
+        , typename T2                           // Type of the second mandatory operand
+        , typename... Ts >                      // Types of the optional operands
+constexpr bool Any_v = Any<TypeTrait,T1,T2,Ts...>::value;
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/config/SMP.h
 //  \brief Configuration of the shared-memory parallelization
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -33,8 +33,6 @@
 //=================================================================================================
 
 
-namespace blaze {
-
 //*************************************************************************************************
 /*!\brief Compilation switch for the (de-)activation of the shared-memory parallelization
 // \ingroup config
@@ -47,8 +45,20 @@ namespace blaze {
 // Possible settings for the shared-memory parallelization switch:
 //  - Deactivated: \b 0
 //  - Activated  : \b 1 (default)
-*/
-#define BLAZE_USE_SHARED_MEMORY_PARALLELIZATION 1
-//*************************************************************************************************
+//
+// \note It is possible to (de-)activate the shared-memory parallelization via command line or
+// by defining this symbol manually before including any Blaze header file:
 
-} // namespace blaze
+   \code
+   g++ ... -DBLAZE_USE_SHARED_MEMORY_PARALLELIZATION=1 ...
+   \endcode
+
+   \code
+   #define BLAZE_USE_SHARED_MEMORY_PARALLELIZATION 1
+   #include <blaze/Blaze.h>
+   \endcode
+*/
+#ifndef BLAZE_USE_SHARED_MEMORY_PARALLELIZATION
+#define BLAZE_USE_SHARED_MEMORY_PARALLELIZATION 1
+#endif
+//*************************************************************************************************

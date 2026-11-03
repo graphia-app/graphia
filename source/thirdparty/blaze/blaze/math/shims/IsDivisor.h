@@ -3,7 +3,7 @@
 //  \file blaze/math/shims/IsDivisor.h
 //  \brief Header file for the isDivisor shim
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -41,11 +41,9 @@
 //*************************************************************************************************
 
 #include <blaze/math/shims/Equal.h>
+#include <blaze/math/typetraits/IsScalar.h>
 #include <blaze/system/Inline.h>
-#include <blaze/util/DisableIf.h>
 #include <blaze/util/EnableIf.h>
-#include <blaze/util/typetraits/IsNumeric.h>
-#include <blaze/util/Unused.h>
 
 
 namespace blaze {
@@ -77,10 +75,10 @@ namespace blaze {
    complex<double> c2( 0.0, 0.0 );  // isDivisor( c2 ) returns false
    \endcode
 */
-template< typename Type, typename = EnableIf_< IsNumeric<Type> > >
+template< typename Type, EnableIf_t< IsScalar_v<Type> >* = nullptr >
 BLAZE_ALWAYS_INLINE bool isDivisor( const Type& v )
 {
-   return v != Type(0);
+   return v != Type{};
 }
 //*************************************************************************************************
 

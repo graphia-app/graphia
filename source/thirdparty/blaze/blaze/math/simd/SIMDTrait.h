@@ -3,7 +3,7 @@
 //  \file blaze/math/simd/SIMDTrait.h
 //  \brief Header file for the SIMD trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -44,7 +44,6 @@
 #include <blaze/system/Vectorization.h>
 #include <blaze/util/Complex.h>
 #include <blaze/util/EnableIf.h>
-#include <blaze/util/mpl/And.h>
 #include <blaze/util/mpl/If.h>
 #include <blaze/util/StaticAssert.h>
 #include <blaze/util/Types.h>
@@ -73,7 +72,7 @@ template< typename T
 struct SIMDTraitBase
 {
    using Type = T;
-   enum : size_t { size = 1UL };
+   static constexpr size_t size = 1UL;
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -85,10 +84,10 @@ struct SIMDTraitBase
 // \ingroup simd
 */
 template< typename T >
-struct SIMDTraitBase< T, EnableIf_< And< IsNumeric<T>, IsIntegral<T>, Has1Byte<T> > > >
+struct SIMDTraitBase< T, EnableIf_t< IsNumeric_v<T> && IsIntegral_v<T> && Has1Byte_v<T> > >
 {
-   using Type = If_< IsSigned<T>, SIMDint8, SIMDuint8 >;
-   enum : size_t { size = Type::size };
+   using Type = If_t< IsSigned_v<T>, SIMDint8, SIMDuint8 >;
+   static constexpr size_t size = Type::size;
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -100,10 +99,10 @@ struct SIMDTraitBase< T, EnableIf_< And< IsNumeric<T>, IsIntegral<T>, Has1Byte<T
 // \ingroup simd
 */
 template< typename T >
-struct SIMDTraitBase< complex<T>, EnableIf_< And< IsNumeric<T>, IsIntegral<T>, Has1Byte<T> > > >
+struct SIMDTraitBase< complex<T>, EnableIf_t< IsNumeric_v<T> && IsIntegral_v<T> && Has1Byte_v<T> > >
 {
-   using Type = If_< IsSigned<T>, SIMDcint8, SIMDcuint8 >;
-   enum : size_t { size = Type::size };
+   using Type = If_t< IsSigned_v<T>, SIMDcint8, SIMDcuint8 >;
+   static constexpr size_t size = Type::size;
 
    BLAZE_STATIC_ASSERT( sizeof( complex<T> ) == 2UL*sizeof( T ) );
 };
@@ -117,10 +116,10 @@ struct SIMDTraitBase< complex<T>, EnableIf_< And< IsNumeric<T>, IsIntegral<T>, H
 // \ingroup simd
 */
 template< typename T >
-struct SIMDTraitBase< T, EnableIf_< And< IsNumeric<T>, IsIntegral<T>, Has2Bytes<T> > > >
+struct SIMDTraitBase< T, EnableIf_t< IsNumeric_v<T> && IsIntegral_v<T> && Has2Bytes_v<T> > >
 {
-   using Type = If_< IsSigned<T>, SIMDint16, SIMDuint16 >;
-   enum : size_t { size = Type::size };
+   using Type = If_t< IsSigned_v<T>, SIMDint16, SIMDuint16 >;
+   static constexpr size_t size = Type::size;
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -132,10 +131,10 @@ struct SIMDTraitBase< T, EnableIf_< And< IsNumeric<T>, IsIntegral<T>, Has2Bytes<
 // \ingroup simd
 */
 template< typename T >
-struct SIMDTraitBase< complex<T>, EnableIf_< And< IsNumeric<T>, IsIntegral<T>, Has2Bytes<T> > > >
+struct SIMDTraitBase< complex<T>, EnableIf_t< IsNumeric_v<T> && IsIntegral_v<T> && Has2Bytes_v<T> > >
 {
-   using Type = If_< IsSigned<T>, SIMDcint16, SIMDcuint16 >;
-   enum : size_t { size = Type::size };
+   using Type = If_t< IsSigned_v<T>, SIMDcint16, SIMDcuint16 >;
+   static constexpr size_t size = Type::size;
 
    BLAZE_STATIC_ASSERT( sizeof( complex<T> ) == 2UL*sizeof( T ) );
 };
@@ -149,10 +148,10 @@ struct SIMDTraitBase< complex<T>, EnableIf_< And< IsNumeric<T>, IsIntegral<T>, H
 // \ingroup simd
 */
 template< typename T >
-struct SIMDTraitBase< T, EnableIf_< And< IsNumeric<T>, IsIntegral<T>, Has4Bytes<T> > > >
+struct SIMDTraitBase< T, EnableIf_t< IsNumeric_v<T> && IsIntegral_v<T> && Has4Bytes_v<T> > >
 {
-   using Type = If_< IsSigned<T>, SIMDint32, SIMDuint32 >;
-   enum : size_t { size = Type::size };
+   using Type = If_t< IsSigned_v<T>, SIMDint32, SIMDuint32 >;
+   static constexpr size_t size = Type::size;
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -164,10 +163,10 @@ struct SIMDTraitBase< T, EnableIf_< And< IsNumeric<T>, IsIntegral<T>, Has4Bytes<
 // \ingroup simd
 */
 template< typename T >
-struct SIMDTraitBase< complex<T>, EnableIf_< And< IsNumeric<T>, IsIntegral<T>, Has4Bytes<T> > > >
+struct SIMDTraitBase< complex<T>, EnableIf_t< IsNumeric_v<T> && IsIntegral_v<T> && Has4Bytes_v<T> > >
 {
-   using Type = If_< IsSigned<T>, SIMDcint32, SIMDcuint32 >;
-   enum : size_t { size = Type::size };
+   using Type = If_t< IsSigned_v<T>, SIMDcint32, SIMDcuint32 >;
+   static constexpr size_t size = Type::size;
 
    BLAZE_STATIC_ASSERT( sizeof( complex<T> ) == 2UL*sizeof( T ) );
 };
@@ -181,10 +180,10 @@ struct SIMDTraitBase< complex<T>, EnableIf_< And< IsNumeric<T>, IsIntegral<T>, H
 // \ingroup simd
 */
 template< typename T >
-struct SIMDTraitBase< T, EnableIf_< And< IsNumeric<T>, IsIntegral<T>, Has8Bytes<T> > > >
+struct SIMDTraitBase< T, EnableIf_t< IsNumeric_v<T> && IsIntegral_v<T> && Has8Bytes_v<T> > >
 {
-   using Type = If_< IsSigned<T>, SIMDint64, SIMDuint64 >;
-   enum : size_t { size = Type::size };
+   using Type = If_t< IsSigned_v<T>, SIMDint64, SIMDuint64 >;
+   static constexpr size_t size = Type::size;
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -196,10 +195,10 @@ struct SIMDTraitBase< T, EnableIf_< And< IsNumeric<T>, IsIntegral<T>, Has8Bytes<
 // \ingroup simd
 */
 template< typename T >
-struct SIMDTraitBase< complex<T>, EnableIf_< And< IsNumeric<T>, IsIntegral<T>, Has8Bytes<T> > > >
+struct SIMDTraitBase< complex<T>, EnableIf_t< IsNumeric_v<T> && IsIntegral_v<T> && Has8Bytes_v<T> > >
 {
-   using Type = If_< IsSigned<T>, SIMDcint64, SIMDcuint64 >;
-   enum : size_t { size = Type::size };
+   using Type = If_t< IsSigned_v<T>, SIMDcint64, SIMDcuint64 >;
+   static constexpr size_t size = Type::size;
 
    BLAZE_STATIC_ASSERT( sizeof( complex<T> ) == 2UL*sizeof( T ) );
 };
@@ -216,7 +215,7 @@ template<>
 struct SIMDTraitBase<float>
 {
    using Type = SIMDfloat;
-   enum : size_t { size = Type::size };
+   static constexpr size_t size = Type::size;
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -231,7 +230,7 @@ template<>
 struct SIMDTraitBase< complex<float> >
 {
    using Type = SIMDcfloat;
-   enum : size_t { size = Type::size };
+   static constexpr size_t size = Type::size;
 
    BLAZE_STATIC_ASSERT( sizeof( complex<float> ) == 2UL*sizeof( float ) );
 };
@@ -248,7 +247,7 @@ template<>
 struct SIMDTraitBase<double>
 {
    using Type = SIMDdouble;
-   enum : size_t { size = Type::size };
+   static constexpr size_t size = Type::size;
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -263,7 +262,7 @@ template<>
 struct SIMDTraitBase< complex<double> >
 {
    using Type = SIMDcdouble;
-   enum : size_t { size = Type::size };
+   static constexpr size_t size = Type::size;
 
    BLAZE_STATIC_ASSERT( sizeof( complex<double> ) == 2UL*sizeof( double ) );
 };
@@ -293,7 +292,8 @@ struct SIMDTraitBase< complex<double> >
 //    \a size is set to 1.
 */
 template< typename T >
-class SIMDTrait : public SIMDTraitBase< RemoveCV_<T> >
+class SIMDTrait
+   : public SIMDTraitBase< RemoveCV_t<T> >
 {};
 //*************************************************************************************************
 
@@ -302,17 +302,17 @@ class SIMDTrait : public SIMDTraitBase< RemoveCV_<T> >
 /*!\brief Auxiliary alias declaration for the SIMDTrait class template.
 // \ingroup simd
 //
-// The SIMDTrait_ alias declaration provides a convenient shortcut to access the nested \a Type
+// The SIMDTrait_t alias declaration provides a convenient shortcut to access the nested \a Type
 // of the SIMDTrait class template. For instance, given the type \a T the following two type
 // definitions are identical:
 
    \code
    using Type1 = typename SIMDTrait<T>::Type;
-   using Type2 = SIMDTrait_<T>;
+   using Type2 = SIMDTrait_t<T>;
    \endcode
 */
 template< typename T >
-using SIMDTrait_ = typename SIMDTrait<T>::Type;
+using SIMDTrait_t = typename SIMDTrait<T>::Type;
 //*************************************************************************************************
 
 } // namespace blaze

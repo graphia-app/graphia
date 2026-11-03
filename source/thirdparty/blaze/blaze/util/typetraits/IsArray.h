@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/IsArray.h
 //  \brief Header file for the IsArray type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -72,8 +72,27 @@ namespace blaze {
    \endcode
 */
 template< typename T >
-struct IsArray : public BoolConstant< std::is_array<T>::value >
+struct IsArray
+   : public BoolConstant< std::is_array<T>::value >
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsArray type trait.
+// \ingroup type_traits
+//
+// The IsArray_v variable template provides a convenient shortcut to access the nested \a value
+// of the IsArray class template. For instance, given the type \a T the following two statements
+// are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsArray<T>::value;
+   constexpr bool value2 = blaze::IsArray_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsArray_v = IsArray<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

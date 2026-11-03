@@ -3,7 +3,7 @@
 //  \file blaze/util/constraints/Comparable.h
 //  \brief Constraint on the pointer relationship
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -58,7 +58,7 @@ namespace blaze {
 // In case \a P1 is not comparable with \a P2, a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_POINTER_MUST_BE_COMPARABLE(P1,P2) \
-   static_assert( ::blaze::IsConvertible<P1,P2>::value || ::blaze::IsConvertible<P2,P1>::value, "Incomparable pointer types detected" );
+   static_assert( ::blaze::IsConvertible_v<P1,P2> || ::blaze::IsConvertible_v<P2,P1>, "Incomparable pointer types detected" );
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/system/CacheSize.h
 //  \brief Header file for the cache size of the target architecture
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,11 +40,12 @@
 // Includes
 //*************************************************************************************************
 
+#include <blaze/config/CacheSize.h>
 #include <blaze/util/StaticAssert.h>
 #include <blaze/util/Types.h>
 
 
-
+namespace blaze {
 
 //=================================================================================================
 //
@@ -52,7 +53,13 @@
 //
 //=================================================================================================
 
-#include <blaze/config/CacheSize.h>
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+constexpr size_t cacheSize = BLAZE_CACHE_SIZE;
+/*! \endcond */
+//*************************************************************************************************
+
+} // namespace blaze
 
 
 

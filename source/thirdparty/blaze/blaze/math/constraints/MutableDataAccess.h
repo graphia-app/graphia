@@ -3,7 +3,7 @@
 //  \file blaze/math/constraints/MutableDataAccess.h
 //  \brief Constraint on the data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -59,7 +59,7 @@ namespace blaze {
 // i.e. does not have a non-const 'data' member function, a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_HAVE_MUTABLE_DATA_ACCESS(T) \
-   static_assert( ::blaze::HasMutableDataAccess<T>::value, "Type without mutable data access detected" )
+   static_assert( ::blaze::HasMutableDataAccess_v<T>, "Type without mutable data access detected" )
 //*************************************************************************************************
 
 
@@ -79,7 +79,7 @@ namespace blaze {
 // does have a non-const 'data' member function, a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_HAVE_MUTABLE_DATA_ACCESS(T) \
-   static_assert( !::blaze::HasMutableDataAccess<T>::value, "Type with mutable data access detected" )
+   static_assert( !::blaze::HasMutableDataAccess_v<T>, "Type with mutable data access detected" )
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/math/traits/DerestrictTrait.h
 //  \brief Header file for the DerestrictTrait class template
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -44,12 +44,7 @@
 #include <blaze/math/typetraits/IsVector.h>
 #include <blaze/util/InvalidType.h>
 #include <blaze/util/mpl/If.h>
-#include <blaze/util/mpl/Or.h>
-#include <blaze/util/typetraits/AddReference.h>
-#include <blaze/util/typetraits/Decay.h>
-#include <blaze/util/typetraits/IsConst.h>
-#include <blaze/util/typetraits/IsReference.h>
-#include <blaze/util/typetraits/IsVolatile.h>
+#include <blaze/util/typetraits/RemoveReference.h>
 
 
 namespace blaze {
@@ -65,28 +60,35 @@ namespace blaze {
 // \ingroup math_traits
 //
 // Via this type trait it is possible to evaluate the resulting return type of the derestrict
-// function. Given the vector or matrix type \a T, the nested type \a Type corresponds to the
-// resulting return type. In case \a T is neither a dense or sparse vector or matrix type,
+// function. Given the non-const vector or matrix type \a T, the nested type \a Type corresponds
+// to the resulting return type. In case \a T is neither a dense or sparse vector or matrix type,
 // the resulting \a Type is set to \a INVALID_TYPE.
 */
 template< typename T >  // Type of the vector or matrix
 struct DerestrictTrait
 {
  private:
-   //**********************************************************************************************
+   //**struct Failure******************************************************************************
    /*! \cond BLAZE_INTERNAL */
-   using Tmp = If< Or< IsVector<T>, IsMatrix<T> >
-                 , AddReference_<T>
-                 , INVALID_TYPE >;
+   struct Failure { using Type = INVALID_TYPE; };
+   /*! \endcond */
+   //**********************************************************************************************
+
+   //**struct Result*******************************************************************************
+   /*! \cond BLAZE_INTERNAL */
+   struct Result {
+      static T& create() noexcept;
+      using Type = decltype( derestrict( create() ) );
+   };
    /*! \endcond */
    //**********************************************************************************************
 
  public:
    //**********************************************************************************************
    /*! \cond BLAZE_INTERNAL */
-   using Type = typename If_< Or< IsConst<T>, IsVolatile<T>, IsReference<T> >
-                            , DerestrictTrait< Decay_<T> >
-                            , Tmp >::Type;
+   using Type = typename If_t< IsVector_v< RemoveReference_t<T> > || IsMatrix_v< RemoveReference_t<T> >
+                             , Result
+                             , Failure >::Type;
    /*! \endcond */
    //**********************************************************************************************
 };
@@ -97,17 +99,17 @@ struct DerestrictTrait
 /*!\brief Auxiliary alias declaration for the DerestrictTrait type trait.
 // \ingroup math_traits
 //
-// The DerestrictTrait_ alias declaration provides a convenient shortcut to access the
+// The DerestrictTrait_t alias declaration provides a convenient shortcut to access the
 // nested \a Type of the DerestrictTrait class template. For instance, given the type \a T
 // the following two type definitions are identical:
 
    \code
-   using Type1 = typename DerestrictTrait<T>::Type;
-   using Type2 = DerestrictTrait_<T>;
+   using Type1 = typename blaze::DerestrictTrait<T>::Type;
+   using Type2 = blaze::DerestrictTrait_t<T>;
    \endcode
 */
 template< typename T >
-using DerestrictTrait_ = typename DerestrictTrait<T>::Type;
+using DerestrictTrait_t = typename DerestrictTrait<T>::Type;
 //*************************************************************************************************
 
 } // namespace blaze

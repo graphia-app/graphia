@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/IsEmpty.h
 //  \brief Header file for the IsEmpty type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -75,8 +75,27 @@ namespace blaze {
    \endcode
 */
 template< typename T >
-struct IsEmpty : public BoolConstant< std::is_empty<T>::value >
+struct IsEmpty
+   : public BoolConstant< std::is_empty<T>::value >
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsEmpty type trait.
+// \ingroup type_traits
+//
+// The IsEmpty_v variable template provides a convenient shortcut to access the nested \a value
+// of the IsEmpty class template. For instance, given the type \a T the following two statements
+// are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsEmpty<T>::value;
+   constexpr bool value2 = blaze::IsEmpty_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsEmpty_v = IsEmpty<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

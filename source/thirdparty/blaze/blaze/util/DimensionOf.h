@@ -3,7 +3,7 @@
 //  \file blaze/util/DimensionOf.h
 //  \brief Compile time evaluation of array sizes
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,8 +40,8 @@
 // Includes
 //*************************************************************************************************
 
+#include <blaze/util/MaybeUnused.h>
 #include <blaze/util/Types.h>
-#include <blaze/util/Unused.h>
 
 
 namespace blaze {
@@ -51,22 +51,6 @@ namespace blaze {
 //  DIMENSIONOF FUNCTIONALITY
 //
 //=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Helper class for the dimensionof function.
-// \ingroup util
-//
-// The Array class is a helper class for the dimensionof function. It provides a public array
-// member of exactly N bytes.
-*/
-template< unsigned int N >
-struct Array {
-   byte_t array[N];
-};
-/*! \endcond */
-//*************************************************************************************************
-
 
 //*************************************************************************************************
 /*!\brief Static evaluation of array dimensions.
@@ -88,11 +72,11 @@ struct Array {
    dimensionof( vi );  // Fails to compile!
    \endcode
 */
-template< typename T, unsigned int N >
-inline size_t dimensionof( T(&a)[N] )
+template< typename T, size_t N >
+constexpr size_t dimensionof( T(&a)[N] )
 {
-   UNUSED_PARAMETER( a );
-   return sizeof( Array<N> );
+   MAYBE_UNUSED( a );
+   return N;
 }
 //*************************************************************************************************
 

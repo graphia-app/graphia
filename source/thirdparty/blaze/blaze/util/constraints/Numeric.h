@@ -3,7 +3,7 @@
 //  \file blaze/util/constraints/Numeric.h
 //  \brief Constraint on the data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -59,7 +59,7 @@ namespace blaze {
 // a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_NUMERIC_TYPE(T) \
-   static_assert( ::blaze::IsNumeric<T>::value, "Non-numeric type detected" )
+   static_assert( ::blaze::IsNumeric_v<T>, "Non-numeric type detected" )
 //*************************************************************************************************
 
 
@@ -79,7 +79,7 @@ namespace blaze {
 // a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_NUMERIC_TYPE(T) \
-   static_assert( !::blaze::IsNumeric<T>::value, "Numeric type detected" )
+   static_assert( !::blaze::IsNumeric_v<T>, "Numeric type detected" )
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/math/constraints/VecScalarMultExpr.h
 //  \brief Constraint on the data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -59,7 +59,7 @@ namespace blaze {
 // derived from the VecScalarMultExpr base class), a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_VECSCALARMULTEXPR_TYPE(T) \
-   static_assert( ::blaze::IsVecScalarMultExpr<T>::value, "Non-vector/scalar multiplication expression type detected" )
+   static_assert( ::blaze::IsVecScalarMultExpr_v<T>, "Non-vector/scalar multiplication expression type detected" )
 //*************************************************************************************************
 
 
@@ -79,7 +79,7 @@ namespace blaze {
 // derived from the VecScalarMultExpr base class), a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_VECSCALARMULTEXPR_TYPE(T) \
-   static_assert( !::blaze::IsVecScalarMultExpr<T>::value, "Vector/scalar multiplication expression type detected" )
+   static_assert( !::blaze::IsVecScalarMultExpr_v<T>, "Vector/scalar multiplication expression type detected" )
 //*************************************************************************************************
 
 } // namespace blaze

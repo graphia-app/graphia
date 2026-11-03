@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/IsSIMDEnabled.h
 //  \brief Header file for the IsSIMDEnabled type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,11 +40,9 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/math/typetraits/IsMatrix.h>
-#include <blaze/math/typetraits/IsVector.h>
 #include <blaze/util/IntegralConstant.h>
-#include <blaze/util/mpl/If.h>
-#include <blaze/util/mpl/Or.h>
+#include <blaze/util/typetraits/AlwaysFalse.h>
+#include <blaze/util/typetraits/HasMember.h>
 
 
 namespace blaze {
@@ -57,30 +55,39 @@ namespace blaze {
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-/*!\brief Auxiliary helper struct for the IsSIMDEnabled type trait.
+/*!\brief First auxiliary helper struct for the IsSIMDEnabled type trait.
+// \ingroup math_type_traits
+*/
+BLAZE_CREATE_HAS_DATA_OR_FUNCTION_MEMBER_TYPE_TRAIT( HasSIMDEnabled, simdEnabled );
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Second auxiliary helper struct for the IsSIMDEnabled type trait.
+// \ingroup math_type_traits
+*/
+template< typename T, typename... Args >
+struct GetSIMDEnabled {
+   static constexpr bool test( bool (*fnc)() ) { return fnc(); }
+   static constexpr bool test( bool b ) { return b; }
+   static constexpr bool value = test( T::template simdEnabled<Args...> );
+};
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Specialization of the GetSIMDEnabled class template for non-templates.
 // \ingroup math_type_traits
 */
 template< typename T >
-struct IsSIMDEnabledHelper
-{
- private:
-   //**struct HasNestedMember**********************************************************************
-   template< typename T2 >
-   struct UseNestedMember { enum : bool { value = T2::simdEnabled }; };
-   //**********************************************************************************************
-
-   //**struct NotSIMDEnabled***********************************************************************
-   template< typename T2 >
-   struct NotSIMDEnabled { enum : bool { value = false }; };
-   //**********************************************************************************************
-
- public:
-   //**********************************************************************************************
-   enum : bool { value = If_< Or< IsVector<T>, IsMatrix<T> >
-                            , UseNestedMember<T>
-                            , NotSIMDEnabled<T>
-                            >::value };
-   //**********************************************************************************************
+struct GetSIMDEnabled<T> {
+   static constexpr bool test( bool (*fnc)() ) { return fnc(); }
+   static constexpr bool test( bool b ) { return b; }
+   static constexpr bool value = test( T::simdEnabled );
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -96,9 +103,30 @@ struct IsSIMDEnabledHelper
 // definition \a Type is \a TrueType, and the class derives from \a TrueType. Otherwise \a value
 // is set to \a false, \a Type is \a FalseType, and the class derives from \a FalseType.
 */
-template< typename T >
-struct IsSIMDEnabled : public BoolConstant< IsSIMDEnabledHelper<T>::value >
+template< typename T, typename... Args >
+struct IsSIMDEnabled
+   : public BoolConstant< If_t< HasSIMDEnabled_v<T>
+                              , GetSIMDEnabled<T,Args...>
+                              , AlwaysFalse<T> >::value >
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsSIMDEnabled type trait.
+// \ingroup math_type_traits
+//
+// The IsSIMDEnabled_v variable template provides a convenient shortcut to access the nested
+// \a value of the IsSIMDEnabled class template. For instance, given the type \a T the
+// following two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsSIMDEnabled<T>::value;
+   constexpr bool value2 = blaze::IsSIMDEnabled_v<T>;
+   \endcode
+*/
+template< typename T, typename... Args >
+constexpr bool IsSIMDEnabled_v = IsSIMDEnabled<T,Args...>::value;
 //*************************************************************************************************
 
 } // namespace blaze

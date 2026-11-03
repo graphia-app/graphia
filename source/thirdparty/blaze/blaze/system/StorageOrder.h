@@ -3,7 +3,7 @@
 //  \file blaze/system/StorageOrder.h
 //  \brief Header file for the default storage order for all vectors of the Blaze library
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,10 +40,11 @@
 // Includes
 //*************************************************************************************************
 
+#include <blaze/config/StorageOrder.h>
 #include <blaze/math/StorageOrder.h>
 
 
-
+namespace blaze {
 
 //=================================================================================================
 //
@@ -51,6 +52,29 @@
 //
 //=================================================================================================
 
-#include <blaze/config/StorageOrder.h>
+//*************************************************************************************************
+/*!\brief The default storage order for all matrices of the Blaze library.
+// \ingroup system
+//
+// This value specifies the default storage order for all matrices of the Blaze library.
+// In case no explicit storage order is specified with the according matrix type, this
+// setting is used.
+
+   \code
+   // Explicit specification of the storage order => row-major matrix
+   StaticMatrix<double,3UL,3UL,rowMajor> A;
+
+   // No explicit specification of the storage order => use of the default storage order
+   StaticMatrix<double,3UL,3UL> B;
+   \endcode
+
+// The default storage order is defined via the BLAZE_DEFAULT_STORAGE_ORDER compilation switch
+// (see the \ref storage_order section). Valid settings for this value are blaze::rowMajor and
+// blaze::columnMajor.
+*/
+constexpr bool defaultStorageOrder = BLAZE_DEFAULT_STORAGE_ORDER;
+//*************************************************************************************************
+
+} // namespace blaze
 
 #endif

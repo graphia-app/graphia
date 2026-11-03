@@ -3,7 +3,7 @@
 //  \file blaze/math/lapack/clapack/gerqf.h
 //  \brief Header file for the CLAPACK gerqf wrapper functions
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,6 +40,7 @@
 // Includes
 //*************************************************************************************************
 
+#include <blaze/math/blas/Types.h>
 #include <blaze/util/Complex.h>
 #include <blaze/util/StaticAssert.h>
 
@@ -52,14 +53,20 @@
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
+#if !defined(INTEL_MKL_VERSION)
 extern "C" {
 
-void sgerqf_( int* m, int* n, float*  A, int* lda, float*  tau, float*  work, int* lwork, int* info );
-void dgerqf_( int* m, int* n, double* A, int* lda, double* tau, double* work, int* lwork, int* info );
-void cgerqf_( int* m, int* n, float*  A, int* lda, float*  tau, float*  work, int* lwork, int* info );
-void zgerqf_( int* m, int* n, double* A, int* lda, double* tau, double* work, int* lwork, int* info );
+void sgerqf_( blaze::blas_int_t* m, blaze::blas_int_t* n, float* A, blaze::blas_int_t* lda,
+              float* tau, float* work, blaze::blas_int_t* lwork, blaze::blas_int_t* info );
+void dgerqf_( blaze::blas_int_t* m, blaze::blas_int_t* n, double* A, blaze::blas_int_t* lda,
+              double* tau, double* work, blaze::blas_int_t* lwork, blaze::blas_int_t* info );
+void cgerqf_( blaze::blas_int_t* m, blaze::blas_int_t* n, float* A, blaze::blas_int_t* lda,
+              float* tau, float* work, blaze::blas_int_t* lwork, blaze::blas_int_t* info );
+void zgerqf_( blaze::blas_int_t* m, blaze::blas_int_t* n, double* A, blaze::blas_int_t* lda,
+              double* tau, double* work, blaze::blas_int_t* lwork, blaze::blas_int_t* info );
 
 }
+#endif
 /*! \endcond */
 //*************************************************************************************************
 
@@ -77,17 +84,17 @@ namespace blaze {
 //*************************************************************************************************
 /*!\name LAPACK RQ decomposition functions (gerqf) */
 //@{
-inline void gerqf( int m, int n, float* A, int lda, float* tau,
-                   float* work, int lwork, int* info );
+void gerqf( blas_int_t m, blas_int_t n, float* A, blas_int_t lda,
+            float* tau, float* work, blas_int_t lwork, blas_int_t* info );
 
-inline void gerqf( int m, int n, double* A, int lda, double* tau,
-                   double* work, int lwork, int* info );
+void gerqf( blas_int_t m, blas_int_t n, double* A, blas_int_t lda,
+            double* tau, double* work, blas_int_t lwork, blas_int_t* info );
 
-inline void gerqf( int m, int n, complex<float>* A, int lda, complex<float>* tau,
-                   complex<float>* work, int lwork, int* info );
+void gerqf( blas_int_t m, blas_int_t n, complex<float>* A, blas_int_t lda,
+            complex<float>* tau, complex<float>* work, blas_int_t lwork, blas_int_t* info );
 
-inline void gerqf( int m, int n, complex<double>* A, int lda, complex<double>* tau,
-                   complex<double>* work, int lwork, int* info );
+void gerqf( blas_int_t m, blas_int_t n, complex<double>* A, blas_int_t lda,
+            complex<double>* tau, complex<double>* work, blas_int_t lwork, blas_int_t* info );
 //@}
 //*************************************************************************************************
 
@@ -142,9 +149,13 @@ inline void gerqf( int m, int n, complex<double>* A, int lda, complex<double>* t
 // is available and linked to the executable. Otherwise a call to this function will result in a
 // linker error.
 */
-inline void gerqf( int m, int n, float* A, int lda, float* tau,
-                   float* work, int lwork, int* info )
+inline void gerqf( blas_int_t m, blas_int_t n, float* A, blas_int_t lda,
+                   float* tau, float* work, blas_int_t lwork, blas_int_t* info )
 {
+#if defined(INTEL_MKL_VERSION)
+   BLAZE_STATIC_ASSERT( sizeof( MKL_INT ) == sizeof( blas_int_t ) );
+#endif
+
    sgerqf_( &m, &n, A, &lda, tau, work, &lwork, info );
 }
 //*************************************************************************************************
@@ -200,9 +211,13 @@ inline void gerqf( int m, int n, float* A, int lda, float* tau,
 // is available and linked to the executable. Otherwise a call to this function will result in a
 // linker error.
 */
-inline void gerqf( int m, int n, double* A, int lda, double* tau,
-                   double* work, int lwork, int* info )
+inline void gerqf( blas_int_t m, blas_int_t n, double* A, blas_int_t lda,
+                   double* tau, double* work, blas_int_t lwork, blas_int_t* info )
 {
+#if defined(INTEL_MKL_VERSION)
+   BLAZE_STATIC_ASSERT( sizeof( MKL_INT ) == sizeof( blas_int_t ) );
+#endif
+
    dgerqf_( &m, &n, A, &lda, tau, work, &lwork, info );
 }
 //*************************************************************************************************
@@ -258,13 +273,21 @@ inline void gerqf( int m, int n, double* A, int lda, double* tau,
 // is available and linked to the executable. Otherwise a call to this function will result in a
 // linker error.
 */
-inline void gerqf( int m, int n, complex<float>* A, int lda, complex<float>* tau,
-                   complex<float>* work, int lwork, int* info )
+inline void gerqf( blas_int_t m, blas_int_t n, complex<float>* A, blas_int_t lda,
+                   complex<float>* tau, complex<float>* work, blas_int_t lwork, blas_int_t* info )
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<float> ) == 2UL*sizeof( float ) );
 
-   cgerqf_( &m, &n, reinterpret_cast<float*>( A ), &lda, reinterpret_cast<float*>( tau ),
-            reinterpret_cast<float*>( work ), &lwork, info );
+#if defined(INTEL_MKL_VERSION)
+   BLAZE_STATIC_ASSERT( sizeof( MKL_INT ) == sizeof( blas_int_t ) );
+   BLAZE_STATIC_ASSERT( sizeof( MKL_Complex8 ) == sizeof( complex<float> ) );
+   using ET = MKL_Complex8;
+#else
+   using ET = float;
+#endif
+
+   cgerqf_( &m, &n, reinterpret_cast<ET*>( A ), &lda, reinterpret_cast<ET*>( tau ),
+            reinterpret_cast<ET*>( work ), &lwork, info );
 }
 //*************************************************************************************************
 
@@ -319,13 +342,21 @@ inline void gerqf( int m, int n, complex<float>* A, int lda, complex<float>* tau
 // is available and linked to the executable. Otherwise a call to this function will result in a
 // linker error.
 */
-inline void gerqf( int m, int n, complex<double>* A, int lda, complex<double>* tau,
-                   complex<double>* work, int lwork, int* info )
+inline void gerqf( blas_int_t m, blas_int_t n, complex<double>* A, blas_int_t lda,
+                   complex<double>* tau, complex<double>* work, blas_int_t lwork, blas_int_t* info )
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<double> ) == 2UL*sizeof( double ) );
 
-   zgerqf_( &m, &n, reinterpret_cast<double*>( A ), &lda, reinterpret_cast<double*>( tau ),
-            reinterpret_cast<double*>( work ), &lwork, info );
+#if defined(INTEL_MKL_VERSION)
+   BLAZE_STATIC_ASSERT( sizeof( MKL_INT ) == sizeof( blas_int_t ) );
+   BLAZE_STATIC_ASSERT( sizeof( MKL_Complex16 ) == sizeof( complex<double> ) );
+   using ET = MKL_Complex16;
+#else
+   using ET = double;
+#endif
+
+   zgerqf_( &m, &n, reinterpret_cast<ET*>( A ), &lda, reinterpret_cast<ET*>( tau ),
+            reinterpret_cast<ET*>( work ), &lwork, info );
 }
 //*************************************************************************************************
 

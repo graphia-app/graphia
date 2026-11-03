@@ -51,6 +51,15 @@ fetch() # url ref destination
 #   own                 globs of the files Graphia adds
 #   notes               what the script can't do for it
 
+blaze()
+{
+    local url=https://bitbucket.org/blaze-lib/blaze.git
+    case $1 in
+        latest) latestTag $url '^v[0-9.]+$' ;;
+        stage) fetch $url "$2" "$WORK/upstream"; mv "$WORK/upstream/blaze" "$3/" ;;
+    esac
+}
+
 cryptopp()
 {
     local url=https://github.com/weidai11/cryptopp.git
@@ -122,7 +131,7 @@ zlib()
     esac
 }
 
-libraries=(cryptopp expat json lexy utfcpp xlsxio zlib)
+libraries=(blaze cryptopp expat json lexy utfcpp xlsxio zlib)
 
 # The repository stores thirdparty text with LF endings, which the patches assume
 normaliseLineEndings() # directory

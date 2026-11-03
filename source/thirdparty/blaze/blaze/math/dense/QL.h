@@ -3,7 +3,7 @@
 //  \file blaze/math/dense/QL.h
 //  \brief Header file for the dense matrix in-place QL decomposition
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -51,14 +51,13 @@
 #include <blaze/math/constraints/Upper.h>
 #include <blaze/math/Exception.h>
 #include <blaze/math/expressions/DenseMatrix.h>
-#include <blaze/math/Functions.h>
 #include <blaze/math/lapack/geqlf.h>
 #include <blaze/math/lapack/orgql.h>
 #include <blaze/math/lapack/ungql.h>
-#include <blaze/math/traits/DerestrictTrait.h>
 #include <blaze/math/typetraits/IsResizable.h>
 #include <blaze/math/typetraits/IsSquare.h>
 #include <blaze/math/views/Submatrix.h>
+#include <blaze/util/algorithms/Min.h>
 #include <blaze/util/EnableIf.h>
 
 
@@ -92,8 +91,8 @@ void ql( const DenseMatrix<MT1,SO1>& A, DenseMatrix<MT2,SO2>& Q, DenseMatrix<MT3
 // reconstruction of the \c Q matrix from the QL decomposition.
 */
 template< typename MT1 >  // Type of matrix A
-inline EnableIf_<IsBuiltin< ElementType_<MT1> > >
-   ql_backend( MT1& A, const ElementType_<MT1>* tau )
+inline auto ql_backend( MT1& A, const ElementType_t<MT1>* tau )
+   -> EnableIf_t<IsBuiltin_v< ElementType_t<MT1> > >
 {
    orgql( A, tau );
 }
@@ -114,8 +113,8 @@ inline EnableIf_<IsBuiltin< ElementType_<MT1> > >
 // reconstruction of the \c Q matrix from the QL decomposition.
 */
 template< typename MT1 >  // Type of matrix A
-inline EnableIf_<IsComplex< ElementType_<MT1> > >
-   ql_backend( MT1& A, const ElementType_<MT1>* tau )
+inline auto ql_backend( MT1& A, const ElementType_t<MT1>* tau )
+   -> EnableIf_t<IsComplex_v< ElementType_t<MT1> > >
 {
    ungql( A, tau );
 }
@@ -180,42 +179,42 @@ template< typename MT1  // Type of matrix A
 void ql( const DenseMatrix<MT1,SO1>& A, DenseMatrix<MT2,SO2>& Q, DenseMatrix<MT3,SO3>& L )
 {
    BLAZE_CONSTRAINT_MUST_NOT_BE_STRICTLY_TRIANGULAR_MATRIX_TYPE( MT1 );
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<MT1> );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT1> );
 
    BLAZE_CONSTRAINT_MUST_NOT_BE_ADAPTOR_TYPE( MT2 );
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<MT2> );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT2> );
 
    BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT3 );
    BLAZE_CONSTRAINT_MUST_NOT_BE_HERMITIAN_MATRIX_TYPE( MT3 );
    BLAZE_CONSTRAINT_MUST_NOT_BE_UNITRIANGULAR_MATRIX_TYPE( MT3 );
    BLAZE_CONSTRAINT_MUST_NOT_BE_STRICTLY_TRIANGULAR_MATRIX_TYPE( MT3 );
    BLAZE_CONSTRAINT_MUST_NOT_BE_UPPER_MATRIX_TYPE( MT3 );
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<MT3> );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT3> );
 
-   typedef ElementType_<MT1>  ET1;
+   using ET1 = ElementType_t<MT1>;
 
-   const size_t m( (~A).rows() );
-   const size_t n( (~A).columns() );
+   const size_t m( (*A).rows() );
+   const size_t n( (*A).columns() );
    const size_t mindim( min( m, n ) );
 
-   if( ( !IsResizable<MT2>::value && ( (~Q).rows() != m || (~Q).columns() != mindim ) ) ||
-       ( !IsResizable<MT3>::value && ( (~L).rows() != mindim || (~L).columns() != n ) ) ) {
+   if( ( !IsResizable_v<MT2> && ( (*Q).rows() != m || (*Q).columns() != mindim ) ) ||
+       ( !IsResizable_v<MT3> && ( (*L).rows() != mindim || (*L).columns() != n ) ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Dimensions of fixed size matrix do not match" );
    }
 
-   if( IsSquare<MT3>::value && mindim != n ) {
+   if( IsSquare_v<MT3> && mindim != n ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Square matrix cannot be resized to min(m,n)-by-n" );
    }
 
    const std::unique_ptr<ET1[]> tau( new ET1[mindim] );
-   DerestrictTrait_<MT2> l( derestrict( ~L ) );
+   decltype(auto) l( derestrict( *L ) );
 
    if( m < n )
    {
       l = A;
       geqlf( l, tau.get() );
-      (~Q) = submatrix( l, 0UL, n-m, m, m );
-      ql_backend( ~Q, tau.get() );
+      (*Q) = submatrix( l, 0UL, n-m, m, m );
+      ql_backend( *Q, tau.get() );
 
       for( size_t i=0UL; i<m; ++i ) {
          for( size_t j=i+n-m+1UL; j<n; ++j ) {
@@ -225,19 +224,19 @@ void ql( const DenseMatrix<MT1,SO1>& A, DenseMatrix<MT2,SO2>& Q, DenseMatrix<MT3
    }
    else
    {
-      (~Q) = A;
-      geqlf( ~Q, tau.get() );
+      (*Q) = A;
+      geqlf( *Q, tau.get() );
 
-      resize( ~L, n, n, false );
+      resize( *L, n, n, false );
       reset( l );
 
       for( size_t i=0UL; i<n; ++i ) {
          for( size_t j=0UL; j<i+1UL; ++j ) {
-            l(i,j) = (~Q)(i+m-n,j);
+            l(i,j) = (*Q)(i+m-n,j);
          }
       }
 
-      ql_backend( ~Q, tau.get() );
+      ql_backend( *Q, tau.get() );
    }
 }
 //*************************************************************************************************

@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/IsShort.h
 //  \brief Header file for the IsShort type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,8 +40,7 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/util/FalseType.h>
-#include <blaze/util/TrueType.h>
+#include <blaze/util/IntegralConstant.h>
 
 
 namespace blaze {
@@ -73,7 +72,8 @@ namespace blaze {
    \endcode
 */
 template< typename T >
-struct IsShort : public FalseType
+struct IsShort
+   : public FalseType
 {};
 //*************************************************************************************************
 
@@ -82,7 +82,8 @@ struct IsShort : public FalseType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsShort type trait for the plain 'short' type.
 template<>
-struct IsShort<short> : public TrueType
+struct IsShort<short>
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -92,7 +93,8 @@ struct IsShort<short> : public TrueType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsShort type trait for 'const short'.
 template<>
-struct IsShort<const short> : public TrueType
+struct IsShort<const short>
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -102,7 +104,8 @@ struct IsShort<const short> : public TrueType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsShort type trait for 'volatile short'.
 template<>
-struct IsShort<volatile short> : public TrueType
+struct IsShort<volatile short>
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -112,7 +115,8 @@ struct IsShort<volatile short> : public TrueType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsShort type trait for 'const volatile short'.
 template<>
-struct IsShort<const volatile short> : public TrueType
+struct IsShort<const volatile short>
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -122,7 +126,8 @@ struct IsShort<const volatile short> : public TrueType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsShort type trait for the plain 'unsigned short' type.
 template<>
-struct IsShort<unsigned short> : public TrueType
+struct IsShort<unsigned short>
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -132,7 +137,8 @@ struct IsShort<unsigned short> : public TrueType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsShort type trait for 'const unsigned short'.
 template<>
-struct IsShort<const unsigned short> : public TrueType
+struct IsShort<const unsigned short>
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -142,7 +148,8 @@ struct IsShort<const unsigned short> : public TrueType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsShort type trait for 'volatile unsigned short'.
 template<>
-struct IsShort<volatile unsigned short> : public TrueType
+struct IsShort<volatile unsigned short>
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -152,9 +159,28 @@ struct IsShort<volatile unsigned short> : public TrueType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsShort type trait for 'const volatile unsigned short'.
 template<>
-struct IsShort<const volatile unsigned short> : public TrueType
+struct IsShort<const volatile unsigned short>
+   : public TrueType
 {};
 /*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsShort type trait.
+// \ingroup type_traits
+//
+// The IsShort_v variable template provides a convenient shortcut to access the nested \a value
+// of the IsShort class template. For instance, given the type \a T the following two statements
+// are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsShort<T>::value;
+   constexpr bool value2 = blaze::IsShort_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsShort_v = IsShort<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

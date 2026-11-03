@@ -1,9 +1,9 @@
 //=================================================================================================
 /*!
 //  \file blaze/util/mpl/Max.h
-//  \brief Header file for the Max class template
+//  \brief Header file for the Max_t alias template
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -56,21 +56,21 @@ namespace blaze {
 /*!\brief Compile time value evaluation.
 // \ingroup mpl
 //
-// The Max class template selects the larger of the two given template arguments \a T1 and \a T2.
-// In order for Max to be able to determine the larger type, both arguments are required to have
-// a nested member \a value. The result of the minimum operation can be accessed via the nested
-// member \a value, the resulting type is available via the nested type \a ValueType.
+// The Max_t alias template selects the larger of the two given template arguments \a T1
+// and \a T2. In order for Max_t to be able to determine the larger type, both arguments
+// are required to have a nested member \a value. The result of the minimum operation can
+// be accessed via the nested member \a value, the resulting type is available via the
+// nested type \a ValueType.
 
    \code
-   blaze::Max< Int<3> , Int<2>  >::value      // Results in 3
-   blaze::Max< Long<3>, Int<2>  >::ValueType  // Results in long
-   blaze::Max< Int<3> , Long<2> >::ValueType  // Results in int
+   blaze::Max_t< Int_t<3> , Int_t<2>  >::value      // Results in 3
+   blaze::Max_t< Long_t<3>, Int_t<2>  >::ValueType  // Results in long
+   blaze::Max_t< Int_t<3> , Long_t<2> >::ValueType  // Results in int
    \endcode
 */
 template< typename T1    // Type of the first compile time value
         , typename T2 >  // Type of the second compile time value
-struct Max : public If_< Less<T1,T2>, T2, T1 >
-{};
+using Max_t = If_t< Less_t<T1,T2>::value, T2, T1 >;
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/IsInteger.h
 //  \brief Header file for the IsInteger type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,8 +40,7 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/util/FalseType.h>
-#include <blaze/util/TrueType.h>
+#include <blaze/util/IntegralConstant.h>
 
 
 namespace blaze {
@@ -77,7 +76,8 @@ namespace blaze {
 // is an integral data type (char, short, int, long, etc.).
 */
 template< typename T >
-struct IsInteger : public FalseType
+struct IsInteger
+   : public FalseType
 {};
 //*************************************************************************************************
 
@@ -86,7 +86,8 @@ struct IsInteger : public FalseType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsInteger type trait for the plain 'int' type.
 template<>
-struct IsInteger<int> : public TrueType
+struct IsInteger<int>
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -96,7 +97,8 @@ struct IsInteger<int> : public TrueType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsInteger type trait for 'const int'.
 template<>
-struct IsInteger<const int> : public TrueType
+struct IsInteger<const int>
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -106,7 +108,8 @@ struct IsInteger<const int> : public TrueType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsInteger type trait for 'volatile int'.
 template<>
-struct IsInteger<volatile int> : public TrueType
+struct IsInteger<volatile int>
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -116,7 +119,8 @@ struct IsInteger<volatile int> : public TrueType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsInteger type trait for 'const volatile int'.
 template<>
-struct IsInteger<const volatile int> : public TrueType
+struct IsInteger<const volatile int>
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -126,7 +130,8 @@ struct IsInteger<const volatile int> : public TrueType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsInteger type trait for the plain 'unsigned int' type.
 template<>
-struct IsInteger<unsigned int> : public TrueType
+struct IsInteger<unsigned int>
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -136,7 +141,8 @@ struct IsInteger<unsigned int> : public TrueType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsInteger type trait for 'const unsigned int'.
 template<>
-struct IsInteger<const unsigned int> : public TrueType
+struct IsInteger<const unsigned int>
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -146,7 +152,8 @@ struct IsInteger<const unsigned int> : public TrueType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsInteger type trait for 'volatile unsigned int'.
 template<>
-struct IsInteger<volatile unsigned int> : public TrueType
+struct IsInteger<volatile unsigned int>
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -156,9 +163,28 @@ struct IsInteger<volatile unsigned int> : public TrueType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsInteger type trait for 'const volatile unsigned int'.
 template<>
-struct IsInteger<const volatile unsigned int> : public TrueType
+struct IsInteger<const volatile unsigned int>
+   : public TrueType
 {};
 /*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsInteger type trait.
+// \ingroup type_traits
+//
+// The IsInteger_v variable template provides a convenient shortcut to access the nested
+// \a value of the IsInteger class template. For instance, given the type \a T the following
+// two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsInteger<T>::value;
+   constexpr bool value2 = blaze::IsInteger_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsInteger_v = IsInteger<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

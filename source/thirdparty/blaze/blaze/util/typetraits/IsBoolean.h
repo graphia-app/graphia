@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/IsBoolean.h
 //  \brief Header file for the IsBoolean type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,8 +40,7 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/util/FalseType.h>
-#include <blaze/util/TrueType.h>
+#include <blaze/util/IntegralConstant.h>
 
 
 namespace blaze {
@@ -72,7 +71,8 @@ namespace blaze {
    \endcode
 */
 template< typename T >
-struct IsBoolean : public FalseType
+struct IsBoolean
+   : public FalseType
 {};
 //*************************************************************************************************
 
@@ -81,7 +81,8 @@ struct IsBoolean : public FalseType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsBoolean type trait for the plain 'bool' type.
 template<>
-struct IsBoolean<bool> : public TrueType
+struct IsBoolean<bool>
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -91,7 +92,8 @@ struct IsBoolean<bool> : public TrueType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsBoolean type trait for 'const bool'.
 template<>
-struct IsBoolean<const bool> : public TrueType
+struct IsBoolean<const bool>
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -101,7 +103,8 @@ struct IsBoolean<const bool> : public TrueType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsBoolean type trait for 'volatile bool'.
 template<>
-struct IsBoolean<volatile bool> : public TrueType
+struct IsBoolean<volatile bool>
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -111,9 +114,28 @@ struct IsBoolean<volatile bool> : public TrueType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsBoolean type trait for 'const volatile bool'
 template<>
-struct IsBoolean<const volatile bool> : public TrueType
+struct IsBoolean<const volatile bool>
+   : public TrueType
 {};
 /*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsBoolean type trait.
+// \ingroup type_traits
+//
+// The IsBoolean_v variable template provides a convenient shortcut to access the nested
+// \a value of the IsBoolean class template. For instance, given the type \a T the following
+// two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsBoolean<T>::value;
+   constexpr bool value2 = blaze::IsBoolean_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsBoolean_v = IsBoolean<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

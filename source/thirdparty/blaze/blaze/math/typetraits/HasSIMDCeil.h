@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/HasSIMDCeil.h
 //  \brief Header file for the HasSIMDCeil type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -41,12 +41,10 @@
 //*************************************************************************************************
 
 #include <blaze/system/Vectorization.h>
-#include <blaze/util/EnableIf.h>
 #include <blaze/util/IntegralConstant.h>
-#include <blaze/util/mpl/Or.h>
-#include <blaze/util/typetraits/Decay.h>
 #include <blaze/util/typetraits/IsDouble.h>
 #include <blaze/util/typetraits/IsFloat.h>
+#include <blaze/util/typetraits/RemoveCVRef.h>
 
 
 namespace blaze {
@@ -59,27 +57,15 @@ namespace blaze {
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-template< typename T         // Type of the operand
-        , typename = void >  // Restricting condition
-struct HasSIMDCeilHelper
-{
-   enum : bool { value = false };
-};
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename T >
-struct HasSIMDCeilHelper< T, EnableIf_< Or< IsFloat<T>, IsDouble<T> > > >
-{
-#if BLAZE_SVML_MODE
-   enum : bool { value = bool( BLAZE_SSE4_MODE ) || bool( BLAZE_AVX_MODE ) || bool( BLAZE_MIC_MODE ) };
-#else
-   enum : bool { value = bool( BLAZE_SSE4_MODE ) || bool( BLAZE_AVX_MODE ) };
-#endif
-};
+/*!\brief Auxiliary alias declaration for the HasSIMDCeil type trait.
+// \ingroup math_type_traits
+*/
+template< typename T >  // Type of the operand
+using HasSIMDCeilHelper =
+   BoolConstant< ( IsFloat_v<T> || IsDouble_v<T> ) &&
+                 ( ( !bool( BLAZE_MIC_MODE ) && !bool( BLAZE_AVX512F_MODE ) &&
+                     ( bool( BLAZE_SSE4_MODE ) || bool( BLAZE_AVX_MODE ) ) ) ||
+                 ( bool( BLAZE_SVML_MODE ) || bool( BLAZE_SLEEF_MODE ) ) ) >;
 /*! \endcond */
 //*************************************************************************************************
 
@@ -106,8 +92,27 @@ struct HasSIMDCeilHelper< T, EnableIf_< Or< IsFloat<T>, IsDouble<T> > > >
    \endcode
 */
 template< typename T >  // Type of the operand
-struct HasSIMDCeil : public BoolConstant< HasSIMDCeilHelper< Decay_<T> >::value >
+struct HasSIMDCeil
+   : public BoolConstant< HasSIMDCeilHelper< RemoveCVRef_t<T> >::value >
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the HasSIMDCeil type trait.
+// \ingroup math_type_traits
+//
+// The HasSIMDCeil_v variable template provides a convenient shortcut to access the nested
+// \a value of the HasSIMDCeil class template. For instance, given the type \a T the following
+// two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::HasSIMDCeil<T>::value;
+   constexpr bool value2 = blaze::HasSIMDCeil_v<T>;
+   \endcode
+*/
+template< typename T >  // Type of the operand
+constexpr bool HasSIMDCeil_v = HasSIMDCeil<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

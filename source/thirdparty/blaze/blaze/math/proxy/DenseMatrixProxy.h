@@ -3,7 +3,7 @@
 //  \file blaze/math/proxy/DenseMatrixProxy.h
 //  \brief Header file for the DenseMatrixProxy class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -50,10 +50,9 @@
 #include <blaze/math/typetraits/IsResizable.h>
 #include <blaze/math/typetraits/IsSquare.h>
 #include <blaze/system/Inline.h>
-#include <blaze/util/DisableIf.h>
 #include <blaze/util/EnableIf.h>
+#include <blaze/util/MaybeUnused.h>
 #include <blaze/util/Types.h>
-#include <blaze/util/Unused.h>
 
 
 namespace blaze {
@@ -74,30 +73,31 @@ namespace blaze {
 */
 template< typename PT    // Type of the proxy
         , typename MT >  // Type of the dense matrix
-class DenseMatrixProxy : public DenseMatrix< PT, IsColumnMajorMatrix<MT>::value >
+class DenseMatrixProxy
+   : public DenseMatrix< PT, IsColumnMajorMatrix_v<MT> >
 {
  public:
    //**Type definitions****************************************************************************
-   typedef ResultType_<MT>      ResultType;      //!< Result type for expression template evaluations.
-   typedef OppositeType_<MT>    OppositeType;    //!< Result type with opposite storage order for expression template evaluations.
-   typedef TransposeType_<MT>   TransposeType;   //!< Transpose type for expression template evaluations.
-   typedef ElementType_<MT>     ElementType;     //!< Type of the matrix elements.
-   typedef ReturnType_<MT>      ReturnType;      //!< Return type for expression template evaluations.
-   typedef CompositeType_<MT>   CompositeType;   //!< Data type for composite expression templates.
-   typedef Reference_<MT>       Reference;       //!< Reference to a non-constant matrix value.
-   typedef ConstReference_<MT>  ConstReference;  //!< Reference to a constant matrix value.
-   typedef Pointer_<MT>         Pointer;         //!< Pointer to a non-constant matrix value.
-   typedef ConstPointer_<MT>    ConstPointer;    //!< Pointer to a constant matrix value.
-   typedef Iterator_<MT>        Iterator;        //!< Iterator over non-constant elements.
-   typedef ConstIterator_<MT>   ConstIterator;   //!< Iterator over constant elements.
+   using ResultType     = ResultType_t<MT>;      //!< Result type for expression template evaluations.
+   using OppositeType   = OppositeType_t<MT>;    //!< Result type with opposite storage order for expression template evaluations.
+   using TransposeType  = TransposeType_t<MT>;   //!< Transpose type for expression template evaluations.
+   using ElementType    = ElementType_t<MT>;     //!< Type of the matrix elements.
+   using ReturnType     = ReturnType_t<MT>;      //!< Return type for expression template evaluations.
+   using CompositeType  = CompositeType_t<MT>;   //!< Data type for composite expression templates.
+   using Reference      = Reference_t<MT>;       //!< Reference to a non-constant matrix value.
+   using ConstReference = ConstReference_t<MT>;  //!< Reference to a constant matrix value.
+   using Pointer        = Pointer_t<MT>;         //!< Pointer to a non-constant matrix value.
+   using ConstPointer   = ConstPointer_t<MT>;    //!< Pointer to a constant matrix value.
+   using Iterator       = Iterator_t<MT>;        //!< Iterator over non-constant elements.
+   using ConstIterator  = ConstIterator_t<MT>;   //!< Iterator over constant elements.
    //**********************************************************************************************
 
    //**Compilation flags***************************************************************************
    //! Compilation flag for SIMD optimization.
-   enum : bool { simdEnabled = MT::simdEnabled };
+   static constexpr bool simdEnabled = MT::simdEnabled;
 
    //! Compilation flag for SMP assignments.
-   enum : bool { smpAssignable = MT::smpAssignable };
+   static constexpr bool smpAssignable = MT::smpAssignable;
    //**********************************************************************************************
 
    //**Data access functions***********************************************************************
@@ -144,6 +144,19 @@ class DenseMatrixProxy : public DenseMatrix< PT, IsColumnMajorMatrix<MT>::value 
    //@}
    //**********************************************************************************************
 
+ protected:
+   //**Special member functions********************************************************************
+   /*!\name Special member functions */
+   //@{
+   DenseMatrixProxy() = default;
+   DenseMatrixProxy( const DenseMatrixProxy& ) = default;
+   DenseMatrixProxy( DenseMatrixProxy&& ) = default;
+   ~DenseMatrixProxy() = default;
+   DenseMatrixProxy& operator=( const DenseMatrixProxy& ) = default;
+   DenseMatrixProxy& operator=( DenseMatrixProxy&& ) = default;
+   //@}
+   //**********************************************************************************************
+
  private:
    //**Compile time checks*************************************************************************
    /*! \cond BLAZE_INTERNAL */
@@ -175,11 +188,11 @@ template< typename PT    // Type of the proxy
 inline typename DenseMatrixProxy<PT,MT>::Reference
    DenseMatrixProxy<PT,MT>::operator()( size_t i, size_t j ) const
 {
-   if( (~*this).isRestricted() ) {
+   if( (**this).isRestricted() ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid access to restricted element" );
    }
 
-   return (~*this).get()(i,j);
+   return (**this).get()(i,j);
 }
 //*************************************************************************************************
 
@@ -201,11 +214,11 @@ template< typename PT    // Type of the proxy
 inline typename DenseMatrixProxy<PT,MT>::Reference
    DenseMatrixProxy<PT,MT>::at( size_t i, size_t j ) const
 {
-   if( (~*this).isRestricted() ) {
+   if( (**this).isRestricted() ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid access to restricted element" );
    }
 
-   return (~*this).get().at(i,j);
+   return (**this).get().at(i,j);
 }
 //*************************************************************************************************
 
@@ -226,11 +239,11 @@ template< typename PT    // Type of the proxy
         , typename MT >  // Type of the dense matrix
 inline typename DenseMatrixProxy<PT,MT>::Pointer DenseMatrixProxy<PT,MT>::data() const
 {
-   if( (~*this).isRestricted() ) {
+   if( (**this).isRestricted() ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid access to restricted element" );
    }
 
-   return (~*this).get().data();
+   return (**this).get().data();
 }
 //*************************************************************************************************
 
@@ -247,11 +260,11 @@ template< typename PT    // Type of the proxy
         , typename MT >  // Type of the dense matrix
 inline typename DenseMatrixProxy<PT,MT>::Pointer DenseMatrixProxy<PT,MT>::data( size_t i ) const
 {
-   if( (~*this).isRestricted() ) {
+   if( (**this).isRestricted() ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid access to restricted element" );
    }
 
-   return (~*this).get().data(i);
+   return (**this).get().data(i);
 }
 //*************************************************************************************************
 
@@ -273,11 +286,11 @@ template< typename PT    // Type of the proxy
 inline typename DenseMatrixProxy<PT,MT>::Iterator
    DenseMatrixProxy<PT,MT>::begin( size_t i ) const
 {
-   if( (~*this).isRestricted() ) {
+   if( (**this).isRestricted() ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid access to restricted element" );
    }
 
-   return (~*this).get().begin(i);
+   return (**this).get().begin(i);
 }
 //*************************************************************************************************
 
@@ -298,7 +311,7 @@ template< typename PT    // Type of the proxy
 inline typename DenseMatrixProxy<PT,MT>::ConstIterator
    DenseMatrixProxy<PT,MT>::cbegin( size_t i ) const
 {
-   return (~*this).get().cbegin(i);
+   return (**this).get().cbegin(i);
 }
 //*************************************************************************************************
 
@@ -320,11 +333,11 @@ template< typename PT    // Type of the proxy
 inline typename DenseMatrixProxy<PT,MT>::Iterator
    DenseMatrixProxy<PT,MT>::end( size_t i ) const
 {
-   if( (~*this).isRestricted() ) {
+   if( (**this).isRestricted() ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid access to restricted element" );
    }
 
-   return (~*this).get().end(i);
+   return (**this).get().end(i);
 }
 //*************************************************************************************************
 
@@ -345,7 +358,7 @@ template< typename PT    // Type of the proxy
 inline typename DenseMatrixProxy<PT,MT>::ConstIterator
    DenseMatrixProxy<PT,MT>::cend( size_t i ) const
 {
-   return (~*this).get().cend(i);
+   return (**this).get().cend(i);
 }
 //*************************************************************************************************
 
@@ -367,7 +380,7 @@ template< typename PT    // Type of the proxy
         , typename MT >  // Type of the dense matrix
 inline size_t DenseMatrixProxy<PT,MT>::rows() const
 {
-   return (~*this).get().rows();
+   return (**this).get().rows();
 }
 //*************************************************************************************************
 
@@ -381,7 +394,7 @@ template< typename PT    // Type of the proxy
         , typename MT >  // Type of the dense matrix
 inline size_t DenseMatrixProxy<PT,MT>::columns() const
 {
-   return (~*this).get().columns();
+   return (**this).get().columns();
 }
 //*************************************************************************************************
 
@@ -400,7 +413,7 @@ template< typename PT    // Type of the proxy
         , typename MT >  // Type of the dense matrix
 inline size_t DenseMatrixProxy<PT,MT>::spacing() const
 {
-   return (~*this).get().spacing();
+   return (**this).get().spacing();
 }
 //*************************************************************************************************
 
@@ -414,7 +427,7 @@ template< typename PT    // Type of the proxy
         , typename MT >  // Type of the dense matrix
 inline size_t DenseMatrixProxy<PT,MT>::capacity() const
 {
-   return (~*this).get().capacity();
+   return (**this).get().capacity();
 }
 //*************************************************************************************************
 
@@ -434,7 +447,7 @@ template< typename PT    // Type of the proxy
         , typename MT >  // Type of the dense matrix
 inline size_t DenseMatrixProxy<PT,MT>::capacity( size_t i ) const
 {
-   return (~*this).get().capacity(i);
+   return (**this).get().capacity(i);
 }
 //*************************************************************************************************
 
@@ -448,7 +461,7 @@ template< typename PT    // Type of the proxy
         , typename MT >  // Type of the dense matrix
 inline size_t DenseMatrixProxy<PT,MT>::nonZeros() const
 {
-   return (~*this).get().nonZeros();
+   return (**this).get().nonZeros();
 }
 //*************************************************************************************************
 
@@ -468,7 +481,7 @@ template< typename PT    // Type of the proxy
         , typename MT >  // Type of the dense matrix
 inline size_t DenseMatrixProxy<PT,MT>::nonZeros( size_t i ) const
 {
-   return (~*this).get().nonZeros(i);
+   return (**this).get().nonZeros(i);
 }
 //*************************************************************************************************
 
@@ -486,7 +499,7 @@ inline void DenseMatrixProxy<PT,MT>::reset() const
 {
    using blaze::reset;
 
-   reset( (~*this).get() );
+   reset( (**this).get() );
 }
 //*************************************************************************************************
 
@@ -508,7 +521,7 @@ inline void DenseMatrixProxy<PT,MT>::reset( size_t i ) const
 {
    using blaze::reset;
 
-   reset( (~*this).get(), i );
+   reset( (**this).get(), i );
 }
 //*************************************************************************************************
 
@@ -526,7 +539,7 @@ inline void DenseMatrixProxy<PT,MT>::clear() const
 {
    using blaze::clear;
 
-   clear( (~*this).get() );
+   clear( (**this).get() );
 }
 //*************************************************************************************************
 
@@ -552,11 +565,11 @@ template< typename PT    // Type of the proxy
         , typename MT >  // Type of the dense matrix
 inline void DenseMatrixProxy<PT,MT>::resize( size_t m, size_t n, bool preserve ) const
 {
-   if( (~*this).isRestricted() ) {
+   if( (**this).isRestricted() ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid access to restricted element" );
    }
 
-   (~*this).get().resize( m, n, preserve );
+   (**this).get().resize( m, n, preserve );
 }
 //*************************************************************************************************
 
@@ -581,11 +594,11 @@ template< typename PT    // Type of the proxy
         , typename MT >  // Type of the dense matrix
 inline void DenseMatrixProxy<PT,MT>::extend( size_t m, size_t n, bool preserve ) const
 {
-   if( (~*this).isRestricted() ) {
+   if( (**this).isRestricted() ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid access to restricted element" );
    }
 
-   (~*this).get().extend( m, n, preserve );
+   (**this).get().extend( m, n, preserve );
 }
 //*************************************************************************************************
 
@@ -604,11 +617,11 @@ template< typename PT    // Type of the proxy
         , typename MT >  // Type of the dense matrix
 inline void DenseMatrixProxy<PT,MT>::reserve( size_t n ) const
 {
-   if( (~*this).isRestricted() ) {
+   if( (**this).isRestricted() ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid access to restricted element" );
    }
 
-   (~*this).get().reserve( n );
+   (**this).get().reserve( n );
 }
 //*************************************************************************************************
 
@@ -623,11 +636,11 @@ template< typename PT    // Type of the proxy
         , typename MT >  // Type of the dense matrix
 inline void DenseMatrixProxy<PT,MT>::transpose() const
 {
-   if( (~*this).isRestricted() ) {
+   if( (**this).isRestricted() ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid access to restricted element" );
    }
 
-   (~*this).get().transpose();
+   (**this).get().transpose();
 }
 //*************************************************************************************************
 
@@ -642,11 +655,11 @@ template< typename PT    // Type of the proxy
         , typename MT >  // Type of the dense matrix
 inline void DenseMatrixProxy<PT,MT>::ctranspose() const
 {
-   if( (~*this).isRestricted() ) {
+   if( (**this).isRestricted() ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid access to restricted element" );
    }
 
-   (~*this).get().ctranspose();
+   (**this).get().ctranspose();
 }
 //*************************************************************************************************
 
@@ -657,17 +670,21 @@ inline void DenseMatrixProxy<PT,MT>::ctranspose() const
 // \param scalar The scalar value for the matrix scaling.
 // \return void
 // \exception std::invalid_argument Invalid access to restricted element.
+//
+// This function scales the matrix by applying the given scalar value \a scalar to each element
+// of the matrix. For built-in and \c complex data types it has the same effect as using the
+// multiplication assignment operator.
 */
 template< typename PT       // Type of the proxy
         , typename MT >     // Type of the dense matrix
 template< typename Other >  // Data type of the scalar value
 inline void DenseMatrixProxy<PT,MT>::scale( const Other& scalar ) const
 {
-   if( (~*this).isRestricted() ) {
+   if( (**this).isRestricted() ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid access to restricted element" );
    }
 
-   (~*this).get().scale( scalar );
+   (**this).get().scale( scalar );
 }
 //*************************************************************************************************
 
@@ -684,50 +701,41 @@ inline void DenseMatrixProxy<PT,MT>::scale( const Other& scalar ) const
 /*!\name DenseMatrixProxy global functions */
 //@{
 template< typename PT, typename MT >
-BLAZE_ALWAYS_INLINE typename DenseMatrixProxy<PT,MT>::Iterator
+typename DenseMatrixProxy<PT,MT>::Iterator
    begin( const DenseMatrixProxy<PT,MT>& proxy, size_t i );
 
 template< typename PT, typename MT >
-BLAZE_ALWAYS_INLINE typename DenseMatrixProxy<PT,MT>::ConstIterator
+typename DenseMatrixProxy<PT,MT>::ConstIterator
    cbegin( const DenseMatrixProxy<PT,MT>& proxy, size_t i );
 
 template< typename PT, typename MT >
-BLAZE_ALWAYS_INLINE typename DenseMatrixProxy<PT,MT>::Iterator
+typename DenseMatrixProxy<PT,MT>::Iterator
    end( const DenseMatrixProxy<PT,MT>& proxy, size_t i );
 
 template< typename PT, typename MT >
-BLAZE_ALWAYS_INLINE typename DenseMatrixProxy<PT,MT>::ConstIterator
+typename DenseMatrixProxy<PT,MT>::ConstIterator
    cend( const DenseMatrixProxy<PT,MT>& proxy, size_t i );
 
 template< typename PT, typename MT >
-BLAZE_ALWAYS_INLINE size_t rows( const DenseMatrixProxy<PT,MT>& proxy );
+size_t rows( const DenseMatrixProxy<PT,MT>& proxy );
 
 template< typename PT, typename MT >
-BLAZE_ALWAYS_INLINE size_t columns( const DenseMatrixProxy<PT,MT>& proxy );
+size_t columns( const DenseMatrixProxy<PT,MT>& proxy );
 
 template< typename PT, typename MT >
-BLAZE_ALWAYS_INLINE size_t capacity( const DenseMatrixProxy<PT,MT>& proxy );
+size_t capacity( const DenseMatrixProxy<PT,MT>& proxy );
 
 template< typename PT, typename MT >
-BLAZE_ALWAYS_INLINE size_t capacity( const DenseMatrixProxy<PT,MT>& proxy, size_t i );
+size_t capacity( const DenseMatrixProxy<PT,MT>& proxy, size_t i );
 
 template< typename PT, typename MT >
-BLAZE_ALWAYS_INLINE size_t nonZeros( const DenseMatrixProxy<PT,MT>& proxy );
+size_t nonZeros( const DenseMatrixProxy<PT,MT>& proxy );
 
 template< typename PT, typename MT >
-BLAZE_ALWAYS_INLINE size_t nonZeros( const DenseMatrixProxy<PT,MT>& proxy, size_t i );
+size_t nonZeros( const DenseMatrixProxy<PT,MT>& proxy, size_t i );
 
 template< typename PT, typename MT >
-BLAZE_ALWAYS_INLINE void resize( const DenseMatrixProxy<PT,MT>& proxy, size_t m, size_t n, bool preserve=true );
-
-template< typename PT, typename MT >
-BLAZE_ALWAYS_INLINE void reset( const DenseMatrixProxy<PT,MT>& proxy );
-
-template< typename PT, typename MT >
-BLAZE_ALWAYS_INLINE void reset( const DenseMatrixProxy<PT,MT>& proxy, size_t i );
-
-template< typename PT, typename MT >
-BLAZE_ALWAYS_INLINE void clear( const DenseMatrixProxy<PT,MT>& proxy );
+void resize( const DenseMatrixProxy<PT,MT>& proxy, size_t m, size_t n, bool preserve=true );
 //@}
 //*************************************************************************************************
 
@@ -953,10 +961,10 @@ BLAZE_ALWAYS_INLINE size_t nonZeros( const DenseMatrixProxy<PT,MT>& proxy, size_
 */
 template< typename PT    // Type of the proxy
         , typename MT >  // Type of the dense matrix
-BLAZE_ALWAYS_INLINE DisableIf_< IsResizable<MT> >
+BLAZE_ALWAYS_INLINE DisableIf_t< IsResizable_v<MT> >
    resize_backend( const DenseMatrixProxy<PT,MT>& proxy, size_t m, size_t n, bool preserve )
 {
-   UNUSED_PARAMETER( preserve );
+   MAYBE_UNUSED( preserve );
 
    if( proxy.rows() != m || proxy.columns() != n ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Matrix cannot be resized" );
@@ -981,7 +989,7 @@ BLAZE_ALWAYS_INLINE DisableIf_< IsResizable<MT> >
 */
 template< typename PT    // Type of the proxy
         , typename MT >  // Type of the dense matrix
-BLAZE_ALWAYS_INLINE EnableIf_< And< IsResizable<MT>, Not< IsSquare<MT> > > >
+BLAZE_ALWAYS_INLINE EnableIf_t< IsResizable_v<MT> && !IsSquare_v<MT> >
    resize_backend( const DenseMatrixProxy<PT,MT>& proxy, size_t m, size_t n, bool preserve )
 {
    proxy.resize( m, n, preserve );
@@ -1006,7 +1014,7 @@ BLAZE_ALWAYS_INLINE EnableIf_< And< IsResizable<MT>, Not< IsSquare<MT> > > >
 */
 template< typename PT    // Type of the proxy
         , typename MT >  // Type of the dense matrix
-BLAZE_ALWAYS_INLINE EnableIf_< And< IsResizable<MT>, IsSquare<MT> > >
+BLAZE_ALWAYS_INLINE EnableIf_t< IsResizable_v<MT> && IsSquare_v<MT> >
    resize_backend( const DenseMatrixProxy<PT,MT>& proxy, size_t m, size_t n, bool preserve )
 {
    if( m != n ) {
@@ -1049,64 +1057,6 @@ template< typename PT    // Type of the proxy
 BLAZE_ALWAYS_INLINE void resize( const DenseMatrixProxy<PT,MT>& proxy, size_t m, size_t n, bool preserve )
 {
    resize_backend( proxy, m, n, preserve );
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Resetting the represented element to the default initial values.
-// \ingroup math
-//
-// \param proxy The given access proxy.
-// \return void
-//
-// This function resets all elements of the matrix to the default initial values.
-*/
-template< typename PT    // Type of the proxy
-        , typename MT >  // Type of the dense matrix
-BLAZE_ALWAYS_INLINE void reset( const DenseMatrixProxy<PT,MT>& proxy )
-{
-   proxy.reset();
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Reset the specified row/column of the represented matrix.
-// \ingroup math
-//
-// \param proxy The given access proxy.
-// \param i The index of the row/column to be resetted.
-// \return void
-//
-// This function resets all elements in the specified row/column of the given matrix to their
-// default value. In case the given matrix is a \a rowMajor matrix the function resets the values
-// in row \a i, if it is a \a columnMajor matrix the function resets the values in column \a i.
-// Note that the capacity of the row/column remains unchanged.
-*/
-template< typename PT    // Type of the proxy
-        , typename MT >  // Type of the dense matrix
-BLAZE_ALWAYS_INLINE void reset( const DenseMatrixProxy<PT,MT>& proxy, size_t i )
-{
-   proxy.reset(i);
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Clearing the represented matrix.
-// \ingroup math
-//
-// \param proxy The given access proxy.
-// \return void
-//
-// This function clears the matrix to its default initial state.
-*/
-template< typename PT    // Type of the proxy
-        , typename MT >  // Type of the dense matrix
-BLAZE_ALWAYS_INLINE void clear( const DenseMatrixProxy<PT,MT>& proxy )
-{
-   proxy.clear();
 }
 //*************************************************************************************************
 

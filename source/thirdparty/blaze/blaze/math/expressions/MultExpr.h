@@ -3,7 +3,7 @@
 //  \file blaze/math/expressions/MultExpr.h
 //  \brief Header file for the MultExpr base class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -59,11 +59,14 @@ namespace blaze {
 // multiplications. All classes, that represent a mathematical multiplication (element-wise
 // vector multiplications, matrix/vector multiplications, vector/matrix multiplications and
 // matrix/matrix multiplications) and that are used within the expression template environment
-// of the Blaze library have to derive from this class in order to qualify as multiplication
-// expression template. Only in case a class is derived from the MultExpr base class, the
-// IsMultExpr type trait recognizes the class as valid multiplication expression template.
+// of the Blaze library have to derive publicly from this class in order to qualify as
+// multiplication expression template. Only in case a class is derived publicly from the
+// MultExpr base class, the IsMultExpr type trait recognizes the class as valid multiplication
+// expression template.
 */
-struct MultExpr : private Expression
+template< typename T >  // Base type of the expression
+struct MultExpr
+   : public Expression<T>
 {};
 //*************************************************************************************************
 

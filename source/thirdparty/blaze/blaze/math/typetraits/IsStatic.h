@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/IsStatic.h
 //  \brief Header file for the IsStatic type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,8 +40,10 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/util/FalseType.h>
-#include <blaze/util/TrueType.h>
+#include <blaze/math/typetraits/IsMatrix.h>
+#include <blaze/math/typetraits/IsVector.h>
+#include <blaze/math/typetraits/Size.h>
+#include <blaze/util/IntegralConstant.h>
 
 
 namespace blaze {
@@ -70,8 +72,8 @@ namespace blaze {
    using blaze::columnVector;
    using blaze::rowMajor;
 
-   typedef StaticVector<int,columnVector>  StaticVectorType;
-   typedef StaticMatrix<double,rowMajor>   StaticMatrixType;
+   using StaticVectorType = StaticVector<int,columnVector>;
+   using StaticMatrixType = StaticMatrix<double,rowMajor>;
 
    blaze::IsStatic< StaticVectorType >::value                        // Evaluates to 1
    blaze::IsStatic< const StaticVectorType >::Type                   // Results in TrueType
@@ -82,44 +84,29 @@ namespace blaze {
    \endcode
 */
 template< typename T >
-struct IsStatic : public FalseType
+struct IsStatic
+   : public BoolConstant< ( IsVector_v<T> && Size_v<T,0UL> != DefaultSize_v ) ||
+                          ( IsMatrix_v<T> && Size_v<T,0UL> != DefaultSize_v &&
+                                             Size_v<T,1UL> != DefaultSize_v ) >
 {};
 //*************************************************************************************************
 
 
 //*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Specialization of the IsStatic type trait for const types.
+/*!\brief Auxiliary variable template for the IsStatic type trait.
 // \ingroup math_type_traits
+//
+// The IsStatic_v variable template provides a convenient shortcut to access the nested \a value
+// of the IsStatic class template. For instance, given the type \a T the following two statements
+// are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsStatic<T>::value;
+   constexpr bool value2 = blaze::IsStatic_v<T>;
+   \endcode
 */
 template< typename T >
-struct IsStatic< const T > : public IsStatic<T>
-{};
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Specialization of the IsStatic type trait for volatile types.
-// \ingroup math_type_traits
-*/
-template< typename T >
-struct IsStatic< volatile T > : public IsStatic<T>
-{};
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Specialization of the IsStatic type trait for cv qualified types.
-// \ingroup math_type_traits
-*/
-template< typename T >
-struct IsStatic< const volatile T > : public IsStatic<T>
-{};
-/*! \endcond */
+constexpr bool IsStatic_v = IsStatic<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/math/expressions/TDMatDVecMultExpr.h
 //  \brief Header file for the transpose dense matrix/dense vector multiplication expression
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -47,21 +47,21 @@
 #include <blaze/math/constraints/ColumnVector.h>
 #include <blaze/math/constraints/DenseMatrix.h>
 #include <blaze/math/constraints/DenseVector.h>
+#include <blaze/math/constraints/MatMatMultExpr.h>
 #include <blaze/math/constraints/MatVecMultExpr.h>
+#include <blaze/math/constraints/RequiresEvaluation.h>
+#include <blaze/math/constraints/Scalar.h>
 #include <blaze/math/Exception.h>
 #include <blaze/math/expressions/Computation.h>
 #include <blaze/math/expressions/DenseVector.h>
 #include <blaze/math/expressions/Forward.h>
 #include <blaze/math/expressions/MatVecMultExpr.h>
 #include <blaze/math/expressions/VecScalarMultExpr.h>
-#include <blaze/math/Functions.h>
+#include <blaze/math/shims/PrevMultiple.h>
 #include <blaze/math/shims/Reset.h>
 #include <blaze/math/shims/Serial.h>
 #include <blaze/math/SIMD.h>
-#include <blaze/math/traits/MultExprTrait.h>
 #include <blaze/math/traits/MultTrait.h>
-#include <blaze/math/traits/SubmatrixExprTrait.h>
-#include <blaze/math/traits/SubvectorExprTrait.h>
 #include <blaze/math/typetraits/HasConstDataAccess.h>
 #include <blaze/math/typetraits/HasMutableDataAccess.h>
 #include <blaze/math/typetraits/HasSIMDAdd.h>
@@ -69,30 +69,31 @@
 #include <blaze/math/typetraits/IsAligned.h>
 #include <blaze/math/typetraits/IsBLASCompatible.h>
 #include <blaze/math/typetraits/IsComputation.h>
+#include <blaze/math/typetraits/IsContiguous.h>
 #include <blaze/math/typetraits/IsDiagonal.h>
 #include <blaze/math/typetraits/IsExpression.h>
 #include <blaze/math/typetraits/IsLower.h>
-#include <blaze/math/typetraits/IsMatMatMultExpr.h>
+#include <blaze/math/typetraits/IsPadded.h>
 #include <blaze/math/typetraits/IsSIMDCombinable.h>
 #include <blaze/math/typetraits/IsStrictlyLower.h>
+#include <blaze/math/typetraits/IsStrictlyTriangular.h>
 #include <blaze/math/typetraits/IsStrictlyUpper.h>
 #include <blaze/math/typetraits/IsTriangular.h>
 #include <blaze/math/typetraits/IsUpper.h>
 #include <blaze/math/typetraits/RequiresEvaluation.h>
-#include <blaze/math/typetraits/Rows.h>
-#include <blaze/math/typetraits/Size.h>
+#include <blaze/math/views/Check.h>
 #include <blaze/system/BLAS.h>
+#include <blaze/system/MacroDisable.h>
 #include <blaze/system/Optimizations.h>
 #include <blaze/system/Thresholds.h>
+#include <blaze/util/algorithms/Max.h>
+#include <blaze/util/algorithms/Min.h>
 #include <blaze/util/Assert.h>
 #include <blaze/util/Complex.h>
-#include <blaze/util/constraints/Reference.h>
 #include <blaze/util/constraints/SameType.h>
-#include <blaze/util/DisableIf.h>
 #include <blaze/util/EnableIf.h>
 #include <blaze/util/FunctionTrace.h>
 #include <blaze/util/IntegralConstant.h>
-#include <blaze/util/mpl/And.h>
 #include <blaze/util/mpl/If.h>
 #include <blaze/util/Types.h>
 #include <blaze/util/typetraits/IsBuiltin.h>
@@ -101,7 +102,6 @@
 #include <blaze/util/typetraits/IsComplexFloat.h>
 #include <blaze/util/typetraits/IsDouble.h>
 #include <blaze/util/typetraits/IsFloat.h>
-#include <blaze/util/typetraits/IsNumeric.h>
 #include <blaze/util/typetraits/IsSame.h>
 
 
@@ -122,124 +122,127 @@ namespace blaze {
 */
 template< typename MT    // Type of the left-hand side dense matrix
         , typename VT >  // Type of the right-hand side dense vector
-class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
-                        , private MatVecMultExpr
-                        , private Computation
+class TDMatDVecMultExpr
+   : public MatVecMultExpr< DenseVector< TDMatDVecMultExpr<MT,VT>, false > >
+   , private Computation
 {
  private:
    //**Type definitions****************************************************************************
-   typedef ResultType_<MT>     MRT;  //!< Result type of the left-hand side dense matrix expression.
-   typedef ResultType_<VT>     VRT;  //!< Result type of the right-hand side dense vector expression.
-   typedef ElementType_<MRT>   MET;  //!< Element type of the left-hand side dense matrix expression.
-   typedef ElementType_<VRT>   VET;  //!< Element type of the right-hand side dense vector expression.
-   typedef CompositeType_<MT>  MCT;  //!< Composite type of the left-hand side dense matrix expression.
-   typedef CompositeType_<VT>  VCT;  //!< Composite type of the right-hand side dense vector expression.
+   using MRT = ResultType_t<MT>;     //!< Result type of the left-hand side dense matrix expression.
+   using VRT = ResultType_t<VT>;     //!< Result type of the right-hand side dense vector expression.
+   using MET = ElementType_t<MRT>;   //!< Element type of the left-hand side dense matrix expression.
+   using VET = ElementType_t<VRT>;   //!< Element type of the right-hand side dense vector expression.
+   using MCT = CompositeType_t<MT>;  //!< Composite type of the left-hand side dense matrix expression.
+   using VCT = CompositeType_t<VT>;  //!< Composite type of the right-hand side dense vector expression.
    //**********************************************************************************************
 
    //**********************************************************************************************
    //! Compilation switch for the composite type of the left-hand side dense matrix expression.
-   enum : bool { evaluateMatrix = ( IsComputation<MT>::value && IsSame<MET,VET>::value &&
-                                    IsBLASCompatible<MET>::value ) || RequiresEvaluation<MT>::value };
+   static constexpr bool evaluateMatrix =
+      ( ( IsComputation_v<MT> && IsSame_v<MET,VET> &&
+          IsBLASCompatible_v<MET> ) || RequiresEvaluation_v<MT> );
    //**********************************************************************************************
 
    //**********************************************************************************************
    //! Compilation switch for the composite type of the right-hand side dense vector expression.
-   enum : bool { evaluateVector = IsComputation<VT>::value || RequiresEvaluation<VT>::value };
+   static constexpr bool evaluateVector = ( IsComputation_v<VT> || RequiresEvaluation_v<VT> );
    //**********************************************************************************************
 
    //**********************************************************************************************
    /*! \cond BLAZE_INTERNAL */
-   //! Helper structure for the explicit application of the SFINAE principle.
-   /*! The UseSMPAssign struct is a helper struct for the selection of the parallel evaluation
-       strategy. In case either the matrix or the vector operand requires an intermediate
-       evaluation, the nested \a value will be set to 1, otherwise it will be 0. */
+   //! Helper variable template for the explicit application of the SFINAE principle.
+   /*! This variable template is a helper for the selection of the parallel evaluation strategy.
+       In case either the matrix or the vector operand requires an intermediate evaluation, the
+       variable will be set to 1, otherwise it will be 0. */
    template< typename T1 >
-   struct UseSMPAssign {
-      enum : bool { value = ( evaluateMatrix || evaluateVector ) };
-   };
+   static constexpr bool UseSMPAssign_v = ( evaluateMatrix || evaluateVector );
    /*! \endcond */
    //**********************************************************************************************
 
    //**********************************************************************************************
    /*! \cond BLAZE_INTERNAL */
-   //! Helper structure for the explicit application of the SFINAE principle.
+   //! Helper variable template for the explicit application of the SFINAE principle.
    /*! In case the matrix type and the two involved vector types are suited for a BLAS kernel,
-       the nested \a value will be set to 1, otherwise it will be 0. */
+       the variable will be set to 1, otherwise it will be 0. */
    template< typename T1, typename T2, typename T3 >
-   struct UseBlasKernel {
-      enum : bool { value = BLAZE_BLAS_MODE && BLAZE_USE_BLAS_MATRIX_VECTOR_MULTIPLICATION &&
-                            HasMutableDataAccess<T1>::value &&
-                            HasConstDataAccess<T2>::value &&
-                            HasConstDataAccess<T3>::value &&
-                            !IsDiagonal<T2>::value &&
-                            T1::simdEnabled && T2::simdEnabled && T3::simdEnabled &&
-                            IsBLASCompatible< ElementType_<T1> >::value &&
-                            IsBLASCompatible< ElementType_<T2> >::value &&
-                            IsBLASCompatible< ElementType_<T3> >::value &&
-                            IsSame< ElementType_<T1>, ElementType_<T2> >::value &&
-                            IsSame< ElementType_<T1>, ElementType_<T3> >::value };
-   };
+   static constexpr bool UseBlasKernel_v =
+      ( BLAZE_BLAS_MODE && BLAZE_USE_BLAS_MATRIX_VECTOR_MULTIPLICATION &&
+        IsContiguous_v<T1> && HasMutableDataAccess_v<T1> &&
+        IsContiguous_v<T2> && HasConstDataAccess_v<T2> &&
+        IsContiguous_v<T3> && HasConstDataAccess_v<T3> &&
+        !IsDiagonal_v<T2> &&
+        T1::simdEnabled && T2::simdEnabled && T3::simdEnabled &&
+        IsBLASCompatible_v< ElementType_t<T1> > &&
+        IsBLASCompatible_v< ElementType_t<T2> > &&
+        IsBLASCompatible_v< ElementType_t<T3> > &&
+        IsSame_v< ElementType_t<T1>, ElementType_t<T2> > &&
+        IsSame_v< ElementType_t<T1>, ElementType_t<T3> > );
    /*! \endcond */
    //**********************************************************************************************
 
    //**********************************************************************************************
    /*! \cond BLAZE_INTERNAL */
-   //! Helper structure for the explicit application of the SFINAE principle.
+   //! Helper variable template for the explicit application of the SFINAE principle.
    /*! In case the matrix type and the two involved vector types are suited for a vectorized
-       computation of the matrix/vector multiplication, the nested \a value will be set to 1,
-       otherwise it will be 0. */
+       computation of the matrix/vector multiplication, the variable will be set to 1, otherwise
+       it will be 0. */
    template< typename T1, typename T2, typename T3 >
-   struct UseVectorizedDefaultKernel {
-      enum : bool { value = useOptimizedKernels &&
-                            !IsDiagonal<T2>::value &&
-                            T1::simdEnabled && T2::simdEnabled && T3::simdEnabled &&
-                            IsSIMDCombinable< ElementType_<T1>
-                                            , ElementType_<T2>
-                                            , ElementType_<T3> >::value &&
-                            HasSIMDAdd< ElementType_<T2>, ElementType_<T3> >::value &&
-                            HasSIMDMult< ElementType_<T2>, ElementType_<T3> >::value };
-   };
+   static constexpr bool UseVectorizedDefaultKernel_v =
+      ( useOptimizedKernels &&
+        !IsDiagonal_v<T2> &&
+        T1::simdEnabled && T2::simdEnabled && T3::simdEnabled &&
+        IsSIMDCombinable_v< ElementType_t<T1>
+                          , ElementType_t<T2>
+                          , ElementType_t<T3> > &&
+        HasSIMDAdd_v< ElementType_t<T2>, ElementType_t<T3> > &&
+        HasSIMDMult_v< ElementType_t<T2>, ElementType_t<T3> > );
    /*! \endcond */
    //**********************************************************************************************
 
  public:
    //**Type definitions****************************************************************************
-   typedef TDMatDVecMultExpr<MT,VT>    This;           //!< Type of this TDMatDVecMultExpr instance.
-   typedef MultTrait_<MRT,VRT>         ResultType;     //!< Result type for expression template evaluations.
-   typedef TransposeType_<ResultType>  TransposeType;  //!< Transpose type for expression template evaluations.
-   typedef ElementType_<ResultType>    ElementType;    //!< Resulting element type.
-   typedef SIMDTrait_<ElementType>     SIMDType;       //!< Resulting SIMD element type.
-   typedef const ElementType           ReturnType;     //!< Return type for expression template evaluations.
-   typedef const ResultType            CompositeType;  //!< Data type for composite expression templates.
+   //! Type of this TDMatDVecMultExpr instance.
+   using This = TDMatDVecMultExpr<MT,VT>;
+
+   //! Base type of this TDMatDVecMultExpr instance.
+   using BaseType = MatVecMultExpr< DenseVector<This,false> >;
+
+   using ResultType    = MultTrait_t<MRT,VRT>;         //!< Result type for expression template evaluations.
+   using TransposeType = TransposeType_t<ResultType>;  //!< Transpose type for expression template evaluations.
+   using ElementType   = ElementType_t<ResultType>;    //!< Resulting element type.
+   using SIMDType      = SIMDTrait_t<ElementType>;     //!< Resulting SIMD element type.
+   using ReturnType    = const ElementType;            //!< Return type for expression template evaluations.
+   using CompositeType = const ResultType;             //!< Data type for composite expression templates.
 
    //! Composite type of the left-hand side dense matrix expression.
-   typedef If_< IsExpression<MT>, const MT, const MT& >  LeftOperand;
+   using LeftOperand = If_t< IsExpression_v<MT>, const MT, const MT& >;
 
    //! Composite type of the right-hand side dense vector expression.
-   typedef If_< IsExpression<VT>, const VT, const VT& >  RightOperand;
+   using RightOperand = If_t< IsExpression_v<VT>, const VT, const VT& >;
 
    //! Type for the assignment of the left-hand side dense matrix operand.
-   typedef IfTrue_< evaluateMatrix, const MRT, MCT >  LT;
+   using LT = If_t< evaluateMatrix, const MRT, MCT >;
 
    //! Type for the assignment of the right-hand side dense vector operand.
-   typedef IfTrue_< evaluateVector, const VRT, VCT >  RT;
+   using RT = If_t< evaluateVector, const VRT, VCT >;
    //**********************************************************************************************
 
    //**Compilation flags***************************************************************************
    //! Compilation switch for the expression template evaluation strategy.
-   enum : bool { simdEnabled = !IsDiagonal<MT>::value &&
-                               MT::simdEnabled && VT::simdEnabled &&
-                               HasSIMDAdd<MET,VET>::value &&
-                               HasSIMDMult<MET,VET>::value };
+   static constexpr bool simdEnabled =
+      ( !IsDiagonal_v<MT> &&
+        MT::simdEnabled && VT::simdEnabled &&
+        HasSIMDAdd_v<MET,VET> &&
+        HasSIMDMult_v<MET,VET> );
 
    //! Compilation switch for the expression template assignment strategy.
-   enum : bool { smpAssignable = !evaluateMatrix && MT::smpAssignable &&
-                                 !evaluateVector && VT::smpAssignable };
+   static constexpr bool smpAssignable =
+      ( !evaluateMatrix && MT::smpAssignable && !evaluateVector && VT::smpAssignable );
    //**********************************************************************************************
 
    //**SIMD properties*****************************************************************************
    //! The number of elements packed within a single SIMD element.
-   enum : size_t { SIMDSIZE = SIMDTrait<ElementType>::size };
+   static constexpr size_t SIMDSIZE = SIMDTrait<ElementType>::size;
    //**********************************************************************************************
 
    //**Constructor*********************************************************************************
@@ -248,7 +251,7 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    // \param mat The left-hand side matrix operand of the multiplication expression.
    // \param vec The right-hand side vector operand of the multiplication expression.
    */
-   explicit inline TDMatDVecMultExpr( const MT& mat, const VT& vec ) noexcept
+   inline TDMatDVecMultExpr( const MT& mat, const VT& vec ) noexcept
       : mat_( mat )  // Left-hand side dense matrix of the multiplication expression
       , vec_( vec )  // Right-hand side dense vector of the multiplication expression
    {
@@ -265,24 +268,26 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    inline ReturnType operator[]( size_t index ) const {
       BLAZE_INTERNAL_ASSERT( index < mat_.rows(), "Invalid vector access index" );
 
-      if( IsDiagonal<MT>::value )
+      if( IsDiagonal_v<MT> )
       {
          return mat_(index,index) * vec_[index];
       }
-      else if( IsLower<MT>::value && ( index + 8UL < mat_.rows() ) )
+      else if( IsLower_v<MT> && ( index + 8UL < mat_.rows() ) )
       {
-         const size_t n( IsStrictlyLower<MT>::value ? index : index+1UL );
-         return subvector( row( mat_, index ), 0UL, n ) * subvector( vec_, 0UL, n );
+         const size_t n( IsStrictlyLower_v<MT> ? index : index+1UL );
+         return subvector( row( mat_, index, unchecked ), 0UL, n, unchecked ) *
+                subvector( vec_, 0UL, n, unchecked );
       }
-      else if( IsUpper<MT>::value && ( index > 8UL ) )
+      else if( IsUpper_v<MT> && ( index > 8UL ) )
       {
-         const size_t begin( IsStrictlyUpper<MT>::value ? index+1UL : index );
+         const size_t begin( IsStrictlyUpper_v<MT> ? index+1UL : index );
          const size_t n    ( mat_.columns() - begin );
-         return subvector( row( mat_, index ), begin, n ) * subvector( vec_, begin, n );
+         return subvector( row( mat_, index, unchecked ), begin, n, unchecked ) *
+                subvector( vec_, begin, n, unchecked );
       }
       else
       {
-         return row( mat_, index ) * vec_;
+         return row( mat_, index, unchecked ) * vec_;
       }
    }
    //**********************************************************************************************
@@ -372,8 +377,10 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    // \return \a true in case the expression can be used in SMP assignments, \a false if not.
    */
    inline bool canSMPAssign() const noexcept {
-      return ( !BLAZE_BLAS_IS_PARALLEL ||
-               ( IsComputation<MT>::value && !evaluateMatrix ) ||
+      return ( !BLAZE_BLAS_MODE ||
+               !BLAZE_USE_BLAS_MATRIX_VECTOR_MULTIPLICATION ||
+               !BLAZE_BLAS_IS_PARALLEL ||
+               ( IsComputation_v<MT> && !evaluateMatrix ) ||
                ( mat_.rows() * mat_.columns() < TDMATDVECMULT_THRESHOLD ) ) &&
              ( size() > SMP_TDMATDVECMULT_THRESHOLD );
    }
@@ -403,13 +410,14 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
       if( rhs.mat_.rows() == 0UL ) {
          return;
       }
-      else if( rhs.mat_.columns() == 0UL ) {
-         reset( ~lhs );
+      else if( rhs.mat_.columns() == 0UL ||
+               ( IsStrictlyTriangular_v<MT> && rhs.mat_.columns() == 1UL ) ) {
+         reset( *lhs );
          return;
       }
 
@@ -419,9 +427,9 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
       BLAZE_INTERNAL_ASSERT( A.rows()    == rhs.mat_.rows()   , "Invalid number of rows"    );
       BLAZE_INTERNAL_ASSERT( A.columns() == rhs.mat_.columns(), "Invalid number of columns" );
       BLAZE_INTERNAL_ASSERT( x.size()    == rhs.vec_.size()   , "Invalid vector size"       );
-      BLAZE_INTERNAL_ASSERT( A.rows()    == (~lhs).size()     , "Invalid vector size"       );
+      BLAZE_INTERNAL_ASSERT( A.rows()    == (*lhs).size()     , "Invalid vector size"       );
 
-      TDMatDVecMultExpr::selectAssignKernel( ~lhs, A, x );
+      TDMatDVecMultExpr::selectAssignKernel( *lhs, A, x );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -442,8 +450,8 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
            , typename VT2 >  // Type of the right-hand side vector operand
    static inline void selectAssignKernel( VT1& y, const MT1& A, const VT2& x )
    {
-      if( ( IsDiagonal<MT1>::value ) ||
-          ( IsComputation<MT>::value && !evaluateMatrix ) ||
+      if( ( IsDiagonal_v<MT1> ) ||
+          ( IsComputation_v<MT> && !evaluateMatrix ) ||
           ( A.rows() * A.columns() < TDMATDVECMULT_THRESHOLD ) )
          selectSmallAssignKernel( y, A, x );
       else
@@ -474,35 +482,36 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
       const size_t M( A.rows()    );
       const size_t N( A.columns() );
 
-      if( IsStrictlyLower<MT1>::value ) {
+      if( IsStrictlyLower_v<MT1> ) {
          reset( y[0] );
       }
 
-      if( !IsUpper<MT1>::value )
+      if( !IsUpper_v<MT1> )
       {
-         for( size_t i=( IsStrictlyLower<MT1>::value ? 1UL : 0UL ); i<M; ++i ) {
+         for( size_t i=( IsStrictlyLower_v<MT1> ? 1UL : 0UL ); i<M; ++i ) {
             y[i] = A(i,0UL) * x[0UL];
          }
       }
 
-      for( size_t j=( IsUpper<MT1>::value && !IsStrictlyUpper<MT1>::value ? 0UL : 1UL ); j<N; ++j )
+      for( size_t j=( IsUpper_v<MT1> && !IsStrictlyUpper_v<MT1> ? 0UL : 1UL ); j<N; ++j )
       {
-         if( IsDiagonal<MT1>::value )
+         if( IsDiagonal_v<MT1> )
          {
             y[j] = A(j,j) * x[j];
          }
          else
          {
-            const size_t ibegin( ( IsLower<MT1>::value )
-                                 ?( IsStrictlyLower<MT1>::value ? j+1UL : j )
+            const size_t ibegin( ( IsLower_v<MT1> )
+                                 ?( IsStrictlyLower_v<MT1> ? j+1UL : j )
                                  :( 0UL ) );
-            const size_t iend( ( IsUpper<MT1>::value )
-                               ?( IsStrictlyUpper<MT1>::value ? j-1UL : j )
+            const size_t iend( ( IsUpper_v<MT1> )
+                               ?( IsStrictlyUpper_v<MT1> ? j-1UL : j )
                                :( M ) );
             BLAZE_INTERNAL_ASSERT( ibegin <= iend, "Invalid loop indices detected" );
 
             const size_t inum( iend - ibegin );
-            const size_t ipos( ibegin + ( inum & size_t(-2) ) );
+            const size_t ipos( ibegin + prevMultiple( inum, 2UL ) );
+            BLAZE_INTERNAL_ASSERT( ipos <= ibegin+inum, "Invalid end calculation" );
 
             for( size_t i=ibegin; i<ipos; i+=2UL ) {
                y[i    ] += A(i    ,j) * x[j];
@@ -511,13 +520,13 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
             if( ipos < iend ) {
                y[ipos] += A(ipos,j) * x[j];
             }
-            if( IsUpper<MT1>::value ) {
+            if( IsUpper_v<MT1> ) {
                y[iend] = A(iend,j) * x[j];
             }
          }
       }
 
-      if( IsStrictlyUpper<MT1>::value ) {
+      if( IsStrictlyUpper_v<MT1> ) {
          reset( y[M-1UL] );
       }
    }
@@ -541,8 +550,8 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    template< typename VT1    // Type of the left-hand side target vector
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2 >  // Type of the right-hand side vector operand
-   static inline DisableIf_< UseVectorizedDefaultKernel<VT1,MT1,VT2> >
-      selectSmallAssignKernel( VT1& y, const MT1& A, const VT2& x )
+   static inline auto selectSmallAssignKernel( VT1& y, const MT1& A, const VT2& x )
+      -> DisableIf_t< UseVectorizedDefaultKernel_v<VT1,MT1,VT2> >
    {
       selectDefaultAssignKernel( y, A, x );
    }
@@ -566,33 +575,41 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    template< typename VT1    // Type of the left-hand side target vector
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2 >  // Type of the right-hand side vector operand
-   static inline EnableIf_< UseVectorizedDefaultKernel<VT1,MT1,VT2> >
-      selectSmallAssignKernel( VT1& y, const MT1& A, const VT2& x )
+   static inline auto selectSmallAssignKernel( VT1& y, const MT1& A, const VT2& x )
+      -> EnableIf_t< UseVectorizedDefaultKernel_v<VT1,MT1,VT2> >
    {
-      constexpr bool remainder( !IsPadded<MT1>::value || !IsPadded<VT1>::value );
+      constexpr bool remainder( !IsPadded_v<MT1> || !IsPadded_v<VT1> );
 
       const size_t M( A.rows()    );
       const size_t N( A.columns() );
 
-      const size_t ipos( remainder ? ( M & size_t(-SIMDSIZE) ) : M );
-      BLAZE_INTERNAL_ASSERT( !remainder || ( M - ( M % SIMDSIZE ) ) == ipos, "Invalid end calculation" );
+      const size_t ipos( remainder ? prevMultiple( M, SIMDSIZE ) : M );
+      BLAZE_INTERNAL_ASSERT( ipos <= M, "Invalid end calculation" );
 
       size_t i( 0UL );
 
       for( ; (i+SIMDSIZE*7UL) < ipos; i+=SIMDSIZE*8UL )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
+         const size_t jbegin( ( IsUpper_v<MT1> )
+                              ?( IsStrictlyUpper_v<MT1> ? i+1UL : i )
                               :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+SIMDSIZE*8UL, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
+         const size_t jend( ( IsLower_v<MT1> )
+                            ?( min( i+SIMDSIZE*8UL, N ) - ( IsStrictlyLower_v<MT1> ? 1UL : 0UL ) )
                             :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
-         SIMDType xmm1, xmm2, xmm3, xmm4, xmm5, xmm6, xmm7, xmm8;
+         SIMDType x1( set( x[jbegin] ) );
+         SIMDType xmm1( A.load(i             ,jbegin) * x1 );
+         SIMDType xmm2( A.load(i+SIMDSIZE    ,jbegin) * x1 );
+         SIMDType xmm3( A.load(i+SIMDSIZE*2UL,jbegin) * x1 );
+         SIMDType xmm4( A.load(i+SIMDSIZE*3UL,jbegin) * x1 );
+         SIMDType xmm5( A.load(i+SIMDSIZE*4UL,jbegin) * x1 );
+         SIMDType xmm6( A.load(i+SIMDSIZE*5UL,jbegin) * x1 );
+         SIMDType xmm7( A.load(i+SIMDSIZE*6UL,jbegin) * x1 );
+         SIMDType xmm8( A.load(i+SIMDSIZE*7UL,jbegin) * x1 );
 
-         for( size_t j=jbegin; j<jend; ++j ) {
-            const SIMDType x1( set( x[j] ) );
+         for( size_t j=jbegin+1UL; j<jend; ++j ) {
+            x1 = set( x[j] );
             xmm1 += A.load(i             ,j) * x1;
             xmm2 += A.load(i+SIMDSIZE    ,j) * x1;
             xmm3 += A.load(i+SIMDSIZE*2UL,j) * x1;
@@ -615,18 +632,22 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
       for( ; (i+SIMDSIZE*3UL) < ipos; i+=SIMDSIZE*4UL )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
+         const size_t jbegin( ( IsUpper_v<MT1> )
+                              ?( IsStrictlyUpper_v<MT1> ? i+1UL : i )
                               :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+SIMDSIZE*4UL, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
+         const size_t jend( ( IsLower_v<MT1> )
+                            ?( min( i+SIMDSIZE*4UL, N ) - ( IsStrictlyLower_v<MT1> ? 1UL : 0UL ) )
                             :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
-         SIMDType xmm1, xmm2, xmm3, xmm4;
+         SIMDType x1( set( x[jbegin] ) );
+         SIMDType xmm1( A.load(i             ,jbegin) * x1 );
+         SIMDType xmm2( A.load(i+SIMDSIZE    ,jbegin) * x1 );
+         SIMDType xmm3( A.load(i+SIMDSIZE*2UL,jbegin) * x1 );
+         SIMDType xmm4( A.load(i+SIMDSIZE*3UL,jbegin) * x1 );
 
-         for( size_t j=jbegin; j<jend; ++j ) {
-            const SIMDType x1( set( x[j] ) );
+         for( size_t j=jbegin+1UL; j<jend; ++j ) {
+            x1 = set( x[j] );
             xmm1 += A.load(i             ,j) * x1;
             xmm2 += A.load(i+SIMDSIZE    ,j) * x1;
             xmm3 += A.load(i+SIMDSIZE*2UL,j) * x1;
@@ -641,18 +662,21 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
       for( ; (i+SIMDSIZE*2UL) < ipos; i+=SIMDSIZE*3UL )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
+         const size_t jbegin( ( IsUpper_v<MT1> )
+                              ?( IsStrictlyUpper_v<MT1> ? i+1UL : i )
                               :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+SIMDSIZE*3UL, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
+         const size_t jend( ( IsLower_v<MT1> )
+                            ?( min( i+SIMDSIZE*3UL, N ) - ( IsStrictlyLower_v<MT1> ? 1UL : 0UL ) )
                             :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
-         SIMDType xmm1, xmm2, xmm3;
+         SIMDType x1( set( x[jbegin] ) );
+         SIMDType xmm1( A.load(i             ,jbegin) * x1 );
+         SIMDType xmm2( A.load(i+SIMDSIZE    ,jbegin) * x1 );
+         SIMDType xmm3( A.load(i+SIMDSIZE*2UL,jbegin) * x1 );
 
-         for( size_t j=jbegin; j<jend; ++j ) {
-            const SIMDType x1( set( x[j] ) );
+         for( size_t j=jbegin+1UL; j<jend; ++j ) {
+            x1 = set( x[j] );
             xmm1 += A.load(i             ,j) * x1;
             xmm2 += A.load(i+SIMDSIZE    ,j) * x1;
             xmm3 += A.load(i+SIMDSIZE*2UL,j) * x1;
@@ -665,18 +689,20 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
       for( ; (i+SIMDSIZE) < ipos; i+=SIMDSIZE*2UL )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
+         const size_t jbegin( ( IsUpper_v<MT1> )
+                              ?( IsStrictlyUpper_v<MT1> ? i+1UL : i )
                               :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+SIMDSIZE*2UL, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
+         const size_t jend( ( IsLower_v<MT1> )
+                            ?( min( i+SIMDSIZE*2UL, N ) - ( IsStrictlyLower_v<MT1> ? 1UL : 0UL ) )
                             :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
-         SIMDType xmm1, xmm2;
+         SIMDType x1( set( x[jbegin] ) );
+         SIMDType xmm1( A.load(i         ,jbegin) * x1 );
+         SIMDType xmm2( A.load(i+SIMDSIZE,jbegin) * x1 );
 
-         for( size_t j=jbegin; j<jend; ++j ) {
-            const SIMDType x1( set( x[j] ) );
+         for( size_t j=jbegin+1UL; j<jend; ++j ) {
+            x1 = set( x[j] );
             xmm1 += A.load(i         ,j) * x1;
             xmm2 += A.load(i+SIMDSIZE,j) * x1;
          }
@@ -687,17 +713,17 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
       for( ; i<ipos; i+=SIMDSIZE )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
+         const size_t jbegin( ( IsUpper_v<MT1> )
+                              ?( IsStrictlyUpper_v<MT1> ? i+1UL : i )
                               :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+SIMDSIZE, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
+         const size_t jend( ( IsLower_v<MT1> )
+                            ?( min( i+SIMDSIZE, N ) - ( IsStrictlyLower_v<MT1> ? 1UL : 0UL ) )
                             :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
-         SIMDType xmm1;
+         SIMDType xmm1( A.load(i,jbegin) * set( x[jbegin] ) );
 
-         for( size_t j=jbegin; j<jend; ++j ) {
+         for( size_t j=jbegin+1UL; j<jend; ++j ) {
             xmm1 += A.load(i,j) * set( x[j] );
          }
 
@@ -706,17 +732,13 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
       for( ; remainder && i<M; ++i )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
-                              :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+1UL, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
-                            :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         const size_t jbegin( ( IsUpper_v<MT1> )?( i ):( 0UL ) );
+         const size_t jend( ( IsLower_v<MT1> )?( min( i+1UL, N ) ):( N ) );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
-         ElementType value = ElementType();
+         ElementType value( A(i,jbegin) * x[jbegin] );
 
-         for( size_t j=jbegin; j<jend; ++j ) {
+         for( size_t j=jbegin+1UL; j<jend; ++j ) {
             value += A(i,j) * x[j];
          }
 
@@ -743,8 +765,8 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    template< typename VT1    // Type of the left-hand side target vector
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2 >  // Type of the right-hand side vector operand
-   static inline DisableIf_< UseVectorizedDefaultKernel<VT1,MT1,VT2> >
-      selectLargeAssignKernel( VT1& y, const MT1& A, const VT2& x )
+   static inline auto selectLargeAssignKernel( VT1& y, const MT1& A, const VT2& x )
+      -> DisableIf_t< UseVectorizedDefaultKernel_v<VT1,MT1,VT2> >
    {
       selectDefaultAssignKernel( y, A, x );
    }
@@ -768,10 +790,10 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    template< typename VT1    // Type of the left-hand side target vector
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2 >  // Type of the right-hand side vector operand
-   static inline EnableIf_< UseVectorizedDefaultKernel<VT1,MT1,VT2> >
-      selectLargeAssignKernel( VT1& y, const MT1& A, const VT2& x )
+   static inline auto selectLargeAssignKernel( VT1& y, const MT1& A, const VT2& x )
+      -> EnableIf_t< UseVectorizedDefaultKernel_v<VT1,MT1,VT2> >
    {
-      constexpr bool remainder( !IsPadded<MT1>::value || !IsPadded<VT1>::value );
+      constexpr bool remainder( !IsPadded_v<MT1> || !IsPadded_v<VT1> );
 
       const size_t M( A.rows()    );
       const size_t N( A.columns() );
@@ -788,23 +810,31 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
          {
             const size_t jend( min( jj+jblock, N ) );
             const size_t itmp( min( ii+iblock, M ) );
-            const size_t iend( ( IsUpper<MT1>::value )
-                               ?( min( itmp, ( IsStrictlyUpper<MT1>::value ? jend-1UL : jend ) ) )
+            const size_t iend( ( IsUpper_v<MT1> )
+                               ?( min( itmp, ( IsStrictlyUpper_v<MT1> ? jend-1UL : jend ) ) )
                                :( itmp ) );
 
-            const size_t ipos( remainder ? ( iend & size_t(-SIMDSIZE) ) : iend );
-            BLAZE_INTERNAL_ASSERT( !remainder || ( iend - ( iend % SIMDSIZE ) ) == ipos, "Invalid end calculation" );
+            const size_t ipos( remainder ? prevMultiple( iend, SIMDSIZE ) : iend );
+            BLAZE_INTERNAL_ASSERT( ipos <= iend, "Invalid end calculation" );
 
-            size_t i( ( IsLower<MT1>::value )
-                      ?( max( ii, ( IsStrictlyLower<MT1>::value ? jj+1UL : jj ) & size_t(-SIMDSIZE) ) )
+            size_t i( ( IsLower_v<MT1> )
+                      ?( max( ii, prevMultiple( ( IsStrictlyLower_v<MT1> ? jj+1UL : jj ), SIMDSIZE ) ) )
                       :( ii ) );
 
             for( ; (i+SIMDSIZE*7UL) < ipos; i+=SIMDSIZE*8UL )
             {
-               SIMDType xmm1, xmm2, xmm3, xmm4, xmm5, xmm6, xmm7, xmm8;
+               SIMDType x1( set( x[jj] ) );
+               SIMDType xmm1( A.load(i             ,jj) * x1 );
+               SIMDType xmm2( A.load(i+SIMDSIZE    ,jj) * x1 );
+               SIMDType xmm3( A.load(i+SIMDSIZE*2UL,jj) * x1 );
+               SIMDType xmm4( A.load(i+SIMDSIZE*3UL,jj) * x1 );
+               SIMDType xmm5( A.load(i+SIMDSIZE*4UL,jj) * x1 );
+               SIMDType xmm6( A.load(i+SIMDSIZE*5UL,jj) * x1 );
+               SIMDType xmm7( A.load(i+SIMDSIZE*6UL,jj) * x1 );
+               SIMDType xmm8( A.load(i+SIMDSIZE*7UL,jj) * x1 );
 
-               for( size_t j=jj; j<jend; ++j ) {
-                  const SIMDType x1( set( x[j] ) );
+               for( size_t j=jj+1UL; j<jend; ++j ) {
+                  x1 = set( x[j] );
                   xmm1 += A.load(i             ,j) * x1;
                   xmm2 += A.load(i+SIMDSIZE    ,j) * x1;
                   xmm3 += A.load(i+SIMDSIZE*2UL,j) * x1;
@@ -827,10 +857,14 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
             for( ; (i+SIMDSIZE*3UL) < ipos; i+=SIMDSIZE*4UL )
             {
-               SIMDType xmm1, xmm2, xmm3, xmm4;
+               SIMDType x1( set( x[jj] ) );
+               SIMDType xmm1( A.load(i             ,jj) * x1 );
+               SIMDType xmm2( A.load(i+SIMDSIZE    ,jj) * x1 );
+               SIMDType xmm3( A.load(i+SIMDSIZE*2UL,jj) * x1 );
+               SIMDType xmm4( A.load(i+SIMDSIZE*3UL,jj) * x1 );
 
-               for( size_t j=jj; j<jend; ++j ) {
-                  const SIMDType x1( set( x[j] ) );
+               for( size_t j=jj+1UL; j<jend; ++j ) {
+                  x1 = set( x[j] );
                   xmm1 += A.load(i             ,j) * x1;
                   xmm2 += A.load(i+SIMDSIZE    ,j) * x1;
                   xmm3 += A.load(i+SIMDSIZE*2UL,j) * x1;
@@ -845,10 +879,13 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
             for( ; (i+SIMDSIZE*2UL) < ipos; i+=SIMDSIZE*3UL )
             {
-               SIMDType xmm1, xmm2, xmm3;
+               SIMDType x1( set( x[jj] ) );
+               SIMDType xmm1( A.load(i             ,jj) * x1 );
+               SIMDType xmm2( A.load(i+SIMDSIZE    ,jj) * x1 );
+               SIMDType xmm3( A.load(i+SIMDSIZE*2UL,jj) * x1 );
 
-               for( size_t j=jj; j<jend; ++j ) {
-                  const SIMDType x1( set( x[j] ) );
+               for( size_t j=jj+1UL; j<jend; ++j ) {
+                  x1 = set( x[j] );
                   xmm1 += A.load(i             ,j) * x1;
                   xmm2 += A.load(i+SIMDSIZE    ,j) * x1;
                   xmm3 += A.load(i+SIMDSIZE*2UL,j) * x1;
@@ -861,10 +898,12 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
             for( ; (i+SIMDSIZE) < ipos; i+=SIMDSIZE*2UL )
             {
-               SIMDType xmm1, xmm2;
+               SIMDType x1( set( x[jj] ) );
+               SIMDType xmm1( A.load(i         ,jj) * x1 );
+               SIMDType xmm2( A.load(i+SIMDSIZE,jj) * x1 );
 
-               for( size_t j=jj; j<jend; ++j ) {
-                  const SIMDType x1( set( x[j] ) );
+               for( size_t j=jj+1UL; j<jend; ++j ) {
+                  x1 = set( x[j] );
                   xmm1 += A.load(i         ,j) * x1;
                   xmm2 += A.load(i+SIMDSIZE,j) * x1;
                }
@@ -875,9 +914,9 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
             for( ; i<ipos; i+=SIMDSIZE )
             {
-               SIMDType xmm1;
+               SIMDType xmm1( A.load(i,jj) * set( x[jj] ) );
 
-               for( size_t j=jj; j<jend; ++j ) {
+               for( size_t j=jj+1UL; j<jend; ++j ) {
                   xmm1 += A.load(i,j) * set( x[j] );
                }
 
@@ -886,9 +925,9 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
             for( ; remainder && i<iend; ++i )
             {
-               ElementType value = ElementType();
+               ElementType value( A(i,jj) * x[jj] );
 
-               for( size_t j=jj; j<jend; ++j ) {
+               for( size_t j=jj+1UL; j<jend; ++j ) {
                   value += A(i,j) * x[j];
                }
 
@@ -917,8 +956,8 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    template< typename VT1    // Type of the left-hand side target vector
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2 >  // Type of the right-hand side vector operand
-   static inline DisableIf_< UseBlasKernel<VT1,MT1,VT2> >
-      selectBlasAssignKernel( VT1& y, const MT1& A, const VT2& x )
+   static inline auto selectBlasAssignKernel( VT1& y, const MT1& A, const VT2& x )
+      -> DisableIf_t< UseBlasKernel_v<VT1,MT1,VT2> >
    {
       selectLargeAssignKernel( y, A, x );
    }
@@ -943,14 +982,14 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    template< typename VT1    // Type of the left-hand side target vector
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2 >  // Type of the right-hand side vector operand
-   static inline EnableIf_< UseBlasKernel<VT1,MT1,VT2> >
-      selectBlasAssignKernel( VT1& y, const MT1& A, const VT2& x )
+   static inline auto selectBlasAssignKernel( VT1& y, const MT1& A, const VT2& x )
+      -> EnableIf_t< UseBlasKernel_v<VT1,MT1,VT2> >
    {
-      typedef ElementType_<VT1>  ET;
+      using ET = ElementType_t<VT1>;
 
-      if( IsTriangular<MT1>::value ) {
+      if( IsTriangular_v<MT1> ) {
          assign( y, x );
-         trmv( y, A, ( IsLower<MT1>::value )?( CblasLower ):( CblasUpper ) );
+         trmv( y, A, ( IsLower_v<MT1> )?( CblasLower ):( CblasUpper ) );
       }
       else {
          gemv( y, A, x, ET(1), ET(0) );
@@ -978,14 +1017,14 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE ( ResultType );
+      BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE( ResultType );
       BLAZE_CONSTRAINT_MUST_BE_COLUMN_VECTOR_TYPE( ResultType );
-      BLAZE_CONSTRAINT_MUST_BE_REFERENCE_TYPE( CompositeType_<ResultType> );
+      BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType );
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
       const ResultType tmp( serial( rhs ) );
-      assign( ~lhs, tmp );
+      assign( *lhs, tmp );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -1008,9 +1047,10 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      if( rhs.mat_.rows() == 0UL || rhs.mat_.columns() == 0UL ) {
+      if( rhs.mat_.rows() == 0UL || rhs.mat_.columns() == 0UL ||
+          ( IsStrictlyTriangular_v<MT> && rhs.mat_.rows() == 1UL ) ) {
          return;
       }
 
@@ -1020,9 +1060,9 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
       BLAZE_INTERNAL_ASSERT( A.rows()    == rhs.mat_.rows()   , "Invalid number of rows"    );
       BLAZE_INTERNAL_ASSERT( A.columns() == rhs.mat_.columns(), "Invalid number of columns" );
       BLAZE_INTERNAL_ASSERT( x.size()    == rhs.vec_.size()   , "Invalid vector size"       );
-      BLAZE_INTERNAL_ASSERT( A.rows()    == (~lhs).size()     , "Invalid vector size"       );
+      BLAZE_INTERNAL_ASSERT( A.rows()    == (*lhs).size()     , "Invalid vector size"       );
 
-      TDMatDVecMultExpr::selectAddAssignKernel( ~lhs, A, x );
+      TDMatDVecMultExpr::selectAddAssignKernel( *lhs, A, x );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -1043,8 +1083,8 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
            , typename VT2 >  // Type of the right-hand side vector operand
    static inline void selectAddAssignKernel( VT1& y, const MT1& A, const VT2& x )
    {
-      if( ( IsDiagonal<MT1>::value ) ||
-          ( IsComputation<MT>::value && !evaluateMatrix ) ||
+      if( ( IsDiagonal_v<MT1> ) ||
+          ( IsComputation_v<MT> && !evaluateMatrix ) ||
           ( A.rows() * A.columns() < TDMATDVECMULT_THRESHOLD ) )
          selectSmallAddAssignKernel( y, A, x );
       else
@@ -1077,22 +1117,23 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
       for( size_t j=0UL; j<N; ++j )
       {
-         if( IsDiagonal<MT1>::value )
+         if( IsDiagonal_v<MT1> )
          {
             y[j] += A(j,j) * x[j];
          }
          else
          {
-            const size_t ibegin( ( IsLower<MT1>::value )
-                                 ?( IsStrictlyLower<MT1>::value ? j+1UL : j )
+            const size_t ibegin( ( IsLower_v<MT1> )
+                                 ?( IsStrictlyLower_v<MT1> ? j+1UL : j )
                                  :( 0UL ) );
-            const size_t iend( ( IsUpper<MT1>::value )
-                               ?( IsStrictlyUpper<MT1>::value ? j : j+1UL )
+            const size_t iend( ( IsUpper_v<MT1> )
+                               ?( IsStrictlyUpper_v<MT1> ? j : j+1UL )
                                :( M ) );
             BLAZE_INTERNAL_ASSERT( ibegin <= iend, "Invalid loop indices detected" );
 
             const size_t inum( iend - ibegin );
-            const size_t ipos( ibegin + ( inum & size_t(-2) ) );
+            const size_t ipos( ibegin + prevMultiple( inum, 2UL ) );
+            BLAZE_INTERNAL_ASSERT( ipos <= ibegin+inum, "Invalid end calculation" );
 
             for( size_t i=ibegin; i<ipos; i+=2UL ) {
                y[i    ] += A(i    ,j) * x[j];
@@ -1124,8 +1165,8 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    template< typename VT1    // Type of the left-hand side target vector
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2 >  // Type of the right-hand side vector operand
-   static inline DisableIf_< UseVectorizedDefaultKernel<VT1,MT1,VT2> >
-      selectSmallAddAssignKernel( VT1& y, const MT1& A, const VT2& x )
+   static inline auto selectSmallAddAssignKernel( VT1& y, const MT1& A, const VT2& x )
+      -> DisableIf_t< UseVectorizedDefaultKernel_v<VT1,MT1,VT2> >
    {
       selectDefaultAddAssignKernel( y, A, x );
    }
@@ -1149,28 +1190,28 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    template< typename VT1    // Type of the left-hand side target vector
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2 >  // Type of the right-hand side vector operand
-   static inline EnableIf_< UseVectorizedDefaultKernel<VT1,MT1,VT2> >
-      selectSmallAddAssignKernel( VT1& y, const MT1& A, const VT2& x )
+   static inline auto selectSmallAddAssignKernel( VT1& y, const MT1& A, const VT2& x )
+      -> EnableIf_t< UseVectorizedDefaultKernel_v<VT1,MT1,VT2> >
    {
-      constexpr bool remainder( !IsPadded<MT1>::value || !IsPadded<VT1>::value );
+      constexpr bool remainder( !IsPadded_v<MT1> || !IsPadded_v<VT1> );
 
       const size_t M( A.rows()    );
       const size_t N( A.columns() );
 
-      const size_t ipos( remainder ? ( M & size_t(-SIMDSIZE) ) : M );
-      BLAZE_INTERNAL_ASSERT( !remainder || ( M - ( M % SIMDSIZE ) ) == ipos, "Invalid end calculation" );
+      const size_t ipos( remainder ? prevMultiple( M, SIMDSIZE ) : M );
+      BLAZE_INTERNAL_ASSERT( ipos <= M, "Invalid end calculation" );
 
       size_t i( 0UL );
 
       for( ; (i+SIMDSIZE*7UL) < ipos; i+=SIMDSIZE*8UL )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
+         const size_t jbegin( ( IsUpper_v<MT1> )
+                              ?( IsStrictlyUpper_v<MT1> ? i+1UL : i )
                               :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+SIMDSIZE*8UL, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
+         const size_t jend( ( IsLower_v<MT1> )
+                            ?( min( i+SIMDSIZE*8UL, N ) - ( IsStrictlyLower_v<MT1> ? 1UL : 0UL ) )
                             :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
          SIMDType xmm1( y.load(i             ) );
          SIMDType xmm2( y.load(i+SIMDSIZE    ) );
@@ -1205,13 +1246,13 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
       for( ; (i+SIMDSIZE*3UL) < ipos; i+=SIMDSIZE*4UL )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
+         const size_t jbegin( ( IsUpper_v<MT1> )
+                              ?( IsStrictlyUpper_v<MT1> ? i+1UL : i )
                               :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+SIMDSIZE*4UL, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
+         const size_t jend( ( IsLower_v<MT1> )
+                            ?( min( i+SIMDSIZE*4UL, N ) - ( IsStrictlyLower_v<MT1> ? 1UL : 0UL ) )
                             :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
          SIMDType xmm1( y.load(i             ) );
          SIMDType xmm2( y.load(i+SIMDSIZE    ) );
@@ -1234,13 +1275,13 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
       for( ; (i+SIMDSIZE*2UL) < ipos; i+=SIMDSIZE*3UL )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
+         const size_t jbegin( ( IsUpper_v<MT1> )
+                              ?( IsStrictlyUpper_v<MT1> ? i+1UL : i )
                               :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+SIMDSIZE*3UL, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
+         const size_t jend( ( IsLower_v<MT1> )
+                            ?( min( i+SIMDSIZE*3UL, N ) - ( IsStrictlyLower_v<MT1> ? 1UL : 0UL ) )
                             :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
          SIMDType xmm1( y.load(i             ) );
          SIMDType xmm2( y.load(i+SIMDSIZE    ) );
@@ -1260,13 +1301,13 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
       for( ; (i+SIMDSIZE) < ipos; i+=SIMDSIZE*2UL )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
+         const size_t jbegin( ( IsUpper_v<MT1> )
+                              ?( IsStrictlyUpper_v<MT1> ? i+1UL : i )
                               :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+SIMDSIZE*2UL, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
+         const size_t jend( ( IsLower_v<MT1> )
+                            ?( min( i+SIMDSIZE*2UL, N ) - ( IsStrictlyLower_v<MT1> ? 1UL : 0UL ) )
                             :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
          SIMDType xmm1( y.load(i         ) );
          SIMDType xmm2( y.load(i+SIMDSIZE) );
@@ -1283,13 +1324,13 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
       for( ; i<ipos; i+=SIMDSIZE )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
+         const size_t jbegin( ( IsUpper_v<MT1> )
+                              ?( IsStrictlyUpper_v<MT1> ? i+1UL : i )
                               :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+SIMDSIZE, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
+         const size_t jend( ( IsLower_v<MT1> )
+                            ?( min( i+SIMDSIZE, N ) - ( IsStrictlyLower_v<MT1> ? 1UL : 0UL ) )
                             :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
          SIMDType xmm1( y.load(i) );
 
@@ -1302,17 +1343,13 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
       for( ; remainder && i<M; ++i )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
-                              :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+1UL, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
-                            :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         const size_t jbegin( ( IsUpper_v<MT1> )?( i ):( 0UL ) );
+         const size_t jend( ( IsLower_v<MT1> )?( min( i+1UL, N ) ):( N ) );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
-         ElementType value = ElementType();
+         ElementType value( A(i,jbegin) * x[jbegin] );
 
-         for( size_t j=jbegin; j<jend; ++j ) {
+         for( size_t j=jbegin+1UL; j<jend; ++j ) {
             value += A(i,j) * x[j];
          }
 
@@ -1339,8 +1376,8 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    template< typename VT1    // Type of the left-hand side target vector
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2 >  // Type of the right-hand side vector operand
-   static inline DisableIf_< UseVectorizedDefaultKernel<VT1,MT1,VT2> >
-      selectLargeAddAssignKernel( VT1& y, const MT1& A, const VT2& x )
+   static inline auto selectLargeAddAssignKernel( VT1& y, const MT1& A, const VT2& x )
+      -> DisableIf_t< UseVectorizedDefaultKernel_v<VT1,MT1,VT2> >
    {
       selectDefaultAddAssignKernel( y, A, x );
    }
@@ -1364,10 +1401,10 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    template< typename VT1    // Type of the left-hand side target vector
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2 >  // Type of the right-hand side vector operand
-   static inline EnableIf_< UseVectorizedDefaultKernel<VT1,MT1,VT2> >
-      selectLargeAddAssignKernel( VT1& y, const MT1& A, const VT2& x )
+   static inline auto selectLargeAddAssignKernel( VT1& y, const MT1& A, const VT2& x )
+      -> EnableIf_t< UseVectorizedDefaultKernel_v<VT1,MT1,VT2> >
    {
-      constexpr bool remainder( !IsPadded<MT1>::value || !IsPadded<VT1>::value );
+      constexpr bool remainder( !IsPadded_v<MT1> || !IsPadded_v<VT1> );
 
       const size_t M( A.rows()    );
       const size_t N( A.columns() );
@@ -1382,23 +1419,31 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
          {
             const size_t jend( min( jj+jblock, N ) );
             const size_t itmp( min( ii+iblock, M ) );
-            const size_t iend( ( IsUpper<MT1>::value )
-                               ?( min( itmp, ( IsStrictlyUpper<MT1>::value ? jend-1UL : jend ) ) )
+            const size_t iend( ( IsUpper_v<MT1> )
+                               ?( min( itmp, ( IsStrictlyUpper_v<MT1> ? jend-1UL : jend ) ) )
                                :( itmp ) );
 
-            const size_t ipos( remainder ? ( iend & size_t(-SIMDSIZE) ) : iend );
-            BLAZE_INTERNAL_ASSERT( !remainder || ( iend - ( iend % SIMDSIZE ) ) == ipos, "Invalid end calculation" );
+            const size_t ipos( remainder ? prevMultiple( iend, SIMDSIZE ) : iend );
+            BLAZE_INTERNAL_ASSERT( ipos <= iend, "Invalid end calculation" );
 
-            size_t i( ( IsLower<MT1>::value )
-                      ?( max( ii, ( IsStrictlyLower<MT1>::value ? jj+1UL : jj ) & size_t(-SIMDSIZE) ) )
+            size_t i( ( IsLower_v<MT1> )
+                      ?( max( ii, prevMultiple( ( IsStrictlyLower_v<MT1> ? jj+1UL : jj ), SIMDSIZE ) ) )
                       :( ii ) );
 
             for( ; (i+SIMDSIZE*7UL) < ipos; i+=SIMDSIZE*8UL )
             {
-               SIMDType xmm1, xmm2, xmm3, xmm4, xmm5, xmm6, xmm7, xmm8;
+               SIMDType x1( set( x[jj] ) );
+               SIMDType xmm1( A.load(i             ,jj) * x1 );
+               SIMDType xmm2( A.load(i+SIMDSIZE    ,jj) * x1 );
+               SIMDType xmm3( A.load(i+SIMDSIZE*2UL,jj) * x1 );
+               SIMDType xmm4( A.load(i+SIMDSIZE*3UL,jj) * x1 );
+               SIMDType xmm5( A.load(i+SIMDSIZE*4UL,jj) * x1 );
+               SIMDType xmm6( A.load(i+SIMDSIZE*5UL,jj) * x1 );
+               SIMDType xmm7( A.load(i+SIMDSIZE*6UL,jj) * x1 );
+               SIMDType xmm8( A.load(i+SIMDSIZE*7UL,jj) * x1 );
 
-               for( size_t j=jj; j<jend; ++j ) {
-                  const SIMDType x1( set( x[j] ) );
+               for( size_t j=jj+1UL; j<jend; ++j ) {
+                  x1 = set( x[j] );
                   xmm1 += A.load(i             ,j) * x1;
                   xmm2 += A.load(i+SIMDSIZE    ,j) * x1;
                   xmm3 += A.load(i+SIMDSIZE*2UL,j) * x1;
@@ -1421,10 +1466,14 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
             for( ; (i+SIMDSIZE*3UL) < ipos; i+=SIMDSIZE*4UL )
             {
-               SIMDType xmm1, xmm2, xmm3, xmm4;
+               SIMDType x1( set( x[jj] ) );
+               SIMDType xmm1( A.load(i             ,jj) * x1 );
+               SIMDType xmm2( A.load(i+SIMDSIZE    ,jj) * x1 );
+               SIMDType xmm3( A.load(i+SIMDSIZE*2UL,jj) * x1 );
+               SIMDType xmm4( A.load(i+SIMDSIZE*3UL,jj) * x1 );
 
-               for( size_t j=jj; j<jend; ++j ) {
-                  const SIMDType x1( set( x[j] ) );
+               for( size_t j=jj+1UL; j<jend; ++j ) {
+                  x1 = set( x[j] );
                   xmm1 += A.load(i             ,j) * x1;
                   xmm2 += A.load(i+SIMDSIZE    ,j) * x1;
                   xmm3 += A.load(i+SIMDSIZE*2UL,j) * x1;
@@ -1439,10 +1488,13 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
             for( ; (i+SIMDSIZE*2UL) < ipos; i+=SIMDSIZE*3UL )
             {
-               SIMDType xmm1, xmm2, xmm3;
+               SIMDType x1( set( x[jj] ) );
+               SIMDType xmm1( A.load(i             ,jj) * x1 );
+               SIMDType xmm2( A.load(i+SIMDSIZE    ,jj) * x1 );
+               SIMDType xmm3( A.load(i+SIMDSIZE*2UL,jj) * x1 );
 
-               for( size_t j=jj; j<jend; ++j ) {
-                  const SIMDType x1( set( x[j] ) );
+               for( size_t j=jj+1UL; j<jend; ++j ) {
+                  x1 = set( x[j] );
                   xmm1 += A.load(i             ,j) * x1;
                   xmm2 += A.load(i+SIMDSIZE    ,j) * x1;
                   xmm3 += A.load(i+SIMDSIZE*2UL,j) * x1;
@@ -1455,10 +1507,12 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
             for( ; (i+SIMDSIZE) < ipos; i+=SIMDSIZE*2UL )
             {
-               SIMDType xmm1, xmm2;
+               SIMDType x1( set( x[jj] ) );
+               SIMDType xmm1( A.load(i         ,jj) * x1 );
+               SIMDType xmm2( A.load(i+SIMDSIZE,jj) * x1 );
 
-               for( size_t j=jj; j<jend; ++j ) {
-                  const SIMDType x1( set( x[j] ) );
+               for( size_t j=jj+1UL; j<jend; ++j ) {
+                  x1 = set( x[j] );
                   xmm1 += A.load(i         ,j) * x1;
                   xmm2 += A.load(i+SIMDSIZE,j) * x1;
                }
@@ -1469,9 +1523,9 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
             for( ; i<ipos; i+=SIMDSIZE )
             {
-               SIMDType xmm1;
+               SIMDType xmm1( A.load(i,jj) * set( x[jj] ) );
 
-               for( size_t j=jj; j<jend; ++j ) {
+               for( size_t j=jj+1UL; j<jend; ++j ) {
                   xmm1 += A.load(i,j) * set( x[j] );
                }
 
@@ -1480,9 +1534,9 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
             for( ; remainder && i<iend; ++i )
             {
-               ElementType value = ElementType();
+               ElementType value( A(i,jj) * x[jj] );
 
-               for( size_t j=jj; j<jend; ++j ) {
+               for( size_t j=jj+1UL; j<jend; ++j ) {
                   value += A(i,j) * x[j];
                }
 
@@ -1511,8 +1565,8 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    template< typename VT1    // Type of the left-hand side target vector
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2 >  // Type of the right-hand side vector operand
-   static inline DisableIf_< UseBlasKernel<VT1,MT1,VT2> >
-      selectBlasAddAssignKernel( VT1& y, const MT1& A, const VT2& x )
+   static inline auto selectBlasAddAssignKernel( VT1& y, const MT1& A, const VT2& x )
+      -> DisableIf_t< UseBlasKernel_v<VT1,MT1,VT2> >
    {
       selectLargeAddAssignKernel( y, A, x );
    }
@@ -1537,14 +1591,14 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    template< typename VT1    // Type of the left-hand side target vector
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2 >  // Type of the right-hand side vector operand
-   static inline EnableIf_< UseBlasKernel<VT1,MT1,VT2> >
-      selectBlasAddAssignKernel( VT1& y, const MT1& A, const VT2& x )
+   static inline auto selectBlasAddAssignKernel( VT1& y, const MT1& A, const VT2& x )
+      -> EnableIf_t< UseBlasKernel_v<VT1,MT1,VT2> >
    {
-      typedef ElementType_<VT1>  ET;
+      using ET = ElementType_t<VT1>;
 
-      if( IsTriangular<MT1>::value ) {
-         ResultType_<VT1> tmp( serial( x ) );
-         trmv( tmp, A, ( IsLower<MT1>::value )?( CblasLower ):( CblasUpper ) );
+      if( IsTriangular_v<MT1> ) {
+         ResultType_t<VT1> tmp( serial( x ) );
+         trmv( tmp, A, ( IsLower_v<MT1> )?( CblasLower ):( CblasUpper ) );
          addAssign( y, tmp );
       }
       else {
@@ -1577,9 +1631,10 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      if( rhs.mat_.rows() == 0UL || rhs.mat_.columns() == 0UL ) {
+      if( rhs.mat_.rows() == 0UL || rhs.mat_.columns() == 0UL ||
+          ( IsStrictlyTriangular_v<MT> && rhs.mat_.rows() == 1UL ) ) {
          return;
       }
 
@@ -1589,9 +1644,9 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
       BLAZE_INTERNAL_ASSERT( A.rows()    == rhs.mat_.rows()   , "Invalid number of rows"    );
       BLAZE_INTERNAL_ASSERT( A.columns() == rhs.mat_.columns(), "Invalid number of columns" );
       BLAZE_INTERNAL_ASSERT( x.size()    == rhs.vec_.size()   , "Invalid vector size"       );
-      BLAZE_INTERNAL_ASSERT( A.rows()    == (~lhs).size()     , "Invalid vector size"       );
+      BLAZE_INTERNAL_ASSERT( A.rows()    == (*lhs).size()     , "Invalid vector size"       );
 
-      TDMatDVecMultExpr::selectSubAssignKernel( ~lhs, A, x );
+      TDMatDVecMultExpr::selectSubAssignKernel( *lhs, A, x );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -1612,8 +1667,8 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
            , typename VT2 >  // Type of the right-hand side vector operand
    static inline void selectSubAssignKernel( VT1& y, const MT1& A, const VT2& x )
    {
-      if( ( IsDiagonal<MT1>::value ) ||
-          ( IsComputation<MT>::value && !evaluateMatrix ) ||
+      if( ( IsDiagonal_v<MT1> ) ||
+          ( IsComputation_v<MT> && !evaluateMatrix ) ||
           ( A.rows() * A.columns() < TDMATDVECMULT_THRESHOLD ) )
          selectSmallSubAssignKernel( y, A, x );
       else
@@ -1646,22 +1701,23 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
       for( size_t j=0UL; j<N; ++j )
       {
-         if( IsDiagonal<MT1>::value )
+         if( IsDiagonal_v<MT1> )
          {
             y[j] -= A(j,j) * x[j];
          }
          else
          {
-            const size_t ibegin( ( IsLower<MT1>::value )
-                                 ?( IsStrictlyLower<MT1>::value ? j+1UL : j )
+            const size_t ibegin( ( IsLower_v<MT1> )
+                                 ?( IsStrictlyLower_v<MT1> ? j+1UL : j )
                                  :( 0UL ) );
-            const size_t iend( ( IsUpper<MT1>::value )
-                               ?( IsStrictlyUpper<MT1>::value ? j : j+1UL )
+            const size_t iend( ( IsUpper_v<MT1> )
+                               ?( IsStrictlyUpper_v<MT1> ? j : j+1UL )
                                :( M ) );
             BLAZE_INTERNAL_ASSERT( ibegin <= iend, "Invalid loop indices detected" );
 
             const size_t inum( iend - ibegin );
-            const size_t ipos( ibegin + ( inum & size_t(-2) ) );
+            const size_t ipos( ibegin + prevMultiple( inum, 2UL ) );
+            BLAZE_INTERNAL_ASSERT( ipos <= ibegin+inum, "Invalid end calculation" );
 
             for( size_t i=ibegin; i<ipos; i+=2UL ) {
                y[i    ] -= A(i    ,j) * x[j];
@@ -1693,8 +1749,8 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    template< typename VT1    // Type of the left-hand side target vector
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2 >  // Type of the right-hand side vector operand
-   static inline DisableIf_< UseVectorizedDefaultKernel<VT1,MT1,VT2> >
-      selectSmallSubAssignKernel( VT1& y, const MT1& A, const VT2& x )
+   static inline auto selectSmallSubAssignKernel( VT1& y, const MT1& A, const VT2& x )
+      -> DisableIf_t< UseVectorizedDefaultKernel_v<VT1,MT1,VT2> >
    {
       selectDefaultSubAssignKernel( y, A, x );
    }
@@ -1719,28 +1775,28 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    template< typename VT1    // Type of the left-hand side target vector
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2 >  // Type of the right-hand side vector operand
-   static inline EnableIf_< UseVectorizedDefaultKernel<VT1,MT1,VT2> >
-      selectSmallSubAssignKernel( VT1& y, const MT1& A, const VT2& x )
+   static inline auto selectSmallSubAssignKernel( VT1& y, const MT1& A, const VT2& x )
+      -> EnableIf_t< UseVectorizedDefaultKernel_v<VT1,MT1,VT2> >
    {
-      constexpr bool remainder( !IsPadded<MT1>::value || !IsPadded<VT1>::value );
+      constexpr bool remainder( !IsPadded_v<MT1> || !IsPadded_v<VT1> );
 
       const size_t M( A.rows()    );
       const size_t N( A.columns() );
 
-      const size_t ipos( remainder ? ( M & size_t(-SIMDSIZE) ) : M );
-      BLAZE_INTERNAL_ASSERT( !remainder || ( M - ( M % SIMDSIZE ) ) == ipos, "Invalid end calculation" );
+      const size_t ipos( remainder ? prevMultiple( M, SIMDSIZE ) : M );
+      BLAZE_INTERNAL_ASSERT( ipos <= M, "Invalid end calculation" );
 
       size_t i( 0UL );
 
       for( ; (i+SIMDSIZE*7UL) < ipos; i+=SIMDSIZE*8UL )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
+         const size_t jbegin( ( IsUpper_v<MT1> )
+                              ?( IsStrictlyUpper_v<MT1> ? i+1UL : i )
                               :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+SIMDSIZE*8UL, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
+         const size_t jend( ( IsLower_v<MT1> )
+                            ?( min( i+SIMDSIZE*8UL, N ) - ( IsStrictlyLower_v<MT1> ? 1UL : 0UL ) )
                             :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
          SIMDType xmm1( y.load(i             ) );
          SIMDType xmm2( y.load(i+SIMDSIZE    ) );
@@ -1775,13 +1831,13 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
       for( ; (i+SIMDSIZE*3UL) < ipos; i+=SIMDSIZE*4UL )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
+         const size_t jbegin( ( IsUpper_v<MT1> )
+                              ?( IsStrictlyUpper_v<MT1> ? i+1UL : i )
                               :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+SIMDSIZE*4UL, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
+         const size_t jend( ( IsLower_v<MT1> )
+                            ?( min( i+SIMDSIZE*4UL, N ) - ( IsStrictlyLower_v<MT1> ? 1UL : 0UL ) )
                             :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
          SIMDType xmm1( y.load(i             ) );
          SIMDType xmm2( y.load(i+SIMDSIZE    ) );
@@ -1804,13 +1860,13 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
       for( ; (i+SIMDSIZE*2UL) < ipos; i+=SIMDSIZE*3UL )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
+         const size_t jbegin( ( IsUpper_v<MT1> )
+                              ?( IsStrictlyUpper_v<MT1> ? i+1UL : i )
                               :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+SIMDSIZE*3UL, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
+         const size_t jend( ( IsLower_v<MT1> )
+                            ?( min( i+SIMDSIZE*3UL, N ) - ( IsStrictlyLower_v<MT1> ? 1UL : 0UL ) )
                             :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
          SIMDType xmm1( y.load(i             ) );
          SIMDType xmm2( y.load(i+SIMDSIZE    ) );
@@ -1830,13 +1886,13 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
       for( ; (i+SIMDSIZE) < ipos; i+=SIMDSIZE*2UL )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
+         const size_t jbegin( ( IsUpper_v<MT1> )
+                              ?( IsStrictlyUpper_v<MT1> ? i+1UL : i )
                               :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+SIMDSIZE*2UL, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
+         const size_t jend( ( IsLower_v<MT1> )
+                            ?( min( i+SIMDSIZE*2UL, N ) - ( IsStrictlyLower_v<MT1> ? 1UL : 0UL ) )
                             :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
          SIMDType xmm1( y.load(i         ) );
          SIMDType xmm2( y.load(i+SIMDSIZE) );
@@ -1853,13 +1909,13 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
       for( ; i<ipos; i+=SIMDSIZE )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
+         const size_t jbegin( ( IsUpper_v<MT1> )
+                              ?( IsStrictlyUpper_v<MT1> ? i+1UL : i )
                               :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+SIMDSIZE, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
+         const size_t jend( ( IsLower_v<MT1> )
+                            ?( min( i+SIMDSIZE, N ) - ( IsStrictlyLower_v<MT1> ? 1UL : 0UL ) )
                             :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
          SIMDType xmm1( y.load(i) );
 
@@ -1872,17 +1928,13 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
       for( ; remainder && i<M; ++i )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
-                              :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+1UL, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
-                            :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         const size_t jbegin( ( IsUpper_v<MT1> )?( i ):( 0UL ) );
+         const size_t jend( ( IsLower_v<MT1> )?( min( i+1UL, N ) ):( N ) );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
-         ElementType value = ElementType();
+         ElementType value( A(i,jbegin) * x[jbegin] );
 
-         for( size_t j=jbegin; j<jend; ++j ) {
+         for( size_t j=jbegin+1UL; j<jend; ++j ) {
             value += A(i,j) * x[j];
          }
 
@@ -1909,8 +1961,8 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    template< typename VT1    // Type of the left-hand side target vector
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2 >  // Type of the right-hand side vector operand
-   static inline DisableIf_< UseVectorizedDefaultKernel<VT1,MT1,VT2> >
-      selectLargeSubAssignKernel( VT1& y, const MT1& A, const VT2& x )
+   static inline auto selectLargeSubAssignKernel( VT1& y, const MT1& A, const VT2& x )
+      -> DisableIf_t< UseVectorizedDefaultKernel_v<VT1,MT1,VT2> >
    {
       selectDefaultSubAssignKernel( y, A, x );
    }
@@ -1935,10 +1987,10 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    template< typename VT1    // Type of the left-hand side target vector
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2 >  // Type of the right-hand side vector operand
-   static inline EnableIf_< UseVectorizedDefaultKernel<VT1,MT1,VT2> >
-      selectLargeSubAssignKernel( VT1& y, const MT1& A, const VT2& x )
+   static inline auto selectLargeSubAssignKernel( VT1& y, const MT1& A, const VT2& x )
+      -> EnableIf_t< UseVectorizedDefaultKernel_v<VT1,MT1,VT2> >
    {
-      constexpr bool remainder( !IsPadded<MT1>::value || !IsPadded<VT1>::value );
+      constexpr bool remainder( !IsPadded_v<MT1> || !IsPadded_v<VT1> );
 
       const size_t M( A.rows()    );
       const size_t N( A.columns() );
@@ -1953,23 +2005,31 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
          {
             const size_t jend( min( jj+jblock, N ) );
             const size_t itmp( min( ii+iblock, M ) );
-            const size_t iend( ( IsUpper<MT1>::value )
-                               ?( min( itmp, ( IsStrictlyUpper<MT1>::value ? jend-1UL : jend ) ) )
+            const size_t iend( ( IsUpper_v<MT1> )
+                               ?( min( itmp, ( IsStrictlyUpper_v<MT1> ? jend-1UL : jend ) ) )
                                :( itmp ) );
 
-            const size_t ipos( remainder ? ( iend & size_t(-SIMDSIZE) ) : iend );
-            BLAZE_INTERNAL_ASSERT( !remainder || ( iend - ( iend % SIMDSIZE ) ) == ipos, "Invalid end calculation" );
+            const size_t ipos( remainder ? prevMultiple( iend, SIMDSIZE ) : iend );
+            BLAZE_INTERNAL_ASSERT( ipos <= iend, "Invalid end calculation" );
 
-            size_t i( ( IsLower<MT1>::value )
-                      ?( max( ii, ( IsStrictlyLower<MT1>::value ? jj+1UL : jj ) & size_t(-SIMDSIZE) ) )
+            size_t i( ( IsLower_v<MT1> )
+                      ?( max( ii, prevMultiple( ( IsStrictlyLower_v<MT1> ? jj+1UL : jj ), SIMDSIZE ) ) )
                       :( ii ) );
 
             for( ; (i+SIMDSIZE*7UL) < ipos; i+=SIMDSIZE*8UL )
             {
-               SIMDType xmm1, xmm2, xmm3, xmm4, xmm5, xmm6, xmm7, xmm8;
+               SIMDType x1( set( x[jj] ) );
+               SIMDType xmm1( A.load(i             ,jj) * x1 );
+               SIMDType xmm2( A.load(i+SIMDSIZE    ,jj) * x1 );
+               SIMDType xmm3( A.load(i+SIMDSIZE*2UL,jj) * x1 );
+               SIMDType xmm4( A.load(i+SIMDSIZE*3UL,jj) * x1 );
+               SIMDType xmm5( A.load(i+SIMDSIZE*4UL,jj) * x1 );
+               SIMDType xmm6( A.load(i+SIMDSIZE*5UL,jj) * x1 );
+               SIMDType xmm7( A.load(i+SIMDSIZE*6UL,jj) * x1 );
+               SIMDType xmm8( A.load(i+SIMDSIZE*7UL,jj) * x1 );
 
-               for( size_t j=jj; j<jend; ++j ) {
-                  const SIMDType x1( set( x[j] ) );
+               for( size_t j=jj+1UL; j<jend; ++j ) {
+                  x1 = set( x[j] );
                   xmm1 += A.load(i             ,j) * x1;
                   xmm2 += A.load(i+SIMDSIZE    ,j) * x1;
                   xmm3 += A.load(i+SIMDSIZE*2UL,j) * x1;
@@ -1992,10 +2052,14 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
             for( ; (i+SIMDSIZE*3UL) < ipos; i+=SIMDSIZE*4UL )
             {
-               SIMDType xmm1, xmm2, xmm3, xmm4;
+               SIMDType x1( set( x[jj] ) );
+               SIMDType xmm1( A.load(i             ,jj) * x1 );
+               SIMDType xmm2( A.load(i+SIMDSIZE    ,jj) * x1 );
+               SIMDType xmm3( A.load(i+SIMDSIZE*2UL,jj) * x1 );
+               SIMDType xmm4( A.load(i+SIMDSIZE*3UL,jj) * x1 );
 
-               for( size_t j=jj; j<jend; ++j ) {
-                  const SIMDType x1( set( x[j] ) );
+               for( size_t j=jj+1UL; j<jend; ++j ) {
+                  x1 = set( x[j] );
                   xmm1 += A.load(i             ,j) * x1;
                   xmm2 += A.load(i+SIMDSIZE    ,j) * x1;
                   xmm3 += A.load(i+SIMDSIZE*2UL,j) * x1;
@@ -2010,10 +2074,13 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
             for( ; (i+SIMDSIZE*2UL) < ipos; i+=SIMDSIZE*3UL )
             {
-               SIMDType xmm1, xmm2, xmm3;
+               SIMDType x1( set( x[jj] ) );
+               SIMDType xmm1( A.load(i             ,jj) * x1 );
+               SIMDType xmm2( A.load(i+SIMDSIZE    ,jj) * x1 );
+               SIMDType xmm3( A.load(i+SIMDSIZE*2UL,jj) * x1 );
 
-               for( size_t j=jj; j<jend; ++j ) {
-                  const SIMDType x1( set( x[j] ) );
+               for( size_t j=jj+1UL; j<jend; ++j ) {
+                  x1 = set( x[j] );
                   xmm1 += A.load(i             ,j) * x1;
                   xmm2 += A.load(i+SIMDSIZE    ,j) * x1;
                   xmm3 += A.load(i+SIMDSIZE*2UL,j) * x1;
@@ -2026,10 +2093,12 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
             for( ; (i+SIMDSIZE) < ipos; i+=SIMDSIZE*2UL )
             {
-               SIMDType xmm1, xmm2;
+               SIMDType x1( set( x[jj] ) );
+               SIMDType xmm1( A.load(i         ,jj) * x1 );
+               SIMDType xmm2( A.load(i+SIMDSIZE,jj) * x1 );
 
-               for( size_t j=jj; j<jend; ++j ) {
-                  const SIMDType x1( set( x[j] ) );
+               for( size_t j=jj+1UL; j<jend; ++j ) {
+                  x1 = set( x[j] );
                   xmm1 += A.load(i         ,j) * x1;
                   xmm2 += A.load(i+SIMDSIZE,j) * x1;
                }
@@ -2040,9 +2109,9 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
             for( ; i<ipos; i+=SIMDSIZE )
             {
-               SIMDType xmm1;
+               SIMDType xmm1( A.load(i,jj) * set( x[jj] ) );
 
-               for( size_t j=jj; j<jend; ++j ) {
+               for( size_t j=jj+1UL; j<jend; ++j ) {
                   xmm1 += A.load(i,j) * set( x[j] );
                }
 
@@ -2051,9 +2120,9 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
 
             for( ; remainder && i<iend; ++i )
             {
-               ElementType value = ElementType();
+               ElementType value( A(i,jj) * x[jj] );
 
-               for( size_t j=jj; j<jend; ++j ) {
+               for( size_t j=jj+1UL; j<jend; ++j ) {
                   value += A(i,j) * x[j];
                }
 
@@ -2082,8 +2151,8 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    template< typename VT1    // Type of the left-hand side target vector
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2 >  // Type of the right-hand side vector operand
-   static inline DisableIf_< UseBlasKernel<VT1,MT1,VT2> >
-      selectBlasSubAssignKernel( VT1& y, const MT1& A, const VT2& x )
+   static inline auto selectBlasSubAssignKernel( VT1& y, const MT1& A, const VT2& x )
+      -> DisableIf_t< UseBlasKernel_v<VT1,MT1,VT2> >
    {
       selectLargeSubAssignKernel( y, A, x );
    }
@@ -2108,14 +2177,14 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    template< typename VT1    // Type of the left-hand side target vector
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2 >  // Type of the right-hand side vector operand
-   static inline EnableIf_< UseBlasKernel<VT1,MT1,VT2> >
-      selectBlasSubAssignKernel( VT1& y, const MT1& A, const VT2& x )
+   static inline auto selectBlasSubAssignKernel( VT1& y, const MT1& A, const VT2& x )
+      -> EnableIf_t< UseBlasKernel_v<VT1,MT1,VT2> >
    {
-      typedef ElementType_<VT1>  ET;
+      using ET = ElementType_t<VT1>;
 
-      if( IsTriangular<MT1>::value ) {
-         ResultType_<VT1> tmp( serial( x ) );
-         trmv( tmp, A, ( IsLower<MT1>::value )?( CblasLower ):( CblasUpper ) );
+      if( IsTriangular_v<MT1> ) {
+         ResultType_t<VT1> tmp( serial( x ) );
+         trmv( tmp, A, ( IsLower_v<MT1> )?( CblasLower ):( CblasUpper ) );
          subAssign( y, tmp );
       }
       else {
@@ -2148,14 +2217,14 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE ( ResultType );
+      BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE( ResultType );
       BLAZE_CONSTRAINT_MUST_BE_COLUMN_VECTOR_TYPE( ResultType );
-      BLAZE_CONSTRAINT_MUST_BE_REFERENCE_TYPE( CompositeType_<ResultType> );
+      BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType );
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
       const ResultType tmp( serial( rhs ) );
-      multAssign( ~lhs, tmp );
+      multAssign( *lhs, tmp );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -2182,14 +2251,14 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE ( ResultType );
+      BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE( ResultType );
       BLAZE_CONSTRAINT_MUST_BE_COLUMN_VECTOR_TYPE( ResultType );
-      BLAZE_CONSTRAINT_MUST_BE_REFERENCE_TYPE( CompositeType_<ResultType> );
+      BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType );
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
       const ResultType tmp( serial( rhs ) );
-      divAssign( ~lhs, tmp );
+      divAssign( *lhs, tmp );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -2214,18 +2283,19 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    // in case the expression specific parallel evaluation strategy is selected.
    */
    template< typename VT1 >  // Type of the target dense vector
-   friend inline EnableIf_< UseSMPAssign<VT1> >
-      smpAssign( DenseVector<VT1,false>& lhs, const TDMatDVecMultExpr& rhs )
+   friend inline auto smpAssign( DenseVector<VT1,false>& lhs, const TDMatDVecMultExpr& rhs )
+      -> EnableIf_t< UseSMPAssign_v<VT1> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
       if( rhs.mat_.rows() == 0UL ) {
          return;
       }
-      else if( rhs.mat_.columns() == 0UL ) {
-         reset( ~lhs );
+      else if( rhs.mat_.columns() == 0UL ||
+               ( IsStrictlyTriangular_v<MT> && rhs.mat_.columns() == 1UL ) ) {
+         reset( *lhs );
          return;
       }
 
@@ -2235,9 +2305,9 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
       BLAZE_INTERNAL_ASSERT( A.rows()    == rhs.mat_.rows()   , "Invalid number of rows"    );
       BLAZE_INTERNAL_ASSERT( A.columns() == rhs.mat_.columns(), "Invalid number of columns" );
       BLAZE_INTERNAL_ASSERT( x.size()    == rhs.vec_.size()   , "Invalid vector size"       );
-      BLAZE_INTERNAL_ASSERT( A.rows()    == (~lhs).size()     , "Invalid vector size"       );
+      BLAZE_INTERNAL_ASSERT( A.rows()    == (*lhs).size()     , "Invalid vector size"       );
 
-      smpAssign( ~lhs, A * x );
+      smpAssign( *lhs, A * x );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -2258,19 +2328,19 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    // in case the expression specific parallel evaluation strategy is selected.
    */
    template< typename VT1 >  // Type of the target sparse vector
-   friend inline EnableIf_< UseSMPAssign<VT1> >
-      smpAssign( SparseVector<VT1,false>& lhs, const TDMatDVecMultExpr& rhs )
+   friend inline auto smpAssign( SparseVector<VT1,false>& lhs, const TDMatDVecMultExpr& rhs )
+      -> EnableIf_t< UseSMPAssign_v<VT1> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE ( ResultType );
+      BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE( ResultType );
       BLAZE_CONSTRAINT_MUST_BE_COLUMN_VECTOR_TYPE( ResultType );
-      BLAZE_CONSTRAINT_MUST_BE_REFERENCE_TYPE( CompositeType_<ResultType> );
+      BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType );
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
       const ResultType tmp( rhs );
-      smpAssign( ~lhs, tmp );
+      smpAssign( *lhs, tmp );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -2291,14 +2361,15 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    // case the expression specific parallel evaluation strategy is selected.
    */
    template< typename VT1 >  // Type of the target dense vector
-   friend inline EnableIf_< UseSMPAssign<VT1> >
-      smpAddAssign( DenseVector<VT1,false>& lhs, const TDMatDVecMultExpr& rhs )
+   friend inline auto smpAddAssign( DenseVector<VT1,false>& lhs, const TDMatDVecMultExpr& rhs )
+      -> EnableIf_t< UseSMPAssign_v<VT1> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      if( rhs.mat_.rows() == 0UL || rhs.mat_.columns() == 0UL ) {
+      if( rhs.mat_.rows() == 0UL || rhs.mat_.columns() == 0UL ||
+          ( IsStrictlyTriangular_v<MT> && rhs.mat_.rows() == 1UL ) ) {
          return;
       }
 
@@ -2308,9 +2379,9 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
       BLAZE_INTERNAL_ASSERT( A.rows()    == rhs.mat_.rows()   , "Invalid number of rows"    );
       BLAZE_INTERNAL_ASSERT( A.columns() == rhs.mat_.columns(), "Invalid number of columns" );
       BLAZE_INTERNAL_ASSERT( x.size()    == rhs.vec_.size()   , "Invalid vector size"       );
-      BLAZE_INTERNAL_ASSERT( A.rows()    == (~lhs).size()     , "Invalid vector size"       );
+      BLAZE_INTERNAL_ASSERT( A.rows()    == (*lhs).size()     , "Invalid vector size"       );
 
-      smpAddAssign( ~lhs, A * x );
+      smpAddAssign( *lhs, A * x );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -2335,14 +2406,15 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    // case the expression specific parallel evaluation strategy is selected.
    */
    template< typename VT1 >  // Type of the target dense vector
-   friend inline EnableIf_< UseSMPAssign<VT1> >
-      smpSubAssign( DenseVector<VT1,false>& lhs, const TDMatDVecMultExpr& rhs )
+   friend inline auto smpSubAssign( DenseVector<VT1,false>& lhs, const TDMatDVecMultExpr& rhs )
+      -> EnableIf_t< UseSMPAssign_v<VT1> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      if( rhs.mat_.rows() == 0UL || rhs.mat_.columns() == 0UL ) {
+      if( rhs.mat_.rows() == 0UL || rhs.mat_.columns() == 0UL ||
+          ( IsStrictlyTriangular_v<MT> && rhs.mat_.rows() == 1UL ) ) {
          return;
       }
 
@@ -2352,9 +2424,9 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
       BLAZE_INTERNAL_ASSERT( A.rows()    == rhs.mat_.rows()   , "Invalid number of rows"    );
       BLAZE_INTERNAL_ASSERT( A.columns() == rhs.mat_.columns(), "Invalid number of columns" );
       BLAZE_INTERNAL_ASSERT( x.size()    == rhs.vec_.size()   , "Invalid vector size"       );
-      BLAZE_INTERNAL_ASSERT( A.rows()    == (~lhs).size()     , "Invalid vector size"       );
+      BLAZE_INTERNAL_ASSERT( A.rows()    == (*lhs).size()     , "Invalid vector size"       );
 
-      smpSubAssign( ~lhs, A * x );
+      smpSubAssign( *lhs, A * x );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -2379,19 +2451,19 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    // the compiler in case the expression specific parallel evaluation strategy is selected.
    */
    template< typename VT1 >  // Type of the target dense vector
-   friend inline EnableIf_< UseSMPAssign<VT1> >
-      smpMultAssign( DenseVector<VT1,false>& lhs, const TDMatDVecMultExpr& rhs )
+   friend inline auto smpMultAssign( DenseVector<VT1,false>& lhs, const TDMatDVecMultExpr& rhs )
+      -> EnableIf_t< UseSMPAssign_v<VT1> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE ( ResultType );
+      BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE( ResultType );
       BLAZE_CONSTRAINT_MUST_BE_COLUMN_VECTOR_TYPE( ResultType );
-      BLAZE_CONSTRAINT_MUST_BE_REFERENCE_TYPE( CompositeType_<ResultType> );
+      BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType );
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
       const ResultType tmp( rhs );
-      smpMultAssign( ~lhs, tmp );
+      smpMultAssign( *lhs, tmp );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -2416,19 +2488,19 @@ class TDMatDVecMultExpr : public DenseVector< TDMatDVecMultExpr<MT,VT>, false >
    // case the expression specific parallel evaluation strategy is selected.
    */
    template< typename VT1 >  // Type of the target dense vector
-   friend inline EnableIf_< UseSMPAssign<VT1> >
-      smpDivAssign( DenseVector<VT1,false>& lhs, const TDMatDVecMultExpr& rhs )
+   friend inline auto smpDivAssign( DenseVector<VT1,false>& lhs, const TDMatDVecMultExpr& rhs )
+      -> EnableIf_t< UseSMPAssign_v<VT1> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE ( ResultType );
+      BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE( ResultType );
       BLAZE_CONSTRAINT_MUST_BE_COLUMN_VECTOR_TYPE( ResultType );
-      BLAZE_CONSTRAINT_MUST_BE_REFERENCE_TYPE( CompositeType_<ResultType> );
+      BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType );
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
       const ResultType tmp( rhs );
-      smpDivAssign( ~lhs, tmp );
+      smpDivAssign( *lhs, tmp );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -2471,123 +2543,125 @@ template< typename MT    // Type of the left-hand side dense matrix
         , typename VT    // Type of the right-hand side dense vector
         , typename ST >  // Type of the side scalar value
 class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
-   : public DenseVector< DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >, false >
-   , private VecScalarMultExpr
+   : public VecScalarMultExpr< DenseVector< DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >, false > >
    , private Computation
 {
  private:
    //**Type definitions****************************************************************************
-   typedef TDMatDVecMultExpr<MT,VT>  MVM;  //!< Type of the transpose dense matrix-dense vector multiplication expression.
-   typedef ResultType_<MVM>          RES;  //!< Result type of the dense matrix-dense vector multiplication expression.
-   typedef ResultType_<MT>           MRT;  //!< Result type of the left-hand side dense matrix expression.
-   typedef ResultType_<VT>           VRT;  //!< Result type of the right-hand side dense vector expression.
-   typedef ElementType_<MRT>         MET;  //!< Element type of the left-hand side dense matrix expression.
-   typedef ElementType_<VRT>         VET;  //!< Element type of the right-hand side dense vector expression.
-   typedef CompositeType_<MT>        MCT;  //!< Composite type of the left-hand side dense matrix expression.
-   typedef CompositeType_<VT>        VCT;  //!< Composite type of the right-hand side dense vector expression.
+   using MVM = TDMatDVecMultExpr<MT,VT>;  //!< Type of the transpose dense matrix-dense vector multiplication expression.
+   using RES = ResultType_t<MVM>;         //!< Result type of the dense matrix-dense vector multiplication expression.
+   using MRT = ResultType_t<MT>;          //!< Result type of the left-hand side dense matrix expression.
+   using VRT = ResultType_t<VT>;          //!< Result type of the right-hand side dense vector expression.
+   using MET = ElementType_t<MRT>;        //!< Element type of the left-hand side dense matrix expression.
+   using VET = ElementType_t<VRT>;        //!< Element type of the right-hand side dense vector expression.
+   using MCT = CompositeType_t<MT>;       //!< Composite type of the left-hand side dense matrix expression.
+   using VCT = CompositeType_t<VT>;       //!< Composite type of the right-hand side dense vector expression.
    //**********************************************************************************************
 
    //**********************************************************************************************
    //! Compilation switch for the composite type of the right-hand side dense matrix expression.
-   enum : bool { evaluateMatrix = ( IsComputation<MT>::value && IsSame<MET,VET>::value &&
-                                    IsBLASCompatible<MET>::value ) || RequiresEvaluation<MT>::value };
+   static constexpr bool evaluateMatrix =
+      ( ( IsComputation_v<MT> && IsSame_v<MET,VET> &&
+          IsBLASCompatible_v<MET> ) || RequiresEvaluation_v<MT> );
    //**********************************************************************************************
 
    //**********************************************************************************************
    //! Compilation switch for the composite type of the right-hand side dense vector expression.
-   enum : bool { evaluateVector = IsComputation<VT>::value || RequiresEvaluation<VT>::value };
+   static constexpr bool evaluateVector = ( IsComputation_v<VT> || RequiresEvaluation_v<VT> );
    //**********************************************************************************************
 
    //**********************************************************************************************
-   //! Helper structure for the explicit application of the SFINAE principle.
-   /*! The UseSMPAssign struct is a helper struct for the selection of the parallel evaluation
-       strategy. In case either the matrix or the vector operand requires an intermediate
-       evaluation, the nested \a value will be set to 1, otherwise it will be 0. */
+   //! Helper variable template for the explicit application of the SFINAE principle.
+   /*! This variable template is a helper for the selection of the parallel evaluation strategy.
+       In case either the matrix or the vector operand requires an intermediate evaluation, the
+       variable will be set to 1, otherwise it will be 0. */
    template< typename T1 >
-   struct UseSMPAssign {
-      enum : bool { value = ( evaluateMatrix || evaluateVector ) };
-   };
+   static constexpr bool UseSMPAssign_v = ( evaluateMatrix || evaluateVector );
    //**********************************************************************************************
 
    //**********************************************************************************************
-   //! Helper structure for the explicit application of the SFINAE principle.
+   //! Helper variable template for the explicit application of the SFINAE principle.
    /*! In case the matrix type, the two involved vector types, and the scalar type are suited
-       for a BLAS kernel, the nested \a value will be set to 1, otherwise it will be 0. */
+       for a BLAS kernel, the variable will be set to 1, otherwise it will be 0. */
    template< typename T1, typename T2, typename T3, typename T4 >
-   struct UseBlasKernel {
-      enum : bool { value = BLAZE_BLAS_MODE && BLAZE_USE_BLAS_MATRIX_VECTOR_MULTIPLICATION &&
-                            HasMutableDataAccess<T1>::value &&
-                            HasConstDataAccess<T2>::value &&
-                            HasConstDataAccess<T3>::value &&
-                            !IsDiagonal<T2>::value &&
-                            T1::simdEnabled && T2::simdEnabled && T3::simdEnabled &&
-                            IsBLASCompatible< ElementType_<T1> >::value &&
-                            IsBLASCompatible< ElementType_<T2> >::value &&
-                            IsBLASCompatible< ElementType_<T3> >::value &&
-                            IsSame< ElementType_<T1>, ElementType_<T2> >::value &&
-                            IsSame< ElementType_<T1>, ElementType_<T3> >::value &&
-                            !( IsBuiltin< ElementType_<T1> >::value && IsComplex<T4>::value ) };
-   };
+   static constexpr bool UseBlasKernel_v =
+      ( BLAZE_BLAS_MODE && BLAZE_USE_BLAS_MATRIX_VECTOR_MULTIPLICATION &&
+        IsContiguous_v<T1> && HasMutableDataAccess_v<T1> &&
+        IsContiguous_v<T2> && HasConstDataAccess_v<T2> &&
+        IsContiguous_v<T3> && HasConstDataAccess_v<T3> &&
+        !IsDiagonal_v<T2> &&
+        T1::simdEnabled && T2::simdEnabled && T3::simdEnabled &&
+        IsBLASCompatible_v< ElementType_t<T1> > &&
+        IsBLASCompatible_v< ElementType_t<T2> > &&
+        IsBLASCompatible_v< ElementType_t<T3> > &&
+        IsSame_v< ElementType_t<T1>, ElementType_t<T2> > &&
+        IsSame_v< ElementType_t<T1>, ElementType_t<T3> > &&
+        !( IsBuiltin_v< ElementType_t<T1> > && IsComplex_v<T4> ) );
    //**********************************************************************************************
 
    //**********************************************************************************************
-   //! Helper structure for the explicit application of the SFINAE principle.
+   //! Helper variable template for the explicit application of the SFINAE principle.
    /*! In case the two involved vector types, the matrix type, and the scalar type are suited
-       for a vectorized computation of the scaled vector/matrix multiplication, the nested
-       \a value will be set to 1, otherwise it will be 0. */
+       for a vectorized computation of the scaled vector/matrix multiplication, the variable
+       will be set to 1, otherwise it will be 0. */
    template< typename T1, typename T2, typename T3, typename T4 >
-   struct UseVectorizedDefaultKernel {
-      enum : bool { value = useOptimizedKernels &&
-                            !IsDiagonal<T2>::value &&
-                            T1::simdEnabled && T2::simdEnabled && T3::simdEnabled &&
-                            IsSIMDCombinable< ElementType_<T1>
-                                            , ElementType_<T2>
-                                            , ElementType_<T3>
-                                            , T4 >::value &&
-                            HasSIMDAdd< ElementType_<T2>, ElementType_<T3> >::value &&
-                            HasSIMDMult< ElementType_<T2>, ElementType_<T3> >::value };
-   };
+   static constexpr bool UseVectorizedDefaultKernel_v =
+      ( useOptimizedKernels &&
+        !IsDiagonal_v<T2> &&
+        T1::simdEnabled && T2::simdEnabled && T3::simdEnabled &&
+        IsSIMDCombinable_v< ElementType_t<T1>
+                          , ElementType_t<T2>
+                          , ElementType_t<T3>
+                          , T4 > &&
+        HasSIMDAdd_v< ElementType_t<T2>, ElementType_t<T3> > &&
+        HasSIMDMult_v< ElementType_t<T2>, ElementType_t<T3> > );
    //**********************************************************************************************
 
  public:
    //**Type definitions****************************************************************************
-   typedef DVecScalarMultExpr<MVM,ST,false>  This;           //!< Type of this DVecScalarMultExpr instance.
-   typedef MultTrait_<RES,ST>                ResultType;     //!< Result type for expression template evaluations.
-   typedef TransposeType_<ResultType>        TransposeType;  //!< Transpose type for expression template evaluations.
-   typedef ElementType_<ResultType>          ElementType;    //!< Resulting element type.
-   typedef SIMDTrait_<ElementType>           SIMDType;       //!< Resulting SIMD element type.
-   typedef const ElementType                 ReturnType;     //!< Return type for expression template evaluations.
-   typedef const ResultType                  CompositeType;  //!< Data type for composite expression templates.
+   //! Type of this DVecScalarMultExpr instance.
+   using This = DVecScalarMultExpr<MVM,ST,false>;
+
+   //! Base type of this DVecScalarMultExpr instance.
+   using BaseType = VecScalarMultExpr< DenseVector<This,false> >;
+
+   using ResultType    = MultTrait_t<RES,ST>;          //!< Result type for expression template evaluations.
+   using TransposeType = TransposeType_t<ResultType>;  //!< Transpose type for expression template evaluations.
+   using ElementType   = ElementType_t<ResultType>;    //!< Resulting element type.
+   using SIMDType      = SIMDTrait_t<ElementType>;     //!< Resulting SIMD element type.
+   using ReturnType    = const ElementType;            //!< Return type for expression template evaluations.
+   using CompositeType = const ResultType;             //!< Data type for composite expression templates.
 
    //! Composite type of the left-hand side dense vector expression.
-   typedef const TDMatDVecMultExpr<MT,VT>  LeftOperand;
+   using LeftOperand = const TDMatDVecMultExpr<MT,VT>;
 
    //! Composite type of the right-hand side scalar value.
-   typedef ST  RightOperand;
+   using RightOperand = ST;
 
    //! Type for the assignment of the dense matrix operand of the left-hand side expression.
-   typedef IfTrue_< evaluateMatrix, const MRT, MCT >  LT;
+   using LT = If_t< evaluateMatrix, const MRT, MCT >;
 
    //! Type for the assignment of the dense vector operand of the left-hand side expression.
-   typedef IfTrue_< evaluateVector, const VRT, VCT >  RT;
+   using RT = If_t< evaluateVector, const VRT, VCT >;
    //**********************************************************************************************
 
    //**Compilation flags***************************************************************************
    //! Compilation switch for the expression template evaluation strategy.
-   enum : bool { simdEnabled = !IsDiagonal<MT>::value &&
-                               MT::simdEnabled && VT::simdEnabled &&
-                               IsSIMDCombinable<MET,VET,ST>::value &&
-                               HasSIMDAdd<MET,VET>::value &&
-                               HasSIMDMult<MET,VET>::value };
+   static constexpr bool simdEnabled =
+      ( !IsDiagonal_v<MT> &&
+        MT::simdEnabled && VT::simdEnabled &&
+        IsSIMDCombinable_v<MET,VET,ST> &&
+        HasSIMDAdd_v<MET,VET> &&
+        HasSIMDMult_v<MET,VET> );
 
    //! Compilation switch for the expression template assignment strategy.
-   enum : bool { smpAssignable = !evaluateMatrix && MT::smpAssignable &&
-                                 !evaluateVector && VT::smpAssignable };
+   static constexpr bool smpAssignable =
+      ( !evaluateMatrix && MT::smpAssignable && !evaluateVector && VT::smpAssignable );
    //**********************************************************************************************
 
    //**SIMD properties*****************************************************************************
    //! The number of elements packed within a single SIMD element.
-   enum : size_t { SIMDSIZE = SIMDTrait<ElementType>::size };
+   static constexpr size_t SIMDSIZE = SIMDTrait<ElementType>::size;
    //**********************************************************************************************
 
    //**Constructor*********************************************************************************
@@ -2596,7 +2670,7 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
    // \param vector The left-hand side dense vector of the multiplication expression.
    // \param scalar The right-hand side scalar of the multiplication expression.
    */
-   explicit inline DVecScalarMultExpr( const MVM& vector, ST scalar )
+   inline DVecScalarMultExpr( const MVM& vector, ST scalar )
       : vector_( vector )  // Left-hand side dense vector of the multiplication expression
       , scalar_( scalar )  // Right-hand side scalar of the multiplication expression
    {}
@@ -2699,9 +2773,11 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
    // \return \a true in case the expression can be used in SMP assignments, \a false if not.
    */
    inline bool canSMPAssign() const noexcept {
-      LeftOperand_<MVM> A( vector_.leftOperand() );
-      return ( !BLAZE_BLAS_IS_PARALLEL ||
-               ( IsComputation<MT>::value && !evaluateMatrix ) ||
+      LeftOperand_t<MVM> A( vector_.leftOperand() );
+      return ( !BLAZE_BLAS_MODE ||
+               !BLAZE_USE_BLAS_MATRIX_VECTOR_MULTIPLICATION ||
+               !BLAZE_BLAS_IS_PARALLEL ||
+               ( IsComputation_v<MT> && !evaluateMatrix ) ||
                ( A.rows() * A.columns() < TDMATDVECMULT_THRESHOLD ) ) &&
              ( size() > SMP_TDMATDVECMULT_THRESHOLD );
    }
@@ -2730,16 +2806,17 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      LeftOperand_<MVM>  left ( rhs.vector_.leftOperand()  );
-      RightOperand_<MVM> right( rhs.vector_.rightOperand() );
+      LeftOperand_t<MVM>  left ( rhs.vector_.leftOperand()  );
+      RightOperand_t<MVM> right( rhs.vector_.rightOperand() );
 
       if( left.rows() == 0UL ) {
          return;
       }
-      else if( left.columns() == 0UL ) {
-         reset( ~lhs );
+      else if( left.columns() == 0UL ||
+               ( IsStrictlyTriangular_v<MT> && left.columns() == 1UL ) ) {
+         reset( *lhs );
          return;
       }
 
@@ -2749,9 +2826,9 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
       BLAZE_INTERNAL_ASSERT( A.rows()    == left.rows()   , "Invalid number of rows"    );
       BLAZE_INTERNAL_ASSERT( A.columns() == left.columns(), "Invalid number of columns" );
       BLAZE_INTERNAL_ASSERT( x.size()    == right.size()  , "Invalid vector size"       );
-      BLAZE_INTERNAL_ASSERT( A.rows()    == (~lhs).size() , "Invalid vector size"       );
+      BLAZE_INTERNAL_ASSERT( A.rows()    == (*lhs).size() , "Invalid vector size"       );
 
-      DVecScalarMultExpr::selectAssignKernel( ~lhs, A, x, rhs.scalar_ );
+      DVecScalarMultExpr::selectAssignKernel( *lhs, A, x, rhs.scalar_ );
    }
    //**********************************************************************************************
 
@@ -2772,8 +2849,8 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
            , typename ST2 >  // Type of the scalar value
    static inline void selectAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
    {
-      if( ( IsDiagonal<MT1>::value ) ||
-          ( IsComputation<MT>::value && !evaluateMatrix ) ||
+      if( ( IsDiagonal_v<MT1> ) ||
+          ( IsComputation_v<MT> && !evaluateMatrix ) ||
           ( A.rows() * A.columns() < TDMATDVECMULT_THRESHOLD ) )
          selectSmallAssignKernel( y, A, x, scalar );
       else
@@ -2804,35 +2881,36 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
       const size_t M( A.rows()    );
       const size_t N( A.columns() );
 
-      if( IsStrictlyLower<MT1>::value ) {
+      if( IsStrictlyLower_v<MT1> ) {
          reset( y[0] );
       }
 
-      if( !IsUpper<MT1>::value )
+      if( !IsUpper_v<MT1> )
       {
-         for( size_t i=( IsStrictlyLower<MT1>::value ? 1UL : 0UL ); i<M; ++i ) {
+         for( size_t i=( IsStrictlyLower_v<MT1> ? 1UL : 0UL ); i<M; ++i ) {
             y[i] = A(i,0UL) * x[0UL];
          }
       }
 
-      for( size_t j=( IsUpper<MT1>::value && !IsStrictlyUpper<MT1>::value ? 0UL : 1UL ); j<N; ++j )
+      for( size_t j=( IsUpper_v<MT1> && !IsStrictlyUpper_v<MT1> ? 0UL : 1UL ); j<N; ++j )
       {
-         if( IsDiagonal<MT1>::value )
+         if( IsDiagonal_v<MT1> )
          {
             y[j] = A(j,j) * x[j] * scalar;
          }
          else
          {
-            const size_t ibegin( ( IsLower<MT1>::value )
-                                 ?( IsStrictlyLower<MT1>::value ? j+1UL : j )
+            const size_t ibegin( ( IsLower_v<MT1> )
+                                 ?( IsStrictlyLower_v<MT1> ? j+1UL : j )
                                  :( 0UL ) );
-            const size_t iend( ( IsUpper<MT1>::value )
-                               ?( IsStrictlyUpper<MT1>::value ? j-1UL : j )
+            const size_t iend( ( IsUpper_v<MT1> )
+                               ?( IsStrictlyUpper_v<MT1> ? j-1UL : j )
                                :( M ) );
             BLAZE_INTERNAL_ASSERT( ibegin <= iend, "Invalid loop indices detected" );
 
             const size_t inum( iend - ibegin );
-            const size_t ipos( ibegin + ( inum & size_t(-2) ) );
+            const size_t ipos( ibegin + prevMultiple( inum, 2UL ) );
+            BLAZE_INTERNAL_ASSERT( ipos <= ibegin+inum, "Invalid end calculation" );
 
             for( size_t i=ibegin; i<ipos; i+=2UL ) {
                y[i    ] += A(i    ,j) * x[j];
@@ -2841,20 +2919,20 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
             if( ipos < iend ) {
                y[ipos] += A(ipos,j) * x[j];
             }
-            if( IsUpper<MT1>::value ) {
+            if( IsUpper_v<MT1> ) {
                y[iend] = A(iend,j) * x[j];
             }
          }
       }
 
-      if( IsStrictlyUpper<MT1>::value ) {
+      if( IsStrictlyUpper_v<MT1> ) {
          reset( y[M-1UL] );
       }
 
-      if( !IsDiagonal<MT1>::value )
+      if( !IsDiagonal_v<MT1> )
       {
-         const size_t iend( IsStrictlyUpper<MT1>::value ? M-1UL : M );
-         for( size_t i=( IsStrictlyLower<MT1>::value ? 1UL : 0UL ); i<iend; ++i ) {
+         const size_t iend( IsStrictlyUpper_v<MT1> ? M-1UL : M );
+         for( size_t i=( IsStrictlyLower_v<MT1> ? 1UL : 0UL ); i<iend; ++i ) {
             y[i] *= scalar;
          }
       }
@@ -2879,8 +2957,8 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2    // Type of the right-hand side vector operand
            , typename ST2 >  // Type of the scalar value
-   static inline DisableIf_< UseVectorizedDefaultKernel<VT1,MT1,VT2,ST2> >
-      selectSmallAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+   static inline auto selectSmallAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+      -> DisableIf_t< UseVectorizedDefaultKernel_v<VT1,MT1,VT2,ST2> >
    {
       selectDefaultAssignKernel( y, A, x, scalar );
    }
@@ -2904,16 +2982,16 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2    // Type of the right-hand side vector operand
            , typename ST2 >  // Type of the scalar value
-   static inline EnableIf_< UseVectorizedDefaultKernel<VT1,MT1,VT2,ST2> >
-      selectSmallAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+   static inline auto selectSmallAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+      -> EnableIf_t< UseVectorizedDefaultKernel_v<VT1,MT1,VT2,ST2> >
    {
-      constexpr bool remainder( !IsPadded<MT1>::value || !IsPadded<VT1>::value );
+      constexpr bool remainder( !IsPadded_v<MT1> || !IsPadded_v<VT1> );
 
       const size_t M( A.rows()    );
       const size_t N( A.columns() );
 
-      const size_t ipos( remainder ? ( M & size_t(-SIMDSIZE) ) : M );
-      BLAZE_INTERNAL_ASSERT( !remainder || ( M - ( M % SIMDSIZE ) ) == ipos, "Invalid end calculation" );
+      const size_t ipos( remainder ? prevMultiple( M, SIMDSIZE ) : M );
+      BLAZE_INTERNAL_ASSERT( ipos <= M, "Invalid end calculation" );
 
       const SIMDType factor( set( scalar ) );
 
@@ -2921,18 +2999,26 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
       for( ; (i+SIMDSIZE*7UL) < ipos; i+=SIMDSIZE*8UL )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
+         const size_t jbegin( ( IsUpper_v<MT1> )
+                              ?( IsStrictlyUpper_v<MT1> ? i+1UL : i )
                               :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+SIMDSIZE*8UL, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
+         const size_t jend( ( IsLower_v<MT1> )
+                            ?( min( i+SIMDSIZE*8UL, N ) - ( IsStrictlyLower_v<MT1> ? 1UL : 0UL ) )
                             :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
-         SIMDType xmm1, xmm2, xmm3, xmm4, xmm5, xmm6, xmm7, xmm8;
+         SIMDType x1( set( x[jbegin] ) );
+         SIMDType xmm1( A.load(i             ,jbegin) * x1 );
+         SIMDType xmm2( A.load(i+SIMDSIZE    ,jbegin) * x1 );
+         SIMDType xmm3( A.load(i+SIMDSIZE*2UL,jbegin) * x1 );
+         SIMDType xmm4( A.load(i+SIMDSIZE*3UL,jbegin) * x1 );
+         SIMDType xmm5( A.load(i+SIMDSIZE*4UL,jbegin) * x1 );
+         SIMDType xmm6( A.load(i+SIMDSIZE*5UL,jbegin) * x1 );
+         SIMDType xmm7( A.load(i+SIMDSIZE*6UL,jbegin) * x1 );
+         SIMDType xmm8( A.load(i+SIMDSIZE*7UL,jbegin) * x1 );
 
-         for( size_t j=jbegin; j<jend; ++j ) {
-            const SIMDType x1( set( x[j] ) );
+         for( size_t j=jbegin+1UL; j<jend; ++j ) {
+            x1 = set( x[j] );
             xmm1 += A.load(i             ,j) * x1;
             xmm2 += A.load(i+SIMDSIZE    ,j) * x1;
             xmm3 += A.load(i+SIMDSIZE*2UL,j) * x1;
@@ -2955,18 +3041,22 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
       for( ; (i+SIMDSIZE*3UL) < ipos; i+=SIMDSIZE*4UL )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
+         const size_t jbegin( ( IsUpper_v<MT1> )
+                              ?( IsStrictlyUpper_v<MT1> ? i+1UL : i )
                               :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+SIMDSIZE*4UL, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
+         const size_t jend( ( IsLower_v<MT1> )
+                            ?( min( i+SIMDSIZE*4UL, N ) - ( IsStrictlyLower_v<MT1> ? 1UL : 0UL ) )
                             :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
-         SIMDType xmm1, xmm2, xmm3, xmm4;
+         SIMDType x1( set( x[jbegin] ) );
+         SIMDType xmm1( A.load(i             ,jbegin) * x1 );
+         SIMDType xmm2( A.load(i+SIMDSIZE    ,jbegin) * x1 );
+         SIMDType xmm3( A.load(i+SIMDSIZE*2UL,jbegin) * x1 );
+         SIMDType xmm4( A.load(i+SIMDSIZE*3UL,jbegin) * x1 );
 
-         for( size_t j=jbegin; j<jend; ++j ) {
-            const SIMDType x1( set( x[j] ) );
+         for( size_t j=jbegin+1UL; j<jend; ++j ) {
+            x1 = set( x[j] );
             xmm1 += A.load(i             ,j) * x1;
             xmm2 += A.load(i+SIMDSIZE    ,j) * x1;
             xmm3 += A.load(i+SIMDSIZE*2UL,j) * x1;
@@ -2981,18 +3071,21 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
       for( ; (i+SIMDSIZE*2UL) < ipos; i+=SIMDSIZE*3UL )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
+         const size_t jbegin( ( IsUpper_v<MT1> )
+                              ?( IsStrictlyUpper_v<MT1> ? i+1UL : i )
                               :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+SIMDSIZE*3UL, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
+         const size_t jend( ( IsLower_v<MT1> )
+                            ?( min( i+SIMDSIZE*3UL, N ) - ( IsStrictlyLower_v<MT1> ? 1UL : 0UL ) )
                             :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
-         SIMDType xmm1, xmm2, xmm3;
+         SIMDType x1( set( x[jbegin] ) );
+         SIMDType xmm1( A.load(i             ,jbegin) * x1 );
+         SIMDType xmm2( A.load(i+SIMDSIZE    ,jbegin) * x1 );
+         SIMDType xmm3( A.load(i+SIMDSIZE*2UL,jbegin) * x1 );
 
-         for( size_t j=jbegin; j<jend; ++j ) {
-            const SIMDType x1( set( x[j] ) );
+         for( size_t j=jbegin+1UL; j<jend; ++j ) {
+            x1 = set( x[j] );
             xmm1 += A.load(i             ,j) * x1;
             xmm2 += A.load(i+SIMDSIZE    ,j) * x1;
             xmm3 += A.load(i+SIMDSIZE*2UL,j) * x1;
@@ -3005,18 +3098,20 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
       for( ; (i+SIMDSIZE) < ipos; i+=SIMDSIZE*2UL )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
+         const size_t jbegin( ( IsUpper_v<MT1> )
+                              ?( IsStrictlyUpper_v<MT1> ? i+1UL : i )
                               :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+SIMDSIZE*2UL, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
+         const size_t jend( ( IsLower_v<MT1> )
+                            ?( min( i+SIMDSIZE*2UL, N ) - ( IsStrictlyLower_v<MT1> ? 1UL : 0UL ) )
                             :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
-         SIMDType xmm1, xmm2;
+         SIMDType x1( set( x[jbegin] ) );
+         SIMDType xmm1( A.load(i         ,jbegin) * x1 );
+         SIMDType xmm2( A.load(i+SIMDSIZE,jbegin) * x1 );
 
-         for( size_t j=jbegin; j<jend; ++j ) {
-            const SIMDType x1( set( x[j] ) );
+         for( size_t j=jbegin+1UL; j<jend; ++j ) {
+            x1 = set( x[j] );
             xmm1 += A.load(i         ,j) * x1;
             xmm2 += A.load(i+SIMDSIZE,j) * x1;
          }
@@ -3027,19 +3122,18 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
       for( ; i<ipos; i+=SIMDSIZE )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
+         const size_t jbegin( ( IsUpper_v<MT1> )
+                              ?( IsStrictlyUpper_v<MT1> ? i+1UL : i )
                               :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+SIMDSIZE, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
+         const size_t jend( ( IsLower_v<MT1> )
+                            ?( min( i+SIMDSIZE, N ) - ( IsStrictlyLower_v<MT1> ? 1UL : 0UL ) )
                             :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
-         SIMDType xmm1;
+         SIMDType xmm1( A.load(i,jbegin) * set( x[jbegin] ) );
 
-         for( size_t j=jbegin; j<jend; ++j ) {
-            const SIMDType x1( set( x[j] ) );
-            xmm1 += A.load(i,j) * x1;
+         for( size_t j=jbegin+1UL; j<jend; ++j ) {
+            xmm1 += A.load(i,j) * set( x[j] );
          }
 
          y.store( i, xmm1*factor );
@@ -3047,17 +3141,13 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
       for( ; remainder && i<M; ++i )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
-                              :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+1UL, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
-                            :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         const size_t jbegin( ( IsUpper_v<MT1> )?( i ):( 0UL ) );
+         const size_t jend( ( IsLower_v<MT1> )?( min( i+1UL, N ) ):( N ) );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
-         ElementType value = ElementType();
+         ElementType value( A(i,jbegin) * x[jbegin] );
 
-         for( size_t j=jbegin; j<jend; ++j ) {
+         for( size_t j=jbegin+1UL; j<jend; ++j ) {
             value += A(i,j) * x[j];
          }
 
@@ -3084,8 +3174,8 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2    // Type of the right-hand side vector operand
            , typename ST2 >  // Type of the scalar value
-   static inline DisableIf_< UseVectorizedDefaultKernel<VT1,MT1,VT2,ST2> >
-      selectLargeAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+   static inline auto selectLargeAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+      -> DisableIf_t< UseVectorizedDefaultKernel_v<VT1,MT1,VT2,ST2> >
    {
       selectDefaultAssignKernel( y, A, x, scalar );
    }
@@ -3109,10 +3199,10 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2    // Type of the right-hand side vector operand
            , typename ST2 >  // Type of the scalar value
-   static inline EnableIf_< UseVectorizedDefaultKernel<VT1,MT1,VT2,ST2> >
-      selectLargeAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+   static inline auto selectLargeAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+      -> EnableIf_t< UseVectorizedDefaultKernel_v<VT1,MT1,VT2,ST2> >
    {
-      constexpr bool remainder( !IsPadded<MT1>::value || !IsPadded<VT1>::value );
+      constexpr bool remainder( !IsPadded_v<MT1> || !IsPadded_v<VT1> );
 
       const size_t M( A.rows()    );
       const size_t N( A.columns() );
@@ -3131,23 +3221,31 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
          {
             const size_t jend( min( jj+jblock, N ) );
             const size_t itmp( min( ii+iblock, M ) );
-            const size_t iend( ( IsUpper<MT1>::value )
-                               ?( min( itmp, ( IsStrictlyUpper<MT1>::value ? jend-1UL : jend ) ) )
+            const size_t iend( ( IsUpper_v<MT1> )
+                               ?( min( itmp, ( IsStrictlyUpper_v<MT1> ? jend-1UL : jend ) ) )
                                :( itmp ) );
 
-            const size_t ipos( remainder ? ( iend & size_t(-SIMDSIZE) ) : iend );
-            BLAZE_INTERNAL_ASSERT( !remainder || ( iend - ( iend % SIMDSIZE ) ) == ipos, "Invalid end calculation" );
+            const size_t ipos( remainder ? prevMultiple( iend, SIMDSIZE ) : iend );
+            BLAZE_INTERNAL_ASSERT( ipos <= iend, "Invalid end calculation" );
 
-            size_t i( ( IsLower<MT1>::value )
-                      ?( max( ii, ( IsStrictlyLower<MT1>::value ? jj+1UL : jj ) & size_t(-SIMDSIZE) ) )
+            size_t i( ( IsLower_v<MT1> )
+                      ?( max( ii, prevMultiple( ( IsStrictlyLower_v<MT1> ? jj+1UL : jj ), SIMDSIZE ) ) )
                       :( ii ) );
 
             for( ; (i+SIMDSIZE*7UL) < ipos; i+=SIMDSIZE*8UL )
             {
-               SIMDType xmm1, xmm2, xmm3, xmm4, xmm5, xmm6, xmm7, xmm8;
+               SIMDType x1( set( x[jj] ) );
+               SIMDType xmm1( A.load(i             ,jj) * x1 );
+               SIMDType xmm2( A.load(i+SIMDSIZE    ,jj) * x1 );
+               SIMDType xmm3( A.load(i+SIMDSIZE*2UL,jj) * x1 );
+               SIMDType xmm4( A.load(i+SIMDSIZE*3UL,jj) * x1 );
+               SIMDType xmm5( A.load(i+SIMDSIZE*4UL,jj) * x1 );
+               SIMDType xmm6( A.load(i+SIMDSIZE*5UL,jj) * x1 );
+               SIMDType xmm7( A.load(i+SIMDSIZE*6UL,jj) * x1 );
+               SIMDType xmm8( A.load(i+SIMDSIZE*7UL,jj) * x1 );
 
-               for( size_t j=jj; j<jend; ++j ) {
-                  const SIMDType x1( set( x[j] ) );
+               for( size_t j=jj+1UL; j<jend; ++j ) {
+                  x1 = set( x[j] );
                   xmm1 += A.load(i             ,j) * x1;
                   xmm2 += A.load(i+SIMDSIZE    ,j) * x1;
                   xmm3 += A.load(i+SIMDSIZE*2UL,j) * x1;
@@ -3170,10 +3268,14 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
             for( ; (i+SIMDSIZE*3UL) < ipos; i+=SIMDSIZE*4UL )
             {
-               SIMDType xmm1, xmm2, xmm3, xmm4;
+               SIMDType x1( set( x[jj] ) );
+               SIMDType xmm1( A.load(i             ,jj) * x1 );
+               SIMDType xmm2( A.load(i+SIMDSIZE    ,jj) * x1 );
+               SIMDType xmm3( A.load(i+SIMDSIZE*2UL,jj) * x1 );
+               SIMDType xmm4( A.load(i+SIMDSIZE*3UL,jj) * x1 );
 
-               for( size_t j=jj; j<jend; ++j ) {
-                  const SIMDType x1( set( x[j] ) );
+               for( size_t j=jj+1UL; j<jend; ++j ) {
+                  x1 = set( x[j] );
                   xmm1 += A.load(i             ,j) * x1;
                   xmm2 += A.load(i+SIMDSIZE    ,j) * x1;
                   xmm3 += A.load(i+SIMDSIZE*2UL,j) * x1;
@@ -3188,10 +3290,13 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
             for( ; (i+SIMDSIZE*2UL) < ipos; i+=SIMDSIZE*3UL )
             {
-               SIMDType xmm1, xmm2, xmm3;
+               SIMDType x1( set( x[jj] ) );
+               SIMDType xmm1( A.load(i             ,jj) * x1 );
+               SIMDType xmm2( A.load(i+SIMDSIZE    ,jj) * x1 );
+               SIMDType xmm3( A.load(i+SIMDSIZE*2UL,jj) * x1 );
 
-               for( size_t j=jj; j<jend; ++j ) {
-                  const SIMDType x1( set( x[j] ) );
+               for( size_t j=jj+1UL; j<jend; ++j ) {
+                  x1 = set( x[j] );
                   xmm1 += A.load(i             ,j) * x1;
                   xmm2 += A.load(i+SIMDSIZE    ,j) * x1;
                   xmm3 += A.load(i+SIMDSIZE*2UL,j) * x1;
@@ -3204,10 +3309,12 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
             for( ; (i+SIMDSIZE) < ipos; i+=SIMDSIZE*2UL )
             {
-               SIMDType xmm1, xmm2;
+               SIMDType x1( set( x[jj] ) );
+               SIMDType xmm1( A.load(i         ,jj) * x1 );
+               SIMDType xmm2( A.load(i+SIMDSIZE,jj) * x1 );
 
-               for( size_t j=jj; j<jend; ++j ) {
-                  const SIMDType x1( set( x[j] ) );
+               for( size_t j=jj+1UL; j<jend; ++j ) {
+                  x1 = set( x[j] );
                   xmm1 += A.load(i         ,j) * x1;
                   xmm2 += A.load(i+SIMDSIZE,j) * x1;
                }
@@ -3218,9 +3325,9 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
             for( ; i<ipos; i+=SIMDSIZE )
             {
-               SIMDType xmm1;
+               SIMDType xmm1( A.load(i,jj) * set( x[jj] ) );
 
-               for( size_t j=jj; j<jend; ++j ) {
+               for( size_t j=jj+1UL; j<jend; ++j ) {
                   xmm1 += A.load(i,j) * set( x[j] );
                }
 
@@ -3229,9 +3336,9 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
             for( ; remainder && i<iend; ++i )
             {
-               ElementType value = ElementType();
+               ElementType value( A(i,jj) * x[jj] );
 
-               for( size_t j=jj; j<jend; ++j ) {
+               for( size_t j=jj+1UL; j<jend; ++j ) {
                   value += A(i,j) * x[j];
                }
 
@@ -3260,8 +3367,8 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2    // Type of the right-hand side vector operand
            , typename ST2 >  // Type of the scalar value
-   static inline DisableIf_< UseBlasKernel<VT1,MT1,VT2,ST2> >
-      selectBlasAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+   static inline auto selectBlasAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+      -> DisableIf_t< UseBlasKernel_v<VT1,MT1,VT2,ST2> >
    {
       selectLargeAssignKernel( y, A, x, scalar );
    }
@@ -3286,14 +3393,14 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2    // Type of the right-hand side vector operand
            , typename ST2 >  // Type of the scalar value
-   static inline EnableIf_< UseBlasKernel<VT1,MT1,VT2,ST2> >
-      selectBlasAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+   static inline auto selectBlasAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+      -> EnableIf_t< UseBlasKernel_v<VT1,MT1,VT2,ST2> >
    {
-      typedef ElementType_<VT1>  ET;
+      using ET = ElementType_t<VT1>;
 
-      if( IsTriangular<MT1>::value ) {
+      if( IsTriangular_v<MT1> ) {
          assign( y, scalar * x );
-         trmv( y, A, ( IsLower<MT1>::value )?( CblasLower ):( CblasUpper ) );
+         trmv( y, A, ( IsLower_v<MT1> )?( CblasLower ):( CblasUpper ) );
       }
       else {
          gemv( y, A, x, ET(scalar), ET(0) );
@@ -3319,14 +3426,14 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE ( ResultType );
+      BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE( ResultType );
       BLAZE_CONSTRAINT_MUST_BE_COLUMN_VECTOR_TYPE( ResultType );
-      BLAZE_CONSTRAINT_MUST_BE_REFERENCE_TYPE( CompositeType_<ResultType> );
+      BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType );
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
       const ResultType tmp( serial( rhs ) );
-      assign( ~lhs, tmp );
+      assign( *lhs, tmp );
    }
    //**********************************************************************************************
 
@@ -3347,12 +3454,13 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      LeftOperand_<MVM>  left ( rhs.vector_.leftOperand()  );
-      RightOperand_<MVM> right( rhs.vector_.rightOperand() );
+      LeftOperand_t<MVM>  left ( rhs.vector_.leftOperand()  );
+      RightOperand_t<MVM> right( rhs.vector_.rightOperand() );
 
-      if( left.rows() == 0UL || left.columns() == 0UL ) {
+      if( left.rows() == 0UL || left.columns() == 0UL ||
+          ( IsStrictlyTriangular_v<MT> && left.rows() == 1UL ) ) {
          return;
       }
 
@@ -3362,9 +3470,9 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
       BLAZE_INTERNAL_ASSERT( A.rows()    == left.rows()   , "Invalid number of rows"    );
       BLAZE_INTERNAL_ASSERT( A.columns() == left.columns(), "Invalid number of columns" );
       BLAZE_INTERNAL_ASSERT( x.size()    == right.size()  , "Invalid vector size"       );
-      BLAZE_INTERNAL_ASSERT( A.rows()    == (~lhs).size() , "Invalid vector size"       );
+      BLAZE_INTERNAL_ASSERT( A.rows()    == (*lhs).size() , "Invalid vector size"       );
 
-      DVecScalarMultExpr::selectAddAssignKernel( ~lhs, A, x, rhs.scalar_ );
+      DVecScalarMultExpr::selectAddAssignKernel( *lhs, A, x, rhs.scalar_ );
    }
    //**********************************************************************************************
 
@@ -3385,8 +3493,8 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
            , typename ST2 >  // Type of the scalar value
    static inline void selectAddAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
    {
-      if( ( IsDiagonal<MT1>::value ) ||
-          ( IsComputation<MT>::value && !evaluateMatrix ) ||
+      if( ( IsDiagonal_v<MT1> ) ||
+          ( IsComputation_v<MT> && !evaluateMatrix ) ||
           ( A.rows() * A.columns() < TDMATDVECMULT_THRESHOLD ) )
          selectSmallAddAssignKernel( y, A, x, scalar );
       else
@@ -3436,8 +3544,8 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2    // Type of the right-hand side vector operand
            , typename ST2 >  // Type of the scalar value
-   static inline DisableIf_< UseVectorizedDefaultKernel<VT1,MT1,VT2,ST2> >
-      selectSmallAddAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+   static inline auto selectSmallAddAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+      -> DisableIf_t< UseVectorizedDefaultKernel_v<VT1,MT1,VT2,ST2> >
    {
       selectDefaultAddAssignKernel( y, A, x, scalar );
    }
@@ -3462,16 +3570,16 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2    // Type of the right-hand side vector operand
            , typename ST2 >  // Type of the scalar value
-   static inline EnableIf_< UseVectorizedDefaultKernel<VT1,MT1,VT2,ST2> >
-      selectSmallAddAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+   static inline auto selectSmallAddAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+      -> EnableIf_t< UseVectorizedDefaultKernel_v<VT1,MT1,VT2,ST2> >
    {
-      constexpr bool remainder( !IsPadded<MT1>::value || !IsPadded<VT1>::value );
+      constexpr bool remainder( !IsPadded_v<MT1> || !IsPadded_v<VT1> );
 
       const size_t M( A.rows()    );
       const size_t N( A.columns() );
 
-      const size_t ipos( remainder ? ( M & size_t(-SIMDSIZE) ) : M );
-      BLAZE_INTERNAL_ASSERT( !remainder || ( M - ( M % SIMDSIZE ) ) == ipos, "Invalid end calculation" );
+      const size_t ipos( remainder ? prevMultiple( M, SIMDSIZE ) : M );
+      BLAZE_INTERNAL_ASSERT( ipos <= M, "Invalid end calculation" );
 
       const SIMDType factor( set( scalar ) );
 
@@ -3479,18 +3587,26 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
       for( ; (i+SIMDSIZE*7UL) < ipos; i+=SIMDSIZE*8UL )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
+         const size_t jbegin( ( IsUpper_v<MT1> )
+                              ?( IsStrictlyUpper_v<MT1> ? i+1UL : i )
                               :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+SIMDSIZE*8UL, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
+         const size_t jend( ( IsLower_v<MT1> )
+                            ?( min( i+SIMDSIZE*8UL, N ) - ( IsStrictlyLower_v<MT1> ? 1UL : 0UL ) )
                             :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
-         SIMDType xmm1, xmm2, xmm3, xmm4, xmm5, xmm6, xmm7, xmm8;
+         SIMDType x1( set( x[jbegin] ) );
+         SIMDType xmm1( A.load(i             ,jbegin) * x1 );
+         SIMDType xmm2( A.load(i+SIMDSIZE    ,jbegin) * x1 );
+         SIMDType xmm3( A.load(i+SIMDSIZE*2UL,jbegin) * x1 );
+         SIMDType xmm4( A.load(i+SIMDSIZE*3UL,jbegin) * x1 );
+         SIMDType xmm5( A.load(i+SIMDSIZE*4UL,jbegin) * x1 );
+         SIMDType xmm6( A.load(i+SIMDSIZE*5UL,jbegin) * x1 );
+         SIMDType xmm7( A.load(i+SIMDSIZE*6UL,jbegin) * x1 );
+         SIMDType xmm8( A.load(i+SIMDSIZE*7UL,jbegin) * x1 );
 
-         for( size_t j=jbegin; j<jend; ++j ) {
-            const SIMDType x1( set( x[j] ) );
+         for( size_t j=jbegin+1UL; j<jend; ++j ) {
+            x1 = set( x[j] );
             xmm1 += A.load(i             ,j) * x1;
             xmm2 += A.load(i+SIMDSIZE    ,j) * x1;
             xmm3 += A.load(i+SIMDSIZE*2UL,j) * x1;
@@ -3513,18 +3629,22 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
       for( ; (i+SIMDSIZE*3UL) < ipos; i+=SIMDSIZE*4UL )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
+         const size_t jbegin( ( IsUpper_v<MT1> )
+                              ?( IsStrictlyUpper_v<MT1> ? i+1UL : i )
                               :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+SIMDSIZE*4UL, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
+         const size_t jend( ( IsLower_v<MT1> )
+                            ?( min( i+SIMDSIZE*4UL, N ) - ( IsStrictlyLower_v<MT1> ? 1UL : 0UL ) )
                             :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
-         SIMDType xmm1, xmm2, xmm3, xmm4;
+         SIMDType x1( set( x[jbegin] ) );
+         SIMDType xmm1( A.load(i             ,jbegin) * x1 );
+         SIMDType xmm2( A.load(i+SIMDSIZE    ,jbegin) * x1 );
+         SIMDType xmm3( A.load(i+SIMDSIZE*2UL,jbegin) * x1 );
+         SIMDType xmm4( A.load(i+SIMDSIZE*3UL,jbegin) * x1 );
 
-         for( size_t j=jbegin; j<jend; ++j ) {
-            const SIMDType x1( set( x[j] ) );
+         for( size_t j=jbegin+1UL; j<jend; ++j ) {
+            x1 = set( x[j] );
             xmm1 += A.load(i             ,j) * x1;
             xmm2 += A.load(i+SIMDSIZE    ,j) * x1;
             xmm3 += A.load(i+SIMDSIZE*2UL,j) * x1;
@@ -3539,18 +3659,21 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
       for( ; (i+SIMDSIZE*2UL) < ipos; i+=SIMDSIZE*3UL )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
+         const size_t jbegin( ( IsUpper_v<MT1> )
+                              ?( IsStrictlyUpper_v<MT1> ? i+1UL : i )
                               :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+SIMDSIZE*3UL, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
+         const size_t jend( ( IsLower_v<MT1> )
+                            ?( min( i+SIMDSIZE*3UL, N ) - ( IsStrictlyLower_v<MT1> ? 1UL : 0UL ) )
                             :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
-         SIMDType xmm1, xmm2, xmm3;
+         SIMDType x1( set( x[jbegin] ) );
+         SIMDType xmm1( A.load(i             ,jbegin) * x1 );
+         SIMDType xmm2( A.load(i+SIMDSIZE    ,jbegin) * x1 );
+         SIMDType xmm3( A.load(i+SIMDSIZE*2UL,jbegin) * x1 );
 
-         for( size_t j=jbegin; j<jend; ++j ) {
-            const SIMDType x1( set( x[j] ) );
+         for( size_t j=jbegin+1UL; j<jend; ++j ) {
+            x1 = set( x[j] );
             xmm1 += A.load(i             ,j) * x1;
             xmm2 += A.load(i+SIMDSIZE    ,j) * x1;
             xmm3 += A.load(i+SIMDSIZE*2UL,j) * x1;
@@ -3563,18 +3686,20 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
       for( ; (i+SIMDSIZE) < ipos; i+=SIMDSIZE*2UL )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
+         const size_t jbegin( ( IsUpper_v<MT1> )
+                              ?( IsStrictlyUpper_v<MT1> ? i+1UL : i )
                               :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+SIMDSIZE*2UL, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
+         const size_t jend( ( IsLower_v<MT1> )
+                            ?( min( i+SIMDSIZE*2UL, N ) - ( IsStrictlyLower_v<MT1> ? 1UL : 0UL ) )
                             :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
-         SIMDType xmm1, xmm2;
+         SIMDType x1( set( x[jbegin] ) );
+         SIMDType xmm1( A.load(i         ,jbegin) * x1 );
+         SIMDType xmm2( A.load(i+SIMDSIZE,jbegin) * x1 );
 
-         for( size_t j=jbegin; j<jend; ++j ) {
-            const SIMDType x1( set( x[j] ) );
+         for( size_t j=jbegin+1UL; j<jend; ++j ) {
+            x1 = set( x[j] );
             xmm1 += A.load(i         ,j) * x1;
             xmm2 += A.load(i+SIMDSIZE,j) * x1;
          }
@@ -3585,17 +3710,17 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
       for( ; i<ipos; i+=SIMDSIZE )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
+         const size_t jbegin( ( IsUpper_v<MT1> )
+                              ?( IsStrictlyUpper_v<MT1> ? i+1UL : i )
                               :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+SIMDSIZE, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
+         const size_t jend( ( IsLower_v<MT1> )
+                            ?( min( i+SIMDSIZE, N ) - ( IsStrictlyLower_v<MT1> ? 1UL : 0UL ) )
                             :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
-         SIMDType xmm1;
+         SIMDType xmm1( A.load(i,jbegin) * set( x[jbegin] ) );
 
-         for( size_t j=jbegin; j<jend; ++j ) {
+         for( size_t j=jbegin+1UL; j<jend; ++j ) {
             xmm1 += A.load(i,j) * set( x[j] );
          }
 
@@ -3604,17 +3729,13 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
       for( ; remainder && i<M; ++i )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
-                              :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+1UL, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
-                            :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         const size_t jbegin( ( IsUpper_v<MT1> )?( i ):( 0UL ) );
+         const size_t jend( ( IsLower_v<MT1> )?( min( i+1UL, N ) ):( N ) );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
-         ElementType value = ElementType();
+         ElementType value( A(i,jbegin) * x[jbegin] );
 
-         for( size_t j=jbegin; j<jend; ++j ) {
+         for( size_t j=jbegin+1UL; j<jend; ++j ) {
             value += A(i,j) * x[j];
          }
 
@@ -3641,8 +3762,8 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2    // Type of the right-hand side vector operand
            , typename ST2 >  // Type of the scalar value
-   static inline DisableIf_< UseVectorizedDefaultKernel<VT1,MT1,VT2,ST2> >
-      selectLargeAddAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+   static inline auto selectLargeAddAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+      -> DisableIf_t< UseVectorizedDefaultKernel_v<VT1,MT1,VT2,ST2> >
    {
       selectDefaultAddAssignKernel( y, A, x, scalar );
    }
@@ -3667,10 +3788,10 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2    // Type of the right-hand side vector operand
            , typename ST2 >  // Type of the scalar value
-   static inline EnableIf_< UseVectorizedDefaultKernel<VT1,MT1,VT2,ST2> >
-      selectLargeAddAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+   static inline auto selectLargeAddAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+      -> EnableIf_t< UseVectorizedDefaultKernel_v<VT1,MT1,VT2,ST2> >
    {
-      constexpr bool remainder( !IsPadded<MT1>::value || !IsPadded<VT1>::value );
+      constexpr bool remainder( !IsPadded_v<MT1> || !IsPadded_v<VT1> );
 
       const size_t M( A.rows()    );
       const size_t N( A.columns() );
@@ -3687,23 +3808,31 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
          {
             const size_t jend( min( jj+jblock, N ) );
             const size_t itmp( min( ii+iblock, M ) );
-            const size_t iend( ( IsUpper<MT1>::value )
-                               ?( min( itmp, ( IsStrictlyUpper<MT1>::value ? jend-1UL : jend ) ) )
+            const size_t iend( ( IsUpper_v<MT1> )
+                               ?( min( itmp, ( IsStrictlyUpper_v<MT1> ? jend-1UL : jend ) ) )
                                :( itmp ) );
 
-            const size_t ipos( remainder ? ( iend & size_t(-SIMDSIZE) ) : iend );
-            BLAZE_INTERNAL_ASSERT( !remainder || ( iend - ( iend % SIMDSIZE ) ) == ipos, "Invalid end calculation" );
+            const size_t ipos( remainder ? prevMultiple( iend, SIMDSIZE ) : iend );
+            BLAZE_INTERNAL_ASSERT( ipos <= iend, "Invalid end calculation" );
 
-            size_t i( ( IsLower<MT1>::value )
-                      ?( max( ii, ( IsStrictlyLower<MT1>::value ? jj+1UL : jj ) & size_t(-SIMDSIZE) ) )
+            size_t i( ( IsLower_v<MT1> )
+                      ?( max( ii, prevMultiple( ( IsStrictlyLower_v<MT1> ? jj+1UL : jj ), SIMDSIZE ) ) )
                       :( ii ) );
 
             for( ; (i+SIMDSIZE*7UL) < ipos; i+=SIMDSIZE*8UL )
             {
-               SIMDType xmm1, xmm2, xmm3, xmm4, xmm5, xmm6, xmm7, xmm8;
+               SIMDType x1( set( x[jj] ) );
+               SIMDType xmm1( A.load(i             ,jj) * x1 );
+               SIMDType xmm2( A.load(i+SIMDSIZE    ,jj) * x1 );
+               SIMDType xmm3( A.load(i+SIMDSIZE*2UL,jj) * x1 );
+               SIMDType xmm4( A.load(i+SIMDSIZE*3UL,jj) * x1 );
+               SIMDType xmm5( A.load(i+SIMDSIZE*4UL,jj) * x1 );
+               SIMDType xmm6( A.load(i+SIMDSIZE*5UL,jj) * x1 );
+               SIMDType xmm7( A.load(i+SIMDSIZE*6UL,jj) * x1 );
+               SIMDType xmm8( A.load(i+SIMDSIZE*7UL,jj) * x1 );
 
-               for( size_t j=jj; j<jend; ++j ) {
-                  const SIMDType x1( set( x[j] ) );
+               for( size_t j=jj+1UL; j<jend; ++j ) {
+                  x1 = set( x[j] );
                   xmm1 += A.load(i             ,j) * x1;
                   xmm2 += A.load(i+SIMDSIZE    ,j) * x1;
                   xmm3 += A.load(i+SIMDSIZE*2UL,j) * x1;
@@ -3726,10 +3855,14 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
             for( ; (i+SIMDSIZE*3UL) < ipos; i+=SIMDSIZE*4UL )
             {
-               SIMDType xmm1, xmm2, xmm3, xmm4;
+               SIMDType x1( set( x[jj] ) );
+               SIMDType xmm1( A.load(i             ,jj) * x1 );
+               SIMDType xmm2( A.load(i+SIMDSIZE    ,jj) * x1 );
+               SIMDType xmm3( A.load(i+SIMDSIZE*2UL,jj) * x1 );
+               SIMDType xmm4( A.load(i+SIMDSIZE*3UL,jj) * x1 );
 
-               for( size_t j=jj; j<jend; ++j ) {
-                  const SIMDType x1( set( x[j] ) );
+               for( size_t j=jj+1UL; j<jend; ++j ) {
+                  x1 = set( x[j] );
                   xmm1 += A.load(i             ,j) * x1;
                   xmm2 += A.load(i+SIMDSIZE    ,j) * x1;
                   xmm3 += A.load(i+SIMDSIZE*2UL,j) * x1;
@@ -3744,10 +3877,13 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
             for( ; (i+SIMDSIZE*2UL) < ipos; i+=SIMDSIZE*3UL )
             {
-               SIMDType xmm1, xmm2, xmm3;
+               SIMDType x1( set( x[jj] ) );
+               SIMDType xmm1( A.load(i             ,jj) * x1 );
+               SIMDType xmm2( A.load(i+SIMDSIZE    ,jj) * x1 );
+               SIMDType xmm3( A.load(i+SIMDSIZE*2UL,jj) * x1 );
 
-               for( size_t j=jj; j<jend; ++j ) {
-                  const SIMDType x1( set( x[j] ) );
+               for( size_t j=jj+1UL; j<jend; ++j ) {
+                  x1 = set( x[j] );
                   xmm1 += A.load(i             ,j) * x1;
                   xmm2 += A.load(i+SIMDSIZE    ,j) * x1;
                   xmm3 += A.load(i+SIMDSIZE*2UL,j) * x1;
@@ -3760,10 +3896,12 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
             for( ; (i+SIMDSIZE) < ipos; i+=SIMDSIZE*2UL )
             {
-               SIMDType xmm1, xmm2;
+               SIMDType x1( set( x[jj] ) );
+               SIMDType xmm1( A.load(i         ,jj) * x1 );
+               SIMDType xmm2( A.load(i+SIMDSIZE,jj) * x1 );
 
-               for( size_t j=jj; j<jend; ++j ) {
-                  const SIMDType x1( set( x[j] ) );
+               for( size_t j=jj+1UL; j<jend; ++j ) {
+                  x1 = set( x[j] );
                   xmm1 += A.load(i         ,j) * x1;
                   xmm2 += A.load(i+SIMDSIZE,j) * x1;
                }
@@ -3774,9 +3912,9 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
             for( ; i<ipos; i+=SIMDSIZE )
             {
-               SIMDType xmm1;
+               SIMDType xmm1( A.load(i,jj) * set( x[jj] ) );
 
-               for( size_t j=jj; j<jend; ++j ) {
+               for( size_t j=jj+1UL; j<jend; ++j ) {
                   xmm1 += A.load(i,j) * set( x[j] );
                }
 
@@ -3785,9 +3923,9 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
             for( ; remainder && i<iend; ++i )
             {
-               ElementType value = ElementType();
+               ElementType value( A(i,jj) * x[jj] );
 
-               for( size_t j=jj; j<jend; ++j ) {
+               for( size_t j=jj+1UL; j<jend; ++j ) {
                   value += A(i,j) * x[j];
                }
 
@@ -3816,8 +3954,8 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2    // Type of the right-hand side vector operand
            , typename ST2 >  // Type of the scalar value
-   static inline DisableIf_< UseBlasKernel<VT1,MT1,VT2,ST2> >
-      selectBlasAddAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+   static inline auto selectBlasAddAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+      -> DisableIf_t< UseBlasKernel_v<VT1,MT1,VT2,ST2> >
    {
       selectLargeAddAssignKernel( y, A, x, scalar );
    }
@@ -3842,14 +3980,14 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2    // Type of the right-hand side vector operand
            , typename ST2 >  // Type of the scalar value
-   static inline EnableIf_< UseBlasKernel<VT1,MT1,VT2,ST2> >
-      selectBlasAddAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+   static inline auto selectBlasAddAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+      -> EnableIf_t< UseBlasKernel_v<VT1,MT1,VT2,ST2> >
    {
-      typedef ElementType_<VT1>  ET;
+      using ET = ElementType_t<VT1>;
 
-      if( IsTriangular<MT1>::value ) {
-         ResultType_<VT1> tmp( serial( scalar * x ) );
-         trmv( tmp, A, ( IsLower<MT1>::value )?( CblasLower ):( CblasUpper ) );
+      if( IsTriangular_v<MT1> ) {
+         ResultType_t<VT1> tmp( serial( scalar * x ) );
+         trmv( tmp, A, ( IsLower_v<MT1> )?( CblasLower ):( CblasUpper ) );
          addAssign( y, tmp );
       }
       else {
@@ -3880,12 +4018,13 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      LeftOperand_<MVM>  left ( rhs.vector_.leftOperand()  );
-      RightOperand_<MVM> right( rhs.vector_.rightOperand() );
+      LeftOperand_t<MVM>  left ( rhs.vector_.leftOperand()  );
+      RightOperand_t<MVM> right( rhs.vector_.rightOperand() );
 
-      if( left.rows() == 0UL || left.columns() == 0UL ) {
+      if( left.rows() == 0UL || left.columns() == 0UL ||
+          ( IsStrictlyTriangular_v<MT> && left.rows() == 1UL ) ) {
          return;
       }
 
@@ -3895,9 +4034,9 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
       BLAZE_INTERNAL_ASSERT( A.rows()    == left.rows()   , "Invalid number of rows"    );
       BLAZE_INTERNAL_ASSERT( A.columns() == left.columns(), "Invalid number of columns" );
       BLAZE_INTERNAL_ASSERT( x.size()    == right.size()  , "Invalid vector size"       );
-      BLAZE_INTERNAL_ASSERT( A.rows()    == (~lhs).size() , "Invalid vector size"       );
+      BLAZE_INTERNAL_ASSERT( A.rows()    == (*lhs).size() , "Invalid vector size"       );
 
-      DVecScalarMultExpr::selectSubAssignKernel( ~lhs, A, x, rhs.scalar_ );
+      DVecScalarMultExpr::selectSubAssignKernel( *lhs, A, x, rhs.scalar_ );
    }
    //**********************************************************************************************
 
@@ -3918,8 +4057,8 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
            , typename ST2 >  // Type of the scalar value
    static inline void selectSubAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
    {
-      if( ( IsDiagonal<MT1>::value ) ||
-          ( IsComputation<MT>::value && !evaluateMatrix ) ||
+      if( ( IsDiagonal_v<MT1> ) ||
+          ( IsComputation_v<MT> && !evaluateMatrix ) ||
           ( A.rows() * A.columns() < TDMATDVECMULT_THRESHOLD ) )
          selectSmallSubAssignKernel( y, A, x, scalar );
       else
@@ -3969,8 +4108,8 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2    // Type of the right-hand side vector operand
            , typename ST2 >  // Type of the scalar value
-   static inline DisableIf_< UseVectorizedDefaultKernel<VT1,MT1,VT2,ST2> >
-      selectSmallSubAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+   static inline auto selectSmallSubAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+      -> DisableIf_t< UseVectorizedDefaultKernel_v<VT1,MT1,VT2,ST2> >
    {
       selectDefaultSubAssignKernel( y, A, x, scalar );
    }
@@ -3995,16 +4134,16 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2    // Type of the right-hand side vector operand
            , typename ST2 >  // Type of the scalar value
-   static inline EnableIf_< UseVectorizedDefaultKernel<VT1,MT1,VT2,ST2> >
-      selectSmallSubAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+   static inline auto selectSmallSubAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+      -> EnableIf_t< UseVectorizedDefaultKernel_v<VT1,MT1,VT2,ST2> >
    {
-      constexpr bool remainder( !IsPadded<MT1>::value || !IsPadded<VT1>::value );
+      constexpr bool remainder( !IsPadded_v<MT1> || !IsPadded_v<VT1> );
 
       const size_t M( A.rows()    );
       const size_t N( A.columns() );
 
-      const size_t ipos( remainder ? ( M & size_t(-SIMDSIZE) ) : M );
-      BLAZE_INTERNAL_ASSERT( !remainder || ( M - ( M % SIMDSIZE ) ) == ipos, "Invalid end calculation" );
+      const size_t ipos( remainder ? prevMultiple( M, SIMDSIZE ) : M );
+      BLAZE_INTERNAL_ASSERT( ipos <= M, "Invalid end calculation" );
 
       const SIMDType factor( set( scalar ) );
 
@@ -4012,18 +4151,26 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
       for( ; (i+SIMDSIZE*7UL) < ipos; i+=SIMDSIZE*8UL )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
+         const size_t jbegin( ( IsUpper_v<MT1> )
+                              ?( IsStrictlyUpper_v<MT1> ? i+1UL : i )
                               :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+SIMDSIZE*8UL, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
+         const size_t jend( ( IsLower_v<MT1> )
+                            ?( min( i+SIMDSIZE*8UL, N ) - ( IsStrictlyLower_v<MT1> ? 1UL : 0UL ) )
                             :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
-         SIMDType xmm1, xmm2, xmm3, xmm4, xmm5, xmm6, xmm7, xmm8;
+         SIMDType x1( set( x[jbegin] ) );
+         SIMDType xmm1( A.load(i             ,jbegin) * x1 );
+         SIMDType xmm2( A.load(i+SIMDSIZE    ,jbegin) * x1 );
+         SIMDType xmm3( A.load(i+SIMDSIZE*2UL,jbegin) * x1 );
+         SIMDType xmm4( A.load(i+SIMDSIZE*3UL,jbegin) * x1 );
+         SIMDType xmm5( A.load(i+SIMDSIZE*4UL,jbegin) * x1 );
+         SIMDType xmm6( A.load(i+SIMDSIZE*5UL,jbegin) * x1 );
+         SIMDType xmm7( A.load(i+SIMDSIZE*6UL,jbegin) * x1 );
+         SIMDType xmm8( A.load(i+SIMDSIZE*7UL,jbegin) * x1 );
 
-         for( size_t j=jbegin; j<jend; ++j ) {
-            const SIMDType x1( set( x[j] ) );
+         for( size_t j=jbegin+1UL; j<jend; ++j ) {
+            x1 = set( x[j] );
             xmm1 += A.load(i             ,j) * x1;
             xmm2 += A.load(i+SIMDSIZE    ,j) * x1;
             xmm3 += A.load(i+SIMDSIZE*2UL,j) * x1;
@@ -4046,18 +4193,22 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
       for( ; (i+SIMDSIZE*3UL) < ipos; i+=SIMDSIZE*4UL )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
+         const size_t jbegin( ( IsUpper_v<MT1> )
+                              ?( IsStrictlyUpper_v<MT1> ? i+1UL : i )
                               :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+SIMDSIZE*4UL, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
+         const size_t jend( ( IsLower_v<MT1> )
+                            ?( min( i+SIMDSIZE*4UL, N ) - ( IsStrictlyLower_v<MT1> ? 1UL : 0UL ) )
                             :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
-         SIMDType xmm1, xmm2, xmm3, xmm4;
+         SIMDType x1( set( x[jbegin] ) );
+         SIMDType xmm1( A.load(i             ,jbegin) * x1 );
+         SIMDType xmm2( A.load(i+SIMDSIZE    ,jbegin) * x1 );
+         SIMDType xmm3( A.load(i+SIMDSIZE*2UL,jbegin) * x1 );
+         SIMDType xmm4( A.load(i+SIMDSIZE*3UL,jbegin) * x1 );
 
-         for( size_t j=jbegin; j<jend; ++j ) {
-            const SIMDType x1( set( x[j] ) );
+         for( size_t j=jbegin+1UL; j<jend; ++j ) {
+            x1 = set( x[j] );
             xmm1 += A.load(i             ,j) * x1;
             xmm2 += A.load(i+SIMDSIZE    ,j) * x1;
             xmm3 += A.load(i+SIMDSIZE*2UL,j) * x1;
@@ -4072,18 +4223,21 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
       for( ; (i+SIMDSIZE*2UL) < ipos; i+=SIMDSIZE*3UL )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
+         const size_t jbegin( ( IsUpper_v<MT1> )
+                              ?( IsStrictlyUpper_v<MT1> ? i+1UL : i )
                               :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+SIMDSIZE*3UL, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
+         const size_t jend( ( IsLower_v<MT1> )
+                            ?( min( i+SIMDSIZE*3UL, N ) - ( IsStrictlyLower_v<MT1> ? 1UL : 0UL ) )
                             :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
-         SIMDType xmm1, xmm2, xmm3;
+         SIMDType x1( set( x[jbegin] ) );
+         SIMDType xmm1( A.load(i             ,jbegin) * x1 );
+         SIMDType xmm2( A.load(i+SIMDSIZE    ,jbegin) * x1 );
+         SIMDType xmm3( A.load(i+SIMDSIZE*2UL,jbegin) * x1 );
 
-         for( size_t j=jbegin; j<jend; ++j ) {
-            const SIMDType x1( set( x[j] ) );
+         for( size_t j=jbegin+1UL; j<jend; ++j ) {
+            x1 = set( x[j] );
             xmm1 += A.load(i             ,j) * x1;
             xmm2 += A.load(i+SIMDSIZE    ,j) * x1;
             xmm3 += A.load(i+SIMDSIZE*2UL,j) * x1;
@@ -4096,18 +4250,20 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
       for( ; (i+SIMDSIZE) < ipos; i+=SIMDSIZE*2UL )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
+         const size_t jbegin( ( IsUpper_v<MT1> )
+                              ?( IsStrictlyUpper_v<MT1> ? i+1UL : i )
                               :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+SIMDSIZE*2UL, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
+         const size_t jend( ( IsLower_v<MT1> )
+                            ?( min( i+SIMDSIZE*2UL, N ) - ( IsStrictlyLower_v<MT1> ? 1UL : 0UL ) )
                             :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
-         SIMDType xmm1, xmm2;
+         SIMDType x1( set( x[jbegin] ) );
+         SIMDType xmm1( A.load(i         ,jbegin) * x1 );
+         SIMDType xmm2( A.load(i+SIMDSIZE,jbegin) * x1 );
 
-         for( size_t j=jbegin; j<jend; ++j ) {
-            const SIMDType x1( set( x[j] ) );
+         for( size_t j=jbegin+1UL; j<jend; ++j ) {
+            x1 = set( x[j] );
             xmm1 += A.load(i         ,j) * x1;
             xmm2 += A.load(i+SIMDSIZE,j) * x1;
          }
@@ -4118,17 +4274,17 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
       for( ; i<ipos; i+=SIMDSIZE )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
+         const size_t jbegin( ( IsUpper_v<MT1> )
+                              ?( IsStrictlyUpper_v<MT1> ? i+1UL : i )
                               :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+SIMDSIZE, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
+         const size_t jend( ( IsLower_v<MT1> )
+                            ?( min( i+SIMDSIZE, N ) - ( IsStrictlyLower_v<MT1> ? 1UL : 0UL ) )
                             :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
-         SIMDType xmm1;
+         SIMDType xmm1( A.load(i,jbegin) * set( x[jbegin] ) );
 
-         for( size_t j=jbegin; j<jend; ++j ) {
+         for( size_t j=jbegin+1UL; j<jend; ++j ) {
             xmm1 += A.load(i,j) * set( x[j] );
          }
 
@@ -4137,17 +4293,13 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
       for( ; remainder && i<M; ++i )
       {
-         const size_t jbegin( ( IsUpper<MT1>::value )
-                              ?( IsStrictlyUpper<MT1>::value ? i+1UL : i )
-                              :( 0UL ) );
-         const size_t jend( ( IsLower<MT1>::value )
-                            ?( min( i+1UL, N ) - ( IsStrictlyLower<MT1>::value ? 1UL : 0UL ) )
-                            :( N ) );
-         BLAZE_INTERNAL_ASSERT( jbegin <= jend, "Invalid loop indices detected" );
+         const size_t jbegin( ( IsUpper_v<MT1> )?( i ):( 0UL ) );
+         const size_t jend( ( IsLower_v<MT1> )?( min( i+1UL, N ) ):( N ) );
+         BLAZE_INTERNAL_ASSERT( jbegin < jend, "Invalid loop indices detected" );
 
-         ElementType value = ElementType();
+         ElementType value( A(i,jbegin) * x[jbegin] );
 
-         for( size_t j=jbegin; j<jend; ++j ) {
+         for( size_t j=jbegin+1UL; j<jend; ++j ) {
             value += A(i,j) * x[j];
          }
 
@@ -4174,8 +4326,8 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2    // Type of the right-hand side vector operand
            , typename ST2 >  // Type of the scalar value
-   static inline DisableIf_< UseVectorizedDefaultKernel<VT1,MT1,VT2,ST2> >
-      selectLargeSubAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+   static inline auto selectLargeSubAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+      -> DisableIf_t< UseVectorizedDefaultKernel_v<VT1,MT1,VT2,ST2> >
    {
       selectDefaultSubAssignKernel( y, A, x, scalar );
    }
@@ -4200,10 +4352,10 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2    // Type of the right-hand side vector operand
            , typename ST2 >  // Type of the scalar value
-   static inline EnableIf_< UseVectorizedDefaultKernel<VT1,MT1,VT2,ST2> >
-      selectLargeSubAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+   static inline auto selectLargeSubAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+      -> EnableIf_t< UseVectorizedDefaultKernel_v<VT1,MT1,VT2,ST2> >
    {
-      constexpr bool remainder( !IsPadded<MT1>::value || !IsPadded<VT1>::value );
+      constexpr bool remainder( !IsPadded_v<MT1> || !IsPadded_v<VT1> );
 
       const size_t M( A.rows()    );
       const size_t N( A.columns() );
@@ -4220,23 +4372,31 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
          {
             const size_t jend( min( jj+jblock, N ) );
             const size_t itmp( min( ii+iblock, M ) );
-            const size_t iend( ( IsUpper<MT1>::value )
-                               ?( min( itmp, ( IsStrictlyUpper<MT1>::value ? jend-1UL : jend ) ) )
+            const size_t iend( ( IsUpper_v<MT1> )
+                               ?( min( itmp, ( IsStrictlyUpper_v<MT1> ? jend-1UL : jend ) ) )
                                :( itmp ) );
 
-            const size_t ipos( remainder ? ( iend & size_t(-SIMDSIZE) ) : iend );
-            BLAZE_INTERNAL_ASSERT( !remainder || ( iend - ( iend % SIMDSIZE ) ) == ipos, "Invalid end calculation" );
+            const size_t ipos( remainder ? prevMultiple( iend, SIMDSIZE ) : iend );
+            BLAZE_INTERNAL_ASSERT( ipos <= iend, "Invalid end calculation" );
 
-            size_t i( ( IsLower<MT1>::value )
-                      ?( max( ii, ( IsStrictlyLower<MT1>::value ? jj+1UL : jj ) & size_t(-SIMDSIZE) ) )
+            size_t i( ( IsLower_v<MT1> )
+                      ?( max( ii, prevMultiple( ( IsStrictlyLower_v<MT1> ? jj+1UL : jj ), SIMDSIZE ) ) )
                       :( ii ) );
 
             for( ; (i+SIMDSIZE*7UL) < ipos; i+=SIMDSIZE*8UL )
             {
-               SIMDType xmm1, xmm2, xmm3, xmm4, xmm5, xmm6, xmm7, xmm8;
+               SIMDType x1( set( x[jj] ) );
+               SIMDType xmm1( A.load(i             ,jj) * x1 );
+               SIMDType xmm2( A.load(i+SIMDSIZE    ,jj) * x1 );
+               SIMDType xmm3( A.load(i+SIMDSIZE*2UL,jj) * x1 );
+               SIMDType xmm4( A.load(i+SIMDSIZE*3UL,jj) * x1 );
+               SIMDType xmm5( A.load(i+SIMDSIZE*4UL,jj) * x1 );
+               SIMDType xmm6( A.load(i+SIMDSIZE*5UL,jj) * x1 );
+               SIMDType xmm7( A.load(i+SIMDSIZE*6UL,jj) * x1 );
+               SIMDType xmm8( A.load(i+SIMDSIZE*7UL,jj) * x1 );
 
-               for( size_t j=jj; j<jend; ++j ) {
-                  const SIMDType x1( set( x[j] ) );
+               for( size_t j=jj+1UL; j<jend; ++j ) {
+                  x1 = set( x[j] );
                   xmm1 += A.load(i             ,j) * x1;
                   xmm2 += A.load(i+SIMDSIZE    ,j) * x1;
                   xmm3 += A.load(i+SIMDSIZE*2UL,j) * x1;
@@ -4259,10 +4419,14 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
             for( ; (i+SIMDSIZE*3UL) < ipos; i+=SIMDSIZE*4UL )
             {
-               SIMDType xmm1, xmm2, xmm3, xmm4;
+               SIMDType x1( set( x[jj] ) );
+               SIMDType xmm1( A.load(i             ,jj) * x1 );
+               SIMDType xmm2( A.load(i+SIMDSIZE    ,jj) * x1 );
+               SIMDType xmm3( A.load(i+SIMDSIZE*2UL,jj) * x1 );
+               SIMDType xmm4( A.load(i+SIMDSIZE*3UL,jj) * x1 );
 
-               for( size_t j=jj; j<jend; ++j ) {
-                  const SIMDType x1( set( x[j] ) );
+               for( size_t j=jj+1UL; j<jend; ++j ) {
+                  x1 = set( x[j] );
                   xmm1 += A.load(i             ,j) * x1;
                   xmm2 += A.load(i+SIMDSIZE    ,j) * x1;
                   xmm3 += A.load(i+SIMDSIZE*2UL,j) * x1;
@@ -4277,10 +4441,13 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
             for( ; (i+SIMDSIZE*2UL) < ipos; i+=SIMDSIZE*3UL )
             {
-               SIMDType xmm1, xmm2, xmm3;
+               SIMDType x1( set( x[jj] ) );
+               SIMDType xmm1( A.load(i             ,jj) * x1 );
+               SIMDType xmm2( A.load(i+SIMDSIZE    ,jj) * x1 );
+               SIMDType xmm3( A.load(i+SIMDSIZE*2UL,jj) * x1 );
 
-               for( size_t j=jj; j<jend; ++j ) {
-                  const SIMDType x1( set( x[j] ) );
+               for( size_t j=jj+1UL; j<jend; ++j ) {
+                  x1 = set( x[j] );
                   xmm1 += A.load(i             ,j) * x1;
                   xmm2 += A.load(i+SIMDSIZE    ,j) * x1;
                   xmm3 += A.load(i+SIMDSIZE*2UL,j) * x1;
@@ -4293,10 +4460,12 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
             for( ; (i+SIMDSIZE) < ipos; i+=SIMDSIZE*2UL )
             {
-               SIMDType xmm1, xmm2;
+               SIMDType x1( set( x[jj] ) );
+               SIMDType xmm1( A.load(i         ,jj) * x1 );
+               SIMDType xmm2( A.load(i+SIMDSIZE,jj) * x1 );
 
-               for( size_t j=jj; j<jend; ++j ) {
-                  const SIMDType x1( set( x[j] ) );
+               for( size_t j=jj+1UL; j<jend; ++j ) {
+                  x1 = set( x[j] );
                   xmm1 += A.load(i         ,j) * x1;
                   xmm2 += A.load(i+SIMDSIZE,j) * x1;
                }
@@ -4307,9 +4476,9 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
             for( ; i<ipos; i+=SIMDSIZE )
             {
-               SIMDType xmm1;
+               SIMDType xmm1( A.load(i,jj) * set( x[jj] ) );
 
-               for( size_t j=jj; j<jend; ++j ) {
+               for( size_t j=jj+1UL; j<jend; ++j ) {
                   xmm1 += A.load(i,j) * set( x[j] );
                }
 
@@ -4318,9 +4487,9 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
 
             for( ; remainder && i<iend; ++i )
             {
-               ElementType value = ElementType();
+               ElementType value( A(i,jj) * x[jj] );
 
-               for( size_t j=jj; j<jend; ++j ) {
+               for( size_t j=jj+1UL; j<jend; ++j ) {
                   value += A(i,j) * x[j];
                }
 
@@ -4349,8 +4518,8 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2    // Type of the right-hand side vector operand
            , typename ST2 >  // Type of the scalar value
-   static inline DisableIf_< UseBlasKernel<VT1,MT1,VT2,ST2> >
-      selectBlasSubAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+   static inline auto selectBlasSubAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+      -> DisableIf_t< UseBlasKernel_v<VT1,MT1,VT2,ST2> >
    {
       selectLargeSubAssignKernel( y, A, x, scalar );
    }
@@ -4375,14 +4544,14 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
            , typename MT1    // Type of the left-hand side matrix operand
            , typename VT2    // Type of the right-hand side vector operand
            , typename ST2 >  // Type of the scalar value
-   static inline EnableIf_< UseBlasKernel<VT1,MT1,VT2,ST2> >
-      selectBlasSubAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+   static inline auto selectBlasSubAssignKernel( VT1& y, const MT1& A, const VT2& x, ST2 scalar )
+      -> EnableIf_t< UseBlasKernel_v<VT1,MT1,VT2,ST2> >
    {
-      typedef ElementType_<VT1>  ET;
+      using ET = ElementType_t<VT1>;
 
-      if( IsTriangular<MT1>::value ) {
-         ResultType_<VT1> tmp( serial( scalar * x ) );
-         trmv( tmp, A, ( IsLower<MT1>::value )?( CblasLower ):( CblasUpper ) );
+      if( IsTriangular_v<MT1> ) {
+         ResultType_t<VT1> tmp( serial( scalar * x ) );
+         trmv( tmp, A, ( IsLower_v<MT1> )?( CblasLower ):( CblasUpper ) );
          subAssign( y, tmp );
       }
       else {
@@ -4413,14 +4582,14 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE ( ResultType );
+      BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE( ResultType );
       BLAZE_CONSTRAINT_MUST_BE_COLUMN_VECTOR_TYPE( ResultType );
-      BLAZE_CONSTRAINT_MUST_BE_REFERENCE_TYPE( CompositeType_<ResultType> );
+      BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType );
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
       const ResultType tmp( serial( rhs ) );
-      multAssign( ~lhs, tmp );
+      multAssign( *lhs, tmp );
    }
    //**********************************************************************************************
 
@@ -4445,14 +4614,14 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE ( ResultType );
+      BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE( ResultType );
       BLAZE_CONSTRAINT_MUST_BE_COLUMN_VECTOR_TYPE( ResultType );
-      BLAZE_CONSTRAINT_MUST_BE_REFERENCE_TYPE( CompositeType_<ResultType> );
+      BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType );
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
       const ResultType tmp( serial( rhs ) );
-      divAssign( ~lhs, tmp );
+      divAssign( *lhs, tmp );
    }
    //**********************************************************************************************
 
@@ -4475,21 +4644,22 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
    // case the expression specific parallel evaluation strategy is selected.
    */
    template< typename VT1 >  // Type of the target dense vector
-   friend inline EnableIf_< UseSMPAssign<VT1> >
-      smpAssign( DenseVector<VT1,false>& lhs, const DVecScalarMultExpr& rhs )
+   friend inline auto smpAssign( DenseVector<VT1,false>& lhs, const DVecScalarMultExpr& rhs )
+      -> EnableIf_t< UseSMPAssign_v<VT1> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      LeftOperand_<MVM>  left ( rhs.vector_.leftOperand()  );
-      RightOperand_<MVM> right( rhs.vector_.rightOperand() );
+      LeftOperand_t<MVM>  left ( rhs.vector_.leftOperand()  );
+      RightOperand_t<MVM> right( rhs.vector_.rightOperand() );
 
       if( left.rows() == 0UL ) {
          return;
       }
-      else if( left.columns() == 0UL ) {
-         reset( ~lhs );
+      else if( left.columns() == 0UL ||
+               ( IsStrictlyTriangular_v<MT> && left.columns() == 1UL ) ) {
+         reset( *lhs );
          return;
       }
 
@@ -4499,9 +4669,9 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
       BLAZE_INTERNAL_ASSERT( A.rows()    == left.rows()   , "Invalid number of rows"    );
       BLAZE_INTERNAL_ASSERT( A.columns() == left.columns(), "Invalid number of columns" );
       BLAZE_INTERNAL_ASSERT( x.size()    == right.size()  , "Invalid vector size"       );
-      BLAZE_INTERNAL_ASSERT( A.rows()    == (~lhs).size() , "Invalid vector size"       );
+      BLAZE_INTERNAL_ASSERT( A.rows()    == (*lhs).size() , "Invalid vector size"       );
 
-      smpAssign( ~lhs, A * x * rhs.scalar_ );
+      smpAssign( *lhs, A * x * rhs.scalar_ );
    }
    //**********************************************************************************************
 
@@ -4520,19 +4690,19 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
    // case the expression specific parallel evaluation strategy is selected.
    */
    template< typename VT1 >  // Type of the target sparse vector
-   friend inline EnableIf_< UseSMPAssign<VT1> >
-      smpAssign( SparseVector<VT1,false>& lhs, const DVecScalarMultExpr& rhs )
+   friend inline auto smpAssign( SparseVector<VT1,false>& lhs, const DVecScalarMultExpr& rhs )
+      -> EnableIf_t< UseSMPAssign_v<VT1> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE ( ResultType );
+      BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE( ResultType );
       BLAZE_CONSTRAINT_MUST_BE_COLUMN_VECTOR_TYPE( ResultType );
-      BLAZE_CONSTRAINT_MUST_BE_REFERENCE_TYPE( CompositeType_<ResultType> );
+      BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType );
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
       const ResultType tmp( rhs );
-      smpAssign( ~lhs, tmp );
+      smpAssign( *lhs, tmp );
    }
    //**********************************************************************************************
 
@@ -4551,17 +4721,18 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
    // the compiler in case the expression specific parallel evaluation strategy is selected.
    */
    template< typename VT1 >  // Type of the target dense vector
-   friend inline EnableIf_< UseSMPAssign<VT1> >
-      smpAddAssign( DenseVector<VT1,false>& lhs, const DVecScalarMultExpr& rhs )
+   friend inline auto smpAddAssign( DenseVector<VT1,false>& lhs, const DVecScalarMultExpr& rhs )
+      -> EnableIf_t< UseSMPAssign_v<VT1> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      LeftOperand_<MVM>  left ( rhs.vector_.leftOperand()  );
-      RightOperand_<MVM> right( rhs.vector_.rightOperand() );
+      LeftOperand_t<MVM>  left ( rhs.vector_.leftOperand()  );
+      RightOperand_t<MVM> right( rhs.vector_.rightOperand() );
 
-      if( left.rows() == 0UL || left.columns() == 0UL ) {
+      if( left.rows() == 0UL || left.columns() == 0UL ||
+          ( IsStrictlyTriangular_v<MT> && left.rows() == 1UL ) ) {
          return;
       }
 
@@ -4571,9 +4742,9 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
       BLAZE_INTERNAL_ASSERT( A.rows()    == left.rows()   , "Invalid number of rows"    );
       BLAZE_INTERNAL_ASSERT( A.columns() == left.columns(), "Invalid number of columns" );
       BLAZE_INTERNAL_ASSERT( x.size()    == right.size()  , "Invalid vector size"       );
-      BLAZE_INTERNAL_ASSERT( A.rows()    == (~lhs).size() , "Invalid vector size"       );
+      BLAZE_INTERNAL_ASSERT( A.rows()    == (*lhs).size() , "Invalid vector size"       );
 
-      smpAddAssign( ~lhs, A * x * rhs.scalar_ );
+      smpAddAssign( *lhs, A * x * rhs.scalar_ );
    }
    //**********************************************************************************************
 
@@ -4596,17 +4767,18 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
    // the compiler in case the expression specific parallel evaluation strategy is selected.
    */
    template< typename VT1 >  // Type of the target dense vector
-   friend inline EnableIf_< UseSMPAssign<VT1> >
-      smpSubAssign( DenseVector<VT1,false>& lhs, const DVecScalarMultExpr& rhs )
+   friend inline auto smpSubAssign( DenseVector<VT1,false>& lhs, const DVecScalarMultExpr& rhs )
+      -> EnableIf_t< UseSMPAssign_v<VT1> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      LeftOperand_<MVM>  left ( rhs.vector_.leftOperand()  );
-      RightOperand_<MVM> right( rhs.vector_.rightOperand() );
+      LeftOperand_t<MVM>  left ( rhs.vector_.leftOperand()  );
+      RightOperand_t<MVM> right( rhs.vector_.rightOperand() );
 
-      if( left.rows() == 0UL || left.columns() == 0UL ) {
+      if( left.rows() == 0UL || left.columns() == 0UL ||
+          ( IsStrictlyTriangular_v<MT> && left.rows() == 1UL ) ) {
          return;
       }
 
@@ -4616,9 +4788,9 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
       BLAZE_INTERNAL_ASSERT( A.rows()    == left.rows()   , "Invalid number of rows"    );
       BLAZE_INTERNAL_ASSERT( A.columns() == left.columns(), "Invalid number of columns" );
       BLAZE_INTERNAL_ASSERT( x.size()    == right.size()  , "Invalid vector size"       );
-      BLAZE_INTERNAL_ASSERT( A.rows()    == (~lhs).size() , "Invalid vector size"       );
+      BLAZE_INTERNAL_ASSERT( A.rows()    == (*lhs).size() , "Invalid vector size"       );
 
-      smpSubAssign( ~lhs, A * x * rhs.scalar_ );
+      smpSubAssign( *lhs, A * x * rhs.scalar_ );
    }
    //**********************************************************************************************
 
@@ -4642,19 +4814,19 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
    // is selected.
    */
    template< typename VT1 >  // Type of the target dense vector
-   friend inline EnableIf_< UseSMPAssign<VT1> >
-      smpMultAssign( DenseVector<VT1,false>& lhs, const DVecScalarMultExpr& rhs )
+   friend inline auto smpMultAssign( DenseVector<VT1,false>& lhs, const DVecScalarMultExpr& rhs )
+      -> EnableIf_t< UseSMPAssign_v<VT1> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE ( ResultType );
+      BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE( ResultType );
       BLAZE_CONSTRAINT_MUST_BE_COLUMN_VECTOR_TYPE( ResultType );
-      BLAZE_CONSTRAINT_MUST_BE_REFERENCE_TYPE( CompositeType_<ResultType> );
+      BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType );
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
       const ResultType tmp( rhs );
-      smpMultAssign( ~lhs, tmp );
+      smpMultAssign( *lhs, tmp );
    }
    //**********************************************************************************************
 
@@ -4677,19 +4849,19 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
    // the compiler in case the expression specific parallel evaluation strategy is selected.
    */
    template< typename VT1 >  // Type of the target dense vector
-   friend inline EnableIf_< UseSMPAssign<VT1> >
-      smpDivAssign( DenseVector<VT1,false>& lhs, const DVecScalarMultExpr& rhs )
+   friend inline auto smpDivAssign( DenseVector<VT1,false>& lhs, const DVecScalarMultExpr& rhs )
+      -> EnableIf_t< UseSMPAssign_v<VT1> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE ( ResultType );
+      BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE( ResultType );
       BLAZE_CONSTRAINT_MUST_BE_COLUMN_VECTOR_TYPE( ResultType );
-      BLAZE_CONSTRAINT_MUST_BE_REFERENCE_TYPE( CompositeType_<ResultType> );
+      BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType );
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
       const ResultType tmp( rhs );
-      smpDivAssign( ~lhs, tmp );
+      smpDivAssign( *lhs, tmp );
    }
    //**********************************************************************************************
 
@@ -4704,7 +4876,7 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
    BLAZE_CONSTRAINT_MUST_BE_COLUMN_MAJOR_MATRIX_TYPE( MT );
    BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE ( VT );
    BLAZE_CONSTRAINT_MUST_BE_COLUMN_VECTOR_TYPE( VT );
-   BLAZE_CONSTRAINT_MUST_BE_NUMERIC_TYPE( ST );
+   BLAZE_CONSTRAINT_MUST_BE_SCALAR_TYPE( ST );
    BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE( ST, RightOperand );
    //**********************************************************************************************
 };
@@ -4744,43 +4916,29 @@ class DVecScalarMultExpr< TDMatDVecMultExpr<MT,VT>, ST, false >
    \endcode
 
 // The operator returns an expression representing a dense vector of the higher-order element
-// type of the two involved element types \a T1::ElementType and \a T2::ElementType. Both the
-// dense matrix type \a T1 and the dense vector type \a T2 as well as the two element types
-// \a T1::ElementType and \a T2::ElementType have to be supported by the MultTrait class
+// type of the two involved element types \a MT::ElementType and \a VT::ElementType. Both the
+// dense matrix type \a MT and the dense vector type \a VT as well as the two element types
+// \a MT::ElementType and \a VT::ElementType have to be supported by the MultTrait class
 // template.\n
 // In case the current size of the vector \a vec doesn't match the current number of columns
 // of the matrix \a mat, a \a std::invalid_argument is thrown.
 */
-template< typename T1    // Type of the left-hand side dense matrix
-        , typename T2 >  // Type of the right-hand side dense vector
-inline const DisableIf_< IsMatMatMultExpr<T1>, TDMatDVecMultExpr<T1,T2> >
-   operator*( const DenseMatrix<T1,true>& mat, const DenseVector<T2,false>& vec )
+template< typename MT    // Type of the left-hand side dense matrix
+        , typename VT >  // Type of the right-hand side dense vector
+inline decltype(auto)
+   operator*( const DenseMatrix<MT,true>& mat, const DenseVector<VT,false>& vec )
 {
    BLAZE_FUNCTION_TRACE;
 
-   if( (~mat).columns() != (~vec).size() ) {
+   BLAZE_CONSTRAINT_MUST_NOT_BE_MATMATMULTEXPR_TYPE( MT );
+
+   if( (*mat).columns() != (*vec).size() ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Matrix and vector sizes do not match" );
    }
 
-   return TDMatDVecMultExpr<T1,T2>( ~mat, ~vec );
+   using ReturnType = const TDMatDVecMultExpr<MT,VT>;
+   return ReturnType( *mat, *vec );
 }
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  SIZE SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT, typename VT >
-struct Size< TDMatDVecMultExpr<MT,VT> > : public Rows<MT>
-{};
-/*! \endcond */
 //*************************************************************************************************
 
 
@@ -4796,31 +4954,8 @@ struct Size< TDMatDVecMultExpr<MT,VT> > : public Rows<MT>
 /*! \cond BLAZE_INTERNAL */
 template< typename MT, typename VT >
 struct IsAligned< TDMatDVecMultExpr<MT,VT> >
-   : public BoolConstant< And< IsAligned<MT>, IsAligned<VT> >::value >
+   : public BoolConstant< IsAligned_v<MT> && IsAligned_v<VT> >
 {};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  EXPRESSION TRAIT SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT, typename VT, bool AF >
-struct SubvectorExprTrait< TDMatDVecMultExpr<MT,VT>, AF >
-{
- public:
-   //**********************************************************************************************
-   using Type = MultExprTrait_< SubmatrixExprTrait_<const MT,AF>
-                              , SubvectorExprTrait_<const VT,AF> >;
-   //**********************************************************************************************
-};
 /*! \endcond */
 //*************************************************************************************************
 

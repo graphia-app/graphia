@@ -3,7 +3,7 @@
 //  \file blaze/math/sparse/SparseVector.h
 //  \brief Header file for utility functions for sparse vectors
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,19 +40,36 @@
 // Includes
 //*************************************************************************************************
 
-#include <cmath>
+#include <utility>
 #include <blaze/math/Aliases.h>
+#include <blaze/math/Exception.h>
 #include <blaze/math/expressions/SparseVector.h>
-#include <blaze/math/Functions.h>
+#include <blaze/math/RelaxationFlag.h>
 #include <blaze/math/shims/Equal.h>
 #include <blaze/math/shims/IsDefault.h>
+#include <blaze/math/shims/IsFinite.h>
+#include <blaze/math/shims/IsInf.h>
 #include <blaze/math/shims/IsNaN.h>
+#include <blaze/math/shims/IsZero.h>
+#include <blaze/math/shims/Pow2.h>
 #include <blaze/math/shims/Sqrt.h>
-#include <blaze/math/shims/Square.h>
-#include <blaze/math/TransposeFlag.h>
+#include <blaze/math/traits/DivTrait.h>
+#include <blaze/math/typetraits/IsInvertible.h>
+#include <blaze/math/typetraits/IsResizable.h>
+#include <blaze/math/typetraits/IsRestricted.h>
+#include <blaze/math/typetraits/IsScalar.h>
+#include <blaze/math/typetraits/IsUniform.h>
+#include <blaze/math/typetraits/IsZero.h>
+#include <blaze/math/typetraits/UnderlyingBuiltin.h>
+#include <blaze/math/typetraits/UnderlyingScalar.h>
 #include <blaze/util/constraints/Numeric.h>
 #include <blaze/util/Assert.h>
+#include <blaze/util/EnableIf.h>
+#include <blaze/util/mpl/If.h>
 #include <blaze/util/Types.h>
+#include <blaze/util/typetraits/IsBuiltin.h>
+#include <blaze/util/typetraits/IsComplex.h>
+#include <blaze/util/typetraits/IsFloatingPoint.h>
 #include <blaze/util/typetraits/RemoveReference.h>
 
 
@@ -67,95 +84,174 @@ namespace blaze {
 //*************************************************************************************************
 /*!\name SparseVector operators */
 //@{
-template< typename T1, bool TF1, typename T2, bool TF2 >
-inline bool operator==( const SparseVector<T1,TF1>& lhs, const SparseVector<T2,TF2>& rhs );
+template< typename VT, bool TF, typename ST >
+auto operator*=( SparseVector<VT,TF>& vec, ST scalar )
+   -> EnableIf_t< IsScalar_v<ST>, VT& >;
 
-template< typename T1, bool TF1, typename T2, bool TF2 >
-inline bool operator!=( const SparseVector<T1,TF1>& lhs, const SparseVector<T2,TF2>& rhs );
+template< typename VT, bool TF, typename ST >
+auto operator*=( SparseVector<VT,TF>&& vec, ST scalar )
+   -> EnableIf_t< IsScalar_v<ST>, VT& >;
+
+template< typename VT, bool TF, typename ST >
+auto operator/=( SparseVector<VT,TF>& vec, ST scalar )
+   -> EnableIf_t< IsScalar_v<ST>, VT& >;
+
+template< typename VT, bool TF, typename ST >
+auto operator/=( SparseVector<VT,TF>&& vec, ST scalar )
+   -> EnableIf_t< IsScalar_v<ST>, VT& >;
 //@}
 //*************************************************************************************************
 
 
 //*************************************************************************************************
-/*!\brief Equality operator for the comparison of two sparse vectors.
+/*!\brief Multiplication assignment operator for the multiplication of a sparse vector and
+//        a scalar value (\f$ \vec{a}*=s \f$).
 // \ingroup sparse_vector
 //
-// \param lhs The left-hand side sparse vector for the comparison.
-// \param rhs The right-hand side sparse vector for the comparison.
-// \return \a true if the two sparse vectors are equal, \a false if not.
+// \param vec The left-hand side sparse vector for the multiplication.
+// \param scalar The right-hand side scalar value for the multiplication.
+// \return Reference to the left-hand side sparse vector.
+// \exception std::invalid_argument Invalid scaling of restricted vector.
+//
+// In case the vector \a VT is restricted and the assignment would violate an invariant of the
+// vector, a \a std::invalid_argument exception is thrown.
 */
-template< typename T1  // Type of the left-hand side sparse vector
-        , bool TF1     // Transpose flag of the left-hand side sparse vector
-        , typename T2  // Type of the right-hand side sparse vector
-        , bool TF2 >   // Transpose flag of the right-hand side sparse vector
-inline bool operator==( const SparseVector<T1,TF1>& lhs, const SparseVector<T2,TF2>& rhs )
+template< typename VT    // Type of the left-hand side sparse vector
+        , bool TF        // Transpose flag
+        , typename ST >  // Data type of the right-hand side scalar
+inline auto operator*=( SparseVector<VT,TF>& vec, ST scalar )
+   -> EnableIf_t< IsScalar_v<ST>, VT& >
 {
-   typedef CompositeType_<T1>  CT1;
-   typedef CompositeType_<T2>  CT2;
-   typedef ConstIterator_< RemoveReference_<CT1> >  LhsConstIterator;
-   typedef ConstIterator_< RemoveReference_<CT2> >  RhsConstIterator;
+   if( IsRestricted_v<VT> ) {
+      if( !tryMult( *vec, 0UL, (*vec).size(), scalar ) ) {
+         BLAZE_THROW_INVALID_ARGUMENT( "Invalid scaling of restricted vector" );
+      }
+   }
 
-   // Early exit in case the vector sizes don't match
-   if( (~lhs).size() != (~rhs).size() ) return false;
-
-   // Evaluation of the two sparse vector operands
-   CT1 a( ~lhs );
-   CT2 b( ~rhs );
-
-   // In order to compare the two vectors, the data values of the lower-order data
-   // type are converted to the higher-order data type within the equal function.
-   const LhsConstIterator lend( a.end() );
-   const RhsConstIterator rend( b.end() );
-
-   LhsConstIterator lelem( a.begin() );
-   RhsConstIterator relem( b.begin() );
-
-   while( lelem != lend && relem != rend )
+   if( !IsResizable_v< ElementType_t<VT> > && isZero( scalar ) )
    {
-      if( isDefault( lelem->value() ) ) { ++lelem; continue; }
-      if( isDefault( relem->value() ) ) { ++relem; continue; }
+      reset( *vec );
+   }
+   else
+   {
+      decltype(auto) left( derestrict( *vec ) );
 
-      if( lelem->index() != relem->index() || !equal( lelem->value(), relem->value() ) ) {
-         return false;
+      const auto last( left.end() );
+      for( auto element=left.begin(); element!=last; ++element ) {
+         element->value() *= scalar;
       }
-      else {
-         ++lelem;
-         ++relem;
-      }
    }
 
-   while( lelem != lend ) {
-      if( !isDefault( lelem->value() ) )
-         return false;
-      ++lelem;
-   }
+   BLAZE_INTERNAL_ASSERT( isIntact( *vec ), "Invariant violation detected" );
 
-   while( relem != rend ) {
-      if( !isDefault( relem->value() ) )
-         return false;
-      ++relem;
-   }
-
-   return true;
+   return *vec;
 }
 //*************************************************************************************************
 
 
 //*************************************************************************************************
-/*!\brief Inequality operator for the comparison of two sparse vectors.
+/*!\brief Multiplication assignment operator for the multiplication of a temporary sparse vector
+//        and a scalar (\f$ v*=s \f$).
 // \ingroup sparse_vector
 //
-// \param lhs The left-hand side sparse vector for the comparison.
-// \param rhs The right-hand side sparse vector for the comparison.
-// \return \a true if the two vectors are not equal, \a false if they are equal.
+// \param vec The left-hand side temporary sparse vector for the multiplication.
+// \param scalar The right-hand side scalar value for the multiplication.
+// \return Reference to the left-hand side sparse vector.
+// \exception std::invalid_argument Invalid scaling of restricted vector.
+//
+// In case the vector \a VT is restricted and the assignment would violate an invariant of the
+// vector, a \a std::invalid_argument exception is thrown.
 */
-template< typename T1  // Type of the left-hand side sparse vector
-        , bool TF1     // Transpose flag of the left-hand side sparse vector
-        , typename T2  // Type of the right-hand side sparse vector
-        , bool TF2 >   // Transpose flag of the right-hand side sparse vector
-inline bool operator!=( const SparseVector<T1,TF1>& lhs, const SparseVector<T2,TF2>& rhs )
+template< typename VT    // Type of the left-hand side sparse vector
+        , bool TF        // Transpose flag
+        , typename ST >  // Data type of the right-hand side scalar
+inline auto operator*=( SparseVector<VT,TF>&& vec, ST scalar )
+   -> EnableIf_t< IsScalar_v<ST>, VT& >
 {
-   return !( lhs == rhs );
+   return operator*=( *vec, scalar );
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Division assignment operator for the division of a sparse vector by a scalar value
+//        (\f$ \vec{a}/=s \f$).
+// \ingroup sparse_vector
+//
+// \param vec The left-hand side sparse vector for the division.
+// \param scalar The right-hand side scalar value for the division.
+// \return Reference to the left-hand side sparse vector.
+// \exception std::invalid_argument Invalid scaling of restricted vector.
+//
+// In case the vector \a VT is restricted and the assignment would violate an invariant of the
+// vector, a \a std::invalid_argument exception is thrown.
+//
+// \note A division by zero is only checked by an user assert.
+*/
+template< typename VT    // Type of the left-hand side sparse vector
+        , bool TF        // Transpose flag
+        , typename ST >  // Data type of the right-hand side scalar
+inline auto operator/=( SparseVector<VT,TF>& vec, ST scalar )
+   -> EnableIf_t< IsScalar_v<ST>, VT& >
+{
+   BLAZE_USER_ASSERT( !isZero( scalar ), "Division by zero detected" );
+
+   if( IsRestricted_v<VT> ) {
+      if( !tryDiv( *vec, 0UL, (*vec).size(), scalar ) ) {
+         BLAZE_THROW_INVALID_ARGUMENT( "Invalid scaling of restricted vector" );
+      }
+   }
+
+   using ScalarType = If_t< IsFloatingPoint_v< UnderlyingBuiltin_t<VT> > ||
+                            IsFloatingPoint_v< UnderlyingBuiltin_t<ST> >
+                          , If_t< IsComplex_v< UnderlyingScalar_t<VT> > && IsBuiltin_v<ST>
+                                , DivTrait_t< UnderlyingBuiltin_t<VT>, ST >
+                                , DivTrait_t< UnderlyingScalar_t<VT>, ST > >
+                          , ST >;
+
+   decltype(auto) left( derestrict( *vec ) );
+
+   if( IsInvertible_v<ScalarType> ) {
+      const ScalarType tmp( ScalarType(1)/static_cast<ScalarType>( scalar ) );
+      for( auto element=left.begin(); element!=left.end(); ++element ) {
+         element->value() *= tmp;
+      }
+   }
+   else {
+      for( auto element=left.begin(); element!=left.end(); ++element ) {
+         element->value() /= scalar;
+      }
+   }
+
+   BLAZE_INTERNAL_ASSERT( isIntact( *vec ), "Invariant violation detected" );
+
+   return *vec;
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Division assignment operator for the division of a temporary sparse vector by a scalar
+//        value (\f$ \vec{a}/=s \f$).
+// \ingroup sparse_vector
+//
+// \param vec The left-hand side temporary sparse vector for the division.
+// \param scalar The right-hand side scalar value for the division.
+// \return Reference to the left-hand side sparse vector.
+// \exception std::invalid_argument Invalid scaling of restricted vector.
+//
+// In case the vector \a VT is restricted and the assignment would violate an invariant of the
+// vector, a \a std::invalid_argument exception is thrown.
+//
+// \note A division by zero is only checked by an user assert.
+*/
+template< typename VT    // Type of the left-hand side sparse vector
+        , bool TF        // Transpose flag
+        , typename ST >  // Data type of the right-hand side scalar
+inline auto operator/=( SparseVector<VT,TF>&& vec, ST scalar )
+   -> EnableIf_t< IsScalar_v<ST>, VT& >
+{
+   return operator/=( *vec, scalar );
 }
 //*************************************************************************************************
 
@@ -175,19 +271,16 @@ template< typename VT, bool TF >
 bool isnan( const SparseVector<VT,TF>& sv );
 
 template< typename VT, bool TF >
-bool isUniform( const SparseVector<VT,TF>& dv );
+bool isinf( const SparseVector<VT,TF>& sv );
 
 template< typename VT, bool TF >
-const ElementType_<VT> sqrLength( const SparseVector<VT,TF>& sv );
+bool isfinite( const SparseVector<VT,TF>& sv );
 
-template< typename VT, bool TF >
-inline auto length( const SparseVector<VT,TF>& sv ) -> decltype( sqrt( sqrLength( ~sv ) ) );
+template< RelaxationFlag RF, typename VT, bool TF >
+bool isUniform( const SparseVector<VT,TF>& sv );
 
-template< typename VT, bool TF >
-const ElementType_<VT> min( const SparseVector<VT,TF>& sv );
-
-template< typename VT, bool TF >
-const ElementType_<VT> max( const SparseVector<VT,TF>& sv );
+template< RelaxationFlag RF, typename VT, bool TF >
+bool isZero( const SparseVector<VT,TF>& sv );
 //@}
 //*************************************************************************************************
 
@@ -208,24 +301,97 @@ const ElementType_<VT> max( const SparseVector<VT,TF>& sv );
    // ... Resizing and initialization
    if( isnan( a ) ) { ... }
    \endcode
-
-// Note that this function only works for vectors with floating point elements. The attempt to
-// use it for a vector with a non-floating point element type results in a compile time error.
 */
 template< typename VT  // Type of the sparse vector
         , bool TF >    // Transpose flag
 inline bool isnan( const SparseVector<VT,TF>& sv )
 {
-   typedef CompositeType_<VT>  CT;
-   typedef ConstIterator_< RemoveReference_<CT> >  ConstIterator;
+   if( !IsFloatingPoint_v< UnderlyingBuiltin_t<VT> > )
+      return false;
 
-   CT a( ~sv );  // Evaluation of the sparse vector operand
+   using CT = CompositeType_t<VT>;
 
-   const ConstIterator end( a.end() );
-   for( ConstIterator element=a.begin(); element!=end; ++element ) {
+   CT a( *sv );  // Evaluation of the sparse vector operand
+
+   const auto end( a.end() );
+   for( auto element=a.begin(); element!=end; ++element ) {
       if( isnan( element->value() ) ) return true;
    }
    return false;
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Checks the given sparse vector for infinite elements.
+// \ingroup sparse_vector
+//
+// \param sv The sparse vector to be checked for infinite elements.
+// \return \a true if at least one element of the vector is infinite, \a false otherwise.
+//
+// This function checks the N-dimensional sparse vector for infinite (inf) elements. If at
+// least one element of the vector is infinite, the function returns \a true, otherwise
+// it returns \a false.
+
+   \code
+   blaze::CompressedVector<double> a;
+   // ... Resizing and initialization
+   if( isinf( a ) ) { ... }
+   \endcode
+*/
+template< typename VT  // Type of the sparse vector
+        , bool TF >    // Transpose flag
+inline bool isinf( const SparseVector<VT,TF>& sv )
+{
+   if( !IsFloatingPoint_v< UnderlyingBuiltin_t<VT> > )
+      return false;
+
+   using CT = CompositeType_t<VT>;
+
+   CT a( *sv );  // Evaluation of the sparse vector operand
+
+   const auto end( a.end() );
+   for( auto element=a.begin(); element!=end; ++element ) {
+      if( isinf( element->value() ) ) return true;
+   }
+   return false;
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Checks the given sparse vector for finite elements.
+// \ingroup sparse_vector
+//
+// \param sv The sparse vector to be checked for finite elements.
+// \return \a true if all elements of the vector are finite, \a false otherwise.
+//
+// This function checks if all elements of the N-dimensional sparse vector are finite elements
+// (i.e. normal, subnormal or zero elements, but not infinite or NaN). If all elements of the
+// vector are finite, the function returns \a true, otherwise it returns \a false.
+
+   \code
+   blaze::CompressedVector<double> a;
+   // ... Resizing and initialization
+   if( isfinite( a ) ) { ... }
+   \endcode
+*/
+template< typename VT  // Type of the sparse vector
+        , bool TF >    // Transpose flag
+inline bool isfinite( const SparseVector<VT,TF>& sv )
+{
+   if( !IsFloatingPoint_v< UnderlyingBuiltin_t<VT> > )
+      return true;
+
+   using CT = CompositeType_t<VT>;
+
+   CT a( *sv );  // Evaluation of the sparse vector operand
+
+   const auto end( a.end() );
+   for( auto element=a.begin(); element!=end; ++element ) {
+      if( !isfinite( element->value() ) ) return false;
+   }
+   return true;
 }
 //*************************************************************************************************
 
@@ -247,7 +413,14 @@ inline bool isnan( const SparseVector<VT,TF>& sv )
    if( isUniform( a ) ) { ... }
    \endcode
 
-// It is also possible to check if a vector expression results in a uniform vector:
+// Optionally, it is possible to switch between strict semantics (blaze::strict) and relaxed
+// semantics (blaze::relaxed):
+
+   \code
+   if( isUniform<relaxed>( a ) ) { ... }
+   \endcode
+
+// It is also possible to check if a vector expression results is a uniform vector:
 
    \code
    if( isUniform( a + b ) ) { ... }
@@ -256,35 +429,36 @@ inline bool isnan( const SparseVector<VT,TF>& sv )
 // However, note that this might require the complete evaluation of the expression, including
 // the generation of a temporary vector.
 */
-template< typename VT  // Type of the sparse vector
-        , bool TF >    // Transpose flag
+template< RelaxationFlag RF  // Relaxation flag
+        , typename VT        // Type of the sparse vector
+        , bool TF >          // Transpose flag
 bool isUniform( const SparseVector<VT,TF>& sv )
 {
-   typedef CompositeType_<VT>  CT;
-   typedef ConstReference_< RemoveReference_<CT> >  ConstReference;
-   typedef ConstIterator_< RemoveReference_<CT> >   ConstIterator;
+   using CT = CompositeType_t<VT>;
 
-   if( (~sv).size() < 2UL )
+   if( IsUniform_v<VT> || (*sv).size() < 2UL )
       return true;
 
-   CT a( ~sv );  // Evaluation of the sparse vector operand
+   CT a( *sv );  // Evaluation of the sparse vector operand
 
-   if( (~sv).nonZeros() != (~sv).size() )
+   if( a.nonZeros() != a.size() )
    {
-      for( ConstIterator element=(~sv).begin(); element!=(~sv).end(); ++element ) {
-         if( !isDefault( element->value() ) )
+      const auto end( a.end() );
+      for( auto element=a.begin(); element!=end; ++element ) {
+         if( !isDefault<RF>( element->value() ) )
             return false;
       }
    }
    else
    {
-      ConstReference cmp( (~sv)[0] );
-      ConstIterator element( (~sv).begin() );
+      const auto& cmp( a[0] );
+      auto element( a.begin() );
+      const auto end( a.end() );
 
       ++element;
 
-      for( ; element!=(~sv).end(); ++element ) {
-         if( element->value() != cmp )
+      for( ; element!=end; ++element ) {
+         if( !equal<RF>( element->value(), cmp ) )
             return false;
       }
    }
@@ -295,192 +469,82 @@ bool isUniform( const SparseVector<VT,TF>& sv )
 
 
 //*************************************************************************************************
-/*!\brief Calculation of the sparse vector square length \f$|\vec{a}|^2\f$.
+/*!\brief Checks if the given sparse vector is a zero vector.
 // \ingroup sparse_vector
 //
-// \param sv The given sparse vector.
-// \return The square length of the vector.
+// \param sv The sparse vector to be checked.
+// \return \a true if the vector is a zero vector, \a false if not.
 //
-// This function calculates the actual square length of the sparse vector.
-//
-// \note This operation is only defined for numeric data types. In case the element type is
-// not a numeric data type (i.e. a user defined data type or boolean) the attempt to use the
-// sqrLength() function results in a compile time error!
+// This function checks if the given sparse vector is a zero vector. The vector is considered
+// to be zero if all its elements are zero. The following code example demonstrates the use
+// of the function:
+
+   \code
+   blaze::CompressedVector<int,blaze::columnVector> a, b;
+   // ... Initialization
+   if( isZero( a ) ) { ... }
+   \endcode
+
+// Optionally, it is possible to switch between strict semantics (blaze::strict) and relaxed
+// semantics (blaze::relaxed):
+
+   \code
+   if( isZero<relaxed>( a ) ) { ... }
+   \endcode
+
+// It is also possible to check if a vector expression results is a zero vector:
+
+   \code
+   if( isZero( a + b ) ) { ... }
+   \endcode
+
+// However, note that this might require the complete evaluation of the expression, including
+// the generation of a temporary vector.
 */
-template< typename VT  // Type of the sparse vector
-        , bool TF >    // Transpose flag
-const ElementType_<VT> sqrLength( const SparseVector<VT,TF>& sv )
+template< RelaxationFlag RF  // Relaxation flag
+        , typename VT        // Type of the sparse vector
+        , bool TF >          // Transpose flag
+bool isZero( const SparseVector<VT,TF>& sv )
 {
-   typedef ElementType_<VT>    ElementType;
-   typedef ConstIterator_<VT>  ConstIterator;
+   if( IsZero_v<VT> || (*sv).nonZeros() == 0UL )
+      return true;
 
-   BLAZE_CONSTRAINT_MUST_BE_NUMERIC_TYPE( ElementType );
+   CompositeType_t<VT> a( *sv );  // Evaluation of the sparse vector operand
 
-   ElementType sum( 0 );
-   for( ConstIterator element=(~sv).begin(); element!=(~sv).end(); ++element )
-      sum += sq( element->value() );
-   return sum;
+   const auto end( a.end() );
+   for( auto element=a.begin(); element!=end; ++element ) {
+      if( !isZero<RF>( element->value() ) )
+         return false;
+   }
+
+   return true;
 }
 //*************************************************************************************************
 
 
 //*************************************************************************************************
-/*!\brief Calculation of the sparse vector length \f$|\vec{a}|\f$.
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Erasing a single element, a range or selection of elements from the given sparse vector.
 // \ingroup sparse_vector
 //
 // \param sv The given sparse vector.
-// \return The length of the sparse vector.
+// \param args The runtime arguments for the erase call.
+// \return The result of the according erase member function.
 //
-// This function calculates the actual length of the sparse vector. The return type of the
-// length() function depends on the actual element type of the vector instance:
-//
-// <table border="0" cellspacing="0" cellpadding="1">
-//    <tr>
-//       <td width="250px"> \b Type </td>
-//       <td width="100px"> \b LengthType </td>
-//    </tr>
-//    <tr>
-//       <td>float</td>
-//       <td>float</td>
-//    </tr>
-//    <tr>
-//       <td>integral data types and double</td>
-//       <td>double</td>
-//    </tr>
-//    <tr>
-//       <td>long double</td>
-//       <td>long double</td>
-//    </tr>
-//    <tr>
-//       <td>complex<T></td>
-//       <td>complex<T></td>
-//    </tr>
-// </table>
-//
-// \note This operation is only defined for numeric data types. In case the element type is
-// not a numeric data type (i.e. a user defined data type or boolean) the attempt to use the
-// length() function results in a compile time error!
+// This function represents an abstract interface for erasing a single element, a range of
+// elements or a selection of elements from the given sparse vector. It forwards the given
+// arguments to the according \a erase() member function of the sparse vector and returns
+// the result of the function call.
 */
-template< typename VT  // Type of the sparse vector
-        , bool TF >    // Transpose flag
-inline auto length( const SparseVector<VT,TF>& sv ) -> decltype( sqrt( sqrLength( ~sv ) ) )
+template< typename VT         // Type of the sparse vector
+        , bool TF             // Transpose flag
+        , typename... Args >  // Type of the erase arguments
+auto erase( SparseVector<VT,TF>& sv, Args&&... args )
+   -> decltype( (*sv).erase( std::forward<Args>( args )... ) )
 {
-   return sqrt( sqrLength( ~sv ) );
+   return (*sv).erase( std::forward<Args>( args )... );
 }
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Returns the smallest element of the sparse vector.
-// \ingroup sparse_vector
-//
-// \param sv The given sparse vector.
-// \return The smallest sparse vector element.
-//
-// This function returns the smallest element of the given sparse vector. This function can
-// only be used for element types that support the smaller-than relationship. In case the
-// vector currently has a size of 0, the returned value is the default value (e.g. 0 in case
-// of fundamental data types).
-//
-// \note In case the sparse vector is not completely filled, the zero elements are also
-// taken into account. Example: the following compressed vector has only 2 non-zero elements.
-// However, the minimum of this vector is 0:
-
-                              \f[
-                              \left(\begin{array}{*{4}{c}}
-                              1 & 0 & 3 & 0 \\
-                              \end{array}\right)
-                              \f]
-*/
-template< typename VT  // Type of the sparse vector
-        , bool TF >    // Transpose flag
-const ElementType_<VT> min( const SparseVector<VT,TF>& sv )
-{
-   using blaze::min;
-
-   typedef ElementType_<VT>    ET;
-   typedef CompositeType_<VT>  CT;
-   typedef ConstIterator_< RemoveReference_<CT> >  ConstIterator;
-
-   CT a( ~sv );  // Evaluation of the sparse vector operand
-
-   const ConstIterator end( a.end() );
-   ConstIterator element( a.begin() );
-
-   if( element == end ) {
-      return ET();
-   }
-   else if( a.nonZeros() == a.size() ) {
-      ET minimum( element->value() );
-      ++element;
-      for( ; element!=end; ++element )
-         minimum = min( minimum, element->value() );
-      return minimum;
-   }
-   else {
-      ET minimum = ET();
-      for( ; element!=end; ++element )
-         minimum = min( minimum, element->value() );
-      return minimum;
-   }
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Returns the largest element of the sparse vector.
-// \ingroup sparse_vector
-//
-// \param sv The given sparse vector.
-// \return The largest sparse vector element.
-//
-// This function returns the largest element of the given sparse vector. This function can
-// only be used for element types that support the smaller-than relationship. In case the
-// vector currently has a size of 0, the returned value is the default value (e.g. 0 in case
-// of fundamental data types).
-//
-// \note In case the compressed vector is not completely filled, the zero elements are also
-// taken into account. Example: the following compressed vector has only 2 non-zero elements.
-// However, the maximum of this vector is 0:
-
-                              \f[
-                              \left(\begin{array}{*{4}{c}}
-                              -1 & 0 & -3 & 0 \\
-                              \end{array}\right)
-                              \f]
-*/
-template< typename VT  // Type of the sparse vector
-        , bool TF >    // Transpose flag
-const ElementType_<VT> max( const SparseVector<VT,TF>& sv )
-{
-   using blaze::max;
-
-   typedef ElementType_<VT>    ET;
-   typedef CompositeType_<VT>  CT;
-   typedef ConstIterator_< RemoveReference_<CT> >  ConstIterator;
-
-   CT a( ~sv );  // Evaluation of the sparse vector operand
-
-   const ConstIterator end( a.end() );
-   ConstIterator element( a.begin() );
-
-   if( element == end ) {
-      return ET();
-   }
-   else if( a.nonZeros() == a.size() ) {
-      ET maximum( element->value() );
-      ++element;
-      for( ; element!=end; ++element )
-         maximum = max( maximum, element->value() );
-      return maximum;
-   }
-   else {
-      ET maximum = ET();
-      for( ; element!=end; ++element )
-         maximum = max( maximum, element->value() );
-      return maximum;
-   }
-}
+/*! \endcond */
 //*************************************************************************************************
 
 } // namespace blaze

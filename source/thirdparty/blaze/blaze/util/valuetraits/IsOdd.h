@@ -3,7 +3,7 @@
 //  \file blaze/util/valuetraits/IsOdd.h
 //  \brief Header file for the IsEven value trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -70,8 +70,27 @@ namespace blaze {
    \endcode
 */
 template< size_t N >
-struct IsOdd : public BoolConstant< N % 2UL != 0UL >
+struct IsOdd
+   : public BoolConstant< N % 2UL != 0UL >
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsOdd value trait.
+// \ingroup value_traits
+//
+// The IsOdd_v variable template provides a convenient shortcut to access the nested \a value
+// of the IsOdd class template. For instance, given the compile time constant value \a N the
+// following two statements are identical:
+
+   \code
+   constexpr bool value1 = IsOdd<N>::value;
+   constexpr bool value2 = IsOdd_v<N>;
+   \endcode
+*/
+template< size_t N >
+constexpr bool IsOdd_v = IsOdd<N>::value;
 //*************************************************************************************************
 
 } // namespace blaze

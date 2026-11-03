@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/RemoveVolatile.h
 //  \brief Header file for the RemoveVolatile type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -73,7 +73,7 @@ struct RemoveVolatile
  public:
    //**********************************************************************************************
    /*! \cond BLAZE_INTERNAL */
-   typedef typename std::remove_volatile<T>::type  Type;
+   using Type = typename std::remove_volatile<T>::type;
    /*! \endcond */
    //**********************************************************************************************
 };
@@ -84,17 +84,17 @@ struct RemoveVolatile
 /*!\brief Auxiliary alias declaration for the RemoveVolatile type trait.
 // \ingroup type_traits
 //
-// The RemoveVolatile_ alias declaration provides a convenient shortcut to access the nested
+// The RemoveVolatile_t alias declaration provides a convenient shortcut to access the nested
 // \a Type of the RemoveVolatile class template. For instance, given the type \a T the following
 // two type definitions are identical:
 
    \code
-   using Type1 = typename RemoveVolatile<T>::Type;
-   using Type2 = RemoveVolatile_<T>;
+   using Type1 = typename blaze::RemoveVolatile<T>::Type;
+   using Type2 = blaze::RemoveVolatile_t<T>;
    \endcode
 */
 template< typename T >
-using RemoveVolatile_ = typename RemoveVolatile<T>::Type;
+using RemoveVolatile_t = typename RemoveVolatile<T>::Type;
 //*************************************************************************************************
 
 } // namespace blaze

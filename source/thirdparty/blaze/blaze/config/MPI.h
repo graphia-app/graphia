@@ -3,7 +3,7 @@
 //  \file blaze/config/MPI.h
 //  \brief Configuration of the MPI parallelization
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -46,6 +46,20 @@
 // Note that changing the setting of the MPI parallel mode requires a recompilation of the
 // Blaze library. Also note that this switch is automatically set by the configuration script
 // of the Blaze library.
+//
+// \note It is possible to (de-)activate the MPI mode via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_MPI_PARALLEL_MODE=1 ...
+   \endcode
+
+   \code
+   #define BLAZE_MPI_PARALLEL_MODE 1
+   #include <blaze/Blaze.h>
+   \endcode
 */
+#ifndef BLAZE_MPI_PARALLEL_MODE
 #define BLAZE_MPI_PARALLEL_MODE 0
+#endif
 //*************************************************************************************************

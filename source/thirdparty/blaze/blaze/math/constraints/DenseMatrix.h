@@ -3,7 +3,7 @@
 //  \file blaze/math/constraints/DenseMatrix.h
 //  \brief Constraint on the data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -55,11 +55,11 @@ namespace blaze {
 /*!\brief Constraint on the data type.
 // \ingroup math_constraints
 //
-// In case the given data type \a T is not a dense, N-dimensional matrix type, a compilation
-// error is created.
+// In case the given data type \a T is not a dense matrix type (i.e. a type that is derived from
+// the DenseMatrix base class), a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_DENSE_MATRIX_TYPE(T) \
-   static_assert( ::blaze::IsDenseMatrix<T>::value, "Non-dense matrix type detected" )
+   static_assert( ::blaze::IsDenseMatrix_v<T>, "Non-dense matrix type detected" )
 //*************************************************************************************************
 
 
@@ -75,11 +75,11 @@ namespace blaze {
 /*!\brief Constraint on the data type.
 // \ingroup math_constraints
 //
-// In case the given data type \a T is a dense, N-dimensional matrix type, a compilation
-// error is created.
+// In case the given data type \a T is a dense matrix type (i.e. a type that is derived from
+// the DenseMatrix base class), a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_DENSE_MATRIX_TYPE(T) \
-   static_assert( !::blaze::IsDenseMatrix<T>::value, "Dense matrix type detected" )
+   static_assert( !::blaze::IsDenseMatrix_v<T>, "Dense matrix type detected" )
 //*************************************************************************************************
 
 } // namespace blaze

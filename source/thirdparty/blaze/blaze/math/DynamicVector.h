@@ -3,7 +3,7 @@
 //  \file blaze/math/DynamicVector.h
 //  \brief Header file for the complete DynamicVector implementation
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -44,6 +44,7 @@
 #include <blaze/math/dense/StaticVector.h>
 #include <blaze/math/DenseVector.h>
 #include <blaze/math/DynamicMatrix.h>
+#include <blaze/math/ZeroVector.h>
 #include <blaze/util/Random.h>
 
 
@@ -62,121 +63,81 @@ namespace blaze {
 //
 // This specialization of the Rand class creates random instances of DynamicVector.
 */
-template< typename Type  // Data type of the vector
-        , bool TF >      // Transpose flag
-class Rand< DynamicVector<Type,TF> >
+template< typename Type   // Data type of the vector
+        , bool TF         // Transpose flag
+        , typename Tag >  // Type tag
+class Rand< DynamicVector<Type,TF,Tag> >
 {
  public:
-   //**Generate functions**************************************************************************
-   /*!\name Generate functions */
-   //@{
-   inline const DynamicVector<Type,TF> generate( size_t n ) const;
-
-   template< typename Arg >
-   inline const DynamicVector<Type,TF> generate( size_t n, const Arg& min, const Arg& max ) const;
-   //@}
+   //**********************************************************************************************
+   /*!\brief Generation of a random DynamicVector.
+   //
+   // \param n The size of the random vector.
+   // \return The generated random vector.
+   */
+   inline const DynamicVector<Type,TF,Tag> generate( size_t n ) const
+   {
+      DynamicVector<Type,TF,Tag> vector( n );
+      randomize( vector );
+      return vector;
+   }
    //**********************************************************************************************
 
-   //**Randomize functions*************************************************************************
-   /*!\name Randomize functions */
-   //@{
-   inline void randomize( DynamicVector<Type,TF>& vector ) const;
+   //**********************************************************************************************
+   /*!\brief Generation of a random DynamicVector.
+   //
+   // \param n The size of the random vector.
+   // \param min The smallest possible value for a vector element.
+   // \param max The largest possible value for a vector element.
+   // \return The generated random vector.
+   */
+   template< typename Arg >  // Min/max argument type
+   inline const DynamicVector<Type,TF,Tag> generate( size_t n, const Arg& min, const Arg& max ) const
+   {
+      DynamicVector<Type,TF,Tag> vector( n );
+      randomize( vector, min, max );
+      return vector;
+   }
+   //**********************************************************************************************
 
-   template< typename Arg >
-   inline void randomize( DynamicVector<Type,TF>& vector, const Arg& min, const Arg& max ) const;
-   //@}
+   //**********************************************************************************************
+   /*!\brief Randomization of a DynamicVector.
+   //
+   // \param vector The vector to be randomized.
+   // \return void
+   */
+   inline void randomize( DynamicVector<Type,TF,Tag>& vector ) const
+   {
+      using blaze::randomize;
+
+      const size_t size( vector.size() );
+      for( size_t i=0UL; i<size; ++i ) {
+         randomize( vector[i] );
+      }
+   }
+   //**********************************************************************************************
+
+   //**********************************************************************************************
+   /*!\brief Randomization of a DynamicVector.
+   //
+   // \param vector The vector to be randomized.
+   // \param min The smallest possible value for a vector element.
+   // \param max The largest possible value for a vector element.
+   // \return void
+   */
+   template< typename Arg >  // Min/max argument type
+   inline void randomize( DynamicVector<Type,TF,Tag>& vector,
+                          const Arg& min, const Arg& max ) const
+   {
+      using blaze::randomize;
+
+      const size_t size( vector.size() );
+      for( size_t i=0UL; i<size; ++i ) {
+         randomize( vector[i], min, max );
+      }
+   }
    //**********************************************************************************************
 };
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Generation of a random DynamicVector.
-//
-// \param n The size of the random vector.
-// \return The generated random vector.
-*/
-template< typename Type  // Data type of the vector
-        , bool TF >      // Transpose flag
-inline const DynamicVector<Type,TF> Rand< DynamicVector<Type,TF> >::generate( size_t n ) const
-{
-   DynamicVector<Type,TF> vector( n );
-   randomize( vector );
-   return vector;
-}
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Generation of a random DynamicVector.
-//
-// \param n The size of the random vector.
-// \param min The smallest possible value for a vector element.
-// \param max The largest possible value for a vector element.
-// \return The generated random vector.
-*/
-template< typename Type   // Data type of the vector
-        , bool TF >       // Transpose flag
-template< typename Arg >  // Min/max argument type
-inline const DynamicVector<Type,TF>
-   Rand< DynamicVector<Type,TF> >::generate( size_t n, const Arg& min, const Arg& max ) const
-{
-   DynamicVector<Type,TF> vector( n );
-   randomize( vector, min, max );
-   return vector;
-}
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Randomization of a DynamicVector.
-//
-// \param vector The vector to be randomized.
-// \return void
-*/
-template< typename Type  // Data type of the vector
-        , bool TF >      // Transpose flag
-inline void Rand< DynamicVector<Type,TF> >::randomize( DynamicVector<Type,TF>& vector ) const
-{
-   using blaze::randomize;
-
-   const size_t size( vector.size() );
-   for( size_t i=0UL; i<size; ++i ) {
-      randomize( vector[i] );
-   }
-}
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Randomization of a DynamicVector.
-//
-// \param vector The vector to be randomized.
-// \param min The smallest possible value for a vector element.
-// \param max The largest possible value for a vector element.
-// \return void
-*/
-template< typename Type   // Data type of the vector
-        , bool TF >       // Transpose flag
-template< typename Arg >  // Min/max argument type
-inline void Rand< DynamicVector<Type,TF> >::randomize( DynamicVector<Type,TF>& vector,
-                                                       const Arg& min, const Arg& max ) const
-{
-   using blaze::randomize;
-
-   const size_t size( vector.size() );
-   for( size_t i=0UL; i<size; ++i ) {
-      randomize( vector[i], min, max );
-   }
-}
 /*! \endcond */
 //*************************************************************************************************
 

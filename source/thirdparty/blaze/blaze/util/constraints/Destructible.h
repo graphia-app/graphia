@@ -3,7 +3,7 @@
 //  \file blaze/util/constraints/Destructible.h
 //  \brief Constraint on the data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -59,7 +59,7 @@ namespace blaze {
 // is created.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_DESTRUCTIBLE_TYPE(T) \
-   static_assert( ::blaze::IsDestructible<T>::value, "Non-destructible type detected" )
+   static_assert( ::blaze::IsDestructible_v<T>, "Non-destructible type detected" )
 //*************************************************************************************************
 
 
@@ -79,7 +79,7 @@ namespace blaze {
 // is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_DESTRUCTIBLE_TYPE(T) \
-   static_assert( !::blaze::IsDestructible<T>::value, "Destructible type detected" )
+   static_assert( !::blaze::IsDestructible_v<T>, "Destructible type detected" )
 //*************************************************************************************************
 
 
@@ -99,7 +99,7 @@ namespace blaze {
 // error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_NOTHROW_DESTRUCTIBLE_TYPE(T) \
-   static_assert( ::blaze::IsNothrowDestructible<T>::value, "Non-noexcept destructible type detected" )
+   static_assert( ::blaze::IsNothrowDestructible_v<T>, "Non-noexcept destructible type detected" )
 //*************************************************************************************************
 
 
@@ -119,7 +119,7 @@ namespace blaze {
 // error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_NOTHROW_DESTRUCTIBLE_TYPE(T) \
-   static_assert( !::blaze::IsNothrowDestructible<T>::value, "Noexcept destructible type detected" )
+   static_assert( !::blaze::IsNothrowDestructible_v<T>, "Noexcept destructible type detected" )
 //*************************************************************************************************
 
 } // namespace blaze

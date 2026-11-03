@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/HasSIMDPow.h
 //  \brief Header file for the HasSIMDPow type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -41,12 +41,11 @@
 //*************************************************************************************************
 
 #include <blaze/system/Vectorization.h>
-#include <blaze/util/EnableIf.h>
 #include <blaze/util/IntegralConstant.h>
-#include <blaze/util/mpl/Or.h>
-#include <blaze/util/typetraits/Decay.h>
 #include <blaze/util/typetraits/IsDouble.h>
 #include <blaze/util/typetraits/IsFloat.h>
+#include <blaze/util/typetraits/IsSame.h>
+#include <blaze/util/typetraits/RemoveCVRef.h>
 
 
 namespace blaze {
@@ -59,27 +58,21 @@ namespace blaze {
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-template< typename T         // Type of the operand
-        , typename = void >  // Restricting condition
-struct HasSIMDPowHelper
-{
-   enum : bool { value = false };
-};
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-#if BLAZE_SVML_MODE
-template< typename T >
-struct HasSIMDPowHelper< T, EnableIf_< Or< IsFloat<T>, IsDouble<T> > > >
-{
-   enum : bool { value = bool( BLAZE_SSE_MODE ) ||
-                         bool( BLAZE_AVX_MODE ) ||
-                         bool( BLAZE_MIC_MODE ) };
-};
-#endif
+/*!\brief Auxiliary alias declaration for the HasSIMDPow type trait.
+// \ingroup math_type_traits
+*/
+template< typename T1    // Type of the left-hand side operand
+        , typename T2 >  // Type of the right-hand side operand
+using HasSIMDPowHelper =
+   BoolConstant< IsSame_v<T1,T2> &&
+                 ( IsFloat_v<T1> || IsDouble_v<T1> ) &&
+                 ( bool( BLAZE_SVML_MODE    ) ||
+                   bool( BLAZE_SLEEF_MODE )   ||
+                   bool( BLAZE_XSIMD_MODE ) ) &&
+                 ( bool( BLAZE_SSE_MODE     ) ||
+                   bool( BLAZE_AVX_MODE     ) ||
+                   bool( BLAZE_MIC_MODE     ) ||
+                   bool( BLAZE_AVX512F_MODE ) ) >;
 /*! \endcond */
 //*************************************************************************************************
 
@@ -105,9 +98,30 @@ struct HasSIMDPowHelper< T, EnableIf_< Or< IsFloat<T>, IsDouble<T> > > >
    blaze::HasSIMDPow< complex<double> >      // Is derived from FalseType
    \endcode
 */
-template< typename T >  // Type of the operand
-struct HasSIMDPow : public BoolConstant< HasSIMDPowHelper< Decay_<T> >::value >
+template< typename T1    // Type of the left-hand side operand
+        , typename T2 >  // Type of the right-hand side operand
+struct HasSIMDPow
+   : public BoolConstant< HasSIMDPowHelper< RemoveCVRef_t<T1>, RemoveCVRef_t<T2> >::value >
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the HasSIMDPow type trait.
+// \ingroup math_type_traits
+//
+// The HasSIMDPow_v variable template provides a convenient shortcut to access the nested
+// \a value of the HasSIMDPow class template. For instance, given the types \a T1 and \a T2
+// the following two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::HasSIMDPow<T1,T2>::value;
+   constexpr bool value2 = blaze::HasSIMDPow_v<T1,T2>;
+   \endcode
+*/
+template< typename T1    // Type of the left-hand side operand
+        , typename T2 >  // Type of the right-hand side operand
+constexpr bool HasSIMDPow_v = HasSIMDPow<T1,T2>::value;
 //*************************************************************************************************
 
 } // namespace blaze

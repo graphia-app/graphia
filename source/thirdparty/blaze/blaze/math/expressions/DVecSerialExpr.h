@@ -3,7 +3,7 @@
 //  \file blaze/math/expressions/DVecSerialExpr.h
 //  \brief Header file for the dense vector serial evaluation expression
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -48,21 +48,11 @@
 #include <blaze/math/expressions/DenseVector.h>
 #include <blaze/math/expressions/Forward.h>
 #include <blaze/math/expressions/VecSerialExpr.h>
-#include <blaze/math/traits/DVecSerialExprTrait.h>
-#include <blaze/math/traits/SerialExprTrait.h>
-#include <blaze/math/traits/SubvectorExprTrait.h>
-#include <blaze/math/traits/TDVecSerialExprTrait.h>
 #include <blaze/math/typetraits/IsAligned.h>
-#include <blaze/math/typetraits/IsColumnVector.h>
-#include <blaze/math/typetraits/IsDenseVector.h>
 #include <blaze/math/typetraits/IsExpression.h>
-#include <blaze/math/typetraits/IsRowVector.h>
-#include <blaze/math/typetraits/Size.h>
+#include <blaze/system/MacroDisable.h>
 #include <blaze/util/Assert.h>
 #include <blaze/util/FunctionTrace.h>
-#include <blaze/util/IntegralConstant.h>
-#include <blaze/util/InvalidType.h>
-#include <blaze/util/mpl/And.h>
 #include <blaze/util/mpl/If.h>
 #include <blaze/util/Types.h>
 
@@ -84,31 +74,36 @@ namespace blaze {
 */
 template< typename VT  // Type of the dense vector
         , bool TF >    // Transpose flag
-class DVecSerialExpr : public DenseVector< DVecSerialExpr<VT,TF>, TF >
-                     , private VecSerialExpr
-                     , private Computation
+class DVecSerialExpr
+   : public VecSerialExpr< DenseVector< DVecSerialExpr<VT,TF>, TF > >
+   , private Computation
 {
  public:
    //**Type definitions****************************************************************************
-   typedef DVecSerialExpr<VT,TF>  This;           //!< Type of this DVecSerialExpr instance.
-   typedef ResultType_<VT>        ResultType;     //!< Result type for expression template evaluations.
-   typedef TransposeType_<VT>     TransposeType;  //!< Transpose type for expression template evaluations.
-   typedef ElementType_<VT>       ElementType;    //!< Resulting element type.
-   typedef ReturnType_<VT>        ReturnType;     //!< Return type for expression template evaluations.
+   //! Type of this DVecSerialExpr instance.
+   using This = DVecSerialExpr<VT,TF>;
+
+   //! Base type of this DVecSerialExpr instance.
+   using BaseType = VecSerialExpr< DenseVector<This,TF> >;
+
+   using ResultType    = ResultType_t<VT>;     //!< Result type for expression template evaluations.
+   using TransposeType = TransposeType_t<VT>;  //!< Transpose type for expression template evaluations.
+   using ElementType   = ElementType_t<VT>;    //!< Resulting element type.
+   using ReturnType    = ReturnType_t<VT>;     //!< Return type for expression template evaluations.
 
    //! Data type for composite expression templates.
-   typedef const ResultType  CompositeType;
+   using CompositeType = const ResultType;
 
    //! Composite data type of the dense vector expression.
-   typedef If_< IsExpression<VT>, const VT, const VT& >  Operand;
+   using Operand = If_t< IsExpression_v<VT>, const VT, const VT& >;
    //**********************************************************************************************
 
    //**Compilation flags***************************************************************************
    //! Compilation switch for the expression template evaluation strategy.
-   enum : bool { simdEnabled = false };
+   static constexpr bool simdEnabled = false;
 
    //! Compilation switch for the expression template assignment strategy.
-   enum : bool { smpAssignable = VT::smpAssignable };
+   static constexpr bool smpAssignable = VT::smpAssignable;
    //**********************************************************************************************
 
    //**Constructor*********************************************************************************
@@ -244,9 +239,9 @@ class DVecSerialExpr : public DenseVector< DVecSerialExpr<VT,TF>, TF >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      assign( ~lhs, rhs.dv_ );
+      assign( *lhs, rhs.dv_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -268,9 +263,9 @@ class DVecSerialExpr : public DenseVector< DVecSerialExpr<VT,TF>, TF >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      assign( ~lhs, rhs.dv_ );
+      assign( *lhs, rhs.dv_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -292,9 +287,9 @@ class DVecSerialExpr : public DenseVector< DVecSerialExpr<VT,TF>, TF >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      addAssign( ~lhs, rhs.dv_ );
+      addAssign( *lhs, rhs.dv_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -305,7 +300,7 @@ class DVecSerialExpr : public DenseVector< DVecSerialExpr<VT,TF>, TF >
    // \ingroup dense_vector
    //
    // \param lhs The target left-hand side sparse vector.
-   // \param rhs The right-hand side evaulation expression to be added.
+   // \param rhs The right-hand side serial evaluation expression to be added.
    // \return void
    //
    // This function implements the performance optimized addition assignment of a dense vector
@@ -316,9 +311,9 @@ class DVecSerialExpr : public DenseVector< DVecSerialExpr<VT,TF>, TF >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      addAssign( ~lhs, rhs.dv_ );
+      addAssign( *lhs, rhs.dv_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -341,9 +336,9 @@ class DVecSerialExpr : public DenseVector< DVecSerialExpr<VT,TF>, TF >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      subAssign( ~lhs, rhs.dv_ );
+      subAssign( *lhs, rhs.dv_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -366,9 +361,9 @@ class DVecSerialExpr : public DenseVector< DVecSerialExpr<VT,TF>, TF >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      subAssign( ~lhs, rhs.dv_ );
+      subAssign( *lhs, rhs.dv_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -391,9 +386,9 @@ class DVecSerialExpr : public DenseVector< DVecSerialExpr<VT,TF>, TF >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      multAssign( ~lhs, rhs.dv_ );
+      multAssign( *lhs, rhs.dv_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -416,9 +411,9 @@ class DVecSerialExpr : public DenseVector< DVecSerialExpr<VT,TF>, TF >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      multAssign( ~lhs, rhs.dv_ );
+      multAssign( *lhs, rhs.dv_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -440,9 +435,9 @@ class DVecSerialExpr : public DenseVector< DVecSerialExpr<VT,TF>, TF >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      divAssign( ~lhs, rhs.dv_ );
+      divAssign( *lhs, rhs.dv_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -464,9 +459,9 @@ class DVecSerialExpr : public DenseVector< DVecSerialExpr<VT,TF>, TF >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      divAssign( ~lhs, rhs.dv_ );
+      divAssign( *lhs, rhs.dv_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -488,9 +483,9 @@ class DVecSerialExpr : public DenseVector< DVecSerialExpr<VT,TF>, TF >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      assign( ~lhs, rhs.dv_ );
+      assign( *lhs, rhs.dv_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -512,9 +507,9 @@ class DVecSerialExpr : public DenseVector< DVecSerialExpr<VT,TF>, TF >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      assign( ~lhs, rhs.dv_ );
+      assign( *lhs, rhs.dv_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -537,9 +532,9 @@ class DVecSerialExpr : public DenseVector< DVecSerialExpr<VT,TF>, TF >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      addAssign( ~lhs, rhs.dv_ );
+      addAssign( *lhs, rhs.dv_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -562,9 +557,9 @@ class DVecSerialExpr : public DenseVector< DVecSerialExpr<VT,TF>, TF >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      addAssign( ~lhs, rhs.dv_ );
+      addAssign( *lhs, rhs.dv_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -587,9 +582,9 @@ class DVecSerialExpr : public DenseVector< DVecSerialExpr<VT,TF>, TF >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      subAssign( ~lhs, rhs.dv_ );
+      subAssign( *lhs, rhs.dv_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -612,9 +607,9 @@ class DVecSerialExpr : public DenseVector< DVecSerialExpr<VT,TF>, TF >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      subAssign( ~lhs, rhs.dv_ );
+      subAssign( *lhs, rhs.dv_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -637,9 +632,9 @@ class DVecSerialExpr : public DenseVector< DVecSerialExpr<VT,TF>, TF >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      multAssign( ~lhs, rhs.dv_ );
+      multAssign( *lhs, rhs.dv_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -662,9 +657,9 @@ class DVecSerialExpr : public DenseVector< DVecSerialExpr<VT,TF>, TF >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      multAssign( ~lhs, rhs.dv_ );
+      multAssign( *lhs, rhs.dv_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -687,9 +682,9 @@ class DVecSerialExpr : public DenseVector< DVecSerialExpr<VT,TF>, TF >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      divAssign( ~lhs, rhs.dv_ );
+      divAssign( *lhs, rhs.dv_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -712,9 +707,9 @@ class DVecSerialExpr : public DenseVector< DVecSerialExpr<VT,TF>, TF >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      divAssign( ~lhs, rhs.dv_ );
+      divAssign( *lhs, rhs.dv_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -756,58 +751,13 @@ class DVecSerialExpr : public DenseVector< DVecSerialExpr<VT,TF>, TF >
 */
 template< typename VT  // Type of the dense vector
         , bool TF >    // Transpose flag
-inline const DVecSerialExpr<VT,TF> serial( const DenseVector<VT,TF>& dv )
+inline decltype(auto) serial( const DenseVector<VT,TF>& dv )
 {
    BLAZE_FUNCTION_TRACE;
 
-   return DVecSerialExpr<VT,TF>( ~dv );
+   using ReturnType = const DVecSerialExpr<VT,TF>;
+   return ReturnType( *dv );
 }
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  GLOBAL RESTRUCTURING FUNCTIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Evaluation of the given dense vector serial evaluation expression \a dv.
-// \ingroup dense_vector
-//
-// \param dv The input serial evaluation expression.
-// \return The evaluated dense vector.
-//
-// This function implements a performance optimized treatment of the serial evaluation of a dense
-// vector serial evaluation expression.
-*/
-template< typename VT  // Type of the dense vector
-        , bool TF >    // Transpose flag
-inline const DVecSerialExpr<VT,TF> serial( const DVecSerialExpr<VT,TF>& dv )
-{
-   return dv;
-}
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  SIZE SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename VT, bool TF >
-struct Size< DVecSerialExpr<VT,TF> > : public Size<VT>
-{};
-/*! \endcond */
 //*************************************************************************************************
 
 
@@ -823,62 +773,8 @@ struct Size< DVecSerialExpr<VT,TF> > : public Size<VT>
 /*! \cond BLAZE_INTERNAL */
 template< typename VT, bool TF >
 struct IsAligned< DVecSerialExpr<VT,TF> >
-   : public BoolConstant< IsAligned<VT>::value >
+   : public IsAligned<VT>
 {};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  EXPRESSION TRAIT SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename VT >
-struct DVecSerialExprTrait< DVecSerialExpr<VT,false> >
-{
- public:
-   //**********************************************************************************************
-   using Type = If_< And< IsDenseVector<VT>, IsColumnVector<VT> >
-                   , DVecSerialExpr<VT,false>
-                   , INVALID_TYPE >;
-   //**********************************************************************************************
-};
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename VT >
-struct TDVecSerialExprTrait< DVecSerialExpr<VT,true> >
-{
- public:
-   //**********************************************************************************************
-   using Type = If_< And< IsDenseVector<VT>, IsRowVector<VT> >
-                   , DVecSerialExpr<VT,true>
-                   , INVALID_TYPE >;
-   //**********************************************************************************************
-};
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename VT, bool TF, bool AF >
-struct SubvectorExprTrait< DVecSerialExpr<VT,TF>, AF >
-{
- public:
-   //**********************************************************************************************
-   using Type = SerialExprTrait_< SubvectorExprTrait_<const VT,AF> >;
-   //**********************************************************************************************
-};
 /*! \endcond */
 //*************************************************************************************************
 

@@ -3,7 +3,7 @@
 //  \file blaze/math/expressions/VecVecAddExpr.h
 //  \brief Header file for the VecVecAddExpr base class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -57,12 +57,14 @@ namespace blaze {
 //
 // The VecVecAddExpr class serves as a tag for all expression templates that implement a
 // vector/vector addition. All classes, that represent a vector addition and that are used
-// within the expression template environment of the Blaze library have to derive from this
-// class in order to qualify as vector addition expression template. Only in case a class is
-// derived from the VecVecAddExpr base class, the IsVecVecAddExpr type trait recognizes the
-// class as valid vector addition expression template.
+// within the expression template environment of the Blaze library have to derive publicly
+// from this class in order to qualify as vector addition expression template. Only in case
+// a class is derived publicly from the VecVecAddExpr base class, the IsVecVecAddExpr type
+// trait recognizes the class as valid vector addition expression template.
 */
-struct VecVecAddExpr : private AddExpr
+template< typename VT >  // Vector base type of the expression
+struct VecVecAddExpr
+   : public AddExpr<VT>
 {};
 //*************************************************************************************************
 

@@ -3,7 +3,7 @@
 //  \file blaze/util/AlignedArray.h
 //  \brief Header file for the AlignedArray implementation
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,12 +40,14 @@
 // Includes
 //*************************************************************************************************
 
+#include <array>
 #include <blaze/util/constraints/Const.h>
 #include <blaze/util/constraints/Volatile.h>
 #include <blaze/util/Exception.h>
-#include <blaze/util/mpl/Max.h>
+#include <blaze/util/IntegerSequence.h>
 #include <blaze/util/StaticAssert.h>
 #include <blaze/util/typetraits/AlignmentOf.h>
+#include <blaze/util/typetraits/RemoveCV.h>
 
 
 namespace blaze {
@@ -92,77 +94,120 @@ namespace blaze {
    blaze::AlignedArray<int,3UL> array3( 1, 2, 3 );  // Same effect as above
    \endcode
 */
-template< typename Type                                  // Data type of the elements
-        , size_t N                                       // Number of elements
-        , size_t Alignment = AlignmentOf<Type>::value >  // Array alignment
+template< typename Type                             // Data type of the elements
+        , size_t N                                  // Number of elements
+        , size_t Alignment = AlignmentOf_v<Type> >  // Array alignment
 class AlignedArray
 {
  public:
    //**Type definitions****************************************************************************
-   typedef Type         ElementType;     //!< Type of the array elements.
-   typedef Type*        Pointer;         //!< Pointer to a non-constant array element.
-   typedef const Type*  ConstPointer;    //!< Pointer to a constant array element.
-   typedef Type&        Reference;       //!< Reference to a non-constant array element.
-   typedef const Type&  ConstReference;  //!< Reference to a constant array element.
-   typedef Type*        Iterator;        //!< Iterator over non-constant elements.
-   typedef const Type*  ConstIterator;   //!< Iterator over constant elements.
+   using ElementType    = Type;         //!< Type of the array elements.
+   using Pointer        = Type*;        //!< Pointer to a non-constant array element.
+   using ConstPointer   = const Type*;  //!< Pointer to a constant array element.
+   using Reference      = Type&;        //!< Reference to a non-constant array element.
+   using ConstReference = const Type&;  //!< Reference to a constant array element.
+   using Iterator       = Type*;        //!< Iterator over non-constant elements.
+   using ConstIterator  = const Type*;  //!< Iterator over constant elements.
    //**********************************************************************************************
 
    //**Constructors********************************************************************************
    /*!\name Constructors */
    //@{
-   explicit inline AlignedArray();
+   AlignedArray() = default;
+   AlignedArray( const AlignedArray& ) = default;
+   AlignedArray( AlignedArray&& ) = default;
 
    template< typename... Ts >
-   explicit inline constexpr AlignedArray( const Ts&... args );
+   constexpr AlignedArray( const Ts&... args );
+
+   template< typename T, size_t M >
+   constexpr AlignedArray( const T (&array)[M] );
+
+   template< typename T, size_t M >
+   constexpr AlignedArray( const std::array<T,M>& array );
+
+   template< typename T, size_t M >
+   constexpr AlignedArray( const AlignedArray<T,M>& array );
    //@}
    //**********************************************************************************************
 
    //**Destructor**********************************************************************************
-   // No explicitly declared destructor.
+   /*!\name Destructor */
+   //@{
+   ~AlignedArray() = default;
+   //@}
    //**********************************************************************************************
 
    //**Conversion operators************************************************************************
    /*!\name Conversion operators */
    //@{
-   inline           operator Pointer     () noexcept;
-   inline constexpr operator ConstPointer() const noexcept;
+   constexpr operator Pointer     () noexcept;
+   constexpr operator ConstPointer() const noexcept;
    //@}
    //**********************************************************************************************
 
    //**Data access functions***********************************************************************
    /*!\name Data access functions */
    //@{
-   inline           Reference      operator[]( size_t index ) noexcept;
-   inline constexpr ConstReference operator[]( size_t index ) const noexcept;
-   inline           Reference      at( size_t index );
-   inline           ConstReference at( size_t index ) const;
-   inline           Pointer        data() noexcept;
-   inline constexpr ConstPointer   data() const noexcept;
-   inline           Iterator       begin () noexcept;
-   inline constexpr ConstIterator  begin () const noexcept;
-   inline constexpr ConstIterator  cbegin() const noexcept;
-   inline           Iterator       end   () noexcept;
-   inline constexpr ConstIterator  end   () const noexcept;
-   inline constexpr ConstIterator  cend  () const noexcept;
+   constexpr Reference      operator[]( size_t index ) noexcept;
+   constexpr ConstReference operator[]( size_t index ) const noexcept;
+   inline    Reference      at( size_t index );
+   inline    ConstReference at( size_t index ) const;
+   constexpr Pointer        data() noexcept;
+   constexpr ConstPointer   data() const noexcept;
+   constexpr Iterator       begin () noexcept;
+   constexpr ConstIterator  begin () const noexcept;
+   constexpr ConstIterator  cbegin() const noexcept;
+   constexpr Iterator       end   () noexcept;
+   constexpr ConstIterator  end   () const noexcept;
+   constexpr ConstIterator  cend  () const noexcept;
+   //@}
+   //**********************************************************************************************
+
+   //**Assignment operators************************************************************************
+   /*!\name Assignment operators */
+   //@{
+   AlignedArray& operator=( const AlignedArray& ) = default;
+   AlignedArray& operator=( AlignedArray&& ) = default;
+
+   template< typename T, size_t M >
+   constexpr AlignedArray& operator=( const T (&array)[M] );
+
+   template< typename T, size_t M >
+   constexpr AlignedArray& operator=( const std::array<T,M>& array );
+
+   template< typename T, size_t M >
+   constexpr AlignedArray& operator=( const AlignedArray<T,M>& array );
    //@}
    //**********************************************************************************************
 
    //**Utility functions***************************************************************************
    /*!\name Utility functions */
    //@{
-   inline constexpr size_t size() const noexcept;
+   constexpr size_t size() const noexcept;
    //@}
    //**********************************************************************************************
 
- private:
    //**Member variables****************************************************************************
    /*! \cond BLAZE_INTERNAL */
    /*!\name Member variables */
    //@{
-   alignas( Alignment ) Type v_[ N > 0UL ? N : 1UL ];  //!< The aligned array of size max(N,1).
+   alignas( Alignment ) Type v_[ N>0UL ? N : 1UL ];  //!< The aligned array of size max(N,1).
+                                                     /*!< This data member must not be accessed
+                                                          directly. It is declared public in order
+                                                          to provide an array-like distinction
+                                                          between default and value initialization. */
    //@}
    /*! \endcond */
+   //**********************************************************************************************
+
+ private:
+   //**Constructors********************************************************************************
+   /*!\name Constructors */
+   //@{
+   template< typename T, size_t... Is >
+   constexpr AlignedArray( const T& array, std::index_sequence<Is...> );
+   //@}
    //**********************************************************************************************
 
    //**Compile time checks*************************************************************************
@@ -179,20 +224,33 @@ class AlignedArray
 
 //=================================================================================================
 //
-//  CONSTRUCTORS
+//  DEDUCTION GUIDES
 //
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\brief The default constructor for AlignedArray.
-*/
-template< typename Type       // Data type of the elements
-        , size_t N            // Number of elements
-        , size_t Alignment >  // Array alignment
-inline AlignedArray<Type,N,Alignment>::AlignedArray()
-{}
+#if BLAZE_CPP17_MODE
+
+template< typename Type, typename... Ts >
+AlignedArray( Type, Ts... ) -> AlignedArray<Type,1+sizeof...(Ts)>;
+
+template< typename Type, size_t N >
+AlignedArray( Type (&)[N] ) -> AlignedArray< RemoveCV_t<Type>, N >;
+
+template< typename Type, size_t N >
+AlignedArray( std::array<Type,N> ) -> AlignedArray<Type,N>;
+
+#endif
 //*************************************************************************************************
 
+
+
+
+//=================================================================================================
+//
+//  CONSTRUCTORS
+//
+//=================================================================================================
 
 //*************************************************************************************************
 /*!\brief Initialization constructor for AlignedArray.
@@ -203,11 +261,91 @@ template< typename Type       // Data type of the elements
         , size_t N            // Number of elements
         , size_t Alignment >  // Array alignment
 template< typename... Ts >    // Types of the array initializers
-inline constexpr AlignedArray<Type,N,Alignment>::AlignedArray( const Ts&... args )
-   : v_{ args... }
+constexpr AlignedArray<Type,N,Alignment>::AlignedArray( const Ts&... args )
+   : v_{ args... }  // The aligned array
+{}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Initialization of all aligned array elements from the given static array.
+//
+// \param array The given static array for the initialization.
+//
+// The aligned array is initialized with the values from the given static array. Missing values
+// are initialized with default values.
+*/
+template< typename Type       // Data type of the elements
+        , size_t N            // Number of elements
+        , size_t Alignment >  // Array alignment
+template< typename T          // Data type of the static array
+        , size_t M >          // Number of elements of the static array
+constexpr AlignedArray<Type,N,Alignment>::AlignedArray( const T (&array)[M] )
+   : AlignedArray( array, make_index_sequence<M>{} )
 {
-   BLAZE_STATIC_ASSERT( sizeof...( Ts ) == N );
+   BLAZE_STATIC_ASSERT( M <= N );
 }
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Initialization of all aligned array elements from the given std::array.
+//
+// \param array The given std::array for the initialization.
+//
+// The aligned array is initialized with the values from the given std::array. Missing values are
+// initialized with default values.
+*/
+template< typename Type       // Data type of the elements
+        , size_t N            // Number of elements
+        , size_t Alignment >  // Array alignment
+template< typename T          // Data type of the std::array
+        , size_t M >          // Number of elements of the std::array
+constexpr AlignedArray<Type,N,Alignment>::AlignedArray( const std::array<T,M>& array )
+   : AlignedArray( array, make_index_sequence<M>{} )
+{
+   BLAZE_STATIC_ASSERT( M <= N );
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Initialization of all aligned array elements from another aligned  array.
+//
+// \param array The given aligned array for the initialization.
+//
+// The aligned array is initialized with the values from the another aligned array. Missing
+// values are initialized with default values.
+*/
+template< typename Type       // Data type of the elements
+        , size_t N            // Number of elements
+        , size_t Alignment >  // Array alignment
+template< typename T          // Data type of the aligned array
+        , size_t M >          // Number of elements of the aligned array
+constexpr AlignedArray<Type,N,Alignment>::AlignedArray( const AlignedArray<T,M>& array )
+   : AlignedArray( array, make_index_sequence<M>{} )
+{
+   BLAZE_STATIC_ASSERT( M <= N );
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Initialization of all aligned array elements from the given array.
+//
+// \param array The given array for the initialization.
+//
+// The aligned array is initialized with the values from the given array. Missing values are
+// initialized with default values.
+*/
+template< typename Type       // Data type of the elements
+        , size_t N            // Number of elements
+        , size_t Alignment >  // Array alignment
+template< typename T          // Data type of the array
+        , size_t... Is >      // Sequence of indices for the given array
+constexpr AlignedArray<Type,N,Alignment>::AlignedArray( const T& array, std::index_sequence<Is...> )
+   : v_{ array[Is]... }
+{}
 //*************************************************************************************************
 
 
@@ -227,7 +365,7 @@ inline constexpr AlignedArray<Type,N,Alignment>::AlignedArray( const Ts&... args
 template< typename Type       // Data type of the elements
         , size_t N            // Number of elements
         , size_t Alignment >  // Array alignment
-inline AlignedArray<Type,N,Alignment>::operator Pointer() noexcept
+constexpr AlignedArray<Type,N,Alignment>::operator Pointer() noexcept
 {
    return v_;
 }
@@ -242,7 +380,7 @@ inline AlignedArray<Type,N,Alignment>::operator Pointer() noexcept
 template< typename Type       // Data type of the elements
         , size_t N            // Number of elements
         , size_t Alignment >  // Array alignment
-inline constexpr AlignedArray<Type,N,Alignment>::operator ConstPointer() const noexcept
+constexpr AlignedArray<Type,N,Alignment>::operator ConstPointer() const noexcept
 {
    return v_;
 }
@@ -268,7 +406,7 @@ inline constexpr AlignedArray<Type,N,Alignment>::operator ConstPointer() const n
 template< typename Type       // Data type of the elements
         , size_t N            // Number of elements
         , size_t Alignment >  // Array alignment
-inline typename AlignedArray<Type,N,Alignment>::Reference
+constexpr typename AlignedArray<Type,N,Alignment>::Reference
    AlignedArray<Type,N,Alignment>::operator[]( size_t index ) noexcept
 {
    return v_[index];
@@ -287,7 +425,7 @@ inline typename AlignedArray<Type,N,Alignment>::Reference
 template< typename Type       // Data type of the elements
         , size_t N            // Number of elements
         , size_t Alignment >  // Array alignment
-inline constexpr typename AlignedArray<Type,N,Alignment>::ConstReference
+constexpr typename AlignedArray<Type,N,Alignment>::ConstReference
    AlignedArray<Type,N,Alignment>::operator[]( size_t index ) const noexcept
 {
    return v_[index];
@@ -353,7 +491,7 @@ inline typename AlignedArray<Type,N,Alignment>::ConstReference
 template< typename Type       // Data type of the elements
         , size_t N            // Number of elements
         , size_t Alignment >  // Array alignment
-inline typename AlignedArray<Type,N,Alignment>::Pointer
+constexpr typename AlignedArray<Type,N,Alignment>::Pointer
    AlignedArray<Type,N,Alignment>::data() noexcept
 {
    return v_;
@@ -371,7 +509,7 @@ inline typename AlignedArray<Type,N,Alignment>::Pointer
 template< typename Type       // Data type of the elements
         , size_t N            // Number of elements
         , size_t Alignment >  // Array alignment
-inline constexpr typename AlignedArray<Type,N,Alignment>::ConstPointer
+constexpr typename AlignedArray<Type,N,Alignment>::ConstPointer
    AlignedArray<Type,N,Alignment>::data() const noexcept
 {
    return v_;
@@ -382,12 +520,12 @@ inline constexpr typename AlignedArray<Type,N,Alignment>::ConstPointer
 //*************************************************************************************************
 /*!\brief Returns an iterator to the first element of the aligned array.
 //
-// \return Iterator to the first element of the aigned array.
+// \return Iterator to the first element of the aligned array.
 */
 template< typename Type       // Data type of the elements
         , size_t N            // Number of elements
         , size_t Alignment >  // Array alignment
-inline typename AlignedArray<Type,N,Alignment>::Iterator
+constexpr typename AlignedArray<Type,N,Alignment>::Iterator
    AlignedArray<Type,N,Alignment>::begin() noexcept
 {
    return v_;
@@ -398,12 +536,12 @@ inline typename AlignedArray<Type,N,Alignment>::Iterator
 //*************************************************************************************************
 /*!\brief Returns an iterator to the first element of the aligned array.
 //
-// \return Iterator to the first element of the aigned array.
+// \return Iterator to the first element of the aligned array.
 */
 template< typename Type       // Data type of the elements
         , size_t N            // Number of elements
         , size_t Alignment >  // Array alignment
-inline constexpr typename AlignedArray<Type,N,Alignment>::ConstIterator
+constexpr typename AlignedArray<Type,N,Alignment>::ConstIterator
    AlignedArray<Type,N,Alignment>::begin() const noexcept
 {
    return v_;
@@ -414,12 +552,12 @@ inline constexpr typename AlignedArray<Type,N,Alignment>::ConstIterator
 //*************************************************************************************************
 /*!\brief Returns an iterator to the first element of the aligned array.
 //
-// \return Iterator to the first element of the aigned array.
+// \return Iterator to the first element of the aligned array.
 */
 template< typename Type       // Data type of the elements
         , size_t N            // Number of elements
         , size_t Alignment >  // Array alignment
-inline constexpr typename AlignedArray<Type,N,Alignment>::ConstIterator
+constexpr typename AlignedArray<Type,N,Alignment>::ConstIterator
    AlignedArray<Type,N,Alignment>::cbegin() const noexcept
 {
    return v_;
@@ -435,7 +573,7 @@ inline constexpr typename AlignedArray<Type,N,Alignment>::ConstIterator
 template< typename Type       // Data type of the elements
         , size_t N            // Number of elements
         , size_t Alignment >  // Array alignment
-inline typename AlignedArray<Type,N,Alignment>::Iterator
+constexpr typename AlignedArray<Type,N,Alignment>::Iterator
    AlignedArray<Type,N,Alignment>::end() noexcept
 {
    return v_ + N;
@@ -451,7 +589,7 @@ inline typename AlignedArray<Type,N,Alignment>::Iterator
 template< typename Type       // Data type of the elements
         , size_t N            // Number of elements
         , size_t Alignment >  // Array alignment
-inline constexpr typename AlignedArray<Type,N,Alignment>::ConstIterator
+constexpr typename AlignedArray<Type,N,Alignment>::ConstIterator
    AlignedArray<Type,N,Alignment>::end() const noexcept
 {
    return v_ + N;
@@ -467,10 +605,108 @@ inline constexpr typename AlignedArray<Type,N,Alignment>::ConstIterator
 template< typename Type       // Data type of the elements
         , size_t N            // Number of elements
         , size_t Alignment >  // Array alignment
-inline constexpr typename AlignedArray<Type,N,Alignment>::ConstIterator
+constexpr typename AlignedArray<Type,N,Alignment>::ConstIterator
    AlignedArray<Type,N,Alignment>::cend() const noexcept
 {
    return v_ + N;
+}
+//*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  ASSIGNMENT OPERATORS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*!\brief Assignment to all array elements from the given static array.
+//
+// \param array The given static array for the assignment.
+// \return Reference to the assigned array.
+//
+// The elements of the aligned array are assigned the values from the given static array.
+// Missing values are assigned default values.
+*/
+template< typename Type       // Data type of the elements
+        , size_t N            // Number of elements
+        , size_t Alignment >  // Array alignment
+template< typename T          // Data type of the static array
+        , size_t M >          // Number of elements of the static array
+constexpr AlignedArray<Type,N,Alignment>&
+   AlignedArray<Type,N,Alignment>::operator=( const T (&array)[M] )
+{
+   BLAZE_STATIC_ASSERT( M <= N );
+
+   for( size_t i=0UL; i<M; ++i )
+      v_[i] = array[i];
+
+   for( size_t i=M; i<N; ++i )
+      v_[i] = Type{};
+
+   return *this;
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Assignment to all array elements from the given std::array.
+//
+// \param array The given std::array for the assignment.
+// \return Reference to the assigned array.
+//
+// The elements of the aligned array are assigned the values from the given std::array. Missing
+// values are assigned default values.
+*/
+template< typename Type       // Data type of the elements
+        , size_t N            // Number of elements
+        , size_t Alignment >  // Array alignment
+template< typename T          // Data type of the std::array
+        , size_t M >          // Number of elements of the std::array
+constexpr AlignedArray<Type,N,Alignment>&
+   AlignedArray<Type,N,Alignment>::operator=( const std::array<T,M>& array )
+{
+   BLAZE_STATIC_ASSERT( M <= N );
+
+   for( size_t i=0UL; i<M; ++i )
+      v_[i] = array[i];
+
+   for( size_t i=M; i<N; ++i )
+      v_[i] = Type{};
+
+   return *this;
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Assignment to all array elements from another aligned array.
+//
+// \param array The given aligned array for the assignment.
+// \return Reference to the assigned array.
+//
+// The elements of the aligned array are assigned the values from another aligned array.
+// Missing values are assigned default values.
+*/
+template< typename Type       // Data type of the elements
+        , size_t N            // Number of elements
+        , size_t Alignment >  // Array alignment
+template< typename T          // Data type of the std::array
+        , size_t M >          // Number of elements of the std::array
+constexpr AlignedArray<Type,N,Alignment>&
+   AlignedArray<Type,N,Alignment>::operator=( const AlignedArray<T,M>& array )
+{
+   BLAZE_STATIC_ASSERT( M <= N );
+
+   for( size_t i=0UL; i<M; ++i )
+      v_[i] = array[i];
+
+   for( size_t i=M; i<N; ++i )
+      v_[i] = Type{};
+
+   return *this;
 }
 //*************************************************************************************************
 
@@ -491,7 +727,7 @@ inline constexpr typename AlignedArray<Type,N,Alignment>::ConstIterator
 template< typename Type       // Data type of the elements
         , size_t N            // Number of elements
         , size_t Alignment >  // Array alignment
-inline constexpr size_t AlignedArray<Type,N,Alignment>::size() const noexcept
+constexpr size_t AlignedArray<Type,N,Alignment>::size() const noexcept
 {
    return N;
 }

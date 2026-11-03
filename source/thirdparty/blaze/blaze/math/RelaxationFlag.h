@@ -1,9 +1,9 @@
 //=================================================================================================
 /*!
 //  \file blaze/math/RelaxationFlag.h
-//  \brief Header file for the relaxation flag types
+//  \brief Header file for the relaxation flag enumeration
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,49 +40,51 @@ namespace blaze {
 
 //=================================================================================================
 //
-//  RELAXATION FLAG TYPES
+//  RELAXATION FLAG
 //
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\brief Relaxation flag for strict semantics.
+/*!\brief Relaxation flag for strict or relaxed semantics.
+// \ingroup math
 //
-// Via this flag it is possible to specify that according operations should use strict
-// semantics instead of relaxed semantics. The following example demonstrates this by means
-// of the isDefault() function template:
+// Via these flags it is possible to specify that according operations should use strict
+// semantics instead of relaxed semantics or vice versa. The following example demonstrates this
+// by means of the isDefault() function template:
 
    \code
    using blaze::strict;
    using blaze::relaxed;
 
-   blaze::StaticVector<double,3UL> v{ 0.0, 1E-9, 0.0 );
+   blaze::StaticVector<double,3UL> v{ 0.0, 1E-9, 0.0 };
 
    isDefault<strict> ( v );  // Returns false
    isDefault<relaxed>( v );  // Returns true
    \endcode
 */
-const bool strict = false;
+enum RelaxationFlag : bool
+{
+   strict  = false,  //!< Flag for strict semantics.
+   relaxed = true    //!< Flag for relaxed semantics.
+};
 //*************************************************************************************************
 
 
 //*************************************************************************************************
-/*!\brief Relaxation flag for relaxed semantics.
+/*!\brief Negating the given relaxation flag.
+// \ingroup math
 //
-// Via this flag it is possible to specify that according operations should use relaxed
-// semantics instead of strict semantics. The following example demonstrates this by means
-// of the isDefault() function template:
-
-   \code
-   using blaze::strict;
-   using blaze::relaxed;
-
-   blaze::StaticVector<double,3UL> v{ 0.0, 1E-9, 0.0 );
-
-   isDefault<strict> ( v );  // Returns false
-   isDefault<relaxed>( v );  // Returns true
-   \endcode
+// \param flag The given relaxation flag to be negated.
+// \return The negated relaxation flag.
+//
+// This logical NOT operator negates the given relaxation flag. In case the given flag represents
+// \a strict, the function returns \a relaxed, in case it represents \a relaxed it returns
+// \a strict.
 */
-const bool relaxed = true;
+constexpr RelaxationFlag operator!( RelaxationFlag flag ) noexcept
+{
+   return static_cast<RelaxationFlag>( !static_cast<bool>( flag ) );
+}
 //*************************************************************************************************
 
 } // namespace blaze

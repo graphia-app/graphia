@@ -3,7 +3,7 @@
 //  \file blaze/math/shims/Imaginary.h
 //  \brief Header file for the imaginary shim
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,53 +40,22 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/system/Inline.h>
-#include <blaze/util/EnableIf.h>
-#include <blaze/util/typetraits/IsBuiltin.h>
-#include <blaze/util/Unused.h>
+#include <cmath>
 
 
 namespace blaze {
 
 //=================================================================================================
 //
-//  IMAGINARY SHIM
+//  IMAG SHIM
 //
 //=================================================================================================
 
 //*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Computing the imaginary part of the given value/object.
+/*!\brief Import of the std::imag() function into the Blaze namespace.
 // \ingroup math_shims
-//
-// \param a The given value/object.
-// \return The imaginary part of the given value.
-//
-// The \a imag shim represents an abstract interface for the computation of the imaginary part
-// of any given data type. In case the given value is of complex type the function returns the
-// imaginary part:
-
-   \code
-   const blaze::complex<double> a( 3.0, -2.0 );
-   const double b( imag( a ) );  // Results in -2.0
-   \endcode
-
-// Values of built-in data type are considered complex numbers with an imaginary part of 0. Thus
-// the returned value is 0:
-
-   \code
-   const double a( -3.0 );
-   const double b( imag( a ) );  // Results in 0.0
-   \endcode
 */
-template< typename T >
-BLAZE_ALWAYS_INLINE EnableIf_< IsBuiltin<T>, T > imag( T a ) noexcept
-{
-   UNUSED_PARAMETER( a );
-
-   return T(0);
-}
-/*! \endcond */
+using std::imag;
 //*************************************************************************************************
 
 } // namespace blaze

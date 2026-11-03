@@ -3,7 +3,7 @@
 //  \file blaze/util/constraints/ComplexDouble.h
 //  \brief Constraint on the data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -60,7 +60,7 @@ namespace blaze {
 // not of type \a complex<double> a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_COMPLEX_DOUBLE_TYPE(T) \
-   static_assert( ::blaze::IsComplexDouble<T>::value, "Non-double precision complex type detected" )
+   static_assert( ::blaze::IsComplexDouble_v<T>, "Non-double precision complex type detected" )
 //*************************************************************************************************
 
 
@@ -81,7 +81,7 @@ namespace blaze {
 // type \a complex<double> a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_COMPLEX_DOUBLE_TYPE(T) \
-   static_assert( !::blaze::IsComplexDouble<T>::value, "Double precision complex type detected" )
+   static_assert( !::blaze::IsComplexDouble_v<T>, "Double precision complex type detected" )
 //*************************************************************************************************
 
 } // namespace blaze

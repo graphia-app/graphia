@@ -3,7 +3,7 @@
 //  \file blaze/math/expressions/MatEvalExpr.h
 //  \brief Header file for the MatEvalExpr base class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -41,6 +41,7 @@
 //*************************************************************************************************
 
 #include <blaze/math/expressions/EvalExpr.h>
+#include <blaze/util/FunctionTrace.h>
 
 
 namespace blaze {
@@ -58,12 +59,44 @@ namespace blaze {
 // The MatEvalExpr class serves as a tag for all expression templates that implement a matrix
 // evaluation operation. All classes, that represent a matrix evaluation operation and that
 // are used within the expression template environment of the Blaze library have to derive
-// from this class in order to qualify as matrix evaluation expression template. Only in case
-// a class is derived from the MatEvalExpr base class, the IsMatEvalExpr type trait recognizes
-// the class as valid matrix evaluation expression template.
+// publicly from this class in order to qualify as matrix evaluation expression template. Only
+// in case a class is derived publicly from the MatEvalExpr base class, the IsMatEvalExpr type
+// trait recognizes the class as valid matrix evaluation expression template.
 */
-struct MatEvalExpr : private EvalExpr
+template< typename MT >  // Matrix base type of the expression
+struct MatEvalExpr
+   : public EvalExpr<MT>
 {};
+//*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  GLOBAL RESTRUCTURING FUNCTIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Evaluation of the given matrix evaluation expression.
+// \ingroup math
+//
+// \param matrix The input evaluation expression.
+// \return The evaluated matrix.
+//
+// This function implements a performance optimized treatment of the evaluation of a matrix
+// evaluation expression.
+*/
+template< typename MT >  // Matrix base type of the expression
+inline decltype(auto) eval( const MatEvalExpr<MT>& matrix )
+{
+   BLAZE_FUNCTION_TRACE;
+
+   return *matrix;
+}
+/*! \endcond */
 //*************************************************************************************************
 
 } // namespace blaze

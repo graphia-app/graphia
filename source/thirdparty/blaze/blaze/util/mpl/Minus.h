@@ -1,9 +1,9 @@
 //=================================================================================================
 /*!
 //  \file blaze/util/mpl/Minus.h
-//  \brief Header file for the Minus class template
+//  \brief Header file for the Minus_t alias template
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -56,23 +56,23 @@ namespace blaze {
 /*!\brief Compile time integral subtraction.
 // \ingroup mpl
 //
-// The Minus class template returns the difference of the two given template arguments \a T1 and
-// \a T2. In order for Minus to be able to subtract the two types, both arguments are required to
-// have a nested member \a value. The result of the subtraction can be accessed via the nested
-// member \a value, the resulting type is available via the nested type \a ValueType.
+// The Minus_t alias template returns the difference of the two given template arguments \a T1
+// and \a T2. In order for Minus_t to be able to subtract the two types, both arguments are
+// required to have a nested member \a value. The result of the subtraction can be accessed
+// via the nested member \a value, the resulting type is available via the nested type
+// \a ValueType.
 
    \code
-   blaze::Minus< Int<3> , Int<2>  >::value      // Results in 5
-   blaze::Minus< Long<3>, Int<2>  >::ValueType  // Results in long
-   blaze::Minus< Int<3> , Long<2> >::ValueType  // Results in long
+   blaze::Minus_t< Int_t<3> , Int_t<2>  >::value      // Results in 5
+   blaze::Minus_t< Long_t<3>, Int_t<2>  >::ValueType  // Results in long
+   blaze::Minus_t< Int_t<3> , Long_t<2> >::ValueType  // Results in long
    \endcode
 */
 template< typename T1    // Type of the first compile time value
         , typename T2 >  // Type of the second compile time value
-struct Minus
-   : public IntegralConstant< CommonType_< typename T1::ValueType, typename T2::ValueType >
-                            , ( T1::value - T2::value ) >
-{};
+using Minus_t =
+   IntegralConstant< CommonType_t< typename T1::ValueType, typename T2::ValueType >
+                   , ( T1::value - T2::value ) >;
 //*************************************************************************************************
 
 } // namespace blaze

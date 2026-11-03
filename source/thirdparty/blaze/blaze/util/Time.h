@@ -3,7 +3,7 @@
 //  \file blaze/util/Time.h
 //  \brief Header file for time functions
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,7 +40,7 @@
 // Includes
 //*************************************************************************************************
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || defined(__MINGW64_VERSION_MAJOR) || defined(__MINGW32__)
 #  ifndef NOMINMAX
 #    define NOMINMAX
 #  endif
@@ -128,7 +128,7 @@ inline double getWcTime()
 {
 #ifdef WIN32
    struct _timeb timeptr;
-   _ftime( &timeptr );
+   _ftime64_s( &timeptr );
    return ( static_cast<double>( timeptr.time ) + static_cast<double>( timeptr.millitm )/1E3 );
 #else
    struct timeval tp;

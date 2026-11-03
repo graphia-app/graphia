@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/IsProxy.h
 //  \brief Header file for the IsProxy type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -43,7 +43,6 @@
 #include <utility>
 #include <blaze/math/proxy/Forward.h>
 #include <blaze/util/IntegralConstant.h>
-#include <blaze/util/typetraits/RemoveCV.h>
 
 
 namespace blaze {
@@ -56,28 +55,13 @@ namespace blaze {
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-/*!\brief Auxiliary helper struct for the IsProxy type trait.
+/*!\brief Auxiliary helper functions for the IsProxy type trait.
 // \ingroup math_type_traits
 */
-template< typename T >
-struct IsProxyHelper
-{
- private:
-   //**********************************************************************************************
-   typedef char (&Yes)[1];
-   typedef char (&No) [2];
+template< typename PT, typename RT >
+TrueType isProxy_backend( const volatile Proxy<PT,RT>* );
 
-   template< typename PT, typename RT >
-   static Yes test( const Proxy<PT,RT>& );
-
-   static No test( ... );
-   //**********************************************************************************************
-
- public:
-   //**********************************************************************************************
-   enum : bool { value = ( sizeof( test( std::declval< RemoveCV_<T> >() ) ) == sizeof( Yes ) ) };
-   //**********************************************************************************************
-};
+FalseType isProxy_backend( ... );
 /*! \endcond */
 //*************************************************************************************************
 
@@ -87,10 +71,10 @@ struct IsProxyHelper
 // \ingroup math_type_traits
 //
 // This type trait tests whether or not the given template parameter is a proxy type (i.e.
-// derived from the blaze::Proxy class template). In case the type is a proxy, the \a value
-// member constant is set to \a true, the nested type definition \a Type is \a TrueType,
-// and the class derives from \a TrueType. Otherwise \a value is set to \a false, \a Type
-// is \a FalseType, and the class derives from \a FalseType.
+// publicly derived from the blaze::Proxy class template). In case the type is a proxy,
+// the \a value member constant is set to \a true, the nested type definition \a Type is
+// \a TrueType, and the class derives from \a TrueType. Otherwise \a value is set to
+// \a false, \a Type is \a FalseType, and the class derives from \a FalseType.
 
    \code
    class MyProxy1 : public Proxy<MyProxy1> {};
@@ -107,8 +91,40 @@ struct IsProxyHelper
    \endcode
 */
 template< typename T >
-struct IsProxy : public BoolConstant< IsProxyHelper<T>::value >
+struct IsProxy
+   : public decltype( isProxy_backend( std::declval<T*>() ) )
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Specialization of the IsProxy type trait for references.
+// \ingroup math_type_traits
+*/
+template< typename T >
+struct IsProxy<T&>
+   : public FalseType
+{};
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsProxy type trait.
+// \ingroup math_type_traits
+//
+// The IsProxy_v variable template provides a convenient shortcut to access the nested \a value
+// of the IsProxy class template. For instance, given the type \a T the following two statements
+// are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsProxy<T>::value;
+   constexpr bool value2 = blaze::IsProxy_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsProxy_v = IsProxy<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

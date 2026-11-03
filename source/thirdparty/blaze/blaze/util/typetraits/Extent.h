@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/Extent.h
 //  \brief Header file for the Extent type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -41,6 +41,7 @@
 //*************************************************************************************************
 
 #include <blaze/util/IntegralConstant.h>
+#include <blaze/util/Types.h>
 
 
 namespace blaze {
@@ -62,19 +63,19 @@ namespace blaze {
 // incomplete, \a value is set to 0.
 
    \code
-   blaze::Extent< int[4], 0U >::value            // Evaluates to 4
-   blaze::Extent< int[2][3][4], 0U >::value      // Evaluates to 2
-   blaze::Extent< int[2][3][4], 1U >::value      // Evaluates to 3
-   blaze::Extent< int[2][3][4], 2U >::value      // Evaluates to 4
-   blaze::Extent< int[][2], 0U >::value          // Evaluates to 0
-   blaze::Extent< int[][2], 1U >::value          // Evaluates to 2
-   blaze::Extent< int*, 0U >::value              // Evaluates to 0
-   blaze::Extent< std::vector<int>, 0U >::value  // Evaluates to 0 (std::vector is NOT an array type)
+   blaze::Extent< int[4], 0UL >::value            // Evaluates to 4
+   blaze::Extent< int[2][3][4], 0UL >::value      // Evaluates to 2
+   blaze::Extent< int[2][3][4], 1UL >::value      // Evaluates to 3
+   blaze::Extent< int[2][3][4], 2UL >::value      // Evaluates to 4
+   blaze::Extent< int[][2], 0UL >::value          // Evaluates to 0
+   blaze::Extent< int[][2], 1UL >::value          // Evaluates to 2
+   blaze::Extent< int*, 0UL >::value              // Evaluates to 0
+   blaze::Extent< std::vector<int>, 0UL >::value  // Evaluates to 0 (std::vector is NOT an array type)
    \endcode
 */
-template< typename T, unsigned int N >
+template< typename T, size_t N >
 struct Extent
-   : public IntegralConstant<unsigned int,0U>
+   : public IntegralConstant<size_t,0UL>
 {};
 //*************************************************************************************************
 
@@ -82,9 +83,9 @@ struct Extent
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 //! Partial specialization of the Extent type trait for empty array extents.
-template< typename T, unsigned int N >
+template< typename T, size_t N >
 struct Extent<T[],N>
-   : public IntegralConstant<unsigned int,Extent<T,N-1U>::value>
+   : public IntegralConstant<size_t,Extent<T,N-1UL>::value>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -93,9 +94,9 @@ struct Extent<T[],N>
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 //! Partial specialization of the Extent type trait for non-empty array extents.
-template< typename T, unsigned int N, unsigned int E >
+template< typename T, size_t N, size_t E >
 struct Extent<T[E],N>
-   : public IntegralConstant<unsigned int,Extent<T,N-1U>::value>
+   : public IntegralConstant<size_t,Extent<T,N-1UL>::value>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -106,7 +107,7 @@ struct Extent<T[E],N>
 //! Terminating partial specialization of the Extent type trait for empty array extents.
 template< typename T >
 struct Extent<T[],0UL>
-   : public IntegralConstant<unsigned int,0U>
+   : public IntegralConstant<size_t,0UL>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -115,11 +116,29 @@ struct Extent<T[],0UL>
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 //! Terminating partial specialization of the Extent type trait for non-empty array extents.
-template< typename T, unsigned int E >
-struct Extent<T[E],0U>
-   : public IntegralConstant<unsigned int,E>
+template< typename T, size_t E >
+struct Extent<T[E],0UL>
+   : public IntegralConstant<size_t,E>
 {};
 /*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the Extent type trait.
+// \ingroup type_traits
+//
+// The Extent_v variable template provides a convenient shortcut to access the nested \a value
+// of the Extent class template. For instance, given the type \a T and the compile time constant
+// \a N the following two statements are identical:
+
+   \code
+   constexpr size_t value1 = blaze::Extent<T,N>::value;
+   constexpr size_t value2 = blaze::Extent_v<T,N>;
+   \endcode
+*/
+template< typename T, size_t N >
+constexpr size_t Extent_v = Extent<T,N>::value;
 //*************************************************************************************************
 
 } // namespace blaze

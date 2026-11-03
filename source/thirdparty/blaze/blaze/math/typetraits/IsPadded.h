@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/IsPadded.h
 //  \brief Header file for the IsPadded type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,8 +40,7 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/util/FalseType.h>
-#include <blaze/util/TrueType.h>
+#include <blaze/util/IntegralConstant.h>
 
 
 namespace blaze {
@@ -73,7 +72,8 @@ namespace blaze {
    \endcode
 */
 template< typename T >
-struct IsPadded : public FalseType
+struct IsPadded
+   : public FalseType
 {};
 //*************************************************************************************************
 
@@ -84,7 +84,8 @@ struct IsPadded : public FalseType
 // \ingroup math_type_traits
 */
 template< typename T >
-struct IsPadded< const T > : public IsPadded<T>
+struct IsPadded< const T >
+   : public IsPadded<T>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -96,7 +97,8 @@ struct IsPadded< const T > : public IsPadded<T>
 // \ingroup math_type_traits
 */
 template< typename T >
-struct IsPadded< volatile T > : public IsPadded<T>
+struct IsPadded< volatile T >
+   : public IsPadded<T>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -108,9 +110,28 @@ struct IsPadded< volatile T > : public IsPadded<T>
 // \ingroup math_type_traits
 */
 template< typename T >
-struct IsPadded< const volatile T > : public IsPadded<T>
+struct IsPadded< const volatile T >
+   : public IsPadded<T>
 {};
 /*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsPadded type trait.
+// \ingroup math_type_traits
+//
+// The IsPadded_v variable template provides a convenient shortcut to access the nested \a value
+// of the IsPadded class template. For instance, given the type \a T the following two statements
+// are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsPadded<T>::value;
+   constexpr bool value2 = blaze::IsPadded_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsPadded_v = IsPadded<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/math/adaptors/DiagonalMatrix.h
 //  \brief Header file for the implementation of a diagonal matrix adaptor
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -44,10 +44,6 @@
 #include <blaze/math/adaptors/diagonalmatrix/BaseTemplate.h>
 #include <blaze/math/adaptors/diagonalmatrix/Dense.h>
 #include <blaze/math/adaptors/diagonalmatrix/Sparse.h>
-#include <blaze/math/adaptors/lowermatrix/BaseTemplate.h>
-#include <blaze/math/adaptors/strictlylowermatrix/BaseTemplate.h>
-#include <blaze/math/adaptors/strictlyuppermatrix/BaseTemplate.h>
-#include <blaze/math/adaptors/uppermatrix/BaseTemplate.h>
 #include <blaze/math/constraints/BLASCompatible.h>
 #include <blaze/math/constraints/Hermitian.h>
 #include <blaze/math/constraints/Lower.h>
@@ -58,40 +54,61 @@
 #include <blaze/math/Exception.h>
 #include <blaze/math/Forward.h>
 #include <blaze/math/InversionFlag.h>
+#include <blaze/math/RelaxationFlag.h>
 #include <blaze/math/shims/IsDivisor.h>
 #include <blaze/math/shims/IsDefault.h>
 #include <blaze/math/traits/AddTrait.h>
-#include <blaze/math/traits/ColumnTrait.h>
-#include <blaze/math/traits/DerestrictTrait.h>
+#include <blaze/math/traits/DeclDiagTrait.h>
+#include <blaze/math/traits/DeclHermTrait.h>
+#include <blaze/math/traits/DeclLowTrait.h>
+#include <blaze/math/traits/DeclStrLowTrait.h>
+#include <blaze/math/traits/DeclStrUppTrait.h>
+#include <blaze/math/traits/DeclSymTrait.h>
+#include <blaze/math/traits/DeclUniLowTrait.h>
+#include <blaze/math/traits/DeclUniUppTrait.h>
+#include <blaze/math/traits/DeclUppTrait.h>
 #include <blaze/math/traits/DivTrait.h>
-#include <blaze/math/traits/ForEachTrait.h>
+#include <blaze/math/traits/KronTrait.h>
+#include <blaze/math/traits/MapTrait.h>
 #include <blaze/math/traits/MultTrait.h>
-#include <blaze/math/traits/RowTrait.h>
+#include <blaze/math/traits/SchurTrait.h>
 #include <blaze/math/traits/SubmatrixTrait.h>
 #include <blaze/math/traits/SubTrait.h>
-#include <blaze/math/typetraits/Columns.h>
 #include <blaze/math/typetraits/HasConstDataAccess.h>
 #include <blaze/math/typetraits/HighType.h>
 #include <blaze/math/typetraits/IsAdaptor.h>
 #include <blaze/math/typetraits/IsAligned.h>
+#include <blaze/math/typetraits/IsContiguous.h>
+#include <blaze/math/typetraits/IsDiagonal.h>
 #include <blaze/math/typetraits/IsHermitian.h>
+#include <blaze/math/typetraits/IsIdentity.h>
 #include <blaze/math/typetraits/IsLower.h>
+#include <blaze/math/typetraits/IsMatrix.h>
 #include <blaze/math/typetraits/IsPadded.h>
-#include <blaze/math/typetraits/IsResizable.h>
 #include <blaze/math/typetraits/IsRestricted.h>
+#include <blaze/math/typetraits/IsScalar.h>
 #include <blaze/math/typetraits/IsSquare.h>
+#include <blaze/math/typetraits/IsStrictlyLower.h>
+#include <blaze/math/typetraits/IsStrictlyUpper.h>
 #include <blaze/math/typetraits/IsSymmetric.h>
+#include <blaze/math/typetraits/IsUniform.h>
+#include <blaze/math/typetraits/IsUniTriangular.h>
 #include <blaze/math/typetraits/IsUpper.h>
+#include <blaze/math/typetraits/IsZero.h>
 #include <blaze/math/typetraits/LowType.h>
+#include <blaze/math/typetraits/MaxSize.h>
 #include <blaze/math/typetraits/RemoveAdaptor.h>
-#include <blaze/math/typetraits/Rows.h>
+#include <blaze/math/typetraits/Size.h>
+#include <blaze/math/typetraits/StorageOrder.h>
+#include <blaze/math/typetraits/YieldsDiagonal.h>
+#include <blaze/math/typetraits/YieldsIdentity.h>
+#include <blaze/math/typetraits/YieldsZero.h>
 #include <blaze/util/Assert.h>
 #include <blaze/util/EnableIf.h>
 #include <blaze/util/IntegralConstant.h>
-#include <blaze/util/TrueType.h>
+#include <blaze/util/MaybeUnused.h>
+#include <blaze/util/mpl/If.h>
 #include <blaze/util/typetraits/IsBuiltin.h>
-#include <blaze/util/typetraits/IsNumeric.h>
-#include <blaze/util/Unused.h>
 
 
 namespace blaze {
@@ -105,81 +122,15 @@ namespace blaze {
 //*************************************************************************************************
 /*!\name DiagonalMatrix operators */
 //@{
-template< typename MT, bool SO, bool DF >
-inline void reset( DiagonalMatrix<MT,SO,DF>& m );
+template< RelaxationFlag RF, typename MT, bool SO, bool DF >
+bool isDefault( const DiagonalMatrix<MT,SO,DF>& m );
 
 template< typename MT, bool SO, bool DF >
-inline void reset( DiagonalMatrix<MT,SO,DF>& m, size_t i );
+bool isIntact( const DiagonalMatrix<MT,SO,DF>& m );
 
 template< typename MT, bool SO, bool DF >
-inline void clear( DiagonalMatrix<MT,SO,DF>& m );
-
-template< bool RF, typename MT, bool SO, bool DF >
-inline bool isDefault( const DiagonalMatrix<MT,SO,DF>& m );
-
-template< typename MT, bool SO, bool DF >
-inline bool isIntact( const DiagonalMatrix<MT,SO,DF>& m );
-
-template< typename MT, bool SO, bool DF >
-inline void swap( DiagonalMatrix<MT,SO,DF>& a, DiagonalMatrix<MT,SO,DF>& b ) noexcept;
+void swap( DiagonalMatrix<MT,SO,DF>& a, DiagonalMatrix<MT,SO,DF>& b ) noexcept;
 //@}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Resetting the given diagonal matrix.
-// \ingroup diagonal_matrix
-//
-// \param m The diagonal matrix to be resetted.
-// \return void
-*/
-template< typename MT  // Type of the adapted matrix
-        , bool SO      // Storage order of the adapted matrix
-        , bool DF >    // Density flag
-inline void reset( DiagonalMatrix<MT,SO,DF>& m )
-{
-   m.reset();
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Resetting the specified row/column of the given diagonal matrix.
-// \ingroup diagonal_matrix
-//
-// \param m The diagonal matrix to be resetted.
-// \param i The index of the row/column to be resetted.
-// \return void
-//
-// This function resets the values in the specified row/column of the given diagonal matrix to
-// their default value. In case the given matrix is a \a rowMajor matrix the function resets the
-// values in row \a i, if it is a \a columnMajor matrix the function resets the values in column
-// \a i. Note that the capacity of the row/column remains unchanged.
-*/
-template< typename MT  // Type of the adapted matrix
-        , bool SO      // Storage order of the adapted matrix
-        , bool DF >    // Density flag
-inline void reset( DiagonalMatrix<MT,SO,DF>& m, size_t i )
-{
-   m.reset( i );
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Clearing the given diagonal matrix.
-// \ingroup diagonal_matrix
-//
-// \param m The diagonal matrix to be cleared.
-// \return void
-*/
-template< typename MT  // Type of the adapted matrix
-        , bool SO      // Storage order of the adapted matrix
-        , bool DF >    // Density flag
-inline void clear( DiagonalMatrix<MT,SO,DF>& m )
-{
-   m.clear();
-}
 //*************************************************************************************************
 
 
@@ -211,13 +162,20 @@ inline void clear( DiagonalMatrix<MT,SO,DF>& m )
    if( isDefault<relaxed>( A ) ) { ... }
    \endcode
 */
-template< bool RF      // Relaxation flag
-        , typename MT  // Type of the adapted matrix
-        , bool SO      // Storage order of the adapted matrix
-        , bool DF >    // Density flag
+template< RelaxationFlag RF  // Relaxation flag
+        , typename MT        // Type of the adapted matrix
+        , bool SO            // Storage order of the adapted matrix
+        , bool DF >          // Density flag
 inline bool isDefault( const DiagonalMatrix<MT,SO,DF>& m )
 {
-   return isDefault<RF>( m.matrix_ );
+   if( Size_v<MT,0UL> == DefaultSize_v )
+      return m.rows() == 0UL;
+
+   for( size_t i=0UL; i<m.rows(); ++i ) {
+      if( !isDefault<RF>( m(i,i) ) ) return false;
+   }
+
+   return true;
 }
 //*************************************************************************************************
 
@@ -299,7 +257,7 @@ template< InversionFlag IF  // Inversion algorithm
         , bool SO >         // Storage order of the dense matrix
 inline void invert( DiagonalMatrix<MT,SO,true>& m )
 {
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<MT> );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT> );
 
    if( IF == asUniLower || IF == asUniUpper ) {
       BLAZE_INTERNAL_ASSERT( isIdentity( m ), "Violation of preconditions detected" );
@@ -337,7 +295,7 @@ template< typename MT1, bool SO1, typename MT2, typename MT3, typename MT4, bool
 inline void lu( const DiagonalMatrix<MT1,SO1,true>& A, DenseMatrix<MT2,SO1>& L,
                 DenseMatrix<MT3,SO1>& U, Matrix<MT4,SO2>& P )
 {
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<MT1> );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT1> );
 
    BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT2 );
    BLAZE_CONSTRAINT_MUST_NOT_BE_HERMITIAN_MATRIX_TYPE( MT2 );
@@ -349,25 +307,335 @@ inline void lu( const DiagonalMatrix<MT1,SO1,true>& A, DenseMatrix<MT2,SO1>& L,
    BLAZE_CONSTRAINT_MUST_NOT_BE_UNITRIANGULAR_MATRIX_TYPE( MT3 );
    BLAZE_CONSTRAINT_MUST_NOT_BE_LOWER_MATRIX_TYPE( MT3 );
 
-   typedef ElementType_<MT3>  ET3;
-   typedef ElementType_<MT4>  ET4;
+   using ET3 = ElementType_t<MT3>;
+   using ET4 = ElementType_t<MT4>;
 
-   const size_t n( (~A).rows() );
+   const size_t n( (*A).rows() );
 
-   DerestrictTrait_<MT3> U2( derestrict( ~U ) );
+   decltype(auto) U2( derestrict( *U ) );
 
-   (~L) = A;
+   (*L) = A;
 
-   resize( ~U, n, n );
+   resize( *U, n, n );
    reset( U2 );
 
-   resize( ~P, n, n );
-   reset( ~P );
+   resize( *P, n, n );
+   reset( *P );
 
    for( size_t i=0UL; i<n; ++i ) {
       U2(i,i)   = ET3(1);
-      (~P)(i,i) = ET4(1);
+      (*P)(i,i) = ET4(1);
    }
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by setting a single element of a diagonal matrix.
+// \ingroup diagonal_matrix
+//
+// \param mat The target diagonal matrix.
+// \param i The row index of the element to be set.
+// \param j The column index of the element to be set.
+// \param value The value to be set to the element.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the adapted matrix
+        , bool SO        // Storage order of the adapted matrix
+        , bool DF        // Density flag
+        , typename ET >  // Type of the element
+inline bool trySet( const DiagonalMatrix<MT,SO,DF>& mat, size_t i, size_t j, const ET& value )
+{
+   BLAZE_INTERNAL_ASSERT( i < (*mat).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( j < (*mat).columns(), "Invalid column access index" );
+
+   MAYBE_UNUSED( mat );
+
+   return ( i == j || isDefault( value ) );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by setting a range of elements of a diagonal matrix.
+// \ingroup diagonal_matrix
+//
+// \param mat The target diagonal matrix.
+// \param row The index of the first row of the range to be multiplied.
+// \param column The index of the first column of the range to be multiplied.
+// \param m The number of rows of the range to be multiplied.
+// \param n The number of columns of the range to be multiplied.
+// \param value The value to be set to the range of elements.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the adapted matrix
+        , bool SO        // Storage order of the adapted matrix
+        , bool DF        // Density flag
+        , typename ET >  // Type of the element
+BLAZE_ALWAYS_INLINE bool
+   trySet( const DiagonalMatrix<MT,SO,DF>& mat, size_t row, size_t column, size_t m, size_t n, const ET& value )
+{
+   BLAZE_INTERNAL_ASSERT( row <= (*mat).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*mat).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( row + m <= (*mat).rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + n <= (*mat).columns(), "Invalid number of columns" );
+
+   MAYBE_UNUSED( mat );
+
+   return ( m == 0UL ) ||
+          ( n == 0UL ) ||
+          ( row == column && m == 1UL && n == 1UL ) ||
+          isDefault( value );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by adding to a single element of a diagonal matrix.
+// \ingroup diagonal_matrix
+//
+// \param mat The target diagonal matrix.
+// \param i The row index of the element to be modified.
+// \param j The column index of the element to be modified.
+// \param value The value to be added to the element.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the adapted matrix
+        , bool SO        // Storage order of the adapted matrix
+        , bool DF        // Density flag
+        , typename ET >  // Type of the element
+inline bool tryAdd( const DiagonalMatrix<MT,SO,DF>& mat, size_t i, size_t j, const ET& value )
+{
+   return trySet( mat, i, j, value );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by adding to a range of elements of a diagonal matrix.
+// \ingroup diagonal_matrix
+//
+// \param mat The target diagonal matrix.
+// \param row The index of the first row of the range to be multiplied.
+// \param column The index of the first column of the range to be multiplied.
+// \param m The number of rows of the range to be multiplied.
+// \param n The number of columns of the range to be multiplied.
+// \param value The value to be added to the range of elements.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the adapted matrix
+        , bool SO        // Storage order of the adapted matrix
+        , bool DF        // Density flag
+        , typename ET >  // Type of the element
+BLAZE_ALWAYS_INLINE bool
+   tryAdd( const DiagonalMatrix<MT,SO,DF>& mat, size_t row, size_t column, size_t m, size_t n, const ET& value )
+{
+   return trySet( mat, row, column, m, n, value );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by subtracting from a single element of a diagonal matrix.
+// \ingroup diagonal_matrix
+//
+// \param mat The target diagonal matrix.
+// \param i The row index of the element to be modified.
+// \param j The column index of the element to be modified.
+// \param value The value to be subtracted from the element.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the adapted matrix
+        , bool SO        // Storage order of the adapted matrix
+        , bool DF        // Density flag
+        , typename ET >  // Type of the element
+inline bool trySub( const DiagonalMatrix<MT,SO,DF>& mat, size_t i, size_t j, const ET& value )
+{
+   return trySet( mat, i, j, value );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by subtracting from a range of elements of a diagonal matrix.
+// \ingroup diagonal_matrix
+//
+// \param mat The target diagonal matrix.
+// \param row The index of the first row of the range to be multiplied.
+// \param column The index of the first column of the range to be multiplied.
+// \param m The number of rows of the range to be multiplied.
+// \param n The number of columns of the range to be multiplied.
+// \param value The value to be subtracted from the range of elements.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the adapted matrix
+        , bool SO        // Storage order of the adapted matrix
+        , bool DF        // Density flag
+        , typename ET >  // Type of the element
+BLAZE_ALWAYS_INLINE bool
+   trySub( const DiagonalMatrix<MT,SO,DF>& mat, size_t row, size_t column, size_t m, size_t n, const ET& value )
+{
+   return trySet( mat, row, column, m, n, value );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by a bitwise OR on a single element of a diagonal matrix.
+// \ingroup diagonal_matrix
+//
+// \param mat The target diagonal matrix.
+// \param i The row index of the element to be modified.
+// \param j The column index of the element to be modified.
+// \param value The bit pattern to be used on the element.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the adapted matrix
+        , bool SO        // Storage order of the adapted matrix
+        , bool DF        // Density flag
+        , typename ET >  // Type of the element
+inline bool tryBitor( const DiagonalMatrix<MT,SO,DF>& mat, size_t i, size_t j, const ET& value )
+{
+   return trySet( mat, i, j, value );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by a bitwise OR on a range of elements of a diagonal matrix.
+// \ingroup diagonal_matrix
+//
+// \param mat The target diagonal matrix.
+// \param row The index of the first row of the range to be modified.
+// \param column The index of the first column of the range to be modified.
+// \param m The number of rows of the range to be modified.
+// \param n The number of columns of the range to be modified.
+// \param value The bit pattern to be used on the range of elements.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the adapted matrix
+        , bool SO        // Storage order of the adapted matrix
+        , bool DF        // Density flag
+        , typename ET >  // Type of the element
+BLAZE_ALWAYS_INLINE bool
+   tryBitor( const DiagonalMatrix<MT,SO,DF>& mat, size_t row, size_t column, size_t m, size_t n, const ET& value )
+{
+   return trySet( mat, row, column, m, n, value );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by a bitwise XOR on a single element of a diagonal matrix.
+// \ingroup diagonal_matrix
+//
+// \param mat The target diagonal matrix.
+// \param i The row index of the element to be modified.
+// \param j The column index of the element to be modified.
+// \param value The bit pattern to be used on the element.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the adapted matrix
+        , bool SO        // Storage order of the adapted matrix
+        , bool DF        // Density flag
+        , typename ET >  // Type of the element
+inline bool tryBitxor( const DiagonalMatrix<MT,SO,DF>& mat, size_t i, size_t j, const ET& value )
+{
+   return tryAdd( mat, i, j, value );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by a bitwise XOR on a range of elements of a diagonal matrix.
+// \ingroup diagonal_matrix
+//
+// \param mat The target diagonal matrix.
+// \param row The index of the first row of the range to be modified.
+// \param column The index of the first column of the range to be modified.
+// \param m The number of rows of the range to be modified.
+// \param n The number of columns of the range to be modified.
+// \param value The bit pattern to be used on the range of elements.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the adapted matrix
+        , bool SO        // Storage order of the adapted matrix
+        , bool DF        // Density flag
+        , typename ET >  // Type of the element
+BLAZE_ALWAYS_INLINE bool
+   tryBitxor( const DiagonalMatrix<MT,SO,DF>& mat, size_t row, size_t column, size_t m, size_t n, const ET& value )
+{
+   return tryAdd( mat, row, column, m, n, value );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -400,19 +668,19 @@ inline bool tryAssign( const DiagonalMatrix<MT,SO,DF>& lhs,
 
    BLAZE_INTERNAL_ASSERT( row <= lhs.rows(), "Invalid row access index" );
    BLAZE_INTERNAL_ASSERT( column <= lhs.columns(), "Invalid column access index" );
-   BLAZE_INTERNAL_ASSERT( (~rhs).size() <= lhs.rows() - row, "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( row + (*rhs).size() <= lhs.rows(), "Invalid number of rows" );
 
-   UNUSED_PARAMETER( lhs );
+   MAYBE_UNUSED( lhs );
 
    const size_t index( ( column <= row )?( 0UL ):( column - row ) );
 
    for( size_t i=0UL; i<index; ++i ) {
-      if( !isDefault( (~rhs)[i] ) )
+      if( !isDefault( (*rhs)[i] ) )
          return false;
    }
 
-   for( size_t i=index+1UL; i<(~rhs).size(); ++i ) {
-      if( !isDefault( (~rhs)[i] ) )
+   for( size_t i=index+1UL; i<(*rhs).size(); ++i ) {
+      if( !isDefault( (*rhs)[i] ) )
          return false;
    }
 
@@ -449,20 +717,67 @@ inline bool tryAssign( const DiagonalMatrix<MT,SO,DF>& lhs,
 
    BLAZE_INTERNAL_ASSERT( row <= lhs.rows(), "Invalid row access index" );
    BLAZE_INTERNAL_ASSERT( column <= lhs.columns(), "Invalid column access index" );
-   BLAZE_INTERNAL_ASSERT( (~rhs).size() <= lhs.columns() - column, "Invalid number of columns" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).size() <= lhs.columns(), "Invalid number of columns" );
 
-   UNUSED_PARAMETER( lhs );
+   MAYBE_UNUSED( lhs );
 
    const size_t index( ( row <= column )?( 0UL ):( row - column ) );
 
    for( size_t i=0UL; i<index; ++i ) {
-      if( !isDefault( (~rhs)[i] ) )
+      if( !isDefault( (*rhs)[i] ) )
          return false;
    }
 
-   for( size_t i=index+1UL; i<(~rhs).size(); ++i ) {
-      if( !isDefault( (~rhs)[i] ) )
+   for( size_t i=index+1UL; i<(*rhs).size(); ++i ) {
+      if( !isDefault( (*rhs)[i] ) )
          return false;
+   }
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the assignment of a dense vector to a band of a
+//        diagonal matrix.
+// \ingroup diagonal_matrix
+//
+// \param lhs The target left-hand side diagonal matrix.
+// \param rhs The right-hand side dense vector to be assigned.
+// \param band The index of the band the right-hand side vector is assigned to.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT  // Type of the adapted matrix
+        , bool SO      // Storage order of the adapted matrix
+        , bool DF      // Density flag
+        , typename VT  // Type of the right-hand side dense vector
+        , bool TF >    // Transpose flag of the right-hand side dense vector
+inline bool tryAssign( const DiagonalMatrix<MT,SO,DF>& lhs, const DenseVector<VT,TF>& rhs,
+                       ptrdiff_t band, size_t row, size_t column )
+{
+   BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( VT );
+
+   BLAZE_INTERNAL_ASSERT( row <= lhs.rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= lhs.columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).size() <= lhs.columns(), "Invalid number of columns" );
+
+   MAYBE_UNUSED( lhs, row, column );
+
+   if( band != 0L ) {
+      for( size_t i=0UL; i<(*rhs).size(); ++i ) {
+         if( !isDefault( (*rhs)[i] ) )
+            return false;
+      }
    }
 
    return true;
@@ -498,15 +813,13 @@ inline bool tryAssign( const DiagonalMatrix<MT,SO,DF>& lhs,
 
    BLAZE_INTERNAL_ASSERT( row <= lhs.rows(), "Invalid row access index" );
    BLAZE_INTERNAL_ASSERT( column <= lhs.columns(), "Invalid column access index" );
-   BLAZE_INTERNAL_ASSERT( (~rhs).size() <= lhs.rows() - row, "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( row + (*rhs).size() <= lhs.rows(), "Invalid number of rows" );
 
-   UNUSED_PARAMETER( lhs );
-
-   typedef typename VT::ConstIterator  RhsIterator;
+   MAYBE_UNUSED( lhs );
 
    const size_t index( column - row );
 
-   for( RhsIterator element=(~rhs).begin(); element!=(~rhs).end(); ++element ) {
+   for( auto element=(*rhs).begin(); element!=(*rhs).end(); ++element ) {
       if( element->index() != index && !isDefault( element->value() ) )
          return false;
    }
@@ -544,17 +857,62 @@ inline bool tryAssign( const DiagonalMatrix<MT,SO,DF>& lhs,
 
    BLAZE_INTERNAL_ASSERT( row <= lhs.rows(), "Invalid row access index" );
    BLAZE_INTERNAL_ASSERT( column <= lhs.columns(), "Invalid column access index" );
-   BLAZE_INTERNAL_ASSERT( (~rhs).size() <= lhs.columns() - column, "Invalid number of columns" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).size() <= lhs.columns(), "Invalid number of columns" );
 
-   UNUSED_PARAMETER( lhs );
-
-   typedef typename VT::ConstIterator  RhsIterator;
+   MAYBE_UNUSED( lhs );
 
    const size_t index( row - column );
 
-   for( RhsIterator element=(~rhs).begin(); element!=(~rhs).end(); ++element ) {
+   for( auto element=(*rhs).begin(); element!=(*rhs).end(); ++element ) {
       if( element->index() != index && !isDefault( element->value() ) )
          return false;
+   }
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the assignment of a sparse vector to a band of a
+//        diagonal matrix.
+// \ingroup diagonal_matrix
+//
+// \param lhs The target left-hand side diagonal matrix.
+// \param rhs The right-hand side sparse vector to be assigned.
+// \param band The index of the band the right-hand side vector is assigned to.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT  // Type of the adapted matrix
+        , bool SO      // Storage order of the adapted matrix
+        , bool DF      // Density flag
+        , typename VT  // Type of the right-hand side sparse vector
+        , bool TF >    // Transpose flag of the right-hand side sparse vector
+inline bool tryAssign( const DiagonalMatrix<MT,SO,DF>& lhs, const SparseVector<VT,TF>& rhs,
+                       ptrdiff_t band, size_t row, size_t column )
+{
+   BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( VT );
+
+   BLAZE_INTERNAL_ASSERT( row <= lhs.rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= lhs.columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).size() <= lhs.columns(), "Invalid number of columns" );
+
+   MAYBE_UNUSED( lhs, row, column );
+
+   if( band != 0L ) {
+      for( const auto& element : *rhs ) {
+         if( !isDefault( element.value() ) )
+            return false;
+      }
    }
 
    return true;
@@ -590,17 +948,17 @@ inline bool tryAssign( const DiagonalMatrix<MT1,SO,DF>& lhs,
 
    BLAZE_INTERNAL_ASSERT( row <= lhs.rows(), "Invalid row access index" );
    BLAZE_INTERNAL_ASSERT( column <= lhs.columns(), "Invalid column access index" );
-   BLAZE_INTERNAL_ASSERT( (~rhs).rows() <= lhs.rows() - row, "Invalid number of rows" );
-   BLAZE_INTERNAL_ASSERT( (~rhs).columns() <= lhs.columns() - column, "Invalid number of columns" );
+   BLAZE_INTERNAL_ASSERT( row + (*rhs).rows() <= lhs.rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).columns() <= lhs.columns(), "Invalid number of columns" );
 
-   UNUSED_PARAMETER( lhs );
+   MAYBE_UNUSED( lhs );
 
-   const size_t M( (~rhs).rows()    );
-   const size_t N( (~rhs).columns() );
+   const size_t M( (*rhs).rows()    );
+   const size_t N( (*rhs).columns() );
 
    for( size_t i=0UL; i<M; ++i ) {
       for( size_t j=0UL; j<N; ++j ) {
-         if( ( row + i != column + j ) && !isDefault( (~rhs)(i,j) ) )
+         if( ( row + i != column + j ) && !isDefault( (*rhs)(i,j) ) )
             return false;
       }
    }
@@ -638,17 +996,17 @@ inline bool tryAssign( const DiagonalMatrix<MT1,SO,DF>& lhs,
 
    BLAZE_INTERNAL_ASSERT( row <= lhs.rows(), "Invalid row access index" );
    BLAZE_INTERNAL_ASSERT( column <= lhs.columns(), "Invalid column access index" );
-   BLAZE_INTERNAL_ASSERT( (~rhs).rows() <= lhs.rows() - row, "Invalid number of rows" );
-   BLAZE_INTERNAL_ASSERT( (~rhs).columns() <= lhs.columns() - column, "Invalid number of columns" );
+   BLAZE_INTERNAL_ASSERT( row + (*rhs).rows() <= lhs.rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).columns() <= lhs.columns(), "Invalid number of columns" );
 
-   UNUSED_PARAMETER( lhs );
+   MAYBE_UNUSED( lhs );
 
-   const size_t M( (~rhs).rows()    );
-   const size_t N( (~rhs).columns() );
+   const size_t M( (*rhs).rows()    );
+   const size_t N( (*rhs).columns() );
 
    for( size_t j=0UL; j<N; ++j ) {
       for( size_t i=0UL; i<M; ++i ) {
-         if( ( column + j != row + i ) && !isDefault( (~rhs)(i,j) ) )
+         if( ( column + j != row + i ) && !isDefault( (*rhs)(i,j) ) )
             return false;
       }
    }
@@ -686,17 +1044,15 @@ inline bool tryAssign( const DiagonalMatrix<MT1,SO,DF>& lhs,
 
    BLAZE_INTERNAL_ASSERT( row <= lhs.rows(), "Invalid row access index" );
    BLAZE_INTERNAL_ASSERT( column <= lhs.columns(), "Invalid column access index" );
-   BLAZE_INTERNAL_ASSERT( (~rhs).rows() <= lhs.rows() - row, "Invalid number of rows" );
-   BLAZE_INTERNAL_ASSERT( (~rhs).columns() <= lhs.columns() - column, "Invalid number of columns" );
+   BLAZE_INTERNAL_ASSERT( row + (*rhs).rows() <= lhs.rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).columns() <= lhs.columns(), "Invalid number of columns" );
 
-   UNUSED_PARAMETER( lhs );
+   MAYBE_UNUSED( lhs );
 
-   typedef typename MT2::ConstIterator  RhsIterator;
-
-   const size_t M( (~rhs).rows() );
+   const size_t M( (*rhs).rows() );
 
    for( size_t i=0UL; i<M; ++i ) {
-      for( RhsIterator element=(~rhs).begin(i); element!=(~rhs).end(i); ++element ) {
+      for( auto element=(*rhs).begin(i); element!=(*rhs).end(i); ++element ) {
          if( ( row + i != column + element->index() ) && !isDefault( element->value() ) )
             return false;
       }
@@ -735,17 +1091,15 @@ inline bool tryAssign( const DiagonalMatrix<MT1,SO,DF>& lhs,
 
    BLAZE_INTERNAL_ASSERT( row <= lhs.rows(), "Invalid row access index" );
    BLAZE_INTERNAL_ASSERT( column <= lhs.columns(), "Invalid column access index" );
-   BLAZE_INTERNAL_ASSERT( (~rhs).rows() <= lhs.rows() - row, "Invalid number of rows" );
-   BLAZE_INTERNAL_ASSERT( (~rhs).columns() <= lhs.columns() - column, "Invalid number of columns" );
+   BLAZE_INTERNAL_ASSERT( row + (*rhs).rows() <= lhs.rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).columns() <= lhs.columns(), "Invalid number of columns" );
 
-   UNUSED_PARAMETER( lhs );
+   MAYBE_UNUSED( lhs );
 
-   typedef typename MT2::ConstIterator  RhsIterator;
-
-   const size_t N( (~rhs).columns() );
+   const size_t N( (*rhs).columns() );
 
    for( size_t j=0UL; j<N; ++j ) {
-      for( RhsIterator element=(~rhs).begin(j); element!=(~rhs).end(j); ++element ) {
+      for( auto element=(*rhs).begin(j); element!=(*rhs).end(j); ++element ) {
          if( ( column + j != row + element->index() ) && !isDefault( element->value() ) )
             return false;
       }
@@ -781,7 +1135,39 @@ template< typename MT  // Type of the adapted matrix
 inline bool tryAddAssign( const DiagonalMatrix<MT,SO,DF>& lhs,
                           const Vector<VT,TF>& rhs, size_t row, size_t column )
 {
-   return tryAssign( lhs, ~rhs, row, column );
+   return tryAssign( lhs, *rhs, row, column );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the addition assignment of a vector to the band of
+//        a diagonal matrix.
+// \ingroup diagonal_matrix
+//
+// \param lhs The target left-hand side diagonal matrix.
+// \param rhs The right-hand side vector to be added.
+// \param band The index of the band the right-hand side vector is assigned to.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT  // Type of the adapted matrix
+        , bool SO      // Storage order of the adapted matrix
+        , bool DF      // Density flag
+        , typename VT  // Type of the right-hand side vector
+        , bool TF >    // Transpose flag of the right-hand side vector
+inline bool tryAddAssign( const DiagonalMatrix<MT,SO,DF>& lhs, const Vector<VT,TF>& rhs,
+                          ptrdiff_t band, size_t row, size_t column )
+{
+   return tryAssign( lhs, *rhs, band, row, column );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -811,7 +1197,7 @@ template< typename MT1  // Type of the adapted matrix
 inline bool tryAddAssign( const DiagonalMatrix<MT1,SO1,DF>& lhs,
                           const Matrix<MT2,SO2>& rhs, size_t row, size_t column )
 {
-   return tryAssign( lhs, ~rhs, row, column );
+   return tryAssign( lhs, *rhs, row, column );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -842,7 +1228,39 @@ template< typename MT  // Type of the adapted matrix
 inline bool trySubAssign( const DiagonalMatrix<MT,SO,DF>& lhs,
                           const Vector<VT,TF>& rhs, size_t row, size_t column )
 {
-   return tryAssign( lhs, ~rhs, row, column );
+   return tryAssign( lhs, *rhs, row, column );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the subtraction assignment of a vector to the band of
+//        a diagonal matrix.
+// \ingroup diagonal_matrix
+//
+// \param lhs The target left-hand side diagonal matrix.
+// \param rhs The right-hand side vector to be subtracted.
+// \param band The index of the band the right-hand side vector is assigned to.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT  // Type of the adapted matrix
+        , bool SO      // Storage order of the adapted matrix
+        , bool DF      // Density flag
+        , typename VT  // Type of the right-hand side vector
+        , bool TF >    // Transpose flag of the right-hand side vector
+inline bool trySubAssign( const DiagonalMatrix<MT,SO,DF>& lhs, const Vector<VT,TF>& rhs,
+                          ptrdiff_t band, size_t row, size_t column )
+{
+   return tryAssign( lhs, *rhs, band, row, column );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -873,7 +1291,192 @@ template< typename MT1  // Type of the adapted matrix
 inline bool trySubAssign( const DiagonalMatrix<MT1,SO1,DF>& lhs,
                           const Matrix<MT2,SO2>& rhs, size_t row, size_t column )
 {
-   return tryAssign( lhs, ~rhs, row, column );
+   return tryAssign( lhs, *rhs, row, column );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the bitwise OR assignment of a vector to a diagonal
+//        matrix.
+// \ingroup diagonal_matrix
+//
+// \param lhs The target left-hand side diagonal matrix.
+// \param rhs The right-hand side vector for the bitwise OR operation.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT  // Type of the adapted matrix
+        , bool SO      // Storage order of the adapted matrix
+        , bool DF      // Density flag
+        , typename VT  // Type of the right-hand side vector
+        , bool TF >    // Transpose flag of the right-hand side vector
+inline bool tryBitorAssign( const DiagonalMatrix<MT,SO,DF>& lhs,
+                            const Vector<VT,TF>& rhs, size_t row, size_t column )
+{
+   return tryAssign( lhs, *rhs, row, column );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the bitwise OR assignment of a vector to the band of
+//        a diagonal matrix.
+// \ingroup diagonal_matrix
+// \param lhs The target left-hand side diagonal matrix.
+// \param rhs The right-hand side vector for the bitwise OR operation.
+// \param band The index of the band the right-hand side vector is assigned to.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT  // Type of the adapted matrix
+        , bool SO      // Storage order of the adapted matrix
+        , bool DF      // Density flag
+        , typename VT  // Type of the right-hand side vector
+        , bool TF >    // Transpose flag of the right-hand side vector
+inline bool tryBitorAssign( const DiagonalMatrix<MT,SO,DF>& lhs, const Vector<VT,TF>& rhs,
+                            ptrdiff_t band, size_t row, size_t column )
+{
+   return tryAssign( lhs, *rhs, band, row, column );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the bitwise OR assignment of a matrix to a diagonal matrix.
+// \ingroup diagonal_matrix
+//
+// \param lhs The target left-hand side diagonal matrix.
+// \param rhs The right-hand side matrix for the bitwise OR operation.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT1  // Type of the adapted matrix
+        , bool SO1      // Storage order of the adapted matrix
+        , bool DF       // Density flag
+        , typename MT2  // Type of the right-hand side matrix
+        , bool SO2 >    // Storage order of the right-hand side matrix
+inline bool tryBitorAssign( const DiagonalMatrix<MT1,SO1,DF>& lhs,
+                            const Matrix<MT2,SO2>& rhs, size_t row, size_t column )
+{
+   return tryAssign( lhs, *rhs, row, column );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the bitwise XOR assignment of a vector to a diagonal
+//        matrix.
+// \ingroup diagonal_matrix
+//
+// \param lhs The target left-hand side diagonal matrix.
+// \param rhs The right-hand side vector for the bitwise XOR operation.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT  // Type of the adapted matrix
+        , bool SO      // Storage order of the adapted matrix
+        , bool DF      // Density flag
+        , typename VT  // Type of the right-hand side vector
+        , bool TF >    // Transpose flag of the right-hand side vector
+inline bool tryBitxorAssign( const DiagonalMatrix<MT,SO,DF>& lhs,
+                             const Vector<VT,TF>& rhs, size_t row, size_t column )
+{
+   return tryAssign( lhs, *rhs, row, column );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the bitwise XOR assignment of a vector to the band of
+//        a diagonal matrix.
+// \ingroup diagonal_matrix
+// \param lhs The target left-hand side diagonal matrix.
+// \param rhs The right-hand side vector for the bitwise XOR operation.
+// \param band The index of the band the right-hand side vector is assigned to.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT  // Type of the adapted matrix
+        , bool SO      // Storage order of the adapted matrix
+        , bool DF      // Density flag
+        , typename VT  // Type of the right-hand side vector
+        , bool TF >    // Transpose flag of the right-hand side vector
+inline bool tryBitxorAssign( const DiagonalMatrix<MT,SO,DF>& lhs, const Vector<VT,TF>& rhs,
+                             ptrdiff_t band, size_t row, size_t column )
+{
+   return tryAssign( lhs, *rhs, band, row, column );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the bitwise XOR assignment of a matrix to a diagonal
+//        matrix.
+// \ingroup diagonal_matrix
+//
+// \param lhs The target left-hand side diagonal matrix.
+// \param rhs The right-hand side matrix for the bitwise XOR operation.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT1  // Type of the adapted matrix
+        , bool SO1      // Storage order of the adapted matrix
+        , bool DF       // Density flag
+        , typename MT2  // Type of the right-hand side matrix
+        , bool SO2 >    // Storage order of the right-hand side matrix
+inline bool tryBitxorAssign( const DiagonalMatrix<MT1,SO1,DF>& lhs,
+                             const Matrix<MT2,SO2>& rhs, size_t row, size_t column )
+{
+   return tryAssign( lhs, *rhs, row, column );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -909,14 +1512,20 @@ inline MT& derestrict( DiagonalMatrix<MT,SO,DF>& m )
 
 //=================================================================================================
 //
-//  ROWS SPECIALIZATIONS
+//  SIZE SPECIALIZATIONS
 //
 //=================================================================================================
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct Rows< DiagonalMatrix<MT,SO,DF> > : public Rows<MT>
+struct Size< DiagonalMatrix<MT,SO,DF>, 0UL >
+   : public Size<MT,0UL>
+{};
+
+template< typename MT, bool SO, bool DF >
+struct Size< DiagonalMatrix<MT,SO,DF>, 1UL >
+   : public Size<MT,1UL>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -926,14 +1535,20 @@ struct Rows< DiagonalMatrix<MT,SO,DF> > : public Rows<MT>
 
 //=================================================================================================
 //
-//  COLUMNS SPECIALIZATIONS
+//  SIZE SPECIALIZATIONS
 //
 //=================================================================================================
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct Columns< DiagonalMatrix<MT,SO,DF> > : public Columns<MT>
+struct MaxSize< DiagonalMatrix<MT,SO,DF>, 0UL >
+   : public MaxSize<MT,0UL>
+{};
+
+template< typename MT, bool SO, bool DF >
+struct MaxSize< DiagonalMatrix<MT,SO,DF>, 1UL >
+   : public MaxSize<MT,1UL>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -950,7 +1565,26 @@ struct Columns< DiagonalMatrix<MT,SO,DF> > : public Columns<MT>
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct IsSquare< DiagonalMatrix<MT,SO,DF> > : public TrueType
+struct IsSquare< DiagonalMatrix<MT,SO,DF> >
+   : public TrueType
+{};
+/*! \endcond */
+//*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  ISUNIFORM SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename MT, bool SO, bool DF >
+struct IsUniform< DiagonalMatrix<MT,SO,DF> >
+   : public IsUniform<MT>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -967,7 +1601,8 @@ struct IsSquare< DiagonalMatrix<MT,SO,DF> > : public TrueType
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct IsSymmetric< DiagonalMatrix<MT,SO,DF> > : public TrueType
+struct IsSymmetric< DiagonalMatrix<MT,SO,DF> >
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -985,7 +1620,7 @@ struct IsSymmetric< DiagonalMatrix<MT,SO,DF> > : public TrueType
 /*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
 struct IsHermitian< DiagonalMatrix<MT,SO,DF> >
-   : public BoolConstant< IsBuiltin< ElementType_<MT> >::value >
+   : public IsBuiltin< ElementType_t<MT> >
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -1002,7 +1637,26 @@ struct IsHermitian< DiagonalMatrix<MT,SO,DF> >
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct IsLower< DiagonalMatrix<MT,SO,DF> > : public TrueType
+struct IsLower< DiagonalMatrix<MT,SO,DF> >
+   : public TrueType
+{};
+/*! \endcond */
+//*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  ISSTRICTLYLOWER SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename MT, bool SO, bool DF >
+struct IsStrictlyLower< DiagonalMatrix<MT,SO,DF> >
+   : public IsZero<MT>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -1019,7 +1673,26 @@ struct IsLower< DiagonalMatrix<MT,SO,DF> > : public TrueType
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct IsUpper< DiagonalMatrix<MT,SO,DF> > : public TrueType
+struct IsUpper< DiagonalMatrix<MT,SO,DF> >
+   : public TrueType
+{};
+/*! \endcond */
+//*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  ISSTRICTLYUPPER SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename MT, bool SO, bool DF >
+struct IsStrictlyUpper< DiagonalMatrix<MT,SO,DF> >
+   : public IsZero<MT>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -1036,7 +1709,8 @@ struct IsUpper< DiagonalMatrix<MT,SO,DF> > : public TrueType
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct IsAdaptor< DiagonalMatrix<MT,SO,DF> > : public TrueType
+struct IsAdaptor< DiagonalMatrix<MT,SO,DF> >
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -1053,7 +1727,8 @@ struct IsAdaptor< DiagonalMatrix<MT,SO,DF> > : public TrueType
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct IsRestricted< DiagonalMatrix<MT,SO,DF> > : public TrueType
+struct IsRestricted< DiagonalMatrix<MT,SO,DF> >
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -1070,7 +1745,8 @@ struct IsRestricted< DiagonalMatrix<MT,SO,DF> > : public TrueType
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO >
-struct HasConstDataAccess< DiagonalMatrix<MT,SO,true> > : public TrueType
+struct HasConstDataAccess< DiagonalMatrix<MT,SO,true> >
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -1087,7 +1763,26 @@ struct HasConstDataAccess< DiagonalMatrix<MT,SO,true> > : public TrueType
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct IsAligned< DiagonalMatrix<MT,SO,DF> > : public BoolConstant< IsAligned<MT>::value >
+struct IsAligned< DiagonalMatrix<MT,SO,DF> >
+   : public IsAligned<MT>
+{};
+/*! \endcond */
+//*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  ISCONTIGUOUS SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename MT, bool SO, bool DF >
+struct IsContiguous< DiagonalMatrix<MT,SO,DF> >
+   : public IsContiguous<MT>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -1104,24 +1799,8 @@ struct IsAligned< DiagonalMatrix<MT,SO,DF> > : public BoolConstant< IsAligned<MT
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct IsPadded< DiagonalMatrix<MT,SO,DF> > : public BoolConstant< IsPadded<MT>::value >
-{};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  ISRESIZABLE SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT, bool SO, bool DF >
-struct IsResizable< DiagonalMatrix<MT,SO,DF> > : public BoolConstant< IsResizable<MT>::value >
+struct IsPadded< DiagonalMatrix<MT,SO,DF> >
+   : public IsPadded<MT>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -1150,191 +1829,20 @@ struct RemoveAdaptor< DiagonalMatrix<MT,SO,DF> >
 
 //=================================================================================================
 //
-//  DERESTRICTTRAIT SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT, bool SO, bool DF >
-struct DerestrictTrait< DiagonalMatrix<MT,SO,DF> >
-{
-   using Type = MT&;
-};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
 //  ADDTRAIT SPECIALIZATIONS
 //
 //=================================================================================================
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-template< typename MT, bool SO1, bool DF, typename T, size_t M, size_t N, bool SO2 >
-struct AddTrait< DiagonalMatrix<MT,SO1,DF>, StaticMatrix<T,M,N,SO2> >
+template< typename T1, typename T2 >
+struct AddTraitEval1< T1, T2
+                    , EnableIf_t< IsMatrix_v<T1> &&
+                                  IsMatrix_v<T2> &&
+                                  IsDiagonal_v<T1> && IsDiagonal_v<T2> &&
+                                  !( IsZero_v<T1> || IsZero_v<T2> ) > >
 {
-   using Type = AddTrait_< MT, StaticMatrix<T,M,N,SO2> >;
-};
-
-template< typename T, size_t M, size_t N, bool SO1, typename MT, bool SO2, bool DF >
-struct AddTrait< StaticMatrix<T,M,N,SO1>, DiagonalMatrix<MT,SO2,DF> >
-{
-   using Type = AddTrait_< StaticMatrix<T,M,N,SO1>, MT >;
-};
-
-template< typename MT, bool SO1, bool DF, typename T, size_t M, size_t N, bool SO2 >
-struct AddTrait< DiagonalMatrix<MT,SO1,DF>, HybridMatrix<T,M,N,SO2> >
-{
-   using Type = AddTrait< MT, HybridMatrix<T,M,N,SO2> >;
-};
-
-template< typename T, size_t M, size_t N, bool SO1, typename MT, bool SO2, bool DF >
-struct AddTrait< HybridMatrix<T,M,N,SO1>, DiagonalMatrix<MT,SO2,DF> >
-{
-   using Type = AddTrait_< HybridMatrix<T,M,N,SO1>, MT >;
-};
-
-template< typename MT, bool SO1, bool DF, typename T, bool SO2 >
-struct AddTrait< DiagonalMatrix<MT,SO1,DF>, DynamicMatrix<T,SO2> >
-{
-   using Type = AddTrait_< MT, DynamicMatrix<T,SO2> >;
-};
-
-template< typename T, bool SO1, typename MT, bool SO2, bool DF >
-struct AddTrait< DynamicMatrix<T,SO1>, DiagonalMatrix<MT,SO2,DF> >
-{
-   using Type = AddTrait_< DynamicMatrix<T,SO1>, MT >;
-};
-
-template< typename MT, bool SO1, bool DF, typename T, bool AF, bool PF, bool SO2 >
-struct AddTrait< DiagonalMatrix<MT,SO1,DF>, CustomMatrix<T,AF,PF,SO2> >
-{
-   using Type = AddTrait_< MT, CustomMatrix<T,AF,PF,SO2> >;
-};
-
-template< typename T, bool AF, bool PF, bool SO1, typename MT, bool SO2, bool DF >
-struct AddTrait< CustomMatrix<T,AF,PF,SO1>, DiagonalMatrix<MT,SO2,DF> >
-{
-   using Type = AddTrait_< CustomMatrix<T,AF,PF,SO1>, MT >;
-};
-
-template< typename MT, bool SO1, bool DF, typename T, bool SO2 >
-struct AddTrait< DiagonalMatrix<MT,SO1,DF>, CompressedMatrix<T,SO2> >
-{
-   using Type = AddTrait_< MT, CompressedMatrix<T,SO2> >;
-};
-
-template< typename T, bool SO1, typename MT, bool SO2, bool DF >
-struct AddTrait< CompressedMatrix<T,SO1>, DiagonalMatrix<MT,SO2,DF> >
-{
-   using Type = AddTrait_< CompressedMatrix<T,SO1>, MT >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2, bool NF >
-struct AddTrait< DiagonalMatrix<MT1,SO1,DF1>, SymmetricMatrix<MT2,SO2,DF2,NF> >
-{
-   using Type = AddTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, bool NF, typename MT2, bool SO2, bool DF2 >
-struct AddTrait< SymmetricMatrix<MT1,SO1,DF1,NF>, DiagonalMatrix<MT2,SO2,DF2> >
-{
-   using Type = AddTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct AddTrait< DiagonalMatrix<MT1,SO1,DF1>, HermitianMatrix<MT2,SO2,DF2> >
-{
-   using Type = AddTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct AddTrait< HermitianMatrix<MT1,SO1,DF1>, DiagonalMatrix<MT2,SO2,DF2> >
-{
-   using Type = AddTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct AddTrait< DiagonalMatrix<MT1,SO1,DF1>, LowerMatrix<MT2,SO2,DF2> >
-{
-   using Type = LowerMatrix< AddTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct AddTrait< LowerMatrix<MT1,SO1,DF1>, DiagonalMatrix<MT2,SO2,DF2> >
-{
-   using Type = LowerMatrix< AddTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct AddTrait< DiagonalMatrix<MT1,SO1,DF1>, UniLowerMatrix<MT2,SO2,DF2> >
-{
-   using Type = LowerMatrix< AddTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct AddTrait< UniLowerMatrix<MT1,SO1,DF1>, DiagonalMatrix<MT2,SO2,DF2> >
-{
-   using Type = LowerMatrix< AddTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct AddTrait< DiagonalMatrix<MT1,SO1,DF1>, StrictlyLowerMatrix<MT2,SO2,DF2> >
-{
-   using Type = LowerMatrix< AddTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct AddTrait< StrictlyLowerMatrix<MT1,SO1,DF1>, DiagonalMatrix<MT2,SO2,DF2> >
-{
-   using Type = LowerMatrix< AddTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct AddTrait< DiagonalMatrix<MT1,SO1,DF1>, UpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = UpperMatrix< AddTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct AddTrait< UpperMatrix<MT1,SO1,DF1>, DiagonalMatrix<MT2,SO2,DF2> >
-{
-   using Type = UpperMatrix< AddTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct AddTrait< DiagonalMatrix<MT1,SO1,DF1>, UniUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = UpperMatrix< AddTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct AddTrait< UniUpperMatrix<MT1,SO1,DF1>, DiagonalMatrix<MT2,SO2,DF2> >
-{
-   using Type = UpperMatrix< AddTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct AddTrait< DiagonalMatrix<MT1,SO1,DF1>, StrictlyUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = UpperMatrix< AddTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct AddTrait< StrictlyUpperMatrix<MT1,SO1,DF1>, DiagonalMatrix<MT2,SO2,DF2> >
-{
-   using Type = UpperMatrix< AddTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct AddTrait< DiagonalMatrix<MT1,SO1,DF1>, DiagonalMatrix<MT2,SO2,DF2> >
-{
-   using Type = DiagonalMatrix< AddTrait_<MT1,MT2> >;
+   using Type = DiagonalMatrix< typename AddTraitEval2<T1,T2>::Type >;
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -1350,154 +1858,55 @@ struct AddTrait< DiagonalMatrix<MT1,SO1,DF1>, DiagonalMatrix<MT2,SO2,DF2> >
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-template< typename MT, bool SO1, bool DF, typename T, size_t M, size_t N, bool SO2 >
-struct SubTrait< DiagonalMatrix<MT,SO1,DF>, StaticMatrix<T,M,N,SO2> >
+template< typename T1, typename T2 >
+struct SubTraitEval1< T1, T2
+                    , EnableIf_t< IsMatrix_v<T1> &&
+                                  IsMatrix_v<T2> &&
+                                  IsDiagonal_v<T1> && IsDiagonal_v<T2> &&
+                                  !( IsZero_v<T1> || IsZero_v<T2> ) > >
 {
-   using Type = SubTrait_< MT, StaticMatrix<T,M,N,SO2> >;
+   using Type = DiagonalMatrix< typename SubTraitEval2<T1,T2>::Type >;
 };
 
-template< typename T, size_t M, size_t N, bool SO1, typename MT, bool SO2, bool DF >
-struct SubTrait< StaticMatrix<T,M,N,SO1>, DiagonalMatrix<MT,SO2,DF> >
+template< typename T1, typename T2 >
+struct SubTraitEval1< T1, T2
+                    , EnableIf_t< IsMatrix_v<T1> &&
+                                  IsMatrix_v<T2> &&
+                                  IsZero_v<T1> && IsIdentity_v<T2> > >
 {
-   using Type = SubTrait_< StaticMatrix<T,M,N,SO1>, MT >;
+   using Tmp = If_t< StorageOrder_v<T1> != StorageOrder_v<T2>, OppositeType_t<T1>, T1 >;
+   using Type = DiagonalMatrix< typename SubTraitEval2<Tmp,T2>::Type >;
 };
+/*! \endcond */
+//*************************************************************************************************
 
-template< typename MT, bool SO1, bool DF, typename T, size_t M, size_t N, bool SO2 >
-struct SubTrait< DiagonalMatrix<MT,SO1,DF>, HybridMatrix<T,M,N,SO2> >
-{
-   using Type = SubTrait_< MT, HybridMatrix<T,M,N,SO2> >;
-};
 
-template< typename T, size_t M, size_t N, bool SO1, typename MT, bool SO2, bool DF >
-struct SubTrait< HybridMatrix<T,M,N,SO1>, DiagonalMatrix<MT,SO2,DF> >
-{
-   using Type = SubTrait_< HybridMatrix<T,M,N,SO1>, MT >;
-};
 
-template< typename MT, bool SO1, bool DF, typename T, bool SO2 >
-struct SubTrait< DiagonalMatrix<MT,SO1,DF>, DynamicMatrix<T,SO2> >
-{
-   using Type = SubTrait_< MT, DynamicMatrix<T,SO2> >;
-};
 
-template< typename T, bool SO1, typename MT, bool SO2, bool DF >
-struct SubTrait< DynamicMatrix<T,SO1>, DiagonalMatrix<MT,SO2,DF> >
-{
-   using Type = SubTrait_< DynamicMatrix<T,SO1>, MT >;
-};
+//=================================================================================================
+//
+//  SCHURTRAIT SPECIALIZATIONS
+//
+//=================================================================================================
 
-template< typename MT, bool SO1, bool DF, typename T, bool AF, bool PF, bool SO2 >
-struct SubTrait< DiagonalMatrix<MT,SO1,DF>, CustomMatrix<T,AF,PF,SO2> >
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename T1, typename T2 >
+struct SchurTraitEval1< T1, T2
+                      , EnableIf_t< IsMatrix_v<T1> &&
+                                    IsMatrix_v<T2> &&
+                                    ( IsDiagonal_v<T1> ||
+                                      IsDiagonal_v<T2> ||
+                                      ( IsLower_v<T1> && IsUpper_v<T2> ) ||
+                                      ( IsUpper_v<T1> && IsLower_v<T2> ) ) &&
+                                    !( IsStrictlyLower_v<T1> && IsUpper_v<T2> ) &&
+                                    !( IsStrictlyUpper_v<T1> && IsLower_v<T2> ) &&
+                                    !( IsLower_v<T1> && IsStrictlyUpper_v<T2> ) &&
+                                    !( IsUpper_v<T1> && IsStrictlyLower_v<T2> ) &&
+                                    !( IsUniTriangular_v<T1> && IsUniTriangular_v<T2> ) &&
+                                    !( IsZero_v<T1> || IsZero_v<T2> ) > >
 {
-   using Type = SubTrait_< MT, CustomMatrix<T,AF,PF,SO2> >;
-};
-
-template< typename T, bool AF, bool PF, bool SO1, typename MT, bool SO2, bool DF >
-struct SubTrait< CustomMatrix<T,AF,PF,SO1>, DiagonalMatrix<MT,SO2,DF> >
-{
-   using Type = SubTrait_< CustomMatrix<T,AF,PF,SO1>, MT >;
-};
-
-template< typename MT, bool SO1, bool DF, typename T, bool SO2 >
-struct SubTrait< DiagonalMatrix<MT,SO1,DF>, CompressedMatrix<T,SO2> >
-{
-   using Type = SubTrait_< MT, CompressedMatrix<T,SO2> >;
-};
-
-template< typename T, bool SO1, typename MT, bool SO2, bool DF >
-struct SubTrait< CompressedMatrix<T,SO1>, DiagonalMatrix<MT,SO2,DF> >
-{
-   using Type = SubTrait_< CompressedMatrix<T,SO1>, MT >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2, bool NF >
-struct SubTrait< DiagonalMatrix<MT1,SO1,DF1>, SymmetricMatrix<MT2,SO2,DF2,NF> >
-{
-   using Type = SubTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, bool NF, typename MT2, bool SO2, bool DF2 >
-struct SubTrait< SymmetricMatrix<MT1,SO1,DF1,NF>, DiagonalMatrix<MT2,SO2,DF2> >
-{
-   using Type = SubTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct SubTrait< DiagonalMatrix<MT1,SO1,DF1>, HermitianMatrix<MT2,SO2,DF2> >
-{
-   using Type = SubTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct SubTrait< HermitianMatrix<MT1,SO1,DF1>, DiagonalMatrix<MT2,SO2,DF2> >
-{
-   using Type = SubTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct SubTrait< DiagonalMatrix<MT1,SO1,DF1>, LowerMatrix<MT2,SO2,DF2> >
-{
-   using Type = LowerMatrix< SubTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct SubTrait< LowerMatrix<MT1,SO1,DF1>, DiagonalMatrix<MT2,SO2,DF2> >
-{
-   using Type = LowerMatrix< SubTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct SubTrait< DiagonalMatrix<MT1,SO1,DF1>, UniLowerMatrix<MT2,SO2,DF2> >
-{
-   using Type = LowerMatrix< SubTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct SubTrait< UniLowerMatrix<MT1,SO1,DF1>, DiagonalMatrix<MT2,SO2,DF2> >
-{
-   using Type = LowerMatrix< SubTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct SubTrait< DiagonalMatrix<MT1,SO1,DF1>, UpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = UpperMatrix< SubTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct SubTrait< UpperMatrix<MT1,SO1,DF1>, DiagonalMatrix<MT2,SO2,DF2> >
-{
-   using Type = UpperMatrix< SubTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct SubTrait< DiagonalMatrix<MT1,SO1,DF1>, UniUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = UpperMatrix< SubTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct SubTrait< UniUpperMatrix<MT1,SO1,DF1>, DiagonalMatrix<MT2,SO2,DF2> >
-{
-   using Type = UpperMatrix< SubTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct SubTrait< DiagonalMatrix<MT1,SO1,DF1>, StrictlyUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = UpperMatrix< SubTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct SubTrait< StrictlyUpperMatrix<MT1,SO1,DF1>, DiagonalMatrix<MT2,SO2,DF2> >
-{
-   using Type = UpperMatrix< SubTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct SubTrait< DiagonalMatrix<MT1,SO1,DF1>, DiagonalMatrix<MT2,SO2,DF2> >
-{
-   using Type = DiagonalMatrix< SubTrait_<MT1,MT2> >;
+   using Type = DiagonalMatrix< typename SchurTraitEval2<T1,T2>::Type >;
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -1513,238 +1922,57 @@ struct SubTrait< DiagonalMatrix<MT1,SO1,DF1>, DiagonalMatrix<MT2,SO2,DF2> >
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-template< typename MT, bool SO, bool DF, typename T >
-struct MultTrait< DiagonalMatrix<MT,SO,DF>, T, EnableIf_< IsNumeric<T> > >
+template< typename T1, typename T2 >
+struct MultTraitEval1< T1, T2
+                     , EnableIf_t< IsMatrix_v<T1> &&
+                                   IsScalar_v<T2> &&
+                                   ( IsDiagonal_v<T1> && !IsUniform_v<T1> ) > >
 {
-   using Type = DiagonalMatrix< MultTrait_<MT,T> >;
+   using Type = DiagonalMatrix< typename MultTraitEval2<T1,T2>::Type >;
 };
 
-template< typename T, typename MT, bool SO, bool DF >
-struct MultTrait< T, DiagonalMatrix<MT,SO,DF>, EnableIf_< IsNumeric<T> > >
+template< typename T1, typename T2 >
+struct MultTraitEval1< T1, T2
+                     , EnableIf_t< IsScalar_v<T1> &&
+                                   IsMatrix_v<T2> &&
+                                   ( IsDiagonal_v<T2> && !IsUniform_v<T2> ) > >
 {
-   using Type = DiagonalMatrix< MultTrait_<T,MT> >;
+   using Type = DiagonalMatrix< typename MultTraitEval2<T1,T2>::Type >;
 };
 
-template< typename MT, bool SO, bool DF, typename T, size_t N >
-struct MultTrait< DiagonalMatrix<MT,SO,DF>, StaticVector<T,N,false> >
+template< typename T1, typename T2 >
+struct MultTraitEval1< T1, T2
+                     , EnableIf_t< IsMatrix_v<T1> &&
+                                   IsMatrix_v<T2> &&
+                                   ( IsDiagonal_v<T1> && IsDiagonal_v<T2> ) &&
+                                   !( IsIdentity_v<T1> || IsIdentity_v<T2> ) &&
+                                   !( IsZero_v<T1> || IsZero_v<T2> ) > >
 {
-   using Type = MultTrait_< MT, StaticVector<T,N,false> >;
+   using Type = DiagonalMatrix< typename MultTraitEval2<T1,T2>::Type >;
 };
+/*! \endcond */
+//*************************************************************************************************
 
-template< typename T, size_t N, typename MT, bool SO, bool DF >
-struct MultTrait< StaticVector<T,N,true>, DiagonalMatrix<MT,SO,DF> >
-{
-   using Type = MultTrait_< StaticVector<T,N,true>, MT >;
-};
 
-template< typename MT, bool SO, bool DF, typename T, size_t N >
-struct MultTrait< DiagonalMatrix<MT,SO,DF>, HybridVector<T,N,false> >
-{
-   using Type = MultTrait_< MT, HybridVector<T,N,false> >;
-};
 
-template< typename T, size_t N, typename MT, bool SO, bool DF >
-struct MultTrait< HybridVector<T,N,true>, DiagonalMatrix<MT,SO,DF> >
-{
-   using Type = MultTrait_< HybridVector<T,N,true>, MT >;
-};
 
-template< typename MT, bool SO, bool DF, typename T >
-struct MultTrait< DiagonalMatrix<MT,SO,DF>, DynamicVector<T,false> >
-{
-   using Type = MultTrait_< MT, DynamicVector<T,false> >;
-};
+//=================================================================================================
+//
+//  KRONTRAIT SPECIALIZATIONS
+//
+//=================================================================================================
 
-template< typename T, typename MT, bool SO, bool DF >
-struct MultTrait< DynamicVector<T,true>, DiagonalMatrix<MT,SO,DF> >
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename T1, typename T2 >
+struct KronTraitEval1< T1, T2
+                     , EnableIf_t< IsMatrix_v<T1> &&
+                                   IsMatrix_v<T2> &&
+                                   ( IsDiagonal_v<T1> && IsDiagonal_v<T2> ) &&
+                                   !( IsIdentity_v<T1> && IsIdentity_v<T2> ) &&
+                                   !( IsZero_v<T1> || IsZero_v<T2> ) > >
 {
-   using Type = MultTrait_< DynamicVector<T,true>, MT >;
-};
-
-template< typename MT, bool SO, bool DF, typename T, bool AF, bool PF >
-struct MultTrait< DiagonalMatrix<MT,SO,DF>, CustomVector<T,AF,PF,false> >
-{
-   using Type = MultTrait_< MT, CustomVector<T,AF,PF,false> >;
-};
-
-template< typename T, bool AF, bool PF, typename MT, bool SO, bool DF >
-struct MultTrait< CustomVector<T,AF,PF,true>, DiagonalMatrix<MT,SO,DF> >
-{
-   using Type = MultTrait_< CustomVector<T,AF,PF,true>, MT >;
-};
-
-template< typename MT, bool SO, bool DF, typename T >
-struct MultTrait< DiagonalMatrix<MT,SO,DF>, CompressedVector<T,false> >
-{
-   using Type = MultTrait_< MT, CompressedVector<T,false> >;
-};
-
-template< typename T, typename MT, bool SO, bool DF >
-struct MultTrait< CompressedVector<T,true>, DiagonalMatrix<MT,SO,DF> >
-{
-   using Type = MultTrait_< CompressedVector<T,true>, MT >;
-};
-
-template< typename MT, bool SO1, bool DF, typename T, size_t M, size_t N, bool SO2 >
-struct MultTrait< DiagonalMatrix<MT,SO1,DF>, StaticMatrix<T,M,N,SO2> >
-{
-   using Type = MultTrait_< MT, StaticMatrix<T,M,N,SO2> >;
-};
-
-template< typename T, size_t M, size_t N, bool SO1, typename MT, bool SO2, bool DF >
-struct MultTrait< StaticMatrix<T,M,N,SO1>, DiagonalMatrix<MT,SO2,DF> >
-{
-   using Type = MultTrait_< StaticMatrix<T,M,N,SO1>, MT >;
-};
-
-template< typename MT, bool SO1, bool DF, typename T, size_t M, size_t N, bool SO2 >
-struct MultTrait< DiagonalMatrix<MT,SO1,DF>, HybridMatrix<T,M,N,SO2> >
-{
-   using Type = MultTrait_< MT, HybridMatrix<T,M,N,SO2> >;
-};
-
-template< typename T, size_t M, size_t N, bool SO1, typename MT, bool SO2, bool DF >
-struct MultTrait< HybridMatrix<T,M,N,SO1>, DiagonalMatrix<MT,SO2,DF> >
-{
-   using Type = MultTrait_< HybridMatrix<T,M,N,SO1>, MT >;
-};
-
-template< typename MT, bool SO1, bool DF, typename T, bool SO2 >
-struct MultTrait< DiagonalMatrix<MT,SO1,DF>, DynamicMatrix<T,SO2> >
-{
-   using Type = MultTrait_< MT, DynamicMatrix<T,SO2> >;
-};
-
-template< typename T, bool SO1, typename MT, bool SO2, bool DF >
-struct MultTrait< DynamicMatrix<T,SO1>, DiagonalMatrix<MT,SO2,DF> >
-{
-   using Type = MultTrait_< DynamicMatrix<T,SO1>, MT >;
-};
-
-template< typename MT, bool SO1, bool DF, typename T, bool AF, bool PF, bool SO2 >
-struct MultTrait< DiagonalMatrix<MT,SO1,DF>, CustomMatrix<T,AF,PF,SO2> >
-{
-   using Type = MultTrait_< MT, CustomMatrix<T,AF,PF,SO2> >;
-};
-
-template< typename T, bool AF, bool PF, bool SO1, typename MT, bool SO2, bool DF >
-struct MultTrait< CustomMatrix<T,AF,PF,SO1>, DiagonalMatrix<MT,SO2,DF> >
-{
-   using Type = MultTrait_< CustomMatrix<T,AF,PF,SO1>, MT >;
-};
-
-template< typename MT, bool SO1, bool DF, typename T, bool SO2 >
-struct MultTrait< DiagonalMatrix<MT,SO1,DF>, CompressedMatrix<T,SO2> >
-{
-   using Type = MultTrait_< MT, CompressedMatrix<T,SO2> >;
-};
-
-template< typename T, bool SO1, typename MT, bool SO2, bool DF >
-struct MultTrait< CompressedMatrix<T,SO1>, DiagonalMatrix<MT,SO2,DF> >
-{
-   using Type = MultTrait_< CompressedMatrix<T,SO1>, MT >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2, bool NF >
-struct MultTrait< DiagonalMatrix<MT1,SO1,DF1>, SymmetricMatrix<MT2,SO2,DF2,NF> >
-{
-   using Type = MultTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, bool NF, typename MT2, bool SO2, bool DF2 >
-struct MultTrait< SymmetricMatrix<MT1,SO1,DF1,NF>, DiagonalMatrix<MT2,SO2,DF2> >
-{
-   using Type = MultTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct MultTrait< DiagonalMatrix<MT1,SO1,DF1>, HermitianMatrix<MT2,SO2,DF2> >
-{
-   using Type = MultTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct MultTrait< HermitianMatrix<MT1,SO1,DF1>, DiagonalMatrix<MT2,SO2,DF2> >
-{
-   using Type = MultTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct MultTrait< DiagonalMatrix<MT1,SO1,DF1>, LowerMatrix<MT2,SO2,DF2> >
-{
-   using Type = LowerMatrix< MultTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct MultTrait< LowerMatrix<MT1,SO1,DF1>, DiagonalMatrix<MT2,SO2,DF2> >
-{
-   using Type = LowerMatrix< MultTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct MultTrait< DiagonalMatrix<MT1,SO1,DF1>, UniLowerMatrix<MT2,SO2,DF2> >
-{
-   using Type = LowerMatrix< MultTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct MultTrait< UniLowerMatrix<MT1,SO1,DF1>, DiagonalMatrix<MT2,SO2,DF2> >
-{
-   using Type = LowerMatrix< MultTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct MultTrait< DiagonalMatrix<MT1,SO1,DF1>, StrictlyLowerMatrix<MT2,SO2,DF2> >
-{
-   using Type = StrictlyLowerMatrix< MultTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct MultTrait< StrictlyLowerMatrix<MT1,SO1,DF1>, DiagonalMatrix<MT2,SO2,DF2> >
-{
-   using Type = StrictlyLowerMatrix< MultTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct MultTrait< DiagonalMatrix<MT1,SO1,DF1>, UpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = UpperMatrix< MultTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct MultTrait< UpperMatrix<MT1,SO1,DF1>, DiagonalMatrix<MT2,SO2,DF2> >
-{
-   using Type = UpperMatrix< MultTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct MultTrait< DiagonalMatrix<MT1,SO1,DF1>, UniUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = UpperMatrix< MultTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct MultTrait< UniUpperMatrix<MT1,SO1,DF1>, DiagonalMatrix<MT2,SO2,DF2> >
-{
-   using Type = UpperMatrix< MultTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct MultTrait< DiagonalMatrix<MT1,SO1,DF1>, StrictlyUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = StrictlyUpperMatrix< MultTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct MultTrait< StrictlyUpperMatrix<MT1,SO1,DF1>, DiagonalMatrix<MT2,SO2,DF2> >
-{
-   using Type = StrictlyUpperMatrix< MultTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct MultTrait< DiagonalMatrix<MT1,SO1,DF1>, DiagonalMatrix<MT2,SO2,DF2> >
-{
-   using Type = DiagonalMatrix< MultTrait_<MT1,MT2> >;
+   using Type = DiagonalMatrix< typename KronTraitEval2<T1,T2>::Type >;
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -1760,10 +1988,11 @@ struct MultTrait< DiagonalMatrix<MT1,SO1,DF1>, DiagonalMatrix<MT2,SO2,DF2> >
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-template< typename MT, bool SO, bool DF, typename T >
-struct DivTrait< DiagonalMatrix<MT,SO,DF>, T, EnableIf_< IsNumeric<T> > >
+template< typename T1, typename T2 >
+struct DivTraitEval1< T1, T2
+                    , EnableIf_t< IsDiagonal_v<T1> && IsScalar_v<T2> > >
 {
-   using Type = DiagonalMatrix< DivTrait_<MT,T> >;
+   using Type = DiagonalMatrix< typename DivTraitEval2<T1,T2>::Type >;
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -1773,100 +2002,204 @@ struct DivTrait< DiagonalMatrix<MT,SO,DF>, T, EnableIf_< IsNumeric<T> > >
 
 //=================================================================================================
 //
-//  FOREACHTRAIT SPECIALIZATIONS
+//  MAPTRAIT SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename T, typename OP >
+struct UnaryMapTraitEval1< T, OP
+                         , EnableIf_t< YieldsDiagonal_v<OP,T> &&
+                                       !YieldsIdentity_v<OP,T> &&
+                                       !YieldsZero_v<OP,T> > >
+{
+   using Type = DiagonalMatrix< typename UnaryMapTraitEval2<T,OP>::Type, StorageOrder_v<T> >;
+};
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename T1, typename T2, typename OP >
+struct BinaryMapTraitEval1< T1, T2, OP
+                          , EnableIf_t< YieldsDiagonal_v<OP,T1,T2> &&
+                                        !YieldsIdentity_v<OP,T1,T2> &&
+                                        !YieldsZero_v<OP,T1,T2> > >
+{
+   using Type = DiagonalMatrix< typename BinaryMapTraitEval2<T1,T2,OP>::Type >;
+};
+/*! \endcond */
+//*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  DECLSYMTRAIT SPECIALIZATIONS
 //
 //=================================================================================================
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct ForEachTrait< DiagonalMatrix<MT,SO,DF>, Abs >
+struct DeclSymTrait< DiagonalMatrix<MT,SO,DF> >
 {
-   using Type = DiagonalMatrix< ForEachTrait_<MT,Abs> >;
+   using Type = DiagonalMatrix<MT,SO,DF>;
 };
+/*! \endcond */
+//*************************************************************************************************
 
+
+
+
+//=================================================================================================
+//
+//  DECLHERMTRAIT SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct ForEachTrait< DiagonalMatrix<MT,SO,DF>, Floor >
+struct DeclHermTrait< DiagonalMatrix<MT,SO,DF> >
 {
-   using Type = DiagonalMatrix< ForEachTrait_<MT,Floor> >;
+   using Type = HermitianMatrix<MT,SO,DF>;
 };
+/*! \endcond */
+//*************************************************************************************************
 
+
+
+
+//=================================================================================================
+//
+//  DECLLOWTRAIT SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct ForEachTrait< DiagonalMatrix<MT,SO,DF>, Ceil >
+struct DeclLowTrait< DiagonalMatrix<MT,SO,DF> >
 {
-   using Type = DiagonalMatrix< ForEachTrait_<MT,Ceil> >;
+   using Type = DiagonalMatrix<MT,SO,DF>;
 };
+/*! \endcond */
+//*************************************************************************************************
 
+
+
+
+//=================================================================================================
+//
+//  DECLUNILOWTRAIT SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct ForEachTrait< DiagonalMatrix<MT,SO,DF>, Conj >
+struct DeclUniLowTrait< DiagonalMatrix<MT,SO,DF> >
 {
-   using Type = DiagonalMatrix< ForEachTrait_<MT,Conj> >;
+   using Type = IdentityMatrix< ElementType_t<MT>, SO >;
 };
+/*! \endcond */
+//*************************************************************************************************
 
+
+
+
+//=================================================================================================
+//
+//  DECLSTRLOWTRAIT SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct ForEachTrait< DiagonalMatrix<MT,SO,DF>, Real >
+struct DeclStrLowTrait< DiagonalMatrix<MT,SO,DF> >
 {
-   using Type = DiagonalMatrix< ForEachTrait_<MT,Real> >;
+   using Type = ZeroMatrix< ElementType_t<MT>, SO >;
 };
+/*! \endcond */
+//*************************************************************************************************
 
+
+
+
+//=================================================================================================
+//
+//  DECLUPPTRAIT SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct ForEachTrait< DiagonalMatrix<MT,SO,DF>, Imag >
+struct DeclUppTrait< DiagonalMatrix<MT,SO,DF> >
 {
-   using Type = DiagonalMatrix< ForEachTrait_<MT,Imag> >;
+   using Type = DiagonalMatrix<MT,SO,DF>;
 };
+/*! \endcond */
+//*************************************************************************************************
 
+
+
+
+//=================================================================================================
+//
+//  DECLUNIUPPTRAIT SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct ForEachTrait< DiagonalMatrix<MT,SO,DF>, Sin >
+struct DeclUniUppTrait< DiagonalMatrix<MT,SO,DF> >
 {
-   using Type = DiagonalMatrix< ForEachTrait_<MT,Sin> >;
+   using Type = IdentityMatrix< ElementType_t<MT>, SO >;
 };
+/*! \endcond */
+//*************************************************************************************************
 
+
+
+
+//=================================================================================================
+//
+//  DECLSTRUPPTRAIT SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct ForEachTrait< DiagonalMatrix<MT,SO,DF>, Asin >
+struct DeclStrUppTrait< DiagonalMatrix<MT,SO,DF> >
 {
-   using Type = DiagonalMatrix< ForEachTrait_<MT,Asin> >;
+   using Type = ZeroMatrix< ElementType_t<MT>, SO >;
 };
+/*! \endcond */
+//*************************************************************************************************
 
-template< typename MT, bool SO, bool DF >
-struct ForEachTrait< DiagonalMatrix<MT,SO,DF>, Sinh >
-{
-   using Type = DiagonalMatrix< ForEachTrait_<MT,Sinh> >;
-};
 
-template< typename MT, bool SO, bool DF >
-struct ForEachTrait< DiagonalMatrix<MT,SO,DF>, Asinh >
-{
-   using Type = DiagonalMatrix< ForEachTrait_<MT,Asinh> >;
-};
 
-template< typename MT, bool SO, bool DF >
-struct ForEachTrait< DiagonalMatrix<MT,SO,DF>, Tan >
-{
-   using Type = DiagonalMatrix< ForEachTrait_<MT,Tan> >;
-};
 
-template< typename MT, bool SO, bool DF >
-struct ForEachTrait< DiagonalMatrix<MT,SO,DF>, Atan >
-{
-   using Type = DiagonalMatrix< ForEachTrait_<MT,Atan> >;
-};
+//=================================================================================================
+//
+//  DECLDIAGTRAIT SPECIALIZATIONS
+//
+//=================================================================================================
 
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct ForEachTrait< DiagonalMatrix<MT,SO,DF>, Tanh >
+struct DeclDiagTrait< DiagonalMatrix<MT,SO,DF> >
 {
-   using Type = DiagonalMatrix< ForEachTrait_<MT,Tanh> >;
-};
-
-template< typename MT, bool SO, bool DF >
-struct ForEachTrait< DiagonalMatrix<MT,SO,DF>, Atanh >
-{
-   using Type = DiagonalMatrix< ForEachTrait_<MT,Atanh> >;
-};
-
-template< typename MT, bool SO, bool DF >
-struct ForEachTrait< DiagonalMatrix<MT,SO,DF>, Erf >
-{
-   using Type = DiagonalMatrix< ForEachTrait_<MT,Erf> >;
+   using Type = DiagonalMatrix<MT,SO,DF>;
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -1920,48 +2253,14 @@ struct LowType< DiagonalMatrix<MT1,SO1,DF1>, DiagonalMatrix<MT2,SO2,DF2> >
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-template< typename MT, bool SO, bool DF >
-struct SubmatrixTrait< DiagonalMatrix<MT,SO,DF> >
+template< typename MT, size_t I, size_t N >
+struct SubmatrixTraitEval1< MT, I, I, N, N
+                          , EnableIf_t< I != inf && N != inf &&
+                                        IsDiagonal_v<MT> &&
+                                        !IsIdentity_v<MT> &&
+                                        !IsZero_v<MT> > >
 {
-   using Type = SubmatrixTrait_<MT>;
-};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  ROWTRAIT SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT, bool SO, bool DF >
-struct RowTrait< DiagonalMatrix<MT,SO,DF> >
-{
-   using Type = RowTrait_<MT>;
-};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  COLUMNTRAIT SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT, bool SO, bool DF >
-struct ColumnTrait< DiagonalMatrix<MT,SO,DF> >
-{
-   using Type = ColumnTrait_<MT>;
+   using Type = DiagonalMatrix< typename SubmatrixTraitEval2<MT,I,I,N,N>::Type >;
 };
 /*! \endcond */
 //*************************************************************************************************

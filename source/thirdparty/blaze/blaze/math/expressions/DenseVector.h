@@ -3,7 +3,7 @@
 //  \file blaze/math/expressions/DenseVector.h
 //  \brief Header file for the DenseVector base class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -41,6 +41,11 @@
 //*************************************************************************************************
 
 #include <blaze/math/expressions/Vector.h>
+#include <blaze/math/typetraits/HasConstDataAccess.h>
+#include <blaze/math/typetraits/HasMutableDataAccess.h>
+#include <blaze/system/Inline.h>
+#include <blaze/util/EnableIf.h>
+#include <blaze/util/MaybeUnused.h>
 
 
 namespace blaze {
@@ -67,8 +72,176 @@ namespace blaze {
 */
 template< typename VT  // Type of the dense vector
         , bool TF >    // Transpose flag
-struct DenseVector : public Vector<VT,TF>
-{};
+class DenseVector
+   : public Vector<VT,TF>
+{
+ protected:
+   //**Special member functions********************************************************************
+   /*!\name Special member functions */
+   //@{
+   DenseVector() = default;
+   DenseVector( const DenseVector& ) = default;
+   DenseVector( DenseVector&& ) = default;
+   ~DenseVector() = default;
+   DenseVector& operator=( const DenseVector& ) = default;
+   DenseVector& operator=( DenseVector&& ) = default;
+   //@}
+   //**********************************************************************************************
+};
+//*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  GLOBAL FUNCTIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*!\name DenseVector global functions */
+//@{
+template< typename VT, bool TF >
+typename VT::ElementType* data( DenseVector<VT,TF>& dv ) noexcept;
+
+template< typename VT, bool TF >
+const typename VT::ElementType* data( const DenseVector<VT,TF>& dv ) noexcept;
+//@}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Backend implementation of the \c data() function for vectors without mutable data access.
+// \ingroup dense_vector
+//
+// \param dv The given dense vector.
+// \return Pointer to the internal element storage.
+//
+// This function returns the internal storage of a dense vector without mutable data access,
+// which is represented by \c nullptr.
+*/
+template< typename VT  // Type of the vector
+        , bool TF >    // Transpose flag of the vector
+BLAZE_ALWAYS_INLINE auto data_backend( DenseVector<VT,TF>& dv ) noexcept
+   -> DisableIf_t< HasMutableDataAccess_v<VT>, typename VT::ElementType* >
+{
+   MAYBE_UNUSED( dv );
+
+   return nullptr;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Backend implementation of the \c data() function for vectors with mutable data access.
+// \ingroup dense_vector
+//
+// \param dv The given dense vector.
+// \return Pointer to the internal element storage.
+//
+// This function returns the internal storage of a dense vector with mutable data access.
+*/
+template< typename VT  // Type of the vector
+        , bool TF >    // Transpose flag of the vector
+BLAZE_ALWAYS_INLINE auto data_backend( DenseVector<VT,TF>& dv ) noexcept
+   -> EnableIf_t< HasMutableDataAccess_v<VT>, typename VT::ElementType* >
+{
+   return (*dv).data();
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Low-level data access to the dense vector elements.
+// \ingroup dense_vector
+//
+// \param dv The given dense vector.
+// \return Pointer to the internal element storage.
+//
+// This function provides a unified interface to access the given dense vector's internal
+// element storage. In contrast to the \c data() member function, which is only available
+// in case the vector has some internal storage, this function can be used on all kinds of
+// dense vectors. In case the given dense vector does not provide low-level data access,
+// the function returns \c nullptr.
+*/
+template< typename VT  // Type of the vector
+        , bool TF >    // Transpose flag of the vector
+BLAZE_ALWAYS_INLINE typename VT::ElementType* data( DenseVector<VT,TF>& dv ) noexcept
+{
+   return data_backend( *dv );
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Backend implementation of the \c data() function for vectors without constant data access.
+// \ingroup dense_vector
+//
+// \param dv The given dense vector.
+// \return Pointer to the internal element storage.
+//
+// This function returns the internal storage of a dense vector without constant data access,
+// which is represented by \c nullptr.
+*/
+template< typename VT  // Type of the vector
+        , bool TF >    // Transpose flag of the vector
+BLAZE_ALWAYS_INLINE auto data_backend( const DenseVector<VT,TF>& dv ) noexcept
+   -> DisableIf_t< HasConstDataAccess_v<VT>, const typename VT::ElementType* >
+{
+   MAYBE_UNUSED( dv );
+
+   return nullptr;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Backend implementation of the \c data() function for vectors with constant data access.
+// \ingroup dense_vector
+//
+// \param dv The given dense vector.
+// \return Pointer to the internal element storage.
+//
+// This function returns the internal storage of a dense vector with constant data access.
+*/
+template< typename VT  // Type of the vector
+        , bool TF >    // Transpose flag of the vector
+BLAZE_ALWAYS_INLINE auto data_backend( const DenseVector<VT,TF>& dv ) noexcept
+   -> EnableIf_t< HasConstDataAccess_v<VT>, const typename VT::ElementType* >
+{
+   return (*dv).data();
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Low-level data access to the dense vector elements.
+// \ingroup dense_vector
+//
+// \param dv The given dense vector.
+// \return Pointer to the internal element storage.
+//
+// This function provides a unified interface to access the given dense vector's internal
+// element storage. In contrast to the \c data() member function, which is only available
+// in case the vector has some internal storage, this function can be used on all kinds of
+// dense vectors. In case the given dense vector does not provide low-level data access,
+// the function returns \c nullptr.
+*/
+template< typename VT  // Type of the vector
+        , bool TF >    // Transpose flag of the vector
+BLAZE_ALWAYS_INLINE const typename VT::ElementType* data( const DenseVector<VT,TF>& dv ) noexcept
+{
+   return data_backend( *dv );
+}
 //*************************************************************************************************
 
 } // namespace blaze

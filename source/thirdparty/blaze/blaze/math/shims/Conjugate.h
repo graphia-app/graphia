@@ -3,7 +3,7 @@
 //  \file blaze/math/shims/Conjugate.h
 //  \brief Header file for the conjugate shim
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -42,9 +42,7 @@
 
 #include <utility>
 #include <blaze/system/Inline.h>
-#include <blaze/util/DisableIf.h>
 #include <blaze/util/EnableIf.h>
-#include <blaze/util/typetraits/IsBuiltin.h>
 #include <blaze/util/typetraits/IsNumeric.h>
 
 
@@ -57,14 +55,14 @@ namespace blaze {
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\brief Computing the conjugate of the given value/object.
+/*!\brief Computing the conjugate of the given numeric value.
 // \ingroup math_shims
 //
-// \param a The given value/object.
+// \param a The given numeric value.
 // \return The complex conjugate of the given value.
 //
 // The \a conj shim represents an abstract interface for the computation of the complex conjugate
-// of any given data type. In case the given value is of complex type the function computes the
+// of a numeric value. In case the given value is of complex type the function computes the
 // complex conjugate by reversing the sign of the imaginary part:
 
    \code
@@ -72,14 +70,14 @@ namespace blaze {
    const blaze::complex<double> b( conj( a ) );  // Results in ( 1, -2 )
    \endcode
 
-// Values of other data types, such as all built-in data types, are considered complex numbers
-// with an imaginary part of 0. Thus the returned value corresponds to the given value. For more
-// information on complex conjugates, see
+// Values of built-in data type are considered complex numbers with an imaginary part of 0. Thus
+// the returned value corresponds to the given value. For more information on complex conjugates,
+// see
 //
 //       https://en.wikipedia.org/wiki/Complex_conjugate
 */
-template< typename T >
-BLAZE_ALWAYS_INLINE constexpr EnableIf_< IsBuiltin<T>, T > conj( T a ) noexcept
+template< typename T, EnableIf_t< IsNumeric_v<T> >* = nullptr >
+BLAZE_ALWAYS_INLINE constexpr T conj( const T& a ) noexcept
 {
    return a;
 }
@@ -117,7 +115,7 @@ BLAZE_ALWAYS_INLINE constexpr EnableIf_< IsBuiltin<T>, T > conj( T a ) noexcept
 //       https://en.wikipedia.org/wiki/Complex_conjugate
 */
 template< typename T >
-BLAZE_ALWAYS_INLINE void conjugate( T& a ) noexcept( IsNumeric<T>::value )
+BLAZE_ALWAYS_INLINE void conjugate( T& a ) noexcept( IsNumeric_v<T> )
 {
    a = conj( a );
 }
@@ -141,8 +139,8 @@ BLAZE_ALWAYS_INLINE void conjugate( T& a ) noexcept( IsNumeric<T>::value )
 // \param b The second value/object to be swapped and conjugated.
 // \return void
 */
-template< typename T >
-BLAZE_ALWAYS_INLINE DisableIf_< IsNumeric<T> > cswap_backend( T& a, T& b )
+template< typename T, DisableIf_t< IsNumeric_v<T> >* = nullptr >
+BLAZE_ALWAYS_INLINE void cswap_backend( T& a, T& b )
 {
    using std::swap;
 
@@ -163,8 +161,8 @@ BLAZE_ALWAYS_INLINE DisableIf_< IsNumeric<T> > cswap_backend( T& a, T& b )
 // \param b The second value to be swapped and conjugated.
 // \return void
 */
-template< typename T >
-BLAZE_ALWAYS_INLINE EnableIf_< IsNumeric<T> > cswap_backend( T& a, T& b ) noexcept
+template< typename T, EnableIf_t< IsNumeric_v<T> >* = nullptr >
+BLAZE_ALWAYS_INLINE void cswap_backend( T& a, T& b ) noexcept
 {
    const T tmp( a );
    a = conj( b );
@@ -192,7 +190,7 @@ BLAZE_ALWAYS_INLINE EnableIf_< IsNumeric<T> > cswap_backend( T& a, T& b ) noexce
    \endcode
 */
 template< typename T >
-BLAZE_ALWAYS_INLINE void cswap( T& a, T& b ) noexcept( IsNumeric<T>::value )
+BLAZE_ALWAYS_INLINE void cswap( T& a, T& b ) noexcept( IsNumeric_v<T> )
 {
    cswap_backend( a, b );
 }

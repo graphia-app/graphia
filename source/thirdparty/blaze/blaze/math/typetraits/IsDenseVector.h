@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/IsDenseVector.h
 //  \brief Header file for the IsDenseVector type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,11 +40,9 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/math/expressions/DenseVector.h>
+#include <utility>
+#include <blaze/math/expressions/Forward.h>
 #include <blaze/util/IntegralConstant.h>
-#include <blaze/util/mpl/Or.h>
-#include <blaze/util/typetraits/IsBaseOf.h>
-#include <blaze/util/typetraits/RemoveCV.h>
 
 
 namespace blaze {
@@ -56,29 +54,74 @@ namespace blaze {
 //=================================================================================================
 
 //*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Auxiliary helper functions for the IsDenseVector type trait.
+// \ingroup math_type_traits
+*/
+template< typename VT, bool TF >
+TrueType isDenseVector_backend( const volatile DenseVector<VT,TF>* );
+
+FalseType isDenseVector_backend( ... );
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
 /*!\brief Compile time check for dense vector types.
 // \ingroup math_type_traits
 //
-// This type trait tests whether or not the given template parameter is a dense, N-dimensional
-// vector type. In case the type is a dense vector type, the \a value member constant is set
-// to \a true, the nested type definition \a Type is \a TrueType, and the class derives from
-// \a TrueType. Otherwise \a value is set to \a false, \a Type is \a FalseType, and the class
-// derives from \a FalseType.
+// This type trait tests whether or not the given template parameter is a dense vector type
+// (i.e. whether \a T is derived from the DenseVector base class). In case the type is a dense
+// vector type, the \a value member constant is set to \a true, the nested type definition
+// \a Type is \a TrueType, and the class derives from \a TrueType. Otherwise \a value is set
+// to \a false, \a Type is \a FalseType, and the class derives from \a FalseType.
 
    \code
-   blaze::IsDenseVector< DynamicVector<double,false> >::value       // Evaluates to 1
-   blaze::IsDenseVector< const StaticVector<float,3U,true> >::Type  // Results in TrueType
-   blaze::IsDenseVector< volatile StaticVector<int,6U,true> >       // Is derived from TrueType
-   blaze::IsDenseVector< CompressedVector<double,false> >::value    // Evaluates to 0
-   blaze::IsDenseVector< CompressedMatrix<double,true> >::Type      // Results in FalseType
-   blaze::IsDenseVector< DynamicMatrix<double,true> >               // Is derived from FalseType
+   using namespace blaze;
+
+   IsDenseVector< DynamicVector<double> >::value        // Evaluates to 1
+   IsDenseVector< const StaticVector<float,3U> >::Type  // Results in TrueType
+   IsDenseVector< volatile StaticVector<int,6U> >       // Is derived from TrueType
+   IsDenseVector< CompressedVector<double> >::value     // Evaluates to 0
+   IsDenseVector< CompressedMatrix<double> >::Type      // Results in FalseType
+   IsDenseVector< DynamicMatrix<double> >               // Is derived from FalseType
    \endcode
 */
 template< typename T >
 struct IsDenseVector
-   : public BoolConstant< Or< IsBaseOf<DenseVector<RemoveCV_<T>,false>,T>
-                            , IsBaseOf<DenseVector<RemoveCV_<T>,true>,T> >::value >
+   : public decltype( isDenseVector_backend( std::declval<T*>() ) )
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Specialization of the IsDenseVector type trait for references.
+// \ingroup math_type_traits
+*/
+template< typename T >
+struct IsDenseVector<T&>
+   : public FalseType
+{};
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsDenseVector type trait.
+// \ingroup math_type_traits
+//
+// The IsDenseVector_v variable template provides a convenient shortcut to access the nested
+// \a value of the IsDenseVector class template. For instance, given the type \a T the
+// following two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsDenseVector<T>::value;
+   constexpr bool value2 = blaze::IsDenseVector_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsDenseVector_v = IsDenseVector<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

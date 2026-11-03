@@ -3,7 +3,7 @@
 //  \file blaze/math/adaptors/uniuppermatrix/BaseTemplate.h
 //  \brief Header file for the implementation of the base template of the UniUpperMatrix
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,8 +40,8 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/math/typetraits/IsColumnMajorMatrix.h>
 #include <blaze/math/typetraits/IsDenseMatrix.h>
+#include <blaze/math/typetraits/StorageOrder.h>
 
 
 namespace blaze {
@@ -68,8 +68,12 @@ namespace blaze {
 // can be specified via the first template parameter:
 
    \code
+   namespace blaze {
+
    template< typename MT, bool SO, bool DF >
    class UniUpperMatrix;
+
+   } // namespace blaze
    \endcode
 
 //  - MT: specifies the type of the matrix to be adapted. UniUpperMatrix can be used with any
@@ -204,7 +208,7 @@ namespace blaze {
    using blaze::UniUpperMatrix;
    using blaze::rowMajor;
 
-   typedef UniUpperMatrix< CompressedMatrix<double,rowMajor> >  CompressedUniUpper;
+   using CompressedUniUpper = UniUpperMatrix< CompressedMatrix<double,rowMajor> >;
 
    // Default constructed, row-major 3x3 uniupper compressed matrix
    CompressedUniUpper A( 3 );
@@ -260,7 +264,7 @@ namespace blaze {
    using blaze::unpadded;
    using blaze::rowMajor;
 
-   typedef UniUpperMatrix< CustomMatrix<double,unaligned,unpadded,rowMajor> >  CustomUniUpper;
+   using CustomUniUpper = UniUpperMatrix< CustomMatrix<double,unaligned,unpadded,rowMajor> >;
 
    // Creating a 3x3 uniupper custom matrix from a properly initialized array
    double array[9] = { 1.0, 2.0, 3.0,
@@ -570,9 +574,9 @@ namespace blaze {
    C = A * B;  // Results in an uniupper matrix; no runtime overhead
    \endcode
 */
-template< typename MT                               // Type of the adapted matrix
-        , bool SO = IsColumnMajorMatrix<MT>::value  // Storage order of the adapted matrix
-        , bool DF = IsDenseMatrix<MT>::value >      // Density flag
+template< typename MT                      // Type of the adapted matrix
+        , bool SO = StorageOrder_v<MT>     // Storage order of the adapted matrix
+        , bool DF = IsDenseMatrix_v<MT> >  // Density flag
 class UniUpperMatrix
 {};
 //*************************************************************************************************

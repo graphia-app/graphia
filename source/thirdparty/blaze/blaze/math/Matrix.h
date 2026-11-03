@@ -3,7 +3,7 @@
 //  \file blaze/math/Matrix.h
 //  \brief Header file for all basic Matrix functionality
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -41,11 +41,19 @@
 //*************************************************************************************************
 
 #include <iomanip>
-#include <ostream>
+#include <iosfwd>
+#include <utility>
 #include <blaze/math/Aliases.h>
 #include <blaze/math/Exception.h>
 #include <blaze/math/expressions/Matrix.h>
-#include <blaze/math/RelaxationFlag.h>
+#include <blaze/math/shims/Add.h>
+#include <blaze/math/shims/Div.h>
+#include <blaze/math/shims/Mult.h>
+#include <blaze/math/shims/Sub.h>
+#include <blaze/math/ReductionFlag.h>
+#include <blaze/math/views/Band.h>
+#include <blaze/math/views/Elements.h>
+#include <blaze/util/EnableIf.h>
 
 
 namespace blaze {
@@ -60,40 +68,55 @@ namespace blaze {
 /*!\name Matrix functions */
 //@{
 template< typename MT, bool SO >
-inline bool isSymmetric( const Matrix<MT,SO>& m );
+bool isSymmetric( const Matrix<MT,SO>& m );
 
 template< typename MT, bool SO >
-inline bool isHermitian( const Matrix<MT,SO>& m );
+bool isHermitian( const Matrix<MT,SO>& m );
 
 template< typename MT, bool SO >
-inline bool isUniform( const Matrix<MT,SO>& m );
+bool isUniform( const Matrix<MT,SO>& m );
 
 template< typename MT, bool SO >
-inline bool isLower( const Matrix<MT,SO>& m );
+bool isLower( const Matrix<MT,SO>& m );
 
 template< typename MT, bool SO >
-inline bool isUniLower( const Matrix<MT,SO>& m );
+bool isUniLower( const Matrix<MT,SO>& m );
 
 template< typename MT, bool SO >
-inline bool isStrictlyLower( const Matrix<MT,SO>& m );
+bool isStrictlyLower( const Matrix<MT,SO>& m );
 
 template< typename MT, bool SO >
-inline bool isUpper( const Matrix<MT,SO>& m );
+bool isUpper( const Matrix<MT,SO>& m );
 
 template< typename MT, bool SO >
-inline bool isUniUpper( const Matrix<MT,SO>& m );
+bool isUniUpper( const Matrix<MT,SO>& m );
 
 template< typename MT, bool SO >
-inline bool isStrictlyUpper( const Matrix<MT,SO>& m );
+bool isStrictlyUpper( const Matrix<MT,SO>& m );
 
 template< typename MT, bool SO >
-inline bool isDiagonal( const Matrix<MT,SO>& m );
+bool isDiagonal( const Matrix<MT,SO>& m );
 
 template< typename MT, bool SO >
-inline bool isIdentity( const Matrix<MT,SO>& m );
+bool isIdentity( const Matrix<MT,SO>& m );
 
 template< typename MT, bool SO >
-inline auto trace( const Matrix<MT,SO>& m );
+decltype(auto) pow2( const Matrix<MT,SO>& m );
+
+template< typename MT, bool SO >
+decltype(auto) pow3( const Matrix<MT,SO>& m );
+
+template< typename MT, bool SO >
+decltype(auto) pow4( const Matrix<MT,SO>& m );
+
+template< typename MT1, bool SO1, typename MT2, bool SO2 >
+decltype(auto) schur( const Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs );
+
+template< typename MT, bool SO >
+auto trace( const Matrix<MT,SO>& m );
+
+template< bool RF, typename MT >
+decltype(auto) reverse( MT&& m );
 //@}
 //*************************************************************************************************
 
@@ -135,7 +158,7 @@ template< typename MT  // Type of the matrix
         , bool SO >    // Storage order
 inline bool isSymmetric( const Matrix<MT,SO>& m )
 {
-   return isSymmetric<relaxed>( ~m );
+   return isSymmetric<relaxed>( *m );
 }
 //*************************************************************************************************
 
@@ -179,7 +202,7 @@ template< typename MT  // Type of the matrix
         , bool SO >    // Storage order
 inline bool isHermitian( const Matrix<MT,SO>& m )
 {
-   return isHermitian<relaxed>( ~m );
+   return isHermitian<relaxed>( *m );
 }
 //*************************************************************************************************
 
@@ -221,7 +244,7 @@ template< typename MT  // Type of the matrix
         , bool SO >    // Storage order
 inline bool isUniform( const Matrix<MT,SO>& m )
 {
-   return isUniform<relaxed>( ~m );
+   return isUniform<relaxed>( *m );
 }
 //*************************************************************************************************
 
@@ -273,7 +296,7 @@ template< typename MT  // Type of the matrix
         , bool SO >    // Storage order
 inline bool isLower( const Matrix<MT,SO>& m )
 {
-   return isLower<relaxed>( ~m );
+   return isLower<relaxed>( *m );
 }
 //*************************************************************************************************
 
@@ -324,7 +347,7 @@ template< typename MT  // Type of the matrix
         , bool SO >    // Storage order
 inline bool isUniLower( const Matrix<MT,SO>& m )
 {
-   return isUniLower<relaxed>( ~m );
+   return isUniLower<relaxed>( *m );
 }
 //*************************************************************************************************
 
@@ -376,7 +399,7 @@ template< typename MT  // Type of the matrix
         , bool SO >    // Storage order
 inline bool isStrictlyLower( const Matrix<MT,SO>& m )
 {
-   return isStrictlyLower<relaxed>( ~m );
+   return isStrictlyLower<relaxed>( *m );
 }
 //*************************************************************************************************
 
@@ -428,7 +451,7 @@ template< typename MT  // Type of the matrix
         , bool SO >    // Storage order
 inline bool isUpper( const Matrix<MT,SO>& m )
 {
-   return isUpper<relaxed>( ~m );
+   return isUpper<relaxed>( *m );
 }
 //*************************************************************************************************
 
@@ -479,7 +502,7 @@ template< typename MT  // Type of the matrix
         , bool SO >    // Storage order
 inline bool isUniUpper( const Matrix<MT,SO>& m )
 {
-   return isUniUpper<relaxed>( ~m );
+   return isUniUpper<relaxed>( *m );
 }
 //*************************************************************************************************
 
@@ -531,7 +554,7 @@ template< typename MT  // Type of the matrix
         , bool SO >    // Storage order
 inline bool isStrictlyUpper( const Matrix<MT,SO>& m )
 {
-   return isStrictlyUpper<relaxed>( ~m );
+   return isStrictlyUpper<relaxed>( *m );
 }
 //*************************************************************************************************
 
@@ -584,7 +607,7 @@ template< typename MT  // Type of the matrix
         , bool SO >    // Storage order
 inline bool isDiagonal( const Matrix<MT,SO>& m )
 {
-   return isDiagonal<relaxed>( ~m );
+   return isDiagonal<relaxed>( *m );
 }
 //*************************************************************************************************
 
@@ -636,10 +659,117 @@ template< typename MT  // Type of the matrix
         , bool SO >    // Storage order
 inline bool isIdentity( const Matrix<MT,SO>& m )
 {
-   return isIdentity<relaxed>( ~m );
+   return isIdentity<relaxed>( *m );
 }
 //*************************************************************************************************
 
+
+//*************************************************************************************************
+/*!\brief Computes the square for each single element of the matrix \a m.
+// \ingroup matrix
+//
+// \param m The input matrix.
+// \return The square of each single element of \a m.
+//
+// The \a pow2() function computes the square for each element of the input matrix \a m. The
+// function returns an expression representing this operation.\n
+// The following example demonstrates the use of the \a pow2() function:
+
+   \code
+   blaze::DynamicMatrix<double> A, B;
+   // ... Resizing and initialization
+   B = pow2( A );
+   \endcode
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order
+inline decltype(auto) pow2( const Matrix<MT,SO>& m )
+{
+   return (*m) % (*m);
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Computes the cube for each single element of the matrix \a m.
+// \ingroup matrix
+//
+// \param m The input matrix.
+// \return The cube of each single element of \a m.
+//
+// The \a pow3() function computes the cube for each element of the input matrix \a m. The
+// function returns an expression representing this operation.\n
+// The following example demonstrates the use of the \a pow3() function:
+
+   \code
+   blaze::DynamicMatrix<double> A, B;
+   // ... Resizing and initialization
+   B = pow3( A );
+   \endcode
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order
+inline decltype(auto) pow3( const Matrix<MT,SO>& m )
+{
+   return (*m) % (*m) % (*m);
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Computes the quadruple for each single element of the matrix \a m.
+// \ingroup matrix
+//
+// \param m The input matrix.
+// \return The quadruple of each single element of \a m.
+//
+// The \a pow4() function computes the quadruple for each element of the input matrix \a m. The
+// function returns an expression representing this operation.\n
+// The following example demonstrates the use of the \a pow4() function:
+
+   \code
+   blaze::DynamicMatrix<double> A, B;
+   // ... Resizing and initialization
+   B = pow4( A );
+   \endcode
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order
+inline decltype(auto) pow4( const Matrix<MT,SO>& m )
+{
+   return pow2( pow2( *m ) );
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Schur product of two matrices (\f$ A=B \circ C \f$).
+// \ingroup matrix
+//
+// \param lhs The left-hand side matrix for the Schur product.
+// \param rhs The right-hand side matrix for the Schur product.
+// \return The Schur product.
+//
+// This function represents the Schur product between two matrices:
+
+   \code
+   blaze::DynamicMatrix<double> A, B, C;
+   // ... Resizing and initialization
+   C = schur( A, B );
+   \endcode
+
+// The function returns an expression representing a matrix of the higher-order element type
+// of the two involved element types \a VT1::ElementType and \a VT2::ElementType.
+*/
+template< typename MT1  // Type of the left-hand side matrix
+        , bool SO1      // Storage order of the left-hand side matrix
+        , typename MT2  // Type of the right-hand side matrix
+        , bool SO2 >    // Storage order of the right-hand side matrix
+inline decltype(auto) schur( const Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
+{
+   return (*lhs) % (*rhs);
+}
+//*************************************************************************************************
 
 
 //*************************************************************************************************
@@ -661,23 +791,93 @@ template< typename MT  // Type of the matrix
         , bool SO >    // Storage order
 inline auto trace( const Matrix<MT,SO>& m )
 {
-   using ET = ElementType_<MT>;
-
-   if( !isSquare( ~m ) ) {
+   if( !isSquare( *m ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid input matrix for trace computation" );
    }
 
-   if( (~m).rows() == 0UL ) {
-      return ET();
-   }
+   return sum( diagonal( *m ) );
+}
+//*************************************************************************************************
 
-   ET tmp( (~m)(0UL,0UL) );
 
-   for( size_t i=1UL; i<(~m).rows(); ++i ) {
-      tmp += (~m)(i,i);
-   }
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Backend implementation of the \c reverse() function for reversing the rows of a matrix.
+// \ingroup matrix
+//
+// \param m The matrix to be reversed.
+// \return The reversed matrix.
+*/
+template< bool RF      // Reverse flag
+        , typename MT  // Type of the matrix
+        , EnableIf_t< RF == rowwise >* = nullptr >
+inline decltype(auto) reverse_backend( MT&& m )
+{
+   return rows( std::forward<MT>( m ), [max=m.rows()-1UL]( size_t i ){ return max - i; }, m.rows() );
+}
+/*! \endcond */
+//*************************************************************************************************
 
-   return tmp;
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Backend implementation of the \c reverse() function for reversing the columns of a matrix.
+// \ingroup matrix
+//
+// \param m The matrix to be reversed.
+// \return The reversed matrix.
+*/
+template< bool RF      // Reverse flag
+        , typename MT  // Type of the matrix
+        , EnableIf_t< RF == columnwise >* = nullptr >
+inline decltype(auto) reverse_backend( MT&& m )
+{
+   return columns( std::forward<MT>( m ), [max=m.columns()-1UL]( size_t i ){ return max - i; }, m.columns() );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Reverse the rows or columns of a matrix.
+// \ingroup matrix
+//
+// \param m The matrix to be reversed.
+// \return The reversed matrix.
+//
+// This function reverses the rows or matrices of a dense or sparse matrix. In case the compile
+// time flag \a RF is set to \a blaze::rowwise, the rows of the matrix are reversed, in case \a RF
+// is set to \a blaze::columnwise, the columns of the matrix are reversed. The following examples
+// gives an impression of both alternatives:
+
+   \code
+   blaze::DynamicMatrix<int,rowMajor> A{ { 1, 0, 2, 3 },
+                                         { 2, 4, 0, 1 },
+                                         { 0, 3, 1, 0 } };
+   blaze::DynamicMatrix<int> B;
+
+   // Reversing the rows result in the matrix
+   //
+   //    ( 0 3 1 0 )
+   //    ( 2 4 0 1 )
+   //    ( 1 0 2 3 )
+   //
+   B = reverse<rowwise>( A );
+
+   // Reversing the columns result in the matrix
+   //
+   //    ( 3 2 0 1 )
+   //    ( 1 0 4 2 )
+   //    ( 0 1 3 0 )
+   //
+   B = reverse<columnwise>( A );
+   \endcode
+*/
+template< bool RF        // Reverse flag
+        , typename MT >  // Type of the matrix
+inline decltype(auto) reverse( MT&& m )
+{
+   return reverse_backend<RF>( std::forward<MT>( m ) );
 }
 //*************************************************************************************************
 
@@ -694,7 +894,7 @@ inline auto trace( const Matrix<MT,SO>& m )
 /*!\name Matrix operators */
 //@{
 template< typename MT, bool SO >
-inline std::ostream& operator<<( std::ostream& os, const Matrix<MT,SO>& m );
+std::ostream& operator<<( std::ostream& os, const Matrix<MT,SO>& m );
 //@}
 //*************************************************************************************************
 
@@ -711,7 +911,7 @@ template< typename MT  // Type of the matrix
         , bool SO >    // Storage order
 inline std::ostream& operator<<( std::ostream& os, const Matrix<MT,SO>& m )
 {
-   CompositeType_<MT> tmp( ~m );
+   CompositeType_t<MT> tmp( *m );
 
    for( size_t i=0UL; i<tmp.rows(); ++i ) {
       os << "( ";

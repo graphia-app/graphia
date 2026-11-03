@@ -3,7 +3,7 @@
 //  \file blaze/math/expressions/Computation.h
 //  \brief Header file for the Computation base class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -36,6 +36,13 @@
 #define _BLAZE_MATH_EXPRESSIONS_COMPUTATION_H_
 
 
+//*************************************************************************************************
+// Includes
+//*************************************************************************************************
+
+#include <blaze/math/expressions/Operation.h>
+
+
 namespace blaze {
 
 //=================================================================================================
@@ -57,6 +64,7 @@ namespace blaze {
 // template.
 */
 struct Computation
+   : private Operation
 {};
 //*************************************************************************************************
 

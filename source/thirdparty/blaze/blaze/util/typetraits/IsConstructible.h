@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/IsConstructible.h
 //  \brief Header file for the IsConstructible type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -74,6 +74,24 @@ struct IsConstructible
 //*************************************************************************************************
 
 
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsConstructible type trait.
+// \ingroup type_traits
+//
+// The IsConstructible_v variable template provides a convenient shortcut to access the nested
+// \a value of the IsConstructible class template. For instance, given the types \a T1, \a T2
+// and \a T3 the following two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsConstructible<T1,T2,T3>::value;
+   constexpr bool value2 = blaze::IsConstructible_v<T1,T2,T3>;
+   \endcode
+*/
+template< typename T, typename... Args >
+constexpr bool IsConstructible_v = IsConstructible<T>::value;
+//*************************************************************************************************
+
+
 
 
 //=================================================================================================
@@ -101,6 +119,24 @@ template< typename T, typename... Args >
 struct IsNothrowConstructible
    : public BoolConstant< std::is_nothrow_constructible<T,Args...>::value >
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsNothrowConstructible type trait.
+// \ingroup type_traits
+//
+// The IsNothrowConstructible_v variable template provides a convenient shortcut to access the
+// nested \a value of the IsNothrowConstructible class template. For instance, given the types
+// \a T1, \a T2 and \a T3 the following two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsNothrowConstructible<T1,T2,T3>::value;
+   constexpr bool value2 = blaze::IsNothrowConstructible_v<T1,T2,T3>;
+   \endcode
+*/
+template< typename T, typename... Args >
+constexpr bool IsNothrowConstructible_v = IsNothrowConstructible<T>::value;
 //*************************************************************************************************
 
 
@@ -134,6 +170,24 @@ struct IsDefaultConstructible
 //*************************************************************************************************
 
 
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsDefaultConstructible type trait.
+// \ingroup type_traits
+//
+// The IsDefaultConstructible_v variable template provides a convenient shortcut to access the
+// nested \a value of the IsDefaultConstructible class template. For instance, given the type
+// \a T the following two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsDefaultConstructible<T>::value;
+   constexpr bool value2 = blaze::IsDefaultConstructible_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsDefaultConstructible_v = IsDefaultConstructible<T>::value;
+//*************************************************************************************************
+
+
 
 
 //=================================================================================================
@@ -161,6 +215,24 @@ template< typename T >
 struct IsNothrowDefaultConstructible
    : public BoolConstant< std::is_nothrow_default_constructible<T>::value >
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsNothrowDefaultConstructible type trait.
+// \ingroup type_traits
+//
+// The IsNothrowDefaultConstructible_v variable template provides a convenient shortcut to access
+// the nested \a value of the IsNothrowDefaultConstructible class template. For instance, given
+// the type \a T the following two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsNothrowDefaultConstructible<T>::value;
+   constexpr bool value2 = blaze::IsNothrowDefaultConstructible_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsNothrowDefaultConstructible_v = IsNothrowDefaultConstructible<T>::value;
 //*************************************************************************************************
 
 
@@ -194,6 +266,24 @@ struct IsCopyConstructible
 //*************************************************************************************************
 
 
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsCopyConstructible type trait.
+// \ingroup type_traits
+//
+// The IsCopyConstructible_v variable template provides a convenient shortcut to access the
+// nested \a value of the IsCopyConstructible class template. For instance, given the type
+// \a T the following two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsCopyConstructible<T>::value;
+   constexpr bool value2 = blaze::IsCopyConstructible_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsCopyConstructible_v = IsCopyConstructible<T>::value;
+//*************************************************************************************************
+
+
 
 
 //=================================================================================================
@@ -221,6 +311,24 @@ template< typename T >
 struct IsNothrowCopyConstructible
    : public BoolConstant< std::is_copy_constructible<T>::value >
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsNothrowCopyConstructible type trait.
+// \ingroup type_traits
+//
+// The IsNothrowCopyConstructible_v variable template provides a convenient shortcut to access
+// the nested \a value of the IsNothrowCopyConstructible class template. For instance, given
+// the type \a T the following two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsNothrowCopyConstructible<T>::value;
+   constexpr bool value2 = blaze::IsNothrowCopyConstructible_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsNothrowCopyConstructible_v = IsNothrowCopyConstructible<T>::value;
 //*************************************************************************************************
 
 
@@ -254,6 +362,24 @@ struct IsMoveConstructible
 //*************************************************************************************************
 
 
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsMoveConstructible type trait.
+// \ingroup type_traits
+//
+// The IsMoveConstructible_v variable template provides a convenient shortcut to access the
+// nested \a value of the IsMoveConstructible class template. For instance, given the type
+// \a T the following two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsMoveConstructible<T>::value;
+   constexpr bool value2 = blaze::IsMoveConstructible_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsMoveConstructible_v = IsMoveConstructible<T>::value;
+//*************************************************************************************************
+
+
 
 
 //=================================================================================================
@@ -281,6 +407,24 @@ template< typename T >
 struct IsNothrowMoveConstructible
    : public BoolConstant< std::is_nothrow_move_constructible<T>::value >
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsNothrowMoveConstructible type trait.
+// \ingroup type_traits
+//
+// The IsNothrowMoveConstructible_v variable template provides a convenient shortcut to access
+// the nested \a value of the IsNothrowMoveConstructible class template. For instance, given
+// the type \a T the following two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsNothrowMoveConstructible<T>::value;
+   constexpr bool value2 = blaze::IsNothrowMoveConstructible_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsNothrowMoveConstructible_v = IsNothrowMoveConstructible<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

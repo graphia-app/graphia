@@ -3,7 +3,7 @@
 //  \file blaze/math/expressions/DVecDVecSubExpr.h
 //  \brief Header file for the dense vector/dense vector subtraction expression
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -41,8 +41,10 @@
 //*************************************************************************************************
 
 #include <iterator>
+#include <utility>
 #include <blaze/math/Aliases.h>
 #include <blaze/math/constraints/DenseVector.h>
+#include <blaze/math/constraints/RequiresEvaluation.h>
 #include <blaze/math/constraints/TransposeFlag.h>
 #include <blaze/math/constraints/VecVecSubExpr.h>
 #include <blaze/math/Exception.h>
@@ -52,9 +54,7 @@
 #include <blaze/math/expressions/VecVecSubExpr.h>
 #include <blaze/math/shims/Serial.h>
 #include <blaze/math/SIMD.h>
-#include <blaze/math/traits/SubExprTrait.h>
 #include <blaze/math/traits/SubTrait.h>
-#include <blaze/math/traits/SubvectorExprTrait.h>
 #include <blaze/math/typetraits/HasSIMDSub.h>
 #include <blaze/math/typetraits/IsAligned.h>
 #include <blaze/math/typetraits/IsComputation.h>
@@ -62,17 +62,15 @@
 #include <blaze/math/typetraits/IsPadded.h>
 #include <blaze/math/typetraits/IsTemporary.h>
 #include <blaze/math/typetraits/RequiresEvaluation.h>
-#include <blaze/math/typetraits/Size.h>
+#include <blaze/system/HostDevice.h>
 #include <blaze/system/Inline.h>
+#include <blaze/system/MacroDisable.h>
 #include <blaze/system/Thresholds.h>
 #include <blaze/util/Assert.h>
-#include <blaze/util/constraints/Reference.h>
 #include <blaze/util/EnableIf.h>
 #include <blaze/util/FunctionTrace.h>
 #include <blaze/util/IntegralConstant.h>
-#include <blaze/util/mpl/And.h>
 #include <blaze/util/mpl/If.h>
-#include <blaze/util/mpl/Max.h>
 #include <blaze/util/Types.h>
 
 
@@ -94,20 +92,20 @@ namespace blaze {
 template< typename VT1  // Type of the left-hand side dense vector
         , typename VT2  // Type of the right-hand side dense vector
         , bool TF >     // Transpose flag
-class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
-                      , private VecVecSubExpr
-                      , private Computation
+class DVecDVecSubExpr
+   : public VecVecSubExpr< DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF > >
+   , private Computation
 {
  private:
    //**Type definitions****************************************************************************
-   typedef ResultType_<VT1>     RT1;  //!< Result type of the left-hand side dense vector expression.
-   typedef ResultType_<VT2>     RT2;  //!< Result type of the right-hand side dense vector expression.
-   typedef ReturnType_<VT1>     RN1;  //!< Return type of the left-hand side dense vector expression.
-   typedef ReturnType_<VT2>     RN2;  //!< Return type of the right-hand side dense vector expression.
-   typedef CompositeType_<VT1>  CT1;  //!< Composite type of the left-hand side dense vector expression.
-   typedef CompositeType_<VT2>  CT2;  //!< Composite type of the right-hand side dense vector expression.
-   typedef ElementType_<VT1>    ET1;  //!< Element type of the left-hand side dense vector expression.
-   typedef ElementType_<VT2>    ET2;  //!< Element type of the right-hand side dense vector expression.
+   using RT1 = ResultType_t<VT1>;     //!< Result type of the left-hand side dense vector expression.
+   using RT2 = ResultType_t<VT2>;     //!< Result type of the right-hand side dense vector expression.
+   using RN1 = ReturnType_t<VT1>;     //!< Return type of the left-hand side dense vector expression.
+   using RN2 = ReturnType_t<VT2>;     //!< Return type of the right-hand side dense vector expression.
+   using CT1 = CompositeType_t<VT1>;  //!< Composite type of the left-hand side dense vector expression.
+   using CT2 = CompositeType_t<VT2>;  //!< Composite type of the right-hand side dense vector expression.
+   using ET1 = ElementType_t<VT1>;    //!< Element type of the left-hand side dense vector expression.
+   using ET2 = ElementType_t<VT2>;    //!< Element type of the right-hand side dense vector expression.
    //**********************************************************************************************
 
    //**Return type evaluation**********************************************************************
@@ -117,10 +115,10 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
        or matrix, \a returnExpr will be set to 0 and the subscript operator will return
        it's result by value. Otherwise \a returnExpr will be set to 1 and the subscript
        operator may return it's result as an expression. */
-   enum : bool { returnExpr = !IsTemporary<RN1>::value && !IsTemporary<RN2>::value };
+   static constexpr bool returnExpr = ( !IsTemporary_v<RN1> && !IsTemporary_v<RN2> );
 
    //! Expression return type for the subscript operator.
-   typedef SubExprTrait_<RN1,RN2>  ExprReturnType;
+   using ExprReturnType = decltype( std::declval<RN1>() - std::declval<RN2>() );
    //**********************************************************************************************
 
    //**Serial evaluation strategy******************************************************************
@@ -131,50 +129,53 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
        return by value, \a useAssign will be set to 1 and the subtraction expression will be
        evaluated via the \a assign function family. Otherwise \a useAssign will be set to 0 and
        the expression will be evaluated via the subscript operator. */
-   enum : bool { useAssign = ( RequiresEvaluation<VT1>::value || RequiresEvaluation<VT2>::value || !returnExpr ) };
+   static constexpr bool useAssign =
+      ( RequiresEvaluation_v<VT1> || RequiresEvaluation_v<VT2> || !returnExpr );
 
    /*! \cond BLAZE_INTERNAL */
-   //! Helper structure for the explicit application of the SFINAE principle.
+   //! Helper variable template for the explicit application of the SFINAE principle.
    template< typename VT >
-   struct UseAssign {
-      enum : bool { value = useAssign };
-   };
+   static constexpr bool UseAssign_v = useAssign;
    /*! \endcond */
    //**********************************************************************************************
 
    //**Parallel evaluation strategy****************************************************************
    /*! \cond BLAZE_INTERNAL */
-   //! Helper structure for the explicit application of the SFINAE principle.
-   /*! The UseSMPAssign struct is a helper struct for the selection of the parallel evaluation
-       strategy. In case at least one of the two dense vector operands is not SMP assignable and
-       at least one of the two operands requires an intermediate evaluation, \a value is set to 1
-       and the expression specific evaluation strategy is selected. Otherwise \a value is set to
+   //! Helper variable template for the explicit application of the SFINAE principle.
+   /*! This variable template is a helper for the selection of the parallel evaluation strategy.
+       In case at least one of the two dense vector operands is not SMP assignable and at least
+       one of the two operands requires an intermediate evaluation, the variable is set to 1 and
+       the expression specific evaluation strategy is selected. Otherwise the variable is set to
        0 and the default strategy is chosen. */
    template< typename VT >
-   struct UseSMPAssign {
-      enum : bool { value = ( !VT1::smpAssignable || !VT2::smpAssignable ) && useAssign };
-   };
+   static constexpr bool UseSMPAssign_v =
+      ( ( !VT1::smpAssignable || !VT2::smpAssignable ) && useAssign );
    /*! \endcond */
    //**********************************************************************************************
 
  public:
    //**Type definitions****************************************************************************
-   typedef DVecDVecSubExpr<VT1,VT2,TF>  This;           //!< Type of this DVecDVecSubExpr instance.
-   typedef SubTrait_<RT1,RT2>           ResultType;     //!< Result type for expression template evaluations.
-   typedef TransposeType_<ResultType>   TransposeType;  //!< Transpose type for expression template evaluations.
-   typedef ElementType_<ResultType>     ElementType;    //!< Resulting element type.
+   //! Type of this DVecDVecSubExpr instance.
+   using This = DVecDVecSubExpr<VT1,VT2,TF>;
+
+   //! Base type of this DVecDVecSubExpr instance.
+   using BaseType = VecVecSubExpr< DenseVector<This,TF> >;
+
+   using ResultType    = SubTrait_t<RT1,RT2>;          //!< Result type for expression template evaluations.
+   using TransposeType = TransposeType_t<ResultType>;  //!< Transpose type for expression template evaluations.
+   using ElementType   = ElementType_t<ResultType>;    //!< Resulting element type.
 
    //! Return type for expression template evaluations.
-   typedef const IfTrue_< returnExpr, ExprReturnType, ElementType >  ReturnType;
+   using ReturnType = const If_t< returnExpr, ExprReturnType, ElementType >;
 
    //! Data type for composite expression templates.
-   typedef IfTrue_< useAssign, const ResultType, const DVecDVecSubExpr& >  CompositeType;
+   using CompositeType = If_t< useAssign, const ResultType, const DVecDVecSubExpr& >;
 
    //! Composite type of the left-hand side dense vector expression.
-   typedef If_< IsExpression<VT1>, const VT1, const VT1& >  LeftOperand;
+   using LeftOperand = If_t< IsExpression_v<VT1>, const VT1, const VT1& >;
 
    //! Composite type of the right-hand side dense vector expression.
-   typedef If_< IsExpression<VT2>, const VT2, const VT2& >  RightOperand;
+   using RightOperand = If_t< IsExpression_v<VT2>, const VT2, const VT2& >;
    //**********************************************************************************************
 
    //**ConstIterator class definition**************************************************************
@@ -184,24 +185,24 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
    {
     public:
       //**Type definitions*************************************************************************
-      typedef std::random_access_iterator_tag  IteratorCategory;  //!< The iterator category.
-      typedef ElementType                      ValueType;         //!< Type of the underlying elements.
-      typedef ElementType*                     PointerType;       //!< Pointer return type.
-      typedef ElementType&                     ReferenceType;     //!< Reference return type.
-      typedef ptrdiff_t                        DifferenceType;    //!< Difference between two iterators.
+      using IteratorCategory = std::random_access_iterator_tag;  //!< The iterator category.
+      using ValueType        = ElementType;                      //!< Type of the underlying elements.
+      using PointerType      = ElementType*;                     //!< Pointer return type.
+      using ReferenceType    = ElementType&;                     //!< Reference return type.
+      using DifferenceType   = ptrdiff_t;                        //!< Difference between two iterators.
 
       // STL iterator requirements
-      typedef IteratorCategory  iterator_category;  //!< The iterator category.
-      typedef ValueType         value_type;         //!< Type of the underlying elements.
-      typedef PointerType       pointer;            //!< Pointer return type.
-      typedef ReferenceType     reference;          //!< Reference return type.
-      typedef DifferenceType    difference_type;    //!< Difference between two iterators.
+      using iterator_category = IteratorCategory;  //!< The iterator category.
+      using value_type        = ValueType;         //!< Type of the underlying elements.
+      using pointer           = PointerType;       //!< Pointer return type.
+      using reference         = ReferenceType;     //!< Reference return type.
+      using difference_type   = DifferenceType;    //!< Difference between two iterators.
 
       //! ConstIterator type of the left-hand side dense vector expression.
-      typedef ConstIterator_<VT1>  LeftIteratorType;
+      using LeftIteratorType = ConstIterator_t<VT1>;
 
       //! ConstIterator type of the right-hand side dense vector expression.
-      typedef ConstIterator_<VT2>  RightIteratorType;
+      using RightIteratorType = ConstIterator_t<VT2>;
       //*******************************************************************************************
 
       //**Constructor******************************************************************************
@@ -210,7 +211,7 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
       // \param left Iterator to the initial left-hand side element.
       // \param right Iterator to the initial right-hand side element.
       */
-      explicit inline ConstIterator( LeftIteratorType left, RightIteratorType right )
+      inline BLAZE_DEVICE_CALLABLE ConstIterator( LeftIteratorType left, RightIteratorType right )
          : left_ ( left  )  // Iterator to the current left-hand side element
          , right_( right )  // Iterator to the current right-hand side element
       {}
@@ -222,7 +223,7 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
       // \param inc The increment of the iterator.
       // \return The incremented iterator.
       */
-      inline ConstIterator& operator+=( size_t inc ) {
+      inline BLAZE_DEVICE_CALLABLE ConstIterator& operator+=( size_t inc ) {
          left_  += inc;
          right_ += inc;
          return *this;
@@ -235,7 +236,7 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
       // \param dec The decrement of the iterator.
       // \return The decremented iterator.
       */
-      inline ConstIterator& operator-=( size_t dec ) {
+      inline BLAZE_DEVICE_CALLABLE ConstIterator& operator-=( size_t dec ) {
          left_  -= dec;
          right_ -= dec;
          return *this;
@@ -247,7 +248,7 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
       //
       // \return Reference to the incremented iterator.
       */
-      inline ConstIterator& operator++() {
+      inline BLAZE_DEVICE_CALLABLE ConstIterator& operator++() {
          ++left_;
          ++right_;
          return *this;
@@ -259,7 +260,7 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
       //
       // \return The previous position of the iterator.
       */
-      inline const ConstIterator operator++( int ) {
+      inline BLAZE_DEVICE_CALLABLE const ConstIterator operator++( int ) {
          return ConstIterator( left_++, right_++ );
       }
       //*******************************************************************************************
@@ -269,7 +270,7 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
       //
       // \return Reference to the decremented iterator.
       */
-      inline ConstIterator& operator--() {
+      inline BLAZE_DEVICE_CALLABLE ConstIterator& operator--() {
          --left_;
          --right_;
          return *this;
@@ -281,7 +282,7 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
       //
       // \return The previous position of the iterator.
       */
-      inline const ConstIterator operator--( int ) {
+      inline BLAZE_DEVICE_CALLABLE const ConstIterator operator--( int ) {
          return ConstIterator( left_--, right_-- );
       }
       //*******************************************************************************************
@@ -291,7 +292,7 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
       //
       // \return The resulting value.
       */
-      inline ReturnType operator*() const {
+      inline BLAZE_DEVICE_CALLABLE ReturnType operator*() const {
          return (*left_) - (*right_);
       }
       //*******************************************************************************************
@@ -312,7 +313,7 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
       // \param rhs The right-hand side iterator.
       // \return \a true if the iterators refer to the same element, \a false if not.
       */
-      inline bool operator==( const ConstIterator& rhs ) const {
+      inline BLAZE_DEVICE_CALLABLE bool operator==( const ConstIterator& rhs ) const {
          return left_ == rhs.left_;
       }
       //*******************************************************************************************
@@ -323,7 +324,7 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
       // \param rhs The right-hand side iterator.
       // \return \a true if the iterators don't refer to the same element, \a false if they do.
       */
-      inline bool operator!=( const ConstIterator& rhs ) const {
+      inline BLAZE_DEVICE_CALLABLE bool operator!=( const ConstIterator& rhs ) const {
          return left_ != rhs.left_;
       }
       //*******************************************************************************************
@@ -334,7 +335,7 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
       // \param rhs The right-hand side iterator.
       // \return \a true if the left-hand side iterator is smaller, \a false if not.
       */
-      inline bool operator<( const ConstIterator& rhs ) const {
+      inline BLAZE_DEVICE_CALLABLE bool operator<( const ConstIterator& rhs ) const {
          return left_ < rhs.left_;
       }
       //*******************************************************************************************
@@ -345,7 +346,7 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
       // \param rhs The right-hand side iterator.
       // \return \a true if the left-hand side iterator is greater, \a false if not.
       */
-      inline bool operator>( const ConstIterator& rhs ) const {
+      inline BLAZE_DEVICE_CALLABLE bool operator>( const ConstIterator& rhs ) const {
          return left_ > rhs.left_;
       }
       //*******************************************************************************************
@@ -356,7 +357,7 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
       // \param rhs The right-hand side iterator.
       // \return \a true if the left-hand side iterator is smaller or equal, \a false if not.
       */
-      inline bool operator<=( const ConstIterator& rhs ) const {
+      inline BLAZE_DEVICE_CALLABLE bool operator<=( const ConstIterator& rhs ) const {
          return left_ <= rhs.left_;
       }
       //*******************************************************************************************
@@ -367,7 +368,7 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
       // \param rhs The right-hand side iterator.
       // \return \a true if the left-hand side iterator is greater or equal, \a false if not.
       */
-      inline bool operator>=( const ConstIterator& rhs ) const {
+      inline BLAZE_DEVICE_CALLABLE bool operator>=( const ConstIterator& rhs ) const {
          return left_ >= rhs.left_;
       }
       //*******************************************************************************************
@@ -378,7 +379,7 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
       // \param rhs The right-hand side iterator.
       // \return The number of elements between the two iterators.
       */
-      inline DifferenceType operator-( const ConstIterator& rhs ) const {
+      inline BLAZE_DEVICE_CALLABLE DifferenceType operator-( const ConstIterator& rhs ) const {
          return left_ - rhs.left_;
       }
       //*******************************************************************************************
@@ -390,7 +391,7 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
       // \param inc The number of elements the iterator is incremented.
       // \return The incremented iterator.
       */
-      friend inline const ConstIterator operator+( const ConstIterator& it, size_t inc ) {
+      friend inline BLAZE_DEVICE_CALLABLE const ConstIterator operator+( const ConstIterator& it, size_t inc ) {
          return ConstIterator( it.left_ + inc, it.right_ + inc );
       }
       //*******************************************************************************************
@@ -402,7 +403,7 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
       // \param it The iterator to be incremented.
       // \return The incremented iterator.
       */
-      friend inline const ConstIterator operator+( size_t inc, const ConstIterator& it ) {
+      friend inline BLAZE_DEVICE_CALLABLE const ConstIterator operator+( size_t inc, const ConstIterator& it ) {
          return ConstIterator( it.left_ + inc, it.right_ + inc );
       }
       //*******************************************************************************************
@@ -414,7 +415,7 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
       // \param dec The number of elements the iterator is decremented.
       // \return The decremented iterator.
       */
-      friend inline const ConstIterator operator-( const ConstIterator& it, size_t dec ) {
+      friend inline BLAZE_DEVICE_CALLABLE const ConstIterator operator-( const ConstIterator& it, size_t dec ) {
          return ConstIterator( it.left_ - dec, it.right_ - dec );
       }
       //*******************************************************************************************
@@ -429,16 +430,16 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
 
    //**Compilation flags***************************************************************************
    //! Compilation switch for the expression template evaluation strategy.
-   enum : bool { simdEnabled = VT1::simdEnabled && VT2::simdEnabled &&
-                               HasSIMDSub<ET1,ET2>::value };
+   static constexpr bool simdEnabled =
+      ( VT1::simdEnabled && VT2::simdEnabled && HasSIMDSub_v<ET1,ET2> );
 
    //! Compilation switch for the expression template assignment strategy.
-   enum : bool { smpAssignable = VT1::smpAssignable && VT2::smpAssignable };
+   static constexpr bool smpAssignable = ( VT1::smpAssignable && VT2::smpAssignable );
    //**********************************************************************************************
 
    //**SIMD properties*****************************************************************************
    //! The number of elements packed within a single SIMD element.
-   enum : size_t { SIMDSIZE = SIMDTrait<ElementType>::size };
+   static constexpr size_t SIMDSIZE = SIMDTrait<ElementType>::size;
    //**********************************************************************************************
 
    //**Constructor*********************************************************************************
@@ -447,7 +448,7 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
    // \param lhs The left-hand side operand of the subtraction expression.
    // \param rhs The right-hand side operand of the subtraction expression.
    */
-   explicit inline DVecDVecSubExpr( const VT1& lhs, const VT2& rhs ) noexcept
+   inline DVecDVecSubExpr( const VT1& lhs, const VT2& rhs ) noexcept
       : lhs_( lhs )  // Left-hand side dense vector of the subtraction expression
       , rhs_( rhs )  // Right-hand side dense vector of the subtraction expression
    {
@@ -553,8 +554,8 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
    */
    template< typename T >
    inline bool canAlias( const T* alias ) const noexcept {
-      return ( IsExpression<VT1>::value && ( RequiresEvaluation<VT1>::value ? lhs_.isAliased( alias ) : lhs_.canAlias( alias ) ) ) ||
-             ( IsExpression<VT2>::value && ( RequiresEvaluation<VT2>::value ? rhs_.isAliased( alias ) : rhs_.canAlias( alias ) ) );
+      return ( IsExpression_v<VT1> && ( RequiresEvaluation_v<VT1> ? lhs_.isAliased( alias ) : lhs_.canAlias( alias ) ) ) ||
+             ( IsExpression_v<VT2> && ( RequiresEvaluation_v<VT2> ? rhs_.isAliased( alias ) : rhs_.canAlias( alias ) ) );
    }
    //**********************************************************************************************
 
@@ -612,19 +613,24 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
    // of the two operands requires an intermediate evaluation.
    */
    template< typename VT >  // Type of the target dense vector
-   friend inline EnableIf_< UseAssign<VT> >
-      assign( DenseVector<VT,TF>& lhs, const DVecDVecSubExpr& rhs )
+   friend inline auto assign( DenseVector<VT,TF>& lhs, const DVecDVecSubExpr& rhs )
+      -> EnableIf_t< UseAssign_v<VT> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      if( !IsComputation<VT1>::value && isSame( ~lhs, rhs.lhs_ ) ) {
-         subAssign( ~lhs, rhs.rhs_ );
+      if( !IsComputation_v<VT1> && isSame( *lhs, rhs.lhs_ ) ) {
+         subAssign( *lhs, rhs.rhs_ );
+      }
+      else if( ( !IsComputation_v<VT2> && isSame( *lhs, rhs.rhs_ ) ) ||
+               ( !RequiresEvaluation_v<VT2> && rhs.rhs_.isAliased( &(*lhs) ) ) ) {
+         assign   ( *lhs, -rhs.rhs_ );
+         addAssign( *lhs,  rhs.lhs_ );
       }
       else {
-         assign   ( ~lhs, rhs.lhs_ );
-         subAssign( ~lhs, rhs.rhs_ );
+         assign   ( *lhs, rhs.lhs_ );
+         subAssign( *lhs, rhs.rhs_ );
       }
    }
    /*! \endcond */
@@ -645,19 +651,19 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
    // of the two operands requires an intermediate evaluation.
    */
    template< typename VT >  // Type of the target sparse vector
-   friend inline EnableIf_< UseAssign<VT> >
-      assign( SparseVector<VT,TF>& lhs, const DVecDVecSubExpr& rhs )
+   friend inline auto assign( SparseVector<VT,TF>& lhs, const DVecDVecSubExpr& rhs )
+      -> EnableIf_t< UseAssign_v<VT> >
    {
       BLAZE_FUNCTION_TRACE;
 
       BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE( ResultType );
       BLAZE_CONSTRAINT_MUST_BE_VECTOR_WITH_TRANSPOSE_FLAG( ResultType, TF );
-      BLAZE_CONSTRAINT_MUST_BE_REFERENCE_TYPE( CompositeType_<ResultType> );
+      BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType );
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
       const ResultType tmp( serial( rhs ) );
-      assign( ~lhs, tmp );
+      assign( *lhs, tmp );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -677,15 +683,21 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
    // of the operands requires an intermediate evaluation.
    */
    template< typename VT >  // Type of the target dense vector
-   friend inline EnableIf_< UseAssign<VT> >
-      addAssign( DenseVector<VT,TF>& lhs, const DVecDVecSubExpr& rhs )
+   friend inline auto addAssign( DenseVector<VT,TF>& lhs, const DVecDVecSubExpr& rhs )
+      -> EnableIf_t< UseAssign_v<VT> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      addAssign( ~lhs, rhs.lhs_ );
-      subAssign( ~lhs, rhs.rhs_ );
+      if( !RequiresEvaluation_v<VT2> ) {
+         subAssign( *lhs, rhs.rhs_ );
+         addAssign( *lhs, rhs.lhs_ );
+      }
+      else {
+         addAssign( *lhs, rhs.lhs_ );
+         subAssign( *lhs, rhs.rhs_ );
+      }
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -709,15 +721,21 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
    // the operands requires an intermediate evaluation.
    */
    template< typename VT >  // Type of the target dense vector
-   friend inline EnableIf_< UseAssign<VT> >
-      subAssign( DenseVector<VT,TF>& lhs, const DVecDVecSubExpr& rhs )
+   friend inline auto subAssign( DenseVector<VT,TF>& lhs, const DVecDVecSubExpr& rhs )
+      -> EnableIf_t< UseAssign_v<VT> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      subAssign( ~lhs, rhs.lhs_ );
-      addAssign( ~lhs, rhs.rhs_ );
+      if( !RequiresEvaluation_v<VT2> ) {
+         addAssign( *lhs, rhs.rhs_ );
+         subAssign( *lhs, rhs.lhs_ );
+      }
+      else {
+         subAssign( *lhs, rhs.lhs_ );
+         addAssign( *lhs, rhs.rhs_ );
+      }
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -741,19 +759,19 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
    // in case either of the operands requires an intermediate evaluation.
    */
    template< typename VT >  // Type of the target dense vector
-   friend inline EnableIf_< UseAssign<VT> >
-      multAssign( DenseVector<VT,TF>& lhs, const DVecDVecSubExpr& rhs )
+   friend inline auto multAssign( DenseVector<VT,TF>& lhs, const DVecDVecSubExpr& rhs )
+      -> EnableIf_t< UseAssign_v<VT> >
    {
       BLAZE_FUNCTION_TRACE;
 
       BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE( ResultType );
       BLAZE_CONSTRAINT_MUST_BE_VECTOR_WITH_TRANSPOSE_FLAG( ResultType, TF );
-      BLAZE_CONSTRAINT_MUST_BE_REFERENCE_TYPE( CompositeType_<ResultType> );
+      BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType );
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
       const ResultType tmp( serial( rhs ) );
-      multAssign( ~lhs, tmp );
+      multAssign( *lhs, tmp );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -777,19 +795,19 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
    // of the operands requires an intermediate evaluation.
    */
    template< typename VT >  // Type of the target dense vector
-   friend inline EnableIf_< UseAssign<VT> >
-      divAssign( DenseVector<VT,TF>& lhs, const DVecDVecSubExpr& rhs )
+   friend inline auto divAssign( DenseVector<VT,TF>& lhs, const DVecDVecSubExpr& rhs )
+      -> EnableIf_t< UseAssign_v<VT> >
    {
       BLAZE_FUNCTION_TRACE;
 
       BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE( ResultType );
       BLAZE_CONSTRAINT_MUST_BE_VECTOR_WITH_TRANSPOSE_FLAG( ResultType, TF );
-      BLAZE_CONSTRAINT_MUST_BE_REFERENCE_TYPE( CompositeType_<ResultType> );
+      BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType );
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
       const ResultType tmp( serial( rhs ) );
-      divAssign( ~lhs, tmp );
+      divAssign( *lhs, tmp );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -813,19 +831,24 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
    // specific parallel evaluation strategy is selected.
    */
    template< typename VT >  // Type of the target dense vector
-   friend inline EnableIf_< UseSMPAssign<VT> >
-      smpAssign( DenseVector<VT,TF>& lhs, const DVecDVecSubExpr& rhs )
+   friend inline auto smpAssign( DenseVector<VT,TF>& lhs, const DVecDVecSubExpr& rhs )
+      -> EnableIf_t< UseSMPAssign_v<VT> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      if( !IsComputation<VT1>::value && isSame( ~lhs, rhs.lhs_ ) ) {
-         smpSubAssign( ~lhs, rhs.rhs_ );
+      if( !IsComputation_v<VT1> && isSame( *lhs, rhs.lhs_ ) ) {
+         smpSubAssign( *lhs, rhs.rhs_ );
+      }
+      else if( ( !IsComputation_v<VT2> && isSame( *lhs, rhs.rhs_ ) ) ||
+               ( !RequiresEvaluation_v<VT2> && rhs.rhs_.isAliased( &(*lhs) ) ) ) {
+         smpAssign   ( *lhs, -rhs.rhs_ );
+         smpAddAssign( *lhs,  rhs.lhs_ );
       }
       else {
-         smpAssign   ( ~lhs, rhs.lhs_ );
-         smpSubAssign( ~lhs, rhs.rhs_ );
+         smpAssign   ( *lhs, rhs.lhs_ );
+         smpSubAssign( *lhs, rhs.rhs_ );
       }
    }
    /*! \endcond */
@@ -846,19 +869,19 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
    // specific parallel evaluation strategy is selected.
    */
    template< typename VT >  // Type of the target sparse vector
-   friend inline EnableIf_< UseSMPAssign<VT> >
-      smpAssign( SparseVector<VT,TF>& lhs, const DVecDVecSubExpr& rhs )
+   friend inline auto smpAssign( SparseVector<VT,TF>& lhs, const DVecDVecSubExpr& rhs )
+      -> EnableIf_t< UseSMPAssign_v<VT> >
    {
       BLAZE_FUNCTION_TRACE;
 
       BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE( ResultType );
       BLAZE_CONSTRAINT_MUST_BE_VECTOR_WITH_TRANSPOSE_FLAG( ResultType, TF );
-      BLAZE_CONSTRAINT_MUST_BE_REFERENCE_TYPE( CompositeType_<ResultType> );
+      BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType );
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
       const ResultType tmp( rhs );
-      smpAssign( ~lhs, tmp );
+      smpAssign( *lhs, tmp );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -878,15 +901,21 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
    // specific parallel evaluation strategy is selected.
    */
    template< typename VT >  // Type of the target dense vector
-   friend inline EnableIf_< UseSMPAssign<VT> >
-      smpAddAssign( DenseVector<VT,TF>& lhs, const DVecDVecSubExpr& rhs )
+   friend inline auto smpAddAssign( DenseVector<VT,TF>& lhs, const DVecDVecSubExpr& rhs )
+      -> EnableIf_t< UseSMPAssign_v<VT> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      smpAddAssign( ~lhs, rhs.lhs_ );
-      smpSubAssign( ~lhs, rhs.rhs_ );
+      if( !RequiresEvaluation_v<VT2> ) {
+         smpSubAssign( *lhs, rhs.rhs_ );
+         smpAddAssign( *lhs, rhs.lhs_ );
+      }
+      else {
+         smpAddAssign( *lhs, rhs.lhs_ );
+         smpSubAssign( *lhs, rhs.rhs_ );
+      }
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -910,15 +939,21 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
    // specific parallel evaluation strategy is selected.
    */
    template< typename VT >  // Type of the target dense vector
-   friend inline EnableIf_< UseSMPAssign<VT> >
-      smpSubAssign( DenseVector<VT,TF>& lhs, const DVecDVecSubExpr& rhs )
+   friend inline auto smpSubAssign( DenseVector<VT,TF>& lhs, const DVecDVecSubExpr& rhs )
+      -> EnableIf_t< UseSMPAssign_v<VT> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
-      smpSubAssign( ~lhs, rhs.lhs_ );
-      smpAddAssign( ~lhs, rhs.rhs_ );
+      if( !RequiresEvaluation_v<VT2> ) {
+         smpAddAssign( *lhs, rhs.rhs_ );
+         smpSubAssign( *lhs, rhs.lhs_ );
+      }
+      else {
+         smpSubAssign( *lhs, rhs.lhs_ );
+         smpAddAssign( *lhs, rhs.rhs_ );
+      }
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -942,19 +977,19 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
    // specific parallel evaluation strategy is selected.
    */
    template< typename VT >  // Type of the target dense vector
-   friend inline EnableIf_< UseSMPAssign<VT> >
-      smpMultAssign( DenseVector<VT,TF>& lhs, const DVecDVecSubExpr& rhs )
+   friend inline auto smpMultAssign( DenseVector<VT,TF>& lhs, const DVecDVecSubExpr& rhs )
+      -> EnableIf_t< UseSMPAssign_v<VT> >
    {
       BLAZE_FUNCTION_TRACE;
 
       BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE( ResultType );
       BLAZE_CONSTRAINT_MUST_BE_VECTOR_WITH_TRANSPOSE_FLAG( ResultType, TF );
-      BLAZE_CONSTRAINT_MUST_BE_REFERENCE_TYPE( CompositeType_<ResultType> );
+      BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType );
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
       const ResultType tmp( rhs );
-      smpMultAssign( ~lhs, tmp );
+      smpMultAssign( *lhs, tmp );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -978,19 +1013,19 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
    // specific parallel evaluation strategy is selected.
    */
    template< typename VT >  // Type of the target dense vector
-   friend inline EnableIf_< UseSMPAssign<VT> >
-      smpDivAssign( DenseVector<VT,TF>& lhs, const DVecDVecSubExpr& rhs )
+   friend inline auto smpDivAssign( DenseVector<VT,TF>& lhs, const DVecDVecSubExpr& rhs )
+      -> EnableIf_t< UseSMPAssign_v<VT> >
    {
       BLAZE_FUNCTION_TRACE;
 
       BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE( ResultType );
       BLAZE_CONSTRAINT_MUST_BE_VECTOR_WITH_TRANSPOSE_FLAG( ResultType, TF );
-      BLAZE_CONSTRAINT_MUST_BE_REFERENCE_TYPE( CompositeType_<ResultType> );
+      BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType );
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
       const ResultType tmp( rhs );
-      smpDivAssign( ~lhs, tmp );
+      smpDivAssign( *lhs, tmp );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -1038,44 +1073,27 @@ class DVecDVecSubExpr : public DenseVector< DVecDVecSubExpr<VT1,VT2,TF>, TF >
    \endcode
 
 // The operator returns an expression representing a dense vector of the higher-order element
-// type of the two involved vector element types \a T1::ElementType and \a T2::ElementType.
-// Both vector types \a T1 and \a T2 as well as the two element types \a T1::ElementType and
-// \a T2::ElementType have to be supported by the SubTrait class template.\n
+// type of the two involved vector element types \a VT1::ElementType and \a VT2::ElementType.
+// Both vector types \a VT1 and \a VT2 as well as the two element types \a VT1::ElementType
+// and \a VT2::ElementType have to be supported by the SubTrait class template.\n
 // In case the current sizes of the two given vectors don't match, a \a std::invalid_argument
 // is thrown.
 */
-template< typename T1  // Type of the left-hand side dense vector
-        , typename T2  // Type of the right-hand side dense vector
-        , bool TF >    // Transpose flag
-inline const DVecDVecSubExpr<T1,T2,TF>
-   operator-( const DenseVector<T1,TF>& lhs, const DenseVector<T2,TF>& rhs )
+template< typename VT1  // Type of the left-hand side dense vector
+        , typename VT2  // Type of the right-hand side dense vector
+        , bool TF >     // Transpose flag
+inline decltype(auto)
+   operator-( const DenseVector<VT1,TF>& lhs, const DenseVector<VT2,TF>& rhs )
 {
    BLAZE_FUNCTION_TRACE;
 
-   if( (~lhs).size() != (~rhs).size() ) {
+   if( (*lhs).size() != (*rhs).size() ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Vector sizes do not match" );
    }
 
-   return DVecDVecSubExpr<T1,T2,TF>( ~lhs, ~rhs );
+   using ReturnType = const DVecDVecSubExpr<VT1,VT2,TF>;
+   return ReturnType( *lhs, *rhs );
 }
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  SIZE SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename VT1, typename VT2, bool TF >
-struct Size< DVecDVecSubExpr<VT1,VT2,TF> >
-   : public Max< Size<VT1>, Size<VT2> >
-{};
-/*! \endcond */
 //*************************************************************************************************
 
 
@@ -1091,7 +1109,7 @@ struct Size< DVecDVecSubExpr<VT1,VT2,TF> >
 /*! \cond BLAZE_INTERNAL */
 template< typename VT1, typename VT2, bool TF >
 struct IsAligned< DVecDVecSubExpr<VT1,VT2,TF> >
-   : public BoolConstant< And< IsAligned<VT1>, IsAligned<VT2> >::value  >
+   : public BoolConstant< IsAligned_v<VT1> && IsAligned_v<VT2> >
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -1109,31 +1127,8 @@ struct IsAligned< DVecDVecSubExpr<VT1,VT2,TF> >
 /*! \cond BLAZE_INTERNAL */
 template< typename VT1, typename VT2, bool TF >
 struct IsPadded< DVecDVecSubExpr<VT1,VT2,TF> >
-   : public BoolConstant< And< IsPadded<VT1>, IsPadded<VT2> >::value  >
+   : public BoolConstant< IsPadded_v<VT1> && IsPadded_v<VT2> >
 {};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  EXPRESSION TRAIT SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename VT1, typename VT2, bool TF, bool AF >
-struct SubvectorExprTrait< DVecDVecSubExpr<VT1,VT2,TF>, AF >
-{
- public:
-   //**********************************************************************************************
-   using Type = SubExprTrait_< SubvectorExprTrait_<const VT1,AF>
-                             , SubvectorExprTrait_<const VT2,AF> >;
-   //**********************************************************************************************
-};
 /*! \endcond */
 //*************************************************************************************************
 

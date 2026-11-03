@@ -3,7 +3,7 @@
 //  \file blaze/math/functors/Noop.h
 //  \brief Header file for the Noop functor
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,6 +40,9 @@
 // Includes
 //*************************************************************************************************
 
+#include <utility>
+#include <blaze/math/constraints/SIMDPack.h>
+#include <blaze/system/HostDevice.h>
 #include <blaze/system/Inline.h>
 
 
@@ -58,21 +61,45 @@ namespace blaze {
 struct Noop
 {
    //**********************************************************************************************
-   /*!\brief Default constructor of the Noop functor.
-   */
-   explicit inline Noop()
-   {}
-   //**********************************************************************************************
-
-   //**********************************************************************************************
    /*!\brief Returns the given object/value without modifications.
    //
    // \param a The given object/value.
    // \return The given object/value without modifications.
    */
    template< typename T >
-   BLAZE_ALWAYS_INLINE decltype(auto) operator()( const T& a ) const
+   BLAZE_ALWAYS_INLINE BLAZE_DEVICE_CALLABLE decltype(auto) operator()( T&& a ) const
    {
+      return std::forward<T>( a );
+   }
+   //**********************************************************************************************
+
+   //**********************************************************************************************
+   /*!\brief Returns whether SIMD is enabled for the specified data type \a T.
+   //
+   // \return \a true in case SIMD is enabled for the data type \a T, \a false if not.
+   */
+   template< typename T >
+   static constexpr bool simdEnabled() { return true; }
+   //**********************************************************************************************
+
+   //**********************************************************************************************
+   /*!\brief Returns whether the operation supports padding, i.e. whether it can deal with zeros.
+   //
+   // \return \a true in case padding is supported, \a false if not.
+   */
+   static constexpr bool paddingEnabled() { return true; }
+   //**********************************************************************************************
+
+   //**********************************************************************************************
+   /*!\brief Returns the given SIMD vector without modifications.
+   //
+   // \param a The given SIMD vector.
+   // \return The given SIMD vector without modifications.
+   */
+   template< typename T >
+   BLAZE_ALWAYS_INLINE decltype(auto) load( const T& a ) const
+   {
+      BLAZE_CONSTRAINT_MUST_BE_SIMD_PACK( T );
       return a;
    }
    //**********************************************************************************************

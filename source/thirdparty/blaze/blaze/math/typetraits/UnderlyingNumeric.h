@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/UnderlyingNumeric.h
 //  \brief Header file for the UnderlyingNumeric type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,10 +40,10 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/util/mpl/If.h>
-#include <blaze/util/mpl/Or.h>
-#include <blaze/util/typetraits/IsNumeric.h>
-#include <blaze/util/typetraits/IsComplex.h>
+#include <blaze/util/Complex.h>
+#include <blaze/util/EnableIf.h>
+#include <blaze/util/typetraits/IsSame.h>
+#include <blaze/util/typetraits/RemoveCV.h>
 
 
 namespace blaze {
@@ -55,53 +55,46 @@ namespace blaze {
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\brief Evaluation of the underlying numeric element type of a given data type.
+/*! \cond BLAZE_INTERNAL */
+template< typename, typename = void > struct UnderlyingNumericHelper1;
+template< typename, typename = void > struct UnderlyingNumericHelper2;
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Evaluation of the underlying scalar element type of a given data type.
 // \ingroup math_type_traits
 //
-// Via this type trait it is possible to evaluate the underlying numeric (fundamental or complex)
-// element type at the heart of a given data type. Examples:
+// This type trait evaluates the underlying numeric (fundamental or complex) element type at the
+// heart of the given data type \a T. For this purpose either a nested \a ElementType or a nested
+// \a value_type will be used. Examples:
 
    \code
-   typedef double                                    Type1;  // Built-in data type
-   typedef complex<float>                            Type2;  // Complex data type
-   typedef StaticVector<int,3UL>                     Type3;  // Vector with built-in element type
-   typedef CompressedVector< DynamicVector<float> >  Type4;  // Vector with vector element type
+   using Type1 = double;                                    // Built-in data type
+   using Type2 = complex<float>;                            // Complex data type
+   using Type3 = std::vector<short>;                        // std::vector with built-in element type
+   using Type4 = StaticVector<int,3UL>;                     // Vector with built-in element type
+   using Type5 = CompressedVector< DynamicVector<float> >;  // Vector with vector element type
 
-   blaze::UnderlyingNumeric< Type1 >::Type  // corresponds to double
-   blaze::UnderlyingNumeric< Type2 >::Type  // corresponds to complex<float>
-   blaze::UnderlyingNumeric< Type3 >::Type  // corresponds to int
-   blaze::UnderlyingNumeric< Type4 >::Type  // corresponds to float
+   blaze::UnderlyingScalar< Type1 >::Type  // corresponds to double
+   blaze::UnderlyingScalar< Type2 >::Type  // corresponds to complex<float>
+   blaze::UnderlyingScalar< Type3 >::Type  // corresponds to short
+   blaze::UnderlyingScalar< Type4 >::Type  // corresponds to int
+   blaze::UnderlyingScalar< Type5 >::Type  // corresponds to float
    \endcode
 
-// Note that per default UnderlyingNumeric only supports fundamental/built-in data types, complex,
-// and data types with the nested type definition \a ElementType. Support for other data types can
-// be added by specializing the UnderlyingNumeric class template.
+// Note that it is possible to add support for other data types that have an underlying scalar
+// element type but do neither provide a nested \a ElementType nor \a value_type type by
+// specializing the UnderlyingScalar class template.
 */
 template< typename T >
 struct UnderlyingNumeric
 {
- private:
-   //**struct BuiltinOrComplex*********************************************************************
-   /*! \cond BLAZE_INTERNAL */
-   template< typename T2 >
-   struct BuiltinOrComplex { typedef T2  Type; };
-   /*! \endcond */
-   //**********************************************************************************************
-
-   //**struct Other********************************************************************************
-   /*! \cond BLAZE_INTERNAL */
-   template< typename T2 >
-   struct Other { typedef typename UnderlyingNumeric<typename T2::ElementType>::Type  Type; };
-   /*! \endcond */
-   //**********************************************************************************************
-
  public:
    //**********************************************************************************************
    /*! \cond BLAZE_INTERNAL */
-   typedef typename If_< Or< IsBuiltin<T>, IsComplex<T> >
-                       , BuiltinOrComplex<T>
-                       , Other<T>
-                       >::Type  Type;
+   using Type = typename UnderlyingNumericHelper1< RemoveCV_t<T> >::Type;
    /*! \endcond */
    //**********************************************************************************************
 };
@@ -110,19 +103,65 @@ struct UnderlyingNumeric
 
 //*************************************************************************************************
 /*!\brief Auxiliary alias declaration for the UnderlyingNumeric type trait.
-// \ingroup type_traits
+// \ingroup math_type_traits
 //
-// The UnderlyingNumeric_ alias declaration provides a convenient shortcut to access the
+// The UnderlyingNumeric_t alias declaration provides a convenient shortcut to access the
 // nested \a Type of the UnderlyingNumeric class template. For instance, given the type \a T
 // the following two type definitions are identical:
 
    \code
-   using Type1 = typename UnderlyingNumeric<T>::Type;
-   using Type2 = UnderlyingNumeric_<T>;
+   using Type1 = typename blaze::UnderlyingNumeric<T>::Type;
+   using Type2 = blaze::UnderlyingNumeric_t<T>;
    \endcode
 */
 template< typename T >
-using UnderlyingNumeric_ = typename UnderlyingNumeric<T>::Type;
+using UnderlyingNumeric_t = typename UnderlyingNumeric<T>::Type;
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief First auxiliary helper struct for the UnderlyingNumeric type trait.
+// \ingroup math_type_traits
+*/
+template< typename T, typename >
+struct UnderlyingNumericHelper1
+{
+   using Type = typename UnderlyingNumericHelper2<T>::Type;
+};
+
+template< typename T >
+struct UnderlyingNumericHelper1< complex<T>, void >
+{
+   using Type = complex<T>;
+};
+
+template< typename T >
+struct UnderlyingNumericHelper1< T, EnableIf_t< !IsSame_v< T, typename T::ElementType > > >
+{
+   using Type = typename UnderlyingNumericHelper1< typename T::ElementType >::Type;
+};
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Second auxiliary helper struct for the UnderlyingNumeric type trait.
+// \ingroup math_type_traits
+*/
+template< typename T, typename >
+struct UnderlyingNumericHelper2
+{
+   using Type = T;
+};
+
+template< typename T >
+struct UnderlyingNumericHelper2< T, EnableIf_t< !IsSame_v< T, typename T::value_type > > >
+{
+   using Type = typename UnderlyingNumericHelper1< typename T::value_type >::Type;
+};
+/*! \endcond */
 //*************************************************************************************************
 
 } // namespace blaze

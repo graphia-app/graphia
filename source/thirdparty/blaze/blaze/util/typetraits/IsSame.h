@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/IsSame.h
 //  \brief Header file for the IsSame and IsStrictlySame type traits
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,9 +40,7 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/util/FalseType.h>
 #include <blaze/util/IntegralConstant.h>
-#include <blaze/util/TrueType.h>
 #include <blaze/util/typetraits/RemoveCV.h>
 
 
@@ -74,7 +72,8 @@ namespace blaze {
    \endcode
 */
 template< typename A, typename B >
-struct IsStrictlySame : public FalseType
+struct IsStrictlySame
+   : public FalseType
 {};
 //*************************************************************************************************
 
@@ -83,9 +82,28 @@ struct IsStrictlySame : public FalseType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsStrictlySame class template for a single, matching data type.
 template< typename T >
-struct IsStrictlySame<T,T> : public TrueType
+struct IsStrictlySame<T,T>
+   : public TrueType
 {};
 /*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsStrictlySame type trait.
+// \ingroup type_traits
+//
+// The IsStrictlySame_v variable template provides a convenient shortcut to access the nested
+// \a value of the IsStrictlySame class template. For instance, given the types \a T1 and \a T2
+// the following two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsStrictlySame<T1,T2>::value;
+   constexpr bool value2 = blaze::IsStrictlySame_v<T1,T2>;
+   \endcode
+*/
+template< typename A, typename B >
+constexpr bool IsStrictlySame_v = IsStrictlySame<A,B>::value;
 //*************************************************************************************************
 
 
@@ -96,23 +114,6 @@ struct IsStrictlySame<T,T> : public TrueType
 //  CLASS DEFINITION
 //
 //=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Auxiliary helper struct for the IsSame type trait.
-// \ingroup type_traits
-*/
-template< typename A, typename B >
-struct IsSameHelper
-{
- public:
-   //**********************************************************************************************
-   enum : bool { value = IsStrictlySame< RemoveCV_<A>, RemoveCV_<B> >::value };
-   //**********************************************************************************************
-};
-/*! \endcond */
-//*************************************************************************************************
-
 
 //*************************************************************************************************
 /*!\brief Type relationship analysis.
@@ -135,8 +136,27 @@ struct IsSameHelper
    \endcode
 */
 template< typename A, typename B >
-struct IsSame : public BoolConstant< IsSameHelper<A,B>::value >
+struct IsSame
+   : public BoolConstant< IsStrictlySame_v< RemoveCV_t<A>, RemoveCV_t<B> > >
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsSame type trait.
+// \ingroup type_traits
+//
+// The IsSame_v variable template provides a convenient shortcut to access the nested \a value
+// of the IsSame class template. For instance, given the types \a T1 and \a T2 the following
+// two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsSame<T1,T2>::value;
+   constexpr bool value2 = blaze::IsSame_v<T1,T2>;
+   \endcode
+*/
+template< typename A, typename B >
+constexpr bool IsSame_v = IsSame<A,B>::value;
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/util/constraints/Pointer.h
 //  \brief Constraint on the data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -58,7 +58,7 @@ namespace blaze {
 // In case the given data type \a T is not a pointer type, a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_POINTER_TYPE(T) \
-   static_assert( ::blaze::IsPointer<T>::value, "Non-pointer type detected" )
+   static_assert( ::blaze::IsPointer_v<T>, "Non-pointer type detected" )
 //*************************************************************************************************
 
 
@@ -77,7 +77,7 @@ namespace blaze {
 // In case the given data type \a T is not a pointer type, a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_POINTER_TYPE(T) \
-   static_assert( !::blaze::IsPointer<T>::value, "Pointer type detected" )
+   static_assert( !::blaze::IsPointer_v<T>, "Pointer type detected" )
 //*************************************************************************************************
 
 } // namespace blaze

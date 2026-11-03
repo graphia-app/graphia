@@ -3,7 +3,7 @@
 //  \file blaze/math/smp/default/Functions.h
 //  \brief Header file for the default SMP utility functions
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -42,9 +42,9 @@
 
 #include <blaze/system/Inline.h>
 #include <blaze/system/SMP.h>
+#include <blaze/util/MaybeUnused.h>
 #include <blaze/util/StaticAssert.h>
 #include <blaze/util/Types.h>
-#include <blaze/util/Unused.h>
 
 
 namespace blaze {
@@ -96,7 +96,7 @@ BLAZE_ALWAYS_INLINE size_t getNumThreads()
 */
 BLAZE_ALWAYS_INLINE void setNumThreads( size_t number )
 {
-   UNUSED_PARAMETER( number );
+   MAYBE_UNUSED( number );
 }
 //*************************************************************************************************
 
@@ -142,8 +142,10 @@ BLAZE_ALWAYS_INLINE void shutDownThreads()
 /*! \cond BLAZE_INTERNAL */
 namespace {
 
-BLAZE_STATIC_ASSERT( !BLAZE_OPENMP_PARALLEL_MODE      );
-BLAZE_STATIC_ASSERT( !BLAZE_CPP_THREADS_PARALLEL_MODE );
+BLAZE_STATIC_ASSERT( !BLAZE_HPX_PARALLEL_MODE           );
+BLAZE_STATIC_ASSERT( !BLAZE_CPP_THREADS_PARALLEL_MODE   );
+BLAZE_STATIC_ASSERT( !BLAZE_BOOST_THREADS_PARALLEL_MODE );
+BLAZE_STATIC_ASSERT( !BLAZE_OPENMP_PARALLEL_MODE        );
 
 }
 /*! \endcond */

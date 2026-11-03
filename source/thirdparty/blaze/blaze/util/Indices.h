@@ -3,7 +3,7 @@
 //  \file blaze/util/Indices.h
 //  \brief Header file for the Indices class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -62,30 +62,28 @@ namespace blaze {
 //
 // This auxiliary class can be used to generate a set of random indices.
 */
+template< typename T >  // Type of the indices
 class Indices
 {
  public:
    //**Type definitions****************************************************************************
-   typedef std::vector<size_t>::const_iterator  ConstIterator;  //!< Iterator over the generated indices.
+   //! Iterator over the generated indices.
+   using ConstIterator = typename std::vector<T>::const_iterator;
    //**********************************************************************************************
 
    //**Constructors********************************************************************************
    /*!\name Constructors */
    //@{
-   inline Indices( size_t min, size_t max, size_t number );
+   inline Indices( T min, T max, T number );
    //@}
-   //**********************************************************************************************
-
-   //**Destructor**********************************************************************************
-   // No explicitly declared destructor.
    //**********************************************************************************************
 
    //**Utility functions***************************************************************************
    /*!\name Utility functions */
    //@{
-   inline size_t        size () const;
-   inline ConstIterator begin() const;
-   inline ConstIterator end  () const;
+   inline size_t        size () const noexcept;
+   inline ConstIterator begin() const noexcept;
+   inline ConstIterator end  () const noexcept;
    //@}
    //**********************************************************************************************
 
@@ -93,7 +91,7 @@ class Indices
    //**Member variables****************************************************************************
    /*!\name Member variables */
    //@{
-   std::vector<size_t> indices_;  //!< The generated indices.
+   std::vector<T> indices_;  //!< The generated indices.
    //@}
    //**********************************************************************************************
 };
@@ -121,14 +119,15 @@ class Indices
 // in the range \a min to \a max. In case \a number is larger than the possible number of incides
 // in the specified range, a \a std::invalid_argument exception is thrown.
 */
-inline Indices::Indices( size_t min, size_t max, size_t number )
+template< typename T >  // Type of the indices
+inline Indices<T>::Indices( T min, T max, T number )
    : indices_()  // The generated indices
 {
    if( max < min ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid index range" );
    }
 
-   const size_t maxNumber( max + 1UL - min );
+   const T maxNumber( max + T(1) - min );
 
    if( number > maxNumber ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid number of indices" );
@@ -138,13 +137,13 @@ inline Indices::Indices( size_t min, size_t max, size_t number )
       return;
    }
 
-   if( number <= size_t( maxNumber * 0.5 ) )
+   if( number <= T( maxNumber * 0.5 ) )
    {
       indices_.reserve( number );
 
       while( indices_.size() < number )
       {
-         const size_t value = rand<size_t>(min,max);
+         const T value = rand<T>(min,max);
          BLAZE_INTERNAL_ASSERT( min <= value && value <= max, "Invalid index detected" );
          const auto pos = std::lower_bound( indices_.begin(), indices_.end(), value );
 
@@ -160,7 +159,7 @@ inline Indices::Indices( size_t min, size_t max, size_t number )
 
       while( indices_.size() > number )
       {
-         const size_t value = rand<size_t>(min,max);
+         const T value = rand<T>(min,max);
          BLAZE_INTERNAL_ASSERT( min <= value && value <= max, "Invalid index detected" );
          const auto pos = std::lower_bound( indices_.begin(), indices_.end(), value );
 
@@ -186,7 +185,8 @@ inline Indices::Indices( size_t min, size_t max, size_t number )
 //
 // \return The total number of random indices.
 */
-inline size_t Indices::size() const
+template< typename T >  // Type of the indices
+inline size_t Indices<T>::size() const noexcept
 {
    return indices_.size();
 }
@@ -198,7 +198,8 @@ inline size_t Indices::size() const
 //
 // \return Iterator to the beginning of the vector.
 */
-inline Indices::ConstIterator Indices::begin() const
+template< typename T >  // Type of the indices
+inline typename Indices<T>::ConstIterator Indices<T>::begin() const noexcept
 {
    return indices_.begin();
 }
@@ -210,7 +211,8 @@ inline Indices::ConstIterator Indices::begin() const
 //
 // \return Iterator just past the last element of the vector.
 */
-inline Indices::ConstIterator Indices::end() const
+template< typename T >  // Type of the indices
+inline typename Indices<T>::ConstIterator Indices<T>::end() const noexcept
 {
    return indices_.end();
 }

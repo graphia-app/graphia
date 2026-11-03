@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/CommonType.h
 //  \brief Header file for the CommonType type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -71,7 +71,7 @@ struct CommonType
  public:
    //**********************************************************************************************
    /*! \cond BLAZE_INTERNAL */
-   typedef typename std::common_type<T...>::type  Type;
+   using Type = typename std::common_type<T...>::type;
    /*! \endcond */
    //**********************************************************************************************
 };
@@ -82,17 +82,17 @@ struct CommonType
 /*!\brief Auxiliary alias declaration for the CommonType type trait.
 // \ingroup type_traits
 //
-// The CommonType_ alias declaration provides a convenient shortcut to access the nested \a Type
+// The CommonType_t alias declaration provides a convenient shortcut to access the nested \a Type
 // of the CommonType class template. For instance, given the types \a T1 and \a T2 the following
 // two type definitions are identical:
 
    \code
-   using Type1 = typename CommonType<T1,T2>::Type;
-   using Type2 = CommonType_<T1,T2>;
+   using Type1 = typename blaze::CommonType<T1,T2>::Type;
+   using Type2 = blaze::CommonType_t<T1,T2>;
    \endcode
 */
 template< typename... T >
-using CommonType_ = typename CommonType<T...>::Type;
+using CommonType_t = typename CommonType<T...>::Type;
 //*************************************************************************************************
 
 } // namespace blaze

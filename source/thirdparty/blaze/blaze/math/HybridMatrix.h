@@ -3,7 +3,7 @@
 //  \file blaze/math/HybridMatrix.h
 //  \brief Header file for the complete HybridMatrix implementation
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,16 +40,18 @@
 // Includes
 //*************************************************************************************************
 
+#include <blaze/math/constraints/Scalar.h>
 #include <blaze/math/dense/HybridMatrix.h>
 #include <blaze/math/DenseMatrix.h>
 #include <blaze/math/Exception.h>
 #include <blaze/math/HybridVector.h>
+#include <blaze/math/IdentityMatrix.h>
 #include <blaze/math/shims/Conjugate.h>
 #include <blaze/math/shims/Real.h>
 #include <blaze/math/StaticMatrix.h>
 #include <blaze/math/typetraits/UnderlyingBuiltin.h>
+#include <blaze/math/ZeroMatrix.h>
 #include <blaze/util/Assert.h>
-#include <blaze/util/constraints/Numeric.h>
 #include <blaze/util/Random.h>
 
 
@@ -68,138 +70,93 @@ namespace blaze {
 //
 // This specialization of the Rand class creates random instances of HybridMatrix.
 */
-template< typename Type  // Data type of the matrix
-        , size_t M       // Number of rows
-        , size_t N       // Number of columns
-        , bool SO >      // Storage order
-class Rand< HybridMatrix<Type,M,N,SO> >
+template< typename Type     // Data type of the matrix
+        , size_t M          // Number of rows
+        , size_t N          // Number of columns
+        , bool SO           // Storage order
+        , AlignmentFlag AF  // Alignment flag
+        , PaddingFlag PF    // Padding flag
+        , typename Tag >    // Type tag
+class Rand< HybridMatrix<Type,M,N,SO,AF,PF,Tag> >
 {
  public:
-   //**Generate functions**************************************************************************
-   /*!\name Generate functions */
-   //@{
-   inline const HybridMatrix<Type,M,N,SO> generate( size_t m, size_t n ) const;
+   //*************************************************************************************************
+   /*!\brief Generation of a random HybridMatrix.
+   //
+   // \return The generated random matrix.
+   */
+   inline const HybridMatrix<Type,M,N,SO,AF,PF,Tag>
+      generate( size_t m, size_t n ) const
+   {
+      HybridMatrix<Type,M,N,SO,AF,PF,Tag> matrix( m, n );
+      randomize( matrix );
+      return matrix;
+   }
+   //*************************************************************************************************
 
-   template< typename Arg >
-   inline const HybridMatrix<Type,M,N,SO> generate( size_t m, size_t n, const Arg& min, const Arg& max ) const;
-   //@}
-   //**********************************************************************************************
+   //*************************************************************************************************
+   /*!\brief Generation of a random HybridMatrix.
+   //
+   // \param min The smallest possible value for a matrix element.
+   // \param max The largest possible value for a matrix element.
+   // \return The generated random matrix.
+   */
+   template< typename Arg >    // Min/max argument type
+   inline const HybridMatrix<Type,M,N,SO,AF,PF,Tag>
+      generate( size_t m, size_t n, const Arg& min, const Arg& max ) const
+   {
+      HybridMatrix<Type,M,N,SO,AF,PF,Tag> matrix( m, n );
+      randomize( matrix, min, max );
+      return matrix;
+   }
+   //*************************************************************************************************
 
-   //**Randomize functions*************************************************************************
-   /*!\name Randomize functions */
-   //@{
-   inline void randomize( HybridMatrix<Type,M,N,SO>& matrix ) const;
+   //*************************************************************************************************
+   /*!\brief Randomization of a HybridMatrix.
+   //
+   // \param matrix The matrix to be randomized.
+   // \return void
+   */
+   inline void randomize( HybridMatrix<Type,M,N,SO,AF,PF,Tag>& matrix ) const
+   {
+      using blaze::randomize;
 
-   template< typename Arg >
-   inline void randomize( HybridMatrix<Type,M,N,SO>& matrix, const Arg& min, const Arg& max ) const;
-   //@}
-   //**********************************************************************************************
+      const size_t m( matrix.rows()    );
+      const size_t n( matrix.columns() );
+
+      for( size_t i=0UL; i<m; ++i ) {
+         for( size_t j=0UL; j<n; ++j ) {
+            randomize( matrix(i,j) );
+         }
+      }
+   }
+   //*************************************************************************************************
+
+   //*************************************************************************************************
+   /*!\brief Randomization of a HybridMatrix.
+   //
+   // \param matrix The matrix to be randomized.
+   // \param min The smallest possible value for a matrix element.
+   // \param max The largest possible value for a matrix element.
+   // \return void
+   */
+   template< typename Arg >  // Min/max argument type
+   inline void randomize( HybridMatrix<Type,M,N,SO,AF,PF,Tag>& matrix,
+                          const Arg& min, const Arg& max ) const
+   {
+      using blaze::randomize;
+
+      const size_t m( matrix.rows()    );
+      const size_t n( matrix.columns() );
+
+      for( size_t i=0UL; i<m; ++i ) {
+         for( size_t j=0UL; j<n; ++j ) {
+            randomize( matrix(i,j), min, max );
+         }
+      }
+   }
+   //*************************************************************************************************
 };
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Generation of a random HybridMatrix.
-//
-// \return The generated random matrix.
-*/
-template< typename Type  // Data type of the matrix
-        , size_t M       // Number of rows
-        , size_t N       // Number of columns
-        , bool SO >      // Storage order
-inline const HybridMatrix<Type,M,N,SO>
-   Rand< HybridMatrix<Type,M,N,SO> >::generate( size_t m, size_t n ) const
-{
-   HybridMatrix<Type,M,N,SO> matrix( m, n );
-   randomize( matrix );
-   return matrix;
-}
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Generation of a random HybridMatrix.
-//
-// \param min The smallest possible value for a matrix element.
-// \param max The largest possible value for a matrix element.
-// \return The generated random matrix.
-*/
-template< typename Type   // Data type of the matrix
-        , size_t M        // Number of rows
-        , size_t N        // Number of columns
-        , bool SO >       // Storage order
-template< typename Arg >  // Min/max argument type
-inline const HybridMatrix<Type,M,N,SO>
-   Rand< HybridMatrix<Type,M,N,SO> >::generate( size_t m, size_t n, const Arg& min, const Arg& max ) const
-{
-   HybridMatrix<Type,M,N,SO> matrix( m, n );
-   randomize( matrix, min, max );
-   return matrix;
-}
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Randomization of a HybridMatrix.
-//
-// \param matrix The matrix to be randomized.
-// \return void
-*/
-template< typename Type  // Data type of the matrix
-        , size_t M       // Number of rows
-        , size_t N       // Number of columns
-        , bool SO >      // Storage order
-inline void Rand< HybridMatrix<Type,M,N,SO> >::randomize( HybridMatrix<Type,M,N,SO>& matrix ) const
-{
-   using blaze::randomize;
-
-   const size_t m( matrix.rows()    );
-   const size_t n( matrix.columns() );
-
-   for( size_t i=0UL; i<m; ++i ) {
-      for( size_t j=0UL; j<n; ++j ) {
-         randomize( matrix(i,j) );
-      }
-   }
-}
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Randomization of a HybridMatrix.
-//
-// \param matrix The matrix to be randomized.
-// \param min The smallest possible value for a matrix element.
-// \param max The largest possible value for a matrix element.
-// \return void
-*/
-template< typename Type   // Data type of the matrix
-        , size_t M        // Number of rows
-        , size_t N        // Number of columns
-        , bool SO >       // Storage order
-template< typename Arg >  // Min/max argument type
-inline void Rand< HybridMatrix<Type,M,N,SO> >::randomize( HybridMatrix<Type,M,N,SO>& matrix,
-                                                          const Arg& min, const Arg& max ) const
-{
-   using blaze::randomize;
-
-   const size_t m( matrix.rows()    );
-   const size_t n( matrix.columns() );
-
-   for( size_t i=0UL; i<m; ++i ) {
-      for( size_t j=0UL; j<n; ++j ) {
-         randomize( matrix(i,j), min, max );
-      }
-   }
-}
 /*! \endcond */
 //*************************************************************************************************
 
@@ -220,15 +177,18 @@ inline void Rand< HybridMatrix<Type,M,N,SO> >::randomize( HybridMatrix<Type,M,N,
 // \return void
 // \exception std::invalid_argument Invalid non-square matrix provided.
 */
-template< typename Type  // Data type of the matrix
-        , size_t M       // Number of rows
-        , size_t N       // Number of columns
-        , bool SO >      // Storage order
-void makeSymmetric( HybridMatrix<Type,M,N,SO>& matrix )
+template< typename Type     // Data type of the matrix
+        , size_t M          // Number of rows
+        , size_t N          // Number of columns
+        , bool SO           // Storage order
+        , AlignmentFlag AF  // Alignment flag
+        , PaddingFlag PF    // Padding flag
+        , typename Tag >    // Type tag
+void makeSymmetric( HybridMatrix<Type,M,N,SO,AF,PF,Tag>& matrix )
 {
    using blaze::randomize;
 
-   if( !isSquare( ~matrix ) ) {
+   if( !isSquare( *matrix ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid non-square matrix provided" );
    }
 
@@ -258,16 +218,19 @@ void makeSymmetric( HybridMatrix<Type,M,N,SO>& matrix )
 // \return void
 // \exception std::invalid_argument Invalid non-square matrix provided.
 */
-template< typename Type   // Data type of the matrix
-        , size_t M        // Number of rows
-        , size_t N        // Number of columns
-        , bool SO         // Storage order
-        , typename Arg >  // Min/max argument type
-void makeSymmetric( HybridMatrix<Type,M,N,SO>& matrix, const Arg& min, const Arg& max )
+template< typename Type     // Data type of the matrix
+        , size_t M          // Number of rows
+        , size_t N          // Number of columns
+        , bool SO           // Storage order
+        , AlignmentFlag AF  // Alignment flag
+        , PaddingFlag PF    // Padding flag
+        , typename Tag      // Type tag
+        , typename Arg >    // Min/max argument type
+void makeSymmetric( HybridMatrix<Type,M,N,SO,AF,PF,Tag>& matrix, const Arg& min, const Arg& max )
 {
    using blaze::randomize;
 
-   if( !isSquare( ~matrix ) ) {
+   if( !isSquare( *matrix ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid non-square matrix provided" );
    }
 
@@ -295,19 +258,22 @@ void makeSymmetric( HybridMatrix<Type,M,N,SO>& matrix, const Arg& min, const Arg
 // \return void
 // \exception std::invalid_argument Invalid non-square matrix provided.
 */
-template< typename Type  // Data type of the matrix
-        , size_t M       // Number of rows
-        , size_t N       // Number of columns
-        , bool SO >      // Storage order
-void makeHermitian( HybridMatrix<Type,M,N,SO>& matrix )
+template< typename Type     // Data type of the matrix
+        , size_t M          // Number of rows
+        , size_t N          // Number of columns
+        , bool SO           // Storage order
+        , AlignmentFlag AF  // Alignment flag
+        , PaddingFlag PF    // Padding flag
+        , typename Tag >    // Type tag
+void makeHermitian( HybridMatrix<Type,M,N,SO,AF,PF,Tag>& matrix )
 {
    using blaze::randomize;
 
-   BLAZE_CONSTRAINT_MUST_BE_NUMERIC_TYPE( Type );
+   BLAZE_CONSTRAINT_MUST_BE_SCALAR_TYPE( Type );
 
-   typedef UnderlyingBuiltin_<Type>  BT;
+   using BT = UnderlyingBuiltin_t<Type>;
 
-   if( !isSquare( ~matrix ) ) {
+   if( !isSquare( *matrix ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid non-square matrix provided" );
    }
 
@@ -337,20 +303,23 @@ void makeHermitian( HybridMatrix<Type,M,N,SO>& matrix )
 // \return void
 // \exception std::invalid_argument Invalid non-square matrix provided.
 */
-template< typename Type   // Data type of the matrix
-        , size_t M        // Number of rows
-        , size_t N        // Number of columns
-        , bool SO         // Storage order
-        , typename Arg >  // Min/max argument type
-void makeHermitian( HybridMatrix<Type,M,N,SO>& matrix, const Arg& min, const Arg& max )
+template< typename Type     // Data type of the matrix
+        , size_t M          // Number of rows
+        , size_t N          // Number of columns
+        , bool SO           // Storage order
+        , AlignmentFlag AF  // Alignment flag
+        , PaddingFlag PF    // Padding flag
+        , typename Tag      // Type tag
+        , typename Arg >    // Min/max argument type
+void makeHermitian( HybridMatrix<Type,M,N,SO,AF,PF,Tag>& matrix, const Arg& min, const Arg& max )
 {
    using blaze::randomize;
 
-   BLAZE_CONSTRAINT_MUST_BE_NUMERIC_TYPE( Type );
+   BLAZE_CONSTRAINT_MUST_BE_SCALAR_TYPE( Type );
 
-   typedef UnderlyingBuiltin_<Type>  BT;
+   using BT = UnderlyingBuiltin_t<Type>;
 
-   if( !isSquare( ~matrix ) ) {
+   if( !isSquare( *matrix ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid non-square matrix provided" );
    }
 
@@ -378,17 +347,20 @@ void makeHermitian( HybridMatrix<Type,M,N,SO>& matrix, const Arg& min, const Arg
 // \return void
 // \exception std::invalid_argument Invalid non-square matrix provided.
 */
-template< typename Type  // Data type of the matrix
-        , size_t M       // Number of rows
-        , size_t N       // Number of columns
-        , bool SO >      // Storage order
-void makePositiveDefinite( HybridMatrix<Type,M,N,SO>& matrix )
+template< typename Type     // Data type of the matrix
+        , size_t M          // Number of rows
+        , size_t N          // Number of columns
+        , bool SO           // Storage order
+        , AlignmentFlag AF  // Alignment flag
+        , PaddingFlag PF    // Padding flag
+        , typename Tag >    // Type tag
+void makePositiveDefinite( HybridMatrix<Type,M,N,SO,AF,PF,Tag>& matrix )
 {
    using blaze::randomize;
 
-   BLAZE_CONSTRAINT_MUST_BE_NUMERIC_TYPE( Type );
+   BLAZE_CONSTRAINT_MUST_BE_SCALAR_TYPE( Type );
 
-   if( !isSquare( ~matrix ) ) {
+   if( !isSquare( *matrix ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid non-square matrix provided" );
    }
 

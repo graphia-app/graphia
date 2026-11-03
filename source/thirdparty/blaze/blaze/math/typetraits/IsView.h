@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/IsView.h
 //  \brief Header file for the IsView type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,11 +40,9 @@
 // Includes
 //*************************************************************************************************
 
+#include <utility>
 #include <blaze/math/expressions/View.h>
 #include <blaze/util/IntegralConstant.h>
-#include <blaze/util/mpl/And.h>
-#include <blaze/util/mpl/Not.h>
-#include <blaze/util/typetraits/IsBaseOf.h>
 
 
 namespace blaze {
@@ -54,6 +52,19 @@ namespace blaze {
 //  CLASS DEFINITION
 //
 //=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Auxiliary helper functions for the IsView type trait.
+// \ingroup math_type_traits
+*/
+template< typename U >
+TrueType isView_backend( const volatile View<U>* );
+
+FalseType isView_backend( ... );
+/*! \endcond */
+//*************************************************************************************************
+
 
 //*************************************************************************************************
 /*!\brief Compile time check for views.
@@ -66,14 +77,17 @@ namespace blaze {
 // derives from \a FalseType.
 
    \code
-   using blaze::columnVector;
+   using blaze::aligned;
 
-   typedef blaze::DynamicVector<double,columnVector>  VectorType;
-   typedef blaze::Subvector<VectorType>               SubvectorType;
+   using VectorType = blaze::StaticVector<int,10UL>;
+   using MatrixType = blaze::DynamicMatrix<double>;
 
-   typedef blaze::CompressedMatrix<int,rowMajor>  MatrixType;
-   typedef blaze::Row<MatrixType>                 RowType;
-   typedef blaze::Column<MatrixType>              ColumnType;
+   VectorType a;
+   MatrixType A( 100UL, 200UL );
+
+   using SubvectorType = decltype( blaze::subvector( a, 2UL, 8UL ) );
+   using RowType       = decltype( blaze::row( A, 8UL ) );
+   using ColumnType    = decltype( blaze::column( A, 5UL ) );
 
    blaze::IsView< SubvectorType >::value    // Evaluates to 1
    blaze::IsView< const RowType >::Type     // Results in TrueType
@@ -84,8 +98,40 @@ namespace blaze {
    \endcode
 */
 template< typename T >
-struct IsView : public BoolConstant< And< IsBaseOf<View,T>, Not< IsBaseOf<T,View> > >::value >
+struct IsView
+   : public decltype( isView_backend( std::declval<T*>() ) )
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Specialization of the IsView type trait for references.
+// \ingroup math_type_traits
+*/
+template< typename T >
+struct IsView<T&>
+   : public FalseType
+{};
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsView type trait.
+// \ingroup math_type_traits
+//
+// The IsView_v variable template provides a convenient shortcut to access the nested \a value
+// of the IsView class template. For instance, given the type \a T the following two statements
+// are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsView<T>::value;
+   constexpr bool value2 = blaze::IsView_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsView_v = IsView<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

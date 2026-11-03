@@ -3,7 +3,7 @@
 //  \file blaze/math/expressions/SVecDVecDivExpr.h
 //  \brief Header file for the sparse vector/sparse vector division expression
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -41,12 +41,14 @@
 //*************************************************************************************************
 
 #include <iterator>
+#include <utility>
 #include <blaze/math/Aliases.h>
 #include <blaze/math/constraints/DenseVector.h>
 #include <blaze/math/constraints/RequiresEvaluation.h>
 #include <blaze/math/constraints/SparseVector.h>
 #include <blaze/math/constraints/TransposeFlag.h>
 #include <blaze/math/constraints/VecVecDivExpr.h>
+#include <blaze/math/constraints/Zero.h>
 #include <blaze/math/Exception.h>
 #include <blaze/math/expressions/Computation.h>
 #include <blaze/math/expressions/Forward.h>
@@ -55,16 +57,17 @@
 #include <blaze/math/shims/Reset.h>
 #include <blaze/math/shims/Serial.h>
 #include <blaze/math/sparse/ValueIndexPair.h>
-#include <blaze/math/traits/DivExprTrait.h>
 #include <blaze/math/traits/DivTrait.h>
-#include <blaze/math/traits/SubvectorExprTrait.h>
 #include <blaze/math/typetraits/IsExpression.h>
 #include <blaze/math/typetraits/IsTemporary.h>
+#include <blaze/math/typetraits/IsZero.h>
 #include <blaze/math/typetraits/RequiresEvaluation.h>
 #include <blaze/math/typetraits/Size.h>
+#include <blaze/system/MacroDisable.h>
 #include <blaze/util/Assert.h>
 #include <blaze/util/EnableIf.h>
 #include <blaze/util/FunctionTrace.h>
+#include <blaze/util/MaybeUnused.h>
 #include <blaze/util/mpl/If.h>
 #include <blaze/util/mpl/Max.h>
 #include <blaze/util/Types.h>
@@ -89,18 +92,18 @@ namespace blaze {
 template< typename VT1  // Type of the left-hand side sparse vector
         , typename VT2  // Type of the right-hand side dense vector
         , bool TF >     // Transpose flag
-class SVecDVecDivExpr : public SparseVector< SVecDVecDivExpr<VT1,VT2,TF>, TF >
-                      , private VecVecDivExpr
-                      , private Computation
+class SVecDVecDivExpr
+   : public VecVecDivExpr< SparseVector< SVecDVecDivExpr<VT1,VT2,TF>, TF > >
+   , private Computation
 {
  private:
    //**Type definitions****************************************************************************
-   typedef ResultType_<VT1>     RT1;  //!< Result type of the left-hand side sparse vector expression.
-   typedef ResultType_<VT2>     RT2;  //!< Result type of the right-hand side dense vector expression.
-   typedef ReturnType_<VT1>     RN1;  //!< Return type of the left-hand side sparse vector expression.
-   typedef ReturnType_<VT2>     RN2;  //!< Return type of the right-hand side dense vector expression.
-   typedef CompositeType_<VT1>  CT1;  //!< Composite type of the left-hand side sparse vector expression.
-   typedef CompositeType_<VT2>  CT2;  //!< Composite type of the right-hand side dense vector expression.
+   using RT1 = ResultType_t<VT1>;     //!< Result type of the left-hand side sparse vector expression.
+   using RT2 = ResultType_t<VT2>;     //!< Result type of the right-hand side dense vector expression.
+   using RN1 = ReturnType_t<VT1>;     //!< Return type of the left-hand side sparse vector expression.
+   using RN2 = ReturnType_t<VT2>;     //!< Return type of the right-hand side dense vector expression.
+   using CT1 = CompositeType_t<VT1>;  //!< Composite type of the left-hand side sparse vector expression.
+   using CT2 = CompositeType_t<VT2>;  //!< Composite type of the right-hand side dense vector expression.
    //**********************************************************************************************
 
    //**Return type evaluation**********************************************************************
@@ -110,10 +113,10 @@ class SVecDVecDivExpr : public SparseVector< SVecDVecDivExpr<VT1,VT2,TF>, TF >
        or matrix, \a returnExpr will be set to \a false and the subscript operator will
        return it's result by value. Otherwise \a returnExpr will be set to \a true and
        the subscript operator may return it's result as an expression. */
-   enum : bool { returnExpr = !IsTemporary<RN1>::value && !IsTemporary<RN2>::value };
+   static constexpr bool returnExpr = ( !IsTemporary_v<RN1> && !IsTemporary_v<RN2> );
 
    //! Expression return type for the subscript operator.
-   typedef DivExprTrait_<RN1,RN2>  ExprReturnType;
+   using ExprReturnType = decltype( std::declval<RN1>() / std::declval<RN2>() );
    //**********************************************************************************************
 
    //**Evaluation strategy*************************************************************************
@@ -124,40 +127,43 @@ class SVecDVecDivExpr : public SparseVector< SVecDVecDivExpr<VT1,VT2,TF>, TF >
        \a true and the division expression will be evaluated via the \a assign function family.
        Otherwise \a useAssign will be set to \a false and the expression will be evaluated via
        the subscript operator. */
-   enum : bool { useAssign = ( RequiresEvaluation<VT1>::value || RequiresEvaluation<VT2>::value ) };
+   static constexpr bool useAssign = ( RequiresEvaluation_v<VT1> || RequiresEvaluation_v<VT2> );
 
    /*! \cond BLAZE_INTERNAL */
-   //! Helper structure for the explicit application of the SFINAE principle.
+   //! Helper variable template for the explicit application of the SFINAE principle.
    template< typename VT >
-   struct UseAssign {
-      enum : bool { value = useAssign };
-   };
+   static constexpr bool UseAssign_v = useAssign;
    /*! \endcond */
    //**********************************************************************************************
 
  public:
    //**Type definitions****************************************************************************
-   typedef SVecDVecDivExpr<VT1,VT2,TF>  This;           //!< Type of this SVecDVecDivExpr instance.
-   typedef DivTrait_<RT1,RT2>           ResultType;     //!< Result type for expression template evaluations.
-   typedef TransposeType_<ResultType>   TransposeType;  //!< Transpose type for expression template evaluations.
-   typedef ElementType_<ResultType>     ElementType;    //!< Resulting element type.
+   //! Type of this SVecDVecDivExpr instance.
+   using This = SVecDVecDivExpr<VT1,VT2,TF>;
+
+   //! Base type of this SVecDVecDivExpr instance.
+   using BaseType = VecVecDivExpr< SparseVector<This,TF> >;
+
+   using ResultType    = DivTrait_t<RT1,RT2>;          //!< Result type for expression template evaluations.
+   using TransposeType = TransposeType_t<ResultType>;  //!< Transpose type for expression template evaluations.
+   using ElementType   = ElementType_t<ResultType>;    //!< Resulting element type.
 
    //! Return type for expression template evaluations.
-   typedef const IfTrue_< returnExpr, ExprReturnType, ElementType >  ReturnType;
+   using ReturnType = const If_t< returnExpr, ExprReturnType, ElementType >;
 
    //! Data type for composite expression templates.
-   typedef IfTrue_< useAssign, const ResultType, const SVecDVecDivExpr& >  CompositeType;
+   using CompositeType = If_t< useAssign, const ResultType, const SVecDVecDivExpr& >;
 
    //! Composite type of the left-hand side sparse vector expression.
-   typedef If_< IsExpression<VT1>, const VT1, const VT1& >  LeftOperand;
+   using LeftOperand = If_t< IsExpression_v<VT1>, const VT1, const VT1& >;
 
    //! Composite type of the right-hand side dense vector expression.
-   typedef If_< IsExpression<VT2>, const VT2, const VT2& >  RightOperand;
+   using RightOperand = If_t< IsExpression_v<VT2>, const VT2, const VT2& >;
    //**********************************************************************************************
 
    //**Compilation flags***************************************************************************
    //! Compilation switch for the expression template assignment strategy.
-   enum : bool { smpAssignable = false };
+   static constexpr bool smpAssignable = false;
    //**********************************************************************************************
 
    //**ConstIterator class definition**************************************************************
@@ -168,23 +174,23 @@ class SVecDVecDivExpr : public SparseVector< SVecDVecDivExpr<VT1,VT2,TF>, TF >
     public:
       //**Type definitions*************************************************************************
       //! Element type of the sparse vector expression.
-      typedef ValueIndexPair<ElementType>  Element;
+      using Element = ValueIndexPair<ElementType>;
 
       //! Iterator type of the sparse vector expression.
-      typedef ConstIterator_< RemoveReference_<LeftOperand> >  IteratorType;
+      using IteratorType = ConstIterator_t< RemoveReference_t<LeftOperand> >;
 
-      typedef std::forward_iterator_tag  IteratorCategory;  //!< The iterator category.
-      typedef ElementType                ValueType;         //!< Type of the underlying pointers.
-      typedef ValueType*                 PointerType;       //!< Pointer return type.
-      typedef ValueType&                 ReferenceType;     //!< Reference return type.
-      typedef ptrdiff_t                  DifferenceType;    //!< Difference between two iterators.
+      using IteratorCategory = std::forward_iterator_tag;  //!< The iterator category.
+      using ValueType        = ElementType;                //!< Type of the underlying pointers.
+      using PointerType      = ValueType*;                 //!< Pointer return type.
+      using ReferenceType    = ValueType&;                 //!< Reference return type.
+      using DifferenceType   = ptrdiff_t;                  //!< Difference between two iterators.
 
       // STL iterator requirements
-      typedef IteratorCategory  iterator_category;  //!< The iterator category.
-      typedef ValueType         value_type;         //!< Type of the underlying pointers.
-      typedef PointerType       pointer;            //!< Pointer return type.
-      typedef ReferenceType     reference;          //!< Reference return type.
-      typedef DifferenceType    difference_type;    //!< Difference between two iterators.
+      using iterator_category = IteratorCategory;  //!< The iterator category.
+      using value_type        = ValueType;         //!< Type of the underlying pointers.
+      using pointer           = PointerType;       //!< Pointer return type.
+      using reference         = ReferenceType;     //!< Reference return type.
+      using difference_type   = DifferenceType;    //!< Difference between two iterators.
       //*******************************************************************************************
 
       //**Constructor******************************************************************************
@@ -294,7 +300,7 @@ class SVecDVecDivExpr : public SparseVector< SVecDVecDivExpr<VT1,VT2,TF>, TF >
    // \param lhs The left-hand side sparse vector operand of the division expression.
    // \param rhs The right-hand side dense vector operand of the division expression.
    */
-   explicit inline SVecDVecDivExpr( const VT1& lhs, const VT2& rhs ) noexcept
+   inline SVecDVecDivExpr( const VT1& lhs, const VT2& rhs ) noexcept
       : lhs_( lhs )  // Left-hand side sparse vector of the division expression
       , rhs_( rhs )  // Right-hand side dense vector of the division expression
    {
@@ -470,24 +476,22 @@ class SVecDVecDivExpr : public SparseVector< SVecDVecDivExpr<VT1,VT2,TF>, TF >
    // of the two operands requires an intermediate evaluation.
    */
    template< typename VT >  // Type of the target dense vector
-   friend inline EnableIf_< UseAssign<VT> >
-      assign( DenseVector<VT,TF>& lhs, const SVecDVecDivExpr& rhs )
+   friend inline auto assign( DenseVector<VT,TF>& lhs, const SVecDVecDivExpr& rhs )
+      -> EnableIf_t< UseAssign_v<VT> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
-
-      typedef ConstIterator_< RemoveReference_<CT1> >  ConstIterator;
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
       CT1 x( serial( rhs.lhs_ ) );  // Evaluation of the left-hand side sparse vector operand
       CT2 y( serial( rhs.rhs_ ) );  // Evaluation of the right-hand side dense vector operand
 
       BLAZE_INTERNAL_ASSERT( x.size() == rhs.lhs_.size(), "Invalid vector size" );
       BLAZE_INTERNAL_ASSERT( y.size() == rhs.rhs_.size(), "Invalid vector size" );
-      BLAZE_INTERNAL_ASSERT( x.size() == (~lhs).size()  , "Invalid vector size" );
+      BLAZE_INTERNAL_ASSERT( x.size() == (*lhs).size()  , "Invalid vector size" );
 
-      for( ConstIterator element=x.begin(); element!=x.end(); ++element )
-         (~lhs)[element->index()] = element->value() / y[element->index()];
+      for( auto element=x.begin(); element!=x.end(); ++element )
+         (*lhs)[element->index()] = element->value() / y[element->index()];
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -507,24 +511,26 @@ class SVecDVecDivExpr : public SparseVector< SVecDVecDivExpr<VT1,VT2,TF>, TF >
    // of the two operands requires an intermediate evaluation.
    */
    template< typename VT >  // Type of the target sparse vector
-   friend inline EnableIf_< UseAssign<VT> >
-      assign( SparseVector<VT,TF>& lhs, const SVecDVecDivExpr& rhs )
+   friend inline auto assign( SparseVector<VT,TF>& lhs, const SVecDVecDivExpr& rhs )
+      -> EnableIf_t< UseAssign_v<VT> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
-
-      typedef ConstIterator_< RemoveReference_<CT1> >  ConstIterator;
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
       CT1 x( serial( rhs.lhs_ ) );  // Evaluation of the left-hand side sparse vector operand
       CT2 y( serial( rhs.rhs_ ) );  // Evaluation of the right-hand side dense vector operand
 
       BLAZE_INTERNAL_ASSERT( x.size() == rhs.lhs_.size(), "Invalid vector size" );
       BLAZE_INTERNAL_ASSERT( y.size() == rhs.rhs_.size(), "Invalid vector size" );
-      BLAZE_INTERNAL_ASSERT( x.size() == (~lhs).size()  , "Invalid vector size" );
+      BLAZE_INTERNAL_ASSERT( x.size() == (*lhs).size()  , "Invalid vector size" );
 
-      for( ConstIterator element=x.begin(); element!=x.end(); ++element )
-         (~lhs).append( element->index(), element->value() / y[element->index()] );
+      // Final memory allocation (based on the evaluated operands)
+      (*lhs).reserve( x.nonZeros() );
+
+      // Performing the vector division
+      for( auto element=x.begin(); element!=x.end(); ++element )
+         (*lhs).append( element->index(), element->value() / y[element->index()] );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -544,24 +550,22 @@ class SVecDVecDivExpr : public SparseVector< SVecDVecDivExpr<VT1,VT2,TF>, TF >
    // two operands requires an intermediate evaluation.
    */
    template< typename VT >  // Type of the target dense vector
-   friend inline EnableIf_< UseAssign<VT> >
-      addAssign( DenseVector<VT,TF>& lhs, const SVecDVecDivExpr& rhs )
+   friend inline auto addAssign( DenseVector<VT,TF>& lhs, const SVecDVecDivExpr& rhs )
+      -> EnableIf_t< UseAssign_v<VT> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
-
-      typedef ConstIterator_< RemoveReference_<CT1> >  ConstIterator;
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
       CT1 x( serial( rhs.lhs_ ) );  // Evaluation of the left-hand side sparse vector operand
       CT2 y( serial( rhs.rhs_ ) );  // Evaluation of the right-hand side dense vector operand
 
       BLAZE_INTERNAL_ASSERT( x.size() == rhs.lhs_.size(), "Invalid vector size" );
       BLAZE_INTERNAL_ASSERT( y.size() == rhs.rhs_.size(), "Invalid vector size" );
-      BLAZE_INTERNAL_ASSERT( x.size() == (~lhs).size()  , "Invalid vector size" );
+      BLAZE_INTERNAL_ASSERT( x.size() == (*lhs).size()  , "Invalid vector size" );
 
-      for( ConstIterator element=x.begin(); element!=x.end(); ++element )
-         (~lhs)[element->index()] += element->value() / y[element->index()];
+      for( auto element=x.begin(); element!=x.end(); ++element )
+         (*lhs)[element->index()] += element->value() / y[element->index()];
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -585,24 +589,22 @@ class SVecDVecDivExpr : public SparseVector< SVecDVecDivExpr<VT1,VT2,TF>, TF >
    // two operands requires an intermediate evaluation.
    */
    template< typename VT >  // Type of the target dense vector
-   friend inline EnableIf_< UseAssign<VT> >
-      subAssign( DenseVector<VT,TF>& lhs, const SVecDVecDivExpr& rhs )
+   friend inline auto subAssign( DenseVector<VT,TF>& lhs, const SVecDVecDivExpr& rhs )
+      -> EnableIf_t< UseAssign_v<VT> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
-
-      typedef ConstIterator_< RemoveReference_<CT1> >  ConstIterator;
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
       CT1 x( serial( rhs.lhs_ ) );  // Evaluation of the left-hand side sparse vector operand
       CT2 y( serial( rhs.rhs_ ) );  // Evaluation of the right-hand side dense vector operand
 
       BLAZE_INTERNAL_ASSERT( x.size() == rhs.lhs_.size(), "Invalid vector size" );
       BLAZE_INTERNAL_ASSERT( y.size() == rhs.rhs_.size(), "Invalid vector size" );
-      BLAZE_INTERNAL_ASSERT( x.size() == (~lhs).size()  , "Invalid vector size" );
+      BLAZE_INTERNAL_ASSERT( x.size() == (*lhs).size()  , "Invalid vector size" );
 
-      for( ConstIterator element=x.begin(); element!=x.end(); ++element )
-         (~lhs)[element->index()] -= element->value() / y[element->index()];
+      for( auto element=x.begin(); element!=x.end(); ++element )
+         (*lhs)[element->index()] -= element->value() / y[element->index()];
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -626,36 +628,34 @@ class SVecDVecDivExpr : public SparseVector< SVecDVecDivExpr<VT1,VT2,TF>, TF >
    // of the two operands requires an intermediate evaluation.
    */
    template< typename VT >  // Type of the target dense vector
-   friend inline EnableIf_< UseAssign<VT> >
-      multAssign( DenseVector<VT,TF>& lhs, const SVecDVecDivExpr& rhs )
+   friend inline auto multAssign( DenseVector<VT,TF>& lhs, const SVecDVecDivExpr& rhs )
+      -> EnableIf_t< UseAssign_v<VT> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).size() == rhs.size(), "Invalid vector sizes" );
-
-      typedef ConstIterator_< RemoveReference_<CT1> >  ConstIterator;
+      BLAZE_INTERNAL_ASSERT( (*lhs).size() == rhs.size(), "Invalid vector sizes" );
 
       CT1 x( serial( rhs.lhs_ ) );  // Evaluation of the left-hand side sparse vector operand
       CT2 y( serial( rhs.rhs_ ) );  // Evaluation of the right-hand side dense vector operand
 
       BLAZE_INTERNAL_ASSERT( x.size() == rhs.lhs_.size(), "Invalid vector size" );
       BLAZE_INTERNAL_ASSERT( y.size() == rhs.rhs_.size(), "Invalid vector size" );
-      BLAZE_INTERNAL_ASSERT( x.size() == (~lhs).size()  , "Invalid vector size" );
+      BLAZE_INTERNAL_ASSERT( x.size() == (*lhs).size()  , "Invalid vector size" );
 
-      const ConstIterator end( x.end() );
-      ConstIterator begin( x.begin() );
+      const auto end( x.end() );
+      auto begin( x.begin() );
       size_t i( 0UL );
 
       for( ; begin!=end; ++begin ) {
          const size_t index( begin->index() );
          for( ; i<index; ++i )
-            reset( (~lhs)[i] );
-         (~lhs)[index] *= begin->value() / y[index];
+            reset( (*lhs)[i] );
+         (*lhs)[index] *= begin->value() / y[index];
          ++i;
       }
 
       for( ; i<rhs.size(); ++i )
-         reset( (~lhs)[i] );
+         reset( (*lhs)[i] );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -670,6 +670,7 @@ class SVecDVecDivExpr : public SparseVector< SVecDVecDivExpr<VT1,VT2,TF>, TF >
    BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE ( VT2 );
    BLAZE_CONSTRAINT_MUST_BE_VECTOR_WITH_TRANSPOSE_FLAG( VT1, TF );
    BLAZE_CONSTRAINT_MUST_BE_VECTOR_WITH_TRANSPOSE_FLAG( VT2, TF );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_ZERO_TYPE( VT1 );
    BLAZE_CONSTRAINT_MUST_FORM_VALID_VECVECDIVEXPR( VT1, VT2 );
    /*! \endcond */
    //**********************************************************************************************
@@ -686,12 +687,79 @@ class SVecDVecDivExpr : public SparseVector< SVecDVecDivExpr<VT1,VT2,TF>, TF >
 //=================================================================================================
 
 //*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Backend implementation of the componentwise division of a sparse vector and a dense
+//        vector (\f$ \vec{a}=\vec{b}/\vec{c} \f$).
+// \ingroup sparse_vector
+//
+// \param lhs The left-hand side sparse vector for the component quotient.
+// \param rhs The right-hand side dense vector for the component quotient.
+// \return The quotient of the two vectors.
+//
+// This function implements a performance optimized treatment of the componentwise division
+// of a sparse vector and a dense vector.
+*/
+template< typename VT1  // Type of the left-hand side sparse vector
+        , typename VT2  // Type of the right-hand side dense vector
+        , bool TF       // Transpose flag
+        , DisableIf_t< IsZero_v<VT1> >* = nullptr >
+inline const SVecDVecDivExpr<VT1,VT2,TF>
+   svecdvecdiv( const SparseVector<VT1,TF>& lhs, const DenseVector<VT2,TF>& rhs )
+{
+   BLAZE_FUNCTION_TRACE;
+
+   BLAZE_INTERNAL_ASSERT( (*lhs).size() == (*rhs).size(), "Invalid vector sizes" );
+
+   return SVecDVecDivExpr<VT1,VT2,TF>( *lhs, *rhs );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Backend implementation of the componentwise division of a zero vector and a dense
+//        vector (\f$ \vec{a}=\vec{b}/\vec{c} \f$).
+// \ingroup sparse_vector
+//
+// \param lhs The left-hand side zero vector for the component quotient.
+// \param rhs The right-hand side dense vector for the component quotient.
+// \return The resulting zero vector.
+//
+// This function implements a performance optimized treatment of the componentwise division
+// of a zero vector and a dense vector. It returns a zero vector.
+*/
+template< typename VT1  // Type of the left-hand side sparse vector
+        , typename VT2  // Type of the right-hand side dense vector
+        , bool TF       // Transpose flag
+        , EnableIf_t< IsZero_v<VT1> >* = nullptr >
+inline decltype(auto)
+   svecdvecdiv( const SparseVector<VT1,TF>& lhs, const DenseVector<VT2,TF>& rhs )
+{
+   BLAZE_FUNCTION_TRACE;
+
+   MAYBE_UNUSED( rhs );
+
+   BLAZE_INTERNAL_ASSERT( (*lhs).size() == (*rhs).size(), "Invalid vector sizes" );
+
+   using ReturnType = const DivTrait_t< ResultType_t<VT1>, ResultType_t<VT2> >;
+
+   BLAZE_CONSTRAINT_MUST_BE_VECTOR_WITH_TRANSPOSE_FLAG( ReturnType, TF );
+   BLAZE_CONSTRAINT_MUST_BE_ZERO_TYPE( ReturnType );
+
+   return ReturnType( (*lhs).size() );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
 /*!\brief Division operator for the componentwise division of a sparse vector and a dense
 //        vector (\f$ \vec{a}=\vec{b}/\vec{c} \f$).
 // \ingroup sparse_vector
 //
-// \param lhs The left-hand side sparse vector for the component product.
-// \param rhs The right-hand side dense vector for the component product.
+// \param lhs The left-hand side sparse vector for the component quotient.
+// \param rhs The right-hand side dense vector for the component quotient.
 // \return The quotient of the two vectors.
 // \exception std::invalid_argument Vector sizes do not match.
 //
@@ -705,25 +773,25 @@ class SVecDVecDivExpr : public SparseVector< SVecDVecDivExpr<VT1,VT2,TF>, TF >
    \endcode
 
 // The operator returns an expression representing a sparse vector of the higher-order element
-// type of the two involved vector element types \a T1::ElementType and \a T2::ElementType.
-// Both vector types \a T1 and \a T2 as well as the two element types \a T1::ElementType and
-// \a T2::ElementType have to be supported by the DivTrait class template.\n
+// type of the two involved vector element types \a VT1::ElementType and \a VT2::ElementType.
+// Both vector types \a VT1 and \a VT2 as well as the two element types \a VT1::ElementType
+// and \a VT2::ElementType have to be supported by the DivTrait class template.\n
 // In case the current sizes of the two given vectors don't match, a \a std::invalid_argument
 // is thrown.
 */
-template< typename T1  // Type of the left-hand side sparse vector
-        , typename T2  // Type of the right-hand side dense vector
-        , bool TF >    // Transpose flag
-inline const SVecDVecDivExpr<T1,T2,TF>
-   operator/( const SparseVector<T1,TF>& lhs, const DenseVector<T2,TF>& rhs )
+template< typename VT1  // Type of the left-hand side sparse vector
+        , typename VT2  // Type of the right-hand side dense vector
+        , bool TF >     // Transpose flag
+inline decltype(auto)
+   operator/( const SparseVector<VT1,TF>& lhs, const DenseVector<VT2,TF>& rhs )
 {
    BLAZE_FUNCTION_TRACE;
 
-   if( (~lhs).size() != (~rhs).size() ) {
+   if( (*lhs).size() != (*rhs).size() ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Vector sizes do not match" );
    }
 
-   return SVecDVecDivExpr<T1,T2,TF>( ~lhs, ~rhs );
+   return svecdvecdiv( *lhs, *rhs );
 }
 //*************************************************************************************************
 
@@ -739,32 +807,9 @@ inline const SVecDVecDivExpr<T1,T2,TF>
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename VT1, typename VT2, bool TF >
-struct Size< SVecDVecDivExpr<VT1,VT2,TF> >
-   : public Max< Size<VT1>, Size<VT2> >
+struct Size< SVecDVecDivExpr<VT1,VT2,TF>, 0UL >
+   : public Max_t< Size<VT1,0UL>, Size<VT2,0UL> >
 {};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  EXPRESSION TRAIT SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename VT1, typename VT2, bool TF, bool AF >
-struct SubvectorExprTrait< SVecDVecDivExpr<VT1,VT2,TF>, AF >
-{
- public:
-   //**********************************************************************************************
-   using Type = DivExprTrait_< SubvectorExprTrait_<const VT1,AF>
-                             , SubvectorExprTrait_<const VT2,AF> >;
-   //**********************************************************************************************
-};
 /*! \endcond */
 //*************************************************************************************************
 

@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/IsPod.h
 //  \brief Header file for the IsPod type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -84,8 +84,27 @@ namespace blaze {
    \endcode
 */
 template< typename T >
-struct IsPod : public BoolConstant< std::is_pod<T>::value >
+struct IsPod
+   : public BoolConstant< std::is_pod<T>::value >
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsPod type trait.
+// \ingroup type_traits
+//
+// The IsPod_v variable template provides a convenient shortcut to access the nested \a value of
+// the IsPod class template. For instance, given the type \a T the following two statements are
+// identical:
+
+   \code
+   constexpr bool value1 = blaze::IsPod<T>::value;
+   constexpr bool value2 = blaze::IsPod_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsPod_v = IsPod<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

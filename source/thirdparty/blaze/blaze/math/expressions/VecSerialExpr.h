@@ -3,7 +3,7 @@
 //  \file blaze/math/expressions/VecSerialExpr.h
 //  \brief Header file for the VecSerialExpr base class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -56,14 +56,47 @@ namespace blaze {
 // \ingroup math
 //
 // The VecSerialExpr class serves as a tag for all expression templates that enforce a serial
-// evaluation of a vector. All classes, that represent a vector serialization operation and that
-// are used within the expression template environment of the Blaze library have to derive from
-// this class in order to qualify as vector serial evaluation expression template. Only in case
-// a class is derived from the VecSerialExpr base class, the IsVecSerialExpr type trait recognizes
-// the class as valid vector serial evaluation expression template.
+// evaluation of a vector. All classes, that represent a vector serialization operation and
+// that are used within the expression template environment of the Blaze library have to
+// derive publicly from this class in order to qualify as vector serial evaluation expression
+// template. Only in case a class is derived publicly from the VecSerialExpr base class, the
+// IsVecSerialExpr type trait recognizes the class as valid vector serial evaluation expression
+// template.
 */
-struct VecSerialExpr : private SerialExpr
+template< typename VT >  // Vector base type of the expression
+struct VecSerialExpr
+   : public SerialExpr<VT>
 {};
+//*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  GLOBAL RESTRUCTURING FUNCTIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Evaluation of the given vector serial evaluation expression.
+// \ingroup math
+//
+// \param vector The input serial evaluation expression.
+// \return The evaluated vector.
+//
+// This function implements a performance optimized treatment of the serial evaluation of a
+// vector serial evaluation expression.
+*/
+template< typename VT >  // Vector base type of the expression
+inline decltype(auto) serial( const VecSerialExpr<VT>& vector )
+{
+   BLAZE_FUNCTION_TRACE;
+
+   return *vector;
+}
+/*! \endcond */
 //*************************************************************************************************
 
 } // namespace blaze

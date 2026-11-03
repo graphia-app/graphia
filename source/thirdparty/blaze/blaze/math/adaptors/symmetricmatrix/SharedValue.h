@@ -3,7 +3,7 @@
 //  \file blaze/math/adaptors/symmetricmatrix/SharedValue.h
 //  \brief Header file for the SharedValue class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -41,6 +41,7 @@
 //*************************************************************************************************
 
 #include <memory>
+#include <blaze/math/RelaxationFlag.h>
 #include <blaze/util/constraints/Const.h>
 #include <blaze/util/constraints/Pointer.h>
 #include <blaze/util/constraints/Reference.h>
@@ -68,24 +69,37 @@ class SharedValue
 {
  public:
    //**Type definitions****************************************************************************
-   typedef Type         ValueType;       //!< Type of the shared value.
-   typedef Type&        Reference;       //!< Reference to the shared value.
-   typedef const Type&  ConstReference;  //!< Reference-to-const to the shared value.
-   typedef Type*        Pointer;         //!< Pointer to the shared value.
-   typedef const Type*  ConstPointer;    //!< Pointer-to-const to the shared value.
+   using ValueType      = Type;         //!< Type of the shared value.
+   using Reference      = Type&;        //!< Reference to the shared value.
+   using ConstReference = const Type&;  //!< Reference-to-const to the shared value.
+   using Pointer        = Type*;        //!< Pointer to the shared value.
+   using ConstPointer   = const Type*;  //!< Pointer-to-const to the shared value.
    //**********************************************************************************************
 
    //**Constructors********************************************************************************
    /*!\name Constructors */
    //@{
-   explicit inline SharedValue();
+            inline SharedValue();
    explicit inline SharedValue( const Type& value );
-   // No explicitly declared copy constructor.
+
+   SharedValue( const SharedValue& ) = default;
+   SharedValue( SharedValue&& ) = default;
    //@}
    //**********************************************************************************************
 
    //**Destructor**********************************************************************************
-   // No explicitly declared destructor.
+   /*!\name Destructor */
+   //@{
+   ~SharedValue() = default;
+   //@}
+   //**********************************************************************************************
+
+   //**Assignment operators************************************************************************
+   /*!\name Assignment operators */
+   //@{
+   SharedValue& operator=( const SharedValue& ) = default;
+   SharedValue& operator=( SharedValue&& ) = default;
+   //@}
    //**********************************************************************************************
 
    //**Access operators****************************************************************************
@@ -233,10 +247,10 @@ inline typename SharedValue<Type>::Pointer SharedValue<Type>::base() const noexc
 /*!\name SharedValue operators */
 //@{
 template< typename T1, typename T2 >
-inline bool operator==( const SharedValue<T1>& lhs, const SharedValue<T2>& rhs );
+bool operator==( const SharedValue<T1>& lhs, const SharedValue<T2>& rhs );
 
 template< typename T1, typename T2 >
-inline bool operator!=( const SharedValue<T1>& lhs, const SharedValue<T2>& rhs );
+bool operator!=( const SharedValue<T1>& lhs, const SharedValue<T2>& rhs );
 //@}
 //*************************************************************************************************
 
@@ -284,8 +298,11 @@ inline bool operator!=( const SharedValue<T1>& lhs, const SharedValue<T2>& rhs )
 //*************************************************************************************************
 /*!\name SharedValue global functions */
 //@{
-template< bool RF, typename Type >
-inline bool isDefault( const SharedValue<Type>& value );
+template< RelaxationFlag RF, typename Type >
+bool isDefault( const SharedValue<Type>& value );
+
+template< RelaxationFlag RF, typename T1, typename T2 >
+bool equal( const SharedValue<T1>& lhs, const SharedValue<T2>& rhs );
 //@}
 //*************************************************************************************************
 
@@ -300,12 +317,32 @@ inline bool isDefault( const SharedValue<Type>& value );
 // This function checks whether the given shared value is in default state. In case it is in
 // default state, the function returns \a true, otherwise it returns \a false.
 */
-template< bool RF, typename Type >
+template< RelaxationFlag RF, typename Type >
 inline bool isDefault( const SharedValue<Type>& value )
 {
    using blaze::isDefault;
 
    return isDefault<RF>( *value );
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Equality check for a two shared values.
+// \ingroup symmetric_matrix
+//
+// \param a The left-hand side shared value.
+// \param b The right-hand side shared value.
+// \return \a true if the two shared values are equal, \a false if not.
+//
+// This function checks whether the two given shared values are equal, taking the limited
+// machine accuracy into account. In case the two values are equal, the function returns
+// \a true, otherwise it returns \a false.
+*/
+template< RelaxationFlag RF, typename T1, typename T2 >
+inline bool equal( const SharedValue<T1>& a, const SharedValue<T2>& b )
+{
+   return equal<RF>( *a, *b );
 }
 //*************************************************************************************************
 

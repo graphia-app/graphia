@@ -3,7 +3,7 @@
 //  \file blaze/math/constraints/SparseMatrix.h
 //  \brief Constraint on the data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -55,11 +55,11 @@ namespace blaze {
 /*!\brief Constraint on the data type.
 // \ingroup math_constraints
 //
-// In case the given data type \a T is not a sparse, N-dimensional matrix type, a compilation
-// error is created.
+// In case the given data type \a T is not a sparse matrix type (i.e. whether \a T is derived
+// from the SparseMatrix base class), a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_SPARSE_MATRIX_TYPE(T) \
-   static_assert( ::blaze::IsSparseMatrix<T>::value, "Non-sparse matrix type detected" )
+   static_assert( ::blaze::IsSparseMatrix_v<T>, "Non-sparse matrix type detected" )
 //*************************************************************************************************
 
 
@@ -75,11 +75,11 @@ namespace blaze {
 /*!\brief Constraint on the data type.
 // \ingroup math_constraints
 //
-// In case the given data type \a T is a sparse, N-dimensional matrix type, a compilation
-// error is created.
+// In case the given data type \a T is a sparse matrix type (i.e. whether \a T is derived from
+// the SparseMatrix base class), a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_SPARSE_MATRIX_TYPE(T) \
-   static_assert( !::blaze::IsSparseMatrix<T>::value, "Sparse matrix type detected" )
+   static_assert( !::blaze::IsSparseMatrix_v<T>, "Sparse matrix type detected" )
 //*************************************************************************************************
 
 } // namespace blaze

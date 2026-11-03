@@ -3,7 +3,7 @@
 //  \file blaze/math/traits/SubTrait.h
 //  \brief Header file for the subtraction trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -41,22 +41,12 @@
 //*************************************************************************************************
 
 #include <utility>
-#include <blaze/util/Complex.h>
+#include <blaze/math/GroupTag.h>
 #include <blaze/util/EnableIf.h>
-#include <blaze/util/mpl/And.h>
-#include <blaze/util/mpl/If.h>
-#include <blaze/util/mpl/Or.h>
-#include <blaze/util/typetraits/All.h>
-#include <blaze/util/typetraits/Any.h>
 #include <blaze/util/typetraits/CommonType.h>
-#include <blaze/util/typetraits/Decay.h>
-#include <blaze/util/typetraits/IsBuiltin.h>
-#include <blaze/util/typetraits/IsConst.h>
-#include <blaze/util/typetraits/IsIntegral.h>
-#include <blaze/util/typetraits/IsReference.h>
-#include <blaze/util/typetraits/IsSigned.h>
-#include <blaze/util/typetraits/IsVolatile.h>
-#include <blaze/util/typetraits/MakeSigned.h>
+#include <blaze/util/typetraits/IsNumeric.h>
+#include <blaze/util/typetraits/RemoveCVRef.h>
+#include <blaze/util/typetraits/Void.h>
 
 
 namespace blaze {
@@ -68,6 +58,24 @@ namespace blaze {
 //=================================================================================================
 
 //*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename, typename, typename = void > struct SubTrait;
+template< typename, typename, typename = void > struct SubTraitEval1;
+template< typename, typename, typename = void > struct SubTraitEval2;
+template< typename, typename, typename = void > struct SubTraitEval3;
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename T1, typename T2 >
+auto evalSubTrait( const volatile T1&, const volatile T2& ) -> SubTraitEval1<T1,T2>;
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
 /*!\brief Base template for the SubTrait class.
 // \ingroup math_traits
 //
@@ -76,50 +84,25 @@ namespace blaze {
 // The SubTrait class template offers the possibility to select the resulting data type of a
 // generic subtraction operation between the two given types \a T1 and \a T2. SubTrait defines
 // the nested type \a Type, which represents the resulting data type of the subtraction. In case
-// the two types \a T1 and \a T2 cannot be subtracted, a compilation error is created. Note that
+// the two types \a T1 and \a T2 cannot be subtracted, there is no nested type \a Type. Note that
 // \c const and \c volatile qualifiers and reference modifiers are generally ignored.
-//
-// Per default, SubTrait supports all built-in data types. Additionally, the Blaze library
-// provides appropriate specializations for the following user-defined arithmetic types:
-//
-// <ul>
-//    <li>std::complex</li>
-//    <li>blaze::StaticVector</li>
-//    <li>blaze::HybridVector</li>
-//    <li>blaze::DynamicVector</li>
-//    <li>blaze::CustomVector</li>
-//    <li>blaze::CompressedVector</li>
-//    <li>blaze::StaticMatrix</li>
-//    <li>blaze::HybridMatrix</li>
-//    <li>blaze::DynamicMatrix</li>
-//    <li>blaze::CustomMatrix</li>
-//    <li>blaze::CompressedMatrix</li>
-//    <li>blaze::SymmetricMatrix</li>
-//    <li>blaze::HermitianMatrix</li>
-//    <li>blaze::LowerMatrix</li>
-//    <li>blaze::UniLowerMatrix</li>
-//    <li>blaze::StrictlyLowerMatrix</li>
-//    <li>blaze::UpperMatrix</li>
-//    <li>blaze::UniUpperMatrix</li>
-//    <li>blaze::StrictlyUpperMatrix</li>
-//    <li>blaze::DiagonalMatrix</li>
-// </ul>
 //
 //
 // \n \section subtrait_specializations Creating custom specializations
 //
-// SubTrait is guaranteed to work for all data types that provide a subtraction operator (i.e.
-// \c operator-). In order to add support for user-defined data types that either don't provide
-// a subtraction operator or whose subtraction operator returns a proxy object instead of a
-// concrete type (as it is for instance common in expression template libraries) it is possible
-// to specialize the SubTrait template. The following example shows the according specialization
-// for the subtraction between two dynamic column vectors:
+// SubTrait is guaranteed to work for all built-in data types, complex numbers, all vector and
+// matrix types of the Blaze library (including views and adaptors) and all data types that
+// provide a subtraction operator (i.e. \c operator-). In order to add support for user-defined
+// data types that either don't provide a subtraction operator or whose subtraction operator
+// returns a proxy object instead of a concrete type (as it is for instance common in expression
+// template libraries) it is possible to specialize the SubTrait template. The following example
+// shows the according specialization for the subtraction between two dynamic column vectors:
 
    \code
    template< typename T1, typename T2 >
    struct SubTrait< DynamicVector<T1,columnVector>, DynamicVector<T2,columnVector> >
    {
-      typedef DynamicVector< typename SubTrait<T1,T2>::Type, columnVector >  Type;
+      using Type = DynamicVector< typename SubTrait<T1,T2>::Type, columnVector >;
    };
    \endcode
 
@@ -137,91 +120,26 @@ namespace blaze {
    }                                     //
    \endcode
 */
-template< typename T1        // Type of the left-hand side operand
-        , typename T2        // Type of the right-hand side operand
-        , typename = void >  // Restricting condition
+template< typename T1  // Type of the left-hand side operand
+        , typename T2  // Type of the right-hand side operand
+        , typename >   // Restricting condition
 struct SubTrait
-{
- private:
-   //**********************************************************************************************
-   /*! \cond BLAZE_INTERNAL */
-   using Type1 = Decay_<T1>;
-   using Type2 = Decay_<T2>;
-   /*! \endcond */
-   //**********************************************************************************************
-
-   //**********************************************************************************************
-   /*! \cond BLAZE_INTERNAL */
-   struct NativeType { using Type = decltype( std::declval<Type1>() - std::declval<Type2>() ); };
-   /*! \endcond */
-   //**********************************************************************************************
-
-   //**********************************************************************************************
-   /*! \cond BLAZE_INTERNAL */
-   struct SignedType { using Type = MakeSigned_< typename NativeType::Type >; };
-   /*! \endcond */
-   //**********************************************************************************************
-
- public:
-   //**********************************************************************************************
-   /*! \cond BLAZE_INTERNAL */
-   using Type = typename If_< Or< IsConst<T1>, IsVolatile<T1>, IsReference<T1>
-                                , IsConst<T2>, IsVolatile<T2>, IsReference<T2> >
-                            , SubTrait<Type1,Type2>
-                            , If_< And< All< IsIntegral, T1, T2 >, Any< IsSigned, T1, T2 > >
-                                 , SignedType
-                                 , NativeType > >::Type;
-   /*! \endcond */
-   //**********************************************************************************************
-};
+   : public decltype( evalSubTrait( std::declval<T1&>(), std::declval<T2&>() ) )
+{};
 //*************************************************************************************************
 
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-/*!\brief Specialization of the SubTrait class template for a complex and a built-in type.
+/*!\brief Specialization of the SubTrait class template for two numeric types.
 // \ingroup math_traits
 */
 template< typename T1, typename T2 >
-struct SubTrait< complex<T1>, T2, EnableIf_< IsBuiltin<T2> > >
+struct SubTrait< T1, T2, EnableIf_t< IsNumeric_v<T1> && IsNumeric_v<T2> > >
 {
  public:
    //**********************************************************************************************
-   using Type = CommonType_< complex<T1> , T2 >;
-   //**********************************************************************************************
-};
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Specialization of the SubTrait class template for a built-in and a complex type.
-// \ingroup math_traits
-*/
-template< typename T1, typename T2 >
-struct SubTrait< T1, complex<T2>, EnableIf_< IsBuiltin<T1> > >
-{
- public:
-   //**********************************************************************************************
-   using Type = CommonType_< T1, complex<T2> >;
-   //**********************************************************************************************
-};
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Specialization of the SubTrait class template for two complex types.
-// \ingroup math_traits
-*/
-template< typename T1, typename T2 >
-struct SubTrait< complex<T1>, complex<T2> >
-{
- public:
-   //**********************************************************************************************
-   using Type = CommonType_< complex<T1>, complex<T2> >;
+   using Type = CommonType_t<T1,T2>;
    //**********************************************************************************************
 };
 /*! \endcond */
@@ -232,17 +150,97 @@ struct SubTrait< complex<T1>, complex<T2> >
 /*!\brief Auxiliary alias declaration for the SubTrait class template.
 // \ingroup math_traits
 //
-// The SubTrait_ alias declaration provides a convenient shortcut to access the nested \a Type
+// The SubTrait_t alias declaration provides a convenient shortcut to access the nested \a Type
 // of the SubTrait class template. For instance, given the types \a T1 and \a T2 the following
 // two type definitions are identical:
 
    \code
-   using Type1 = typename SubTrait<T1,T2>::Type;
-   using Type2 = SubTrait_<T1,T2>;
+   using Type1 = typename blaze::SubTrait<T1,T2>::Type;
+   using Type2 = blaze::SubTrait_t<T1,T2>;
    \endcode
 */
 template< typename T1, typename T2 >
-using SubTrait_ = typename SubTrait<T1,T2>::Type;
+using SubTrait_t = typename SubTrait<T1,T2>::Type;
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief First auxiliary helper struct for the SubTrait type trait.
+// \ingroup math_traits
+*/
+template< typename T1  // Type of the left-hand side operand
+        , typename T2  // Type of the right-hand side operand
+        , typename >   // Restricting condition
+struct SubTraitEval1
+   : public SubTraitEval2<T1,T2>
+{};
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Specialization of the SubTraitEval1 class template for two 'GroupTag'.
+// \ingroup math_traits
+*/
+template< size_t ID >
+struct SubTraitEval1<GroupTag<ID>,GroupTag<ID>,void>
+{
+ public:
+   //**********************************************************************************************
+   using Type = GroupTag<ID>;
+   //**********************************************************************************************
+};
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Second auxiliary helper struct for the SubTrait type trait.
+// \ingroup math_traits
+*/
+template< typename T1  // Type of the left-hand side operand
+        , typename T2  // Type of the right-hand side operand
+        , typename >   // Restricting condition
+struct SubTraitEval2
+   : public SubTraitEval3<T1,T2>
+{};
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Third auxiliary helper struct for the SubTrait type trait.
+// \ingroup math_traits
+*/
+template< typename T1  // Type of the left-hand side operand
+        , typename T2  // Type of the right-hand side operand
+        , typename >   // Restricting condition
+struct SubTraitEval3
+{};
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Specialization of the SubTraitEval3 class template for two types supporting subtraction.
+// \ingroup math_traits
+*/
+template< typename T1    // Type of the left-hand side operand
+        , typename T2 >  // Type of the right-hand side operand
+struct SubTraitEval3< T1, T2
+                    , Void_t< decltype( std::declval<T1>() - std::declval<T2>() ) > >
+{
+ public:
+   //**********************************************************************************************
+   using Type = RemoveCVRef_t< decltype( std::declval<T1>() - std::declval<T2>() ) >;
+   //**********************************************************************************************
+};
+/*! \endcond */
 //*************************************************************************************************
 
 } // namespace blaze

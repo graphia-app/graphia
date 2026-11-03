@@ -3,7 +3,7 @@
 //  \file blaze/util/constraints/Enum.h
 //  \brief Constraint on the data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -58,7 +58,7 @@ namespace blaze {
 // In case the given data type \a T is not an enumeration type, a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_ENUM_TYPE(T) \
-   static_assert( ::blaze::IsEnum<T>::value, "Non-enum type detected" )
+   static_assert( ::blaze::IsEnum_v<T>, "Non-enum type detected" )
 //*************************************************************************************************
 
 
@@ -77,7 +77,7 @@ namespace blaze {
 // In case the given data type \a T is an enumeration type, a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_ENUM_TYPE(T) \
-   static_assert( !::blaze::IsEnum<T>::value, "Enum type detected" )
+   static_assert( !::blaze::IsEnum_v<T>, "Enum type detected" )
 //*************************************************************************************************
 
 } // namespace blaze

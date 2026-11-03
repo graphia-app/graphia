@@ -3,7 +3,7 @@
 //  \file blaze/math/shims/IsZero.h
 //  \brief Header file for the isZero shim
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -42,11 +42,9 @@
 
 #include <blaze/math/RelaxationFlag.h>
 #include <blaze/math/shims/IsDefault.h>
+#include <blaze/math/typetraits/IsScalar.h>
 #include <blaze/system/Inline.h>
-#include <blaze/util/DisableIf.h>
 #include <blaze/util/EnableIf.h>
-#include <blaze/util/typetraits/IsNumeric.h>
-#include <blaze/util/Unused.h>
 
 
 namespace blaze {
@@ -99,32 +97,13 @@ namespace blaze {
    complex<double> c3( 1.0, 0.0  );  //    false              |    false
    \endcode
 */
-template< bool RF          // Relaxation flag
-        , typename Type >  // Type of the given value/object
-BLAZE_ALWAYS_INLINE EnableIf_< IsNumeric<Type>, bool > isZero( const Type& v ) noexcept
+template< RelaxationFlag RF  // Relaxation flag
+        , typename Type      // Type of the given value/object
+        , EnableIf_t< IsScalar_v<Type> >* = nullptr >
+BLAZE_ALWAYS_INLINE bool isZero( const Type& v ) noexcept
 {
    return isDefault<RF>( v );
 }
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Overload of the \a isZero function for non-numeric data types.
-// \ingroup math_shims
-//
-// \param v The value/object to be tested.
-// \return \a false.
-*/
-template< bool RF          // Relaxation flag
-        , typename Type >  // Type of the given value/object
-BLAZE_ALWAYS_INLINE DisableIf_< IsNumeric<Type>, bool > isZero( const Type& v ) noexcept
-{
-   UNUSED_PARAMETER( v );
-
-   return false;
-}
-/*! \endcond */
 //*************************************************************************************************
 
 

@@ -3,7 +3,7 @@
 //  \file blaze/util/StaticAssert.h
 //  \brief Compile time assertion
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -74,9 +74,9 @@ namespace blaze {
    template< typename T >
    class RotationMatrix {
       ...
-      BLAZE_STATIC_ASSERT( IsFloatingPoint<T>::value );
+      BLAZE_STATIC_ASSERT( IsFloatingPoint_v<T> );
       // ... or ...
-      BLAZE_STATIC_ASSERT_MSG( IsFloatingPoint<T>::value, "Given type is not a floating point type" );
+      BLAZE_STATIC_ASSERT_MSG( IsFloatingPoint_v<T>, "Given type is not a floating point type" );
       ...
    };
    \endcode
@@ -91,13 +91,13 @@ namespace blaze {
       static_assert( expr, "Compile time condition violated" )
       ^
    note: in expansion of macro 'BLAZE_STATIC_ASSERT'
-      BLAZE_STATIC_ASSERT( IsFloatingPoint<T>::value );
+      BLAZE_STATIC_ASSERT( IsFloatingPoint_v<T> );
 
    error: static assertion failed: Given type is not a floating point type
       static_assert( expr, msg )
       ^
    note: in expansion of macro 'BLAZE_STATIC_ASSERT_MSG'
-      BLAZE_STATIC_ASSERT_MSG( IsFloatingPoint<T>::value, "Given type is not a floating point type" );
+      BLAZE_STATIC_ASSERT_MSG( IsFloatingPoint_v<T>, "Given type is not a floating point type" );
    \endcode
 */
 //*************************************************************************************************

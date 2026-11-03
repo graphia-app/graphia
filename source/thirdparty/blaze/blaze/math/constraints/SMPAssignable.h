@@ -3,7 +3,7 @@
 //  \file blaze/math/constraints/SMPAssignable.h
 //  \brief Constraint on the data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -59,7 +59,7 @@ namespace blaze {
 // threads), a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_SMP_ASSIGNABLE(T) \
-   static_assert( ::blaze::IsSMPAssignable<T>::value, "Non-SMP assignable type detected" )
+   static_assert( ::blaze::IsSMPAssignable_v<T>, "Non-SMP assignable type detected" )
 //*************************************************************************************************
 
 
@@ -79,7 +79,7 @@ namespace blaze {
 // compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_SMP_ASSIGNABLE(T) \
-   static_assert( !::blaze::IsSMPAssignable<T>::value, "SMP assignable type detected" )
+   static_assert( !::blaze::IsSMPAssignable_v<T>, "SMP assignable type detected" )
 //*************************************************************************************************
 
 } // namespace blaze

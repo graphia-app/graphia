@@ -3,7 +3,7 @@
 //  \file blaze/math/constraints/Identity.h
 //  \brief Constraint on the data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -58,7 +58,7 @@ namespace blaze {
 // In case the given data type \a T is not an identity matrix type, a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_IDENTITY_MATRIX_TYPE(T) \
-   static_assert( ::blaze::IsIdentity<T>::value, "Non-identity matrix type detected" )
+   static_assert( ::blaze::IsIdentity_v<T>, "Non-identity matrix type detected" )
 //*************************************************************************************************
 
 
@@ -77,7 +77,7 @@ namespace blaze {
 // In case the given data type \a T is an identity matrix type, a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_IDENTITY_MATRIX_TYPE(T) \
-   static_assert( !::blaze::IsIdentity<T>::value, "Identity matrix type detected" )
+   static_assert( !::blaze::IsIdentity_v<T>, "Identity matrix type detected" )
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/math/constraints/DeclExpr.h
 //  \brief Constraint on the data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -59,7 +59,7 @@ namespace blaze {
 // the DeclExpr base class), a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_DECLEXPR_TYPE(T) \
-   static_assert( ::blaze::IsDeclExpr<T>::value, "Non-declaration expression type detected" )
+   static_assert( ::blaze::IsDeclExpr_v<T>, "Non-declaration expression type detected" )
 //*************************************************************************************************
 
 
@@ -79,7 +79,7 @@ namespace blaze {
 // DeclExpr base class), a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_DECLEXPR_TYPE(T) \
-   static_assert( !::blaze::IsDeclExpr<T>::value, "Declaration expression type detected" )
+   static_assert( !::blaze::IsDeclExpr_v<T>, "Declaration expression type detected" )
 //*************************************************************************************************
 
 } // namespace blaze

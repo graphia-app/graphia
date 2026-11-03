@@ -3,7 +3,7 @@
 //  \file blaze/math/expressions/VecTVecMultExpr.h
 //  \brief Header file for the VecTVecMultExpr base class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -58,12 +58,14 @@ namespace blaze {
 // The VecTVecMultExpr class serves as a tag for all expression templates that implement
 // mathematical outer products (i.e. multiplications between a column vector and a row vector).
 // All classes, that represent a mathematical outer product and that are used within the
-// expression template environment of the Blaze library have to derive from this class in order
-// to qualify as outer product expression template. Only in case a class is derived from the
-// VecTVecMultExpr base class, the IsVecTVecMultExpr type trait recognizes the class as valid
-// outer product expression template.
+// expression template environment of the Blaze library have to derive publicly from this
+// class in order to qualify as outer product expression template. Only in case a class is
+// derived publicly from the VecTVecMultExpr base class, the IsVecTVecMultExpr type trait
+// recognizes the class as valid outer product expression template.
 */
-struct VecTVecMultExpr : private MultExpr
+template< typename MT >  // Matrix base type of the expression
+struct VecTVecMultExpr
+   : public MultExpr<MT>
 {};
 //*************************************************************************************************
 

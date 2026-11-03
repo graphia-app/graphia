@@ -3,7 +3,7 @@
 //  \file blaze/math/lapack/clapack/hetrs.h
 //  \brief Header file for the CLAPACK hetrs wrapper functions
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,8 +40,10 @@
 // Includes
 //*************************************************************************************************
 
+#include <blaze/math/blas/Types.h>
 #include <blaze/util/Complex.h>
 #include <blaze/util/StaticAssert.h>
+#include <blaze/util/Types.h>
 
 
 //=================================================================================================
@@ -52,12 +54,18 @@
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
+#if !defined(INTEL_MKL_VERSION)
 extern "C" {
 
-void chetrs_( char* uplo, int* n, int* nrhs, float*  A, int* lda, int* ipiv, float*  B, int* ldb, int* info );
-void zhetrs_( char* uplo, int* n, int* nrhs, double* A, int* lda, int* ipiv, double* B, int* ldb, int* info );
+void chetrs_( char* uplo, blaze::blas_int_t* n, blaze::blas_int_t* nrhs, float* A,
+              blaze::blas_int_t* lda, blaze::blas_int_t* ipiv, float* B, blaze::blas_int_t* ldb,
+              blaze::blas_int_t* info, blaze::fortran_charlen_t nuplo );
+void zhetrs_( char* uplo, blaze::blas_int_t* n, blaze::blas_int_t* nrhs, double* A,
+              blaze::blas_int_t* lda, blaze::blas_int_t* ipiv, double* B, blaze::blas_int_t* ldb,
+              blaze::blas_int_t* info, blaze::fortran_charlen_t nuplo );
 
 }
+#endif
 /*! \endcond */
 //*************************************************************************************************
 
@@ -75,11 +83,13 @@ namespace blaze {
 //*************************************************************************************************
 /*!\name LAPACK LDLH-based substitution functions (hetrs) */
 //@{
-inline void hetrs( char uplo, int n, int nrhs, const complex<float>* A, int lda, const int* ipiv,
-                   complex<float>* B, int ldb, int* info );
+void hetrs( char uplo, blas_int_t n, blas_int_t nrhs, const complex<float>* A,
+            blas_int_t lda, const blas_int_t* ipiv, complex<float>* B,
+            blas_int_t ldb, blas_int_t* info );
 
-inline void hetrs( char uplo, int n, int nrhs, const complex<double>* A, int lda, const int* ipiv,
-                   complex<double>* B, int ldb, int* info );
+void hetrs( char uplo, blas_int_t n, blas_int_t nrhs, const complex<double>* A,
+            blas_int_t lda, const blas_int_t* ipiv, complex<double>* B,
+            blas_int_t ldb, blas_int_t* info );
 //@}
 //*************************************************************************************************
 
@@ -118,13 +128,26 @@ inline void hetrs( char uplo, int n, int nrhs, const complex<double>* A, int lda
 // is available and linked to the executable. Otherwise a call to this function will result in a
 // linker error.
 */
-inline void hetrs( char uplo, int n, int nrhs, const complex<float>* A, int lda,
-                   const int* ipiv, complex<float>* B, int ldb, int* info )
+inline void hetrs( char uplo, blas_int_t n, blas_int_t nrhs, const complex<float>* A,
+                   blas_int_t lda, const blas_int_t* ipiv, complex<float>* B,
+                   blas_int_t ldb, blas_int_t* info )
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<float> ) == 2UL*sizeof( float ) );
 
-   chetrs_( &uplo, &n, &nrhs, const_cast<float*>( reinterpret_cast<const float*>( A ) ),
-            &lda, const_cast<int*>( ipiv ), reinterpret_cast<float*>( B ), &ldb, info );
+#if defined(INTEL_MKL_VERSION)
+   BLAZE_STATIC_ASSERT( sizeof( MKL_INT ) == sizeof( blas_int_t ) );
+   BLAZE_STATIC_ASSERT( sizeof( MKL_Complex8 ) == sizeof( complex<float> ) );
+   using ET = MKL_Complex8;
+#else
+   using ET = float;
+#endif
+
+   chetrs_( &uplo, &n, &nrhs, const_cast<ET*>( reinterpret_cast<const ET*>( A ) ),
+            &lda, const_cast<blas_int_t*>( ipiv ), reinterpret_cast<ET*>( B ), &ldb, info
+#if !defined(INTEL_MKL_VERSION)
+          , blaze::fortran_charlen_t(1)
+#endif
+          );
 }
 //*************************************************************************************************
 
@@ -163,13 +186,26 @@ inline void hetrs( char uplo, int n, int nrhs, const complex<float>* A, int lda,
 // is available and linked to the executable. Otherwise a call to this function will result in a
 // linker error.
 */
-inline void hetrs( char uplo, int n, int nrhs, const complex<double>* A, int lda,
-                   const int* ipiv, complex<double>* B, int ldb, int* info )
+inline void hetrs( char uplo, blas_int_t n, blas_int_t nrhs, const complex<double>* A,
+                   blas_int_t lda, const blas_int_t* ipiv, complex<double>* B,
+                   blas_int_t ldb, blas_int_t* info )
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<double> ) == 2UL*sizeof( double ) );
 
-   zhetrs_( &uplo, &n, &nrhs, const_cast<double*>( reinterpret_cast<const double*>( A ) ),
-            &lda, const_cast<int*>( ipiv ), reinterpret_cast<double*>( B ), &ldb, info );
+#if defined(INTEL_MKL_VERSION)
+   BLAZE_STATIC_ASSERT( sizeof( MKL_INT ) == sizeof( blas_int_t ) );
+   BLAZE_STATIC_ASSERT( sizeof( MKL_Complex16 ) == sizeof( complex<double> ) );
+   using ET = MKL_Complex16;
+#else
+   using ET = double;
+#endif
+
+   zhetrs_( &uplo, &n, &nrhs, const_cast<ET*>( reinterpret_cast<const ET*>( A ) ),
+            &lda, const_cast<blas_int_t*>( ipiv ), reinterpret_cast<ET*>( B ), &ldb, info
+#if !defined(INTEL_MKL_VERSION)
+          , blaze::fortran_charlen_t(1)
+#endif
+          );
 }
 //*************************************************************************************************
 

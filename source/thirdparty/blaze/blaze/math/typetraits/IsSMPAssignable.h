@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/IsSMPAssignable.h
 //  \brief Header file for the IsSMPAssignable type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,11 +40,8 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/math/typetraits/IsMatrix.h>
-#include <blaze/math/typetraits/IsVector.h>
 #include <blaze/util/IntegralConstant.h>
-#include <blaze/util/mpl/If.h>
-#include <blaze/util/mpl/Or.h>
+#include <blaze/util/typetraits/Void.h>
 
 
 namespace blaze {
@@ -60,28 +57,20 @@ namespace blaze {
 /*!\brief Auxiliary helper struct for the IsSMPAssignable type trait.
 // \ingroup math_type_traits
 */
-template< typename T >
+template< typename T, typename = void >
 struct IsSMPAssignableHelper
-{
- private:
-   //**struct HasNestedMember**********************************************************************
-   template< typename T2 >
-   struct UseNestedMember { enum : bool { value = T2::smpAssignable }; };
-   //**********************************************************************************************
+   : public FalseType
+{};
+/*! \endcond */
+//*************************************************************************************************
 
-   //**struct NoNestedMember***********************************************************************
-   template< typename T2 >
-   struct NotSMPAssignable { enum : bool { value = false }; };
-   //**********************************************************************************************
 
- public:
-   //**********************************************************************************************
-   enum : bool { value = If_< Or< IsVector<T>, IsMatrix<T> >
-                            , UseNestedMember<T>
-                            , NotSMPAssignable<T>
-                            >::value };
-   //**********************************************************************************************
-};
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename T >
+struct IsSMPAssignableHelper< T, Void_t< decltype( T::smpAssignable ) > >
+   : public BoolConstant< T::smpAssignable >
+{};
 /*! \endcond */
 //*************************************************************************************************
 
@@ -102,10 +91,14 @@ struct IsSMPAssignableHelper
    \code
    using blaze::StaticVector;
    using blaze::StaticMatrix;
+   using blaze::DynamicVector;
    using blaze::DynamicMatrix;
 
-   typedef blaze::DynamicVector<int,columnVector>  VectorType;
-   typedef blaze::Subvector<VectorType>            SubvectorType;
+   using VectorType = DynamicVector<int,columnVector>;
+
+   VectorType a( 100UL );
+
+   using SubvectorType = decltype( blaze::subvector( a, 8UL, 16UL ) );
 
    blaze::IsSMPAssignable< VectorType >::value            // Evaluates to 1
    blaze::IsSMPAssignable< SubvectorType >::Type          // Results in TrueType
@@ -116,8 +109,27 @@ struct IsSMPAssignableHelper
    \endcode
 */
 template< typename T >
-struct IsSMPAssignable : public BoolConstant< IsSMPAssignableHelper<T>::value >
+struct IsSMPAssignable
+   : public BoolConstant< IsSMPAssignableHelper<T>::value >
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsSMPAssignable type trait.
+// \ingroup math_type_traits
+//
+// The IsSMPAssignable_v variable template provides a convenient shortcut to access the nested
+// \a value of the IsSMPAssignable class template. For instance, given the type \a T the
+// following two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsSMPAssignable<T>::value;
+   constexpr bool value2 = blaze::IsSMPAssignable_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsSMPAssignable_v = IsSMPAssignable<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/math/constraints/TransExpr.h
 //  \brief Constraint on the data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -59,7 +59,7 @@ namespace blaze {
 // the TransExpr base class), a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_TRANSEXPR_TYPE(T) \
-   static_assert( ::blaze::IsTransExpr<T>::value, "Non-transposition expression type detected" )
+   static_assert( ::blaze::IsTransExpr_v<T>, "Non-transposition expression type detected" )
 //*************************************************************************************************
 
 
@@ -79,7 +79,7 @@ namespace blaze {
 // TransExpr base class), a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_TRANSEXPR_TYPE(T) \
-   static_assert( !::blaze::IsTransExpr<T>::value, "Transposition expression type detected" )
+   static_assert( !::blaze::IsTransExpr_v<T>, "Transposition expression type detected" )
 //*************************************************************************************************
 
 } // namespace blaze

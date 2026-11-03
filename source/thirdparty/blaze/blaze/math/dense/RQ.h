@@ -3,7 +3,7 @@
 //  \file blaze/math/dense/RQ.h
 //  \brief Header file for the dense matrix in-place RQ decomposition
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -51,14 +51,13 @@
 #include <blaze/math/constraints/UniTriangular.h>
 #include <blaze/math/Exception.h>
 #include <blaze/math/expressions/DenseMatrix.h>
-#include <blaze/math/Functions.h>
 #include <blaze/math/lapack/gerqf.h>
 #include <blaze/math/lapack/orgrq.h>
 #include <blaze/math/lapack/ungrq.h>
-#include <blaze/math/traits/DerestrictTrait.h>
 #include <blaze/math/typetraits/IsResizable.h>
 #include <blaze/math/typetraits/IsSquare.h>
 #include <blaze/math/views/Submatrix.h>
+#include <blaze/util/algorithms/Min.h>
 #include <blaze/util/EnableIf.h>
 
 
@@ -92,8 +91,8 @@ void rq( const DenseMatrix<MT1,SO1>& A, DenseMatrix<MT2,SO2>& R, DenseMatrix<MT3
 // reconstruction of the \c Q matrix from the RQ decomposition.
 */
 template< typename MT1 >  // Type of matrix A
-inline EnableIf_<IsBuiltin< ElementType_<MT1> > >
-   rq_backend( MT1& A, const ElementType_<MT1>* tau )
+inline auto rq_backend( MT1& A, const ElementType_t<MT1>* tau )
+   -> EnableIf_t<IsBuiltin_v< ElementType_t<MT1> > >
 {
    orgrq( A, tau );
 }
@@ -114,8 +113,8 @@ inline EnableIf_<IsBuiltin< ElementType_<MT1> > >
 // reconstruction of the \c Q matrix from the RQ decomposition.
 */
 template< typename MT1 >  // Type of matrix A
-inline EnableIf_<IsComplex< ElementType_<MT1> > >
-   rq_backend( MT1& A, const ElementType_<MT1>* tau )
+inline auto rq_backend( MT1& A, const ElementType_t<MT1>* tau )
+   -> EnableIf_t<IsComplex_v< ElementType_t<MT1> > >
 {
    ungrq( A, tau );
 }
@@ -181,58 +180,58 @@ template< typename MT1  // Type of matrix A
 void rq( const DenseMatrix<MT1,SO1>& A, DenseMatrix<MT2,SO2>& R, DenseMatrix<MT3,SO3>& Q )
 {
    BLAZE_CONSTRAINT_MUST_NOT_BE_STRICTLY_TRIANGULAR_MATRIX_TYPE( MT1 );
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<MT1> );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT1> );
 
    BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT2 );
    BLAZE_CONSTRAINT_MUST_NOT_BE_HERMITIAN_MATRIX_TYPE( MT2 );
    BLAZE_CONSTRAINT_MUST_NOT_BE_UNITRIANGULAR_MATRIX_TYPE( MT2 );
    BLAZE_CONSTRAINT_MUST_NOT_BE_STRICTLY_TRIANGULAR_MATRIX_TYPE( MT2 );
    BLAZE_CONSTRAINT_MUST_NOT_BE_LOWER_MATRIX_TYPE( MT2 );
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<MT2> );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT2> );
 
    BLAZE_CONSTRAINT_MUST_NOT_BE_ADAPTOR_TYPE( MT3 );
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<MT3> );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT3> );
 
-   typedef ElementType_<MT1>  ET1;
+   using ET1 = ElementType_t<MT1>;
 
-   const size_t m( (~A).rows() );
-   const size_t n( (~A).columns() );
+   const size_t m( (*A).rows() );
+   const size_t n( (*A).columns() );
    const size_t mindim( min( m, n ) );
 
-   if( ( !IsResizable<MT2>::value && ( (~R).rows() != m || (~R).columns() != mindim ) ) ||
-       ( !IsResizable<MT3>::value && ( (~Q).rows() != mindim || (~Q).columns() != n ) ) ) {
+   if( ( !IsResizable_v<MT2> && ( (*R).rows() != m || (*R).columns() != mindim ) ) ||
+       ( !IsResizable_v<MT3> && ( (*Q).rows() != mindim || (*Q).columns() != n ) ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Dimensions of fixed size matrix do not match" );
    }
 
-   if( IsSquare<MT2>::value && m != mindim ) {
+   if( IsSquare_v<MT2> && m != mindim ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Square matrix cannot be resized to m-by-min(m,n)" );
    }
 
    const std::unique_ptr<ET1[]> tau( new ET1[mindim] );
-   DerestrictTrait_<MT2> r( derestrict( ~R ) );
+   decltype(auto) r( derestrict( *R ) );
 
    if( m < n )
    {
-      (~Q) = A;
-      gerqf( ~Q, tau.get() );
+      (*Q) = A;
+      gerqf( *Q, tau.get() );
 
-      resize( ~R, m, m, false );
+      resize( *R, m, m, false );
       reset( r );
 
       for( size_t i=0UL; i<m; ++i ) {
          for( size_t j=i; j<m; ++j ) {
-            r(i,j) = (~Q)(i,j+n-m);
+            r(i,j) = (*Q)(i,j+n-m);
          }
       }
 
-      rq_backend( ~Q, tau.get() );
+      rq_backend( *Q, tau.get() );
    }
    else
    {
       r = A;
       gerqf( r, tau.get() );
-      (~Q) = submatrix( r, m-n, 0UL, n, n );
-      rq_backend( ~Q, tau.get() );
+      (*Q) = submatrix( r, m-n, 0UL, n, n );
+      rq_backend( *Q, tau.get() );
 
       for( size_t i=m-n; i<m; ++i ) {
          for( size_t j=0UL; j<i+n-m; ++j ) {

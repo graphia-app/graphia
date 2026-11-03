@@ -3,7 +3,7 @@
 //  \file blaze/math/expressions/MatMatAddExpr.h
 //  \brief Header file for the MatMatAddExpr base class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -57,12 +57,14 @@ namespace blaze {
 //
 // The MatMatAddExpr class serves as a tag for all expression templates that implement a
 // matrix/matrix addition. All classes, that represent a matrix addition and that are used
-// within the expression template environment of the Blaze library have to derive from this
-// class in order to qualify as matrix addition expression template. Only in case a class is
-// derived from the MatMatAddExpr base class, the IsMatMatAddExpr type trait recognizes the
-// class as valid matrix addition expression template.
+// within the expression template environment of the Blaze library have to derive publicly
+// from this class in order to qualify as matrix addition expression template. Only in case
+// a class is derived publicly from the MatMatAddExpr base class, the IsMatMatAddExpr type
+// trait recognizes the class as valid matrix addition expression template.
 */
-struct MatMatAddExpr : private AddExpr
+template< typename MT >  // Matrix base type of the expression
+struct MatMatAddExpr
+   : public AddExpr<MT>
 {};
 //*************************************************************************************************
 

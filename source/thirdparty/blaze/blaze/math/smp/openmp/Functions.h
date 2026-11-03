@@ -3,7 +3,7 @@
 //  \file blaze/math/smp/openmp/Functions.h
 //  \brief Header file for the OpenMP-based SMP utility functions
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -94,7 +94,7 @@ BLAZE_ALWAYS_INLINE void setNumThreads( size_t number )
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid number of threads" );
    }
 
-   omp_set_num_threads( number );
+   omp_set_num_threads( static_cast<int>( number ) );
 }
 /*! \endcond */
 //*************************************************************************************************

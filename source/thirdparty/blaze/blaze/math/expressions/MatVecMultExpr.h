@@ -3,7 +3,7 @@
 //  \file blaze/math/expressions/MatVecMultExpr.h
 //  \brief Header file for the MatVecMultExpr base class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -58,12 +58,14 @@ namespace blaze {
 // The MatVecMultExpr class serves as a tag for all expression templates that implement a
 // matrix/vector multiplication. All classes, that represent a matrix/vector multiplication
 // and that are used within the expression template environment of the Blaze library have
-// to derive from this class in order to qualify as matrix/vector multiplication expression
-// template. Only in case a class is derived from the MatVecMultExpr base class, the
-// IsMatVecMultExpr type trait recognizes the class as valid matrix/vector multiplication
-// expression template.
+// to derive publicly from this class in order to qualify as matrix/vector multiplication
+// expression template. Only in case a class is derived publicly from the MatVecMultExpr
+// base class, the IsMatVecMultExpr type trait recognizes the class as valid matrix/vector
+// multiplication expression template.
 */
-struct MatVecMultExpr : private MultExpr
+template< typename VT >  // Vector base type of the expression
+struct MatVecMultExpr
+   : public MultExpr<VT>
 {};
 //*************************************************************************************************
 

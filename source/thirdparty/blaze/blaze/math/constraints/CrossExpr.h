@@ -3,7 +3,7 @@
 //  \file blaze/math/constraints/CrossExpr.h
 //  \brief Constraint on the data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -59,7 +59,7 @@ namespace blaze {
 // the CrossExpr base class), a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_CROSSEXPR_TYPE(T) \
-   static_assert( ::blaze::IsCrossExpr<T>::value, "Non-cross product expression type detected" )
+   static_assert( ::blaze::IsCrossExpr_v<T>, "Non-cross product expression type detected" )
 //*************************************************************************************************
 
 
@@ -79,7 +79,7 @@ namespace blaze {
 // CrossExpr base class), a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_CROSSEXPR_TYPE(T) \
-   static_assert( !::blaze::IsCrossExpr<T>::value, "Cross product expression type detected" )
+   static_assert( !::blaze::IsCrossExpr_v<T>, "Cross product expression type detected" )
 //*************************************************************************************************
 
 } // namespace blaze

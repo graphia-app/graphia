@@ -3,7 +3,7 @@
 //  \file blaze/math/simd/Functions.h
 //  \brief Header file for all SIMD functions
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -43,17 +43,22 @@
 #include <blaze/math/simd/Abs.h>
 #include <blaze/math/simd/Acos.h>
 #include <blaze/math/simd/Acosh.h>
-#include <blaze/math/simd/Addition.h>
+#include <blaze/math/simd/Add.h>
 #include <blaze/math/simd/Asin.h>
 #include <blaze/math/simd/Asinh.h>
 #include <blaze/math/simd/Atan.h>
+#include <blaze/math/simd/Atan2.h>
 #include <blaze/math/simd/Atanh.h>
+#include <blaze/math/simd/Bitand.h>
+#include <blaze/math/simd/Bitor.h>
+#include <blaze/math/simd/Bitxor.h>
 #include <blaze/math/simd/Cbrt.h>
 #include <blaze/math/simd/Ceil.h>
 #include <blaze/math/simd/Conj.h>
 #include <blaze/math/simd/Cos.h>
 #include <blaze/math/simd/Cosh.h>
-#include <blaze/math/simd/Division.h>
+#include <blaze/math/simd/Div.h>
+#include <blaze/math/simd/Equal.h>
 #include <blaze/math/simd/Erf.h>
 #include <blaze/math/simd/Erfc.h>
 #include <blaze/math/simd/Exp.h>
@@ -61,6 +66,7 @@
 #include <blaze/math/simd/Exp10.h>
 #include <blaze/math/simd/Floor.h>
 #include <blaze/math/simd/FMA.h>
+#include <blaze/math/simd/Hypot.h>
 #include <blaze/math/simd/InvCbrt.h>
 #include <blaze/math/simd/InvSqrt.h>
 #include <blaze/math/simd/Loada.h>
@@ -68,19 +74,29 @@
 #include <blaze/math/simd/Log.h>
 #include <blaze/math/simd/Log2.h>
 #include <blaze/math/simd/Log10.h>
-#include <blaze/math/simd/Multiplication.h>
+#include <blaze/math/simd/Max.h>
+#include <blaze/math/simd/Min.h>
+#include <blaze/math/simd/Mult.h>
 #include <blaze/math/simd/Pow.h>
-#include <blaze/math/simd/Reduction.h>
+#include <blaze/math/simd/Prod.h>
+#include <blaze/math/simd/Reduce.h>
 #include <blaze/math/simd/Round.h>
 #include <blaze/math/simd/Set.h>
+#include <blaze/math/simd/Setall.h>
 #include <blaze/math/simd/Setzero.h>
+#include <blaze/math/simd/ShiftLI.h>
+#include <blaze/math/simd/ShiftLV.h>
+#include <blaze/math/simd/ShiftRI.h>
+#include <blaze/math/simd/ShiftRV.h>
+#include <blaze/math/simd/Sign.h>
 #include <blaze/math/simd/Sin.h>
 #include <blaze/math/simd/Sinh.h>
 #include <blaze/math/simd/Sqrt.h>
 #include <blaze/math/simd/Storea.h>
 #include <blaze/math/simd/Storeu.h>
 #include <blaze/math/simd/Stream.h>
-#include <blaze/math/simd/Subtraction.h>
+#include <blaze/math/simd/Sub.h>
+#include <blaze/math/simd/Sum.h>
 #include <blaze/math/simd/Tan.h>
 #include <blaze/math/simd/Tanh.h>
 #include <blaze/math/simd/Trunc.h>

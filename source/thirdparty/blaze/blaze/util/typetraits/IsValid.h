@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/IsValid.h
 //  \brief Header file for the IsValid type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,9 +40,8 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/util/FalseType.h>
+#include <blaze/util/IntegralConstant.h>
 #include <blaze/util/InvalidType.h>
-#include <blaze/util/TrueType.h>
 
 
 namespace blaze {
@@ -73,7 +72,8 @@ namespace blaze {
    \endcode
 */
 template< typename T >
-struct IsValid : public TrueType
+struct IsValid
+   : public TrueType
 {};
 //*************************************************************************************************
 
@@ -82,7 +82,8 @@ struct IsValid : public TrueType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsValid type trait for the plain 'INVALID_TYPE' type.
 template<>
-struct IsValid<INVALID_TYPE> : public FalseType
+struct IsValid<INVALID_TYPE>
+   : public FalseType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -92,7 +93,8 @@ struct IsValid<INVALID_TYPE> : public FalseType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsValid type trait for 'const INVALID_TYPE'.
 template<>
-struct IsValid<const INVALID_TYPE> : public FalseType
+struct IsValid<const INVALID_TYPE>
+   : public FalseType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -102,7 +104,8 @@ struct IsValid<const INVALID_TYPE> : public FalseType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsValid type trait for 'volatile INVALID_TYPE'.
 template<>
-struct IsValid<volatile INVALID_TYPE> : public FalseType
+struct IsValid<volatile INVALID_TYPE>
+   : public FalseType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -112,9 +115,28 @@ struct IsValid<volatile INVALID_TYPE> : public FalseType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsValid type trait for 'const volatile INVALID_TYPE'.
 template<>
-struct IsValid<const volatile INVALID_TYPE> : public FalseType
+struct IsValid<const volatile INVALID_TYPE>
+   : public FalseType
 {};
 /*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsValid type trait.
+// \ingroup type_traits
+//
+// The IsValid_v variable template provides a convenient shortcut to access the nested \a value
+// of the IsValid class template. For instance, given the type \a T the following two statements
+// are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsValid<T>::value;
+   constexpr bool value2 = blaze::IsValid_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsValid_v = IsValid<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/IsSymmetric.h
 //  \brief Header file for the IsSymmetric type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,8 +40,10 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/util/FalseType.h>
-#include <blaze/util/TrueType.h>
+#include <blaze/math/typetraits/IsExpression.h>
+#include <blaze/util/EnableIf.h>
+#include <blaze/util/IntegralConstant.h>
+#include <blaze/util/typetraits/IsSame.h>
 
 
 namespace blaze {
@@ -51,6 +53,32 @@ namespace blaze {
 //  CLASS DEFINITION
 //
 //=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename T > struct IsSymmetric;
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Auxiliary helper struct for the IsSymmetric type trait.
+// \ingroup math_traits
+*/
+template< typename T
+        , typename = void >
+struct IsSymmetricHelper
+   : public FalseType
+{};
+
+template< typename T >  // Type of the operand
+struct IsSymmetricHelper< T, EnableIf_t< IsExpression_v<T> && !IsSame_v<T,typename T::ResultType> > >
+   : public IsSymmetric< typename T::ResultType >::Type
+{};
+/*! \endcond */
+//*************************************************************************************************
+
 
 //*************************************************************************************************
 /*!\brief Compile time check for symmetric matrices.
@@ -65,13 +93,13 @@ namespace blaze {
    \code
    using blaze::rowMajor;
 
-   typedef blaze::StaticMatrix<double,rowMajor>   StaticMatrixType;
-   typedef blaze::DynamicMatrix<float,rowMajor>   DynamicMatrixType;
-   typedef blaze::CompressedMatrix<int,rowMajor>  CompressedMatrixType;
+   using StaticMatrixType     = blaze::StaticMatrix<double,rowMajor>;
+   using DynamicMatrixType    = blaze::DynamicMatrix<float,rowMajor>;
+   using CompressedMatrixType = blaze::CompressedMatrix<int,rowMajor>;
 
-   typedef blaze::SymmetricMatrix<StaticMatrixType>      SymmetricStaticType;
-   typedef blaze::SymmetricMatrix<DynamicMatrixType>     SymmetricDynamicType;
-   typedef blaze::SymmetricMatrix<CompressedMatrixType>  SymmetricCompressedType;
+   using SymmetricStaticType     = blaze::SymmetricMatrix<StaticMatrixType>;
+   using SymmetricDynamicType    = blaze::SymmetricMatrix<DynamicMatrixType>;
+   using SymmetricCompressedType = blaze::SymmetricMatrix<CompressedMatrixType>;
 
    blaze::IsSymmetric< SymmetricStaticType >::value        // Evaluates to 1
    blaze::IsSymmetric< const SymmetricDynamicType >::Type  // Results in TrueType
@@ -82,7 +110,8 @@ namespace blaze {
    \endcode
 */
 template< typename T >
-struct IsSymmetric : public FalseType
+struct IsSymmetric
+   : public IsSymmetricHelper<T>
 {};
 //*************************************************************************************************
 
@@ -93,7 +122,8 @@ struct IsSymmetric : public FalseType
 // \ingroup math_type_traits
 */
 template< typename T >
-struct IsSymmetric< const T > : public IsSymmetric<T>
+struct IsSymmetric< const T >
+   : public IsSymmetric<T>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -105,7 +135,8 @@ struct IsSymmetric< const T > : public IsSymmetric<T>
 // \ingroup math_type_traits
 */
 template< typename T >
-struct IsSymmetric< volatile T > : public IsSymmetric<T>
+struct IsSymmetric< volatile T >
+   : public IsSymmetric<T>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -117,9 +148,28 @@ struct IsSymmetric< volatile T > : public IsSymmetric<T>
 // \ingroup math_type_traits
 */
 template< typename T >
-struct IsSymmetric< const volatile T > : public IsSymmetric<T>
+struct IsSymmetric< const volatile T >
+   : public IsSymmetric<T>
 {};
 /*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsSymmetric type trait.
+// \ingroup math_type_traits
+//
+// The IsSymmetric_v variable template provides a convenient shortcut to access the nested
+// \a value of the IsSymmetric class template. For instance, given the type \a T the following
+// two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsSymmetric<T>::value;
+   constexpr bool value2 = blaze::IsSymmetric_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsSymmetric_v = IsSymmetric<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/math/blas/gemv.h
 //  \brief Header file for BLAS general matrix/vector multiplication functions (gemv)
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -41,203 +41,41 @@
 //*************************************************************************************************
 
 #include <blaze/math/Aliases.h>
+#include <blaze/math/blas/cblas/gemv.h>
 #include <blaze/math/constraints/BLASCompatible.h>
 #include <blaze/math/constraints/Computation.h>
 #include <blaze/math/constraints/ConstDataAccess.h>
 #include <blaze/math/constraints/MutableDataAccess.h>
 #include <blaze/math/expressions/DenseMatrix.h>
 #include <blaze/math/expressions/DenseVector.h>
-#include <blaze/system/BLAS.h>
-#include <blaze/system/Inline.h>
-#include <blaze/util/Assert.h>
-#include <blaze/util/Complex.h>
+#include <blaze/math/typetraits/IsRowMajorMatrix.h>
+#include <blaze/system/MacroDisable.h>
 #include <blaze/util/NumericCast.h>
-#include <blaze/util/StaticAssert.h>
 
 
 namespace blaze {
 
 //=================================================================================================
 //
-//  BLAS WRAPPER FUNCTIONS (GEMV)
+//  BLAS GENERAL MATRIX/VECTOR MULTIPLICATION FUNCTIONS (GEMV)
 //
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\name BLAS wrapper functions (gemv) */
+/*!\name BLAS general matrix/vector multiplication functions (gemv) */
 //@{
 #if BLAZE_BLAS_MODE
 
-BLAZE_ALWAYS_INLINE void gemv( CBLAS_ORDER layout, CBLAS_TRANSPOSE transA, int m, int n,
-                               float alpha, const float* A, int lda, const float* x, int incX,
-                               float beta, float* y, int incY );
-
-BLAZE_ALWAYS_INLINE void gemv( CBLAS_ORDER layout, CBLAS_TRANSPOSE transA, int m, int n,
-                               double alpha, const double* A, int lda, const double* x, int incX,
-                               double beta, double* y, int incY );
-
-BLAZE_ALWAYS_INLINE void gemv( CBLAS_ORDER layout, CBLAS_TRANSPOSE transA, int m, int n,
-                               complex<float> alpha, const complex<float>* A, int lda,
-                               const complex<float>* x, int incX, complex<float> beta,
-                               complex<float>* y, int incY );
-
-BLAZE_ALWAYS_INLINE void gemv( CBLAS_ORDER layout, CBLAS_TRANSPOSE transA, int m, int n,
-                               complex<double> alpha, const complex<double>* A, int lda,
-                               const complex<double>* x, int incX, complex<double> beta,
-                               complex<double>* y, int incY );
-
 template< typename VT1, typename MT1, bool SO, typename VT2, typename ST >
-BLAZE_ALWAYS_INLINE void gemv( DenseVector<VT1,false>& y, const DenseMatrix<MT1,SO>& A,
-                               const DenseVector<VT2,false>& x, ST alpha, ST beta );
+void gemv( DenseVector<VT1,false>& y, const DenseMatrix<MT1,SO>& A,
+           const DenseVector<VT2,false>& x, ST alpha, ST beta );
 
 template< typename VT1, typename VT2, typename MT1, bool SO, typename ST >
-BLAZE_ALWAYS_INLINE void gemv( DenseVector<VT1,true>& y, const DenseVector<VT2,true>& x,
-                               const DenseMatrix<MT1,SO>& A, ST alpha, ST beta );
+void gemv( DenseVector<VT1,true>& y, const DenseVector<VT2,true>& x,
+           const DenseMatrix<MT1,SO>& A, ST alpha, ST beta );
 
 #endif
 //@}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-#if BLAZE_BLAS_MODE
-/*!\brief BLAS kernel for a dense matrix/dense vector multiplication for single precision operands
-//        (\f$ \vec{y}=\alpha*A*\vec{x}+\beta*\vec{y} \f$).
-// \ingroup blas
-//
-// \param order Specifies the storage order of matrix \a A (\a CblasColMajor or \a CblasColMajor).
-// \param transA Specifies whether to transpose matrix \a A (\a CblasNoTrans or \a CblasTrans).
-// \param m The number of rows of matrix \a A \f$[0..\infty)\f$.
-// \param n The number of columns of matrix \a A \f$[0..\infty)\f$.
-// \param alpha The scaling factor for \f$ A*\vec{x} \f$.
-// \param A Pointer to the first element of matrix \a A.
-// \param lda The total number of elements between two rows/columns of matrix \a A \f$[0..\infty)\f$.
-// \param x Pointer to the first element of vector \a x.
-// \param incX The stride within vector \a x.
-// \param beta The scaling factor for \f$ \vec{y} \f$.
-// \param y Pointer to the first element of vector \a y.
-// \param incY The stride within vector \a y.
-// \return void
-//
-// This function performs the dense matrix/dense vector multiplication for single precision
-// operands based on the BLAS cblas_sgemv() function.
-*/
-BLAZE_ALWAYS_INLINE void gemv( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, int m, int n,
-                               float alpha, const float* A, int lda, const float* x, int incX,
-                               float beta, float* y, int incY )
-{
-   cblas_sgemv( order, transA, m, n, alpha, A, lda, x, incX, beta, y, incY );
-}
-#endif
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-#if BLAZE_BLAS_MODE
-/*!\brief BLAS kernel for a dense matrix/dense vector multiplication for double precision operands
-//        (\f$ \vec{y}=\alpha*A*\vec{x}+\beta*\vec{y} \f$).
-// \ingroup blas
-//
-// \param order Specifies the storage order of matrix \a A (\a CblasColMajor or \a CblasColMajor).
-// \param transA Specifies whether to transpose matrix \a A (\a CblasNoTrans or \a CblasTrans).
-// \param m The number of rows of matrix \a A \f$[0..\infty)\f$.
-// \param n The number of columns of matrix \a A \f$[0..\infty)\f$.
-// \param alpha The scaling factor for \f$ A*\vec{x} \f$.
-// \param A Pointer to the first element of matrix \a A.
-// \param lda The total number of elements between two rows/columns of matrix \a A \f$[0..\infty)\f$.
-// \param x Pointer to the first element of vector \a x.
-// \param incX The stride within vector \a x.
-// \param beta The scaling factor for \f$ \vec{y} \f$.
-// \param y Pointer to the first element of vector \a y.
-// \param incY The stride within vector \a y.
-// \return void
-//
-// This function performs the dense matrix/dense vector multiplication for double precision
-// operands based on the BLAS cblas_dgemv() function.
-*/
-BLAZE_ALWAYS_INLINE void gemv( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, int m, int n,
-                               double alpha, const double* A, int lda, const double* x, int incX,
-                               double beta, double* y, int incY )
-{
-   cblas_dgemv( order, transA, m, n, alpha, A, lda, x, incX, beta, y, incY );
-}
-#endif
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-#if BLAZE_BLAS_MODE
-/*!\brief BLAS kernel for a dense matrix/dense vector multiplication for single precision complex
-//        operands (\f$ \vec{y}=\alpha*A*\vec{x}+\beta*\vec{y} \f$).
-// \ingroup blas
-//
-// \param order Specifies the storage order of matrix \a A (\a CblasColMajor or \a CblasColMajor).
-// \param transA Specifies whether to transpose matrix \a A (\a CblasNoTrans or \a CblasTrans).
-// \param m The number of rows of matrix \a A \f$[0..\infty)\f$.
-// \param n The number of columns of matrix \a A \f$[0..\infty)\f$.
-// \param alpha The scaling factor for \f$ A*\vec{x} \f$.
-// \param A Pointer to the first element of matrix \a A.
-// \param lda The total number of elements between two rows/columns of matrix \a A \f$[0..\infty)\f$.
-// \param x Pointer to the first element of vector \a x.
-// \param incX The stride within vector \a x.
-// \param beta The scaling factor for \f$ \vec{y} \f$.
-// \param y Pointer to the first element of vector \a y.
-// \param incY The stride within vector \a y.
-// \return void
-//
-// This function performs the dense matrix/dense vector multiplication for single precision
-// complex operands based on the BLAS cblas_cgemv() function.
-*/
-BLAZE_ALWAYS_INLINE void gemv( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, int m, int n,
-                               complex<float> alpha, const complex<float>* A, int lda,
-                               const complex<float>* x, int incX, complex<float> beta,
-                               complex<float>* y, int incY )
-{
-   BLAZE_STATIC_ASSERT( sizeof( complex<float> ) == 2UL*sizeof( float ) );
-
-   cblas_cgemv( order, transA, m, n, reinterpret_cast<const float*>( &alpha ),
-                reinterpret_cast<const float*>( A ), lda, reinterpret_cast<const float*>( x ),
-                incX, reinterpret_cast<const float*>( &beta ), reinterpret_cast<float*>( y ), incY );
-}
-#endif
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-#if BLAZE_BLAS_MODE
-/*!\brief BLAS kernel for a dense matrix/dense vector multiplication for double precision complex
-//        operands (\f$ \vec{y}=\alpha*A*\vec{x}+\beta*\vec{y} \f$).
-// \ingroup blas
-//
-// \param order Specifies the storage order of matrix \a A (\a CblasColMajor or \a CblasColMajor).
-// \param transA Specifies whether to transpose matrix \a A (\a CblasNoTrans or \a CblasTrans).
-// \param m The number of rows of matrix \a A \f$[0..\infty)\f$.
-// \param n The number of columns of matrix \a A \f$[0..\infty)\f$.
-// \param alpha The scaling factor for \f$ A*\vec{x} \f$.
-// \param A Pointer to the first element of matrix \a A.
-// \param lda The total number of elements between two rows/columns of matrix \a A \f$[0..\infty)\f$.
-// \param x Pointer to the first element of vector \a x.
-// \param incX The stride within vector \a x.
-// \param beta The scaling factor for \f$ \vec{y} \f$.
-// \param y Pointer to the first element of vector \a y.
-// \param incY The stride within vector \a y.
-// \return void
-//
-// This function performs the dense matrix/dense vector multiplication for double precision
-// complex operands based on the BLAS zblas_zgemv() function.
-*/
-BLAZE_ALWAYS_INLINE void gemv( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, int m, int n,
-                               complex<double> alpha, const complex<double>* A, int lda,
-                               const complex<double>* x, int incX, complex<double> beta,
-                               complex<double>* y, int incY )
-{
-   BLAZE_STATIC_ASSERT( sizeof( complex<double> ) == 2UL*sizeof( double ) );
-
-   cblas_zgemv( order, transA, m, n, reinterpret_cast<const double*>( &alpha ),
-                reinterpret_cast<const double*>( A ), lda, reinterpret_cast<const double*>( x ),
-                incX, reinterpret_cast<const double*>( &beta ), reinterpret_cast<double*>( y ), incY );
-}
-#endif
 //*************************************************************************************************
 
 
@@ -258,14 +96,18 @@ BLAZE_ALWAYS_INLINE void gemv( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, int m,
 // functions. Note that the function only works for vectors and matrices with \c float, \c double,
 // \c complex<float>, or \c complex<double> element type. The attempt to call the function with
 // vectors and matrices of any other element type results in a compile time error.
+//
+// \note This function can only be used if a fitting BLAS library, which supports this function,
+// is available and linked to the executable. Otherwise a call to this function will result in a
+// linker error.
 */
 template< typename VT1   // Type of the left-hand side target vector
         , typename MT1   // Type of the left-hand side matrix operand
         , bool SO        // Storage order of the left-hand side matrix operand
         , typename VT2   // Type of the right-hand side vector operand
         , typename ST >  // Type of the scalar factors
-BLAZE_ALWAYS_INLINE void gemv( DenseVector<VT1,false>& y, const DenseMatrix<MT1,SO>& A,
-                               const DenseVector<VT2,false>& x, ST alpha, ST beta )
+inline void gemv( DenseVector<VT1,false>& y, const DenseMatrix<MT1,SO>& A,
+                  const DenseVector<VT2,false>& x, ST alpha, ST beta )
 {
    BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( VT1 );
    BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT1 );
@@ -275,16 +117,16 @@ BLAZE_ALWAYS_INLINE void gemv( DenseVector<VT1,false>& y, const DenseMatrix<MT1,
    BLAZE_CONSTRAINT_MUST_HAVE_CONST_DATA_ACCESS  ( MT1 );
    BLAZE_CONSTRAINT_MUST_HAVE_CONST_DATA_ACCESS  ( VT2 );
 
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<VT1> );
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<MT1> );
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<VT2> );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<VT1> );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT1> );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<VT2> );
 
-   const int m  ( numeric_cast<int>( (~A).rows() )    );
-   const int n  ( numeric_cast<int>( (~A).columns() ) );
-   const int lda( numeric_cast<int>( (~A).spacing() ) );
+   const blas_int_t m  ( numeric_cast<blas_int_t>( (*A).rows() )    );
+   const blas_int_t n  ( numeric_cast<blas_int_t>( (*A).columns() ) );
+   const blas_int_t lda( numeric_cast<blas_int_t>( (*A).spacing() ) );
 
    gemv( ( SO )?( CblasColMajor ):( CblasRowMajor ), CblasNoTrans, m, n, alpha,
-         (~A).data(), lda, (~x).data(), 1, beta, (~y).data(), 1 );
+         (*A).data(), lda, (*x).data(), 1, beta, (*y).data(), 1 );
 }
 #endif
 //*************************************************************************************************
@@ -307,14 +149,18 @@ BLAZE_ALWAYS_INLINE void gemv( DenseVector<VT1,false>& y, const DenseMatrix<MT1,
 // BLAS gemv() functions. Note that the function only works for vectors and matrices with \c float,
 // \c double, \c complex<float>, or \c complex<double> element type. The attempt to call the
 // function with vectors and matrices of any other element type results in a compile time error.
+//
+// \note This function can only be used if a fitting BLAS library, which supports this function,
+// is available and linked to the executable. Otherwise a call to this function will result in a
+// linker error.
 */
 template< typename VT1   // Type of the left-hand side target vector
         , typename VT2   // Type of the left-hand side vector operand
         , typename MT1   // Type of the right-hand side matrix operand
         , bool SO        // Storage order of the right-hand side matrix operand
         , typename ST >  // Type of the scalar factors
-BLAZE_ALWAYS_INLINE void gemv( DenseVector<VT1,true>& y, const DenseVector<VT2,true>& x,
-                               const DenseMatrix<MT1,SO>& A, ST alpha, ST beta )
+inline void gemv( DenseVector<VT1,true>& y, const DenseVector<VT2,true>& x,
+                  const DenseMatrix<MT1,SO>& A, ST alpha, ST beta )
 {
    BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( VT1 );
    BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT1 );
@@ -324,16 +170,16 @@ BLAZE_ALWAYS_INLINE void gemv( DenseVector<VT1,true>& y, const DenseVector<VT2,t
    BLAZE_CONSTRAINT_MUST_HAVE_CONST_DATA_ACCESS  ( VT2 );
    BLAZE_CONSTRAINT_MUST_HAVE_CONST_DATA_ACCESS  ( MT1 );
 
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<VT1> );
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<MT1> );
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<VT2> );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<VT1> );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT1> );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<VT2> );
 
-   const int m  ( numeric_cast<int>( (~A).rows() )    );
-   const int n  ( numeric_cast<int>( (~A).columns() ) );
-   const int lda( numeric_cast<int>( (~A).spacing() ) );
+   const blas_int_t m  ( numeric_cast<blas_int_t>( (*A).rows() )    );
+   const blas_int_t n  ( numeric_cast<blas_int_t>( (*A).columns() ) );
+   const blas_int_t lda( numeric_cast<blas_int_t>( (*A).spacing() ) );
 
    gemv( ( SO )?( CblasColMajor ):( CblasRowMajor ), CblasTrans, m, n, alpha,
-         (~A).data(), lda, (~x).data(), 1, beta, (~y).data(), 1 );
+         (*A).data(), lda, (*x).data(), 1, beta, (*y).data(), 1 );
 }
 #endif
 //*************************************************************************************************

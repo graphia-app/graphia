@@ -3,7 +3,7 @@
 //  \file blaze/math/adaptors/unilowermatrix/UniLowerElement.h
 //  \brief Header file for the UniLowerElement class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -42,16 +42,18 @@
 
 #include <blaze/math/Aliases.h>
 #include <blaze/math/adaptors/unilowermatrix/UniLowerValue.h>
-#include <blaze/math/constraints/Expression.h>
+#include <blaze/math/constraints/Computation.h>
 #include <blaze/math/constraints/Hermitian.h>
 #include <blaze/math/constraints/Lower.h>
+#include <blaze/math/constraints/Scalar.h>
 #include <blaze/math/constraints/SparseMatrix.h>
 #include <blaze/math/constraints/Symmetric.h>
+#include <blaze/math/constraints/Transformation.h>
 #include <blaze/math/constraints/Upper.h>
+#include <blaze/math/constraints/View.h>
 #include <blaze/math/Exception.h>
 #include <blaze/math/sparse/SparseElement.h>
 #include <blaze/util/constraints/Const.h>
-#include <blaze/util/constraints/Numeric.h>
 #include <blaze/util/constraints/Pointer.h>
 #include <blaze/util/constraints/Reference.h>
 #include <blaze/util/constraints/Volatile.h>
@@ -77,7 +79,7 @@ namespace blaze {
 // matrix:
 
    \code
-   typedef blaze::UniLowerMatrix< blaze::CompressedMatrix<int> >  UniLower;
+   using UniLower = blaze::UniLowerMatrix< blaze::CompressedMatrix<int> >;
 
    // Creating a 3x3 lower unitriangular sparse matrix
    UniLower A( 3UL );
@@ -93,21 +95,22 @@ namespace blaze {
    \endcode
 */
 template< typename MT >  // Type of the adapted matrix
-class UniLowerElement : private SparseElement
+class UniLowerElement
+   : private SparseElement
 {
  private:
    //**Type definitions****************************************************************************
-   typedef ElementType_<MT>  ElementType;   //!< Type of the represented matrix element.
-   typedef Iterator_<MT>     IteratorType;  //!< Type of the underlying sparse matrix iterators.
+   using ElementType  = ElementType_t<MT>;  //!< Type of the represented matrix element.
+   using IteratorType = Iterator_t<MT>;     //!< Type of the underlying sparse matrix iterators.
    //**********************************************************************************************
 
  public:
    //**Type definitions****************************************************************************
-   typedef UniLowerValue<MT>        ValueType;       //!< The value type of the value-index-pair.
-   typedef size_t                   IndexType;       //!< The index type of the value-index-pair.
-   typedef UniLowerValue<MT>        Reference;       //!< Reference return type.
-   typedef const UniLowerValue<MT>  ConstReference;  //!< Reference-to-const return type.
-   typedef UniLowerElement*         Pointer;         //!< Pointer return type.
+   using ValueType      = UniLowerValue<MT>;        //!< The value type of the value-index-pair.
+   using IndexType      = size_t;                   //!< The index type of the value-index-pair.
+   using Reference      = UniLowerValue<MT>;        //!< Reference return type.
+   using ConstReference = const UniLowerValue<MT>;  //!< Reference-to-const return type.
+   using Pointer        = UniLowerElement*;         //!< Pointer return type.
    //**********************************************************************************************
 
    //**Constructor*********************************************************************************
@@ -156,12 +159,14 @@ class UniLowerElement : private SparseElement
    BLAZE_CONSTRAINT_MUST_NOT_BE_POINTER_TYPE         ( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_CONST                ( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_VOLATILE             ( MT );
-   BLAZE_CONSTRAINT_MUST_NOT_BE_EXPRESSION_TYPE      ( MT );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_VIEW_TYPE            ( MT );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE     ( MT );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_TRANSFORMATION_TYPE  ( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_HERMITIAN_MATRIX_TYPE( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_LOWER_MATRIX_TYPE    ( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_UPPER_MATRIX_TYPE    ( MT );
-   BLAZE_CONSTRAINT_MUST_BE_NUMERIC_TYPE             ( ElementType );
+   BLAZE_CONSTRAINT_MUST_BE_SCALAR_TYPE              ( ElementType );
    /*! \endcond */
    //**********************************************************************************************
 };

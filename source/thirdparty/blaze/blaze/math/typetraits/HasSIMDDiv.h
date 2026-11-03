@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/HasSIMDDiv.h
 //  \brief Header file for the HasSIMDDiv type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -44,11 +44,10 @@
 #include <blaze/util/Complex.h>
 #include <blaze/util/EnableIf.h>
 #include <blaze/util/IntegralConstant.h>
-#include <blaze/util/mpl/And.h>
-#include <blaze/util/typetraits/Decay.h>
 #include <blaze/util/typetraits/IsIntegral.h>
 #include <blaze/util/typetraits/IsNumeric.h>
 #include <blaze/util/typetraits/IsSigned.h>
+#include <blaze/util/typetraits/RemoveCVRef.h>
 
 
 namespace blaze {
@@ -61,13 +60,15 @@ namespace blaze {
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
+/*!\brief Auxiliary helper struct for the HasSIMDDiv type trait.
+// \ingroup math_type_traits
+*/
 template< typename T1        // Type of the left-hand side operand
         , typename T2        // Type of the right-hand side operand
         , typename = void >  // Restricting condition
 struct HasSIMDDivHelper
-{
-   enum : bool { value = false };
-};
+   : public FalseType
+{};
 /*! \endcond */
 //*************************************************************************************************
 
@@ -75,18 +76,25 @@ struct HasSIMDDivHelper
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename T1, typename T2 >
-struct HasSIMDDivHelper< T1, T2, EnableIf_< And< IsNumeric<T1>, IsIntegral<T1>, IsSigned<T1>
-                                               , IsNumeric<T2>, IsIntegral<T2>, IsSigned<T2>
-                                               , Bool< sizeof(T1) == sizeof(T2) > > > >
-{
-   enum : bool { value = bool( BLAZE_MIC_MODE ) && sizeof(T1) >= 4UL };
-};
+struct HasSIMDDivHelper< T1, T2, EnableIf_t< ( IsNumeric_v<T1> && IsNumeric_v<T2> ) &&
+                                             ( IsIntegral_v<T1> && IsIntegral_v<T2> ) &&
+                                             !( IsSigned_v<T1> ^ IsSigned_v<T2> ) &&
+                                             sizeof(T1) == sizeof(T2) > >
+   : public BoolConstant< bool( BLAZE_SVML_MODE ) &&
+                          ( ( bool( BLAZE_AVX2_MODE     ) ) ||
+                            ( bool( BLAZE_MIC_MODE      ) && sizeof(T1) >= 4UL ) ||
+                            ( bool( BLAZE_AVX512BW_MODE ) && sizeof(T1) <= 2UL ) ||
+                            ( bool( BLAZE_AVX512F_MODE  ) && sizeof(T1) >= 4UL ) ) >
+{};
 
 template< typename T >
-struct HasSIMDDivHelper< complex<T>, T, EnableIf_< And< IsNumeric<T>, IsIntegral<T>, IsSigned<T> > > >
-{
-   enum : bool { value = bool( BLAZE_MIC_MODE ) && sizeof(T) >= 4UL };
-};
+struct HasSIMDDivHelper< complex<T>, T, EnableIf_t< IsNumeric_v<T> && IsIntegral_v<T> > >
+   : public BoolConstant< bool( BLAZE_SVML_MODE ) &&
+                          ( ( bool( BLAZE_AVX2_MODE     ) ) ||
+                            ( bool( BLAZE_MIC_MODE      ) && sizeof(T) >= 4UL ) ||
+                            ( bool( BLAZE_AVX512BW_MODE ) && sizeof(T) <= 2UL ) ||
+                            ( bool( BLAZE_AVX512F_MODE  ) && sizeof(T) >= 4UL ) ) >
+{};
 /*! \endcond */
 //*************************************************************************************************
 
@@ -95,11 +103,11 @@ struct HasSIMDDivHelper< complex<T>, T, EnableIf_< And< IsNumeric<T>, IsIntegral
 /*! \cond BLAZE_INTERNAL */
 template<>
 struct HasSIMDDivHelper< float, float >
-{
-   enum : bool { value = bool( BLAZE_SSE_MODE ) ||
-                         bool( BLAZE_AVX_MODE ) ||
-                         bool( BLAZE_MIC_MODE ) };
-};
+   : public BoolConstant< bool( BLAZE_SSE_MODE     ) ||
+                          bool( BLAZE_AVX_MODE     ) ||
+                          bool( BLAZE_MIC_MODE     ) ||
+                          bool( BLAZE_AVX512F_MODE ) >
+{};
 /*! \endcond */
 //*************************************************************************************************
 
@@ -108,11 +116,11 @@ struct HasSIMDDivHelper< float, float >
 /*! \cond BLAZE_INTERNAL */
 template<>
 struct HasSIMDDivHelper< double, double >
-{
-   enum : bool { value = bool( BLAZE_SSE2_MODE ) ||
-                         bool( BLAZE_AVX_MODE  ) ||
-                         bool( BLAZE_MIC_MODE  ) };
-};
+   : public BoolConstant< bool( BLAZE_SSE2_MODE    ) ||
+                          bool( BLAZE_AVX_MODE     ) ||
+                          bool( BLAZE_MIC_MODE     ) ||
+                          bool( BLAZE_AVX512F_MODE ) >
+{};
 /*! \endcond */
 //*************************************************************************************************
 
@@ -141,8 +149,28 @@ struct HasSIMDDivHelper< double, double >
 template< typename T1        // Type of the left-hand side operand
         , typename T2        // Type of the right-hand side operand
         , typename = void >  // Restricting condition
-struct HasSIMDDiv : public BoolConstant< HasSIMDDivHelper< Decay_<T1>, Decay_<T2> >::value >
+struct HasSIMDDiv
+   : public BoolConstant< HasSIMDDivHelper< RemoveCVRef_t<T1>, RemoveCVRef_t<T2> >::value >
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the HasSIMDDiv type trait.
+// \ingroup math_type_traits
+//
+// The HasSIMDDiv_v variable template provides a convenient shortcut to access the nested
+// \a value of the HasSIMDDiv class template. For instance, given the types \a T1 and \a T2
+// the following two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::HasSIMDDiv<T1,T2>::value;
+   constexpr bool value2 = blaze::HasSIMDDiv_v<T1,T2>;
+   \endcode
+*/
+template< typename T1    // Type of the left-hand side operand
+        , typename T2 >  // Type of the right-hand side operand
+constexpr bool HasSIMDDiv_v = HasSIMDDiv<T1,T2>::value;
 //*************************************************************************************************
 
 } // namespace blaze

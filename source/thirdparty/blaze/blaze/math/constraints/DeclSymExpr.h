@@ -3,7 +3,7 @@
 //  \file blaze/math/constraints/DeclSymExpr.h
 //  \brief Constraint on the data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -59,7 +59,7 @@ namespace blaze {
 // DeclSymExpr base class), a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_DECLSYMEXPR_TYPE(T) \
-   static_assert( ::blaze::IsDeclSymExpr<T>::value, "Non-declsym expression type detected" )
+   static_assert( ::blaze::IsDeclSymExpr_v<T>, "Non-declsym expression type detected" )
 //*************************************************************************************************
 
 
@@ -79,7 +79,7 @@ namespace blaze {
 // DeclSymExpr base class), a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_DECLSYMEXPR_TYPE(T) \
-   static_assert( !::blaze::IsDeclSymExpr<T>::value, "Declsym expression type detected" )
+   static_assert( !::blaze::IsDeclSymExpr_v<T>, "Declsym expression type detected" )
 //*************************************************************************************************
 
 } // namespace blaze

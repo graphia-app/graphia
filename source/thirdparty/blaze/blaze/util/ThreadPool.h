@@ -3,7 +3,7 @@
 //  \file blaze/util/ThreadPool.h
 //  \brief Header file of the ThreadPool class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -41,10 +41,11 @@
 //*************************************************************************************************
 
 #include <functional>
+#include <memory>
+#include <vector>
 #include <blaze/util/Assert.h>
 #include <blaze/util/Exception.h>
 #include <blaze/util/NonCopyable.h>
-#include <blaze/util/PtrVector.h>
 #include <blaze/util/StaticAssert.h>
 #include <blaze/util/Thread.h>
 #include <blaze/util/threadpool/Task.h>
@@ -130,15 +131,15 @@ namespace blaze {
 // C++11 standard thread pool or as Boost thread pool:
 
    \code
-   typedef blaze::ThreadPool< boost::thread
-                            , boost::mutex
-                            , boost::unique_lock<boost::mutex>
-                            , boost::condition_variable >  BoostThreadPool;
+   using BoostThreadPool = blaze::ThreadPool< boost::thread
+                                            , boost::mutex
+                                            , boost::unique_lock<boost::mutex>
+                                            , boost::condition_variable >;
 
-   typedef blaze::ThreadPool< std::thread
-                            , std::mutex
-                            , std::unique_lock<std::mutex>
-                            , std::condition_variable >  StdThreadPool;
+   using StdThreadPool = blaze::ThreadPool< std::thread
+                                          , std::mutex
+                                          , std::unique_lock<std::mutex>
+                                          , std::condition_variable >;
    \endcode
 
 // For more information about the standard thread functionality, see [1] or [2] or the current
@@ -307,16 +308,21 @@ template< typename TT    // Type of the encapsulated thread
         , typename MT    // Type of the synchronization mutex
         , typename LT    // Type of the mutex lock
         , typename CT >  // Type of the condition variable
-class ThreadPool : private NonCopyable
+class ThreadPool
+   : private NonCopyable
 {
  private:
    //**Type definitions****************************************************************************
-   typedef Thread<TT,MT,LT,CT>       ManagedThread;  //!< Type of the managed threads.
-   typedef PtrVector<ManagedThread>  Threads;        //!< Type of the thread container.
-   typedef threadpool::TaskQueue     TaskQueue;      //!< Type of the task queue.
-   typedef MT                        Mutex;          //!< Type of the mutex.
-   typedef LT                        Lock;           //!< Type of a locking object.
-   typedef CT                        Condition;      //!< Condition variable type.
+   //! Type of the managed threads.
+   using ManagedThread = Thread<TT,MT,LT,CT>;
+
+   //! Type of the thread container.
+   using Threads = std::vector< std::unique_ptr<ManagedThread> >;
+
+   using TaskQueue = threadpool::TaskQueue;  //!< Type of the task queue.
+   using Mutex     = MT;                     //!< Type of the mutex.
+   using Lock      = LT;                     //!< Type of a locking object.
+   using Condition = CT;                     //!< Condition variable type.
    //**********************************************************************************************
 
  public:
@@ -467,7 +473,7 @@ ThreadPool<TT,MT,LT,CT>::~ThreadPool()
    }
 
    // Joining all threads
-   for( typename Threads::Iterator thread=threads_.begin(); thread!=threads_.end(); ++thread ) {
+   for( auto const& thread : threads_ ) {
       thread->join();
    }
 
@@ -669,9 +675,9 @@ void ThreadPool<TT,MT,LT,CT>::resize( size_t n, bool block )
       }
 
       // Joining and destroying any terminated thread
-      for( typename Threads::Iterator thread=threads_.begin(); thread!=threads_.end(); ) {
-         if( thread->hasTerminated() ) {
-            thread->join();
+      for( typename Threads::iterator thread=threads_.begin(); thread!=threads_.end(); ) {
+         if( (*thread)->hasTerminated() ) {
+            (*thread)->join();
             thread = threads_.erase( thread );
          }
          else ++thread;
@@ -742,7 +748,7 @@ template< typename TT    // Type of the encapsulated thread
         , typename CT >  // Type of the condition variable
 void ThreadPool<TT,MT,LT,CT>::createThread()
 {
-   threads_.pushBack( new ManagedThread( this ) );
+   threads_.push_back( std::unique_ptr<ManagedThread>( new ManagedThread( this ) ) );
    ++total_;
    ++expected_;
    ++active_;

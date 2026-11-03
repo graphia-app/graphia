@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/IsDiagonal.h
 //  \brief Header file for the IsDiagonal type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -43,7 +43,6 @@
 #include <blaze/math/typetraits/IsLower.h>
 #include <blaze/math/typetraits/IsUpper.h>
 #include <blaze/util/IntegralConstant.h>
-#include <blaze/util/mpl/And.h>
 
 
 namespace blaze {
@@ -67,16 +66,16 @@ namespace blaze {
    \code
    using blaze::rowMajor;
 
-   typedef blaze::StaticMatrix<double,3UL,3UL,rowMajor>  StaticMatrixType;
-   typedef blaze::DynamicMatrix<float,rowMajor>          DynamicMatrixType;
-   typedef blaze::CompressedMatrix<int,rowMajor>         CompressedMatrixType;
+   using StaticMatrixType     = blaze::StaticMatrix<double,3UL,3UL,rowMajor>;
+   using DynamicMatrixType    = blaze::DynamicMatrix<float,rowMajor>;
+   using CompressedMatrixType = blaze::CompressedMatrix<int,rowMajor>;
 
-   typedef blaze::DiagonalMatrix<StaticMatrixType>      DiagonalStaticType;
-   typedef blaze::DiagonalMatrix<DynamicMatrixType>     DiagonalDynamicType;
-   typedef blaze::DiagonalMatrix<CompressedMatrixType>  DiagonalCompressedType;
+   using DiagonalStaticType     = blaze::DiagonalMatrix<StaticMatrixType>;
+   using DiagonalDynamicType    = blaze::DiagonalMatrix<DynamicMatrixType>;
+   using DiagonalCompressedType = blaze::DiagonalMatrix<CompressedMatrixType>;
 
-   typedef blaze::LowerMatrix<StaticMatrixType>   LowerStaticType;
-   typedef blaze::UpperMatrix<DynamicMatrixType>  UpperDynamicType;
+   using LowerStaticType  = blaze::LowerMatrix<StaticMatrixType>;
+   using UpperDynamicType = blaze::UpperMatrix<DynamicMatrixType>;
 
    blaze::IsDiagonal< DiagonalStaticType >::value           // Evaluates to 1
    blaze::IsDiagonal< const DiagonalDynamicType >::Type     // Results in TrueType
@@ -87,7 +86,8 @@ namespace blaze {
    \endcode
 */
 template< typename T >
-struct IsDiagonal : public BoolConstant< And< IsLower<T>, IsUpper<T> >::value >
+struct IsDiagonal
+   : public BoolConstant< IsLower_v<T> && IsUpper_v<T> >
 {};
 //*************************************************************************************************
 
@@ -98,7 +98,8 @@ struct IsDiagonal : public BoolConstant< And< IsLower<T>, IsUpper<T> >::value >
 // \ingroup math_type_traits
 */
 template< typename T >
-struct IsDiagonal< const T > : public IsDiagonal<T>
+struct IsDiagonal< const T >
+   : public IsDiagonal<T>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -110,7 +111,8 @@ struct IsDiagonal< const T > : public IsDiagonal<T>
 // \ingroup math_type_traits
 */
 template< typename T >
-struct IsDiagonal< volatile T > : public IsDiagonal<T>
+struct IsDiagonal< volatile T >
+   : public IsDiagonal<T>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -122,9 +124,28 @@ struct IsDiagonal< volatile T > : public IsDiagonal<T>
 // \ingroup math_type_traits
 */
 template< typename T >
-struct IsDiagonal< const volatile T > : public IsDiagonal<T>
+struct IsDiagonal< const volatile T >
+   : public IsDiagonal<T>
 {};
 /*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsDiagonal type trait.
+// \ingroup math_type_traits
+//
+// The IsDiagonal_v variable template provides a convenient shortcut to access the nested
+// \a value of the IsDiagonal class template. For instance, given the type \a T the following
+// two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsDiagonal<T>::value;
+   constexpr bool value2 = blaze::IsDiagonal_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsDiagonal_v = IsDiagonal<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/math/lapack/heev.h
 //  \brief Header file for the LAPACK Hermitian matrix eigenvalue functions (heev)
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -45,12 +45,12 @@
 #include <blaze/math/constraints/Adaptor.h>
 #include <blaze/math/constraints/BLASCompatible.h>
 #include <blaze/math/constraints/Computation.h>
+#include <blaze/math/constraints/Contiguous.h>
 #include <blaze/math/constraints/MutableDataAccess.h>
 #include <blaze/math/Exception.h>
 #include <blaze/math/expressions/DenseMatrix.h>
 #include <blaze/math/expressions/DenseVector.h>
 #include <blaze/math/lapack/clapack/heev.h>
-#include <blaze/math/typetraits/IsResizable.h>
 #include <blaze/math/typetraits/IsRowMajorMatrix.h>
 #include <blaze/util/Assert.h>
 #include <blaze/util/constraints/Complex.h>
@@ -69,7 +69,7 @@ namespace blaze {
 /*!\name LAPACK Hermitian matrix eigenvalue functions (heev) */
 //@{
 template< typename MT, bool SO, typename VT, bool TF >
-inline void heev( DenseMatrix<MT,SO>& A, DenseVector<VT,TF>& w, char jobz, char uplo );
+void heev( DenseMatrix<MT,SO>& A, DenseVector<VT,TF>& w, char jobz, char uplo );
 //@}
 //*************************************************************************************************
 
@@ -141,18 +141,20 @@ inline void heev( DenseMatrix<MT,SO>& A, DenseVector<VT,TF>& w, char jobz, char 
    BLAZE_CONSTRAINT_MUST_NOT_BE_ADAPTOR_TYPE( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT );
    BLAZE_CONSTRAINT_MUST_HAVE_MUTABLE_DATA_ACCESS( MT );
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<MT> );
-   BLAZE_CONSTRAINT_MUST_BE_COMPLEX_TYPE( ElementType_<MT> );
+   BLAZE_CONSTRAINT_MUST_BE_CONTIGUOUS_TYPE( MT );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT> );
+   BLAZE_CONSTRAINT_MUST_BE_COMPLEX_TYPE( ElementType_t<MT> );
 
    BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( VT );
    BLAZE_CONSTRAINT_MUST_HAVE_MUTABLE_DATA_ACCESS( VT );
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<VT> );
-   BLAZE_CONSTRAINT_MUST_BE_BUILTIN_TYPE( ElementType_<VT> );
+   BLAZE_CONSTRAINT_MUST_BE_CONTIGUOUS_TYPE( VT );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<VT> );
+   BLAZE_CONSTRAINT_MUST_BE_BUILTIN_TYPE( ElementType_t<VT> );
 
-   using CT = ElementType_<MT>;
-   using BT = UnderlyingElement_<CT>;
+   using CT = ElementType_t<MT>;
+   using BT = UnderlyingElement_t<CT>;
 
-   if( !isSquare( ~A ) ) {
+   if( !isSquare( *A ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid non-square matrix provided" );
    }
 
@@ -164,25 +166,25 @@ inline void heev( DenseMatrix<MT,SO>& A, DenseVector<VT,TF>& w, char jobz, char 
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid uplo argument provided" );
    }
 
-   resize( ~w, (~A).rows(), false );
+   resize( *w, (*A).rows(), false );
 
-   int n   ( numeric_cast<int>( (~A).rows()    ) );
-   int lda ( numeric_cast<int>( (~A).spacing() ) );
-   int info( 0 );
+   blas_int_t n   ( numeric_cast<blas_int_t>( (*A).rows()    ) );
+   blas_int_t lda ( numeric_cast<blas_int_t>( (*A).spacing() ) );
+   blas_int_t info( 0 );
 
    if( n == 0 ) {
       return;
    }
 
-   int lwork( 10*n + 2 );
+   blas_int_t lwork( 10*n + 2 );
    const std::unique_ptr<CT[]> work ( new CT[lwork] );
    const std::unique_ptr<BT[]> rwork( new BT[3*n-2] );
 
-   if( IsRowMajorMatrix<MT>::value ) {
+   if( IsRowMajorMatrix_v<MT> ) {
       ( uplo == 'L' )?( uplo = 'U' ):( uplo = 'L' );
    }
 
-   heev( jobz, uplo, n, (~A).data(), lda, (~w).data(), work.get(), lwork, rwork.get(), &info );
+   heev( jobz, uplo, n, (*A).data(), lda, (*w).data(), work.get(), lwork, rwork.get(), &info );
 
    BLAZE_INTERNAL_ASSERT( info >= 0, "Invalid argument for eigenvalue computation" );
 

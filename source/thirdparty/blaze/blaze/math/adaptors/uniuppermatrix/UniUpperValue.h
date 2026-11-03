@@ -3,7 +3,7 @@
 //  \file blaze/math/adaptors/uniuppermatrix/UniUpperValue.h
 //  \brief Header file for the UniUpperValue class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -41,24 +41,26 @@
 //*************************************************************************************************
 
 #include <blaze/math/Aliases.h>
-#include <blaze/math/constraints/Expression.h>
+#include <blaze/math/constraints/Computation.h>
 #include <blaze/math/constraints/Hermitian.h>
 #include <blaze/math/constraints/Lower.h>
+#include <blaze/math/constraints/Scalar.h>
 #include <blaze/math/constraints/SparseMatrix.h>
 #include <blaze/math/constraints/Symmetric.h>
+#include <blaze/math/constraints/Transformation.h>
 #include <blaze/math/constraints/Upper.h>
+#include <blaze/math/constraints/View.h>
 #include <blaze/math/Exception.h>
 #include <blaze/math/proxy/Proxy.h>
+#include <blaze/math/RelaxationFlag.h>
 #include <blaze/math/shims/Clear.h>
 #include <blaze/math/shims/Invert.h>
 #include <blaze/math/shims/IsDefault.h>
-#include <blaze/math/shims/IsNaN.h>
 #include <blaze/math/shims/IsOne.h>
 #include <blaze/math/shims/IsReal.h>
 #include <blaze/math/shims/IsZero.h>
 #include <blaze/math/shims/Reset.h>
 #include <blaze/util/constraints/Const.h>
-#include <blaze/util/constraints/Numeric.h>
 #include <blaze/util/constraints/Pointer.h>
 #include <blaze/util/constraints/Reference.h>
 #include <blaze/util/constraints/Volatile.h>
@@ -86,7 +88,7 @@ namespace blaze {
 // illustrates this by means of a \f$ 3 \times 3 \f$ sparse upper unitriangular matrix:
 
    \code
-   typedef blaze::UniUpperMatrix< blaze::CompressedMatrix<int> >  UniUpper;
+   using UniUpper = blaze::UniUpperMatrix< blaze::CompressedMatrix<int> >;
 
    // Creating a 3x3 upper unitriangular sparse matrix
    UniUpper A( 3UL );
@@ -102,7 +104,8 @@ namespace blaze {
    \endcode
 */
 template< typename MT >  // Type of the adapted matrix
-class UniUpperValue : public Proxy< UniUpperValue<MT> >
+class UniUpperValue
+   : public Proxy< UniUpperValue<MT> >
 {
  private:
    //**struct BuiltinType**************************************************************************
@@ -110,7 +113,7 @@ class UniUpperValue : public Proxy< UniUpperValue<MT> >
    /*!\brief Auxiliary struct to determine the value type of the represented complex element.
    */
    template< typename T >
-   struct BuiltinType { typedef INVALID_TYPE  Type; };
+   struct BuiltinType { using Type = INVALID_TYPE; };
    /*! \endcond */
    //**********************************************************************************************
 
@@ -119,26 +122,35 @@ class UniUpperValue : public Proxy< UniUpperValue<MT> >
    /*!\brief Auxiliary struct to determine the value type of the represented complex element.
    */
    template< typename T >
-   struct ComplexType { typedef typename T::value_type  Type; };
+   struct ComplexType { using Type = typename T::value_type; };
    /*! \endcond */
    //**********************************************************************************************
 
  public:
    //**Type definitions****************************************************************************
-   typedef ElementType_<MT>  RepresentedType;   //!< Type of the represented matrix element.
+   using RepresentedType = ElementType_t<MT>;   //!< Type of the represented matrix element.
 
    //! Value type of the represented complex element.
-   typedef typename If_< IsComplex<RepresentedType>
-                       , ComplexType<RepresentedType>
-                       , BuiltinType<RepresentedType> >::Type  ValueType;
+   using ValueType = typename If_t< IsComplex_v<RepresentedType>
+                                  , ComplexType<RepresentedType>
+                                  , BuiltinType<RepresentedType> >::Type;
 
-   typedef ValueType  value_type;  //!< Value type of the represented complex element.
+   using value_type = ValueType;  //!< Value type of the represented complex element.
    //**********************************************************************************************
 
    //**Constructors********************************************************************************
    /*!\name Constructors */
    //@{
    inline UniUpperValue( RepresentedType& value, bool diagonal );
+
+   UniUpperValue( const UniUpperValue& ) = default;
+   //@}
+   //**********************************************************************************************
+
+   //**Destructor**********************************************************************************
+   /*!\name Destructor */
+   //@{
+   ~UniUpperValue() = default;
    //@}
    //**********************************************************************************************
 
@@ -157,8 +169,6 @@ class UniUpperValue : public Proxy< UniUpperValue<MT> >
    //**Utility functions***************************************************************************
    /*!\name Utility functions */
    //@{
-   inline void reset () const;
-   inline void clear () const;
    inline void invert() const;
 
    inline RepresentedType get() const noexcept;
@@ -196,12 +206,56 @@ class UniUpperValue : public Proxy< UniUpperValue<MT> >
    BLAZE_CONSTRAINT_MUST_NOT_BE_POINTER_TYPE         ( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_CONST                ( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_VOLATILE             ( MT );
-   BLAZE_CONSTRAINT_MUST_NOT_BE_EXPRESSION_TYPE      ( MT );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_VIEW_TYPE            ( MT );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE     ( MT );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_TRANSFORMATION_TYPE  ( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_HERMITIAN_MATRIX_TYPE( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_LOWER_MATRIX_TYPE    ( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_UPPER_MATRIX_TYPE    ( MT );
-   BLAZE_CONSTRAINT_MUST_BE_NUMERIC_TYPE( RepresentedType );
+   BLAZE_CONSTRAINT_MUST_BE_SCALAR_TYPE              ( RepresentedType );
+   /*! \endcond */
+   //**********************************************************************************************
+
+   //**********************************************************************************************
+   /*! \cond BLAZE_INTERNAL */
+   /*!\brief Resetting the uniupper value to the default initial values.
+   // \ingroup uniupper_matrix
+   //
+   // \param value The given uniupper value.
+   // \return void
+   //
+   // This function resets the uniupper value to its default initial value.
+   */
+   friend inline void reset( const UniUpperValue& value )
+   {
+      using blaze::reset;
+
+      if( !value.diagonal_ ) {
+         reset( *value.value_ );
+      }
+   }
+   /*! \endcond */
+   //**********************************************************************************************
+
+   //**********************************************************************************************
+   /*! \cond BLAZE_INTERNAL */
+   /*!\brief Clearing the uniupper value.
+   // \ingroup uniupper_matrix
+   //
+   // \param value The given uniupper value.
+   // \return void
+   //
+   // This function clears the uniupper value to its default initial state.
+   */
+   friend inline void clear( const UniUpperValue& value )
+   {
+      using blaze::clear;
+
+      if( !value.diagonal_ ) {
+         clear( *value.value_ );
+      }
+   }
    /*! \endcond */
    //**********************************************************************************************
 };
@@ -378,42 +432,6 @@ inline UniUpperValue<MT>& UniUpperValue<MT>::operator/=( const T& value )
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\brief Reset the uniupper value to its default initial value.
-//
-// \return void
-//
-// This function resets the uniupper value to its default initial value.
-*/
-template< typename MT >  // Type of the adapted matrix
-inline void UniUpperValue<MT>::reset() const
-{
-   using blaze::reset;
-
-   if( !diagonal_ )
-      reset( *value_ );
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Clearing the uniupper value.
-//
-// \return void
-//
-// This function clears the uniupper value to its default initial state.
-*/
-template< typename MT >  // Type of the adapted matrix
-inline void UniUpperValue<MT>::clear() const
-{
-   using blaze::clear;
-
-   if( !diagonal_ )
-      clear( *value_ );
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
 /*!\brief In-place inversion of the uniupper value
 //
 // \return void
@@ -572,63 +590,8 @@ inline void UniUpperValue<MT>::imag( ValueType value ) const
 /*!\name UniUpperValue global functions */
 //@{
 template< typename MT >
-inline void reset( const UniUpperValue<MT>& value );
-
-template< typename MT >
-inline void clear( const UniUpperValue<MT>& value );
-
-template< typename MT >
-inline void invert( const UniUpperValue<MT>& value );
-
-template< bool RF, typename MT >
-inline bool isDefault( const UniUpperValue<MT>& value );
-
-template< bool RF, typename MT >
-inline bool isReal( const UniUpperValue<MT>& value );
-
-template< bool RF, typename MT >
-inline bool isZero( const UniUpperValue<MT>& value );
-
-template< bool RF, typename MT >
-inline bool isOne( const UniUpperValue<MT>& value );
-
-template< typename MT >
-inline bool isnan( const UniUpperValue<MT>& value );
+void invert( const UniUpperValue<MT>& value );
 //@}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Resetting the uniupper value to the default initial values.
-// \ingroup uniupper_matrix
-//
-// \param value The given uniupper value.
-// \return void
-//
-// This function resets the uniupper value to its default initial value.
-*/
-template< typename MT >
-inline void reset( const UniUpperValue<MT>& value )
-{
-   value.reset();
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Clearing the uniupper value.
-// \ingroup uniupper_matrix
-//
-// \param value The given uniupper value.
-// \return void
-//
-// This function clears the uniupper value to its default initial state.
-*/
-template< typename MT >
-inline void clear( const UniUpperValue<MT>& value )
-{
-   value.clear();
-}
 //*************************************************************************************************
 
 
@@ -643,108 +606,6 @@ template< typename MT >
 inline void invert( const UniUpperValue<MT>& value )
 {
    value.invert();
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Returns whether the uniupper value is in default state.
-// \ingroup uniupper_matrix
-//
-// \param value The given uniupper value.
-// \return \a true in case the uniupper value is in default state, \a false otherwise.
-//
-// This function checks whether the uniupper value is in default state. In case it is in
-// default state, the function returns \a true, otherwise it returns \a false.
-*/
-template< bool RF, typename MT >
-inline bool isDefault( const UniUpperValue<MT>& value )
-{
-   using blaze::isDefault;
-
-   return isDefault<RF>( value.get() );
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Returns whether the uniupper value represents a real number.
-// \ingroup uniupper_matrix
-//
-// \param value The given uniupper value.
-// \return \a true in case the uniupper value represents a real number, \a false otherwise.
-//
-// This function checks whether the uniupper value represents the a real number. In case the
-// value is of built-in type, the function returns \a true. In case the element is of complex
-// type, the function returns \a true if the imaginary part is equal to 0. Otherwise it returns
-// \a false.
-*/
-template< bool RF, typename MT >
-inline bool isReal( const UniUpperValue<MT>& value )
-{
-   using blaze::isReal;
-
-   return isReal<RF>( value.get() );
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Returns whether the uniupper value is 0.
-// \ingroup uniupper_matrix
-//
-// \param value The given uniupper value.
-// \return \a true in case the uniupper value is 0, \a false otherwise.
-//
-// This function checks whether the uniupper value represents the numeric value 0. In case it
-// is 0, the function returns \a true, otherwise it returns \a false.
-*/
-template< bool RF, typename MT >
-inline bool isZero( const UniUpperValue<MT>& value )
-{
-   using blaze::isZero;
-
-   return isZero<RF>( value.get() );
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Returns whether the uniupper value is 1.
-// \ingroup uniupper_matrix
-//
-// \param value The given uniupper value.
-// \return \a true in case the uniupper value is 1, \a false otherwise.
-//
-// This function checks whether the uniupper value represents the numeric value 1. In case it
-// is 1, the function returns \a true, otherwise it returns \a false.
-*/
-template< bool RF, typename MT >
-inline bool isOne( const UniUpperValue<MT>& value )
-{
-   using blaze::isOne;
-
-   return isOne<RF>( value.get() );
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Returns whether the uniupper value is not a number.
-// \ingroup uniupper_matrix
-//
-// \param value The given uniupper value.
-// \return \a true in case the uniupper value is in not a number, \a false otherwise.
-//
-// This function checks whether the uniupper value is not a number (NaN). In case it is not a
-// number, the function returns \a true, otherwise it returns \a false.
-*/
-template< typename MT >
-inline bool isnan( const UniUpperValue<MT>& value )
-{
-   using blaze::isnan;
-
-   return isnan( value.get() );
 }
 //*************************************************************************************************
 

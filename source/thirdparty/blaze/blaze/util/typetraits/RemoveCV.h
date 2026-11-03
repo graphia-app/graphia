@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/RemoveCV.h
 //  \brief Header file for the RemoveCV type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -73,7 +73,7 @@ struct RemoveCV
  public:
    //**********************************************************************************************
    /*! \cond BLAZE_INTERNAL */
-   typedef typename std::remove_cv<T>::type  Type;
+   using Type = typename std::remove_cv<T>::type;
    /*! \endcond */
    //**********************************************************************************************
 };
@@ -84,17 +84,17 @@ struct RemoveCV
 /*!\brief Auxiliary alias declaration for the RemoveCV type trait.
 // \ingroup type_traits
 //
-// The RemoveCV_ alias declaration provides a convenient shortcut to access the nested \a Type
+// The RemoveCV_t alias declaration provides a convenient shortcut to access the nested \a Type
 // of the RemoveCV class template. For instance, given the type \a T the following two type
 // definitions are identical:
 
    \code
-   using Type1 = typename RemoveCV<T>::Type;
-   using Type2 = RemoveCV_<T>;
+   using Type1 = typename blaze::RemoveCV<T>::Type;
+   using Type2 = blaze::RemoveCV_t<T>;
    \endcode
 */
 template< typename T >
-using RemoveCV_ = typename RemoveCV<T>::Type;
+using RemoveCV_t = typename RemoveCV<T>::Type;
 //*************************************************************************************************
 
 } // namespace blaze

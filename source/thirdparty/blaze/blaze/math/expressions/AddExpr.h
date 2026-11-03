@@ -3,7 +3,7 @@
 //  \file blaze/math/expressions/AddExpr.h
 //  \brief Header file for the AddExpr base class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -58,11 +58,13 @@ namespace blaze {
 // The AddExpr class serves as a tag for all expression templates that implement mathematical
 // additions. All classes, that represent a mathematical addition (vector additions and matrix
 // additions) and that are used within the expression template environment of the Blaze library
-// have to derive from this class in order to qualify as addition expression template. Only in
-// case a class is derived from the AddExpr base class, the IsAddExpr type trait recognizes the
-// class as valid addition expression template.
+// have to derive publicly from this class in order to qualify as addition expression template.
+// Only in case a class is derived publicly from the AddExpr base class, the IsAddExpr type
+// trait recognizes the class as valid addition expression template.
 */
-struct AddExpr : private Expression
+template< typename T >  // Base type of the expression
+struct AddExpr
+   : public Expression<T>
 {};
 //*************************************************************************************************
 

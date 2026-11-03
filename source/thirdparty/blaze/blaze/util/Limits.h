@@ -3,7 +3,7 @@
 //  \file blaze/util/Limits.h
 //  \brief Numerical limits of built-in data types
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -41,6 +41,7 @@
 //*************************************************************************************************
 
 #include <limits>
+#include <blaze/system/Platform.h>
 #include <blaze/util/Types.h>
 
 
@@ -126,7 +127,7 @@ struct Limits<unsigned char>
 {
    /*!\brief Positive infinity value.
    // \return The largest possible positive unsigned char value. */
-   static inline constexpr unsigned char inf() { return std::numeric_limits<unsigned char>::max(); }
+   static constexpr unsigned char inf() { return std::numeric_limits<unsigned char>::max(); }
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -142,11 +143,11 @@ struct Limits<char>
 {
    /*!\brief Positive infinity value.
    // \return The largest possible positive char value. */
-   static inline constexpr char inf () { return std::numeric_limits<char>::max(); }
+   static constexpr char inf () { return std::numeric_limits<char>::max(); }
 
    /*!\brief Negative infinity value.
    // \return The largest possible negative char value. */
-   static inline constexpr char ninf() { return std::numeric_limits<char>::min(); }
+   static constexpr char ninf() { return std::numeric_limits<char>::min(); }
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -162,11 +163,11 @@ struct Limits<signed char>
 {
    /*!\brief Positive infinity value.
    // \return The largest possible positive signed char value. */
-   static inline constexpr signed char inf () { return std::numeric_limits<signed char>::max(); }
+   static constexpr signed char inf () { return std::numeric_limits<signed char>::max(); }
 
    /*!\brief Negative infinity value.
    // \return The largest possible negative signed char value. */
-   static inline constexpr signed char ninf() { return std::numeric_limits<signed char>::min(); }
+   static constexpr signed char ninf() { return std::numeric_limits<signed char>::min(); }
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -182,11 +183,11 @@ struct Limits<wchar_t>
 {
    /*!\brief Positive infinity value.
    // \return The largest possible positive wchar_t value. */
-   static inline constexpr wchar_t inf () { return std::numeric_limits<wchar_t>::max(); }
+   static constexpr wchar_t inf () { return std::numeric_limits<wchar_t>::max(); }
 
    /*!\brief Negative infinity value.
    // \return The largest possible negative wchar_t value. */
-   static inline constexpr wchar_t ninf() { return std::numeric_limits<wchar_t>::min(); }
+   static constexpr wchar_t ninf() { return std::numeric_limits<wchar_t>::min(); }
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -202,7 +203,7 @@ struct Limits<unsigned short>
 {
    /*!\brief Positive infinity value.
    // \return The largest possible positive unsigned short value. */
-   static inline constexpr unsigned short inf() { return std::numeric_limits<unsigned short>::max(); }
+   static constexpr unsigned short inf() { return std::numeric_limits<unsigned short>::max(); }
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -218,11 +219,11 @@ struct Limits<short>
 {
    /*!\brief Positive infinity value.
    // \return The largest possible positive short value. */
-   static inline constexpr short inf () { return std::numeric_limits<short>::max(); }
+   static constexpr short inf () { return std::numeric_limits<short>::max(); }
 
    /*!\brief Negative infinity value.
    // \return The largest possible negative short value. */
-   static inline constexpr short ninf() { return std::numeric_limits<short>::min(); }
+   static constexpr short ninf() { return std::numeric_limits<short>::min(); }
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -238,7 +239,7 @@ struct Limits<unsigned int>
 {
    /*!\brief Positive infinity value.
    // \return The largest possible positive unsigned int value. */
-   static inline constexpr unsigned int inf() { return std::numeric_limits<unsigned int>::max(); }
+   static constexpr unsigned int inf() { return std::numeric_limits<unsigned int>::max(); }
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -254,11 +255,11 @@ struct Limits<int>
 {
    /*!\brief Positive infinity value.
    // \return The largest possible positive int value. */
-   static inline constexpr int inf () { return std::numeric_limits<int>::max(); }
+   static constexpr int inf () { return std::numeric_limits<int>::max(); }
 
    /*!\brief Negative infinity value.
    // \return The largest possible negative int value. */
-   static inline constexpr int ninf() { return std::numeric_limits<int>::min(); }
+   static constexpr int ninf() { return std::numeric_limits<int>::min(); }
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -274,7 +275,7 @@ struct Limits<unsigned long>
 {
    /*!\brief Positive infinity value.
    // \return The largest possible positive unsigned long value. */
-   static inline constexpr unsigned long inf() { return std::numeric_limits<unsigned long>::max(); }
+   static constexpr unsigned long inf() { return std::numeric_limits<unsigned long>::max(); }
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -290,18 +291,18 @@ struct Limits<long>
 {
    /*!\brief Positive infinity value.
    // \return The largest possible positive long value. */
-   static inline constexpr long inf () { return std::numeric_limits<long>::max(); }
+   static constexpr long inf () { return std::numeric_limits<long>::max(); }
 
    /*!\brief Negative infinity value.
    // \return The largest possible negative long value. */
-   static inline constexpr long ninf() { return std::numeric_limits<long>::min(); }
+   static constexpr long ninf() { return std::numeric_limits<long>::min(); }
 };
 /*! \endcond */
 //*************************************************************************************************
 
 
 //*************************************************************************************************
-#if defined(_WIN64)
+#if BLAZE_WIN32_PLATFORM || BLAZE_WIN64_PLATFORM
 /*! \cond BLAZE_INTERNAL */
 /*!\brief Limits<size_t> specialization.
 // \ingroup util
@@ -311,7 +312,7 @@ struct Limits<size_t>
 {
    /*!\brief Positive infinity value.
    // \return The largest possible positive size_t value. */
-   static inline constexpr size_t inf() { return std::numeric_limits<size_t>::max(); }
+   static constexpr size_t inf() { return std::numeric_limits<size_t>::max(); }
 };
 /*! \endcond */
 #endif
@@ -319,7 +320,7 @@ struct Limits<size_t>
 
 
 //*************************************************************************************************
-#if defined(_WIN64)
+#if BLAZE_WIN32_PLATFORM || BLAZE_WIN64_PLATFORM
 /*! \cond BLAZE_INTERNAL */
 /*!\brief Limits<ptrdiff_t> specialization.
 // \ingroup util
@@ -329,11 +330,11 @@ struct Limits<ptrdiff_t>
 {
    /*!\brief Positive infinity value.
    // \return The largest possible positive ptrdiff_t value. */
-   static inline constexpr ptrdiff_t inf () { return std::numeric_limits<ptrdiff_t>::max(); }
+   static constexpr ptrdiff_t inf () { return std::numeric_limits<ptrdiff_t>::max(); }
 
    /*!\brief Negative infinity value.
    // \return The largest possible negative ptrdiff_t value. */
-   static inline constexpr ptrdiff_t ninf() { return std::numeric_limits<ptrdiff_t>::min(); }
+   static constexpr ptrdiff_t ninf() { return std::numeric_limits<ptrdiff_t>::min(); }
 };
 /*! \endcond */
 #endif
@@ -350,23 +351,23 @@ struct Limits<float>
 {
    /*!\brief Positive infinity value.
    // \return The largest possible positive float value. */
-   static inline constexpr float inf () { return  std::numeric_limits<float>::max(); }
+   static constexpr float inf () { return  std::numeric_limits<float>::max(); }
 
    /*!\brief Negative infinity value.
    // \return The largest possible negative float value. */
-   static inline constexpr float ninf() { return -std::numeric_limits<float>::max(); }
+   static constexpr float ninf() { return -std::numeric_limits<float>::max(); }
 
    /*!\brief Machine epsilon.
    // \return The smallest possible difference between two float values. */
-   static inline constexpr float epsilon() { return std::numeric_limits<float>::epsilon(); }
+   static constexpr float epsilon() { return std::numeric_limits<float>::epsilon(); }
 
    /*!\brief The compuation accuracy of the Blaze library.
    // \return The computation threshold for single precision floating point values. */
-   static inline constexpr float accuracy() { return 1E-6F; }
+   static constexpr float accuracy() { return 1E-6F; }
 
    /*!\brief The machine floating point accuracy.
    // \return The machine accuracy for single precision floating point values. */
-   static inline constexpr float fpuAccuracy() { return 1E-12F; }
+   static constexpr float fpuAccuracy() { return 1E-12F; }
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -382,23 +383,23 @@ struct Limits<double>
 {
    /*!\brief Positive infinity value.
    // \return The largest possible positive double value. */
-   static inline constexpr double inf () { return  std::numeric_limits<double>::max(); }
+   static constexpr double inf () { return  std::numeric_limits<double>::max(); }
 
    /*!\brief Negative infinity value.
    // \return The largest possible negative double value. */
-   static inline constexpr double ninf() { return -std::numeric_limits<double>::max(); }
+   static constexpr double ninf() { return -std::numeric_limits<double>::max(); }
 
    /*!\brief Machine epsilon.
    // \return The smallest possible difference between two double values. */
-   static inline constexpr double epsilon() { return std::numeric_limits<double>::epsilon(); }
+   static constexpr double epsilon() { return std::numeric_limits<double>::epsilon(); }
 
    /*!\brief The compuation accuracy of the Blaze library.
    // \return The computation threshold for double precision floating point values. */
-   static inline constexpr double accuracy() { return 1E-8; }
+   static constexpr double accuracy() { return 1E-8; }
 
    /*!\brief The machine floating point accuracy.
    // \return The machine accuracy for double precision floating point values. */
-   static inline constexpr double fpuAccuracy() { return 1E-15; }
+   static constexpr double fpuAccuracy() { return 1E-15; }
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -414,23 +415,23 @@ struct Limits<long double>
 {
    /*!\brief Positive infinity value.
    // \return The largest possible positive long double value. */
-   static inline constexpr long double inf () { return  std::numeric_limits<long double>::max(); }
+   static constexpr long double inf () { return  std::numeric_limits<long double>::max(); }
 
    /*!\brief Negative infinity value.
    // \return The largest possible negative long double value. */
-   static inline constexpr long double ninf() { return -std::numeric_limits<long double>::max(); }
+   static constexpr long double ninf() { return -std::numeric_limits<long double>::max(); }
 
    /*!\brief Machine epsilon.
    // \return The smallest possible difference between two long double values. */
-   static inline constexpr long double epsilon() { return std::numeric_limits<long double>::epsilon(); }
+   static constexpr long double epsilon() { return std::numeric_limits<long double>::epsilon(); }
 
    /*!\brief The compuation accuracy of the Blaze library.
    // \return The computation threshold for long double floating point values. */
-   static inline constexpr long double accuracy() { return 1E-10L; }
+   static constexpr long double accuracy() { return 1E-10L; }
 
    /*!\brief The machine floating point accuracy.
    // \return The machine accuracy for long double floating point values. */
-   static inline constexpr long double fpuAccuracy() { return 1E-15L; }
+   static constexpr long double fpuAccuracy() { return 1E-15L; }
 };
 /*! \endcond */
 //*************************************************************************************************

@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/IsSquare.h
 //  \brief Header file for the IsSquare type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,8 +40,7 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/util/FalseType.h>
-#include <blaze/util/TrueType.h>
+#include <blaze/util/IntegralConstant.h>
 
 
 namespace blaze {
@@ -67,14 +66,14 @@ namespace blaze {
    using blaze::rowMajor;
 
    // Type definitions of square matrix types
-   typedef blaze::StaticMatrix<double,2UL,2UL,rowMajor>  Mat2x2;
-   typedef blaze::StaticMatrix<double,3UL,3UL,rowMajor>  Mat3x3;
-   typedef blaze::StaticMatrix<double,4UL,4UL,rowMajor>  Mat4x4;
+   using Mat2x2 = blaze::StaticMatrix<double,2UL,2UL,rowMajor>;
+   using Mat3x3 = blaze::StaticMatrix<double,3UL,3UL,rowMajor>;
+   using Mat4x4 = blaze::StaticMatrix<double,4UL,4UL,rowMajor>;
 
    // Type definitions of non-square matrix types
-   typedef blaze::StaticMatrix<double,2UL,3UL,rowMajor>  Mat2x3;
-   typedef blaze::DynamicMatrix<double,rowMajor>         DynamicMatrixType;
-   typedef blaze::HybridMatrix<double,3UL,3UL,rowMajor>  HybridMatrixType;
+   using Mat2x3            = blaze::StaticMatrix<double,2UL,3UL,rowMajor>;
+   using DynamicMatrixType = blaze::DynamicMatrix<double,rowMajor>;
+   using HybridMatrixType  = blaze::HybridMatrix<double,3UL,3UL,rowMajor>;
 
    blaze::IsSquare< Mat2x2 >::value              // Evaluates to 1
    blaze::IsSquare< const Mat3x3 >::Type         // Results in TrueType
@@ -85,7 +84,8 @@ namespace blaze {
    \endcode
 */
 template< typename T >
-struct IsSquare : public FalseType
+struct IsSquare
+   : public FalseType
 {};
 //*************************************************************************************************
 
@@ -96,7 +96,8 @@ struct IsSquare : public FalseType
 // \ingroup math_type_traits
 */
 template< typename T >
-struct IsSquare< const T > : public IsSquare<T>
+struct IsSquare< const T >
+   : public IsSquare<T>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -108,7 +109,8 @@ struct IsSquare< const T > : public IsSquare<T>
 // \ingroup math_type_traits
 */
 template< typename T >
-struct IsSquare< volatile T > : public IsSquare<T>
+struct IsSquare< volatile T >
+   : public IsSquare<T>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -120,9 +122,28 @@ struct IsSquare< volatile T > : public IsSquare<T>
 // \ingroup math_type_traits
 */
 template< typename T >
-struct IsSquare< const volatile T > : public IsSquare<T>
+struct IsSquare< const volatile T >
+   : public IsSquare<T>
 {};
 /*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsSquare type trait.
+// \ingroup math_type_traits
+//
+// The IsSquare_v variable template provides a convenient shortcut to access the nested \a value
+// of the IsSquare class template. For instance, given the type \a T the following two statements
+// are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsSquare<T>::value;
+   constexpr bool value2 = blaze::IsSquare_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsSquare_v = IsSquare<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/math/dense/SVD.h
 //  \brief Header file for the dense matrix singular value decomposition (SVD)
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -48,7 +48,9 @@
 #include <blaze/math/expressions/DenseVector.h>
 #include <blaze/math/lapack/gesdd.h>
 #include <blaze/math/lapack/gesvdx.h>
+#include <blaze/math/typetraits/IsContiguous.h>
 #include <blaze/math/typetraits/RemoveAdaptor.h>
+#include <blaze/util/mpl/If.h>
 
 
 namespace blaze {
@@ -67,7 +69,7 @@ inline void svd( const DenseMatrix<MT,SO>& A, DenseVector<VT,TF>& s );
 
 template< typename MT1, bool SO, typename VT, bool TF, typename MT2, typename MT3 >
 inline void svd( const DenseMatrix<MT1,SO>& A, DenseMatrix<MT2,SO>& U,
-                 DenseVector<VT,TF>& s, DenseMatrix<MT3,SO>& V );
+                 DenseVector<VT,TF>& s, DenseMatrix<MT3,SO>& V, bool square = false );
 
 template< typename MT, bool SO, typename VT, bool TF, typename ST >
 inline size_t svd( const DenseMatrix<MT,SO>& A, DenseVector<VT,TF>& s, ST low, ST upp );
@@ -133,22 +135,28 @@ template< typename MT  // Type of the matrix A
 inline void svd( const DenseMatrix<MT,SO>& A, DenseVector<VT,TF>& s )
 {
    BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT );
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<MT> );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT> );
 
    BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( VT );
    BLAZE_CONSTRAINT_MUST_HAVE_MUTABLE_DATA_ACCESS( VT );
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<VT> );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<VT> );
 
-   using Tmp = ResultType_< RemoveAdaptor_<MT> >;
+   using ATmp = ResultType_t< RemoveAdaptor_t<MT> >;
+   using STmp = If_t< IsContiguous_v<VT>, VT&, ResultType_t<VT> >;
 
-   BLAZE_CONSTRAINT_MUST_NOT_BE_ADAPTOR_TYPE( Tmp );
-   BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( Tmp );
-   BLAZE_CONSTRAINT_MUST_HAVE_MUTABLE_DATA_ACCESS( Tmp );
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<Tmp> );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_ADAPTOR_TYPE( ATmp );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( ATmp );
+   BLAZE_CONSTRAINT_MUST_HAVE_MUTABLE_DATA_ACCESS( ATmp );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<ATmp> );
 
-   Tmp tmp( A );
+   ATmp Atmp( *A );
+   STmp stmp( *s );
 
-   gesdd( tmp, s );
+   gesdd( Atmp, stmp );
+
+   if( !IsContiguous_v<VT> ) {
+      (*s) = stmp;
+   }
 }
 //*************************************************************************************************
 
@@ -161,6 +169,7 @@ inline void svd( const DenseMatrix<MT,SO>& A, DenseVector<VT,TF>& s )
 // \param U The resulting matrix of left singular vectors.
 // \param s The resulting vector of singular values.
 // \param V The resulting matrix of right singular vectors.
+// \param square Defaults to False.  If True, will make sure U and V are square matrices.
 // \return void
 // \exception std::invalid_argument Dimensions of fixed size matrix U do not match.
 // \exception std::invalid_argument Size of fixed size vector does not match.
@@ -217,35 +226,53 @@ template< typename MT1    // Type of the matrix A
         , typename MT2    // Type of the matrix U
         , typename MT3 >  // Type of the matrix V
 inline void svd( const DenseMatrix<MT1,SO>& A, DenseMatrix<MT2,SO>& U,
-                 DenseVector<VT,TF>& s, DenseMatrix<MT3,SO>& V )
+                 DenseVector<VT,TF>& s, DenseMatrix<MT3,SO>& V, bool square )
 {
    BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT1 );
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<MT1> );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT1> );
 
    BLAZE_CONSTRAINT_MUST_NOT_BE_ADAPTOR_TYPE( MT2 );
    BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT2 );
    BLAZE_CONSTRAINT_MUST_HAVE_MUTABLE_DATA_ACCESS( MT2 );
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<MT2> );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT2> );
 
    BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( VT );
    BLAZE_CONSTRAINT_MUST_HAVE_MUTABLE_DATA_ACCESS( VT );
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<VT> );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<VT> );
 
    BLAZE_CONSTRAINT_MUST_NOT_BE_ADAPTOR_TYPE( MT3 );
    BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT3 );
    BLAZE_CONSTRAINT_MUST_HAVE_MUTABLE_DATA_ACCESS( MT3 );
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<MT3> );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT3> );
 
-   using Tmp = ResultType_< RemoveAdaptor_<MT1> >;
+   using ATmp = ResultType_t< RemoveAdaptor_t<MT1> >;
+   using UTmp = If_t< IsContiguous_v<MT2>, MT2&, ResultType_t<MT2> >;
+   using STmp = If_t< IsContiguous_v<VT>, VT&, ResultType_t<VT> >;
+   using VTmp = If_t< IsContiguous_v<MT3>, MT3&, ResultType_t<MT3> >;
 
-   BLAZE_CONSTRAINT_MUST_NOT_BE_ADAPTOR_TYPE( Tmp );
-   BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( Tmp );
-   BLAZE_CONSTRAINT_MUST_HAVE_MUTABLE_DATA_ACCESS( Tmp );
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<Tmp> );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_ADAPTOR_TYPE( ATmp );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( ATmp );
+   BLAZE_CONSTRAINT_MUST_HAVE_MUTABLE_DATA_ACCESS( ATmp );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<ATmp> );
 
-   Tmp tmp( A );
+   ATmp Atmp( *A );
+   UTmp Utmp( *U );
+   STmp stmp( *s );
+   VTmp Vtmp( *V );
 
-   gesdd( tmp, U, s, V, 'S' );
+   gesdd( Atmp, Utmp, stmp, Vtmp, (square) ? 'A' : 'S' );
+
+   if( !IsContiguous_v<MT2> ) {
+      (*U) = Utmp;
+   }
+
+   if( !IsContiguous_v<VT> ) {
+      (*s) = stmp;
+   }
+
+   if( !IsContiguous_v<MT3> ) {
+      (*V) = Vtmp;
+   }
 }
 //*************************************************************************************************
 
@@ -320,24 +347,32 @@ template< typename MT    // Type of the matrix A
 inline size_t svd( const DenseMatrix<MT,SO>& A, DenseVector<VT,TF>& s, ST low, ST upp )
 {
    BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT );
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<MT> );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT> );
 
    BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( VT );
    BLAZE_CONSTRAINT_MUST_HAVE_MUTABLE_DATA_ACCESS( VT );
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<VT> );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<VT> );
 
    BLAZE_CONSTRAINT_MUST_BE_BUILTIN_TYPE( ST );
 
-   using Tmp = ResultType_< RemoveAdaptor_<MT> >;
+   using ATmp = ResultType_t< RemoveAdaptor_t<MT> >;
+   using STmp = If_t< IsContiguous_v<VT>, VT&, ResultType_t<VT> >;
 
-   BLAZE_CONSTRAINT_MUST_NOT_BE_ADAPTOR_TYPE( Tmp );
-   BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( Tmp );
-   BLAZE_CONSTRAINT_MUST_HAVE_MUTABLE_DATA_ACCESS( Tmp );
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<Tmp> );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_ADAPTOR_TYPE( ATmp );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( ATmp );
+   BLAZE_CONSTRAINT_MUST_HAVE_MUTABLE_DATA_ACCESS( ATmp );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<ATmp> );
 
-   Tmp tmp( A );
+   ATmp Atmp( *A );
+   STmp stmp( *s );
 
-   return gesvdx( tmp, s, low, upp );
+   const auto num = gesvdx( Atmp, stmp, low, upp );
+
+   if( !IsContiguous_v<VT> ) {
+      (*s) = stmp;
+   }
+
+   return num;
 }
 //*************************************************************************************************
 
@@ -431,34 +466,54 @@ inline size_t svd( const DenseMatrix<MT1,SO>& A, DenseMatrix<MT2,SO>& U,
                    DenseVector<VT,TF>& s, DenseMatrix<MT3,SO>& V, ST low, ST upp )
 {
    BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT1 );
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<MT1> );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT1> );
 
    BLAZE_CONSTRAINT_MUST_NOT_BE_ADAPTOR_TYPE( MT2 );
    BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT2 );
    BLAZE_CONSTRAINT_MUST_HAVE_MUTABLE_DATA_ACCESS( MT2 );
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<MT2> );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT2> );
 
    BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( VT );
    BLAZE_CONSTRAINT_MUST_HAVE_MUTABLE_DATA_ACCESS( VT );
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<VT> );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<VT> );
 
    BLAZE_CONSTRAINT_MUST_NOT_BE_ADAPTOR_TYPE( MT3 );
    BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT3 );
    BLAZE_CONSTRAINT_MUST_HAVE_MUTABLE_DATA_ACCESS( MT3 );
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<MT3> );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT3> );
 
    BLAZE_CONSTRAINT_MUST_BE_BUILTIN_TYPE( ST );
 
-   using Tmp = ResultType_< RemoveAdaptor_<MT1> >;
+   using ATmp = ResultType_t< RemoveAdaptor_t<MT1> >;
+   using UTmp = If_t< IsContiguous_v<MT2>, MT2&, ResultType_t<MT2> >;
+   using STmp = If_t< IsContiguous_v<VT>, VT&, ResultType_t<VT> >;
+   using VTmp = If_t< IsContiguous_v<MT3>, MT3&, ResultType_t<MT3> >;
 
-   BLAZE_CONSTRAINT_MUST_NOT_BE_ADAPTOR_TYPE( Tmp );
-   BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( Tmp );
-   BLAZE_CONSTRAINT_MUST_HAVE_MUTABLE_DATA_ACCESS( Tmp );
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<Tmp> );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_ADAPTOR_TYPE( ATmp );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( ATmp );
+   BLAZE_CONSTRAINT_MUST_HAVE_MUTABLE_DATA_ACCESS( ATmp );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<ATmp> );
 
-   Tmp tmp( A );
+   ATmp Atmp( *A );
+   UTmp Utmp( *U );
+   STmp stmp( *s );
+   VTmp Vtmp( *V );
 
-   return gesvdx( tmp, U, s, V, low, upp );
+   const auto num = gesvdx( Atmp, Utmp, stmp, Vtmp, low, upp );
+
+   if( !IsContiguous_v<MT2> ) {
+      (*U) = Utmp;
+   }
+
+   if( !IsContiguous_v<VT> ) {
+      (*s) = stmp;
+   }
+
+   if( !IsContiguous_v<MT3> ) {
+      (*V) = Vtmp;
+   }
+
+   return num;
 }
 //*************************************************************************************************
 

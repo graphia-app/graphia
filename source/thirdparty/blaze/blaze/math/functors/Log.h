@@ -3,7 +3,7 @@
 //  \file blaze/math/functors/Log.h
 //  \brief Header file for the Log functor
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,10 +40,18 @@
 // Includes
 //*************************************************************************************************
 
+#include <utility>
 #include <blaze/math/constraints/SIMDPack.h>
 #include <blaze/math/shims/Log.h>
 #include <blaze/math/simd/Log.h>
 #include <blaze/math/typetraits/HasSIMDLog.h>
+#include <blaze/math/typetraits/IsHermitian.h>
+#include <blaze/math/typetraits/IsSymmetric.h>
+#include <blaze/math/typetraits/IsUniform.h>
+#include <blaze/math/typetraits/YieldsHermitian.h>
+#include <blaze/math/typetraits/YieldsSymmetric.h>
+#include <blaze/math/typetraits/YieldsUniform.h>
+#include <blaze/system/HostDevice.h>
 #include <blaze/system/Inline.h>
 
 
@@ -62,22 +70,15 @@ namespace blaze {
 struct Log
 {
    //**********************************************************************************************
-   /*!\brief Default constructor of the Log functor.
-   */
-   explicit inline Log()
-   {}
-   //**********************************************************************************************
-
-   //**********************************************************************************************
    /*!\brief Returns the result of the log() function for the given object/value.
    //
    // \param a The given object/value.
    // \return The result of the log() function for the given object/value.
    */
    template< typename T >
-   BLAZE_ALWAYS_INLINE decltype(auto) operator()( const T& a ) const
+   BLAZE_ALWAYS_INLINE BLAZE_DEVICE_CALLABLE decltype(auto) operator()( T&& a ) const
    {
-      return log( a );
+      return log( std::forward<T>( a ) );
    }
    //**********************************************************************************************
 
@@ -87,7 +88,15 @@ struct Log
    // \return \a true in case SIMD is enabled for the data type \a T, \a false if not.
    */
    template< typename T >
-   static constexpr bool simdEnabled() { return HasSIMDLog<T>::value; }
+   static constexpr bool simdEnabled() { return HasSIMDLog_v<T>; }
+   //**********************************************************************************************
+
+   //**********************************************************************************************
+   /*!\brief Returns whether the operation supports padding, i.e. whether it can deal with zeros.
+   //
+   // \return \a true in case padding is supported, \a false if not.
+   */
+   static constexpr bool paddingEnabled() { return false; }
    //**********************************************************************************************
 
    //**********************************************************************************************
@@ -104,6 +113,60 @@ struct Log
    }
    //**********************************************************************************************
 };
+//*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  YIELDSUNIFORM SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename T >
+struct YieldsUniform<Log,T>
+   : public IsUniform<T>
+{};
+/*! \endcond */
+//*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  YIELDSSYMMETRIC SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename MT >
+struct YieldsSymmetric<Log,MT>
+   : public IsSymmetric<MT>
+{};
+/*! \endcond */
+//*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  YIELDSHERMITIAN SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename MT >
+struct YieldsHermitian<Log,MT>
+   : public IsHermitian<MT>
+{};
+/*! \endcond */
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/Rank.h
 //  \brief Header file for the Rank type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -69,7 +69,8 @@ namespace blaze {
    \endcode
 */
 template< typename T >
-struct Rank : public IntegralConstant<size_t,0UL>
+struct Rank
+   : public IntegralConstant<size_t,0UL>
 {};
 //*************************************************************************************************
 
@@ -78,7 +79,8 @@ struct Rank : public IntegralConstant<size_t,0UL>
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the Rank type trait for empty arrays.
 template< typename T >
-struct Rank<T[]> : public IntegralConstant<size_t,1UL+Rank<T>::value>
+struct Rank<T[]>
+   : public IntegralConstant<size_t,1UL+Rank<T>::value>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -88,9 +90,28 @@ struct Rank<T[]> : public IntegralConstant<size_t,1UL+Rank<T>::value>
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the Rank type trait for non-empty arrays.
 template< typename T, unsigned int N >
-struct Rank<T[N]> : public IntegralConstant<size_t,1UL+Rank<T>::value>
+struct Rank<T[N]>
+   : public IntegralConstant<size_t,1UL+Rank<T>::value>
 {};
 /*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the Rank type trait.
+// \ingroup type_traits
+//
+// The Rank_v variable template provides a convenient shortcut to access the nested \a value of
+// the Rank class template. For instance, given the type \a T the following two statements are
+// identical:
+
+   \code
+   constexpr size_t value1 = blaze::Rank<T>::value;
+   constexpr size_t value2 = blaze::Rank_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr size_t Rank_v = Rank<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

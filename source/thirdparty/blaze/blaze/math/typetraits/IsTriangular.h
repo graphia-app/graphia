@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/IsTriangular.h
 //  \brief Header file for the IsTriangular type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -43,7 +43,6 @@
 #include <blaze/math/typetraits/IsLower.h>
 #include <blaze/math/typetraits/IsUpper.h>
 #include <blaze/util/IntegralConstant.h>
-#include <blaze/util/mpl/Or.h>
 
 
 namespace blaze {
@@ -67,13 +66,13 @@ namespace blaze {
    \code
    using blaze::rowMajor;
 
-   typedef blaze::StaticMatrix<double,3UL,3UL,rowMajor>  StaticMatrixType;
-   typedef blaze::DynamicMatrix<float,rowMajor>          DynamicMatrixType;
-   typedef blaze::CompressedMatrix<int,rowMajor>         CompressedMatrixType;
+   using StaticMatrixType     = blaze::StaticMatrix<double,3UL,3UL,rowMajor>;
+   using DynamicMatrixType    = blaze::DynamicMatrix<float,rowMajor>;
+   using CompressedMatrixType = blaze::CompressedMatrix<int,rowMajor>;
 
-   typedef blaze::LowerMatrix<StaticMatrixType>      LowerStaticType;
-   typedef blaze::UpperMatrix<DynamicMatrixType>     UpperDynamicType;
-   typedef blaze::LowerMatrix<CompressedMatrixType>  LowerCompressedType;
+   using LowerStaticType     = blaze::LowerMatrix<StaticMatrixType>;
+   using UpperDynamicType    = blaze::UpperMatrix<DynamicMatrixType>;
+   using LowerCompressedType = blaze::LowerMatrix<CompressedMatrixType>;
 
    blaze::IsLower< LowerStaticType >::value         // Evaluates to 1
    blaze::IsLower< const UpperDynamicType >::Type   // Results in TrueType
@@ -84,8 +83,27 @@ namespace blaze {
    \endcode
 */
 template< typename T >
-struct IsTriangular : public BoolConstant< Or< IsLower<T>, IsUpper<T> >::value >
+struct IsTriangular
+   : public BoolConstant< IsLower_v<T> || IsUpper_v<T> >
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsTriangular type trait.
+// \ingroup math_type_traits
+//
+// The IsTriangular_v variable template provides a convenient shortcut to access the nested
+// \a value of the IsTriangular class template. For instance, given the type \a T the following
+// two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsTriangular<T>::value;
+   constexpr bool value2 = blaze::IsTriangular_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsTriangular_v = IsTriangular<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

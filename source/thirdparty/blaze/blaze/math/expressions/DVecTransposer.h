@@ -3,7 +3,7 @@
 //  \file blaze/math/expressions/DVecTransposer.h
 //  \brief Header file for the dense vector transposer
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -47,15 +47,17 @@
 #include <blaze/math/Exception.h>
 #include <blaze/math/expressions/DenseVector.h>
 #include <blaze/math/simd/SIMDTrait.h>
-#include <blaze/math/traits/SubvectorTrait.h>
+#include <blaze/math/typetraits/HasConstDataAccess.h>
+#include <blaze/math/typetraits/HasMutableDataAccess.h>
 #include <blaze/math/typetraits/IsAligned.h>
+#include <blaze/math/typetraits/IsContiguous.h>
 #include <blaze/math/typetraits/IsPadded.h>
+#include <blaze/math/typetraits/MaxSize.h>
+#include <blaze/math/typetraits/Size.h>
 #include <blaze/system/Inline.h>
+#include <blaze/system/MacroDisable.h>
 #include <blaze/util/Assert.h>
-#include <blaze/util/EnableIf.h>
-#include <blaze/util/IntegralConstant.h>
 #include <blaze/util/Types.h>
-#include <blaze/util/typetraits/IsNumeric.h>
 
 
 namespace blaze {
@@ -74,23 +76,25 @@ namespace blaze {
 */
 template< typename VT  // Type of the dense vector
         , bool TF >    // Transpose flag
-class DVecTransposer : public DenseVector< DVecTransposer<VT,TF>, TF >
+class DVecTransposer
+   : public DenseVector< DVecTransposer<VT,TF>, TF >
 {
  public:
    //**Type definitions****************************************************************************
-   typedef DVecTransposer<VT,TF>    This;            //!< Type of this DVecTransposer instance.
-   typedef TransposeType_<VT>       ResultType;      //!< Result type for expression template evaluations.
-   typedef ResultType_<VT>          TransposeType;   //!< Transpose type for expression template evaluations.
-   typedef ElementType_<VT>         ElementType;     //!< Type of the vector elements.
-   typedef SIMDTrait_<ElementType>  SIMDType;        //!< SIMD type of the vector elements.
-   typedef ReturnType_<VT>          ReturnType;      //!< Return type for expression template evaluations.
-   typedef const This&              CompositeType;   //!< Data type for composite expression templates.
-   typedef Reference_<VT>           Reference;       //!< Reference to a non-constant vector value.
-   typedef ConstReference_<VT>      ConstReference;  //!< Reference to a constant vector value.
-   typedef Pointer_<VT>             Pointer;         //!< Pointer to a non-constant vector value.
-   typedef ConstPointer_<VT>        ConstPointer;    //!< Pointer to a constant vector value.
-   typedef Iterator_<VT>            Iterator;        //!< Iterator over non-constant elements.
-   typedef ConstIterator_<VT>       ConstIterator;   //!< Iterator over constant elements.
+   using This           = DVecTransposer<VT,TF>;     //!< Type of this DVecTransposer instance.
+   using BaseType       = DenseVector<This,TF>;      //!< Base type of this DVecTransposer instance.
+   using ResultType     = TransposeType_t<VT>;       //!< Result type for expression template evaluations.
+   using TransposeType  = ResultType_t<VT>;          //!< Transpose type for expression template evaluations.
+   using ElementType    = ElementType_t<VT>;         //!< Type of the vector elements.
+   using SIMDType       = SIMDTrait_t<ElementType>;  //!< SIMD type of the vector elements.
+   using ReturnType     = ReturnType_t<VT>;          //!< Return type for expression template evaluations.
+   using CompositeType  = const This&;               //!< Data type for composite expression templates.
+   using Reference      = Reference_t<VT>;           //!< Reference to a non-constant vector value.
+   using ConstReference = ConstReference_t<VT>;      //!< Reference to a constant vector value.
+   using Pointer        = Pointer_t<VT>;             //!< Pointer to a non-constant vector value.
+   using ConstPointer   = ConstPointer_t<VT>;        //!< Pointer to a constant vector value.
+   using Iterator       = Iterator_t<VT>;            //!< Iterator over non-constant elements.
+   using ConstIterator  = ConstIterator_t<VT>;       //!< Iterator over constant elements.
    //**********************************************************************************************
 
    //**Compilation flags***************************************************************************
@@ -98,13 +102,13 @@ class DVecTransposer : public DenseVector< DVecTransposer<VT,TF>, TF >
    /*! The \a simdEnabled compilation flag indicates whether expressions the vector is involved
        in can be optimized via SIMD operations. In case the dense vector operand is vectorizable,
        the \a simdEnabled compilation flag is set to \a true, otherwise it is set to \a false. */
-   enum : bool { simdEnabled = VT::simdEnabled };
+   static constexpr bool simdEnabled = VT::simdEnabled;
 
    //! Compilation flag for SMP assignments.
    /*! The \a smpAssignable compilation flag indicates whether the vector can be used in SMP
        (shared memory parallel) assignments (both on the left-hand and right-hand side of the
        assignment). */
-   enum : bool { smpAssignable = VT::smpAssignable };
+   static constexpr bool smpAssignable = VT::smpAssignable;
    //**********************************************************************************************
 
    //**Constructor*********************************************************************************
@@ -137,7 +141,7 @@ class DVecTransposer : public DenseVector< DVecTransposer<VT,TF>, TF >
    */
    inline ConstReference operator[]( size_t index ) const {
       BLAZE_USER_ASSERT( index < dv_.size(), "Invalid vector access index" );
-      return dv_[index];
+      return const_cast<const VT&>( dv_ )[index];
    }
    //**********************************************************************************************
 
@@ -251,40 +255,6 @@ class DVecTransposer : public DenseVector< DVecTransposer<VT,TF>, TF >
    }
    //**********************************************************************************************
 
-   //**Multiplication assignment operator**********************************************************
-   /*!\brief Multiplication assignment operator for the multiplication between a vector and
-   //        a scalar value (\f$ \vec{a}*=s \f$).
-   //
-   // \param rhs The right-hand side scalar value for the multiplication.
-   // \return Reference to this DVecTransposer.
-   */
-   template< typename Other >  // Data type of the right-hand side scalar
-   inline EnableIf_< IsNumeric<Other>, DVecTransposer >& operator*=( Other rhs )
-   {
-      (~dv_) *= rhs;
-      return *this;
-   }
-   //**********************************************************************************************
-
-   //**Division assignment operator****************************************************************
-   /*!\brief Division assignment operator for the division of a vector by a scalar value
-   //        (\f$ \vec{a}/=s \f$).
-   //
-   // \param rhs The right-hand side scalar value for the division.
-   // \return Reference to this DVecTransposer.
-   //
-   // \note A division by zero is only checked by an user assert.
-   */
-   template< typename Other >  // Data type of the right-hand side scalar
-   inline EnableIf_< IsNumeric<Other>, DVecTransposer >& operator/=( Other rhs )
-   {
-      BLAZE_USER_ASSERT( rhs != Other(0), "Division by zero detected" );
-
-      (~dv_) /= rhs;
-      return *this;
-   }
-   //**********************************************************************************************
-
    //**Size function*******************************************************************************
    /*!\brief Returns the current size/dimension of the vector.
    //
@@ -302,6 +272,18 @@ class DVecTransposer : public DenseVector< DVecTransposer<VT,TF>, TF >
    */
    inline void reset() {
       return dv_.reset();
+   }
+   //**********************************************************************************************
+
+   //**IsIntact function***************************************************************************
+   /*!\brief Returns whether the invariants of the vector are intact.
+   //
+   // \return \a true in case the vector's invariants are intact, \a false otherwise.
+   */
+   inline bool isIntact() const noexcept
+   {
+      using blaze::isIntact;
+      return isIntact( dv_ );
    }
    //**********************************************************************************************
 
@@ -469,10 +451,10 @@ class DVecTransposer : public DenseVector< DVecTransposer<VT,TF>, TF >
    }
    //**********************************************************************************************
 
-   //**Transpose assignment of dense vectors*******************************************************
-   /*!\brief Implementation of the transpose assignment of a dense vector.
+   //**Transpose assignment of vectors*************************************************************
+   /*!\brief Implementation of the transpose assignment of a vector.
    //
-   // \param rhs The right-hand side dense vector to be assigned.
+   // \param rhs The right-hand side vector to be assigned.
    // \return void
    //
    // This function must \b NOT be called explicitly! It is used internally for the performance
@@ -480,31 +462,19 @@ class DVecTransposer : public DenseVector< DVecTransposer<VT,TF>, TF >
    // in erroneous results and/or in compilation errors. Instead of using this function use the
    // assignment operator.
    */
-   template< typename VT2 >  // Type of the right-hand side dense vector
-   inline void assign( const DenseVector<VT2,TF>& rhs )
+   template< typename VT2 >  // Type of the right-hand side vector
+   inline void assign( const Vector<VT2,TF>& rhs )
    {
       BLAZE_CONSTRAINT_MUST_BE_VECTOR_WITH_TRANSPOSE_FLAG( VT2, TF );
 
-      BLAZE_INTERNAL_ASSERT( dv_.size() == (~rhs).size(), "Invalid vector sizes" );
-
-      const size_t n( size() );
-
-      const size_t ipos( n & size_t(-2) );
-      BLAZE_INTERNAL_ASSERT( ( n - ( n % 2UL ) ) == ipos, "Invalid end calculation" );
-
-      for( size_t i=0UL; i<ipos; i+=2UL ) {
-         dv_[i    ] = (~rhs)[i    ];
-         dv_[i+1UL] = (~rhs)[i+1UL];
-      }
-      if( ipos < n )
-         dv_[ipos] = (~rhs)[ipos];
+      dv_.assign( trans( *rhs ) );
    }
    //**********************************************************************************************
 
-   //**Transpose assignment of sparse vectors******************************************************
-   /*!\brief Implementation of the transpose assignment of a sparse vector.
+   //**Transpose addition assignment of vectors****************************************************
+   /*!\brief Implementation of the transpose addition assignment of a vector.
    //
-   // \param rhs The right-hand side sparse vector to be assigned.
+   // \param rhs The right-hand side vector to be added.
    // \return void
    //
    // This function must \b NOT be called explicitly! It is used internally for the performance
@@ -512,24 +482,19 @@ class DVecTransposer : public DenseVector< DVecTransposer<VT,TF>, TF >
    // in erroneous results and/or in compilation errors. Instead of using this function use the
    // assignment operator.
    */
-   template< typename VT2 >  // Type of the right-hand side sparse vector
-   inline void assign( const SparseVector<VT2,TF>& rhs )
+   template< typename VT2 >  // Type of the right-hand side vector
+   inline void addAssign( const Vector<VT2,TF>& rhs )
    {
       BLAZE_CONSTRAINT_MUST_BE_VECTOR_WITH_TRANSPOSE_FLAG( VT2, TF );
 
-      BLAZE_INTERNAL_ASSERT( dv_.size() == (~rhs).size(), "Invalid vector sizes" );
-
-      typedef ConstIterator_<VT2>  RhsConstIterator;
-
-      for( RhsConstIterator element=(~rhs).begin(); element!=(~rhs).end(); ++element )
-         dv_[element->index()] = element->value();
+      dv_.addAssign( trans( *rhs ) );
    }
    //**********************************************************************************************
 
-   //**Transpose addition assignment of dense vectors**********************************************
-   /*!\brief Implementation of the transpose addition assignment of a dense vector.
+   //**Transpose subtraction assignment of vectors*************************************************
+   /*!\brief Implementation of the transpose subtraction assignment of a vector.
    //
-   // \param rhs The right-hand side dense vector to be added.
+   // \param rhs The right-hand side vector to be subtracted.
    // \return void
    //
    // This function must \b NOT be called explicitly! It is used internally for the performance
@@ -537,31 +502,19 @@ class DVecTransposer : public DenseVector< DVecTransposer<VT,TF>, TF >
    // in erroneous results and/or in compilation errors. Instead of using this function use the
    // assignment operator.
    */
-   template< typename VT2 >  // Type of the right-hand side dense vector
-   inline void addAssign( const DenseVector<VT2,TF>& rhs )
+   template< typename VT2 >  // Type of the right-hand side vector
+   inline void subAssign( const Vector<VT2,TF>& rhs )
    {
       BLAZE_CONSTRAINT_MUST_BE_VECTOR_WITH_TRANSPOSE_FLAG( VT2, TF );
 
-      BLAZE_INTERNAL_ASSERT( dv_.size() == (~rhs).size(), "Invalid vector sizes" );
-
-      const size_t n( size() );
-
-      const size_t ipos( n & size_t(-2) );
-      BLAZE_INTERNAL_ASSERT( ( n - ( n % 2UL ) ) == ipos, "Invalid end calculation" );
-
-      for( size_t i=0UL; i<ipos; i+=2UL ) {
-         dv_[i    ] += (~rhs)[i    ];
-         dv_[i+1UL] += (~rhs)[i+1UL];
-      }
-      if( ipos < n )
-         dv_[ipos] += (~rhs)[ipos];
+      dv_.subAssign( trans( *rhs ) );
    }
    //**********************************************************************************************
 
-   //**Transpose addition assignment of sparse vectors*********************************************
-   /*!\brief Implementation of the transpose addition assignment of a sparse vector.
+   //**Transpose multiplication assignment of vectors**********************************************
+   /*!\brief Implementation of the transpose multiplication assignment of a vector.
    //
-   // \param rhs The right-hand side sparse vector to be added.
+   // \param rhs The right-hand side vector to be multiplied.
    // \return void
    //
    // This function must \b NOT be called explicitly! It is used internally for the performance
@@ -569,134 +522,12 @@ class DVecTransposer : public DenseVector< DVecTransposer<VT,TF>, TF >
    // in erroneous results and/or in compilation errors. Instead of using this function use the
    // assignment operator.
    */
-   template< typename VT2 >  // Type of the right-hand side sparse vector
-   inline void addAssign( const SparseVector<VT2,TF>& rhs )
+   template< typename VT2 >  // Type of the right-hand side vector
+   inline void multAssign( const Vector<VT2,TF>& rhs )
    {
       BLAZE_CONSTRAINT_MUST_BE_VECTOR_WITH_TRANSPOSE_FLAG( VT2, TF );
 
-      BLAZE_INTERNAL_ASSERT( dv_.size() == (~rhs).size(), "Invalid vector sizes" );
-
-      typedef ConstIterator_<VT2>  RhsConstIterator;
-
-      for( RhsConstIterator element=(~rhs).begin(); element!=(~rhs).end(); ++element )
-         dv_[element->index()] += element->value();
-   }
-   //**********************************************************************************************
-
-   //**Transpose subtraction assignment of dense vectors*******************************************
-   /*!\brief Implementation of the transpose subtraction assignment of a dense vector.
-   //
-   // \param rhs The right-hand side dense vector to be subtracted.
-   // \return void
-   //
-   // This function must \b NOT be called explicitly! It is used internally for the performance
-   // optimized evaluation of expression templates. Calling this function explicitly might result
-   // in erroneous results and/or in compilation errors. Instead of using this function use the
-   // assignment operator.
-   */
-   template< typename VT2 >  // Type of the right-hand side dense vector
-   inline void subAssign( const DenseVector<VT2,TF>& rhs )
-   {
-      BLAZE_CONSTRAINT_MUST_BE_VECTOR_WITH_TRANSPOSE_FLAG( VT2, TF );
-
-      BLAZE_INTERNAL_ASSERT( dv_.size() == (~rhs).size(), "Invalid vector sizes" );
-
-      const size_t n( size() );
-
-      const size_t ipos( n & size_t(-2) );
-      BLAZE_INTERNAL_ASSERT( ( n - ( n % 2UL ) ) == ipos, "Invalid end calculation" );
-
-      for( size_t i=0UL; i<ipos; i+=2UL ) {
-         dv_[i    ] -= (~rhs)[i    ];
-         dv_[i+1UL] -= (~rhs)[i+1UL];
-      }
-      if( ipos < n )
-         dv_[ipos] -= (~rhs)[ipos];
-   }
-   //**********************************************************************************************
-
-   //**Transpose subtraction assignment of sparse vectors******************************************
-   /*!\brief Implementation of the transpose subtraction assignment of a sparse vector.
-   //
-   // \param rhs The right-hand side sparse vector to be subtracted.
-   // \return void
-   //
-   // This function must \b NOT be called explicitly! It is used internally for the performance
-   // optimized evaluation of expression templates. Calling this function explicitly might result
-   // in erroneous results and/or in compilation errors. Instead of using this function use the
-   // assignment operator.
-   */
-   template< typename VT2 >  // Type of the right-hand side sparse vector
-   inline void subAssign( const SparseVector<VT2,TF>& rhs )
-   {
-      BLAZE_CONSTRAINT_MUST_BE_VECTOR_WITH_TRANSPOSE_FLAG( VT2, TF );
-
-      BLAZE_INTERNAL_ASSERT( dv_.size() == (~rhs).size(), "Invalid vector sizes" );
-
-      typedef ConstIterator_<VT2>  RhsConstIterator;
-
-      for( RhsConstIterator element=(~rhs).begin(); element!=(~rhs).end(); ++element )
-         dv_[element->index()] -= element->value();
-   }
-   //**********************************************************************************************
-
-   //**Transpose multiplication assignment of dense vectors****************************************
-   /*!\brief Implementation of the transpose multiplication assignment of a dense vector.
-   //
-   // \param rhs The right-hand side dense vector to be multiplied.
-   // \return void
-   //
-   // This function must \b NOT be called explicitly! It is used internally for the performance
-   // optimized evaluation of expression templates. Calling this function explicitly might result
-   // in erroneous results and/or in compilation errors. Instead of using this function use the
-   // assignment operator.
-   */
-   template< typename VT2 >  // Type of the right-hand side dense vector
-   inline void multAssign( const DenseVector<VT2,TF>& rhs )
-   {
-      BLAZE_CONSTRAINT_MUST_BE_VECTOR_WITH_TRANSPOSE_FLAG( VT2, TF );
-
-      BLAZE_INTERNAL_ASSERT( dv_.size() == (~rhs).size(), "Invalid vector sizes" );
-
-      const size_t n( size() );
-
-      const size_t ipos( n & size_t(-2) );
-      BLAZE_INTERNAL_ASSERT( ( n - ( n % 2UL ) ) == ipos, "Invalid end calculation" );
-
-      for( size_t i=0UL; i<ipos; i+=2UL ) {
-         dv_[i    ] *= (~rhs)[i    ];
-         dv_[i+1UL] *= (~rhs)[i+1UL];
-      }
-      if( ipos < n )
-         dv_[ipos] *= (~rhs)[ipos];
-   }
-   //**********************************************************************************************
-
-   //**Transpose multiplication assignment of sparse vectors***************************************
-   /*!\brief Implementation of the transpose multiplication assignment of a sparse vector.
-   //
-   // \param rhs The right-hand side sparse vector to be multiplied.
-   // \return void
-   //
-   // This function must \b NOT be called explicitly! It is used internally for the performance
-   // optimized evaluation of expression templates. Calling this function explicitly might result
-   // in erroneous results and/or in compilation errors. Instead of using this function use the
-   // assignment operator.
-   */
-   template< typename VT2 >  // Type of the right-hand side dense vector
-   inline void multAssign( const SparseVector<VT2,TF>& rhs )
-   {
-      BLAZE_CONSTRAINT_MUST_BE_VECTOR_WITH_TRANSPOSE_FLAG( VT2, TF );
-
-      BLAZE_INTERNAL_ASSERT( dv_.size() == (~rhs).size(), "Invalid vector sizes" );
-
-      typedef ConstIterator_<VT2>  RhsConstIterator;
-
-      const VT tmp( dv_ );
-      dv_.reset();
-
-      for( RhsConstIterator element=(~rhs).begin(); element!=(~rhs).end(); ++element )
-         dv_[element->index()] = tmp[element->index()] * element->value();
+      dv_.multAssign( trans( *rhs ) );
    }
    //**********************************************************************************************
 
@@ -716,19 +547,7 @@ class DVecTransposer : public DenseVector< DVecTransposer<VT,TF>, TF >
    {
       BLAZE_CONSTRAINT_MUST_BE_VECTOR_WITH_TRANSPOSE_FLAG( VT2, TF );
 
-      BLAZE_INTERNAL_ASSERT( dv_.size() == (~rhs).size(), "Invalid vector sizes" );
-
-      const size_t n( size() );
-
-      const size_t ipos( n & size_t(-2) );
-      BLAZE_INTERNAL_ASSERT( ( n - ( n % 2UL ) ) == ipos, "Invalid end calculation" );
-
-      for( size_t i=0UL; i<ipos; i+=2UL ) {
-         dv_[i    ] /= (~rhs)[i    ];
-         dv_[i+1UL] /= (~rhs)[i+1UL];
-      }
-      if( ipos < n )
-         dv_[ipos] /= (~rhs)[ipos];
+      dv_.divAssign( trans( *rhs ) );
    }
    //**********************************************************************************************
 
@@ -758,18 +577,90 @@ class DVecTransposer : public DenseVector< DVecTransposer<VT,TF>, TF >
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-/*!\brief Resetting the dense vector contained in a DVecTransposer.
+/*!\brief Returns whether the invariants of the given DVecTransposer are intact.
 // \ingroup dense_vector_expression
 //
-// \param v The dense vector to be resetted.
-// \return void
+// \param v The dense vector to be tested.
+// \return \a true in caes the given vector's invariants are intact, \a false otherwise.
 */
 template< typename VT  // Type of the dense vector
         , bool TF >    // Transpose flag
-inline void reset( DVecTransposer<VT,TF>& v )
+inline bool isIntact( const DVecTransposer<VT,TF>& v ) noexcept
 {
-   v.reset();
+   return v.isIntact();
 }
+/*! \endcond */
+//*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  SIZE SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename VT, bool TF >
+struct Size< DVecTransposer<VT,TF>, 0UL >
+   : public Size<VT,0UL>
+{};
+/*! \endcond */
+//*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  MAXSIZE SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename VT, bool TF >
+struct MaxSize< DVecTransposer<VT,TF>, 0UL >
+   : public MaxSize<VT,0UL>
+{};
+/*! \endcond */
+//*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  HASCONSTDATAACCESS SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename VT, bool TF >
+struct HasConstDataAccess< DVecTransposer<VT,TF> >
+   : public HasConstDataAccess<VT>
+{};
+/*! \endcond */
+//*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  HASMUTABLEDATAACCESS SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename VT, bool TF >
+struct HasMutableDataAccess< DVecTransposer<VT,TF> >
+   : public HasMutableDataAccess<VT>
+{};
 /*! \endcond */
 //*************************************************************************************************
 
@@ -786,7 +677,25 @@ inline void reset( DVecTransposer<VT,TF>& v )
 /*! \cond BLAZE_INTERNAL */
 template< typename VT, bool TF >
 struct IsAligned< DVecTransposer<VT,TF> >
-   : public BoolConstant< IsAligned<VT>::value >
+   : public IsAligned<VT>
+{};
+/*! \endcond */
+//*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  ISCONTIGUOUS SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename VT, bool TF >
+struct IsContiguous< DVecTransposer<VT,TF> >
+   : public IsContiguous<VT>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -804,27 +713,8 @@ struct IsAligned< DVecTransposer<VT,TF> >
 /*! \cond BLAZE_INTERNAL */
 template< typename VT, bool TF >
 struct IsPadded< DVecTransposer<VT,TF> >
-   : public BoolConstant< IsPadded<VT>::value >
+   : public IsPadded<VT>
 {};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  SUBVECTORTRAIT SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename VT, bool TF >
-struct SubvectorTrait< DVecTransposer<VT,TF> >
-{
-   using Type = SubvectorTrait_< ResultType_< DVecTransposer<VT,TF> > >;
-};
 /*! \endcond */
 //*************************************************************************************************
 

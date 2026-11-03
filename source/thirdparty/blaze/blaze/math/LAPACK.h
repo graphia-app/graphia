@@ -3,7 +3,7 @@
 //  \file blaze/math/LAPACK.h
 //  \brief Header file for the LAPACK functionality
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -53,6 +53,7 @@
 #include <blaze/math/lapack/getrf.h>
 #include <blaze/math/lapack/getri.h>
 #include <blaze/math/lapack/getrs.h>
+#include <blaze/math/lapack/gges.h>
 #include <blaze/math/lapack/heev.h>
 #include <blaze/math/lapack/heevd.h>
 #include <blaze/math/lapack/heevx.h>
@@ -60,9 +61,13 @@
 #include <blaze/math/lapack/hetrf.h>
 #include <blaze/math/lapack/hetri.h>
 #include <blaze/math/lapack/hetrs.h>
+#include <blaze/math/lapack/org2l.h>
+#include <blaze/math/lapack/org2r.h>
+#include <blaze/math/lapack/orgl2.h>
 #include <blaze/math/lapack/orglq.h>
 #include <blaze/math/lapack/orgql.h>
 #include <blaze/math/lapack/orgqr.h>
+#include <blaze/math/lapack/orgr2.h>
 #include <blaze/math/lapack/orgrq.h>
 #include <blaze/math/lapack/ormlq.h>
 #include <blaze/math/lapack/ormql.h>
@@ -82,9 +87,13 @@
 #include <blaze/math/lapack/trsv.h>
 #include <blaze/math/lapack/trtri.h>
 #include <blaze/math/lapack/trtrs.h>
+#include <blaze/math/lapack/ung2l.h>
+#include <blaze/math/lapack/ung2r.h>
+#include <blaze/math/lapack/ungl2.h>
 #include <blaze/math/lapack/unglq.h>
 #include <blaze/math/lapack/ungql.h>
 #include <blaze/math/lapack/ungqr.h>
+#include <blaze/math/lapack/ungr2.h>
 #include <blaze/math/lapack/ungrq.h>
 #include <blaze/math/lapack/unmlq.h>
 #include <blaze/math/lapack/unmql.h>

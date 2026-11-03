@@ -3,7 +3,7 @@
 //  \file blaze/config/Debugging.h
 //  \brief Configuration of the debugging policy of the Blaze library
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -33,8 +33,6 @@
 //=================================================================================================
 
 
-namespace blaze {
-
 //*************************************************************************************************
 /*!\brief Compilation switch for the (de-)activation of the debug mode.
 // \ingroup config
@@ -48,8 +46,22 @@ namespace blaze {
 // Possible settings for the debug mode switch:
 //  - Deactivated: \b 0 (default)
 //  - Activated  : \b 1
+//
+// \note It is possible to (de-)activate the debug mode via command line or by defining this
+// symbol manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_USE_DEBUG_MODE=1 ...
+   \endcode
+
+   \code
+   #define BLAZE_USE_DEBUG_MODE 1
+   #include <blaze/Blaze.h>
+   \endcode
 */
+#ifndef BLAZE_USE_DEBUG_MODE
 #define BLAZE_USE_DEBUG_MODE 0
+#endif
 //*************************************************************************************************
 
 
@@ -64,8 +76,20 @@ namespace blaze {
 // Possible settings for the function trace switch:
 //  - Deactivated: \b 0 (default)
 //  - Activated  : \b 1
-*/
-#define BLAZE_USE_FUNCTION_TRACES 0
-//*************************************************************************************************
+//
+// \note It is possible to (de-)activate function traces via command line or by defining this
+// symbol manually before including any Blaze header file:
 
-} // namespace blaze
+   \code
+   g++ ... -DBLAZE_USE_FUNCTION_TRACES=1 ...
+   \endcode
+
+   \code
+   #define BLAZE_USE_FUNCTION_TRACES 1
+   #include <blaze/Blaze.h>
+   \endcode
+*/
+#ifndef BLAZE_USE_FUNCTION_TRACES
+#define BLAZE_USE_FUNCTION_TRACES 0
+#endif
+//*************************************************************************************************

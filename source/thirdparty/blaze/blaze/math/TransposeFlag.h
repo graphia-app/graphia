@@ -3,7 +3,7 @@
 //  \file blaze/math/TransposeFlag.h
 //  \brief Header file for the vector transpose flag types
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -55,7 +55,7 @@ namespace blaze {
    blaze::StaticVector<int,3UL,columnVector> v{ 1, 2, 3 };
    \endcode
 */
-const bool columnVector = false;
+constexpr bool columnVector = false;
 //*************************************************************************************************
 
 
@@ -70,7 +70,7 @@ const bool columnVector = false;
    blaze::StaticVector<int,3UL,rowVector> v{ 1, 2, 3 };
    \endcode
 */
-const bool rowVector = true;
+constexpr bool rowVector = true;
 //*************************************************************************************************
 
 } // namespace blaze

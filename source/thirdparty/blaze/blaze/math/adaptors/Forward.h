@@ -3,7 +3,7 @@
 //  \file blaze/math/adaptors/Forward.h
 //  \brief Header file for all adaptor forward declarations
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -36,24 +36,18 @@
 #define _BLAZE_MATH_ADAPTORS_FORWARD_H_
 
 
-namespace blaze {
+//*************************************************************************************************
+// Includes
+//*************************************************************************************************
 
-//=================================================================================================
-//
-//  ::blaze NAMESPACE FORWARD DECLARATIONS
-//
-//=================================================================================================
-
-template< typename, bool, bool > class DiagonalMatrix;
-template< typename, bool, bool > class LowerMatrix;
-template< typename, bool, bool > class HermitianMatrix;
-template< typename, bool, bool > class StrictlyLowerMatrix;
-template< typename, bool, bool > class StrictlyUpperMatrix;
-template< typename, bool, bool, bool > class SymmetricMatrix;
-template< typename, bool, bool > class UniLowerMatrix;
-template< typename, bool, bool > class UniUpperMatrix;
-template< typename, bool, bool > class UpperMatrix;
-
-} // namespace blaze
+#include <blaze/math/adaptors/diagonalmatrix/BaseTemplate.h>
+#include <blaze/math/adaptors/lowermatrix/BaseTemplate.h>
+#include <blaze/math/adaptors/hermitianmatrix/BaseTemplate.h>
+#include <blaze/math/adaptors/strictlylowermatrix/BaseTemplate.h>
+#include <blaze/math/adaptors/strictlyuppermatrix/BaseTemplate.h>
+#include <blaze/math/adaptors/symmetricmatrix/BaseTemplate.h>
+#include <blaze/math/adaptors/unilowermatrix/BaseTemplate.h>
+#include <blaze/math/adaptors/uniuppermatrix/BaseTemplate.h>
+#include <blaze/math/adaptors/uppermatrix/BaseTemplate.h>
 
 #endif

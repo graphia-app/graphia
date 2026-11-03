@@ -3,7 +3,7 @@
 //  \file blaze/math/expressions/SMatSMatAddExpr.h
 //  \brief Header file for the sparse matrix/sparse matrix addition expression
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,12 +40,14 @@
 // Includes
 //*************************************************************************************************
 
+#include <utility>
 #include <blaze/math/Aliases.h>
-#include <blaze/math/constraints/ColumnMajorMatrix.h>
 #include <blaze/math/constraints/MatMatAddExpr.h>
+#include <blaze/math/constraints/RequiresEvaluation.h>
 #include <blaze/math/constraints/RowMajorMatrix.h>
 #include <blaze/math/constraints/SparseMatrix.h>
 #include <blaze/math/constraints/Symmetric.h>
+#include <blaze/math/constraints/Zero.h>
 #include <blaze/math/Exception.h>
 #include <blaze/math/expressions/Computation.h>
 #include <blaze/math/expressions/Forward.h>
@@ -53,36 +55,21 @@
 #include <blaze/math/expressions/SparseMatrix.h>
 #include <blaze/math/shims/IsDefault.h>
 #include <blaze/math/shims/Serial.h>
-#include <blaze/math/traits/AddExprTrait.h>
 #include <blaze/math/traits/AddTrait.h>
-#include <blaze/math/traits/ColumnExprTrait.h>
-#include <blaze/math/traits/RowExprTrait.h>
-#include <blaze/math/traits/SubmatrixExprTrait.h>
-#include <blaze/math/typetraits/Columns.h>
-#include <blaze/math/typetraits/IsComputation.h>
+#include <blaze/math/typetraits/IsColumnMajorMatrix.h>
 #include <blaze/math/typetraits/IsExpression.h>
-#include <blaze/math/typetraits/IsHermitian.h>
-#include <blaze/math/typetraits/IsLower.h>
 #include <blaze/math/typetraits/IsResizable.h>
-#include <blaze/math/typetraits/IsStrictlyLower.h>
-#include <blaze/math/typetraits/IsStrictlyUpper.h>
 #include <blaze/math/typetraits/IsSymmetric.h>
 #include <blaze/math/typetraits/IsTemporary.h>
-#include <blaze/math/typetraits/IsUniLower.h>
-#include <blaze/math/typetraits/IsUniUpper.h>
-#include <blaze/math/typetraits/IsUpper.h>
-#include <blaze/math/typetraits/Rows.h>
+#include <blaze/math/typetraits/IsZero.h>
 #include <blaze/util/Assert.h>
-#include <blaze/util/DisableIf.h>
 #include <blaze/util/EnableIf.h>
 #include <blaze/util/FunctionTrace.h>
 #include <blaze/util/IntegralConstant.h>
-#include <blaze/util/mpl/And.h>
+#include <blaze/util/MaybeUnused.h>
 #include <blaze/util/mpl/If.h>
-#include <blaze/util/mpl/Max.h>
-#include <blaze/util/mpl/Or.h>
 #include <blaze/util/Types.h>
-#include <blaze/util/typetraits/RemoveReference.h>
+#include <blaze/util/typetraits/IsSame.h>
 
 
 namespace blaze {
@@ -102,18 +89,18 @@ namespace blaze {
 */
 template< typename MT1    // Type of the left-hand side sparse matrix
         , typename MT2 >  // Type of the right-hand side sparse matrix
-class SMatSMatAddExpr : public SparseMatrix< SMatSMatAddExpr<MT1,MT2>, false >
-                      , private MatMatAddExpr
-                      , private Computation
+class SMatSMatAddExpr
+   : public MatMatAddExpr< SparseMatrix< SMatSMatAddExpr<MT1,MT2>, false > >
+   , private Computation
 {
  private:
    //**Type definitions****************************************************************************
-   typedef ResultType_<MT1>     RT1;  //!< Result type of the left-hand side sparse matrix expression.
-   typedef ResultType_<MT2>     RT2;  //!< Result type of the right-hand side sparse matrix expression.
-   typedef CompositeType_<MT1>  CT1;  //!< Composite type of the left-hand side sparse matrix expression.
-   typedef CompositeType_<MT2>  CT2;  //!< Composite type of the right-hand side sparse matrix expression.
-   typedef ReturnType_<MT1>     RN1;  //!< Return type of the left-hand side sparse matrix expression.
-   typedef ReturnType_<MT2>     RN2;  //!< Return type of the right-hand side sparse matrix expression.
+   using RT1 = ResultType_t<MT1>;     //!< Result type of the left-hand side sparse matrix expression.
+   using RT2 = ResultType_t<MT2>;     //!< Result type of the right-hand side sparse matrix expression.
+   using CT1 = CompositeType_t<MT1>;  //!< Composite type of the left-hand side sparse matrix expression.
+   using CT2 = CompositeType_t<MT2>;  //!< Composite type of the right-hand side sparse matrix expression.
+   using RN1 = ReturnType_t<MT1>;     //!< Return type of the left-hand side sparse matrix expression.
+   using RN2 = ReturnType_t<MT2>;     //!< Return type of the right-hand side sparse matrix expression.
    //**********************************************************************************************
 
    //**Return type evaluation**********************************************************************
@@ -123,65 +110,66 @@ class SMatSMatAddExpr : public SparseMatrix< SMatSMatAddExpr<MT1,MT2>, false >
        or matrix, \a returnExpr will be set to \a false and the subscript operator will
        return it's result by value. Otherwise \a returnExpr will be set to \a true and
        the subscript operator may return it's result as an expression. */
-   enum : bool { returnExpr = !IsTemporary<RN1>::value && !IsTemporary<RN2>::value };
+   static constexpr bool returnExpr = !IsTemporary_v<RN1> && !IsTemporary_v<RN2>;
 
    //! Expression return type for the subscript operator.
-   typedef AddExprTrait_<RN1,RN2>  ExprReturnType;
+   using ExprReturnType = decltype( std::declval<RN1>() + std::declval<RN2>() );
    //**********************************************************************************************
 
    //**Serial evaluation strategy******************************************************************
    /*! \cond BLAZE_INTERNAL */
-   //! Helper structure for the explicit application of the SFINAE principle.
-   /*! The UseSymmetricKernel struct is a helper struct for the selection of the serial
-       evaluation strategy. In case the target matrix is column-major and both matrix
-       operands are symmetric, \a value is set to 1 and an optimized evaluation strategy
-       is selected. Otherwise \a value is set to 0 and the default strategy is chosen. */
+   //! Helper variable template for the explicit application of the SFINAE principle.
+   /*! This variable template is a helper for the selection of the serial evaluation strategy.
+       In case the target matrix is column-major and both matrix operands are symmetric, the
+       variable is set to 1 and an optimized evaluation strategy is selected. Otherwise the
+       variable is set to 0 and the default strategy is chosen. */
    template< typename T1, typename T2, typename T3 >
-   struct UseSymmetricKernel {
-      BLAZE_CONSTRAINT_MUST_BE_COLUMN_MAJOR_MATRIX_TYPE( T1 );
-      enum : bool { value = IsSymmetric<T2>::value && IsSymmetric<T3>::value };
-   };
+   static constexpr bool UseSymmetricKernel_v =
+      ( IsColumnMajorMatrix_v<T1> && IsSymmetric_v<T2> && IsSymmetric_v<T3> );
    /*! \endcond */
    //**********************************************************************************************
 
    //**Parallel evaluation strategy****************************************************************
    /*! \cond BLAZE_INTERNAL */
-   //! Helper structure for the explicit application of the SFINAE principle.
-   /*! The UseSMPAssign struct is a helper struct for the selection of the parallel evaluation
-       strategy. In case the target matrix is SMP assignable, \a value is set to 1 and the
-       expression specific evaluation strategy is selected. Otherwise \a value is set to 0
-       and the default strategy is chosen. */
+   //! Helper variable template for the explicit application of the SFINAE principle.
+   /*! This variable template is a helper for the selection of the parallel evaluation strategy.
+       In case the target matrix is SMP assignable, the variable is set to 1 and the expression
+       specific evaluation strategy is selected. Otherwise the variable is set to 0 and the
+       default strategy is chosen. */
    template< typename MT >
-   struct UseSMPAssign {
-      enum : bool { value = MT::smpAssignable };
-   };
+   static constexpr bool UseSMPAssign_v = MT::smpAssignable;
    /*! \endcond */
    //**********************************************************************************************
 
  public:
    //**Type definitions****************************************************************************
-   typedef SMatSMatAddExpr<MT1,MT2>    This;           //!< Type of this SMatSMatAddExpr instance.
-   typedef AddTrait_<RT1,RT2>          ResultType;     //!< Result type for expression template evaluations.
-   typedef OppositeType_<ResultType>   OppositeType;   //!< Result type with opposite storage order for expression template evaluations.
-   typedef TransposeType_<ResultType>  TransposeType;  //!< Transpose type for expression template evaluations.
-   typedef ElementType_<ResultType>    ElementType;    //!< Resulting element type.
+   //! Type of this SMatSMatAddExpr instance.
+   using This = SMatSMatAddExpr<MT1,MT2>;
+
+   //! Base type of this SMatSMatAddExpr instance.
+   using BaseType = MatMatAddExpr< SparseMatrix<This,false> >;
+
+   using ResultType    = AddTrait_t<RT1,RT2>;          //!< Result type for expression template evaluations.
+   using OppositeType  = OppositeType_t<ResultType>;   //!< Result type with opposite storage order for expression template evaluations.
+   using TransposeType = TransposeType_t<ResultType>;  //!< Transpose type for expression template evaluations.
+   using ElementType   = ElementType_t<ResultType>;    //!< Resulting element type.
 
    //! Return type for expression template evaluations.
-   typedef const IfTrue_< returnExpr, ExprReturnType, ElementType >  ReturnType;
+   using ReturnType = const If_t< returnExpr, ExprReturnType, ElementType >;
 
    //! Data type for composite expression templates.
-   typedef const ResultType  CompositeType;
+   using CompositeType = const ResultType;
 
    //! Composite type of the left-hand side sparse matrix expression.
-   typedef If_< IsExpression<MT1>, const MT1, const MT1& >  LeftOperand;
+   using LeftOperand = If_t< IsExpression_v<MT1>, const MT1, const MT1& >;
 
    //! Composite type of the right-hand side sparse matrix expression.
-   typedef If_< IsExpression<MT2>, const MT2, const MT2& >  RightOperand;
+   using RightOperand = If_t< IsExpression_v<MT2>, const MT2, const MT2& >;
    //**********************************************************************************************
 
    //**Compilation flags***************************************************************************
    //! Compilation switch for the expression template assignment strategy.
-   enum : bool { smpAssignable = false };
+   static constexpr bool smpAssignable = false;
    //**********************************************************************************************
 
    //**Constructor*********************************************************************************
@@ -190,7 +178,7 @@ class SMatSMatAddExpr : public SparseMatrix< SMatSMatAddExpr<MT1,MT2>, false >
    // \param lhs The left-hand side sparse matrix operand of the addition expression.
    // \param rhs The right-hand side sparse matrix operand of the addition expression.
    */
-   explicit inline SMatSMatAddExpr( const MT1& lhs, const MT2& rhs ) noexcept
+   inline SMatSMatAddExpr( const MT1& lhs, const MT2& rhs ) noexcept
       : lhs_( lhs )  // Left-hand side sparse matrix of the addition expression
       , rhs_( rhs )  // Right-hand side sparse matrix of the addition expression
    {
@@ -341,15 +329,13 @@ class SMatSMatAddExpr : public SparseMatrix< SMatSMatAddExpr<MT1,MT2>, false >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
-      typedef ConstIterator_< RemoveReference_<CT2> >  RightIterator;
+      assign( *lhs, rhs.lhs_ );
 
-      assign( ~lhs, rhs.lhs_ );
-
-      if( !IsResizable< ElementType_<MT> >::value ) {
-         addAssign( ~lhs, rhs.rhs_ );
+      if( !IsResizable_v< ElementType_t<MT> > ) {
+         addAssign( *lhs, rhs.rhs_ );
       }
       else
       {
@@ -357,16 +343,16 @@ class SMatSMatAddExpr : public SparseMatrix< SMatSMatAddExpr<MT1,MT2>, false >
 
          BLAZE_INTERNAL_ASSERT( B.rows()    == rhs.rhs_.rows()   , "Invalid number of rows"    );
          BLAZE_INTERNAL_ASSERT( B.columns() == rhs.rhs_.columns(), "Invalid number of columns" );
-         BLAZE_INTERNAL_ASSERT( B.rows()    == (~lhs).rows()     , "Invalid number of rows"    );
-         BLAZE_INTERNAL_ASSERT( B.columns() == (~lhs).columns()  , "Invalid number of columns" );
+         BLAZE_INTERNAL_ASSERT( B.rows()    == (*lhs).rows()     , "Invalid number of rows"    );
+         BLAZE_INTERNAL_ASSERT( B.columns() == (*lhs).columns()  , "Invalid number of columns" );
 
-         for( size_t i=0UL; i<(~lhs).rows(); ++i ) {
-            const RightIterator end( B.end(i) );
-            for( RightIterator element=B.begin(i); element!=end; ++element ) {
-               if( isDefault( (~lhs)(i,element->index()) ) )
-                  (~lhs)(i,element->index()) = element->value();
+         for( size_t i=0UL; i<(*lhs).rows(); ++i ) {
+            const auto end( B.end(i) );
+            for( auto element=B.begin(i); element!=end; ++element ) {
+               if( isDefault( (*lhs)(i,element->index()) ) )
+                  (*lhs)(i,element->index()) = element->value();
                else
-                  (~lhs)(i,element->index()) += element->value();
+                  (*lhs)(i,element->index()) += element->value();
             }
          }
       }
@@ -391,11 +377,8 @@ class SMatSMatAddExpr : public SparseMatrix< SMatSMatAddExpr<MT1,MT2>, false >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
-
-      typedef ConstIterator_< RemoveReference_<CT1> >  LeftIterator;
-      typedef ConstIterator_< RemoveReference_<CT2> >  RightIterator;
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
       CT1 A( serial( rhs.lhs_ ) );  // Evaluation of the left-hand side sparse matrix operand
       CT2 B( serial( rhs.rhs_ ) );  // Evaluation of the right-hand side sparse matrix operand
@@ -404,49 +387,49 @@ class SMatSMatAddExpr : public SparseMatrix< SMatSMatAddExpr<MT1,MT2>, false >
       BLAZE_INTERNAL_ASSERT( A.columns() == rhs.lhs_.columns(), "Invalid number of columns" );
       BLAZE_INTERNAL_ASSERT( B.rows()    == rhs.rhs_.rows()   , "Invalid number of rows"    );
       BLAZE_INTERNAL_ASSERT( B.columns() == rhs.rhs_.columns(), "Invalid number of columns" );
-      BLAZE_INTERNAL_ASSERT( A.rows()    == (~lhs).rows()     , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( A.columns() == (~lhs).columns()  , "Invalid number of columns" );
+      BLAZE_INTERNAL_ASSERT( A.rows()    == (*lhs).rows()     , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( A.columns() == (*lhs).columns()  , "Invalid number of columns" );
 
       // Final memory allocation (based on the evaluated operands)
-      (~lhs).reserve( A.nonZeros() + B.nonZeros() );
+      (*lhs).reserve( A.nonZeros() + B.nonZeros() );
 
       // Performing the matrix addition
-      for( size_t i=0UL; i<(~lhs).rows(); ++i )
+      for( size_t i=0UL; i<(*lhs).rows(); ++i )
       {
-         const LeftIterator  lend( A.end(i) );
-         const RightIterator rend( B.end(i) );
+         const auto lend( A.end(i) );
+         const auto rend( B.end(i) );
 
-         LeftIterator  l( A.begin(i) );
-         RightIterator r( B.begin(i) );
+         auto l( A.begin(i) );
+         auto r( B.begin(i) );
 
          while( l != lend && r != rend )
          {
             if( l->index() < r->index() ) {
-               (~lhs).append( i, l->index(), l->value() );
+               (*lhs).append( i, l->index(), l->value() );
                ++l;
             }
             else if( l->index() > r->index() ) {
-               (~lhs).append( i, r->index(), r->value() );
+               (*lhs).append( i, r->index(), r->value() );
                ++r;
             }
             else {
-               (~lhs).append( i, l->index(), l->value()+r->value() );
+               (*lhs).append( i, l->index(), l->value() + r->value() );
                ++l;
                ++r;
             }
          }
 
          while( l != lend ) {
-            (~lhs).append( i, l->index(), l->value() );
+            (*lhs).append( i, l->index(), l->value() );
             ++l;
          }
 
          while( r != rend ) {
-            (~lhs).append( i, r->index(), r->value() );
+            (*lhs).append( i, r->index(), r->value() );
             ++r;
          }
 
-         (~lhs).finalize( i );
+         (*lhs).finalize( i );
       }
    }
    /*! \endcond */
@@ -465,18 +448,15 @@ class SMatSMatAddExpr : public SparseMatrix< SMatSMatAddExpr<MT1,MT2>, false >
    // expression to a column-major sparse matrix.
    */
    template< typename MT >  // Type of the target sparse matrix
-   friend inline DisableIf_< UseSymmetricKernel<MT,MT1,MT2> >
-      assign( SparseMatrix<MT,true>& lhs, const SMatSMatAddExpr& rhs )
+   friend inline auto assign( SparseMatrix<MT,true>& lhs, const SMatSMatAddExpr& rhs )
+      -> DisableIf_t< UseSymmetricKernel_v<MT,MT1,MT2> >
    {
       BLAZE_FUNCTION_TRACE;
 
       BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT );
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
-
-      typedef ConstIterator_< RemoveReference_<CT1> >  LeftIterator;
-      typedef ConstIterator_< RemoveReference_<CT2> >  RightIterator;
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
       CT1 A( serial( rhs.lhs_ ) );  // Evaluation of the left-hand side sparse matrix operand
       CT2 B( serial( rhs.rhs_ ) );  // Evaluation of the right-hand side sparse matrix operand
@@ -485,8 +465,8 @@ class SMatSMatAddExpr : public SparseMatrix< SMatSMatAddExpr<MT1,MT2>, false >
       BLAZE_INTERNAL_ASSERT( A.columns() == rhs.lhs_.columns(), "Invalid number of columns" );
       BLAZE_INTERNAL_ASSERT( B.rows()    == rhs.rhs_.rows()   , "Invalid number of rows"    );
       BLAZE_INTERNAL_ASSERT( B.columns() == rhs.rhs_.columns(), "Invalid number of columns" );
-      BLAZE_INTERNAL_ASSERT( A.rows()    == (~lhs).rows()     , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( A.columns() == (~lhs).columns()  , "Invalid number of columns" );
+      BLAZE_INTERNAL_ASSERT( A.rows()    == (*lhs).rows()     , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( A.columns() == (*lhs).columns()  , "Invalid number of columns" );
 
       const size_t m( A.rows()    );
       const size_t n( A.columns() );
@@ -495,11 +475,11 @@ class SMatSMatAddExpr : public SparseMatrix< SMatSMatAddExpr<MT1,MT2>, false >
       std::vector<size_t> nonzeros( n, 0UL );
       for( size_t i=0UL; i<m; ++i )
       {
-         const LeftIterator  lend( A.end(i) );
-         const RightIterator rend( B.end(i) );
+         const auto lend( A.end(i) );
+         const auto rend( B.end(i) );
 
-         LeftIterator  l( A.begin(i) );
-         RightIterator r( B.begin(i) );
+         auto l( A.begin(i) );
+         auto r( B.begin(i) );
 
          while( l != lend && r != rend )
          {
@@ -531,42 +511,42 @@ class SMatSMatAddExpr : public SparseMatrix< SMatSMatAddExpr<MT1,MT2>, false >
 
       // Resizing the left-hand side sparse matrix
       for( size_t j=0UL; j<n; ++j ) {
-         (~lhs).reserve( j, nonzeros[j] );
+         (*lhs).reserve( j, nonzeros[j] );
       }
 
       // Performing the matrix addition
       for( size_t i=0UL; i<m; ++i )
       {
-         const LeftIterator  lend( A.end(i) );
-         const RightIterator rend( B.end(i) );
+         const auto lend( A.end(i) );
+         const auto rend( B.end(i) );
 
-         LeftIterator  l( A.begin(i) );
-         RightIterator r( B.begin(i) );
+         auto l( A.begin(i) );
+         auto r( B.begin(i) );
 
          while( l != lend && r != rend )
          {
             if( l->index() < r->index() ) {
-               (~lhs).append( i, l->index(), l->value() );
+               (*lhs).append( i, l->index(), l->value() );
                ++l;
             }
             else if( l->index() > r->index() ) {
-               (~lhs).append( i, r->index(), r->value() );
+               (*lhs).append( i, r->index(), r->value() );
                ++r;
             }
             else {
-               (~lhs).append( i, l->index(), l->value()+r->value() );
+               (*lhs).append( i, l->index(), l->value() + r->value() );
                ++l;
                ++r;
             }
          }
 
          while( l != lend ) {
-            (~lhs).append( i, l->index(), l->value() );
+            (*lhs).append( i, l->index(), l->value() );
             ++l;
          }
 
          while( r != rend ) {
-            (~lhs).append( i, r->index(), r->value() );
+            (*lhs).append( i, r->index(), r->value() );
             ++r;
          }
       }
@@ -587,17 +567,17 @@ class SMatSMatAddExpr : public SparseMatrix< SMatSMatAddExpr<MT1,MT2>, false >
    // matrix addition expression to a column-major sparse matrix.
    */
    template< typename MT >  // Type of the target sparse matrix
-   friend inline EnableIf_< UseSymmetricKernel<MT,MT1,MT2> >
-      assign( SparseMatrix<MT,true>& lhs, const SMatSMatAddExpr& rhs )
+   friend inline auto assign( SparseMatrix<MT,true>& lhs, const SMatSMatAddExpr& rhs )
+      -> EnableIf_t< UseSymmetricKernel_v<MT,MT1,MT2> >
    {
       BLAZE_FUNCTION_TRACE;
 
       BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT );
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
-      assign( ~lhs, trans( rhs.lhs_ ) + trans( rhs.rhs_ ) );
+      assign( *lhs, trans( rhs.lhs_ ) + trans( rhs.rhs_ ) );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -620,11 +600,11 @@ class SMatSMatAddExpr : public SparseMatrix< SMatSMatAddExpr<MT1,MT2>, false >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
-      addAssign( ~lhs, rhs.lhs_ );
-      addAssign( ~lhs, rhs.rhs_ );
+      addAssign( *lhs, rhs.lhs_ );
+      addAssign( *lhs, rhs.rhs_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -651,17 +631,52 @@ class SMatSMatAddExpr : public SparseMatrix< SMatSMatAddExpr<MT1,MT2>, false >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
-      subAssign( ~lhs, rhs.lhs_ );
-      subAssign( ~lhs, rhs.rhs_ );
+      subAssign( *lhs, rhs.lhs_ );
+      subAssign( *lhs, rhs.rhs_ );
    }
    /*! \endcond */
    //**********************************************************************************************
 
    //**Subtraction assignment to sparse matrices***************************************************
    // No special implementation for the subtraction assignment to sparse matrices.
+   //**********************************************************************************************
+
+   //**Schur product assignment to dense matrices**************************************************
+   /*! \cond BLAZE_INTERNAL */
+   /*!\brief Schur product assignment of a sparse matrix-sparse matrix addition to a dense matrix.
+   // \ingroup sparse_matrix
+   //
+   // \param lhs The target left-hand side dense matrix.
+   // \param rhs The right-hand side addition expression for the Schur product.
+   // \return void
+   //
+   // This function implements the performance optimized Schur product assignment of a sparse
+   // matrix-sparse matrix addition expression to a dense matrix.
+   */
+   template< typename MT  // Type of the target dense matrix
+           , bool SO >    // Storage order of the target dense matrix
+   friend inline void schurAssign( DenseMatrix<MT,SO>& lhs, const SMatSMatAddExpr& rhs )
+   {
+      BLAZE_FUNCTION_TRACE;
+
+      BLAZE_CONSTRAINT_MUST_BE_SPARSE_MATRIX_TYPE( ResultType );
+      BLAZE_CONSTRAINT_MUST_BE_ROW_MAJOR_MATRIX_TYPE( ResultType );
+      BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType );
+
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
+
+      const ResultType tmp( serial( rhs ) );
+      schurAssign( *lhs, tmp );
+   }
+   /*! \endcond */
+   //**********************************************************************************************
+
+   //**Schur product assignment to sparse matrices******************************************************
+   // No special implementation for the Schur product assignment to sparse matrices.
    //**********************************************************************************************
 
    //**Multiplication assignment to dense matrices*************************************************
@@ -696,16 +711,16 @@ class SMatSMatAddExpr : public SparseMatrix< SMatSMatAddExpr<MT1,MT2>, false >
    */
    template< typename MT  // Type of the target dense matrix
            , bool SO >    // Storage order of the target dense matrix
-   friend inline EnableIf_< UseSMPAssign<MT> >
-      smpAddAssign( DenseMatrix<MT,SO>& lhs, const SMatSMatAddExpr& rhs )
+   friend inline auto smpAddAssign( DenseMatrix<MT,SO>& lhs, const SMatSMatAddExpr& rhs )
+      -> EnableIf_t< UseSMPAssign_v<MT> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
-      smpAddAssign( ~lhs, rhs.lhs_ );
-      smpAddAssign( ~lhs, rhs.rhs_ );
+      smpAddAssign( *lhs, rhs.lhs_ );
+      smpAddAssign( *lhs, rhs.rhs_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -730,22 +745,61 @@ class SMatSMatAddExpr : public SparseMatrix< SMatSMatAddExpr<MT1,MT2>, false >
    */
    template< typename MT  // Type of the target dense matrix
            , bool SO >    // Storage order of the target dense matrix
-   friend inline EnableIf_< UseSMPAssign<MT> >
-      smpSubAssign( DenseMatrix<MT,SO>& lhs, const SMatSMatAddExpr& rhs )
+   friend inline auto smpSubAssign( DenseMatrix<MT,SO>& lhs, const SMatSMatAddExpr& rhs )
+      -> EnableIf_t< UseSMPAssign_v<MT> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
-      smpSubAssign( ~lhs, rhs.lhs_ );
-      smpSubAssign( ~lhs, rhs.rhs_ );
+      smpSubAssign( *lhs, rhs.lhs_ );
+      smpSubAssign( *lhs, rhs.rhs_ );
    }
    /*! \endcond */
    //**********************************************************************************************
 
    //**SMP subtraction assignment to sparse matrices***********************************************
    // No special implementation for the SMP subtraction assignment to sparse matrices.
+   //**********************************************************************************************
+
+   //**SMP Schur product assignment to dense matrices**********************************************
+   /*! \cond BLAZE_INTERNAL */
+   /*!\brief SMP Schur product assignment of a sparse matrix-sparse matrix addition to a dense
+   //        matrix.
+   // \ingroup sparse_matrix
+   //
+   // \param lhs The target left-hand side dense matrix.
+   // \param rhs The right-hand side addition expression for the Schur product.
+   // \return void
+   //
+   // This function implements the performance optimized SMP Schur product assignment of a sparse
+   // matrix-sparse matrix addition expression to a dense matrix. Due to the explicit application
+   // of the SFINAE principle, this function can only be selected by the compiler in case the
+   // expression specific parallel evaluation strategy is selected.
+   */
+   template< typename MT  // Type of the target dense matrix
+           , bool SO >    // Storage order of the target dense matrix
+   friend inline auto smpSchurAssign( DenseMatrix<MT,SO>& lhs, const SMatSMatAddExpr& rhs )
+      -> EnableIf_t< UseSMPAssign_v<MT> >
+   {
+      BLAZE_FUNCTION_TRACE;
+
+      BLAZE_CONSTRAINT_MUST_BE_SPARSE_MATRIX_TYPE( ResultType );
+      BLAZE_CONSTRAINT_MUST_BE_ROW_MAJOR_MATRIX_TYPE( ResultType );
+      BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType );
+
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
+
+      const ResultType tmp( rhs );
+      smpSchurAssign( *lhs, tmp );
+   }
+   /*! \endcond */
+   //**********************************************************************************************
+
+   //**SMP Schur product assignment to sparse matrices*********************************************
+   // No special implementation for the SMP Schur product assignment to sparse matrices.
    //**********************************************************************************************
 
    //**SMP multiplication assignment to dense matrices*********************************************
@@ -778,6 +832,141 @@ class SMatSMatAddExpr : public SparseMatrix< SMatSMatAddExpr<MT1,MT2>, false >
 //=================================================================================================
 
 //*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Backend implementation of the addition of two row-major sparse matrices (\f$ A=B+C \f$).
+// \ingroup sparse_matrix
+//
+// \param lhs The left-hand side sparse matrix for the addition.
+// \param rhs The right-hand side sparse matrix for the addition.
+// \return The sum of the two matrices.
+//
+// This function implements a performance optimized treatment of the addition between two
+// row-major sparse matrices.
+*/
+template< typename MT1  // Type of the left-hand side sparse matrix
+        , typename MT2  // Type of the right-hand side sparse matrix
+        , DisableIf_t< ( ( IsZero_v<MT1> || IsZero_v<MT2> ) &&
+                         IsSame_v< ElementType_t<MT1>, ElementType_t<MT2> > ) ||
+                       ( IsZero_v<MT1> && IsZero_v<MT2> ) >* = nullptr >
+inline const SMatSMatAddExpr<MT1,MT2>
+   smatsmatadd( const SparseMatrix<MT1,false>& lhs, const SparseMatrix<MT2,false>& rhs )
+{
+   BLAZE_FUNCTION_TRACE;
+
+   BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == (*rhs).rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( (*lhs).columns() == (*rhs).columns(), "Invalid number of columns" );
+
+   return SMatSMatAddExpr<MT1,MT2>( *lhs, *rhs );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Backend implementation of the addition between a row-major sparse matrix and a row-major
+//        zero matrix (\f$ A=B+C \f$).
+// \ingroup sparse_matrix
+//
+// \param lhs The left-hand side sparse matrix for the addition.
+// \param rhs The right-hand side zero matrix for the addition.
+// \return Reference to the left-hand side sparse matrix.
+//
+// This function implements a performance optimized treatment of the addition between a row-major
+// sparse matrix and a row-major zero matrix. It returns a reference to the left-hand side sparse
+// matrix.
+*/
+template< typename MT1  // Type of the left-hand side sparse matrix
+        , typename MT2  // Type of the right-hand side sparse matrix
+        , EnableIf_t< !IsZero_v<MT1> && IsZero_v<MT2> &&
+                      IsSame_v< ElementType_t<MT1>, ElementType_t<MT2> > >* = nullptr >
+inline const MT1&
+   smatsmatadd( const SparseMatrix<MT1,false>& lhs, const SparseMatrix<MT2,false>& rhs )
+{
+   BLAZE_FUNCTION_TRACE;
+
+   MAYBE_UNUSED( rhs );
+
+   BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == (*rhs).rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( (*lhs).columns() == (*rhs).columns(), "Invalid number of columns" );
+
+   return (*lhs);
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Backend implementation of the addition between a row-major zero matrix and a row-major
+//        sparse matrix (\f$ A=B+C \f$).
+// \ingroup sparse_matrix
+//
+// \param lhs The left-hand side zero matrix for the addition.
+// \param rhs The right-hand side sparse matrix for the addition.
+// \return Reference to the right-hand side sparse matrix.
+//
+// This function implements a performance optimized treatment of the addition between a row-major
+// zero matrix and a row-major sparse matrix. It returns a reference to the right-hand side sparse
+// matrix.
+*/
+template< typename MT1  // Type of the left-hand side sparse matrix
+        , typename MT2  // Type of the right-hand side sparse matrix
+        , EnableIf_t< IsZero_v<MT1> && !IsZero_v<MT2> &&
+                      IsSame_v< ElementType_t<MT1>, ElementType_t<MT2> > >* = nullptr >
+inline const MT2&
+   smatsmatadd( const SparseMatrix<MT1,false>& lhs, const SparseMatrix<MT2,false>& rhs )
+{
+   BLAZE_FUNCTION_TRACE;
+
+   MAYBE_UNUSED( lhs );
+
+   BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == (*rhs).rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( (*lhs).columns() == (*rhs).columns(), "Invalid number of columns" );
+
+   return (*rhs);
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Backend implementation of the addition of two row-major zero matrices (\f$ A=B+C \f$).
+// \ingroup sparse_matrix
+//
+// \param lhs The left-hand side zero matrix for the addition.
+// \param rhs The right-hand side zero matrix for the addition.
+// \return The resulting zero matrix.
+//
+// This function implements a performance optimized treatment of the addition between two
+// row-major zero matrices. It returns a zero matrix.
+*/
+template< typename MT1  // Type of the left-hand side sparse matrix
+        , typename MT2  // Type of the right-hand side sparse matrix
+        , EnableIf_t< IsZero_v<MT1> && IsZero_v<MT2> >* = nullptr >
+inline decltype(auto)
+   smatsmatadd( const SparseMatrix<MT1,false>& lhs, const SparseMatrix<MT2,false>& rhs )
+{
+   BLAZE_FUNCTION_TRACE;
+
+   MAYBE_UNUSED( rhs );
+
+   BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == (*rhs).rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( (*lhs).columns() == (*rhs).columns(), "Invalid number of columns" );
+
+   using ReturnType = const AddTrait_t< ResultType_t<MT1>, ResultType_t<MT2> >;
+
+   BLAZE_CONSTRAINT_MUST_BE_ROW_MAJOR_MATRIX_TYPE( ReturnType );
+   BLAZE_CONSTRAINT_MUST_BE_ZERO_TYPE( ReturnType );
+
+   return ReturnType( (*lhs).rows(), (*lhs).columns() );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
 /*!\brief Addition operator for the addition of two row-major sparse matrices (\f$ A=B+C \f$).
 // \ingroup sparse_matrix
 //
@@ -797,260 +986,25 @@ class SMatSMatAddExpr : public SparseMatrix< SMatSMatAddExpr<MT1,MT2>, false >
    \endcode
 
 // The operator returns an expression representing a sparse matrix of the higher-order element
-// type of the two involved matrix element types \a T1::ElementType and \a T2::ElementType.
-// Both matrix types \a T1 and \a T2 as well as the two element types \a T1::ElementType and
-// \a T2::ElementType have to be supported by the AddTrait class template.\n
+// type of the two involved matrix element types \a MT1::ElementType and \a MT2::ElementType.
+// Both matrix types \a MT1 and \a MT2 as well as the two element types \a MT1::ElementType
+// and \a MT2::ElementType have to be supported by the AddTrait class template.\n
 // In case the current number of rows and columns of the two given matrices don't match, a
 // \a std::invalid_argument is thrown.
 */
-template< typename T1    // Type of the left-hand side sparse matrix
-        , typename T2 >  // Type of the right-hand side sparse matrix
-inline const SMatSMatAddExpr<T1,T2>
-   operator+( const SparseMatrix<T1,false>& lhs, const SparseMatrix<T2,false>& rhs )
+template< typename MT1    // Type of the left-hand side sparse matrix
+        , typename MT2 >  // Type of the right-hand side sparse matrix
+inline decltype(auto)
+   operator+( const SparseMatrix<MT1,false>& lhs, const SparseMatrix<MT2,false>& rhs )
 {
    BLAZE_FUNCTION_TRACE;
 
-   if( (~lhs).rows() != (~rhs).rows() || (~lhs).columns() != (~rhs).columns() ) {
+   if( (*lhs).rows() != (*rhs).rows() || (*lhs).columns() != (*rhs).columns() ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Matrix sizes do not match" );
    }
 
-   return SMatSMatAddExpr<T1,T2>( ~lhs, ~rhs );
+   return smatsmatadd( *lhs, *rhs );
 }
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  ROWS SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT1, typename MT2 >
-struct Rows< SMatSMatAddExpr<MT1,MT2> >
-   : public Max< Rows<MT1>, Rows<MT2> >
-{};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  COLUMNS SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT1, typename MT2 >
-struct Columns< SMatSMatAddExpr<MT1,MT2> >
-   : public Max< Columns<MT1>, Columns<MT2> >
-{};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  ISSYMMETRIC SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT1, typename MT2 >
-struct IsSymmetric< SMatSMatAddExpr<MT1,MT2> >
-   : public BoolConstant< IsSymmetric<MT1>::value && IsSymmetric<MT2>::value >
-{};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  ISHERMITIAN SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT1, typename MT2 >
-struct IsHermitian< SMatSMatAddExpr<MT1,MT2> >
-   : public BoolConstant< IsHermitian<MT1>::value && IsHermitian<MT2>::value >
-{};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  ISLOWER SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT1, typename MT2 >
-struct IsLower< SMatSMatAddExpr<MT1,MT2> >
-   : public BoolConstant< And< IsLower<MT1>, IsLower<MT2> >::value >
-{};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  ISUNILOWER SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT1, typename MT2 >
-struct IsUniLower< SMatSMatAddExpr<MT1,MT2> >
-   : public BoolConstant< Or< And< IsUniLower<MT1>, IsStrictlyLower<MT2> >
-                            , And< IsUniLower<MT2>, IsStrictlyLower<MT1> > >::value >
-{};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  ISSTRICTLYLOWER SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT1, typename MT2 >
-struct IsStrictlyLower< SMatSMatAddExpr<MT1,MT2> >
-   : public BoolConstant< And< IsStrictlyLower<MT1>, IsStrictlyLower<MT2> >::value >
-{};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  ISUPPER SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT1, typename MT2 >
-struct IsUpper< SMatSMatAddExpr<MT1,MT2> >
-   : public BoolConstant< And< IsUpper<MT1>, IsUpper<MT2> >::value >
-{};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  ISUNIUPPER SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT1, typename MT2 >
-struct IsUniUpper< SMatSMatAddExpr<MT1,MT2> >
-   : public BoolConstant< Or< And< IsUniUpper<MT1>, IsStrictlyUpper<MT2> >
-                            , And< IsUniUpper<MT2>, IsStrictlyUpper<MT1> > >::value >
-{};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  ISSTRICTLYUPPER SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT1, typename MT2 >
-struct IsStrictlyUpper< SMatSMatAddExpr<MT1,MT2> >
-   : public BoolConstant< And< IsStrictlyUpper<MT1>, IsStrictlyUpper<MT2> >::value >
-{};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  EXPRESSION TRAIT SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT1, typename MT2, bool AF >
-struct SubmatrixExprTrait< SMatSMatAddExpr<MT1,MT2>, AF >
-{
- public:
-   //**********************************************************************************************
-   using Type = AddExprTrait_< SubmatrixExprTrait_<const MT1,AF>
-                             , SubmatrixExprTrait_<const MT2,AF> >;
-   //**********************************************************************************************
-};
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT1, typename MT2 >
-struct RowExprTrait< SMatSMatAddExpr<MT1,MT2> >
-{
- public:
-   //**********************************************************************************************
-   using Type = AddExprTrait_< RowExprTrait_<const MT1>
-                             , RowExprTrait_<const MT2> >;
-   //**********************************************************************************************
-};
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT1, typename MT2 >
-struct ColumnExprTrait< SMatSMatAddExpr<MT1,MT2> >
-{
- public:
-   //**********************************************************************************************
-   using Type = AddExprTrait_< ColumnExprTrait_<const MT1>
-                             , ColumnExprTrait_<const MT2> >;
-   //**********************************************************************************************
-};
-/*! \endcond */
 //*************************************************************************************************
 
 } // namespace blaze

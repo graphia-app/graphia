@@ -3,7 +3,7 @@
 //  \file blaze/math/adaptors/strictlyuppermatrix/Dense.h
 //  \brief StrictlyUpperMatrix specialization for dense matrices
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -46,8 +46,8 @@
 #include <blaze/math/adaptors/strictlyuppermatrix/BaseTemplate.h>
 #include <blaze/math/adaptors/strictlyuppermatrix/StrictlyUpperProxy.h>
 #include <blaze/math/Aliases.h>
+#include <blaze/math/constraints/Computation.h>
 #include <blaze/math/constraints/DenseMatrix.h>
-#include <blaze/math/constraints/Expression.h>
 #include <blaze/math/constraints/Hermitian.h>
 #include <blaze/math/constraints/Lower.h>
 #include <blaze/math/constraints/Resizable.h>
@@ -55,20 +55,24 @@
 #include <blaze/math/constraints/Static.h>
 #include <blaze/math/constraints/StorageOrder.h>
 #include <blaze/math/constraints/Symmetric.h>
+#include <blaze/math/constraints/Transformation.h>
 #include <blaze/math/constraints/Upper.h>
+#include <blaze/math/constraints/View.h>
 #include <blaze/math/dense/DenseMatrix.h>
+#include <blaze/math/dense/InitializerMatrix.h>
 #include <blaze/math/Exception.h>
 #include <blaze/math/expressions/DenseMatrix.h>
 #include <blaze/math/InitializerList.h>
 #include <blaze/math/shims/Clear.h>
 #include <blaze/math/shims/IsDefault.h>
-#include <blaze/math/typetraits/Columns.h>
+#include <blaze/math/shims/IsZero.h>
 #include <blaze/math/typetraits/IsComputation.h>
 #include <blaze/math/typetraits/IsResizable.h>
+#include <blaze/math/typetraits/IsScalar.h>
 #include <blaze/math/typetraits/IsSquare.h>
 #include <blaze/math/typetraits/IsStrictlyUpper.h>
 #include <blaze/math/typetraits/IsUniTriangular.h>
-#include <blaze/math/typetraits/Rows.h>
+#include <blaze/math/typetraits/Size.h>
 #include <blaze/math/views/Submatrix.h>
 #include <blaze/system/Inline.h>
 #include <blaze/util/Assert.h>
@@ -77,13 +81,11 @@
 #include <blaze/util/constraints/Reference.h>
 #include <blaze/util/constraints/Vectorizable.h>
 #include <blaze/util/constraints/Volatile.h>
-#include <blaze/util/DisableIf.h>
 #include <blaze/util/EnableIf.h>
-#include <blaze/util/FalseType.h>
+#include <blaze/util/IntegralConstant.h>
+#include <blaze/util/MaybeUnused.h>
 #include <blaze/util/StaticAssert.h>
-#include <blaze/util/TrueType.h>
 #include <blaze/util/Types.h>
-#include <blaze/util/Unused.h>
 
 
 namespace blaze {
@@ -109,27 +111,28 @@ class StrictlyUpperMatrix<MT,SO,true>
 {
  private:
    //**Type definitions****************************************************************************
-   typedef OppositeType_<MT>   OT;  //!< Opposite type of the dense matrix.
-   typedef TransposeType_<MT>  TT;  //!< Transpose type of the dense matrix.
-   typedef ElementType_<MT>    ET;  //!< Element type of the dense matrix.
+   using OT = OppositeType_t<MT>;   //!< Opposite type of the dense matrix.
+   using TT = TransposeType_t<MT>;  //!< Transpose type of the dense matrix.
+   using ET = ElementType_t<MT>;    //!< Element type of the dense matrix.
    //**********************************************************************************************
 
  public:
    //**Type definitions****************************************************************************
-   typedef StrictlyUpperMatrix<MT,SO,true>   This;            //!< Type of this StrictlyUpperMatrix instance.
-   typedef DenseMatrix<This,SO>              BaseType;        //!< Base type of this StrictlyUpperMatrix instance.
-   typedef This                              ResultType;      //!< Result type for expression template evaluations.
-   typedef StrictlyUpperMatrix<OT,!SO,true>  OppositeType;    //!< Result type with opposite storage order for expression template evaluations.
-   typedef StrictlyLowerMatrix<TT,!SO,true>  TransposeType;   //!< Transpose type for expression template evaluations.
-   typedef ET                                ElementType;     //!< Type of the matrix elements.
-   typedef SIMDType_<MT>                     SIMDType;        //!< SIMD type of the matrix elements.
-   typedef ReturnType_<MT>                   ReturnType;      //!< Return type for expression template evaluations.
-   typedef const This&                       CompositeType;   //!< Data type for composite expression templates.
-   typedef StrictlyUpperProxy<MT>            Reference;       //!< Reference to a non-constant matrix value.
-   typedef ConstReference_<MT>               ConstReference;  //!< Reference to a constant matrix value.
-   typedef Pointer_<MT>                      Pointer;         //!< Pointer to a non-constant matrix value.
-   typedef ConstPointer_<MT>                 ConstPointer;    //!< Pointer to a constant matrix value.
-   typedef ConstIterator_<MT>                ConstIterator;   //!< Iterator over constant elements.
+   using This           = StrictlyUpperMatrix<MT,SO,true>;   //!< Type of this StrictlyUpperMatrix instance.
+   using BaseType       = DenseMatrix<This,SO>;              //!< Base type of this StrictlyUpperMatrix instance.
+   using ResultType     = This;                              //!< Result type for expression template evaluations.
+   using OppositeType   = StrictlyUpperMatrix<OT,!SO,true>;  //!< Result type with opposite storage order for expression template evaluations.
+   using TransposeType  = StrictlyLowerMatrix<TT,!SO,true>;  //!< Transpose type for expression template evaluations.
+   using ElementType    = ET;                                //!< Type of the matrix elements.
+   using SIMDType       = SIMDType_t<MT>;                    //!< SIMD type of the matrix elements.
+   using TagType        = TagType_t<MT>;                     //!< Tag type of this StrictlyUpperMatrix instance.
+   using ReturnType     = ReturnType_t<MT>;                  //!< Return type for expression template evaluations.
+   using CompositeType  = const This&;                       //!< Data type for composite expression templates.
+   using Reference      = StrictlyUpperProxy<MT>;            //!< Reference to a non-constant matrix value.
+   using ConstReference = ConstReference_t<MT>;              //!< Reference to a constant matrix value.
+   using Pointer        = Pointer_t<MT>;                     //!< Pointer to a non-constant matrix value.
+   using ConstPointer   = ConstPointer_t<MT>;                //!< Pointer to a constant matrix value.
+   using ConstIterator  = ConstIterator_t<MT>;               //!< Iterator over constant elements.
    //**********************************************************************************************
 
    //**Rebind struct definition********************************************************************
@@ -138,7 +141,7 @@ class StrictlyUpperMatrix<MT,SO,true>
    template< typename NewType >  // Data type of the other matrix
    struct Rebind {
       //! The type of the other StrictlyUpperMatrix.
-      typedef StrictlyUpperMatrix< typename MT::template Rebind<NewType>::Other >  Other;
+      using Other = StrictlyUpperMatrix< typename MT::template Rebind<NewType>::Other >;
    };
    //**********************************************************************************************
 
@@ -149,7 +152,7 @@ class StrictlyUpperMatrix<MT,SO,true>
            , size_t NewN >  // Number of columns of the other matrix
    struct Resize {
       //! The type of the other StrictlyUpperMatrix.
-      typedef StrictlyUpperMatrix< typename MT::template Resize<NewM,NewN>::Other >  Other;
+      using Other = StrictlyUpperMatrix< typename MT::template Resize<NewM,NewN>::Other >;
    };
    //**********************************************************************************************
 
@@ -160,18 +163,18 @@ class StrictlyUpperMatrix<MT,SO,true>
    {
     public:
       //**Type definitions*************************************************************************
-      typedef std::random_access_iterator_tag  IteratorCategory;  //!< The iterator category.
-      typedef ElementType_<MT>                 ValueType;         //!< Type of the underlying elements.
-      typedef StrictlyUpperProxy<MT>           PointerType;       //!< Pointer return type.
-      typedef StrictlyUpperProxy<MT>           ReferenceType;     //!< Reference return type.
-      typedef ptrdiff_t                        DifferenceType;    //!< Difference between two iterators.
+      using IteratorCategory = std::random_access_iterator_tag;  //!< The iterator category.
+      using ValueType        = ElementType_t<MT>;                //!< Type of the underlying elements.
+      using PointerType      = StrictlyUpperProxy<MT>;           //!< Pointer return type.
+      using ReferenceType    = StrictlyUpperProxy<MT>;           //!< Reference return type.
+      using DifferenceType   = ptrdiff_t;                        //!< Difference between two iterators.
 
       // STL iterator requirements
-      typedef IteratorCategory  iterator_category;  //!< The iterator category.
-      typedef ValueType         value_type;         //!< Type of the underlying elements.
-      typedef PointerType       pointer;            //!< Pointer return type.
-      typedef ReferenceType     reference;          //!< Reference return type.
-      typedef DifferenceType    difference_type;    //!< Difference between two iterators.
+      using iterator_category = IteratorCategory;  //!< The iterator category.
+      using value_type        = ValueType;         //!< Type of the underlying elements.
+      using pointer           = PointerType;       //!< Pointer return type.
+      using reference         = ReferenceType;     //!< Reference return type.
+      using difference_type   = DifferenceType;    //!< Difference between two iterators.
       //*******************************************************************************************
 
       //**Constructor******************************************************************************
@@ -629,35 +632,29 @@ class StrictlyUpperMatrix<MT,SO,true>
 
    //**Compilation flags***************************************************************************
    //! Compilation switch for the expression template evaluation strategy.
-   enum : bool { simdEnabled = MT::simdEnabled };
+   static constexpr bool simdEnabled = MT::simdEnabled;
 
    //! Compilation switch for the expression template assignment strategy.
-   enum : bool { smpAssignable = MT::smpAssignable };
+   static constexpr bool smpAssignable = MT::smpAssignable;
    //**********************************************************************************************
 
    //**Constructors********************************************************************************
    /*!\name Constructors */
    //@{
-                           explicit inline StrictlyUpperMatrix();
+                                    inline StrictlyUpperMatrix();
    template< typename A1 > explicit inline StrictlyUpperMatrix( const A1& a1 );
-                           explicit inline StrictlyUpperMatrix( size_t n, const ElementType& init );
+                                    inline StrictlyUpperMatrix( size_t n, const ElementType& init );
 
-   explicit inline StrictlyUpperMatrix( initializer_list< initializer_list<ElementType> > list );
+   inline StrictlyUpperMatrix( initializer_list< initializer_list<ElementType> > list );
 
    template< typename Other >
-   explicit inline StrictlyUpperMatrix( size_t n, const Other* array );
+   inline StrictlyUpperMatrix( size_t n, const Other* array );
 
    template< typename Other, size_t N >
-   explicit inline StrictlyUpperMatrix( const Other (&array)[N][N] );
+   inline StrictlyUpperMatrix( const Other (&array)[N][N] );
 
-   explicit inline StrictlyUpperMatrix( ElementType* ptr, size_t n );
-   explicit inline StrictlyUpperMatrix( ElementType* ptr, size_t n, size_t nn );
-
-   template< typename Deleter >
-   explicit inline StrictlyUpperMatrix( ElementType* ptr, size_t n, Deleter d );
-
-   template< typename Deleter >
-   explicit inline StrictlyUpperMatrix( ElementType* ptr, size_t n, size_t nn, Deleter d );
+   inline StrictlyUpperMatrix( ElementType* ptr, size_t n );
+   inline StrictlyUpperMatrix( ElementType* ptr, size_t n, size_t nn );
 
    inline StrictlyUpperMatrix( const StrictlyUpperMatrix& m );
    inline StrictlyUpperMatrix( StrictlyUpperMatrix&& m ) noexcept;
@@ -665,7 +662,10 @@ class StrictlyUpperMatrix<MT,SO,true>
    //**********************************************************************************************
 
    //**Destructor**********************************************************************************
-   // No explicitly declared destructor.
+   /*!\name Destructor */
+   //@{
+   ~StrictlyUpperMatrix() = default;
+   //@}
    //**********************************************************************************************
 
    //**Data access functions***********************************************************************
@@ -699,37 +699,37 @@ class StrictlyUpperMatrix<MT,SO,true>
    inline StrictlyUpperMatrix& operator=( StrictlyUpperMatrix&& rhs ) noexcept;
 
    template< typename MT2, bool SO2 >
-   inline DisableIf_< IsComputation<MT2>, StrictlyUpperMatrix& >
-      operator=( const Matrix<MT2,SO2>& rhs );
+   inline auto operator=( const Matrix<MT2,SO2>& rhs )
+      -> DisableIf_t< IsComputation_v<MT2>, StrictlyUpperMatrix& >;
 
    template< typename MT2, bool SO2 >
-   inline EnableIf_< IsComputation<MT2>, StrictlyUpperMatrix& >
-      operator=( const Matrix<MT2,SO2>& rhs );
+   inline auto operator=( const Matrix<MT2,SO2>& rhs )
+      -> EnableIf_t< IsComputation_v<MT2>, StrictlyUpperMatrix& >;
 
    template< typename MT2, bool SO2 >
-   inline DisableIf_< IsComputation<MT2>, StrictlyUpperMatrix& >
-      operator+=( const Matrix<MT2,SO2>& rhs );
+   inline auto operator+=( const Matrix<MT2,SO2>& rhs )
+      -> DisableIf_t< IsComputation_v<MT2>, StrictlyUpperMatrix& >;
 
    template< typename MT2, bool SO2 >
-   inline EnableIf_< IsComputation<MT2>, StrictlyUpperMatrix& >
-      operator+=( const Matrix<MT2,SO2>& rhs );
+   inline auto operator+=( const Matrix<MT2,SO2>& rhs )
+      -> EnableIf_t< IsComputation_v<MT2>, StrictlyUpperMatrix& >;
 
    template< typename MT2, bool SO2 >
-   inline DisableIf_< IsComputation<MT2>, StrictlyUpperMatrix& >
-      operator-=( const Matrix<MT2,SO2>& rhs );
+   inline auto operator-=( const Matrix<MT2,SO2>& rhs )
+      -> DisableIf_t< IsComputation_v<MT2>, StrictlyUpperMatrix& >;
 
    template< typename MT2, bool SO2 >
-   inline EnableIf_< IsComputation<MT2>, StrictlyUpperMatrix& >
-      operator-=( const Matrix<MT2,SO2>& rhs );
+   inline auto operator-=( const Matrix<MT2,SO2>& rhs )
+      -> EnableIf_t< IsComputation_v<MT2>, StrictlyUpperMatrix& >;
 
    template< typename MT2, bool SO2 >
-   inline StrictlyUpperMatrix& operator*=( const Matrix<MT2,SO2>& rhs );
+   inline auto operator%=( const Matrix<MT2,SO2>& rhs ) -> StrictlyUpperMatrix&;
 
-   template< typename Other >
-   inline EnableIf_< IsNumeric<Other>, StrictlyUpperMatrix >& operator*=( Other rhs );
+   template< typename ST >
+   inline auto operator*=( ST rhs ) -> EnableIf_t< IsScalar_v<ST>, StrictlyUpperMatrix& >;
 
-   template< typename Other >
-   inline EnableIf_< IsNumeric<Other>, StrictlyUpperMatrix >& operator/=( Other rhs );
+   template< typename ST >
+   inline auto operator/=( ST rhs ) -> EnableIf_t< IsScalar_v<ST>, StrictlyUpperMatrix& >;
    //@}
    //**********************************************************************************************
 
@@ -749,10 +749,11 @@ class StrictlyUpperMatrix<MT,SO,true>
           void   resize ( size_t n, bool preserve=true );
    inline void   extend ( size_t n, bool preserve=true );
    inline void   reserve( size_t elements );
+   inline void   shrinkToFit();
    inline void   swap( StrictlyUpperMatrix& m ) noexcept;
 
-   static inline constexpr size_t maxNonZeros() noexcept;
-   static inline constexpr size_t maxNonZeros( size_t n ) noexcept;
+   static constexpr size_t maxNonZeros() noexcept;
+   static constexpr size_t maxNonZeros( size_t n ) noexcept;
    //@}
    //**********************************************************************************************
 
@@ -815,14 +816,16 @@ class StrictlyUpperMatrix<MT,SO,true>
    BLAZE_CONSTRAINT_MUST_NOT_BE_POINTER_TYPE         ( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_CONST                ( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_VOLATILE             ( MT );
-   BLAZE_CONSTRAINT_MUST_NOT_BE_EXPRESSION_TYPE      ( MT );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_VIEW_TYPE            ( MT );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE     ( MT );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_TRANSFORMATION_TYPE  ( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_HERMITIAN_MATRIX_TYPE( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_LOWER_MATRIX_TYPE    ( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_UPPER_MATRIX_TYPE    ( MT );
    BLAZE_CONSTRAINT_MUST_BE_MATRIX_WITH_STORAGE_ORDER( OT, !SO );
    BLAZE_CONSTRAINT_MUST_BE_MATRIX_WITH_STORAGE_ORDER( TT, !SO );
-   BLAZE_STATIC_ASSERT( Rows<MT>::value == Columns<MT>::value );
+   BLAZE_STATIC_ASSERT( ( Size_v<MT,0UL> == Size_v<MT,1UL> ) );
    //**********************************************************************************************
 };
 /*! \endcond */
@@ -875,7 +878,7 @@ template< typename MT    // Type of the adapted dense matrix
         , bool SO >      // Storage order of the adapted dense matrix
 template< typename A1 >  // Type of the constructor argument
 inline StrictlyUpperMatrix<MT,SO,true>::StrictlyUpperMatrix( const A1& a1 )
-   : matrix_( construct( a1, typename IsResizable<MT>::Type() ) )  // The adapted dense matrix
+   : matrix_( construct( a1, IsResizable<MT>() ) )  // The adapted dense matrix
 {
    BLAZE_INTERNAL_ASSERT( isSquare( matrix_ ), "Non-square strictly upper matrix detected" );
    BLAZE_INTERNAL_ASSERT( isIntact(), "Broken invariant detected" );
@@ -896,7 +899,7 @@ template< typename MT  // Type of the adapted dense matrix
 inline StrictlyUpperMatrix<MT,SO,true>::StrictlyUpperMatrix( size_t n, const ElementType& init )
    : matrix_( n, n, ElementType() )  // The adapted dense matrix
 {
-   BLAZE_CONSTRAINT_MUST_BE_RESIZABLE( MT );
+   BLAZE_CONSTRAINT_MUST_BE_RESIZABLE_TYPE( MT );
 
    if( SO ) {
       for( size_t j=0UL; j<columns(); ++j ) {
@@ -938,7 +941,8 @@ inline StrictlyUpperMatrix<MT,SO,true>::StrictlyUpperMatrix( size_t n, const Ele
 
 // The matrix is sized according to the size of the initializer list and all matrix elements are
 // initialized with the values from the given list. Missing values are initialized with default
-// values. In case the given list does not represent a diagonal matrix, a \a std::invalid_argument
+// values. In case the matrix cannot be resized and the dimensions of the initializer list don't
+// match or if the given list does not represent a strictly upper matrix, a \a std::invalid_argument
 // exception is thrown.
 */
 template< typename MT  // Type of the adapted dense matrix
@@ -1047,7 +1051,18 @@ inline StrictlyUpperMatrix<MT,SO,true>::StrictlyUpperMatrix( const Other (&array
 // \param n The number of rows and columns of the array of elements.
 // \exception std::invalid_argument Invalid setup of strictly upper custom matrix.
 //
-// This constructor creates an unpadded strictly upper custom matrix of size \f$ n \times n \f$.
+// This constructor creates an unpadded strictly upper custom matrix of size \f$ n \times n \f$:
+
+   \code
+   using blaze::StrictlyUpperMatrix;
+   using blaze::CustomMatrix;
+   using blaze::unaligned;
+   using blaze::unpadded;
+
+   std::vector<int> memory( 9UL );
+   StrictlyUpperMatrix< CustomMatrix<int,unaligned,unpadded> > A( memory.data(), 3UL );
+   \endcode
+
 // The construction fails if ...
 //
 //  - ... the passed pointer is \c nullptr;
@@ -1085,8 +1100,19 @@ inline StrictlyUpperMatrix<MT,SO,true>::StrictlyUpperMatrix( ElementType* ptr, s
 // \param nn The total number of elements between two rows/columns.
 // \exception std::invalid_argument Invalid setup of strictly upper custom matrix.
 //
-// This constructor creates a strictly upper custom matrix of size \f$ n \times n \f$. The
-// construction fails if ...
+// This constructor creates a strictly upper custom matrix of size \f$ n \times n \f$:
+
+   \code
+   using blaze::StrictlyUpperMatrix;
+   using blaze::CustomMatrix;
+   using blaze::unaligned;
+   using blaze::padded;
+
+   std::vector<int> memory( 24UL );
+   StrictlyUpperMatrix< CustomMatrix<int,unaligned,padded> > A( memory.data(), 3UL, 8UL );
+   \endcode
+
+// The construction fails if ...
 //
 //  - ... the passed pointer is \c nullptr;
 //  - ... the alignment flag \a AF is set to \a aligned, but the passed pointer is not properly
@@ -1103,81 +1129,6 @@ template< typename MT  // Type of the adapted dense matrix
         , bool SO >    // Storage order of the adapted dense matrix
 inline StrictlyUpperMatrix<MT,SO,true>::StrictlyUpperMatrix( ElementType* ptr, size_t n, size_t nn )
    : matrix_( ptr, n, n, nn )  // The adapted dense matrix
-{
-   if( !isStrictlyUpper( matrix_ ) ) {
-      BLAZE_THROW_INVALID_ARGUMENT( "Invalid setup of strictly upper matrix" );
-   }
-
-   BLAZE_INTERNAL_ASSERT( isIntact(), "Broken invariant detected" );
-}
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Constructor for a strictly upper custom matrix of size \f$ n \times n \f$.
-//
-// \param ptr The array of elements to be used by the matrix.
-// \param n The number of rows and columns of the array of elements.
-// \param d The deleter to destroy the array of elements.
-// \exception std::invalid_argument Invalid setup of strictly upper custom matrix.
-//
-// This constructor creates an unpadded strictly upper custom matrix of size \f$ n \times n \f$.
-// The construction fails if ...
-//
-//  - ... the passed pointer is \c nullptr;
-//  - ... the alignment flag \a AF is set to \a aligned, but the passed pointer is not properly
-//    aligned according to the available instruction set (SSE, AVX, ...);
-//  - ... the values in the given array do not represent a strictly lower triangular matrix.
-//
-// In all failure cases a \a std::invalid_argument exception is thrown.
-//
-// \note This constructor is \b NOT available for padded strictly upper custom matrices!
-*/
-template< typename MT         // Type of the adapted dense matrix
-        , bool SO >           // Storage order of the adapted dense matrix
-template< typename Deleter >  // Type of the custom deleter
-inline StrictlyUpperMatrix<MT,SO,true>::StrictlyUpperMatrix( ElementType* ptr, size_t n, Deleter d )
-   : matrix_( ptr, n, n, d )  // The adapted dense matrix
-{
-   if( !isStrictlyUpper( matrix_ ) ) {
-      BLAZE_THROW_INVALID_ARGUMENT( "Invalid setup of strictly upper matrix" );
-   }
-
-   BLAZE_INTERNAL_ASSERT( isIntact(), "Broken invariant detected" );
-}
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Constructor for a strictly upper custom matrix of size \f$ n \times n \f$.
-//
-// \param ptr The array of elements to be used by the matrix.
-// \param n The number of rows and columns of the array of elements.
-// \param nn The total number of elements between two rows/columns.
-// \param d The deleter to destroy the array of elements.
-// \exception std::invalid_argument Invalid setup of strictly upper custom matrix.
-//
-// This constructor creates a strictly upper custom matrix of size \f$ n \times n \f$. The
-// construction fails if ...
-//
-//  - ... the passed pointer is \c nullptr;
-//  - ... the alignment flag \a AF is set to \a aligned, but the passed pointer is not properly
-//    aligned according to the available instruction set (SSE, AVX, ...);
-//  - ... the specified spacing \a nn is insufficient for the given data type \a Type and the
-//    available instruction set;
-//  - ... the values in the given array do not represent a strictly lower triangular matrix.
-//
-// In all failure cases a \a std::invalid_argument exception is thrown.
-*/
-template< typename MT         // Type of the adapted dense matrix
-        , bool SO >           // Storage order of the adapted dense matrix
-template< typename Deleter >  // Type of the custom deleter
-inline StrictlyUpperMatrix<MT,SO,true>::StrictlyUpperMatrix( ElementType* ptr, size_t n, size_t nn, Deleter d )
-   : matrix_( ptr, n, n, nn, d )  // The adapted dense matrix
 {
    if( !isStrictlyUpper( matrix_ ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid setup of strictly upper matrix" );
@@ -1605,23 +1556,24 @@ inline StrictlyUpperMatrix<MT,SO,true>&
          { 0, 0, 0 } };
    \endcode
 
-// The matrix elements are assigned the values from the given initializer list. Missing values
-// are initialized as default (as e.g. the value 6 in the example). Note that in case the size
-// of the top-level initializer list exceeds the number of rows or the size of any nested list
-// exceeds the number of columns, a \a std::invalid_argument exception is thrown.
+// The matrix is resized according to the size of the initializer list and all matrix elements
+// are assigned the values from the given list. Missing values are assigned default values. In
+// case the matrix cannot be resized and the dimensions of the initializer list don't match or
+// if the given list does not represent a strictly upper matrix, a \a std::invalid_argument
+// exception is thrown.
 */
 template< typename MT  // Type of the adapted dense matrix
         , bool SO >    // Storage order of the adapted dense matrix
 inline StrictlyUpperMatrix<MT,SO,true>&
    StrictlyUpperMatrix<MT,SO,true>::operator=( initializer_list< initializer_list<ElementType> > list )
 {
-   MT tmp( list );
+   const InitializerMatrix<ElementType> tmp( list, list.size() );
 
    if( !isStrictlyUpper( tmp ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to strictly upper matrix" );
    }
 
-   matrix_ = std::move( tmp );
+   matrix_ = list;
 
    BLAZE_INTERNAL_ASSERT( isSquare( matrix_ ), "Non-square strictly upper matrix detected" );
    BLAZE_INTERNAL_ASSERT( isIntact(), "Broken invariant detected" );
@@ -1747,15 +1699,15 @@ template< typename MT   // Type of the adapted dense matrix
         , bool SO >     // Storage order of the adapted dense matrix
 template< typename MT2  // Type of the right-hand side matrix
         , bool SO2 >    // Storage order of the right-hand side matrix
-inline DisableIf_< IsComputation<MT2>, StrictlyUpperMatrix<MT,SO,true>& >
-   StrictlyUpperMatrix<MT,SO,true>::operator=( const Matrix<MT2,SO2>& rhs )
+inline auto StrictlyUpperMatrix<MT,SO,true>::operator=( const Matrix<MT2,SO2>& rhs )
+   -> DisableIf_t< IsComputation_v<MT2>, StrictlyUpperMatrix& >
 {
-   if( IsUniTriangular<MT2>::value ||
-       ( !IsStrictlyUpper<MT2>::value && !isStrictlyUpper( ~rhs ) ) ) {
+   if( IsUniTriangular_v<MT2> ||
+       ( !IsStrictlyUpper_v<MT2> && !isStrictlyUpper( *rhs ) ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to strictly upper matrix" );
    }
 
-   matrix_ = ~rhs;
+   matrix_ = declupp( *rhs );
 
    BLAZE_INTERNAL_ASSERT( isSquare( matrix_ ), "Non-square strictly upper matrix detected" );
    BLAZE_INTERNAL_ASSERT( isIntact(), "Broken invariant detected" );
@@ -1783,18 +1735,18 @@ template< typename MT   // Type of the adapted dense matrix
         , bool SO >     // Storage order of the adapted dense matrix
 template< typename MT2  // Type of the right-hand side matrix
         , bool SO2 >    // Storage order of the right-hand side matrix
-inline EnableIf_< IsComputation<MT2>, StrictlyUpperMatrix<MT,SO,true>& >
-   StrictlyUpperMatrix<MT,SO,true>::operator=( const Matrix<MT2,SO2>& rhs )
+inline auto StrictlyUpperMatrix<MT,SO,true>::operator=( const Matrix<MT2,SO2>& rhs )
+   -> EnableIf_t< IsComputation_v<MT2>, StrictlyUpperMatrix& >
 {
-   if( IsUniTriangular<MT2>::value || ( !IsSquare<MT2>::value && !isSquare( ~rhs ) ) ) {
+   if( IsUniTriangular_v<MT2> || ( !IsSquare_v<MT2> && !isSquare( *rhs ) ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to strictly upper matrix" );
    }
 
-   if( IsStrictlyUpper<MT2>::value ) {
-      matrix_ = ~rhs;
+   if( IsStrictlyUpper_v<MT2> ) {
+      matrix_ = *rhs;
    }
    else {
-      MT tmp( ~rhs );
+      MT tmp( *rhs );
 
       if( !isStrictlyUpper( tmp ) ) {
          BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to strictly upper matrix" );
@@ -1829,15 +1781,15 @@ template< typename MT   // Type of the adapted dense matrix
         , bool SO >     // Storage order of the adapted dense matrix
 template< typename MT2  // Type of the right-hand side matrix
         , bool SO2 >    // Storage order of the right-hand side matrix
-inline DisableIf_< IsComputation<MT2>, StrictlyUpperMatrix<MT,SO,true>& >
-   StrictlyUpperMatrix<MT,SO,true>::operator+=( const Matrix<MT2,SO2>& rhs )
+inline auto StrictlyUpperMatrix<MT,SO,true>::operator+=( const Matrix<MT2,SO2>& rhs )
+   -> DisableIf_t< IsComputation_v<MT2>, StrictlyUpperMatrix& >
 {
-   if( IsUniTriangular<MT2>::value ||
-       ( !IsStrictlyUpper<MT2>::value && !isStrictlyUpper( ~rhs ) ) ) {
+   if( IsUniTriangular_v<MT2> ||
+       ( !IsStrictlyUpper_v<MT2> && !isStrictlyUpper( *rhs ) ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to strictly upper matrix" );
    }
 
-   matrix_ += ~rhs;
+   matrix_ += declupp( *rhs );
 
    BLAZE_INTERNAL_ASSERT( isSquare( matrix_ ), "Non-square strictly upper matrix detected" );
    BLAZE_INTERNAL_ASSERT( isIntact(), "Broken invariant detected" );
@@ -1865,24 +1817,24 @@ template< typename MT   // Type of the adapted dense matrix
         , bool SO >     // Storage order of the adapted dense matrix
 template< typename MT2  // Type of the right-hand side matrix
         , bool SO2 >    // Storage order of the right-hand side matrix
-inline EnableIf_< IsComputation<MT2>, StrictlyUpperMatrix<MT,SO,true>& >
-   StrictlyUpperMatrix<MT,SO,true>::operator+=( const Matrix<MT2,SO2>& rhs )
+inline auto StrictlyUpperMatrix<MT,SO,true>::operator+=( const Matrix<MT2,SO2>& rhs )
+   -> EnableIf_t< IsComputation_v<MT2>, StrictlyUpperMatrix& >
 {
-   if( IsUniTriangular<MT2>::value || ( !IsSquare<MT2>::value && !isSquare( ~rhs ) ) ) {
+   if( IsUniTriangular_v<MT2> || ( !IsSquare_v<MT2> && !isSquare( *rhs ) ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to strictly upper matrix" );
    }
 
-   if( IsStrictlyUpper<MT2>::value ) {
-      matrix_ += ~rhs;
+   if( IsStrictlyUpper_v<MT2> ) {
+      matrix_ += *rhs;
    }
    else {
-      const ResultType_<MT2> tmp( ~rhs );
+      const ResultType_t<MT2> tmp( *rhs );
 
       if( !isStrictlyUpper( tmp ) ) {
          BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to strictly upper matrix" );
       }
 
-      matrix_ += tmp;
+      matrix_ += declupp( tmp );
    }
 
    BLAZE_INTERNAL_ASSERT( isSquare( matrix_ ), "Non-square strictly upper matrix detected" );
@@ -1911,14 +1863,14 @@ template< typename MT   // Type of the adapted dense matrix
         , bool SO >     // Storage order of the adapted dense matrix
 template< typename MT2  // Type of the right-hand side matrix
         , bool SO2 >    // Storage order of the right-hand side matrix
-inline DisableIf_< IsComputation<MT2>, StrictlyUpperMatrix<MT,SO,true>& >
-   StrictlyUpperMatrix<MT,SO,true>::operator-=( const Matrix<MT2,SO2>& rhs )
+inline auto StrictlyUpperMatrix<MT,SO,true>::operator-=( const Matrix<MT2,SO2>& rhs )
+   -> DisableIf_t< IsComputation_v<MT2>, StrictlyUpperMatrix& >
 {
-   if( !IsStrictlyUpper<MT2>::value && !isStrictlyUpper( ~rhs ) ) {
+   if( !IsStrictlyUpper_v<MT2> && !isStrictlyUpper( *rhs ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to strictly upper matrix" );
    }
 
-   matrix_ -= ~rhs;
+   matrix_ -= declupp( *rhs );
 
    BLAZE_INTERNAL_ASSERT( isSquare( matrix_ ), "Non-square strictly upper matrix detected" );
    BLAZE_INTERNAL_ASSERT( isIntact(), "Broken invariant detected" );
@@ -1946,24 +1898,24 @@ template< typename MT   // Type of the adapted dense matrix
         , bool SO >     // Storage order of the adapted dense matrix
 template< typename MT2  // Type of the right-hand side matrix
         , bool SO2 >    // Storage order of the right-hand side matrix
-inline EnableIf_< IsComputation<MT2>, StrictlyUpperMatrix<MT,SO,true>& >
-   StrictlyUpperMatrix<MT,SO,true>::operator-=( const Matrix<MT2,SO2>& rhs )
+inline auto StrictlyUpperMatrix<MT,SO,true>::operator-=( const Matrix<MT2,SO2>& rhs )
+   -> EnableIf_t< IsComputation_v<MT2>, StrictlyUpperMatrix& >
 {
-   if( !IsSquare<MT2>::value && !isSquare( ~rhs ) ) {
+   if( !IsSquare_v<MT2> && !isSquare( *rhs ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to strictly upper matrix" );
    }
 
-   if( IsStrictlyUpper<MT2>::value ) {
-      matrix_ -= ~rhs;
+   if( IsStrictlyUpper_v<MT2> ) {
+      matrix_ -= *rhs;
    }
    else {
-      const ResultType_<MT2> tmp( ~rhs );
+      const ResultType_t<MT2> tmp( *rhs );
 
       if( !isStrictlyUpper( tmp ) ) {
          BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to strictly upper matrix" );
       }
 
-      matrix_ -= tmp;
+      matrix_ -= declupp( tmp );
    }
 
    BLAZE_INTERNAL_ASSERT( isSquare( matrix_ ), "Non-square strictly upper matrix detected" );
@@ -1977,34 +1929,27 @@ inline EnableIf_< IsComputation<MT2>, StrictlyUpperMatrix<MT,SO,true>& >
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-/*!\brief Multiplication assignment operator for the multiplication of a matrix (\f$ A*=B \f$).
+/*!\brief Schur product assignment operator for the multiplication of a matrix (\f$ A\circ=B \f$).
 //
-// \param rhs The right-hand side matrix for the multiplication.
+// \param rhs The right-hand side matrix for the Schur product.
 // \return Reference to the matrix.
-// \exception std::invalid_argument Matrix sizes do not match.
+// \exception std::invalid_argument Invalid assignment to strictly upper matrix.
 //
 // In case the current sizes of the two matrices don't match, a \a std::invalid_argument exception
-// is thrown. Also note that the result of the multiplication operation must be a strictly upper
-// matrix. In case it is not, a \a std::invalid_argument exception is thrown.
+// is thrown.
 */
 template< typename MT   // Type of the adapted dense matrix
         , bool SO >     // Storage order of the adapted dense matrix
 template< typename MT2  // Type of the right-hand side matrix
         , bool SO2 >    // Storage order of the right-hand side matrix
-inline StrictlyUpperMatrix<MT,SO,true>&
-   StrictlyUpperMatrix<MT,SO,true>::operator*=( const Matrix<MT2,SO2>& rhs )
+inline auto StrictlyUpperMatrix<MT,SO,true>::operator%=( const Matrix<MT2,SO2>& rhs )
+   -> StrictlyUpperMatrix&
 {
-   if( matrix_.rows() != (~rhs).columns() ) {
+   if( !IsSquare_v<MT2> && !isSquare( *rhs ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to strictly upper matrix" );
    }
 
-   MT tmp( matrix_ * ~rhs );
-
-   if( !isStrictlyUpper( tmp ) ) {
-      BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to strictly upper matrix" );
-   }
-
-   matrix_ = std::move( tmp );
+   matrix_ %= *rhs;
 
    BLAZE_INTERNAL_ASSERT( isSquare( matrix_ ), "Non-square strictly upper matrix detected" );
    BLAZE_INTERNAL_ASSERT( isIntact(), "Broken invariant detected" );
@@ -2023,11 +1968,11 @@ inline StrictlyUpperMatrix<MT,SO,true>&
 // \param rhs The right-hand side scalar value for the multiplication.
 // \return Reference to the matrix.
 */
-template< typename MT       // Type of the adapted dense matrix
-        , bool SO >         // Storage order of the adapted dense matrix
-template< typename Other >  // Data type of the right-hand side scalar
-inline EnableIf_< IsNumeric<Other>, StrictlyUpperMatrix<MT,SO,true> >&
-   StrictlyUpperMatrix<MT,SO,true>::operator*=( Other rhs )
+template< typename MT    // Type of the adapted dense matrix
+        , bool SO >      // Storage order of the adapted dense matrix
+template< typename ST >  // Data type of the right-hand side scalar
+inline auto StrictlyUpperMatrix<MT,SO,true>::operator*=( ST rhs )
+   -> EnableIf_t< IsScalar_v<ST>, StrictlyUpperMatrix& >
 {
    matrix_ *= rhs;
    return *this;
@@ -2043,13 +1988,13 @@ inline EnableIf_< IsNumeric<Other>, StrictlyUpperMatrix<MT,SO,true> >&
 // \param rhs The right-hand side scalar value for the division.
 // \return Reference to the matrix.
 */
-template< typename MT       // Type of the adapted dense matrix
-        , bool SO >         // Storage order of the adapted dense matrix
-template< typename Other >  // Data type of the right-hand side scalar
-inline EnableIf_< IsNumeric<Other>, StrictlyUpperMatrix<MT,SO,true> >&
-   StrictlyUpperMatrix<MT,SO,true>::operator/=( Other rhs )
+template< typename MT    // Type of the adapted dense matrix
+        , bool SO >      // Storage order of the adapted dense matrix
+template< typename ST >  // Data type of the right-hand side scalar
+inline auto StrictlyUpperMatrix<MT,SO,true>::operator/=( ST rhs )
+   -> EnableIf_t< IsScalar_v<ST>, StrictlyUpperMatrix& >
 {
-   BLAZE_USER_ASSERT( rhs != Other(0), "Division by zero detected" );
+   BLAZE_USER_ASSERT( !isZero( rhs ), "Division by zero detected" );
 
    matrix_ /= rhs;
    return *this;
@@ -2270,14 +2215,10 @@ template< typename MT  // Type of the adapted dense matrix
         , bool SO >    // Storage order of the adapted dense matrix
 inline void StrictlyUpperMatrix<MT,SO,true>::clear()
 {
-   using blaze::clear;
+   matrix_.clear();
 
-   if( IsResizable<MT>::value ) {
-      clear( matrix_ );
-   }
-   else {
-      reset();
-   }
+   BLAZE_INTERNAL_ASSERT( matrix_.rows()    == 0UL, "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( matrix_.columns() == 0UL, "Invalid number of columns" );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -2323,9 +2264,9 @@ template< typename MT  // Type of the adapted dense matrix
         , bool SO >    // Storage order of the adapted dense matrix
 void StrictlyUpperMatrix<MT,SO,true>::resize( size_t n, bool preserve )
 {
-   BLAZE_CONSTRAINT_MUST_BE_RESIZABLE( MT );
+   BLAZE_CONSTRAINT_MUST_BE_RESIZABLE_TYPE( MT );
 
-   UNUSED_PARAMETER( preserve );
+   MAYBE_UNUSED( preserve );
 
    BLAZE_INTERNAL_ASSERT( isSquare( matrix_ ), "Non-square strictly upper matrix detected" );
 
@@ -2360,9 +2301,9 @@ template< typename MT  // Type of the adapted dense matrix
         , bool SO >    // Storage order of the adapted dense matrix
 inline void StrictlyUpperMatrix<MT,SO,true>::extend( size_t n, bool preserve )
 {
-   BLAZE_CONSTRAINT_MUST_BE_RESIZABLE( MT );
+   BLAZE_CONSTRAINT_MUST_BE_RESIZABLE_TYPE( MT );
 
-   UNUSED_PARAMETER( preserve );
+   MAYBE_UNUSED( preserve );
 
    resize( rows() + n, true );
 }
@@ -2384,6 +2325,26 @@ template< typename MT  // Type of the adapted dense matrix
 inline void StrictlyUpperMatrix<MT,SO,true>::reserve( size_t elements )
 {
    matrix_.reserve( elements );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Requesting the removal of unused capacity.
+//
+// \return void
+//
+// This function minimizes the capacity of the matrix by removing unused capacity. Please note
+// that in case a reallocation occurs, all iterators (including end() iterators), all pointers
+// and references to elements of this matrix are invalidated.
+*/
+template< typename MT  // Type of the adapted dense matrix
+        , bool SO >    // Storage order of the adapted dense matrix
+inline void StrictlyUpperMatrix<MT,SO,true>::shrinkToFit()
+{
+   matrix_.shrinkToFit();
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -2422,11 +2383,11 @@ inline void StrictlyUpperMatrix<MT,SO,true>::swap( StrictlyUpperMatrix& m ) noex
 */
 template< typename MT  // Type of the adapted dense matrix
         , bool SO >    // Storage order of the adapted dense matrix
-inline constexpr size_t StrictlyUpperMatrix<MT,SO,true>::maxNonZeros() noexcept
+constexpr size_t StrictlyUpperMatrix<MT,SO,true>::maxNonZeros() noexcept
 {
    BLAZE_CONSTRAINT_MUST_BE_STATIC_TYPE( MT );
 
-   return maxNonZeros( Rows<MT>::value );
+   return maxNonZeros( Size_v<MT,0UL> );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -2444,7 +2405,7 @@ inline constexpr size_t StrictlyUpperMatrix<MT,SO,true>::maxNonZeros() noexcept
 */
 template< typename MT  // Type of the adapted dense matrix
         , bool SO >    // Storage order of the adapted dense matrix
-inline constexpr size_t StrictlyUpperMatrix<MT,SO,true>::maxNonZeros( size_t n ) noexcept
+constexpr size_t StrictlyUpperMatrix<MT,SO,true>::maxNonZeros( size_t n ) noexcept
 {
    return ( ( n - 1UL ) * n ) / 2UL;
 }
@@ -2466,6 +2427,17 @@ inline constexpr size_t StrictlyUpperMatrix<MT,SO,true>::maxNonZeros( size_t n )
 //
 // \param scalar The scalar value for the matrix scaling.
 // \return Reference to the matrix.
+//
+// This function scales the matrix by applying the given scalar value \a scalar to each element
+// of the matrix. For built-in and \c complex data types it has the same effect as using the
+// multiplication assignment operator:
+
+   \code
+   blaze::StrictlyUpperMatrix< blaze::DynamicMatrix<int> > A;
+   // ... Resizing and initialization
+   A *= 4;        // Scaling of the matrix
+   A.scale( 4 );  // Same effect as above
+   \endcode
 */
 template< typename MT       // Type of the adapted dense matrix
         , bool SO >         // Storage order of the adapted dense matrix
@@ -2703,7 +2675,7 @@ template< typename MT  // Type of the adapted dense matrix
         , bool SO >    // Storage order of the adapted dense matrix
 inline const MT StrictlyUpperMatrix<MT,SO,true>::construct( size_t n, TrueType )
 {
-   BLAZE_CONSTRAINT_MUST_BE_RESIZABLE( MT );
+   BLAZE_CONSTRAINT_MUST_BE_RESIZABLE_TYPE( MT );
 
    return MT( n, n, ElementType() );
 }
@@ -2722,8 +2694,8 @@ template< typename MT  // Type of the adapted dense matrix
         , bool SO >    // Storage order of the adapted dense matrix
 inline const MT StrictlyUpperMatrix<MT,SO,true>::construct( const ElementType& init, FalseType )
 {
-   BLAZE_CONSTRAINT_MUST_NOT_BE_RESIZABLE( MT );
-   BLAZE_CONSTRAINT_MUST_BE_SQUARE( MT );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_RESIZABLE_TYPE( MT );
+   BLAZE_CONSTRAINT_MUST_BE_SQUARE_MATRIX_TYPE( MT );
 
    MT tmp;
 
@@ -2764,10 +2736,10 @@ template< typename MT2  // Type of the foreign matrix
         , typename T >  // Type of the third argument
 inline const MT StrictlyUpperMatrix<MT,SO,true>::construct( const Matrix<MT2,SO2>& m, T )
 {
-   const MT tmp( ~m );
+   const MT tmp( *m );
 
-   if( IsUniTriangular<MT2>::value ||
-       ( !IsStrictlyUpper<MT2>::value && !isStrictlyUpper( tmp ) ) ) {
+   if( IsUniTriangular_v<MT2> ||
+       ( !IsStrictlyUpper_v<MT2> && !isStrictlyUpper( tmp ) ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid setup of strictly upper matrix" );
    }
 

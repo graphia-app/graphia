@@ -3,7 +3,7 @@
 //  \file blaze/math/expressions/TransExpr.h
 //  \brief Header file for the TransExpr base class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -58,11 +58,13 @@ namespace blaze {
 // The TransExpr class serves as a tag for all expression templates that implement mathematical
 // transpositions. All classes, that represent a mathematical transposition (vector transpositions
 // and matrix transpositions) and that are used within the expression template environment of the
-// Blaze library have to derive from this class in order to qualify as transposition expression
-// template. Only in case a class is derived from the TransExpr base class, the IsTransExpr type
-// trait recognizes the class as valid transposition expression template.
+// Blaze library have to derive publicly from this class in order to qualify as transposition
+// expression template. Only in case a class is derived publicly from the TransExpr base class,
+// the IsTransExpr type trait recognizes the class as valid transposition expression template.
 */
-struct TransExpr : private Expression
+template< typename T >  // Base type of the expression
+struct TransExpr
+   : public Expression<T>
 {};
 //*************************************************************************************************
 

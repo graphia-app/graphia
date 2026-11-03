@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/IsVecEvalExpr.h
 //  \brief Header file for the IsVecEvalExpr type trait class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,11 +40,9 @@
 // Includes
 //*************************************************************************************************
 
+#include <utility>
 #include <blaze/math/expressions/VecEvalExpr.h>
 #include <blaze/util/IntegralConstant.h>
-#include <blaze/util/mpl/And.h>
-#include <blaze/util/mpl/Not.h>
-#include <blaze/util/typetraits/IsBaseOf.h>
 
 
 namespace blaze {
@@ -56,21 +54,65 @@ namespace blaze {
 //=================================================================================================
 
 //*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Auxiliary helper functions for the IsVecEvalExpr type trait.
+// \ingroup math_type_traits
+*/
+template< typename VT >
+TrueType isVecEvalExpr_backend( const volatile VecEvalExpr<VT>* );
+
+FalseType isVecEvalExpr_backend( ... );
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
 /*!\brief Compile time check whether the given type is a vector evaluation expression template.
 // \ingroup math_type_traits
 //
 // This type trait class tests whether or not the given type \a Type is a vector evaluation
 // expression template. In order to qualify as a valid vector evaluation expression template,
-// the given type has to derive (publicly or privately) from the VecEvalExpr base class. In
-// case the given type is a valid vector evaluation expression template, the \a value member
-// constant is set to \a true, the nested type definition \a Type is \a TrueType, and the class
-// derives from \a TrueType. Otherwise \a value is set to \a false, \a Type is \a FalseType, and
-// the class derives from \a FalseType.
+// the given type has to derive publicly from the VecEvalExpr base class. In case the given
+// type is a valid vector evaluation expression template, the \a value member constant is set
+// to \a true, the nested type definition \a Type is \a TrueType, and the class derives from
+// \a TrueType. Otherwise \a value is set to \a false, \a Type is \a FalseType, and the class
+// derives from \a FalseType.
 */
 template< typename T >
 struct IsVecEvalExpr
-   : public BoolConstant< And< IsBaseOf<VecEvalExpr,T>, Not< IsBaseOf<T,VecEvalExpr> > >::value >
+   : public decltype( isVecEvalExpr_backend( std::declval<T*>() ) )
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Specialization of the IsVecEvalExpr type trait for references.
+// \ingroup math_type_traits
+*/
+template< typename T >
+struct IsVecEvalExpr<T&>
+   : public FalseType
+{};
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsVecEvalExpr type trait.
+// \ingroup math_type_traits
+//
+// The IsVecEvalExpr_v variable template provides a convenient shortcut to access the nested
+// \a value of the IsVecEvalExpr class template. For instance, given the type \a T the
+// following two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsVecEvalExpr<T>::value;
+   constexpr bool value2 = blaze::IsVecEvalExpr_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsVecEvalExpr_v = IsVecEvalExpr<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

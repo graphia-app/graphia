@@ -1,9 +1,9 @@
 //=================================================================================================
 /*!
 //  \file blaze/util/mpl/Equal.h
-//  \brief Header file for the Equal class template
+//  \brief Header file for the Equal_t alias template
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,7 +40,7 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/util/mpl/Bool.h>
+#include <blaze/util/IntegralConstant.h>
 
 
 namespace blaze {
@@ -55,23 +55,41 @@ namespace blaze {
 /*!\brief Compile time type comparison.
 // \ingroup mpl
 //
-// The Equal class template compares the two given types using the equality operator ('==').
+// The Equal_t alias template compares the two given types using the equality operator ('==').
 // In case \a T1::value is equal to \a T2::value, the nested \a value member is set to \a true.
 // Otherwise it is set to \a false.
 
    \code
    using namespace blaze;
 
-   Equal< Int<3>, Int<3>  >::value   // Evaluates to true
-   Equal< Int<5>, Long<5> >::value   // Evaluates to true
-   Equal< Long<0>, Int<4> >::value   // Evaluates to false
-   Equal< Int<1>, Int<2>::ValueType  // Results in bool
+   Equal_t< Int_t<3>, Int_t<3>  >::value   // Evaluates to true
+   Equal_t< Int_t<5>, Long_t<5> >::value   // Evaluates to true
+   Equal_t< Long_t<0>, Int_t<4> >::value   // Evaluates to false
+   Equal_t< Int_t<1>, Int_t<2>::ValueType  // Results in bool
    \endcode
 */
 template< typename T1    // The type of the left-hand side operand
         , typename T2 >  // The type of the right-hand side operand
-struct Equal : public Bool< ( T1::value == T2::value ) >
-{};
+using Equal_t = Bool_t< ( T1::value == T2::value ) >;
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the Equal_t alias.
+// \ingroup mpl
+//
+// The Equal_v variable template provides a convenient shortcut to access the nested \a value of
+// the Equal_t alias. For instance, given the types \a T1 and \a T2 the following two statements
+// are identical:
+
+   \code
+   constexpr bool value1 = Equal_t<T1,T2>::value;
+   constexpr bool value2 = Equal_v<T1,T2>;
+   \endcode
+*/
+template< typename T1    // The type of the left-hand side operand
+        , typename T2 >  // The type of the right-hand side operand
+constexpr bool Equal_v = Equal_t<T1,T2>::value;
 //*************************************************************************************************
 
 } // namespace blaze

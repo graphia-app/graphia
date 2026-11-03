@@ -3,7 +3,7 @@
 //  \file blaze/math/constraints/DenseVector.h
 //  \brief Constraint on the data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -55,11 +55,11 @@ namespace blaze {
 /*!\brief Constraint on the data type.
 // \ingroup math_constraints
 //
-// In case the given data type \a T is not a dense, N-dimensional vector type, a compilation
-// error is created.
+// In case the given data type \a T is not a dense vector type (i.e. a type that is derived from
+// the DenseVector base class), a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE(T) \
-   static_assert( ::blaze::IsDenseVector<T>::value, "Non-dense vector type detected" )
+   static_assert( ::blaze::IsDenseVector_v<T>, "Non-dense vector type detected" )
 //*************************************************************************************************
 
 
@@ -75,11 +75,11 @@ namespace blaze {
 /*!\brief Constraint on the data type.
 // \ingroup math_constraints
 //
-// In case the given data type \a T is a dense, N-dimensional vector type, a compilation
-// error is created.
+// In case the given data type \a T is a dense vector type (i.e. a type that is derived from
+// the DenseVector base class), a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_DENSE_VECTOR_TYPE(T) \
-   static_assert( !::blaze::IsDenseVector<T>::value, "Dense vector type detected" )
+   static_assert( !::blaze::IsDenseVector_v<T>, "Dense vector type detected" )
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/IsSigned.h
 //  \brief Header file for the IsSigned type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -74,8 +74,27 @@ namespace blaze {
    \endcode
 */
 template< typename T >
-struct IsSigned : public BoolConstant< std::is_signed<T>::value >
+struct IsSigned
+   : public BoolConstant< std::is_signed<T>::value >
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsSigned type trait.
+// \ingroup type_traits
+//
+// The IsSigned_v variable template provides a convenient shortcut to access the nested \a value
+// of the IsSigned class template. For instance, given the type \a T the following two statements
+// are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsSigned<T>::value;
+   constexpr bool value2 = blaze::IsSigned_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsSigned_v = IsSigned<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

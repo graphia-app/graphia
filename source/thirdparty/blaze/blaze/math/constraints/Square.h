@@ -3,7 +3,7 @@
 //  \file blaze/math/constraints/Square.h
 //  \brief Constraint on the data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -47,7 +47,7 @@ namespace blaze {
 
 //=================================================================================================
 //
-//  MUST_BE_SQUARE CONSTRAINT
+//  MUST_BE_SQUARE_MATRIX_TYPE CONSTRAINT
 //
 //=================================================================================================
 
@@ -57,8 +57,8 @@ namespace blaze {
 //
 // In case the given data type \a T is not a square matrix type, a compilation error is created.
 */
-#define BLAZE_CONSTRAINT_MUST_BE_SQUARE(T) \
-   static_assert( ::blaze::IsSquare<T>::value, "Non-square matrix type detected" )
+#define BLAZE_CONSTRAINT_MUST_BE_SQUARE_MATRIX_TYPE(T) \
+   static_assert( ::blaze::IsSquare_v<T>, "Non-square matrix type detected" )
 //*************************************************************************************************
 
 
@@ -66,7 +66,7 @@ namespace blaze {
 
 //=================================================================================================
 //
-//  MUST_NOT_BE_SQUARE CONSTRAINT
+//  MUST_NOT_BE_SQUARE_MATRIX_TYPE CONSTRAINT
 //
 //=================================================================================================
 
@@ -76,8 +76,8 @@ namespace blaze {
 //
 // In case the given data type \a T is a square matrix type, a compilation error is created.
 */
-#define BLAZE_CONSTRAINT_MUST_NOT_BE_SQUARE(T) \
-   static_assert( !::blaze::IsSquare<T>::value, "Square matrix type detected" )
+#define BLAZE_CONSTRAINT_MUST_NOT_BE_SQUARE_MATRIX_TYPE(T) \
+   static_assert( !::blaze::IsSquare_v<T>, "Square matrix type detected" )
 //*************************************************************************************************
 
 } // namespace blaze

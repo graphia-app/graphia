@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/RemoveAllExtents.h
 //  \brief Header file for the RemoveAllExtents type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -72,7 +72,7 @@ struct RemoveAllExtents
  public:
    //**********************************************************************************************
    /*! \cond BLAZE_INTERNAL */
-   typedef typename std::remove_all_extents<T>::type  Type;
+   using Type = typename std::remove_all_extents<T>::type;
    /*! \endcond */
    //**********************************************************************************************
 };
@@ -83,17 +83,17 @@ struct RemoveAllExtents
 /*!\brief Auxiliary alias declaration for the RemoveAllExtents type trait.
 // \ingroup type_traits
 //
-// The RemoveAllExtents_ alias declaration provides a convenient shortcut to access the nested
+// The RemoveAllExtents_t alias declaration provides a convenient shortcut to access the nested
 // \a Type of the RemoveAllExtents class template. For instance, given the type \a T the following
 // two type definitions are identical:
 
    \code
-   using Type1 = typename RemoveAllExtents<T>::Type;
-   using Type2 = RemoveAllExtents_<T>;
+   using Type1 = typename blaze::RemoveAllExtents<T>::Type;
+   using Type2 = blaze::RemoveAllExtents_t<T>;
    \endcode
 */
 template< typename T >
-using RemoveAllExtents_ = typename RemoveAllExtents<T>::Type;
+using RemoveAllExtents_t = typename RemoveAllExtents<T>::Type;
 //*************************************************************************************************
 
 } // namespace blaze

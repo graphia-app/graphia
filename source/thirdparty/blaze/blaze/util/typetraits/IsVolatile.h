@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/IsVolatile.h
 //  \brief Header file for the IsVolatile type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -72,8 +72,27 @@ namespace blaze {
    \endcode
 */
 template< typename T >
-struct IsVolatile : public BoolConstant< std::is_volatile<T>::value  >
+struct IsVolatile
+   : public BoolConstant< std::is_volatile<T>::value  >
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsVolatile type trait.
+// \ingroup type_traits
+//
+// The IsVolatile_v variable template provides a convenient shortcut to access the nested
+// \a value of the IsVolatile class template. For instance, given the type \a T the following
+// two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsVolatile<T>::value;
+   constexpr bool value2 = blaze::IsVolatile_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsVolatile_v = IsVolatile<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/math/constraints/TVecMatMultExpr.h
 //  \brief Constraint on the data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -43,12 +43,7 @@
 #include <blaze/math/typetraits/IsMatrix.h>
 #include <blaze/math/typetraits/IsRowVector.h>
 #include <blaze/math/typetraits/IsTVecMatMultExpr.h>
-#include <blaze/math/typetraits/Rows.h>
 #include <blaze/math/typetraits/Size.h>
-#include <blaze/util/mpl/And.h>
-#include <blaze/util/mpl/Equal.h>
-#include <blaze/util/mpl/Or.h>
-#include <blaze/util/mpl/PtrdiffT.h>
 
 
 namespace blaze {
@@ -67,7 +62,7 @@ namespace blaze {
 // derived from the TVecMatMultExpr base class), a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_TVECMATMULTEXPR_TYPE(T) \
-   static_assert( ::blaze::IsTVecMatMultExpr<T>::value, "Non-vector/matrix multiplication expression type detected" )
+   static_assert( ::blaze::IsTVecMatMultExpr_v<T>, "Non-vector/matrix multiplication expression type detected" )
 //*************************************************************************************************
 
 
@@ -87,7 +82,7 @@ namespace blaze {
 // derived from the TVecMatMultExpr base class), a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_TVECMATMULTEXPR_TYPE(T) \
-   static_assert( !::blaze::IsTVecMatMultExpr<T>::value, "Vector/matrix multiplication expression type detected" )
+   static_assert( !::blaze::IsTVecMatMultExpr_v<T>, "Vector/matrix multiplication expression type detected" )
 //*************************************************************************************************
 
 
@@ -107,12 +102,12 @@ namespace blaze {
 // a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_FORM_VALID_TVECMATMULTEXPR(T1,T2) \
-   static_assert( ::blaze::And< ::blaze::IsRowVector<T1> \
-                              , ::blaze::IsMatrix<T2> \
-                              , ::blaze::Or< ::blaze::Equal< ::blaze::Size<T1>, ::blaze::PtrdiffT<-1L> > \
-                                           , ::blaze::Equal< ::blaze::Rows<T2>, ::blaze::PtrdiffT<-1L> > \
-                                           , ::blaze::Equal< ::blaze::Size<T1>, ::blaze::Rows<T2> > > \
-                              >::value, "Invalid vector/matrix multiplication expression detected" )
+   static_assert( ::blaze::IsRowVector_v<T1> && \
+                  ::blaze::IsMatrix_v<T2> && \
+                  ( ( ::blaze::Size_v<T1,0UL> == -1L ) || \
+                    ( ::blaze::Size_v<T2,0UL> == -1L ) || \
+                    ( ::blaze::Size_v<T1,0UL> == ::blaze::Size_v<T2,0UL> ) ) \
+                , "Invalid vector/matrix multiplication expression detected" )
 //*************************************************************************************************
 
 } // namespace blaze

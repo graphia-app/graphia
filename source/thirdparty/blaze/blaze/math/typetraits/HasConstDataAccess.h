@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/HasConstDataAccess.h
 //  \brief Header file for the HasConstDataAccess type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,8 +40,7 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/util/FalseType.h>
-#include <blaze/util/TrueType.h>
+#include <blaze/util/IntegralConstant.h>
 
 
 namespace blaze {
@@ -72,7 +71,8 @@ namespace blaze {
    \endcode
 */
 template< typename T >
-struct HasConstDataAccess : public FalseType
+struct HasConstDataAccess
+   : public FalseType
 {};
 //*************************************************************************************************
 
@@ -83,7 +83,8 @@ struct HasConstDataAccess : public FalseType
 // \ingroup math_type_traits
 */
 template< typename T >
-struct HasConstDataAccess< const T > : public HasConstDataAccess<T>
+struct HasConstDataAccess< const T >
+   : public HasConstDataAccess<T>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -95,7 +96,8 @@ struct HasConstDataAccess< const T > : public HasConstDataAccess<T>
 // \ingroup math_type_traits
 */
 template< typename T >
-struct HasConstDataAccess< volatile T > : public HasConstDataAccess<T>
+struct HasConstDataAccess< volatile T >
+   : public HasConstDataAccess<T>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -107,9 +109,28 @@ struct HasConstDataAccess< volatile T > : public HasConstDataAccess<T>
 // \ingroup math_type_traits
 */
 template< typename T >
-struct HasConstDataAccess< const volatile T > : public HasConstDataAccess<T>
+struct HasConstDataAccess< const volatile T >
+   : public HasConstDataAccess<T>
 {};
 /*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the HasConstDataAccess type trait.
+// \ingroup math_type_traits
+//
+// The HasConstDataAccess_v variable template provides a convenient shortcut to access the nested
+// \a value of the HasConstDataAccess class template. For instance, given the type \a T the
+// following two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::HasConstDataAccess<T>::value;
+   constexpr bool value2 = blaze::HasConstDataAccess_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool HasConstDataAccess_v = HasConstDataAccess<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

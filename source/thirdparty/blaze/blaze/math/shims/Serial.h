@@ -3,7 +3,7 @@
 //  \file blaze/math/shims/Serial.h
 //  \brief Header file for the serial shim
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -42,7 +42,6 @@
 
 #include <blaze/system/Inline.h>
 #include <blaze/util/EnableIf.h>
-#include <blaze/util/mpl/Or.h>
 #include <blaze/util/typetraits/IsBuiltin.h>
 #include <blaze/util/typetraits/IsComplex.h>
 
@@ -67,7 +66,7 @@ namespace blaze {
 // as for instance built-in data types, the default behavior is not changed.
 */
 template< typename T >
-BLAZE_ALWAYS_INLINE constexpr EnableIf_< Or< IsBuiltin<T>, IsComplex<T> >, const T& >
+BLAZE_ALWAYS_INLINE constexpr EnableIf_t< IsBuiltin_v<T> || IsComplex_v<T>, const T& >
    serial( const T& a ) noexcept
 {
    return a;

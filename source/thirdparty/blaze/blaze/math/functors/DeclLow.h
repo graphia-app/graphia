@@ -3,7 +3,7 @@
 //  \file blaze/math/functors/DeclLow.h
 //  \brief Header file for the DeclLow functor
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,6 +40,8 @@
 // Includes
 //*************************************************************************************************
 
+#include <utility>
+#include <blaze/system/HostDevice.h>
 #include <blaze/system/Inline.h>
 
 
@@ -58,22 +60,15 @@ namespace blaze {
 struct DeclLow
 {
    //**********************************************************************************************
-   /*!\brief Default constructor of the DeclLow functor.
-   */
-   explicit inline DeclLow()
-   {}
-   //**********************************************************************************************
-
-   //**********************************************************************************************
    /*!\brief Returns the result of the decllow() function for the given object/value.
    //
    // \param a The given object/value.
    // \return The result of the decllow() function for the given object/value.
    */
    template< typename T >
-   BLAZE_ALWAYS_INLINE decltype(auto) operator()( const T& a ) const
+   BLAZE_ALWAYS_INLINE BLAZE_DEVICE_CALLABLE decltype(auto) operator()( T&& a ) const
    {
-      return decllow( a );
+      return decllow( std::forward<T>( a ) );
    }
    //**********************************************************************************************
 };

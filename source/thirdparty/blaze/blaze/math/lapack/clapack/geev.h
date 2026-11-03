@@ -3,7 +3,7 @@
 //  \file blaze/math/lapack/clapack/geev.h
 //  \brief Header file for the CLAPACK geev wrapper functions
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,8 +40,10 @@
 // Includes
 //*************************************************************************************************
 
+#include <blaze/math/blas/Types.h>
 #include <blaze/util/Complex.h>
 #include <blaze/util/StaticAssert.h>
+#include <blaze/util/Types.h>
 
 
 //=================================================================================================
@@ -52,14 +54,28 @@
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
+#if !defined(INTEL_MKL_VERSION)
 extern "C" {
 
-void sgeev_( char* jobvl, char* jobvr, int* n, float*  A, int* lda, float*  wr, float*  wi, float*  VL, int* ldvl, float*  VR, int* ldvr, float*  work, int* lwork, int* info );
-void dgeev_( char* jobvl, char* jobvr, int* n, double* A, int* lda, double* wr, double* wi, double* VL, int* ldvl, double* VR, int* ldvr, double* work, int* lwork, int* info );
-void cgeev_( char* jobvl, char* jobvr, int* n, float*  A, int* lda, float*  w, float*  VL, int* ldvl, float*  VR, int* ldvr, float*  work, int* lwork, float*  rwork, int* info );
-void zgeev_( char* jobvl, char* jobvr, int* n, double* A, int* lda, double* w, double* VL, int* ldvl, double* VR, int* ldvr, double* work, int* lwork, double* rwork, int* info );
+void sgeev_( char* jobvl, char* jobvr, blaze::blas_int_t* n, float* A, blaze::blas_int_t* lda,
+             float* wr, float* wi, float* VL, blaze::blas_int_t* ldvl, float* VR, blaze::blas_int_t* ldvr,
+             float* work, blaze::blas_int_t* lwork, blaze::blas_int_t* info,
+             blaze::fortran_charlen_t njobvl, blaze::fortran_charlen_t njobvr );
+void dgeev_( char* jobvl, char* jobvr, blaze::blas_int_t* n, double* A, blaze::blas_int_t* lda,
+             double* wr, double* wi, double* VL, blaze::blas_int_t* ldvl, double* VR, blaze::blas_int_t* ldvr,
+             double* work, blaze::blas_int_t* lwork, blaze::blas_int_t* info,
+             blaze::fortran_charlen_t njobvl, blaze::fortran_charlen_t njobvr );
+void cgeev_( char* jobvl, char* jobvr, blaze::blas_int_t* n, float* A, blaze::blas_int_t* lda,
+             float* w, float* VL, blaze::blas_int_t* ldvl, float* VR, blaze::blas_int_t* ldvr,
+             float* work, blaze::blas_int_t* lwork, float* rwork, blaze::blas_int_t* info,
+             blaze::fortran_charlen_t njobvl, blaze::fortran_charlen_t njobvr );
+void zgeev_( char* jobvl, char* jobvr, blaze::blas_int_t* n, double* A, blaze::blas_int_t* lda,
+             double* w, double* VL, blaze::blas_int_t* ldvl, double* VR, blaze::blas_int_t* ldvr,
+             double* work, blaze::blas_int_t* lwork, double* rwork, blaze::blas_int_t* info,
+             blaze::fortran_charlen_t njobvl, blaze::fortran_charlen_t njobvr );
 
 }
+#endif
 /*! \endcond */
 //*************************************************************************************************
 
@@ -77,21 +93,23 @@ namespace blaze {
 //*************************************************************************************************
 /*!\name LAPACK general matrix eigenvalue functions (geev) */
 //@{
-inline void geev( char jobvl, char jobvr, int n, float* A, int lda,
-                  float* wr, float* wi, float* VL, int ldvl, float* VR, int ldvr,
-                  float* work, int lwork, int* info );
+void geev( char jobvl, char jobvr, blas_int_t n, float* A, blas_int_t lda,
+           float* wr, float* wi, float* VL, blas_int_t ldvl, float* VR, blas_int_t ldvr,
+           float* work, blas_int_t lwork, blas_int_t* info );
 
-inline void geev( char jobvl, char jobvr, int n, double* A, int lda,
-                  double* wr, double* wi, double* VL, int ldvl, double* VR, int ldvr,
-                  double* work, int lwork, int* info );
+void geev( char jobvl, char jobvr, blas_int_t n, double* A, blas_int_t lda,
+           double* wr, double* wi, double* VL, blas_int_t ldvl, double* VR, blas_int_t ldvr,
+           double* work, blas_int_t lwork, blas_int_t* info );
 
-inline void geev( char jobvl, char jobvr, int n, complex<float>* A, int lda,
-                  complex<float>* w, complex<float>* VL, int ldvl, complex<float>* VR, int ldvr,
-                  complex<float>* work, int lwork, float* rwork, int* info );
+void geev( char jobvl, char jobvr, blas_int_t n, complex<float>* A, blas_int_t lda,
+           complex<float>* w, complex<float>* VL, blas_int_t ldvl, complex<float>* VR,
+           blas_int_t ldvr, complex<float>* work, blas_int_t lwork, float* rwork,
+           blas_int_t* info );
 
-inline void geev( char jobvl, char jobvr, int n, complex<double>* A, int lda,
-                  complex<double>* w, complex<double>* VL, int ldvl, complex<double>* VR, int ldvr,
-                  complex<double>* work, int lwork, double* rwork, int* info );
+void geev( char jobvl, char jobvr, blas_int_t n, complex<double>* A, blas_int_t lda,
+           complex<double>* w, complex<double>* VL, blas_int_t ldvl, complex<double>* VR,
+           blas_int_t ldvr, complex<double>* work, blas_int_t lwork, double* rwork,
+           blas_int_t* info );
 //@}
 //*************************************************************************************************
 
@@ -105,7 +123,7 @@ inline void geev( char jobvl, char jobvr, int n, complex<double>* A, int lda,
 // \param jobvr \c 'V' to compute the right eigenvectors of \a A, \c 'N' to not compute them.
 // \param n The number of rows and columns of the given matrix \f$[0..\infty)\f$.
 // \param A Pointer to the first element of the single precision column-major matrix.
-// \param lda The total number of elements between two columns of the matrix A \f$[0..\infty)\f$.
+// \param lda The total number of elements between two columns of the matrix A; size >= max( 1, \a n ).
 // \param wr Pointer to the first element of the vector for the real part of the eigenvalues.
 // \param wi Pointer to the first element of the vector for the imaginary part of the eigenvalues.
 // \param VL Pointer to the first element of the column-major matrix for the left eigenvectors.
@@ -158,11 +176,19 @@ inline void geev( char jobvl, char jobvr, int n, complex<double>* A, int lda,
 // is available and linked to the executable. Otherwise a call to this function will result in a
 // linker error.
 */
-inline void geev( char jobvl, char jobvr, int n, float* A, int lda,
-                  float* wr, float* wi, float* VL, int ldvl, float* VR, int ldvr,
-                  float* work, int lwork, int* info )
+inline void geev( char jobvl, char jobvr, blas_int_t n, float* A, blas_int_t lda,
+                  float* wr, float* wi, float* VL, blas_int_t ldvl, float* VR, blas_int_t ldvr,
+                  float* work, blas_int_t lwork, blas_int_t* info )
 {
-   sgeev_( &jobvl, &jobvr, &n, A, &lda, wr, wi, VL, &ldvl, VR, &ldvr, work, &lwork, info );
+#if defined(INTEL_MKL_VERSION)
+   BLAZE_STATIC_ASSERT( sizeof( MKL_INT ) == sizeof( blas_int_t ) );
+#endif
+
+   sgeev_( &jobvl, &jobvr, &n, A, &lda, wr, wi, VL, &ldvl, VR, &ldvr, work, &lwork, info
+#if !defined(INTEL_MKL_VERSION)
+         , blaze::fortran_charlen_t(1), blaze::fortran_charlen_t(1)
+#endif
+         );
 }
 //*************************************************************************************************
 
@@ -176,7 +202,7 @@ inline void geev( char jobvl, char jobvr, int n, float* A, int lda,
 // \param jobvr \c 'V' to compute the right eigenvectors of \a A, \c 'N' to not compute them.
 // \param n The number of rows and columns of the given matrix \f$[0..\infty)\f$.
 // \param A Pointer to the first element of the double precision column-major matrix.
-// \param lda The total number of elements between two columns of the matrix A \f$[0..\infty)\f$.
+// \param lda The total number of elements between two columns of the matrix A; size >= max( 1, \a n ).
 // \param wr Pointer to the first element of the vector for the real part of the eigenvalues.
 // \param wi Pointer to the first element of the vector for the imaginary part of the eigenvalues.
 // \param VL Pointer to the first element of the column-major matrix for the left eigenvectors.
@@ -229,11 +255,19 @@ inline void geev( char jobvl, char jobvr, int n, float* A, int lda,
 // is available and linked to the executable. Otherwise a call to this function will result in a
 // linker error.
 */
-inline void geev( char jobvl, char jobvr, int n, double* A, int lda,
-                  double* wr, double* wi, double* VL, int ldvl, double* VR, int ldvr,
-                  double* work, int lwork, int* info )
+inline void geev( char jobvl, char jobvr, blas_int_t n, double* A, blas_int_t lda,
+                  double* wr, double* wi, double* VL, blas_int_t ldvl, double* VR, blas_int_t ldvr,
+                  double* work, blas_int_t lwork, blas_int_t* info )
 {
-   dgeev_( &jobvl, &jobvr, &n, A, &lda, wr, wi, VL, &ldvl, VR, &ldvr, work, &lwork, info );
+#if defined(INTEL_MKL_VERSION)
+   BLAZE_STATIC_ASSERT( sizeof( MKL_INT ) == sizeof( blas_int_t ) );
+#endif
+
+   dgeev_( &jobvl, &jobvr, &n, A, &lda, wr, wi, VL, &ldvl, VR, &ldvr, work, &lwork, info
+#if !defined(INTEL_MKL_VERSION)
+         , blaze::fortran_charlen_t(1), blaze::fortran_charlen_t(1)
+#endif
+         );
 }
 //*************************************************************************************************
 
@@ -247,7 +281,7 @@ inline void geev( char jobvl, char jobvr, int n, double* A, int lda,
 // \param jobvr \c 'V' to compute the right eigenvectors of \a A, \c 'N' to not compute them.
 // \param n The number of rows and columns of the given matrix \f$[0..\infty)\f$.
 // \param A Pointer to the first element of the single precision complex column-major matrix.
-// \param lda The total number of elements between two columns of the matrix A \f$[0..\infty)\f$.
+// \param lda The total number of elements between two columns of the matrix A; size >= max( 1, \a n ).
 // \param w Pointer to the first element of the vector for the eigenvalues.
 // \param VL Pointer to the first element of the column-major matrix for the left eigenvectors.
 // \param ldvl The total number of elements between two columns of the matrix VL \f$[0..\infty)\f$.
@@ -300,15 +334,28 @@ inline void geev( char jobvl, char jobvr, int n, double* A, int lda,
 // is available and linked to the executable. Otherwise a call to this function will result in a
 // linker error.
 */
-inline void geev( char jobvl, char jobvr, int n, complex<float>* A, int lda,
-                  complex<float>* w, complex<float>* VL, int ldvl, complex<float>* VR, int ldvr,
-                  complex<float>* work, int lwork, float* rwork, int* info )
+inline void geev( char jobvl, char jobvr, blas_int_t n, complex<float>* A, blas_int_t lda,
+                  complex<float>* w, complex<float>* VL, blas_int_t ldvl, complex<float>* VR,
+                  blas_int_t ldvr, complex<float>* work, blas_int_t lwork, float* rwork,
+                  blas_int_t* info )
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<float> ) == 2UL*sizeof( float ) );
 
-   cgeev_( &jobvl, &jobvr, &n, reinterpret_cast<float*>( A ), &lda, reinterpret_cast<float*>( w ),
-           reinterpret_cast<float*>( VL ), &ldvl, reinterpret_cast<float*>( VR ), &ldvr,
-           reinterpret_cast<float*>( work ), &lwork, rwork, info );
+#if defined(INTEL_MKL_VERSION)
+   BLAZE_STATIC_ASSERT( sizeof( MKL_INT ) == sizeof( blas_int_t ) );
+   BLAZE_STATIC_ASSERT( sizeof( MKL_Complex8 ) == sizeof( complex<float> ) );
+   using ET = MKL_Complex8;
+#else
+   using ET = float;
+#endif
+
+   cgeev_( &jobvl, &jobvr, &n, reinterpret_cast<ET*>( A ), &lda, reinterpret_cast<ET*>( w ),
+           reinterpret_cast<ET*>( VL ), &ldvl, reinterpret_cast<ET*>( VR ), &ldvr,
+           reinterpret_cast<ET*>( work ), &lwork, rwork, info
+#if !defined(INTEL_MKL_VERSION)
+         , blaze::fortran_charlen_t(1), blaze::fortran_charlen_t(1)
+#endif
+         );
 }
 //*************************************************************************************************
 
@@ -322,7 +369,7 @@ inline void geev( char jobvl, char jobvr, int n, complex<float>* A, int lda,
 // \param jobvr \c 'V' to compute the right eigenvectors of \a A, \c 'N' to not compute them.
 // \param n The number of rows and columns of the given matrix \f$[0..\infty)\f$.
 // \param A Pointer to the first element of the double precision complex column-major matrix.
-// \param lda The total number of elements between two columns of the matrix A \f$[0..\infty)\f$.
+// \param lda The total number of elements between two columns of the matrix A; size >= max( 1, \a n ).
 // \param w Pointer to the first element of the vector for the eigenvalues.
 // \param VL Pointer to the first element of the column-major matrix for the left eigenvectors.
 // \param ldvl The total number of elements between two columns of the matrix VL \f$[0..\infty)\f$.
@@ -375,15 +422,28 @@ inline void geev( char jobvl, char jobvr, int n, complex<float>* A, int lda,
 // is available and linked to the executable. Otherwise a call to this function will result in a
 // linker error.
 */
-inline void geev( char jobvl, char jobvr, int n, complex<double>* A, int lda,
-                  complex<double>* w, complex<double>* VL, int ldvl, complex<double>* VR, int ldvr,
-                  complex<double>* work, int lwork, double* rwork, int* info )
+inline void geev( char jobvl, char jobvr, blas_int_t n, complex<double>* A, blas_int_t lda,
+                  complex<double>* w, complex<double>* VL, blas_int_t ldvl, complex<double>* VR,
+                  blas_int_t ldvr, complex<double>* work, blas_int_t lwork, double* rwork,
+                  blas_int_t* info )
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<double> ) == 2UL*sizeof( double ) );
 
-   zgeev_( &jobvl, &jobvr, &n, reinterpret_cast<double*>( A ), &lda, reinterpret_cast<double*>( w ),
-           reinterpret_cast<double*>( VL ), &ldvl, reinterpret_cast<double*>( VR ), &ldvr,
-           reinterpret_cast<double*>( work ), &lwork, rwork, info );
+#if defined(INTEL_MKL_VERSION)
+   BLAZE_STATIC_ASSERT( sizeof( MKL_INT ) == sizeof( blas_int_t ) );
+   BLAZE_STATIC_ASSERT( sizeof( MKL_Complex16 ) == sizeof( complex<double> ) );
+   using ET = MKL_Complex16;
+#else
+   using ET = double;
+#endif
+
+   zgeev_( &jobvl, &jobvr, &n, reinterpret_cast<ET*>( A ), &lda, reinterpret_cast<ET*>( w ),
+           reinterpret_cast<ET*>( VL ), &ldvl, reinterpret_cast<ET*>( VR ), &ldvr,
+           reinterpret_cast<ET*>( work ), &lwork, rwork, info
+#if !defined(INTEL_MKL_VERSION)
+         , blaze::fortran_charlen_t(1), blaze::fortran_charlen_t(1)
+#endif
+         );
 }
 //*************************************************************************************************
 

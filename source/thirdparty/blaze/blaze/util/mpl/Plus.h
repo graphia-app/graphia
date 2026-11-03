@@ -1,9 +1,9 @@
 //=================================================================================================
 /*!
 //  \file blaze/util/mpl/Plus.h
-//  \brief Header file for the Plus class template
+//  \brief Header file for the Plus_t alias template
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -56,23 +56,22 @@ namespace blaze {
 /*!\brief Compile time integral addition.
 // \ingroup mpl
 //
-// The Plus class template returns the sum of the two given template arguments \a T1 and \a T2.
-// In order for Plus to be able to add the two types, both arguments are required to have a nested
-// member \a value. The result of the addition can be accessed via the nested member \a value, the
-// resulting type is available via the nested type \a ValueType.
+// The Plus_t alias template returns the sum of the two given template arguments \a T1 and
+// \a T2. In order for Plus_t to be able to add the two types, both arguments are required
+// to have a nested member \a value. The result of the addition can be accessed via the
+// nested member \a value, the resulting type is available via the nested type \a ValueType.
 
    \code
-   blaze::Plus< Int<3> , Int<2>  >::value      // Results in 5
-   blaze::Plus< Long<3>, Int<2>  >::ValueType  // Results in long
-   blaze::Plus< Int<3> , Long<2> >::ValueType  // Results in long
+   blaze::Plus_t< Int_t<3> , Int_t<2>  >::value      // Results in 5
+   blaze::Plus_t< Long_t<3>, Int_t<2>  >::ValueType  // Results in long
+   blaze::Plus_t< Int_t<3> , Long_t<2> >::ValueType  // Results in long
    \endcode
 */
 template< typename T1    // Type of the first compile time value
         , typename T2 >  // Type of the second compile time value
-struct Plus
-   : public IntegralConstant< CommonType_< typename T1::ValueType, typename T2::ValueType >
-                            , ( T1::value + T2::value ) >
-{};
+using Plus_t =
+   IntegralConstant< CommonType_t< typename T1::ValueType, typename T2::ValueType >
+                   , ( T1::value + T2::value ) >;
 //*************************************************************************************************
 
 } // namespace blaze

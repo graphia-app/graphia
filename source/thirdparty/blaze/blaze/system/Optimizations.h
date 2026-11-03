@@ -3,7 +3,7 @@
 //  \file blaze/system/Optimizations.h
 //  \brief System settings for performance optimizations
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -36,12 +36,30 @@
 #define _BLAZE_SYSTEM_OPTIMIZATIONS_H_
 
 
+//*************************************************************************************************
+// Includes
+//*************************************************************************************************
+
+#include <blaze/config/Optimizations.h>
+
+
+namespace blaze {
+
 //=================================================================================================
 //
 //  OPTIMIZATION SETTINGS
 //
 //=================================================================================================
 
-#include <blaze/config/Optimizations.h>
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+constexpr bool usePadding               = BLAZE_USE_PADDING;
+constexpr bool useStreaming             = BLAZE_USE_STREAMING;
+constexpr bool useOptimizedKernels      = BLAZE_USE_OPTIMIZED_KERNELS;
+constexpr bool useDefaultInitialization = BLAZE_USE_DEFAULT_INITIALIZATION;
+/*! \endcond */
+//*************************************************************************************************
+
+} // namespace blaze
 
 #endif

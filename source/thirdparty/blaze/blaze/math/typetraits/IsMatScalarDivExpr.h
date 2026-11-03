@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/IsMatScalarDivExpr.h
 //  \brief Header file for the IsMatScalarDivExpr type trait class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,11 +40,9 @@
 // Includes
 //*************************************************************************************************
 
+#include <utility>
 #include <blaze/math/expressions/MatScalarDivExpr.h>
 #include <blaze/util/IntegralConstant.h>
-#include <blaze/util/mpl/And.h>
-#include <blaze/util/mpl/Not.h>
-#include <blaze/util/typetraits/IsBaseOf.h>
 
 
 namespace blaze {
@@ -56,22 +54,66 @@ namespace blaze {
 //=================================================================================================
 
 //*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Auxiliary helper functions for the IsMatScalarDivExpr type trait.
+// \ingroup math_type_traits
+*/
+template< typename MT >
+TrueType isMatScalarDivExpr_backend( const volatile MatScalarDivExpr<MT>* );
+
+FalseType isMatScalarDivExpr_backend( ... );
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
 /*!\brief Compile time check whether the given type is a matrix/scalar division expression
 //        template.
 // \ingroup math_type_traits
 //
 // This type trait class tests whether or not the given type \a Type is a matrix/scalar division
 // expression template. In order to qualify as a valid matrix/scalar division expression template,
-// the given type has to derive (publicly or privately) from the MatScalarDivExpr base class. In
-// case the given type is a valid matrix/scalar division expression template, the \a value member
-// constant is set to \a true, the nested type definition \a Type is \a TrueType, and the class
-// derives from \a TrueType. Otherwise \a value is set to \a false, \a Type is \a FalseType, and
-// the class derives from \a FalseType.
+// the given type has to derive publicly from the MatScalarDivExpr base class. In case the given
+// type is a valid matrix/scalar division expression template, the \a value member constant is
+// set to \a true, the nested type definition \a Type is \a TrueType, and the class derives from
+// \a TrueType. Otherwise \a value is set to \a false, \a Type is \a FalseType, and the class
+// derives from \a FalseType.
 */
 template< typename T >
 struct IsMatScalarDivExpr
-   : public BoolConstant< And< IsBaseOf<MatScalarDivExpr,T>, Not< IsBaseOf<T,MatScalarDivExpr> > >::value >
+   : public decltype( isMatScalarDivExpr_backend( std::declval<T*>() ) )
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Specialization of the IsMatScalarDivExpr type trait for references.
+// \ingroup math_type_traits
+*/
+template< typename T >
+struct IsMatScalarDivExpr<T&>
+   : public FalseType
+{};
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsMatScalarDivExpr type trait.
+// \ingroup math_type_traits
+//
+// The IsMatScalarDivExpr_v variable template provides a convenient shortcut to access the nested
+// \a value of the IsMatScalarDivExpr class template. For instance, given the type \a T the
+// following two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsMatScalarDivExpr<T>::value;
+   constexpr bool value2 = blaze::IsMatScalarDivExpr_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsMatScalarDivExpr_v = IsMatScalarDivExpr<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

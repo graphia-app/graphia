@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/IsBaseOf.h
 //  \brief Header file for the IsBaseOf type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -77,8 +77,27 @@ namespace blaze {
    \endcode
 */
 template< typename Base, typename Derived >
-class IsBaseOf : public BoolConstant< std::is_base_of< RemoveCV_<Base>, RemoveCV_<Derived> >::value >
+class IsBaseOf
+   : public BoolConstant< std::is_base_of< RemoveCV_t<Base>, RemoveCV_t<Derived> >::value >
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsBaseOf type trait.
+// \ingroup type_traits
+//
+// The IsBaseOf_v variable template provides a convenient shortcut to access the nested \a value
+// of the IsBaseOf class template. For instance, given the types \a T1 and \a T2 the following
+// two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsBaseOf<T1,T2>::value;
+   constexpr bool value2 = blaze::IsBaseOf_v<T1,T2>;
+   \endcode
+*/
+template< typename Base, typename Derived >
+constexpr bool IsBaseOf_v = IsBaseOf<Base,Derived>::value;
 //*************************************************************************************************
 
 } // namespace blaze

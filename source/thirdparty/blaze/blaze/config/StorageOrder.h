@@ -3,7 +3,7 @@
 //  \file blaze/config/StorageOrder.h
 //  \brief Configuration of the default storage order for all matrices of the Blaze library
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -33,8 +33,6 @@
 //=================================================================================================
 
 
-namespace blaze {
-
 //*************************************************************************************************
 /*!\brief The default storage order for all matrices of the Blaze library.
 // \ingroup config
@@ -47,13 +45,25 @@ namespace blaze {
    // Explicit specification of the storage order => row-major matrix
    StaticMatrix<double,3UL,3UL,rowMajor> A;
 
-   // No explicit specification of the storage order => use of the defaultStorageOrder
+   // No explicit specification of the storage order => use of the default storage order
    StaticMatrix<double,3UL,3UL> B;
    \endcode
 
-// Valid settings for the defaultStorageOrder are blaze::rowMajor and blaze::columnMajor.
-*/
-constexpr bool defaultStorageOrder = rowMajor;
-//*************************************************************************************************
+// Valid settings for the BLAZE_DEFAULT_STORAGE_ORDER are blaze::rowMajor and blaze::columnMajor.
+//
+// \note It is possible to specify the default storage order via command line or by defining this
+// symbol manually before including any Blaze header file:
 
-} // namespace blaze
+   \code
+   g++ ... -DBLAZE_DEFAULT_STORAGE_ORDER=blaze::rowMajor ...
+   \endcode
+
+   \code
+   #define BLAZE_DEFAULT_STORAGE_ORDER blaze::rowMajor
+   #include <blaze/Blaze.h>
+   \endcode
+*/
+#ifndef BLAZE_DEFAULT_STORAGE_ORDER
+#define BLAZE_DEFAULT_STORAGE_ORDER blaze::rowMajor
+#endif
+//*************************************************************************************************

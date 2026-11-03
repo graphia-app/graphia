@@ -3,7 +3,7 @@
 //  \file blaze/util/MemoryPool.h
 //  \brief Header file for the memory pool class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -65,7 +65,8 @@ namespace blaze {
 // specified number of objects. The memory of these blocks is managed as a single free list.
 */
 template< typename Type, size_t Blocksize >
-class MemoryPool : private NonCopyable
+class MemoryPool
+   : private NonCopyable
 {
  private:
    //**union FreeObject****************************************************************************
@@ -103,7 +104,7 @@ class MemoryPool : private NonCopyable
    //**********************************************************************************************
 
    //**Type definitions****************************************************************************
-   typedef std::vector<Block> Blocks;  //!< Vector of memory blocks.
+   using Blocks = std::vector<Block>;  //!< Vector of memory blocks.
    //**********************************************************************************************
 
  public:

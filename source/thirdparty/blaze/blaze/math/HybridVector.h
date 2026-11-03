@@ -3,7 +3,7 @@
 //  \file blaze/math/HybridVector.h
 //  \brief Header file for the complete HybridVector implementation
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -44,6 +44,7 @@
 #include <blaze/math/dense/StaticVector.h>
 #include <blaze/math/DenseVector.h>
 #include <blaze/math/DynamicMatrix.h>
+#include <blaze/math/ZeroVector.h>
 #include <blaze/util/Random.h>
 
 
@@ -62,124 +63,83 @@ namespace blaze {
 //
 // This specialization of the Rand class creates random instances of HybridVector.
 */
-template< typename Type  // Data type of the vector
-        , size_t N       // Number of elements
-        , bool TF >      // Transpose flag
-class Rand< HybridVector<Type,N,TF> >
+template< typename Type     // Data type of the vector
+        , size_t N          // Number of elements
+        , bool TF           // Transpose flag
+        , AlignmentFlag AF  // Alignment flag
+        , PaddingFlag PF    // Padding flag
+        , typename Tag >    // Type tag
+class Rand< HybridVector<Type,N,TF,AF,PF,Tag> >
 {
  public:
-   //**Generate functions**************************************************************************
-   /*!\name Generate functions */
-   //@{
-   inline const HybridVector<Type,N,TF> generate( size_t n ) const;
-
-   template< typename Arg >
-   inline const HybridVector<Type,N,TF> generate( size_t n, const Arg& min, const Arg& max ) const;
-   //@}
+   //**********************************************************************************************
+   /*!\brief Generation of a random HybridVector.
+   //
+   // \param n The size of the random vector.
+   // \return The generated random vector.
+   */
+   inline const HybridVector<Type,N,TF,AF,PF,Tag> generate( size_t n ) const
+   {
+      HybridVector<Type,N,TF,AF,PF,Tag> vector( n );
+      randomize( vector );
+      return vector;
+   }
    //**********************************************************************************************
 
-   //**Randomize functions*************************************************************************
-   /*!\name Randomize functions */
-   //@{
-   inline void randomize( HybridVector<Type,N,TF>& vector ) const;
+   //**********************************************************************************************
+   /*!\brief Generation of a random HybridVector.
+   //
+   // \param n The size of the random vector.
+   // \param min The smallest possible value for a vector element.
+   // \param max The largest possible value for a vector element.
+   // \return The generated random vector.
+   */
+   template< typename Arg >  // Min/max argument type
+   inline const HybridVector<Type,N,TF,AF,PF,Tag>
+      generate( size_t n, const Arg& min, const Arg& max ) const
+   {
+      HybridVector<Type,N,TF,AF,PF,Tag> vector( n );
+      randomize( vector, min, max );
+      return vector;
+   }
+   //**********************************************************************************************
 
-   template< typename Arg >
-   inline void randomize( HybridVector<Type,N,TF>& vector, const Arg& min, const Arg& max ) const;
-   //@}
+   //**********************************************************************************************
+   /*!\brief Randomization of a HybridVector.
+   //
+   // \param vector The vector to be randomized.
+   // \return void
+   */
+   inline void randomize( HybridVector<Type,N,TF,AF,PF,Tag>& vector ) const
+   {
+      using blaze::randomize;
+
+      for( size_t i=0UL; i<vector.size(); ++i ) {
+         randomize( vector[i] );
+      }
+   }
+   //**********************************************************************************************
+
+   //**********************************************************************************************
+   /*!\brief Randomization of a HybridVector.
+   //
+   // \param vector The vector to be randomized.
+   // \param min The smallest possible value for a vector element.
+   // \param max The largest possible value for a vector element.
+   // \return void
+   */
+   template< typename Arg >  // Min/max argument type
+   inline void randomize( HybridVector<Type,N,TF,AF,PF,Tag>& vector,
+                          const Arg& min, const Arg& max ) const
+   {
+      using blaze::randomize;
+
+      for( size_t i=0UL; i<vector.size(); ++i ) {
+         randomize( vector[i], min, max );
+      }
+   }
    //**********************************************************************************************
 };
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Generation of a random HybridVector.
-//
-// \param n The size of the random vector.
-// \return The generated random vector.
-*/
-template< typename Type  // Data type of the vector
-        , size_t N       // Number of elements
-        , bool TF >      // Transpose flag
-inline const HybridVector<Type,N,TF> Rand< HybridVector<Type,N,TF> >::generate( size_t n ) const
-{
-   HybridVector<Type,N,TF> vector( n );
-   randomize( vector );
-   return vector;
-}
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Generation of a random HybridVector.
-//
-// \param n The size of the random vector.
-// \param min The smallest possible value for a vector element.
-// \param max The largest possible value for a vector element.
-// \return The generated random vector.
-*/
-template< typename Type   // Data type of the vector
-        , size_t N        // Number of elements
-        , bool TF >       // Transpose flag
-template< typename Arg >  // Min/max argument type
-inline const HybridVector<Type,N,TF>
-   Rand< HybridVector<Type,N,TF> >::generate( size_t n, const Arg& min, const Arg& max ) const
-{
-   HybridVector<Type,N,TF> vector( n );
-   randomize( vector, min, max );
-   return vector;
-}
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Randomization of a HybridVector.
-//
-// \param vector The vector to be randomized.
-// \return void
-*/
-template< typename Type  // Data type of the vector
-        , size_t N       // Number of elements
-        , bool TF >      // Transpose flag
-inline void Rand< HybridVector<Type,N,TF> >::randomize( HybridVector<Type,N,TF>& vector ) const
-{
-   using blaze::randomize;
-
-   for( size_t i=0UL; i<vector.size(); ++i ) {
-      randomize( vector[i] );
-   }
-}
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Randomization of a HybridVector.
-//
-// \param vector The vector to be randomized.
-// \param min The smallest possible value for a vector element.
-// \param max The largest possible value for a vector element.
-// \return void
-*/
-template< typename Type   // Data type of the vector
-        , size_t N        // Number of elements
-        , bool TF >       // Transpose flag
-template< typename Arg >  // Min/max argument type
-inline void Rand< HybridVector<Type,N,TF> >::randomize( HybridVector<Type,N,TF>& vector,
-                                                        const Arg& min, const Arg& max ) const
-{
-   using blaze::randomize;
-
-   for( size_t i=0UL; i<vector.size(); ++i ) {
-      randomize( vector[i], min, max );
-   }
-}
 /*! \endcond */
 //*************************************************************************************************
 

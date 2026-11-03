@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/IsRValueReference.h
 //  \brief Header file for the IsRValueReference type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -74,8 +74,27 @@ namespace blaze {
    \endcode
 */
 template< typename T >
-struct IsRValueReference : public BoolConstant< std::is_rvalue_reference<T>::value >
+struct IsRValueReference
+   : public BoolConstant< std::is_rvalue_reference<T>::value >
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsRValueReference type trait.
+// \ingroup type_traits
+//
+// The IsRValueReference_v variable template provides a convenient shortcut to access the nested
+// \a value of the IsRValueReference class template. For instance, given the type \a T the
+// following two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsRValueReference<T>::value;
+   constexpr bool value2 = blaze::IsRValueReference_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsRValueReference_v = IsRValueReference<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

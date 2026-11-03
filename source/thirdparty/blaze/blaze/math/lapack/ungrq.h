@@ -3,7 +3,7 @@
 //  \file blaze/math/lapack/ungrq.h
 //  \brief Header file for the LAPACK functions to reconstruct Q from a RQ decomposition (ungrq)
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -45,8 +45,10 @@
 #include <blaze/math/constraints/Adaptor.h>
 #include <blaze/math/constraints/BLASCompatible.h>
 #include <blaze/math/constraints/Computation.h>
+#include <blaze/math/constraints/Contiguous.h>
 #include <blaze/math/constraints/MutableDataAccess.h>
 #include <blaze/math/expressions/DenseMatrix.h>
+#include <blaze/math/lapack/clapack/ungql.h>
 #include <blaze/math/lapack/clapack/ungrq.h>
 #include <blaze/util/Assert.h>
 #include <blaze/util/constraints/Complex.h>
@@ -65,7 +67,7 @@ namespace blaze {
 /*!\name LAPACK functions to reconstruct Q from a RQ decomposition (ungrq) */
 //@{
 template< typename MT, bool SO >
-inline void ungrq( DenseMatrix<MT,SO>& A, const ElementType_<MT>* tau );
+void ungrq( DenseMatrix<MT,SO>& A, const ElementType_t<MT>* tau );
 //@}
 //*************************************************************************************************
 
@@ -90,7 +92,7 @@ inline void ungrq( DenseMatrix<MT,SO>& A, const ElementType_<MT>* tau );
    using blaze::DynamicMatrix;
    using blaze::columnMajor;
 
-   typedef complex<double>  cplx;
+   using cplx = complex<double>;
 
    DynamicMatrix<cplx,columnMajor> A;
    DynamicVector<cplx> tau;
@@ -99,8 +101,8 @@ inline void ungrq( DenseMatrix<MT,SO>& A, const ElementType_<MT>* tau );
    gerqf( A, tau.data() );  // Performing the RQ decomposition
    ungrq( A, tau.data() );  // Reconstructing the Q matrix
 
-   const int m( A.rows() );
-   const int n( A.columns() );
+   const size_t m( A.rows() );
+   const size_t n( A.columns() );
 
    const size_t row( m > n ? m - n : 0UL )
    DynamicMatrix<cplx,columnMajor> Q( submatrix( A, row, 0UL, min(m,n), n ) );
@@ -116,36 +118,37 @@ inline void ungrq( DenseMatrix<MT,SO>& A, const ElementType_<MT>* tau );
 // linker error.
 */
 template< typename MT, bool SO >
-inline void ungrq( DenseMatrix<MT,SO>& A, const ElementType_<MT>* tau )
+inline void ungrq( DenseMatrix<MT,SO>& A, const ElementType_t<MT>* tau )
 {
    BLAZE_CONSTRAINT_MUST_NOT_BE_ADAPTOR_TYPE( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT );
    BLAZE_CONSTRAINT_MUST_HAVE_MUTABLE_DATA_ACCESS( MT );
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<MT> );
-   BLAZE_CONSTRAINT_MUST_BE_COMPLEX_TYPE( ElementType_<MT> );
+   BLAZE_CONSTRAINT_MUST_BE_CONTIGUOUS_TYPE( MT );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT> );
+   BLAZE_CONSTRAINT_MUST_BE_COMPLEX_TYPE( ElementType_t<MT> );
 
-   using ET = ElementType_<MT>;
+   using ET = ElementType_t<MT>;
 
-   int n   ( numeric_cast<int>( SO ? (~A).columns() : (~A).rows() ) );
-   int m   ( numeric_cast<int>( SO ? (~A).rows() : (~A).columns() ) );
-   int k   ( min( m, n ) );
-   int lda ( numeric_cast<int>( (~A).spacing() ) );
-   int info( 0 );
+   blas_int_t n   ( numeric_cast<blas_int_t>( SO ? (*A).columns() : (*A).rows() ) );
+   blas_int_t m   ( numeric_cast<blas_int_t>( SO ? (*A).rows() : (*A).columns() ) );
+   blas_int_t k   ( min( m, n ) );
+   blas_int_t lda ( numeric_cast<blas_int_t>( (*A).spacing() ) );
+   blas_int_t info( 0 );
 
    if( k == 0 ) {
       return;
    }
 
-   int lwork( k*lda );
+   blas_int_t lwork( k*lda );
    const std::unique_ptr<ET[]> work( new ET[lwork] );
 
    if( SO ) {
       const size_t offset( ( m > n )?( m - n ):( 0UL ) );
-      ungrq( k, n, k, (~A).data()+offset, lda, tau, work.get(), lwork, &info );
+      ungrq( k, n, k, (*A).data()+offset, lda, tau, work.get(), lwork, &info );
    }
    else {
       const size_t offset( ( m < n )?( n - m ):( 0UL ) );
-      ungql( m, k, k, (~A).data(offset), lda, tau, work.get(), lwork, &info );
+      ungql( m, k, k, (*A).data(offset), lda, tau, work.get(), lwork, &info );
    }
 
    BLAZE_INTERNAL_ASSERT( info == 0, "Invalid argument for Q reconstruction" );

@@ -3,7 +3,7 @@
 //  \file blaze/math/expressions/SVecSVecOuterExpr.h
 //  \brief Header file for the sparse vector/sparse vector outer product expression
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,6 +40,7 @@
 // Includes
 //*************************************************************************************************
 
+#include <utility>
 #include <blaze/math/Aliases.h>
 #include <blaze/math/constraints/ColumnVector.h>
 #include <blaze/math/constraints/RowVector.h>
@@ -47,6 +48,7 @@
 #include <blaze/math/constraints/SparseVector.h>
 #include <blaze/math/constraints/Symmetric.h>
 #include <blaze/math/constraints/VecTVecMultExpr.h>
+#include <blaze/math/constraints/Zero.h>
 #include <blaze/math/Exception.h>
 #include <blaze/math/expressions/Computation.h>
 #include <blaze/math/expressions/Forward.h>
@@ -54,23 +56,17 @@
 #include <blaze/math/expressions/VecTVecMultExpr.h>
 #include <blaze/math/shims/IsDefault.h>
 #include <blaze/math/shims/Serial.h>
-#include <blaze/math/traits/ColumnExprTrait.h>
-#include <blaze/math/traits/MultExprTrait.h>
 #include <blaze/math/traits/MultTrait.h>
-#include <blaze/math/traits/RowExprTrait.h>
-#include <blaze/math/traits/SubmatrixExprTrait.h>
-#include <blaze/math/traits/SubvectorExprTrait.h>
-#include <blaze/math/typetraits/Columns.h>
 #include <blaze/math/typetraits/IsComputation.h>
 #include <blaze/math/typetraits/IsExpression.h>
 #include <blaze/math/typetraits/IsTemporary.h>
-#include <blaze/math/typetraits/Rows.h>
-#include <blaze/math/typetraits/Size.h>
+#include <blaze/math/typetraits/IsZero.h>
+#include <blaze/system/MacroDisable.h>
 #include <blaze/util/Assert.h>
+#include <blaze/util/EnableIf.h>
 #include <blaze/util/FunctionTrace.h>
 #include <blaze/util/mpl/If.h>
 #include <blaze/util/Types.h>
-#include <blaze/util/typetraits/RemoveReference.h>
 
 
 namespace blaze {
@@ -90,18 +86,18 @@ namespace blaze {
 */
 template< typename VT1    // Type of the left-hand side sparse vector
         , typename VT2 >  // Type of the right-hand side sparse vector
-class SVecSVecOuterExpr : public SparseMatrix< SVecSVecOuterExpr<VT1,VT2>, false >
-                        , private VecTVecMultExpr
-                        , private Computation
+class SVecSVecOuterExpr
+   : public VecTVecMultExpr< SparseMatrix< SVecSVecOuterExpr<VT1,VT2>, false > >
+   , private Computation
 {
  private:
    //**Type definitions****************************************************************************
-   typedef ResultType_<VT1>     RT1;  //!< Result type of the left-hand side sparse vector expression.
-   typedef ResultType_<VT2>     RT2;  //!< Result type of the right-hand side sparse vector expression.
-   typedef ReturnType_<VT1>     RN1;  //!< Return type of the left-hand side sparse vector expression.
-   typedef ReturnType_<VT2>     RN2;  //!< Return type of the right-hand side sparse vector expression.
-   typedef CompositeType_<VT1>  CT1;  //!< Composite type of the left-hand side sparse vector expression.
-   typedef CompositeType_<VT2>  CT2;  //!< Composite type of the right-hand side sparse vector expression.
+   using RT1 = ResultType_t<VT1>;     //!< Result type of the left-hand side sparse vector expression.
+   using RT2 = ResultType_t<VT2>;     //!< Result type of the right-hand side sparse vector expression.
+   using RN1 = ReturnType_t<VT1>;     //!< Return type of the left-hand side sparse vector expression.
+   using RN2 = ReturnType_t<VT2>;     //!< Return type of the right-hand side sparse vector expression.
+   using CT1 = CompositeType_t<VT1>;  //!< Composite type of the left-hand side sparse vector expression.
+   using CT2 = CompositeType_t<VT2>;  //!< Composite type of the right-hand side sparse vector expression.
    //**********************************************************************************************
 
    //**Return type evaluation**********************************************************************
@@ -111,42 +107,47 @@ class SVecSVecOuterExpr : public SparseMatrix< SVecSVecOuterExpr<VT1,VT2>, false
        or matrix, \a returnExpr will be set to \a false and the subscript operator will
        return it's result by value. Otherwise \a returnExpr will be set to \a true and
        the subscript operator may return it's result as an expression. */
-   enum : bool { returnExpr = !IsTemporary<RN1>::value && !IsTemporary<RN2>::value };
+   static constexpr bool returnExpr = ( !IsTemporary_v<RN1> && !IsTemporary_v<RN2> );
 
    //! Expression return type for the subscript operator.
-   typedef MultExprTrait_<RN1,RN2>  ExprReturnType;
+   using ExprReturnType = decltype( std::declval<RN1>() * std::declval<RN2>() );
    //**********************************************************************************************
 
  public:
    //**Type definitions****************************************************************************
-   typedef SVecSVecOuterExpr<VT1,VT2>  This;           //!< Type of this SVecSVecOuterExpr instance.
-   typedef MultTrait_<RT1,RT2>         ResultType;     //!< Result type for expression template evaluations.
-   typedef OppositeType_<ResultType>   OppositeType;   //!< Result type with opposite storage order for expression template evaluations.
-   typedef TransposeType_<ResultType>  TransposeType;  //!< Transpose type for expression template evaluations.
-   typedef ElementType_<ResultType>    ElementType;    //!< Resulting element type.
+   //! Type of this SVecSVecOuterExpr instance.
+   using This = SVecSVecOuterExpr<VT1,VT2>;
+
+   //! Base type of this SVecSVecOuterExpr instance.
+   using BaseType = VecTVecMultExpr< SparseMatrix<This,false> >;
+
+   using ResultType    = MultTrait_t<RT1,RT2>;         //!< Result type for expression template evaluations.
+   using OppositeType  = OppositeType_t<ResultType>;   //!< Result type with opposite storage order for expression template evaluations.
+   using TransposeType = TransposeType_t<ResultType>;  //!< Transpose type for expression template evaluations.
+   using ElementType   = ElementType_t<ResultType>;    //!< Resulting element type.
 
    //! Return type for expression template evaluations.
-   typedef const IfTrue_< returnExpr, ExprReturnType, ElementType >  ReturnType;
+   using ReturnType = const If_t< returnExpr, ExprReturnType, ElementType >;
 
    //! Data type for composite expression templates.
-   typedef const ResultType  CompositeType;
+   using CompositeType = const ResultType;
 
    //! Composite type of the left-hand side sparse vector expression.
-   typedef If_< IsExpression<VT1>, const VT1, const VT1& >  LeftOperand;
+   using LeftOperand = If_t< IsExpression_v<VT1>, const VT1, const VT1& >;
 
    //! Composite type of the right-hand side sparse vector expression.
-   typedef If_< IsExpression<VT2>, const VT2, const VT2& >  RightOperand;
+   using RightOperand = If_t< IsExpression_v<VT2>, const VT2, const VT2& >;
 
-   //! Type for the assignment of the left-hand side dense vector operand.
-   typedef If_< IsComputation<VT1>, const RT1, CT1 >  LT;
+   //! Type for the assignment of the left-hand side sparse vector operand.
+   using LT = If_t< IsComputation_v<VT1>, const RT1, CT1 >;
 
-   //! Type for the assignment of the right-hand side dense vector operand.
-   typedef If_< IsComputation<VT2>, const RT2, CT2 >  RT;
+   //! Type for the assignment of the right-hand side sparse vector operand.
+   using RT = If_t< IsComputation_v<VT2>, const RT2, CT2 >;
    //**********************************************************************************************
 
    //**Compilation flags***************************************************************************
    //! Compilation switch for the expression template assignment strategy.
-   enum : bool { smpAssignable = false };
+   static constexpr bool smpAssignable = false;
    //**********************************************************************************************
 
    //**Constructor*********************************************************************************
@@ -155,7 +156,7 @@ class SVecSVecOuterExpr : public SparseMatrix< SVecSVecOuterExpr<VT1,VT2>, false
    // \param lhs The left-hand side sparse vector operand of the multiplication expression.
    // \param rhs The right-hand side sparse vector operand of the multiplication expression.
    */
-   explicit inline SVecSVecOuterExpr( const VT1& lhs, const VT2& rhs ) noexcept
+   inline SVecSVecOuterExpr( const VT1& lhs, const VT2& rhs ) noexcept
       : lhs_( lhs )  // Left-hand side sparse vector of the multiplication expression
       , rhs_( rhs )  // Right-hand side sparse vector of the multiplication expression
    {}
@@ -303,27 +304,24 @@ class SVecSVecOuterExpr : public SparseMatrix< SVecSVecOuterExpr<VT1,VT2>, false
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
-
-      typedef ConstIterator_< RemoveReference_<LT> >  LeftIterator;
-      typedef ConstIterator_< RemoveReference_<RT> >  RightIterator;
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
       LT x( serial( rhs.lhs_ ) );  // Evaluation of the left-hand side sparse vector operand
       RT y( serial( rhs.rhs_ ) );  // Evaluation of the right-hand side sparse vector operand
 
       BLAZE_INTERNAL_ASSERT( x.size() == rhs.lhs_.size() , "Invalid vector size" );
       BLAZE_INTERNAL_ASSERT( y.size() == rhs.rhs_.size() , "Invalid vector size" );
-      BLAZE_INTERNAL_ASSERT( x.size() == (~lhs).rows()   , "Invalid vector size" );
-      BLAZE_INTERNAL_ASSERT( y.size() == (~lhs).columns(), "Invalid vector size" );
+      BLAZE_INTERNAL_ASSERT( x.size() == (*lhs).rows()   , "Invalid vector size" );
+      BLAZE_INTERNAL_ASSERT( y.size() == (*lhs).columns(), "Invalid vector size" );
 
-      const LeftIterator  lend( x.end() );
-      const RightIterator rend( y.end() );
+      const auto lend( x.end() );
+      const auto rend( y.end() );
 
-      for( LeftIterator lelem=x.begin(); lelem!=lend; ++lelem ) {
+      for( auto lelem=x.begin(); lelem!=lend; ++lelem ) {
          if( !isDefault( lelem->value() ) ) {
-            for( RightIterator relem=y.begin(); relem!=rend; ++relem ) {
-               (~lhs)(lelem->index(),relem->index()) = lelem->value() * relem->value();
+            for( auto relem=y.begin(); relem!=rend; ++relem ) {
+               (*lhs)(lelem->index(),relem->index()) = lelem->value() * relem->value();
             }
          }
       }
@@ -351,27 +349,24 @@ class SVecSVecOuterExpr : public SparseMatrix< SVecSVecOuterExpr<VT1,VT2>, false
 
       BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT );
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
-
-      typedef ConstIterator_< RemoveReference_<LT> >  LeftIterator;
-      typedef ConstIterator_< RemoveReference_<RT> >  RightIterator;
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
       LT x( serial( rhs.lhs_ ) );  // Evaluation of the left-hand side sparse vector operand
       RT y( serial( rhs.rhs_ ) );  // Evaluation of the right-hand side sparse vector operand
 
       BLAZE_INTERNAL_ASSERT( x.size() == rhs.lhs_.size() , "Invalid vector size" );
       BLAZE_INTERNAL_ASSERT( y.size() == rhs.rhs_.size() , "Invalid vector size" );
-      BLAZE_INTERNAL_ASSERT( x.size() == (~lhs).rows()   , "Invalid vector size" );
-      BLAZE_INTERNAL_ASSERT( y.size() == (~lhs).columns(), "Invalid vector size" );
+      BLAZE_INTERNAL_ASSERT( x.size() == (*lhs).rows()   , "Invalid vector size" );
+      BLAZE_INTERNAL_ASSERT( y.size() == (*lhs).columns(), "Invalid vector size" );
 
-      const LeftIterator  lend( x.end() );
-      const RightIterator rend( y.end() );
+      const auto lend( x.end() );
+      const auto rend( y.end() );
 
-      for( RightIterator relem=y.begin(); relem!=rend; ++relem ) {
+      for( auto relem=y.begin(); relem!=rend; ++relem ) {
          if( !isDefault( relem->value() ) ) {
-            for( LeftIterator lelem=x.begin(); lelem!=lend; ++lelem ) {
-               (~lhs)(lelem->index(),relem->index()) = lelem->value() * relem->value();
+            for( auto lelem=x.begin(); lelem!=lend; ++lelem ) {
+               (*lhs)(lelem->index(),relem->index()) = lelem->value() * relem->value();
             }
          }
       }
@@ -396,39 +391,40 @@ class SVecSVecOuterExpr : public SparseMatrix< SVecSVecOuterExpr<VT1,VT2>, false
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()     == rhs.rows()    , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns()  == rhs.columns() , "Invalid number of columns" );
-      BLAZE_INTERNAL_ASSERT( (~lhs).capacity() >= rhs.nonZeros(), "Insufficient capacity"     );
-
-      typedef ConstIterator_< RemoveReference_<LT> >  LeftIterator;
-      typedef ConstIterator_< RemoveReference_<RT> >  RightIterator;
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()     == rhs.rows()    , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns()  == rhs.columns() , "Invalid number of columns" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).capacity() >= rhs.nonZeros(), "Insufficient capacity"     );
 
       LT x( serial( rhs.lhs_ ) );  // Evaluation of the left-hand side sparse vector operand
       RT y( serial( rhs.rhs_ ) );  // Evaluation of the right-hand side sparse vector operand
 
       BLAZE_INTERNAL_ASSERT( x.size() == rhs.lhs_.size() , "Invalid vector size" );
       BLAZE_INTERNAL_ASSERT( y.size() == rhs.rhs_.size() , "Invalid vector size" );
-      BLAZE_INTERNAL_ASSERT( x.size() == (~lhs).rows()   , "Invalid vector size" );
-      BLAZE_INTERNAL_ASSERT( y.size() == (~lhs).columns(), "Invalid vector size" );
+      BLAZE_INTERNAL_ASSERT( x.size() == (*lhs).rows()   , "Invalid vector size" );
+      BLAZE_INTERNAL_ASSERT( y.size() == (*lhs).columns(), "Invalid vector size" );
 
-      const LeftIterator  lend( x.end() );
-      const RightIterator rend( y.end() );
+      // Final memory allocation (based on the evaluated operands)
+      (*lhs).reserve( x.nonZeros() * y.nonZeros() );
+
+      // Performing the outer product
+      const auto lend( x.end() );
+      const auto rend( y.end() );
       size_t index( 0UL );
 
-      for( LeftIterator lelem=x.begin(); lelem!=lend; ++lelem ) {
+      for( auto lelem=x.begin(); lelem!=lend; ++lelem ) {
          if( !isDefault( lelem->value() ) ) {
             for( ; index < lelem->index(); ++index ) {
-               (~lhs).finalize( index );
+               (*lhs).finalize( index );
             }
-            for( RightIterator relem=y.begin(); relem!=rend; ++relem ) {
-               (~lhs).append( lelem->index(), relem->index(), lelem->value() * relem->value() );
+            for( auto relem=y.begin(); relem!=rend; ++relem ) {
+               (*lhs).append( lelem->index(), relem->index(), lelem->value() * relem->value() );
             }
-            (~lhs).finalize( index++ );
+            (*lhs).finalize( index++ );
          }
       }
 
       for( ; index < x.size(); ++index ) {
-         (~lhs).finalize( index );
+         (*lhs).finalize( index );
       }
    }
    /*! \endcond */
@@ -454,39 +450,36 @@ class SVecSVecOuterExpr : public SparseMatrix< SVecSVecOuterExpr<VT1,VT2>, false
 
       BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT );
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()     == rhs.rows()    , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns()  == rhs.columns() , "Invalid number of columns" );
-      BLAZE_INTERNAL_ASSERT( (~lhs).capacity() >= rhs.nonZeros(), "Insufficient capacity"     );
-
-      typedef ConstIterator_< RemoveReference_<LT> >  LeftIterator;
-      typedef ConstIterator_< RemoveReference_<RT> >  RightIterator;
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()     == rhs.rows()    , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns()  == rhs.columns() , "Invalid number of columns" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).capacity() >= rhs.nonZeros(), "Insufficient capacity"     );
 
       LT x( serial( rhs.lhs_ ) );  // Evaluation of the left-hand side sparse vector operand
       RT y( serial( rhs.rhs_ ) );  // Evaluation of the right-hand side sparse vector operand
 
       BLAZE_INTERNAL_ASSERT( x.size() == rhs.lhs_.size() , "Invalid vector size" );
       BLAZE_INTERNAL_ASSERT( y.size() == rhs.rhs_.size() , "Invalid vector size" );
-      BLAZE_INTERNAL_ASSERT( x.size() == (~lhs).rows()   , "Invalid vector size" );
-      BLAZE_INTERNAL_ASSERT( y.size() == (~lhs).columns(), "Invalid vector size" );
+      BLAZE_INTERNAL_ASSERT( x.size() == (*lhs).rows()   , "Invalid vector size" );
+      BLAZE_INTERNAL_ASSERT( y.size() == (*lhs).columns(), "Invalid vector size" );
 
-      const LeftIterator  lend( x.end() );
-      const RightIterator rend( y.end() );
+      const auto lend( x.end() );
+      const auto rend( y.end() );
       size_t index( 0UL );
 
-      for( RightIterator relem=y.begin(); relem!=rend; ++relem ) {
+      for( auto relem=y.begin(); relem!=rend; ++relem ) {
          if( !isDefault( relem->value() ) ) {
             for( ; index < relem->index(); ++index ) {
-               (~lhs).finalize( index );
+               (*lhs).finalize( index );
             }
-            for( LeftIterator lelem=x.begin(); lelem!=lend; ++lelem ) {
-               (~lhs).append( lelem->index(), relem->index(), lelem->value() * relem->value() );
+            for( auto lelem=x.begin(); lelem!=lend; ++lelem ) {
+               (*lhs).append( lelem->index(), relem->index(), lelem->value() * relem->value() );
             }
-            (~lhs).finalize( index++ );
+            (*lhs).finalize( index++ );
          }
       }
 
       for( ; index < y.size(); ++index ) {
-         (~lhs).finalize( index );
+         (*lhs).finalize( index );
       }
    }
    /*! \endcond */
@@ -510,27 +503,24 @@ class SVecSVecOuterExpr : public SparseMatrix< SVecSVecOuterExpr<VT1,VT2>, false
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
-
-      typedef ConstIterator_< RemoveReference_<LT> >  LeftIterator;
-      typedef ConstIterator_< RemoveReference_<RT> >  RightIterator;
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
       LT x( serial( rhs.lhs_ ) );  // Evaluation of the left-hand side sparse vector operand
       RT y( serial( rhs.rhs_ ) );  // Evaluation of the right-hand side sparse vector operand
 
       BLAZE_INTERNAL_ASSERT( x.size() == rhs.lhs_.size() , "Invalid vector size" );
       BLAZE_INTERNAL_ASSERT( y.size() == rhs.rhs_.size() , "Invalid vector size" );
-      BLAZE_INTERNAL_ASSERT( x.size() == (~lhs).rows()   , "Invalid vector size" );
-      BLAZE_INTERNAL_ASSERT( y.size() == (~lhs).columns(), "Invalid vector size" );
+      BLAZE_INTERNAL_ASSERT( x.size() == (*lhs).rows()   , "Invalid vector size" );
+      BLAZE_INTERNAL_ASSERT( y.size() == (*lhs).columns(), "Invalid vector size" );
 
-      const LeftIterator  lend( x.end() );
-      const RightIterator rend( y.end() );
+      const auto lend( x.end() );
+      const auto rend( y.end() );
 
-      for( LeftIterator lelem=x.begin(); lelem!=lend; ++lelem ) {
+      for( auto lelem=x.begin(); lelem!=lend; ++lelem ) {
          if( !isDefault( lelem->value() ) ) {
-            for( RightIterator relem=y.begin(); relem!=rend; ++relem ) {
-               (~lhs)(lelem->index(),relem->index()) += lelem->value() * relem->value();
+            for( auto relem=y.begin(); relem!=rend; ++relem ) {
+               (*lhs)(lelem->index(),relem->index()) += lelem->value() * relem->value();
             }
          }
       }
@@ -558,27 +548,24 @@ class SVecSVecOuterExpr : public SparseMatrix< SVecSVecOuterExpr<VT1,VT2>, false
 
       BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT );
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
-
-      typedef ConstIterator_< RemoveReference_<LT> >  LeftIterator;
-      typedef ConstIterator_< RemoveReference_<RT> >  RightIterator;
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
       LT x( serial( rhs.lhs_ ) );  // Evaluation of the left-hand side sparse vector operand
       RT y( serial( rhs.rhs_ ) );  // Evaluation of the right-hand side sparse vector operand
 
       BLAZE_INTERNAL_ASSERT( x.size() == rhs.lhs_.size() , "Invalid vector size" );
       BLAZE_INTERNAL_ASSERT( y.size() == rhs.rhs_.size() , "Invalid vector size" );
-      BLAZE_INTERNAL_ASSERT( x.size() == (~lhs).rows()   , "Invalid vector size" );
-      BLAZE_INTERNAL_ASSERT( y.size() == (~lhs).columns(), "Invalid vector size" );
+      BLAZE_INTERNAL_ASSERT( x.size() == (*lhs).rows()   , "Invalid vector size" );
+      BLAZE_INTERNAL_ASSERT( y.size() == (*lhs).columns(), "Invalid vector size" );
 
-      const LeftIterator  lend( x.end() );
-      const RightIterator rend( y.end() );
+      const auto lend( x.end() );
+      const auto rend( y.end() );
 
-      for( RightIterator relem=y.begin(); relem!=rend; ++relem ) {
+      for( auto relem=y.begin(); relem!=rend; ++relem ) {
          if( !isDefault( relem->value() ) ) {
-            for( LeftIterator lelem=x.begin(); lelem!=lend; ++lelem ) {
-               (~lhs)(lelem->index(),relem->index()) += lelem->value() * relem->value();
+            for( auto lelem=x.begin(); lelem!=lend; ++lelem ) {
+               (*lhs)(lelem->index(),relem->index()) += lelem->value() * relem->value();
             }
          }
       }
@@ -608,27 +595,24 @@ class SVecSVecOuterExpr : public SparseMatrix< SVecSVecOuterExpr<VT1,VT2>, false
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
-
-      typedef ConstIterator_< RemoveReference_<LT> >  LeftIterator;
-      typedef ConstIterator_< RemoveReference_<RT> >  RightIterator;
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
       LT x( serial( rhs.lhs_ ) );  // Evaluation of the left-hand side sparse vector operand
       RT y( serial( rhs.rhs_ ) );  // Evaluation of the right-hand side sparse vector operand
 
       BLAZE_INTERNAL_ASSERT( x.size() == rhs.lhs_.size() , "Invalid vector size" );
       BLAZE_INTERNAL_ASSERT( y.size() == rhs.rhs_.size() , "Invalid vector size" );
-      BLAZE_INTERNAL_ASSERT( x.size() == (~lhs).rows()   , "Invalid vector size" );
-      BLAZE_INTERNAL_ASSERT( y.size() == (~lhs).columns(), "Invalid vector size" );
+      BLAZE_INTERNAL_ASSERT( x.size() == (*lhs).rows()   , "Invalid vector size" );
+      BLAZE_INTERNAL_ASSERT( y.size() == (*lhs).columns(), "Invalid vector size" );
 
-      const LeftIterator  lend( x.end() );
-      const RightIterator rend( y.end() );
+      const auto lend( x.end() );
+      const auto rend( y.end() );
 
-      for( LeftIterator lelem=x.begin(); lelem!=lend; ++lelem ) {
+      for( auto lelem=x.begin(); lelem!=lend; ++lelem ) {
          if( !isDefault( lelem->value() ) ) {
-            for( RightIterator relem=y.begin(); relem!=rend; ++relem ) {
-               (~lhs)(lelem->index(),relem->index()) -= lelem->value() * relem->value();
+            for( auto relem=y.begin(); relem!=rend; ++relem ) {
+               (*lhs)(lelem->index(),relem->index()) -= lelem->value() * relem->value();
             }
          }
       }
@@ -656,27 +640,24 @@ class SVecSVecOuterExpr : public SparseMatrix< SVecSVecOuterExpr<VT1,VT2>, false
 
       BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT );
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
-
-      typedef ConstIterator_< RemoveReference_<LT> >  LeftIterator;
-      typedef ConstIterator_< RemoveReference_<RT> >  RightIterator;
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
       LT x( serial( rhs.lhs_ ) );  // Evaluation of the left-hand side sparse vector operand
       RT y( serial( rhs.rhs_ ) );  // Evaluation of the right-hand side sparse vector operand
 
       BLAZE_INTERNAL_ASSERT( x.size() == rhs.lhs_.size() , "Invalid vector size" );
       BLAZE_INTERNAL_ASSERT( y.size() == rhs.rhs_.size() , "Invalid vector size" );
-      BLAZE_INTERNAL_ASSERT( x.size() == (~lhs).rows()   , "Invalid vector size" );
-      BLAZE_INTERNAL_ASSERT( y.size() == (~lhs).columns(), "Invalid vector size" );
+      BLAZE_INTERNAL_ASSERT( x.size() == (*lhs).rows()   , "Invalid vector size" );
+      BLAZE_INTERNAL_ASSERT( y.size() == (*lhs).columns(), "Invalid vector size" );
 
-      const LeftIterator  lend( x.end() );
-      const RightIterator rend( y.end() );
+      const auto lend( x.end() );
+      const auto rend( y.end() );
 
-      for( RightIterator relem=y.begin(); relem!=rend; ++relem ) {
+      for( auto relem=y.begin(); relem!=rend; ++relem ) {
          if( !isDefault( relem->value() ) ) {
-            for( LeftIterator lelem=x.begin(); lelem!=lend; ++lelem ) {
-               (~lhs)(lelem->index(),relem->index()) -= lelem->value() * relem->value();
+            for( auto lelem=x.begin(); lelem!=lend; ++lelem ) {
+               (*lhs)(lelem->index(),relem->index()) -= lelem->value() * relem->value();
             }
          }
       }
@@ -686,6 +667,144 @@ class SVecSVecOuterExpr : public SparseMatrix< SVecSVecOuterExpr<VT1,VT2>, false
 
    //**Subtraction assignment to sparse matrices***************************************************
    // No special implementation for the subtraction assignment to sparse matrices.
+   //**********************************************************************************************
+
+   //**Schur product assignment to row-major dense matrices****************************************
+   /*! \cond BLAZE_INTERNAL */
+   /*!\brief Schur product assignment of a sparse vector-sparse vector outer product to a row-major
+   //        dense matrix.
+   // \ingroup sparse_matrix
+   //
+   // \param lhs The target left-hand side dense matrix.
+   // \param rhs The right-hand side outer product expression for the Schur product.
+   // \return void
+   //
+   // This function implements the performance optimized Schur product assignment of a sparse
+   // vector-sparse vector outer product expression to a row-major dense matrix.
+   */
+   template< typename MT >  // Type of the target dense matrix
+   friend inline void schurAssign( DenseMatrix<MT,false>& lhs, const SVecSVecOuterExpr& rhs )
+   {
+      BLAZE_FUNCTION_TRACE;
+
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
+
+      LT x( serial( rhs.lhs_ ) );  // Evaluation of the left-hand side sparse vector operand
+      RT y( serial( rhs.rhs_ ) );  // Evaluation of the right-hand side sparse vector operand
+
+      BLAZE_INTERNAL_ASSERT( x.size() == rhs.lhs_.size() , "Invalid vector size" );
+      BLAZE_INTERNAL_ASSERT( y.size() == rhs.rhs_.size() , "Invalid vector size" );
+      BLAZE_INTERNAL_ASSERT( x.size() == (*lhs).rows()   , "Invalid vector size" );
+      BLAZE_INTERNAL_ASSERT( y.size() == (*lhs).columns(), "Invalid vector size" );
+
+      const auto lend( x.end() );
+      const auto rend( y.end() );
+
+      size_t i( 0UL );
+
+      for( auto lelem=x.begin(); lelem!=lend; ++lelem )
+      {
+         if( isDefault( lelem->value() ) ) continue;
+
+         for( ; i<lelem->index(); ++i ) {
+            for( size_t j=0UL; j<y.size(); ++j )
+               reset( (*lhs)(i,j) );
+         }
+
+         size_t j( 0UL );
+
+         for( auto relem=y.begin(); relem!=rend; ++relem, ++j ) {
+            for( ; j<relem->index(); ++j )
+               reset( (*lhs)(i,j) );
+            (*lhs)(lelem->index(),relem->index()) *= lelem->value() * relem->value();
+         }
+
+         for( ; j<y.size(); ++j ) {
+            reset( (*lhs)(i,j) );
+         }
+
+         ++i;
+      }
+
+      for( ; i<x.size(); ++i ) {
+         for( size_t j=0UL; j<y.size(); ++j )
+            reset( (*lhs)(i,j) );
+      }
+   }
+   /*! \endcond */
+   //**********************************************************************************************
+
+   //**Schur product assignment to column-major dense matrices*************************************
+   /*! \cond BLAZE_INTERNAL */
+   /*!\brief Schur product assignment of a sparse vector-sparse vector outer product to a
+   //        column-major dense matrix.
+   // \ingroup sparse_matrix
+   //
+   // \param lhs The target left-hand side dense matrix.
+   // \param rhs The right-hand side outer product expression for the Schur product.
+   // \return void
+   //
+   // This function implements the performance optimized Schur product assignment of a sparse
+   // vector-sparse vector outer product expression to a column-major dense matrix.
+   */
+   template< typename MT >  // Type of the target dense matrix
+   friend inline void schurAssign( DenseMatrix<MT,true>& lhs, const SVecSVecOuterExpr& rhs )
+   {
+      BLAZE_FUNCTION_TRACE;
+
+      BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT );
+
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
+
+      LT x( serial( rhs.lhs_ ) );  // Evaluation of the left-hand side sparse vector operand
+      RT y( serial( rhs.rhs_ ) );  // Evaluation of the right-hand side sparse vector operand
+
+      BLAZE_INTERNAL_ASSERT( x.size() == rhs.lhs_.size() , "Invalid vector size" );
+      BLAZE_INTERNAL_ASSERT( y.size() == rhs.rhs_.size() , "Invalid vector size" );
+      BLAZE_INTERNAL_ASSERT( x.size() == (*lhs).rows()   , "Invalid vector size" );
+      BLAZE_INTERNAL_ASSERT( y.size() == (*lhs).columns(), "Invalid vector size" );
+
+      const auto lend( x.end() );
+      const auto rend( y.end() );
+
+      size_t j( 0UL );
+
+      for( auto relem=y.begin(); relem!=rend; ++relem )
+      {
+         if( isDefault( relem->value() ) ) continue;
+
+         for( ; j<relem->index(); ++j ) {
+            for( size_t i=0UL; i<x.size(); ++i )
+               reset( (*lhs)(i,j) );
+         }
+
+         size_t i( 0UL );
+
+         for( auto lelem=x.begin(); lelem!=lend; ++lelem, ++i ) {
+            for( ; i<lelem->index(); ++i )
+               reset( (*lhs)(i,j) );
+            (*lhs)(lelem->index(),relem->index()) *= lelem->value() * relem->value();
+         }
+
+         for( ; i<x.size(); ++i ) {
+            reset( (*lhs)(i,j) );
+         }
+
+         ++j;
+      }
+
+      for( ; j<y.size(); ++j ) {
+         for( size_t i=0UL; i<x.size(); ++i )
+            reset( (*lhs)(i,j) );
+      }
+   }
+   /*! \endcond */
+   //**********************************************************************************************
+
+   //**Schur product assignment to sparse matrices*************************************************
+   // No special implementation for the Schur product assignment to sparse matrices.
    //**********************************************************************************************
 
    //**Multiplication assignment to dense matrices*************************************************
@@ -702,6 +821,8 @@ class SVecSVecOuterExpr : public SparseMatrix< SVecSVecOuterExpr<VT1,VT2>, false
    BLAZE_CONSTRAINT_MUST_BE_COLUMN_VECTOR_TYPE( VT1 );
    BLAZE_CONSTRAINT_MUST_BE_SPARSE_VECTOR_TYPE( VT2 );
    BLAZE_CONSTRAINT_MUST_BE_ROW_VECTOR_TYPE   ( VT2 );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_ZERO_TYPE     ( VT1 );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_ZERO_TYPE     ( VT2 );
    BLAZE_CONSTRAINT_MUST_FORM_VALID_VECTVECMULTEXPR( VT1, VT2 );
    /*! \endcond */
    //**********************************************************************************************
@@ -716,6 +837,65 @@ class SVecSVecOuterExpr : public SparseMatrix< SVecSVecOuterExpr<VT1,VT2>, false
 //  GLOBAL BINARY ARITHMETIC OPERATORS
 //
 //=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Backend implementation of the sparse vector-sparse vector outer product
+//        (\f$ A=\vec{b}*\vec{c}^T \f$).
+// \ingroup sparse_matrix
+//
+// \param lhs The left-hand side sparse vector for the outer product.
+// \param rhs The right-hand side transpose sparse vector for the outer product.
+// \return The resulting sparse matrix.
+//
+// This function implements a performance optimized treatment of the sparse vector-sparse vector
+// outer product.
+*/
+template< typename VT1  // Type of the left-hand side sparse vector
+        , typename VT2  // Type of the right-hand side sparse vector
+        , DisableIf_t< IsZero_v<VT1> || IsZero_v<VT2> >* = nullptr >
+inline const SVecSVecOuterExpr<VT1,VT2>
+   svecsvecouter( const SparseVector<VT1,false>& lhs, const SparseVector<VT2,true>& rhs )
+{
+   BLAZE_FUNCTION_TRACE;
+
+   return SVecSVecOuterExpr<VT1,VT2>( *lhs, *rhs );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Backend implementation of the (zero) sparse vector-(zero) sparse vector outer product
+//        (\f$ A=\vec{b}*\vec{c}^T \f$).
+// \ingroup sparse_matrix
+//
+// \param lhs The left-hand side sparse vector for the outer product.
+// \param rhs The right-hand side transpose sparse vector for the outer product.
+// \return The zero sparse matrix.
+//
+// This function implements a performance optimized treatment of the (zero) sparse vector-(zero)
+// sparse vector outer product. It returns a zero matrix.
+*/
+template< typename VT1  // Type of the left-hand side sparse vector
+        , typename VT2  // Type of the right-hand side sparse vector
+        , EnableIf_t< IsZero_v<VT1> || IsZero_v<VT2> >* = nullptr >
+inline decltype(auto)
+   svecsvecouter( const SparseVector<VT1,false>& lhs, const SparseVector<VT2,true>& rhs )
+{
+   BLAZE_FUNCTION_TRACE;
+
+   using ReturnType = const MultTrait_t< ResultType_t<VT1>, ResultType_t<VT2> >;
+
+   BLAZE_CONSTRAINT_MUST_BE_ROW_MAJOR_MATRIX_TYPE( ReturnType );
+   BLAZE_CONSTRAINT_MUST_BE_ZERO_TYPE( ReturnType );
+
+   return ReturnType( (*lhs).size(), (*rhs).size() );
+}
+/*! \endcond */
+//*************************************************************************************************
+
 
 //*************************************************************************************************
 /*!\brief Multiplication operator for the sparse vector-sparse vector outer product
@@ -740,104 +920,19 @@ class SVecSVecOuterExpr : public SparseMatrix< SVecSVecOuterExpr<VT1,VT2>, false
    \endcode
 
 // The operator returns an expression representing a sparse matrix of the higher-order element
-// type of the two involved element types \a T1::ElementType and \a T2::ElementType. Both
-// vector types \a T1 and \a T2 as well as the two element types \a T1::ElementType and
-// \a T2::ElementType have to be supported by the MultTrait class template.
+// type of the two involved element types \a VT1::ElementType and \a VT2::ElementType. Both
+// vector types \a VT1 and \a VT2 as well as the two element types \a VT1::ElementType and
+// \a VT2::ElementType have to be supported by the MultTrait class template.
 */
-template< typename T1    // Type of the left-hand side sparse vector
-        , typename T2 >  // Type of the right-hand side sparse vector
-inline const SVecSVecOuterExpr<T1,T2>
-   operator*( const SparseVector<T1,false>& lhs, const SparseVector<T2,true>& rhs )
+template< typename VT1    // Type of the left-hand side sparse vector
+        , typename VT2 >  // Type of the right-hand side sparse vector
+inline decltype(auto)
+   operator*( const SparseVector<VT1,false>& lhs, const SparseVector<VT2,true>& rhs )
 {
    BLAZE_FUNCTION_TRACE;
 
-   return SVecSVecOuterExpr<T1,T2>( ~lhs, ~rhs );
+   return svecsvecouter( *lhs, *rhs );
 }
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  ROWS SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename VT1, typename VT2 >
-struct Rows< SVecSVecOuterExpr<VT1,VT2> > : public Size<VT1>
-{};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  COLUMNS SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename VT1, typename VT2 >
-struct Columns< SVecSVecOuterExpr<VT1,VT2> > : public Size<VT2>
-{};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  EXPRESSION TRAIT SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename VT1, typename VT2, bool AF >
-struct SubmatrixExprTrait< SVecSVecOuterExpr<VT1,VT2>, AF >
-{
- public:
-   //**********************************************************************************************
-   using Type = MultExprTrait_< SubvectorExprTrait_<const VT1,AF>
-                              , SubvectorExprTrait_<const VT2,AF> >;
-   //**********************************************************************************************
-};
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename VT1, typename VT2 >
-struct RowExprTrait< SVecSVecOuterExpr<VT1,VT2> >
-{
- public:
-   //**********************************************************************************************
-   using Type = MultExprTrait_< ReturnType_<VT1>, VT2 >;
-   //**********************************************************************************************
-};
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename VT1, typename VT2 >
-struct ColumnExprTrait< SVecSVecOuterExpr<VT1,VT2> >
-{
- public:
-   //**********************************************************************************************
-   using Type = MultExprTrait_< VT1, ReturnType_<VT2> >;
-   //**********************************************************************************************
-};
-/*! \endcond */
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/HasSIMDConj.h
 //  \brief Header file for the HasSIMDConj type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -43,10 +43,10 @@
 #include <blaze/math/typetraits/HasSIMDMult.h>
 #include <blaze/util/Complex.h>
 #include <blaze/util/IntegralConstant.h>
-#include <blaze/util/typetraits/Decay.h>
 #include <blaze/util/typetraits/IsFloatingPoint.h>
 #include <blaze/util/typetraits/IsNumeric.h>
 #include <blaze/util/typetraits/IsSigned.h>
+#include <blaze/util/typetraits/RemoveCVRef.h>
 
 
 namespace blaze {
@@ -59,12 +59,14 @@ namespace blaze {
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
+/*!\brief Auxiliary helper struct for the HasSIMDConj type trait.
+// \ingroup math_type_traits
+*/
 template< typename T         // Type of the operand
         , typename = void >  // Restricting condition
 struct HasSIMDConjHelper
-{
-   enum : bool { value = IsNumeric<T>::value };
-};
+   : public BoolConstant< IsNumeric_v<T> >
+{};
 /*! \endcond */
 //*************************************************************************************************
 
@@ -73,10 +75,12 @@ struct HasSIMDConjHelper
 /*! \cond BLAZE_INTERNAL */
 template< typename T >
 struct HasSIMDConjHelper< complex<T> >
-{
-   enum : bool { value = IsNumeric<T>::value && IsSigned<T>::value && HasSIMDMult<T,T>::value &&
-                         ( IsFloatingPoint<T>::value || sizeof(T) <= 4UL ) };
-};
+   : public BoolConstant< IsNumeric_v<T> && IsSigned_v<T> &&
+                          ( ( !bool( BLAZE_AVX512F_MODE  ) && HasSIMDMult_v<T,T> && ( IsFloatingPoint_v<T> || sizeof(T) <= 4UL ) ) ||
+                            (  bool( BLAZE_AVX512F_MODE  ) && IsFloatingPoint_v<T> ) ||
+                            (  bool( BLAZE_AVX512BW_MODE ) && sizeof(T) == 2UL ) ||
+                            (  bool( BLAZE_AVX512F_MODE  ) && sizeof(T) >= 4UL ) ) >
+{};
 /*! \endcond */
 //*************************************************************************************************
 
@@ -103,8 +107,27 @@ struct HasSIMDConjHelper< complex<T> >
    \endcode
 */
 template< typename T >  // Type of the operand
-struct HasSIMDConj : public BoolConstant< HasSIMDConjHelper< Decay_<T> >::value >
+struct HasSIMDConj
+   : public BoolConstant< HasSIMDConjHelper< RemoveCVRef_t<T> >::value >
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the HasSIMDConj type trait.
+// \ingroup math_type_traits
+//
+// The HasSIMDConj_v variable template provides a convenient shortcut to access the nested
+// \a value of the HasSIMDConj class template. For instance, given the type \a T the following
+// two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::HasSIMDConj<T>::value;
+   constexpr bool value2 = blaze::HasSIMDConj_v<T>;
+   \endcode
+*/
+template< typename T >  // Type of the operand
+constexpr bool HasSIMDConj_v = HasSIMDConj<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

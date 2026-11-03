@@ -3,7 +3,7 @@
 //  \file blaze/math/traits/CrossTrait.h
 //  \brief Header file for the cross product trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,13 +40,7 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/util/InvalidType.h>
-#include <blaze/util/mpl/If.h>
-#include <blaze/util/mpl/Or.h>
-#include <blaze/util/typetraits/Decay.h>
-#include <blaze/util/typetraits/IsConst.h>
-#include <blaze/util/typetraits/IsReference.h>
-#include <blaze/util/typetraits/IsVolatile.h>
+#include <utility>
 
 
 namespace blaze {
@@ -58,6 +52,23 @@ namespace blaze {
 //=================================================================================================
 
 //*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename, typename, typename = void > struct CrossTrait;
+template< typename, typename, typename = void > struct CrossTraitEval1;
+template< typename, typename, typename = void > struct CrossTraitEval2;
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename T1, typename T2 >
+auto evalCrossTrait( const volatile T1&, const volatile T2& ) -> CrossTraitEval1<T1,T2>;
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
 /*!\brief Base template for the CrossTrait class.
 // \ingroup math_traits
 //
@@ -66,32 +77,24 @@ namespace blaze {
 // The CrossTrait class template offers the possibility to select the resulting data type of
 // a generic cross product operation between the two given types \a T1 and \a T2. CrossTrait
 // defines the nested type \a Type, which represents the resulting data type of the cross
-// product. In case \a T1 and \a T2 cannot be combined in a cross product, the resulting data
-// type \a Type is set to \a INVALID_TYPE. Note that \a const and \a volatile qualifiers and
-// reference modifiers are generally ignored.
-//
-// Since the cross product is only defined for 3-dimensional vectors, the CrossTrait template
-// only supports the following vector types:
-//
-// <ul>
-//    <li>blaze::StaticVector</li>
-//    <li>blaze::DynamicVector</li>
-//    <li>blaze::CompressedVector</li>
-// </ul>
+// product. In case \a T1 and \a T2 cannot be combined in a cross product, there is no nested
+// type \a Type. Note that \a const and \a volatile qualifiers and reference modifiers are
+// generally ignored.
 //
 //
 // \n \section crosstrait_specializations Creating custom specializations
 //
-// It is possible to specialize the CrossTrait template for additional user-defined data types.
-// The following example shows the according specialization for the cross product between two
-// static column vectors:
+// Per default, CrossTrait supports all vector types of the Blaze library (including views and
+// adaptors). For all other data types it is possible to specialize the CrossTrait template. The
+// following example shows the according specialization for the cross product between two static
+// column vectors:
 
    \code
    template< typename T1, typename T2 >
    struct CrossTrait< StaticVector<T1,3UL,false>, StaticVector<T2,3UL,false> >
    {
-      typedef StaticVector< typename SubTrait< typename MultTrait<T1,T2>::Type
-                                             , typename MultTrait<T1,T2>::Type >::Type, 3UL, false >  Type;
+      using Type = StaticVector< typename SubTrait< typename MultTrait<T1,T2>::Type
+                                                  , typename MultTrait<T1,T2>::Type >::Type, 3UL, false >;
    };
    \endcode
 
@@ -109,34 +112,12 @@ namespace blaze {
    }                                     //
    \endcode
 */
-template< typename T1    // Type of the left-hand side operand
-        , typename T2 >  // Type of the right-hand side operand
+template< typename T1  // Type of the left-hand side operand
+        , typename T2  // Type of the right-hand side operand
+        , typename >   // Restricting condition
 struct CrossTrait
-{
- private:
-   //**********************************************************************************************
-   /*! \cond BLAZE_INTERNAL */
-   using Type1 = Decay_<T1>;
-   using Type2 = Decay_<T2>;
-   /*! \endcond */
-   //**********************************************************************************************
-
-   //**struct Failure******************************************************************************
-   /*! \cond BLAZE_INTERNAL */
-   struct Failure { using Type = INVALID_TYPE; };
-   /*! \endcond */
-   //**********************************************************************************************
-
- public:
-   //**********************************************************************************************
-   /*! \cond BLAZE_INTERNAL */
-   using Type = typename If_< Or< IsConst<T1>, IsVolatile<T1>, IsReference<T1>
-                                , IsConst<T2>, IsVolatile<T2>, IsReference<T2> >
-                            , CrossTrait<Type1,Type2>
-                            , Failure >::Type;
-   /*! \endcond */
-   //**********************************************************************************************
-};
+   : public decltype( evalCrossTrait( std::declval<T1&>(), std::declval<T2&>() ) )
+{};
 //*************************************************************************************************
 
 
@@ -144,17 +125,46 @@ struct CrossTrait
 /*!\brief Auxiliary alias declaration for the CrossTrait class template.
 // \ingroup math_traits
 //
-// The CrossTrait_ alias declaration provides a convenient shortcut to access the nested \a Type
+// The CrossTrait_t alias declaration provides a convenient shortcut to access the nested \a Type
 // of the CrossTrait class template. For instance, given the types \a T1 and \a T2 the following
 // two type definitions are identical:
 
    \code
-   using Type1 = typename CrossTrait<T1,T2>::Type;
-   using Type2 = CrossTrait_<T1,T2>;
+   using Type1 = typename blaze::CrossTrait<T1,T2>::Type;
+   using Type2 = blaze::CrossTrait_t<T1,T2>;
    \endcode
 */
 template< typename T1, typename T2 >
-using CrossTrait_ = typename CrossTrait<T1,T2>::Type;
+using CrossTrait_t = typename CrossTrait<T1,T2>::Type;
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief First auxiliary helper struct for the CrossTrait type trait.
+// \ingroup math_traits
+*/
+template< typename T1  // Type of the left-hand side operand
+        , typename T2  // Type of the right-hand side operand
+        , typename >   // Restricting condition
+struct CrossTraitEval1
+   : public CrossTraitEval2<T1,T2>
+{};
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Second auxiliary helper struct for the CrossTrait type trait.
+// \ingroup math_traits
+*/
+template< typename T1  // Type of the left-hand side operand
+        , typename T2  // Type of the right-hand side operand
+        , typename >   // Restricting condition
+struct CrossTraitEval2
+{};
+/*! \endcond */
 //*************************************************************************************************
 
 } // namespace blaze

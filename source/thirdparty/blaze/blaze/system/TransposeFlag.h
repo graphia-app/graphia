@@ -3,7 +3,7 @@
 //  \file blaze/system/TransposeFlag.h
 //  \brief Header file for the default transpose flag for all vectors of the Blaze library
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,10 +40,11 @@
 // Includes
 //*************************************************************************************************
 
+#include <blaze/config/TransposeFlag.h>
 #include <blaze/math/TransposeFlag.h>
 
 
-
+namespace blaze {
 
 //=================================================================================================
 //
@@ -51,6 +52,29 @@
 //
 //=================================================================================================
 
-#include <blaze/config/TransposeFlag.h>
+//*************************************************************************************************
+/*!\brief The default transpose flag for all vectors of the Blaze library.
+// \ingroup system
+//
+// This value specifies the default transpose flag for all vectors of the Blaze library.
+// In case no explicit transpose flag is specified with the according vector type, this
+// setting is used.
+
+   \code
+   // Explicit specification of the transpose flag => column vector
+   StaticVector<double,3UL,columnVector> a;
+
+   // No explicit specification of the transpose flag => use of the default transpose flag
+   StaticVector<double,3UL> b;
+   \endcode
+
+// The default transpose flag is defined via the BLAZE_DEFAULT_TRANSPOSE_FLAG compilation switch
+// (see the \ref transpose_flag section). Valid settings for this value are blaze::rowVector and
+// blaze::columnVector.
+*/
+constexpr bool defaultTransposeFlag = BLAZE_DEFAULT_TRANSPOSE_FLAG;
+//*************************************************************************************************
+
+} // namespace blaze
 
 #endif

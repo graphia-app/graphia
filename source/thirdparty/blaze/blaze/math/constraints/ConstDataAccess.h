@@ -3,7 +3,7 @@
 //  \file blaze/math/constraints/ConstDataAccess.h
 //  \brief Constraint on the data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -59,7 +59,7 @@ namespace blaze {
 // i.e. does not have a const 'data' member function, a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_HAVE_CONST_DATA_ACCESS(T) \
-   static_assert( ::blaze::HasConstDataAccess<T>::value, "Type without const data access detected" )
+   static_assert( ::blaze::HasConstDataAccess_v<T>, "Type without const data access detected" )
 //*************************************************************************************************
 
 
@@ -79,7 +79,7 @@ namespace blaze {
 // does have a const 'data' member function, a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_HAVE_CONST_DATA_ACCESS(T) \
-   static_assert( !::blaze::HasConstDataAccess<T>::value, "Type with const data access detected" )
+   static_assert( !::blaze::HasConstDataAccess_v<T>, "Type with const data access detected" )
 //*************************************************************************************************
 
 } // namespace blaze

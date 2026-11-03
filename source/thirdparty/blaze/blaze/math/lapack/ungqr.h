@@ -3,7 +3,7 @@
 //  \file blaze/math/lapack/ungqr.h
 //  \brief Header file for the LAPACK functions to reconstruct Q from a QR decomposition (ungqr)
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -45,6 +45,7 @@
 #include <blaze/math/constraints/Adaptor.h>
 #include <blaze/math/constraints/BLASCompatible.h>
 #include <blaze/math/constraints/Computation.h>
+#include <blaze/math/constraints/Contiguous.h>
 #include <blaze/math/constraints/MutableDataAccess.h>
 #include <blaze/math/expressions/DenseMatrix.h>
 #include <blaze/math/lapack/clapack/unglq.h>
@@ -66,7 +67,7 @@ namespace blaze {
 /*!\name LAPACK functions to reconstruct Q from a QR decomposition (ungqr) */
 //@{
 template< typename MT, bool SO >
-inline void ungqr( DenseMatrix<MT,SO>& A, const ElementType_<MT>* tau );
+void ungqr( DenseMatrix<MT,SO>& A, const ElementType_t<MT>* tau );
 //@}
 //*************************************************************************************************
 
@@ -91,7 +92,7 @@ inline void ungqr( DenseMatrix<MT,SO>& A, const ElementType_<MT>* tau );
    using blaze::DynamicMatrix;
    using blaze::columnMajor;
 
-   typedef complex<double>  cplx;
+   using cplx = complex<double>;
 
    DynamicMatrix<cplx,columnMajor> A;
    DynamicVector<cplx> tau;
@@ -100,8 +101,8 @@ inline void ungqr( DenseMatrix<MT,SO>& A, const ElementType_<MT>* tau );
    geqrf( A, tau.data() );  // Performing the QR decomposition
    ungqr( A, tau.data() );  // Reconstructing the Q matrix
 
-   const int m( A.rows() );
-   const int n( A.columns() );
+   const size_t m( A.rows() );
+   const size_t n( A.columns() );
 
    DynamicMatrix<cplx,columnMajor> Q( submatrix( A, 0, 0, m, min(m,n) ) );
    \endcode
@@ -116,34 +117,35 @@ inline void ungqr( DenseMatrix<MT,SO>& A, const ElementType_<MT>* tau );
 // linker error.
 */
 template< typename MT, bool SO >
-inline void ungqr( DenseMatrix<MT,SO>& A, const ElementType_<MT>* tau )
+inline void ungqr( DenseMatrix<MT,SO>& A, const ElementType_t<MT>* tau )
 {
    BLAZE_CONSTRAINT_MUST_NOT_BE_ADAPTOR_TYPE( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT );
    BLAZE_CONSTRAINT_MUST_HAVE_MUTABLE_DATA_ACCESS( MT );
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<MT> );
-   BLAZE_CONSTRAINT_MUST_BE_COMPLEX_TYPE( ElementType_<MT> );
+   BLAZE_CONSTRAINT_MUST_BE_CONTIGUOUS_TYPE( MT );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT> );
+   BLAZE_CONSTRAINT_MUST_BE_COMPLEX_TYPE( ElementType_t<MT> );
 
-   using ET = ElementType_<MT>;
+   using ET = ElementType_t<MT>;
 
-   int m   ( numeric_cast<int>( SO ? (~A).rows() : (~A).columns() ) );
-   int n   ( numeric_cast<int>( SO ? (~A).columns() : (~A).rows() ) );
-   int k   ( min( m, n ) );
-   int lda ( numeric_cast<int>( (~A).spacing() ) );
-   int info( 0 );
+   blas_int_t m   ( numeric_cast<blas_int_t>( SO ? (*A).rows() : (*A).columns() ) );
+   blas_int_t n   ( numeric_cast<blas_int_t>( SO ? (*A).columns() : (*A).rows() ) );
+   blas_int_t k   ( min( m, n ) );
+   blas_int_t lda ( numeric_cast<blas_int_t>( (*A).spacing() ) );
+   blas_int_t info( 0 );
 
    if( k == 0 ) {
       return;
    }
 
-   int lwork( k*lda );
+   blas_int_t lwork( k*lda );
    const std::unique_ptr<ET[]> work( new ET[lwork] );
 
    if( SO ) {
-      ungqr( m, k, k, (~A).data(), lda, tau, work.get(), lwork, &info );
+      ungqr( m, k, k, (*A).data(), lda, tau, work.get(), lwork, &info );
    }
    else {
-      unglq( k, n, k, (~A).data(), lda, tau, work.get(), lwork, &info );
+      unglq( k, n, k, (*A).data(), lda, tau, work.get(), lwork, &info );
    }
 
    BLAZE_INTERNAL_ASSERT( info == 0, "Invalid argument for Q reconstruction" );

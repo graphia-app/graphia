@@ -3,7 +3,7 @@
 //  \file blaze/math/expressions/DeclUppExpr.h
 //  \brief Header file for the DeclUppExpr base class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -58,11 +58,13 @@ namespace blaze {
 // The DeclUppExpr class serves as a tag for all expression templates that represent an explicit
 // upper declaration (declupp) operation. All classes, that represent a declupp operation and
 // that are used within the expression template environment of the Blaze library have to derive
-// from this class in order to qualify as declupp expression template. Only in case a class is
-// derived from the DeclUppExpr base class, the IsDeclUppExpr type trait recognizes the class
-// as valid declupp expression template.
+// publicly from this class in order to qualify as declupp expression template. Only in case
+// class is derived publicly from the DeclUppExpr base class, the IsDeclUppExpr type trait a
+// recognizes the class as valid declupp expression template.
 */
-struct DeclUppExpr : private DeclExpr
+template< typename MT >  // Matrix base type of the expression
+struct DeclUppExpr
+   : public DeclExpr<MT>
 {};
 //*************************************************************************************************
 

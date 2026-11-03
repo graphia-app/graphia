@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/HasSIMDAbs.h
 //  \brief Header file for the HasSIMDAbs type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,16 +40,15 @@
 // Includes
 //*************************************************************************************************
 
+#include <blaze/system/Compiler.h>
 #include <blaze/system/Vectorization.h>
-#include <blaze/util/Complex.h>
-#include <blaze/util/EnableIf.h>
 #include <blaze/util/IntegralConstant.h>
-#include <blaze/util/mpl/And.h>
-#include <blaze/util/typetraits/Decay.h>
 #include <blaze/util/typetraits/IsIntegral.h>
 #include <blaze/util/typetraits/IsNumeric.h>
 #include <blaze/util/typetraits/IsSigned.h>
-#include <blaze/util/typetraits/IsUnsigned.h>
+#include <blaze/util/typetraits/IsDouble.h>
+#include <blaze/util/typetraits/IsFloat.h>
+#include <blaze/util/typetraits/RemoveCVRef.h>
 
 
 namespace blaze {
@@ -62,25 +61,28 @@ namespace blaze {
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-template< typename T         // Type of the operand
-        , typename = void >  // Restricting condition
-struct HasSIMDAbsHelper
-{
-   enum : bool { value = false };
-};
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename T >
-struct HasSIMDAbsHelper< T, EnableIf_< And< IsNumeric<T>, IsIntegral<T>, IsSigned<T> > > >
-{
-   enum : bool { value = ( bool( BLAZE_SSSE3_MODE ) && sizeof(T) <= 4UL ) ||
-                         ( bool( BLAZE_AVX2_MODE  ) && sizeof(T) <= 4UL ) ||
-                         ( bool( BLAZE_MIC_MODE   ) && sizeof(T) >= 4UL ) };
-};
+/*!\brief Auxiliary alias declaration for the HasSIMDAbs type trait.
+// \ingroup math_type_traits
+*/
+template< typename T >  // Type of the operand
+using HasSIMDAbsHelper =
+   BoolConstant< ( ( IsNumeric_v<T> && IsIntegral_v<T> && IsSigned_v<T> ) &&
+                   ( ( bool( BLAZE_SSSE3_MODE    ) && sizeof(T) <= 4UL ) ||
+                     ( bool( BLAZE_AVX2_MODE     ) && sizeof(T) <= 4UL ) ||
+                     ( bool( BLAZE_MIC_MODE      ) && sizeof(T) >= 4UL ) ||
+                     ( bool( BLAZE_AVX512BW_MODE ) && sizeof(T) <= 2UL ) ||
+                     ( bool( BLAZE_AVX512F_MODE  ) && sizeof(T) >= 4UL ) ) ) ||
+                 ( IsFloat_v<T> &&
+                   ( bool( BLAZE_SSE2_MODE    ) ||
+                     bool( BLAZE_AVX_MODE     ) ||
+                     bool( BLAZE_MIC_MODE     ) ||
+                     bool( BLAZE_AVX512F_MODE ) ) ) ||
+                 ( IsDouble_v<T> &&
+                   !( bool( BLAZE_GNU_COMPILER ) && ( bool( BLAZE_MIC_MODE ) || bool( BLAZE_AVX512F_MODE ) ) ) &&
+                   ( bool( BLAZE_SSE2_MODE    ) ||
+                     bool( BLAZE_AVX_MODE     ) ||
+                     bool( BLAZE_MIC_MODE     ) ||
+                     bool( BLAZE_AVX512F_MODE ) ) ) >;
 /*! \endcond */
 //*************************************************************************************************
 
@@ -102,13 +104,32 @@ struct HasSIMDAbsHelper< T, EnableIf_< And< IsNumeric<T>, IsIntegral<T>, IsSigne
    blaze::HasSIMDAbs< short >::Type          // Results in TrueType
    blaze::HasSIMDAbs< int >                  // Is derived from TrueType
    blaze::HasSIMDAbs< unsigned int >::value  // Evaluates to 0
-   blaze::HasSIMDAbs< double >::Type         // Results in FalseType
+   blaze::HasSIMDAbs< long double >::Type    // Results in FalseType
    blaze::HasSIMDAbs< complex<int> >         // Is derived from FalseType
    \endcode
 */
 template< typename T >  // Type of the operand
-struct HasSIMDAbs : public BoolConstant< HasSIMDAbsHelper< Decay_<T> >::value >
+struct HasSIMDAbs
+   : public BoolConstant< HasSIMDAbsHelper< RemoveCVRef_t<T> >::value >
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the HasSIMDAbs type trait.
+// \ingroup math_type_traits
+//
+// The HasSIMDAbs_v variable template provides a convenient shortcut to access the nested
+// \a value of the HasSIMDAbs class template. For instance, given the type \a T the following
+// two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::HasSIMDAbs<T>::value;
+   constexpr bool value2 = blaze::HasSIMDAbs_v<T>;
+   \endcode
+*/
+template< typename T >  // Type of the operand
+constexpr bool HasSIMDAbs_v = HasSIMDAbs<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/math/views/subvector/Sparse.h
 //  \brief Subvector specialization for sparse vectors
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -50,33 +50,33 @@
 #include <blaze/math/constraints/Subvector.h>
 #include <blaze/math/constraints/TransExpr.h>
 #include <blaze/math/constraints/TransposeFlag.h>
+#include <blaze/math/dense/InitializerVector.h>
 #include <blaze/math/Exception.h>
 #include <blaze/math/expressions/SparseVector.h>
 #include <blaze/math/expressions/View.h>
+#include <blaze/math/InitializerList.h>
 #include <blaze/math/shims/IsDefault.h>
 #include <blaze/math/shims/Serial.h>
 #include <blaze/math/sparse/SparseElement.h>
 #include <blaze/math/traits/AddTrait.h>
 #include <blaze/math/traits/CrossTrait.h>
-#include <blaze/math/traits/DerestrictTrait.h>
 #include <blaze/math/traits/DivTrait.h>
 #include <blaze/math/traits/MultTrait.h>
 #include <blaze/math/traits/SubTrait.h>
 #include <blaze/math/traits/SubvectorTrait.h>
 #include <blaze/math/typetraits/IsExpression.h>
 #include <blaze/math/typetraits/IsRestricted.h>
+#include <blaze/math/views/Check.h>
 #include <blaze/math/views/subvector/BaseTemplate.h>
+#include <blaze/math/views/subvector/SubvectorData.h>
+#include <blaze/system/MacroDisable.h>
 #include <blaze/util/Assert.h>
-#include <blaze/util/DisableIf.h>
 #include <blaze/util/EnableIf.h>
 #include <blaze/util/mpl/If.h>
 #include <blaze/util/Types.h>
 #include <blaze/util/typetraits/IsConst.h>
-#include <blaze/util/typetraits/IsFloatingPoint.h>
 #include <blaze/util/typetraits/IsIntegral.h>
-#include <blaze/util/typetraits/IsNumeric.h>
 #include <blaze/util/typetraits/IsReference.h>
-#include <blaze/util/typetraits/RemoveReference.h>
 
 
 namespace blaze {
@@ -90,39 +90,43 @@ namespace blaze {
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 /*!\brief Specialization of Subvector for sparse subvectors.
-// \ingroup views
+// \ingroup subvector
 //
 // This specialization of Subvector adapts the class template to the requirements of sparse
 // subvectors.
 */
-template< typename VT  // Type of the sparse vector
-        , bool AF      // Alignment flag
-        , bool TF >    // Transpose flag
-class Subvector<VT,AF,TF,false>
-   : public SparseVector< Subvector<VT,AF,TF,false>, TF >
-   , private View
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+class Subvector<VT,AF,TF,false,CSAs...>
+   : public View< SparseVector< Subvector<VT,AF,TF,false,CSAs...>, TF > >
+   , private SubvectorData<CSAs...>
 {
  private:
    //**Type definitions****************************************************************************
-   //! Composite data type of the sparse vector expression.
-   typedef If_< IsExpression<VT>, VT, VT& >  Operand;
+   using DataType = SubvectorData<CSAs...>;               //!< The type of the SubvectorData base class.
+   using Operand  = If_t< IsExpression_v<VT>, VT, VT& >;  //!< Composite data type of the vector expression.
    //**********************************************************************************************
 
  public:
    //**Type definitions****************************************************************************
-   typedef Subvector<VT,AF,TF,false>   This;           //!< Type of this Subvector instance.
-   typedef SparseVector<This,TF>       BaseType;       //!< Base type of this Subvector instance.
-   typedef SubvectorTrait_<VT>         ResultType;     //!< Result type for expression template evaluations.
-   typedef TransposeType_<ResultType>  TransposeType;  //!< Transpose type for expression template evaluations.
-   typedef ElementType_<VT>            ElementType;    //!< Type of the subvector elements.
-   typedef ReturnType_<VT>             ReturnType;     //!< Return type for expression template evaluations
-   typedef const Subvector&            CompositeType;  //!< Data type for composite expression templates.
+   //! Type of this Subvector instance.
+   using This = Subvector<VT,AF,TF,false,CSAs...>;
+
+   using BaseType      = View< SparseVector<This,TF> >;  //!< Base type of this Subvector instance.
+   using ViewedType    = VT;                             //!< The type viewed by this Subvector instance.
+   using ResultType    = SubvectorTrait_t<VT,CSAs...>;   //!< Result type for expression template evaluations.
+   using TransposeType = TransposeType_t<ResultType>;    //!< Transpose type for expression template evaluations.
+   using ElementType   = ElementType_t<VT>;              //!< Type of the subvector elements.
+   using ReturnType    = ReturnType_t<VT>;               //!< Return type for expression template evaluations
+   using CompositeType = const Subvector&;               //!< Data type for composite expression templates.
 
    //! Reference to a constant subvector value.
-   typedef ConstReference_<VT>  ConstReference;
+   using ConstReference = ConstReference_t<VT>;
 
    //! Reference to a non-constant subvector value.
-   typedef If_< IsConst<VT>, ConstReference, Reference_<VT> >  Reference;
+   using Reference = If_t< IsConst_v<VT>, ConstReference, Reference_t<VT> >;
    //**********************************************************************************************
 
    //**SubvectorElement class definition***********************************************************
@@ -130,35 +134,10 @@ class Subvector<VT,AF,TF,false>
    */
    template< typename VectorType      // Type of the sparse vector
            , typename IteratorType >  // Type of the sparse vector iterator
-   class SubvectorElement : private SparseElement
+   class SubvectorElement
+      : private SparseElement
    {
-    private:
-      //*******************************************************************************************
-      //! Compilation switch for the return type of the value member function.
-      /*! The \a returnConst compile time constant expression represents a compilation switch for
-          the return type of the value member function. In case the given vector type \a VectorType
-          is const qualified, \a returnConst will be set to 1 and the value member function will
-          return a reference to const. Otherwise \a returnConst will be set to 0 and the value
-          member function will offer write access to the sparse vector elements. */
-      enum : bool { returnConst = IsConst<VectorType>::value };
-      //*******************************************************************************************
-
-      //**Type definitions*************************************************************************
-      //! Type of the underlying sparse elements.
-      typedef typename std::iterator_traits<IteratorType>::value_type  SET;
-
-      typedef Reference_<SET>       RT;   //!< Reference type of the underlying sparse element.
-      typedef ConstReference_<SET>  CRT;  //!< Reference-to-const type of the underlying sparse element.
-      //*******************************************************************************************
-
     public:
-      //**Type definitions*************************************************************************
-      typedef ValueType_<SET>              ValueType;       //!< The value type of the row element.
-      typedef size_t                       IndexType;       //!< The index type of the row element.
-      typedef IfTrue_<returnConst,CRT,RT>  Reference;       //!< Reference return type
-      typedef CRT                          ConstReference;  //!< Reference-to-const return type.
-      //*******************************************************************************************
-
       //**Constructor******************************************************************************
       /*!\brief Constructor for the SubvectorElement class.
       //
@@ -246,7 +225,7 @@ class Subvector<VT,AF,TF,false>
       //
       // \return The current value of the sparse subvector element.
       */
-      inline Reference value() const {
+      inline decltype(auto) value() const {
          return pos_->value();
       }
       //*******************************************************************************************
@@ -256,7 +235,7 @@ class Subvector<VT,AF,TF,false>
       //
       // \return The current index of the sparse element.
       */
-      inline IndexType index() const {
+      inline size_t index() const {
          return pos_->index() - offset_;
       }
       //*******************************************************************************************
@@ -278,18 +257,18 @@ class Subvector<VT,AF,TF,false>
    {
     public:
       //**Type definitions*************************************************************************
-      typedef std::forward_iterator_tag                  IteratorCategory;  //!< The iterator category.
-      typedef SubvectorElement<VectorType,IteratorType>  ValueType;         //!< Type of the underlying elements.
-      typedef ValueType                                  PointerType;       //!< Pointer return type.
-      typedef ValueType                                  ReferenceType;     //!< Reference return type.
-      typedef ptrdiff_t                                  DifferenceType;    //!< Difference between two iterators.
+      using IteratorCategory = std::forward_iterator_tag;                  //!< The iterator category.
+      using ValueType        = SubvectorElement<VectorType,IteratorType>;  //!< Type of the underlying elements.
+      using PointerType      = ValueType;                                  //!< Pointer return type.
+      using ReferenceType    = ValueType;                                  //!< Reference return type.
+      using DifferenceType   = ptrdiff_t;                                  //!< Difference between two iterators.
 
       // STL iterator requirements
-      typedef IteratorCategory  iterator_category;  //!< The iterator category.
-      typedef ValueType         value_type;         //!< Type of the underlying elements.
-      typedef PointerType       pointer;            //!< Pointer return type.
-      typedef ReferenceType     reference;          //!< Reference return type.
-      typedef DifferenceType    difference_type;    //!< Difference between two iterators.
+      using iterator_category = IteratorCategory;  //!< The iterator category.
+      using value_type        = ValueType;         //!< Type of the underlying elements.
+      using pointer           = PointerType;       //!< Pointer return type.
+      using reference         = ReferenceType;     //!< Reference return type.
+      using difference_type   = DifferenceType;    //!< Difference between two iterators.
       //*******************************************************************************************
 
       //**Default constructor**********************************************************************
@@ -433,27 +412,35 @@ class Subvector<VT,AF,TF,false>
 
    //**Type definitions****************************************************************************
    //! Iterator over constant elements.
-   typedef SubvectorIterator< const VT, ConstIterator_<VT> >  ConstIterator;
+   using ConstIterator = SubvectorIterator< const VT, ConstIterator_t<VT> >;
 
    //! Iterator over non-constant elements.
-   typedef If_< IsConst<VT>, ConstIterator, SubvectorIterator< VT, Iterator_<VT> > >  Iterator;
+   using Iterator = If_t< IsConst_v<VT>, ConstIterator, SubvectorIterator< VT, Iterator_t<VT> > >;
    //**********************************************************************************************
 
    //**Compilation flags***************************************************************************
    //! Compilation switch for the expression template assignment strategy.
-   enum : bool { smpAssignable = VT::smpAssignable };
+   static constexpr bool smpAssignable = VT::smpAssignable;
+
+   //! Compilation switch for the expression template evaluation strategy.
+   static constexpr bool compileTimeArgs = DataType::compileTimeArgs;
    //**********************************************************************************************
 
    //**Constructors********************************************************************************
    /*!\name Constructors */
    //@{
-   explicit inline Subvector( Operand vector, size_t index, size_t n );
-   // No explicitly declared copy constructor.
+   template< typename... RSAs >
+   explicit inline Subvector( VT& vector, RSAs... args );
+
+   Subvector( const Subvector& ) = default;
    //@}
    //**********************************************************************************************
 
    //**Destructor**********************************************************************************
-   // No explicitly declared destructor.
+   /*!\name Destructor */
+   //@{
+   ~Subvector() = default;
+   //@}
    //**********************************************************************************************
 
    //**Data access functions***********************************************************************
@@ -475,6 +462,7 @@ class Subvector<VT,AF,TF,false>
    //**Assignment operators************************************************************************
    /*!\name Assignment operators */
    //@{
+                            inline Subvector& operator= ( initializer_list<ElementType> list );
                             inline Subvector& operator= ( const Subvector& rhs );
    template< typename VT2 > inline Subvector& operator= ( const Vector<VT2,TF>& rhs );
    template< typename VT2 > inline Subvector& operator+=( const Vector<VT2,TF>& rhs );
@@ -482,19 +470,18 @@ class Subvector<VT,AF,TF,false>
    template< typename VT2 > inline Subvector& operator*=( const Vector<VT2,TF>& rhs );
    template< typename VT2 > inline Subvector& operator/=( const DenseVector<VT2,TF>& rhs );
    template< typename VT2 > inline Subvector& operator%=( const Vector<VT2,TF>& rhs );
-
-   template< typename Other >
-   inline EnableIf_<IsNumeric<Other>, Subvector >& operator*=( Other rhs );
-
-   template< typename Other >
-   inline EnableIf_<IsNumeric<Other>, Subvector >& operator/=( Other rhs );
    //@}
    //**********************************************************************************************
 
    //**Utility functions***************************************************************************
    /*!\name Utility functions */
    //@{
-   inline size_t size() const noexcept;
+   using DataType::offset;
+   using DataType::size;
+
+   inline VT&       operand() noexcept;
+   inline const VT& operand() const noexcept;
+
    inline size_t capacity() const noexcept;
    inline size_t nonZeros() const;
    inline void   reset();
@@ -518,7 +505,7 @@ class Subvector<VT,AF,TF,false>
    inline Iterator erase( Iterator pos );
    inline Iterator erase( Iterator first, Iterator last );
 
-   template< typename Pred, typename = DisableIf_< IsIntegral<Pred> > >
+   template< typename Pred, typename = DisableIf_t< IsIntegral_v<Pred> > >
    inline void erase( Pred predicate );
 
    template< typename Pred >
@@ -566,43 +553,8 @@ class Subvector<VT,AF,TF,false>
    //**Member variables****************************************************************************
    /*!\name Member variables */
    //@{
-   Operand      vector_;  //!< The sparse vector containing the subvector.
-   const size_t offset_;  //!< The offset of the subvector within the sparse vector.
-   const size_t size_;    //!< The size of the subvector.
+   Operand vector_;  //!< The vector containing the subvector.
    //@}
-   //**********************************************************************************************
-
-   //**Friend declarations*************************************************************************
-   template< bool AF1, typename VT2, bool AF2, bool TF2, bool DF2 >
-   friend const Subvector<VT2,AF1,TF2,DF2>
-      subvector( const Subvector<VT2,AF2,TF2,DF2>& sv, size_t index, size_t size );
-
-   template< typename VT2, bool AF2, bool TF2, bool DF2 >
-   friend bool isIntact( const Subvector<VT2,AF2,TF2,DF2>& sv ) noexcept;
-
-   template< typename VT2, bool AF2, bool TF2, bool DF2 >
-   friend bool isSame( const Subvector<VT2,AF2,TF2,DF2>& a, const Vector<VT2,TF2>& b ) noexcept;
-
-   template< typename VT2, bool AF2, bool TF2, bool DF2 >
-   friend bool isSame( const Vector<VT2,TF2>& a, const Subvector<VT2,AF2,TF2,DF2>& b ) noexcept;
-
-   template< typename VT2, bool AF2, bool TF2, bool DF2 >
-   friend bool isSame( const Subvector<VT2,AF2,TF2,DF2>& a, const Subvector<VT2,AF2,TF2,DF2>& b ) noexcept;
-
-   template< typename VT2, bool AF2, bool TF2, bool DF2, typename VT3 >
-   friend bool tryAssign( const Subvector<VT2,AF2,TF2,DF2>& lhs, const Vector<VT3,TF2>& rhs, size_t index );
-
-   template< typename VT2, bool AF2, bool TF2, bool DF2, typename VT3 >
-   friend bool tryAddAssign( const Subvector<VT2,AF2,TF2,DF2>& lhs, const Vector<VT3,TF2>& rhs, size_t index );
-
-   template< typename VT2, bool AF2, bool TF2, bool DF2, typename VT3 >
-   friend bool trySubAssign( const Subvector<VT2,AF2,TF2,DF2>& lhs, const Vector<VT3,TF2>& rhs, size_t index );
-
-   template< typename VT2, bool AF2, bool TF2, bool DF2, typename VT3 >
-   friend bool tryMultAssign( const Subvector<VT2,AF2,TF2,DF2>& lhs, const Vector<VT3,TF2>& rhs, size_t index );
-
-   template< typename VT2, bool AF2, bool TF2, bool DF2 >
-   friend DerestrictTrait_< Subvector<VT2,AF2,TF2,DF2> > derestrict( Subvector<VT2,AF2,TF2,DF2>& sv );
    //**********************************************************************************************
 
    //**Compile time checks*************************************************************************
@@ -621,33 +573,40 @@ class Subvector<VT,AF,TF,false>
 
 //=================================================================================================
 //
-//  CONSTRUCTOR
+//  CONSTRUCTORS
 //
 //=================================================================================================
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-/*!\brief The constructor for Subvector.
+/*!\brief Constructor for sparse subvectors.
 //
 // \param vector The sparse vector containing the subvector.
-// \param index The index of the first element of the subvector.
-// \param n The size of the subvector.
+// \param args The runtime subvector arguments.
 // \exception std::invalid_argument Invalid subvector specification.
 //
-// In case the subvector is not properly specified (i.e. if the specified first index is larger
-// than the size of the given vector or the subvector is specified beyond the size of the vector)
-// a \a std::invalid_argument exception is thrown.
+// By default, the provided subvector arguments are checked at runtime. In case the subvector is
+// not properly specified (i.e. if the specified offset is greater than the size of the given
+// vector or the subvector is specified beyond the size of the vector) a \a std::invalid_argument
+// exception is thrown. The checks can be skipped by providing the optional \a blaze::unchecked
+// argument.
 */
-template< typename VT  // Type of the sparse vector
-        , bool AF      // Alignment flag
-        , bool TF >    // Transpose flag
-inline Subvector<VT,AF,TF,false>::Subvector( Operand vector, size_t index, size_t n )
-   : vector_( vector )  // The sparse vector containing the subvector
-   , offset_( index  )  // The offset of the subvector within the sparse vector
-   , size_  ( n      )  // The size of the subvector
+template< typename VT         // Type of the sparse vector
+        , AlignmentFlag AF    // Alignment flag
+        , bool TF             // Transpose flag
+        , size_t... CSAs >    // Compile time subvector arguments
+template< typename... RSAs >  // Runtime subvector arguments
+inline Subvector<VT,AF,TF,false,CSAs...>::Subvector( VT& vector, RSAs... args )
+   : DataType( args... )  // Base class initialization
+   , vector_ ( vector  )  // The vector containing the subvector
 {
-   if( index + n > vector.size() ) {
-      BLAZE_THROW_INVALID_ARGUMENT( "Invalid subvector specification" );
+   if( isChecked( args... ) ) {
+      if( offset() + size() > vector.size() ) {
+         BLAZE_THROW_INVALID_ARGUMENT( "Invalid subvector specification" );
+      }
+   }
+   else {
+      BLAZE_USER_ASSERT( offset() + size() <= vector.size(), "Invalid subvector specification" );
    }
 }
 /*! \endcond */
@@ -672,14 +631,15 @@ inline Subvector<VT,AF,TF,false>::Subvector( Operand vector, size_t index, size_
 // This function only performs an index check in case BLAZE_USER_ASSERT() is active. In contrast,
 // the at() function is guaranteed to perform a check of the given access index.
 */
-template< typename VT  // Type of the sparse vector
-        , bool AF      // Alignment flag
-        , bool TF >    // Transpose flag
-inline typename Subvector<VT,AF,TF,false>::Reference
-   Subvector<VT,AF,TF,false>::operator[]( size_t index )
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+inline typename Subvector<VT,AF,TF,false,CSAs...>::Reference
+   Subvector<VT,AF,TF,false,CSAs...>::operator[]( size_t index )
 {
    BLAZE_USER_ASSERT( index < size(), "Invalid subvector access index" );
-   return vector_[offset_+index];
+   return vector_[offset()+index];
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -695,14 +655,15 @@ inline typename Subvector<VT,AF,TF,false>::Reference
 // This function only performs an index check in case BLAZE_USER_ASSERT() is active. In contrast,
 // the at() function is guaranteed to perform a check of the given access index.
 */
-template< typename VT  // Type of the sparse vector
-        , bool AF      // Alignment flag
-        , bool TF >    // Transpose flag
-inline typename Subvector<VT,AF,TF,false>::ConstReference
-   Subvector<VT,AF,TF,false>::operator[]( size_t index ) const
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+inline typename Subvector<VT,AF,TF,false,CSAs...>::ConstReference
+   Subvector<VT,AF,TF,false,CSAs...>::operator[]( size_t index ) const
 {
    BLAZE_USER_ASSERT( index < size(), "Invalid subvector access index" );
-   return const_cast<const VT&>( vector_ )[offset_+index];
+   return const_cast<const VT&>( vector_ )[offset()+index];
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -719,11 +680,12 @@ inline typename Subvector<VT,AF,TF,false>::ConstReference
 // In contrast to the subscript operator this function always performs a check of the given
 // access index.
 */
-template< typename VT  // Type of the sparse vector
-        , bool AF      // Alignment flag
-        , bool TF >    // Transpose flag
-inline typename Subvector<VT,AF,TF,false>::Reference
-   Subvector<VT,AF,TF,false>::at( size_t index )
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+inline typename Subvector<VT,AF,TF,false,CSAs...>::Reference
+   Subvector<VT,AF,TF,false,CSAs...>::at( size_t index )
 {
    if( index >= size() ) {
       BLAZE_THROW_OUT_OF_RANGE( "Invalid subvector access index" );
@@ -745,11 +707,12 @@ inline typename Subvector<VT,AF,TF,false>::Reference
 // In contrast to the subscript operator this function always performs a check of the given
 // access index.
 */
-template< typename VT  // Type of the sparse vector
-        , bool AF      // Alignment flag
-        , bool TF >    // Transpose flag
-inline typename Subvector<VT,AF,TF,false>::ConstReference
-   Subvector<VT,AF,TF,false>::at( size_t index ) const
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+inline typename Subvector<VT,AF,TF,false,CSAs...>::ConstReference
+   Subvector<VT,AF,TF,false,CSAs...>::at( size_t index ) const
 {
    if( index >= size() ) {
       BLAZE_THROW_OUT_OF_RANGE( "Invalid subvector access index" );
@@ -768,15 +731,17 @@ inline typename Subvector<VT,AF,TF,false>::ConstReference
 //
 // This function returns an iterator to the first element of the subvector.
 */
-template< typename VT  // Type of the sparse vector
-        , bool AF      // Alignment flag
-        , bool TF >    // Transpose flag
-inline typename Subvector<VT,AF,TF,false>::Iterator Subvector<VT,AF,TF,false>::begin()
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+inline typename Subvector<VT,AF,TF,false,CSAs...>::Iterator
+   Subvector<VT,AF,TF,false,CSAs...>::begin()
 {
-   if( offset_ == 0UL )
-      return Iterator( vector_.begin(), offset_ );
+   if( offset() == 0UL )
+      return Iterator( vector_.begin(), offset() );
    else
-      return Iterator( vector_.lowerBound( offset_ ), offset_ );
+      return Iterator( vector_.lowerBound( offset() ), offset() );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -790,15 +755,17 @@ inline typename Subvector<VT,AF,TF,false>::Iterator Subvector<VT,AF,TF,false>::b
 //
 // This function returns an iterator to the first element of the subvector.
 */
-template< typename VT  // Type of the sparse vector
-        , bool AF      // Alignment flag
-        , bool TF >    // Transpose flag
-inline typename Subvector<VT,AF,TF,false>::ConstIterator Subvector<VT,AF,TF,false>::begin() const
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+inline typename Subvector<VT,AF,TF,false,CSAs...>::ConstIterator
+   Subvector<VT,AF,TF,false,CSAs...>::begin() const
 {
-   if( offset_ == 0UL )
-      return ConstIterator( vector_.cbegin(), offset_ );
+   if( offset() == 0UL )
+      return ConstIterator( vector_.cbegin(), offset() );
    else
-      return ConstIterator( vector_.lowerBound( offset_ ), offset_ );
+      return ConstIterator( vector_.lowerBound( offset() ), offset() );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -812,15 +779,17 @@ inline typename Subvector<VT,AF,TF,false>::ConstIterator Subvector<VT,AF,TF,fals
 //
 // This function returns an iterator to the first element of the subvector.
 */
-template< typename VT  // Type of the sparse vector
-        , bool AF      // Alignment flag
-        , bool TF >    // Transpose flag
-inline typename Subvector<VT,AF,TF,false>::ConstIterator Subvector<VT,AF,TF,false>::cbegin() const
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+inline typename Subvector<VT,AF,TF,false,CSAs...>::ConstIterator
+   Subvector<VT,AF,TF,false,CSAs...>::cbegin() const
 {
-   if( offset_ == 0UL )
-      return ConstIterator( vector_.cbegin(), offset_ );
+   if( offset() == 0UL )
+      return ConstIterator( vector_.cbegin(), offset() );
    else
-      return ConstIterator( vector_.lowerBound( offset_ ), offset_ );
+      return ConstIterator( vector_.lowerBound( offset() ), offset() );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -834,15 +803,17 @@ inline typename Subvector<VT,AF,TF,false>::ConstIterator Subvector<VT,AF,TF,fals
 //
 // This function returns an iterator just past the last element of the subvector.
 */
-template< typename VT  // Type of the sparse vector
-        , bool AF      // Alignment flag
-        , bool TF >    // Transpose flag
-inline typename Subvector<VT,AF,TF,false>::Iterator Subvector<VT,AF,TF,false>::end()
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+inline typename Subvector<VT,AF,TF,false,CSAs...>::Iterator
+   Subvector<VT,AF,TF,false,CSAs...>::end()
 {
-   if( offset_ + size_ == vector_.size() )
-      return Iterator( vector_.end(), offset_ );
+   if( offset() + size() == vector_.size() )
+      return Iterator( vector_.end(), offset() );
    else
-      return Iterator( vector_.lowerBound( offset_ + size_ ), offset_ );
+      return Iterator( vector_.lowerBound( offset() + size() ), offset() );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -856,15 +827,17 @@ inline typename Subvector<VT,AF,TF,false>::Iterator Subvector<VT,AF,TF,false>::e
 //
 // This function returns an iterator just past the last element of the subvector.
 */
-template< typename VT  // Type of the sparse vector
-        , bool AF      // Alignment flag
-        , bool TF >    // Transpose flag
-inline typename Subvector<VT,AF,TF,false>::ConstIterator Subvector<VT,AF,TF,false>::end() const
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+inline typename Subvector<VT,AF,TF,false,CSAs...>::ConstIterator
+   Subvector<VT,AF,TF,false,CSAs...>::end() const
 {
-   if( offset_ + size_ == vector_.size() )
-      return ConstIterator( vector_.cend(), offset_ );
+   if( offset() + size() == vector_.size() )
+      return ConstIterator( vector_.cend(), offset() );
    else
-      return ConstIterator( vector_.lowerBound( offset_ + size_ ), offset_ );
+      return ConstIterator( vector_.lowerBound( offset() + size() ), offset() );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -878,15 +851,17 @@ inline typename Subvector<VT,AF,TF,false>::ConstIterator Subvector<VT,AF,TF,fals
 //
 // This function returns an iterator just past the last element of the subvector.
 */
-template< typename VT  // Type of the sparse vector
-        , bool AF      // Alignment flag
-        , bool TF >    // Transpose flag
-inline typename Subvector<VT,AF,TF,false>::ConstIterator Subvector<VT,AF,TF,false>::cend() const
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+inline typename Subvector<VT,AF,TF,false,CSAs...>::ConstIterator
+   Subvector<VT,AF,TF,false,CSAs...>::cend() const
 {
-   if( offset_ + size_ == vector_.size() )
-      return ConstIterator( vector_.cend(), offset_ );
+   if( offset() + size() == vector_.size() )
+      return ConstIterator( vector_.cend(), offset() );
    else
-      return ConstIterator( vector_.lowerBound( offset_ + size_ ), offset_ );
+      return ConstIterator( vector_.lowerBound( offset() + size() ), offset() );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -902,6 +877,53 @@ inline typename Subvector<VT,AF,TF,false>::ConstIterator Subvector<VT,AF,TF,fals
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
+/*!\brief List assignment to all subvector elements.
+//
+// \param list The initializer list.
+// \exception std::invalid_argument Invalid assignment to subvector.
+// \exception std::invalid_argument Invalid assignment to restricted vector.
+//
+// This assignment operator offers the option to directly assign to all elements of the subvector
+// by means of an initializer list. The subvector elements are assigned the values from the given
+// initializer list. Missing values are reset to their default state. Note that in case the size
+// of the initializer list exceeds the size of the subvector, a \a std::invalid_argument exception
+// is thrown. Also, if the underlying vector \a VT is restricted and the assignment would violate
+// an invariant of the vector, a \a std::invalid_argument exception is thrown.
+*/
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+inline Subvector<VT,AF,TF,false,CSAs...>&
+   Subvector<VT,AF,TF,false,CSAs...>::operator=( initializer_list<ElementType> list )
+{
+   using blaze::assign;
+
+   if( list.size() > size() ) {
+      BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to subvector" );
+   }
+
+   const InitializerVector<ElementType,TF> tmp( list, size() );
+
+   if( !tryAssign( vector_, tmp, offset() ) ) {
+      BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to restricted vector" );
+   }
+
+   decltype(auto) left( derestrict( *this ) );
+
+   reset();
+   assign( left, tmp );
+
+   BLAZE_INTERNAL_ASSERT( isIntact( vector_ ), "Invariant violation detected" );
+
+   return *this;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
 /*!\brief Copy assignment operator for Subvector.
 //
 // \param rhs Sparse subvector to be copied.
@@ -912,31 +934,32 @@ inline typename Subvector<VT,AF,TF,false>::ConstIterator Subvector<VT,AF,TF,fals
 // In case the current sizes of the two subvectors don't match, a \a std::invalid_argument
 // exception is thrown.
 */
-template< typename VT  // Type of the sparse vector
-        , bool AF      // Alignment flag
-        , bool TF >    // Transpose flag
-inline Subvector<VT,AF,TF,false>&
-   Subvector<VT,AF,TF,false>::operator=( const Subvector& rhs )
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+inline Subvector<VT,AF,TF,false,CSAs...>&
+   Subvector<VT,AF,TF,false,CSAs...>::operator=( const Subvector& rhs )
 {
    using blaze::assign;
 
    BLAZE_CONSTRAINT_MUST_BE_SPARSE_VECTOR_TYPE ( ResultType );
    BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType );
 
-   if( this == &rhs || ( &vector_ == &rhs.vector_ && offset_ == rhs.offset_ ) )
+   if( this == &rhs || ( &vector_ == &rhs.vector_ && offset() == rhs.offset() ) )
       return *this;
 
    if( size() != rhs.size() ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Vector sizes do not match" );
    }
 
-   if( !tryAssign( vector_, rhs, offset_ ) ) {
+   if( !tryAssign( vector_, rhs, offset() ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to restricted vector" );
    }
 
-   DerestrictTrait_<This> left( derestrict( *this ) );
+   decltype(auto) left( derestrict( *this ) );
 
-   if( rhs.canAlias( &vector_ ) ) {
+   if( rhs.canAlias( this ) ) {
       const ResultType tmp( rhs );
       reset();
       assign( left, tmp );
@@ -958,7 +981,7 @@ inline Subvector<VT,AF,TF,false>&
 /*! \cond BLAZE_INTERNAL */
 /*!\brief Assignment operator for different vectors.
 //
-// \param rhs Dense vector to be assigned.
+// \param rhs Vector to be assigned.
 // \return Reference to the assigned subvector.
 // \exception std::invalid_argument Vector sizes do not match.
 // \exception std::invalid_argument Invalid assignment to restricted vector.
@@ -966,33 +989,34 @@ inline Subvector<VT,AF,TF,false>&
 // In case the current sizes of the two vectors don't match, a \a std::invalid_argument
 // exception is thrown.
 */
-template< typename VT     // Type of the sparse vector
-        , bool AF         // Alignment flag
-        , bool TF >       // Transpose flag
-template< typename VT2 >  // Type of the right-hand side vector
-inline Subvector<VT,AF,TF,false>&
-   Subvector<VT,AF,TF,false>::operator=( const Vector<VT2,TF>& rhs )
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+template< typename VT2 >    // Type of the right-hand side vector
+inline Subvector<VT,AF,TF,false,CSAs...>&
+   Subvector<VT,AF,TF,false,CSAs...>::operator=( const Vector<VT2,TF>& rhs )
 {
    using blaze::assign;
 
-   BLAZE_CONSTRAINT_MUST_BE_VECTOR_WITH_TRANSPOSE_FLAG( ResultType_<VT2>, TF );
-   BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType_<VT2> );
+   BLAZE_CONSTRAINT_MUST_BE_VECTOR_WITH_TRANSPOSE_FLAG( ResultType_t<VT2>, TF );
+   BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType_t<VT2> );
 
-   if( size() != (~rhs).size() ) {
+   if( size() != (*rhs).size() ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Vector sizes do not match" );
    }
 
-   typedef If_< IsRestricted<VT>, CompositeType_<VT2>, const VT2& >  Right;
-   Right right( ~rhs );
+   using Right = If_t< IsRestricted_v<VT>, CompositeType_t<VT2>, const VT2& >;
+   Right right( *rhs );
 
-   if( !tryAssign( vector_, right, offset_ ) ) {
+   if( !tryAssign( vector_, right, offset() ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to restricted vector" );
    }
 
-   DerestrictTrait_<This> left( derestrict( *this ) );
+   decltype(auto) left( derestrict( *this ) );
 
-   if( IsReference<Right>::value || right.canAlias( &vector_ ) ) {
-      const ResultType_<VT2> tmp( right );
+   if( IsReference_v<Right> || right.canAlias( this ) ) {
+      const ResultType_t<VT2> tmp( right );
       reset();
       assign( left, tmp );
    }
@@ -1021,35 +1045,36 @@ inline Subvector<VT,AF,TF,false>&
 // In case the current sizes of the two vectors don't match, a \a std::invalid_argument exception
 // is thrown.
 */
-template< typename VT     // Type of the sparse vector
-        , bool AF         // Alignment flag
-        , bool TF >       // Transpose flag
-template< typename VT2 >  // Type of the right-hand side vector
-inline Subvector<VT,AF,TF,false>&
-   Subvector<VT,AF,TF,false>::operator+=( const Vector<VT2,TF>& rhs )
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+template< typename VT2 >    // Type of the right-hand side vector
+inline Subvector<VT,AF,TF,false,CSAs...>&
+   Subvector<VT,AF,TF,false,CSAs...>::operator+=( const Vector<VT2,TF>& rhs )
 {
    using blaze::assign;
 
    BLAZE_CONSTRAINT_MUST_BE_SPARSE_VECTOR_TYPE ( ResultType );
    BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType );
-   BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType_<VT2> );
+   BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType_t<VT2> );
 
-   typedef AddTrait_< ResultType, ResultType_<VT2> >  AddType;
+   using AddType = AddTrait_t< ResultType, ResultType_t<VT2> >;
 
    BLAZE_CONSTRAINT_MUST_BE_VECTOR_WITH_TRANSPOSE_FLAG( AddType, TF );
    BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( AddType );
 
-   if( size() != (~rhs).size() ) {
+   if( size() != (*rhs).size() ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Vector sizes do not match" );
    }
 
-   const AddType tmp( *this + (~rhs) );
+   const AddType tmp( *this + (*rhs) );
 
-   if( !tryAssign( vector_, tmp, offset_ ) ) {
+   if( !tryAssign( vector_, tmp, offset() ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to restricted vector" );
    }
 
-   DerestrictTrait_<This> left( derestrict( *this ) );
+   decltype(auto) left( derestrict( *this ) );
 
    left.reset();
    assign( left, tmp );
@@ -1074,35 +1099,36 @@ inline Subvector<VT,AF,TF,false>&
 // In case the current sizes of the two vectors don't match, a \a std::invalid_argument exception
 // is thrown.
 */
-template< typename VT     // Type of the sparse vector
-        , bool AF         // Alignment flag
-        , bool TF >       // Transpose flag
-template< typename VT2 >  // Type of the right-hand side vector
-inline Subvector<VT,AF,TF,false>&
-   Subvector<VT,AF,TF,false>::operator-=( const Vector<VT2,TF>& rhs )
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+template< typename VT2 >    // Type of the right-hand side vector
+inline Subvector<VT,AF,TF,false,CSAs...>&
+   Subvector<VT,AF,TF,false,CSAs...>::operator-=( const Vector<VT2,TF>& rhs )
 {
    using blaze::assign;
 
    BLAZE_CONSTRAINT_MUST_BE_SPARSE_VECTOR_TYPE ( ResultType );
    BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType );
-   BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType_<VT2> );
+   BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType_t<VT2> );
 
-   typedef SubTrait_< ResultType, ResultType_<VT2> >  SubType;
+   using SubType = SubTrait_t< ResultType, ResultType_t<VT2> >;
 
    BLAZE_CONSTRAINT_MUST_BE_VECTOR_WITH_TRANSPOSE_FLAG( SubType, TF );
    BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( SubType );
 
-   if( size() != (~rhs).size() ) {
+   if( size() != (*rhs).size() ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Vector sizes do not match" );
    }
 
-   const SubType tmp( *this - (~rhs) );
+   const SubType tmp( *this - (*rhs) );
 
-   if( !tryAssign( vector_, tmp, offset_ ) ) {
+   if( !tryAssign( vector_, tmp, offset() ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to restricted vector" );
    }
 
-   DerestrictTrait_<This> left( derestrict( *this ) );
+   decltype(auto) left( derestrict( *this ) );
 
    left.reset();
    assign( left, tmp );
@@ -1128,35 +1154,36 @@ inline Subvector<VT,AF,TF,false>&
 // In case the current sizes of the two vectors don't match, a \a std::invalid_argument exception
 // is thrown.
 */
-template< typename VT     // Type of the sparse vector
-        , bool AF         // Alignment flag
-        , bool TF >       // Transpose flag
-template< typename VT2 >  // Type of the right-hand side vector
-inline Subvector<VT,AF,TF,false>&
-   Subvector<VT,AF,TF,false>::operator*=( const Vector<VT2,TF>& rhs )
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+template< typename VT2 >    // Type of the right-hand side vector
+inline Subvector<VT,AF,TF,false,CSAs...>&
+   Subvector<VT,AF,TF,false,CSAs...>::operator*=( const Vector<VT2,TF>& rhs )
 {
    using blaze::assign;
 
    BLAZE_CONSTRAINT_MUST_BE_SPARSE_VECTOR_TYPE ( ResultType );
    BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType );
-   BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType_<VT2> );
+   BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType_t<VT2> );
 
-   typedef MultTrait_< ResultType, ResultType_<VT2> >  MultType;
+   using MultType = MultTrait_t< ResultType, ResultType_t<VT2> >;
 
    BLAZE_CONSTRAINT_MUST_BE_VECTOR_WITH_TRANSPOSE_FLAG( MultType, TF );
    BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( MultType );
 
-   if( size() != (~rhs).size() ) {
+   if( size() != (*rhs).size() ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Vector sizes do not match" );
    }
 
-   const MultType tmp( *this * (~rhs) );
+   const MultType tmp( *this * (*rhs) );
 
-   if( !tryAssign( vector_, tmp, offset_ ) ) {
+   if( !tryAssign( vector_, tmp, offset() ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to restricted vector" );
    }
 
-   DerestrictTrait_<This> left( derestrict( *this ) );
+   decltype(auto) left( derestrict( *this ) );
 
    left.reset();
    assign( left, tmp );
@@ -1181,37 +1208,38 @@ inline Subvector<VT,AF,TF,false>&
 // In case the current sizes of the two vectors don't match, a \a std::invalid_argument exception
 // is thrown.
 */
-template< typename VT     // Type of the sparse vector
-        , bool AF         // Alignment flag
-        , bool TF >       // Transpose flag
-template< typename VT2 >  // Type of the right-hand side dense vector
-inline Subvector<VT,AF,TF,false>&
-   Subvector<VT,AF,TF,false>::operator/=( const DenseVector<VT2,TF>& rhs )
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+template< typename VT2 >    // Type of the right-hand side dense vector
+inline Subvector<VT,AF,TF,false,CSAs...>&
+   Subvector<VT,AF,TF,false,CSAs...>::operator/=( const DenseVector<VT2,TF>& rhs )
 {
    using blaze::assign;
 
    BLAZE_CONSTRAINT_MUST_BE_SPARSE_VECTOR_TYPE ( ResultType );
    BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType );
-   BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE  ( ResultType_<VT2> );
-   BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType_<VT2> );
+   BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE  ( ResultType_t<VT2> );
+   BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType_t<VT2> );
 
-   typedef DivTrait_< ResultType, ResultType_<VT2> >  DivType;
+   using DivType = DivTrait_t< ResultType, ResultType_t<VT2> >;
 
    BLAZE_CONSTRAINT_MUST_BE_SPARSE_VECTOR_TYPE( DivType );
    BLAZE_CONSTRAINT_MUST_BE_VECTOR_WITH_TRANSPOSE_FLAG( DivType, TF );
    BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( DivType );
 
-   if( size() != (~rhs).size() ) {
+   if( size() != (*rhs).size() ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Vector sizes do not match" );
    }
 
-   const DivType tmp( *this / (~rhs) );
+   const DivType tmp( *this / (*rhs) );
 
-   if( !tryAssign( vector_, tmp, offset_ ) ) {
+   if( !tryAssign( vector_, tmp, offset() ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to restricted vector" );
    }
 
-   DerestrictTrait_<This> left( derestrict( *this ) );
+   decltype(auto) left( derestrict( *this ) );
 
    left.reset();
    assign( left, tmp );
@@ -1227,7 +1255,7 @@ inline Subvector<VT,AF,TF,false>&
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 /*!\brief Cross product assignment operator for the multiplication of a vector
-//        (\f$ \vec{a}%=\vec{b} \f$).
+//        (\f$ \vec{a}\times=\vec{b} \f$).
 //
 // \param rhs The right-hand side vector for the cross product.
 // \return Reference to the assigned subvector.
@@ -1237,113 +1265,41 @@ inline Subvector<VT,AF,TF,false>&
 // In case the current size of any of the two vectors is not equal to 3, a \a std::invalid_argument
 // exception is thrown.
 */
-template< typename VT     // Type of the sparse vector
-        , bool AF         // Alignment flag
-        , bool TF >       // Transpose flag
-template< typename VT2 >  // Type of the right-hand side vector
-inline Subvector<VT,AF,TF,false>&
-   Subvector<VT,AF,TF,false>::operator%=( const Vector<VT2,TF>& rhs )
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+template< typename VT2 >    // Type of the right-hand side vector
+inline Subvector<VT,AF,TF,false,CSAs...>&
+   Subvector<VT,AF,TF,false,CSAs...>::operator%=( const Vector<VT2,TF>& rhs )
 {
    using blaze::assign;
 
-   BLAZE_CONSTRAINT_MUST_BE_VECTOR_WITH_TRANSPOSE_FLAG( ResultType_<VT2>, TF );
-   BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType_<VT2> );
+   BLAZE_CONSTRAINT_MUST_BE_VECTOR_WITH_TRANSPOSE_FLAG( ResultType_t<VT2>, TF );
+   BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType_t<VT2> );
 
-   typedef CrossTrait_< ResultType, ResultType_<VT2> >  CrossType;
+   using CrossType = CrossTrait_t< ResultType, ResultType_t<VT2> >;
 
    BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE( CrossType );
    BLAZE_CONSTRAINT_MUST_BE_VECTOR_WITH_TRANSPOSE_FLAG( CrossType, TF );
    BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( CrossType );
 
-   if( size() != 3UL || (~rhs).size() != 3UL ) {
+   if( size() != 3UL || (*rhs).size() != 3UL ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid vector size for cross product" );
    }
 
-   const CrossType tmp( *this % (~rhs) );
+   const CrossType tmp( *this % (*rhs) );
 
-   if( !tryAssign( vector_, tmp, offset_ ) ) {
+   if( !tryAssign( vector_, tmp, offset() ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to restricted vector" );
    }
 
-   DerestrictTrait_<This> left( derestrict( *this ) );
+   decltype(auto) left( derestrict( *this ) );
 
    left.reset();
    assign( left, tmp );
 
    BLAZE_INTERNAL_ASSERT( isIntact( vector_ ), "Invariant violation detected" );
-
-   return *this;
-}
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Multiplication assignment operator for the multiplication between a sparse subvector
-//        and a scalar value (\f$ \vec{a}*=s \f$).
-//
-// \param rhs The right-hand side scalar value for the multiplication.
-// \return Reference to the assigned subvector.
-//
-// This operator can only be used for built-in data types. Additionally, the elements of
-// the sparse subvector must support the multiplication assignment operator for the given
-// scalar built-in data type.
-*/
-template< typename VT       // Type of the sparse vector
-        , bool AF           // Alignment flag
-        , bool TF >         // Transpose flag
-template< typename Other >  // Data type of the right-hand side scalar
-inline EnableIf_<IsNumeric<Other>, Subvector<VT,AF,TF,false> >&
-   Subvector<VT,AF,TF,false>::operator*=( Other rhs )
-{
-   const Iterator last( end() );
-   for( Iterator element=begin(); element!=last; ++element )
-      element->value() *= rhs;
-   return *this;
-}
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Division assignment operator for the division of a sparse subvector by a scalar value
-//        (\f$ \vec{a}/=s \f$).
-//
-// \param rhs The right-hand side scalar value for the division.
-// \return Reference to the assigned subvector.
-//
-// This operator can only be used for built-in data types. Additionally, the elements of the
-// sparse subvector must either support the multiplication assignment operator for the given
-// floating point data type or the division assignment operator for the given integral data
-// type.
-*/
-template< typename VT       // Type of the sparse vector
-        , bool AF           // Alignment flag
-        , bool TF >         // Transpose flag
-template< typename Other >  // Data type of the right-hand side scalar
-inline EnableIf_<IsNumeric<Other>, Subvector<VT,AF,TF,false> >&
-   Subvector<VT,AF,TF,false>::operator/=( Other rhs )
-{
-   BLAZE_USER_ASSERT( rhs != Other(0), "Division by zero detected" );
-
-   typedef DivTrait_<ElementType,Other>     DT;
-   typedef If_< IsNumeric<DT>, DT, Other >  Tmp;
-
-   const Iterator last( end() );
-
-   // Depending on the two involved data types, an integer division is applied or a
-   // floating point division is selected.
-   if( IsNumeric<DT>::value && IsFloatingPoint<DT>::value ) {
-      const Tmp tmp( Tmp(1)/static_cast<Tmp>( rhs ) );
-      for( Iterator element=begin(); element!=last; ++element )
-         element->value() *= tmp;
-   }
-   else {
-      for( Iterator element=begin(); element!=last; ++element )
-         element->value() /= rhs;
-   }
 
    return *this;
 }
@@ -1361,16 +1317,35 @@ inline EnableIf_<IsNumeric<Other>, Subvector<VT,AF,TF,false> >&
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-/*!\brief Returns the size/dimension of the sparse subvector.
+/*!\brief Returns the vector containing the subvector.
 //
-// \return The size of the sparse subvector.
+// \return The vector containing the subvector.
 */
-template< typename VT  // Type of the sparse vector
-        , bool AF      // Alignment flag
-        , bool TF >    // Transpose flag
-inline size_t Subvector<VT,AF,TF,false>::size() const noexcept
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+inline VT& Subvector<VT,AF,TF,false,CSAs...>::operand() noexcept
 {
-   return size_;
+   return vector_;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Returns the vector containing the subvector.
+//
+// \return The vector containing the subvector.
+*/
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+inline const VT& Subvector<VT,AF,TF,false,CSAs...>::operand() const noexcept
+{
+   return vector_;
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -1382,10 +1357,11 @@ inline size_t Subvector<VT,AF,TF,false>::size() const noexcept
 //
 // \return The capacity of the sparse subvector.
 */
-template< typename VT  // Type of the sparse vector
-        , bool AF      // Alignment flag
-        , bool TF >    // Transpose flag
-inline size_t Subvector<VT,AF,TF,false>::capacity() const noexcept
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+inline size_t Subvector<VT,AF,TF,false,CSAs...>::capacity() const noexcept
 {
    return nonZeros() + vector_.capacity() - vector_.nonZeros();
 }
@@ -1401,10 +1377,11 @@ inline size_t Subvector<VT,AF,TF,false>::capacity() const noexcept
 //
 // Note that the number of non-zero elements is always smaller than the size of the subvector.
 */
-template< typename VT  // Type of the sparse vector
-        , bool AF      // Alignment flag
-        , bool TF >    // Transpose flag
-inline size_t Subvector<VT,AF,TF,false>::nonZeros() const
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+inline size_t Subvector<VT,AF,TF,false,CSAs...>::nonZeros() const
 {
    return end() - begin();
 }
@@ -1418,12 +1395,13 @@ inline size_t Subvector<VT,AF,TF,false>::nonZeros() const
 //
 // \return void
 */
-template< typename VT  // Type of the sparse vector
-        , bool AF      // Alignment flag
-        , bool TF >    // Transpose flag
-inline void Subvector<VT,AF,TF,false>::reset()
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+inline void Subvector<VT,AF,TF,false,CSAs...>::reset()
 {
-   vector_.erase( vector_.lowerBound( offset_ ), vector_.lowerBound( offset_ + size_ ) );
+   vector_.erase( vector_.lowerBound( offset() ), vector_.lowerBound( offset() + size() ) );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -1439,10 +1417,11 @@ inline void Subvector<VT,AF,TF,false>::reset()
 // This function increases the capacity of the sparse subvector to at least \a n elements. The
 // current values of the subvector elements are preserved.
 */
-template< typename VT  // Type of the sparse vector
-        , bool AF      // Alignment flag
-        , bool TF >    // Transpose flag
-void Subvector<VT,AF,TF,false>::reserve( size_t n )
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+void Subvector<VT,AF,TF,false,CSAs...>::reserve( size_t n )
 {
    const size_t current( capacity() );
 
@@ -1474,13 +1453,14 @@ void Subvector<VT,AF,TF,false>::reserve( size_t n )
 // already contains an element with index \a index its value is modified, else a new element with
 // the given \a value is inserted.
 */
-template< typename VT  // Type of the sparse vector
-        , bool AF      // Alignment flag
-        , bool TF >    // Transpose flag
-inline typename Subvector<VT,AF,TF,false>::Iterator
-   Subvector<VT,AF,TF,false>::set( size_t index, const ElementType& value )
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+inline typename Subvector<VT,AF,TF,false,CSAs...>::Iterator
+   Subvector<VT,AF,TF,false,CSAs...>::set( size_t index, const ElementType& value )
 {
-   return Iterator( vector_.set( offset_ + index, value ), offset_ );
+   return Iterator( vector_.set( offset() + index, value ), offset() );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -1499,13 +1479,14 @@ inline typename Subvector<VT,AF,TF,false>::Iterator
 // are not allowed. In case the sparse subvector already contains an element at index \a index,
 // a \a std::invalid_argument exception is thrown.
 */
-template< typename VT  // Type of the sparse vector
-        , bool AF      // Alignment flag
-        , bool TF >    // Transpose flag
-inline typename Subvector<VT,AF,TF,false>::Iterator
-   Subvector<VT,AF,TF,false>::insert( size_t index, const ElementType& value )
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+inline typename Subvector<VT,AF,TF,false,CSAs...>::Iterator
+   Subvector<VT,AF,TF,false,CSAs...>::insert( size_t index, const ElementType& value )
 {
-   return Iterator( vector_.insert( offset_ + index, value ), offset_ );
+   return Iterator( vector_.insert( offset() + index, value ), offset() );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -1536,15 +1517,16 @@ inline typename Subvector<VT,AF,TF,false>::Iterator
 // \note Although append() does not allocate new memory, it still invalidates all iterators
 // returned by the end() functions!
 */
-template< typename VT  // Type of the sparse vector
-        , bool AF      // Alignment flag
-        , bool TF >    // Transpose flag
-inline void Subvector<VT,AF,TF,false>::append( size_t index, const ElementType& value, bool check )
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+inline void Subvector<VT,AF,TF,false,CSAs...>::append( size_t index, const ElementType& value, bool check )
 {
-   if( offset_ + size_ == vector_.size() )
-      vector_.append( offset_ + index, value, check );
-   else if( !check || !isDefault( value ) )
-      vector_.insert( offset_ + index, value );
+   if( offset() + size() == vector_.size() )
+      vector_.append( offset() + index, value, check );
+   else if( !check || !isDefault<strict>( value ) )
+      vector_.insert( offset() + index, value );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -1567,12 +1549,13 @@ inline void Subvector<VT,AF,TF,false>::append( size_t index, const ElementType& 
 //
 // This function erases an element from the sparse subvector.
 */
-template< typename VT  // Type of the sparse vector
-        , bool AF      // Alignment flag
-        , bool TF >    // Transpose flag
-inline void Subvector<VT,AF,TF,false>::erase( size_t index )
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+inline void Subvector<VT,AF,TF,false,CSAs...>::erase( size_t index )
 {
-   vector_.erase( offset_ + index );
+   vector_.erase( offset() + index );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -1587,12 +1570,14 @@ inline void Subvector<VT,AF,TF,false>::erase( size_t index )
 //
 // This function erases an element from the sparse subvector.
 */
-template< typename VT  // Type of the sparse vector
-        , bool AF      // Alignment flag
-        , bool TF >    // Transpose flag
-inline typename Subvector<VT,AF,TF,false>::Iterator Subvector<VT,AF,TF,false>::erase( Iterator pos )
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+inline typename Subvector<VT,AF,TF,false,CSAs...>::Iterator
+   Subvector<VT,AF,TF,false,CSAs...>::erase( Iterator pos )
 {
-   return Iterator( vector_.erase( pos.base() ), offset_ );
+   return Iterator( vector_.erase( pos.base() ), offset() );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -1608,13 +1593,14 @@ inline typename Subvector<VT,AF,TF,false>::Iterator Subvector<VT,AF,TF,false>::e
 //
 // This function erases a range of elements from the sparse subvector.
 */
-template< typename VT  // Type of the sparse vector
-        , bool AF      // Alignment flag
-        , bool TF >    // Transpose flag
-inline typename Subvector<VT,AF,TF,false>::Iterator
-   Subvector<VT,AF,TF,false>::erase( Iterator first, Iterator last )
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+inline typename Subvector<VT,AF,TF,false,CSAs...>::Iterator
+   Subvector<VT,AF,TF,false,CSAs...>::erase( Iterator first, Iterator last )
 {
-   return Iterator( vector_.erase( first.base(), last.base() ), offset_ );
+   return Iterator( vector_.erase( first.base(), last.base() ), offset() );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -1643,12 +1629,13 @@ inline typename Subvector<VT,AF,TF,false>::Iterator
 // \note The predicate is required to be pure, i.e. to produce deterministic results for elements
 // with the same value. The attempt to use an impure predicate leads to undefined behavior!
 */
-template< typename VT    // Type of the sparse vector
-        , bool AF        // Alignment flag
-        , bool TF >      // Transpose flag
-template< typename Pred  // Type of the unary predicate
-        , typename >     // Type restriction on the unary predicate
-inline void Subvector<VT,AF,TF,false>::erase( Pred predicate )
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+template< typename Pred     // Type of the unary predicate
+        , typename >        // Type restriction on the unary predicate
+inline void Subvector<VT,AF,TF,false,CSAs...>::erase( Pred predicate )
 {
    vector_.erase( begin().base(), end().base(), predicate );
 }
@@ -1682,11 +1669,12 @@ inline void Subvector<VT,AF,TF,false>::erase( Pred predicate )
 // \note The predicate is required to be pure, i.e. to produce deterministic results for elements
 // with the same value. The attempt to use an impure predicate leads to undefined behavior!
 */
-template< typename VT      // Type of the sparse vector
-        , bool AF          // Alignment flag
-        , bool TF >        // Transpose flag
-template< typename Pred >  // Type of the unary predicate
-inline void Subvector<VT,AF,TF,false>::erase( Iterator first, Iterator last, Pred predicate )
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+template< typename Pred >   // Type of the unary predicate
+inline void Subvector<VT,AF,TF,false,CSAs...>::erase( Iterator first, Iterator last, Pred predicate )
 {
    vector_.erase( first.base(), last.base(), predicate );
 }
@@ -1714,18 +1702,19 @@ inline void Subvector<VT,AF,TF,false>::erase( Iterator first, Iterator last, Pre
 // is found, the function returns an iterator to the element. Otherwise an iterator just past
 // the last non-zero element of the sparse subvector (the end() iterator) is returned. Note that
 // the returned sparse subvector iterator is subject to invalidation due to inserting operations
-// via the subscript operator or the insert() function!
+// via the subscript operator, the set() function or the insert() function!
 */
-template< typename VT  // Type of the sparse vector
-        , bool AF      // Alignment flag
-        , bool TF >    // Transpose flag
-inline typename Subvector<VT,AF,TF,false>::Iterator
-   Subvector<VT,AF,TF,false>::find( size_t index )
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+inline typename Subvector<VT,AF,TF,false,CSAs...>::Iterator
+   Subvector<VT,AF,TF,false,CSAs...>::find( size_t index )
 {
-   const Iterator_<VT> pos( vector_.find( offset_ + index ) );
+   const Iterator_t<VT> pos( vector_.find( offset() + index ) );
 
    if( pos != vector_.end() )
-      return Iterator( pos, offset_ );
+      return Iterator( pos, offset() );
    else
       return end();
 }
@@ -1745,18 +1734,19 @@ inline typename Subvector<VT,AF,TF,false>::Iterator
 // is found, the function returns an iterator to the element. Otherwise an iterator just past
 // the last non-zero element of the sparse subvector (the end() iterator) is returned. Note that
 // the returned sparse subvector iterator is subject to invalidation due to inserting operations
-// via the subscript operator or the insert() function!
+// via the subscript operator, the set() function or the insert() function!
 */
-template< typename VT  // Type of the sparse vector
-        , bool AF      // Alignment flag
-        , bool TF >    // Transpose flag
-inline typename Subvector<VT,AF,TF,false>::ConstIterator
-   Subvector<VT,AF,TF,false>::find( size_t index ) const
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+inline typename Subvector<VT,AF,TF,false,CSAs...>::ConstIterator
+   Subvector<VT,AF,TF,false,CSAs...>::find( size_t index ) const
 {
-   const ConstIterator_<VT> pos( vector_.find( offset_ + index ) );
+   const ConstIterator_t<VT> pos( vector_.find( offset() + index ) );
 
    if( pos != vector_.end() )
-      return Iterator( pos, offset_ );
+      return Iterator( pos, offset() );
    else
       return end();
 }
@@ -1774,16 +1764,17 @@ inline typename Subvector<VT,AF,TF,false>::ConstIterator
 // This function returns an iterator to the first element with an index not less then the given
 // index. In combination with the upperBound() function this function can be used to create a
 // pair of iterators specifying a range of indices. Note that the returned sparse subvector
-// iterator is subject to invalidation due to inserting operations via the subscript operator
-// or the insert() function!
+// iterator is subject to invalidation due to inserting operations via the subscript operator,
+// the set() function or the insert() function!
 */
-template< typename VT  // Type of the sparse vector
-        , bool AF      // Alignment flag
-        , bool TF >    // Transpose flag
-inline typename Subvector<VT,AF,TF,false>::Iterator
-   Subvector<VT,AF,TF,false>::lowerBound( size_t index )
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+inline typename Subvector<VT,AF,TF,false,CSAs...>::Iterator
+   Subvector<VT,AF,TF,false,CSAs...>::lowerBound( size_t index )
 {
-   return Iterator( vector_.lowerBound( offset_ + index ), offset_ );
+   return Iterator( vector_.lowerBound( offset() + index ), offset() );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -1799,16 +1790,17 @@ inline typename Subvector<VT,AF,TF,false>::Iterator
 // This function returns an iterator to the first element with an index not less then the given
 // index. In combination with the upperBound() function this function can be used to create a
 // pair of iterators specifying a range of indices. Note that the returned sparse subvector
-// iterator is subject to invalidation due to inserting operations via the subscript operator
-// or the insert() function!
+// iterator is subject to invalidation due to inserting operations via the subscript operator,
+// the set() function or the insert() function!
 */
-template< typename VT  // Type of the sparse vector
-        , bool AF      // Alignment flag
-        , bool TF >    // Transpose flag
-inline typename Subvector<VT,AF,TF,false>::ConstIterator
-   Subvector<VT,AF,TF,false>::lowerBound( size_t index ) const
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+inline typename Subvector<VT,AF,TF,false,CSAs...>::ConstIterator
+   Subvector<VT,AF,TF,false,CSAs...>::lowerBound( size_t index ) const
 {
-   return ConstIterator( vector_.lowerBound( offset_ + index ), offset_ );
+   return ConstIterator( vector_.lowerBound( offset() + index ), offset() );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -1822,18 +1814,19 @@ inline typename Subvector<VT,AF,TF,false>::ConstIterator
 // \return Iterator to the first index greater then the given index, end() iterator otherwise.
 //
 // This function returns an iterator to the first element with an index greater then the given
-// index. In combination with the upperBound() function this function can be used to create a
+// index. In combination with the lowerBound() function this function can be used to create a
 // pair of iterators specifying a range of indices. Note that the returned sparse subvector
-// iterator is subject to invalidation due to inserting operations via the subscript operator
-// or the insert() function!
+// iterator is subject to invalidation due to inserting operations via the subscript operator,
+// the set() function or the insert() function!
 */
-template< typename VT  // Type of the sparse vector
-        , bool AF      // Alignment flag
-        , bool TF >    // Transpose flag
-inline typename Subvector<VT,AF,TF,false>::Iterator
-   Subvector<VT,AF,TF,false>::upperBound( size_t index )
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+inline typename Subvector<VT,AF,TF,false,CSAs...>::Iterator
+   Subvector<VT,AF,TF,false,CSAs...>::upperBound( size_t index )
 {
-   return Iterator( vector_.upperBound( offset_ + index ), offset_ );
+   return Iterator( vector_.upperBound( offset() + index ), offset() );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -1847,18 +1840,19 @@ inline typename Subvector<VT,AF,TF,false>::Iterator
 // \return Iterator to the first index greater then the given index, end() iterator otherwise.
 //
 // This function returns an iterator to the first element with an index greater then the given
-// index. In combination with the upperBound() function this function can be used to create a
+// index. In combination with the lowerBound() function this function can be used to create a
 // pair of iterators specifying a range of indices. Note that the returned sparse subvector
-// iterator is subject to invalidation due to inserting operations via the subscript operator
-// or the insert() function!
+// iterator is subject to invalidation due to inserting operations via the subscript operator,
+// the set() function or the insert() function!
 */
-template< typename VT  // Type of the sparse vector
-        , bool AF      // Alignment flag
-        , bool TF >    // Transpose flag
-inline typename Subvector<VT,AF,TF,false>::ConstIterator
-   Subvector<VT,AF,TF,false>::upperBound( size_t index ) const
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+inline typename Subvector<VT,AF,TF,false,CSAs...>::ConstIterator
+   Subvector<VT,AF,TF,false,CSAs...>::upperBound( size_t index ) const
 {
-   return ConstIterator( vector_.upperBound( offset_ + index ), offset_ );
+   return ConstIterator( vector_.upperBound( offset() + index ), offset() );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -1878,12 +1872,18 @@ inline typename Subvector<VT,AF,TF,false>::ConstIterator
 //
 // \param scalar The scalar value for the subvector scaling.
 // \return Reference to the sparse subvector.
+//
+// This function scales the subvector by applying the given scalar value \a scalar to each
+// element of the subvector. For built-in and \c complex data types it has the same effect
+// as using the multiplication assignment operator.
 */
 template< typename VT       // Type of the sparse vector
-        , bool AF           // Alignment flag
-        , bool TF >         // Transpose flag
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
 template< typename Other >  // Data type of the scalar value
-inline Subvector<VT,AF,TF,false>& Subvector<VT,AF,TF,false>::scale( const Other& scalar )
+inline Subvector<VT,AF,TF,false,CSAs...>&
+   Subvector<VT,AF,TF,false,CSAs...>::scale( const Other& scalar )
 {
    for( Iterator element=begin(); element!=end(); ++element )
       element->value() *= scalar;
@@ -1913,12 +1913,13 @@ inline Subvector<VT,AF,TF,false>& Subvector<VT,AF,TF,false>::scale( const Other&
 // to optimize the evaluation.
 */
 template< typename VT       // Type of the sparse vector
-        , bool AF           // Alignment flag
-        , bool TF >         // Transpose flag
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
 template< typename Other >  // Data type of the foreign expression
-inline bool Subvector<VT,AF,TF,false>::canAlias( const Other* alias ) const noexcept
+inline bool Subvector<VT,AF,TF,false,CSAs...>::canAlias( const Other* alias ) const noexcept
 {
-   return vector_.isAliased( alias );
+   return vector_.isAliased( &unview( *alias ) );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -1936,12 +1937,13 @@ inline bool Subvector<VT,AF,TF,false>::canAlias( const Other* alias ) const noex
 // expressions to optimize the evaluation.
 */
 template< typename VT       // Type of the sparse vector
-        , bool AF           // Alignment flag
-        , bool TF >         // Transpose flag
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
 template< typename Other >  // Data type of the foreign expression
-inline bool Subvector<VT,AF,TF,false>::isAliased( const Other* alias ) const noexcept
+inline bool Subvector<VT,AF,TF,false,CSAs...>::isAliased( const Other* alias ) const noexcept
 {
-   return vector_.isAliased( alias );
+   return vector_.isAliased( &unview( *alias ) );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -1958,10 +1960,11 @@ inline bool Subvector<VT,AF,TF,false>::isAliased( const Other* alias ) const noe
 // function additionally provides runtime information (as for instance the current size of the
 // vector).
 */
-template< typename VT  // Type of the sparse vector
-        , bool AF      // Alignment flag
-        , bool TF >    // Transpose flag
-inline bool Subvector<VT,AF,TF,false>::canSMPAssign() const noexcept
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+inline bool Subvector<VT,AF,TF,false,CSAs...>::canSMPAssign() const noexcept
 {
    return false;
 }
@@ -1981,19 +1984,20 @@ inline bool Subvector<VT,AF,TF,false>::canSMPAssign() const noexcept
 // in erroneous results and/or in compilation errors. Instead of using this function use the
 // assignment operator.
 */
-template< typename VT     // Type of the sparse vector
-        , bool AF         // Alignment flag
-        , bool TF >       // Transpose flag
-template< typename VT2 >  // Type of the right-hand side dense vector
-inline void Subvector<VT,AF,TF,false>::assign( const DenseVector<VT2,TF>& rhs )
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+template< typename VT2 >    // Type of the right-hand side dense vector
+inline void Subvector<VT,AF,TF,false,CSAs...>::assign( const DenseVector<VT2,TF>& rhs )
 {
-   BLAZE_INTERNAL_ASSERT( size() == (~rhs).size(), "Invalid vector sizes" );
+   BLAZE_INTERNAL_ASSERT( size() == (*rhs).size(), "Invalid vector sizes" );
    BLAZE_INTERNAL_ASSERT( nonZeros() == 0UL, "Invalid non-zero elements detected" );
 
-   reserve( (~rhs).size() );
+   reserve( (*rhs).size() );
 
    for( size_t i=0UL; i<size(); ++i ) {
-      append( i, (~rhs)[i], true );
+      append( i, (*rhs)[i], true );
    }
 }
 /*! \endcond */
@@ -2012,18 +2016,19 @@ inline void Subvector<VT,AF,TF,false>::assign( const DenseVector<VT2,TF>& rhs )
 // in erroneous results and/or in compilation errors. Instead of using this function use the
 // assignment operator.
 */
-template< typename VT     // Type of the sparse vector
-        , bool AF         // Alignment flag
-        , bool TF >       // Transpose flag
-template< typename VT2 >  // Type of the right-hand side sparse vector
-inline void Subvector<VT,AF,TF,false>::assign( const SparseVector<VT2,TF>& rhs )
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+template< typename VT2 >    // Type of the right-hand side sparse vector
+inline void Subvector<VT,AF,TF,false,CSAs...>::assign( const SparseVector<VT2,TF>& rhs )
 {
-   BLAZE_INTERNAL_ASSERT( size() == (~rhs).size(), "Invalid vector sizes" );
+   BLAZE_INTERNAL_ASSERT( size() == (*rhs).size(), "Invalid vector sizes" );
    BLAZE_INTERNAL_ASSERT( nonZeros() == 0UL, "Invalid non-zero elements detected" );
 
-   reserve( (~rhs).nonZeros() );
+   reserve( (*rhs).nonZeros() );
 
-   for( ConstIterator_<VT2> element=(~rhs).begin(); element!=(~rhs).end(); ++element ) {
+   for( ConstIterator_t<VT2> element=(*rhs).begin(); element!=(*rhs).end(); ++element ) {
       append( element->index(), element->value(), true );
    }
 }
@@ -2043,21 +2048,22 @@ inline void Subvector<VT,AF,TF,false>::assign( const SparseVector<VT2,TF>& rhs )
 // in erroneous results and/or in compilation errors. Instead of using this function use the
 // assignment operator.
 */
-template< typename VT     // Type of the sparse vector
-        , bool AF         // Alignment flag
-        , bool TF >       // Transpose flag
-template< typename VT2 >  // Type of the right-hand side dense vector
-inline void Subvector<VT,AF,TF,false>::addAssign( const DenseVector<VT2,TF>& rhs )
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+template< typename VT2 >    // Type of the right-hand side dense vector
+inline void Subvector<VT,AF,TF,false,CSAs...>::addAssign( const DenseVector<VT2,TF>& rhs )
 {
-   typedef AddTrait_< ResultType, ResultType_<VT2> >  AddType;
+   using AddType = AddTrait_t< ResultType, ResultType_t<VT2> >;
 
    BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE( AddType );
    BLAZE_CONSTRAINT_MUST_BE_VECTOR_WITH_TRANSPOSE_FLAG( AddType, TF );
    BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( AddType );
 
-   BLAZE_INTERNAL_ASSERT( size() == (~rhs).size(), "Invalid vector sizes" );
+   BLAZE_INTERNAL_ASSERT( size() == (*rhs).size(), "Invalid vector sizes" );
 
-   const AddType tmp( serial( *this + (~rhs) ) );
+   const AddType tmp( serial( *this + (*rhs) ) );
    reset();
    assign( tmp );
 }
@@ -2077,21 +2083,22 @@ inline void Subvector<VT,AF,TF,false>::addAssign( const DenseVector<VT2,TF>& rhs
 // in erroneous results and/or in compilation errors. Instead of using this function use the
 // assignment operator.
 */
-template< typename VT     // Type of the sparse vector
-        , bool AF         // Alignment flag
-        , bool TF >       // Transpose flag
-template< typename VT2 >  // Type of the right-hand side sparse vector
-inline void Subvector<VT,AF,TF,false>::addAssign( const SparseVector<VT2,TF>& rhs )
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+template< typename VT2 >    // Type of the right-hand side sparse vector
+inline void Subvector<VT,AF,TF,false,CSAs...>::addAssign( const SparseVector<VT2,TF>& rhs )
 {
-   typedef AddTrait_< ResultType, ResultType_<VT2> >  AddType;
+   using AddType = AddTrait_t< ResultType, ResultType_t<VT2> >;
 
    BLAZE_CONSTRAINT_MUST_BE_SPARSE_VECTOR_TYPE( AddType );
    BLAZE_CONSTRAINT_MUST_BE_VECTOR_WITH_TRANSPOSE_FLAG( AddType, TF );
    BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( AddType );
 
-   BLAZE_INTERNAL_ASSERT( size() == (~rhs).size(), "Invalid vector sizes" );
+   BLAZE_INTERNAL_ASSERT( size() == (*rhs).size(), "Invalid vector sizes" );
 
-   const AddType tmp( serial( *this + (~rhs) ) );
+   const AddType tmp( serial( *this + (*rhs) ) );
    reset();
    assign( tmp );
 }
@@ -2111,21 +2118,22 @@ inline void Subvector<VT,AF,TF,false>::addAssign( const SparseVector<VT2,TF>& rh
 // in erroneous results and/or in compilation errors. Instead of using this function use the
 // assignment operator.
 */
-template< typename VT     // Type of the sparse vector
-        , bool AF         // Alignment flag
-        , bool TF >       // Transpose flag
-template< typename VT2 >  // Type of the right-hand side dense vector
-inline void Subvector<VT,AF,TF,false>::subAssign( const DenseVector<VT2,TF>& rhs )
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+template< typename VT2 >    // Type of the right-hand side dense vector
+inline void Subvector<VT,AF,TF,false,CSAs...>::subAssign( const DenseVector<VT2,TF>& rhs )
 {
-   typedef SubTrait_< ResultType, ResultType_<VT2> >  SubType;
+   using SubType = SubTrait_t< ResultType, ResultType_t<VT2> >;
 
    BLAZE_CONSTRAINT_MUST_BE_DENSE_VECTOR_TYPE( SubType );
    BLAZE_CONSTRAINT_MUST_BE_VECTOR_WITH_TRANSPOSE_FLAG( SubType, TF );
    BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( SubType );
 
-   BLAZE_INTERNAL_ASSERT( size() == (~rhs).size(), "Invalid vector sizes" );
+   BLAZE_INTERNAL_ASSERT( size() == (*rhs).size(), "Invalid vector sizes" );
 
-   const SubType tmp( serial( *this - (~rhs) ) );
+   const SubType tmp( serial( *this - (*rhs) ) );
    reset();
    assign( tmp );
 }
@@ -2145,21 +2153,22 @@ inline void Subvector<VT,AF,TF,false>::subAssign( const DenseVector<VT2,TF>& rhs
 // in erroneous results and/or in compilation errors. Instead of using this function use the
 // assignment operator.
 */
-template< typename VT     // Type of the sparse vector
-        , bool AF         // Alignment flag
-        , bool TF >       // Transpose flag
-template< typename VT2 >  // Type of the right-hand side sparse vector
-inline void Subvector<VT,AF,TF,false>::subAssign( const SparseVector<VT2,TF>& rhs )
+template< typename VT       // Type of the sparse vector
+        , AlignmentFlag AF  // Alignment flag
+        , bool TF           // Transpose flag
+        , size_t... CSAs >  // Compile time subvector arguments
+template< typename VT2 >    // Type of the right-hand side sparse vector
+inline void Subvector<VT,AF,TF,false,CSAs...>::subAssign( const SparseVector<VT2,TF>& rhs )
 {
-   typedef SubTrait_< ResultType, ResultType_<VT2> >  SubType;
+   using SubType = SubTrait_t< ResultType, ResultType_t<VT2> >;
 
    BLAZE_CONSTRAINT_MUST_BE_SPARSE_VECTOR_TYPE( SubType );
    BLAZE_CONSTRAINT_MUST_BE_VECTOR_WITH_TRANSPOSE_FLAG( SubType, TF );
    BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( SubType );
 
-   BLAZE_INTERNAL_ASSERT( size() == (~rhs).size(), "Invalid vector sizes" );
+   BLAZE_INTERNAL_ASSERT( size() == (*rhs).size(), "Invalid vector sizes" );
 
-   const SubType tmp( serial( *this - (~rhs) ) );
+   const SubType tmp( serial( *this - (*rhs) ) );
    reset();
    assign( tmp );
 }

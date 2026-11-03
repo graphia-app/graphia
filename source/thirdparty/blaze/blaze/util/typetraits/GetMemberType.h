@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/GetMemberType.h
 //  \brief Header file for the GetMemberType type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,8 +40,7 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/util/mpl/If.h>
-#include <blaze/util/typetraits/HasMember.h>
+#include <blaze/util/typetraits/Void.h>
 
 
 namespace blaze {
@@ -65,11 +64,11 @@ namespace blaze {
 
    \code
    struct MyType1 {
-      typedef float  ElementType;
+      using ElementType = float;
    };
 
    struct MyType2 {
-      typedef double  ElementType;
+      using ElementType = double;
    };
 
    struct MyType3 {};
@@ -82,33 +81,28 @@ namespace blaze {
    \endcode
 
 // The macro results in the definition of a new class with the specified name \a TYPE_TRAIT_NAME
-// within the current namespace. This may cause name collisions with any other entity called
-// \a TYPE_TRAIT_NAME in the same namespace. Therefore it is advisable to create the type trait
-// as locally as possible to minimize the probability of name collisions. Note however that the
-// macro cannot be used within function scope since a template declaration cannot appear at
-// block scope.
-//
-// Please note that due to an error in the Intel compilers prior to version 14.0 the type trait
-// generated from this macro does NOT work properly, i.e. will not correctly determine whether
-// the specified element is a type member of the given type!
+// and an associated alias template called TYPE_TRAIT_NAME_t within the current namespace. This
+// may cause name collisions with any other entity called \a TYPE_TRAIT_NAME in the same namespace.
+// Therefore it is advisable to create the type trait as locally as possible to minimize the
+// probability of name collisions. Note however that the macro cannot be used within function
+// scope since a template declaration cannot appear at block scope.
 */
 #define BLAZE_CREATE_GET_TYPE_MEMBER_TYPE_TRAIT( TYPE_TRAIT_NAME, MEMBER_NAME, FALLBACK_TYPE )  \
                                                                                                 \
-template< typename Type1233 >                                                                   \
+template< typename Type1233, typename = void >                                                  \
 struct TYPE_TRAIT_NAME                                                                          \
 {                                                                                               \
- private:                                                                                       \
-   struct SUCCESS { typedef typename Type1233::MEMBER_NAME  Type; };                            \
-   struct FAILURE { typedef FALLBACK_TYPE  Type; };                                             \
+   using Type = FALLBACK_TYPE;                                                                  \
+};                                                                                              \
                                                                                                 \
-   BLAZE_CREATE_HAS_TYPE_MEMBER_TYPE_TRAIT( LOCAL_TYPE_TRAIT, MEMBER_NAME );                    \
+template< typename Type1233 >                                                                   \
+struct TYPE_TRAIT_NAME< Type1233, blaze::Void_t< typename Type1233::MEMBER_NAME > >             \
+{                                                                                               \
+   using Type = typename Type1233::MEMBER_NAME;                                                 \
+};                                                                                              \
                                                                                                 \
- public:                                                                                        \
-   using Type = typename blaze::If< LOCAL_TYPE_TRAIT<Type1233>                                  \
-                                  , SUCCESS                                                     \
-                                  , FAILURE                                                     \
-                                  >::Type::Type;                                                \
-};
+template< typename Type1233 >                                                                   \
+using TYPE_TRAIT_NAME##_t = typename TYPE_TRAIT_NAME<Type1233>::Type
 //*************************************************************************************************
 
 } // namespace blaze

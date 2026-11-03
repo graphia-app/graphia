@@ -3,7 +3,7 @@
 //  \file blaze/util/constraints/Object.h
 //  \brief Constraint on the data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -59,7 +59,7 @@ namespace blaze {
 // \a void, and function types), a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_OBJECT_TYPE(T) \
-   static_assert( ::blaze::IsObject<T>::value, "Non-object type detected" )
+   static_assert( ::blaze::IsObject_v<T>, "Non-object type detected" )
 //*************************************************************************************************
 
 
@@ -78,7 +78,7 @@ namespace blaze {
 // In case the given data type \a T is not a object type, a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_OBJECT_TYPE(T) \
-   static_assert( !::blaze::IsObject<T>::value, "Object type detected" )
+   static_assert( !::blaze::IsObject_v<T>, "Object type detected" )
 //*************************************************************************************************
 
 } // namespace blaze

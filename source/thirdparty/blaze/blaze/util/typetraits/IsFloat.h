@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/IsFloat.h
 //  \brief Header file for the IsFloat type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,8 +40,7 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/util/FalseType.h>
-#include <blaze/util/TrueType.h>
+#include <blaze/util/IntegralConstant.h>
 
 
 namespace blaze {
@@ -72,7 +71,8 @@ namespace blaze {
    \endcode
 */
 template< typename T >
-struct IsFloat : public FalseType
+struct IsFloat
+   : public FalseType
 {};
 //*************************************************************************************************
 
@@ -81,7 +81,8 @@ struct IsFloat : public FalseType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsFloat type trait for the plain 'float' type.
 template<>
-struct IsFloat<float> : public TrueType
+struct IsFloat<float>
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -91,7 +92,8 @@ struct IsFloat<float> : public TrueType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsFloat type trait for 'const float'.
 template<>
-struct IsFloat<const float> : public TrueType
+struct IsFloat<const float>
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -101,7 +103,8 @@ struct IsFloat<const float> : public TrueType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsFloat type trait for 'volatile float'.
 template<>
-struct IsFloat<volatile float> : public TrueType
+struct IsFloat<volatile float>
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -111,9 +114,28 @@ struct IsFloat<volatile float> : public TrueType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsFloat type trait for 'const volatile float'.
 template<>
-struct IsFloat<const volatile float> : public TrueType
+struct IsFloat<const volatile float>
+   : public TrueType
 {};
 /*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsFloat type trait.
+// \ingroup type_traits
+//
+// The IsFloat_v variable template provides a convenient shortcut to access the nested \a value
+// of the IsFloat class template. For instance, given the type \a T the following two statements
+// are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsFloat<T>::value;
+   constexpr bool value2 = blaze::IsFloat_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsFloat_v = IsFloat<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

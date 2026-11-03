@@ -3,7 +3,7 @@
 //  \file blaze/util/Policies.h
 //  \brief Header file for policy classes.
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -41,12 +41,9 @@
 //*************************************************************************************************
 
 #include <blaze/util/policies/ArrayDelete.h>
-#include <blaze/util/policies/ConstantGrowth.h>
 #include <blaze/util/policies/Deallocate.h>
 #include <blaze/util/policies/DefaultDelete.h>
-#include <blaze/util/policies/LinearGrowth.h>
 #include <blaze/util/policies/NoDelete.h>
-#include <blaze/util/policies/OptimalGrowth.h>
 #include <blaze/util/policies/PtrDelete.h>
 
 #endif

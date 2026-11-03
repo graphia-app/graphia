@@ -3,7 +3,7 @@
 //  \file blaze/math/shims/IsReal.h
 //  \brief Header file for the isReal shim
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -42,10 +42,12 @@
 
 #include <blaze/math/RelaxationFlag.h>
 #include <blaze/math/shims/IsZero.h>
+#include <blaze/math/typetraits/IsScalar.h>
 #include <blaze/system/Inline.h>
 #include <blaze/util/Complex.h>
+#include <blaze/util/EnableIf.h>
+#include <blaze/util/MaybeUnused.h>
 #include <blaze/util/typetraits/IsBuiltin.h>
-#include <blaze/util/Unused.h>
 
 
 namespace blaze {
@@ -93,13 +95,14 @@ namespace blaze {
 
 // For all other types the function returns \a false.
 */
-template< bool RF          // Relaxation flag
-        , typename Type >  // Type of the given value
+template< RelaxationFlag RF  // Relaxation flag
+        , typename Type      // Type of the given value
+        , EnableIf_t< IsScalar_v<Type> >* = nullptr >
 BLAZE_ALWAYS_INLINE bool isReal( const Type& v ) noexcept
 {
-   UNUSED_PARAMETER( v );
+   MAYBE_UNUSED( v );
 
-   return IsBuiltin<Type>::value;
+   return IsBuiltin_v<Type>;
 }
 //*************************************************************************************************
 
@@ -112,11 +115,11 @@ BLAZE_ALWAYS_INLINE bool isReal( const Type& v ) noexcept
 // \param v The complex number to be tested.
 // \return \a true in case the imaginary part is equal to 0, \a false if not.
 */
-template< bool RF          // Relaxation flag
-        , typename Type >  // Type of the given value
-BLAZE_ALWAYS_INLINE bool isReal( const complex<Type>& v ) noexcept( IsBuiltin<Type>::value )
+template< RelaxationFlag RF  // Relaxation flag
+        , typename Type >    // Type of the given value
+BLAZE_ALWAYS_INLINE bool isReal( const complex<Type>& v ) noexcept( IsBuiltin_v<Type> )
 {
-   return IsBuiltin<Type>::value && isZero<RF>( v.imag() );
+   return IsBuiltin_v<Type> && isZero<RF>( v.imag() );
 }
 /*! \endcond */
 //*************************************************************************************************

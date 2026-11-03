@@ -1,9 +1,9 @@
 //=================================================================================================
 /*!
 //  \file blaze/math/PaddingFlag.h
-//  \brief Header file for the padding flag values
+//  \brief Header file for the padding flag enumeration
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -45,11 +45,12 @@ namespace blaze {
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\brief Padding flag for unpadded vectors and matrices.
+/*!\brief Padding flag for (un-)padded vectors and matrices.
 // \ingroup math
 //
-// Via this flag it is possible to specify custom vectors and matrices as unpadded. The following
-// example demonstrates the setup of an unaligned, unpadded custom row vector of size 7:
+// Via these flags it is possible to specify custom vectors and matrices as unpadded or padded.
+// The following examples demonstrate the setup of an unaligned, unpadded and aligned, padded
+// custom column vector of size 7, respectively:
 
    \code
    using blaze::CustomVector;
@@ -60,17 +61,6 @@ namespace blaze {
    std::vector<int> vec( 7UL );
    CustomVector<int,unaligned,unpadded,columnVector> a( &vec[0], 7UL );
    \endcode
-*/
-const bool unpadded = false;
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Padding flag for padded vectors and matrices.
-// \ingroup math
-//
-// Via this flag it is possible to specify custom vectors and matrices as aligned. The following
-// example demonstrates the setup of an aligned, padded custom row vector of size 7:
 
    \code
    using blaze::CustomVector;
@@ -80,10 +70,32 @@ const bool unpadded = false;
    using blaze::columnVector;
 
    std::vector<int> vec( 16UL );
-   CustomVector<int,unaligned,padded,columnVector> a( &vec[0], 7UL, 16UL );
+   CustomVector<int,aligned,padded,columnVector> a( &vec[0], 7UL, 16UL );
    \endcode
 */
-const bool padded = true;
+enum PaddingFlag : bool
+{
+   unpadded = false,  //!< Flag for unpadded vectors and matrices.
+   padded   = true    //!< Flag for padded vectors and matrices.
+};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Negating the given padding flag.
+// \ingroup math
+//
+// \param flag The given padding flag to be negated.
+// \return The negated padding flag.
+//
+// This logical NOT operator negates the given padding flag. In case the given flag represents
+// \a unpadded, the function returns \a padded, in case it represents \a padded it returns
+// \a unpadded.
+*/
+constexpr PaddingFlag operator!( PaddingFlag flag ) noexcept
+{
+   return static_cast<PaddingFlag>( !static_cast<bool>( flag ) );
+}
 //*************************************************************************************************
 
 } // namespace blaze

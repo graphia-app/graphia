@@ -3,7 +3,7 @@
 //  \file blaze/math/constraints/UniLower.h
 //  \brief Constraint on the data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -59,7 +59,7 @@ namespace blaze {
 // is created.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_UNILOWER_MATRIX_TYPE(T) \
-   static_assert( ::blaze::IsUniLower<T>::value, "Non-lower unitriangular matrix type detected" )
+   static_assert( ::blaze::IsUniLower_v<T>, "Non-lower unitriangular matrix type detected" )
 //*************************************************************************************************
 
 
@@ -79,7 +79,7 @@ namespace blaze {
 // created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_UNILOWER_MATRIX_TYPE(T) \
-   static_assert( !::blaze::IsUniLower<T>::value, "Lower unitriangular matrix type detected" )
+   static_assert( !::blaze::IsUniLower_v<T>, "Lower unitriangular matrix type detected" )
 //*************************************************************************************************
 
 } // namespace blaze

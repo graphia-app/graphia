@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/IsHermitian.h
 //  \brief Header file for the IsHermitian type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,8 +40,10 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/util/FalseType.h>
-#include <blaze/util/TrueType.h>
+#include <blaze/math/typetraits/IsExpression.h>
+#include <blaze/util/EnableIf.h>
+#include <blaze/util/IntegralConstant.h>
+#include <blaze/util/typetraits/IsSame.h>
 
 
 namespace blaze {
@@ -51,6 +53,32 @@ namespace blaze {
 //  CLASS DEFINITION
 //
 //=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename T > struct IsHermitian;
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Auxiliary helper struct for the IsHermitian type trait.
+// \ingroup math_traits
+*/
+template< typename T
+        , typename = void >
+struct IsHermitianHelper
+   : public FalseType
+{};
+
+template< typename T >  // Type of the operand
+struct IsHermitianHelper< T, EnableIf_t< IsExpression_v<T> && !IsSame_v<T,typename T::ResultType> > >
+   : public IsHermitian< typename T::ResultType >::Type
+{};
+/*! \endcond */
+//*************************************************************************************************
+
 
 //*************************************************************************************************
 /*!\brief Compile time check for Hermitian matrices.
@@ -65,13 +93,13 @@ namespace blaze {
    \code
    using blaze::rowMajor;
 
-   typedef blaze::StaticMatrix<double,rowMajor>   StaticMatrixType;
-   typedef blaze::DynamicMatrix<float,rowMajor>   DynamicMatrixType;
-   typedef blaze::CompressedMatrix<int,rowMajor>  CompressedMatrixType;
+   using StaticMatrixType     = blaze::StaticMatrix<double,rowMajor>;
+   using DynamicMatrixType    = blaze::DynamicMatrix<float,rowMajor>;
+   using CompressedMatrixType = blaze::CompressedMatrix<int,rowMajor>;
 
-   typedef blaze::HermitianMatrix<StaticMatrixType>      HermitianStaticType;
-   typedef blaze::HermitianMatrix<DynamicMatrixType>     HermitianDynamicType;
-   typedef blaze::HermitianMatrix<CompressedMatrixType>  HermitianCompressedType;
+   using HermitianStaticType     = blaze::HermitianMatrix<StaticMatrixType>;
+   using HermitianDynamicType    = blaze::HermitianMatrix<DynamicMatrixType>;
+   using HermitianCompressedType = blaze::HermitianMatrix<CompressedMatrixType>;
 
    blaze::IsHermitian< HermitianStaticType >::value        // Evaluates to 1
    blaze::IsHermitian< const HermitianDynamicType >::Type  // Results in TrueType
@@ -82,7 +110,8 @@ namespace blaze {
    \endcode
 */
 template< typename T >
-struct IsHermitian : public FalseType
+struct IsHermitian
+   : public IsHermitianHelper<T>
 {};
 //*************************************************************************************************
 
@@ -93,7 +122,8 @@ struct IsHermitian : public FalseType
 // \ingroup math_type_traits
 */
 template< typename T >
-struct IsHermitian< const T > : public IsHermitian<T>
+struct IsHermitian< const T >
+   : public IsHermitian<T>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -105,7 +135,8 @@ struct IsHermitian< const T > : public IsHermitian<T>
 // \ingroup math_type_traits
 */
 template< typename T >
-struct IsHermitian< volatile T > : public IsHermitian<T>
+struct IsHermitian< volatile T >
+   : public IsHermitian<T>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -117,9 +148,28 @@ struct IsHermitian< volatile T > : public IsHermitian<T>
 // \ingroup math_type_traits
 */
 template< typename T >
-struct IsHermitian< const volatile T > : public IsHermitian<T>
+struct IsHermitian< const volatile T >
+   : public IsHermitian<T>
 {};
 /*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsHermitian type trait.
+// \ingroup math_type_traits
+//
+// The IsHermitian_v variable template provides a convenient shortcut to access the nested
+// \a value of the IsHermitian class template. For instance, given the type \a T the following
+// two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsHermitian<T>::value;
+   constexpr bool value2 = blaze::IsHermitian_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsHermitian_v = IsHermitian<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

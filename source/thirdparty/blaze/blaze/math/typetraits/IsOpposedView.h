@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/IsOpposedView.h
 //  \brief Header file for the IsOpposedView type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,8 +40,7 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/util/FalseType.h>
-#include <blaze/util/TrueType.h>
+#include <blaze/util/IntegralConstant.h>
 
 
 namespace blaze {
@@ -66,8 +65,8 @@ namespace blaze {
    using blaze::Column;
    using blaze::Row;
 
-   typedef blaze::DynamicMatrix<int,columnMajor>  DenseColumnMajor;
-   typedef blaze::CompressedMatrix<int,rowMajor>  SparseRowMajor;
+   using DenseColumnMajor = blaze::DynamicMatrix<int,columnMajor>;
+   using SparseRowMajor   = blaze::CompressedMatrix<int,rowMajor>;
 
    blaze::IsOpposedView< Row<DenseColumnMajor> >::value          // Evaluates to 1
    blaze::IsOpposedView< Column<SparseRowMajor> >::Type          // Results in TrueType
@@ -78,7 +77,8 @@ namespace blaze {
    \endcode
 */
 template< typename T >
-struct IsOpposedView : public FalseType
+struct IsOpposedView
+   : public FalseType
 {};
 //*************************************************************************************************
 
@@ -89,7 +89,8 @@ struct IsOpposedView : public FalseType
 // \ingroup math_type_traits
 */
 template< typename T >
-struct IsOpposedView< const T > : public IsOpposedView<T>
+struct IsOpposedView< const T >
+   : public IsOpposedView<T>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -101,7 +102,8 @@ struct IsOpposedView< const T > : public IsOpposedView<T>
 // \ingroup math_type_traits
 */
 template< typename T >
-struct IsOpposedView< volatile T > : public IsOpposedView<T>
+struct IsOpposedView< volatile T >
+   : public IsOpposedView<T>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -113,9 +115,28 @@ struct IsOpposedView< volatile T > : public IsOpposedView<T>
 // \ingroup math_type_traits
 */
 template< typename T >
-struct IsOpposedView< const volatile T > : public IsOpposedView<T>
+struct IsOpposedView< const volatile T >
+   : public IsOpposedView<T>
 {};
 /*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsOpposedView type trait.
+// \ingroup math_type_traits
+//
+// The IsOpposedView_v variable template provides a convenient shortcut to access the nested
+// \a value of the IsOpposedView class template. For instance, given the type \a T the
+// following two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsOpposedView<T>::value;
+   constexpr bool value2 = blaze::IsOpposedView_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsOpposedView_v = IsOpposedView<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

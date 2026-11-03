@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/IsClass.h
 //  \brief Header file for the IsClass type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -74,8 +74,27 @@ namespace blaze {
    \endcode
 */
 template< typename T >
-struct IsClass : public BoolConstant< std::is_class<T>::value >
+struct IsClass
+   : public BoolConstant< std::is_class<T>::value >
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsClass type trait.
+// \ingroup type_traits
+//
+// The IsClass_v variable template provides a convenient shortcut to access the nested \a value
+// of the IsClass class template. For instance, given the type \a T the following two statements
+// are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsClass<T>::value;
+   constexpr bool value2 = blaze::IsClass_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsClass_v = IsClass<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

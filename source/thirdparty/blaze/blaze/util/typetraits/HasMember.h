@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/HasMember.h
 //  \brief Header file for the HasMember type traits
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,6 +40,7 @@
 // Includes
 //*************************************************************************************************
 
+#include <blaze/util/EmptyType.h>
 #include <blaze/util/IntegralConstant.h>
 #include <blaze/util/mpl/If.h>
 #include <blaze/util/typetraits/IsBuiltin.h>
@@ -89,11 +90,11 @@
    \endcode
 
 // The macro results in the definition of a new class with the specified name \a TYPE_TRAIT_NAME
-// within the current namespace. This may cause name collisions with any other entity called
-// \a TYPE_TRAIT_NAME in the same namespace. Therefore it is advisable to create the type trait
-// as locally as possible to minimize the probability of name collisions. Note however that the
-// macro cannot be used within function scope since a template declaration cannot appear at
-// block scope.
+// and an associated variable template called TYPE_TRAIT_NAME_v within the current namespace.
+// This may cause name collisions with any other entity called \a TYPE_TRAIT_NAME in the same
+// namespace. Therefore it is advisable to create the type trait as locally as possible to
+// minimize the probability of name collisions. Note however that the macro cannot be used
+// within function scope since a template declaration cannot appear at block scope.
 */
 #define BLAZE_CREATE_HAS_DATA_OR_FUNCTION_MEMBER_TYPE_TRAIT( TYPE_TRAIT_NAME, MEMBER_NAME )  \
                                                                                              \
@@ -101,34 +102,32 @@ template < typename TYPE1230 >                                                  
 class TYPE_TRAIT_NAME##HELPER                                                                \
 {                                                                                            \
  private:                                                                                    \
-   using Yes = char[1];                                                                      \
-   using No  = char[2];                                                                      \
-                                                                                             \
-   struct Base {};                                                                           \
-                                                                                             \
    template< typename U, U > struct Check;                                                   \
                                                                                              \
    struct Fallback { int MEMBER_NAME; };                                                     \
                                                                                              \
    struct Derived                                                                            \
-      : blaze::If< blaze::IsBuiltin<TYPE1230>, Base, TYPE1230 >::Type                        \
+      : blaze::If_t< blaze::IsBuiltin_v<TYPE1230>, blaze::EmptyType, TYPE1230 >              \
       , Fallback                                                                             \
    {};                                                                                       \
                                                                                              \
    template < typename U >                                                                   \
-   static No& test( Check<int Fallback::*, &U::MEMBER_NAME>* );                              \
+   static blaze::FalseType test( Check<int Fallback::*, &U::MEMBER_NAME>* );                 \
                                                                                              \
    template < typename U >                                                                   \
-   static Yes& test( ... );                                                                  \
+   static blaze::TrueType test( ... );                                                       \
                                                                                              \
  public:                                                                                     \
-   enum : bool { value = ( sizeof( test<Derived>( nullptr ) ) == sizeof( Yes ) ) };          \
+   using Type = decltype( test<Derived>( nullptr ) );                                        \
 };                                                                                           \
                                                                                              \
 template< typename TYPE1230 >                                                                \
 struct TYPE_TRAIT_NAME                                                                       \
-   : public blaze::BoolConstant< TYPE_TRAIT_NAME##HELPER<TYPE1230>::value >                  \
-{}
+   : public TYPE_TRAIT_NAME##HELPER<TYPE1230>::Type                                          \
+{};                                                                                          \
+                                                                                             \
+template< typename TYPE1230 >                                                                \
+static constexpr bool TYPE_TRAIT_NAME##_v = TYPE_TRAIT_NAME<TYPE1230>::value
 //*************************************************************************************************
 
 
@@ -143,13 +142,13 @@ struct TYPE_TRAIT_NAME                                                          
    \code
    class MyType {
     public:
-      typedef int  PublicType;
+      using PublicType = int;
 
     protected:
-      typedef float  ProtectedType;
+      using ProtectedType = float;
 
     private:
-      typedef double  PrivateType;
+      using PrivateType = double;
    };
 
    BLAZE_CREATE_HAS_TYPE_MEMBER_TYPE_TRAIT( HasPublicType   , PublicType    );
@@ -169,48 +168,42 @@ struct TYPE_TRAIT_NAME                                                          
    \endcode
 
 // The macro results in the definition of a new class with the specified name \a TYPE_TRAIT_NAME
-// within the current namespace. This may cause name collisions with any other entity called
-// \a TYPE_TRAIT_NAME in the same namespace. Therefore it is advisable to create the type trait
-// as locally as possible to minimize the probability of name collisions. Note however that the
-// macro cannot be used within function scope since a template declaration cannot appear at
-// block scope.
-//
-// Please note that due to an error in the Intel compilers prior to version 14.0 the type trait
-// generated from this macro does NOT work properly, i.e. will not correctly determine whether
-// the specified element is a type member of the given type!
+// and an associated variable template called TYPE_TRAIT_NAME_v within the current namespace.
+// This may cause name collisions with any other entity called \a TYPE_TRAIT_NAME in the same
+// namespace. Therefore it is advisable to create the type trait as locally as possible to
+// minimize the probability of name collisions. Note however that the macro cannot be used
+// within function scope since a template declaration cannot appear at block scope.
 */
-#define BLAZE_CREATE_HAS_TYPE_MEMBER_TYPE_TRAIT( TYPE_TRAIT_NAME, MEMBER_NAME )            \
-                                                                                           \
-template < typename TYPE1231 >                                                             \
-struct TYPE_TRAIT_NAME##HELPER                                                             \
-{                                                                                          \
- private:                                                                                  \
-   using Yes = char[1];                                                                    \
-   using No  = char[2];                                                                    \
-                                                                                           \
-   struct Base {};                                                                         \
-                                                                                           \
-   struct Fallback { struct MEMBER_NAME { }; };                                            \
-                                                                                           \
-   struct Derived                                                                          \
-      : blaze::If< blaze::IsBuiltin<TYPE1231>, Base, TYPE1231 >::Type                      \
-      , Fallback                                                                           \
-   {};                                                                                     \
-                                                                                           \
-   template < class U >                                                                    \
-   static No& test( typename U::MEMBER_NAME* );                                            \
-                                                                                           \
-   template < typename U >                                                                 \
-   static Yes& test( U* );                                                                 \
-                                                                                           \
- public:                                                                                   \
-   enum : bool { value = ( sizeof( test<Derived>( nullptr ) ) == sizeof( Yes ) ) };        \
-};                                                                                         \
-                                                                                           \
-template< typename TYPE1231 >                                                              \
-struct TYPE_TRAIT_NAME                                                                     \
-   : public blaze::BoolConstant< TYPE_TRAIT_NAME##HELPER<TYPE1231>::value >                \
-{}
+#define BLAZE_CREATE_HAS_TYPE_MEMBER_TYPE_TRAIT( TYPE_TRAIT_NAME, MEMBER_NAME )      \
+                                                                                     \
+template < typename TYPE1231 >                                                       \
+struct TYPE_TRAIT_NAME##HELPER                                                       \
+{                                                                                    \
+ private:                                                                            \
+   struct Fallback { using MEMBER_NAME = int; };                                     \
+                                                                                     \
+   struct Derived                                                                    \
+      : blaze::If_t< blaze::IsBuiltin_v<TYPE1231>, blaze::EmptyType, TYPE1231 >      \
+      , Fallback                                                                     \
+   {};                                                                               \
+                                                                                     \
+   template < class U >                                                              \
+   static blaze::FalseType test( typename U::MEMBER_NAME* );                         \
+                                                                                     \
+   template < typename U >                                                           \
+   static blaze::TrueType test( U* );                                                \
+                                                                                     \
+ public:                                                                             \
+   using Type = decltype( test<Derived>( nullptr ) );                                \
+};                                                                                   \
+                                                                                     \
+template< typename TYPE1231 >                                                        \
+struct TYPE_TRAIT_NAME                                                               \
+   : public TYPE_TRAIT_NAME##HELPER<TYPE1231>::Type                                  \
+{};                                                                                  \
+                                                                                     \
+template< typename TYPE1231 >                                                        \
+static constexpr bool TYPE_TRAIT_NAME##_v = TYPE_TRAIT_NAME<TYPE1231>::value
 //*************************************************************************************************
 
 
@@ -228,7 +221,7 @@ struct TYPE_TRAIT_NAME                                                          
       void publicCompute();
 
     protected:
-      typedef float  ProtectedType;
+      using ProtectedType = float;
 
     private:
       int value_;
@@ -251,15 +244,11 @@ struct TYPE_TRAIT_NAME                                                          
    \endcode
 
 // The macro results in the definition of a new class with the specified name \a TYPE_TRAIT_NAME
-// within the current namespace. This may cause name collisions with any other entity called
-// \a TYPE_TRAIT_NAME in the same namespace. Therefore it is advisable to create the type trait
-// as locally as possible to minimize the probability of name collisions. Note however that the
-// macro cannot be used within function scope since a template declaration cannot appear at
-// block scope.
-//
-// Please note that due to an error in the Intel compilers prior to version 14.0 the type trait
-// generated from this macro does NOT work properly, i.e. will not correctly determine whether
-// the specified element is a type member of the given type!
+// and an associated variable template called TYPE_TRAIT_NAME_v within the current namespace.
+// This may cause name collisions with any other entity called \a TYPE_TRAIT_NAME in the same
+// namespace. Therefore it is advisable to create the type trait as locally as possible to
+// minimize the probability of name collisions. Note however that the macro cannot be used
+// within function scope since a template declaration cannot appear at block scope.
 */
 #define BLAZE_CREATE_HAS_MEMBER_TYPE_TRAIT( TYPE_TRAIT_NAME, MEMBER_NAME )                  \
                                                                                             \
@@ -278,7 +267,10 @@ struct TYPE_TRAIT_NAME##HELPER                                                  
 template< typename Type1232 >                                                               \
 struct TYPE_TRAIT_NAME                                                                      \
    : public blaze::BoolConstant< TYPE_TRAIT_NAME##HELPER<Type1232>::value >                 \
-{}
+{};                                                                                         \
+                                                                                            \
+template< typename Type1232 >                                                               \
+static constexpr bool TYPE_TRAIT_NAME##_v = TYPE_TRAIT_NAME<Type1232>::value
 //*************************************************************************************************
 
 #endif

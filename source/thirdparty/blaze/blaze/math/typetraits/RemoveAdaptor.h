@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/RemoveAdaptor.h
 //  \brief Header file for the RemoveAdaptor type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -60,9 +60,9 @@ namespace blaze {
    using blaze::LowerMatrix;
    using blaze::UpperMatrix;
 
-   typedef SymmetricMatrix< DynamicMatrix<int> >   SymmetricDynamic;
-   typedef LowerMatrix< CompressedMatrix<float> >  LowerCompressed;
-   typedef UpperMatrix< DynamicMatrix<double> >    UpperDynamic;
+   using SymmetricDynamic = SymmetricMatrix< DynamicMatrix<int> >;
+   using LowerCompressed  = LowerMatrix< CompressedMatrix<float> >;
+   using UpperDynamic     = UpperMatrix< DynamicMatrix<double> >;
 
    blaze::RemoveAdaptor< SymmetricDynamic >::Type             // Results in 'DynamicMatrix<int>'
    blaze::RemoveAdaptor< const LowerCompressed >::Type        // Results in 'const CompressedMatrix<float>'
@@ -78,7 +78,7 @@ struct RemoveAdaptor
  public:
    //**********************************************************************************************
    /*! \cond BLAZE_INTERNAL */
-   typedef T  Type;
+   using Type = T;
    /*! \endcond */
    //**********************************************************************************************
 };
@@ -95,7 +95,7 @@ struct RemoveAdaptor< const T >
 {
  public:
    //**********************************************************************************************
-   typedef const typename RemoveAdaptor<T>::Type  Type;
+   using Type = const typename RemoveAdaptor<T>::Type;
    //**********************************************************************************************
 };
 /*! \endcond */
@@ -112,7 +112,7 @@ struct RemoveAdaptor< volatile T >
 {
  public:
    //**********************************************************************************************
-   typedef volatile typename RemoveAdaptor<T>::Type  Type;
+   using Type = volatile typename RemoveAdaptor<T>::Type;
    //**********************************************************************************************
 };
 /*! \endcond */
@@ -129,7 +129,7 @@ struct RemoveAdaptor< const volatile T >
 {
  public:
    //**********************************************************************************************
-   typedef const volatile typename RemoveAdaptor<T>::Type  Type;
+   using Type = const volatile typename RemoveAdaptor<T>::Type;
    //**********************************************************************************************
 };
 /*! \endcond */
@@ -138,19 +138,19 @@ struct RemoveAdaptor< const volatile T >
 
 //*************************************************************************************************
 /*!\brief Auxiliary alias declaration for the RemoveAdaptor type trait.
-// \ingroup type_traits
+// \ingroup math_type_traits
 //
-// The RemoveAdaptor_ alias declaration provides a convenient shortcut to access the nested
+// The RemoveAdaptor_t alias declaration provides a convenient shortcut to access the nested
 // \a Type of the RemoveAdaptor class template. For instance, given the type \a T the following
 // two type definitions are identical:
 
    \code
-   using Type1 = typename RemoveAdaptor<T>::Type;
-   using Type2 = RemoveAdaptor_<T>;
+   using Type1 = typename blaze::RemoveAdaptor<T>::Type;
+   using Type2 = blaze::RemoveAdaptor_t<T>;
    \endcode
 */
 template< typename T >
-using RemoveAdaptor_ = typename RemoveAdaptor<T>::Type;
+using RemoveAdaptor_t = typename RemoveAdaptor<T>::Type;
 //*************************************************************************************************
 
 } // namespace blaze

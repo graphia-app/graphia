@@ -3,7 +3,7 @@
 //  \file blaze/math/functors/Trans.h
 //  \brief Header file for the Trans functor
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,6 +40,8 @@
 // Includes
 //*************************************************************************************************
 
+#include <utility>
+#include <blaze/system/HostDevice.h>
 #include <blaze/system/Inline.h>
 
 
@@ -58,22 +60,15 @@ namespace blaze {
 struct Trans
 {
    //**********************************************************************************************
-   /*!\brief Default constructor of the Trans functor.
-   */
-   explicit inline Trans()
-   {}
-   //**********************************************************************************************
-
-   //**********************************************************************************************
    /*!\brief Returns the result of the trans() function for the given object/value.
    //
    // \param a The given object/value.
    // \return The result of the trans() function for the given object/value.
    */
    template< typename T >
-   BLAZE_ALWAYS_INLINE decltype(auto) operator()( const T& a ) const
+   BLAZE_ALWAYS_INLINE BLAZE_DEVICE_CALLABLE decltype(auto) operator()( T&& a ) const
    {
-      return trans( a );
+      return trans( std::forward<T>( a ) );
    }
    //**********************************************************************************************
 };

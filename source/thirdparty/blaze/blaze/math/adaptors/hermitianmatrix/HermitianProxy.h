@@ -3,7 +3,7 @@
 //  \file blaze/math/adaptors/hermitianmatrix/HermitianProxy.h
 //  \brief Header file for the HermitianProxy class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -41,30 +41,31 @@
 //*************************************************************************************************
 
 #include <blaze/math/Aliases.h>
-#include <blaze/math/constraints/Expression.h>
+#include <blaze/math/constraints/Computation.h>
 #include <blaze/math/constraints/Hermitian.h>
 #include <blaze/math/constraints/Lower.h>
 #include <blaze/math/constraints/Matrix.h>
+#include <blaze/math/constraints/Scalar.h>
 #include <blaze/math/constraints/Symmetric.h>
+#include <blaze/math/constraints/Transformation.h>
 #include <blaze/math/constraints/Upper.h>
+#include <blaze/math/constraints/View.h>
 #include <blaze/math/Exception.h>
 #include <blaze/math/proxy/Proxy.h>
+#include <blaze/math/RelaxationFlag.h>
 #include <blaze/math/shims/Clear.h>
 #include <blaze/math/shims/Conjugate.h>
 #include <blaze/math/shims/Invert.h>
 #include <blaze/math/shims/IsDefault.h>
-#include <blaze/math/shims/IsNaN.h>
 #include <blaze/math/shims/IsOne.h>
 #include <blaze/math/shims/IsReal.h>
 #include <blaze/math/shims/IsZero.h>
 #include <blaze/math/shims/Reset.h>
+#include <blaze/math/typetraits/UnderlyingBuiltin.h>
 #include <blaze/util/constraints/Const.h>
-#include <blaze/util/constraints/Numeric.h>
 #include <blaze/util/constraints/Pointer.h>
 #include <blaze/util/constraints/Reference.h>
 #include <blaze/util/constraints/Volatile.h>
-#include <blaze/util/InvalidType.h>
-#include <blaze/util/mpl/If.h>
 #include <blaze/util/Types.h>
 #include <blaze/util/typetraits/IsComplex.h>
 
@@ -96,51 +97,38 @@ namespace blaze {
    \endcode
 */
 template< typename MT >  // Type of the adapted matrix
-class HermitianProxy : public Proxy< HermitianProxy<MT> >
+class HermitianProxy
+   : public Proxy< HermitianProxy<MT> >
 {
- private:
-   //**struct BuiltinType**************************************************************************
-   /*! \cond BLAZE_INTERNAL */
-   /*!\brief Auxiliary struct to determine the value type of the represented complex element.
-   */
-   template< typename T >
-   struct BuiltinType { typedef INVALID_TYPE  Type; };
-   /*! \endcond */
-   //**********************************************************************************************
-
-   //**struct ComplexType**************************************************************************
-   /*! \cond BLAZE_INTERNAL */
-   /*!\brief Auxiliary struct to determine the value type of the represented complex element.
-   */
-   template< typename T >
-   struct ComplexType { typedef typename T::value_type  Type; };
-   /*! \endcond */
-   //**********************************************************************************************
-
  public:
    //**Type definitions****************************************************************************
-   typedef ElementType_<MT>       RepresentedType;  //!< Type of the represented matrix element.
-   typedef Reference_<MT>         Reference;        //!< Reference to the represented element.
-   typedef ConstReference_<MT>    ConstReference;   //!< Reference-to-const to the represented element.
-   typedef HermitianProxy*        Pointer;          //!< Pointer to the represented element.
-   typedef const HermitianProxy*  ConstPointer;     //!< Pointer-to-const to the represented element.
+   using RepresentedType = ElementType_t<MT>;      //!< Type of the represented matrix element.
+   using Reference       = Reference_t<MT>;        //!< Reference to the represented element.
+   using ConstReference  = ConstReference_t<MT>;   //!< Reference-to-const to the represented element.
+   using Pointer         = HermitianProxy*;        //!< Pointer to the represented element.
+   using ConstPointer    = const HermitianProxy*;  //!< Pointer-to-const to the represented element.
 
    //! Value type of the represented complex element.
-   typedef typename If_< IsComplex<RepresentedType>
-                       , ComplexType<RepresentedType>
-                       , BuiltinType<RepresentedType> >::Type  ValueType;
+   using ValueType = UnderlyingBuiltin_t<RepresentedType>;
+
+   //! Value type of the represented complex element.
+   using value_type = ValueType;
    //**********************************************************************************************
 
    //**Constructors********************************************************************************
    /*!\name Constructors */
    //@{
-   explicit inline HermitianProxy( MT& matrix, size_t row, size_t column );
-            inline HermitianProxy( const HermitianProxy& hp );
+   inline HermitianProxy( MT& matrix, size_t row, size_t column );
+
+   HermitianProxy( const HermitianProxy& ) = default;
    //@}
    //**********************************************************************************************
 
    //**Destructor**********************************************************************************
-   // No explicitly declared destructor.
+   /*!\name Destructor */
+   //@{
+   ~HermitianProxy() = default;
+   //@}
    //**********************************************************************************************
 
    //**Assignment operators************************************************************************
@@ -152,6 +140,7 @@ class HermitianProxy : public Proxy< HermitianProxy<MT> >
    template< typename T > inline HermitianProxy& operator-=( const T& value );
    template< typename T > inline HermitianProxy& operator*=( const T& value );
    template< typename T > inline HermitianProxy& operator/=( const T& value );
+   template< typename T > inline HermitianProxy& operator%=( const T& value );
    //@}
    //**********************************************************************************************
 
@@ -166,8 +155,6 @@ class HermitianProxy : public Proxy< HermitianProxy<MT> >
    //**Utility functions***************************************************************************
    /*!\name Utility functions */
    //@{
-   inline void reset () const;
-   inline void clear () const;
    inline void invert() const;
 
    inline ConstReference get() const noexcept;
@@ -211,12 +198,57 @@ class HermitianProxy : public Proxy< HermitianProxy<MT> >
    BLAZE_CONSTRAINT_MUST_NOT_BE_POINTER_TYPE         ( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_CONST                ( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_VOLATILE             ( MT );
-   BLAZE_CONSTRAINT_MUST_NOT_BE_EXPRESSION_TYPE      ( MT );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_VIEW_TYPE            ( MT );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE     ( MT );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_TRANSFORMATION_TYPE  ( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_HERMITIAN_MATRIX_TYPE( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_LOWER_MATRIX_TYPE    ( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_UPPER_MATRIX_TYPE    ( MT );
-   BLAZE_CONSTRAINT_MUST_BE_NUMERIC_TYPE             ( RepresentedType );
+   BLAZE_CONSTRAINT_MUST_BE_SCALAR_TYPE              ( RepresentedType );
+   /*! \endcond */
+   //**********************************************************************************************
+
+   //**********************************************************************************************
+   /*! \cond BLAZE_INTERNAL */
+   /*!\brief Resetting the represented element to the default initial values.
+   // \ingroup hermitian_matrix
+   //
+   // \param proxy The given access proxy.
+   // \return void
+   //
+   // This function resets the element represented by the access proxy to its default initial
+   // value.
+   */
+   friend inline void reset( const HermitianProxy& proxy )
+   {
+      using blaze::reset;
+
+      reset( proxy.value1_ );
+      if( !proxy.diagonal_ ) {
+         reset( proxy.value2_ );
+      }
+   }
+   /*! \endcond */
+   //**********************************************************************************************
+
+   //**********************************************************************************************
+   /*! \cond BLAZE_INTERNAL */
+   /*!\brief Clearing the represented element.
+   //
+   // \return void
+   //
+   // This function clears the element represented by the proxy to its default initial state.
+   */
+   friend inline void clear( const HermitianProxy& proxy )
+   {
+      using blaze::clear;
+
+      clear( proxy.value1_ );
+      if( !proxy.diagonal_ ) {
+         clear( proxy.value2_ );
+      }
+   }
    /*! \endcond */
    //**********************************************************************************************
 };
@@ -247,20 +279,6 @@ inline HermitianProxy<MT>::HermitianProxy( MT& matrix, size_t row, size_t column
 //*************************************************************************************************
 
 
-//*************************************************************************************************
-/*!\brief The copy constructor for HermitianProxy.
-//
-// \param hp Numeric proxy to be copied.
-*/
-template< typename MT >  // Type of the adapted matrix
-inline HermitianProxy<MT>::HermitianProxy( const HermitianProxy& hp )
-   : value1_  ( hp.value1_   )  // Reference to the first accessed matrix element
-   , value2_  ( hp.value2_   )  // Reference to the second accessed matrix element
-   , diagonal_( hp.diagonal_ )  // Flag for the accessed matrix element
-{}
-//*************************************************************************************************
-
-
 
 
 //=================================================================================================
@@ -272,7 +290,7 @@ inline HermitianProxy<MT>::HermitianProxy( const HermitianProxy& hp )
 //*************************************************************************************************
 /*!\brief Copy assignment operator for HermitianProxy.
 //
-// \param hp Numeric proxy to be copied.
+// \param hp Hermitian proxy to be copied.
 // \return Reference to the assigned proxy.
 // \exception std::invalid_argument Invalid assignment to diagonal matrix element.
 //
@@ -282,9 +300,9 @@ inline HermitianProxy<MT>::HermitianProxy( const HermitianProxy& hp )
 template< typename MT >  // Type of the adapted matrix
 inline HermitianProxy<MT>& HermitianProxy<MT>::operator=( const HermitianProxy& hp )
 {
-   typedef ElementType_<MT>  ET;
+   using ET = ElementType_t<MT>;
 
-   if( IsComplex<ET>::value && diagonal_ && !isReal( hp.value1_ ) ) {
+   if( IsComplex_v<ET> && diagonal_ && !isReal( hp.value1_ ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to diagonal matrix element" );
    }
 
@@ -311,9 +329,9 @@ template< typename MT >  // Type of the adapted matrix
 template< typename T >   // Type of the right-hand side value
 inline HermitianProxy<MT>& HermitianProxy<MT>::operator=( const T& value )
 {
-   typedef ElementType_<MT>  ET;
+   using ET = ElementType_t<MT>;
 
-   if( IsComplex<ET>::value && diagonal_ && !isReal( value ) ) {
+   if( IsComplex_v<ET> && diagonal_ && !isReal( value ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to diagonal matrix element" );
    }
 
@@ -340,9 +358,9 @@ template< typename MT >  // Type of the adapted matrix
 template< typename T >   // Type of the right-hand side value
 inline HermitianProxy<MT>& HermitianProxy<MT>::operator+=( const T& value )
 {
-   typedef ElementType_<MT>  ET;
+   using ET = ElementType_t<MT>;
 
-   if( IsComplex<ET>::value && diagonal_ && !isReal( value ) ) {
+   if( IsComplex_v<ET> && diagonal_ && !isReal( value ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to diagonal matrix element" );
    }
 
@@ -369,9 +387,9 @@ template< typename MT >  // Type of the adapted matrix
 template< typename T >   // Type of the right-hand side value
 inline HermitianProxy<MT>& HermitianProxy<MT>::operator-=( const T& value )
 {
-   typedef ElementType_<MT>  ET;
+   using ET = ElementType_t<MT>;
 
-   if( IsComplex<ET>::value && diagonal_ && !isReal( value ) ) {
+   if( IsComplex_v<ET> && diagonal_ && !isReal( value ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to diagonal matrix element" );
    }
 
@@ -398,9 +416,9 @@ template< typename MT >  // Type of the adapted matrix
 template< typename T >   // Type of the right-hand side value
 inline HermitianProxy<MT>& HermitianProxy<MT>::operator*=( const T& value )
 {
-   typedef ElementType_<MT>  ET;
+   using ET = ElementType_t<MT>;
 
-   if( IsComplex<ET>::value && diagonal_ && !isReal( value ) ) {
+   if( IsComplex_v<ET> && diagonal_ && !isReal( value ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to diagonal matrix element" );
    }
 
@@ -427,13 +445,42 @@ template< typename MT >  // Type of the adapted matrix
 template< typename T >   // Type of the right-hand side value
 inline HermitianProxy<MT>& HermitianProxy<MT>::operator/=( const T& value )
 {
-   typedef ElementType_<MT>  ET;
+   using ET = ElementType_t<MT>;
 
-   if( IsComplex<ET>::value && diagonal_ && !isReal( value ) ) {
+   if( IsComplex_v<ET> && diagonal_ && !isReal( value ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to diagonal matrix element" );
    }
 
    value1_ /= value;
+   if( !diagonal_ )
+      value2_ = conj( value1_ );
+
+   return *this;
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Modulo assignment to the accessed matrix element.
+//
+// \param value The right-hand side value for the modulo operation.
+// \return Reference to the assigned proxy.
+// \exception std::invalid_argument Invalid assignment to diagonal matrix element.
+//
+// In case the proxy represents a diagonal element and the assigned value does not represent
+// a real number, a \a std::invalid_argument exception is thrown.
+*/
+template< typename MT >  // Type of the adapted matrix
+template< typename T >   // Type of the right-hand side value
+inline HermitianProxy<MT>& HermitianProxy<MT>::operator%=( const T& value )
+{
+   using ET = ElementType_t<MT>;
+
+   if( IsComplex_v<ET> && diagonal_ && !isReal( value ) ) {
+      BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to diagonal matrix element" );
+   }
+
+   value1_ %= value;
    if( !diagonal_ )
       value2_ = conj( value1_ );
 
@@ -483,44 +530,6 @@ inline typename HermitianProxy<MT>::ConstPointer HermitianProxy<MT>::operator->(
 //  UTILITY FUNCTIONS
 //
 //=================================================================================================
-
-//*************************************************************************************************
-/*!\brief Reset the represented element to its default initial value.
-//
-// \return void
-//
-// This function resets the element represented by the proxy to its default initial value.
-*/
-template< typename MT >  // Type of the adapted matrix
-inline void HermitianProxy<MT>::reset() const
-{
-   using blaze::reset;
-
-   reset( value1_ );
-   if( !diagonal_ )
-      reset( value2_ );
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Clearing the represented element.
-//
-// \return void
-//
-// This function clears the element represented by the proxy to its default initial state.
-*/
-template< typename MT >  // Type of the adapted matrix
-inline void HermitianProxy<MT>::clear() const
-{
-   using blaze::clear;
-
-   clear( value1_ );
-   if( !diagonal_ )
-      clear( value2_ );
-}
-//*************************************************************************************************
-
 
 //*************************************************************************************************
 /*!\brief In-place inversion of the represented element
@@ -668,65 +677,8 @@ inline void HermitianProxy<MT>::imag( ValueType value ) const
 /*!\name HermitianProxy global functions */
 //@{
 template< typename MT >
-inline void reset( const HermitianProxy<MT>& proxy );
-
-template< typename MT >
-inline void clear( const HermitianProxy<MT>& proxy );
-
-template< typename MT >
-inline void invert( const HermitianProxy<MT>& proxy );
-
-template< bool RF, typename MT >
-inline bool isDefault( const HermitianProxy<MT>& proxy );
-
-template< bool RF, typename MT >
-inline bool isReal( const HermitianProxy<MT>& proxy );
-
-template< bool RF, typename MT >
-inline bool isZero( const HermitianProxy<MT>& proxy );
-
-template< bool RF, typename MT >
-inline bool isOne( const HermitianProxy<MT>& proxy );
-
-template< typename MT >
-inline bool isnan( const HermitianProxy<MT>& proxy );
+void invert( const HermitianProxy<MT>& proxy );
 //@}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Resetting the represented element to the default initial values.
-// \ingroup hermitian_matrix
-//
-// \param proxy The given access proxy.
-// \return void
-//
-// This function resets the element represented by the access proxy to its default initial
-// value.
-*/
-template< typename MT >
-inline void reset( const HermitianProxy<MT>& proxy )
-{
-   proxy.reset();
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Clearing the represented element.
-// \ingroup hermitian_matrix
-//
-// \param proxy The given access proxy.
-// \return void
-//
-// This function clears the element represented by the access proxy to its default initial
-// state.
-*/
-template< typename MT >
-inline void clear( const HermitianProxy<MT>& proxy )
-{
-   proxy.clear();
-}
 //*************************************************************************************************
 
 
@@ -741,108 +693,6 @@ template< typename MT >
 inline void invert( const HermitianProxy<MT>& proxy )
 {
    proxy.invert();
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Returns whether the represented element is in default state.
-// \ingroup hermitian_matrix
-//
-// \param proxy The given access proxy
-// \return \a true in case the represented element is in default state, \a false otherwise.
-//
-// This function checks whether the element represented by the access proxy is in default state.
-// In case it is in default state, the function returns \a true, otherwise it returns \a false.
-*/
-template< bool RF, typename MT >
-inline bool isDefault( const HermitianProxy<MT>& proxy )
-{
-   using blaze::isDefault;
-
-   return isDefault<RF>( proxy.get() );
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Returns whether the matrix element represents a real number.
-// \ingroup hermitian_matrix
-//
-// \param proxy The given access proxy.
-// \return \a true in case the matrix element represents a real number, \a false otherwise.
-//
-// This function checks whether the element represented by the access proxy represents the a
-// real number. In case the element is of built-in type, the function returns \a true. In case
-// the element is of complex type, the function returns \a true if the imaginary part is equal
-// to 0. Otherwise it returns \a false.
-*/
-template< bool RF, typename MT >
-inline bool isReal( const HermitianProxy<MT>& proxy )
-{
-   using blaze::isReal;
-
-   return isReal<RF>( proxy.get() );
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Returns whether the represented element is 0.
-// \ingroup hermitian_matrix
-//
-// \param proxy The given access proxy.
-// \return \a true in case the represented element is 0, \a false otherwise.
-//
-// This function checks whether the element represented by the access proxy represents the numeric
-// value 0. In case it is 0, the function returns \a true, otherwise it returns \a false.
-*/
-template< bool RF, typename MT >
-inline bool isZero( const HermitianProxy<MT>& proxy )
-{
-   using blaze::isZero;
-
-   return isZero<RF>( proxy.get() );
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Returns whether the represented element is 1.
-// \ingroup hermitian_matrix
-//
-// \param proxy The given access proxy.
-// \return \a true in case the represented element is 1, \a false otherwise.
-//
-// This function checks whether the element represented by the access proxy represents the numeric
-// value 1. In case it is 1, the function returns \a true, otherwise it returns \a false.
-*/
-template< bool RF, typename MT >
-inline bool isOne( const HermitianProxy<MT>& proxy )
-{
-   using blaze::isOne;
-
-   return isOne<RF>( proxy.get() );
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Returns whether the represented element is not a number.
-// \ingroup hermitian_matrix
-//
-// \param proxy The given access proxy.
-// \return \a true in case the represented element is in not a number, \a false otherwise.
-//
-// This function checks whether the element represented by the access proxy is not a number (NaN).
-// In case it is not a number, the function returns \a true, otherwise it returns \a false.
-*/
-template< typename MT >
-inline bool isnan( const HermitianProxy<MT>& proxy )
-{
-   using blaze::isnan;
-
-   return isnan( proxy.get() );
 }
 //*************************************************************************************************
 

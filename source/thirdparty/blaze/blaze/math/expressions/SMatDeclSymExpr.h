@@ -3,7 +3,7 @@
 //  \file blaze/math/expressions/SMatDeclSymExpr.h
 //  \brief Header file for the sparse matrix symmetry declaration expression
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -41,49 +41,31 @@
 //*************************************************************************************************
 
 #include <iterator>
+#include <blaze/math/adaptors/symmetricmatrix/BaseTemplate.h>
 #include <blaze/math/Aliases.h>
 #include <blaze/math/constraints/SparseMatrix.h>
 #include <blaze/math/constraints/StorageOrder.h>
 #include <blaze/math/constraints/Symmetric.h>
+#include <blaze/math/constraints/UniTriangular.h>
 #include <blaze/math/Exception.h>
-#include <blaze/math/expressions/Computation.h>
+#include <blaze/math/expressions/Declaration.h>
 #include <blaze/math/expressions/DeclSymExpr.h>
 #include <blaze/math/expressions/Forward.h>
 #include <blaze/math/expressions/SparseMatrix.h>
-#include <blaze/math/traits/ColumnExprTrait.h>
-#include <blaze/math/traits/DeclSymExprTrait.h>
-#include <blaze/math/traits/MultExprTrait.h>
-#include <blaze/math/traits/RowExprTrait.h>
-#include <blaze/math/traits/SMatDeclSymExprTrait.h>
-#include <blaze/math/traits/SubmatrixExprTrait.h>
-#include <blaze/math/traits/TSMatDeclSymExprTrait.h>
-#include <blaze/math/typetraits/Columns.h>
-#include <blaze/math/typetraits/IsColumnMajorMatrix.h>
+#include <blaze/math/sparse/Forward.h>
+#include <blaze/math/traits/DeclSymTrait.h>
 #include <blaze/math/typetraits/IsExpression.h>
-#include <blaze/math/typetraits/IsHermitian.h>
-#include <blaze/math/typetraits/IsLower.h>
-#include <blaze/math/typetraits/IsRowMajorMatrix.h>
-#include <blaze/math/typetraits/IsSparseMatrix.h>
-#include <blaze/math/typetraits/IsStrictlyLower.h>
-#include <blaze/math/typetraits/IsStrictlyUpper.h>
 #include <blaze/math/typetraits/IsSymmetric.h>
-#include <blaze/math/typetraits/IsUniLower.h>
-#include <blaze/math/typetraits/IsUniUpper.h>
-#include <blaze/math/typetraits/IsUpper.h>
+#include <blaze/math/typetraits/IsUniTriangular.h>
 #include <blaze/math/typetraits/RequiresEvaluation.h>
-#include <blaze/math/typetraits/Rows.h>
 #include <blaze/util/Assert.h>
-#include <blaze/util/DisableIf.h>
-#include <blaze/util/EmptyType.h>
 #include <blaze/util/EnableIf.h>
 #include <blaze/util/FunctionTrace.h>
 #include <blaze/util/IntegralConstant.h>
 #include <blaze/util/InvalidType.h>
-#include <blaze/util/mpl/And.h>
 #include <blaze/util/mpl/If.h>
-#include <blaze/util/TrueType.h>
 #include <blaze/util/Types.h>
-#include <blaze/util/typetraits/HasMember.h>
+#include <blaze/util/typetraits/GetMemberType.h>
 
 
 namespace blaze {
@@ -103,11 +85,18 @@ namespace blaze {
 */
 template< typename MT  // Type of the sparse matrix
         , bool SO >    // Storage order
-class SMatDeclSymExpr : public SparseMatrix< SMatDeclSymExpr<MT,SO>, SO >
-                      , private DeclSymExpr
-                      , private If< IsComputation<MT>, Computation, EmptyType >::Type
+class SMatDeclSymExpr
+   : public DeclSymExpr< SparseMatrix< SMatDeclSymExpr<MT,SO>, SO > >
+   , public Declaration<MT>
 {
  private:
+   //**Type definitions****************************************************************************
+   using RT = ResultType_t<MT>;  //!< Result type of the sparse matrix expression.
+
+   //! Definition of the GetConstIterator type trait.
+   BLAZE_CREATE_GET_TYPE_MEMBER_TYPE_TRAIT( GetConstIterator, ConstIterator, INVALID_TYPE );
+   //**********************************************************************************************
+
    //**Serial evaluation strategy******************************************************************
    //! Compilation switch for the serial evaluation strategy of the symmetry declaration expression.
    /*! The \a useAssign compile time constant expression represents a compilation switch for
@@ -116,69 +105,55 @@ class SMatDeclSymExpr : public SparseMatrix< SMatDeclSymExpr<MT,SO>, SO >
        will be set to 1 and the symmetry declaration expression will be evaluated via the
        \a assign function family. Otherwise \a useAssign will be set to 0 and the expression
        will be evaluated via the subscript operator. */
-   enum : bool { useAssign = RequiresEvaluation<MT>::value };
+   static constexpr bool useAssign = RequiresEvaluation_v<MT>;
 
    /*! \cond BLAZE_INTERNAL */
-   //! Helper structure for the explicit application of the SFINAE principle.
+   //! Helper variable template for the explicit application of the SFINAE principle.
    template< typename MT2 >
-   struct UseAssign {
-      enum : bool { value = useAssign };
-   };
+   static constexpr bool UseAssign_v = useAssign;
    /*! \endcond */
    //**********************************************************************************************
 
    //**Parallel evaluation strategy****************************************************************
    /*! \cond BLAZE_INTERNAL */
-   //! Helper structure for the explicit application of the SFINAE principle.
-   /*! The UseSMPAssign struct is a helper struct for the selection of the parallel evaluation
-       strategy. In case the target matrix is SMP assignable and the sparse matrix operand requires
-       an intermediate evaluation, \a value is set to 1 and the expression specific evaluation
-       strategy is selected. Otherwise \a value is set to 0 and the default strategy is chosen. */
+   //! Helper variable template for the explicit application of the SFINAE principle.
+   /*! This variable template is a helper for the selection of the parallel evaluation strategy.
+       In case the target matrix is SMP assignable and the sparse matrix operand requires an
+       intermediate evaluation, the variable is set to 1 and the expression specific evaluation
+       strategy is selected. Otherwise the variable is set to 0 and the default strategy is
+       chosen. */
    template< typename MT2 >
-   struct UseSMPAssign {
-      enum : bool { value = MT2::smpAssignable && useAssign };
-   };
-   /*! \endcond */
-   //**********************************************************************************************
-
-   //**********************************************************************************************
-   /*! \cond BLAZE_INTERNAL */
-   //! Helper structure to acquire the type of constant iterators of the given matrix type.
-   /*! The GetConstIterator struct helps to acquire the constant iterator type of the given
-       matrix type. In case the given matrix has a nested \a ConstIterator type, the nested
-       type definition \a Type is set to that type. Otherwise \a Type is set to INVALID_TYPE. */
-   template< typename MT2 >
-   struct GetConstIterator {
-      BLAZE_CREATE_HAS_TYPE_MEMBER_TYPE_TRAIT( HasConstIterator, ConstIterator );
-      struct Success { using Type = typename MT2::ConstIterator; };
-      struct Failure { using Type = INVALID_TYPE; };
-      using Type = typename If_< HasConstIterator<MT2>, Success, Failure >::Type;
-   };
+   static constexpr bool UseSMPAssign_v = ( MT2::smpAssignable && useAssign );
    /*! \endcond */
    //**********************************************************************************************
 
  public:
    //**Type definitions****************************************************************************
-   typedef SMatDeclSymExpr<MT,SO>  This;           //!< Type of this SMatDeclSymExpr instance.
-   typedef ResultType_<MT>         ResultType;     //!< Result type for expression template evaluations.
-   typedef OppositeType_<MT>       OppositeType;   //!< Result type with opposite storage order for expression template evaluations.
-   typedef TransposeType_<MT>      TransposeType;  //!< Transpose type for expression template evaluations.
-   typedef ElementType_<MT>        ElementType;    //!< Resulting element type.
-   typedef ReturnType_<MT>         ReturnType;     //!< Return type for expression template evaluations.
+   //! Type of this SMatDeclSymExpr instance.
+   using This = SMatDeclSymExpr<MT,SO>;
+
+   //! Base type of this SMatDeclSymExpr instance.
+   using BaseType = DeclSymExpr< SparseMatrix<This,SO> >;
+
+   using ResultType    = DeclSymTrait_t<RT>;           //!< Result type for expression template evaluations.
+   using OppositeType  = OppositeType_t<ResultType>;   //!< Result type with opposite storage order for expression template evaluations.
+   using TransposeType = TransposeType_t<ResultType>;  //!< Transpose type for expression template evaluations.
+   using ElementType   = ElementType_t<MT>;            //!< Resulting element type.
+   using ReturnType    = ReturnType_t<MT>;             //!< Return type for expression template evaluations.
 
    //! Data type for composite expression templates.
-   typedef If_< RequiresEvaluation<MT>, const ResultType, const SMatDeclSymExpr& >  CompositeType;
+   using CompositeType = If_t< RequiresEvaluation_v<MT>, const ResultType, const SMatDeclSymExpr& >;
 
    //! Iterator over the elements of the dense matrix.
-   typedef typename GetConstIterator<MT>::Type  ConstIterator;
+   using ConstIterator = GetConstIterator_t<MT>;
 
    //! Composite data type of the sparse matrix expression.
-   typedef If_< IsExpression<MT>, const MT, const MT& >  Operand;
+   using Operand = If_t< IsExpression_v<MT>, const MT, const MT& >;
    //**********************************************************************************************
 
    //**Compilation flags***************************************************************************
    //! Compilation switch for the expression template assignment strategy.
-   enum : bool { smpAssignable = MT::smpAssignable };
+   static constexpr bool smpAssignable = MT::smpAssignable;
    //**********************************************************************************************
 
    //**Constructor*********************************************************************************
@@ -188,7 +163,9 @@ class SMatDeclSymExpr : public SparseMatrix< SMatDeclSymExpr<MT,SO>, SO >
    */
    explicit inline SMatDeclSymExpr( const MT& sm ) noexcept
       : sm_( sm )  // Sparse matrix of the declsym expression
-   {}
+   {
+      BLAZE_INTERNAL_ASSERT( isSquare( *sm ), "Non-square matrix detected" );
+   }
    //**********************************************************************************************
 
    //**Access operator*****************************************************************************
@@ -350,15 +327,15 @@ class SMatDeclSymExpr : public SparseMatrix< SMatDeclSymExpr<MT,SO>, SO >
    */
    template< typename MT2  // Type of the target dense matrix
            , bool SO2 >    // Storage order of the target dense matrix
-   friend inline EnableIf_< UseAssign<MT2> >
-      assign( DenseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+   friend inline auto assign( DenseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+      -> EnableIf_t< UseAssign_v<MT2> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
-      assign( ~lhs, rhs.sm_ );
+      assign( *lhs, rhs.sm_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -377,15 +354,15 @@ class SMatDeclSymExpr : public SparseMatrix< SMatDeclSymExpr<MT,SO>, SO >
    */
    template< typename MT2  // Type of the target sparse matrix
            , bool SO2 >    // Storage order of the target sparse matrix
-   friend inline EnableIf_< UseAssign<MT2> >
-      assign( SparseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+   friend inline auto assign( SparseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+      -> EnableIf_t< UseAssign_v<MT2> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
-      assign( ~lhs, rhs.sm_ );
+      assign( *lhs, rhs.sm_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -404,15 +381,15 @@ class SMatDeclSymExpr : public SparseMatrix< SMatDeclSymExpr<MT,SO>, SO >
    */
    template< typename MT2  // Type of the target dense matrix
            , bool SO2 >    // Storage order of the target dense matrix
-   friend inline EnableIf_< UseAssign<MT2> >
-      addAssign( DenseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+   friend inline auto addAssign( DenseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+      -> EnableIf_t< UseAssign_v<MT2> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
-      addAssign( ~lhs, rhs.sm_ );
+      addAssign( *lhs, rhs.sm_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -431,15 +408,15 @@ class SMatDeclSymExpr : public SparseMatrix< SMatDeclSymExpr<MT,SO>, SO >
    */
    template< typename MT2  // Type of the target sparse matrix
            , bool SO2 >    // Storage order of the target sparse matrix
-   friend inline EnableIf_< UseAssign<MT2> >
-      addAssign( SparseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+   friend inline auto addAssign( SparseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+      -> EnableIf_t< UseAssign_v<MT2> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
-      addAssign( ~lhs, rhs.sm_ );
+      addAssign( *lhs, rhs.sm_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -458,15 +435,15 @@ class SMatDeclSymExpr : public SparseMatrix< SMatDeclSymExpr<MT,SO>, SO >
    */
    template< typename MT2  // Type of the target dense matrix
            , bool SO2 >    // Storage order of the target dense matrix
-   friend inline EnableIf_< UseAssign<MT2> >
-      subAssign( DenseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+   friend inline auto subAssign( DenseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+      -> EnableIf_t< UseAssign_v<MT2> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
-      subAssign( ~lhs, rhs.sm_ );
+      subAssign( *lhs, rhs.sm_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -485,15 +462,69 @@ class SMatDeclSymExpr : public SparseMatrix< SMatDeclSymExpr<MT,SO>, SO >
    */
    template< typename MT2  // Type of the target sparse matrix
            , bool SO2 >    // Storage order of the target sparse matrix
-   friend inline EnableIf_< UseAssign<MT2> >
-      subAssign( SparseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+   friend inline auto subAssign( SparseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+      -> EnableIf_t< UseAssign_v<MT2> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
-      subAssign( ~lhs, rhs.sm_ );
+      subAssign( *lhs, rhs.sm_ );
+   }
+   /*! \endcond */
+   //**********************************************************************************************
+
+   //**Schur product assignment to dense matrices**************************************************
+   /*! \cond BLAZE_INTERNAL */
+   /*!\brief Schur product assignment of a sparse matrix declsym expression to a dense matrix.
+   // \ingroup sparse_matrix
+   //
+   // \param lhs The target left-hand side dense matrix.
+   // \param rhs The right-hand side declsym expression for the Schur product.
+   // \return void
+   //
+   // This function implements the performance optimized Schur product assignment of a sparse
+   // matrix declsym expression to a dense matrix.
+   */
+   template< typename MT2  // Type of the target dense matrix
+           , bool SO2 >    // Storage order of the target dense matrix
+   friend inline auto schurAssign( DenseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+      -> EnableIf_t< UseAssign_v<MT2> >
+   {
+      BLAZE_FUNCTION_TRACE;
+
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
+
+      schurAssign( *lhs, rhs.sm_ );
+   }
+   /*! \endcond */
+   //**********************************************************************************************
+
+   //**Schur product assignment to sparse matrices*************************************************
+   /*! \cond BLAZE_INTERNAL */
+   /*!\brief Schur product assignment of a sparse matrix declsym expression to a sparse matrix.
+   // \ingroup sparse_matrix
+   //
+   // \param lhs The target left-hand side sparse matrix.
+   // \param rhs The right-hand side declsym expression for the Schur product.
+   // \return void
+   //
+   // This function implements the performance optimized Schur product assignment of a sparse
+   // matrix declsym expression to a sparse matrix.
+   */
+   template< typename MT2  // Type of the target sparse matrix
+           , bool SO2 >    // Storage order of the target sparse matrix
+   friend inline auto schurAssign( SparseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+      -> EnableIf_t< UseAssign_v<MT2> >
+   {
+      BLAZE_FUNCTION_TRACE;
+
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
+
+      schurAssign( *lhs, rhs.sm_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -512,15 +543,15 @@ class SMatDeclSymExpr : public SparseMatrix< SMatDeclSymExpr<MT,SO>, SO >
    */
    template< typename MT2  // Type of the target dense matrix
            , bool SO2 >    // Storage order of the target dense matrix
-   friend inline EnableIf_< UseAssign<MT2> >
-      multAssign( DenseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+   friend inline auto multAssign( DenseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+      -> EnableIf_t< UseAssign_v<MT2> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
-      multAssign( ~lhs, rhs.sm_ );
+      multAssign( *lhs, rhs.sm_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -539,15 +570,15 @@ class SMatDeclSymExpr : public SparseMatrix< SMatDeclSymExpr<MT,SO>, SO >
    */
    template< typename MT2  // Type of the target sparse matrix
            , bool SO2 >    // Storage order of the target sparse matrix
-   friend inline EnableIf_< UseAssign<MT2> >
-      multAssign( SparseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+   friend inline auto multAssign( SparseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+      -> EnableIf_t< UseAssign_v<MT2> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
-      multAssign( ~lhs, rhs.sm_ );
+      multAssign( *lhs, rhs.sm_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -566,15 +597,15 @@ class SMatDeclSymExpr : public SparseMatrix< SMatDeclSymExpr<MT,SO>, SO >
    */
    template< typename MT2  // Type of the target dense matrix
            , bool SO2 >    // Storage order of the target dense matrix
-   friend inline EnableIf_< UseSMPAssign<MT2> >
-      smpAssign( DenseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+   friend inline auto smpAssign( DenseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+      -> EnableIf_t< UseSMPAssign_v<MT2> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
-      smpAssign( ~lhs, rhs.sm_ );
+      smpAssign( *lhs, rhs.sm_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -593,15 +624,15 @@ class SMatDeclSymExpr : public SparseMatrix< SMatDeclSymExpr<MT,SO>, SO >
    */
    template< typename MT2  // Type of the target sparse matrix
            , bool SO2 >    // Storage order of the target sparse matrix
-   friend inline EnableIf_< UseSMPAssign<MT2> >
-      smpAssign( SparseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+   friend inline auto smpAssign( SparseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+      -> EnableIf_t< UseSMPAssign_v<MT2> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
-      smpAssign( ~lhs, rhs.sm_ );
+      smpAssign( *lhs, rhs.sm_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -620,15 +651,15 @@ class SMatDeclSymExpr : public SparseMatrix< SMatDeclSymExpr<MT,SO>, SO >
    */
    template< typename MT2  // Type of the target dense matrix
            , bool SO2 >    // Storage order of the target dense matrix
-   friend inline EnableIf_< UseSMPAssign<MT2> >
-      smpAddAssign( DenseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+   friend inline auto smpAddAssign( DenseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+      -> EnableIf_t< UseSMPAssign_v<MT2> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
-      smpAddAssign( ~lhs, rhs.sm_ );
+      smpAddAssign( *lhs, rhs.sm_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -647,15 +678,15 @@ class SMatDeclSymExpr : public SparseMatrix< SMatDeclSymExpr<MT,SO>, SO >
    */
    template< typename MT2  // Type of the target sparse matrix
            , bool SO2 >    // Storage order of the target sparse matrix
-   friend inline EnableIf_< UseSMPAssign<MT2> >
-      smpAddAssign( SparseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+   friend inline auto smpAddAssign( SparseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+      -> EnableIf_t< UseSMPAssign_v<MT2> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
-      smpAddAssign( ~lhs, rhs.sm_ );
+      smpAddAssign( *lhs, rhs.sm_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -674,15 +705,15 @@ class SMatDeclSymExpr : public SparseMatrix< SMatDeclSymExpr<MT,SO>, SO >
    */
    template< typename MT2  // Type of the target dense matrix
            , bool SO2 >    // Storage order of the target dense matrix
-   friend inline EnableIf_< UseSMPAssign<MT2> >
-      smpSubAssign( DenseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+   friend inline auto smpSubAssign( DenseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+      -> EnableIf_t< UseSMPAssign_v<MT2> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
-      smpSubAssign( ~lhs, rhs.sm_ );
+      smpSubAssign( *lhs, rhs.sm_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -701,15 +732,69 @@ class SMatDeclSymExpr : public SparseMatrix< SMatDeclSymExpr<MT,SO>, SO >
    */
    template< typename MT2  // Type of the target sparse matrix
            , bool SO2 >    // Storage order of the target sparse matrix
-   friend inline EnableIf_< UseSMPAssign<MT2> >
-      smpSubAssign( SparseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+   friend inline auto smpSubAssign( SparseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+      -> EnableIf_t< UseSMPAssign_v<MT2> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
-      smpSubAssign( ~lhs, rhs.sm_ );
+      smpSubAssign( *lhs, rhs.sm_ );
+   }
+   /*! \endcond */
+   //**********************************************************************************************
+
+   //**SMP Schur product assignment to dense matrices**********************************************
+   /*! \cond BLAZE_INTERNAL */
+   /*!\brief SMP Schur product assignment of a sparse matrix declsym expression to a dense matrix.
+   // \ingroup sparse_matrix
+   //
+   // \param lhs The target left-hand side dense matrix.
+   // \param rhs The right-hand side declsym expression for the Schur product.
+   // \return void
+   //
+   // This function implements the performance optimized SMP Schur product assignment of a sparse
+   // matrix declsym expression to a dense matrix.
+   */
+   template< typename MT2  // Type of the target dense matrix
+           , bool SO2 >    // Storage order of the target dense matrix
+   friend inline auto smpSchurAssign( DenseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+      -> EnableIf_t< UseSMPAssign_v<MT2> >
+   {
+      BLAZE_FUNCTION_TRACE;
+
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
+
+      smpSchurAssign( *lhs, rhs.sm_ );
+   }
+   /*! \endcond */
+   //**********************************************************************************************
+
+   //**SMP Schur product assignment to sparse matrices*********************************************
+   /*! \cond BLAZE_INTERNAL */
+   /*!\brief SMP Schur product assignment of a sparse matrix declsym expression to a sparse matrix.
+   // \ingroup sparse_matrix
+   //
+   // \param lhs The target left-hand side sparse matrix.
+   // \param rhs The right-hand side declsym expression for the Schur product.
+   // \return void
+   //
+   // This function implements the performance optimized SMP Schur product assignment of a sparse
+   // matrix declsym expression to a sparse matrix.
+   */
+   template< typename MT2  // Type of the target sparse matrix
+           , bool SO2 >    // Storage order of the target sparse matrix
+   friend inline auto smpSchurAssign( SparseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+      -> EnableIf_t< UseSMPAssign_v<MT2> >
+   {
+      BLAZE_FUNCTION_TRACE;
+
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
+
+      smpSchurAssign( *lhs, rhs.sm_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -729,15 +814,15 @@ class SMatDeclSymExpr : public SparseMatrix< SMatDeclSymExpr<MT,SO>, SO >
    */
    template< typename MT2  // Type of the target dense matrix
            , bool SO2 >    // Storage order of the target dense matrix
-   friend inline EnableIf_< UseSMPAssign<MT2> >
-      smpMultAssign( DenseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+   friend inline auto smpMultAssign( DenseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+      -> EnableIf_t< UseSMPAssign_v<MT2> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
-      smpMultAssign( ~lhs, rhs.sm_ );
+      smpMultAssign( *lhs, rhs.sm_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -757,15 +842,15 @@ class SMatDeclSymExpr : public SparseMatrix< SMatDeclSymExpr<MT,SO>, SO >
    */
    template< typename MT2  // Type of the target sparse matrix
            , bool SO2 >    // Storage order of the target sparse matrix
-   friend inline EnableIf_< UseSMPAssign<MT2> >
-      smpMultAssign( SparseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+   friend inline auto smpMultAssign( SparseMatrix<MT2,SO2>& lhs, const SMatDeclSymExpr& rhs )
+      -> EnableIf_t< UseSMPAssign_v<MT2> >
    {
       BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+      BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+      BLAZE_INTERNAL_ASSERT( (*lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
-      smpMultAssign( ~lhs, rhs.sm_ );
+      smpMultAssign( *lhs, rhs.sm_ );
    }
    /*! \endcond */
    //**********************************************************************************************
@@ -775,6 +860,7 @@ class SMatDeclSymExpr : public SparseMatrix< SMatDeclSymExpr<MT,SO>, SO >
    BLAZE_CONSTRAINT_MUST_BE_SPARSE_MATRIX_TYPE( MT );
    BLAZE_CONSTRAINT_MUST_BE_MATRIX_WITH_STORAGE_ORDER( MT, SO );
    BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_UNITRIANGULAR_MATRIX_TYPE( MT );
    /*! \endcond */
    //**********************************************************************************************
 };
@@ -790,16 +876,94 @@ class SMatDeclSymExpr : public SparseMatrix< SMatDeclSymExpr<MT,SO>, SO >
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\brief Declares the given non-symmetric sparse matrix expression \a sm as symmetric.
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Declares the given sparse matrix expression \a sm as symmetric.
+// \ingroup sparse_matrix
+//
+// \param sm The input matrix.
+// \return The redeclared sparse matrix.
+//
+// This function declares the given sparse matrix expression \a sm as symmetric. The function
+// returns an expression representing the operation.
+*/
+template< typename MT  // Type of the sparse matrix
+        , bool SO      // Storage order
+        , DisableIf_t< IsSymmetric_v<MT> || IsUniTriangular_v<MT> >* = nullptr >
+inline const SMatDeclSymExpr<MT,SO> declsym_backend( const SparseMatrix<MT,SO>& sm )
+{
+   BLAZE_FUNCTION_TRACE;
+
+   BLAZE_INTERNAL_ASSERT( isSquare( *sm ), "Non-square matrix detected" );
+
+   return SMatDeclSymExpr<MT,SO>( *sm );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Declares the given unitriangular sparse matrix expression \a sm as symmetric.
+// \ingroup sparse_matrix
+//
+// \param sm The input matrix.
+// \return The redeclared sparse matrix.
+//
+// This function declares the given unitriangular sparse matrix expression \a sm as symmetric.
+// The function returns an identity matrix.
+*/
+template< typename MT  // Type of the sparse matrix
+        , bool SO      // Storage order
+        , EnableIf_t< !IsSymmetric_v<MT> && IsUniTriangular_v<MT> >* = nullptr >
+inline const IdentityMatrix<ElementType_t<MT>,SO> declsym_backend( const SparseMatrix<MT,SO>& sm )
+{
+   BLAZE_FUNCTION_TRACE;
+
+   BLAZE_INTERNAL_ASSERT( isSquare( *sm ), "Non-square matrix detected" );
+
+   return IdentityMatrix<ElementType_t<MT>,SO>( (*sm).rows() );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Redeclares the given symmetric sparse matrix expression \a sm as symmetric.
+// \ingroup sparse_matrix
+//
+// \param sm The input matrix.
+// \return The redeclared sparse matrix.
+//
+// This function redeclares the given symmetric sparse matrix expression \a sm as symmetric.
+// The function returns a reference to the already symmetric matrix expression.
+*/
+template< typename MT  // Type of the sparse matrix
+        , bool SO      // Storage order
+        , EnableIf_t< IsSymmetric_v<MT> >* = nullptr >
+inline const MT& declsym_backend( const SparseMatrix<MT,SO>& sm )
+{
+   BLAZE_FUNCTION_TRACE;
+
+   BLAZE_INTERNAL_ASSERT( isSquare( *sm ), "Non-square matrix detected" );
+
+   return *sm;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Declares the given sparse matrix expression \a sm as symmetric.
 // \ingroup sparse_matrix
 //
 // \param sm The input matrix.
 // \return The redeclared sparse matrix.
 // \exception std::invalid_argument Invalid symmetric matrix specification.
 //
-// The \a declsym function declares the given non-symmetric sparse matrix expression \a sm as
-// symmetric. The function returns an expression representing the operation. In case the given
-// matrix is not a square matrix, a \a std::invalid_argument exception is thrown.\n
+// The \a declsym function declares the given sparse matrix expression \a sm as symmetric.
+// In case the given matrix is not a square matrix, a \a std::invalid_argument exception is
+// thrown.\n
 // The following example demonstrates the use of the \a declsym function:
 
    \code
@@ -810,113 +974,16 @@ class SMatDeclSymExpr : public SparseMatrix< SMatDeclSymExpr<MT,SO>, SO >
 */
 template< typename MT  // Type of the sparse matrix
         , bool SO >    // Storage order
-inline DisableIf_< IsSymmetric<MT>, const SMatDeclSymExpr<MT,SO> >
-   declsym( const SparseMatrix<MT,SO>& sm )
+inline decltype(auto) declsym( const SparseMatrix<MT,SO>& sm )
 {
    BLAZE_FUNCTION_TRACE;
 
-   if( !isSquare( ~sm ) ) {
+   if( !isSquare( *sm ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid symmetric matrix specification" );
    }
 
-   return SMatDeclSymExpr<MT,SO>( ~sm );
+   return declsym_backend( *sm );
 }
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Redeclares the given symmetric sparse matrix expression \a sm as symmetric.
-// \ingroup sparse_matrix
-//
-// \param sm The input matrix.
-// \return The redeclared sparse matrix.
-//
-// The \a declsym function redeclares the given symmetric sparse matrix expression \a sm as
-// symmetric. The function returns a reference to the already symmetric matrix expression.
-*/
-template< typename MT  // Type of the sparse matrix
-        , bool SO >    // Storage order
-inline EnableIf_< IsSymmetric<MT>, const MT& >
-   declsym( const SparseMatrix<MT,SO>& sm )
-{
-   BLAZE_FUNCTION_TRACE;
-
-   return ~sm;
-}
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  GLOBAL RESTRUCTURING FUNCTIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Declares the given non-symmetric sparse matrix-scalar multiplication expression as symmetric.
-// \ingroup sparse_matrix
-//
-// \param sm The input sparse matrix-scalar multiplication expression.
-// \return The redeclared expression.
-// \exception std::invalid_argument Invalid symmetric matrix specification.
-//
-// This function implements the application of the declsym() operation on a sparse matrix-
-// scalar multiplication. It restructures the expression \f$ A=declsym(B*s1) \f$ to the
-// expression \f$ A=declsym(B)*s1 \f$. In case the given matrix is not a square matrix,
-// a \a std::invalid_argument exception is thrown.
-*/
-template< typename MT  // Type of the left-hand side sparse matrix
-        , typename ST  // Type of the right-hand side scalar value
-        , bool SO >    // Storage order
-inline const DisableIf_< IsSymmetric<MT>, MultExprTrait_< DeclSymExprTrait_<MT>, ST > >
-   declsym( const SMatScalarMultExpr<MT,ST,SO>& sm )
-{
-   BLAZE_FUNCTION_TRACE;
-
-   if( !isSquare( ~sm ) ) {
-      BLAZE_THROW_INVALID_ARGUMENT( "Invalid symmetric matrix specification" );
-   }
-
-   return declsym( sm.leftOperand() ) * sm.rightOperand();
-}
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  ROWS SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT, bool SO >
-struct Rows< SMatDeclSymExpr<MT,SO> > : public Rows<MT>
-{};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  COLUMNS SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT, bool SO >
-struct Columns< SMatDeclSymExpr<MT,SO> > : public Columns<MT>
-{};
-/*! \endcond */
 //*************************************************************************************************
 
 
@@ -934,214 +1001,6 @@ template< typename MT, bool SO >
 struct IsSymmetric< SMatDeclSymExpr<MT,SO> >
    : public TrueType
 {};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  ISHERMITIAN SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT, bool SO >
-struct IsHermitian< SMatDeclSymExpr<MT,SO> >
-   : public BoolConstant< IsHermitian<MT>::value >
-{};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  ISLOWER SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT, bool SO >
-struct IsLower< SMatDeclSymExpr<MT,SO> >
-   : public BoolConstant< IsLower<MT>::value >
-{};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  ISUNILOWER SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT, bool SO >
-struct IsUniLower< SMatDeclSymExpr<MT,SO> >
-   : public BoolConstant< IsUniLower<MT>::value >
-{};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  ISSTRICTLYLOWER SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT, bool SO >
-struct IsStrictlyLower< SMatDeclSymExpr<MT,SO> >
-   : public BoolConstant< IsStrictlyLower<MT>::value >
-{};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  ISUPPER SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT, bool SO >
-struct IsUpper< SMatDeclSymExpr<MT,SO> >
-   : public BoolConstant< IsUpper<MT>::value >
-{};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  ISUNIUPPER SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT, bool SO >
-struct IsUniUpper< SMatDeclSymExpr<MT,SO> >
-   : public BoolConstant< IsUniUpper<MT>::value >
-{};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  ISSTRICTLYUPPER SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT, bool SO >
-struct IsStrictlyUpper< SMatDeclSymExpr<MT,SO> >
-   : public BoolConstant< IsStrictlyUpper<MT>::value >
-{};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  EXPRESSION TRAIT SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT, typename ST >
-struct SMatDeclSymExprTrait< SMatScalarMultExpr<MT,ST,false> >
-{
- public:
-   //**********************************************************************************************
-   using Type = If_< And< IsSparseMatrix<MT>, IsRowMajorMatrix<MT>, IsNumeric<ST> >
-                   , MultExprTrait_< DeclSymExprTrait_<MT>, ST >
-                   , INVALID_TYPE >;
-   //**********************************************************************************************
-};
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT, typename ST >
-struct TSMatDeclSymExprTrait< SMatScalarMultExpr<MT,ST,true> >
-{
- public:
-   //**********************************************************************************************
-   using Type = If_< And< IsSparseMatrix<MT>, IsColumnMajorMatrix<MT>, IsNumeric<ST> >
-                   , MultExprTrait_< DeclSymExprTrait_<MT>, ST >
-                   , INVALID_TYPE >;
-   //**********************************************************************************************
-};
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT, bool SO, bool AF >
-struct SubmatrixExprTrait< SMatDeclSymExpr<MT,SO>, AF >
-{
- public:
-   //**********************************************************************************************
-   using Type = SubmatrixExprTrait_<const MT,AF>;
-   //**********************************************************************************************
-};
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT, bool SO >
-struct RowExprTrait< SMatDeclSymExpr<MT,SO> >
-{
- public:
-   //**********************************************************************************************
-   using Type = RowExprTrait_<const MT>;
-   //**********************************************************************************************
-};
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT, bool SO >
-struct ColumnExprTrait< SMatDeclSymExpr<MT,SO> >
-{
- public:
-   //**********************************************************************************************
-   using Type = ColumnExprTrait_<const MT>;
-   //**********************************************************************************************
-};
 /*! \endcond */
 //*************************************************************************************************
 

@@ -3,7 +3,7 @@
 //  \file blaze/math/constraints/RequiresEvaluation.h
 //  \brief Constraint on the data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -59,7 +59,7 @@ namespace blaze {
 // expressions, a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_REQUIRE_EVALUATION(T) \
-   static_assert( ::blaze::RequiresEvaluation<T>::value, "Type without evaluation requirement detected" )
+   static_assert( ::blaze::RequiresEvaluation_v<T>, "Type without evaluation requirement detected" )
 //*************************************************************************************************
 
 
@@ -79,7 +79,7 @@ namespace blaze {
 // expressions, a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION(T) \
-   static_assert( !::blaze::RequiresEvaluation<T>::value, "Type with evaluation requirement detected" )
+   static_assert( !::blaze::RequiresEvaluation_v<T>, "Type with evaluation requirement detected" )
 //*************************************************************************************************
 
 } // namespace blaze

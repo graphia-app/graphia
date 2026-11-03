@@ -3,7 +3,7 @@
 //  \file blaze/util/singleton/Singleton.h
 //  \brief Header file for the Singleton class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -43,6 +43,7 @@
 #include <memory>
 #include <mutex>
 #include <blaze/util/constraints/DerivedFrom.h>
+#include <blaze/util/IntegralConstant.h>
 #include <blaze/util/NonCopyable.h>
 #include <blaze/util/NullType.h>
 #include <blaze/util/Suffix.h>
@@ -77,9 +78,9 @@ template< typename T, typename TL, bool C > struct HasCyclicDependency;
 // Helper template class for the HasCyclicDependency template class to resolve all lifetime
 // dependencies represented by means of a dependency type list.
 */
-template< typename TL                      // Type list of checked lifetime dependencies
-        , typename D                       // Type list of lifetime dependencies to check
-        , size_t   N = Length<D>::value >  // Length of the dependency type list
+template< typename TL                 // Type list of checked lifetime dependencies
+        , typename D                  // Type list of lifetime dependencies to check
+        , size_t   N = Length_v<D> >  // Length of the dependency type list
 struct HasCyclicDependencyHelper;
 /*! \endcond */
 //*************************************************************************************************
@@ -97,7 +98,7 @@ template< typename TL   // Type list of checked lifetime dependencies
         , size_t   N >  // Length of the dependency type list
 struct HasCyclicDependencyHelper<TL,NullType,N>
 {
-   enum : bool { value = 0 };
+   static constexpr bool value = false;
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -115,9 +116,9 @@ template< typename TL   // Type list of checked lifetime dependencies
         , typename D >  // Type list of lifetime dependencies to check
 struct HasCyclicDependencyHelper<TL,D,1>
 {
-   typedef typename TypeAt<D,0>::Result  D1;
+   using D1 = TypeAt_t<D,0>;
 
-   enum : bool { value = HasCyclicDependency<D1,TL,Contains<TL,D1>::value>::value };
+   static constexpr bool value = HasCyclicDependency<D1,TL,Contains_v<TL,D1>>::value;
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -135,11 +136,11 @@ template< typename TL   // Type list of checked lifetime dependencies
         , typename D >  // Type list of lifetime dependencies to check
 struct HasCyclicDependencyHelper<TL,D,2>
 {
-   typedef typename TypeAt<D,0>::Result  D1;
-   typedef typename TypeAt<D,1>::Result  D2;
+   using D1 = TypeAt_t<D,0>;
+   using D2 = TypeAt_t<D,1>;
 
-   enum : bool { value = HasCyclicDependency<D1,TL,Contains<TL,D1>::value>::value ||
-                         HasCyclicDependency<D2,TL,Contains<TL,D2>::value>::value };
+   static constexpr bool value = ( HasCyclicDependency<D1,TL,Contains_v<TL,D1>>::value ||
+                                   HasCyclicDependency<D2,TL,Contains_v<TL,D2>>::value );
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -157,13 +158,13 @@ template< typename TL   // Type list of checked lifetime dependencies
         , typename D >  // Type list of lifetime dependencies to check
 struct HasCyclicDependencyHelper<TL,D,3>
 {
-   typedef typename TypeAt<D,0>::Result  D1;
-   typedef typename TypeAt<D,1>::Result  D2;
-   typedef typename TypeAt<D,2>::Result  D3;
+   using D1 = TypeAt_t<D,0>;
+   using D2 = TypeAt_t<D,1>;
+   using D3 = TypeAt_t<D,2>;
 
-   enum : bool { value = HasCyclicDependency<D1,TL,Contains<TL,D1>::value>::value ||
-                         HasCyclicDependency<D2,TL,Contains<TL,D2>::value>::value ||
-                         HasCyclicDependency<D3,TL,Contains<TL,D3>::value>::value };
+   static constexpr bool value = ( HasCyclicDependency<D1,TL,Contains_v<TL,D1>>::value ||
+                                   HasCyclicDependency<D2,TL,Contains_v<TL,D2>>::value ||
+                                   HasCyclicDependency<D3,TL,Contains_v<TL,D3>>::value );
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -181,15 +182,15 @@ template< typename TL   // Type list of checked lifetime dependencies
         , typename D >  // Type list of lifetime dependencies to check
 struct HasCyclicDependencyHelper<TL,D,4>
 {
-   typedef typename TypeAt<D,0>::Result  D1;
-   typedef typename TypeAt<D,1>::Result  D2;
-   typedef typename TypeAt<D,2>::Result  D3;
-   typedef typename TypeAt<D,3>::Result  D4;
+   using D1 = TypeAt_t<D,0>;
+   using D2 = TypeAt_t<D,1>;
+   using D3 = TypeAt_t<D,2>;
+   using D4 = TypeAt_t<D,3>;
 
-   enum : bool { value = HasCyclicDependency<D1,TL,Contains<TL,D1>::value>::value ||
-                         HasCyclicDependency<D2,TL,Contains<TL,D2>::value>::value ||
-                         HasCyclicDependency<D3,TL,Contains<TL,D3>::value>::value ||
-                         HasCyclicDependency<D4,TL,Contains<TL,D4>::value>::value };
+   static constexpr bool value = ( HasCyclicDependency<D1,TL,Contains_v<TL,D1>>::value ||
+                                   HasCyclicDependency<D2,TL,Contains_v<TL,D2>>::value ||
+                                   HasCyclicDependency<D3,TL,Contains_v<TL,D3>>::value ||
+                                   HasCyclicDependency<D4,TL,Contains_v<TL,D4>>::value );
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -207,17 +208,17 @@ template< typename TL   // Type list of checked lifetime dependencies
         , typename D >  // Type list of lifetime dependencies to check
 struct HasCyclicDependencyHelper<TL,D,5>
 {
-   typedef typename TypeAt<D,0>::Result  D1;
-   typedef typename TypeAt<D,1>::Result  D2;
-   typedef typename TypeAt<D,2>::Result  D3;
-   typedef typename TypeAt<D,3>::Result  D4;
-   typedef typename TypeAt<D,4>::Result  D5;
+   using D1 = TypeAt_t<D,0>;
+   using D2 = TypeAt_t<D,1>;
+   using D3 = TypeAt_t<D,2>;
+   using D4 = TypeAt_t<D,3>;
+   using D5 = TypeAt_t<D,4>;
 
-   enum : bool { value = HasCyclicDependency<D1,TL,Contains<TL,D1>::value>::value ||
-                         HasCyclicDependency<D2,TL,Contains<TL,D2>::value>::value ||
-                         HasCyclicDependency<D3,TL,Contains<TL,D3>::value>::value ||
-                         HasCyclicDependency<D4,TL,Contains<TL,D4>::value>::value ||
-                         HasCyclicDependency<D5,TL,Contains<TL,D5>::value>::value };
+   static constexpr bool value = ( HasCyclicDependency<D1,TL,Contains_v<TL,D1>>::value ||
+                                   HasCyclicDependency<D2,TL,Contains_v<TL,D2>>::value ||
+                                   HasCyclicDependency<D3,TL,Contains_v<TL,D3>>::value ||
+                                   HasCyclicDependency<D4,TL,Contains_v<TL,D4>>::value ||
+                                   HasCyclicDependency<D5,TL,Contains_v<TL,D5>>::value );
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -235,19 +236,19 @@ template< typename TL   // Type list of checked lifetime dependencies
         , typename D >  // Type list of lifetime dependencies to check
 struct HasCyclicDependencyHelper<TL,D,6>
 {
-   typedef typename TypeAt<D,0>::Result  D1;
-   typedef typename TypeAt<D,1>::Result  D2;
-   typedef typename TypeAt<D,2>::Result  D3;
-   typedef typename TypeAt<D,3>::Result  D4;
-   typedef typename TypeAt<D,4>::Result  D5;
-   typedef typename TypeAt<D,5>::Result  D6;
+   using D1 = TypeAt_t<D,0>;
+   using D2 = TypeAt_t<D,1>;
+   using D3 = TypeAt_t<D,2>;
+   using D4 = TypeAt_t<D,3>;
+   using D5 = TypeAt_t<D,4>;
+   using D6 = TypeAt_t<D,5>;
 
-   enum : bool { value = HasCyclicDependency<D1,TL,Contains<TL,D1>::value>::value ||
-                         HasCyclicDependency<D2,TL,Contains<TL,D2>::value>::value ||
-                         HasCyclicDependency<D3,TL,Contains<TL,D3>::value>::value ||
-                         HasCyclicDependency<D4,TL,Contains<TL,D4>::value>::value ||
-                         HasCyclicDependency<D5,TL,Contains<TL,D5>::value>::value ||
-                         HasCyclicDependency<D6,TL,Contains<TL,D6>::value>::value };
+   static constexpr bool value = ( HasCyclicDependency<D1,TL,Contains_v<TL,D1>>::value ||
+                                   HasCyclicDependency<D2,TL,Contains_v<TL,D2>>::value ||
+                                   HasCyclicDependency<D3,TL,Contains_v<TL,D3>>::value ||
+                                   HasCyclicDependency<D4,TL,Contains_v<TL,D4>>::value ||
+                                   HasCyclicDependency<D5,TL,Contains_v<TL,D5>>::value ||
+                                   HasCyclicDependency<D6,TL,Contains_v<TL,D6>>::value );
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -265,21 +266,21 @@ template< typename TL   // Type list of checked lifetime dependencies
         , typename D >  // Type list of lifetime dependencies to check
 struct HasCyclicDependencyHelper<TL,D,7>
 {
-   typedef typename TypeAt<D,0>::Result  D1;
-   typedef typename TypeAt<D,1>::Result  D2;
-   typedef typename TypeAt<D,2>::Result  D3;
-   typedef typename TypeAt<D,3>::Result  D4;
-   typedef typename TypeAt<D,4>::Result  D5;
-   typedef typename TypeAt<D,5>::Result  D6;
-   typedef typename TypeAt<D,6>::Result  D7;
+   using D1 = TypeAt_t<D,0>;
+   using D2 = TypeAt_t<D,1>;
+   using D3 = TypeAt_t<D,2>;
+   using D4 = TypeAt_t<D,3>;
+   using D5 = TypeAt_t<D,4>;
+   using D6 = TypeAt_t<D,5>;
+   using D7 = TypeAt_t<D,6>;
 
-   enum : bool { value = HasCyclicDependency<D1,TL,Contains<TL,D1>::value>::value ||
-                         HasCyclicDependency<D2,TL,Contains<TL,D2>::value>::value ||
-                         HasCyclicDependency<D3,TL,Contains<TL,D3>::value>::value ||
-                         HasCyclicDependency<D4,TL,Contains<TL,D4>::value>::value ||
-                         HasCyclicDependency<D5,TL,Contains<TL,D5>::value>::value ||
-                         HasCyclicDependency<D6,TL,Contains<TL,D6>::value>::value ||
-                         HasCyclicDependency<D7,TL,Contains<TL,D7>::value>::value };
+   static constexpr bool value = ( HasCyclicDependency<D1,TL,Contains_v<TL,D1>>::value ||
+                                   HasCyclicDependency<D2,TL,Contains_v<TL,D2>>::value ||
+                                   HasCyclicDependency<D3,TL,Contains_v<TL,D3>>::value ||
+                                   HasCyclicDependency<D4,TL,Contains_v<TL,D4>>::value ||
+                                   HasCyclicDependency<D5,TL,Contains_v<TL,D5>>::value ||
+                                   HasCyclicDependency<D6,TL,Contains_v<TL,D6>>::value ||
+                                   HasCyclicDependency<D7,TL,Contains_v<TL,D7>>::value );
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -297,23 +298,23 @@ template< typename TL   // Type list of checked lifetime dependencies
         , typename D >  // Type list of lifetime dependencies to check
 struct HasCyclicDependencyHelper<TL,D,8>
 {
-   typedef typename TypeAt<D,0>::Result  D1;
-   typedef typename TypeAt<D,1>::Result  D2;
-   typedef typename TypeAt<D,2>::Result  D3;
-   typedef typename TypeAt<D,3>::Result  D4;
-   typedef typename TypeAt<D,4>::Result  D5;
-   typedef typename TypeAt<D,5>::Result  D6;
-   typedef typename TypeAt<D,6>::Result  D7;
-   typedef typename TypeAt<D,7>::Result  D8;
+   using D1 = TypeAt_t<D,0>;
+   using D2 = TypeAt_t<D,1>;
+   using D3 = TypeAt_t<D,2>;
+   using D4 = TypeAt_t<D,3>;
+   using D5 = TypeAt_t<D,4>;
+   using D6 = TypeAt_t<D,5>;
+   using D7 = TypeAt_t<D,6>;
+   using D8 = TypeAt_t<D,7>;
 
-   enum : bool { value = HasCyclicDependency<D1,TL,Contains<TL,D1>::value>::value ||
-                         HasCyclicDependency<D2,TL,Contains<TL,D2>::value>::value ||
-                         HasCyclicDependency<D3,TL,Contains<TL,D3>::value>::value ||
-                         HasCyclicDependency<D4,TL,Contains<TL,D4>::value>::value ||
-                         HasCyclicDependency<D5,TL,Contains<TL,D5>::value>::value ||
-                         HasCyclicDependency<D6,TL,Contains<TL,D6>::value>::value ||
-                         HasCyclicDependency<D7,TL,Contains<TL,D7>::value>::value ||
-                         HasCyclicDependency<D8,TL,Contains<TL,D8>::value>::value };
+   static constexpr bool value = ( HasCyclicDependency<D1,TL,Contains_v<TL,D1>>::value ||
+                                   HasCyclicDependency<D2,TL,Contains_v<TL,D2>>::value ||
+                                   HasCyclicDependency<D3,TL,Contains_v<TL,D3>>::value ||
+                                   HasCyclicDependency<D4,TL,Contains_v<TL,D4>>::value ||
+                                   HasCyclicDependency<D5,TL,Contains_v<TL,D5>>::value ||
+                                   HasCyclicDependency<D6,TL,Contains_v<TL,D6>>::value ||
+                                   HasCyclicDependency<D7,TL,Contains_v<TL,D7>>::value ||
+                                   HasCyclicDependency<D8,TL,Contains_v<TL,D8>>::value );
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -336,14 +337,12 @@ struct HasCyclicDependencyHelper<TL,D,8>
 // cyclic lifetime dependency is detected, the \a value member enumeration is set to 1. Otherwise
 // it is set to 0.
 */
-template< typename T                      // The type to be checked for cyclic lifetime dependencies
-        , typename TL                     // Type list of checked lifetime dependencies
-        , bool C=Contains<TL,T>::value >  // Flag to indicate whether T is contained in TL
+template< typename T                   // The type to be checked for cyclic lifetime dependencies
+        , typename TL                  // Type list of checked lifetime dependencies
+        , bool C = Contains_v<TL,T> >  // Flag to indicate whether T is contained in TL
 struct HasCyclicDependency
-{
-   typedef typename Append<TL,T>::Result  ETL;
-   enum : bool { value = HasCyclicDependencyHelper<ETL,typename T::Dependencies>::value };
-};
+   : public BoolConstant< HasCyclicDependencyHelper<Append_t<TL,T>,typename T::Dependencies>::value >
+{};
 /*! \endcond */
 //*************************************************************************************************
 
@@ -360,9 +359,8 @@ struct HasCyclicDependency
 template< typename T     // The type to be checked for cyclic lifetime dependencies
         , typename TL >  // Type list of checked lifetime dependencies
 struct HasCyclicDependency<T,TL,true>
-{
-   enum : bool { value = 1 };
-};
+   : public TrueType
+{};
 /*! \endcond */
 //*************************************************************************************************
 
@@ -559,15 +557,16 @@ template< typename T                // Type of the singleton (CRTP pattern)
         , typename D6 = NullType    // Type of the sixth lifetime dependency
         , typename D7 = NullType    // Type of the seventh lifetime dependency
         , typename D8 = NullType >  // Type of the eighth lifetime dependency
-class Singleton : private NonCopyable
+class Singleton
+   : private NonCopyable
 {
  public:
    //**Type definitions****************************************************************************
    //! Type of this Singleton instance.
-   typedef Singleton<T,D1,D2,D3,D4,D5,D6,D7,D8>  SingletonType;
+   using SingletonType = Singleton<T,D1,D2,D3,D4,D5,D6,D7,D8>;
 
    //! Type list of all lifetime dependencies.
-   typedef BLAZE_TYPELIST_8( D1, D2, D3, D4, D5, D6, D7, D8 )  Dependencies;
+   using Dependencies = TypeList< D1, D2, D3, D4, D5, D6, D7, D8 >;
    //**********************************************************************************************
 
  protected:
@@ -576,7 +575,7 @@ class Singleton : private NonCopyable
    //
    // In case a cyclic lifetime dependency is detected, a compilation error is created.
    */
-   explicit Singleton()
+   Singleton()
       : dependency1_( D1::instance() )  // Handle to the first lifetime dependency
       , dependency2_( D2::instance() )  // Handle to the second lifetime dependency
       , dependency3_( D3::instance() )  // Handle to the third lifetime dependency
@@ -667,15 +666,16 @@ template< typename T     // Type of the singleton (CRTP pattern)
         , typename D5    // Type of the fifth lifetime dependency
         , typename D6    // Type of the sixth lifetime dependency
         , typename D7 >  // Type of the eighth lifetime dependency
-class Singleton<T,D1,D2,D3,D4,D5,D6,D7,NullType> : private NonCopyable
+class Singleton<T,D1,D2,D3,D4,D5,D6,D7,NullType>
+   : private NonCopyable
 {
  public:
    //**Type definitions****************************************************************************
    //! Type of this Singleton instance.
-   typedef Singleton<T,D1,D2,D3,D4,D5,D6,D7,NullType>  SingletonType;
+   using SingletonType = Singleton<T,D1,D2,D3,D4,D5,D6,D7,NullType>;
 
    //! Type list of all lifetime dependencies.
-   typedef BLAZE_TYPELIST_7( D1, D2, D3, D4, D5, D6, D7 )  Dependencies;
+   using Dependencies = TypeList< D1, D2, D3, D4, D5, D6, D7 >;
    //**********************************************************************************************
 
  protected:
@@ -684,7 +684,7 @@ class Singleton<T,D1,D2,D3,D4,D5,D6,D7,NullType> : private NonCopyable
    //
    // In case a cyclic lifetime dependency is detected, a compilation error is created.
    */
-   explicit Singleton()
+   Singleton()
       : dependency1_( D1::instance() )  // Handle to the first lifetime dependency
       , dependency2_( D2::instance() )  // Handle to the second lifetime dependency
       , dependency3_( D3::instance() )  // Handle to the third lifetime dependency
@@ -771,15 +771,16 @@ template< typename T     // Type of the singleton (CRTP pattern)
         , typename D4    // Type of the fourth lifetime dependency
         , typename D5    // Type of the fifth lifetime dependency
         , typename D6 >  // Type of the eighth lifetime dependency
-class Singleton<T,D1,D2,D3,D4,D5,D6,NullType,NullType> : private NonCopyable
+class Singleton<T,D1,D2,D3,D4,D5,D6,NullType,NullType>
+   : private NonCopyable
 {
  public:
    //**Type definitions****************************************************************************
    //! Type of this Singleton instance.
-   typedef Singleton<T,D1,D2,D3,D4,D5,D6,NullType,NullType>  SingletonType;
+   using SingletonType = Singleton<T,D1,D2,D3,D4,D5,D6,NullType,NullType>;
 
    //! Type list of all lifetime dependencies.
-   typedef BLAZE_TYPELIST_6( D1, D2, D3, D4, D5, D6 )  Dependencies;
+   using Dependencies = TypeList< D1, D2, D3, D4, D5, D6 >;
    //**********************************************************************************************
 
  protected:
@@ -788,7 +789,7 @@ class Singleton<T,D1,D2,D3,D4,D5,D6,NullType,NullType> : private NonCopyable
    //
    // In case a cyclic lifetime dependency is detected, a compilation error is created.
    */
-   explicit Singleton()
+   Singleton()
       : dependency1_( D1::instance() )  // Handle to the first lifetime dependency
       , dependency2_( D2::instance() )  // Handle to the second lifetime dependency
       , dependency3_( D3::instance() )  // Handle to the third lifetime dependency
@@ -870,15 +871,16 @@ template< typename T     // Type of the singleton (CRTP pattern)
         , typename D3    // Type of the third lifetime dependency
         , typename D4    // Type of the fourth lifetime dependency
         , typename D5 >  // Type of the fifth lifetime dependency
-class Singleton<T,D1,D2,D3,D4,D5,NullType,NullType,NullType> : private NonCopyable
+class Singleton<T,D1,D2,D3,D4,D5,NullType,NullType,NullType>
+   : private NonCopyable
 {
  public:
    //**Type definitions****************************************************************************
    //! Type of this Singleton instance.
-   typedef Singleton<T,D1,D2,D3,D4,D5,NullType,NullType,NullType>  SingletonType;
+   using SingletonType = Singleton<T,D1,D2,D3,D4,D5,NullType,NullType,NullType>;
 
    //! Type list of all lifetime dependencies.
-   typedef BLAZE_TYPELIST_5( D1, D2, D3, D4, D5 )  Dependencies;
+   using Dependencies = TypeList< D1, D2, D3, D4, D5 >;
    //**********************************************************************************************
 
  protected:
@@ -887,7 +889,7 @@ class Singleton<T,D1,D2,D3,D4,D5,NullType,NullType,NullType> : private NonCopyab
    //
    // In case a cyclic lifetime dependency is detected, a compilation error is created.
    */
-   explicit Singleton()
+   Singleton()
       : dependency1_( D1::instance() )  // Handle to the first lifetime dependency
       , dependency2_( D2::instance() )  // Handle to the second lifetime dependency
       , dependency3_( D3::instance() )  // Handle to the third lifetime dependency
@@ -964,15 +966,16 @@ template< typename T     // Type of the singleton (CRTP pattern)
         , typename D2    // Type of the second lifetime dependency
         , typename D3    // Type of the third lifetime dependency
         , typename D4 >  // Type of the fourth lifetime dependency
-class Singleton<T,D1,D2,D3,D4,NullType,NullType,NullType,NullType> : private NonCopyable
+class Singleton<T,D1,D2,D3,D4,NullType,NullType,NullType,NullType>
+   : private NonCopyable
 {
  public:
    //**Type definitions****************************************************************************
    //! Type of this Singleton instance.
-   typedef Singleton<T,D1,D2,D3,D4,NullType,NullType,NullType,NullType>  SingletonType;
+   using SingletonType = Singleton<T,D1,D2,D3,D4,NullType,NullType,NullType,NullType>;
 
    //! Type list of all lifetime dependencies.
-   typedef BLAZE_TYPELIST_4( D1, D2, D3, D4 )  Dependencies;
+   using Dependencies = TypeList< D1, D2, D3, D4 >;
    //**********************************************************************************************
 
  protected:
@@ -981,7 +984,7 @@ class Singleton<T,D1,D2,D3,D4,NullType,NullType,NullType,NullType> : private Non
    //
    // In case a cyclic lifetime dependency is detected, a compilation error is created.
    */
-   explicit Singleton()
+   Singleton()
       : dependency1_( D1::instance() )  // Handle to the first lifetime dependency
       , dependency2_( D2::instance() )  // Handle to the second lifetime dependency
       , dependency3_( D3::instance() )  // Handle to the third lifetime dependency
@@ -1053,15 +1056,16 @@ template< typename T     // Type of the singleton (CRTP pattern)
         , typename D1    // Type of the first lifetime dependency
         , typename D2    // Type of the second lifetime dependency
         , typename D3 >  // Type of the third lifetime dependency
-class Singleton<T,D1,D2,D3,NullType,NullType,NullType,NullType,NullType> : private NonCopyable
+class Singleton<T,D1,D2,D3,NullType,NullType,NullType,NullType,NullType>
+   : private NonCopyable
 {
  public:
    //**Type definitions****************************************************************************
    //! Type of this Singleton instance.
-   typedef Singleton<T,D1,D2,D3,NullType,NullType,NullType,NullType,NullType>  SingletonType;
+   using SingletonType = Singleton<T,D1,D2,D3,NullType,NullType,NullType,NullType,NullType>;
 
    //! Type list of all lifetime dependencies.
-   typedef BLAZE_TYPELIST_3( D1, D2, D3 )  Dependencies;
+   using Dependencies = TypeList< D1, D2, D3 >;
    //**********************************************************************************************
 
  protected:
@@ -1070,7 +1074,7 @@ class Singleton<T,D1,D2,D3,NullType,NullType,NullType,NullType,NullType> : priva
    //
    // In case a cyclic lifetime dependency is detected, a compilation error is created.
    */
-   explicit Singleton()
+   Singleton()
       : dependency1_( D1::instance() )  // Handle to the first lifetime dependency
       , dependency2_( D2::instance() )  // Handle to the second lifetime dependency
       , dependency3_( D3::instance() )  // Handle to the third lifetime dependency
@@ -1137,15 +1141,16 @@ class Singleton<T,D1,D2,D3,NullType,NullType,NullType,NullType,NullType> : priva
 template< typename T     // Type of the singleton (CRTP pattern)
         , typename D1    // Type of the first lifetime dependency
         , typename D2 >  // Type of the second lifetime dependency
-class Singleton<T,D1,D2,NullType,NullType,NullType,NullType,NullType,NullType> : private NonCopyable
+class Singleton<T,D1,D2,NullType,NullType,NullType,NullType,NullType,NullType>
+   : private NonCopyable
 {
  public:
    //**Type definitions****************************************************************************
    //! Type of this Singleton instance.
-   typedef Singleton<T,D1,D2,NullType,NullType,NullType,NullType,NullType,NullType>  SingletonType;
+   using SingletonType = Singleton<T,D1,D2,NullType,NullType,NullType,NullType,NullType,NullType>;
 
    //! Type list of all lifetime dependencies.
-   typedef BLAZE_TYPELIST_2( D1, D2 )  Dependencies;
+   using Dependencies = TypeList< D1, D2 >;
    //**********************************************************************************************
 
  protected:
@@ -1154,7 +1159,7 @@ class Singleton<T,D1,D2,NullType,NullType,NullType,NullType,NullType,NullType> :
    //
    // In case a cyclic lifetime dependency is detected, a compilation error is created.
    */
-   explicit Singleton()
+   Singleton()
       : dependency1_( D1::instance() )  // Handle to the first lifetime dependency
       , dependency2_( D2::instance() )  // Handle to the second lifetime dependency
    {
@@ -1216,15 +1221,16 @@ class Singleton<T,D1,D2,NullType,NullType,NullType,NullType,NullType,NullType> :
 */
 template< typename T     // Type of the singleton (CRTP pattern)
         , typename D1 >  // Type of the lifetime dependency
-class Singleton<T,D1,NullType,NullType,NullType,NullType,NullType,NullType,NullType> : private NonCopyable
+class Singleton<T,D1,NullType,NullType,NullType,NullType,NullType,NullType,NullType>
+   : private NonCopyable
 {
  public:
    //**Type definitions****************************************************************************
    //! Type of this Singleton instance.
-   typedef Singleton<T,D1,NullType,NullType,NullType,NullType,NullType,NullType,NullType>  SingletonType;
+   using SingletonType = Singleton<T,D1,NullType,NullType,NullType,NullType,NullType,NullType,NullType>;
 
    //! Type list of all lifetime dependencies.
-   typedef BLAZE_TYPELIST_1( D1 )  Dependencies;
+   using Dependencies = TypeList< D1 >;
    //**********************************************************************************************
 
  protected:
@@ -1233,7 +1239,7 @@ class Singleton<T,D1,NullType,NullType,NullType,NullType,NullType,NullType,NullT
    //
    // In case a cyclic lifetime dependency is detected, a compilation error is created.
    */
-   explicit Singleton()
+   Singleton()
       : dependency1_( D1::instance() )  // Handle to the lifetime dependency
    {
       BLAZE_CONSTRAINT_MUST_BE_DERIVED_FROM( T, SingletonType );
@@ -1290,15 +1296,16 @@ class Singleton<T,D1,NullType,NullType,NullType,NullType,NullType,NullType,NullT
 // are specified.
 */
 template< typename T >  // Type of the singleton (CRTP pattern)
-class Singleton<T,NullType,NullType,NullType,NullType,NullType,NullType,NullType,NullType> : private NonCopyable
+class Singleton<T,NullType,NullType,NullType,NullType,NullType,NullType,NullType,NullType>
+   : private NonCopyable
 {
  public:
    //**Type definitions****************************************************************************
    //! Type of this Singleton instance.
-   typedef Singleton<T,NullType,NullType,NullType,NullType,NullType,NullType,NullType,NullType>  SingletonType;
+   using SingletonType = Singleton<T,NullType,NullType,NullType,NullType,NullType,NullType,NullType,NullType>;
 
    //! Type list of all lifetime dependencies.
-   typedef NullType  Dependencies;
+   using Dependencies = NullType;
    //**********************************************************************************************
 
  protected:
@@ -1307,7 +1314,7 @@ class Singleton<T,NullType,NullType,NullType,NullType,NullType,NullType,NullType
    //
    // In case a cyclic lifetime dependency is detected, a compilation error is created.
    */
-   explicit Singleton()
+   Singleton()
    {
       BLAZE_CONSTRAINT_MUST_BE_DERIVED_FROM( T, SingletonType );
    }

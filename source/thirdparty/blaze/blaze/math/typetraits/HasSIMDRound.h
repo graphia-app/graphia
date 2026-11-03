@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/HasSIMDRound.h
 //  \brief Header file for the HasSIMDRound type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -42,7 +42,9 @@
 
 #include <blaze/system/Vectorization.h>
 #include <blaze/util/IntegralConstant.h>
-#include <blaze/util/typetraits/Decay.h>
+#include <blaze/util/typetraits/IsDouble.h>
+#include <blaze/util/typetraits/IsFloat.h>
+#include <blaze/util/typetraits/RemoveCVRef.h>
 
 
 namespace blaze {
@@ -55,24 +57,20 @@ namespace blaze {
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-template< typename T         // Type of the operand
-        , typename = void >  // Restricting condition
-struct HasSIMDRoundHelper
-{
-   enum : bool { value = false };
-};
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename T >
-struct HasSIMDRoundHelper< T, EnableIf_< Or< IsFloat<T>, IsDouble<T> > > >
-{
-   enum : bool { value = bool( BLAZE_SSE4_MODE ) ||
-                         bool( BLAZE_AVX_MODE  ) };
-};
+/*!\brief Auxiliary alias declaration for the HasSIMDRound type trait.
+// \ingroup math_type_traits
+*/
+template< typename T >  // Type of the operand
+using HasSIMDRoundHelper =
+   BoolConstant< ( IsFloat_v<T> &&
+                   ( bool( BLAZE_SSE4_MODE    ) ||
+                     bool( BLAZE_AVX_MODE     ) ||
+                     bool( BLAZE_MIC_MODE     ) ||
+                     bool( BLAZE_AVX512F_MODE ) ) ) ||
+                 ( IsDouble_v<T> &&
+                   ( bool( BLAZE_SSE4_MODE    ) ||
+                     bool( BLAZE_AVX_MODE     ) ||
+                     bool( BLAZE_AVX512F_MODE ) ) ) >;
 /*! \endcond */
 //*************************************************************************************************
 
@@ -99,8 +97,27 @@ struct HasSIMDRoundHelper< T, EnableIf_< Or< IsFloat<T>, IsDouble<T> > > >
    \endcode
 */
 template< typename T >  // Type of the operand
-struct HasSIMDRound : public BoolConstant< HasSIMDRoundHelper< Decay_<T> >::value >
+struct HasSIMDRound
+   : public BoolConstant< HasSIMDRoundHelper< RemoveCVRef_t<T> >::value >
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the HasSIMDRound type trait.
+// \ingroup math_type_traits
+//
+// The HasSIMDRound_v variable template provides a convenient shortcut to access the nested
+// \a value of the HasSIMDRound class template. For instance, given the type \a T the following
+// two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::HasSIMDRound<T>::value;
+   constexpr bool value2 = blaze::HasSIMDRound_v<T>;
+   \endcode
+*/
+template< typename T >  // Type of the operand
+constexpr bool HasSIMDRound_v = HasSIMDRound<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/math/expressions/Matrix.h
 //  \brief Header file for the Matrix base class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,22 +40,24 @@
 // Includes
 //*************************************************************************************************
 
+#include <blaze/math/Aliases.h>
 #include <blaze/math/constraints/Symmetric.h>
 #include <blaze/math/Exception.h>
 #include <blaze/math/expressions/Forward.h>
+#include <blaze/math/typetraits/IsClearable.h>
+#include <blaze/math/typetraits/IsIdentity.h>
 #include <blaze/math/typetraits/IsResizable.h>
+#include <blaze/math/typetraits/IsShrinkable.h>
 #include <blaze/math/typetraits/IsSquare.h>
 #include <blaze/math/typetraits/IsSymmetric.h>
+#include <blaze/math/typetraits/IsZero.h>
 #include <blaze/system/Inline.h>
 #include <blaze/util/Assert.h>
-#include <blaze/util/DisableIf.h>
 #include <blaze/util/EnableIf.h>
 #include <blaze/util/FunctionTrace.h>
-#include <blaze/util/mpl/And.h>
-#include <blaze/util/mpl/Not.h>
+#include <blaze/util/MaybeUnused.h>
 #include <blaze/util/Types.h>
 #include <blaze/util/typetraits/IsSame.h>
-#include <blaze/util/Unused.h>
 
 
 namespace blaze {
@@ -79,32 +81,284 @@ namespace blaze {
 */
 template< typename MT  // Type of the matrix
         , bool SO >    // Storage order
-struct Matrix
+class Matrix
 {
+ public:
    //**Type definitions****************************************************************************
-   typedef MT  MatrixType;  //!< Type of the matrix.
+   using MatrixType = MT;  //!< Type of the matrix.
    //**********************************************************************************************
 
-   //**Non-const conversion operator***************************************************************
-   /*!\brief Conversion operator for non-constant matrices.
-   //
-   // \return Reference of the actual type of the matrix.
-   */
-   BLAZE_ALWAYS_INLINE MatrixType& operator~() noexcept {
-      return *static_cast<MatrixType*>( this );
-   }
+   //**Compilation flags***************************************************************************
+   static constexpr bool storageOrder = SO;  //!< Storage order of the matrix.
    //**********************************************************************************************
 
-   //**Const conversion operator*******************************************************************
-   /*!\brief Conversion operator for constant matrices.
-   //
-   // \return Constant reference of the actual type of the matrix.
-   */
-   BLAZE_ALWAYS_INLINE const MatrixType& operator~() const noexcept {
-      return *static_cast<const MatrixType*>( this );
-   }
+   //**Conversion operators************************************************************************
+   /*!\name Conversion operators */
+   //@{
+   [[deprecated]] BLAZE_ALWAYS_INLINE constexpr MT&       operator~()       noexcept;
+   [[deprecated]] BLAZE_ALWAYS_INLINE constexpr const MT& operator~() const noexcept;
+
+   constexpr MT&       operator*()       noexcept;
+   constexpr const MT& operator*() const noexcept;
+   //@}
+   //**********************************************************************************************
+
+ protected:
+   //**Special member functions********************************************************************
+   /*!\name Special member functions */
+   //@{
+   Matrix() = default;
+   Matrix( const Matrix& ) = default;
+   Matrix( Matrix&& ) = default;
+   ~Matrix() = default;
+   Matrix& operator=( const Matrix& ) = default;
+   Matrix& operator=( Matrix&& ) = default;
+   //@}
    //**********************************************************************************************
 };
+//*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  CONVERSION OPERATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*!\brief CRTP-based conversion operation for non-constant matrices.
+//
+// \param matrix The matrix to be downcast.
+// \return Mutable reference of the actual type of the matrix.
+//
+// This operator performs the CRTP-based type-safe downcast to the actual type \a MT of the
+// matrix. It will return a mutable reference to the actual type \a MT.
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order
+[[deprecated]] BLAZE_ALWAYS_INLINE constexpr MT& Matrix<MT,SO>::operator~() noexcept
+{
+   return static_cast<MT&>( *this );
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief CRTP-based conversion operation for constant matrices.
+//
+// \param matrix The matrix to be downcast.
+// \return Constant reference of the actual type of the matrix.
+//
+// This operator performs the CRTP-based type-safe downcast to the actual type \a MT of the
+// matrix. It will return a constant reference to the actual type \a MT.
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order
+[[deprecated]] BLAZE_ALWAYS_INLINE constexpr const MT& Matrix<MT,SO>::operator~() const noexcept
+{
+   return static_cast<const MT&>( *this );
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief CRTP-based conversion operation for non-constant matrices.
+//
+// \return Mutable reference of the actual type of the matrix.
+//
+// This operator performs the CRTP-based type-safe downcast to the actual type \a MT of the
+// matrix. It will return a mutable reference to the actual type \a MT.
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order
+BLAZE_ALWAYS_INLINE constexpr MT& Matrix<MT,SO>::operator*() noexcept
+{
+   return static_cast<MT&>( *this );
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief CRTP-based conversion operation for constant matrices.
+//
+// \return Constant reference of the actual type of the matrix.
+//
+// This operator performs the CRTP-based type-safe downcast to the actual type \a MT of the
+// matrix. It will return a constant reference to the actual type \a MT.
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order
+BLAZE_ALWAYS_INLINE constexpr const MT& Matrix<MT,SO>::operator*() const noexcept
+{
+   return static_cast<const MT&>( *this );
+}
+//*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  GLOBAL OPERATORS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Multiplication assignment operator for the multiplication of a column vector and a
+//        matrix (\f$ v*=A \f$).
+// \ingroup matrix
+//
+// \param mat The left-hand side column vector for the multiplication.
+// \param vec The right-hand side matrix for the multiplication.
+// \return Reference to the left-hand side vector.
+// \exception std::invalid_argument Matrix and vector sizes do not match.
+//
+// In case the current size of the vector \a vec doesn't match the current number of columns
+// of the matrix \a mat, a \a std::invalid_argument is thrown.
+*/
+template< typename VT  // Type of the left-hand side column vector
+        , typename MT  // Type of the right-hand side matrix
+        , bool SO >    // Storage order of the right-hand side matrix
+inline VT& operator*=( Vector<VT,false>& lhs, const Matrix<MT,SO>& rhs )
+{
+   ResultType_t<VT> tmp( (*rhs) * (*lhs) );
+   (*lhs) = std::move( tmp );
+   return (*lhs);
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Multiplication assignment operator for the multiplication of a temporary column vector
+//        and a matrix (\f$ v*=A \f$).
+// \ingroup matrix
+//
+// \param mat The left-hand side temporary column vector for the multiplication.
+// \param vec The right-hand side matrix for the multiplication.
+// \return Reference to the left-hand side vector.
+// \exception std::invalid_argument Matrix and vector sizes do not match.
+//
+// In case the current size of the vector \a vec doesn't match the current number of columns
+// of the matrix \a mat, a \a std::invalid_argument is thrown.
+*/
+template< typename VT  // Type of the left-hand side column vector
+        , typename MT  // Type of the right-hand side matrix
+        , bool SO >    // Storage order of the right-hand side matrix
+inline VT& operator*=( Vector<VT,false>&& lhs, const Matrix<MT,SO>& rhs )
+{
+   return (*lhs) *= (*rhs);
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Multiplication assignment operator for the multiplication of a row vector and a
+//        matrix (\f$ v*=A \f$).
+// \ingroup matrix
+//
+// \param mat The left-hand side row vector for the multiplication.
+// \param vec The right-hand side matrix for the multiplication.
+// \return Reference to the left-hand side vector.
+// \exception std::invalid_argument Matrix and vector sizes do not match.
+//
+// In case the current size of the vector \a vec doesn't match the current number of columns
+// of the matrix \a mat, a \a std::invalid_argument is thrown.
+*/
+template< typename VT  // Type of the left-hand side row vector
+        , typename MT  // Type of the right-hand side matrix
+        , bool SO >    // Storage order of the right-hand side matrix
+inline VT& operator*=( Vector<VT,true>& lhs, const Matrix<MT,SO>& rhs )
+{
+   ResultType_t<VT> tmp( (*lhs) * (*rhs) );
+   (*lhs) = std::move( tmp );
+   return (*lhs);
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Multiplication assignment operator for the multiplication of a temporary row vector
+//        and a matrix (\f$ v*=A \f$).
+// \ingroup matrix
+//
+// \param mat The left-hand side temporary row vector for the multiplication.
+// \param vec The right-hand side matrix for the multiplication.
+// \return Reference to the left-hand side vector.
+// \exception std::invalid_argument Matrix and vector sizes do not match.
+//
+// In case the current size of the vector \a vec doesn't match the current number of columns
+// of the matrix \a mat, a \a std::invalid_argument is thrown.
+*/
+template< typename VT  // Type of the left-hand side row vector
+        , typename MT  // Type of the right-hand side matrix
+        , bool SO >    // Storage order of the right-hand side matrix
+inline VT& operator*=( Vector<VT,true>&& lhs, const Matrix<MT,SO>& rhs )
+{
+   return (*lhs) *= (*rhs);
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Multiplication assignment operator for the multiplication of two matrices (\f$ A*=B \f$).
+// \ingroup matrix
+//
+// \param lhs The left-hand side matrix for the multiplication.
+// \param rhs The right-hand side matrix for the multiplication.
+// \return Reference to the left-hand side matrix.
+// \exception std::invalid_argument Matrix sizes do not match.
+//
+// In case the current number of columns of \a lhs and the current number of rows of \a rhs
+// don't match, a \a std::invalid_argument is thrown.
+*/
+template< typename MT1  // Type of the left-hand side matrix
+        , bool SO1      // Storage order of the left-hand side matrix
+        , typename MT2  // Type of the right-hand side matrix
+        , bool SO2 >    // Storage order of the right-hand side matrix
+inline MT1& operator*=( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
+{
+   ResultType_t<MT1> tmp( (*lhs) * (*rhs) );
+   (*lhs) = std::move( tmp );
+   return (*lhs);
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Multiplication assignment operator for the multiplication of a temporary matrix with
+//        another matrix (\f$ A*=B \f$).
+// \ingroup matrix
+//
+// \param lhs The left-hand side temporary matrix for the multiplication.
+// \param rhs The right-hand side matrix for the multiplication.
+// \return Reference to the left-hand side matrix.
+// \exception std::invalid_argument Matrix sizes do not match.
+//
+// In case the current number of columns of \a lhs and the current number of rows of \a rhs
+// don't match, a \a std::invalid_argument is thrown.
+*/
+template< typename MT1  // Type of the left-hand side matrix
+        , bool SO1      // Storage order of the left-hand side matrix
+        , typename MT2  // Type of the right-hand side matrix
+        , bool SO2 >    // Storage order of the right-hand side matrix
+inline MT1& operator*=( Matrix<MT1,SO1>&& lhs, const Matrix<MT2,SO2>& rhs )
+{
+   return (*lhs) *= (*rhs);
+}
+/*! \endcond */
 //*************************************************************************************************
 
 
@@ -120,59 +374,129 @@ struct Matrix
 /*!\name Matrix global functions */
 //@{
 template< typename MT, bool SO >
-BLAZE_ALWAYS_INLINE typename MT::Iterator begin( Matrix<MT,SO>& matrix, size_t i );
+MT& crtp_cast( Matrix<MT,SO>& matrix );
 
 template< typename MT, bool SO >
-BLAZE_ALWAYS_INLINE typename MT::ConstIterator begin( const Matrix<MT,SO>& matrix, size_t i );
+const MT& crtp_cast( const Matrix<MT,SO>& matrix );
 
 template< typename MT, bool SO >
-BLAZE_ALWAYS_INLINE typename MT::ConstIterator cbegin( const Matrix<MT,SO>& matrix, size_t i );
+typename MT::Iterator begin( Matrix<MT,SO>& matrix, size_t i );
 
 template< typename MT, bool SO >
-BLAZE_ALWAYS_INLINE typename MT::Iterator end( Matrix<MT,SO>& matrix, size_t i );
+typename MT::ConstIterator begin( const Matrix<MT,SO>& matrix, size_t i );
 
 template< typename MT, bool SO >
-BLAZE_ALWAYS_INLINE typename MT::ConstIterator end( const Matrix<MT,SO>& matrix, size_t i );
+typename MT::ConstIterator cbegin( const Matrix<MT,SO>& matrix, size_t i );
 
 template< typename MT, bool SO >
-BLAZE_ALWAYS_INLINE typename MT::ConstIterator cend( const Matrix<MT,SO>& matrix, size_t i );
+typename MT::Iterator end( Matrix<MT,SO>& matrix, size_t i );
 
 template< typename MT, bool SO >
-BLAZE_ALWAYS_INLINE size_t rows( const Matrix<MT,SO>& matrix ) noexcept;
+typename MT::ConstIterator end( const Matrix<MT,SO>& matrix, size_t i );
 
 template< typename MT, bool SO >
-BLAZE_ALWAYS_INLINE size_t columns( const Matrix<MT,SO>& matrix ) noexcept;
+typename MT::ConstIterator cend( const Matrix<MT,SO>& matrix, size_t i );
 
 template< typename MT, bool SO >
-BLAZE_ALWAYS_INLINE size_t capacity( const Matrix<MT,SO>& matrix ) noexcept;
+constexpr size_t rows( const Matrix<MT,SO>& matrix ) noexcept;
 
 template< typename MT, bool SO >
-BLAZE_ALWAYS_INLINE size_t capacity( const Matrix<MT,SO>& matrix, size_t i ) noexcept;
+constexpr size_t columns( const Matrix<MT,SO>& matrix ) noexcept;
 
 template< typename MT, bool SO >
-BLAZE_ALWAYS_INLINE size_t nonZeros( const Matrix<MT,SO>& matrix );
+constexpr size_t size( const Matrix<MT,SO>& matrix ) noexcept;
 
 template< typename MT, bool SO >
-BLAZE_ALWAYS_INLINE size_t nonZeros( const Matrix<MT,SO>& matrix, size_t i );
+size_t capacity( const Matrix<MT,SO>& matrix ) noexcept;
 
 template< typename MT, bool SO >
-BLAZE_ALWAYS_INLINE void resize( Matrix<MT,SO>& matrix, size_t rows, size_t columns, bool preserve=true );
+size_t capacity( const Matrix<MT,SO>& matrix, size_t i ) noexcept;
 
 template< typename MT, bool SO >
-BLAZE_ALWAYS_INLINE void transpose( Matrix<MT,SO>& matrix );
+size_t nonZeros( const Matrix<MT,SO>& matrix );
 
 template< typename MT, bool SO >
-BLAZE_ALWAYS_INLINE void ctranspose( Matrix<MT,SO>& matrix );
+size_t nonZeros( const Matrix<MT,SO>& matrix, size_t i );
 
 template< typename MT, bool SO >
-inline const typename MT::ResultType evaluate( const Matrix<MT,SO>& matrix );
+constexpr void reset( Matrix<MT,SO>& matrix );
 
 template< typename MT, bool SO >
-BLAZE_ALWAYS_INLINE bool isSquare( const Matrix<MT,SO>& matrix ) noexcept;
+constexpr void reset( Matrix<MT,SO>&& matrix );
+
+template< typename MT, bool SO >
+constexpr void reset( Matrix<MT,SO>& matrix, size_t i );
+
+template< typename MT, bool SO >
+constexpr void reset( Matrix<MT,SO>&& matrix, size_t i );
+
+template< typename MT, bool SO >
+constexpr void clear( Matrix<MT,SO>& matrix );
+
+template< typename MT, bool SO >
+constexpr void clear( Matrix<MT,SO>&& matrix );
+
+template< typename MT, bool SO >
+void resize( Matrix<MT,SO>& matrix, size_t rows, size_t columns, bool preserve=true );
+
+template< typename MT, bool SO >
+void shrinkToFit( Matrix<MT,SO>& matrix );
+
+template< typename MT, bool SO >
+void transpose( Matrix<MT,SO>& matrix );
+
+template< typename MT, bool SO >
+void ctranspose( Matrix<MT,SO>& matrix );
+
+template< typename MT, bool SO >
+typename MT::ResultType evaluate( const Matrix<MT,SO>& matrix );
+
+template< bool B, typename MT, bool SO >
+typename MT::ResultType evaluateIf( const Matrix<MT,SO>& matrix );
+
+template< typename MT, bool SO >
+constexpr bool isEmpty( const Matrix<MT,SO>& matrix ) noexcept;
+
+template< typename MT, bool SO >
+bool isSquare( const Matrix<MT,SO>& matrix ) noexcept;
 
 template< typename MT1, bool SO1, typename MT2, bool SO2 >
-BLAZE_ALWAYS_INLINE bool isSame( const Matrix<MT1,SO1>& a, const Matrix<MT2,SO2>& b ) noexcept;
+bool isSame( const Matrix<MT1,SO1>& a, const Matrix<MT2,SO2>& b ) noexcept;
 //@}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief CRTP-based conversion operation for non-constant matrices.
+//
+// \return Mutable reference of the actual type of the matrix.
+//
+// This operator performs the CRTP-based type-safe downcast to the actual type \a MT of the
+// matrix. It will return a mutable reference to the actual type \a MT.
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order of the matrix
+BLAZE_ALWAYS_INLINE MT& crtp_cast( Matrix<MT,SO>& matrix )
+{
+   return *matrix;
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief CRTP-based conversion operation for constant matrices.
+//
+// \return Const reference of the actual type of the matrix.
+//
+// This operator performs the CRTP-based type-safe downcast to the actual type \a MT of the
+// matrix. It will return a constant reference to the actual type \a MT.
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order of the matrix
+BLAZE_ALWAYS_INLINE const MT& crtp_cast( const Matrix<MT,SO>& matrix )
+{
+   return *matrix;
+}
 //*************************************************************************************************
 
 
@@ -193,7 +517,7 @@ template< typename MT  // Type of the matrix
         , bool SO >    // Storage order of the matrix
 BLAZE_ALWAYS_INLINE typename MT::Iterator begin( Matrix<MT,SO>& matrix, size_t i )
 {
-   return (~matrix).begin(i);
+   return (*matrix).begin(i);
 }
 //*************************************************************************************************
 
@@ -215,7 +539,7 @@ template< typename MT  // Type of the matrix
         , bool SO >    // Storage order of the matrix
 BLAZE_ALWAYS_INLINE typename MT::ConstIterator begin( const Matrix<MT,SO>& matrix, size_t i )
 {
-   return (~matrix).begin(i);
+   return (*matrix).begin(i);
 }
 //*************************************************************************************************
 
@@ -237,7 +561,7 @@ template< typename MT  // Type of the matrix
         , bool SO >    // Storage order of the matrix
 BLAZE_ALWAYS_INLINE typename MT::ConstIterator cbegin( const Matrix<MT,SO>& matrix, size_t i )
 {
-   return (~matrix).cbegin(i);
+   return (*matrix).cbegin(i);
 }
 //*************************************************************************************************
 
@@ -259,7 +583,7 @@ template< typename MT  // Type of the matrix
         , bool SO >    // Storage order of the matrix
 BLAZE_ALWAYS_INLINE typename MT::Iterator end( Matrix<MT,SO>& matrix, size_t i )
 {
-   return (~matrix).end(i);
+   return (*matrix).end(i);
 }
 //*************************************************************************************************
 
@@ -281,7 +605,7 @@ template< typename MT  // Type of the matrix
         , bool SO >    // Storage order of the matrix
 BLAZE_ALWAYS_INLINE typename MT::ConstIterator end( const Matrix<MT,SO>& matrix, size_t i )
 {
-   return (~matrix).end(i);
+   return (*matrix).end(i);
 }
 //*************************************************************************************************
 
@@ -303,7 +627,7 @@ template< typename MT  // Type of the matrix
         , bool SO >    // Storage order of the matrix
 BLAZE_ALWAYS_INLINE typename MT::ConstIterator cend( const Matrix<MT,SO>& matrix, size_t i )
 {
-   return (~matrix).cend(i);
+   return (*matrix).cend(i);
 }
 //*************************************************************************************************
 
@@ -317,9 +641,9 @@ BLAZE_ALWAYS_INLINE typename MT::ConstIterator cend( const Matrix<MT,SO>& matrix
 */
 template< typename MT  // Type of the matrix
         , bool SO >    // Storage order of the matrix
-BLAZE_ALWAYS_INLINE size_t rows( const Matrix<MT,SO>& matrix ) noexcept
+BLAZE_ALWAYS_INLINE constexpr size_t rows( const Matrix<MT,SO>& matrix ) noexcept
 {
-   return (~matrix).rows();
+   return (*matrix).rows();
 }
 //*************************************************************************************************
 
@@ -333,9 +657,25 @@ BLAZE_ALWAYS_INLINE size_t rows( const Matrix<MT,SO>& matrix ) noexcept
 */
 template< typename MT  // Type of the matrix
         , bool SO >    // Storage order of the matrix
-BLAZE_ALWAYS_INLINE size_t columns( const Matrix<MT,SO>& matrix ) noexcept
+BLAZE_ALWAYS_INLINE constexpr size_t columns( const Matrix<MT,SO>& matrix ) noexcept
 {
-   return (~matrix).columns();
+   return (*matrix).columns();
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Returns the total number of elements of the matrix.
+// \ingroup matrix
+//
+// \param matrix The given matrix.
+// \return The total number of elements of the matrix.
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order of the matrix
+BLAZE_ALWAYS_INLINE constexpr size_t size( const Matrix<MT,SO>& matrix ) noexcept
+{
+   return (*matrix).rows() * (*matrix).columns();
 }
 //*************************************************************************************************
 
@@ -351,7 +691,7 @@ template< typename MT  // Type of the matrix
         , bool SO >    // Storage order of the matrix
 BLAZE_ALWAYS_INLINE size_t capacity( const Matrix<MT,SO>& matrix ) noexcept
 {
-   return (~matrix).capacity();
+   return (*matrix).capacity();
 }
 //*************************************************************************************************
 
@@ -373,7 +713,7 @@ template< typename MT  // Type of the matrix
         , bool SO >    // Storage order of the matrix
 BLAZE_ALWAYS_INLINE size_t capacity( const Matrix<MT,SO>& matrix, size_t i ) noexcept
 {
-   return (~matrix).capacity( i );
+   return (*matrix).capacity( i );
 }
 //*************************************************************************************************
 
@@ -389,7 +729,7 @@ template< typename MT  // Type of the matrix
         , bool SO >    // Storage order of the matrix
 BLAZE_ALWAYS_INLINE size_t nonZeros( const Matrix<MT,SO>& matrix )
 {
-   return (~matrix).nonZeros();
+   return (*matrix).nonZeros();
 }
 //*************************************************************************************************
 
@@ -411,7 +751,231 @@ template< typename MT  // Type of the matrix
         , bool SO >    // Storage order of the matrix
 BLAZE_ALWAYS_INLINE size_t nonZeros( const Matrix<MT,SO>& matrix, size_t i )
 {
-   return (~matrix).nonZeros( i );
+   return (*matrix).nonZeros( i );
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Backend implementation of the \c reset() function for non-zero and non-identity matrices.
+// \ingroup matrix
+//
+// \param matrix The matrix to be resetted.
+// \return void
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order of the matrix
+constexpr auto reset_backend( Matrix<MT,SO>& matrix )
+   -> DisableIf_t< IsZero_v<MT> || IsIdentity_v<MT> >
+{
+   (*matrix).reset();
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Backend implementation of the \c reset() function for zero or identity matrices.
+// \ingroup matrix
+//
+// \param matrix The matrix to be resetted.
+// \return void
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order of the matrix
+constexpr auto reset_backend( Matrix<MT,SO>& matrix )
+   -> EnableIf_t< IsZero_v<MT> || IsIdentity_v<MT> >
+{
+   MAYBE_UNUSED( matrix );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Resetting the given matrix.
+// \ingroup matrix
+//
+// \param matrix The matrix to be resetted.
+// \return void
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order of the matrix
+constexpr void reset( Matrix<MT,SO>& matrix )
+{
+   reset_backend( *matrix );
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Resetting the given temporary matrix.
+// \ingroup matrix
+//
+// \param matrix The temporary matrix to be resetted.
+// \return void
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order of the matrix
+constexpr void reset( Matrix<MT,SO>&& matrix )
+{
+   reset_backend( *matrix );
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Backend implementation of the \c reset() function for non-zero and non-identity matrices.
+// \ingroup matrix
+//
+// \param matrix The matrix to be resetted.
+// \param i The index of the row/column to be resetted.
+// \return void
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order of the matrix
+constexpr auto reset_backend( Matrix<MT,SO>& matrix, size_t i )
+   -> DisableIf_t< IsZero_v<MT> || IsIdentity_v<MT> >
+{
+   (*matrix).reset( i );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Backend implementation of the \c reset() function for zero or identity matrices.
+// \ingroup matrix
+//
+// \param matrix The matrix to be resetted.
+// \param i The index of the row/column to be resetted.
+// \return void
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order of the matrix
+constexpr auto reset_backend( Matrix<MT,SO>& matrix, size_t i )
+   -> EnableIf_t< IsZero_v<MT> || IsIdentity_v<MT> >
+{
+   MAYBE_UNUSED( matrix, i );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Reset the specified row/column of the given matrix.
+// \ingroup matrix
+//
+// \param matrix The matrix to be resetted.
+// \param i The index of the row/column to be resetted.
+// \return void
+//
+// This function resets the values in the specified row/column of the given matrix to their
+// default value. In case the given matrix is a \a rowMajor matrix the function resets the
+// values in row \a i, if it is a \a columnMajor matrix the function resets the values in
+// column \a i. Note that the capacity of the row/column remains unchanged.
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order of the matrix
+constexpr void reset( Matrix<MT,SO>& matrix, size_t i )
+{
+   reset_backend( *matrix, i );
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Reset the specified row/column of the given temporary matrix.
+// \ingroup matrix
+//
+// \param matrix The temporary matrix to be resetted.
+// \param i The index of the row/column to be resetted.
+// \return void
+//
+// This function resets the values in the specified row/column of the given temporary matrix
+// to their default value. In case the given matrix is a \a rowMajor matrix the function resets
+// the values in row \a i, if it is a \a columnMajor matrix the function resets the values in
+// column \a i. Note that the capacity of the row/column remains unchanged.
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order of the matrix
+constexpr void reset( Matrix<MT,SO>&& matrix, size_t i )
+{
+   reset_backend( *matrix, i );
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Backend implementation of the \c clear() function for non-clearable matrices.
+// \ingroup matrix
+//
+// \param matrix The matrix to be cleared.
+// \return void
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order of the matrix
+constexpr auto clear_backend( Matrix<MT,SO>& matrix )
+   -> DisableIf_t< IsClearable_v<MT> >
+{
+   (*matrix).reset();
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Backend implementation of the \c clear() function for clearable matrices.
+// \ingroup matrix
+//
+// \param matrix The matrix to be cleared.
+// \return void
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order of the matrix
+constexpr auto clear_backend( Matrix<MT,SO>& matrix )
+   -> EnableIf_t< IsClearable_v<MT> >
+{
+   (*matrix).clear();
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Clearing the given matrix.
+// \ingroup matrix
+//
+// \param matrix The matrix to be cleared.
+// \return void
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order of the matrix
+constexpr void clear( Matrix<MT,SO>& matrix )
+{
+   clear_backend( *matrix );
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Clearing the given temporary matrix.
+// \ingroup matrix
+//
+// \param matrix The temporary matrix to be cleared.
+// \return void
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order of the matrix
+constexpr void clear( Matrix<MT,SO>&& matrix )
+{
+   clear_backend( *matrix );
 }
 //*************************************************************************************************
 
@@ -435,12 +999,12 @@ BLAZE_ALWAYS_INLINE size_t nonZeros( const Matrix<MT,SO>& matrix, size_t i )
 */
 template< typename MT  // Type of the matrix
         , bool SO >    // Storage order of the matrix
-BLAZE_ALWAYS_INLINE DisableIf_< IsResizable<MT> >
-   resize_backend( Matrix<MT,SO>& matrix, size_t m, size_t n, bool preserve )
+BLAZE_ALWAYS_INLINE auto resize_backend( Matrix<MT,SO>& matrix, size_t m, size_t n, bool preserve )
+   -> DisableIf_t< IsResizable_v<MT> >
 {
-   UNUSED_PARAMETER( preserve );
+   MAYBE_UNUSED( preserve );
 
-   if( (~matrix).rows() != m || (~matrix).columns() != n ) {
+   if( (*matrix).rows() != m || (*matrix).columns() != n ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Matrix cannot be resized" );
    }
 }
@@ -463,10 +1027,10 @@ BLAZE_ALWAYS_INLINE DisableIf_< IsResizable<MT> >
 */
 template< typename MT  // Type of the matrix
         , bool SO >    // Storage order of the matrix
-BLAZE_ALWAYS_INLINE EnableIf_< And< IsResizable<MT>, Not< IsSquare<MT> > > >
-   resize_backend( Matrix<MT,SO>& matrix, size_t m, size_t n, bool preserve )
+BLAZE_ALWAYS_INLINE auto resize_backend( Matrix<MT,SO>& matrix, size_t m, size_t n, bool preserve )
+   -> EnableIf_t< IsResizable_v<MT> && !IsSquare_v<MT> >
 {
-   (~matrix).resize( m, n, preserve );
+   (*matrix).resize( m, n, preserve );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -488,14 +1052,14 @@ BLAZE_ALWAYS_INLINE EnableIf_< And< IsResizable<MT>, Not< IsSquare<MT> > > >
 */
 template< typename MT  // Type of the matrix
         , bool SO >    // Storage order of the matrix
-BLAZE_ALWAYS_INLINE EnableIf_< And< IsResizable<MT>, IsSquare<MT> > >
-   resize_backend( Matrix<MT,SO>& matrix, size_t m, size_t n, bool preserve )
+BLAZE_ALWAYS_INLINE auto resize_backend( Matrix<MT,SO>& matrix, size_t m, size_t n, bool preserve )
+   -> EnableIf_t< IsResizable_v<MT> && IsSquare_v<MT> >
 {
    if( m != n ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid resize arguments for square matrix" );
    }
 
-   (~matrix).resize( m, preserve );
+   (*matrix).resize( m, preserve );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -549,6 +1113,67 @@ BLAZE_ALWAYS_INLINE void resize( Matrix<MT,SO>& matrix, size_t m, size_t n, bool
 
 
 //*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Backend implementation of the \c shrinkToFit() function for non-shrinkable matrices.
+// \ingroup matrix
+//
+// \param matrix The given matrix to be shrunk.
+// \return void
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order of the matrix
+BLAZE_ALWAYS_INLINE auto shrinkToFit_backend( Matrix<MT,SO>& matrix )
+   -> DisableIf_t< IsShrinkable_v<MT> >
+{
+   MAYBE_UNUSED( matrix );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Backend implementation of the \c shrinkToFit() function for shrinkable matrices.
+// \ingroup matrix
+//
+// \param matrix The given matrix to be shrunk.
+// \return void
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order of the matrix
+BLAZE_ALWAYS_INLINE auto shrinkToFit_backend( Matrix<MT,SO>& matrix )
+   -> EnableIf_t< IsShrinkable_v<MT> >
+{
+   (*matrix).shrinkToFit();
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Requesting the removal of unused capacity.
+// \ingroup matrix
+//
+// \param matrix The given matrix to be shrunk.
+// \return void
+//
+// This function tries to minimize the capacity of the matrix by removing unused capacity.
+// Please note that in case of a shrinkable matrix, due to padding the capacity might not be
+// reduced exactly to the number of rows times the number of columns. Please also note that
+// in case a reallocation occurs, all iterators (including end() iterators), all pointers and
+// references to elements of this matrix are invalidated. In case of an unshrinkable matrix
+// the function has no effect.
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order of the matrix
+BLAZE_ALWAYS_INLINE void shrinkToFit( Matrix<MT,SO>& matrix )
+{
+   shrinkToFit_backend( matrix );
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
 /*!\brief In-place transpose of the given matrix.
 // \ingroup matrix
 //
@@ -569,7 +1194,7 @@ template< typename MT  // Type of the matrix
         , bool SO >    // Storage order of the matrix
 BLAZE_ALWAYS_INLINE void transpose( Matrix<MT,SO>& matrix )
 {
-   (~matrix).transpose();
+   (*matrix).transpose();
 }
 //*************************************************************************************************
 
@@ -595,7 +1220,7 @@ template< typename MT  // Type of the matrix
         , bool SO >    // Storage order of the matrix
 BLAZE_ALWAYS_INLINE void ctranspose( Matrix<MT,SO>& matrix )
 {
-   (~matrix).ctranspose();
+   (*matrix).ctranspose();
 }
 //*************************************************************************************************
 
@@ -654,10 +1279,91 @@ BLAZE_ALWAYS_INLINE void ctranspose( Matrix<MT,SO>& matrix )
 */
 template< typename MT  // Type of the matrix
         , bool SO >    // Storage order of the matrix
-inline const typename MT::ResultType evaluate( const Matrix<MT,SO>& matrix )
+inline typename MT::ResultType evaluate( const Matrix<MT,SO>& matrix )
 {
-   const typename MT::ResultType tmp( ~matrix );
+   typename MT::ResultType tmp( *matrix );
    return tmp;
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Conditional evaluation the given matrix expression.
+// \ingroup matrix
+//
+// \param matrix The matrix to be evaluated.
+// \return The result of the evaluated matrix expression.
+//
+// This function does not evaluate the given matrix expression and returns a reference to the
+// matrix expression.
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order of the matrix
+inline decltype(auto) evaluateIf( FalseType, const Matrix<MT,SO>& matrix )
+{
+   return *matrix;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Conditional evaluation the given matrix expression.
+// \ingroup matrix
+//
+// \param matrix The matrix to be evaluated.
+// \return The result of the evaluated matrix expression.
+//
+// This function evaluates the given matrix expression by means of the evaluate() function.
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order of the matrix
+inline decltype(auto) evaluateIf( TrueType, const Matrix<MT,SO>& matrix )
+{
+   return evaluate( *matrix );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Conditional evaluation of the given matrix expression.
+// \ingroup matrix
+//
+// \param matrix The matrix to be evaluated.
+// \return The result of the evaluated matrix expression.
+//
+// In case the given compile time condition evaluates to \a true, this function evaluates the
+// the given matrix expression by means of the evaluate() function. Otherwise the function returns
+// a reference to the given matrix expression.
+*/
+template< bool B       // Compile time condition
+        , typename MT  // Type of the matrix
+        , bool SO >    // Storage order of the matrix
+inline decltype(auto) evaluateIf( const Matrix<MT,SO>& matrix )
+{
+   return evaluateIf( BoolConstant<B>{}, *matrix );
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Checks if the given matrix is empty.
+// \ingroup matrix
+//
+// \param matrix The matrix to be checked.
+// \return \a true if the matrix is empty, \a false if not.
+//
+// This function checks if the total number of elements of the given matrix is zero. If the
+// total number of elements is zero the function returns \a true, otherwise it returns \a false.
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order of the matrix
+BLAZE_ALWAYS_INLINE constexpr bool isEmpty( const Matrix<MT,SO>& matrix ) noexcept
+{
+   return size( *matrix ) == 0UL;
 }
 //*************************************************************************************************
 
@@ -676,7 +1382,7 @@ template< typename MT  // Type of the matrix
         , bool SO >    // Storage order
 BLAZE_ALWAYS_INLINE bool isSquare( const Matrix<MT,SO>& matrix ) noexcept
 {
-   return ( IsSquare<MT>::value || (~matrix).rows() == (~matrix).columns() );
+   return ( IsSquare_v<MT> || (*matrix).rows() == (*matrix).columns() );
 }
 //*************************************************************************************************
 
@@ -696,15 +1402,12 @@ BLAZE_ALWAYS_INLINE bool isSquare( const Matrix<MT,SO>& matrix ) noexcept
 // \a false.
 
    \code
-   typedef blaze::DynamicMatrix<int>     MatrixType;
-   typedef blaze::Submatrix<MatrixType>  SubmatrixType;
+   blaze::DynamicMatrix<int> mat1( 4UL, 5UL );  // Setup of a 4x5 dynamic matrix
+   blaze::DynamicMatrix<int> mat2( 4UL, 5UL );  // Setup of a second 4x5 dynamic matrix
 
-   MatrixType mat1( 4UL, 5UL );  // Setup of a 4x5 dynamic matrix
-   MatrixType mat2( 4UL, 5UL );  // Setup of a second 4x5 dynamic matrix
-
-   SubmatrixType sub1 = submatrix( mat1, 0UL, 0UL, 4UL, 5UL );  // Submatrix fully covering mat1
-   SubmatrixType sub2 = submatrix( mat1, 1UL, 1UL, 2UL, 3UL );  // Submatrix partially covering mat1
-   SubmatrixType sub3 = submatrix( mat1, 1UL, 1UL, 2UL, 3UL );  // Submatrix partially covering mat1
+   auto sub1 = submatrix( mat1, 0UL, 0UL, 4UL, 5UL );  // Submatrix fully covering mat1
+   auto sub2 = submatrix( mat1, 1UL, 1UL, 2UL, 3UL );  // Submatrix partially covering mat1
+   auto sub3 = submatrix( mat1, 1UL, 1UL, 2UL, 3UL );  // Submatrix partially covering mat1
 
    isSame( mat1, mat1 );  // returns true since both objects refer to the same matrix
    isSame( mat1, mat2 );  // returns false since mat1 and mat2 are two different matrices
@@ -720,7 +1423,7 @@ template< typename MT1  // Type of the left-hand side matrix
         , bool SO2 >    // Storage order of the right-hand side matrix
 BLAZE_ALWAYS_INLINE bool isSame( const Matrix<MT1,SO1>& a, const Matrix<MT2,SO2>& b ) noexcept
 {
-   return ( IsSame<MT1,MT2>::value &&
+   return ( IsSame_v<MT1,MT2> &&
             reinterpret_cast<const void*>( &a ) == reinterpret_cast<const void*>( &b ) );
 }
 //*************************************************************************************************
@@ -742,7 +1445,7 @@ BLAZE_ALWAYS_INLINE void assign_backend( Matrix<MT1,SO>& lhs, const Matrix<MT2,S
 {
    BLAZE_FUNCTION_TRACE;
 
-   (~lhs).assign( ~rhs );
+   (*lhs).assign( *rhs );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -760,14 +1463,14 @@ BLAZE_ALWAYS_INLINE void assign_backend( Matrix<MT1,SO>& lhs, const Matrix<MT2,S
 template< typename MT1    // Type of the left-hand side matrix
         , bool SO         // Storage order of the left-hand side matrix
         , typename MT2 >  // Type of the right-hand side matrix
-BLAZE_ALWAYS_INLINE DisableIf_< IsSymmetric<MT2> >
-   assign_backend( Matrix<MT1,SO>& lhs, const Matrix<MT2,!SO>& rhs )
+BLAZE_ALWAYS_INLINE auto assign_backend( Matrix<MT1,SO>& lhs, const Matrix<MT2,!SO>& rhs )
+   -> DisableIf_t< IsSymmetric_v<MT2> >
 {
    BLAZE_FUNCTION_TRACE;
 
    BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT1 );
 
-   (~lhs).assign( ~rhs );
+   (*lhs).assign( *rhs );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -786,16 +1489,14 @@ BLAZE_ALWAYS_INLINE DisableIf_< IsSymmetric<MT2> >
 template< typename MT1    // Type of the left-hand side matrix
         , bool SO         // Storage order of the left-hand side matrix
         , typename MT2 >  // Type of the right-hand side matrix
-BLAZE_ALWAYS_INLINE EnableIf_< IsSymmetric<MT2> >
-   assign_backend( Matrix<MT1,SO>& lhs, const Matrix<MT2,!SO>& rhs )
+BLAZE_ALWAYS_INLINE auto assign_backend( Matrix<MT1,SO>& lhs, const Matrix<MT2,!SO>& rhs )
+   -> EnableIf_t< IsSymmetric_v<MT2> >
 {
    BLAZE_FUNCTION_TRACE;
 
-   BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT1 );
+   BLAZE_INTERNAL_ASSERT( isSquare( *rhs ), "Non-square symmetric matrix detected" );
 
-   BLAZE_INTERNAL_ASSERT( isSquare( ~rhs ), "Non-square symmetric matrix detected" );
-
-   (~lhs).assign( trans( ~rhs ) );
+   (*lhs).assign( trans( *rhs ) );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -824,10 +1525,10 @@ BLAZE_ALWAYS_INLINE void assign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rh
 {
    BLAZE_FUNCTION_TRACE;
 
-   BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == (~rhs).rows()   , "Invalid number of rows"    );
-   BLAZE_INTERNAL_ASSERT( (~lhs).columns() == (~rhs).columns(), "Invalid number of columns" );
+   BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == (*rhs).rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( (*lhs).columns() == (*rhs).columns(), "Invalid number of columns" );
 
-   assign_backend( ~lhs, ~rhs );
+   assign_backend( *lhs, *rhs );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -850,7 +1551,7 @@ BLAZE_ALWAYS_INLINE void addAssign_backend( Matrix<MT1,SO>& lhs, const Matrix<MT
 {
    BLAZE_FUNCTION_TRACE;
 
-   (~lhs).addAssign( ~rhs );
+   (*lhs).addAssign( *rhs );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -869,14 +1570,14 @@ BLAZE_ALWAYS_INLINE void addAssign_backend( Matrix<MT1,SO>& lhs, const Matrix<MT
 template< typename MT1    // Type of the left-hand side matrix
         , bool SO         // Storage order of the left-hand side matrix
         , typename MT2 >  // Type of the right-hand side matrix
-BLAZE_ALWAYS_INLINE DisableIf_< IsSymmetric<MT2> >
-   addAssign_backend( Matrix<MT1,SO>& lhs, const Matrix<MT2,!SO>& rhs )
+BLAZE_ALWAYS_INLINE auto addAssign_backend( Matrix<MT1,SO>& lhs, const Matrix<MT2,!SO>& rhs )
+   -> DisableIf_t< IsSymmetric_v<MT2> >
 {
    BLAZE_FUNCTION_TRACE;
 
    BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT1 );
 
-   (~lhs).addAssign( ~rhs );
+   (*lhs).addAssign( *rhs );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -895,16 +1596,14 @@ BLAZE_ALWAYS_INLINE DisableIf_< IsSymmetric<MT2> >
 template< typename MT1    // Type of the left-hand side matrix
         , bool SO         // Storage order of the left-hand side matrix
         , typename MT2 >  // Type of the right-hand side matrix
-BLAZE_ALWAYS_INLINE EnableIf_< IsSymmetric<MT2> >
-   addAssign_backend( Matrix<MT1,SO>& lhs, const Matrix<MT2,!SO>& rhs )
+BLAZE_ALWAYS_INLINE auto addAssign_backend( Matrix<MT1,SO>& lhs, const Matrix<MT2,!SO>& rhs )
+   -> EnableIf_t< IsSymmetric_v<MT2> >
 {
    BLAZE_FUNCTION_TRACE;
 
-   BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT1 );
+   BLAZE_INTERNAL_ASSERT( isSquare( *rhs ), "Non-square symmetric matrix detected" );
 
-   BLAZE_INTERNAL_ASSERT( isSquare( ~rhs ), "Non-square symmetric matrix detected" );
-
-   (~lhs).addAssign( trans( ~rhs ) );
+   (*lhs).addAssign( trans( *rhs ) );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -933,10 +1632,10 @@ BLAZE_ALWAYS_INLINE void addAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>&
 {
    BLAZE_FUNCTION_TRACE;
 
-   BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == (~rhs).rows()   , "Invalid number of rows"    );
-   BLAZE_INTERNAL_ASSERT( (~lhs).columns() == (~rhs).columns(), "Invalid number of columns" );
+   BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == (*rhs).rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( (*lhs).columns() == (*rhs).columns(), "Invalid number of columns" );
 
-   addAssign_backend( ~lhs, ~rhs );
+   addAssign_backend( *lhs, *rhs );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -959,7 +1658,7 @@ BLAZE_ALWAYS_INLINE void subAssign_backend( Matrix<MT1,SO>& lhs, const Matrix<MT
 {
    BLAZE_FUNCTION_TRACE;
 
-   (~lhs).subAssign( ~rhs );
+   (*lhs).subAssign( *rhs );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -978,14 +1677,14 @@ BLAZE_ALWAYS_INLINE void subAssign_backend( Matrix<MT1,SO>& lhs, const Matrix<MT
 template< typename MT1    // Type of the left-hand side matrix
         , bool SO         // Storage order of the left-hand side matrix
         , typename MT2 >  // Type of the right-hand side matrix
-BLAZE_ALWAYS_INLINE DisableIf_< IsSymmetric<MT2> >
-   subAssign_backend( Matrix<MT1,SO>& lhs, const Matrix<MT2,!SO>& rhs )
+BLAZE_ALWAYS_INLINE auto subAssign_backend( Matrix<MT1,SO>& lhs, const Matrix<MT2,!SO>& rhs )
+   -> DisableIf_t< IsSymmetric_v<MT2> >
 {
    BLAZE_FUNCTION_TRACE;
 
    BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT1 );
 
-   (~lhs).subAssign( ~rhs );
+   (*lhs).subAssign( *rhs );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -1004,16 +1703,14 @@ BLAZE_ALWAYS_INLINE DisableIf_< IsSymmetric<MT2> >
 template< typename MT1    // Type of the left-hand side matrix
         , bool SO         // Storage order of the left-hand side matrix
         , typename MT2 >  // Type of the right-hand side matrix
-BLAZE_ALWAYS_INLINE EnableIf_< IsSymmetric<MT2> >
-   subAssign_backend( Matrix<MT1,SO>& lhs, const Matrix<MT2,!SO>& rhs )
+BLAZE_ALWAYS_INLINE auto subAssign_backend( Matrix<MT1,SO>& lhs, const Matrix<MT2,!SO>& rhs )
+   -> EnableIf_t< IsSymmetric_v<MT2> >
 {
    BLAZE_FUNCTION_TRACE;
 
-   BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT1 );
+   BLAZE_INTERNAL_ASSERT( isSquare( *rhs ), "Non-square symmetric matrix detected" );
 
-   BLAZE_INTERNAL_ASSERT( isSquare( ~rhs ), "Non-square symmetric matrix detected" );
-
-   (~lhs).subAssign( trans( ~rhs ) );
+   (*lhs).subAssign( trans( *rhs ) );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -1042,10 +1739,117 @@ BLAZE_ALWAYS_INLINE void subAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>&
 {
    BLAZE_FUNCTION_TRACE;
 
-   BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == (~rhs).rows()   , "Invalid number of rows"    );
-   BLAZE_INTERNAL_ASSERT( (~lhs).columns() == (~rhs).columns(), "Invalid number of columns" );
+   BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == (*rhs).rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( (*lhs).columns() == (*rhs).columns(), "Invalid number of columns" );
 
-   subAssign_backend( ~lhs, ~rhs );
+   subAssign_backend( *lhs, *rhs );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Backend implementation of the Schur product assignment of two matrices with the same
+//        storage order.
+// \ingroup matrix
+//
+// \param lhs The target left-hand side matrix.
+// \param rhs The right-hand side matrix for the Schur product.
+// \return void
+*/
+template< typename MT1  // Type of the left-hand side matrix
+        , typename MT2  // Type of the right-hand side matrix
+        , bool SO >     // Storage order of both matrices
+BLAZE_ALWAYS_INLINE void schurAssign_backend( Matrix<MT1,SO>& lhs, const Matrix<MT2,SO>& rhs )
+{
+   BLAZE_FUNCTION_TRACE;
+
+   (*lhs).schurAssign( *rhs );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Backend implementation of the Schur product assignment of two matrices with different
+//        storage order.
+// \ingroup matrix
+//
+// \param lhs The target left-hand side matrix.
+// \param rhs The right-hand side matrix for the Schur product.
+// \return void
+*/
+template< typename MT1    // Type of the left-hand side matrix
+        , bool SO         // Storage order of the left-hand side matrix
+        , typename MT2 >  // Type of the right-hand side matrix
+BLAZE_ALWAYS_INLINE auto schurAssign_backend( Matrix<MT1,SO>& lhs, const Matrix<MT2,!SO>& rhs )
+   -> DisableIf_t< IsSymmetric_v<MT2> >
+{
+   BLAZE_FUNCTION_TRACE;
+
+   BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT1 );
+
+   (*lhs).schurAssign( *rhs );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Backend implementation of the Schur product assignment of a symmetric matrix to a
+//        matrix with different storage order.
+// \ingroup matrix
+//
+// \param lhs The target left-hand side matrix.
+// \param rhs The right-hand side matrix for the Schur product.
+// \return void
+*/
+template< typename MT1    // Type of the left-hand side matrix
+        , bool SO         // Storage order of the left-hand side matrix
+        , typename MT2 >  // Type of the right-hand side matrix
+BLAZE_ALWAYS_INLINE auto schurAssign_backend( Matrix<MT1,SO>& lhs, const Matrix<MT2,!SO>& rhs )
+   -> EnableIf_t< IsSymmetric_v<MT2> >
+{
+   BLAZE_FUNCTION_TRACE;
+
+   BLAZE_INTERNAL_ASSERT( isSquare( *rhs ), "Non-square symmetric matrix detected" );
+
+   (*lhs).schurAssign( trans( *rhs ) );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Default implementation of the Schur product assignment of a matrix to matrix.
+// \ingroup matrix
+//
+// \param lhs The target left-hand side matrix.
+// \param rhs The right-hand side matrix for the Schur product.
+// \return void
+//
+// This function implements the default Schur product assignment of a matrix to a matrix.\n
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT1  // Type of the left-hand side matrix
+        , bool SO1      // Storage order of the left-hand side matrix
+        , typename MT2  // Type of the right-hand side matrix
+        , bool SO2 >    // Storage order of the right-hand side matrix
+BLAZE_ALWAYS_INLINE void schurAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
+{
+   BLAZE_FUNCTION_TRACE;
+
+   BLAZE_INTERNAL_ASSERT( (*lhs).rows()    == (*rhs).rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( (*lhs).columns() == (*rhs).columns(), "Invalid number of columns" );
+
+   schurAssign_backend( *lhs, *rhs );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -1074,9 +1878,628 @@ BLAZE_ALWAYS_INLINE void multAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>
 {
    BLAZE_FUNCTION_TRACE;
 
-   BLAZE_INTERNAL_ASSERT( (~lhs).columns() == (~rhs).rows(), "Invalid matrix sizes" );
+   BLAZE_INTERNAL_ASSERT( (*lhs).columns() == (*rhs).rows(), "Invalid matrix sizes" );
 
-   (~lhs).multAssign( ~rhs );
+   (*lhs).multAssign( *rhs );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by setting a single element of a matrix.
+// \ingroup matrix
+//
+// \param mat The target matrix.
+// \param i The row index of the element to be set.
+// \param j The column index of the element to be set.
+// \param value The value to be set to the element.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the matrix
+        , bool SO        // Storage order
+        , typename ET >  // Type of the element
+BLAZE_ALWAYS_INLINE bool trySet( const Matrix<MT,SO>& mat, size_t i, size_t j, const ET& value )
+{
+   BLAZE_INTERNAL_ASSERT( i < (*mat).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( j < (*mat).columns(), "Invalid column access index" );
+
+   MAYBE_UNUSED( mat, i, j, value );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by setting a range of elements of a matrix.
+// \ingroup matrix
+//
+// \param mat The target matrix.
+// \param row The index of the first row of the range to be modified.
+// \param column The index of the first column of the range to be modified.
+// \param m The number of rows of the range to be modified.
+// \param n The number of columns of the range to be modified.
+// \param value The value to be set to the range of elements.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the matrix
+        , bool SO        // Storage order
+        , typename ET >  // Type of the element
+BLAZE_ALWAYS_INLINE bool
+   trySet( const Matrix<MT,SO>& mat, size_t row, size_t column, size_t m, size_t n, const ET& value )
+{
+   BLAZE_INTERNAL_ASSERT( row <= (*mat).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*mat).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( row + m <= (*mat).rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + n <= (*mat).columns(), "Invalid number of columns" );
+
+   MAYBE_UNUSED( mat, row, column, m, n, value );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by adding to a single element of a matrix.
+// \ingroup matrix
+//
+// \param mat The target matrix.
+// \param i The row index of the element to be modified.
+// \param j The column index of the element to be modified.
+// \param value The value to be added to the element.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the matrix
+        , bool SO        // Storage order
+        , typename ET >  // Type of the element
+BLAZE_ALWAYS_INLINE bool tryAdd( const Matrix<MT,SO>& mat, size_t i, size_t j, const ET& value )
+{
+   BLAZE_INTERNAL_ASSERT( i < (*mat).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( j < (*mat).columns(), "Invalid column access index" );
+
+   MAYBE_UNUSED( mat, i, j, value );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by adding to a range of elements of a matrix.
+// \ingroup matrix
+//
+// \param mat The target matrix.
+// \param row The index of the first row of the range to be modified.
+// \param column The index of the first column of the range to be modified.
+// \param m The number of rows of the range to be modified.
+// \param n The number of columns of the range to be modified.
+// \param value The value to be added to the range of elements.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the matrix
+        , bool SO        // Storage order
+        , typename ET >  // Type of the element
+BLAZE_ALWAYS_INLINE bool
+   tryAdd( const Matrix<MT,SO>& mat, size_t row, size_t column, size_t m, size_t n, const ET& value )
+{
+   BLAZE_INTERNAL_ASSERT( row <= (*mat).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*mat).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( row + m <= (*mat).rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + n <= (*mat).columns(), "Invalid number of columns" );
+
+   MAYBE_UNUSED( mat, row, column, m, n, value );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by subtracting from a single element of a matrix.
+// \ingroup matrix
+//
+// \param mat The target matrix.
+// \param i The row index of the element to be modified.
+// \param j The column index of the element to be modified.
+// \param value The value to be subtracted from the element.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the matrix
+        , bool SO        // Storage order
+        , typename ET >  // Type of the element
+BLAZE_ALWAYS_INLINE bool trySub( const Matrix<MT,SO>& mat, size_t i, size_t j, const ET& value )
+{
+   BLAZE_INTERNAL_ASSERT( i < (*mat).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( j < (*mat).columns(), "Invalid column access index" );
+
+   MAYBE_UNUSED( mat, i, j, value );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by subtracting from a range of elements of a matrix.
+// \ingroup matrix
+//
+// \param mat The target matrix.
+// \param row The index of the first row of the range to be modified.
+// \param column The index of the first column of the range to be modified.
+// \param m The number of rows of the range to be modified.
+// \param n The number of columns of the range to be modified.
+// \param value The value to be subtracted from the range of elements.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the matrix
+        , bool SO        // Storage order
+        , typename ET >  // Type of the element
+BLAZE_ALWAYS_INLINE bool
+   trySub( const Matrix<MT,SO>& mat, size_t row, size_t column, size_t m, size_t n, const ET& value )
+{
+   BLAZE_INTERNAL_ASSERT( row <= (*mat).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*mat).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( row + m <= (*mat).rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + n <= (*mat).columns(), "Invalid number of columns" );
+
+   MAYBE_UNUSED( mat, row, column, m, n, value );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by scaling a single element of a matrix.
+// \ingroup matrix
+//
+// \param mat The target matrix.
+// \param i The row index of the element to be modified.
+// \param j The column index of the element to be modified.
+// \param value The factor for the element.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the matrix
+        , bool SO        // Storage order
+        , typename ET >  // Type of the element
+BLAZE_ALWAYS_INLINE bool tryMult( const Matrix<MT,SO>& mat, size_t i, size_t j, const ET& value )
+{
+   BLAZE_INTERNAL_ASSERT( i < (*mat).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( j < (*mat).columns(), "Invalid column access index" );
+
+   MAYBE_UNUSED( mat, i, j, value );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by scaling a range of elements of a matrix.
+// \ingroup matrix
+//
+// \param mat The target matrix.
+// \param row The index of the first row of the range to be modified.
+// \param column The index of the first column of the range to be modified.
+// \param m The number of rows of the range to be modified.
+// \param n The number of columns of the range to be modified.
+// \param value The factor for the elements.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the matrix
+        , bool SO        // Storage order
+        , typename ET >  // Type of the element
+BLAZE_ALWAYS_INLINE bool
+   tryMult( const Matrix<MT,SO>& mat, size_t row, size_t column, size_t m, size_t n, const ET& value )
+{
+   BLAZE_INTERNAL_ASSERT( row <= (*mat).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*mat).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( row + m <= (*mat).rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + n <= (*mat).columns(), "Invalid number of columns" );
+
+   MAYBE_UNUSED( mat, row, column, m, n, value );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by scaling a single element of a matrix.
+// \ingroup matrix
+//
+// \param mat The target matrix.
+// \param i The row index of the element to be modified.
+// \param j The column index of the element to be modified.
+// \param value The divisor for the element.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the matrix
+        , bool SO        // Storage order
+        , typename ET >  // Type of the element
+BLAZE_ALWAYS_INLINE bool tryDiv( const Matrix<MT,SO>& mat, size_t i, size_t j, const ET& value )
+{
+   BLAZE_INTERNAL_ASSERT( i < (*mat).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( j < (*mat).columns(), "Invalid column access index" );
+
+   MAYBE_UNUSED( mat, i, j, value );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by scaling a range of elements of a matrix.
+// \ingroup matrix
+//
+// \param mat The target matrix.
+// \param row The index of the first row of the range to be modified.
+// \param column The index of the first column of the range to be modified.
+// \param m The number of rows of the range to be modified.
+// \param n The number of columns of the range to be modified.
+// \param value The divisor for the elements.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the matrix
+        , bool SO        // Storage order
+        , typename ET >  // Type of the element
+BLAZE_ALWAYS_INLINE bool
+   tryDiv( const Matrix<MT,SO>& mat, size_t row, size_t column, size_t m, size_t n, const ET& value )
+{
+   BLAZE_INTERNAL_ASSERT( row <= (*mat).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*mat).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( row + m <= (*mat).rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + n <= (*mat).columns(), "Invalid number of columns" );
+
+   MAYBE_UNUSED( mat, row, column, m, n, value );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by shifting a single element of a matrix.
+// \ingroup matrix
+//
+// \param mat The target matrix.
+// \param i The row index of the element to be modified.
+// \param j The column index of the element to be modified.
+// \param count The number of bits to shift the element.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order
+BLAZE_ALWAYS_INLINE bool tryShift( const Matrix<MT,SO>& mat, size_t i, size_t j, int count )
+{
+   BLAZE_INTERNAL_ASSERT( i < (*mat).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( j < (*mat).columns(), "Invalid column access index" );
+
+   MAYBE_UNUSED( mat, i, j, count );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by shifting a range of elements of a matrix.
+// \ingroup matrix
+//
+// \param mat The target matrix.
+// \param row The index of the first row of the range to be modified.
+// \param column The index of the first column of the range to be modified.
+// \param m The number of rows of the range to be modified.
+// \param n The number of columns of the range to be modified.
+// \param count The number of bits to shift the range of elements.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order
+BLAZE_ALWAYS_INLINE bool
+   tryShift( const Matrix<MT,SO>& mat, size_t row, size_t column, size_t m, size_t n, int count )
+{
+   BLAZE_INTERNAL_ASSERT( row <= (*mat).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*mat).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( row + m <= (*mat).rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + n <= (*mat).columns(), "Invalid number of columns" );
+
+   MAYBE_UNUSED( mat, row, column, m, n, count );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by a bitwise AND on a single element of a matrix.
+// \ingroup matrix
+//
+// \param mat The target matrix.
+// \param i The row index of the element to be modified.
+// \param j The column index of the element to be modified.
+// \param value The bit pattern to be used on the element.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the matrix
+        , bool SO        // Storage order
+        , typename ET >  // Type of the element
+BLAZE_ALWAYS_INLINE bool tryBitand( const Matrix<MT,SO>& mat, size_t i, size_t j, const ET& value )
+{
+   BLAZE_INTERNAL_ASSERT( i < (*mat).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( j < (*mat).columns(), "Invalid column access index" );
+
+   MAYBE_UNUSED( mat, i, j, value );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by a bitwise AND on a range of elements of a matrix.
+// \ingroup matrix
+//
+// \param mat The target matrix.
+// \param row The index of the first row of the range to be modified.
+// \param column The index of the first column of the range to be modified.
+// \param m The number of rows of the range to be modified.
+// \param n The number of columns of the range to be modified.
+// \param value The bit pattern to be used on the range of elements.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the matrix
+        , bool SO        // Storage order
+        , typename ET >  // Type of the element
+BLAZE_ALWAYS_INLINE bool
+   tryBitand( const Matrix<MT,SO>& mat, size_t row, size_t column, size_t m, size_t n, const ET& value )
+{
+   BLAZE_INTERNAL_ASSERT( row <= (*mat).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*mat).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( row + m <= (*mat).rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + n <= (*mat).columns(), "Invalid number of columns" );
+
+   MAYBE_UNUSED( mat, row, column, m, n, value );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by a bitwise OR on a single element of a matrix.
+// \ingroup matrix
+//
+// \param mat The target matrix.
+// \param i The row index of the element to be modified.
+// \param j The column index of the element to be modified.
+// \param value The bit pattern to be used on the element.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the matrix
+        , bool SO        // Storage order
+        , typename ET >  // Type of the element
+BLAZE_ALWAYS_INLINE bool tryBitor( const Matrix<MT,SO>& mat, size_t i, size_t j, const ET& value )
+{
+   BLAZE_INTERNAL_ASSERT( i < (*mat).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( j < (*mat).columns(), "Invalid column access index" );
+
+   MAYBE_UNUSED( mat, i, j, value );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by a bitwise OR on a range of elements of a matrix.
+// \ingroup matrix
+//
+// \param mat The target matrix.
+// \param row The index of the first row of the range to be modified.
+// \param column The index of the first column of the range to be modified.
+// \param m The number of rows of the range to be modified.
+// \param n The number of columns of the range to be modified.
+// \param value The bit pattern to be used on the range of elements.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the matrix
+        , bool SO        // Storage order
+        , typename ET >  // Type of the element
+BLAZE_ALWAYS_INLINE bool
+   tryBitor( const Matrix<MT,SO>& mat, size_t row, size_t column, size_t m, size_t n, const ET& value )
+{
+   BLAZE_INTERNAL_ASSERT( row <= (*mat).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*mat).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( row + m <= (*mat).rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + n <= (*mat).columns(), "Invalid number of columns" );
+
+   MAYBE_UNUSED( mat, row, column, m, n, value );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by a bitwise XOR on a single element of a matrix.
+// \ingroup matrix
+//
+// \param mat The target matrix.
+// \param i The row index of the element to be modified.
+// \param j The column index of the element to be modified.
+// \param value The bit pattern to be used on the element.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the matrix
+        , bool SO        // Storage order
+        , typename ET >  // Type of the element
+BLAZE_ALWAYS_INLINE bool tryBitxor( const Matrix<MT,SO>& mat, size_t i, size_t j, const ET& value )
+{
+   BLAZE_INTERNAL_ASSERT( i < (*mat).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( j < (*mat).columns(), "Invalid column access index" );
+
+   MAYBE_UNUSED( mat, i, j, value );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by a bitwise XOR on a range of elements of a matrix.
+// \ingroup matrix
+//
+// \param mat The target matrix.
+// \param row The index of the first row of the range to be modified.
+// \param column The index of the first column of the range to be modified.
+// \param m The number of rows of the range to be modified.
+// \param n The number of columns of the range to be modified.
+// \param value The bit pattern to be used on the range of elements.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the matrix
+        , bool SO        // Storage order
+        , typename ET >  // Type of the element
+BLAZE_ALWAYS_INLINE bool
+   tryBitxor( const Matrix<MT,SO>& mat, size_t row, size_t column, size_t m, size_t n, const ET& value )
+{
+   BLAZE_INTERNAL_ASSERT( row <= (*mat).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*mat).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( row + m <= (*mat).rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + n <= (*mat).columns(), "Invalid number of columns" );
+
+   MAYBE_UNUSED( mat, row, column, m, n, value );
+
+   return true;
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -1105,12 +2528,49 @@ template< typename MT  // Type of the left-hand side matrix
 BLAZE_ALWAYS_INLINE bool tryAssign( const Matrix<MT,SO>& lhs, const Vector<VT,TF>& rhs,
                                     size_t row, size_t column )
 {
-   BLAZE_INTERNAL_ASSERT( row <= (~lhs).rows(), "Invalid row access index" );
-   BLAZE_INTERNAL_ASSERT( column <= (~lhs).columns(), "Invalid column access index" );
-   BLAZE_INTERNAL_ASSERT( TF || ( (~rhs).size() <= (~lhs).rows() - row ), "Invalid number of rows" );
-   BLAZE_INTERNAL_ASSERT( !TF || ( (~rhs).size() <= (~lhs).columns() - column ), "Invalid number of columns" );
+   BLAZE_INTERNAL_ASSERT( row <= (*lhs).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*lhs).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( TF || ( row + (*rhs).size() <= (*lhs).rows() ), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( !TF || ( column + (*rhs).size() <= (*lhs).columns() ), "Invalid number of columns" );
 
-   UNUSED_PARAMETER( lhs, rhs, row, column );
+   MAYBE_UNUSED( lhs, rhs, row, column );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the assignment of a vector to the band of a matrix.
+// \ingroup matrix
+//
+// \param lhs The target left-hand side matrix.
+// \param rhs The right-hand side vector to be assigned.
+// \param band The index of the band the right-hand side vector is assigned to.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT  // Type of the left-hand side matrix
+        , bool SO      // Storage order of the left-hand side matrix
+        , typename VT  // Type of the right-hand side vector
+        , bool TF >    // Transpose flag of the right-hand side vector
+BLAZE_ALWAYS_INLINE bool tryAssign( const Matrix<MT,SO>& lhs, const Vector<VT,TF>& rhs,
+                                    ptrdiff_t band, size_t row, size_t column )
+{
+   BLAZE_INTERNAL_ASSERT( row <= (*lhs).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*lhs).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( row + (*rhs).size() <= (*lhs).rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).size() <= (*lhs).columns(), "Invalid number of columns" );
+
+   MAYBE_UNUSED( lhs, rhs, band, row, column );
 
    return true;
 }
@@ -1141,12 +2601,12 @@ template< typename MT1  // Type of the left-hand side matrix
 BLAZE_ALWAYS_INLINE bool tryAssign( const Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs,
                                     size_t row, size_t column )
 {
-   BLAZE_INTERNAL_ASSERT( row <= (~lhs).rows(), "Invalid row access index" );
-   BLAZE_INTERNAL_ASSERT( column <= (~lhs).columns(), "Invalid column access index" );
-   BLAZE_INTERNAL_ASSERT( (~rhs).rows() <= (~lhs).rows() - row, "Invalid number of rows" );
-   BLAZE_INTERNAL_ASSERT( (~rhs).columns() <= (~lhs).columns() - column, "Invalid number of columns" );
+   BLAZE_INTERNAL_ASSERT( row <= (*lhs).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*lhs).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( row + (*rhs).rows() <= (*lhs).rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).columns() <= (*lhs).columns(), "Invalid number of columns" );
 
-   UNUSED_PARAMETER( lhs, rhs, row, column );
+   MAYBE_UNUSED( lhs, rhs, row, column );
 
    return true;
 }
@@ -1177,12 +2637,49 @@ template< typename MT  // Type of the left-hand side matrix
 BLAZE_ALWAYS_INLINE bool tryAddAssign( const Matrix<MT,SO>& lhs, const Vector<VT,TF>& rhs,
                                        size_t row, size_t column )
 {
-   BLAZE_INTERNAL_ASSERT( row <= (~lhs).rows(), "Invalid row access index" );
-   BLAZE_INTERNAL_ASSERT( column <= (~lhs).columns(), "Invalid column access index" );
-   BLAZE_INTERNAL_ASSERT( TF || ( (~rhs).size() <= (~lhs).rows() - row ), "Invalid number of rows" );
-   BLAZE_INTERNAL_ASSERT( !TF || ( (~rhs).size() <= (~lhs).columns() - column ), "Invalid number of columns" );
+   BLAZE_INTERNAL_ASSERT( row <= (*lhs).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*lhs).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( TF || ( row + (*rhs).size() <= (*lhs).rows() ), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( !TF || ( column + (*rhs).size() <= (*lhs).columns() ), "Invalid number of columns" );
 
-   UNUSED_PARAMETER( lhs, rhs, row, column );
+   MAYBE_UNUSED( lhs, rhs, row, column );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the addition assignment of a vector to the band of a matrix.
+// \ingroup matrix
+//
+// \param lhs The target left-hand side matrix.
+// \param rhs The right-hand side vector to be added.
+// \param band The index of the band the right-hand side vector is assigned to.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT  // Type of the left-hand side matrix
+        , bool SO      // Storage order of the left-hand side matrix
+        , typename VT  // Type of the right-hand side vector
+        , bool TF >    // Transpose flag of the right-hand side vector
+BLAZE_ALWAYS_INLINE bool tryAddAssign( const Matrix<MT,SO>& lhs, const Vector<VT,TF>& rhs,
+                                       ptrdiff_t band, size_t row, size_t column )
+{
+   BLAZE_INTERNAL_ASSERT( row <= (*lhs).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*lhs).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( row + (*rhs).size() <= (*lhs).rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).size() <= (*lhs).columns(), "Invalid number of columns" );
+
+   MAYBE_UNUSED( lhs, rhs, band, row, column );
 
    return true;
 }
@@ -1213,12 +2710,12 @@ template< typename MT1  // Type of the left-hand side matrix
 BLAZE_ALWAYS_INLINE bool tryAddAssign( const Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs,
                                        size_t row, size_t column )
 {
-   BLAZE_INTERNAL_ASSERT( row <= (~lhs).rows(), "Invalid row access index" );
-   BLAZE_INTERNAL_ASSERT( column <= (~lhs).columns(), "Invalid column access index" );
-   BLAZE_INTERNAL_ASSERT( (~rhs).rows() <= (~lhs).rows() - row, "Invalid number of rows" );
-   BLAZE_INTERNAL_ASSERT( (~rhs).columns() <= (~lhs).columns() - column, "Invalid number of columns" );
+   BLAZE_INTERNAL_ASSERT( row <= (*lhs).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*lhs).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( row + (*rhs).rows() <= (*lhs).rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).columns() <= (*lhs).columns(), "Invalid number of columns" );
 
-   UNUSED_PARAMETER( lhs, rhs, row, column );
+   MAYBE_UNUSED( lhs, rhs, row, column );
 
    return true;
 }
@@ -1249,12 +2746,50 @@ template< typename MT  // Type of the left-hand side matrix
 BLAZE_ALWAYS_INLINE bool trySubAssign( const Matrix<MT,SO>& lhs, const Vector<VT,TF>& rhs,
                                        size_t row, size_t column )
 {
-   BLAZE_INTERNAL_ASSERT( row <= (~lhs).rows(), "Invalid row access index" );
-   BLAZE_INTERNAL_ASSERT( column <= (~lhs).columns(), "Invalid column access index" );
-   BLAZE_INTERNAL_ASSERT( TF || ( (~rhs).size() <= (~lhs).rows() - row ), "Invalid number of rows" );
-   BLAZE_INTERNAL_ASSERT( !TF || ( (~rhs).size() <= (~lhs).columns() - column ), "Invalid number of columns" );
+   BLAZE_INTERNAL_ASSERT( row <= (*lhs).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*lhs).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( TF || ( row + (*rhs).size() <= (*lhs).rows() ), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( !TF || ( column + (*rhs).size() <= (*lhs).columns() ), "Invalid number of columns" );
 
-   UNUSED_PARAMETER( lhs, rhs, row, column );
+   MAYBE_UNUSED( lhs, rhs, row, column );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the subtraction assignment of a vector to the band of
+//        a matrix.
+// \ingroup matrix
+//
+// \param lhs The target left-hand side matrix.
+// \param rhs The right-hand side vector to be subtracted.
+// \param band The index of the band the right-hand side vector is assigned to.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT  // Type of the left-hand side matrix
+        , bool SO      // Storage order of the left-hand side matrix
+        , typename VT  // Type of the right-hand side vector
+        , bool TF >    // Transpose flag of the right-hand side vector
+BLAZE_ALWAYS_INLINE bool trySubAssign( const Matrix<MT,SO>& lhs, const Vector<VT,TF>& rhs,
+                                       ptrdiff_t band, size_t row, size_t column )
+{
+   BLAZE_INTERNAL_ASSERT( row <= (*lhs).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*lhs).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( row + (*rhs).size() <= (*lhs).rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).size() <= (*lhs).columns(), "Invalid number of columns" );
+
+   MAYBE_UNUSED( lhs, rhs, band, row, column );
 
    return true;
 }
@@ -1285,12 +2820,12 @@ template< typename MT1  // Type of the left-hand side matrix
 BLAZE_ALWAYS_INLINE bool trySubAssign( const Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs,
                                        size_t row, size_t column )
 {
-   BLAZE_INTERNAL_ASSERT( row <= (~lhs).rows(), "Invalid row access index" );
-   BLAZE_INTERNAL_ASSERT( column <= (~lhs).columns(), "Invalid column access index" );
-   BLAZE_INTERNAL_ASSERT( (~rhs).rows() <= (~lhs).rows() - row, "Invalid number of rows" );
-   BLAZE_INTERNAL_ASSERT( (~rhs).columns() <= (~lhs).columns() - column, "Invalid number of columns" );
+   BLAZE_INTERNAL_ASSERT( row <= (*lhs).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*lhs).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( row + (*rhs).rows() <= (*lhs).rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).columns() <= (*lhs).columns(), "Invalid number of columns" );
 
-   UNUSED_PARAMETER( lhs, rhs, row, column );
+   MAYBE_UNUSED( lhs, rhs, row, column );
 
    return true;
 }
@@ -1321,12 +2856,86 @@ template< typename MT  // Type of the left-hand side matrix
 BLAZE_ALWAYS_INLINE bool tryMultAssign( const Matrix<MT,SO>& lhs, const Vector<VT,TF>& rhs,
                                         size_t row, size_t column )
 {
-   BLAZE_INTERNAL_ASSERT( row <= (~lhs).rows(), "Invalid row access index" );
-   BLAZE_INTERNAL_ASSERT( column <= (~lhs).columns(), "Invalid column access index" );
-   BLAZE_INTERNAL_ASSERT( TF || ( (~rhs).size() <= (~lhs).rows() - row ), "Invalid number of rows" );
-   BLAZE_INTERNAL_ASSERT( !TF || ( (~rhs).size() <= (~lhs).columns() - column ), "Invalid number of columns" );
+   BLAZE_INTERNAL_ASSERT( row <= (*lhs).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*lhs).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( TF || ( row + (*rhs).size() <= (*lhs).rows() ), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( !TF || ( column + (*rhs).size() <= (*lhs).columns() ), "Invalid number of columns" );
 
-   UNUSED_PARAMETER( lhs, rhs, row, column );
+   MAYBE_UNUSED( lhs, rhs, row, column );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the multiplication assignment of a vector to the band
+//        of a matrix.
+// \ingroup matrix
+//
+// \param lhs The target left-hand side matrix.
+// \param rhs The right-hand side vector to be multiplied.
+// \param band The index of the band the right-hand side vector is assigned to.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT  // Type of the left-hand side matrix
+        , bool SO      // Storage order of the left-hand side matrix
+        , typename VT  // Type of the right-hand side vector
+        , bool TF >    // Transpose flag of the right-hand side vector
+BLAZE_ALWAYS_INLINE bool tryMultAssign( const Matrix<MT,SO>& lhs, const Vector<VT,TF>& rhs,
+                                        ptrdiff_t band, size_t row, size_t column )
+{
+   BLAZE_INTERNAL_ASSERT( row <= (*lhs).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*lhs).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( row + (*rhs).size() <= (*lhs).rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).size() <= (*lhs).columns(), "Invalid number of columns" );
+
+   MAYBE_UNUSED( lhs, rhs, band, row, column );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the Schur product assignment of a matrix to a matrix.
+// \ingroup matrix
+//
+// \param lhs The target left-hand side matrix.
+// \param rhs The right-hand side matrix for the Schur product.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT1  // Type of the left-hand side matrix
+        , bool SO1      // Storage order of the left-hand side matrix
+        , typename MT2  // Type of the right-hand side matrix
+        , bool SO2 >    // Storage order of the right-hand side matrix
+BLAZE_ALWAYS_INLINE bool trySchurAssign( const Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs,
+                                         size_t row, size_t column )
+{
+   BLAZE_INTERNAL_ASSERT( row <= (*lhs).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*lhs).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( row + (*rhs).rows() <= (*lhs).rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).columns() <= (*lhs).columns(), "Invalid number of columns" );
+
+   MAYBE_UNUSED( lhs, rhs, row, column );
 
    return true;
 }
@@ -1357,12 +2966,489 @@ template< typename MT  // Type of the left-hand side matrix
 BLAZE_ALWAYS_INLINE bool tryDivAssign( const Matrix<MT,SO>& lhs, const Vector<VT,TF>& rhs,
                                        size_t row, size_t column )
 {
-   BLAZE_INTERNAL_ASSERT( row <= (~lhs).rows(), "Invalid row access index" );
-   BLAZE_INTERNAL_ASSERT( column <= (~lhs).columns(), "Invalid column access index" );
-   BLAZE_INTERNAL_ASSERT( TF || ( (~rhs).size() <= (~lhs).rows() - row ), "Invalid number of rows" );
-   BLAZE_INTERNAL_ASSERT( !TF || ( (~rhs).size() <= (~lhs).columns() - column ), "Invalid number of columns" );
+   BLAZE_INTERNAL_ASSERT( row <= (*lhs).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*lhs).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( TF || ( row + (*rhs).size() <= (*lhs).rows() ), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( !TF || ( column + (*rhs).size() <= (*lhs).columns() ), "Invalid number of columns" );
 
-   UNUSED_PARAMETER( lhs, rhs, row, column );
+   MAYBE_UNUSED( lhs, rhs, row, column );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the division assignment of a vector to the band of
+//        a matrix.
+// \ingroup matrix
+//
+// \param lhs The target left-hand side matrix.
+// \param rhs The right-hand side vector divisor.
+// \param band The index of the band the right-hand side vector is assigned to.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT  // Type of the left-hand side matrix
+        , bool SO      // Storage order of the left-hand side matrix
+        , typename VT  // Type of the right-hand side vector
+        , bool TF >    // Transpose flag of the right-hand side vector
+BLAZE_ALWAYS_INLINE bool tryDivAssign( const Matrix<MT,SO>& lhs, const Vector<VT,TF>& rhs,
+                                       ptrdiff_t band, size_t row, size_t column )
+{
+   BLAZE_INTERNAL_ASSERT( row <= (*lhs).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*lhs).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( row + (*rhs).size() <= (*lhs).rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).size() <= (*lhs).columns(), "Invalid number of columns" );
+
+   MAYBE_UNUSED( lhs, rhs, band, row, column );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the shift assignment of a vector to a matrix.
+// \ingroup matrix
+//
+// \param lhs The target left-hand side matrix.
+// \param rhs The right-hand side vector of bits to shift.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT  // Type of the left-hand side matrix
+        , bool SO      // Storage order of the left-hand side matrix
+        , typename VT  // Type of the right-hand side vector
+        , bool TF >    // Transpose flag of the right-hand side vector
+BLAZE_ALWAYS_INLINE bool tryShiftAssign( const Matrix<MT,SO>& lhs, const Vector<VT,TF>& rhs,
+                                         size_t row, size_t column )
+{
+   BLAZE_INTERNAL_ASSERT( row <= (*lhs).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*lhs).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( TF || ( row + (*rhs).size() <= (*lhs).rows() ), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( !TF || ( column + (*rhs).size() <= (*lhs).columns() ), "Invalid number of columns" );
+
+   MAYBE_UNUSED( lhs, rhs, row, column );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the shift assignment of a vector to the band of a matrix.
+// \ingroup matrix
+//
+// \param lhs The target left-hand side matrix.
+// \param rhs The right-hand side vector of bits to shift.
+// \param band The index of the band the right-hand side vector is assigned to.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT  // Type of the left-hand side matrix
+        , bool SO      // Storage order of the left-hand side matrix
+        , typename VT  // Type of the right-hand side vector
+        , bool TF >    // Transpose flag of the right-hand side vector
+BLAZE_ALWAYS_INLINE bool tryShiftAssign( const Matrix<MT,SO>& lhs, const Vector<VT,TF>& rhs,
+                                         ptrdiff_t band, size_t row, size_t column )
+{
+   BLAZE_INTERNAL_ASSERT( row <= (*lhs).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*lhs).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( row + (*rhs).size() <= (*lhs).rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).size() <= (*lhs).columns(), "Invalid number of columns" );
+
+   MAYBE_UNUSED( lhs, rhs, band, row, column );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the shift assignment of a matrix to a matrix.
+// \ingroup matrix
+//
+// \param lhs The target left-hand side matrix.
+// \param rhs The right-hand side matrix of bits to shift.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT1  // Type of the left-hand side matrix
+        , bool SO1      // Storage order of the left-hand side matrix
+        , typename MT2  // Type of the right-hand side matrix
+        , bool SO2 >    // Storage order of the right-hand side matrix
+BLAZE_ALWAYS_INLINE bool tryShiftAssign( const Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs,
+                                         size_t row, size_t column )
+{
+   BLAZE_INTERNAL_ASSERT( row <= (*lhs).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*lhs).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( row + (*rhs).rows() <= (*lhs).rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).columns() <= (*lhs).columns(), "Invalid number of columns" );
+
+   MAYBE_UNUSED( lhs, rhs, row, column );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the bitwise AND assignment of a vector to a matrix.
+// \ingroup matrix
+//
+// \param lhs The target left-hand side matrix.
+// \param rhs The right-hand side vector for the bitwise AND operation.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT  // Type of the left-hand side matrix
+        , bool SO      // Storage order of the left-hand side matrix
+        , typename VT  // Type of the right-hand side vector
+        , bool TF >    // Transpose flag of the right-hand side vector
+BLAZE_ALWAYS_INLINE bool tryBitandAssign( const Matrix<MT,SO>& lhs, const Vector<VT,TF>& rhs,
+                                          size_t row, size_t column )
+{
+   BLAZE_INTERNAL_ASSERT( row <= (*lhs).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*lhs).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( TF || ( row + (*rhs).size() <= (*lhs).rows() ), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( !TF || ( column + (*rhs).size() <= (*lhs).columns() ), "Invalid number of columns" );
+
+   MAYBE_UNUSED( lhs, rhs, row, column );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the bitwise AND assignment of a vector to the band of
+//        a matrix.
+// \ingroup matrix
+//
+// \param lhs The target left-hand side matrix.
+// \param rhs The right-hand side vector for the bitwise AND operation.
+// \param band The index of the band the right-hand side vector is assigned to.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT  // Type of the left-hand side matrix
+        , bool SO      // Storage order of the left-hand side matrix
+        , typename VT  // Type of the right-hand side vector
+        , bool TF >    // Transpose flag of the right-hand side vector
+BLAZE_ALWAYS_INLINE bool tryBitandAssign( const Matrix<MT,SO>& lhs, const Vector<VT,TF>& rhs,
+                                          ptrdiff_t band, size_t row, size_t column )
+{
+   BLAZE_INTERNAL_ASSERT( row <= (*lhs).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*lhs).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( row + (*rhs).size() <= (*lhs).rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).size() <= (*lhs).columns(), "Invalid number of columns" );
+
+   MAYBE_UNUSED( lhs, rhs, band, row, column );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the bitwise AND assignment of a matrix to a matrix.
+// \ingroup matrix
+//
+// \param lhs The target left-hand side matrix.
+// \param rhs The right-hand side matrix for the bitwise AND operation.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT1  // Type of the left-hand side matrix
+        , bool SO1      // Storage order of the left-hand side matrix
+        , typename MT2  // Type of the right-hand side matrix
+        , bool SO2 >    // Storage order of the right-hand side matrix
+BLAZE_ALWAYS_INLINE bool tryBitandAssign( const Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs,
+                                          size_t row, size_t column )
+{
+   BLAZE_INTERNAL_ASSERT( row <= (*lhs).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*lhs).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( row + (*rhs).rows() <= (*lhs).rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).columns() <= (*lhs).columns(), "Invalid number of columns" );
+
+   MAYBE_UNUSED( lhs, rhs, row, column );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the bitwise OR assignment of a vector to a matrix.
+// \ingroup matrix
+//
+// \param lhs The target left-hand side matrix.
+// \param rhs The right-hand side vector for the bitwise OR operation.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT  // Type of the left-hand side matrix
+        , bool SO      // Storage order of the left-hand side matrix
+        , typename VT  // Type of the right-hand side vector
+        , bool TF >    // Transpose flag of the right-hand side vector
+BLAZE_ALWAYS_INLINE bool tryBitorAssign( const Matrix<MT,SO>& lhs, const Vector<VT,TF>& rhs,
+                                         size_t row, size_t column )
+{
+   BLAZE_INTERNAL_ASSERT( row <= (*lhs).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*lhs).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( TF || ( row + (*rhs).size() <= (*lhs).rows() ), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( !TF || ( column + (*rhs).size() <= (*lhs).columns() ), "Invalid number of columns" );
+
+   MAYBE_UNUSED( lhs, rhs, row, column );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the bitwise OR assignment of a vector to the band of
+//        a matrix.
+// \ingroup matrix
+//
+// \param lhs The target left-hand side matrix.
+// \param rhs The right-hand side vector for the bitwise OR operation.
+// \param band The index of the band the right-hand side vector is assigned to.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT  // Type of the left-hand side matrix
+        , bool SO      // Storage order of the left-hand side matrix
+        , typename VT  // Type of the right-hand side vector
+        , bool TF >    // Transpose flag of the right-hand side vector
+BLAZE_ALWAYS_INLINE bool tryBitorAssign( const Matrix<MT,SO>& lhs, const Vector<VT,TF>& rhs,
+                                         ptrdiff_t band, size_t row, size_t column )
+{
+   BLAZE_INTERNAL_ASSERT( row <= (*lhs).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*lhs).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( row + (*rhs).size() <= (*lhs).rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).size() <= (*lhs).columns(), "Invalid number of columns" );
+
+   MAYBE_UNUSED( lhs, rhs, band, row, column );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the bitwise OR assignment of a matrix to a matrix.
+// \ingroup matrix
+//
+// \param lhs The target left-hand side matrix.
+// \param rhs The right-hand side matrix for the bitwise OR operation.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT1  // Type of the left-hand side matrix
+        , bool SO1      // Storage order of the left-hand side matrix
+        , typename MT2  // Type of the right-hand side matrix
+        , bool SO2 >    // Storage order of the right-hand side matrix
+BLAZE_ALWAYS_INLINE bool tryBitorAssign( const Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs,
+                                         size_t row, size_t column )
+{
+   BLAZE_INTERNAL_ASSERT( row <= (*lhs).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*lhs).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( row + (*rhs).rows() <= (*lhs).rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).columns() <= (*lhs).columns(), "Invalid number of columns" );
+
+   MAYBE_UNUSED( lhs, rhs, row, column );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the bitwise XOR assignment of a vector to a matrix.
+// \ingroup matrix
+//
+// \param lhs The target left-hand side matrix.
+// \param rhs The right-hand side vector for the bitwise XOR operation.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT  // Type of the left-hand side matrix
+        , bool SO      // Storage order of the left-hand side matrix
+        , typename VT  // Type of the right-hand side vector
+        , bool TF >    // Transpose flag of the right-hand side vector
+BLAZE_ALWAYS_INLINE bool tryBitxorAssign( const Matrix<MT,SO>& lhs, const Vector<VT,TF>& rhs,
+                                          size_t row, size_t column )
+{
+   BLAZE_INTERNAL_ASSERT( row <= (*lhs).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*lhs).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( TF || ( row + (*rhs).size() <= (*lhs).rows() ), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( !TF || ( column + (*rhs).size() <= (*lhs).columns() ), "Invalid number of columns" );
+
+   MAYBE_UNUSED( lhs, rhs, row, column );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the bitwise XOR assignment of a vector to the band of
+//        a matrix.
+// \ingroup matrix
+//
+// \param lhs The target left-hand side matrix.
+// \param rhs The right-hand side vector for the bitwise XOR operation.
+// \param band The index of the band the right-hand side vector is assigned to.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT  // Type of the left-hand side matrix
+        , bool SO      // Storage order of the left-hand side matrix
+        , typename VT  // Type of the right-hand side vector
+        , bool TF >    // Transpose flag of the right-hand side vector
+BLAZE_ALWAYS_INLINE bool tryBitxorAssign( const Matrix<MT,SO>& lhs, const Vector<VT,TF>& rhs,
+                                          ptrdiff_t band, size_t row, size_t column )
+{
+   BLAZE_INTERNAL_ASSERT( row <= (*lhs).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*lhs).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( row + (*rhs).size() <= (*lhs).rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).size() <= (*lhs).columns(), "Invalid number of columns" );
+
+   MAYBE_UNUSED( lhs, rhs, band, row, column );
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the bitwise XOR assignment of a matrix to a matrix.
+// \ingroup matrix
+//
+// \param lhs The target left-hand side matrix.
+// \param rhs The right-hand side matrix for the bitwise XOR operation.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT1  // Type of the left-hand side matrix
+        , bool SO1      // Storage order of the left-hand side matrix
+        , typename MT2  // Type of the right-hand side matrix
+        , bool SO2 >    // Storage order of the right-hand side matrix
+BLAZE_ALWAYS_INLINE bool tryBitxorAssign( const Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs,
+                                         size_t row, size_t column )
+{
+   BLAZE_INTERNAL_ASSERT( row <= (*lhs).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*lhs).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( row + (*rhs).rows() <= (*lhs).rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).columns() <= (*lhs).columns(), "Invalid number of columns" );
+
+   MAYBE_UNUSED( lhs, rhs, row, column );
 
    return true;
 }
@@ -1389,7 +3475,55 @@ template< typename MT  // Type of the matrix
         , bool SO >    // Storage order
 BLAZE_ALWAYS_INLINE MT& derestrict( Matrix<MT,SO>& matrix )
 {
-   return ~matrix;
+   return *matrix;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Removal of the top-level view on the given matrix.
+// \ingroup matrix
+//
+// \param matrix The matrix to be unviewed.
+// \return Reference to the matrix without view.
+//
+// This function removes the top-level view on the given matrix and returns a reference to the
+// unviewed matrix.\n
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in the violation of invariants, erroneous results and/or in compilation errors.
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order
+BLAZE_ALWAYS_INLINE MT& unview( Matrix<MT,SO>& matrix )
+{
+   return *matrix;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Removal of the top-level view on the given constant matrix.
+// \ingroup matrix
+//
+// \param matrix The constant matrix to be unviewed.
+// \return Reference to the matrix without view.
+//
+// This function removes the top-level view on the given constant matrix and returns a reference
+// to the unviewed matrix.\n
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in the violation of invariants, erroneous results and/or in compilation errors.
+*/
+template< typename MT  // Type of the matrix
+        , bool SO >    // Storage order
+BLAZE_ALWAYS_INLINE const MT& unview( const Matrix<MT,SO>& matrix )
+{
+   return *matrix;
 }
 /*! \endcond */
 //*************************************************************************************************

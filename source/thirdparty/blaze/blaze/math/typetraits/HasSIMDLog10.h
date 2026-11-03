@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/HasSIMDLog10.h
 //  \brief Header file for the HasSIMDLog10 type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -41,12 +41,10 @@
 //*************************************************************************************************
 
 #include <blaze/system/Vectorization.h>
-#include <blaze/util/EnableIf.h>
 #include <blaze/util/IntegralConstant.h>
-#include <blaze/util/mpl/Or.h>
-#include <blaze/util/typetraits/Decay.h>
 #include <blaze/util/typetraits/IsDouble.h>
 #include <blaze/util/typetraits/IsFloat.h>
+#include <blaze/util/typetraits/RemoveCVRef.h>
 
 
 namespace blaze {
@@ -59,27 +57,19 @@ namespace blaze {
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-template< typename T         // Type of the operand
-        , typename = void >  // Restricting condition
-struct HasSIMDLog10Helper
-{
-   enum : bool { value = false };
-};
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-#if BLAZE_SVML_MODE
-template< typename T >
-struct HasSIMDLog10Helper< T, EnableIf_< Or< IsFloat<T>, IsDouble<T> > > >
-{
-   enum : bool { value = bool( BLAZE_SSE_MODE ) ||
-                         bool( BLAZE_AVX_MODE ) ||
-                         bool( BLAZE_MIC_MODE ) };
-};
-#endif
+/*!\brief Auxiliary alias declaration for the HasSIMDLog10 type trait.
+// \ingroup math_type_traits
+*/
+template< typename T >  // Type of the operand
+using HasSIMDLog10Helper =
+   BoolConstant< ( IsFloat_v<T> || IsDouble_v<T> ) &&
+                 ( bool( BLAZE_SVML_MODE    ) ||
+                   bool( BLAZE_SLEEF_MODE )   ||
+                   bool( BLAZE_XSIMD_MODE ) ) &&
+                 ( bool( BLAZE_SSE_MODE     ) ||
+                   bool( BLAZE_AVX_MODE     ) ||
+                   bool( BLAZE_MIC_MODE     ) ||
+                   bool( BLAZE_AVX512F_MODE ) ) >;
 /*! \endcond */
 //*************************************************************************************************
 
@@ -106,8 +96,27 @@ struct HasSIMDLog10Helper< T, EnableIf_< Or< IsFloat<T>, IsDouble<T> > > >
    \endcode
 */
 template< typename T >  // Type of the operand
-struct HasSIMDLog10 : public BoolConstant< HasSIMDLog10Helper< Decay_<T> >::value >
+struct HasSIMDLog10
+   : public BoolConstant< HasSIMDLog10Helper< RemoveCVRef_t<T> >::value >
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the HasSIMDLog10 type trait.
+// \ingroup math_type_traits
+//
+// The HasSIMDLog10_v variable template provides a convenient shortcut to access the nested
+// \a value of the HasSIMDLog10 class template. For instance, given the type \a T the following
+// two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::HasSIMDLog10<T>::value;
+   constexpr bool value2 = blaze::HasSIMDLog10_v<T>;
+   \endcode
+*/
+template< typename T >  // Type of the operand
+constexpr bool HasSIMDLog10_v = HasSIMDLog10<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

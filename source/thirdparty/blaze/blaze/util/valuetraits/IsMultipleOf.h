@@ -3,7 +3,7 @@
 //  \file blaze/util/valuetraits/IsMultipleOf.h
 //  \brief Header file for the IsMultipleOf value trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,9 +40,7 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/util/FalseType.h>
 #include <blaze/util/IntegralConstant.h>
-#include <blaze/util/TrueType.h>
 
 
 namespace blaze {
@@ -76,7 +74,8 @@ namespace blaze {
    \endcode
 */
 template< size_t M, size_t N >
-struct IsMultipleOf : public BoolConstant< M % N == 0UL >
+struct IsMultipleOf
+   : public BoolConstant< M % N == 0UL >
 {};
 //*************************************************************************************************
 
@@ -87,7 +86,8 @@ struct IsMultipleOf : public BoolConstant< M % N == 0UL >
 // \ingroup type_traits
 */
 template< size_t M >
-struct IsMultipleOf<M,0UL> : public FalseType
+struct IsMultipleOf<M,0UL>
+   : public FalseType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -99,9 +99,28 @@ struct IsMultipleOf<M,0UL> : public FalseType
 // \ingroup type_traits
 */
 template<>
-struct IsMultipleOf<0,0> : public TrueType
+struct IsMultipleOf<0,0>
+   : public TrueType
 {};
 /*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsMultipleOf value trait.
+// \ingroup value_traits
+//
+// The IsMultipleOf_v variable template provides a convenient shortcut to access the nested
+// \a value of the IsMultipleOf class template. For instance, given the compile time constant
+// values \a M and \a N the following two statements are identical:
+
+   \code
+   constexpr bool value1 = IsMultipleOf<M,N>::value;
+   constexpr bool value2 = IsMultipleOf_v<M,N>;
+   \endcode
+*/
+template< size_t M, size_t N >
+constexpr bool IsMultipleOf_v = IsMultipleOf<M,N>::value;
 //*************************************************************************************************
 
 } // namespace blaze

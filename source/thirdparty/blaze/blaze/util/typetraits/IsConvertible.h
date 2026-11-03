@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/IsConvertible.h
 //  \brief Header file for the IsConvertible type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -84,8 +84,27 @@ namespace blaze {
    \endcode
 */
 template< typename From, typename To >
-struct IsConvertible : public BoolConstant< std::is_convertible<From,To>::value >
+struct IsConvertible
+   : public BoolConstant< std::is_convertible<From,To>::value >
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsConvertible type trait.
+// \ingroup type_traits
+//
+// The IsConvertible_v variable template provides a convenient shortcut to access the nested
+// \a value of the IsConvertible class template. For instance, given the types \a T1 and \a T2
+// the following two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsConvertible<T1,T2>::value;
+   constexpr bool value2 = blaze::IsConvertible_v<T1,T2>;
+   \endcode
+*/
+template< typename From, typename To >
+constexpr bool IsConvertible_v = IsConvertible<From,To>::value;
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/util/threadpool/TaskQueue.h
 //  \brief Task queue for the thread pool
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -65,18 +65,18 @@ class TaskQueue
 {
  private:
    //**Type definitions****************************************************************************
-   typedef std::deque<Task>  Tasks;  //!< FIFO container for tasks.
+   using Tasks = std::deque<Task>;  //!< FIFO container for tasks.
    //**********************************************************************************************
 
  public:
    //**Type definitions****************************************************************************
-   typedef Tasks::size_type  SizeType;  //!< Size type of the task queue.
+   using SizeType = Tasks::size_type;  //!< Size type of the task queue.
    //**********************************************************************************************
 
    //**Constructor*********************************************************************************
    /*!\name Constructor */
    //@{
-   explicit inline TaskQueue();
+   inline TaskQueue();
    //@}
    //**********************************************************************************************
 

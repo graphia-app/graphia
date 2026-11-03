@@ -3,7 +3,7 @@
 //  \file blaze/util/functiontrace/FunctionTrace.h
 //  \brief Header file for the FunctionTrace class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -39,6 +39,16 @@
 //*************************************************************************************************
 // Includes
 //*************************************************************************************************
+
+#if BLAZE_HPX_PARALLEL_MODE
+#  include <hpx/include/threads.hpp>
+#elif BLAZE_CPP_THREADS_PARALLEL_MODE
+#  include <thread>
+#elif BLAZE_BOOST_THREADS_PARALLEL_MODE
+#  include <boost/thread/thread.hpp>
+#elif BLAZE_OPENMP_PARALLEL_MODE
+#  include <omp.h>
+#endif
 
 #include <iostream>
 #include <new>
@@ -136,10 +146,14 @@ inline FunctionTrace::FunctionTrace( const std::string& file, const std::string&
    std::ostringstream oss;
    oss << " + ";
 
-#if BLAZE_OPENMP_PARALLEL_MODE
-   oss << "[Thread " << omp_get_thread_num() << "]";
-#else
+#if BLAZE_HPX_PARALLEL_MODE
+   oss << "[Thread " << hpx::this_thread::get_id() << "]";
+#elif BLAZE_CPP_THREADS_PARALLEL_MODE
    oss << "[Thread " << std::this_thread::get_id() << "]";
+#elif BLAZE_BOOST_THREADS_PARALLEL_MODE
+   oss << "[Thread " << boost::this_thread::get_id() << "]";
+#elif BLAZE_OPENMP_PARALLEL_MODE
+   oss << "[Thread " << omp_get_thread_num() << "]";
 #endif
 
    oss << " Entering function '" << function_ << "' in file '" << file_ << "'\n";
@@ -166,8 +180,12 @@ inline FunctionTrace::~FunctionTrace()
 
 #if BLAZE_OPENMP_PARALLEL_MODE
    oss << "[Thread " << omp_get_thread_num() << "]";
-#else
+#elif BLAZE_CPP_THREADS_PARALLEL_MODE
    oss << "[Thread " << std::this_thread::get_id() << "]";
+#elif BLAZE_BOOST_THREADS_PARALLEL_MODE
+   oss << "[Thread " << boost::this_thread::get_id() << "]";
+#elif BLAZE_HPX_PARALLEL_MODE
+   oss << "[Thread " << hpx::this_thread::get_id() << "]";
 #endif
 
    oss << " Leaving function '" << function_ << "' in file '" << file_ << "'\n";

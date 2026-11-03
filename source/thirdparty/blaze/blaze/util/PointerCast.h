@@ -3,7 +3,7 @@
 //  \file blaze/util/PointerCast.h
 //  \brief Cast operators for pointer types
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -191,8 +191,8 @@ template< typename To, template<typename> class S, typename From > inline S<To> 
    class B { ... };
    class D : public B { ... };
 
-   typedef SharedPtr<B> BPtr;
-   typedef SharedPtr<D> DPtr;
+   using BPtr = SharedPtr<B>;
+   using DPtr = SharedPtr<D>;
 
    BPtr b = BPtr( new D() );              // Base smart pointer to a derived class object
    DPtr d = static_pointer_cast<D>( b );  // Static down-cast
@@ -221,8 +221,8 @@ inline S<To> static_pointer_cast( S<From> ptr )
    class B { ... };
    class D : public B { ... };
 
-   typedef SharedPtr<B> BPtr;
-   typedef SharedPtr<D> DPtr;
+   using BPtr = SharedPtr<B>;
+   using DPtr = SharedPtr<D>;
 
    BPtr b = ...;                           // Base smart pointer
    DPtr d = dynamic_pointer_cast<D>( b );  // Dynamic down-cast
@@ -249,8 +249,8 @@ inline S<To> dynamic_pointer_cast( S<From> ptr )
    \code
    class A { ... };
 
-   typedef SharedPtr<A>        APtr;
-   typedef SharedPtr<const A>  ConstAPtr;
+   using APtr      = SharedPtr<A>;
+   using ConstAPtr = SharedPtr<const A>;
 
    ConstAPtr a1;                           // Smart pointer to a constant A object
    APtr a2 = const_pointer_cast<A>( a1 );  // Const cast to a smart pointer to a non-constant A object

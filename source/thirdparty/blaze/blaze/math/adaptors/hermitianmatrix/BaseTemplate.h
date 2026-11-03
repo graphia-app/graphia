@@ -3,7 +3,7 @@
 //  \file blaze/math/adaptors/hermitianmatrix/BaseTemplate.h
 //  \brief Header file for the implementation of the base template of the HeritianMatrix
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,9 +40,8 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/math/typetraits/IsColumnMajorMatrix.h>
 #include <blaze/math/typetraits/IsDenseMatrix.h>
-#include <blaze/util/typetraits/IsNumeric.h>
+#include <blaze/math/typetraits/StorageOrder.h>
 
 
 namespace blaze {
@@ -69,8 +68,12 @@ namespace blaze {
 // be specified via the first template parameter:
 
    \code
+   namespace blaze {
+
    template< typename MT, bool SO, bool DF >
    class HermitianMatrix;
+
+   } // namespace blaze
    \endcode
 
 //  - MT: specifies the type of the matrix to be adapted. HermitianMatrix can be used with any
@@ -221,7 +224,7 @@ namespace blaze {
    using blaze::HermitianMatrix;
    using blaze::rowMajor;
 
-	typedef std::complex<double>  cplx;
+	using cplx = std::complex<double>;
 
    // Default constructed, row-major 3x3 Hermitian compressed matrix
    HermitianMatrix< CompressedMatrix<cplx,rowMajor> > A( 3 );
@@ -288,7 +291,7 @@ namespace blaze {
    using blaze::HermitianMatrix;
    using blaze::rowMajor;
 
-	typedef std::complex<double>  cplx;
+	using cplx = std::complex<double>;
 
    // Setup of the Hermitian matrix
    //
@@ -319,7 +322,7 @@ namespace blaze {
    using blaze::unpadded;
    using blaze::rowMajor;
 
-   typedef HermitianMatrix< CustomMatrix<double,unaligned,unpadded,rowMajor> >  CustomHermitian;
+   using CustomHermitian = HermitianMatrix< CustomMatrix<double,unaligned,unpadded,rowMajor> >;
 
    // Creating a 3x3 Hermitian custom matrix from a properly initialized array
    double array[9] = { 1.0, 2.0, 4.0,
@@ -340,7 +343,7 @@ namespace blaze {
    using blaze::DynamicMatrix;
    using blaze::HermtianMatrix;
 
-	typedef std::complex<double>  cplx;
+	using cplx = std::complex<double>;
 
    // Setup of the Hermitian matrix
    //
@@ -447,7 +450,7 @@ namespace blaze {
    using blaze::rowMajor;
    using blaze::columnMajor;
 
-	typedef complex<float>  cplx;
+	using cplx = complex<float>;
 
    DynamicMatrix<cplx,rowMajor> A( 3, 3 );
    CompressedMatrix<cplx,rowMajor> B( 3, 3 );
@@ -558,13 +561,10 @@ namespace blaze {
    \code
    using blaze::DynamicMatrix;
    using blaze::HermitianMatrix;
-   using blaze::rowMajor;
    using blaze::columnMajor;
 
-   typedef HermitianMatrix< DynamicMatrix<double,columnMajor> >  DynamicHermitian;
-
-   DynamicHermitian A( 10UL );  // Both Hermitian and symmetric
-   Row<DynamicHermitian> row5 = row( A, 5UL );
+   HermitianMatrix< DynamicMatrix<double,columnMajor> > A( 10UL );  // Both Hermitian and symmetric
+   auto row5 = row( A, 5UL );
    \endcode
 
 // Usually, a row view on a column-major matrix results in a considerable performance decrease in
@@ -609,9 +609,9 @@ namespace blaze {
    C = A * B;  // Is not guaranteed to result in a Hermitian matrix; some runtime overhead
    \endcode
 */
-template< typename MT                               // Type of the adapted matrix
-        , bool SO = IsColumnMajorMatrix<MT>::value  // Storage order of the adapted matrix
-        , bool DF = IsDenseMatrix<MT>::value >      // Density flag
+template< typename MT                      // Type of the adapted matrix
+        , bool SO = StorageOrder_v<MT>     // Storage order of the adapted matrix
+        , bool DF = IsDenseMatrix_v<MT> >  // Density flag
 class HermitianMatrix
 {};
 //*************************************************************************************************

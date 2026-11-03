@@ -3,7 +3,7 @@
 //  \file blaze/config/Inline.h
 //  \brief Configuration of the inline policy of the Blaze library
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -50,8 +50,22 @@
 // keyword uses the regular \c inline keyword as fallback. Possible setting for the switch are:
 //  - Deactivated: \b 0
 //  - Activated  : \b 1
+//
+// Note that it is possible to (de-)activate the strengthened inline keyword via command line or
+// by defining this symbol manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_USE_STRONG_INLINE=1 ...
+   \endcode
+
+   \code
+   #define BLAZE_USE_STRONG_INLINE 1
+   #include <blaze/Blaze.h>
+   \endcode
 */
+#ifndef BLAZE_USE_STRONG_INLINE
 #define BLAZE_USE_STRONG_INLINE 1
+#endif
 //*************************************************************************************************
 
 
@@ -70,6 +84,20 @@
 // for the switch are:
 //  - Deactivated: \b 0
 //  - Activated  : \b 1
+//
+// Note that it is possible to (de-)activate the enforced inline keyword via command line or by
+// defining this symbol manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_USE_ALWAYS_INLINE=1 ...
+   \endcode
+
+   \code
+   #define BLAZE_USE_ALWAYS_INLINE 1
+   #include <blaze/Blaze.h>
+   \endcode
 */
+#ifndef BLAZE_USE_ALWAYS_INLINE
 #define BLAZE_USE_ALWAYS_INLINE 1
+#endif
 //*************************************************************************************************

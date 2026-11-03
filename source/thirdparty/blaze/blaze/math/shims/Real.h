@@ -3,7 +3,7 @@
 //  \file blaze/math/shims/Real.h
 //  \brief Header file for the real shim
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,9 +40,7 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/system/Inline.h>
-#include <blaze/util/EnableIf.h>
-#include <blaze/util/typetraits/IsBuiltin.h>
+#include <cmath>
 
 
 namespace blaze {
@@ -54,36 +52,10 @@ namespace blaze {
 //=================================================================================================
 
 //*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Computing the real part of the given value/object.
+/*!\brief Import of the std::real() function into the Blaze namespace.
 // \ingroup math_shims
-//
-// \param a The given value/object.
-// \return The real part of the given value.
-//
-// The \a real shim represents an abstract interface for the computation of the real part of
-// any given data type. In case the given value is of complex type the function returns the
-// real part:
-
-   \code
-   const blaze::complex<double> a( 3.0, -2.0 );
-   const double b( real( a ) );  // Results in 3.0
-   \endcode
-
-// Values of built-in data type are considered complex numbers with an imaginary part of 0. Thus
-// the returned value corresponds to the given value:
-
-   \code
-   const double a( -3.0 );
-   const double b( real( a ) );  // Results in -3.0
-   \endcode
 */
-template< typename T >
-BLAZE_ALWAYS_INLINE constexpr EnableIf_< IsBuiltin<T>, T > real( T a ) noexcept
-{
-   return a;
-}
-/*! \endcond */
+using std::real;
 //*************************************************************************************************
 
 } // namespace blaze

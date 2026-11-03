@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/IsStrictlyUpper.h
 //  \brief Header file for the IsStrictlyUpper type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,8 +40,10 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/util/FalseType.h>
-#include <blaze/util/TrueType.h>
+#include <blaze/math/typetraits/IsExpression.h>
+#include <blaze/util/EnableIf.h>
+#include <blaze/util/IntegralConstant.h>
+#include <blaze/util/typetraits/IsSame.h>
 
 
 namespace blaze {
@@ -51,6 +53,32 @@ namespace blaze {
 //  CLASS DEFINITION
 //
 //=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename T > struct IsStrictlyUpper;
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Auxiliary helper struct for the IsStrictlyUpper type trait.
+// \ingroup math_traits
+*/
+template< typename T
+        , typename = void >
+struct IsStrictlyUpperHelper
+   : public FalseType
+{};
+
+template< typename T >  // Type of the operand
+struct IsStrictlyUpperHelper< T, EnableIf_t< IsExpression_v<T> && !IsSame_v<T,typename T::ResultType> > >
+   : public IsStrictlyUpper< typename T::ResultType >::Type
+{};
+/*! \endcond */
+//*************************************************************************************************
+
 
 //*************************************************************************************************
 /*!\brief Compile time check for strictly upper triangular matrices.
@@ -66,13 +94,13 @@ namespace blaze {
    \code
    using blaze::rowMajor;
 
-   typedef blaze::StaticMatrix<double,3UL,3UL,rowMajor>  StaticMatrixType;
-   typedef blaze::DynamicMatrix<float,rowMajor>          DynamicMatrixType;
-   typedef blaze::CompressedMatrix<int,rowMajor>         CompressedMatrixType;
+   using StaticMatrixType     = blaze::StaticMatrix<double,3UL,3UL,rowMajor>;
+   using DynamicMatrixType    = blaze::DynamicMatrix<float,rowMajor>;
+   using CompressedMatrixType = blaze::CompressedMatrix<int,rowMajor>;
 
-   typedef blaze::StrictlyUpperMatrix<StaticMatrixType>      StrictlyUpperStaticType;
-   typedef blaze::StrictlyUpperMatrix<DynamicMatrixType>     StrictlyUpperDynamicType;
-   typedef blaze::StrictlyUpperMatrix<CompressedMatrixType>  StrictlyUpperCompressedType;
+   using StrictlyUpperStaticType     = blaze::StrictlyUpperMatrix<StaticMatrixType>;
+   using StrictlyUpperDynamicType    = blaze::StrictlyUpperMatrix<DynamicMatrixType>;
+   using StrictlyUpperCompressedType = blaze::StrictlyUpperMatrix<CompressedMatrixType>;
 
    blaze::IsStrictlyUpper< StrictlyUpperStaticType >::value        // Evaluates to 1
    blaze::IsStrictlyUpper< const StrictlyUpperDynamicType >::Type  // Results in TrueType
@@ -83,7 +111,8 @@ namespace blaze {
    \endcode
 */
 template< typename T >
-struct IsStrictlyUpper : public FalseType
+struct IsStrictlyUpper
+   : public IsStrictlyUpperHelper<T>
 {};
 //*************************************************************************************************
 
@@ -94,7 +123,8 @@ struct IsStrictlyUpper : public FalseType
 // \ingroup math_type_traits
 */
 template< typename T >
-struct IsStrictlyUpper< const T > : public IsStrictlyUpper<T>
+struct IsStrictlyUpper< const T >
+   : public IsStrictlyUpper<T>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -106,7 +136,8 @@ struct IsStrictlyUpper< const T > : public IsStrictlyUpper<T>
 // \ingroup math_type_traits
 */
 template< typename T >
-struct IsStrictlyUpper< volatile T > : public IsStrictlyUpper<T>
+struct IsStrictlyUpper< volatile T >
+   : public IsStrictlyUpper<T>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -118,9 +149,28 @@ struct IsStrictlyUpper< volatile T > : public IsStrictlyUpper<T>
 // \ingroup math_type_traits
 */
 template< typename T >
-struct IsStrictlyUpper< const volatile T > : public IsStrictlyUpper<T>
+struct IsStrictlyUpper< const volatile T >
+   : public IsStrictlyUpper<T>
 {};
 /*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsStrictlyUpper type trait.
+// \ingroup math_type_traits
+//
+// The IsStrictlyUpper_v variable template provides a convenient shortcut to access the nested
+// \a value of the IsStrictlyUpper class template. For instance, given the type \a T the
+// following two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsStrictlyUpper<T>::value;
+   constexpr bool value2 = blaze::IsStrictlyUpper_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsStrictlyUpper_v = IsStrictlyUpper<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/AlignmentOf.h
 //  \brief Header file for the AlignmentOf type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -43,6 +43,7 @@
 #include <type_traits>
 #include <blaze/system/Vectorization.h>
 #include <blaze/util/Complex.h>
+#include <blaze/util/Types.h>
 #include <blaze/util/typetraits/IsVectorizable.h>
 
 
@@ -69,14 +70,17 @@ struct AlignmentOfHelper
 
  public:
    //**********************************************************************************************
-#if BLAZE_MIC_MODE
-   static constexpr size_t value = ( IsVectorizable<T>::value )?( 64UL ):( defaultAlignment );
+   static constexpr size_t value =
+#if BLAZE_AVX512BW_MODE
+      ( IsVectorizable_v<T> )?( 64UL ):( defaultAlignment );
+#elif BLAZE_AVX512F_MODE || BLAZE_MIC_MODE
+      ( IsVectorizable_v<T> )?( sizeof(T) >= 4UL ? 64UL : 32UL ):( defaultAlignment );
 #elif BLAZE_AVX2_MODE
-   static constexpr size_t value = ( IsVectorizable<T>::value )?( 32UL ):( defaultAlignment );
+      ( IsVectorizable_v<T> )?( 32UL ):( defaultAlignment );
 #elif BLAZE_SSE2_MODE
-   static constexpr size_t value = ( IsVectorizable<T>::value )?( 16UL ):( defaultAlignment );
+      ( IsVectorizable_v<T> )?( 16UL ):( defaultAlignment );
 #else
-   static constexpr size_t value = defaultAlignment;
+      defaultAlignment;
 #endif
    //**********************************************************************************************
 };
@@ -94,14 +98,15 @@ struct AlignmentOfHelper<float>
 {
  public:
    //**********************************************************************************************
-#if BLAZE_MIC_MODE
-   static constexpr size_t value = 64UL;
+   static constexpr size_t value =
+#if BLAZE_AVX512F_MODE || BLAZE_MIC_MODE
+      64UL;
 #elif BLAZE_AVX_MODE
-   static constexpr size_t value = 32UL;
+      32UL;
 #elif BLAZE_SSE_MODE
-   static constexpr size_t value = 16UL;
+      16UL;
 #else
-   static constexpr size_t value = std::alignment_of<float>::value;
+      std::alignment_of<float>::value;
 #endif
    //**********************************************************************************************
 };
@@ -119,14 +124,15 @@ struct AlignmentOfHelper<double>
 {
  public:
    //**********************************************************************************************
-#if BLAZE_MIC_MODE
-   static constexpr size_t value = 64UL;
+   static constexpr size_t value =
+#if BLAZE_AVX512F_MODE || BLAZE_MIC_MODE
+      64UL;
 #elif BLAZE_AVX_MODE
-   static constexpr size_t value = 32UL;
-#elif BLAZE_SSE_MODE
-   static constexpr size_t value = 16UL;
+      32UL;
+#elif BLAZE_SSE2_MODE
+      16UL;
 #else
-   static constexpr size_t value = std::alignment_of<double>::value;
+      std::alignment_of<double>::value;
 #endif
    //**********************************************************************************************
 };
@@ -136,48 +142,15 @@ struct AlignmentOfHelper<double>
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-/*!\brief Specialization of \c AlignmentOfHelper for 'complex<float>'.
+/*!\brief Specialization of \c AlignmentOfHelper for 'complex<T>'.
 // \ingroup type_traits
 */
-template<>
-struct AlignmentOfHelper< complex<float> >
+template< typename T >
+struct AlignmentOfHelper< complex<T> >
 {
  public:
    //**********************************************************************************************
-#if BLAZE_MIC_MODE
-   static constexpr size_t value = 64UL;
-#elif BLAZE_AVX_MODE
-   static constexpr size_t value = 32UL;
-#elif BLAZE_SSE_MODE
-   static constexpr size_t value = 16UL;
-#else
-   static constexpr size_t value = std::alignment_of< complex<float> >::value;
-#endif
-   //**********************************************************************************************
-};
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Specialization of \c AlignmentOfHelper for 'complex<double>'.
-// \ingroup type_traits
-*/
-template<>
-struct AlignmentOfHelper< complex<double> >
-{
- public:
-   //**********************************************************************************************
-#if BLAZE_MIC_MODE
-   static constexpr size_t value = 64UL;
-#elif BLAZE_AVX_MODE
-   static constexpr size_t value = 32UL;
-#elif BLAZE_SSE_MODE
-   static constexpr size_t value = 16UL;
-#else
-   static constexpr size_t value = std::alignment_of< complex<double> >::value;
-#endif
+   static constexpr size_t value = AlignmentOfHelper<T>::value;
    //**********************************************************************************************
 };
 /*! \endcond */
@@ -204,7 +177,8 @@ struct AlignmentOfHelper< complex<double> >
    \endcode
 */
 template< typename T >
-struct AlignmentOf : IntegralConstant<size_t,AlignmentOfHelper<T>::value>
+struct AlignmentOf
+   : public IntegralConstant<size_t,AlignmentOfHelper<T>::value>
 {};
 //*************************************************************************************************
 
@@ -215,7 +189,8 @@ struct AlignmentOf : IntegralConstant<size_t,AlignmentOfHelper<T>::value>
 // \ingroup type_traits
 */
 template< typename T >
-struct AlignmentOf< const T > : IntegralConstant<size_t,AlignmentOfHelper<T>::value>
+struct AlignmentOf< const T >
+   : public IntegralConstant<size_t,AlignmentOfHelper<T>::value>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -227,7 +202,8 @@ struct AlignmentOf< const T > : IntegralConstant<size_t,AlignmentOfHelper<T>::va
 // \ingroup type_traits
 */
 template< typename T >
-struct AlignmentOf< volatile T > : IntegralConstant<size_t,AlignmentOfHelper<T>::value>
+struct AlignmentOf< volatile T >
+   : public IntegralConstant<size_t,AlignmentOfHelper<T>::value>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -239,9 +215,28 @@ struct AlignmentOf< volatile T > : IntegralConstant<size_t,AlignmentOfHelper<T>:
 // \ingroup type_traits
 */
 template< typename T >
-struct AlignmentOf< const volatile T > : IntegralConstant<size_t,AlignmentOfHelper<T>::value>
+struct AlignmentOf< const volatile T >
+   : public IntegralConstant<size_t,AlignmentOfHelper<T>::value>
 {};
 /*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the AlignmentOf type trait.
+// \ingroup type_traits
+//
+// The AlignmentOf_v variable template provides a convenient shortcut to access the nested
+// \a value of the AlignmentOf class template. For instance, given the type \a T the following
+// two statements are identical:
+
+   \code
+   constexpr size_t value1 = blaze::AlignmentOf<T>::value;
+   constexpr size_t value2 = blaze::AlignmentOf_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr size_t AlignmentOf_v = AlignmentOf<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/config/Restrict.h
 //  \brief Configuration of the restrict policy of the Blaze library
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -42,6 +42,20 @@
 // Possible settings for the C99 restrict switch:
 //  - Deactivated: \b 0
 //  - Activated  : \b 1
+//
+// \note It is possible to (de-)activate the restrict keyword via command line or by defining
+// this symbol manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_USE_RESTRICT=1 ...
+   \endcode
+
+   \code
+   #define BLAZE_USE_RESTRICT 1
+   #include <blaze/Blaze.h>
+   \endcode
 */
+#ifndef BLAZE_USE_RESTRICT
 #define BLAZE_USE_RESTRICT 1
+#endif
 //*************************************************************************************************

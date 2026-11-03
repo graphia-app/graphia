@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/RemovePointer.h
 //  \brief Header file for the RemovePointer type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -71,7 +71,7 @@ struct RemovePointer
  public:
    //**********************************************************************************************
    /*! \cond BLAZE_INTERNAL */
-   typedef typename std::remove_pointer<T>::type  Type;
+   using Type = typename std::remove_pointer<T>::type;
    /*! \endcond */
    //**********************************************************************************************
 };
@@ -82,17 +82,17 @@ struct RemovePointer
 /*!\brief Auxiliary alias declaration for the RemovePointer type trait.
 // \ingroup type_traits
 //
-// The RemovePointer_ alias declaration provides a convenient shortcut to access the nested
+// The RemovePointer_t alias declaration provides a convenient shortcut to access the nested
 // \a Type of the RemovePointer class template. For instance, given the type \a T the following
 // two type definitions are identical:
 
    \code
-   using Type1 = typename RemovePointer<T>::Type;
-   using Type2 = RemovePointer_<T>;
+   using Type1 = typename blaze::RemovePointer<T>::Type;
+   using Type2 = blaze::RemovePointer_t<T>;
    \endcode
 */
 template< typename T >
-using RemovePointer_ = typename RemovePointer<T>::Type;
+using RemovePointer_t = typename RemovePointer<T>::Type;
 //*************************************************************************************************
 
 } // namespace blaze

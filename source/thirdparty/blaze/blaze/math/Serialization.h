@@ -3,7 +3,7 @@
 //  \file blaze/math/Serialization.h
 //  \brief Header file for the serialization functionality for vectors and matrices
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -41,7 +41,6 @@
 //*************************************************************************************************
 
 #include <blaze/math/serialization/MatrixSerializer.h>
-#include <blaze/math/serialization/TypeValueMapping.h>
 #include <blaze/math/serialization/VectorSerializer.h>
 
 #endif

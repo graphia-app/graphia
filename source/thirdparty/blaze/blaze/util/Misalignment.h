@@ -3,7 +3,7 @@
 //  \file blaze/util/Misalignment.h
 //  \brief Header file for the misalignment function
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -67,7 +67,7 @@ namespace blaze {
 template< typename T >
 BLAZE_ALWAYS_INLINE size_t misalignment( const T* address )
 {
-   return ( reinterpret_cast<size_t>( address ) % AlignmentOf<T>::value );
+   return ( reinterpret_cast<size_t>( address ) % AlignmentOf_v<T> );
 }
 //*************************************************************************************************
 

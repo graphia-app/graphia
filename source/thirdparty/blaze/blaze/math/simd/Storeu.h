@@ -3,7 +3,7 @@
 //  \file blaze/math/simd/Storeu.h
 //  \brief Header file for the SIMD unaligned store functionality
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -45,7 +45,6 @@
 #include <blaze/system/Vectorization.h>
 #include <blaze/util/Complex.h>
 #include <blaze/util/EnableIf.h>
-#include <blaze/util/mpl/And.h>
 #include <blaze/util/StaticAssert.h>
 #include <blaze/util/typetraits/HasSize.h>
 #include <blaze/util/typetraits/IsIntegral.h>
@@ -72,15 +71,17 @@ namespace blaze {
 */
 template< typename T1    // Type of the integral value
         , typename T2 >  // Type of the SIMD data type
-BLAZE_ALWAYS_INLINE EnableIf_< And< IsIntegral<T1>, HasSize<T1,1UL> > >
+BLAZE_ALWAYS_INLINE EnableIf_t< IsIntegral_v<T1> && HasSize_v<T1,1UL> >
    storeu( T1* address, const SIMDi8<T2>& value ) noexcept
 {
-#if BLAZE_AVX2_MODE
-   _mm256_storeu_si256( reinterpret_cast<__m256i*>( address ), (~value).value );
+#if BLAZE_AVX512BW_MODE
+   _mm512_storeu_si512( address, (*value).value );
+#elif BLAZE_AVX2_MODE
+   _mm256_storeu_si256( reinterpret_cast<__m256i*>( address ), (*value).value );
 #elif BLAZE_SSE2_MODE
-   _mm_storeu_si128( reinterpret_cast<__m128i*>( address ), (~value).value );
+   _mm_storeu_si128( reinterpret_cast<__m128i*>( address ), (*value).value );
 #else
-   *address = (~value).value;
+   *address = (*value).value;
 #endif
 }
 //*************************************************************************************************
@@ -99,17 +100,19 @@ BLAZE_ALWAYS_INLINE EnableIf_< And< IsIntegral<T1>, HasSize<T1,1UL> > >
 */
 template< typename T1    // Type of the integral value
         , typename T2 >  // Type of the SIMD data type
-BLAZE_ALWAYS_INLINE EnableIf_< And< IsIntegral<T1>, HasSize<T1,1UL> > >
+BLAZE_ALWAYS_INLINE EnableIf_t< IsIntegral_v<T1> && HasSize_v<T1,1UL> >
    storeu( complex<T1>* address, const SIMDci8<T2>& value ) noexcept
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<T1> ) == 2UL*sizeof( T1 ) );
 
-#if BLAZE_AVX2_MODE
-   _mm256_storeu_si256( reinterpret_cast<__m256i*>( address ), (~value).value );
+#if BLAZE_AVX512BW_MODE
+   _mm512_storeu_si512( address, (*value).value );
+#elif BLAZE_AVX2_MODE
+   _mm256_storeu_si256( reinterpret_cast<__m256i*>( address ), (*value).value );
 #elif BLAZE_SSE2_MODE
-   _mm_storeu_si128( reinterpret_cast<__m128i*>( address ), (~value).value );
+   _mm_storeu_si128( reinterpret_cast<__m128i*>( address ), (*value).value );
 #else
-   *address = (~value).value;
+   *address = (*value).value;
 #endif
 }
 //*************************************************************************************************
@@ -136,15 +139,17 @@ BLAZE_ALWAYS_INLINE EnableIf_< And< IsIntegral<T1>, HasSize<T1,1UL> > >
 */
 template< typename T1    // Type of the integral value
         , typename T2 >  // Type of the SIMD data type
-BLAZE_ALWAYS_INLINE EnableIf_< And< IsIntegral<T1>, HasSize<T1,2UL> > >
+BLAZE_ALWAYS_INLINE EnableIf_t< IsIntegral_v<T1> && HasSize_v<T1,2UL> >
    storeu( T1* address, const SIMDi16<T2>& value ) noexcept
 {
-#if BLAZE_AVX2_MODE
-   _mm256_storeu_si256( reinterpret_cast<__m256i*>( address ), (~value).value );
+#if BLAZE_AVX512BW_MODE
+   _mm512_storeu_si512( address, (*value).value );
+#elif BLAZE_AVX2_MODE
+   _mm256_storeu_si256( reinterpret_cast<__m256i*>( address ), (*value).value );
 #elif BLAZE_SSE2_MODE
-   _mm_storeu_si128( reinterpret_cast<__m128i*>( address ), (~value).value );
+   _mm_storeu_si128( reinterpret_cast<__m128i*>( address ), (*value).value );
 #else
-   *address = (~value).value;
+   *address = (*value).value;
 #endif
 }
 //*************************************************************************************************
@@ -163,17 +168,19 @@ BLAZE_ALWAYS_INLINE EnableIf_< And< IsIntegral<T1>, HasSize<T1,2UL> > >
 */
 template< typename T1    // Type of the integral value
         , typename T2 >  // Type of the SIMD data type
-BLAZE_ALWAYS_INLINE EnableIf_< And< IsIntegral<T1>, HasSize<T1,2UL> > >
+BLAZE_ALWAYS_INLINE EnableIf_t< IsIntegral_v<T1> && HasSize_v<T1,2UL> >
    storeu( complex<T1>* address, const SIMDci16<T2>& value ) noexcept
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<T1> ) == 2UL*sizeof( T1 ) );
 
-#if BLAZE_AVX2_MODE
-   _mm256_storeu_si256( reinterpret_cast<__m256i*>( address ), (~value).value );
+#if BLAZE_AVX512BW_MODE
+   _mm512_storeu_si512( address, (*value).value );
+#elif BLAZE_AVX2_MODE
+   _mm256_storeu_si256( reinterpret_cast<__m256i*>( address ), (*value).value );
 #elif BLAZE_SSE2_MODE
-   _mm_storeu_si128( reinterpret_cast<__m128i*>( address ), (~value).value );
+   _mm_storeu_si128( reinterpret_cast<__m128i*>( address ), (*value).value );
 #else
-   *address = (~value).value;
+   *address = (*value).value;
 #endif
 }
 //*************************************************************************************************
@@ -200,18 +207,20 @@ BLAZE_ALWAYS_INLINE EnableIf_< And< IsIntegral<T1>, HasSize<T1,2UL> > >
 */
 template< typename T1    // Type of the integral value
         , typename T2 >  // Type of the SIMD data type
-BLAZE_ALWAYS_INLINE EnableIf_< And< IsIntegral<T1>, HasSize<T1,4UL> > >
+BLAZE_ALWAYS_INLINE EnableIf_t< IsIntegral_v<T1> && HasSize_v<T1,4UL> >
    storeu( T1* address, const SIMDi32<T2>& value ) noexcept
 {
-#if BLAZE_MIC_MODE
-   _mm512_packstorelo_epi32( address     , (~value).value );
-   _mm512_packstorehi_epi32( address+16UL, (~value).value );
+#if BLAZE_AVX512F_MODE
+   _mm512_mask_storeu_epi32( address, 0xFFFF, (*value).value );
+#elif BLAZE_MIC_MODE
+   _mm512_packstorelo_epi32( address     , (*value).value );
+   _mm512_packstorehi_epi32( address+16UL, (*value).value );
 #elif BLAZE_AVX2_MODE
-   _mm256_storeu_si256( reinterpret_cast<__m256i*>( address ), (~value).value );
+   _mm256_storeu_si256( reinterpret_cast<__m256i*>( address ), (*value).value );
 #elif BLAZE_SSE2_MODE
-   _mm_storeu_si128( reinterpret_cast<__m128i*>( address ), (~value).value );
+   _mm_storeu_si128( reinterpret_cast<__m128i*>( address ), (*value).value );
 #else
-   *address = (~value).value;
+   *address = (*value).value;
 #endif
 }
 //*************************************************************************************************
@@ -230,20 +239,22 @@ BLAZE_ALWAYS_INLINE EnableIf_< And< IsIntegral<T1>, HasSize<T1,4UL> > >
 */
 template< typename T1    // Type of the integral value
         , typename T2 >  // Type of the SIMD data type
-BLAZE_ALWAYS_INLINE EnableIf_< And< IsIntegral<T1>, HasSize<T1,4UL> > >
+BLAZE_ALWAYS_INLINE EnableIf_t< IsIntegral_v<T1> && HasSize_v<T1,4UL> >
    storeu( complex<T1>* address, const SIMDci32<T2>& value ) noexcept
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<T1> ) == 2UL*sizeof( T1 ) );
 
-#if BLAZE_MIC_MODE
-   _mm512_packstorelo_epi32( address    , (~value).value );
-   _mm512_packstorehi_epi32( address+8UL, (~value).value );
+#if BLAZE_AVX512F_MODE
+   _mm512_mask_storeu_epi32( address, 0xFFFF, (*value).value );
+#elif BLAZE_MIC_MODE
+   _mm512_packstorelo_epi32( address    , (*value).value );
+   _mm512_packstorehi_epi32( address+8UL, (*value).value );
 #elif BLAZE_AVX2_MODE
-   _mm256_storeu_si256( reinterpret_cast<__m256i*>( address ), (~value).value );
+   _mm256_storeu_si256( reinterpret_cast<__m256i*>( address ), (*value).value );
 #elif BLAZE_SSE2_MODE
-   _mm_storeu_si128( reinterpret_cast<__m128i*>( address ), (~value).value );
+   _mm_storeu_si128( reinterpret_cast<__m128i*>( address ), (*value).value );
 #else
-   *address = (~value).value;
+   *address = (*value).value;
 #endif
 }
 //*************************************************************************************************
@@ -270,18 +281,20 @@ BLAZE_ALWAYS_INLINE EnableIf_< And< IsIntegral<T1>, HasSize<T1,4UL> > >
 */
 template< typename T1    // Type of the integral value
         , typename T2 >  // Type of the SIMD data type
-BLAZE_ALWAYS_INLINE EnableIf_< And< IsIntegral<T1>, HasSize<T1,8UL> > >
+BLAZE_ALWAYS_INLINE EnableIf_t< IsIntegral_v<T1> && HasSize_v<T1,8UL> >
    storeu( T1* address, const SIMDi64<T2>& value ) noexcept
 {
-#if BLAZE_MIC_MODE
-   _mm512_packstorelo_epi64( address    , (~value).value );
-   _mm512_packstorehi_epi64( address+8UL, (~value).value );
+#if BLAZE_AVX512F_MODE
+   _mm512_mask_storeu_epi64( address, 0xFF, (*value).value );
+#elif BLAZE_MIC_MODE
+   _mm512_packstorelo_epi64( address    , (*value).value );
+   _mm512_packstorehi_epi64( address+8UL, (*value).value );
 #elif BLAZE_AVX2_MODE
-   _mm256_storeu_si256( reinterpret_cast<__m256i*>( address ), (~value).value );
+   _mm256_storeu_si256( reinterpret_cast<__m256i*>( address ), (*value).value );
 #elif BLAZE_SSE2_MODE
-   _mm_storeu_si128( reinterpret_cast<__m128i*>( address ), (~value).value );
+   _mm_storeu_si128( reinterpret_cast<__m128i*>( address ), (*value).value );
 #else
-   *address = (~value).value;
+   *address = (*value).value;
 #endif
 }
 //*************************************************************************************************
@@ -300,20 +313,22 @@ BLAZE_ALWAYS_INLINE EnableIf_< And< IsIntegral<T1>, HasSize<T1,8UL> > >
 */
 template< typename T1    // Type of the integral value
         , typename T2 >  // Type of the SIMD data type
-BLAZE_ALWAYS_INLINE EnableIf_< And< IsIntegral<T1>, HasSize<T1,8UL> > >
+BLAZE_ALWAYS_INLINE EnableIf_t< IsIntegral_v<T1> && HasSize_v<T1,8UL> >
    storeu( complex<T1>* address, const SIMDci64<T2>& value ) noexcept
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<T1> ) == 2UL*sizeof( T1 ) );
 
-#if BLAZE_MIC_MODE
-   _mm512_packstorelo_epi64( address    , (~value).value );
-   _mm512_packstorehi_epi64( address+4UL, (~value).value );
+#if BLAZE_AVX512F_MODE
+   _mm512_mask_storeu_epi64( address, 0xFF, (*value).value );
+#elif BLAZE_MIC_MODE
+   _mm512_packstorelo_epi64( address    , (*value).value );
+   _mm512_packstorehi_epi64( address+4UL, (*value).value );
 #elif BLAZE_AVX2_MODE
-   _mm256_storeu_si256( reinterpret_cast<__m256i*>( address ), (~value).value );
+   _mm256_storeu_si256( reinterpret_cast<__m256i*>( address ), (*value).value );
 #elif BLAZE_SSE2_MODE
-   _mm_storeu_si128( reinterpret_cast<__m128i*>( address ), (~value).value );
+   _mm_storeu_si128( reinterpret_cast<__m128i*>( address ), (*value).value );
 #else
-   *address = (~value).value;
+   *address = (*value).value;
 #endif
 }
 //*************************************************************************************************
@@ -341,16 +356,18 @@ BLAZE_ALWAYS_INLINE EnableIf_< And< IsIntegral<T1>, HasSize<T1,8UL> > >
 template< typename T >  // Type of the operand
 BLAZE_ALWAYS_INLINE void storeu( float* address, const SIMDf32<T>& value ) noexcept
 {
-#if BLAZE_MIC_MODE
-   const SIMDfloat( (~value).eval().value );
-   _mm512_packstorelo_ps( address     , tmp );
-   _mm512_packstorehi_ps( address+16UL, tmp );
+#if BLAZE_AVX512F_MODE
+   _mm512_storeu_ps( address, (*value).value );
+#elif BLAZE_MIC_MODE
+   const SIMDfloat tmp( (*value).eval().value );
+   _mm512_packstorelo_ps( address     , tmp.value );
+   _mm512_packstorehi_ps( address+16UL, tmp.value );
 #elif BLAZE_AVX_MODE
-   _mm256_storeu_ps( address, (~value).eval().value );
+   _mm256_storeu_ps( address, (*value).eval().value );
 #elif BLAZE_SSE_MODE
-   _mm_storeu_ps( address, (~value).eval().value );
+   _mm_storeu_ps( address, (*value).eval().value );
 #else
-   *address = (~value).eval().value;
+   *address = (*value).eval().value;
 #endif
 }
 //*************************************************************************************************
@@ -371,7 +388,9 @@ BLAZE_ALWAYS_INLINE void storeu( complex<float>* address, const SIMDcfloat& valu
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<float> ) == 2UL*sizeof( float ) );
 
-#if BLAZE_MIC_MODE
+#if BLAZE_AVX512F_MODE
+   _mm512_storeu_ps( address, (*value).value );
+#elif BLAZE_MIC_MODE
    _mm512_packstorelo_ps( reinterpret_cast<float*>( address     ), value.value );
    _mm512_packstorehi_ps( reinterpret_cast<float*>( address+8UL ), value.value );
 #elif BLAZE_AVX_MODE
@@ -407,16 +426,18 @@ BLAZE_ALWAYS_INLINE void storeu( complex<float>* address, const SIMDcfloat& valu
 template< typename T >  // Type of the operand
 BLAZE_ALWAYS_INLINE void storeu( double* address, const SIMDf64<T>& value ) noexcept
 {
-#if BLAZE_MIC_MODE
-   const SIMDdouble tmp( (~value).eval().value );
-   _mm512_packstorelo_pd( address    , tmp );
-   _mm512_packstorehi_pd( address+8UL, tmp );
+#if BLAZE_AVX512F_MODE
+   _mm512_storeu_pd( address, (*value).value );
+#elif BLAZE_MIC_MODE
+   const SIMDdouble tmp( (*value).eval().value );
+   _mm512_packstorelo_pd( address    , tmp.value );
+   _mm512_packstorehi_pd( address+8UL, tmp.value );
 #elif BLAZE_AVX_MODE
-   _mm256_storeu_pd( address, (~value).eval().value );
+   _mm256_storeu_pd( address, (*value).eval().value );
 #elif BLAZE_SSE2_MODE
-   _mm_storeu_pd( address, (~value).eval().value );
+   _mm_storeu_pd( address, (*value).eval().value );
 #else
-   *address = (~value).eval().value;
+   *address = (*value).eval().value;
 #endif
 }
 //*************************************************************************************************
@@ -437,7 +458,9 @@ BLAZE_ALWAYS_INLINE void storeu( complex<double>* address, const SIMDcdouble& va
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<double> ) == 2UL*sizeof( double ) );
 
-#if BLAZE_MIC_MODE
+#if BLAZE_AVX512F_MODE
+   _mm512_storeu_pd( address, (*value).value );
+#elif BLAZE_MIC_MODE
    _mm512_packstorelo_pd( reinterpret_cast<double*>( address     ), value.value );
    _mm512_packstorehi_pd( reinterpret_cast<double*>( address+4UL ), value.value );
 #elif BLAZE_AVX_MODE

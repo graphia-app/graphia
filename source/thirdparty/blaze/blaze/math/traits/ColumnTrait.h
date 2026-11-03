@@ -3,7 +3,7 @@
 //  \file blaze/math/traits/ColumnTrait.h
 //  \brief Header file for the column trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,13 +40,9 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/util/InvalidType.h>
-#include <blaze/util/mpl/If.h>
-#include <blaze/util/mpl/Or.h>
-#include <blaze/util/typetraits/Decay.h>
-#include <blaze/util/typetraits/IsConst.h>
-#include <blaze/util/typetraits/IsReference.h>
-#include <blaze/util/typetraits/IsVolatile.h>
+#include <utility>
+#include <blaze/math/Infinity.h>
+#include <blaze/util/Types.h>
 
 
 namespace blaze {
@@ -58,40 +54,49 @@ namespace blaze {
 //=================================================================================================
 
 //*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename, size_t... > struct ColumnTrait;
+template< typename, size_t, typename = void > struct ColumnTraitEval1;
+template< typename, size_t, typename = void > struct ColumnTraitEval2;
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< size_t I, typename T >
+auto evalColumnTrait( const volatile T& ) -> ColumnTraitEval1<T,I>;
+
+template< typename T >
+auto evalColumnTrait( const volatile T& ) -> ColumnTraitEval1<T,inf>;
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
 /*!\brief Base template for the ColumnTrait class.
 // \ingroup math_traits
 //
 // \section columntrait_general General
 //
 // The ColumnTrait class template offers the possibility to select the resulting data type when
-// creating a view on a specific column of a dense or sparse matrix. ColumnTrait defines the nested
-// type \a Type, which represents the resulting data type of the column operation. In case the
-// given data type is not a dense or sparse matrix type, the resulting data type \a Type is
-// set to \a INVALID_TYPE. Note that \a const and \a volatile qualifiers and reference modifiers
-// are generally ignored.
-//
-// Per default, the ColumnTrait template only supports the following matrix types:
-//
-// <ul>
-//    <li>blaze::StaticMatrix</li>
-//    <li>blaze::HybridMatrix</li>
-//    <li>blaze::DynamicMatrix</li>
-//    <li>blaze::CustomMatrix</li>
-//    <li>blaze::CompressedMatrix</li>
-//    <li>blaze::Submatrix</li>
-// </ul>
+// creating a view on a specific column of a dense or sparse matrix. In case the given type \a MT
+// is a dense or sparse matrix type, ColumnTrait defines the nested type \a Type, which represents
+// the resulting data type of the column operation. Otherwise there is no nested type \a Type.
+// Note that \a const and \a volatile qualifiers and reference modifiers are generally ignored.
 //
 //
 // \section columntrait_specializations Creating custom specializations
 //
-// It is possible to specialize the ColumnTrait template for additional user-defined matrix types.
-// The following example shows the according specialization for the DynamicMatrix class template:
+// Per default, ColumnTrait supports all matrix types of the Blaze library (including views and
+// adaptors). For all other data types it is possible to specialize the ColumnTrait template. The
+// following example shows the according specialization for the DynamicMatrix class template:
 
    \code
-   template< typename T1, bool SO >
-   struct ColumnTrait< DynamicMatrix<T1,SO> >
+   template< typename T1, bool SO, size_t... CCAs >
+   struct ColumnTrait< DynamicMatrix<T1,SO>, CCAs... >
    {
-      typedef DynamicVector<T1,true>  Type;
+      using Type = DynamicVector<T1,true>;
    };
    \endcode
 
@@ -105,33 +110,19 @@ namespace blaze {
    using blaze::columnMajor;
 
    // Definition of the column type of a column-major dynamic matrix
-   typedef blaze::DynamicMatrix<int,columnMajor>    MatrixType1;
-   typedef typename ColumnTrait<MatrixType1>::Type  ColumnType1;
+   using MatrixType1 = blaze::DynamicMatrix<int,columnMajor>;
+   using ResultType1 = typename blaze::ColumnTrait<MatrixType1>::Type;
 
-   // Definition of the column type of the row-major static matrix
-   typedef blaze::StaticMatrix<int,3UL,3UL,rowMajor>  MatrixType2;
-   typedef typename ColumnTrait<MatrixType2>::Type    ColumnType2;
+   // Definition of the column type for the 1st column of a row-major static matrix
+   using MatrixType2 = blaze::StaticMatrix<int,3UL,4UL,rowMajor>;
+   using ResultType2 = typename blaze::ColumnTrait<MatrixType2,1UL>::Type;
    \endcode
 */
-template< typename MT >  // Type of the matrix
+template< typename MT       // Type of the matrix
+        , size_t... CCAs >  // Compile time column arguments
 struct ColumnTrait
-{
- private:
-   //**********************************************************************************************
-   /*! \cond BLAZE_INTERNAL */
-   struct Failure { using Type = INVALID_TYPE; };
-   /*! \endcond */
-   //**********************************************************************************************
-
- public:
-   //**********************************************************************************************
-   /*! \cond BLAZE_INTERNAL */
-   using Type = typename If_< Or< IsConst<MT>, IsVolatile<MT>, IsReference<MT> >
-                            , ColumnTrait< Decay_<MT> >
-                            , Failure >::Type;
-   /*! \endcond */
-   //**********************************************************************************************
-};
+   : public decltype( evalColumnTrait<CCAs...>( std::declval<MT&>() ) )
+{};
 //*************************************************************************************************
 
 
@@ -139,17 +130,47 @@ struct ColumnTrait
 /*!\brief Auxiliary alias declaration for the ColumnTrait type trait.
 // \ingroup math_traits
 //
-// The ColumnTrait_ alias declaration provides a convenient shortcut to access the nested
+// The ColumnTrait_t alias declaration provides a convenient shortcut to access the nested
 // \a Type of the ColumnTrait class template. For instance, given the matrix type \a MT the
 // following two type definitions are identical:
 
    \code
-   using Type1 = typename ColumnTrait<MT>::Type;
-   using Type2 = ColumnTrait_<MT>;
+   using Type1 = typename blaze::ColumnTrait<MT>::Type;
+   using Type2 = blaze::ColumnTrait_t<MT>;
    \endcode
 */
-template< typename MT >  // Type of the matrix
-using ColumnTrait_ = typename ColumnTrait<MT>::Type;
+template< typename MT       // Type of the matrix
+        , size_t... CCAs >  // Compile time column arguments
+using ColumnTrait_t = typename ColumnTrait<MT,CCAs...>::Type;
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief First auxiliary helper struct for the ColumnTrait type trait.
+// \ingroup math_traits
+*/
+template< typename MT  // Type of the matrix
+        , size_t I     // Compile time column index
+        , typename >   // Restricting condition
+struct ColumnTraitEval1
+   : public ColumnTraitEval2<MT,I>
+{};
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Second auxiliary helper struct for the ColumnTrait type trait.
+// \ingroup math_traits
+*/
+template< typename MT  // Type of the matrix
+        , size_t I     // Compile time column index
+        , typename >   // Restricting condition
+struct ColumnTraitEval2
+{};
+/*! \endcond */
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/math/lapack/clapack/orgrq.h
 //  \brief Header file for the CLAPACK orgrq wrapper functions
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,6 +40,7 @@
 // Includes
 //*************************************************************************************************
 
+#include <blaze/math/blas/Types.h>
 #include <blaze/util/Complex.h>
 #include <blaze/util/StaticAssert.h>
 
@@ -52,12 +53,18 @@
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
+#if !defined(INTEL_MKL_VERSION)
 extern "C" {
 
-void sorgrq_( int* m, int* n, int* k, float*  A, int* lda, float*  tau, float*  work, int* lwork, int* info );
-void dorgrq_( int* m, int* n, int* k, double* A, int* lda, double* tau, double* work, int* lwork, int* info );
+void sorgrq_( blaze::blas_int_t* m, blaze::blas_int_t* n, blaze::blas_int_t* k, float* A,
+              blaze::blas_int_t* lda, float* tau, float* work, blaze::blas_int_t* lwork,
+              blaze::blas_int_t* info );
+void dorgrq_( blaze::blas_int_t* m, blaze::blas_int_t* n, blaze::blas_int_t* k, double* A,
+              blaze::blas_int_t* lda, double* tau, double* work, blaze::blas_int_t* lwork,
+              blaze::blas_int_t* info );
 
 }
+#endif
 /*! \endcond */
 //*************************************************************************************************
 
@@ -75,11 +82,11 @@ namespace blaze {
 //*************************************************************************************************
 /*!\name LAPACK functions to reconstruct Q from a RQ decomposition (orgrq) */
 //@{
-inline void orgrq( int m, int n, int k, float* A, int lda, const float* tau,
-                   float* work, int lwork, int* info );
+void orgrq( blas_int_t m, blas_int_t n, blas_int_t k, float* A, blas_int_t lda,
+            const float* tau, float* work, blas_int_t lwork, blas_int_t* info );
 
-inline void orgrq( int m, int n, int k, double* A, int lda, const double* tau,
-                   double* work, int lwork, int* info );
+void orgrq( blas_int_t m, blas_int_t n, blas_int_t k, double* A, blas_int_t lda,
+            const double* tau, double* work, blas_int_t lwork, blas_int_t* info );
 //@}
 //*************************************************************************************************
 
@@ -115,8 +122,13 @@ inline void orgrq( int m, int n, int k, double* A, int lda, const double* tau,
 // is available and linked to the executable. Otherwise a call to this function will result in a
 // linker error.
 */
-inline void orgrq( int m, int n, int k, float* A, int lda, const float* tau, float* work, int lwork, int* info )
+inline void orgrq( blas_int_t m, blas_int_t n, blas_int_t k, float* A, blas_int_t lda,
+                   const float* tau, float* work, blas_int_t lwork, blas_int_t* info )
 {
+#if defined(INTEL_MKL_VERSION)
+   BLAZE_STATIC_ASSERT( sizeof( MKL_INT ) == sizeof( blas_int_t ) );
+#endif
+
    sorgrq_( &m, &n, &k, A, &lda, const_cast<float*>( tau ), work, &lwork, info );
 }
 //*************************************************************************************************
@@ -153,8 +165,13 @@ inline void orgrq( int m, int n, int k, float* A, int lda, const float* tau, flo
 // is available and linked to the executable. Otherwise a call to this function will result in a
 // linker error.
 */
-inline void orgrq( int m, int n, int k, double* A, int lda, const double* tau, double* work, int lwork, int* info )
+inline void orgrq( blas_int_t m, blas_int_t n, blas_int_t k, double* A, blas_int_t lda,
+                   const double* tau, double* work, blas_int_t lwork, blas_int_t* info )
 {
+#if defined(INTEL_MKL_VERSION)
+   BLAZE_STATIC_ASSERT( sizeof( MKL_INT ) == sizeof( blas_int_t ) );
+#endif
+
    dorgrq_( &m, &n, &k, A, &lda, const_cast<double*>( tau ), work, &lwork, info );
 }
 //*************************************************************************************************

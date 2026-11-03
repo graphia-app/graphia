@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/IsAligned.h
 //  \brief Header file for the IsAligned type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,8 +40,7 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/util/FalseType.h>
-#include <blaze/util/TrueType.h>
+#include <blaze/util/IntegralConstant.h>
 
 
 namespace blaze {
@@ -84,7 +83,8 @@ namespace blaze {
    \endcode
 */
 template< typename T >
-struct IsAligned : public FalseType
+struct IsAligned
+   : public FalseType
 {};
 //*************************************************************************************************
 
@@ -95,7 +95,8 @@ struct IsAligned : public FalseType
 // \ingroup math_type_traits
 */
 template< typename T >
-struct IsAligned< const T > : public IsAligned<T>
+struct IsAligned< const T >
+   : public IsAligned<T>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -107,7 +108,8 @@ struct IsAligned< const T > : public IsAligned<T>
 // \ingroup math_type_traits
 */
 template< typename T >
-struct IsAligned< volatile T > : public IsAligned<T>
+struct IsAligned< volatile T >
+   : public IsAligned<T>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -119,9 +121,28 @@ struct IsAligned< volatile T > : public IsAligned<T>
 // \ingroup math_type_traits
 */
 template< typename T >
-struct IsAligned< const volatile T > : public IsAligned<T>
+struct IsAligned< const volatile T >
+   : public IsAligned<T>
 {};
 /*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsAligned type trait.
+// \ingroup math_type_traits
+//
+// The IsAligned_v variable template provides a convenient shortcut to access the nested
+// \a value of the IsAligned class template. For instance, given the type \a T the following
+// two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsAligned<T>::value;
+   constexpr bool value2 = blaze::IsAligned_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsAligned_v = IsAligned<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

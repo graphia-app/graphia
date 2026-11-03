@@ -3,7 +3,7 @@
 //  \file blaze/math/StaticVector.h
 //  \brief Header file for the complete StaticVector implementation
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -44,6 +44,7 @@
 #include <blaze/math/DenseVector.h>
 #include <blaze/math/DynamicVector.h>
 #include <blaze/math/StaticMatrix.h>
+#include <blaze/math/ZeroVector.h>
 #include <blaze/util/Random.h>
 
 
@@ -62,122 +63,80 @@ namespace blaze {
 //
 // This specialization of the Rand class creates random instances of StaticVector.
 */
-template< typename Type  // Data type of the vector
-        , size_t N       // Number of elements
-        , bool TF >      // Transpose flag
-class Rand< StaticVector<Type,N,TF> >
+template< typename Type     // Data type of the vector
+        , size_t N          // Number of elements
+        , bool TF           // Transpose flag
+        , AlignmentFlag AF  // Alignment flag
+        , PaddingFlag PF    // Padding flag
+        , typename Tag >    // Type tag
+class Rand< StaticVector<Type,N,TF,AF,PF,Tag> >
 {
  public:
-   //**Generate functions**************************************************************************
-   /*!\name Generate functions */
-   //@{
-   inline const StaticVector<Type,N,TF> generate() const;
-
-   template< typename Arg >
-   inline const StaticVector<Type,N,TF> generate( const Arg& min, const Arg& max ) const;
-   //@}
+   //**********************************************************************************************
+   /*!\brief Generation of a random StaticVector.
+   //
+   // \return The generated random vector.
+   */
+   inline const StaticVector<Type,N,TF,AF,PF,Tag> generate() const
+   {
+      StaticVector<Type,N,TF,AF,PF,Tag> vector;
+      randomize( vector );
+      return vector;
+   }
    //**********************************************************************************************
 
-   //**Randomize functions*************************************************************************
-   /*!\name Randomize functions */
-   //@{
-   inline void randomize( StaticVector<Type,N,TF>& vector ) const;
+   //**********************************************************************************************
+   /*!\brief Generation of a random StaticVector.
+   //
+   // \param min The smallest possible value for a vector element.
+   // \param max The largest possible value for a vector element.
+   // \return The generated random vector.
+   */
+   template< typename Arg >  // Min/max argument type
+   inline const StaticVector<Type,N,TF,AF,PF,Tag> generate( const Arg& min, const Arg& max ) const
+   {
+      StaticVector<Type,N,TF,AF,PF,Tag> vector;
+      randomize( vector, min, max );
+      return vector;
+   }
+   //**********************************************************************************************
 
-   template< typename Arg >
-   inline void randomize( StaticVector<Type,N,TF>& vector, const Arg& min, const Arg& max ) const;
-   //@}
+   //**********************************************************************************************
+   /*!\brief Randomization of a StaticVector.
+   //
+   // \param vector The vector to be randomized.
+   // \return void
+   */
+   inline void randomize( StaticVector<Type,N,TF,AF,PF,Tag>& vector ) const
+   {
+      using blaze::randomize;
+
+      for( size_t i=0UL; i<N; ++i ) {
+         randomize( vector[i] );
+      }
+   }
+   //**********************************************************************************************
+
+   //**********************************************************************************************
+   /*!\brief Randomization of a StaticVector.
+   //
+   // \param vector The vector to be randomized.
+   // \param min The smallest possible value for a vector element.
+   // \param max The largest possible value for a vector element.
+   // \return void
+   */
+   template< typename Arg >  // Min/max argument type
+   inline void randomize( StaticVector<Type,N,TF,AF,PF,Tag>& vector,
+                          const Arg& min, const Arg& max ) const
+   {
+      using blaze::randomize;
+
+      for( size_t i=0UL; i<N; ++i ) {
+         randomize( vector[i], min, max );
+      }
+   }
    //**********************************************************************************************
 };
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Generation of a random StaticVector.
-//
-// \return The generated random vector.
-*/
-template< typename Type  // Data type of the vector
-        , size_t N       // Number of elements
-        , bool TF >      // Transpose flag
-inline const StaticVector<Type,N,TF> Rand< StaticVector<Type,N,TF> >::generate() const
-{
-   StaticVector<Type,N,TF> vector;
-   randomize( vector );
-   return vector;
-}
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Generation of a random StaticVector.
-//
-// \param min The smallest possible value for a vector element.
-// \param max The largest possible value for a vector element.
-// \return The generated random vector.
-*/
-template< typename Type   // Data type of the vector
-        , size_t N        // Number of elements
-        , bool TF >       // Transpose flag
-template< typename Arg >  // Min/max argument type
-inline const StaticVector<Type,N,TF>
-   Rand< StaticVector<Type,N,TF> >::generate( const Arg& min, const Arg& max ) const
-{
-   StaticVector<Type,N,TF> vector;
-   randomize( vector, min, max );
-   return vector;
-}
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Randomization of a StaticVector.
-//
-// \param vector The vector to be randomized.
-// \return void
-*/
-template< typename Type  // Data type of the vector
-        , size_t N       // Number of elements
-        , bool TF >      // Transpose flag
-inline void Rand< StaticVector<Type,N,TF> >::randomize( StaticVector<Type,N,TF>& vector ) const
-{
-   using blaze::randomize;
-
-   for( size_t i=0UL; i<N; ++i ) {
-      randomize( vector[i] );
-   }
-}
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Randomization of a StaticVector.
-//
-// \param vector The vector to be randomized.
-// \param min The smallest possible value for a vector element.
-// \param max The largest possible value for a vector element.
-// \return void
-*/
-template< typename Type   // Data type of the vector
-        , size_t N        // Number of elements
-        , bool TF >       // Transpose flag
-template< typename Arg >  // Min/max argument type
-inline void Rand< StaticVector<Type,N,TF> >::randomize( StaticVector<Type,N,TF>& vector,
-                                                        const Arg& min, const Arg& max ) const
-{
-   using blaze::randomize;
-
-   for( size_t i=0UL; i<N; ++i ) {
-      randomize( vector[i], min, max );
-   }
-}
 /*! \endcond */
 //*************************************************************************************************
 

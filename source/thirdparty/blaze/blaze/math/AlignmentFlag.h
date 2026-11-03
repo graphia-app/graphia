@@ -1,9 +1,9 @@
 //=================================================================================================
 /*!
 //  \file blaze/math/AlignmentFlag.h
-//  \brief Header file for the alignment flag values
+//  \brief Header file for the alignment flag enumeration
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,49 +40,48 @@ namespace blaze {
 
 //=================================================================================================
 //
-//  ALIGNMENT FLAG VALUES
+//  ALIGNMENT FLAG
 //
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\brief Alignment flag for unaligned vectors and matrices.
+/*!\brief Alignment flag for (un-)aligned vectors and matrices.
 // \ingroup math
 //
-// Via this flag it is possible to specify subvectors, submatrices, custom vectors and matrices
-// as unaligned. The following example demonstrates the setup of an unaligned subvector:
+// Via these flags it is possible to specify subvectors, submatrices, custom vectors and matrices
+// as unaligned or aligned. The following example demonstrates the setup of an unaligned subvector:
 
    \code
    using blaze::columnVector;
    using blaze::unaligned;
 
-   typedef blaze::DynamicVector<int,columnVector>  VectorType;
-
-   VectorType v( 100UL );
-   Subvector<VectorType,unaligned> sv = subvector<unaligned>( v, 10UL, 20UL );
+   blaze::DynamicVector<int,columnVector> v( 100UL );
+   auto sv = subvector<unaligned>( v, 10UL, 20UL );
    \endcode
 */
-const bool unaligned = false;
+enum AlignmentFlag : bool
+{
+   unaligned = false,  //!< Flag for unaligned vectors and matrices.
+   aligned   = true    //!< Flag for aligned vectors and matrices.
+};
 //*************************************************************************************************
 
 
 //*************************************************************************************************
-/*!\brief Alignment flag for aligned vectors and matrices.
+/*!\brief Negating the given alignment flag.
 // \ingroup math
 //
-// Via this flag it is possible to specify subvectors, submatrices, custom vectors and matrices
-// as aligned. The following example demonstrates the setup of an aligned subvector:
-
-   \code
-   using blaze::columnVector;
-   using blaze::aligned;
-
-   typedef blaze::DynamicVector<int,columnVector>  VectorType;
-
-   VectorType v( 100UL );
-   Subvector<VectorType,aligned> sv = subvector<aligned>( v, 8UL, 32UL );
-   \endcode
+// \param flag The given alignment flag to be negated.
+// \return The negated alignment flag.
+//
+// This logical NOT operator negates the given alignment flag. In case the given flag represents
+// \a unaligned, the function returns \a aligned, in case it represents \a aligned it returns
+// \a unaligned.
 */
-const bool aligned = true;
+constexpr AlignmentFlag operator!( AlignmentFlag flag ) noexcept
+{
+   return static_cast<AlignmentFlag>( !static_cast<bool>( flag ) );
+}
 //*************************************************************************************************
 
 } // namespace blaze

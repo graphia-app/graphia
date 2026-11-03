@@ -3,7 +3,7 @@
 //  \file blaze/math/SparseVector.h
 //  \brief Header file for all basic SparseVector functionality
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -41,22 +41,38 @@
 //*************************************************************************************************
 
 #include <blaze/math/expressions/DenseVector.h>
+#include <blaze/math/expressions/DVecSVecEqualExpr.h>
 #include <blaze/math/expressions/DVecSVecInnerExpr.h>
+#include <blaze/math/expressions/DVecSVecKronExpr.h>
 #include <blaze/math/expressions/DVecSVecMultExpr.h>
 #include <blaze/math/expressions/SparseVector.h>
 #include <blaze/math/expressions/SVecDVecDivExpr.h>
 #include <blaze/math/expressions/SVecDVecInnerExpr.h>
+#include <blaze/math/expressions/SVecDVecKronExpr.h>
 #include <blaze/math/expressions/SVecDVecMultExpr.h>
 #include <blaze/math/expressions/SVecEvalExpr.h>
-#include <blaze/math/expressions/SVecForEachExpr.h>
+#include <blaze/math/expressions/SVecExpandExpr.h>
+#include <blaze/math/expressions/SVecFixExpr.h>
+#include <blaze/math/expressions/SVecMapExpr.h>
+#include <blaze/math/expressions/SVecMeanExpr.h>
+#include <blaze/math/expressions/SVecNoAliasExpr.h>
+#include <blaze/math/expressions/SVecNormExpr.h>
+#include <blaze/math/expressions/SVecNoSIMDExpr.h>
+#include <blaze/math/expressions/SVecReduceExpr.h>
+#include <blaze/math/expressions/SVecRepeatExpr.h>
 #include <blaze/math/expressions/SVecScalarDivExpr.h>
 #include <blaze/math/expressions/SVecScalarMultExpr.h>
 #include <blaze/math/expressions/SVecSerialExpr.h>
+#include <blaze/math/expressions/SVecStdDevExpr.h>
 #include <blaze/math/expressions/SVecSVecAddExpr.h>
+#include <blaze/math/expressions/SVecSVecEqualExpr.h>
 #include <blaze/math/expressions/SVecSVecInnerExpr.h>
+#include <blaze/math/expressions/SVecSVecKronExpr.h>
 #include <blaze/math/expressions/SVecSVecMultExpr.h>
 #include <blaze/math/expressions/SVecSVecSubExpr.h>
 #include <blaze/math/expressions/SVecTransExpr.h>
+#include <blaze/math/expressions/SVecVarExpr.h>
+#include <blaze/math/serialization/VectorSerializer.h>
 #include <blaze/math/smp/DenseVector.h>
 #include <blaze/math/smp/SparseVector.h>
 #include <blaze/math/sparse/SparseVector.h>

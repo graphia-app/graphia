@@ -3,7 +3,7 @@
 //  \file blaze/math/smp/ThreadMapping.h
 //  \brief Header file for the SMP thread mapping functionality
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -42,9 +42,10 @@
 
 #include <utility>
 #include <blaze/math/expressions/Matrix.h>
-#include <blaze/math/Functions.h>
 #include <blaze/math/shims/Round.h>
 #include <blaze/math/shims/Sqrt.h>
+#include <blaze/util/algorithms/Max.h>
+#include <blaze/util/algorithms/Min.h>
 #include <blaze/util/Types.h>
 
 
@@ -80,13 +81,13 @@ template< typename MT  // Type of the matrix
         , bool SO >    // Storage order of the matrix
 ThreadMapping createThreadMapping( size_t threads, const Matrix<MT,SO>& A )
 {
-   const size_t M( (~A).rows()    );
-   const size_t N( (~A).columns() );
+   const size_t M( (*A).rows()    );
+   const size_t N( (*A).columns() );
 
    if( M > N || ( M == N && !SO ) )
    {
       const double ratio( double(M)/double(N) );
-      size_t m = min<size_t>( threads, max<size_t>( 1UL, round( sqrt( threads*ratio ) ) ) );
+      size_t m = min( threads, max( 1UL, static_cast<size_t>( round( sqrt( threads*ratio ) ) ) ) );
       size_t n = threads / m;
 
       while( m * n != threads ) {
@@ -99,7 +100,7 @@ ThreadMapping createThreadMapping( size_t threads, const Matrix<MT,SO>& A )
    else
    {
       const double ratio( double(N)/double(M) );
-      size_t n = min<size_t>( threads, max<size_t>( 1UL, round( sqrt( threads*ratio ) ) ) );
+      size_t n = min( threads, max( 1UL, static_cast<size_t>( round( sqrt( threads*ratio ) ) ) ) );
       size_t m = threads / n;
 
       while( m * n != threads ) {

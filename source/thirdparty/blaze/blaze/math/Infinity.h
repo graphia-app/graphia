@@ -3,7 +3,7 @@
 //  \file blaze/math/Infinity.h
 //  \brief Numerical infinity for built-in data types.
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,6 +40,7 @@
 // Includes
 //*************************************************************************************************
 
+#include <blaze/system/Platform.h>
 #include <blaze/util/constraints/Builtin.h>
 #include <blaze/util/Limits.h>
 #include <blaze/util/Types.h>
@@ -88,38 +89,41 @@ class NegativeInfinity
 {
  public:
    //**Type definitions****************************************************************************
-   typedef I  PositiveType;  //!< The positive infinity type.
+   using PositiveType = I;  //!< The positive infinity type.
    //**********************************************************************************************
 
  private:
-   //**Constructor*********************************************************************************
-   /*!\name Constructor */
+   //**Constructors********************************************************************************
+   /*!\name Constructors */
    //@{
-   explicit inline constexpr NegativeInfinity();
-   // No explicitly declared copy constructor.
+   constexpr NegativeInfinity();
+   NegativeInfinity( const NegativeInfinity& ) = default;
    //@}
    //**********************************************************************************************
 
  public:
    //**Destructor**********************************************************************************
-   // No explicitly declared destructor.
+   /*!\name Destructor */
+   //@{
+   ~NegativeInfinity() = default;
+   //@}
    //**********************************************************************************************
 
    //**Conversion operators************************************************************************
    /*!\name Conversion operators */
    //@{
-   inline constexpr operator signed char() const;
-   inline constexpr operator char()        const;
-   inline constexpr operator wchar_t()     const;
-   inline constexpr operator short()       const;
-   inline constexpr operator int()         const;
-   inline constexpr operator long()        const;
-#if defined(_WIN64)
-   inline constexpr operator ptrdiff_t()   const;
+   constexpr operator signed char() const;
+   constexpr operator char()        const;
+   constexpr operator wchar_t()     const;
+   constexpr operator short()       const;
+   constexpr operator int()         const;
+   constexpr operator long()        const;
+#if BLAZE_WIN32_PLATFORM || BLAZE_WIN64_PLATFORM
+   constexpr operator ptrdiff_t()   const;
 #endif
-   inline constexpr operator float()       const;
-   inline constexpr operator double()      const;
-   inline constexpr operator long double() const;
+   constexpr operator float()       const;
+   constexpr operator double()      const;
+   constexpr operator long double() const;
    //@}
    //**********************************************************************************************
 
@@ -127,19 +131,19 @@ class NegativeInfinity
    /*!\name Utility functions */
    //@{
    template< typename T >
-   inline constexpr bool equal( const T& rhs ) const;
+   constexpr bool equal( const T& rhs ) const;
+   //@}
+   //**********************************************************************************************
+
+   //**Forbidden operations************************************************************************
+   /*!\name Forbidden operations */
+   //@{
+   NegativeInfinity& operator=( const NegativeInfinity& ) = delete;
+   void* operator&() const = delete;
    //@}
    //**********************************************************************************************
 
  private:
-   //**Forbidden operations************************************************************************
-   /*!\name Forbidden operations */
-   //@{
-   NegativeInfinity& operator=( const NegativeInfinity& ninf );  //!< Copy assignment operator (private & undefined)
-   void* operator&() const;                                      //!< Address operator (private & undefined)
-   //@}
-   //**********************************************************************************************
-
    //**Friend declarations*************************************************************************
    /*! \cond BLAZE_INTERNAL */
    friend class Infinity;
@@ -153,7 +157,7 @@ class NegativeInfinity
 
 //=================================================================================================
 //
-//  CONSTRUCTOR
+//  CONSTRUCTORS
 //
 //=================================================================================================
 
@@ -161,7 +165,7 @@ class NegativeInfinity
 /*!\brief The default constructor of the NegativeInfinity class.
 */
 template< typename I >  // Positive infinity type
-inline constexpr NegativeInfinity<I>::NegativeInfinity()
+constexpr NegativeInfinity<I>::NegativeInfinity()
 {}
 //*************************************************************************************************
 
@@ -180,7 +184,7 @@ inline constexpr NegativeInfinity<I>::NegativeInfinity()
 // The conversion operator returns the smallest possible signed char value.
 */
 template< typename I >  // Positive infinity type
-inline constexpr NegativeInfinity<I>::operator signed char() const
+constexpr NegativeInfinity<I>::operator signed char() const
 {
    return Limits<signed char>::ninf();
 }
@@ -193,7 +197,7 @@ inline constexpr NegativeInfinity<I>::operator signed char() const
 // The conversion operator returns the smallest possible char value.
 */
 template< typename I >  // Positive infinity type
-inline constexpr NegativeInfinity<I>::operator char() const
+constexpr NegativeInfinity<I>::operator char() const
 {
    return Limits<char>::ninf();
 }
@@ -206,7 +210,7 @@ inline constexpr NegativeInfinity<I>::operator char() const
 // The conversion operator returns the smallest possible wchar_t value.
 */
 template< typename I >  // Positive infinity type
-inline constexpr NegativeInfinity<I>::operator wchar_t() const
+constexpr NegativeInfinity<I>::operator wchar_t() const
 {
    return Limits<wchar_t>::ninf();
 }
@@ -219,7 +223,7 @@ inline constexpr NegativeInfinity<I>::operator wchar_t() const
 // The conversion operator returns the smallest possible short value.
 */
 template< typename I >  // Positive infinity type
-inline constexpr NegativeInfinity<I>::operator short() const
+constexpr NegativeInfinity<I>::operator short() const
 {
    return Limits<short>::ninf();
 }
@@ -232,7 +236,7 @@ inline constexpr NegativeInfinity<I>::operator short() const
 // The conversion operator returns the smallest possible int value.
 */
 template< typename I >  // Positive infinity type
-inline constexpr NegativeInfinity<I>::operator int() const
+constexpr NegativeInfinity<I>::operator int() const
 {
    return Limits<int>::ninf();
 }
@@ -245,7 +249,7 @@ inline constexpr NegativeInfinity<I>::operator int() const
 // The conversion operator returns the smallest possible long value.
 */
 template< typename I >  // Positive infinity type
-inline constexpr NegativeInfinity<I>::operator long() const
+constexpr NegativeInfinity<I>::operator long() const
 {
    return Limits<long>::ninf();
 }
@@ -253,13 +257,13 @@ inline constexpr NegativeInfinity<I>::operator long() const
 
 
 //*************************************************************************************************
-#if defined(_WIN64)
+#if BLAZE_WIN32_PLATFORM || BLAZE_WIN64_PLATFORM
 /*!\brief Conversion operator to the ptrdiff_t built-in type.
 //
 // The conversion operator returns the smallest possible ptrdiff_t value.
 */
 template< typename I >  // Positive infinity type
-inline constexpr NegativeInfinity<I>::operator ptrdiff_t() const
+constexpr NegativeInfinity<I>::operator ptrdiff_t() const
 {
    return Limits<ptrdiff_t>::ninf();
 }
@@ -273,7 +277,7 @@ inline constexpr NegativeInfinity<I>::operator ptrdiff_t() const
 // The conversion operator returns the smallest possible float value.
 */
 template< typename I >  // Positive infinity type
-inline constexpr NegativeInfinity<I>::operator float() const
+constexpr NegativeInfinity<I>::operator float() const
 {
    return Limits<float>::ninf();
 }
@@ -286,7 +290,7 @@ inline constexpr NegativeInfinity<I>::operator float() const
 // The conversion operator returns the smallest possible double value.
 */
 template< typename I >  // Positive infinity type
-inline constexpr NegativeInfinity<I>::operator double() const
+constexpr NegativeInfinity<I>::operator double() const
 {
    return Limits<double>::ninf();
 }
@@ -299,7 +303,7 @@ inline constexpr NegativeInfinity<I>::operator double() const
 // The conversion operator returns the smallest possible long double value.
 */
 template< typename I >  // Positive infinity type
-inline constexpr NegativeInfinity<I>::operator long double() const
+constexpr NegativeInfinity<I>::operator long double() const
 {
    return Limits<long double>::ninf();
 }
@@ -323,7 +327,7 @@ inline constexpr NegativeInfinity<I>::operator long double() const
 */
 template< typename I >  // Positive infinity type
 template< typename T >  // Built-in data type
-inline constexpr bool NegativeInfinity<I>::equal( const T& rhs ) const
+constexpr bool NegativeInfinity<I>::equal( const T& rhs ) const
 {
    BLAZE_CONSTRAINT_MUST_BE_BUILTIN_TYPE( T );
    return Limits<T>::ninf() == rhs;
@@ -343,22 +347,22 @@ inline constexpr bool NegativeInfinity<I>::equal( const T& rhs ) const
 /*!\name NegativeInfinity operators */
 //@{
 template< typename I1, typename I2 >
-inline constexpr bool operator==( const NegativeInfinity<I1>& lhs, const NegativeInfinity<I2>& rhs );
+constexpr bool operator==( const NegativeInfinity<I1>& lhs, const NegativeInfinity<I2>& rhs );
 
 template< typename I, typename T >
-inline constexpr bool operator==( const NegativeInfinity<I>& lhs, const T& rhs );
+constexpr bool operator==( const NegativeInfinity<I>& lhs, const T& rhs );
 
 template< typename I, typename T >
-inline constexpr bool operator==( const T& lhs, const NegativeInfinity<I>& rhs );
+constexpr bool operator==( const T& lhs, const NegativeInfinity<I>& rhs );
 
 template< typename I1, typename I2 >
-inline constexpr bool operator!=( const NegativeInfinity<I1>& lhs, const NegativeInfinity<I2>& rhs );
+constexpr bool operator!=( const NegativeInfinity<I1>& lhs, const NegativeInfinity<I2>& rhs );
 
 template< typename I, typename T >
-inline constexpr bool operator!=( const NegativeInfinity<I>& lhs, const T& rhs );
+constexpr bool operator!=( const NegativeInfinity<I>& lhs, const T& rhs );
 
 template< typename I, typename T >
-inline constexpr bool operator!=( const T& lhs, const NegativeInfinity<I>& rhs );
+constexpr bool operator!=( const T& lhs, const NegativeInfinity<I>& rhs );
 //@}
 //*************************************************************************************************
 
@@ -371,7 +375,7 @@ inline constexpr bool operator!=( const T& lhs, const NegativeInfinity<I>& rhs )
 */
 template< typename I1    // Left-hand side positive infinity type
         , typename I2 >  // Right-hand side positive infinity type
-inline constexpr bool operator==( const NegativeInfinity<I1>& /*lhs*/, const NegativeInfinity<I2>& /*rhs*/ )
+constexpr bool operator==( const NegativeInfinity<I1>& /*lhs*/, const NegativeInfinity<I2>& /*rhs*/ )
 {
    return true;
 }
@@ -391,7 +395,7 @@ inline constexpr bool operator==( const NegativeInfinity<I1>& /*lhs*/, const Neg
 */
 template< typename I    // Positive infinity type
         , typename T >  // Built-in data type
-inline constexpr bool operator==( const NegativeInfinity<I>& lhs, const T& rhs )
+constexpr bool operator==( const NegativeInfinity<I>& lhs, const T& rhs )
 {
    return lhs.equal( rhs );
 }
@@ -411,7 +415,7 @@ inline constexpr bool operator==( const NegativeInfinity<I>& lhs, const T& rhs )
 */
 template< typename I    // Positive infinity type
         , typename T >  // Built-in data type
-inline constexpr bool operator==( const T& lhs, const NegativeInfinity<I>& rhs )
+constexpr bool operator==( const T& lhs, const NegativeInfinity<I>& rhs )
 {
    return rhs.equal( lhs );
 }
@@ -426,7 +430,7 @@ inline constexpr bool operator==( const T& lhs, const NegativeInfinity<I>& rhs )
 */
 template< typename I1    // Left-hand side positive infinity type
         , typename I2 >  // Right-hand side positive infinity type
-inline constexpr bool operator!=( const NegativeInfinity<I1>& /*lhs*/, const NegativeInfinity<I2>& /*rhs*/ )
+constexpr bool operator!=( const NegativeInfinity<I1>& /*lhs*/, const NegativeInfinity<I2>& /*rhs*/ )
 {
    return false;
 }
@@ -446,7 +450,7 @@ inline constexpr bool operator!=( const NegativeInfinity<I1>& /*lhs*/, const Neg
 */
 template< typename I    // Positive infinity type
         , typename T >  // Built-in data type
-inline constexpr bool operator!=( const NegativeInfinity<I>& lhs, const T& rhs )
+constexpr bool operator!=( const NegativeInfinity<I>& lhs, const T& rhs )
 {
    return !lhs.equal( rhs );
 }
@@ -466,7 +470,7 @@ inline constexpr bool operator!=( const NegativeInfinity<I>& lhs, const T& rhs )
 */
 template< typename I    // Positive infinity type
         , typename T >  // Built-in data type
-inline constexpr bool operator!=( const T& lhs, const NegativeInfinity<I>& rhs )
+constexpr bool operator!=( const T& lhs, const NegativeInfinity<I>& rhs )
 {
    return !rhs.equal( lhs );
 }
@@ -525,48 +529,52 @@ class Infinity
 {
  public:
    //**Type definitions****************************************************************************
-   typedef NegativeInfinity<Infinity>  NegativeType;  //!< The negative infinity type.
+   using NegativeType = NegativeInfinity<Infinity>;  //!< The negative infinity type.
    //**********************************************************************************************
 
-   //**Constructor*********************************************************************************
-   /*!\name Constructor */
+   //**Constructors********************************************************************************
+   /*!\name Constructors */
    //@{
-   explicit inline constexpr Infinity();
+   constexpr Infinity();
+   Infinity( const Infinity& ) = default;
    //@}
    //**********************************************************************************************
 
    //**Destructor**********************************************************************************
-   // No explicitly declared destructor.
+   /*!\name Destructor */
+   //@{
+   ~Infinity() = default;
+   //@}
    //**********************************************************************************************
 
    //**Conversion operators************************************************************************
    /*!\name Conversion operators */
    //@{
-   inline constexpr operator unsigned char()  const;
-   inline constexpr operator signed char()    const;
-   inline constexpr operator char()           const;
-   inline constexpr operator wchar_t()        const;
-   inline constexpr operator unsigned short() const;
-   inline constexpr operator short()          const;
-   inline constexpr operator unsigned int()   const;
-   inline constexpr operator int()            const;
-   inline constexpr operator unsigned long()  const;
-   inline constexpr operator long()           const;
-#if defined(_WIN64)
-   inline constexpr operator size_t()         const;
-   inline constexpr operator ptrdiff_t()      const;
+   constexpr operator unsigned char()  const;
+   constexpr operator signed char()    const;
+   constexpr operator char()           const;
+   constexpr operator wchar_t()        const;
+   constexpr operator unsigned short() const;
+   constexpr operator short()          const;
+   constexpr operator unsigned int()   const;
+   constexpr operator int()            const;
+   constexpr operator unsigned long()  const;
+   constexpr operator long()           const;
+#if BLAZE_WIN32_PLATFORM || BLAZE_WIN64_PLATFORM
+   constexpr operator size_t()         const;
+   constexpr operator ptrdiff_t()      const;
 #endif
-   inline constexpr operator float()          const;
-   inline constexpr operator double()         const;
-   inline constexpr operator long double()    const;
+   constexpr operator float()          const;
+   constexpr operator double()         const;
+   constexpr operator long double()    const;
    //@}
    //**********************************************************************************************
 
    //**Arithmetic operators************************************************************************
    /*!\name Arithmetic operators */
    //@{
-   inline constexpr const Infinity&    operator+() const;
-   inline constexpr const NegativeType operator-() const;
+   constexpr const Infinity&    operator+() const;
+   constexpr const NegativeType operator-() const;
    //@}
    //**********************************************************************************************
 
@@ -574,16 +582,15 @@ class Infinity
    /*!\name Utility functions */
    //@{
    template< typename T >
-   inline constexpr bool equal( const T& rhs ) const;
+   constexpr bool equal( const T& rhs ) const;
    //@}
    //**********************************************************************************************
 
- private:
    //**Forbidden operations************************************************************************
    /*!\name Forbidden operations */
    //@{
-   Infinity& operator=( const Infinity& inf );  //!< Copy assignment operator (private & undefined)
-   void* operator&() const;                     //!< Address operator (private & undefined)
+   Infinity& operator=( const Infinity& ) = delete;
+   void* operator&() const = delete;
    //@}
    //**********************************************************************************************
 };
@@ -594,14 +601,14 @@ class Infinity
 
 //=================================================================================================
 //
-//  CONSTRUCTOR
+//  CONSTRUCTORS
 //
 //=================================================================================================
 
 //*************************************************************************************************
 /*!\brief The default constructor of the Infinity class.
 */
-inline constexpr Infinity::Infinity()
+constexpr Infinity::Infinity()
 {}
 //*************************************************************************************************
 
@@ -619,7 +626,7 @@ inline constexpr Infinity::Infinity()
 //
 // The conversion operator returns the largest possible unsigned char value.
 */
-inline constexpr Infinity::operator unsigned char() const
+constexpr Infinity::operator unsigned char() const
 {
    return Limits<unsigned char>::inf();
 }
@@ -631,7 +638,7 @@ inline constexpr Infinity::operator unsigned char() const
 //
 // The conversion operator returns the largest possible char value.
 */
-inline constexpr Infinity::operator char() const
+constexpr Infinity::operator char() const
 {
    return Limits<char>::inf();
 }
@@ -643,7 +650,7 @@ inline constexpr Infinity::operator char() const
 //
 // The conversion operator returns the largest possible signed char value.
 */
-inline constexpr Infinity::operator signed char() const
+constexpr Infinity::operator signed char() const
 {
    return Limits<signed char>::inf();
 }
@@ -655,7 +662,7 @@ inline constexpr Infinity::operator signed char() const
 //
 // The conversion operator returns the largest possible wchar_t value.
 */
-inline constexpr Infinity::operator wchar_t() const
+constexpr Infinity::operator wchar_t() const
 {
    return Limits<wchar_t>::inf();
 }
@@ -667,7 +674,7 @@ inline constexpr Infinity::operator wchar_t() const
 //
 // The conversion operator returns the largest possible unsigned short value.
 */
-inline constexpr Infinity::operator unsigned short() const
+constexpr Infinity::operator unsigned short() const
 {
    return Limits<unsigned short>::inf();
 }
@@ -679,7 +686,7 @@ inline constexpr Infinity::operator unsigned short() const
 //
 // The conversion operator returns the largest possible short value.
 */
-inline constexpr Infinity::operator short() const
+constexpr Infinity::operator short() const
 {
    return Limits<short>::inf();
 }
@@ -691,7 +698,7 @@ inline constexpr Infinity::operator short() const
 //
 // The conversion operator returns the largest possible unsigned int value.
 */
-inline constexpr Infinity::operator unsigned int() const
+constexpr Infinity::operator unsigned int() const
 {
    return Limits<unsigned int>::inf();
 }
@@ -703,7 +710,7 @@ inline constexpr Infinity::operator unsigned int() const
 //
 // The conversion operator returns the largest possible int value.
 */
-inline constexpr Infinity::operator int() const
+constexpr Infinity::operator int() const
 {
    return Limits<int>::inf();
 }
@@ -715,7 +722,7 @@ inline constexpr Infinity::operator int() const
 //
 // The conversion operator returns the largest possible unsigned long value.
 */
-inline constexpr Infinity::operator unsigned long() const
+constexpr Infinity::operator unsigned long() const
 {
    return Limits<unsigned long>::inf();
 }
@@ -727,7 +734,7 @@ inline constexpr Infinity::operator unsigned long() const
 //
 // The conversion operator returns the largest possible long value.
 */
-inline constexpr Infinity::operator long() const
+constexpr Infinity::operator long() const
 {
    return Limits<long>::inf();
 }
@@ -735,12 +742,12 @@ inline constexpr Infinity::operator long() const
 
 
 //*************************************************************************************************
-#if defined(_WIN64)
+#if BLAZE_WIN32_PLATFORM || BLAZE_WIN64_PLATFORM
 /*!\brief Conversion operator to the size_t built-in type.
 //
 // The conversion operator returns the largest possible size_t value.
 */
-inline constexpr Infinity::operator size_t() const
+constexpr Infinity::operator size_t() const
 {
    return Limits<size_t>::inf();
 }
@@ -749,12 +756,12 @@ inline constexpr Infinity::operator size_t() const
 
 
 //*************************************************************************************************
-#if defined(_WIN64)
+#if BLAZE_WIN32_PLATFORM || BLAZE_WIN64_PLATFORM
 /*!\brief Conversion operator to the ptrdiff_t built-in type.
 //
 // The conversion operator returns the largest possible ptrdiff_t value.
 */
-inline constexpr Infinity::operator ptrdiff_t() const
+constexpr Infinity::operator ptrdiff_t() const
 {
    return Limits<ptrdiff_t>::inf();
 }
@@ -767,7 +774,7 @@ inline constexpr Infinity::operator ptrdiff_t() const
 //
 // The conversion operator returns the largest possible float value.
 */
-inline constexpr Infinity::operator float() const
+constexpr Infinity::operator float() const
 {
    return Limits<float>::inf();
 }
@@ -779,7 +786,7 @@ inline constexpr Infinity::operator float() const
 //
 // The conversion operator returns the largest possible double value.
 */
-inline constexpr Infinity::operator double() const
+constexpr Infinity::operator double() const
 {
    return Limits<double>::inf();
 }
@@ -791,7 +798,7 @@ inline constexpr Infinity::operator double() const
 //
 // The conversion operator returns the largest possible long double value.
 */
-inline constexpr Infinity::operator long double() const
+constexpr Infinity::operator long double() const
 {
    return Limits<long double>::inf();
 }
@@ -811,7 +818,7 @@ inline constexpr Infinity::operator long double() const
 //
 // \return The positive infinity value.
 */
-inline constexpr const Infinity& Infinity::operator+() const
+constexpr const Infinity& Infinity::operator+() const
 {
    return *this;
 }
@@ -823,7 +830,7 @@ inline constexpr const Infinity& Infinity::operator+() const
 //
 // \return The negative infinity value.
 */
-inline constexpr const Infinity::NegativeType Infinity::operator-() const
+constexpr const Infinity::NegativeType Infinity::operator-() const
 {
    return NegativeType();
 }
@@ -846,7 +853,7 @@ inline constexpr const Infinity::NegativeType Infinity::operator-() const
 // result in a compile time error.
 */
 template< typename T >
-inline constexpr bool Infinity::equal( const T& rhs ) const
+constexpr bool Infinity::equal( const T& rhs ) const
 {
    BLAZE_CONSTRAINT_MUST_BE_BUILTIN_TYPE( T );
    return Limits<T>::inf() == rhs;
@@ -865,33 +872,33 @@ inline constexpr bool Infinity::equal( const T& rhs ) const
 //*************************************************************************************************
 /*!\name Infinity operators */
 //@{
-inline constexpr bool operator==( const Infinity& lhs, const Infinity& rhs );
+constexpr bool operator==( const Infinity& lhs, const Infinity& rhs );
 
 template< typename I >
-inline constexpr bool operator==( const Infinity& lhs, const NegativeInfinity<I>& rhs );
+constexpr bool operator==( const Infinity& lhs, const NegativeInfinity<I>& rhs );
 
 template< typename I >
-inline constexpr bool operator==( const NegativeInfinity<I>& lhs, const Infinity& rhs );
+constexpr bool operator==( const NegativeInfinity<I>& lhs, const Infinity& rhs );
 
 template< typename T >
-inline constexpr bool operator==( const Infinity& lhs, const T& rhs );
+constexpr bool operator==( const Infinity& lhs, const T& rhs );
 
 template< typename T >
-inline constexpr bool operator==( const T& lhs, const Infinity& rhs );
+constexpr bool operator==( const T& lhs, const Infinity& rhs );
 
-inline constexpr bool operator!=( const Infinity& lhs, const Infinity& rhs );
+constexpr bool operator!=( const Infinity& lhs, const Infinity& rhs );
 
 template< typename I >
-inline constexpr bool operator!=( const Infinity& lhs, const NegativeInfinity<I>& rhs );
+constexpr bool operator!=( const Infinity& lhs, const NegativeInfinity<I>& rhs );
 
 template< typename I >
-inline constexpr bool operator!=( const NegativeInfinity<I>& lhs, const Infinity& rhs );
+constexpr bool operator!=( const NegativeInfinity<I>& lhs, const Infinity& rhs );
 
 template< typename T >
-inline constexpr bool operator!=( const Infinity& lhs, const T& rhs );
+constexpr bool operator!=( const Infinity& lhs, const T& rhs );
 
 template< typename T >
-inline constexpr bool operator!=( const T& lhs, const Infinity& rhs );
+constexpr bool operator!=( const T& lhs, const Infinity& rhs );
 //@}
 //*************************************************************************************************
 
@@ -902,7 +909,7 @@ inline constexpr bool operator!=( const T& lhs, const Infinity& rhs );
 //
 // \return \a true.
 */
-inline constexpr bool operator==( const Infinity& /*lhs*/, const Infinity& /*rhs*/ )
+constexpr bool operator==( const Infinity& /*lhs*/, const Infinity& /*rhs*/ )
 {
    return true;
 }
@@ -916,7 +923,7 @@ inline constexpr bool operator==( const Infinity& /*lhs*/, const Infinity& /*rhs
 // \return \a false.
 */
 template< typename I >  // Positive infinity type
-inline constexpr bool operator==( const Infinity& /*lhs*/, const NegativeInfinity<I>& /*rhs*/ )
+constexpr bool operator==( const Infinity& /*lhs*/, const NegativeInfinity<I>& /*rhs*/ )
 {
    return false;
 }
@@ -930,7 +937,7 @@ inline constexpr bool operator==( const Infinity& /*lhs*/, const NegativeInfinit
 // \return \a false.
 */
 template< typename I >  // Positive infinity type
-inline constexpr bool operator==( const NegativeInfinity<I>& /*lhs*/, const Infinity& /*rhs*/ )
+constexpr bool operator==( const NegativeInfinity<I>& /*lhs*/, const Infinity& /*rhs*/ )
 {
    return false;
 }
@@ -949,7 +956,7 @@ inline constexpr bool operator==( const NegativeInfinity<I>& /*lhs*/, const Infi
 // types will result in a compile time error.
 */
 template< typename T >
-inline constexpr bool operator==( const Infinity& lhs, const T& rhs )
+constexpr bool operator==( const Infinity& lhs, const T& rhs )
 {
    return lhs.equal( rhs );
 }
@@ -968,7 +975,7 @@ inline constexpr bool operator==( const Infinity& lhs, const T& rhs )
 // types will result in a compile time error.
 */
 template< typename T >
-inline constexpr bool operator==( const T& lhs, const Infinity& rhs )
+constexpr bool operator==( const T& lhs, const Infinity& rhs )
 {
    return rhs.equal( lhs );
 }
@@ -981,7 +988,7 @@ inline constexpr bool operator==( const T& lhs, const Infinity& rhs )
 //
 // \return \a false.
 */
-inline constexpr bool operator!=( const Infinity& /*lhs*/, const Infinity& /*rhs*/ )
+constexpr bool operator!=( const Infinity& /*lhs*/, const Infinity& /*rhs*/ )
 {
    return false;
 }
@@ -995,7 +1002,7 @@ inline constexpr bool operator!=( const Infinity& /*lhs*/, const Infinity& /*rhs
 // \return \a true.
 */
 template< typename I >  // Positive infinity type
-inline constexpr bool operator!=( const Infinity& /*lhs*/, const NegativeInfinity<I>& /*rhs*/ )
+constexpr bool operator!=( const Infinity& /*lhs*/, const NegativeInfinity<I>& /*rhs*/ )
 {
    return true;
 }
@@ -1009,7 +1016,7 @@ inline constexpr bool operator!=( const Infinity& /*lhs*/, const NegativeInfinit
 // \return \a true.
 */
 template< typename I >  // Positive infinity type
-inline constexpr bool operator!=( const NegativeInfinity<I>& /*lhs*/, const Infinity& /*rhs*/ )
+constexpr bool operator!=( const NegativeInfinity<I>& /*lhs*/, const Infinity& /*rhs*/ )
 {
    return true;
 }
@@ -1028,7 +1035,7 @@ inline constexpr bool operator!=( const NegativeInfinity<I>& /*lhs*/, const Infi
 // types will result in a compile time error.
 */
 template< typename T >
-inline constexpr bool operator!=( const Infinity& lhs, const T& rhs )
+constexpr bool operator!=( const Infinity& lhs, const T& rhs )
 {
    return !lhs.equal( rhs );
 }
@@ -1047,7 +1054,7 @@ inline constexpr bool operator!=( const Infinity& lhs, const T& rhs )
 // types will result in a compile time error.
 */
 template< typename T >
-inline constexpr bool operator!=( const T& lhs, const Infinity& rhs )
+constexpr bool operator!=( const T& lhs, const Infinity& rhs )
 {
    return !rhs.equal( lhs );
 }

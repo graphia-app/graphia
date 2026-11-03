@@ -3,7 +3,7 @@
 //  \file blaze/math/lapack/clapack/getri.h
 //  \brief Header file for the CLAPACK getri wrapper functions
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,6 +40,7 @@
 // Includes
 //*************************************************************************************************
 
+#include <blaze/math/blas/Types.h>
 #include <blaze/util/Complex.h>
 #include <blaze/util/StaticAssert.h>
 
@@ -52,14 +53,20 @@
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
+#if !defined(INTEL_MKL_VERSION)
 extern "C" {
 
-void sgetri_( int* n, float*  A, int* lda, int* ipiv, float*  work, int* lwork, int* info );
-void dgetri_( int* n, double* A, int* lda, int* ipiv, double* work, int* lwork, int* info );
-void cgetri_( int* n, float*  A, int* lda, int* ipiv, float*  work, int* lwork, int* info );
-void zgetri_( int* n, double* A, int* lda, int* ipiv, double* work, int* lwork, int* info );
+void sgetri_( blaze::blas_int_t* n, float* A, blaze::blas_int_t* lda, blaze::blas_int_t* ipiv,
+              float* work, blaze::blas_int_t* lwork, blaze::blas_int_t* info );
+void dgetri_( blaze::blas_int_t* n, double* A, blaze::blas_int_t* lda, blaze::blas_int_t* ipiv,
+              double* work, blaze::blas_int_t* lwork, blaze::blas_int_t* info );
+void cgetri_( blaze::blas_int_t* n, float* A, blaze::blas_int_t* lda, blaze::blas_int_t* ipiv,
+              float* work, blaze::blas_int_t* lwork, blaze::blas_int_t* info );
+void zgetri_( blaze::blas_int_t* n, double* A, blaze::blas_int_t* lda, blaze::blas_int_t* ipiv,
+              double* work, blaze::blas_int_t* lwork, blaze::blas_int_t* info );
 
 }
+#endif
 /*! \endcond */
 //*************************************************************************************************
 
@@ -77,15 +84,17 @@ namespace blaze {
 //*************************************************************************************************
 /*!\name LAPACK LU-based inversion functions (getri) */
 //@{
-inline void getri( int n, float* A, int lda, const int* ipiv, float* work, int lwork, int* info );
+void getri( blas_int_t n, float* A, blas_int_t lda, const blas_int_t* ipiv,
+            float* work, blas_int_t lwork, blas_int_t* info );
 
-inline void getri( int n, double* A, int lda, const int* ipiv, double* work, int lwork, int* info );
+void getri( blas_int_t n, double* A, blas_int_t lda, const blas_int_t* ipiv,
+            double* work, blas_int_t lwork, blas_int_t* info );
 
-inline void getri( int n, complex<float>* A, int lda, const int* ipiv,
-                   complex<float>* work, int lwork, int* info );
+void getri( blas_int_t n, complex<float>* A, blas_int_t lda, const blas_int_t* ipiv,
+            complex<float>* work, blas_int_t lwork, blas_int_t* info );
 
-inline void getri( int n, complex<double>* A, int lda, const int* ipiv,
-                   complex<double>* work, int lwork, int* info );
+void getri( blas_int_t n, complex<double>* A, blas_int_t lda, const blas_int_t* ipiv,
+            complex<double>* work, blas_int_t lwork, blas_int_t* info );
 //@}
 //*************************************************************************************************
 
@@ -126,9 +135,14 @@ inline void getri( int n, complex<double>* A, int lda, const int* ipiv,
 // is available and linked to the executable. Otherwise a call to this function will result in a
 // linker error.
 */
-inline void getri( int n, float* A, int lda, const int* ipiv, float* work, int lwork, int* info )
+inline void getri( blas_int_t n, float* A, blas_int_t lda, const blas_int_t* ipiv,
+                   float* work, blas_int_t lwork, blas_int_t* info )
 {
-   sgetri_( &n, A, &lda, const_cast<int*>( ipiv ), work, &lwork, info );
+#if defined(INTEL_MKL_VERSION)
+   BLAZE_STATIC_ASSERT( sizeof( MKL_INT ) == sizeof( blas_int_t ) );
+#endif
+
+   sgetri_( &n, A, &lda, const_cast<blas_int_t*>( ipiv ), work, &lwork, info );
 }
 //*************************************************************************************************
 
@@ -169,9 +183,14 @@ inline void getri( int n, float* A, int lda, const int* ipiv, float* work, int l
 // is available and linked to the executable. Otherwise a call to this function will result in a
 // linker error.
 */
-inline void getri( int n, double* A, int lda, const int* ipiv, double* work, int lwork, int* info )
+inline void getri( blas_int_t n, double* A, blas_int_t lda, const blas_int_t* ipiv,
+                   double* work, blas_int_t lwork, blas_int_t* info )
 {
-   dgetri_( &n, A, &lda, const_cast<int*>( ipiv ), work, &lwork, info );
+#if defined(INTEL_MKL_VERSION)
+   BLAZE_STATIC_ASSERT( sizeof( MKL_INT ) == sizeof( blas_int_t ) );
+#endif
+
+   dgetri_( &n, A, &lda, const_cast<blas_int_t*>( ipiv ), work, &lwork, info );
 }
 //*************************************************************************************************
 
@@ -212,13 +231,21 @@ inline void getri( int n, double* A, int lda, const int* ipiv, double* work, int
 // is available and linked to the executable. Otherwise a call to this function will result in a
 // linker error.
 */
-inline void getri( int n, complex<float>* A, int lda, const int* ipiv,
-                   complex<float>* work, int lwork, int* info )
+inline void getri( blas_int_t n, complex<float>* A, blas_int_t lda, const blas_int_t* ipiv,
+                   complex<float>* work, blas_int_t lwork, blas_int_t* info )
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<float> ) == 2UL*sizeof( float ) );
 
-   cgetri_( &n, reinterpret_cast<float*>( A ), &lda, const_cast<int*>( ipiv ),
-            reinterpret_cast<float*>( work ), &lwork, info );
+#if defined(INTEL_MKL_VERSION)
+   BLAZE_STATIC_ASSERT( sizeof( MKL_INT ) == sizeof( blas_int_t ) );
+   BLAZE_STATIC_ASSERT( sizeof( MKL_Complex8 ) == sizeof( complex<float> ) );
+   using ET = MKL_Complex8;
+#else
+   using ET = float;
+#endif
+
+   cgetri_( &n, reinterpret_cast<ET*>( A ), &lda, const_cast<blas_int_t*>( ipiv ),
+            reinterpret_cast<ET*>( work ), &lwork, info );
 }
 //*************************************************************************************************
 
@@ -259,13 +286,21 @@ inline void getri( int n, complex<float>* A, int lda, const int* ipiv,
 // is available and linked to the executable. Otherwise a call to this function will result in a
 // linker error.
 */
-inline void getri( int n, complex<double>* A, int lda, const int* ipiv,
-                   complex<double>* work, int lwork, int* info )
+inline void getri( blas_int_t n, complex<double>* A, blas_int_t lda, const blas_int_t* ipiv,
+                   complex<double>* work, blas_int_t lwork, blas_int_t* info )
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<double> ) == 2UL*sizeof( double ) );
 
-   zgetri_( &n, reinterpret_cast<double*>( A ), &lda, const_cast<int*>( ipiv ),
-            reinterpret_cast<double*>( work ), &lwork, info );
+#if defined(INTEL_MKL_VERSION)
+   BLAZE_STATIC_ASSERT( sizeof( MKL_INT ) == sizeof( blas_int_t ) );
+   BLAZE_STATIC_ASSERT( sizeof( MKL_Complex16 ) == sizeof( complex<double> ) );
+   using ET = MKL_Complex16;
+#else
+   using ET = double;
+#endif
+
+   zgetri_( &n, reinterpret_cast<ET*>( A ), &lda, const_cast<blas_int_t*>( ipiv ),
+            reinterpret_cast<ET*>( work ), &lwork, info );
 }
 //*************************************************************************************************
 

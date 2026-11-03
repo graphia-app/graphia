@@ -3,7 +3,7 @@
 //  \file blaze/math/traits/RowTrait.h
 //  \brief Header file for the row trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,13 +40,9 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/util/InvalidType.h>
-#include <blaze/util/mpl/If.h>
-#include <blaze/util/mpl/Or.h>
-#include <blaze/util/typetraits/Decay.h>
-#include <blaze/util/typetraits/IsConst.h>
-#include <blaze/util/typetraits/IsReference.h>
-#include <blaze/util/typetraits/IsVolatile.h>
+#include <utility>
+#include <blaze/math/Infinity.h>
+#include <blaze/util/Types.h>
 
 
 namespace blaze {
@@ -58,40 +54,49 @@ namespace blaze {
 //=================================================================================================
 
 //*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename, size_t... > struct RowTrait;
+template< typename, size_t, typename = void > struct RowTraitEval1;
+template< typename, size_t, typename = void > struct RowTraitEval2;
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< size_t I, typename T >
+auto evalRowTrait( const volatile T& ) -> RowTraitEval1<T,I>;
+
+template< typename T >
+auto evalRowTrait( const volatile T& ) -> RowTraitEval1<T,inf>;
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
 /*!\brief Base template for the RowTrait class.
 // \ingroup math_traits
 //
 // \section rowtrait_general General
 //
 // The RowTrait class template offers the possibility to select the resulting data type when
-// creating a view on a specific row of a dense or sparse matrix. RowTrait defines the nested
-// type \a Type, which represents the resulting data type of the row operation. In case the
-// given data type is not a dense or sparse matrix type, the resulting data type \a Type is
-// set to \a INVALID_TYPE. Note that \a const and \a volatile qualifiers and reference modifiers
-// are generally ignored.
-//
-// Per default, the RowTrait template only supports the following matrix types:
-//
-// <ul>
-//    <li>blaze::StaticMatrix</li>
-//    <li>blaze::HybridMatrix</li>
-//    <li>blaze::DynamicMatrix</li>
-//    <li>blaze::CustomMatrix</li>
-//    <li>blaze::CompressedMatrix</li>
-//    <li>blaze::Submatrix</li>
-// </ul>
+// creating a view on a specific row of a dense or sparse matrix. In case the given type \a MT
+// is a dense or sparse matrix type, RowTrait defines the nested type \a Type, which represents
+// the resulting data type of the row operation. Otherwise there is no nested type \a Type.
+// Note that \a const and \a volatile qualifiers and reference modifiers are generally ignored.
 //
 //
 // \section rowtrait_specializations Creating custom specializations
 //
-// It is possible to specialize the RowTrait template for additional user-defined matrix types.
-// The following example shows the according specialization for the DynamicMatrix class template:
+// Per default, RowTrait supports all matrix types of the Blaze library (including views and
+// adaptors). For all other data types it is possible to specialize the RowTrait template. The
+// following example shows the according specialization for the DynamicMatrix class template:
 
    \code
-   template< typename T1, bool SO >
-   struct RowTrait< DynamicMatrix<T1,SO> >
+   template< typename T1, bool SO, size_t... CRAs >
+   struct RowTrait< DynamicMatrix<T1,SO>, CRAs... >
    {
-      typedef DynamicVector<T1,true>  Type;
+      using Type = DynamicVector<T1,true>;
    };
    \endcode
 
@@ -105,33 +110,19 @@ namespace blaze {
    using blaze::columnMajor;
 
    // Definition of the row type of a row-major dynamic matrix
-   typedef blaze::DynamicMatrix<int,rowMajor>    MatrixType1;
-   typedef typename RowTrait<MatrixType1>::Type  RowType1;
+   using MatrixType1 = blaze::DynamicMatrix<int,rowMajor>;
+   using ResultType1 = typename blaze::RowTrait<MatrixType1>::Type;
 
-   // Definition of the row type of the column-major static matrix
-   typedef blaze::StaticMatrix<int,3UL,3UL,columnMajor>  MatrixType2;
-   typedef typename RowTrait<MatrixType2>::Type          RowType2;
+   // Definition of the row type for the 1st row of a column-major static matrix
+   using MatrixType2 = blaze::StaticMatrix<int,4UL,3UL,columnMajor>;
+   using ResultType2 = typename blaze::RowTrait<MatrixType2,1UL>::Type;
    \endcode
 */
-template< typename MT >  // Type of the matrix
+template< typename MT       // Type of the matrix
+        , size_t... CRAs >  // Compile time row arguments
 struct RowTrait
-{
- private:
-   //**********************************************************************************************
-   /*! \cond BLAZE_INTERNAL */
-   struct Failure { using Type = INVALID_TYPE; };
-   /*! \endcond */
-   //**********************************************************************************************
-
- public:
-   //**********************************************************************************************
-   /*! \cond BLAZE_INTERNAL */
-   using Type = typename If_< Or< IsConst<MT>, IsVolatile<MT>, IsReference<MT> >
-                            , RowTrait< Decay_<MT> >
-                            , Failure >::Type;
-   /*! \endcond */
-   //**********************************************************************************************
-};
+   : public decltype( evalRowTrait<CRAs...>( std::declval<MT&>() ) )
+{};
 //*************************************************************************************************
 
 
@@ -139,17 +130,47 @@ struct RowTrait
 /*!\brief Auxiliary alias declaration for the RowTrait type trait.
 // \ingroup math_traits
 //
-// The RowTrait_ alias declaration provides a convenient shortcut to access the nested
+// The RowTrait_t alias declaration provides a convenient shortcut to access the nested
 // \a Type of the RowTrait class template. For instance, given the matrix type \a MT the
 // following two type definitions are identical:
 
    \code
-   using Type1 = typename RowTrait<MT>::Type;
-   using Type2 = RowTrait_<MT>;
+   using Type1 = typename blaze::RowTrait<MT>::Type;
+   using Type2 = blaze::RowTrait_t<MT>;
    \endcode
 */
-template< typename MT >  // Type of the matrix
-using RowTrait_ = typename RowTrait<MT>::Type;
+template< typename MT       // Type of the matrix
+        , size_t... CRAs >  // Compile time row arguments
+using RowTrait_t = typename RowTrait<MT,CRAs...>::Type;
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief First auxiliary helper struct for the RowTrait type trait.
+// \ingroup math_traits
+*/
+template< typename MT  // Type of the matrix
+        , size_t I     // Compile time row index
+        , typename >   // Restricting condition
+struct RowTraitEval1
+   : public RowTraitEval2<MT,I>
+{};
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Second auxiliary helper struct for the RowTrait type trait.
+// \ingroup math_traits
+*/
+template< typename MT  // Type of the matrix
+        , size_t I     // Compile time row index
+        , typename >   // Restricting condition
+struct RowTraitEval2
+{};
+/*! \endcond */
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/math/constraints/SparseElement.h
 //  \brief Constraint on the data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -59,7 +59,7 @@ namespace blaze {
 // SparseElement base class), a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_SPARSE_ELEMENT_TYPE(T) \
-   static_assert( ::blaze::IsSparseElement<T>::value, "Non-sparse element type detected" )
+   static_assert( ::blaze::IsSparseElement_v<T>, "Non-sparse element type detected" )
 //*************************************************************************************************
 
 
@@ -79,7 +79,7 @@ namespace blaze {
 // SparseElement base class), a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_SPARSE_ELEMENT_TYPE(T) \
-   static_assert( !::blaze::IsSparseElement<T>::value, "Sparse element type detected" )
+   static_assert( !::blaze::IsSparseElement_v<T>, "Sparse element type detected" )
 //*************************************************************************************************
 
 } // namespace blaze

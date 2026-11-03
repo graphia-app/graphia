@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/IsLValueReference.h
 //  \brief Header file for the IsLValueReference type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -73,8 +73,27 @@ namespace blaze {
    \endcode
 */
 template< typename T >
-struct IsLValueReference : public BoolConstant< std::is_lvalue_reference<T>::value >
+struct IsLValueReference
+   : public BoolConstant< std::is_lvalue_reference<T>::value >
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsLValueReference type trait.
+// \ingroup type_traits
+//
+// The IsLValueReference_v variable template provides a convenient shortcut to access the nested
+// \a value of the IsLValueReference class template. For instance, given the type \a T the
+// following two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsLValueReference<T>::value;
+   constexpr bool value2 = blaze::IsLValueReference_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsLValueReference_v = IsLValueReference<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

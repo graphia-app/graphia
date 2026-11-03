@@ -3,7 +3,7 @@
 //  \file blaze/math/shims/Clamp.h
 //  \brief Header file for the clamp shim
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -34,15 +34,6 @@
 
 #ifndef _BLAZE_MATH_SHIMS_CLAMP_H_
 #define _BLAZE_MATH_SHIMS_CLAMP_H_
-
-
-//*************************************************************************************************
-// Includes
-//*************************************************************************************************
-
-#include <blaze/system/Inline.h>
-#include <blaze/util/EnableIf.h>
-#include <blaze/util/typetraits/IsBuiltin.h>
 
 
 namespace blaze {
@@ -77,7 +68,7 @@ namespace blaze {
    \endcode
 */
 template< typename T >
-const T& clamp( const T& a, const T& min, const T& max ) noexcept
+inline const T& clamp( const T& a, const T& min, const T& max ) noexcept
 {
    if( a < min )
       return min;

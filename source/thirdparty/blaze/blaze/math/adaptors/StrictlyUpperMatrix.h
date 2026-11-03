@@ -3,7 +3,7 @@
 //  \file blaze/math/adaptors/StrictlyUpperMatrix.h
 //  \brief Header file for the implementation of a strictly upper triangular matrix adaptor
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -43,40 +43,60 @@
 #include <blaze/math/adaptors/strictlyuppermatrix/BaseTemplate.h>
 #include <blaze/math/adaptors/strictlyuppermatrix/Dense.h>
 #include <blaze/math/adaptors/strictlyuppermatrix/Sparse.h>
-#include <blaze/math/adaptors/uniuppermatrix/BaseTemplate.h>
-#include <blaze/math/adaptors/uppermatrix/BaseTemplate.h>
 #include <blaze/math/constraints/RequiresEvaluation.h>
 #include <blaze/math/Forward.h>
-#include <blaze/math/Functions.h>
+#include <blaze/math/RelaxationFlag.h>
 #include <blaze/math/shims/IsDefault.h>
 #include <blaze/math/traits/AddTrait.h>
-#include <blaze/math/traits/ColumnTrait.h>
-#include <blaze/math/traits/DerestrictTrait.h>
+#include <blaze/math/traits/DeclDiagTrait.h>
+#include <blaze/math/traits/DeclHermTrait.h>
+#include <blaze/math/traits/DeclLowTrait.h>
+#include <blaze/math/traits/DeclStrLowTrait.h>
+#include <blaze/math/traits/DeclStrUppTrait.h>
+#include <blaze/math/traits/DeclSymTrait.h>
+#include <blaze/math/traits/DeclUniLowTrait.h>
+#include <blaze/math/traits/DeclUniUppTrait.h>
+#include <blaze/math/traits/DeclUppTrait.h>
 #include <blaze/math/traits/DivTrait.h>
-#include <blaze/math/traits/ForEachTrait.h>
+#include <blaze/math/traits/KronTrait.h>
+#include <blaze/math/traits/MapTrait.h>
 #include <blaze/math/traits/MultTrait.h>
-#include <blaze/math/traits/RowTrait.h>
+#include <blaze/math/traits/SchurTrait.h>
 #include <blaze/math/traits/SubmatrixTrait.h>
 #include <blaze/math/traits/SubTrait.h>
-#include <blaze/math/typetraits/Columns.h>
 #include <blaze/math/typetraits/HasConstDataAccess.h>
 #include <blaze/math/typetraits/HighType.h>
 #include <blaze/math/typetraits/IsAdaptor.h>
 #include <blaze/math/typetraits/IsAligned.h>
+#include <blaze/math/typetraits/IsContiguous.h>
+#include <blaze/math/typetraits/IsHermitian.h>
+#include <blaze/math/typetraits/IsIdentity.h>
+#include <blaze/math/typetraits/IsLower.h>
+#include <blaze/math/typetraits/IsMatrix.h>
 #include <blaze/math/typetraits/IsPadded.h>
-#include <blaze/math/typetraits/IsResizable.h>
 #include <blaze/math/typetraits/IsRestricted.h>
+#include <blaze/math/typetraits/IsScalar.h>
 #include <blaze/math/typetraits/IsSquare.h>
+#include <blaze/math/typetraits/IsStrictlyLower.h>
 #include <blaze/math/typetraits/IsStrictlyUpper.h>
+#include <blaze/math/typetraits/IsSymmetric.h>
+#include <blaze/math/typetraits/IsUniform.h>
+#include <blaze/math/typetraits/IsUniUpper.h>
+#include <blaze/math/typetraits/IsUpper.h>
+#include <blaze/math/typetraits/IsZero.h>
 #include <blaze/math/typetraits/LowType.h>
 #include <blaze/math/typetraits/RemoveAdaptor.h>
-#include <blaze/math/typetraits/Rows.h>
+#include <blaze/math/typetraits/Size.h>
+#include <blaze/math/typetraits/StorageOrder.h>
+#include <blaze/math/typetraits/YieldsDiagonal.h>
+#include <blaze/math/typetraits/YieldsDiagonal.h>
+#include <blaze/math/typetraits/YieldsStrictlyUpper.h>
+#include <blaze/util/algorithms/Min.h>
 #include <blaze/util/Assert.h>
 #include <blaze/util/EnableIf.h>
 #include <blaze/util/IntegralConstant.h>
-#include <blaze/util/TrueType.h>
-#include <blaze/util/typetraits/IsNumeric.h>
-#include <blaze/util/Unused.h>
+#include <blaze/util/InvalidType.h>
+#include <blaze/util/MaybeUnused.h>
 
 
 namespace blaze {
@@ -90,144 +110,15 @@ namespace blaze {
 //*************************************************************************************************
 /*!\name StrictlyUpperMatrix operators */
 //@{
-template< typename MT, bool SO, bool DF >
-inline void reset( StrictlyUpperMatrix<MT,SO,DF>& m );
+template< RelaxationFlag RF, typename MT, bool SO, bool DF >
+bool isDefault( const StrictlyUpperMatrix<MT,SO,DF>& m );
 
 template< typename MT, bool SO, bool DF >
-inline void reset( StrictlyUpperMatrix<MT,SO,DF>& m, size_t i );
+bool isIntact( const StrictlyUpperMatrix<MT,SO,DF>& m );
 
 template< typename MT, bool SO, bool DF >
-inline void clear( StrictlyUpperMatrix<MT,SO,DF>& m );
-
-template< bool RF, typename MT, bool SO, bool DF >
-inline bool isDefault( const StrictlyUpperMatrix<MT,SO,DF>& m );
-
-template< typename MT, bool SO, bool DF >
-inline bool isIntact( const StrictlyUpperMatrix<MT,SO,DF>& m );
-
-template< typename MT, bool SO, bool DF >
-inline void swap( StrictlyUpperMatrix<MT,SO,DF>& a, StrictlyUpperMatrix<MT,SO,DF>& b ) noexcept;
+void swap( StrictlyUpperMatrix<MT,SO,DF>& a, StrictlyUpperMatrix<MT,SO,DF>& b ) noexcept;
 //@}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Resetting the given strictly upper matrix.
-// \ingroup strictly_upper_matrix
-//
-// \param m The strictly upper matrix to be resetted.
-// \return void
-*/
-template< typename MT  // Type of the adapted matrix
-        , bool SO      // Storage order of the adapted matrix
-        , bool DF >    // Density flag
-inline void reset( StrictlyUpperMatrix<MT,SO,DF>& m )
-{
-   m.reset();
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Resetting the specified row/column of the given strictly upper matrix.
-// \ingroup strictly_upper_matrix
-//
-// \param m The strictly upper matrix to be resetted.
-// \param i The index of the row/column to be resetted.
-// \return void
-//
-// This function resets the values in the specified row/column of the given strictly upper matrix
-// to their default value. In case the given matrix is a \a rowMajor matrix the function resets
-// the values in row \a i, if it is a \a columnMajor matrix the function resets the values in
-// column \a i. Note that the capacity of the row/column remains unchanged.
-*/
-template< typename MT  // Type of the adapted matrix
-        , bool SO      // Storage order of the adapted matrix
-        , bool DF >    // Density flag
-inline void reset( StrictlyUpperMatrix<MT,SO,DF>& m, size_t i )
-{
-   m.reset( i );
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Clearing the given strictly upper matrix.
-// \ingroup strictly_upper_matrix
-//
-// \param m The strictly upper matrix to be cleared.
-// \return void
-*/
-template< typename MT  // Type of the adapted matrix
-        , bool SO      // Storage order of the adapted matrix
-        , bool DF >    // Density flag
-inline void clear( StrictlyUpperMatrix<MT,SO,DF>& m )
-{
-   m.clear();
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Returns whether the given resizable strictly upper matrix is in default state.
-// \ingroup strictly_upper_matrix
-//
-// \param m The strictly upper matrix to be tested for its default state.
-// \return \a true in case the given matrix is in default state, \a false otherwise.
-//
-// This function checks whether the resizable strictly upper triangular matrix is in default
-// state.
-*/
-template< bool RF      // Relaxation flag
-        , typename MT  // Type of the adapted matrix
-        , bool SO      // Storage order of the adapted matrix
-        , bool DF >    // Density flag
-inline bool isDefault_backend( const StrictlyUpperMatrix<MT,SO,DF>& m, TrueType )
-{
-   return ( m.rows() == 0UL );
-}
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Returns whether the given fixed-size strictly upper matrix is in default state.
-// \ingroup strictly_upper_matrix
-//
-// \param m The strictly upper matrix to be tested for its default state.
-// \return \a true in case the given matrix is in default state, \a false otherwise.
-//
-// This function checks whether the fixed-size strictly upper triangular matrix is in default
-// state.
-*/
-template< bool RF      // Relaxation flag
-        , typename MT  // Type of the adapted matrix
-        , bool SO      // Storage order of the adapted matrix
-        , bool DF >    // Density flag
-inline bool isDefault_backend( const StrictlyUpperMatrix<MT,SO,DF>& m, FalseType )
-{
-   if( SO ) {
-      for( size_t j=1UL; j<m.columns(); ++j ) {
-         for( size_t i=0UL; i<j; ++i ) {
-            if( !isDefault<RF>( m(i,j) ) )
-               return false;
-         }
-      }
-   }
-   else {
-      for( size_t i=0UL; i<m.rows(); ++i ) {
-         for( size_t j=i+1UL; j<m.columns(); ++j ) {
-            if( !isDefault<RF>( m(i,j) ) )
-               return false;
-         }
-      }
-   }
-
-   return true;
-}
-/*! \endcond */
 //*************************************************************************************************
 
 
@@ -258,13 +149,15 @@ inline bool isDefault_backend( const StrictlyUpperMatrix<MT,SO,DF>& m, FalseType
    if( isDefault<relaxed>( A ) ) { ... }
    \endcode
 */
-template< bool RF      // Relaxation flag
-        , typename MT  // Type of the adapted matrix
-        , bool SO      // Storage order of the adapted matrix
-        , bool DF >    // Density flag
+template< RelaxationFlag RF  // Relaxation flag
+        , typename MT        // Type of the adapted matrix
+        , bool SO            // Storage order of the adapted matrix
+        , bool DF >          // Density flag
 inline bool isDefault( const StrictlyUpperMatrix<MT,SO,DF>& m )
 {
-   return isDefault_backend<RF>( m, typename IsResizable<MT>::Type() );
+   if( Size_v<MT,0UL> == DefaultSize_v )
+      return m.rows() == 0UL;
+   else return isLower<RF>( m );
 }
 //*************************************************************************************************
 
@@ -320,6 +213,320 @@ inline void swap( StrictlyUpperMatrix<MT,SO,DF>& a, StrictlyUpperMatrix<MT,SO,DF
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by setting a single element of a strictly upper matrix.
+// \ingroup strictly_upper_matrix
+//
+// \param mat The target strictly upper matrix.
+// \param i The row index of the element to be set.
+// \param j The column index of the element to be set.
+// \param value The value to be set to the element.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the adapted matrix
+        , bool SO        // Storage order of the adapted matrix
+        , bool DF        // Density flag
+        , typename ET >  // Type of the element
+inline bool trySet( const StrictlyUpperMatrix<MT,SO,DF>& mat, size_t i, size_t j, const ET& value )
+{
+   BLAZE_INTERNAL_ASSERT( i < (*mat).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( j < (*mat).columns(), "Invalid column access index" );
+
+   MAYBE_UNUSED( mat );
+
+   return ( i < j || isDefault( value ) );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by setting a range of elements of a strictly upper matrix.
+// \ingroup strictly_upper_matrix
+//
+// \param mat The target strictly upper matrix.
+// \param row The index of the first row of the range to be multiplied.
+// \param column The index of the first column of the range to be multiplied.
+// \param m The number of rows of the range to be multiplied.
+// \param n The number of columns of the range to be multiplied.
+// \param value The value to be set to the range of elements.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the adapted matrix
+        , bool SO        // Storage order of the adapted matrix
+        , bool DF        // Density flag
+        , typename ET >  // Type of the element
+BLAZE_ALWAYS_INLINE bool
+   trySet( const StrictlyUpperMatrix<MT,SO,DF>& mat, size_t row, size_t column, size_t m, size_t n, const ET& value )
+{
+   BLAZE_INTERNAL_ASSERT( row <= (*mat).rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= (*mat).columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( row + m <= (*mat).rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + n <= (*mat).columns(), "Invalid number of columns" );
+
+   MAYBE_UNUSED( mat );
+
+   return ( m == 0UL ) ||
+          ( n == 0UL ) ||
+          ( column >= row + m ) ||
+          isDefault( value );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by adding to a single element of a strictly upper matrix.
+// \ingroup strictly_upper_matrix
+//
+// \param mat The target strictly upper matrix.
+// \param i The row index of the element to be modified.
+// \param j The column index of the element to be modified.
+// \param value The value to be added to the element.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the adapted matrix
+        , bool SO        // Storage order of the adapted matrix
+        , bool DF        // Density flag
+        , typename ET >  // Type of the element
+inline bool tryAdd( const StrictlyUpperMatrix<MT,SO,DF>& mat, size_t i, size_t j, const ET& value )
+{
+   return trySet( mat, i, j, value );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by adding to a range of elements of a strictly upper matrix.
+// \ingroup strictly_upper_matrix
+//
+// \param mat The target strictly upper matrix.
+// \param row The index of the first row of the range to be multiplied.
+// \param column The index of the first column of the range to be multiplied.
+// \param m The number of rows of the range to be multiplied.
+// \param n The number of columns of the range to be multiplied.
+// \param value The value to be added to the range of elements.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the adapted matrix
+        , bool SO        // Storage order of the adapted matrix
+        , bool DF        // Density flag
+        , typename ET >  // Type of the element
+BLAZE_ALWAYS_INLINE bool
+   tryAdd( const StrictlyUpperMatrix<MT,SO,DF>& mat, size_t row, size_t column, size_t m, size_t n, const ET& value )
+{
+   return trySet( mat, row, column, m, n, value );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by subtracting from a single element of a strictly upper
+//        matrix.
+// \ingroup strictly_upper_matrix
+//
+// \param mat The target strictly upper matrix.
+// \param i The row index of the element to be modified.
+// \param j The column index of the element to be modified.
+// \param value The value to be subtracted from the element.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the adapted matrix
+        , bool SO        // Storage order of the adapted matrix
+        , bool DF        // Density flag
+        , typename ET >  // Type of the element
+inline bool trySub( const StrictlyUpperMatrix<MT,SO,DF>& mat, size_t i, size_t j, const ET& value )
+{
+   return trySet( mat, i, j, value );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by subtracting from a range of elements of a strictly
+//        upper matrix.
+// \ingroup strictly_upper_matrix
+//
+// \param mat The target strictly upper matrix.
+// \param row The index of the first row of the range to be multiplied.
+// \param column The index of the first column of the range to be multiplied.
+// \param m The number of rows of the range to be multiplied.
+// \param n The number of columns of the range to be multiplied.
+// \param value The value to be subtracted from the range of elements.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the adapted matrix
+        , bool SO        // Storage order of the adapted matrix
+        , bool DF        // Density flag
+        , typename ET >  // Type of the element
+BLAZE_ALWAYS_INLINE bool
+   trySub( const StrictlyUpperMatrix<MT,SO,DF>& mat, size_t row, size_t column, size_t m, size_t n, const ET& value )
+{
+   return trySet( mat, row, column, m, n, value );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by a bitwise OR on a single element of a strictly upper matrix.
+// \ingroup strictly_upper_matrix
+//
+// \param mat The target strictly upper matrix.
+// \param i The row index of the element to be modified.
+// \param j The column index of the element to be modified.
+// \param value The bit pattern to be used on the element.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the adapted matrix
+        , bool SO        // Storage order of the adapted matrix
+        , bool DF        // Density flag
+        , typename ET >  // Type of the element
+inline bool tryBitor( const StrictlyUpperMatrix<MT,SO,DF>& mat, size_t i, size_t j, const ET& value )
+{
+   return trySet( mat, i, j, value );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by a bitwise OR on a range of elements of a strictly upper
+//        matrix.
+// \ingroup strictly_upper_matrix
+//
+// \param mat The target strictly upper matrix.
+// \param row The index of the first row of the range to be multiplied.
+// \param column The index of the first column of the range to be multiplied.
+// \param m The number of rows of the range to be multiplied.
+// \param n The number of columns of the range to be multiplied.
+// \param value The bit pattern to be used on the range of elements.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the adapted matrix
+        , bool SO        // Storage order of the adapted matrix
+        , bool DF        // Density flag
+        , typename ET >  // Type of the element
+BLAZE_ALWAYS_INLINE bool
+   tryBitor( const StrictlyUpperMatrix<MT,SO,DF>& mat, size_t row, size_t column, size_t m, size_t n, const ET& value )
+{
+   return trySet( mat, row, column, m, n, value );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by a bitwise XOR on a single element of a strictly upper matrix.
+// \ingroup strictly_upper_matrix
+//
+// \param mat The target strictly upper matrix.
+// \param i The row index of the element to be modified.
+// \param j The column index of the element to be modified.
+// \param value The bit pattern to be used on the element.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the adapted matrix
+        , bool SO        // Storage order of the adapted matrix
+        , bool DF        // Density flag
+        , typename ET >  // Type of the element
+inline bool tryBitxor( const StrictlyUpperMatrix<MT,SO,DF>& mat, size_t i, size_t j, const ET& value )
+{
+   return tryAdd( mat, i, j, value );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by a bitwise XOR on a range of elements of a strictly upper
+//        matrix.
+// \ingroup strictly_upper_matrix
+//
+// \param mat The target strictly upper matrix.
+// \param row The index of the first row of the range to be multiplied.
+// \param column The index of the first column of the range to be multiplied.
+// \param m The number of rows of the range to be multiplied.
+// \param n The number of columns of the range to be multiplied.
+// \param value The bit pattern to be used on the range of elements.
+// \return \a true in case the operation would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT    // Type of the adapted matrix
+        , bool SO        // Storage order of the adapted matrix
+        , bool DF        // Density flag
+        , typename ET >  // Type of the element
+BLAZE_ALWAYS_INLINE bool
+   tryBitxor( const StrictlyUpperMatrix<MT,SO,DF>& mat, size_t row, size_t column, size_t m, size_t n, const ET& value )
+{
+   return tryAdd( mat, row, column, m, n, value );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
 /*!\brief Predict invariant violations by the assignment of a dense vector to a strictly upper
 //        matrix.
 // \ingroup strictly_upper_matrix
@@ -346,14 +553,14 @@ inline bool tryAssign( const StrictlyUpperMatrix<MT,SO,DF>& lhs,
 
    BLAZE_INTERNAL_ASSERT( row <= lhs.rows(), "Invalid row access index" );
    BLAZE_INTERNAL_ASSERT( column <= lhs.columns(), "Invalid column access index" );
-   BLAZE_INTERNAL_ASSERT( (~rhs).size() <= lhs.rows() - row, "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( row + (*rhs).size() <= lhs.rows(), "Invalid number of rows" );
 
-   UNUSED_PARAMETER( lhs );
+   MAYBE_UNUSED( lhs );
 
    const size_t ibegin( ( column <= row )?( 0UL ):( column - row ) );
 
-   for( size_t i=ibegin; i<(~rhs).size(); ++i ) {
-      if( !isDefault( (~rhs)[i] ) )
+   for( size_t i=ibegin; i<(*rhs).size(); ++i ) {
+      if( !isDefault( (*rhs)[i] ) )
          return false;
    }
 
@@ -391,18 +598,66 @@ inline bool tryAssign( const StrictlyUpperMatrix<MT,SO,DF>& lhs,
 
    BLAZE_INTERNAL_ASSERT( row <= lhs.rows(), "Invalid row access index" );
    BLAZE_INTERNAL_ASSERT( column <= lhs.columns(), "Invalid column access index" );
-   BLAZE_INTERNAL_ASSERT( (~rhs).size() <= lhs.columns() - column, "Invalid number of columns" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).size() <= lhs.columns(), "Invalid number of columns" );
 
-   UNUSED_PARAMETER( lhs );
+   MAYBE_UNUSED( lhs );
 
    if( row < column )
       return true;
 
-   const size_t iend( min( row - column + 1UL, (~rhs).size() ) );
+   const size_t iend( min( row - column + 1UL, (*rhs).size() ) );
 
    for( size_t i=0UL; i<iend; ++i ) {
-      if( !isDefault( (~rhs)[i] ) )
+      if( !isDefault( (*rhs)[i] ) )
          return false;
+   }
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the assignment of a dense vector to the band of
+//        a strictly upper matrix.
+// \ingroup strictly_upper_matrix
+//
+// \param lhs The target left-hand side strictly upper matrix.
+// \param rhs The right-hand side dense vector to be assigned.
+// \param band The index of the band the right-hand side vector is assigned to.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT  // Type of the adapted matrix
+        , bool SO      // Storage order of the adapted matrix
+        , bool DF      // Density flag
+        , typename VT  // Type of the right-hand side dense vector
+        , bool TF >    // Transpose flag of the right-hand side dense vector
+inline bool tryAssign( const StrictlyUpperMatrix<MT,SO,DF>& lhs, const DenseVector<VT,TF>& rhs,
+                       ptrdiff_t band, size_t row, size_t column )
+{
+   BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( VT );
+
+   BLAZE_INTERNAL_ASSERT( row <= lhs.rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= lhs.columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( row + (*rhs).size() <= lhs.rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).size() <= lhs.columns(), "Invalid number of columns" );
+
+   MAYBE_UNUSED( lhs, row, column );
+
+   if( band <= 0L ) {
+      for( size_t i=0UL; i<(*rhs).size(); ++i ) {
+         if( !isDefault( (*rhs)[i] ) )
+            return false;
+      }
    }
 
    return true;
@@ -439,14 +694,12 @@ inline bool tryAssign( const StrictlyUpperMatrix<MT,SO,DF>& lhs,
 
    BLAZE_INTERNAL_ASSERT( row <= lhs.rows(), "Invalid row access index" );
    BLAZE_INTERNAL_ASSERT( column <= lhs.columns(), "Invalid column access index" );
-   BLAZE_INTERNAL_ASSERT( (~rhs).size() <= lhs.rows() - row, "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( row + (*rhs).size() <= lhs.rows(), "Invalid number of rows" );
 
-   UNUSED_PARAMETER( lhs );
+   MAYBE_UNUSED( lhs );
 
-   typedef typename VT::ConstIterator  RhsIterator;
-
-   const RhsIterator last( (~rhs).end() );
-   RhsIterator element( (~rhs).lowerBound( ( column <= row )?( 0UL ):( column - row ) ) );
+   const auto last( (*rhs).end() );
+   auto element( (*rhs).lowerBound( ( column <= row )?( 0UL ):( column - row ) ) );
 
    for( ; element!=last; ++element ) {
       if( !isDefault( element->value() ) )
@@ -487,20 +740,66 @@ inline bool tryAssign( const StrictlyUpperMatrix<MT,SO,DF>& lhs,
 
    BLAZE_INTERNAL_ASSERT( row <= lhs.rows(), "Invalid row access index" );
    BLAZE_INTERNAL_ASSERT( column <= lhs.columns(), "Invalid column access index" );
-   BLAZE_INTERNAL_ASSERT( (~rhs).size() <= lhs.columns() - column, "Invalid number of columns" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).size() <= lhs.columns(), "Invalid number of columns" );
 
-   UNUSED_PARAMETER( lhs );
-
-   typedef typename VT::ConstIterator  RhsIterator;
+   MAYBE_UNUSED( lhs );
 
    if( row < column )
       return true;
 
-   const RhsIterator last( (~rhs).lowerBound( row - column + 1UL ) );
+   const auto last( (*rhs).lowerBound( row - column + 1UL ) );
 
-   for( RhsIterator element=(~rhs).begin(); element!=last; ++element ) {
+   for( auto element=(*rhs).begin(); element!=last; ++element ) {
       if( !isDefault( element->value() ) )
          return false;
+   }
+
+   return true;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the assignment of a sparse vector to the band of
+//        a strictly upper matrix.
+// \ingroup strictly_upper_matrix
+//
+// \param lhs The target left-hand side strictly upper matrix.
+// \param rhs The right-hand side sparse vector to be assigned.
+// \param band The index of the band the right-hand side vector is assigned to.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT  // Type of the adapted matrix
+        , bool SO      // Storage order of the adapted matrix
+        , bool DF      // Density flag
+        , typename VT  // Type of the right-hand side sparse vector
+        , bool TF >    // Transpose flag of the right-hand side sparse vector
+inline bool tryAssign( const StrictlyUpperMatrix<MT,SO,DF>& lhs, const SparseVector<VT,TF>& rhs,
+                       ptrdiff_t band, size_t row, size_t column )
+{
+   BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( VT );
+
+   BLAZE_INTERNAL_ASSERT( row <= lhs.rows(), "Invalid row access index" );
+   BLAZE_INTERNAL_ASSERT( column <= lhs.columns(), "Invalid column access index" );
+   BLAZE_INTERNAL_ASSERT( row + (*rhs).size() <= lhs.rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).size() <= lhs.columns(), "Invalid number of columns" );
+
+   MAYBE_UNUSED( lhs, row, column );
+
+   if( band <= 0L ) {
+      for( const auto& element : *rhs ) {
+         if( !isDefault( element.value() ) )
+            return false;
+      }
    }
 
    return true;
@@ -537,15 +836,15 @@ inline bool tryAssign( const StrictlyUpperMatrix<MT1,SO,DF>& lhs,
 
    BLAZE_INTERNAL_ASSERT( row <= lhs.rows(), "Invalid row access index" );
    BLAZE_INTERNAL_ASSERT( column <= lhs.columns(), "Invalid column access index" );
-   BLAZE_INTERNAL_ASSERT( (~rhs).rows() <= lhs.rows() - row, "Invalid number of rows" );
-   BLAZE_INTERNAL_ASSERT( (~rhs).columns() <= lhs.columns() - column, "Invalid number of columns" );
+   BLAZE_INTERNAL_ASSERT( row + (*rhs).rows() <= lhs.rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).columns() <= lhs.columns(), "Invalid number of columns" );
 
-   UNUSED_PARAMETER( lhs );
+   MAYBE_UNUSED( lhs );
 
-   const size_t M( (~rhs).rows()    );
-   const size_t N( (~rhs).columns() );
+   const size_t M( (*rhs).rows()    );
+   const size_t N( (*rhs).columns() );
 
-   if( column + 1UL >= row + M )
+   if( column >= row + M )
       return true;
 
    const size_t ibegin( ( column <= row )?( 0UL ):( column - row ) );
@@ -555,7 +854,7 @@ inline bool tryAssign( const StrictlyUpperMatrix<MT1,SO,DF>& lhs,
       const size_t jend( min( row + i - column + 1UL, N ) );
 
       for( size_t j=0UL; j<jend; ++j ) {
-         if( !isDefault( (~rhs)(i,j) ) )
+         if( !isDefault( (*rhs)(i,j) ) )
             return false;
       }
    }
@@ -594,15 +893,15 @@ inline bool tryAssign( const StrictlyUpperMatrix<MT1,SO,DF>& lhs,
 
    BLAZE_INTERNAL_ASSERT( row <= lhs.rows(), "Invalid row access index" );
    BLAZE_INTERNAL_ASSERT( column <= lhs.columns(), "Invalid column access index" );
-   BLAZE_INTERNAL_ASSERT( (~rhs).rows() <= lhs.rows() - row, "Invalid number of rows" );
-   BLAZE_INTERNAL_ASSERT( (~rhs).columns() <= lhs.columns() - column, "Invalid number of columns" );
+   BLAZE_INTERNAL_ASSERT( row + (*rhs).rows() <= lhs.rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).columns() <= lhs.columns(), "Invalid number of columns" );
 
-   UNUSED_PARAMETER( lhs );
+   MAYBE_UNUSED( lhs );
 
-   const size_t M( (~rhs).rows()    );
-   const size_t N( (~rhs).columns() );
+   const size_t M( (*rhs).rows()    );
+   const size_t N( (*rhs).columns() );
 
-   if( column + 1UL >= row + M )
+   if( column >= row + M )
       return true;
 
    const size_t jend( min( row + M - column, N ) );
@@ -613,7 +912,7 @@ inline bool tryAssign( const StrictlyUpperMatrix<MT1,SO,DF>& lhs,
       const size_t ibegin( ( containsDiagonal )?( column + j - row ):( 0UL ) );
 
       for( size_t i=ibegin; i<M; ++i ) {
-         if( !isDefault( (~rhs)(i,j) ) )
+         if( !isDefault( (*rhs)(i,j) ) )
             return false;
       }
    }
@@ -652,17 +951,15 @@ inline bool tryAssign( const StrictlyUpperMatrix<MT1,SO,DF>& lhs,
 
    BLAZE_INTERNAL_ASSERT( row <= lhs.rows(), "Invalid row access index" );
    BLAZE_INTERNAL_ASSERT( column <= lhs.columns(), "Invalid column access index" );
-   BLAZE_INTERNAL_ASSERT( (~rhs).rows() <= lhs.rows() - row, "Invalid number of rows" );
-   BLAZE_INTERNAL_ASSERT( (~rhs).columns() <= lhs.columns() - column, "Invalid number of columns" );
+   BLAZE_INTERNAL_ASSERT( row + (*rhs).rows() <= lhs.rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).columns() <= lhs.columns(), "Invalid number of columns" );
 
-   UNUSED_PARAMETER( lhs );
+   MAYBE_UNUSED( lhs );
 
-   typedef typename MT2::ConstIterator  RhsIterator;
+   const size_t M( (*rhs).rows()    );
+   const size_t N( (*rhs).columns() );
 
-   const size_t M( (~rhs).rows()    );
-   const size_t N( (~rhs).columns() );
-
-   if( column + 1UL >= row + M )
+   if( column >= row + M )
       return true;
 
    const size_t ibegin( ( column < row )?( 0UL ):( column - row ) );
@@ -670,9 +967,9 @@ inline bool tryAssign( const StrictlyUpperMatrix<MT1,SO,DF>& lhs,
    for( size_t i=ibegin; i<M; ++i )
    {
       const size_t index( row + i - column + 1UL );
-      const RhsIterator last( (~rhs).lowerBound( i, min( index, N ) ) );
+      const auto last( (*rhs).lowerBound( i, min( index, N ) ) );
 
-      for( RhsIterator element=(~rhs).begin(i); element!=last; ++element ) {
+      for( auto element=(*rhs).begin(i); element!=last; ++element ) {
          if( !isDefault( element->value() ) )
             return false;
       }
@@ -712,17 +1009,15 @@ inline bool tryAssign( const StrictlyUpperMatrix<MT1,SO,DF>& lhs,
 
    BLAZE_INTERNAL_ASSERT( row <= lhs.rows(), "Invalid row access index" );
    BLAZE_INTERNAL_ASSERT( column <= lhs.columns(), "Invalid column access index" );
-   BLAZE_INTERNAL_ASSERT( (~rhs).rows() <= lhs.rows() - row, "Invalid number of rows" );
-   BLAZE_INTERNAL_ASSERT( (~rhs).columns() <= lhs.columns() - column, "Invalid number of columns" );
+   BLAZE_INTERNAL_ASSERT( row + (*rhs).rows() <= lhs.rows(), "Invalid number of rows" );
+   BLAZE_INTERNAL_ASSERT( column + (*rhs).columns() <= lhs.columns(), "Invalid number of columns" );
 
-   UNUSED_PARAMETER( lhs );
+   MAYBE_UNUSED( lhs );
 
-   typedef typename MT2::ConstIterator  RhsIterator;
+   const size_t M( (*rhs).rows()    );
+   const size_t N( (*rhs).columns() );
 
-   const size_t M( (~rhs).rows()    );
-   const size_t N( (~rhs).columns() );
-
-   if( column + 1UL >= row + M )
+   if( column >= row + M )
       return true;
 
    const size_t jend( min( row + M - column, N ) );
@@ -732,8 +1027,8 @@ inline bool tryAssign( const StrictlyUpperMatrix<MT1,SO,DF>& lhs,
       const bool containsDiagonal( column + j >= row );
       const size_t index( ( containsDiagonal )?( column + j - row ):( 0UL ) );
 
-      const RhsIterator last( (~rhs).end(j) );
-      RhsIterator element( (~rhs).lowerBound( index, j ) );
+      const auto last( (*rhs).end(j) );
+      auto element( (*rhs).lowerBound( index, j ) );
 
       for( ; element!=last; ++element ) {
          if( !isDefault( element->value() ) )
@@ -772,7 +1067,39 @@ template< typename MT  // Type of the adapted matrix
 inline bool tryAddAssign( const StrictlyUpperMatrix<MT,SO,DF>& lhs,
                           const Vector<VT,TF>& rhs, size_t row, size_t column )
 {
-   return tryAssign( lhs, ~rhs, row, column );
+   return tryAssign( lhs, *rhs, row, column );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the addition assignment of a vector to the band of
+//        a strictly upper matrix.
+// \ingroup strictly_upper_matrix
+//
+// \param lhs The target left-hand side strictly upper matrix.
+// \param rhs The right-hand side vector to be added.
+// \param band The index of the band the right-hand side vector is assigned to.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT  // Type of the adapted matrix
+        , bool SO      // Storage order of the adapted matrix
+        , bool DF      // Density flag
+        , typename VT  // Type of the right-hand side vector
+        , bool TF >    // Transpose flag of the right-hand side vector
+inline bool tryAddAssign( const StrictlyUpperMatrix<MT,SO,DF>& lhs, const Vector<VT,TF>& rhs,
+                          ptrdiff_t band, size_t row, size_t column )
+{
+   return tryAssign( lhs, *rhs, band, row, column );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -803,7 +1130,7 @@ template< typename MT1  // Type of the adapted matrix
 inline bool tryAddAssign( const StrictlyUpperMatrix<MT1,SO1,DF>& lhs,
                           const Matrix<MT2,SO2>& rhs, size_t row, size_t column )
 {
-   return tryAssign( lhs, ~rhs, row, column );
+   return tryAssign( lhs, *rhs, row, column );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -834,7 +1161,39 @@ template< typename MT  // Type of the adapted matrix
 inline bool trySubAssign( const StrictlyUpperMatrix<MT,SO,DF>& lhs,
                           const Vector<VT,TF>& rhs, size_t row, size_t column )
 {
-   return tryAssign( lhs, ~rhs, row, column );
+   return tryAssign( lhs, *rhs, row, column );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the subtraction assignment of a vector to the band of
+//        a strictly upper matrix.
+// \ingroup strictly_upper_matrix
+//
+// \param lhs The target left-hand side strictly upper matrix.
+// \param rhs The right-hand side vector to be subtracted.
+// \param band The index of the band the right-hand side vector is assigned to.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT  // Type of the adapted matrix
+        , bool SO      // Storage order of the adapted matrix
+        , bool DF      // Density flag
+        , typename VT  // Type of the right-hand side vector
+        , bool TF >    // Transpose flag of the right-hand side vector
+inline bool trySubAssign( const StrictlyUpperMatrix<MT,SO,DF>& lhs, const Vector<VT,TF>& rhs,
+                          ptrdiff_t band, size_t row, size_t column )
+{
+   return tryAssign( lhs, *rhs, band, row, column );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -865,7 +1224,193 @@ template< typename MT1  // Type of the adapted matrix
 inline bool trySubAssign( const StrictlyUpperMatrix<MT1,SO1,DF>& lhs,
                           const Matrix<MT2,SO2>& rhs, size_t row, size_t column )
 {
-   return tryAssign( lhs, ~rhs, row, column );
+   return tryAssign( lhs, *rhs, row, column );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the bitwise OR assignment of a vector to a strictly
+//        upper matrix.
+// \ingroup strictly_upper_matrix
+//
+// \param lhs The target left-hand side strictly upper matrix.
+// \param rhs The right-hand side vector for the bitwise OR operation.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT  // Type of the adapted matrix
+        , bool SO      // Storage order of the adapted matrix
+        , bool DF      // Density flag
+        , typename VT  // Type of the right-hand side vector
+        , bool TF >    // Transpose flag of the right-hand side vector
+inline bool tryBitorAssign( const StrictlyUpperMatrix<MT,SO,DF>& lhs,
+                            const Vector<VT,TF>& rhs, size_t row, size_t column )
+{
+   return tryAssign( lhs, *rhs, row, column );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the bitwise OR assignment of a vector to the band of
+//        a strictly upper matrix.
+// \ingroup strictly_upper_matrix
+// \param lhs The target left-hand side strictly upper matrix.
+// \param rhs The right-hand side vector for the bitwise OR operation.
+// \param band The index of the band the right-hand side vector is assigned to.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT  // Type of the adapted matrix
+        , bool SO      // Storage order of the adapted matrix
+        , bool DF      // Density flag
+        , typename VT  // Type of the right-hand side vector
+        , bool TF >    // Transpose flag of the right-hand side vector
+inline bool tryBitorAssign( const StrictlyUpperMatrix<MT,SO,DF>& lhs, const Vector<VT,TF>& rhs,
+                            ptrdiff_t band, size_t row, size_t column )
+{
+   return tryAssign( lhs, *rhs, band, row, column );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the bitwise OR assignment of a matrix to a strictly
+//        upper matrix.
+// \ingroup strictly_upper_matrix
+//
+// \param lhs The target left-hand side strictly upper matrix.
+// \param rhs The right-hand side matrix for the bitwise OR operation.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT1  // Type of the adapted matrix
+        , bool SO1      // Storage order of the adapted matrix
+        , bool DF       // Density flag
+        , typename MT2  // Type of the right-hand side matrix
+        , bool SO2 >    // Storage order of the right-hand side matrix
+inline bool tryBitorAssign( const StrictlyUpperMatrix<MT1,SO1,DF>& lhs,
+                            const Matrix<MT2,SO2>& rhs, size_t row, size_t column )
+{
+   return tryAssign( lhs, *rhs, row, column );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the bitwise XOR assignment of a vector to a strictly
+//        upper matrix.
+// \ingroup strictly_upper_matrix
+//
+// \param lhs The target left-hand side strictly upper matrix.
+// \param rhs The right-hand side vector for the bitwise XOR operation.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT  // Type of the adapted matrix
+        , bool SO      // Storage order of the adapted matrix
+        , bool DF      // Density flag
+        , typename VT  // Type of the right-hand side vector
+        , bool TF >    // Transpose flag of the right-hand side vector
+inline bool tryBitxorAssign( const StrictlyUpperMatrix<MT,SO,DF>& lhs,
+                             const Vector<VT,TF>& rhs, size_t row, size_t column )
+{
+   return tryAssign( lhs, *rhs, row, column );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the bitwise XOR assignment of a vector to the band of
+//        a strictly upper matrix.
+// \ingroup strictly_upper_matrix
+// \param lhs The target left-hand side strictly upper matrix.
+// \param rhs The right-hand side vector for the bitwise XOR operation.
+// \param band The index of the band the right-hand side vector is assigned to.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT  // Type of the adapted matrix
+        , bool SO      // Storage order of the adapted matrix
+        , bool DF      // Density flag
+        , typename VT  // Type of the right-hand side vector
+        , bool TF >    // Transpose flag of the right-hand side vector
+inline bool tryBitxorAssign( const StrictlyUpperMatrix<MT,SO,DF>& lhs, const Vector<VT,TF>& rhs,
+                             ptrdiff_t band, size_t row, size_t column )
+{
+   return tryAssign( lhs, *rhs, band, row, column );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Predict invariant violations by the bitwise XOR assignment of a matrix to a strictly
+//        upper matrix.
+// \ingroup strictly_upper_matrix
+//
+// \param lhs The target left-hand side strictly upper matrix.
+// \param rhs The right-hand side matrix for the bitwise XOR operation.
+// \param row The row index of the first element to be modified.
+// \param column The column index of the first element to be modified.
+// \return \a true in case the assignment would be successful, \a false if not.
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename MT1  // Type of the adapted matrix
+        , bool SO1      // Storage order of the adapted matrix
+        , bool DF       // Density flag
+        , typename MT2  // Type of the right-hand side matrix
+        , bool SO2 >    // Storage order of the right-hand side matrix
+inline bool tryBitxorAssign( const StrictlyUpperMatrix<MT1,SO1,DF>& lhs,
+                             const Matrix<MT2,SO2>& rhs, size_t row, size_t column )
+{
+   return tryAssign( lhs, *rhs, row, column );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -900,14 +1445,20 @@ inline MT& derestrict( StrictlyUpperMatrix<MT,SO,DF>& m )
 
 //=================================================================================================
 //
-//  ROWS SPECIALIZATIONS
+//  SIZE SPECIALIZATIONS
 //
 //=================================================================================================
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct Rows< StrictlyUpperMatrix<MT,SO,DF> > : public Rows<MT>
+struct Size< StrictlyUpperMatrix<MT,SO,DF>, 0UL >
+   : public Size<MT,0UL>
+{};
+
+template< typename MT, bool SO, bool DF >
+struct Size< StrictlyUpperMatrix<MT,SO,DF>, 1UL >
+   : public Size<MT,1UL>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -917,14 +1468,20 @@ struct Rows< StrictlyUpperMatrix<MT,SO,DF> > : public Rows<MT>
 
 //=================================================================================================
 //
-//  COLUMNS SPECIALIZATIONS
+//  MAXSIZE SPECIALIZATIONS
 //
 //=================================================================================================
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct Columns< StrictlyUpperMatrix<MT,SO,DF> > : public Columns<MT>
+struct MaxSize< StrictlyUpperMatrix<MT,SO,DF>, 0UL >
+   : public MaxSize<MT,0UL>
+{};
+
+template< typename MT, bool SO, bool DF >
+struct MaxSize< StrictlyUpperMatrix<MT,SO,DF>, 1UL >
+   : public MaxSize<MT,1UL>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -941,7 +1498,80 @@ struct Columns< StrictlyUpperMatrix<MT,SO,DF> > : public Columns<MT>
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct IsSquare< StrictlyUpperMatrix<MT,SO,DF> > : public TrueType
+struct IsSquare< StrictlyUpperMatrix<MT,SO,DF> >
+   : public TrueType
+{};
+/*! \endcond */
+//*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  ISUNIFORM SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename MT, bool SO, bool DF >
+struct IsUniform< StrictlyUpperMatrix<MT,SO,DF> >
+   : public IsUniform<MT>
+{};
+/*! \endcond */
+//*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  ISSYMMETRIC SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename MT, bool SO, bool DF >
+struct IsSymmetric< StrictlyUpperMatrix<MT,SO,DF> >
+   : public IsUniform<MT>
+{};
+/*! \endcond */
+//*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  ISHERMITIAN SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename MT, bool SO, bool DF >
+struct IsHermitian< StrictlyUpperMatrix<MT,SO,DF> >
+   : public IsUniform<MT>
+{};
+/*! \endcond */
+//*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  ISSTRICTLYLOWER SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename MT, bool SO, bool DF >
+struct IsStrictlyLower< StrictlyUpperMatrix<MT,SO,DF> >
+   : public IsUniform<MT>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -958,7 +1588,8 @@ struct IsSquare< StrictlyUpperMatrix<MT,SO,DF> > : public TrueType
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct IsStrictlyUpper< StrictlyUpperMatrix<MT,SO,DF> > : public TrueType
+struct IsStrictlyUpper< StrictlyUpperMatrix<MT,SO,DF> >
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -975,7 +1606,8 @@ struct IsStrictlyUpper< StrictlyUpperMatrix<MT,SO,DF> > : public TrueType
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct IsAdaptor< StrictlyUpperMatrix<MT,SO,DF> > : public TrueType
+struct IsAdaptor< StrictlyUpperMatrix<MT,SO,DF> >
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -992,7 +1624,8 @@ struct IsAdaptor< StrictlyUpperMatrix<MT,SO,DF> > : public TrueType
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct IsRestricted< StrictlyUpperMatrix<MT,SO,DF> > : public TrueType
+struct IsRestricted< StrictlyUpperMatrix<MT,SO,DF> >
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -1009,7 +1642,8 @@ struct IsRestricted< StrictlyUpperMatrix<MT,SO,DF> > : public TrueType
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO >
-struct HasConstDataAccess< StrictlyUpperMatrix<MT,SO,true> > : public TrueType
+struct HasConstDataAccess< StrictlyUpperMatrix<MT,SO,true> >
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -1026,7 +1660,26 @@ struct HasConstDataAccess< StrictlyUpperMatrix<MT,SO,true> > : public TrueType
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct IsAligned< StrictlyUpperMatrix<MT,SO,DF> > : public BoolConstant< IsAligned<MT>::value >
+struct IsAligned< StrictlyUpperMatrix<MT,SO,DF> >
+   : public IsAligned<MT>
+{};
+/*! \endcond */
+//*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  ISCONTIGUOUS SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename MT, bool SO, bool DF >
+struct IsContiguous< StrictlyUpperMatrix<MT,SO,DF> >
+   : public IsContiguous<MT>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -1043,24 +1696,8 @@ struct IsAligned< StrictlyUpperMatrix<MT,SO,DF> > : public BoolConstant< IsAlign
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct IsPadded< StrictlyUpperMatrix<MT,SO,DF> > : public BoolConstant< IsPadded<MT>::value >
-{};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  ISRESIZABLE SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT, bool SO, bool DF >
-struct IsResizable< StrictlyUpperMatrix<MT,SO,DF> > : public BoolConstant< IsResizable<MT>::value >
+struct IsPadded< StrictlyUpperMatrix<MT,SO,DF> >
+   : public IsPadded<MT>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -1089,179 +1726,20 @@ struct RemoveAdaptor< StrictlyUpperMatrix<MT,SO,DF> >
 
 //=================================================================================================
 //
-//  DERESTRICTTRAIT SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT, bool SO, bool DF >
-struct DerestrictTrait< StrictlyUpperMatrix<MT,SO,DF> >
-{
-   using Type = MT&;
-};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
 //  ADDTRAIT SPECIALIZATIONS
 //
 //=================================================================================================
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-template< typename MT, bool SO1, bool DF, typename T, size_t M, size_t N, bool SO2 >
-struct AddTrait< StrictlyUpperMatrix<MT,SO1,DF>, StaticMatrix<T,M,N,SO2> >
+template< typename T1, typename T2 >
+struct AddTraitEval1< T1, T2
+                    , EnableIf_t< IsMatrix_v<T1> &&
+                                  IsMatrix_v<T2> &&
+                                  ( IsStrictlyUpper_v<T1> && IsStrictlyUpper_v<T2> ) &&
+                                  !( IsZero_v<T1> || IsZero_v<T2> ) > >
 {
-   using Type = AddTrait_< MT, StaticMatrix<T,M,N,SO2> >;
-};
-
-template< typename T, size_t M, size_t N, bool SO1, typename MT, bool SO2, bool DF >
-struct AddTrait< StaticMatrix<T,M,N,SO1>, StrictlyUpperMatrix<MT,SO2,DF> >
-{
-   using Type = AddTrait_< StaticMatrix<T,M,N,SO1>, MT >;
-};
-
-template< typename MT, bool SO1, bool DF, typename T, size_t M, size_t N, bool SO2 >
-struct AddTrait< StrictlyUpperMatrix<MT,SO1,DF>, HybridMatrix<T,M,N,SO2> >
-{
-   using Type = AddTrait_< MT, HybridMatrix<T,M,N,SO2> >;
-};
-
-template< typename T, size_t M, size_t N, bool SO1, typename MT, bool SO2, bool DF >
-struct AddTrait< HybridMatrix<T,M,N,SO1>, StrictlyUpperMatrix<MT,SO2,DF> >
-{
-   using Type = AddTrait_< HybridMatrix<T,M,N,SO1>, MT >;
-};
-
-template< typename MT, bool SO1, bool DF, typename T, bool SO2 >
-struct AddTrait< StrictlyUpperMatrix<MT,SO1,DF>, DynamicMatrix<T,SO2> >
-{
-   using Type = AddTrait_< MT, DynamicMatrix<T,SO2> >;
-};
-
-template< typename T, bool SO1, typename MT, bool SO2, bool DF >
-struct AddTrait< DynamicMatrix<T,SO1>, StrictlyUpperMatrix<MT,SO2,DF> >
-{
-   using Type = AddTrait_< DynamicMatrix<T,SO1>, MT >;
-};
-
-template< typename MT, bool SO1, bool DF, typename T, bool AF, bool PF, bool SO2 >
-struct AddTrait< StrictlyUpperMatrix<MT,SO1,DF>, CustomMatrix<T,AF,PF,SO2> >
-{
-   using Type = AddTrait_< MT, CustomMatrix<T,AF,PF,SO2> >;
-};
-
-template< typename T, bool AF, bool PF, bool SO1, typename MT, bool SO2, bool DF >
-struct AddTrait< CustomMatrix<T,AF,PF,SO1>, StrictlyUpperMatrix<MT,SO2,DF> >
-{
-   using Type = AddTrait_< CustomMatrix<T,AF,PF,SO1>, MT >;
-};
-
-template< typename MT, bool SO1, bool DF, typename T, bool SO2 >
-struct AddTrait< StrictlyUpperMatrix<MT,SO1,DF>, CompressedMatrix<T,SO2> >
-{
-   using Type = AddTrait_< MT, CompressedMatrix<T,SO2> >;
-};
-
-template< typename T, bool SO1, typename MT, bool SO2, bool DF >
-struct AddTrait< CompressedMatrix<T,SO1>, StrictlyUpperMatrix<MT,SO2,DF> >
-{
-   using Type = AddTrait_< CompressedMatrix<T,SO1>, MT >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2, bool NF >
-struct AddTrait< StrictlyUpperMatrix<MT1,SO1,DF1>, SymmetricMatrix<MT2,SO2,DF2,NF> >
-{
-   using Type = AddTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, bool NF, typename MT2, bool SO2, bool DF2 >
-struct AddTrait< SymmetricMatrix<MT1,SO1,DF1,NF>, StrictlyUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = AddTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct AddTrait< StrictlyUpperMatrix<MT1,SO1,DF1>, HermitianMatrix<MT2,SO2,DF2> >
-{
-   using Type = AddTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct AddTrait< HermitianMatrix<MT1,SO1,DF1>, StrictlyUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = AddTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct AddTrait< StrictlyUpperMatrix<MT1,SO1,DF1>, LowerMatrix<MT2,SO2,DF2> >
-{
-   using Type = AddTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct AddTrait< LowerMatrix<MT1,SO1,DF1>, StrictlyUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = AddTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct AddTrait< StrictlyUpperMatrix<MT1,SO1,DF1>, UniLowerMatrix<MT2,SO2,DF2> >
-{
-   using Type = AddTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct AddTrait< UniLowerMatrix<MT1,SO1,DF1>, StrictlyUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = AddTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct AddTrait< StrictlyUpperMatrix<MT1,SO1,DF1>, StrictlyLowerMatrix<MT2,SO2,DF2> >
-{
-   using Type = AddTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct AddTrait< StrictlyLowerMatrix<MT1,SO1,DF1>, StrictlyUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = AddTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct AddTrait< StrictlyUpperMatrix<MT1,SO1,DF1>, UpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = UpperMatrix< AddTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct AddTrait< UpperMatrix<MT1,SO1,DF1>, StrictlyUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = UpperMatrix< AddTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct AddTrait< StrictlyUpperMatrix<MT1,SO1,DF1>, UniUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = UniUpperMatrix< AddTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct AddTrait< UniUpperMatrix<MT1,SO1,DF1>, StrictlyUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = UniUpperMatrix< AddTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct AddTrait< StrictlyUpperMatrix<MT1,SO1,DF1>, StrictlyUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = StrictlyUpperMatrix< AddTrait_<MT1,MT2> >;
+   using Type = StrictlyUpperMatrix< typename AddTraitEval2<T1,T2>::Type >;
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -1277,154 +1755,40 @@ struct AddTrait< StrictlyUpperMatrix<MT1,SO1,DF1>, StrictlyUpperMatrix<MT2,SO2,D
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-template< typename MT, bool SO1, bool DF, typename T, size_t M, size_t N, bool SO2 >
-struct SubTrait< StrictlyUpperMatrix<MT,SO1,DF>, StaticMatrix<T,M,N,SO2> >
+template< typename T1, typename T2 >
+struct SubTraitEval1< T1, T2
+                    , EnableIf_t< IsMatrix_v<T1> &&
+                                  IsMatrix_v<T2> &&
+                                  ( ( IsUniUpper_v<T1> && IsUniUpper_v<T2> ) ||
+                                    ( IsStrictlyUpper_v<T1> && IsStrictlyUpper_v<T2> ) ) &&
+                                  !( IsIdentity_v<T1> && IsIdentity_v<T2> ) &&
+                                  !( IsZero_v<T1> || IsZero_v<T2> ) > >
 {
-   using Type = SubTrait_< MT, StaticMatrix<T,M,N,SO2> >;
+   using Type = StrictlyUpperMatrix< typename SubTraitEval2<T1,T2>::Type >;
 };
+/*! \endcond */
+//*************************************************************************************************
 
-template< typename T, size_t M, size_t N, bool SO1, typename MT, bool SO2, bool DF >
-struct SubTrait< StaticMatrix<T,M,N,SO1>, StrictlyUpperMatrix<MT,SO2,DF> >
-{
-   using Type = SubTrait_< StaticMatrix<T,M,N,SO1>, MT >;
-};
 
-template< typename MT, bool SO1, bool DF, typename T, size_t M, size_t N, bool SO2 >
-struct SubTrait< StrictlyUpperMatrix<MT,SO1,DF>, HybridMatrix<T,M,N,SO2> >
-{
-   using Type = SubTrait_< MT, HybridMatrix<T,M,N,SO2> >;
-};
 
-template< typename T, size_t M, size_t N, bool SO1, typename MT, bool SO2, bool DF >
-struct SubTrait< HybridMatrix<T,M,N,SO1>, StrictlyUpperMatrix<MT,SO2,DF> >
-{
-   using Type = SubTrait_< HybridMatrix<T,M,N,SO1>, MT >;
-};
 
-template< typename MT, bool SO1, bool DF, typename T, bool SO2 >
-struct SubTrait< StrictlyUpperMatrix<MT,SO1,DF>, DynamicMatrix<T,SO2> >
-{
-   using Type = SubTrait_< MT, DynamicMatrix<T,SO2> >;
-};
+//=================================================================================================
+//
+//  SCHURTRAIT SPECIALIZATIONS
+//
+//=================================================================================================
 
-template< typename T, bool SO1, typename MT, bool SO2, bool DF >
-struct SubTrait< DynamicMatrix<T,SO1>, StrictlyUpperMatrix<MT,SO2,DF> >
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename T1, typename T2 >
+struct SchurTraitEval1< T1, T2
+                      , EnableIf_t< IsMatrix_v<T1> &&
+                                    IsMatrix_v<T2> &&
+                                    ( ( IsStrictlyUpper_v<T1> && !IsLower_v<T2> ) ||
+                                      ( !IsLower_v<T1> && IsStrictlyUpper_v<T2> ) ) &&
+                                    !( IsZero_v<T1> || IsZero_v<T2> ) > >
 {
-   using Type = SubTrait_< DynamicMatrix<T,SO1>, MT >;
-};
-
-template< typename MT, bool SO1, bool DF, typename T, bool AF, bool PF, bool SO2 >
-struct SubTrait< StrictlyUpperMatrix<MT,SO1,DF>, CustomMatrix<T,AF,PF,SO2> >
-{
-   using Type = SubTrait_< MT, CustomMatrix<T,AF,PF,SO2> >;
-};
-
-template< typename T, bool AF, bool PF, bool SO1, typename MT, bool SO2, bool DF >
-struct SubTrait< CustomMatrix<T,AF,PF,SO1>, StrictlyUpperMatrix<MT,SO2,DF> >
-{
-   using Type = SubTrait_< CustomMatrix<T,AF,PF,SO1>, MT >;
-};
-
-template< typename MT, bool SO1, bool DF, typename T, bool SO2 >
-struct SubTrait< StrictlyUpperMatrix<MT,SO1,DF>, CompressedMatrix<T,SO2> >
-{
-   using Type = SubTrait_< MT, CompressedMatrix<T,SO2> >;
-};
-
-template< typename T, bool SO1, typename MT, bool SO2, bool DF >
-struct SubTrait< CompressedMatrix<T,SO1>, StrictlyUpperMatrix<MT,SO2,DF> >
-{
-   using Type = SubTrait_< CompressedMatrix<T,SO1>, MT >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2, bool NF >
-struct SubTrait< StrictlyUpperMatrix<MT1,SO1,DF1>, SymmetricMatrix<MT2,SO2,DF2,NF> >
-{
-   using Type = SubTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, bool NF, typename MT2, bool SO2, bool DF2 >
-struct SubTrait< SymmetricMatrix<MT1,SO1,DF1,NF>, StrictlyUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = SubTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct SubTrait< StrictlyUpperMatrix<MT1,SO1,DF1>, HermitianMatrix<MT2,SO2,DF2> >
-{
-   using Type = SubTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct SubTrait< HermitianMatrix<MT1,SO1,DF1>, StrictlyUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = SubTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct SubTrait< StrictlyUpperMatrix<MT1,SO1,DF1>, LowerMatrix<MT2,SO2,DF2> >
-{
-   using Type = SubTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct SubTrait< LowerMatrix<MT1,SO1,DF1>, StrictlyUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = SubTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct SubTrait< StrictlyUpperMatrix<MT1,SO1,DF1>, UniLowerMatrix<MT2,SO2,DF2> >
-{
-   using Type = SubTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct SubTrait< UniLowerMatrix<MT1,SO1,DF1>, StrictlyUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = SubTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct SubTrait< StrictlyUpperMatrix<MT1,SO1,DF1>, StrictlyLowerMatrix<MT2,SO2,DF2> >
-{
-   using Type = SubTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct SubTrait< StrictlyLowerMatrix<MT1,SO1,DF1>, StrictlyUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = SubTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct SubTrait< StrictlyUpperMatrix<MT1,SO1,DF1>, UpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = UpperMatrix< SubTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct SubTrait< UpperMatrix<MT1,SO1,DF1>, StrictlyUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = UpperMatrix< SubTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct SubTrait< StrictlyUpperMatrix<MT1,SO1,DF1>, UniUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = UpperMatrix< SubTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct SubTrait< UniUpperMatrix<MT1,SO1,DF1>, StrictlyUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = UniUpperMatrix< SubTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct SubTrait< StrictlyUpperMatrix<MT1,SO1,DF1>, StrictlyUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = StrictlyUpperMatrix< SubTrait_<MT1,MT2> >;
+   using Type = StrictlyUpperMatrix< typename SchurTraitEval2<T1,T2>::Type >;
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -1440,226 +1804,58 @@ struct SubTrait< StrictlyUpperMatrix<MT1,SO1,DF1>, StrictlyUpperMatrix<MT2,SO2,D
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-template< typename MT, bool SO, bool DF, typename T >
-struct MultTrait< StrictlyUpperMatrix<MT,SO,DF>, T, EnableIf_< IsNumeric<T> > >
+template< typename T1, typename T2 >
+struct MultTraitEval1< T1, T2
+                     , EnableIf_t< IsMatrix_v<T1> &&
+                                   IsScalar_v<T2> &&
+                                   ( IsStrictlyUpper_v<T1> && !IsUniform_v<T1> ) > >
 {
-   using Type = StrictlyUpperMatrix< MultTrait_<MT,T> >;
+   using Type = StrictlyUpperMatrix< typename MultTraitEval2<T1,T2>::Type >;
 };
 
-template< typename T, typename MT, bool SO, bool DF >
-struct MultTrait< T, StrictlyUpperMatrix<MT,SO,DF>, EnableIf_< IsNumeric<T> > >
+template< typename T1, typename T2 >
+struct MultTraitEval1< T1, T2
+                     , EnableIf_t< IsScalar_v<T1> &&
+                                   IsMatrix_v<T2> &&
+                                   ( IsStrictlyUpper_v<T2> && !IsUniform_v<T2> ) > >
 {
-   using Type = StrictlyUpperMatrix< MultTrait_<T,MT> >;
+   using Type = StrictlyUpperMatrix< typename MultTraitEval2<T1,T2>::Type >;
 };
 
-template< typename MT, bool SO, bool DF, typename T, size_t N >
-struct MultTrait< StrictlyUpperMatrix<MT,SO,DF>, StaticVector<T,N,false> >
+template< typename T1, typename T2 >
+struct MultTraitEval1< T1, T2
+                     , EnableIf_t< IsMatrix_v<T1> &&
+                                   IsMatrix_v<T2> &&
+                                   ( ( IsStrictlyUpper_v<T1> && IsUpper_v<T2> ) ||
+                                     ( IsUpper_v<T1> && IsStrictlyUpper_v<T2> ) ) &&
+                                   !( IsIdentity_v<T1> || IsIdentity_v<T2> ) &&
+                                   !( IsZero_v<T1> || IsZero_v<T2> ) > >
 {
-   using Type = MultTrait_< MT, StaticVector<T,N,false> >;
+   using Type = StrictlyUpperMatrix< typename MultTraitEval2<T1,T2>::Type >;
 };
+/*! \endcond */
+//*************************************************************************************************
 
-template< typename T, size_t N, typename MT, bool SO, bool DF >
-struct MultTrait< StaticVector<T,N,true>, StrictlyUpperMatrix<MT,SO,DF> >
-{
-   using Type = MultTrait_< StaticVector<T,N,true>, MT >;
-};
 
-template< typename MT, bool SO, bool DF, typename T, size_t N >
-struct MultTrait< StrictlyUpperMatrix<MT,SO,DF>, HybridVector<T,N,false> >
-{
-   using Type = MultTrait_< MT, HybridVector<T,N,false> >;
-};
 
-template< typename T, size_t N, typename MT, bool SO, bool DF >
-struct MultTrait< HybridVector<T,N,true>, StrictlyUpperMatrix<MT,SO,DF> >
-{
-   using Type = MultTrait_< HybridVector<T,N,true>, MT >;
-};
 
-template< typename MT, bool SO, bool DF, typename T >
-struct MultTrait< StrictlyUpperMatrix<MT,SO,DF>, DynamicVector<T,false> >
-{
-   using Type = MultTrait_< MT, DynamicVector<T,false> >;
-};
+//=================================================================================================
+//
+//  KRONTRAIT SPECIALIZATIONS
+//
+//=================================================================================================
 
-template< typename T, typename MT, bool SO, bool DF >
-struct MultTrait< DynamicVector<T,true>, StrictlyUpperMatrix<MT,SO,DF> >
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename T1, typename T2 >
+struct KronTraitEval1< T1, T2
+                     , EnableIf_t< IsMatrix_v<T1> &&
+                                   IsMatrix_v<T2> &&
+                                   ( ( IsStrictlyUpper_v<T1> ) ||
+                                     ( IsUpper_v<T1> && IsStrictlyUpper_v<T2> ) ) &&
+                                   !( IsZero_v<T1> || IsZero_v<T2> ) > >
 {
-   using Type = MultTrait_< DynamicVector<T,true>, MT >;
-};
-
-template< typename MT, bool SO, bool DF, typename T, bool AF, bool PF >
-struct MultTrait< StrictlyUpperMatrix<MT,SO,DF>, CustomVector<T,AF,PF,false> >
-{
-   using Type = MultTrait_< MT, CustomVector<T,AF,PF,false> >;
-};
-
-template< typename T, bool AF, bool PF, typename MT, bool SO, bool DF >
-struct MultTrait< CustomVector<T,AF,PF,true>, StrictlyUpperMatrix<MT,SO,DF> >
-{
-   using Type = MultTrait_< CustomVector<T,AF,PF,true>, MT >;
-};
-
-template< typename MT, bool SO, bool DF, typename T >
-struct MultTrait< StrictlyUpperMatrix<MT,SO,DF>, CompressedVector<T,false> >
-{
-   using Type = MultTrait_< MT, CompressedVector<T,false> >;
-};
-
-template< typename T, typename MT, bool SO, bool DF >
-struct MultTrait< CompressedVector<T,true>, StrictlyUpperMatrix<MT,SO,DF> >
-{
-   using Type = MultTrait_< CompressedVector<T,true>, MT >;
-};
-
-template< typename MT, bool SO1, bool DF, typename T, size_t M, size_t N, bool SO2 >
-struct MultTrait< StrictlyUpperMatrix<MT,SO1,DF>, StaticMatrix<T,M,N,SO2> >
-{
-   using Type = MultTrait_< MT, StaticMatrix<T,M,N,SO2> >;
-};
-
-template< typename T, size_t M, size_t N, bool SO1, typename MT, bool SO2, bool DF >
-struct MultTrait< StaticMatrix<T,M,N,SO1>, StrictlyUpperMatrix<MT,SO2,DF> >
-{
-   using Type = MultTrait_< StaticMatrix<T,M,N,SO1>, MT >;
-};
-
-template< typename MT, bool SO1, bool DF, typename T, size_t M, size_t N, bool SO2 >
-struct MultTrait< StrictlyUpperMatrix<MT,SO1,DF>, HybridMatrix<T,M,N,SO2> >
-{
-   using Type = MultTrait_< MT, HybridMatrix<T,M,N,SO2> >;
-};
-
-template< typename T, size_t M, size_t N, bool SO1, typename MT, bool SO2, bool DF >
-struct MultTrait< HybridMatrix<T,M,N,SO1>, StrictlyUpperMatrix<MT,SO2,DF> >
-{
-   using Type = MultTrait_< HybridMatrix<T,M,N,SO1>, MT >;
-};
-
-template< typename MT, bool SO1, bool DF, typename T, bool SO2 >
-struct MultTrait< StrictlyUpperMatrix<MT,SO1,DF>, DynamicMatrix<T,SO2> >
-{
-   using Type = MultTrait_< MT, DynamicMatrix<T,SO2> >;
-};
-
-template< typename T, bool SO1, typename MT, bool SO2, bool DF >
-struct MultTrait< DynamicMatrix<T,SO1>, StrictlyUpperMatrix<MT,SO2,DF> >
-{
-   using Type = MultTrait_< DynamicMatrix<T,SO1>, MT >;
-};
-
-template< typename MT, bool SO1, bool DF, typename T, bool AF, bool PF, bool SO2 >
-struct MultTrait< StrictlyUpperMatrix<MT,SO1,DF>, CustomMatrix<T,AF,PF,SO2> >
-{
-   using Type = MultTrait_< MT, CustomMatrix<T,AF,PF,SO2> >;
-};
-
-template< typename T, bool AF, bool PF, bool SO1, typename MT, bool SO2, bool DF >
-struct MultTrait< CustomMatrix<T,AF,PF,SO1>, StrictlyUpperMatrix<MT,SO2,DF> >
-{
-   using Type = MultTrait_< CustomMatrix<T,AF,PF,SO1>, MT >;
-};
-
-template< typename MT, bool SO1, bool DF, typename T, bool SO2 >
-struct MultTrait< StrictlyUpperMatrix<MT,SO1,DF>, CompressedMatrix<T,SO2> >
-{
-   using Type = MultTrait_< MT, CompressedMatrix<T,SO2> >;
-};
-
-template< typename T, bool SO1, typename MT, bool SO2, bool DF >
-struct MultTrait< CompressedMatrix<T,SO1>, StrictlyUpperMatrix<MT,SO2,DF> >
-{
-   using Type = MultTrait_< CompressedMatrix<T,SO1>, MT >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2, bool NF >
-struct MultTrait< StrictlyUpperMatrix<MT1,SO1,DF1>, SymmetricMatrix<MT2,SO2,DF2,NF> >
-{
-   using Type = MultTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, bool NF, typename MT2, bool SO2, bool DF2 >
-struct MultTrait< SymmetricMatrix<MT1,SO1,DF1,NF>, StrictlyUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = MultTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct MultTrait< StrictlyUpperMatrix<MT1,SO1,DF1>, HermitianMatrix<MT2,SO2,DF2> >
-{
-   using Type = MultTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct MultTrait< HermitianMatrix<MT1,SO1,DF1>, StrictlyUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = MultTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct MultTrait< StrictlyUpperMatrix<MT1,SO1,DF1>, LowerMatrix<MT2,SO2,DF2> >
-{
-   using Type = MultTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct MultTrait< LowerMatrix<MT1,SO1,DF1>, StrictlyUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = MultTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct MultTrait< StrictlyUpperMatrix<MT1,SO1,DF1>, UniLowerMatrix<MT2,SO2,DF2> >
-{
-   using Type = MultTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct MultTrait< UniLowerMatrix<MT1,SO1,DF1>, StrictlyUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = MultTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct MultTrait< StrictlyUpperMatrix<MT1,SO1,DF1>, StrictlyLowerMatrix<MT2,SO2,DF2> >
-{
-   using Type = MultTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct MultTrait< StrictlyLowerMatrix<MT1,SO1,DF1>, StrictlyUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = MultTrait_<MT1,MT2>;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct MultTrait< StrictlyUpperMatrix<MT1,SO1,DF1>, UpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = StrictlyUpperMatrix< MultTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct MultTrait< UpperMatrix<MT1,SO1,DF1>, StrictlyUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = StrictlyUpperMatrix< MultTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct MultTrait< StrictlyUpperMatrix<MT1,SO1,DF1>, UniUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = StrictlyUpperMatrix< MultTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct MultTrait< UniUpperMatrix<MT1,SO1,DF1>, StrictlyUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = StrictlyUpperMatrix< MultTrait_<MT1,MT2> >;
-};
-
-template< typename MT1, bool SO1, bool DF1, typename MT2, bool SO2, bool DF2 >
-struct MultTrait< StrictlyUpperMatrix<MT1,SO1,DF1>, StrictlyUpperMatrix<MT2,SO2,DF2> >
-{
-   using Type = StrictlyUpperMatrix< MultTrait_<MT1,MT2> >;
+   using Type = StrictlyUpperMatrix< typename KronTraitEval2<T1,T2>::Type >;
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -1675,10 +1871,11 @@ struct MultTrait< StrictlyUpperMatrix<MT1,SO1,DF1>, StrictlyUpperMatrix<MT2,SO2,
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-template< typename MT, bool SO, bool DF, typename T >
-struct DivTrait< StrictlyUpperMatrix<MT,SO,DF>, T, EnableIf_< IsNumeric<T> > >
+template< typename T1, typename T2 >
+struct DivTraitEval1< T1, T2
+                    , EnableIf_t< IsStrictlyUpper_v<T1> && IsScalar_v<T2> > >
 {
-   using Type = StrictlyUpperMatrix< DivTrait_<MT,T> >;
+   using Type = StrictlyUpperMatrix< typename DivTraitEval2<T1,T2>::Type >;
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -1688,100 +1885,202 @@ struct DivTrait< StrictlyUpperMatrix<MT,SO,DF>, T, EnableIf_< IsNumeric<T> > >
 
 //=================================================================================================
 //
-//  FOREACHTRAIT SPECIALIZATIONS
+//  MAPTRAIT SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename T, typename OP >
+struct UnaryMapTraitEval1< T, OP
+                         , EnableIf_t< YieldsStrictlyUpper_v<OP,T> &&
+                                       !YieldsDiagonal_v<OP,T> > >
+{
+   using Type = StrictlyUpperMatrix< typename UnaryMapTraitEval2<T,OP>::Type, StorageOrder_v<T> >;
+};
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename T1, typename T2, typename OP >
+struct BinaryMapTraitEval1< T1, T2, OP
+                          , EnableIf_t< YieldsStrictlyUpper_v<OP,T1,T2> &&
+                                        !YieldsDiagonal_v<OP,T1,T2> > >
+{
+   using Type = StrictlyUpperMatrix< typename BinaryMapTraitEval2<T1,T2,OP>::Type >;
+};
+/*! \endcond */
+//*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  DECLSYMTRAIT SPECIALIZATIONS
 //
 //=================================================================================================
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct ForEachTrait< StrictlyUpperMatrix<MT,SO,DF>, Abs >
+struct DeclSymTrait< StrictlyUpperMatrix<MT,SO,DF> >
 {
-   using Type = StrictlyUpperMatrix< ForEachTrait_<MT,Abs> >;
+   using Type = ZeroMatrix< typename MT::ElementType, SO >;
 };
+/*! \endcond */
+//*************************************************************************************************
 
+
+
+
+//=================================================================================================
+//
+//  DECLHERMTRAIT SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct ForEachTrait< StrictlyUpperMatrix<MT,SO,DF>, Floor >
+struct DeclHermTrait< StrictlyUpperMatrix<MT,SO,DF> >
 {
-   using Type = StrictlyUpperMatrix< ForEachTrait_<MT,Floor> >;
+   using Type = ZeroMatrix< typename MT::ElementType, SO >;
 };
+/*! \endcond */
+//*************************************************************************************************
 
+
+
+
+//=================================================================================================
+//
+//  DECLLOWTRAIT SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct ForEachTrait< StrictlyUpperMatrix<MT,SO,DF>, Ceil >
+struct DeclLowTrait< StrictlyUpperMatrix<MT,SO,DF> >
 {
-   using Type = StrictlyUpperMatrix< ForEachTrait_<MT,Ceil> >;
+   using Type = ZeroMatrix< typename MT::ElementType, SO >;
 };
+/*! \endcond */
+//*************************************************************************************************
 
+
+
+
+//=================================================================================================
+//
+//  DECLUNILOWTRAIT SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct ForEachTrait< StrictlyUpperMatrix<MT,SO,DF>, Conj >
+struct DeclUniLowTrait< StrictlyUpperMatrix<MT,SO,DF> >
 {
-   using Type = StrictlyUpperMatrix< ForEachTrait_<MT,Conj> >;
+   using Type = INVALID_TYPE;
 };
+/*! \endcond */
+//*************************************************************************************************
 
+
+
+
+//=================================================================================================
+//
+//  DECLSTRLOWTRAIT SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct ForEachTrait< StrictlyUpperMatrix<MT,SO,DF>, Real >
+struct DeclStrLowTrait< StrictlyUpperMatrix<MT,SO,DF> >
 {
-   using Type = StrictlyUpperMatrix< ForEachTrait_<MT,Real> >;
+   using Type = ZeroMatrix< typename MT::ElementType, SO >;
 };
+/*! \endcond */
+//*************************************************************************************************
 
+
+
+
+//=================================================================================================
+//
+//  DECLUPPTRAIT SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct ForEachTrait< StrictlyUpperMatrix<MT,SO,DF>, Imag >
+struct DeclUppTrait< StrictlyUpperMatrix<MT,SO,DF> >
 {
-   using Type = StrictlyUpperMatrix< ForEachTrait_<MT,Imag> >;
+   using Type = StrictlyUpperMatrix<MT,SO,DF>;
 };
+/*! \endcond */
+//*************************************************************************************************
 
+
+
+
+//=================================================================================================
+//
+//  DECLUNIUPPTRAIT SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct ForEachTrait< StrictlyUpperMatrix<MT,SO,DF>, Sin >
+struct DeclUniUppTrait< StrictlyUpperMatrix<MT,SO,DF> >
 {
-   using Type = StrictlyUpperMatrix< ForEachTrait_<MT,Sin> >;
+   using Type = INVALID_TYPE;
 };
+/*! \endcond */
+//*************************************************************************************************
 
+
+
+
+//=================================================================================================
+//
+//  DECLSTRUPPTRAIT SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct ForEachTrait< StrictlyUpperMatrix<MT,SO,DF>, Asin >
+struct DeclStrUppTrait< StrictlyUpperMatrix<MT,SO,DF> >
 {
-   using Type = StrictlyUpperMatrix< ForEachTrait_<MT,Asin> >;
+   using Type = StrictlyUpperMatrix<MT,SO,DF>;
 };
+/*! \endcond */
+//*************************************************************************************************
 
-template< typename MT, bool SO, bool DF >
-struct ForEachTrait< StrictlyUpperMatrix<MT,SO,DF>, Sinh >
-{
-   using Type = StrictlyUpperMatrix< ForEachTrait_<MT,Sinh> >;
-};
 
-template< typename MT, bool SO, bool DF >
-struct ForEachTrait< StrictlyUpperMatrix<MT,SO,DF>, Asinh >
-{
-   using Type = StrictlyUpperMatrix< ForEachTrait_<MT,Asinh> >;
-};
 
-template< typename MT, bool SO, bool DF >
-struct ForEachTrait< StrictlyUpperMatrix<MT,SO,DF>, Tan >
-{
-   using Type = StrictlyUpperMatrix< ForEachTrait_<MT,Tan> >;
-};
 
-template< typename MT, bool SO, bool DF >
-struct ForEachTrait< StrictlyUpperMatrix<MT,SO,DF>, Atan >
-{
-   using Type = StrictlyUpperMatrix< ForEachTrait_<MT,Atan> >;
-};
+//=================================================================================================
+//
+//  DECLDIAGTRAIT SPECIALIZATIONS
+//
+//=================================================================================================
 
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
 template< typename MT, bool SO, bool DF >
-struct ForEachTrait< StrictlyUpperMatrix<MT,SO,DF>, Tanh >
+struct DeclDiagTrait< StrictlyUpperMatrix<MT,SO,DF> >
 {
-   using Type = StrictlyUpperMatrix< ForEachTrait_<MT,Tanh> >;
-};
-
-template< typename MT, bool SO, bool DF >
-struct ForEachTrait< StrictlyUpperMatrix<MT,SO,DF>, Atanh >
-{
-   using Type = StrictlyUpperMatrix< ForEachTrait_<MT,Atanh> >;
-};
-
-template< typename MT, bool SO, bool DF >
-struct ForEachTrait< StrictlyUpperMatrix<MT,SO,DF>, Erf >
-{
-   using Type = StrictlyUpperMatrix< ForEachTrait_<MT,Erf> >;
+   using Type = ZeroMatrix< typename MT::ElementType, SO >;
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -1835,48 +2134,13 @@ struct LowType< StrictlyUpperMatrix<MT1,SO1,DF1>, StrictlyUpperMatrix<MT2,SO2,DF
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-template< typename MT, bool SO, bool DF >
-struct SubmatrixTrait< StrictlyUpperMatrix<MT,SO,DF> >
+template< typename MT, size_t I, size_t N >
+struct SubmatrixTraitEval1< MT, I, I, N, N
+                          , EnableIf_t< I != inf && N != inf &&
+                                        IsStrictlyUpper_v<MT> &&
+                                        !IsZero_v<MT> > >
 {
-   using Type = SubmatrixTrait_<MT>;
-};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  ROWTRAIT SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT, bool SO, bool DF >
-struct RowTrait< StrictlyUpperMatrix<MT,SO,DF> >
-{
-   using Type = RowTrait_<MT>;
-};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  COLUMNTRAIT SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename MT, bool SO, bool DF >
-struct ColumnTrait< StrictlyUpperMatrix<MT,SO,DF> >
-{
-   using Type = ColumnTrait_<MT>;
+   using Type = StrictlyUpperMatrix< typename SubmatrixTraitEval2<MT,I,I,N,N>::Type >;
 };
 /*! \endcond */
 //*************************************************************************************************

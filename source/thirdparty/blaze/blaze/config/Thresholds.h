@@ -3,7 +3,7 @@
 //  \file blaze/config/Thresholds.h
 //  \brief Configuration of the thresholds for matrix/vector and matrix/matrix multiplications
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -33,8 +33,6 @@
 //=================================================================================================
 
 
-namespace blaze {
-
 //=================================================================================================
 //
 //  BLAS THRESHOLDS
@@ -54,8 +52,22 @@ namespace blaze {
 // The default setting for this threshold is 4000000 (which for instance corresponds to a matrix
 // size of \f$ 2000 \times 2000 \f$). Note that in case the Blaze debug mode is active, this
 // threshold will be replaced by the blaze::DMATDVECMULT_DEBUG_THRESHOLD value.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_DMATDVECMULT_THRESHOLD=4000000 ...
+   \endcode
+
+   \code
+   #define BLAZE_DMATDVECMULT_THRESHOLD 4000000UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t DMATDVECMULT_USER_THRESHOLD = 4000000UL;
+#ifndef BLAZE_DMATDVECMULT_THRESHOLD
+#define BLAZE_DMATDVECMULT_THRESHOLD 4000000UL
+#endif
 //*************************************************************************************************
 
 
@@ -72,8 +84,22 @@ constexpr size_t DMATDVECMULT_USER_THRESHOLD = 4000000UL;
 // The default setting for this threshold is 62500 (which for instance corresponds to a matrix
 // size of \f$ 250 \times 250 \f$). Note that in case the Blaze debug mode is active, this
 // threshold will be replaced by the blaze::TDMATDVECMULT_DEBUG_THRESHOLD value.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_TDMATDVECMULT_THRESHOLD=62500 ...
+   \endcode
+
+   \code
+   #define BLAZE_TDMATDVECMULT_THRESHOLD 62500UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t TDMATDVECMULT_USER_THRESHOLD = 62500UL;
+#ifndef BLAZE_TDMATDVECMULT_THRESHOLD
+#define BLAZE_TDMATDVECMULT_THRESHOLD 62500UL
+#endif
 //*************************************************************************************************
 
 
@@ -90,8 +116,22 @@ constexpr size_t TDMATDVECMULT_USER_THRESHOLD = 62500UL;
 // The default setting for this threshold is 62500 (which for instance corresponds to a matrix
 // size of \f$ 250 \times 250 \f$). Note that in case the Blaze debug mode is active, this
 // threshold will be replaced by the blaze::TDVECDMATMULT_DEBUG_THRESHOLD value.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_TDVECDMATMULT_THRESHOLD=62500 ...
+   \endcode
+
+   \code
+   #define BLAZE_TDVECDMATMULT_THRESHOLD 62500UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t TDVECDMATMULT_USER_THRESHOLD = 62500UL;
+#ifndef BLAZE_TDVECDMATMULT_THRESHOLD
+#define BLAZE_TDVECDMATMULT_THRESHOLD 62500UL
+#endif
 //*************************************************************************************************
 
 
@@ -108,8 +148,22 @@ constexpr size_t TDVECDMATMULT_USER_THRESHOLD = 62500UL;
 // The default setting for this threshold is 4000000 (which for instance corresponds to a matrix
 // size of \f$ 2000 \times 2000 \f$). Note that in case the Blaze debug mode is active, this
 // threshold will be replaced by the blaze::TDVECTDMATMULT_DEBUG_THRESHOLD value.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_TDVECTDMATMULT_THRESHOLD=4000000 ...
+   \endcode
+
+   \code
+   #define BLAZE_TDVECTDMATMULT_THRESHOLD 4000000UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t TDVECTDMATMULT_USER_THRESHOLD = 4000000UL;
+#ifndef BLAZE_TDVECTDMATMULT_THRESHOLD
+#define BLAZE_TDVECTDMATMULT_THRESHOLD 4000000UL
+#endif
 //*************************************************************************************************
 
 
@@ -126,8 +180,22 @@ constexpr size_t TDVECTDMATMULT_USER_THRESHOLD = 4000000UL;
 // The default setting for this threshold is 4900 (which for instance corresponds to a matrix
 // size of \f$ 70 \times 70 \f$). Note that in case the Blaze debug mode is active, this
 // threshold will be replaced by the blaze::DMATDMATMULT_DEBUG_THRESHOLD value.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_DMATDMATMULT_THRESHOLD=4900 ...
+   \endcode
+
+   \code
+   #define BLAZE_DMATDMATMULT_THRESHOLD 4900UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t DMATDMATMULT_USER_THRESHOLD = 4900UL;
+#ifndef BLAZE_DMATDMATMULT_THRESHOLD
+#define BLAZE_DMATDMATMULT_THRESHOLD 4900UL
+#endif
 //*************************************************************************************************
 
 
@@ -144,8 +212,22 @@ constexpr size_t DMATDMATMULT_USER_THRESHOLD = 4900UL;
 // The default setting for this threshold is 4900 (which for instance corresponds to a matrix
 // size of \f$ 70 \times 70 \f$). Note that in case the Blaze debug mode is active, this
 // threshold will be replaced by the blaze::DMATTDMATMULT_DEBUG_THRESHOLD value.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_DMATTDMATMULT_THRESHOLD=4900 ...
+   \endcode
+
+   \code
+   #define BLAZE_DMATTDMATMULT_THRESHOLD 4900UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t DMATTDMATMULT_USER_THRESHOLD = 4900UL;
+#ifndef BLAZE_DMATTDMATMULT_THRESHOLD
+#define BLAZE_DMATTDMATMULT_THRESHOLD 4900UL
+#endif
 //*************************************************************************************************
 
 
@@ -162,8 +244,22 @@ constexpr size_t DMATTDMATMULT_USER_THRESHOLD = 4900UL;
 // The default setting for this threshold is 4900 (which for instance corresponds to a matrix
 // size of \f$ 70 \times 70 \f$). Note that in case the Blaze debug mode is active, this
 // threshold will be replaced by the blaze::TDMATDMATMULT_DEBUG_THRESHOLD value.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_TDMATDMATMULT_THRESHOLD=4900 ...
+   \endcode
+
+   \code
+   #define BLAZE_TDMATDMATMULT_THRESHOLD 4900UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t TDMATDMATMULT_USER_THRESHOLD = 4900UL;
+#ifndef BLAZE_TDMATDMATMULT_THRESHOLD
+#define BLAZE_TDMATDMATMULT_THRESHOLD 4900UL
+#endif
 //*************************************************************************************************
 
 
@@ -180,8 +276,22 @@ constexpr size_t TDMATDMATMULT_USER_THRESHOLD = 4900UL;
 // The default setting for this threshold is 4900 (which for instance corresponds to a matrix
 // size of \f$ 70 \times 70 \f$). Note that in case the Blaze debug mode is active, this
 // threshold will be replaced by the blaze::TDMATTDMATMULT_DEBUG_THRESHOLD value.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_TDMATTDMATMULT_THRESHOLD=4900 ...
+   \endcode
+
+   \code
+   #define BLAZE_TDMATTDMATMULT_THRESHOLD 4900UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t TDMATTDMATMULT_USER_THRESHOLD = 4900UL;
+#ifndef BLAZE_TDMATTDMATMULT_THRESHOLD
+#define BLAZE_TDMATTDMATMULT_THRESHOLD 4900UL
+#endif
 //*************************************************************************************************
 
 
@@ -198,8 +308,22 @@ constexpr size_t TDMATTDMATMULT_USER_THRESHOLD = 4900UL;
 // The default setting for this threshold is 2500 (which for instance corresponds to a matrix
 // size of \f$ 50 \times 50 \f$). Note that in case the Blaze debug mode is active, this
 // threshold will be replaced by the blaze::DMATSMATMULT_DEBUG_THRESHOLD value.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_DMATSMATMULT_THRESHOLD=2500 ...
+   \endcode
+
+   \code
+   #define BLAZE_DMATSMATMULT_THRESHOLD 2500UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t DMATSMATMULT_USER_THRESHOLD = 2500UL;
+#ifndef BLAZE_DMATSMATMULT_THRESHOLD
+#define BLAZE_DMATSMATMULT_THRESHOLD 2500UL
+#endif
 //*************************************************************************************************
 
 
@@ -216,8 +340,22 @@ constexpr size_t DMATSMATMULT_USER_THRESHOLD = 2500UL;
 // The default setting for this threshold is 2500 (which for instance corresponds to a matrix
 // size of \f$ 50 \times 50 \f$). Note that in case the Blaze debug mode is active, this
 // threshold will be replaced by the blaze::TDMATSMATMULT_DEBUG_THRESHOLD value.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_TDMATSMATMULT_THRESHOLD=2500 ...
+   \endcode
+
+   \code
+   #define BLAZE_TDMATSMATMULT_THRESHOLD 2500UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t TDMATSMATMULT_USER_THRESHOLD = 2500UL;
+#ifndef BLAZE_TDMATSMATMULT_THRESHOLD
+#define BLAZE_TDMATSMATMULT_THRESHOLD 2500UL
+#endif
 //*************************************************************************************************
 
 
@@ -234,8 +372,22 @@ constexpr size_t TDMATSMATMULT_USER_THRESHOLD = 2500UL;
 // The default setting for this threshold is 10000 (which for instance corresponds to a matrix
 // size of \f$ 100 \times 100 \f$). Note that in case the Blaze debug mode is active, this
 // threshold will be replaced by the blaze::TSMATDMATMULT_DEBUG_THRESHOLD value.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_TSMATDMATMULT_THRESHOLD=10000 ...
+   \endcode
+
+   \code
+   #define BLAZE_TSMATDMATMULT_THRESHOLD 10000UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t TSMATDMATMULT_USER_THRESHOLD = 10000UL;
+#ifndef BLAZE_TSMATDMATMULT_THRESHOLD
+#define BLAZE_TSMATDMATMULT_THRESHOLD 10000UL
+#endif
 //*************************************************************************************************
 
 
@@ -252,8 +404,22 @@ constexpr size_t TSMATDMATMULT_USER_THRESHOLD = 10000UL;
 // The default setting for this threshold is 22500 (which for instance corresponds to a matrix
 // size of \f$ 150 \times 150 \f$). Note that in case the Blaze debug mode is active, this
 // threshold will be replaced by the blaze::TSMATTDMATMULT_DEBUG_THRESHOLD value.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_TSMATTDMATMULT_THRESHOLD=22500 ...
+   \endcode
+
+   \code
+   #define BLAZE_TSMATTDMATMULT_THRESHOLD 22500UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t TSMATTDMATMULT_USER_THRESHOLD = 22500UL;
+#ifndef BLAZE_TSMATTDMATMULT_THRESHOLD
+#define BLAZE_TSMATTDMATMULT_THRESHOLD 22500UL
+#endif
 //*************************************************************************************************
 
 
@@ -279,104 +445,26 @@ constexpr size_t TSMATTDMATMULT_USER_THRESHOLD = 22500UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 38000. In case the threshold is set to 0, the
 // operation is unconditionally executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_DVECASSIGN_THRESHOLD=38000 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_DVECASSIGN_THRESHOLD 38000UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_DVECASSIGN_USER_THRESHOLD = 38000UL;
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief SMP dense vector/dense vector addition threshold.
-// \ingroup config
-//
-// This threshold specifies when a dense vector/dense vector addition can be executed in parallel.
-// In case the number of elements of the target vector is larger or equal to this threshold, the
-// operation is executed in parallel. If the number of elements is below this threshold the
-// operation is executed single-threaded.
-//
-// Please note that this threshold is highly sensitiv to the used system architecture and the
-// shared memory parallelization technique. Therefore the default value cannot guarantee maximum
-// performance for all possible situations and configurations. It merely provides a reasonable
-// standard for the current generation of CPUs. Also note that the provided default has been
-// determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
-//
-// The default setting for this threshold is 38000. In case the threshold is set to 0, the
-// operation is unconditionally executed in parallel.
-*/
-constexpr size_t SMP_DVECDVECADD_USER_THRESHOLD = 38000UL;
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief SMP dense vector/dense vector subtraction threshold.
-// \ingroup config
-//
-// This threshold specifies when a dense vector/dense vector subtraction can be executed in
-// parallel. In case the number of elements of the target vector is larger or equal to this
-// threshold, the operation is executed in parallel. If the number of elements is below this
-// threshold the operation is executed single-threaded.
-//
-// Please note that this threshold is highly sensitiv to the used system architecture and the
-// shared memory parallelization technique. Therefore the default value cannot guarantee maximum
-// performance for all possible situations and configurations. It merely provides a reasonable
-// standard for the current generation of CPUs. Also note that the provided default has been
-// determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
-//
-// The default setting for this threshold is 38000. In case the threshold is set to 0, the
-// operation is unconditionally executed in parallel.
-*/
-constexpr size_t SMP_DVECDVECSUB_USER_THRESHOLD = 38000UL;
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief SMP dense vector/dense vector multiplication threshold.
-// \ingroup config
-//
-// This threshold specifies when a dense vector/dense vector multiplication can be executed
-// in parallel. In case the number of elements of the target vector is larger or equal to this
-// threshold, the operation is executed in parallel. If the number of elements is below this
-// threshold the operation is executed single-threaded.
-//
-// Please note that this threshold is highly sensitiv to the used system architecture and the
-// shared memory parallelization technique. Therefore the default value cannot guarantee maximum
-// performance for all possible situations and configurations. It merely provides a reasonable
-// standard for the current generation of CPUs. Also note that the provided default has been
-// determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
-//
-// The default setting for this threshold is 38000. In case the threshold is set to 0, the
-// operation is unconditionally executed in parallel.
-*/
-constexpr size_t SMP_DVECDVECMULT_USER_THRESHOLD = 38000UL;
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief SMP dense vector/dense vector division threshold.
-// \ingroup config
-//
-// This threshold specifies when a dense vector/dense vector division can be executed in
-// parallel. In case the number of elements of the target vector is larger or equal to this
-// threshold, the operation is executed in parallel. If the number of elements is below this
-// threshold the operation is executed single-threaded.
-//
-// Please note that this threshold is highly sensitiv to the used system architecture and the
-// shared memory parallelization technique. Therefore the default value cannot guarantee maximum
-// performance for all possible situations and configurations. It merely provides a reasonable
-// standard for the current generation of CPUs. Also note that the provided default has been
-// determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
-//
-// The default setting for this threshold is 38000. In case the threshold is set to 0, the
-// operation is unconditionally executed in parallel.
-*/
-constexpr size_t SMP_DVECDVECDIV_USER_THRESHOLD = 38000UL;
+#ifndef BLAZE_SMP_DVECASSIGN_THRESHOLD
+#define BLAZE_SMP_DVECASSIGN_THRESHOLD 38000UL
+#endif
 //*************************************************************************************************
 
 
@@ -394,12 +482,212 @@ constexpr size_t SMP_DVECDVECDIV_USER_THRESHOLD = 38000UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 51000. In case the threshold is set to 0, the
 // operation is unconditionally executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_DVECSCALARMULT_THRESHOLD=51000 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_DVECSCALARMULT_THRESHOLD 51000UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_DVECSCALARMULT_USER_THRESHOLD = 51000UL;
+#ifndef BLAZE_SMP_DVECSCALARMULT_THRESHOLD
+#define BLAZE_SMP_DVECSCALARMULT_THRESHOLD 51000UL
+#endif
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief SMP dense vector/dense vector addition threshold.
+// \ingroup config
+//
+// This threshold specifies when a dense vector/dense vector addition can be executed in parallel.
+// In case the number of elements of the target vector is larger or equal to this threshold, the
+// operation is executed in parallel. If the number of elements is below this threshold the
+// operation is executed single-threaded.
+//
+// Please note that this threshold is highly sensitiv to the used system architecture and the
+// shared memory parallelization technique. Therefore the default value cannot guarantee maximum
+// performance for all possible situations and configurations. It merely provides a reasonable
+// standard for the current generation of CPUs. Also note that the provided default has been
+// determined using the OpenMP parallelization and requires individual adaption for the C++11
+// and Boost thread parallelization or the HPX-based parallelization.
+//
+// The default setting for this threshold is 38000. In case the threshold is set to 0, the
+// operation is unconditionally executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_DVECDVECADD_THRESHOLD=38000 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_DVECDVECADD_THRESHOLD 38000UL
+   #include <blaze/Blaze.h>
+   \endcode
+*/
+#ifndef BLAZE_SMP_DVECDVECADD_THRESHOLD
+#define BLAZE_SMP_DVECDVECADD_THRESHOLD 38000UL
+#endif
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief SMP dense vector/dense vector subtraction threshold.
+// \ingroup config
+//
+// This threshold specifies when a dense vector/dense vector subtraction can be executed in
+// parallel. In case the number of elements of the target vector is larger or equal to this
+// threshold, the operation is executed in parallel. If the number of elements is below this
+// threshold the operation is executed single-threaded.
+//
+// Please note that this threshold is highly sensitiv to the used system architecture and the
+// shared memory parallelization technique. Therefore the default value cannot guarantee maximum
+// performance for all possible situations and configurations. It merely provides a reasonable
+// standard for the current generation of CPUs. Also note that the provided default has been
+// determined using the OpenMP parallelization and requires individual adaption for the C++11
+// and Boost thread parallelization or the HPX-based parallelization.
+//
+// The default setting for this threshold is 38000. In case the threshold is set to 0, the
+// operation is unconditionally executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_DVECDVECSUB_THRESHOLD=38000 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_DVECDVECSUB_THRESHOLD 38000UL
+   #include <blaze/Blaze.h>
+   \endcode
+*/
+#ifndef BLAZE_SMP_DVECDVECSUB_THRESHOLD
+#define BLAZE_SMP_DVECDVECSUB_THRESHOLD 38000UL
+#endif
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief SMP dense vector/dense vector multiplication threshold.
+// \ingroup config
+//
+// This threshold specifies when a dense vector/dense vector multiplication can be executed
+// in parallel. In case the number of elements of the target vector is larger or equal to this
+// threshold, the operation is executed in parallel. If the number of elements is below this
+// threshold the operation is executed single-threaded.
+//
+// Please note that this threshold is highly sensitiv to the used system architecture and the
+// shared memory parallelization technique. Therefore the default value cannot guarantee maximum
+// performance for all possible situations and configurations. It merely provides a reasonable
+// standard for the current generation of CPUs. Also note that the provided default has been
+// determined using the OpenMP parallelization and requires individual adaption for the C++11
+// and Boost thread parallelization or the HPX-based parallelization.
+//
+// The default setting for this threshold is 38000. In case the threshold is set to 0, the
+// operation is unconditionally executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_DVECDVECMULT_THRESHOLD=38000 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_DVECDVECMULT_THRESHOLD 38000UL
+   #include <blaze/Blaze.h>
+   \endcode
+*/
+#ifndef BLAZE_SMP_DVECDVECMULT_THRESHOLD
+#define BLAZE_SMP_DVECDVECMULT_THRESHOLD 38000UL
+#endif
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief SMP dense vector/dense vector division threshold.
+// \ingroup config
+//
+// This threshold specifies when a dense vector/dense vector division can be executed in
+// parallel. In case the number of elements of the target vector is larger or equal to this
+// threshold, the operation is executed in parallel. If the number of elements is below this
+// threshold the operation is executed single-threaded.
+//
+// Please note that this threshold is highly sensitiv to the used system architecture and the
+// shared memory parallelization technique. Therefore the default value cannot guarantee maximum
+// performance for all possible situations and configurations. It merely provides a reasonable
+// standard for the current generation of CPUs. Also note that the provided default has been
+// determined using the OpenMP parallelization and requires individual adaption for the C++11
+// and Boost thread parallelization or the HPX-based parallelization.
+//
+// The default setting for this threshold is 38000. In case the threshold is set to 0, the
+// operation is unconditionally executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_DVECDVECDIV_THRESHOLD=38000 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_DVECDVECDIV_THRESHOLD 38000UL
+   #include <blaze/Blaze.h>
+   \endcode
+*/
+#ifndef BLAZE_SMP_DVECDVECDIV_THRESHOLD
+#define BLAZE_SMP_DVECDVECDIV_THRESHOLD 38000UL
+#endif
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief SMP dense vector/dense vector outer product threshold.
+// \ingroup config
+//
+// This threshold specifies when a dense vector/dense vector outer product can be executed in
+// parallel. In case the number of elements of the target matrix is larger or equal to this
+// threshold, the operation is executed in parallel. If the number of elements is below this
+// threshold the operation is executed single-threaded.
+//
+// Please note that this threshold is highly sensitiv to the used system architecture and the
+// shared memory parallelization technique. Therefore the default value cannot guarantee maximum
+// performance for all possible situations and configurations. It merely provides a reasonable
+// standard for the current generation of CPUs. Also note that the provided default has been
+// determined using the OpenMP parallelization and requires individual adaption for the C++11
+// and Boost thread parallelization or the HPX-based parallelization.
+//
+// The default setting for this threshold is 84100 (which corresponds to a matrix size of
+// \f$ 290 \times 290 \f$). In case the threshold is set to 0, the operation is unconditionally
+// executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_DVECDVECOUTER_THRESHOLD=84100 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_DVECDVECOUTER_THRESHOLD 84100UL
+   #include <blaze/Blaze.h>
+   \endcode
+*/
+#ifndef BLAZE_SMP_DVECDVECOUTER_THRESHOLD
+#define BLAZE_SMP_DVECDVECOUTER_THRESHOLD 84100UL
+#endif
 //*************************************************************************************************
 
 
@@ -417,12 +705,26 @@ constexpr size_t SMP_DVECSCALARMULT_USER_THRESHOLD = 51000UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 330. In case the threshold is set to 0, the operation
 // is unconditionally executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_DMATDVECMULT_THRESHOLD=330 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_DMATDVECMULT_THRESHOLD 330UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_DMATDVECMULT_USER_THRESHOLD = 330UL;
+#ifndef BLAZE_SMP_DMATDVECMULT_THRESHOLD
+#define BLAZE_SMP_DMATDVECMULT_THRESHOLD 330UL
+#endif
 //*************************************************************************************************
 
 
@@ -440,12 +742,26 @@ constexpr size_t SMP_DMATDVECMULT_USER_THRESHOLD = 330UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 360. In case the threshold is set to 0, the operation
 // is unconditionally executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_TDMATDVECMULT_THRESHOLD=360 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_TDMATDVECMULT_THRESHOLD 360UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_TDMATDVECMULT_USER_THRESHOLD = 360UL;
+#ifndef BLAZE_SMP_TDMATDVECMULT_THRESHOLD
+#define BLAZE_SMP_TDMATDVECMULT_THRESHOLD 360UL
+#endif
 //*************************************************************************************************
 
 
@@ -463,12 +779,26 @@ constexpr size_t SMP_TDMATDVECMULT_USER_THRESHOLD = 360UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 370. In case the threshold is set to 0, the operation
 // is unconditionally executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_TDVECDMATMULT_THRESHOLD=370 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_TDVECDMATMULT_THRESHOLD 370UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_TDVECDMATMULT_USER_THRESHOLD = 370UL;
+#ifndef BLAZE_SMP_TDVECDMATMULT_THRESHOLD
+#define BLAZE_SMP_TDVECDMATMULT_THRESHOLD 370UL
+#endif
 //*************************************************************************************************
 
 
@@ -486,12 +816,26 @@ constexpr size_t SMP_TDVECDMATMULT_USER_THRESHOLD = 370UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 340. In case the threshold is set to 0, the operation
 // is unconditionally executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_TDVECTDMATMULT_THRESHOLD=340 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_TDVECTDMATMULT_THRESHOLD 340UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_TDVECTDMATMULT_USER_THRESHOLD = 340UL;
+#ifndef BLAZE_SMP_TDVECTDMATMULT_THRESHOLD
+#define BLAZE_SMP_TDVECTDMATMULT_THRESHOLD 340UL
+#endif
 //*************************************************************************************************
 
 
@@ -509,12 +853,26 @@ constexpr size_t SMP_TDVECTDMATMULT_USER_THRESHOLD = 340UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 480. In case the threshold is set to 0, the operation
 // is unconditionally executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_DMATSVECMULT_THRESHOLD=480 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_DMATSVECMULT_THRESHOLD 480UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_DMATSVECMULT_USER_THRESHOLD = 480UL;
+#ifndef BLAZE_SMP_DMATSVECMULT_THRESHOLD
+#define BLAZE_SMP_DMATSVECMULT_THRESHOLD 480UL
+#endif
 //*************************************************************************************************
 
 
@@ -532,12 +890,26 @@ constexpr size_t SMP_DMATSVECMULT_USER_THRESHOLD = 480UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 910. In case the threshold is set to 0, the operation
 // is unconditionally executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_TDMATSVECMULT_THRESHOLD=910 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_TDMATSVECMULT_THRESHOLD 910UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_TDMATSVECMULT_USER_THRESHOLD = 910UL;
+#ifndef BLAZE_SMP_TDMATSVECMULT_THRESHOLD
+#define BLAZE_SMP_TDMATSVECMULT_THRESHOLD 910UL
+#endif
 //*************************************************************************************************
 
 
@@ -555,12 +927,26 @@ constexpr size_t SMP_TDMATSVECMULT_USER_THRESHOLD = 910UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 910. In case the threshold is set to 0, the operation
 // is unconditionally executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_TSVECDMATMULT_THRESHOLD=910 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_TSVECDMATMULT_THRESHOLD 910UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_TSVECDMATMULT_USER_THRESHOLD = 910UL;
+#ifndef BLAZE_SMP_TSVECDMATMULT_THRESHOLD
+#define BLAZE_SMP_TSVECDMATMULT_THRESHOLD 910UL
+#endif
 //*************************************************************************************************
 
 
@@ -578,12 +964,26 @@ constexpr size_t SMP_TSVECDMATMULT_USER_THRESHOLD = 910UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 480. In case the threshold is set to 0, the operation
 // is unconditionally executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_TSVECTDMATMULT_THRESHOLD=480 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_TSVECTDMATMULT_THRESHOLD 480UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_TSVECTDMATMULT_USER_THRESHOLD = 480UL;
+#ifndef BLAZE_SMP_TSVECTDMATMULT_THRESHOLD
+#define BLAZE_SMP_TSVECTDMATMULT_THRESHOLD 480UL
+#endif
 //*************************************************************************************************
 
 
@@ -601,12 +1001,26 @@ constexpr size_t SMP_TSVECTDMATMULT_USER_THRESHOLD = 480UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 600. In case the threshold is set to 0, the operation
 // is unconditionally executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_SMATDVECMULT_THRESHOLD=600 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_SMATDVECMULT_THRESHOLD 600UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_SMATDVECMULT_USER_THRESHOLD = 600UL;
+#ifndef BLAZE_SMP_SMATDVECMULT_THRESHOLD
+#define BLAZE_SMP_SMATDVECMULT_THRESHOLD 600UL
+#endif
 //*************************************************************************************************
 
 
@@ -624,12 +1038,26 @@ constexpr size_t SMP_SMATDVECMULT_USER_THRESHOLD = 600UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 1250. In case the threshold is set to 0, the operation
 // is unconditionally executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_TSMATDVECMULT_THRESHOLD=1250 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_TSMATDVECMULT_THRESHOLD 1250UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_TSMATDVECMULT_USER_THRESHOLD = 1250UL;
+#ifndef BLAZE_SMP_TSMATDVECMULT_THRESHOLD
+#define BLAZE_SMP_TSMATDVECMULT_THRESHOLD 1250UL
+#endif
 //*************************************************************************************************
 
 
@@ -647,12 +1075,26 @@ constexpr size_t SMP_TSMATDVECMULT_USER_THRESHOLD = 1250UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 1190. In case the threshold is set to 0, the operation
 // is unconditionally executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_TDVECSMATMULT_THRESHOLD=1190 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_TDVECSMATMULT_THRESHOLD 1190UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_TDVECSMATMULT_USER_THRESHOLD = 1190UL;
+#ifndef BLAZE_SMP_TDVECSMATMULT_THRESHOLD
+#define BLAZE_SMP_TDVECSMATMULT_THRESHOLD 1190UL
+#endif
 //*************************************************************************************************
 
 
@@ -670,12 +1112,26 @@ constexpr size_t SMP_TDVECSMATMULT_USER_THRESHOLD = 1190UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 530. In case the threshold is set to 0, the operation
 // is unconditionally executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_TDVECTSMATMULT_THRESHOLD=530 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_TDVECTSMATMULT_THRESHOLD 530UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_TDVECTSMATMULT_USER_THRESHOLD = 530UL;
+#ifndef BLAZE_SMP_TDVECTSMATMULT_THRESHOLD
+#define BLAZE_SMP_TDVECTSMATMULT_THRESHOLD 530UL
+#endif
 //*************************************************************************************************
 
 
@@ -693,12 +1149,26 @@ constexpr size_t SMP_TDVECTSMATMULT_USER_THRESHOLD = 530UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 260. In case the threshold is set to 0, the operation
 // is unconditionally executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_SMATSVECMULT_THRESHOLD=260 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_SMATSVECMULT_THRESHOLD 260UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_SMATSVECMULT_USER_THRESHOLD = 260UL;
+#ifndef BLAZE_SMP_SMATSVECMULT_THRESHOLD
+#define BLAZE_SMP_SMATSVECMULT_THRESHOLD 260UL
+#endif
 //*************************************************************************************************
 
 
@@ -716,12 +1186,26 @@ constexpr size_t SMP_SMATSVECMULT_USER_THRESHOLD = 260UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 2160. In case the threshold is set to 0, the operation
 // is unconditionally executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_TSMATSVECMULT_THRESHOLD=2160 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_TSMATSVECMULT_THRESHOLD 2160UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_TSMATSVECMULT_USER_THRESHOLD = 2160UL;
+#ifndef BLAZE_SMP_TSMATSVECMULT_THRESHOLD
+#define BLAZE_SMP_TSMATSVECMULT_THRESHOLD 2160UL
+#endif
 //*************************************************************************************************
 
 
@@ -739,12 +1223,26 @@ constexpr size_t SMP_TSMATSVECMULT_USER_THRESHOLD = 2160UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 2160. In case the threshold is set to 0, the operation
 // is unconditionally executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_TSVECSMATMULT_THRESHOLD=2160 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_TSVECSMATMULT_THRESHOLD 2160UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_TSVECSMATMULT_USER_THRESHOLD = 2160UL;
+#ifndef BLAZE_SMP_TSVECSMATMULT_THRESHOLD
+#define BLAZE_SMP_TSVECSMATMULT_THRESHOLD 2160UL
+#endif
 //*************************************************************************************************
 
 
@@ -762,12 +1260,26 @@ constexpr size_t SMP_TSVECSMATMULT_USER_THRESHOLD = 2160UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 260. In case the threshold is set to 0, the operation
 // is unconditionally executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_TSVECTSMATMULT_THRESHOLD=260 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_TSVECTSMATMULT_THRESHOLD 260UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_TSVECTSMATMULT_USER_THRESHOLD = 260UL;
+#ifndef BLAZE_SMP_TSVECTSMATMULT_THRESHOLD
+#define BLAZE_SMP_TSVECTSMATMULT_THRESHOLD 260UL
+#endif
 //*************************************************************************************************
 
 
@@ -785,13 +1297,65 @@ constexpr size_t SMP_TSVECTSMATMULT_USER_THRESHOLD = 260UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 48400 (which corresponds to a matrix size of
 // \f$ 220 \times 220 \f$). In case the threshold is set to 0, the operation is unconditionally
 // executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_DMATASSIGN_THRESHOLD=48400 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_DMATASSIGN_THRESHOLD 48400UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_DMATASSIGN_USER_THRESHOLD = 48400UL;
+#ifndef BLAZE_SMP_DMATASSIGN_THRESHOLD
+#define BLAZE_SMP_DMATASSIGN_THRESHOLD 48400UL
+#endif
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief SMP dense matrix/scalar multiplication/division threshold.
+// \ingroup config
+//
+// This threshold specifies when a dense matrix/scalar multiplication or division can be executed
+// in parallel. In case the number of elements of the target matrix is larger or equal to this
+// threshold, the operation is executed in parallel. If the number of elements is below this
+// threshold the operation is executed single-threaded.
+//
+// Please note that this threshold is highly sensitiv to the used system architecture and the
+// shared memory parallelization technique. Therefore the default value cannot guarantee maximum
+// performance for all possible situations and configurations. It merely provides a reasonable
+// standard for the current generation of CPUs. Also note that the provided default has been
+// determined using the OpenMP parallelization and requires individual adaption for the C++11
+// and Boost thread parallelization or the HPX-based parallelization.
+//
+// The default setting for this threshold is 48400 (which corresponds to a matrix size of
+// \f$ 220 \times 220 \f$). In case the threshold is set to 0, the operation is unconditionally
+// executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_DMATSCALARMULT_THRESHOLD=48400 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_DMATSCALARMULT_THRESHOLD 48400UL
+   #include <blaze/Blaze.h>
+   \endcode
+*/
+#ifndef BLAZE_SMP_DMATSCALARMULT_THRESHOLD
+#define BLAZE_SMP_DMATSCALARMULT_THRESHOLD 48400UL
+#endif
 //*************************************************************************************************
 
 
@@ -810,13 +1374,27 @@ constexpr size_t SMP_DMATASSIGN_USER_THRESHOLD = 48400UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 36100 (which corresponds to a matrix size of
 // \f$ 190 \times 190 \f$). In case the threshold is set to 0, the operation is unconditionally
 // executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_DMATDMATADD_THRESHOLD=36100 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_DMATDMATADD_THRESHOLD 36100UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_DMATDMATADD_USER_THRESHOLD = 36100UL;
+#ifndef BLAZE_SMP_DMATDMATADD_THRESHOLD
+#define BLAZE_SMP_DMATDMATADD_THRESHOLD 36100UL
+#endif
 //*************************************************************************************************
 
 
@@ -836,13 +1414,27 @@ constexpr size_t SMP_DMATDMATADD_USER_THRESHOLD = 36100UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 30625 (which corresponds to a matrix size of
 // \f$ 175 \times 175 \f$). In case the threshold is set to 0, the operation is unconditionally
 // executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_DMATTDMATADD_THRESHOLD=30625 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_DMATTDMATADD_THRESHOLD 30625UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_DMATTDMATADD_USER_THRESHOLD = 30625UL;
+#ifndef BLAZE_SMP_DMATTDMATADD_THRESHOLD
+#define BLAZE_SMP_DMATTDMATADD_THRESHOLD 30625UL
+#endif
 //*************************************************************************************************
 
 
@@ -861,13 +1453,27 @@ constexpr size_t SMP_DMATTDMATADD_USER_THRESHOLD = 30625UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 36100 (which corresponds to a matrix size of
 // \f$ 190 \times 190 \f$). In case the threshold is set to 0, the operation is unconditionally
 // executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_DMATDMATSUB_THRESHOLD=36100 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_DMATDMATSUB_THRESHOLD 36100UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_DMATDMATSUB_USER_THRESHOLD = 36100UL;
+#ifndef BLAZE_SMP_DMATDMATSUB_THRESHOLD
+#define BLAZE_SMP_DMATDMATSUB_THRESHOLD 36100UL
+#endif
 //*************************************************************************************************
 
 
@@ -887,37 +1493,106 @@ constexpr size_t SMP_DMATDMATSUB_USER_THRESHOLD = 36100UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 30625 (which corresponds to a matrix size of
 // \f$ 175 \times 175 \f$). In case the threshold is set to 0, the operation is unconditionally
 // executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_DMATTDMATSUB_THRESHOLD=30625 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_DMATTDMATSUB_THRESHOLD 30625UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_DMATTDMATSUB_USER_THRESHOLD = 30625UL;
+#ifndef BLAZE_SMP_DMATTDMATSUB_THRESHOLD
+#define BLAZE_SMP_DMATTDMATSUB_THRESHOLD 30625UL
+#endif
 //*************************************************************************************************
 
 
 //*************************************************************************************************
-/*!\brief SMP dense matrix/scalar multiplication/division threshold.
+/*!\brief SMP row-major dense matrix/row-major dense matrix Schur product threshold.
 // \ingroup config
 //
-// This threshold specifies when a dense matrix/scalar multiplication or division can be executed
-// in parallel. In case the number of elements of the target matrix is larger or equal to this
-// threshold, the operation is executed in parallel. If the number of elements is below this
-// threshold the operation is executed single-threaded.
+// This threshold specifies when a row-major dense matrix/row-major dense matrix Schur product
+// can be executed in parallel. This threshold affects both Schur products between two row-major
+// matrices or two column-major dense matrices. In case the number of elements of the target
+// matrix is larger or equal to this threshold, the operation is executed in parallel. If the
+// number of elements is below this threshold the operation is executed single-threaded.
 //
 // Please note that this threshold is highly sensitiv to the used system architecture and the
 // shared memory parallelization technique. Therefore the default value cannot guarantee maximum
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
-// The default setting for this threshold is 48400 (which corresponds to a matrix size of
-// \f$ 220 \times 220 \f$). In case the threshold is set to 0, the operation is unconditionally
+// The default setting for this threshold is 36100 (which corresponds to a matrix size of
+// \f$ 190 \times 190 \f$). In case the threshold is set to 0, the operation is unconditionally
 // executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_DMATDMATSCHUR_THRESHOLD=36100 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_DMATDMATSCHUR_THRESHOLD 36100UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_DMATSCALARMULT_USER_THRESHOLD = 48400UL;
+#ifndef BLAZE_SMP_DMATDMATSCHUR_THRESHOLD
+#define BLAZE_SMP_DMATDMATSCHUR_THRESHOLD 36100UL
+#endif
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief SMP row-major dense matrix/column-major dense matrix Schur product threshold.
+// \ingroup config
+//
+// This threshold specifies when a row-major dense matrix/column-major dense matrix Schur product
+// can be executed in parallel. This threshold affects both Schur products between a row-major
+// matrix and a column-major matrix and a column-major matrix and a row-major matrix. In case
+// the number of elements of the target matrix is larger or equal to this threshold, the
+// operation is executed in parallel. If the number of elements is below this threshold the
+// operation is executed single-threaded.
+//
+// Please note that this threshold is highly sensitiv to the used system architecture and the
+// shared memory parallelization technique. Therefore the default value cannot guarantee maximum
+// performance for all possible situations and configurations. It merely provides a reasonable
+// standard for the current generation of CPUs. Also note that the provided default has been
+// determined using the OpenMP parallelization and requires individual adaption for the C++11
+// and Boost thread parallelization or the HPX-based parallelization.
+//
+// The default setting for this threshold is 30625 (which corresponds to a matrix size of
+// \f$ 175 \times 175 \f$). In case the threshold is set to 0, the operation is unconditionally
+// executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_DMATTDMATSCHUR_THRESHOLD=30625 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_DMATTDMATSCHUR_THRESHOLD 30625UL
+   #include <blaze/Blaze.h>
+   \endcode
+*/
+#ifndef BLAZE_SMP_DMATTDMATSCHUR_THRESHOLD
+#define BLAZE_SMP_DMATTDMATSCHUR_THRESHOLD 30625UL
+#endif
 //*************************************************************************************************
 
 
@@ -935,13 +1610,27 @@ constexpr size_t SMP_DMATSCALARMULT_USER_THRESHOLD = 48400UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 3025 (which corresponds to a matrix size of
 // \f$ 55 \times 55 \f$). In case the threshold is set to 0, the operation is unconditionally
 // executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_DMATDMATMULT_THRESHOLD=3025 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_DMATDMATMULT_THRESHOLD 3025UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_DMATDMATMULT_USER_THRESHOLD = 3025UL;
+#ifndef BLAZE_SMP_DMATDMATMULT_THRESHOLD
+#define BLAZE_SMP_DMATDMATMULT_THRESHOLD 3025UL
+#endif
 //*************************************************************************************************
 
 
@@ -959,13 +1648,27 @@ constexpr size_t SMP_DMATDMATMULT_USER_THRESHOLD = 3025UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 3025 (which corresponds to a matrix size of
 // \f$ 55 \times 55 \f$). In case the threshold is set to 0, the operation is unconditionally
 // executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_DMATTDMATMULT_THRESHOLD=3025 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_DMATTDMATMULT_THRESHOLD 3025UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_DMATTDMATMULT_USER_THRESHOLD = 3025UL;
+#ifndef BLAZE_SMP_DMATTDMATMULT_THRESHOLD
+#define BLAZE_SMP_DMATTDMATMULT_THRESHOLD 3025UL
+#endif
 //*************************************************************************************************
 
 
@@ -983,13 +1686,27 @@ constexpr size_t SMP_DMATTDMATMULT_USER_THRESHOLD = 3025UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 3025 (which corresponds to a matrix size of
 // \f$ 55 \times 55 \f$). In case the threshold is set to 0, the operation is unconditionally
 // executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_TDMATDMATMULT_THRESHOLD=3025 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_TDMATDMATMULT_THRESHOLD 3025UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_TDMATDMATMULT_USER_THRESHOLD = 3025UL;
+#ifndef BLAZE_SMP_TDMATDMATMULT_THRESHOLD
+#define BLAZE_SMP_TDMATDMATMULT_THRESHOLD 3025UL
+#endif
 //*************************************************************************************************
 
 
@@ -1007,13 +1724,27 @@ constexpr size_t SMP_TDMATDMATMULT_USER_THRESHOLD = 3025UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 3025 (which corresponds to a matrix size of
 // \f$ 55 \times 55 \f$). In case the threshold is set to 0, the operation is unconditionally
 // executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_TDMATTDMATMULT_THRESHOLD=3025 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_TDMATTDMATMULT_THRESHOLD 3025UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_TDMATTDMATMULT_USER_THRESHOLD = 3025UL;
+#ifndef BLAZE_SMP_TDMATTDMATMULT_THRESHOLD
+#define BLAZE_SMP_TDMATTDMATMULT_THRESHOLD 3025UL
+#endif
 //*************************************************************************************************
 
 
@@ -1031,13 +1762,27 @@ constexpr size_t SMP_TDMATTDMATMULT_USER_THRESHOLD = 3025UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 4096 (which corresponds to a matrix size of
 // \f$ 64 \times 64 \f$). In case the threshold is set to 0, the operation is unconditionally
 // executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_DMATSMATMULT_THRESHOLD=4096 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_DMATSMATMULT_THRESHOLD 4096UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_DMATSMATMULT_USER_THRESHOLD = 4096UL;
+#ifndef BLAZE_SMP_DMATSMATMULT_THRESHOLD
+#define BLAZE_SMP_DMATSMATMULT_THRESHOLD 4096UL
+#endif
 //*************************************************************************************************
 
 
@@ -1055,13 +1800,27 @@ constexpr size_t SMP_DMATSMATMULT_USER_THRESHOLD = 4096UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 4624 (which corresponds to a matrix size of
 // \f$ 68 \times 68 \f$). In case the threshold is set to 0, the operation is unconditionally
 // executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_DMATTSMATMULT_THRESHOLD=4624 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_DMATTSMATMULT_THRESHOLD 4624UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_DMATTSMATMULT_USER_THRESHOLD = 4624UL;
+#ifndef BLAZE_SMP_DMATTSMATMULT_THRESHOLD
+#define BLAZE_SMP_DMATTSMATMULT_THRESHOLD 4624UL
+#endif
 //*************************************************************************************************
 
 
@@ -1079,13 +1838,27 @@ constexpr size_t SMP_DMATTSMATMULT_USER_THRESHOLD = 4624UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 8100 (which corresponds to a matrix size of
 // \f$ 90 \times 90 \f$). In case the threshold is set to 0, the operation is unconditionally
 // executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_TDMATSMATMULT_THRESHOLD=8100 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_TDMATSMATMULT_THRESHOLD 8100UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_TDMATSMATMULT_USER_THRESHOLD = 8100UL;
+#ifndef BLAZE_SMP_TDMATSMATMULT_THRESHOLD
+#define BLAZE_SMP_TDMATSMATMULT_THRESHOLD 8100UL
+#endif
 //*************************************************************************************************
 
 
@@ -1103,13 +1876,27 @@ constexpr size_t SMP_TDMATSMATMULT_USER_THRESHOLD = 8100UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 8100 (which corresponds to a matrix size of
 // \f$ 90 \times 90 \f$). In case the threshold is set to 0, the operation
 // is unconditionally executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_TDMATTSMATMULT_THRESHOLD=8100 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_TDMATTSMATMULT_THRESHOLD 8100UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_TDMATTSMATMULT_USER_THRESHOLD = 8100UL;
+#ifndef BLAZE_SMP_TDMATTSMATMULT_THRESHOLD
+#define BLAZE_SMP_TDMATTSMATMULT_THRESHOLD 8100UL
+#endif
 //*************************************************************************************************
 
 
@@ -1127,13 +1914,27 @@ constexpr size_t SMP_TDMATTSMATMULT_USER_THRESHOLD = 8100UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 7744 (which corresponds to a matrix size of
 // \f$ 88 \times 88 \f$). In case the threshold is set to 0, the operation
 // is unconditionally executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_SMATDMATMULT_THRESHOLD=7744 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_SMATDMATMULT_THRESHOLD 7744UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_SMATDMATMULT_USER_THRESHOLD = 7744UL;
+#ifndef BLAZE_SMP_SMATDMATMULT_THRESHOLD
+#define BLAZE_SMP_SMATDMATMULT_THRESHOLD 7744UL
+#endif
 //*************************************************************************************************
 
 
@@ -1151,13 +1952,27 @@ constexpr size_t SMP_SMATDMATMULT_USER_THRESHOLD = 7744UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 5184 (which corresponds to a matrix size of
 // \f$ 72 \times 72 \f$). In case the threshold is set to 0, the operation is unconditionally
 // executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_SMATTDMATMULT_THRESHOLD=5184 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_SMATTDMATMULT_THRESHOLD 5184UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_SMATTDMATMULT_USER_THRESHOLD = 5184UL;
+#ifndef BLAZE_SMP_SMATTDMATMULT_THRESHOLD
+#define BLAZE_SMP_SMATTDMATMULT_THRESHOLD 5184UL
+#endif
 //*************************************************************************************************
 
 
@@ -1175,13 +1990,27 @@ constexpr size_t SMP_SMATTDMATMULT_USER_THRESHOLD = 5184UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 4356 (which corresponds to a matrix size of
 // \f$ 66 \times 66 \f$). In case the threshold is set to 0, the operation is unconditionally
 // executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_TSMATDMATMULT_THRESHOLD=4356 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_TSMATDMATMULT_THRESHOLD 4356UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_TSMATDMATMULT_USER_THRESHOLD = 4356UL;
+#ifndef BLAZE_SMP_TSMATDMATMULT_THRESHOLD
+#define BLAZE_SMP_TSMATDMATMULT_THRESHOLD 4356UL
+#endif
 //*************************************************************************************************
 
 
@@ -1199,13 +2028,27 @@ constexpr size_t SMP_TSMATDMATMULT_USER_THRESHOLD = 4356UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 4356 (which corresponds to a matrix size of
 // \f$ 66 \times 66 \f$). In case the threshold is set to 0, the operation is unconditionally
 // executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_TSMATTDMATMULT_THRESHOLD=4356 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_TSMATTDMATMULT_THRESHOLD 4356UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_TSMATTDMATMULT_USER_THRESHOLD = 4356UL;
+#ifndef BLAZE_SMP_TSMATTDMATMULT_THRESHOLD
+#define BLAZE_SMP_TSMATTDMATMULT_THRESHOLD 4356UL
+#endif
 //*************************************************************************************************
 
 
@@ -1223,13 +2066,27 @@ constexpr size_t SMP_TSMATTDMATMULT_USER_THRESHOLD = 4356UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 22500 (which corresponds to a matrix size of
 // \f$ 150 \times 150 \f$). In case the threshold is set to 0, the operation is unconditionally
 // executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_SMATSMATMULT_THRESHOLD=22500 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_SMATSMATMULT_THRESHOLD 22500UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_SMATSMATMULT_USER_THRESHOLD = 22500UL;
+#ifndef BLAZE_SMP_SMATSMATMULT_THRESHOLD
+#define BLAZE_SMP_SMATSMATMULT_THRESHOLD 22500UL
+#endif
 //*************************************************************************************************
 
 
@@ -1247,13 +2104,27 @@ constexpr size_t SMP_SMATSMATMULT_USER_THRESHOLD = 22500UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 19600 (which corresponds to a matrix size of
 // \f$ 140 \times 140 \f$). In case the threshold is set to 0, the operation is unconditionally
 // executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_SMATTSMATMULT_THRESHOLD=19600 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_SMATTSMATMULT_THRESHOLD 19600UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_SMATTSMATMULT_USER_THRESHOLD = 19600UL;
+#ifndef BLAZE_SMP_SMATTSMATMULT_THRESHOLD
+#define BLAZE_SMP_SMATTSMATMULT_THRESHOLD 19600UL
+#endif
 //*************************************************************************************************
 
 
@@ -1271,13 +2142,27 @@ constexpr size_t SMP_SMATTSMATMULT_USER_THRESHOLD = 19600UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 19600 (which corresponds to a matrix size of
 // \f$ 140 \times 140 \f$). In case the threshold is set to 0, the operation is unconditionally
 // executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_TSMATSMATMULT_THRESHOLD=19600 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_TSMATSMATMULT_THRESHOLD 19600UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_TSMATSMATMULT_USER_THRESHOLD = 19600UL;
+#ifndef BLAZE_SMP_TSMATSMATMULT_THRESHOLD
+#define BLAZE_SMP_TSMATSMATMULT_THRESHOLD 19600UL
+#endif
 //*************************************************************************************************
 
 
@@ -1295,37 +2180,99 @@ constexpr size_t SMP_TSMATSMATMULT_USER_THRESHOLD = 19600UL;
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
 // The default setting for this threshold is 22500 (which corresponds to a matrix size of
 // \f$ 150 \times 150 \f$). In case the threshold is set to 0, the operation is unconditionally
 // executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_TSMATTSMATMULT_THRESHOLD=22500 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_TSMATTSMATMULT_THRESHOLD 22500UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_TSMATTSMATMULT_USER_THRESHOLD = 22500UL;
+#ifndef BLAZE_SMP_TSMATTSMATMULT_THRESHOLD
+#define BLAZE_SMP_TSMATTSMATMULT_THRESHOLD 22500UL
+#endif
 //*************************************************************************************************
 
 
 //*************************************************************************************************
-/*!\brief SMP dense vector/dense vector outer product threshold.
+/*!\brief SMP dense matrix reduction threshold.
 // \ingroup config
 //
-// This threshold specifies when a dense vector/dense vector outer product can be executed in
-// parallel. In case the number of elements of the target matrix is larger or equal to this
-// threshold, the operation is executed in parallel. If the number of elements is below this
-// threshold the operation is executed single-threaded.
+// This threshold specifies when a dense matrix reduction can be executed in parallel. In case
+// the number of elements of the target vector is larger or equal to this threshold, the operation
+// is executed in parallel. If the number of elements is below this threshold the operation is
+// executed single-threaded.
 //
 // Please note that this threshold is highly sensitiv to the used system architecture and the
 // shared memory parallelization technique. Therefore the default value cannot guarantee maximum
 // performance for all possible situations and configurations. It merely provides a reasonable
 // standard for the current generation of CPUs. Also note that the provided default has been
 // determined using the OpenMP parallelization and requires individual adaption for the C++11
-// and Boost thread parallelization.
+// and Boost thread parallelization or the HPX-based parallelization.
 //
-// The default setting for this threshold is 84100 (which corresponds to a matrix size of
-// \f$ 290 \times 290 \f$). In case the threshold is set to 0, the operation is unconditionally
-// executed in parallel.
+// The default setting for this threshold is 180. In case the threshold is set to 0, the operation
+// is unconditionally executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_DMATREDUCE_THRESHOLD=180 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_DMATREDUCE_THRESHOLD 180UL
+   #include <blaze/Blaze.h>
+   \endcode
 */
-constexpr size_t SMP_DVECDVECOUTER_USER_THRESHOLD = 84100UL;
+#ifndef BLAZE_SMP_DMATREDUCE_THRESHOLD
+#define BLAZE_SMP_DMATREDUCE_THRESHOLD 180UL
+#endif
 //*************************************************************************************************
 
-} // namespace blaze
+
+//*************************************************************************************************
+/*!\brief SMP sparse matrix reduction threshold.
+// \ingroup config
+//
+// This threshold specifies when a sparse matrix reduction can be executed in parallel. In case
+// the number of elements of the target vector is larger or equal to this threshold, the operation
+// is executed in parallel. If the number of elements is below this threshold the operation is
+// executed single-threaded.
+//
+// Please note that this threshold is highly sensitiv to the used system architecture and the
+// shared memory parallelization technique. Therefore the default value cannot guarantee maximum
+// performance for all possible situations and configurations. It merely provides a reasonable
+// standard for the current generation of CPUs. Also note that the provided default has been
+// determined using the OpenMP parallelization and requires individual adaption for the C++11
+// and Boost thread parallelization or the HPX-based parallelization.
+//
+// The default setting for this threshold is 180. In case the threshold is set to 0, the operation
+// is unconditionally executed in parallel.
+//
+// \note It is possible to specify this threshold via command line or by defining this symbol
+// manually before including any Blaze header file:
+
+   \code
+   g++ ... -DBLAZE_SMP_SMATREDUCE_THRESHOLD=180 ...
+   \endcode
+
+   \code
+   #define BLAZE_SMP_SMATREDUCE_THRESHOLD 180UL
+   #include <blaze/Blaze.h>
+   \endcode
+*/
+#ifndef BLAZE_SMP_SMATREDUCE_THRESHOLD
+#define BLAZE_SMP_SMATREDUCE_THRESHOLD 180UL
+#endif
+//*************************************************************************************************

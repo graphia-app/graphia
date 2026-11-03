@@ -3,7 +3,7 @@
 //  \file blaze/math/lapack/clapack/gesvdx.h
 //  \brief Header file for the CLAPACK gesvdx wrapper functions
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,8 +40,10 @@
 // Includes
 //*************************************************************************************************
 
+#include <blaze/math/blas/Types.h>
 #include <blaze/util/Complex.h>
 #include <blaze/util/StaticAssert.h>
+#include <blaze/util/Types.h>
 
 
 //=================================================================================================
@@ -52,14 +54,40 @@
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
+#if !defined(INTEL_MKL_VERSION) || (INTEL_MKL_VERSION < 20170000)
 extern "C" {
 
-void sgesvdx_( char* jobu, char* jobv, char* range, int* m, int* n, float*  A, int* lda, float*  vl, float*  vu, int* il, int* iu, int* ns, float*  s, float*  U, int* ldu, float*  V, int* ldv, float*  work, int* lwork, int* iwork, int* info );
-void dgesvdx_( char* jobu, char* jobv, char* range, int* m, int* n, double* A, int* lda, double* vl, double* vu, int* il, int* iu, int* ns, double* s, double* U, int* ldu, double* V, int* ldv, double* work, int* lwork, int* iwork, int* info );
-void cgesvdx_( char* jobu, char* jobv, char* range, int* m, int* n, float*  A, int* lda, float*  vl, float*  vu, int* il, int* iu, int* ns, float*  s, float*  U, int* ldu, float*  V, int* ldv, float*  work, int* lwork, float*  rwork, int* iwork, int* info );
-void zgesvdx_( char* jobu, char* jobv, char* range, int* m, int* n, double* A, int* lda, double* vl, double* vu, int* il, int* iu, int* ns, double* s, double* U, int* ldu, double* V, int* ldv, double* work, int* lwork, double* rwork, int* iwork, int* info );
+void sgesvdx_( char* jobu, char* jobv, char* range, blaze::blas_int_t* m, blaze::blas_int_t* n,
+               float* A, blaze::blas_int_t* lda, float* vl, float* vu, blaze::blas_int_t* il,
+               blaze::blas_int_t* iu, blaze::blas_int_t* ns, float* s, float* U,
+               blaze::blas_int_t* ldu, float* V, blaze::blas_int_t* ldv, float* work,
+               blaze::blas_int_t* lwork, blaze::blas_int_t* iwork, blaze::blas_int_t* info,
+               blaze::fortran_charlen_t njobu, blaze::fortran_charlen_t njobv,
+               blaze::fortran_charlen_t nrange );
+void dgesvdx_( char* jobu, char* jobv, char* range, blaze::blas_int_t* m, blaze::blas_int_t* n,
+               double* A, blaze::blas_int_t* lda, double* vl, double* vu, blaze::blas_int_t* il,
+               blaze::blas_int_t* iu, blaze::blas_int_t* ns, double* s, double* U,
+               blaze::blas_int_t* ldu, double* V, blaze::blas_int_t* ldv, double* work,
+               blaze::blas_int_t* lwork, blaze::blas_int_t* iwork, blaze::blas_int_t* info,
+               blaze::fortran_charlen_t njobu, blaze::fortran_charlen_t njobv,
+               blaze::fortran_charlen_t nrange );
+void cgesvdx_( char* jobu, char* jobv, char* range, blaze::blas_int_t* m, blaze::blas_int_t* n,
+               float* A, blaze::blas_int_t* lda, float* vl, float* vu, blaze::blas_int_t* il,
+               blaze::blas_int_t* iu, blaze::blas_int_t* ns, float* s, float* U,
+               blaze::blas_int_t* ldu, float* V, blaze::blas_int_t* ldv, float* work,
+               blaze::blas_int_t* lwork, float* rwork, blaze::blas_int_t* iwork,
+               blaze::blas_int_t* info, blaze::fortran_charlen_t njobu,
+               blaze::fortran_charlen_t njobv, blaze::fortran_charlen_t nrange );
+void zgesvdx_( char* jobu, char* jobv, char* range, blaze::blas_int_t* m, blaze::blas_int_t* n,
+               double* A, blaze::blas_int_t* lda, double* vl, double* vu, blaze::blas_int_t* il,
+               blaze::blas_int_t* iu, blaze::blas_int_t* ns, double* s, double* U,
+               blaze::blas_int_t* ldu, double* V, blaze::blas_int_t* ldv, double* work,
+               blaze::blas_int_t* lwork, double* rwork, blaze::blas_int_t* iwork,
+               blaze::blas_int_t* info, blaze::fortran_charlen_t njobu,
+               blaze::fortran_charlen_t njobv, blaze::fortran_charlen_t nrange );
 
 }
+#endif
 /*! \endcond */
 //*************************************************************************************************
 
@@ -77,25 +105,33 @@ namespace blaze {
 //*************************************************************************************************
 /*!\name LAPACK SVD functions (gesvdx) */
 //@{
-inline void gesvdx( char jobu, char jobv, char range, int m, int n, float* A, int lda,
-                    float vl, float vu, int il, int iu, int* ns,
-                    float* s, float* U, int ldu, float* V, int ldv,
-                    float* work, int lwork, int* iwork, int* info );
+void gesvdx( char jobu, char jobv, char range, blas_int_t m, blas_int_t n,
+             float* A, blas_int_t lda, float vl, float vu,
+             blas_int_t il, blas_int_t iu, blas_int_t* ns, float* s,
+             float* U, blas_int_t ldu, float* V, blas_int_t ldv,
+             float* work, blas_int_t lwork, blas_int_t* iwork,
+             blas_int_t* info );
 
-inline void gesvdx( char jobu, char jobv, char range, int m, int n, double* A, int lda,
-                    double vl, double vu, int il, int iu, int* ns,
-                    double* s, double* U, int ldu, double* V, int ldv,
-                    double* work, int lwork, int* iwork, int* info );
+void gesvdx( char jobu, char jobv, char range, blas_int_t m, blas_int_t n,
+             double* A, blas_int_t lda, double vl, double vu,
+             blas_int_t il, blas_int_t iu, blas_int_t* ns, double* s,
+             double* U, blas_int_t ldu, double* V, blas_int_t ldv,
+             double* work, blas_int_t lwork, blas_int_t* iwork,
+             blas_int_t* info );
 
-inline void gesvdx( char jobu, char jobv, char range, int m, int n, complex<float>* A, int lda,
-                    float vl, float vu, int il, int iu, int* ns,
-                    float* s, complex<float>* U, int ldu, complex<float>* V, int ldv,
-                    complex<float>* work, int lwork, float* rwork, int* iwork, int* info );
+void gesvdx( char jobu, char jobv, char range, blas_int_t m, blas_int_t n,
+             complex<float>* A, blas_int_t lda, float vl, float vu,
+             blas_int_t il, blas_int_t iu, blas_int_t* ns, float* s,
+             complex<float>* U, blas_int_t ldu, complex<float>* V, blas_int_t ldv,
+             complex<float>* work, blas_int_t lwork, float* rwork,
+             blas_int_t* iwork, blas_int_t* info );
 
-inline void gesvdx( char jobu, char jobv, char range, int m, int n, complex<double>* A, int lda,
-                    double vl, double vu, int il, int iu, int* ns,
-                    double* s, complex<double>* U, int ldu, complex<double>* V, int ldv,
-                    complex<double>* work, int lwork, double* rwork, int* iwork, int* info );
+void gesvdx( char jobu, char jobv, char range, blas_int_t m, blas_int_t n,
+             complex<double>* A, blas_int_t lda, double vl, double vu,
+             blas_int_t il, blas_int_t iu, blas_int_t* ns, double* s,
+             complex<double>* U, blas_int_t ldu, complex<double>* V, blas_int_t ldv,
+             complex<double>* work, blas_int_t lwork, double* rwork,
+             blas_int_t* iwork, blas_int_t* info );
 //@}
 //*************************************************************************************************
 
@@ -174,16 +210,26 @@ inline void gesvdx( char jobu, char jobv, char range, int m, int n, complex<doub
 // is available and linked to the executable. Otherwise a call to this function will result in a
 // linker error.
 */
-inline void gesvdx( char jobu, char jobv, char range, int m, int n, float* A, int lda,
-                    float vl, float vu, int il, int iu, int* ns,
-                    float* s, float* U, int ldu, float* V, int ldv,
-                    float* work, int lwork, int* iwork, int* info )
+inline void gesvdx( char jobu, char jobv, char range, blas_int_t m, blas_int_t n,
+                    float* A, blas_int_t lda, float vl, float vu,
+                    blas_int_t il, blas_int_t iu, blas_int_t* ns, float* s,
+                    float* U, blas_int_t ldu, float* V, blas_int_t ldv,
+                    float* work, blas_int_t lwork, blas_int_t* iwork,
+                    blas_int_t* info )
 {
+#if defined(INTEL_MKL_VERSION) && (INTEL_MKL_VERSION >= 20170000)
+   BLAZE_STATIC_ASSERT( sizeof( MKL_INT ) == sizeof( blas_int_t ) );
+#endif
+
    ++il;
    ++iu;
 
    sgesvdx_( &jobu, &jobv, &range, &m, &n, A, &lda, &vl, &vu, &il, &iu, ns,
-             s, U, &ldu, V, &ldv, work, &lwork, iwork, info );
+             s, U, &ldu, V, &ldv, work, &lwork, iwork, info
+#if !defined(INTEL_MKL_VERSION) || (INTEL_MKL_VERSION < 20170000)
+           , blaze::fortran_charlen_t(1), blaze::fortran_charlen_t(1), blaze::fortran_charlen_t(1)
+#endif
+           );
 }
 //*************************************************************************************************
 
@@ -262,16 +308,26 @@ inline void gesvdx( char jobu, char jobv, char range, int m, int n, float* A, in
 // is available and linked to the executable. Otherwise a call to this function will result in a
 // linker error.
 */
-inline void gesvdx( char jobu, char jobv, char range, int m, int n, double* A, int lda,
-                    double vl, double vu, int il, int iu, int* ns,
-                    double* s, double* U, int ldu, double* V, int ldv,
-                    double* work, int lwork, int* iwork, int* info )
+inline void gesvdx( char jobu, char jobv, char range, blas_int_t m, blas_int_t n,
+                    double* A, blas_int_t lda, double vl, double vu,
+                    blas_int_t il, blas_int_t iu, blas_int_t* ns, double* s,
+                    double* U, blas_int_t ldu, double* V, blas_int_t ldv,
+                    double* work, blas_int_t lwork, blas_int_t* iwork,
+                    blas_int_t* info )
 {
+#if defined(INTEL_MKL_VERSION) && (INTEL_MKL_VERSION >= 20170000)
+   BLAZE_STATIC_ASSERT( sizeof( MKL_INT ) == sizeof( blas_int_t ) );
+#endif
+
    ++il;
    ++iu;
 
    dgesvdx_( &jobu, &jobv, &range, &m, &n, A, &lda, &vl, &vu, &il, &iu, ns,
-             s, U, &ldu, V, &ldv, work, &lwork, iwork, info );
+             s, U, &ldu, V, &ldv, work, &lwork, iwork, info
+#if !defined(INTEL_MKL_VERSION) || (INTEL_MKL_VERSION < 20170000)
+           , blaze::fortran_charlen_t(1), blaze::fortran_charlen_t(1), blaze::fortran_charlen_t(1)
+#endif
+           );
 }
 //*************************************************************************************************
 
@@ -351,20 +407,34 @@ inline void gesvdx( char jobu, char jobv, char range, int m, int n, double* A, i
 // is available and linked to the executable. Otherwise a call to this function will result in a
 // linker error.
 */
-inline void gesvdx( char jobu, char jobv, char range, int m, int n, complex<float>* A, int lda,
-                    float vl, float vu, int il, int iu, int* ns,
-                    float* s, complex<float>* U, int ldu, complex<float>* V, int ldv,
-                    complex<float>* work, int lwork, float* rwork, int* iwork, int* info )
+inline void gesvdx( char jobu, char jobv, char range, blas_int_t m, blas_int_t n,
+                    complex<float>* A, blas_int_t lda, float vl, float vu,
+                    blas_int_t il, blas_int_t iu, blas_int_t* ns, float* s,
+                    complex<float>* U, blas_int_t ldu, complex<float>* V, blas_int_t ldv,
+                    complex<float>* work, blas_int_t lwork, float* rwork,
+                    blas_int_t* iwork, blas_int_t* info )
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<float> ) == 2UL*sizeof( float ) );
+
+#if defined(INTEL_MKL_VERSION) && (INTEL_MKL_VERSION >= 20170000)
+   BLAZE_STATIC_ASSERT( sizeof( MKL_INT ) == sizeof( blas_int_t ) );
+   BLAZE_STATIC_ASSERT( sizeof( MKL_Complex8 ) == sizeof( complex<float> ) );
+   using ET = MKL_Complex8;
+#else
+   using ET = float;
+#endif
 
    ++il;
    ++iu;
 
-   cgesvdx_( &jobu, &jobv, &range, &m, &n, reinterpret_cast<float*>( A ), &lda,
+   cgesvdx_( &jobu, &jobv, &range, &m, &n, reinterpret_cast<ET*>( A ), &lda,
              &vl, &vu, &il, &iu, ns, s,
-             reinterpret_cast<float*>( U ), &ldu, reinterpret_cast<float*>( V ), &ldv,
-             reinterpret_cast<float*>( work ), &lwork, rwork, iwork, info );
+             reinterpret_cast<ET*>( U ), &ldu, reinterpret_cast<ET*>( V ), &ldv,
+             reinterpret_cast<ET*>( work ), &lwork, rwork, iwork, info
+#if !defined(INTEL_MKL_VERSION) || (INTEL_MKL_VERSION < 20170000)
+           , blaze::fortran_charlen_t(1), blaze::fortran_charlen_t(1), blaze::fortran_charlen_t(1)
+#endif
+           );
 }
 //*************************************************************************************************
 
@@ -444,20 +514,34 @@ inline void gesvdx( char jobu, char jobv, char range, int m, int n, complex<floa
 // is available and linked to the executable. Otherwise a call to this function will result in a
 // linker error.
 */
-inline void gesvdx( char jobu, char jobv, char range, int m, int n, complex<double>* A, int lda,
-                    double vl, double vu, int il, int iu, int* ns,
-                    double* s, complex<double>* U, int ldu, complex<double>* V, int ldv,
-                    complex<double>* work, int lwork, double* rwork, int* iwork, int* info )
+inline void gesvdx( char jobu, char jobv, char range, blas_int_t m, blas_int_t n,
+                    complex<double>* A, blas_int_t lda, double vl, double vu,
+                    blas_int_t il, blas_int_t iu, blas_int_t* ns, double* s,
+                    complex<double>* U, blas_int_t ldu, complex<double>* V, blas_int_t ldv,
+                    complex<double>* work, blas_int_t lwork, double* rwork,
+                    blas_int_t* iwork, blas_int_t* info )
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<double> ) == 2UL*sizeof( double ) );
+
+#if defined(INTEL_MKL_VERSION) && (INTEL_MKL_VERSION >= 20170000)
+   BLAZE_STATIC_ASSERT( sizeof( MKL_INT ) == sizeof( blas_int_t ) );
+   BLAZE_STATIC_ASSERT( sizeof( MKL_Complex16 ) == sizeof( complex<double> ) );
+   using ET = MKL_Complex16;
+#else
+   using ET = double;
+#endif
 
    ++il;
    ++iu;
 
-   zgesvdx_( &jobu, &jobv, &range, &m, &n, reinterpret_cast<double*>( A ), &lda,
+   zgesvdx_( &jobu, &jobv, &range, &m, &n, reinterpret_cast<ET*>( A ), &lda,
              &vl, &vu, &il, &iu, ns, s,
-             reinterpret_cast<double*>( U ), &ldu, reinterpret_cast<double*>( V ), &ldv,
-             reinterpret_cast<double*>( work ), &lwork, rwork, iwork, info );
+             reinterpret_cast<ET*>( U ), &ldu, reinterpret_cast<ET*>( V ), &ldv,
+             reinterpret_cast<ET*>( work ), &lwork, rwork, iwork, info
+#if !defined(INTEL_MKL_VERSION) || (INTEL_MKL_VERSION < 20170000)
+           , blaze::fortran_charlen_t(1), blaze::fortran_charlen_t(1), blaze::fortran_charlen_t(1)
+#endif
+           );
 }
 //*************************************************************************************************
 

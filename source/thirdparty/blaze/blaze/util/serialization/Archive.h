@@ -3,7 +3,7 @@
 //  \file blaze/util/serialization/Archive.h
 //  \brief Header file for the Archive class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -41,9 +41,7 @@
 //*************************************************************************************************
 
 #include <memory>
-#include <blaze/util/DisableIf.h>
 #include <blaze/util/EnableIf.h>
-#include <blaze/util/NonCopyable.h>
 #include <blaze/util/Types.h>
 #include <blaze/util/typetraits/IsNumeric.h>
 
@@ -138,7 +136,7 @@ namespace blaze {
 // for any possible destination.
 */
 template< typename Stream >  // Type of the bound stream
-class Archive : private NonCopyable
+class Archive
 {
  public:
    //**Constructors********************************************************************************
@@ -148,11 +146,25 @@ class Archive : private NonCopyable
    explicit inline Archive( Args&&... args );
 
    explicit inline Archive( Stream& stream );
+
+   Archive( const Archive& ) = delete;
+   Archive( Archive&& ) = default;
    //@}
    //**********************************************************************************************
 
    //**Destructor**********************************************************************************
-   // No explicitly declared destructor.
+   /*!\name Destructor */
+   //@{
+   ~Archive() = default;
+   //@}
+   //**********************************************************************************************
+
+   //**Assignment operators************************************************************************
+   /*!\name Assignment operators */
+   //@{
+   Archive& operator=( const Archive& ) = delete;
+   Archive& operator=( Archive&& ) = default;
+   //@}
    //**********************************************************************************************
 
    //**Operators***********************************************************************************
@@ -167,22 +179,22 @@ class Archive : private NonCopyable
    /*!\name Serialization functions */
    //@{
    template< typename T >
-   EnableIf_< IsNumeric<T>, Archive& > operator<<( const T& value );
+   EnableIf_t< IsNumeric_v<T>, Archive& > operator<<( const T& value );
 
    template< typename T >
-   DisableIf_< IsNumeric<T>, Archive& > operator<<( const T& value );
+   DisableIf_t< IsNumeric_v<T>, Archive& > operator<<( const T& value );
 
    template< typename T >
-   EnableIf_< IsNumeric<T>, Archive& > operator>>( T& value );
+   EnableIf_t< IsNumeric_v<T>, Archive& > operator>>( T& value );
 
    template< typename T >
-   DisableIf_< IsNumeric<T>, Archive& > operator>>( T& value );
+   DisableIf_t< IsNumeric_v<T>, Archive& > operator>>( T& value );
 
    template< typename Type >
-   inline EnableIf_< IsNumeric<Type>, Archive& > write( const Type* array, size_t count );
+   inline EnableIf_t< IsNumeric_v<Type>, Archive& > write( const Type* array, size_t count );
 
    template< typename Type >
-   inline EnableIf_< IsNumeric<Type>, Archive& > read ( Type* array, size_t count );
+   inline EnableIf_t< IsNumeric_v<Type>, Archive& > read ( Type* array, size_t count );
    //@}
    //**********************************************************************************************
 
@@ -203,7 +215,6 @@ class Archive : private NonCopyable
    //**********************************************************************************************
 
  private:
-
    //**Member variables****************************************************************************
    /*!\name Member variables */
    //@{
@@ -317,9 +328,9 @@ inline bool Archive<Stream>::operator!() const
 */
 template< typename Stream >  // Type of the bound stream
 template< typename T >       // Type of the value to be serialized
-EnableIf_< IsNumeric<T>, Archive<Stream>& > Archive<Stream>::operator<<( const T& value )
+EnableIf_t< IsNumeric_v<T>, Archive<Stream>& > Archive<Stream>::operator<<( const T& value )
 {
-   typedef typename Stream::char_type  CharType;
+   using CharType = typename Stream::char_type;
    stream_.write( reinterpret_cast<const CharType*>( &value ), sizeof( T ) );
    return *this;
 }
@@ -334,7 +345,7 @@ EnableIf_< IsNumeric<T>, Archive<Stream>& > Archive<Stream>::operator<<( const T
 */
 template< typename Stream >  // Type of the bound stream
 template< typename T >       // Type of the object to be serialized
-DisableIf_< IsNumeric<T>, Archive<Stream>& > Archive<Stream>::operator<<( const T& value )
+DisableIf_t< IsNumeric_v<T>, Archive<Stream>& > Archive<Stream>::operator<<( const T& value )
 {
    serialize( *this, value );
    return *this;
@@ -350,9 +361,9 @@ DisableIf_< IsNumeric<T>, Archive<Stream>& > Archive<Stream>::operator<<( const 
 */
 template< typename Stream >  // Type of the bound stream
 template< typename T >       // Type of the value to be deserialized
-EnableIf_< IsNumeric<T>, Archive<Stream>& > Archive<Stream>::operator>>( T& value )
+EnableIf_t< IsNumeric_v<T>, Archive<Stream>& > Archive<Stream>::operator>>( T& value )
 {
-   typedef typename Stream::char_type  CharType;
+   using CharType = typename Stream::char_type;
    stream_.read( reinterpret_cast<CharType*>( &value ), sizeof( T ) );
    return *this;
 }
@@ -367,7 +378,7 @@ EnableIf_< IsNumeric<T>, Archive<Stream>& > Archive<Stream>::operator>>( T& valu
 */
 template< typename Stream >  // Type of the bound stream
 template< typename T >       // Type of the value to be deserialized
-DisableIf_< IsNumeric<T>, Archive<Stream>& > Archive<Stream>::operator>>( T& value )
+DisableIf_t< IsNumeric_v<T>, Archive<Stream>& > Archive<Stream>::operator>>( T& value )
 {
    deserialize( *this, value );
    return *this;
@@ -386,10 +397,10 @@ DisableIf_< IsNumeric<T>, Archive<Stream>& > Archive<Stream>::operator>>( T& val
 */
 template< typename Stream >  // Type of the bound stream
 template< typename Type >    // Type of the array elements
-inline EnableIf_< IsNumeric<Type>, Archive<Stream>& >
+inline EnableIf_t< IsNumeric_v<Type>, Archive<Stream>& >
    Archive<Stream>::write( const Type* array, size_t count )
 {
-   typedef typename Stream::char_type  CharType;
+   using CharType = typename Stream::char_type;
    stream_.write( reinterpret_cast<const CharType*>( array ), count*sizeof(Type) );
    return *this;
 }
@@ -409,10 +420,10 @@ inline EnableIf_< IsNumeric<Type>, Archive<Stream>& >
 */
 template< typename Stream >  // Type of the bound stream
 template< typename Type >    // Type of the array elements
-inline EnableIf_< IsNumeric<Type>, Archive<Stream>& >
+inline EnableIf_t< IsNumeric_v<Type>, Archive<Stream>& >
    Archive<Stream>::read( Type* array, size_t count )
 {
-   typedef typename Stream::char_type  CharType;
+   using CharType = typename Stream::char_type;
    stream_.read( reinterpret_cast<CharType*>( array ), count*sizeof(Type) );
    return *this;
 }

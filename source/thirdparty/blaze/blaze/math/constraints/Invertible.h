@@ -3,7 +3,7 @@
 //  \file blaze/math/constraints/Invertible.h
 //  \brief Constraint on the data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -60,7 +60,7 @@ namespace blaze {
 // created.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_INVERTIBLE_TYPE(T) \
-   static_assert( ::blaze::IsInvertible<T>::value, "Non-invertible type detected" )
+   static_assert( ::blaze::IsInvertible_v<T>, "Non-invertible type detected" )
 //*************************************************************************************************
 
 
@@ -81,7 +81,7 @@ namespace blaze {
 // is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_INVERTIBLE_TYPE(T) \
-   static_assert( !blaze::IsInvertible<T>::value, "Invertible type detected" )
+   static_assert( !blaze::IsInvertible_v<T>, "Invertible type detected" )
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/IsSIMDCombinable.h
 //  \brief Header file for the IsSIMDCombinable type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -62,10 +62,9 @@ template< typename T1
         , typename T2
         , typename... Ts >
 struct IsSIMDCombinableHelper
-{
-   enum : bool { value = IsSIMDCombinableHelper<T1,T2>::value &&
-                         IsSIMDCombinableHelper<T2,Ts...>::value };
-};
+   : public BoolConstant< IsSIMDCombinableHelper<T1,T2>::value &&
+                          IsSIMDCombinableHelper<T2,Ts...>::value >
+{};
 /*! \endcond */
 //*************************************************************************************************
 
@@ -75,9 +74,8 @@ struct IsSIMDCombinableHelper
 //! Specialization of the IsSIMDCombinableHelper class template for two matching types.
 template< typename T >
 struct IsSIMDCombinableHelper<T,T>
-{
-   enum : bool { value = IsNumeric<T>::value };
-};
+   : public BoolConstant< IsNumeric_v<T> >
+{};
 /*! \endcond */
 //*************************************************************************************************
 
@@ -87,11 +85,10 @@ struct IsSIMDCombinableHelper<T,T>
 //! Specialization of the IsSIMDCombinableHelper class template for two different types.
 template< typename T1, typename T2 >
 struct IsSIMDCombinableHelper<T1,T2>
-{
-   enum : bool { value = IsNumeric<T1>::value && IsIntegral<T1>::value &&
-                         IsNumeric<T2>::value && IsIntegral<T2>::value &&
-                         sizeof(T1) == sizeof(T2) };
-};
+   : public BoolConstant< IsNumeric_v<T1> && IsIntegral_v<T1> &&
+                          IsNumeric_v<T2> && IsIntegral_v<T2> &&
+                          sizeof(T1) == sizeof(T2) >
+{};
 /*! \endcond */
 //*************************************************************************************************
 
@@ -120,6 +117,24 @@ template< typename T1, typename T2, typename... Ts >
 struct IsSIMDCombinable
    : public BoolConstant< IsSIMDCombinableHelper< T1, T2, Ts... >::value >
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsSIMDCombinable type trait.
+// \ingroup math_type_traits
+//
+// The IsSIMDCombinable_v variable template provides a convenient shortcut to access the nested
+// \a value of the IsSIMDCombinable class template. For instance, given the types \a T1 and
+// \a T2 the following two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsSIMDCombinable<T1,T2>::value;
+   constexpr bool value2 = blaze::IsSIMDCombinable_v<T1,T2>;
+   \endcode
+*/
+template< typename T1, typename T2, typename... Ts >
+constexpr bool IsSIMDCombinable_v = IsSIMDCombinable<T1,T2,Ts...>::value;
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/util/Types.h
 //  \brief Header file for basic type definitions
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -173,6 +173,42 @@ using ularge_t = uint64_t;
 // \ingroup util
 */
 using id_t = ularge_t;
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Type of the hidden arguments of character type within a Fortran forward declaration.
+// \ingroup util
+*/
+#if BLAZE_GNU_COMPILER && BLAZE_GNU_MAJOR_VERSION <= 7
+using fortran_charlen_t = int;
+#else
+using fortran_charlen_t = size_t;
+#endif
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Type of single precision complex numbers within a Fortran forward declaration.
+// \ingroup util
+*/
+struct fortran_complex8
+{
+   float real;  //!< The real part of the complex number.
+   float imag;  //!< The imaginary part of the complex number.
+};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Type of double precision complex numbers within a Fortran forward declaration.
+// \ingroup util
+*/
+struct fortran_complex16
+{
+   double real;  //!< The real part of the complex number.
+   double imag;  //!< The imaginary part of the complex number.
+};
 //*************************************************************************************************
 
 } // namespace blaze

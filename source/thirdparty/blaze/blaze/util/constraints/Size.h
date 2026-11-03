@@ -3,7 +3,7 @@
 //  \file blaze/util/constraints/Size.h
 //  \brief Constraint on the size of a data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -58,7 +58,7 @@ namespace blaze {
 // In case the type \a T doesn't have a size of \a S bytes, a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_HAVE_SIZE(T,S) \
-   static_assert( ::blaze::HasSize<T,S>::value, "Invalid size detected" )
+   static_assert( ::blaze::HasSize_v<T,S>, "Invalid size detected" )
 //*************************************************************************************************
 
 
@@ -77,7 +77,7 @@ namespace blaze {
 // In case the type \a T has a size of \a S bytes, a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_HAVE_SIZE(T,S) \
-   static_assert( !::blaze::HasSize<T,S>::value, "Invalid size detected" )
+   static_assert( !::blaze::HasSize_v<T,S>, "Invalid size detected" )
 //*************************************************************************************************
 
 
@@ -96,7 +96,7 @@ namespace blaze {
 // In case the type \a T doesn't have a size of exactly 1 byte, a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_HAVE_1_BYTE(T) \
-   static_assert( ::blaze::Has1Byte<T>::value, "Invalid size detected" )
+   static_assert( ::blaze::Has1Byte_v<T>, "Invalid size detected" )
 //*************************************************************************************************
 
 
@@ -115,7 +115,7 @@ namespace blaze {
 // In case the type \a T has a size of exactly 1 byte, a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_HAVE_1_BYTE(T) \
-   static_assert( !::blaze::Has1Byte<T>::value, "Invalid size detected" )
+   static_assert( !::blaze::Has1Byte_v<T>, "Invalid size detected" )
 //*************************************************************************************************
 
 
@@ -134,7 +134,7 @@ namespace blaze {
 // In case the type \a T doesn't have a size of exactly 2 bytes, a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_HAVE_2_BYTES(T) \
-   static_assert( ::blaze::Has2Byte<T>::value, "Invalid size detected" )
+   static_assert( ::blaze::Has2Byte_v<T>, "Invalid size detected" )
 //*************************************************************************************************
 
 
@@ -153,7 +153,7 @@ namespace blaze {
 // In case the type \a T has a size of exactly 2 bytes, a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_HAVE_2_BYTES(T) \
-   static_assert( !::blaze::Has2Byte<T>::value, "Invalid size detected" )
+   static_assert( !::blaze::Has2Byte_v<T>, "Invalid size detected" )
 //*************************************************************************************************
 
 
@@ -172,7 +172,7 @@ namespace blaze {
 // In case the type \a T doesn't have a size of exactly 4 bytes, a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_HAVE_4_BYTES(T) \
-   static_assert( ::blaze::Has4Byte<T>::value, "Invalid size detected" )
+   static_assert( ::blaze::Has4Byte_v<T>, "Invalid size detected" )
 //*************************************************************************************************
 
 
@@ -191,7 +191,7 @@ namespace blaze {
 // In case the type \a T has a size of exactly 4 bytes, a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_HAVE_4_BYTES(T) \
-   static_assert( !::blaze::Has4Byte<T>::value, "Invalid size detected" )
+   static_assert( !::blaze::Has4Byte_v<T>, "Invalid size detected" )
 //*************************************************************************************************
 
 
@@ -211,7 +211,7 @@ namespace blaze {
 // In case the type \a T doesn't have a size of exactly 8 bytes, a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_HAVE_8_BYTES(T) \
-   static_assert( ::blaze::Has8Byte<T>::value, "Invalid size detected" )
+   static_assert( ::blaze::Has8Byte_v<T>, "Invalid size detected" )
 //*************************************************************************************************
 
 
@@ -230,7 +230,7 @@ namespace blaze {
 // In case the type \a T has a size of exactly 8 bytes, a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_HAVE_8_BYTES(T) \
-   static_assert( !::blaze::Has8Byte<T>::value, "Invalid size detected" )
+   static_assert( !::blaze::Has8Byte_v<T>, "Invalid size detected" )
 //*************************************************************************************************
 
 } // namespace blaze

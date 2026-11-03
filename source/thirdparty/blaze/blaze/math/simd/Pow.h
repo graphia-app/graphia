@@ -3,7 +3,7 @@
 //  \file blaze/math/simd/Pow.h
 //  \brief Header file for the SIMD power functionality
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,6 +40,9 @@
 // Includes
 //*************************************************************************************************
 
+#if BLAZE_SLEEF_MODE
+#  include <sleef.h>
+#endif
 #include <blaze/math/simd/BasicTypes.h>
 #include <blaze/system/Inline.h>
 #include <blaze/system/Vectorization.h>
@@ -61,21 +64,43 @@ namespace blaze {
 // \param b The vector of single precision floating point exponents.
 // \return The resulting vector.
 //
-// This operation is only available via the SVML for SSE, AVX, and AVX-512.
+// This operation is only available via the SVML or SLEEF for SSE, AVX, MIC, and AVX-512.
 */
-template< typename T >  // Type of the operands
-BLAZE_ALWAYS_INLINE const SIMDfloat pow( const SIMDf32<T>& a, const SIMDf32<T>& b ) noexcept
-#if BLAZE_SVML_MODE && BLAZE_MIC_MODE
+template< typename T1    // Type of the left-hand side operand
+        , typename T2 >  // Type of the right-hand side operand
+BLAZE_ALWAYS_INLINE const SIMDfloat pow( const SIMDf32<T1>& a, const SIMDf32<T2>& b ) noexcept
+#if BLAZE_SVML_MODE
+#  if BLAZE_AVX512F_MODE || BLAZE_MIC_MODE
 {
-   return _mm512_pow_ps( (~a).eval().value, (~b).eval().value );
+   return _mm512_pow_ps( (*a).eval().value, (*b).eval().value );
 }
-#elif BLAZE_SVML_MODE && BLAZE_AVX_MODE
+#  elif BLAZE_AVX_MODE
 {
-   return _mm256_pow_ps( (~a).eval().value, (~b).eval().value );
+   return _mm256_pow_ps( (*a).eval().value, (*b).eval().value );
 }
-#elif BLAZE_SVML_MODE && BLAZE_SSE_MODE
+#  elif BLAZE_SSE_MODE
 {
-   return _mm_pow_ps( (~a).eval().value, (~b).eval().value );
+   return _mm_pow_ps( (*a).eval().value, (*b).eval().value );
+}
+#  endif
+#elif BLAZE_SLEEF_MODE
+#  if BLAZE_AVX512F_MODE || BLAZE_MIC_MODE
+{
+   return Sleef_powf16_u10( (*a).eval().value, (*b).eval().value );
+}
+#  elif BLAZE_AVX_MODE
+{
+   return Sleef_powf8_u10( (*a).eval().value, (*b).eval().value );
+}
+#  elif BLAZE_SSE_MODE
+{
+   return Sleef_powf4_u10( (*a).eval().value, (*b).eval().value );
+}
+#  endif
+#elif BLAZE_XSIMD_MODE
+{
+  return SIMDfloat{ xsimd::pow( xsimd::batch<float>{ (*a).eval().value },
+                                xsimd::batch<float>{ (*b).eval().value } ).data };
 }
 #else
 = delete;
@@ -99,21 +124,43 @@ BLAZE_ALWAYS_INLINE const SIMDfloat pow( const SIMDf32<T>& a, const SIMDf32<T>& 
 // \param b The vector of double precision floating point exponents.
 // \return The resulting vector.
 //
-// This operation is only available via the SVML for SSE, AVX, and AVX-512.
+// This operation is only available via the SVML or SLEEF for SSE, AVX, MIC, and AVX-512.
 */
-template< typename T >  // Type of the operands
-BLAZE_ALWAYS_INLINE const SIMDdouble pow( const SIMDf64<T>& a, const SIMDf64<T>& b ) noexcept
-#if BLAZE_SVML_MODE && BLAZE_MIC_MODE
+template< typename T1    // Type of the left-hand side operand
+        , typename T2 >  // Type of the right-hand side operand
+BLAZE_ALWAYS_INLINE const SIMDdouble pow( const SIMDf64<T1>& a, const SIMDf64<T2>& b ) noexcept
+#if BLAZE_SVML_MODE
+#  if BLAZE_AVX512F_MODE || BLAZE_MIC_MODE
 {
-   return _mm512_pow_pd( (~a).eval().value, (~b).eval().value );
+   return _mm512_pow_pd( (*a).eval().value, (*b).eval().value );
 }
-#elif BLAZE_SVML_MODE && BLAZE_AVX_MODE
+#  elif BLAZE_AVX_MODE
 {
-   return _mm256_pow_pd( (~a).eval().value, (~b).eval().value );
+   return _mm256_pow_pd( (*a).eval().value, (*b).eval().value );
 }
-#elif BLAZE_SVML_MODE && BLAZE_SSE_MODE
+#  elif BLAZE_SSE_MODE
 {
-   return _mm_pow_pd( (~a).eval().value, (~b).eval().value );
+   return _mm_pow_pd( (*a).eval().value, (*b).eval().value );
+}
+#  endif
+#elif BLAZE_SLEEF_MODE
+#  if BLAZE_AVX512F_MODE || BLAZE_MIC_MODE
+{
+   return Sleef_powd8_u10( (*a).eval().value, (*b).eval().value );
+}
+#  elif BLAZE_AVX_MODE
+{
+   return Sleef_powd4_u10( (*a).eval().value, (*b).eval().value );
+}
+#  elif BLAZE_SSE_MODE
+{
+   return Sleef_powd2_u10( (*a).eval().value, (*b).eval().value );
+}
+#  endif
+#elif BLAZE_XSIMD_MODE
+{
+  return SIMDdouble{ xsimd::pow( xsimd::batch<double>{ (*a).eval().value },
+                                 xsimd::batch<double>{ (*b).eval().value } ).data };
 }
 #else
 = delete;

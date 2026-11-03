@@ -3,7 +3,7 @@
 //  \file blaze/util/valuetraits/IsPowerOf.h
 //  \brief Header file for the IsPowerOf value trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,9 +40,7 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/util/FalseType.h>
 #include <blaze/util/IntegralConstant.h>
-#include <blaze/util/TrueType.h>
 
 
 namespace blaze {
@@ -77,7 +75,8 @@ namespace blaze {
    \endcode
 */
 template< size_t B, size_t N >
-struct IsPowerOf : public BoolConstant< IsPowerOf<B,N/B>::value >
+struct IsPowerOf
+   : public BoolConstant< IsPowerOf<B,N/B>::value >
 {};
 //*************************************************************************************************
 
@@ -93,7 +92,8 @@ struct IsPowerOf : public BoolConstant< IsPowerOf<B,N/B>::value >
 // not, \a value is set to 0, \a Type is \a FalseType, and the class derives from \a FalseType.
 */
 template< size_t N >
-struct IsPowerOf<2,N> : public BoolConstant< ( N & (N-1) ) == 0UL >
+struct IsPowerOf<2,N>
+   : public BoolConstant< ( N & (N-1) ) == 0UL >
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -109,7 +109,8 @@ struct IsPowerOf<2,N> : public BoolConstant< ( N & (N-1) ) == 0UL >
 // to 0, the nested type definition \a Type to \a FalseType, and it derives from \a FalseType.
 */
 template<>
-struct IsPowerOf<2,0> : public FalseType
+struct IsPowerOf<2,0>
+   : public FalseType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -126,7 +127,8 @@ struct IsPowerOf<2,0> : public FalseType
 // \a TrueType, and it derives from \a TrueType.
 */
 template< size_t B >
-struct IsPowerOf<B,1> : public TrueType
+struct IsPowerOf<B,1>
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -143,7 +145,8 @@ struct IsPowerOf<B,1> : public TrueType
 // from \a FalseType.
 */
 template< size_t N >
-struct IsPowerOf<1,N> : public FalseType
+struct IsPowerOf<1,N>
+   : public FalseType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -160,7 +163,8 @@ struct IsPowerOf<1,N> : public FalseType
 // \a TrueType.
 */
 template<>
-struct IsPowerOf<1,1> : public TrueType
+struct IsPowerOf<1,1>
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -177,7 +181,8 @@ struct IsPowerOf<1,1> : public TrueType
 // \a FalseType.
 */
 template< size_t B >
-struct IsPowerOf<B,0> : public FalseType
+struct IsPowerOf<B,0>
+   : public FalseType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -194,7 +199,8 @@ struct IsPowerOf<B,0> : public FalseType
 // \a FalseType.
 */
 template< size_t N >
-struct IsPowerOf<0,N> : public FalseType
+struct IsPowerOf<0,N>
+   : public FalseType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -211,9 +217,28 @@ struct IsPowerOf<0,N> : public FalseType
 // and it derives from \a TrueType.
 */
 template<>
-struct IsPowerOf<0,0> : public TrueType
+struct IsPowerOf<0,0>
+   : public TrueType
 {};
 /*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsPowerOf value trait.
+// \ingroup value_traits
+//
+// The IsPowerOf_v variable template provides a convenient shortcut to access the nested \a value
+// of the IsPowerOf class template. For instance, given the compile time constant values \a B and
+// \a N the following two statements are identical:
+
+   \code
+   constexpr bool value1 = IsPowerOf<B,N>::value;
+   constexpr bool value2 = IsPowerOf_v<B,N>;
+   \endcode
+*/
+template< size_t B, size_t N >
+constexpr bool IsPowerOf_v = IsPowerOf<B,N>::value;
 //*************************************************************************************************
 
 } // namespace blaze

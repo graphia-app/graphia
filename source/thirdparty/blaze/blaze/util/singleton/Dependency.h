@@ -3,7 +3,7 @@
 //  \file blaze/util/singleton/Dependency.h
 //  \brief Header file for the Dependency class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -84,20 +84,11 @@ template< typename T >  // Type of the lifetime dependency
 class Dependency
 {
  public:
-   //**Constructor*********************************************************************************
-   /*!\name Constructor */
+   //**Constructors********************************************************************************
+   /*!\name Constructors */
    //@{
    inline Dependency();
-   // No explicitly declared copy constructor.
    //@}
-   //**********************************************************************************************
-
-   //**Destructor**********************************************************************************
-   // No explicitly declared destructor.
-   //**********************************************************************************************
-
-   //**Copy assignment operator********************************************************************
-   // No explicitly declared copy assignment operator.
    //**********************************************************************************************
 
  private:
@@ -115,7 +106,7 @@ class Dependency
 
 //=================================================================================================
 //
-//  CONSTRUCTOR
+//  CONSTRUCTORS
 //
 //=================================================================================================
 

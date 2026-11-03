@@ -3,7 +3,7 @@
 //  \file blaze/math/adaptors/hermitianmatrix/Sparse.h
 //  \brief HermitianMatrix specialization for sparse matrices
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -47,43 +47,44 @@
 #include <blaze/math/adaptors/hermitianmatrix/HermitianElement.h>
 #include <blaze/math/adaptors/hermitianmatrix/HermitianProxy.h>
 #include <blaze/math/Aliases.h>
-#include <blaze/math/constraints/Expression.h>
+#include <blaze/math/constraints/Computation.h>
 #include <blaze/math/constraints/Hermitian.h>
 #include <blaze/math/constraints/Lower.h>
 #include <blaze/math/constraints/Resizable.h>
+#include <blaze/math/constraints/Scalar.h>
 #include <blaze/math/constraints/SparseMatrix.h>
 #include <blaze/math/constraints/StorageOrder.h>
 #include <blaze/math/constraints/Symmetric.h>
+#include <blaze/math/constraints/Transformation.h>
 #include <blaze/math/constraints/Upper.h>
+#include <blaze/math/constraints/View.h>
+#include <blaze/math/dense/InitializerMatrix.h>
 #include <blaze/math/Exception.h>
 #include <blaze/math/expressions/Forward.h>
 #include <blaze/math/expressions/SparseMatrix.h>
-#include <blaze/math/shims/Clear.h>
+#include <blaze/math/InitializerList.h>
 #include <blaze/math/shims/IsDefault.h>
 #include <blaze/math/shims/IsReal.h>
+#include <blaze/math/shims/IsZero.h>
 #include <blaze/math/shims/Conjugate.h>
 #include <blaze/math/sparse/SparseMatrix.h>
-#include <blaze/math/traits/TransExprTrait.h>
-#include <blaze/math/typetraits/Columns.h>
 #include <blaze/math/typetraits/IsComputation.h>
 #include <blaze/math/typetraits/IsHermitian.h>
+#include <blaze/math/typetraits/IsScalar.h>
 #include <blaze/math/typetraits/IsSquare.h>
-#include <blaze/math/typetraits/Rows.h>
+#include <blaze/math/typetraits/Size.h>
 #include <blaze/util/Assert.h>
 #include <blaze/util/constraints/Const.h>
-#include <blaze/util/constraints/Numeric.h>
 #include <blaze/util/constraints/Pointer.h>
 #include <blaze/util/constraints/Reference.h>
 #include <blaze/util/constraints/Volatile.h>
-#include <blaze/util/DisableIf.h>
 #include <blaze/util/EnableIf.h>
+#include <blaze/util/IntegralConstant.h>
+#include <blaze/util/MaybeUnused.h>
 #include <blaze/util/StaticAssert.h>
-#include <blaze/util/TrueType.h>
 #include <blaze/util/Types.h>
 #include <blaze/util/typetraits/IsBuiltin.h>
 #include <blaze/util/typetraits/IsComplex.h>
-#include <blaze/util/typetraits/IsNumeric.h>
-#include <blaze/util/Unused.h>
 
 
 namespace blaze {
@@ -109,24 +110,25 @@ class HermitianMatrix<MT,SO,false>
 {
  private:
    //**Type definitions****************************************************************************
-   typedef OppositeType_<MT>   OT;  //!< Opposite type of the sparse matrix.
-   typedef TransposeType_<MT>  TT;  //!< Transpose type of the sparse matrix.
-   typedef ElementType_<MT>    ET;  //!< Element type of the sparse matrix.
+   using OT = OppositeType_t<MT>;   //!< Opposite type of the sparse matrix.
+   using TT = TransposeType_t<MT>;  //!< Transpose type of the sparse matrix.
+   using ET = ElementType_t<MT>;    //!< Element type of the sparse matrix.
    //**********************************************************************************************
 
  public:
    //**Type definitions****************************************************************************
-   typedef HermitianMatrix<MT,SO,false>   This;            //!< Type of this HermitianMatrix instance.
-   typedef SparseMatrix<This,SO>          BaseType;        //!< Base type of this HermitianMatrix instance.
-   typedef This                           ResultType;      //!< Result type for expression template evaluations.
-   typedef HermitianMatrix<OT,!SO,false>  OppositeType;    //!< Result type with opposite storage order for expression template evaluations.
-   typedef HermitianMatrix<TT,!SO,false>  TransposeType;   //!< Transpose type for expression template evaluations.
-   typedef ET                             ElementType;     //!< Type of the matrix elements.
-   typedef ReturnType_<MT>                ReturnType;      //!< Return type for expression template evaluations.
-   typedef const This&                    CompositeType;   //!< Data type for composite expression templates.
-   typedef HermitianProxy<MT>             Reference;       //!< Reference to a non-constant matrix value.
-   typedef ConstReference_<MT>            ConstReference;  //!< Reference to a constant matrix value.
-   typedef ConstIterator_<MT>             ConstIterator;   //!< Iterator over constant elements.
+   using This           = HermitianMatrix<MT,SO,false>;   //!< Type of this HermitianMatrix instance.
+   using BaseType       = SparseMatrix<This,SO>;          //!< Base type of this HermitianMatrix instance.
+   using ResultType     = This;                           //!< Result type for expression template evaluations.
+   using OppositeType   = HermitianMatrix<OT,!SO,false>;  //!< Result type with opposite storage order for expression template evaluations.
+   using TransposeType  = HermitianMatrix<TT,!SO,false>;  //!< Transpose type for expression template evaluations.
+   using ElementType    = ET;                             //!< Type of the matrix elements.
+   using TagType        = TagType_t<MT>;                  //!< Tag type of this HermitianMatrix instance.
+   using ReturnType     = ReturnType_t<MT>;               //!< Return type for expression template evaluations.
+   using CompositeType  = const This&;                    //!< Data type for composite expression templates.
+   using Reference      = HermitianProxy<MT>;             //!< Reference to a non-constant matrix value.
+   using ConstReference = ConstReference_t<MT>;           //!< Reference to a constant matrix value.
+   using ConstIterator  = ConstIterator_t<MT>;            //!< Iterator over constant elements.
    //**********************************************************************************************
 
    //**Rebind struct definition********************************************************************
@@ -135,7 +137,7 @@ class HermitianMatrix<MT,SO,false>
    template< typename NewType >  // Data type of the other matrix
    struct Rebind {
       //! The type of the other HermitianMatrix.
-      typedef HermitianMatrix< typename MT::template Rebind<NewType>::Other >  Other;
+      using Other = HermitianMatrix< typename MT::template Rebind<NewType>::Other >;
    };
    //**********************************************************************************************
 
@@ -146,7 +148,7 @@ class HermitianMatrix<MT,SO,false>
            , size_t NewN >  // Number of columns of the other matrix
    struct Resize {
       //! The type of the other HermitianMatrix.
-      typedef HermitianMatrix< typename MT::template Resize<NewM,NewN>::Other >  Other;
+      using Other = HermitianMatrix< typename MT::template Resize<NewM,NewN>::Other >;
    };
    //**********************************************************************************************
 
@@ -157,20 +159,20 @@ class HermitianMatrix<MT,SO,false>
    {
     public:
       //**Type definitions*************************************************************************
-      typedef Iterator_<MT>  IteratorType;  //!< Type of the underlying sparse matrix iterators.
+      using IteratorType = Iterator_t<MT>;  //!< Type of the underlying sparse matrix iterators.
 
-      typedef std::forward_iterator_tag  IteratorCategory;  //!< The iterator category.
-      typedef HermitianElement<MT>       ValueType;         //!< Type of the underlying elements.
-      typedef ValueType                  PointerType;       //!< Pointer return type.
-      typedef ValueType                  ReferenceType;     //!< Reference return type.
-      typedef ptrdiff_t                  DifferenceType;    //!< Difference between two iterators.
+      using IteratorCategory = std::forward_iterator_tag;  //!< The iterator category.
+      using ValueType        = HermitianElement<MT>;       //!< Type of the underlying elements.
+      using PointerType      = ValueType;                  //!< Pointer return type.
+      using ReferenceType    = ValueType;                  //!< Reference return type.
+      using DifferenceType   = ptrdiff_t;                  //!< Difference between two iterators.
 
       // STL iterator requirements
-      typedef IteratorCategory  iterator_category;  //!< The iterator category.
-      typedef ValueType         value_type;         //!< Type of the underlying elements.
-      typedef PointerType       pointer;            //!< Pointer return type.
-      typedef ReferenceType     reference;          //!< Reference return type.
-      typedef DifferenceType    difference_type;    //!< Difference between two iterators.
+      using iterator_category = IteratorCategory;  //!< The iterator category.
+      using value_type        = ValueType;         //!< Type of the underlying elements.
+      using pointer           = PointerType;       //!< Pointer return type.
+      using reference         = ReferenceType;     //!< Reference return type.
+      using difference_type   = DifferenceType;    //!< Difference between two iterators.
       //*******************************************************************************************
 
       //**Default constructor**********************************************************************
@@ -304,16 +306,17 @@ class HermitianMatrix<MT,SO,false>
 
    //**Compilation flags***************************************************************************
    //! Compilation switch for the expression template assignment strategy.
-   enum : bool { smpAssignable = false };
+   static constexpr bool smpAssignable = false;
    //**********************************************************************************************
 
    //**Constructors********************************************************************************
    /*!\name Constructors */
    //@{
-   explicit inline HermitianMatrix();
+            inline HermitianMatrix();
    explicit inline HermitianMatrix( size_t n );
-   explicit inline HermitianMatrix( size_t n, size_t nonzeros );
-   explicit inline HermitianMatrix( size_t n, const std::vector<size_t>& nonzeros );
+            inline HermitianMatrix( size_t n, size_t nonzeros );
+            inline HermitianMatrix( size_t n, const std::vector<size_t>& nonzeros );
+            inline HermitianMatrix( initializer_list< initializer_list<ElementType> > list );
 
    inline HermitianMatrix( const HermitianMatrix& m );
    inline HermitianMatrix( HermitianMatrix&& m ) noexcept;
@@ -324,7 +327,10 @@ class HermitianMatrix<MT,SO,false>
    //**********************************************************************************************
 
    //**Destructor**********************************************************************************
-   // No explicitly declared destructor.
+   /*!\name Destructor */
+   //@{
+   ~HermitianMatrix() = default;
+   //@}
    //**********************************************************************************************
 
    //**Data access functions***********************************************************************
@@ -346,47 +352,64 @@ class HermitianMatrix<MT,SO,false>
    //**Assignment operators************************************************************************
    /*!\name Assignment operators */
    //@{
+   inline HermitianMatrix& operator=( initializer_list< initializer_list<ElementType> > list );
+
    inline HermitianMatrix& operator=( const HermitianMatrix& rhs );
    inline HermitianMatrix& operator=( HermitianMatrix&& rhs ) noexcept;
 
    template< typename MT2, bool SO2 >
-   inline DisableIf_< IsComputation<MT2>, HermitianMatrix& > operator=( const Matrix<MT2,SO2>& rhs );
+   inline auto operator=( const Matrix<MT2,SO2>& rhs )
+      -> DisableIf_t< IsComputation_v<MT2>, HermitianMatrix& >;
 
    template< typename MT2, bool SO2 >
-   inline EnableIf_< IsComputation<MT2>, HermitianMatrix& > operator=( const Matrix<MT2,SO2>& rhs );
+   inline auto operator=( const Matrix<MT2,SO2>& rhs )
+      -> EnableIf_t< IsComputation_v<MT2>, HermitianMatrix& >;
 
    template< typename MT2 >
-   inline EnableIf_< IsBuiltin< ElementType_<MT2> >, HermitianMatrix& >
-      operator=( const Matrix<MT2,!SO>& rhs );
+   inline auto operator=( const Matrix<MT2,!SO>& rhs )
+      -> EnableIf_t< IsBuiltin_v< ElementType_t<MT2> >, HermitianMatrix& >;
 
    template< typename MT2, bool SO2 >
-   inline DisableIf_< IsComputation<MT2>, HermitianMatrix& > operator+=( const Matrix<MT2,SO2>& rhs );
+   inline auto operator+=( const Matrix<MT2,SO2>& rhs )
+      -> DisableIf_t< IsComputation_v<MT2>, HermitianMatrix& >;
 
    template< typename MT2, bool SO2 >
-   inline EnableIf_< IsComputation<MT2>, HermitianMatrix& > operator+=( const Matrix<MT2,SO2>& rhs );
+   inline auto operator+=( const Matrix<MT2,SO2>& rhs )
+      -> EnableIf_t< IsComputation_v<MT2>, HermitianMatrix& >;
 
    template< typename MT2 >
-   inline EnableIf_< IsBuiltin< ElementType_<MT2> >, HermitianMatrix& >
-      operator+=( const Matrix<MT2,!SO>& rhs );
+   inline auto operator+=( const Matrix<MT2,!SO>& rhs )
+      -> EnableIf_t< IsBuiltin_v< ElementType_t<MT2> >, HermitianMatrix& >;
 
    template< typename MT2, bool SO2 >
-   inline DisableIf_< IsComputation<MT2>, HermitianMatrix& > operator-=( const Matrix<MT2,SO2>& rhs );
+   inline auto operator-=( const Matrix<MT2,SO2>& rhs )
+      -> DisableIf_t< IsComputation_v<MT2>, HermitianMatrix& >;
 
    template< typename MT2, bool SO2 >
-   inline EnableIf_< IsComputation<MT2>, HermitianMatrix& > operator-=( const Matrix<MT2,SO2>& rhs );
+   inline auto operator-=( const Matrix<MT2,SO2>& rhs )
+      -> EnableIf_t< IsComputation_v<MT2>, HermitianMatrix& >;
 
    template< typename MT2 >
-   inline EnableIf_< IsBuiltin< ElementType_<MT2> >, HermitianMatrix& >
-      operator-=( const Matrix<MT2,!SO>& rhs );
+   inline auto operator-=( const Matrix<MT2,!SO>& rhs )
+      -> EnableIf_t< IsBuiltin_v< ElementType_t<MT2> >, HermitianMatrix& >;
 
    template< typename MT2, bool SO2 >
-   inline HermitianMatrix& operator*=( const Matrix<MT2,SO2>& rhs );
+   inline auto operator%=( const Matrix<MT2,SO2>& rhs )
+      -> DisableIf_t< IsComputation_v<MT2>, HermitianMatrix& >;
 
-   template< typename Other >
-   inline EnableIf_< IsNumeric<Other>, HermitianMatrix >& operator*=( Other rhs );
+   template< typename MT2, bool SO2 >
+   inline auto operator%=( const Matrix<MT2,SO2>& rhs )
+      -> EnableIf_t< IsComputation_v<MT2>, HermitianMatrix& >;
 
-   template< typename Other >
-   inline EnableIf_< IsNumeric<Other>, HermitianMatrix >& operator/=( Other rhs );
+   template< typename MT2 >
+   inline auto operator%=( const Matrix<MT2,!SO>& rhs )
+      -> EnableIf_t< IsBuiltin_v< ElementType_t<MT2> >, HermitianMatrix& >;
+
+   template< typename ST >
+   inline auto operator*=( ST rhs ) -> EnableIf_t< IsScalar_v<ST>, HermitianMatrix& >;
+
+   template< typename ST >
+   inline auto operator/=( ST rhs ) -> EnableIf_t< IsScalar_v<ST>, HermitianMatrix& >;
    //@}
    //**********************************************************************************************
 
@@ -407,6 +430,7 @@ class HermitianMatrix<MT,SO,false>
    inline void   reserve( size_t i, size_t nonzeros );
    inline void   trim();
    inline void   trim( size_t i );
+   inline void   shrinkToFit();
    inline void   swap( HermitianMatrix& m ) noexcept;
    //@}
    //**********************************************************************************************
@@ -455,7 +479,6 @@ class HermitianMatrix<MT,SO,false>
    inline HermitianMatrix& ctranspose();
 
    template< typename Other > inline HermitianMatrix& scale( const Other& scalar );
-   template< typename Other > inline HermitianMatrix& scaleDiagonal( const Other& scale );
    //@}
    //**********************************************************************************************
 
@@ -481,10 +504,10 @@ class HermitianMatrix<MT,SO,false>
    /*!\name Construction functions */
    //@{
    template< typename MT2, bool SO2, typename T >
-   inline const MT2& construct( const Matrix<MT2,SO2>& m, T );
+   inline decltype(auto) construct( const Matrix<MT2,SO2>& m, T );
 
    template< typename MT2 >
-   inline TransExprTrait_<MT2> construct( const Matrix<MT2,!SO>& m, TrueType );
+   inline decltype(auto) construct( const Matrix<MT2,!SO>& m, TrueType );
    //@}
    //**********************************************************************************************
 
@@ -495,26 +518,23 @@ class HermitianMatrix<MT,SO,false>
    //@}
    //**********************************************************************************************
 
-   //**Friend declarations*************************************************************************
-   template< bool RF, typename MT2, bool SO2, bool DF2 >
-   friend bool isDefault( const HermitianMatrix<MT2,SO2,DF2>& m );
-   //**********************************************************************************************
-
    //**Compile time checks*************************************************************************
    BLAZE_CONSTRAINT_MUST_BE_SPARSE_MATRIX_TYPE       ( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_REFERENCE_TYPE       ( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_POINTER_TYPE         ( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_CONST                ( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_VOLATILE             ( MT );
-   BLAZE_CONSTRAINT_MUST_NOT_BE_EXPRESSION_TYPE      ( MT );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_VIEW_TYPE            ( MT );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE     ( MT );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_TRANSFORMATION_TYPE  ( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_HERMITIAN_MATRIX_TYPE( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_LOWER_MATRIX_TYPE    ( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_UPPER_MATRIX_TYPE    ( MT );
    BLAZE_CONSTRAINT_MUST_BE_MATRIX_WITH_STORAGE_ORDER( OT, !SO );
    BLAZE_CONSTRAINT_MUST_BE_MATRIX_WITH_STORAGE_ORDER( TT, !SO );
-   BLAZE_CONSTRAINT_MUST_BE_NUMERIC_TYPE             ( ElementType );
-   BLAZE_STATIC_ASSERT( Rows<MT>::value == Columns<MT>::value );
+   BLAZE_CONSTRAINT_MUST_BE_SCALAR_TYPE              ( ElementType );
+   BLAZE_STATIC_ASSERT( ( Size_v<MT,0UL> == Size_v<MT,1UL> ) );
    //**********************************************************************************************
 };
 /*! \endcond */
@@ -557,7 +577,7 @@ template< typename MT  // Type of the adapted sparse matrix
 inline HermitianMatrix<MT,SO,false>::HermitianMatrix( size_t n )
    : matrix_( n, n )  // The adapted sparse matrix
 {
-   BLAZE_CONSTRAINT_MUST_BE_RESIZABLE( MT );
+   BLAZE_CONSTRAINT_MUST_BE_RESIZABLE_TYPE( MT );
 
    BLAZE_INTERNAL_ASSERT( isSquare( matrix_ ), "Non-square Hermitian matrix detected" );
 }
@@ -579,7 +599,7 @@ template< typename MT  // Type of the adapted sparse matrix
 inline HermitianMatrix<MT,SO,false>::HermitianMatrix( size_t n, size_t nonzeros )
    : matrix_( n, n, nonzeros )  // The adapted sparse matrix
 {
-   BLAZE_CONSTRAINT_MUST_BE_RESIZABLE( MT );
+   BLAZE_CONSTRAINT_MUST_BE_RESIZABLE_TYPE( MT );
 
    BLAZE_INTERNAL_ASSERT( isSquare( matrix_ ), "Non-square Hermitian matrix detected" );
 }
@@ -603,9 +623,51 @@ template< typename MT  // Type of the adapted sparse matrix
 inline HermitianMatrix<MT,SO,false>::HermitianMatrix( size_t n, const std::vector<size_t>& nonzeros )
    : matrix_( n, n, nonzeros )  // The adapted sparse matrix
 {
-   BLAZE_CONSTRAINT_MUST_BE_RESIZABLE( MT );
+   BLAZE_CONSTRAINT_MUST_BE_RESIZABLE_TYPE( MT );
 
    BLAZE_INTERNAL_ASSERT( isSquare( matrix_ ), "Non-square Hermitian matrix detected" );
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief List initialization of all matrix elements.
+//
+// \param list The initializer list.
+// \exception std::invalid_argument Invalid setup of Hermitian matrix.
+//
+// This constructor provides the option to explicitly initialize the elements of the Hermitian
+// matrix by means of an initializer list:
+
+   \code
+   using blaze::rowMajor;
+
+   using cplx = complex<int>;
+   using MT = blaze::HermitianMatrix< blaze::CompressedMatrix<int,rowMajor> >;
+
+   MT A{ { cplx(1, 0), cplx(2, 2), cplx(4,-4) },
+         { cplx(2,-2), cplx(3, 0), cplx(5, 5) },
+         { cplx(4, 4), cplx(5,-5), cplx(4, 0) } };
+   \endcode
+
+// The matrix is sized according to the size of the initializer list and all matrix elements are
+// initialized with the values from the given list. Missing values are initialized with default
+// values. In case the matrix cannot be resized and the dimensions of the initializer list don't
+// match or if the given list does not represent an Hermitian matrix, a \a std::invalid_argument
+// exception is thrown.
+*/
+template< typename MT  // Type of the adapted sparse matrix
+        , bool SO >    // Storage order of the adapted sparse matrix
+inline HermitianMatrix<MT,SO,false>::HermitianMatrix( initializer_list< initializer_list<ElementType> > list )
+   : matrix_( list )  // The adapted sparse matrix
+{
+   if( !isHermitian( matrix_ ) ) {
+      BLAZE_THROW_INVALID_ARGUMENT( "Invalid setup of Hermitian matrix" );
+   }
+
+   BLAZE_INTERNAL_ASSERT( isIntact(), "Broken invariant detected" );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -662,9 +724,9 @@ template< typename MT   // Type of the adapted sparse matrix
 template< typename MT2  // Type of the foreign matrix
         , bool SO2 >    // Storage order of the foreign matrix
 inline HermitianMatrix<MT,SO,false>::HermitianMatrix( const Matrix<MT2,SO2>& m )
-   : matrix_( construct( m, typename IsBuiltin< ElementType_<MT2> >::Type() ) )  // The adapted sparse matrix
+   : matrix_( construct( m, typename IsBuiltin< ElementType_t<MT2> >::Type() ) )  // The adapted sparse matrix
 {
-   if( !IsHermitian<MT2>::value && !isHermitian( matrix_ ) ) {
+   if( !IsHermitian_v<MT2> && !isHermitian( matrix_ ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid setup of Hermitian matrix" );
    }
 }
@@ -956,6 +1018,55 @@ inline typename HermitianMatrix<MT,SO,false>::ConstIterator
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
+/*!\brief List assignment to all matrix elements.
+//
+// \param list The initializer list.
+// \exception std::invalid_argument Invalid assignment to Hermitian matrix.
+//
+// This assignment operator offers the option to directly assign to all elements of the Hermitian
+// matrix by means of an initializer list:
+
+   \code
+   using blaze::rowMajor;
+
+   using cplx = complex<int>;
+
+   blaze::HermitianMatrix< blaze::CompressedMatrix<cplx,rowMajor> > A;
+   A = { { cplx(1, 0), cplx(2, 2), cplx(4,-4) },
+         { cplx(2,-2), cplx(3, 0), cplx(5, 5) },
+         { cplx(4, 4), cplx(5,-5), cplx(4, 0) } };
+   \endcode
+
+// The matrix is resized according to the size of the initializer list and all matrix elements
+// are assigned the values from the given list. Missing values are assigned default values. In
+// case the matrix cannot be resized and the dimensions of the initializer list don't match or
+// if the given list does not represent an Hermitian matrix, a \a std::invalid_argument exception
+// is thrown.
+*/
+template< typename MT  // Type of the adapted sparse matrix
+        , bool SO >    // Storage order of the adapted sparse matrix
+inline HermitianMatrix<MT,SO,false>&
+   HermitianMatrix<MT,SO,false>::operator=( initializer_list< initializer_list<ElementType> > list )
+{
+   const InitializerMatrix<ElementType> tmp( list, list.size() );
+
+   if( !isHermitian( tmp ) ) {
+      BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to Hermitian matrix" );
+   }
+
+   matrix_ = list;
+
+   BLAZE_INTERNAL_ASSERT( isSquare( matrix_ ), "Non-square Hermitian matrix detected" );
+   BLAZE_INTERNAL_ASSERT( isIntact(), "Broken invariant detected" );
+
+   return *this;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
 /*!\brief Copy assignment operator for HermitianMatrix.
 //
 // \param rhs Matrix to be copied.
@@ -1020,14 +1131,14 @@ template< typename MT   // Type of the adapted sparse matrix
         , bool SO >     // Storage order of the adapted sparse matrix
 template< typename MT2  // Type of the right-hand side matrix
         , bool SO2 >    // Storage order of the right-hand side matrix
-inline DisableIf_< IsComputation<MT2>, HermitianMatrix<MT,SO,false>& >
-   HermitianMatrix<MT,SO,false>::operator=( const Matrix<MT2,SO2>& rhs )
+inline auto HermitianMatrix<MT,SO,false>::operator=( const Matrix<MT2,SO2>& rhs )
+   -> DisableIf_t< IsComputation_v<MT2>, HermitianMatrix& >
 {
-   if( !IsHermitian<MT2>::value && !isHermitian( ~rhs ) ) {
+   if( !IsHermitian_v<MT2> && !isHermitian( *rhs ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to Hermitian matrix" );
    }
 
-   matrix_ = ~rhs;
+   matrix_ = *rhs;
 
    BLAZE_INTERNAL_ASSERT( isSquare( matrix_ ), "Non-square Hermitian matrix detected" );
    BLAZE_INTERNAL_ASSERT( isIntact(), "Broken invariant detected" );
@@ -1055,18 +1166,18 @@ template< typename MT   // Type of the adapted sparse matrix
         , bool SO >     // Storage order of the adapted sparse matrix
 template< typename MT2  // Type of the right-hand side matrix
         , bool SO2 >    // Storage order of the right-hand side matrix
-inline EnableIf_< IsComputation<MT2>, HermitianMatrix<MT,SO,false>& >
-   HermitianMatrix<MT,SO,false>::operator=( const Matrix<MT2,SO2>& rhs )
+inline auto HermitianMatrix<MT,SO,false>::operator=( const Matrix<MT2,SO2>& rhs )
+   -> EnableIf_t< IsComputation_v<MT2>, HermitianMatrix& >
 {
-   if( !IsSquare<MT2>::value && !isSquare( ~rhs ) ) {
+   if( !IsSquare_v<MT2> && !isSquare( *rhs ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to Hermitian matrix" );
    }
 
-   if( IsHermitian<MT2>::value ) {
-      matrix_ = ~rhs;
+   if( IsHermitian_v<MT2> ) {
+      matrix_ = *rhs;
    }
    else {
-      MT tmp( ~rhs );
+      MT tmp( *rhs );
 
       if( !isHermitian( tmp ) ) {
          BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to Hermitian matrix" );
@@ -1100,10 +1211,10 @@ inline EnableIf_< IsComputation<MT2>, HermitianMatrix<MT,SO,false>& >
 template< typename MT     // Type of the adapted sparse matrix
         , bool SO >       // Storage order of the adapted sparse matrix
 template< typename MT2 >  // Type of the right-hand side matrix
-inline EnableIf_< IsBuiltin< ElementType_<MT2> >, HermitianMatrix<MT,SO,false>& >
-   HermitianMatrix<MT,SO,false>::operator=( const Matrix<MT2,!SO>& rhs )
+inline auto HermitianMatrix<MT,SO,false>::operator=( const Matrix<MT2,!SO>& rhs )
+   -> EnableIf_t< IsBuiltin_v< ElementType_t<MT2> >, HermitianMatrix& >
 {
-   return this->operator=( trans( ~rhs ) );
+   return this->operator=( trans( *rhs ) );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -1126,14 +1237,14 @@ template< typename MT   // Type of the adapted sparse matrix
         , bool SO >     // Storage order of the adapted sparse matrix
 template< typename MT2  // Type of the right-hand side matrix
         , bool SO2 >    // Storage order of the right-hand side matrix
-inline DisableIf_< IsComputation<MT2>, HermitianMatrix<MT,SO,false>& >
-   HermitianMatrix<MT,SO,false>::operator+=( const Matrix<MT2,SO2>& rhs )
+inline auto HermitianMatrix<MT,SO,false>::operator+=( const Matrix<MT2,SO2>& rhs )
+   -> DisableIf_t< IsComputation_v<MT2>, HermitianMatrix& >
 {
-   if( !IsHermitian<MT2>::value && !isHermitian( ~rhs ) ) {
+   if( !IsHermitian_v<MT2> && !isHermitian( *rhs ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to Hermitian matrix" );
    }
 
-   matrix_ += ~rhs;
+   matrix_ += *rhs;
 
    BLAZE_INTERNAL_ASSERT( isSquare( matrix_ ), "Non-square Hermitian matrix detected" );
    BLAZE_INTERNAL_ASSERT( isIntact(), "Broken invariant detected" );
@@ -1161,18 +1272,18 @@ template< typename MT   // Type of the adapted sparse matrix
         , bool SO >     // Storage order of the adapted sparse matrix
 template< typename MT2  // Type of the right-hand side matrix
         , bool SO2 >    // Storage order of the right-hand side matrix
-inline EnableIf_< IsComputation<MT2>, HermitianMatrix<MT,SO,false>& >
-   HermitianMatrix<MT,SO,false>::operator+=( const Matrix<MT2,SO2>& rhs )
+inline auto HermitianMatrix<MT,SO,false>::operator+=( const Matrix<MT2,SO2>& rhs )
+   -> EnableIf_t< IsComputation_v<MT2>, HermitianMatrix& >
 {
-   if( !IsSquare<MT2>::value && !isSquare( ~rhs ) ) {
+   if( !IsSquare_v<MT2> && !isSquare( *rhs ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to Hermitian matrix" );
    }
 
-   if( IsHermitian<MT2>::value ) {
-      matrix_ += ~rhs;
+   if( IsHermitian_v<MT2> ) {
+      matrix_ += *rhs;
    }
    else {
-      const ResultType_<MT2> tmp( ~rhs );
+      const ResultType_t<MT2> tmp( *rhs );
 
       if( !isHermitian( tmp ) ) {
          BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to Hermitian matrix" );
@@ -1207,10 +1318,10 @@ inline EnableIf_< IsComputation<MT2>, HermitianMatrix<MT,SO,false>& >
 template< typename MT     // Type of the adapted sparse matrix
         , bool SO >       // Storage order of the adapted sparse matrix
 template< typename MT2 >  // Type of the right-hand side matrix
-inline EnableIf_< IsBuiltin< ElementType_<MT2> >, HermitianMatrix<MT,SO,false>& >
-   HermitianMatrix<MT,SO,false>::operator+=( const Matrix<MT2,!SO>& rhs )
+inline auto HermitianMatrix<MT,SO,false>::operator+=( const Matrix<MT2,!SO>& rhs )
+   -> EnableIf_t< IsBuiltin_v< ElementType_t<MT2> >, HermitianMatrix& >
 {
-   return this->operator+=( trans( ~rhs ) );
+   return this->operator+=( trans( *rhs ) );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -1233,14 +1344,14 @@ template< typename MT   // Type of the adapted sparse matrix
         , bool SO >     // Storage order of the adapted sparse matrix
 template< typename MT2  // Type of the right-hand side matrix
         , bool SO2 >    // Storage order of the right-hand side matrix
-inline DisableIf_< IsComputation<MT2>, HermitianMatrix<MT,SO,false>& >
-   HermitianMatrix<MT,SO,false>::operator-=( const Matrix<MT2,SO2>& rhs )
+inline auto HermitianMatrix<MT,SO,false>::operator-=( const Matrix<MT2,SO2>& rhs )
+   -> DisableIf_t< IsComputation_v<MT2>, HermitianMatrix& >
 {
-   if( !IsHermitian<MT2>::value && !isHermitian( ~rhs ) ) {
+   if( !IsHermitian_v<MT2> && !isHermitian( *rhs ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to Hermitian matrix" );
    }
 
-   matrix_ -= ~rhs;
+   matrix_ -= *rhs;
 
    BLAZE_INTERNAL_ASSERT( isSquare( matrix_ ), "Non-square Hermitian matrix detected" );
    BLAZE_INTERNAL_ASSERT( isIntact(), "Broken invariant detected" );
@@ -1268,18 +1379,18 @@ template< typename MT   // Type of the adapted sparse matrix
         , bool SO >     // Storage order of the adapted sparse matrix
 template< typename MT2  // Type of the right-hand side matrix
         , bool SO2 >    // Storage order of the right-hand side matrix
-inline EnableIf_< IsComputation<MT2>, HermitianMatrix<MT,SO,false>& >
-   HermitianMatrix<MT,SO,false>::operator-=( const Matrix<MT2,SO2>& rhs )
+inline auto HermitianMatrix<MT,SO,false>::operator-=( const Matrix<MT2,SO2>& rhs )
+   -> EnableIf_t< IsComputation_v<MT2>, HermitianMatrix& >
 {
-   if( !IsSquare<MT2>::value && !isSquare( ~rhs ) ) {
+   if( !IsSquare_v<MT2> && !isSquare( *rhs ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to Hermitian matrix" );
    }
 
-   if( IsHermitian<MT2>::value ) {
-      matrix_ -= ~rhs;
+   if( IsHermitian_v<MT2> ) {
+      matrix_ -= *rhs;
    }
    else {
-      const ResultType_<MT2> tmp( ~rhs );
+      const ResultType_t<MT2> tmp( *rhs );
 
       if( !isHermitian( tmp ) ) {
          BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to Hermitian matrix" );
@@ -1314,10 +1425,10 @@ inline EnableIf_< IsComputation<MT2>, HermitianMatrix<MT,SO,false>& >
 template< typename MT     // Type of the adapted sparse matrix
         , bool SO >       // Storage order of the adapted sparse matrix
 template< typename MT2 >  // Type of the right-hand side matrix
-inline EnableIf_< IsBuiltin< ElementType_<MT2> >, HermitianMatrix<MT,SO,false>& >
-   HermitianMatrix<MT,SO,false>::operator-=( const Matrix<MT2,!SO>& rhs )
+inline auto HermitianMatrix<MT,SO,false>::operator-=( const Matrix<MT2,!SO>& rhs )
+   -> EnableIf_t< IsBuiltin_v< ElementType_t<MT2> >, HermitianMatrix& >
 {
-   return this->operator-=( trans( ~rhs ) );
+   return this->operator-=( trans( *rhs ) );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -1325,39 +1436,108 @@ inline EnableIf_< IsBuiltin< ElementType_<MT2> >, HermitianMatrix<MT,SO,false>& 
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-/*!\brief Multiplication assignment operator for the multiplication of a matrix (\f$ A*=B \f$).
+/*!\brief Schur product assignment operator for the multiplication of a general matrix
+//        (\f$ A\circ=B \f$).
 //
-// \param rhs The right-hand side matrix for the multiplication.
+// \param rhs The right-hand side general matrix for the Schur product.
 // \return Reference to the matrix.
-// \exception std::invalid_argument Matrix sizes do not match.
+// \exception std::invalid_argument Invalid assignment to Hermitian matrix.
 //
 // In case the current sizes of the two matrices don't match, a \a std::invalid_argument exception
-// is thrown. Also note that the result of the multiplication operation must be a Hermitian matrix.
-// In case it is not, a \a std::invalid_argument exception is thrown.
+// is thrown. Also note that the result of the Schur product operation must be a Hermitian matrix,
+// i.e. the given matrix must be a Hermitian matrix. In case the result is not a Hermitian matrix,
+// a \a std::invalid_argument exception is thrown.
 */
 template< typename MT   // Type of the adapted sparse matrix
         , bool SO >     // Storage order of the adapted sparse matrix
 template< typename MT2  // Type of the right-hand side matrix
         , bool SO2 >    // Storage order of the right-hand side matrix
-inline HermitianMatrix<MT,SO,false>&
-   HermitianMatrix<MT,SO,false>::operator*=( const Matrix<MT2,SO2>& rhs )
+inline auto HermitianMatrix<MT,SO,false>::operator%=( const Matrix<MT2,SO2>& rhs )
+   -> DisableIf_t< IsComputation_v<MT2>, HermitianMatrix& >
 {
-   if( matrix_.rows() != (~rhs).columns() ) {
+   if( !IsHermitian_v<MT2> && !isHermitian( *rhs ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to Hermitian matrix" );
    }
 
-   MT tmp( matrix_ * ~rhs );
-
-   if( !isHermitian( tmp ) ) {
-      BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to Hermitian matrix" );
-   }
-
-   matrix_ = std::move( tmp );
+   matrix_ %= *rhs;
 
    BLAZE_INTERNAL_ASSERT( isSquare( matrix_ ), "Non-square Hermitian matrix detected" );
    BLAZE_INTERNAL_ASSERT( isIntact(), "Broken invariant detected" );
 
    return *this;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Schur product assignment operator for the multiplication of a matrix computation
+//        (\f$ A\circ=B \f$).
+//
+// \param rhs The right-hand side matrix computation for the Schur product.
+// \return Reference to the matrix.
+// \exception std::invalid_argument Invalid assignment to Hermitian matrix.
+//
+// In case the current sizes of the two matrices don't match, a \a std::invalid_argument exception
+// is thrown. Also note that the result of the Schur product operation must be a Hermitian matrix,
+// i.e. the given matrix must be a Hermitian matrix. In case the result is not a Hermitian matrix,
+// a \a std::invalid_argument exception is thrown.
+*/
+template< typename MT   // Type of the adapted sparse matrix
+        , bool SO >     // Storage order of the adapted sparse matrix
+template< typename MT2  // Type of the right-hand side matrix
+        , bool SO2 >    // Storage order of the right-hand side matrix
+inline auto HermitianMatrix<MT,SO,false>::operator%=( const Matrix<MT2,SO2>& rhs )
+   -> EnableIf_t< IsComputation_v<MT2>, HermitianMatrix& >
+{
+   if( !IsSquare_v<MT2> && !isSquare( *rhs ) ) {
+      BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to Hermitian matrix" );
+   }
+
+   if( IsHermitian_v<MT2> ) {
+      matrix_ %= *rhs;
+   }
+   else {
+      const ResultType_t<MT2> tmp( *rhs );
+
+      if( !isHermitian( tmp ) ) {
+         BLAZE_THROW_INVALID_ARGUMENT( "Invalid assignment to Hermitian matrix" );
+      }
+
+      matrix_ %= tmp;
+   }
+
+   BLAZE_INTERNAL_ASSERT( isSquare( matrix_ ), "Non-square Hermitian matrix detected" );
+   BLAZE_INTERNAL_ASSERT( isIntact(), "Broken invariant detected" );
+
+   return *this;
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Schur product assignment operator for the multiplication of a matrix with opposite
+//        storage order (\f$ A\circ=B \f$).
+//
+// \param rhs The right-hand side matrix for the Schur product.
+// \return Reference to the matrix.
+// \exception std::invalid_argument Invalid assignment to Hermitian matrix.
+//
+// In case the current sizes of the two matrices don't match, a \a std::invalid_argument exception
+// is thrown. Also note that the result of the Schur product operation must be a Hermitian matrix,
+// i.e. the given matrix must be a Hermitian matrix. In case the result is not a Hermitian matrix,
+// a \a std::invalid_argument exception is thrown.
+*/
+template< typename MT     // Type of the adapted sparse matrix
+        , bool SO >       // Storage order of the adapted sparse matrix
+template< typename MT2 >  // Type of the right-hand side matrix
+inline auto HermitianMatrix<MT,SO,false>::operator%=( const Matrix<MT2,!SO>& rhs )
+   -> EnableIf_t< IsBuiltin_v< ElementType_t<MT2> >, HermitianMatrix& >
+{
+   return this->operator%=( trans( *rhs ) );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -1371,11 +1551,11 @@ inline HermitianMatrix<MT,SO,false>&
 // \param rhs The right-hand side scalar value for the multiplication.
 // \return Reference to the matrix.
 */
-template< typename MT       // Type of the adapted sparse matrix
-        , bool SO >         // Storage order of the adapted sparse matrix
-template< typename Other >  // Data type of the right-hand side scalar
-inline EnableIf_< IsNumeric<Other>, HermitianMatrix<MT,SO,false> >&
-   HermitianMatrix<MT,SO,false>::operator*=( Other rhs )
+template< typename MT    // Type of the adapted sparse matrix
+        , bool SO >      // Storage order of the adapted sparse matrix
+template< typename ST >  // Data type of the right-hand side scalar
+inline auto HermitianMatrix<MT,SO,false>::operator*=( ST rhs )
+   -> EnableIf_t< IsScalar_v<ST>, HermitianMatrix& >
 {
    matrix_ *= rhs;
    return *this;
@@ -1391,13 +1571,13 @@ inline EnableIf_< IsNumeric<Other>, HermitianMatrix<MT,SO,false> >&
 // \param rhs The right-hand side scalar value for the division.
 // \return Reference to the matrix.
 */
-template< typename MT       // Type of the adapted sparse matrix
-        , bool SO >         // Storage order of the adapted sparse matrix
-template< typename Other >  // Data type of the right-hand side scalar
-inline EnableIf_< IsNumeric<Other>, HermitianMatrix<MT,SO,false> >&
-   HermitianMatrix<MT,SO,false>::operator/=( Other rhs )
+template< typename MT    // Type of the adapted sparse matrix
+        , bool SO >      // Storage order of the adapted sparse matrix
+template< typename ST >  // Data type of the right-hand side scalar
+inline auto HermitianMatrix<MT,SO,false>::operator/=( ST rhs )
+   -> EnableIf_t< IsScalar_v<ST>, HermitianMatrix& >
 {
-   BLAZE_USER_ASSERT( rhs != Other(0), "Division by zero detected" );
+   BLAZE_USER_ASSERT( !isZero( rhs ), "Division by zero detected" );
 
    matrix_ /= rhs;
    return *this;
@@ -1577,7 +1757,9 @@ template< typename MT  // Type of the adapted sparse matrix
         , bool SO >    // Storage order of the adapted sparse matrix
 inline void HermitianMatrix<MT,SO,false>::reset( size_t i )
 {
-   for( Iterator_<MT> it=matrix_.begin(i); it!=matrix_.end(i); ++it )
+   using blaze::erase;
+
+   for( auto it=matrix_.begin(i); it!=matrix_.end(i); ++it )
    {
       const size_t j( it->index() );
 
@@ -1585,14 +1767,14 @@ inline void HermitianMatrix<MT,SO,false>::reset( size_t i )
          continue;
 
       if( SO ) {
-         const Iterator_<MT> pos( matrix_.find( i, j ) );
+         const Iterator_t<MT> pos( matrix_.find( i, j ) );
          BLAZE_INTERNAL_ASSERT( pos != matrix_.end( j ), "Missing element detected" );
-         matrix_.erase( j, pos );
+         erase( matrix_, j, pos );
       }
       else {
-         const Iterator_<MT> pos( matrix_.find( j, i ) );
+         const Iterator_t<MT> pos( matrix_.find( j, i ) );
          BLAZE_INTERNAL_ASSERT( pos != matrix_.end( j ), "Missing element detected" );
-         matrix_.erase( j, pos );
+         erase( matrix_, j, pos );
       }
    }
 
@@ -1614,9 +1796,10 @@ template< typename MT  // Type of the adapted sparse matrix
         , bool SO >    // Storage order of the adapted sparse matrix
 inline void HermitianMatrix<MT,SO,false>::clear()
 {
-   using blaze::clear;
+   matrix_.clear();
 
-   clear( matrix_ );
+   BLAZE_INTERNAL_ASSERT( matrix_.rows()    == 0UL, "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( matrix_.columns() == 0UL, "Invalid number of columns" );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -1641,9 +1824,9 @@ template< typename MT  // Type of the adapted sparse matrix
         , bool SO >    // Storage order of the adapted sparse matrix
 void HermitianMatrix<MT,SO,false>::resize( size_t n, bool preserve )
 {
-   BLAZE_CONSTRAINT_MUST_BE_RESIZABLE( MT );
+   BLAZE_CONSTRAINT_MUST_BE_RESIZABLE_TYPE( MT );
 
-   UNUSED_PARAMETER( preserve );
+   MAYBE_UNUSED( preserve );
 
    BLAZE_INTERNAL_ASSERT( isSquare( matrix_ ), "Non-square Hermitian matrix detected" );
 
@@ -1743,6 +1926,26 @@ inline void HermitianMatrix<MT,SO,false>::trim( size_t i )
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
+/*!\brief Requesting the removal of unused capacity.
+//
+// \return void
+//
+// This function minimizes the capacity of the matrix by removing unused capacity. Please note
+// that in case a reallocation occurs, all iterators (including end() iterators), all pointers
+// and references to elements of this matrix are invalidated.
+*/
+template< typename MT  // Type of the adapted sparse matrix
+        , bool SO >    // Storage order of the adapted sparse matrix
+inline void HermitianMatrix<MT,SO,false>::shrinkToFit()
+{
+   matrix_.shrinkToFit();
+}
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
 /*!\brief Swapping the contents of two matrices.
 //
 // \param m The matrix to be swapped.
@@ -1790,7 +1993,7 @@ inline typename HermitianMatrix<MT,SO,false>::Iterator
 {
    const bool isDiagonal( i == j );
 
-   if( IsComplex<ElementType>::value && isDiagonal && !isReal( value ) ) {
+   if( IsComplex_v<ElementType> && isDiagonal && !isReal( value ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid access to diagonal matrix element" );
    }
 
@@ -1825,7 +2028,7 @@ inline typename HermitianMatrix<MT,SO,false>::Iterator
 {
    const bool isDiagonal( i == j );
 
-   if( IsComplex<ElementType>::value && isDiagonal && !isReal( value ) ) {
+   if( IsComplex_v<ElementType> && isDiagonal && !isReal( value ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid access to diagonal matrix element" );
    }
 
@@ -1873,7 +2076,7 @@ inline typename HermitianMatrix<MT,SO,false>::Iterator
    using blaze::HermitianMatrix;
    using blaze::rowMajor;
 
-   typedef std::complex<double>  cplx;
+   using cplx = std::complex<double>;
 
    // Setup of the Hermitian matrix
    //
@@ -1902,12 +2105,12 @@ inline void HermitianMatrix<MT,SO,false>::append( size_t i, size_t j, const Elem
 {
    const bool isDiagonal( i == j );
 
-   if( IsComplex<ElementType>::value && isDiagonal && !isReal( value ) ) {
+   if( IsComplex_v<ElementType> && isDiagonal && !isReal( value ) ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid access to diagonal matrix element" );
    }
 
    matrix_.append( i, j, value, check );
-   if( !isDiagonal && ( !check || !isDefault( value ) ) )
+   if( !isDiagonal && ( !check || !isDefault<strict>( value ) ) )
       matrix_.insert( j, i, conj( value ) );
 }
 /*! \endcond */
@@ -1960,9 +2163,11 @@ template< typename MT  // Type of the adapted sparse matrix
         , bool SO >    // Storage order of the adapted sparse matrix
 inline void HermitianMatrix<MT,SO,false>::erase( size_t i, size_t j )
 {
-   matrix_.erase( i, j );
+   using blaze::erase;
+
+   erase( matrix_, i, j );
    if( i != j )
-      matrix_.erase( j, i );
+      erase( matrix_, j, i );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -1985,7 +2190,9 @@ template< typename MT  // Type of the adapted sparse matrix
 inline typename HermitianMatrix<MT,SO,false>::Iterator
    HermitianMatrix<MT,SO,false>::erase( size_t i, Iterator pos )
 {
-   const Iterator_<MT> base( pos.base() );
+   using blaze::erase;
+
+   const Iterator_t<MT> base( pos.base() );
 
    if( base == matrix_.end( i ) )
       return pos;
@@ -1994,18 +2201,18 @@ inline typename HermitianMatrix<MT,SO,false>::Iterator
 
    if( i == j ) {
       BLAZE_INTERNAL_ASSERT( matrix_.find( i, i ) != matrix_.end( i ), "Missing element detected" );
-      return Iterator( matrix_.erase( i, base ), matrix_, i );
+      return Iterator( erase( matrix_, i, base ), matrix_, i );
    }
 
    if( SO ) {
       BLAZE_INTERNAL_ASSERT( matrix_.find( i, j ) != matrix_.end( j ), "Missing element detected" );
-      matrix_.erase( j, matrix_.find( i, j ) );
-      return Iterator( matrix_.erase( i, base ), matrix_, i );
+      erase( matrix_, j, matrix_.find( i, j ) );
+      return Iterator( erase( matrix_, i, base ), matrix_, i );
    }
    else {
       BLAZE_INTERNAL_ASSERT( matrix_.find( j, i ) != matrix_.end( j ), "Missing element detected" );
-      matrix_.erase( j, matrix_.find( j, i ) );
-      return Iterator( matrix_.erase( i, base ), matrix_, i );
+      erase( matrix_, j, matrix_.find( j, i ) );
+      return Iterator( erase( matrix_, i, base ), matrix_, i );
    }
 }
 /*! \endcond */
@@ -2031,7 +2238,9 @@ template< typename MT  // Type of the adapted sparse matrix
 inline typename HermitianMatrix<MT,SO,false>::Iterator
    HermitianMatrix<MT,SO,false>::erase( size_t i, Iterator first, Iterator last )
 {
-   for( Iterator_<MT> it=first.base(); it!=last.base(); ++it )
+   using blaze::erase;
+
+   for( auto it=first.base(); it!=last.base(); ++it )
    {
       const size_t j( it->index() );
 
@@ -2040,15 +2249,15 @@ inline typename HermitianMatrix<MT,SO,false>::Iterator
 
       if( SO ) {
          BLAZE_INTERNAL_ASSERT( matrix_.find( i, j ) != matrix_.end( j ), "Missing element detected" );
-         matrix_.erase( i, j );
+         erase( matrix_, i, j );
       }
       else {
          BLAZE_INTERNAL_ASSERT( matrix_.find( j, i ) != matrix_.end( j ), "Missing element detected" );
-         matrix_.erase( j, i );
+         erase( matrix_, j, i );
       }
    }
 
-   return Iterator( matrix_.erase( i, first.base(), last.base() ), matrix_, i );
+   return Iterator( erase( matrix_, i, first.base(), last.base() ), matrix_, i );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -2081,9 +2290,11 @@ template< typename MT  // Type of the adapted sparse matrix
 template< typename Pred >  // Type of the unary predicate
 inline void HermitianMatrix<MT,SO,false>::erase( Pred predicate )
 {
-   matrix_.erase( [predicate=predicate]( const ElementType& value ) {
-                     return predicate( value ) || predicate( conj( value ) );
-                  } );
+   using blaze::erase;
+
+   erase( matrix_, [predicate=predicate]( const ElementType& value ) {
+                      return predicate( value ) || predicate( conj( value ) );
+                   } );
 
    BLAZE_INTERNAL_ASSERT( isIntact(), "Broken invariant detected" );
 }
@@ -2125,17 +2336,19 @@ template< typename Pred >  // Type of the unary predicate
 inline void
    HermitianMatrix<MT,SO,false>::erase( size_t i, Iterator first, Iterator last, Pred predicate )
 {
-   for( Iterator it=first; it!=last; ++it ) {
+   using blaze::erase;
+
+   for( auto it=first; it!=last; ++it ) {
       const size_t j( it->index() );
       if( i != j && predicate( it->value() ) ) {
          if( SO )
-            matrix_.erase( i, j );
+            erase( matrix_, i, j );
          else
-            matrix_.erase( j, i );
+            erase( matrix_, j, i );
       }
    }
 
-   matrix_.erase( i, first.base(), last.base(), predicate );
+   erase( matrix_, i, first.base(), last.base(), predicate );
 
    BLAZE_INTERNAL_ASSERT( isIntact(), "Broken invariant detected" );
 }
@@ -2164,8 +2377,8 @@ inline void
 // In case the element is found, the function returns an row/column iterator to the element.
 // Otherwise an iterator just past the last non-zero element of row \a i or column \a j (the
 // end() iterator) is returned. Note that the returned Hermitian matrix iterator is subject
-// to invalidation due to inserting operations via the function call operator or the insert()
-// function!
+// to invalidation due to inserting operations via the function call operator, the set()
+// function or the insert() function!
 */
 template< typename MT  // Type of the adapted sparse matrix
         , bool SO >    // Storage order of the adapted sparse matrix
@@ -2191,8 +2404,8 @@ inline typename HermitianMatrix<MT,SO,false>::Iterator
 // In case the element is found, the function returns an row/column iterator to the element.
 // Otherwise an iterator just past the last non-zero element of row \a i or column \a j (the
 // end() iterator) is returned. Note that the returned Hermitian matrix iterator is subject
-// to invalidation due to inserting operations via the function call operator or the insert()
-// function!
+// to invalidation due to inserting operations via the function call operator, the set()
+// function or the insert() function!
 */
 template< typename MT  // Type of the adapted sparse matrix
         , bool SO >    // Storage order of the adapted sparse matrix
@@ -2218,8 +2431,8 @@ inline typename HermitianMatrix<MT,SO,false>::ConstIterator
 // returns a column iterator to the first element with an index not less then the given row
 // index. In combination with the upperBound() function this function can be used to create a
 // pair of iterators specifying a range of indices. Note that the returned Hermitian matrix
-// iterator is subject to invalidation due to inserting operations via the function call operator
-// or the insert() function!
+// iterator is subject to invalidation due to inserting operations via the function call operator,
+// the set() function or the insert() function!
 */
 template< typename MT  // Type of the adapted sparse matrix
         , bool SO >    // Storage order of the adapted sparse matrix
@@ -2245,8 +2458,8 @@ inline typename HermitianMatrix<MT,SO,false>::Iterator
 // returns a column iterator to the first element with an index not less then the given row
 // index. In combination with the upperBound() function this function can be used to create a
 // pair of iterators specifying a range of indices. Note that the returned Hermitian matrix
-// iterator is subject to invalidation due to inserting operations via the function call operator
-// or the insert() function!
+// iterator is subject to invalidation due to inserting operations via the function call operator,
+// the set() function or the insert() function!
 */
 template< typename MT  // Type of the adapted sparse matrix
         , bool SO >    // Storage order of the adapted sparse matrix
@@ -2270,10 +2483,10 @@ inline typename HermitianMatrix<MT,SO,false>::ConstIterator
 // In case of a row-major matrix, this function returns a row iterator to the first element with
 // an index greater then the given column index. In case of a column-major matrix, the function
 // returns a column iterator to the first element with an index greater then the given row
-// index. In combination with the upperBound() function this function can be used to create a
+// index. In combination with the lowerBound() function this function can be used to create a
 // pair of iterators specifying a range of indices. Note that the returned Hermitian matrix
-// iterator is subject to invalidation due to inserting operations via the function call operator
-// or the insert() function!
+// iterator is subject to invalidation due to inserting operations via the function call operator,
+// the set() function or the insert() function!
 */
 template< typename MT  // Type of the adapted sparse matrix
         , bool SO >    // Storage order of the adapted sparse matrix
@@ -2297,10 +2510,10 @@ inline typename HermitianMatrix<MT,SO,false>::Iterator
 // In case of a row-major matrix, this function returns a row iterator to the first element with
 // an index greater then the given column index. In case of a column-major matrix, the function
 // returns a column iterator to the first element with an index greater then the given row
-// index. In combination with the upperBound() function this function can be used to create a
+// index. In combination with the lowerBound() function this function can be used to create a
 // pair of iterators specifying a range of indices. Note that the returned Hermitian matrix
-// iterator is subject to invalidation due to inserting operations via the function call operator
-// or the insert() function!
+// iterator is subject to invalidation due to inserting operations via the function call operator,
+// the set() function or the insert() function!
 */
 template< typename MT  // Type of the adapted sparse matrix
         , bool SO >    // Storage order of the adapted sparse matrix
@@ -2331,7 +2544,7 @@ template< typename MT  // Type of the adapted sparse matrix
         , bool SO >    // Storage order of the adapted sparse matrix
 inline HermitianMatrix<MT,SO,false>& HermitianMatrix<MT,SO,false>::transpose()
 {
-   if( IsComplex<ElementType>::value )
+   if( IsComplex_v<ElementType> )
       matrix_.transpose();
    return *this;
 }
@@ -2361,6 +2574,17 @@ inline HermitianMatrix<MT,SO,false>& HermitianMatrix<MT,SO,false>::ctranspose()
 //
 // \param scalar The scalar value for the matrix scaling.
 // \return Reference to the matrix.
+//
+// This function scales the matrix by applying the given scalar value \a scalar to each element
+// of the matrix. For built-in and \c complex data types it has the same effect as using the
+// multiplication assignment operator:
+
+   \code
+   blaze::HermitianMatrix< blaze::CompressedMatrix<int> > A;
+   // ... Resizing and initialization
+   A *= 4;        // Scaling of the matrix
+   A.scale( 4 );  // Same effect as above
+   \endcode
 */
 template< typename MT       // Type of the adapted sparse matrix
         , bool SO >         // Storage order of the adapted sparse matrix
@@ -2369,26 +2593,6 @@ inline HermitianMatrix<MT,SO,false>&
    HermitianMatrix<MT,SO,false>::scale( const Other& scalar )
 {
    matrix_.scale( scalar );
-   return *this;
-}
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Scaling the diagonal of the Hermitian matrix by the scalar value \a scalar.
-//
-// \param scalar The scalar value for the diagonal scaling.
-// \return Reference to the Hermitian matrix.
-*/
-template< typename MT       // Type of the adapted sparse matrix
-        , bool SO >         // Storage order of the adapted sparse matrix
-template< typename Other >  // Data type of the scalar value
-inline HermitianMatrix<MT,SO,false>&
-   HermitianMatrix<MT,SO,false>::scaleDiagonal( const Other& scalar )
-{
-   matrix_.scaleDiagonal( scalar );
    return *this;
 }
 /*! \endcond */
@@ -2513,9 +2717,9 @@ template< typename MT   // Type of the adapted dense matrix
 template< typename MT2  // Type of the foreign matrix
         , bool SO2      // Storage order of the foreign matrix
         , typename T >  // Type of the third argument
-inline const MT2& HermitianMatrix<MT,SO,false>::construct( const Matrix<MT2,SO2>& m, T )
+inline decltype(auto) HermitianMatrix<MT,SO,false>::construct( const Matrix<MT2,SO2>& m, T )
 {
-   return ~m;
+   return *m;
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -2526,10 +2730,9 @@ inline const MT2& HermitianMatrix<MT,SO,false>::construct( const Matrix<MT2,SO2>
 template< typename MT     // Type of the adapted dense matrix
         , bool SO >       // Storage order of the adapted dense matrix
 template< typename MT2 >  // Type of the foreign matrix
-inline TransExprTrait_<MT2>
-   HermitianMatrix<MT,SO,false>::construct( const Matrix<MT2,!SO>& m, TrueType )
+inline decltype(auto) HermitianMatrix<MT,SO,false>::construct( const Matrix<MT2,!SO>& m, TrueType )
 {
-   return trans( ~m );
+   return trans( *m );
 }
 /*! \endcond */
 //*************************************************************************************************

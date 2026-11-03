@@ -3,7 +3,7 @@
 //  \file blaze/math/sparse/Forward.h
 //  \brief Header file for all forward declarations for sparse vectors and matrices
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -36,6 +36,15 @@
 #define _BLAZE_MATH_SPARSE_FORWARD_H_
 
 
+//*************************************************************************************************
+// Includes
+//*************************************************************************************************
+
+#include <blaze/math/GroupTag.h>
+#include <blaze/system/StorageOrder.h>
+#include <blaze/system/TransposeFlag.h>
+
+
 namespace blaze {
 
 //=================================================================================================
@@ -44,8 +53,30 @@ namespace blaze {
 //
 //=================================================================================================
 
-template< typename, bool > class CompressedMatrix;
-template< typename, bool > class CompressedVector;
+template< typename Type                   // Data type of the vector
+        , bool TF = defaultTransposeFlag  // Transpose flag
+        , typename Tag = Group0 >         // Type tag
+class CompressedVector;
+
+template< typename Type                  // Data type of the matrix
+        , bool SO = defaultStorageOrder  // Storage order
+        , typename Tag = Group0 >        // Type tag
+class CompressedMatrix;
+
+template< typename Type                  // Data type of the matrix
+        , bool SO = defaultStorageOrder  // Storage order
+        , typename Tag = Group0 >        // Type tag
+class IdentityMatrix;
+
+template< typename Type                   // Data type of the vector
+        , bool TF = defaultTransposeFlag  // Transpose flag
+        , typename Tag = Group0 >         // Type tag
+class ZeroVector;
+
+template< typename Type                  // Data type of the matrix
+        , bool SO = defaultStorageOrder  // Storage order
+        , typename Tag = Group0 >        // Type tag
+class ZeroMatrix;
 
 } // namespace blaze
 

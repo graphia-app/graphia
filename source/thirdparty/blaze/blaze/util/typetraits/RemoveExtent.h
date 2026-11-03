@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/RemoveExtent.h
 //  \brief Header file for the RemoveExtent type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -71,7 +71,7 @@ struct RemoveExtent
  public:
    //**********************************************************************************************
    /*! \cond BLAZE_INTERNAL */
-   typedef typename std::remove_extent<T>::type  Type;
+   using Type = typename std::remove_extent<T>::type;
    /*! \endcond */
    //**********************************************************************************************
 };
@@ -82,17 +82,17 @@ struct RemoveExtent
 /*!\brief Auxiliary alias declaration for the RemoveExtent type trait.
 // \ingroup type_traits
 //
-// The RemoveExtent_ alias declaration provides a convenient shortcut to access the nested \a Type
+// The RemoveExtent_t alias declaration provides a convenient shortcut to access the nested \a Type
 // of the RemoveExtent class template. For instance, given the type \a T the following two type
 // definitions are identical:
 
    \code
-   using Type1 = typename RemoveExtent<T>::Type;
-   using Type2 = RemoveExtent_<T>;
+   using Type1 = typename blaze::RemoveExtent<T>::Type;
+   using Type2 = blaze::RemoveExtent_t<T>;
    \endcode
 */
 template< typename T >
-using RemoveExtent_ = typename RemoveExtent<T>::Type;
+using RemoveExtent_t = typename RemoveExtent<T>::Type;
 //*************************************************************************************************
 
 } // namespace blaze

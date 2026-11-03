@@ -3,7 +3,7 @@
 //  \file blaze/math/lapack/clapack/ormql.h
 //  \brief Header file for the CLAPACK ormql wrapper functions
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -36,6 +36,15 @@
 #define _BLAZE_MATH_LAPACK_CLAPACK_ORMQL_H_
 
 
+//*************************************************************************************************
+// Includes
+//*************************************************************************************************
+
+#include <blaze/math/blas/Types.h>
+#include <blaze/util/StaticAssert.h>
+#include <blaze/util/Types.h>
+
+
 //=================================================================================================
 //
 //  LAPACK FORWARD DECLARATIONS
@@ -44,12 +53,20 @@
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
+#if !defined(INTEL_MKL_VERSION)
 extern "C" {
 
-void sormql_( char* side, char* trans, int* m, int* n, int* k, float*  A, int* lda, float*  tau, float*  C, int* ldc, float*  work, int* lwork, int* info );
-void dormql_( char* side, char* trans, int* m, int* n, int* k, double* A, int* lda, double* tau, double* C, int* ldc, double* work, int* lwork, int* info );
+void sormql_( char* side, char* trans, blaze::blas_int_t* m, blaze::blas_int_t* n,
+              blaze::blas_int_t* k, float* A, blaze::blas_int_t* lda, float* tau, float* C,
+              blaze::blas_int_t* ldc, float* work, blaze::blas_int_t* lwork, blaze::blas_int_t* info,
+              blaze::fortran_charlen_t nside, blaze::fortran_charlen_t ntrans );
+void dormql_( char* side, char* trans, blaze::blas_int_t* m, blaze::blas_int_t* n,
+              blaze::blas_int_t* k, double* A, blaze::blas_int_t* lda, double* tau, double* C,
+              blaze::blas_int_t* ldc, double* work, blaze::blas_int_t* lwork, blaze::blas_int_t* info,
+              blaze::fortran_charlen_t nside, blaze::fortran_charlen_t ntrans );
 
 }
+#endif
 /*! \endcond */
 //*************************************************************************************************
 
@@ -67,11 +84,13 @@ namespace blaze {
 //*************************************************************************************************
 /*!\name LAPACK functions to multiply Q from a QL decomposition with a matrix (ormql) */
 //@{
-inline void ormql( char side, char trans, int m, int n, int k, const float* A, int lda,
-                   const float* tau, float* C, int ldc, float* work, int lwork, int* info );
+void ormql( char side, char trans, blas_int_t m, blas_int_t n, blas_int_t k,
+            const float* A, blas_int_t lda, const float* tau, float* C, blas_int_t ldc,
+            float* work, blas_int_t lwork, blas_int_t* info );
 
-inline void ormql( char side, char trans, int m, int n, int k, const double* A, int lda,
-                   const double* tau, double* C, int ldc, double* work, int lwork, int* info );
+void ormql( char side, char trans, blas_int_t m, blas_int_t n, blas_int_t k,
+            const double* A, blas_int_t lda, const double* tau, double* C, blas_int_t ldc,
+            double* work, blas_int_t lwork, blas_int_t* info );
 //@}
 //*************************************************************************************************
 
@@ -123,11 +142,20 @@ inline void ormql( char side, char trans, int m, int n, int k, const double* A, 
 // is available and linked to the executable. Otherwise a call to this function will result in a
 // linker error.
 */
-inline void ormql( char side, char trans, int m, int n, int k, const float* A, int lda,
-                   const float* tau, float* C, int ldc, float* work, int lwork, int* info )
+inline void ormql( char side, char trans, blas_int_t m, blas_int_t n, blas_int_t k,
+                   const float* A, blas_int_t lda, const float* tau, float* C, blas_int_t ldc,
+                   float* work, blas_int_t lwork, blas_int_t* info )
 {
+#if defined(INTEL_MKL_VERSION)
+   BLAZE_STATIC_ASSERT( sizeof( MKL_INT ) == sizeof( blas_int_t ) );
+#endif
+
    sormql_( &side, &trans, &m, &n, &k, const_cast<float*>( A ), &lda,
-            const_cast<float*>( tau ), C, &ldc, work, &lwork, info );
+            const_cast<float*>( tau ), C, &ldc, work, &lwork, info
+#if !defined(INTEL_MKL_VERSION)
+          , blaze::fortran_charlen_t(1), blaze::fortran_charlen_t(1)
+#endif
+          );
 }
 //*************************************************************************************************
 
@@ -179,11 +207,20 @@ inline void ormql( char side, char trans, int m, int n, int k, const float* A, i
 // is available and linked to the executable. Otherwise a call to this function will result in a
 // linker error.
 */
-inline void ormql( char side, char trans, int m, int n, int k, const double* A, int lda,
-                   const double* tau, double* C, int ldc, double* work, int lwork, int* info )
+inline void ormql( char side, char trans, blas_int_t m, blas_int_t n, blas_int_t k,
+                   const double* A, blas_int_t lda, const double* tau, double* C, blas_int_t ldc,
+                   double* work, blas_int_t lwork, blas_int_t* info )
 {
+#if defined(INTEL_MKL_VERSION)
+   BLAZE_STATIC_ASSERT( sizeof( MKL_INT ) == sizeof( blas_int_t ) );
+#endif
+
    dormql_( &side, &trans, &m, &n, &k, const_cast<double*>( A ), &lda,
-            const_cast<double*>( tau ), C, &ldc, work, &lwork, info );
+            const_cast<double*>( tau ), C, &ldc, work, &lwork, info
+#if !defined(INTEL_MKL_VERSION)
+          , blaze::fortran_charlen_t(1), blaze::fortran_charlen_t(1)
+#endif
+          );
 }
 //*************************************************************************************************
 

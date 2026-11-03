@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/IsObject.h
 //  \brief Header file for the IsObject type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -73,8 +73,27 @@ namespace blaze {
    \endcode
 */
 template< typename T >
-struct IsObject : public BoolConstant< std::is_object<T>::value >
+struct IsObject
+   : public BoolConstant< std::is_object<T>::value >
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsObject type trait.
+// \ingroup type_traits
+//
+// The IsObject_v variable template provides a convenient shortcut to access the nested \a value
+// of the IsObject class template. For instance, given the type \a T the following two statements
+// are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsObject<T>::value;
+   constexpr bool value2 = blaze::IsObject_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsObject_v = IsObject<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/Decay.h
 //  \brief Header file for the Decay type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -74,7 +74,7 @@ struct Decay
  public:
    //**********************************************************************************************
    /*! \cond BLAZE_INTERNAL */
-   typedef typename std::decay<T>::type  Type;
+   using Type = typename std::decay<T>::type;
    /*! \endcond */
    //**********************************************************************************************
 };
@@ -85,17 +85,17 @@ struct Decay
 /*!\brief Auxiliary alias declaration for the Decay type trait.
 // \ingroup type_traits
 //
-// The Decay_ alias declaration provides a convenient shortcut to access the nested \a Type of
+// The Decay_t alias declaration provides a convenient shortcut to access the nested \a Type of
 // the Decay class template. For instance, given the type \a T the following two type definitions
 // are identical:
 
    \code
-   using Type1 = typename Decay<T>::Type;
-   using Type2 = Decay_<T>;
+   using Type1 = typename blaze::Decay<T>::Type;
+   using Type2 = blaze::Decay_t<T>;
    \endcode
 */
 template< typename T >
-using Decay_ = typename Decay<T>::Type;
+using Decay_t = typename Decay<T>::Type;
 //*************************************************************************************************
 
 } // namespace blaze

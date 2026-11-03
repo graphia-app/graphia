@@ -3,7 +3,7 @@
 //  \file blaze/util/constraints/Integer.h
 //  \brief Constraint on the data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -59,7 +59,7 @@ namespace blaze {
 // the cv-qualifiers). In case \a T is not of type \c int, a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_INTEGER_TYPE(T) \
-   static_assert( ::blaze::IsInteger<T>::value, "Non-integer type detected" )
+   static_assert( ::blaze::IsInteger_v<T>, "Non-integer type detected" )
 //*************************************************************************************************
 
 
@@ -80,7 +80,7 @@ namespace blaze {
 // created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_INTEGER_TYPE(T) \
-   static_assert( !::blaze::IsInteger<T>::value, "Integer type detected" )
+   static_assert( !::blaze::IsInteger_v<T>, "Integer type detected" )
 //*************************************************************************************************
 
 } // namespace blaze

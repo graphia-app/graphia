@@ -3,7 +3,7 @@
 //  \file blaze/config/CacheSize.h
 //  \brief Configuration of the cache size of the target architecture
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -33,8 +33,6 @@
 //=================================================================================================
 
 
-namespace blaze {
-
 //*************************************************************************************************
 /*!\brief Cache size of the target architecture.
 // \ingroup config
@@ -44,8 +42,20 @@ namespace blaze {
 //
 // The size of the cache is specified in Byte. For instance, a cache of 3 MiByte must therefore
 // be specified as 3145728.
-*/
-constexpr size_t cacheSize = 3145728UL;
-//*************************************************************************************************
+//
+// \note It is possible to specify the cache size via command line or by defining this symbol
+// manually before including any Blaze header file:
 
-} // namespace blaze
+   \code
+   g++ ... -DBLAZE_CACHE_SIZE=3145728 ...
+   \endcode
+
+   \code
+   #define BLAZE_CACHE_SIZE 3145728UL
+   #include <blaze/Blaze.h>
+   \endcode
+*/
+#ifndef BLAZE_CACHE_SIZE
+#define BLAZE_CACHE_SIZE 3145728UL
+#endif
+//*************************************************************************************************

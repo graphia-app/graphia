@@ -3,7 +3,7 @@
 //  \file blaze/math/shims/Reset.h
 //  \brief Header file for the reset shim
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,7 +40,10 @@
 // Includes
 //*************************************************************************************************
 
+#include <blaze/math/typetraits/IsScalar.h>
+#include <blaze/math/typetraits/IsSIMDPack.h>
 #include <blaze/system/Inline.h>
+#include <blaze/util/EnableIf.h>
 
 
 namespace blaze {
@@ -61,10 +64,11 @@ namespace blaze {
 // The \a reset shim represents an abstract interface for the resetting of a value/object of
 // any given data type to its default value. Values of built-in data type are reset to zero.
 */
-template< typename Type >
-BLAZE_ALWAYS_INLINE void reset( Type& resettable )
+template< typename T
+        , EnableIf_t< IsScalar_v<T> || IsSIMDPack_v<T> >* = nullptr >
+BLAZE_ALWAYS_INLINE constexpr void reset( T& resettable )
 {
-   resettable = Type(0);
+   resettable = T();
 }
 //*************************************************************************************************
 

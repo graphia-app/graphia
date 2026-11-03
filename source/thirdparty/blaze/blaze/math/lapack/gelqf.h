@@ -3,7 +3,7 @@
 //  \file blaze/math/lapack/gelqf.h
 //  \brief Header file for the LAPACK LQ decomposition functions (gelqf)
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -45,6 +45,7 @@
 #include <blaze/math/constraints/Adaptor.h>
 #include <blaze/math/constraints/BLASCompatible.h>
 #include <blaze/math/constraints/Computation.h>
+#include <blaze/math/constraints/Contiguous.h>
 #include <blaze/math/constraints/MutableDataAccess.h>
 #include <blaze/math/expressions/DenseMatrix.h>
 #include <blaze/math/lapack/clapack/gelqf.h>
@@ -65,7 +66,7 @@ namespace blaze {
 /*!\name LAPACK LQ decomposition functions (gelqf) */
 //@{
 template< typename MT, bool SO >
-inline void gelqf( DenseMatrix<MT,SO>& A, ElementType_<MT>* tau );
+void gelqf( DenseMatrix<MT,SO>& A, ElementType_t<MT>* tau );
 //@}
 //*************************************************************************************************
 
@@ -114,32 +115,33 @@ inline void gelqf( DenseMatrix<MT,SO>& A, ElementType_<MT>* tau );
 */
 template< typename MT  // Type of the dense matrix
         , bool SO >    // Storage order of the dense matrix
-inline void gelqf( DenseMatrix<MT,SO>& A, ElementType_<MT>* tau )
+inline void gelqf( DenseMatrix<MT,SO>& A, ElementType_t<MT>* tau )
 {
    BLAZE_CONSTRAINT_MUST_NOT_BE_ADAPTOR_TYPE( MT );
    BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT );
    BLAZE_CONSTRAINT_MUST_HAVE_MUTABLE_DATA_ACCESS( MT );
-   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_<MT> );
+   BLAZE_CONSTRAINT_MUST_BE_CONTIGUOUS_TYPE( MT );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT> );
 
-   using ET = ElementType_<MT>;
+   using ET = ElementType_t<MT>;
 
-   int m   ( numeric_cast<int>( SO ? (~A).rows() : (~A).columns() ) );
-   int n   ( numeric_cast<int>( SO ? (~A).columns() : (~A).rows() ) );
-   int lda ( numeric_cast<int>( (~A).spacing() ) );
-   int info( 0 );
+   blas_int_t m   ( numeric_cast<blas_int_t>( SO ? (*A).rows() : (*A).columns() ) );
+   blas_int_t n   ( numeric_cast<blas_int_t>( SO ? (*A).columns() : (*A).rows() ) );
+   blas_int_t lda ( numeric_cast<blas_int_t>( (*A).spacing() ) );
+   blas_int_t info( 0 );
 
    if( m == 0 || n == 0 ) {
       return;
    }
 
-   int lwork( ( SO ? m : n ) * lda );
+   blas_int_t lwork( ( SO ? m : n ) * lda );
    const std::unique_ptr<ET[]> work( new ET[lwork] );
 
    if( SO ) {
-      gelqf( m, n, (~A).data(), lda, tau, work.get(), lwork, &info );
+      gelqf( m, n, (*A).data(), lda, tau, work.get(), lwork, &info );
    }
    else {
-      geqrf( m, n, (~A).data(), lda, tau, work.get(), lwork, &info );
+      geqrf( m, n, (*A).data(), lda, tau, work.get(), lwork, &info );
    }
 
    BLAZE_INTERNAL_ASSERT( info == 0, "Invalid argument for LQ decomposition" );

@@ -3,7 +3,7 @@
 //  \file blaze/math/constraints/ColumnMajorMatrix.h
 //  \brief Constraints on the storage order of matrix types
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -59,7 +59,7 @@ namespace blaze {
 // matrix type whose storage order is set to \a true) a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_COLUMN_MAJOR_MATRIX_TYPE(T) \
-   static_assert( ::blaze::IsColumnMajorMatrix<T>::value, "Non-column-major matrix type detected" )
+   static_assert( ::blaze::IsColumnMajorMatrix_v<T>, "Non-column-major matrix type detected" )
 //*************************************************************************************************
 
 
@@ -79,7 +79,7 @@ namespace blaze {
 // type whose storage order is set to \a true) a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_COLUMN_MAJOR_MATRIX_TYPE(T) \
-   static_assert( !::blaze::IsColumnMajorMatrix<T>::value, "Column-major matrix type detected" )
+   static_assert( !::blaze::IsColumnMajorMatrix_v<T>, "Column-major matrix type detected" )
 //*************************************************************************************************
 
 } // namespace blaze

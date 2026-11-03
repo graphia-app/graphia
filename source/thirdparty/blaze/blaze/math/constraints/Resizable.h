@@ -3,7 +3,7 @@
 //  \file blaze/math/constraints/Resizable.h
 //  \brief Constraint on the data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -47,7 +47,7 @@ namespace blaze {
 
 //=================================================================================================
 //
-//  MUST_BE_RESIZABLE CONSTRAINT
+//  MUST_BE_RESIZABLE_TYPE CONSTRAINT
 //
 //=================================================================================================
 
@@ -58,8 +58,8 @@ namespace blaze {
 // In case the given data type \a T is not resizable, i.e. does not have a 'resize' member
 // function that could be used to change the size, a compilation error is created.
 */
-#define BLAZE_CONSTRAINT_MUST_BE_RESIZABLE(T) \
-   static_assert( ::blaze::IsResizable<T>::value, "Non-resizable type detected" )
+#define BLAZE_CONSTRAINT_MUST_BE_RESIZABLE_TYPE(T) \
+   static_assert( ::blaze::IsResizable_v<T>, "Non-resizable type detected" )
 //*************************************************************************************************
 
 
@@ -67,7 +67,7 @@ namespace blaze {
 
 //=================================================================================================
 //
-//  MUST_NOT_BE_RESIZABLE CONSTRAINT
+//  MUST_NOT_BE_RESIZABLE_TYPE CONSTRAINT
 //
 //=================================================================================================
 
@@ -78,8 +78,8 @@ namespace blaze {
 // In case the given data type \a T is resizable, i.e. has a 'resize' member function that can
 // be used to change the size, a compilation error is created.
 */
-#define BLAZE_CONSTRAINT_MUST_NOT_BE_RESIZABLE(T) \
-   static_assert( !::blaze::IsResizable<T>::value, "Resizable type detected" )
+#define BLAZE_CONSTRAINT_MUST_NOT_BE_RESIZABLE_TYPE(T) \
+   static_assert( !::blaze::IsResizable_v<T>, "Resizable type detected" )
 //*************************************************************************************************
 
 } // namespace blaze

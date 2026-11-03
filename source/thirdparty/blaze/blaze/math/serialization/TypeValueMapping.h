@@ -3,7 +3,7 @@
 //  \file blaze/math/serialization/TypeValueMapping.h
 //  \brief Header file for the TypeValueMapping class template
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -165,10 +165,10 @@ struct TypeValueMapping
  public:
    //**********************************************************************************************
    /*! \cond BLAZE_INTERNAL */
-   enum { value = TypeValueMappingHelper< IsIntegral<T>::value && IsSigned<T>::value
-                                        , IsIntegral<T>::value && IsUnsigned<T>::value
-                                        , IsFloatingPoint<T>::value
-                                        , IsComplex<T>::value
+   enum { value = TypeValueMappingHelper< IsIntegral_v<T> && IsSigned_v<T>
+                                        , IsIntegral_v<T> && IsUnsigned_v<T>
+                                        , IsFloatingPoint_v<T>
+                                        , IsComplex_v<T>
                                         >::value };
    /*! \endcond */
    //**********************************************************************************************

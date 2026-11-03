@@ -3,7 +3,7 @@
 //  \file blaze/math/constraints/DeclDiagExpr.h
 //  \brief Constraint on the data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -59,7 +59,7 @@ namespace blaze {
 // DeclDiagExpr base class), a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_DECLDIAGEXPR_TYPE(T) \
-   static_assert( ::blaze::IsDeclDiagExpr<T>::value, "Non-decldiag expression type detected" )
+   static_assert( ::blaze::IsDeclDiagExpr_v<T>, "Non-decldiag expression type detected" )
 //*************************************************************************************************
 
 
@@ -79,7 +79,7 @@ namespace blaze {
 // DeclDiagExpr base class), a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_DECLDIAGEXPR_TYPE(T) \
-   static_assert( !::blaze::IsDeclDiagExpr<T>::value, "Decldiag expression type detected" )
+   static_assert( !::blaze::IsDeclDiagExpr_v<T>, "Decldiag expression type detected" )
 //*************************************************************************************************
 
 } // namespace blaze

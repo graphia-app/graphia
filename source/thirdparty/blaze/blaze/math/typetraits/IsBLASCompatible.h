@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/IsBLASCompatible.h
 //  \brief Header file for the IsBLASCompatible type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -41,7 +41,6 @@
 //*************************************************************************************************
 
 #include <blaze/util/IntegralConstant.h>
-#include <blaze/util/mpl/Or.h>
 #include <blaze/util/typetraits/IsComplexDouble.h>
 #include <blaze/util/typetraits/IsComplexFloat.h>
 #include <blaze/util/typetraits/IsDouble.h>
@@ -78,8 +77,26 @@ namespace blaze {
 */
 template< typename T >
 struct IsBLASCompatible
-   : public BoolConstant< Or< IsFloat<T>, IsDouble<T>, IsComplexFloat<T>, IsComplexDouble<T> >::value >
+   : public BoolConstant< IsFloat_v<T> || IsDouble_v<T> || IsComplexFloat_v<T> || IsComplexDouble_v<T> >
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsBLASCompatible type trait.
+// \ingroup math_type_traits
+//
+// The IsBLASCompatible_v variable template provides a convenient shortcut to access the nested
+// \a value of the IsBLASCompatible class template. For instance, given the type \a T the
+// following two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsBLASCompatible<T>::value;
+   constexpr bool value2 = blaze::IsBLASCompatible_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsBLASCompatible_v = IsBLASCompatible<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

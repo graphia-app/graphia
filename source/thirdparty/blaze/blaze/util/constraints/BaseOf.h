@@ -3,7 +3,7 @@
 //  \file blaze/util/constraints/BaseOf.h
 //  \brief Constraint on the inheritance relationship of a data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -58,7 +58,7 @@ namespace blaze {
 // In case \a B is not a base class of \a D, a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_BASE_OF(B,D) \
-   static_assert( ::blaze::IsBaseOf<B,D>::value, "Broken inheritance relationship detected" )
+   static_assert( ::blaze::IsBaseOf_v<B,D>, "Broken inheritance relationship detected" )
 //*************************************************************************************************
 
 
@@ -78,7 +78,7 @@ namespace blaze {
 // compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_BASE_OF(B,D) \
-   static_assert( !::blaze::IsBaseOf<B,D>::value, "Unexpected inheritance relationship detected" )
+   static_assert( !::blaze::IsBaseOf_v<B,D>, "Unexpected inheritance relationship detected" )
 //*************************************************************************************************
 
 
@@ -99,7 +99,7 @@ namespace blaze {
 // \a B and \a D are the same type.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_STRICTLY_BASE_OF(B,D) \
-   static_assert( ::blaze::IsBaseOf<B,D>::value && !::blaze::IsBaseOf<D,B>::value , "Broken inheritance relationship detected" )
+   static_assert( ::blaze::IsBaseOf_v<B,D> && !::blaze::IsBaseOf_v<D,B> , "Broken inheritance relationship detected" )
 //*************************************************************************************************
 
 
@@ -120,7 +120,7 @@ namespace blaze {
 // and \a D are the same type.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_STRICTLY_BASE_OF(B,D) \
-   static_assert( !::blaze::IsBaseOf<B,D>::value || ::blaze::IsBaseOf<D,B>::value , "Unexpected inheritance relationship detected" )
+   static_assert( !::blaze::IsBaseOf_v<B,D> || ::blaze::IsBaseOf_v<D,B> , "Unexpected inheritance relationship detected" )
 //*************************************************************************************************
 
 } // namespace blaze

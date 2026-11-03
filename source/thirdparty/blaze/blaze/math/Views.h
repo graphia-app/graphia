@@ -3,7 +3,7 @@
 //  \file blaze/math/Views.h
 //  \brief Header file for the vector and matrix views
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,8 +40,12 @@
 // Includes
 //*************************************************************************************************
 
+#include <blaze/math/Band.h>
 #include <blaze/math/Column.h>
+#include <blaze/math/Columns.h>
+#include <blaze/math/Elements.h>
 #include <blaze/math/Row.h>
+#include <blaze/math/Rows.h>
 #include <blaze/math/Submatrix.h>
 #include <blaze/math/Subvector.h>
 

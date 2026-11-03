@@ -3,7 +3,7 @@
 //  \file blaze/util/constraints/SameType.h
 //  \brief Data type constraint
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -69,7 +69,7 @@ namespace blaze {
 // considered to be unequal), use the blaze::BLAZE_CONSTRAINT_MUST_BE_STRICTLY_SAME_TYPE constraint.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE(A,B) \
-   static_assert( ::blaze::IsSame<A,B>::value, "Non-matching types detected" )
+   static_assert( ::blaze::IsSame_v<A,B>, "Non-matching types detected" )
 //*************************************************************************************************
 
 
@@ -100,7 +100,7 @@ namespace blaze {
 // constraint.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_SAME_TYPE(A,B) \
-   static_assert( !::blaze::IsSame<A,B>::value, "Matching types detected" )
+   static_assert( !::blaze::IsSame_v<A,B>, "Matching types detected" )
 //*************************************************************************************************
 
 
@@ -129,7 +129,7 @@ namespace blaze {
 // considered to be equal), use the blaze::BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE constraint.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_STRICTLY_SAME_TYPE(A,B) \
-   static_assert( ::blaze::IsStrictlySame<A,B>::value, "Non-matching types detected" )
+   static_assert( ::blaze::IsStrictlySame_v<A,B>, "Non-matching types detected" )
 //*************************************************************************************************
 
 
@@ -158,7 +158,7 @@ namespace blaze {
 // considered to be equal), use the blaze::BLAZE_CONSTRAINT_MUST_NOT_BE_SAME_TYPE constraint.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_STRICTLY_SAME_TYPE(A,B) \
-   static_assert( !::blaze::IsStrictlySame<A,B>::value, "Matching types detected" )
+   static_assert( !::blaze::IsStrictlySame_v<A,B>, "Matching types detected" )
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/util/Constraints.h
 //  \brief Header file for compile time constraints
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -62,8 +62,10 @@
 #include <blaze/util/constraints/Enum.h>
 #include <blaze/util/constraints/Float.h>
 #include <blaze/util/constraints/FloatingPoint.h>
+#include <blaze/util/constraints/GreaterThan.h>
 #include <blaze/util/constraints/Integer.h>
 #include <blaze/util/constraints/Integral.h>
+#include <blaze/util/constraints/LessThan.h>
 #include <blaze/util/constraints/Long.h>
 #include <blaze/util/constraints/LongDouble.h>
 #include <blaze/util/constraints/LValueReference.h>

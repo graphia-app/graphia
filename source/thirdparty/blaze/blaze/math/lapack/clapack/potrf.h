@@ -3,7 +3,7 @@
 //  \file blaze/math/lapack/clapack/potrf.h
 //  \brief Header file for the CLAPACK potrf wrapper functions
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,8 +40,10 @@
 // Includes
 //*************************************************************************************************
 
+#include <blaze/math/blas/Types.h>
 #include <blaze/util/Complex.h>
 #include <blaze/util/StaticAssert.h>
+#include <blaze/util/Types.h>
 
 
 //=================================================================================================
@@ -52,14 +54,20 @@
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
+#if !defined(INTEL_MKL_VERSION) && !defined(BLAS_H)
 extern "C" {
 
-void spotrf_( char* uplo, int* n, float*  A, int* lda, int* info );
-void dpotrf_( char* uplo, int* n, double* A, int* lda, int* info );
-void cpotrf_( char* uplo, int* n, float*  A, int* lda, int* info );
-void zpotrf_( char* uplo, int* n, double* A, int* lda, int* info );
+void spotrf_( char* uplo, blaze::blas_int_t* n, float* A, blaze::blas_int_t* lda,
+              blaze::blas_int_t* info, blaze::fortran_charlen_t nuplo );
+void dpotrf_( char* uplo, blaze::blas_int_t* n, double* A, blaze::blas_int_t* lda,
+              blaze::blas_int_t* info, blaze::fortran_charlen_t nuplo );
+void cpotrf_( char* uplo, blaze::blas_int_t* n, float* A, blaze::blas_int_t* lda,
+              blaze::blas_int_t* info, blaze::fortran_charlen_t nuplo );
+void zpotrf_( char* uplo, blaze::blas_int_t* n, double* A, blaze::blas_int_t* lda,
+              blaze::blas_int_t* info, blaze::fortran_charlen_t nuplo );
 
 }
+#endif
 /*! \endcond */
 //*************************************************************************************************
 
@@ -77,13 +85,13 @@ namespace blaze {
 //*************************************************************************************************
 /*!\name LAPACK LLH (Cholesky) decomposition functions (potrf) */
 //@{
-inline void potrf( char uplo, int n, float* A, int lda, int* info );
+void potrf( char uplo, blas_int_t n, float* A, blas_int_t lda, blas_int_t* info );
 
-inline void potrf( char uplo, int n, double* A, int lda, int* info );
+void potrf( char uplo, blas_int_t n, double* A, blas_int_t lda, blas_int_t* info );
 
-inline void potrf( char uplo, int n, complex<float>* A, int lda, int* info );
+void potrf( char uplo, blas_int_t n, complex<float>* A, blas_int_t lda, blas_int_t* info );
 
-inline void potrf( char uplo, int n, complex<double>* A, int lda, int* info );
+void potrf( char uplo, blas_int_t n, complex<double>* A, blas_int_t lda, blas_int_t* info );
 //@}
 //*************************************************************************************************
 
@@ -126,9 +134,17 @@ inline void potrf( char uplo, int n, complex<double>* A, int lda, int* info );
 // is available and linked to the executable. Otherwise a call to this function will result in a
 // linker error.
 */
-inline void potrf( char uplo, int n, float* A, int lda, int* info )
+inline void potrf( char uplo, blas_int_t n, float* A, blas_int_t lda, blas_int_t* info )
 {
-   spotrf_( &uplo, &n, A, &lda, info );
+#if defined(INTEL_MKL_VERSION)
+   BLAZE_STATIC_ASSERT( sizeof( MKL_INT ) == sizeof( blas_int_t ) );
+#endif
+
+   spotrf_( &uplo, &n, A, &lda, info
+#if !defined(INTEL_MKL_VERSION) && !defined(BLAS_H)
+          , blaze::fortran_charlen_t(1)
+#endif
+          );
 }
 //*************************************************************************************************
 
@@ -171,9 +187,17 @@ inline void potrf( char uplo, int n, float* A, int lda, int* info )
 // is available and linked to the executable. Otherwise a call to this function will result in a
 // linker error.
 */
-inline void potrf( char uplo, int n, double* A, int lda, int* info )
+inline void potrf( char uplo, blas_int_t n, double* A, blas_int_t lda, blas_int_t* info )
 {
-   dpotrf_( &uplo, &n, A, &lda, info );
+#if defined(INTEL_MKL_VERSION)
+   BLAZE_STATIC_ASSERT( sizeof( MKL_INT ) == sizeof( blas_int_t ) );
+#endif
+
+   dpotrf_( &uplo, &n, A, &lda, info
+#if !defined(INTEL_MKL_VERSION) && !defined(BLAS_H)
+          , blaze::fortran_charlen_t(1)
+#endif
+          );
 }
 //*************************************************************************************************
 
@@ -216,11 +240,23 @@ inline void potrf( char uplo, int n, double* A, int lda, int* info )
 // is available and linked to the executable. Otherwise a call to this function will result in a
 // linker error.
 */
-inline void potrf( char uplo, int n, complex<float>* A, int lda, int* info )
+inline void potrf( char uplo, blas_int_t n, complex<float>* A, blas_int_t lda, blas_int_t* info )
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<float> ) == 2UL*sizeof( float ) );
 
-   cpotrf_( &uplo, &n, reinterpret_cast<float*>( A ), &lda, info );
+#if defined(INTEL_MKL_VERSION)
+   BLAZE_STATIC_ASSERT( sizeof( MKL_INT ) == sizeof( blas_int_t ) );
+   BLAZE_STATIC_ASSERT( sizeof( MKL_Complex8 ) == sizeof( complex<float> ) );
+   using ET = MKL_Complex8;
+#else
+   using ET = float;
+#endif
+
+   cpotrf_( &uplo, &n, reinterpret_cast<ET*>( A ), &lda, info
+#if !defined(INTEL_MKL_VERSION) && !defined(BLAS_H)
+          , blaze::fortran_charlen_t(1)
+#endif
+          );
 }
 //*************************************************************************************************
 
@@ -263,11 +299,23 @@ inline void potrf( char uplo, int n, complex<float>* A, int lda, int* info )
 // is available and linked to the executable. Otherwise a call to this function will result in a
 // linker error.
 */
-inline void potrf( char uplo, int n, complex<double>* A, int lda, int* info )
+inline void potrf( char uplo, blas_int_t n, complex<double>* A, blas_int_t lda, blas_int_t* info )
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<double> ) == 2UL*sizeof( double ) );
 
-   zpotrf_( &uplo, &n, reinterpret_cast<double*>( A ), &lda, info );
+#if defined(INTEL_MKL_VERSION)
+   BLAZE_STATIC_ASSERT( sizeof( MKL_INT ) == sizeof( blas_int_t ) );
+   BLAZE_STATIC_ASSERT( sizeof( MKL_Complex16 ) == sizeof( complex<double> ) );
+   using ET = MKL_Complex16;
+#else
+   using ET = double;
+#endif
+
+   zpotrf_( &uplo, &n, reinterpret_cast<ET*>( A ), &lda, info
+#if !defined(INTEL_MKL_VERSION) && !defined(BLAS_H)
+          , blaze::fortran_charlen_t(1)
+#endif
+          );
 }
 //*************************************************************************************************
 

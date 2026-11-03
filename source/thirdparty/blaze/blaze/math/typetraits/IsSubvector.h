@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/IsSubvector.h
 //  \brief Header file for the IsSubvector type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -41,8 +41,7 @@
 //*************************************************************************************************
 
 #include <blaze/math/views/Forward.h>
-#include <blaze/util/FalseType.h>
-#include <blaze/util/TrueType.h>
+#include <blaze/util/IntegralConstant.h>
 
 
 namespace blaze {
@@ -57,32 +56,38 @@ namespace blaze {
 /*!\brief Compile time check for subvectors.
 // \ingroup math_type_traits
 //
-// This type trait tests whether or not the given template parameter is a subvector (i.e. dense
-// or sparse subvector). In case the type is a subvector, the \a value member constant is set
-// to \a true, the nested type definition \a Type is \a TrueType, and the class derives from
-// \a TrueType. Otherwise \a value is set to \a false, \a Type is \a FalseType, and the class
-// derives from \a FalseType.
+// This type trait tests whether or not the given template parameter is a subvector (i.e. a view
+// on the part of a dense or sparse vector). In case the type is a subvector, the \a value member
+// constant is set to \a true, the nested type definition \a Type is \a TrueType, and the class
+// derives from \a TrueType. Otherwise \a value is set to \a false, \a Type is \a FalseType, and
+// the class derives from \a FalseType.
 
    \code
-   typedef blaze::DynamicVector<double,columnVector>  DenseVectorType1;
-   typedef blaze::Subvector<DenseVectorType1>         DenseSubvectorType1;
+   using blaze::aligned;
 
-   typedef blaze::StaticVector<float,3UL,rowVector>   DenseVectorType2;
-   typedef blaze::Subvector<DenseVectorType2>         DenseSubvectorType2;
+   using VectorType1 = blaze::StaticVector<int,10UL>;
+   using VectorType2 = blaze::DynamicVector<double>;
+   using VectorType3 = blaze::CompressedVector<float>;
 
-   typedef blaze::CompressedVector<int,columnVector>  SparseVectorType;
-   typedef blaze::Subvector<SparseVectorType>         SparseSubvectorType;
+   VectorType1 a;
+   VectorType2 b( 100UL );
+   VectorType3 c( 200UL );
 
-   blaze::IsSubvector< SparseSubvectorType >::value       // Evaluates to 1
-   blaze::IsSubvector< const DenseSubvectorType1 >::Type  // Results in TrueType
-   blaze::IsSubvector< volatile DenseSubvectorType2 >     // Is derived from TrueType
-   blaze::IsSubvector< DenseVectorType1 >::value          // Evaluates to 0
-   blaze::IsSubvector< const SparseVectorType >::Type     // Results in FalseType
-   blaze::IsSubvector< volatile long double >             // Is derived from FalseType
+   using SubvectorType1 = decltype( blaze::subvector<2UL,4UL>( a ) );
+   using SubvectorType2 = decltype( blaze::subvector<aligned>( b, 8UL 24UL ) );
+   using SubvectorType3 = decltype( blaze::subvector( c, 5UL, 13UL ) );
+
+   blaze::IsSubvector< SubvectorType1 >::value       // Evaluates to 1
+   blaze::IsSubvector< const SubvectorType2 >::Type  // Results in TrueType
+   blaze::IsSubvector< volatile SubvectorType3 >     // Is derived from TrueType
+   blaze::IsSubvector< VectorType1 >::value          // Evaluates to 0
+   blaze::IsSubvector< const VectorType2 >::Type     // Results in FalseType
+   blaze::IsSubvector< volatile VectorType3 >        // Is derived from FalseType
    \endcode
 */
 template< typename T >
-struct IsSubvector : public FalseType
+struct IsSubvector
+   : public FalseType
 {};
 //*************************************************************************************************
 
@@ -92,8 +97,9 @@ struct IsSubvector : public FalseType
 /*!\brief Specialization of the IsSubvector type trait for 'Subvector'.
 // \ingroup math_type_traits
 */
-template< typename VT, bool AF, bool TF, bool DF >
-struct IsSubvector< Subvector<VT,AF,TF,DF> > : public TrueType
+template< typename VT, AlignmentFlag AF, bool TF, bool DF, size_t... CSAs >
+struct IsSubvector< Subvector<VT,AF,TF,DF,CSAs...> >
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -104,8 +110,9 @@ struct IsSubvector< Subvector<VT,AF,TF,DF> > : public TrueType
 /*!\brief Specialization of the IsSubvector type trait for 'const Subvector'.
 // \ingroup math_type_traits
 */
-template< typename VT, bool AF, bool TF, bool DF >
-struct IsSubvector< const Subvector<VT,AF,TF,DF> > : public TrueType
+template< typename VT, AlignmentFlag AF, bool TF, bool DF, size_t... CSAs >
+struct IsSubvector< const Subvector<VT,AF,TF,DF,CSAs...> >
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -116,8 +123,9 @@ struct IsSubvector< const Subvector<VT,AF,TF,DF> > : public TrueType
 /*!\brief Specialization of the IsSubvector type trait for 'volatile Subvector'.
 // \ingroup math_type_traits
 */
-template< typename VT, bool AF, bool TF, bool DF >
-struct IsSubvector< volatile Subvector<VT,AF,TF,DF> > : public TrueType
+template< typename VT, AlignmentFlag AF, bool TF, bool DF, size_t... CSAs >
+struct IsSubvector< volatile Subvector<VT,AF,TF,DF,CSAs...> >
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -128,10 +136,29 @@ struct IsSubvector< volatile Subvector<VT,AF,TF,DF> > : public TrueType
 /*!\brief Specialization of the IsSubvector type trait for 'const volatile Subvector'.
 // \ingroup math_type_traits
 */
-template< typename VT, bool AF, bool TF, bool DF >
-struct IsSubvector< const volatile Subvector<VT,AF,TF,DF> > : public TrueType
+template< typename VT, AlignmentFlag AF, bool TF, bool DF, size_t... CSAs >
+struct IsSubvector< const volatile Subvector<VT,AF,TF,DF,CSAs...> >
+   : public TrueType
 {};
 /*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsSubvector type trait.
+// \ingroup math_type_traits
+//
+// The IsSubvector_v variable template provides a convenient shortcut to access the nested
+// \a value of the IsSubvector class template. For instance, given the type \a T the following
+// two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsSubvector<T>::value;
+   constexpr bool value2 = blaze::IsSubvector_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsSubvector_v = IsSubvector<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/util/UnsignedValue.h
 //  \brief Header file for the UnsignedValue class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,8 +40,7 @@
 // Includes
 //*************************************************************************************************
 
-#include <istream>
-#include <ostream>
+#include <iosfwd>
 #include <blaze/util/constraints/Unsigned.h>
 
 
@@ -68,24 +67,18 @@ class UnsignedValue
    /*!\name Constructors */
    //@{
    explicit inline UnsignedValue( T value=0 );
-   // No explicitly declared copy constructor.
    //@}
    //**********************************************************************************************
 
-   //**Destructor**********************************************************************************
-   // No explicitly declared destructor.
-   //**********************************************************************************************
-
-   //**Assignment operator*************************************************************************
-   /*!\name Assignment operator */
+   //**Assignment operators************************************************************************
+   /*!\name Assignment operators */
    //@{
    inline UnsignedValue& operator=( T value );
-   // No explicitly declared copy assignment operator.
    //@}
    //**********************************************************************************************
 
-   //**Conversion operator*************************************************************************
-   /*!\name Conversion operator */
+   //**Conversion operators************************************************************************
+   /*!\name Conversion operators */
    //@{
    inline operator T() const;
    //@}
@@ -119,7 +112,7 @@ class UnsignedValue
 
 //=================================================================================================
 //
-//  CONSTRUCTOR
+//  CONSTRUCTORS
 //
 //=================================================================================================
 

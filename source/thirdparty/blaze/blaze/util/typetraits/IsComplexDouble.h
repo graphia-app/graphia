@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/IsComplexDouble.h
 //  \brief Header file for the IsComplexDouble type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -41,8 +41,7 @@
 //*************************************************************************************************
 
 #include <blaze/util/Complex.h>
-#include <blaze/util/FalseType.h>
-#include <blaze/util/TrueType.h>
+#include <blaze/util/IntegralConstant.h>
 
 
 namespace blaze {
@@ -73,7 +72,8 @@ namespace blaze {
    \endcode
 */
 template< typename T >
-struct IsComplexDouble : public FalseType
+struct IsComplexDouble
+   : public FalseType
 {};
 //*************************************************************************************************
 
@@ -82,7 +82,8 @@ struct IsComplexDouble : public FalseType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsComplexDouble type trait for the plain 'complex<double>' type.
 template<>
-struct IsComplexDouble< complex<double> > : public TrueType
+struct IsComplexDouble< complex<double> >
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -92,7 +93,8 @@ struct IsComplexDouble< complex<double> > : public TrueType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsComplexDouble type trait for 'const complex<double>'.
 template<>
-struct IsComplexDouble< const complex<double> > : public TrueType
+struct IsComplexDouble< const complex<double> >
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -102,7 +104,8 @@ struct IsComplexDouble< const complex<double> > : public TrueType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsComplexDouble type trait for 'volatile complex<double>'.
 template<>
-struct IsComplexDouble< volatile complex<double> > : public TrueType
+struct IsComplexDouble< volatile complex<double> >
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -112,9 +115,28 @@ struct IsComplexDouble< volatile complex<double> > : public TrueType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsComplexDouble type trait for 'const volatile complex<double>'
 template<>
-struct IsComplexDouble< const volatile complex<double> > : public TrueType
+struct IsComplexDouble< const volatile complex<double> >
+   : public TrueType
 {};
 /*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsComplexDouble type trait.
+// \ingroup type_traits
+//
+// The IsComplexDouble_v variable template provides a convenient shortcut to access the nested
+// \a value of the IsComplexDouble class template. For instance, given the type \a T the
+// following two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsComplexDouble<T>::value;
+   constexpr bool value2 = blaze::IsComplexDouble_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsComplexDouble_v = IsComplexDouble<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

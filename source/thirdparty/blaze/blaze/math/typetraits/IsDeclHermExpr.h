@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/IsDeclHermExpr.h
 //  \brief Header file for the IsDeclHermExpr type trait class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,11 +40,9 @@
 // Includes
 //*************************************************************************************************
 
+#include <utility>
 #include <blaze/math/expressions/DeclHermExpr.h>
 #include <blaze/util/IntegralConstant.h>
-#include <blaze/util/mpl/And.h>
-#include <blaze/util/mpl/Not.h>
-#include <blaze/util/typetraits/IsBaseOf.h>
 
 
 namespace blaze {
@@ -56,21 +54,64 @@ namespace blaze {
 //=================================================================================================
 
 //*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Auxiliary helper functions for the IsDeclHermExpr type trait.
+// \ingroup math_type_traits
+*/
+template< typename MT >
+TrueType isDeclHermExpr_backend( const volatile DeclHermExpr<MT>* );
+
+FalseType isDeclHermExpr_backend( ... );
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
 /*!\brief Compile time check whether the given type is a declherm expression template.
 // \ingroup math_type_traits
 //
 // This type trait class tests whether or not the given type \a Type is a declherm expression
-// template. In order to qualify as a valid declherm expression template, the given type has
-// to derive (publicly or privately) from the DeclHermExpr base class. In case the given type
-// is a valid declherm expression template, the \a value member constant is set to \a true,
-// the nested type definition \a Type is \a TrueType, and the class derives from \a TrueType.
-// Otherwise \a value is set to \a false, \a Type is \a FalseType, and the class derives
-// from \a FalseType.
+// template. In order to qualify as a valid declherm expression template, the given type has to
+// derive publicly from the DeclHermExpr base class. In case the given type is a valid declherm
+// expression template, the \a value member constant is set to \a true, the nested type definition
+// \a Type is \a TrueType, and the class derives from \a TrueType. Otherwise \a value is set to
+// \a false, \a Type is \a FalseType, and the class derives from \a FalseType.
 */
 template< typename T >
 struct IsDeclHermExpr
-   : public BoolConstant< And< IsBaseOf<DeclHermExpr,T>, Not< IsBaseOf<T,DeclHermExpr> > >::value >
+   : public decltype( isDeclHermExpr_backend( std::declval<T*>() ) )
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Specialization of the IsDeclHermExpr type trait for references.
+// \ingroup math_type_traits
+*/
+template< typename T >
+struct IsDeclHermExpr<T&>
+   : public FalseType
+{};
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsDeclHermExpr type trait.
+// \ingroup math_type_traits
+//
+// The IsDeclHermExpr_v variable template provides a convenient shortcut to access the nested
+// \a value of the IsDeclHermExpr class template. For instance, given the type \a T the
+// following two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsDeclHermExpr<T>::value;
+   constexpr bool value2 = blaze::IsDeclHermExpr_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsDeclHermExpr_v = IsDeclHermExpr<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

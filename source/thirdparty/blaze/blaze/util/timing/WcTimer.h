@@ -3,7 +3,7 @@
 //  \file blaze/util/timing/WcTimer.h
 //  \brief Progress timer for wall clock time measurements
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -63,7 +63,7 @@ namespace timing {
 // In contrast to the measurement of CPU time, the wall clock time also contains waiting times
 // such as input/output operations.
 */
-typedef Timer<WcPolicy>  WcTimer;
+using WcTimer = Timer<WcPolicy>;
 //*************************************************************************************************
 
 } // timing

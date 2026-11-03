@@ -3,7 +3,7 @@
 //  \file blaze/math/constraints/SIMDEnabled.h
 //  \brief Constraint on the data type
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -59,7 +59,7 @@ namespace blaze {
 // SIMD member functions), a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_BE_SIMD_ENABLED(T) \
-   static_assert( ::blaze::IsSIMDEnabled<T>::value, "Non-SIMD enabled type detected" )
+   static_assert( ::blaze::IsSIMDEnabled_v<T>, "Non-SIMD enabled type detected" )
 //*************************************************************************************************
 
 
@@ -79,7 +79,7 @@ namespace blaze {
 // functions), a compilation error is created.
 */
 #define BLAZE_CONSTRAINT_MUST_NOT_BE_SIMD_ENABLED(T) \
-   static_assert( !::blaze::IsSIMDEnabled<T>::value, "SIMD enabled type detected" )
+   static_assert( !::blaze::IsSIMDEnabled_v<T>, "SIMD enabled type detected" )
 //*************************************************************************************************
 
 } // namespace blaze

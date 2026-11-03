@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/IsDestructible.h
 //  \brief Header file for the IsDestructible type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -75,6 +75,24 @@ struct IsDestructible
 //*************************************************************************************************
 
 
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsDestructible type trait.
+// \ingroup type_traits
+//
+// The IsDestructible_v variable template provides a convenient shortcut to access the nested
+// \a value of the IsDestructible class template. For instance, given the type \a T the following
+// two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsDestructible<T>::value;
+   constexpr bool value2 = blaze::IsDestructible_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsDestructible_v = IsDestructible<T>::value;
+//*************************************************************************************************
+
+
 
 
 //=================================================================================================
@@ -103,6 +121,24 @@ template< typename T >
 struct IsNothrowDestructible
    : public BoolConstant< std::is_nothrow_destructible<T>::value >
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsNothrowDestructible type trait.
+// \ingroup type_traits
+//
+// The IsNothrowDestructible_v variable template provides a convenient shortcut to access the
+// nested \a value of the IsNothrowDestructible class template. For instance, given the type
+// \a T the following two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsNothrowDestructible<T>::value;
+   constexpr bool value2 = blaze::IsNothrowDestructible_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsNothrowDestructible_v = IsNothrowDestructible<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

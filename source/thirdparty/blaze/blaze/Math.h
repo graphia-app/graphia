@@ -3,7 +3,7 @@
 //  \file blaze/Math.h
 //  \brief Header file for the inclusion of the math module of the Blaze library
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -43,6 +43,7 @@
 #include <blaze/math/Accuracy.h>
 #include <blaze/math/Aliases.h>
 #include <blaze/math/AlignmentFlag.h>
+#include <blaze/math/Band.h>
 #include <blaze/math/BLAS.h>
 #include <blaze/math/CompressedMatrix.h>
 #include <blaze/math/CompressedVector.h>
@@ -53,9 +54,12 @@
 #include <blaze/math/DynamicMatrix.h>
 #include <blaze/math/DynamicVector.h>
 #include <blaze/math/Epsilon.h>
-#include <blaze/math/Functions.h>
 #include <blaze/math/Functors.h>
+#include <blaze/math/GroupTag.h>
+#include <blaze/math/IdentityMatrix.h>
 #include <blaze/math/Infinity.h>
+#include <blaze/math/InitializerMatrix.h>
+#include <blaze/math/InitializerVector.h>
 #include <blaze/math/InversionFlag.h>
 #include <blaze/math/HermitianMatrix.h>
 #include <blaze/math/HybridMatrix.h>
@@ -63,6 +67,7 @@
 #include <blaze/math/LAPACK.h>
 #include <blaze/math/LowerMatrix.h>
 #include <blaze/math/PaddingFlag.h>
+#include <blaze/math/ReductionFlag.h>
 #include <blaze/math/RelaxationFlag.h>
 #include <blaze/math/Serialization.h>
 #include <blaze/math/Shims.h>
@@ -76,9 +81,13 @@
 #include <blaze/math/Traits.h>
 #include <blaze/math/TransposeFlag.h>
 #include <blaze/math/TypeTraits.h>
+#include <blaze/math/UniformMatrix.h>
+#include <blaze/math/UniformVector.h>
 #include <blaze/math/UniLowerMatrix.h>
 #include <blaze/math/UniUpperMatrix.h>
 #include <blaze/math/UpperMatrix.h>
 #include <blaze/math/Views.h>
+#include <blaze/math/ZeroMatrix.h>
+#include <blaze/math/ZeroVector.h>
 
 #endif

@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/UnderlyingBuiltin.h
 //  \brief Header file for the UnderlyingBuiltin type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,9 +40,9 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/util/mpl/If.h>
-#include <blaze/util/typetraits/IsBuiltin.h>
-#include <blaze/util/typetraits/IsComplex.h>
+#include <blaze/util/EnableIf.h>
+#include <blaze/util/typetraits/IsSame.h>
+#include <blaze/util/typetraits/RemoveCV.h>
 
 
 namespace blaze {
@@ -54,62 +54,46 @@ namespace blaze {
 //=================================================================================================
 
 //*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename, typename = void > struct UnderlyingBuiltinHelper1;
+template< typename, typename = void > struct UnderlyingBuiltinHelper2;
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
 /*!\brief Evaluation of the underlying builtin element type of a given data type.
 // \ingroup math_type_traits
 //
-// Via this type trait it is possible to evaluate the underlying fundamental element type at the
-// heart of a given data type. Examples:
+// This type trait evaluates the underlying fundamental element type at the heart of the given
+// data type \a T. For this purpose either a nested \a ElementType or a nested \a value_type will
+// be used. Examples:
 
    \code
-   typedef double                                    Type1;  // Built-in data type
-   typedef complex<float>                            Type2;  // Complex data type
-   typedef StaticVector<int,3UL>                     Type3;  // Vector with built-in element type
-   typedef CompressedVector< DynamicVector<float> >  Type4;  // Vector with vector element type
+   using Type1 = double;                                    // Built-in data type
+   using Type2 = complex<float>;                            // Complex data type
+   using Type3 = std::vector<short>;                        // std::vector with built-in element type
+   using Type4 = StaticVector<int,3UL>;                     // Vector with built-in element type
+   using Type5 = CompressedVector< DynamicVector<float> >;  // Vector with vector element type
 
    blaze::UnderlyingBuiltin< Type1 >::Type  // corresponds to double
    blaze::UnderlyingBuiltin< Type2 >::Type  // corresponds to float
-   blaze::UnderlyingBuiltin< Type3 >::Type  // corresponds to int
-   blaze::UnderlyingBuiltin< Type4 >::Type  // corresponds to float
+   blaze::UnderlyingBuiltin< Type3 >::Type  // corresponds to short
+   blaze::UnderlyingBuiltin< Type4 >::Type  // corresponds to int
+   blaze::UnderlyingBuiltin< Type5 >::Type  // corresponds to float
    \endcode
 
-// Note that per default UnderlyingBuiltin only supports fundamental/built-in data types, complex,
-// and data types with the nested type definition \a ElementType. Support for other data types can
-// be added by specializing the UnderlyingBuiltin class template.
+// Note that it is possible to add support for other data types that have an underlying
+// fundamental element type but do neither provide a nested \a ElementType nor \a value_type type
+// by specializing the UnderlyingBuiltin class template.
 */
 template< typename T >
 struct UnderlyingBuiltin
 {
- private:
-   //**struct Builtin******************************************************************************
-   /*! \cond BLAZE_INTERNAL */
-   template< typename T2 >
-   struct Builtin { typedef T2  Type; };
-   /*! \endcond */
-   //**********************************************************************************************
-
-   //**struct Complex******************************************************************************
-   /*! \cond BLAZE_INTERNAL */
-   template< typename T2 >
-   struct Complex { typedef typename UnderlyingBuiltin<typename T2::value_type>::Type  Type; };
-   /*! \endcond */
-   //**********************************************************************************************
-
-   //**struct Other********************************************************************************
-   /*! \cond BLAZE_INTERNAL */
-   template< typename T2 >
-   struct Other { typedef typename UnderlyingBuiltin<typename T2::ElementType>::Type  Type; };
-   /*! \endcond */
-   //**********************************************************************************************
-
  public:
    //**********************************************************************************************
    /*! \cond BLAZE_INTERNAL */
-   typedef typename If_< IsBuiltin<T>
-                       , Builtin<T>
-                       , If_< IsComplex<T>
-                            , Complex<T>
-                            , Other<T> >
-                       >::Type  Type;
+   using Type = typename UnderlyingBuiltinHelper1< RemoveCV_t<T> >::Type;
    /*! \endcond */
    //**********************************************************************************************
 };
@@ -118,19 +102,59 @@ struct UnderlyingBuiltin
 
 //*************************************************************************************************
 /*!\brief Auxiliary alias declaration for the UnderlyingBuiltin type trait.
-// \ingroup type_traits
+// \ingroup math_type_traits
 //
-// The UnderlyingBuiltin_ alias declaration provides a convenient shortcut to access the
+// The UnderlyingBuiltin_t alias declaration provides a convenient shortcut to access the
 // nested \a Type of the UnderlyingBuiltin class template. For instance, given the type \a T
 // the following two type definitions are identical:
 
    \code
-   using Type1 = typename UnderlyingBuiltin<T>::Type;
-   using Type2 = UnderlyingBuiltin_<T>;
+   using Type1 = typename blaze::UnderlyingBuiltin<T>::Type;
+   using Type2 = blaze::UnderlyingBuiltin_t<T>;
    \endcode
 */
 template< typename T >
-using UnderlyingBuiltin_ = typename UnderlyingBuiltin<T>::Type;
+using UnderlyingBuiltin_t = typename UnderlyingBuiltin<T>::Type;
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief First auxiliary helper struct for the UnderlyingBuiltin type trait.
+// \ingroup math_type_traits
+*/
+template< typename T, typename >
+struct UnderlyingBuiltinHelper1
+{
+   using Type = typename UnderlyingBuiltinHelper2<T>::Type;
+};
+
+template< typename T >
+struct UnderlyingBuiltinHelper1< T, EnableIf_t< !IsSame_v< T, typename T::ElementType > > >
+{
+   using Type = typename UnderlyingBuiltinHelper1< typename T::ElementType >::Type;
+};
+/*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Second auxiliary helper struct for the UnderlyingBuiltin type trait.
+// \ingroup math_type_traits
+*/
+template< typename T, typename >
+struct UnderlyingBuiltinHelper2
+{
+   using Type = T;
+};
+
+template< typename T >
+struct UnderlyingBuiltinHelper2< T, EnableIf_t< !IsSame_v< T, typename T::value_type > > >
+{
+   using Type = typename UnderlyingBuiltinHelper1< typename T::value_type >::Type;
+};
+/*! \endcond */
 //*************************************************************************************************
 
 } // namespace blaze

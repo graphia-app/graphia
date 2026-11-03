@@ -3,7 +3,7 @@
 //  \file blaze/math/expressions/MatTransExpr.h
 //  \brief Header file for the MatTransExpr base class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -41,6 +41,7 @@
 //*************************************************************************************************
 
 #include <blaze/math/expressions/TransExpr.h>
+#include <blaze/util/FunctionTrace.h>
 
 
 namespace blaze {
@@ -58,12 +59,53 @@ namespace blaze {
 // The MatTransExpr class serves as a tag for all expression templates that implement a matrix
 // transposition operation. All classes, that represent a matrix transposition operation and
 // that are used within the expression template environment of the Blaze library have to derive
-// from this class in order to qualify as matrix transposition expression template. Only in case
-// a class is derived from the MatTransExpr base class, the IsMatTransExpr type trait recognizes
-// the class as valid matrix transposition expression template.
+// publicly from this class in order to qualify as matrix transposition expression template. Only
+// in case a class is derived publicly from the MatTransExpr base class, the IsMatTransExpr type
+// trait recognizes the class as valid matrix transposition expression template.
 */
-struct MatTransExpr : private TransExpr
+template< typename MT >  // Matrix base type of the expression
+struct MatTransExpr
+   : public TransExpr<MT>
 {};
+//*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  GLOBAL RESTRUCTURING FUNCTIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Calculating the transpose of a transpose matrix.
+// \ingroup math
+//
+// \param matrix The matrix to be (re-)transposed.
+// \return The transpose of the transpose matrix.
+//
+// This function implements a performance optimized treatment of the transpose operation on
+// a matrix transpose expression. It returns an expression representing the transpose of a
+// transpose matrix:
+
+   \code
+   using blaze::rowMajor;
+
+   blaze::DynamicMatrix<double,rowMajor> A, B;
+   // ... Resizing and initialization
+   B = trans( trans( A ) );
+   \endcode
+*/
+template< typename MT >  // Matrix base type of the expression
+inline decltype(auto) trans( const MatTransExpr<MT>& matrix )
+{
+   BLAZE_FUNCTION_TRACE;
+
+   return (*matrix).operand();
+}
+/*! \endcond */
 //*************************************************************************************************
 
 } // namespace blaze

@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/HasSize.h
 //  \brief Header file for the HasSize type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -57,7 +57,7 @@ namespace blaze {
 // \ingroup type_traits
 //
 // This class offers the possibility to test the size of a type at compile time. If the type
-// \a T is exactly \a Size bytes large, the \a value member constant is set to \a true, the
+// \a T is exactly \a S bytes large, the \a value member constant is set to \a true, the
 // nested type definition \a Type is \a TrueType, and the class derives from \a TrueType.
 // Otherwise \a value is set to \a false, \a Type is \a FalseType, and the class derives from
 // \a FalseType.
@@ -71,8 +71,9 @@ namespace blaze {
    blaze::HasSize<unsigned char,4>           // Is derived from FalseType
    \endcode
 */
-template< typename T, size_t Size >
-struct HasSize : public BoolConstant< sizeof( T ) == Size >
+template< typename T, size_t S >
+struct HasSize
+   : public BoolConstant< sizeof( T ) == S >
 {};
 //*************************************************************************************************
 
@@ -85,11 +86,12 @@ struct HasSize : public BoolConstant< sizeof( T ) == Size >
 // This class ia a partial specialization of the HasSize template for the type \a void. This
 // specialization assumes that an object of type \a void has a size of 0. Therefore \a value
 // is set to \a true, \a Type is \a TrueType, and the class derives from \a TrueType only if the
-// \a Size template argument is 0. Otherwise \a value is set to \a false, \a Type is \a FalseType,
+// \a S template argument is 0. Otherwise \a value is set to \a false, \a Type is \a FalseType,
 // and the class derives from \a FalseType.
 */
-template< size_t Size >
-struct HasSize<void,Size> : public BoolConstant< 0 == Size >
+template< size_t S >
+struct HasSize<void,S>
+   : public BoolConstant< 0 == S >
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -103,11 +105,12 @@ struct HasSize<void,Size> : public BoolConstant< 0 == Size >
 // This class ia a partial specialization of the HasSize template for constant \a void. This
 // specialization assumes that an object of type \a void has a size of 0. Therefore \a value
 // is set to \a true, \a Type is \a TrueType, and the class derives from \a TrueType only if
-// the \a Size template argument is 0. Otherwise \a value is set to \a false, \a Type is
+// the \a S template argument is 0. Otherwise \a value is set to \a false, \a Type is
 // \a FalseType, and the class derives from \a FalseType.
 */
-template< size_t Size >
-struct HasSize<const void,Size> : public BoolConstant< 0 == Size >
+template< size_t S >
+struct HasSize<const void,S>
+   : public BoolConstant< 0 == S >
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -121,11 +124,12 @@ struct HasSize<const void,Size> : public BoolConstant< 0 == Size >
 // This class ia a partial specialization of the HasSize template for volatile \a void. This
 // specialization assumes that an object of type \a void has a size of 0. Therefore \a value
 // is set to \a true, \a Type is \a TrueType, and the class derives from \a TrueType only if
-// the \a Size template argument is 0. Otherwise \a value is set to \a false, \a Type is
+// the \a S template argument is 0. Otherwise \a value is set to \a false, \a Type is
 // \a FalseType, and the class derives from \a FalseType.
 */
-template< size_t Size >
-struct HasSize<volatile void,Size> : public BoolConstant< 0 == Size >
+template< size_t S >
+struct HasSize<volatile void,S>
+   : public BoolConstant< 0 == S >
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -139,13 +143,32 @@ struct HasSize<volatile void,Size> : public BoolConstant< 0 == Size >
 // This class ia a partial specialization of the HasSize template for constant volatile \a void.
 // This specialization assumes that an object of type \a void has a size of 0. Therefore \a value
 // is set to \a true, \a Type is \a TrueType, and the class derives from \a TrueType only if the
-// \a Size template argument is 0. Otherwise \a value is set to \a false, \a Type is \a FalseType,
+// \a S template argument is 0. Otherwise \a value is set to \a false, \a Type is \a FalseType,
 // and the class derives from \a FalseType.
 */
-template< size_t Size >
-struct HasSize<const volatile void,Size> : public BoolConstant< 0 == Size >
+template< size_t S >
+struct HasSize<const volatile void,S>
+   : public BoolConstant< 0 == S >
 {};
 /*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the HasSize type trait.
+// \ingroup type_traits
+//
+// The HasSize_v variable template provides a convenient shortcut to access the nested
+// \a value of the HasSize class template. For instance, given the type \a T the following
+// two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::HasSize<T,8UL>::value;
+   constexpr bool value2 = blaze::HasSize_v<T,8UL>;
+   \endcode
+*/
+template< typename T, size_t S >
+constexpr bool HasSize_v = HasSize<T,S>::value;
 //*************************************************************************************************
 
 
@@ -177,8 +200,27 @@ struct HasSize<const volatile void,Size> : public BoolConstant< 0 == Size >
    \endcode
 */
 template< typename T >
-struct Has1Byte : public HasSize<T,1UL>
+struct Has1Byte
+   : public HasSize<T,1UL>
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the Has1Byte type trait.
+// \ingroup type_traits
+//
+// The Has1Byte_v variable template provides a convenient shortcut to access the nested
+// \a value of the Has1Byte class template. For instance, given the type \a T the following
+// two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::Has1Byte<T>::value;
+   constexpr bool value2 = blaze::Has1Byte_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool Has1Byte_v = Has1Byte<T>::value;
 //*************************************************************************************************
 
 
@@ -210,8 +252,27 @@ struct Has1Byte : public HasSize<T,1UL>
    \endcode
 */
 template< typename T >
-struct Has2Bytes : public HasSize<T,2UL>
+struct Has2Bytes
+   : public HasSize<T,2UL>
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the Has2Bytes type trait.
+// \ingroup type_traits
+//
+// The Has2Bytes_v variable template provides a convenient shortcut to access the nested
+// \a value of the Has2Bytes class template. For instance, given the type \a T the following
+// two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::Has2Bytes<T>::value;
+   constexpr bool value2 = blaze::Has2Bytes_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool Has2Bytes_v = Has2Bytes<T>::value;
 //*************************************************************************************************
 
 
@@ -243,8 +304,27 @@ struct Has2Bytes : public HasSize<T,2UL>
    \endcode
 */
 template< typename T >
-struct Has4Bytes : public HasSize<T,4UL>
+struct Has4Bytes
+   : public HasSize<T,4UL>
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the Has4Bytes type trait.
+// \ingroup type_traits
+//
+// The Has4Bytes_v variable template provides a convenient shortcut to access the nested
+// \a value of the Has4Bytes class template. For instance, given the type \a T the following
+// two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::Has4Bytes<T>::value;
+   constexpr bool value2 = blaze::Has4Bytes_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool Has4Bytes_v = Has4Bytes<T>::value;
 //*************************************************************************************************
 
 
@@ -276,8 +356,27 @@ struct Has4Bytes : public HasSize<T,4UL>
    \endcode
 */
 template< typename T >
-struct Has8Bytes : public HasSize<T,8UL>
+struct Has8Bytes
+   : public HasSize<T,8UL>
 {};
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the Has8Bytes type trait.
+// \ingroup type_traits
+//
+// The Has8Bytes_v variable template provides a convenient shortcut to access the nested
+// \a value of the Has8Bytes class template. For instance, given the type \a T the following
+// two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::Has8Bytes<T>::value;
+   constexpr bool value2 = blaze::Has8Bytes_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool Has8Bytes_v = Has8Bytes<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

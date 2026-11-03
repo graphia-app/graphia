@@ -3,7 +3,7 @@
 //  \file blaze/util/typetraits/IsCharacter.h
 //  \brief Header file for the IsCharacter type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,8 +40,7 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/util/FalseType.h>
-#include <blaze/util/TrueType.h>
+#include <blaze/util/IntegralConstant.h>
 
 
 namespace blaze {
@@ -73,7 +72,8 @@ namespace blaze {
    \endcode
 */
 template< typename T >
-struct IsCharacter : public FalseType
+struct IsCharacter
+   : public FalseType
 {};
 //*************************************************************************************************
 
@@ -82,7 +82,8 @@ struct IsCharacter : public FalseType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsCharacter type trait for the plain 'char' type.
 template<>
-struct IsCharacter<char> : public TrueType
+struct IsCharacter<char>
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -92,7 +93,8 @@ struct IsCharacter<char> : public TrueType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsCharacter type trait for the plain 'signed char' type.
 template<>
-struct IsCharacter<signed char> : public TrueType
+struct IsCharacter<signed char>
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -102,7 +104,8 @@ struct IsCharacter<signed char> : public TrueType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsCharacter type trait for the plain 'unsigned char' type.
 template<>
-struct IsCharacter<unsigned char> : public TrueType
+struct IsCharacter<unsigned char>
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -112,7 +115,8 @@ struct IsCharacter<unsigned char> : public TrueType
 /*! \cond BLAZE_INTERNAL */
 //! Specialization of the IsCharacter type trait for the plain 'wchar_t' type.
 template<>
-struct IsCharacter<wchar_t> : public TrueType
+struct IsCharacter<wchar_t>
+   : public TrueType
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -122,7 +126,8 @@ struct IsCharacter<wchar_t> : public TrueType
 /*! \cond BLAZE_INTERNAL */
 //! Partial specialization of the IsCharacter type trait 'const' qualified types.
 template< typename T >
-struct IsCharacter<const T> : public IsCharacter<T>::Type
+struct IsCharacter<const T>
+   : public IsCharacter<T>::Type
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -132,7 +137,8 @@ struct IsCharacter<const T> : public IsCharacter<T>::Type
 /*! \cond BLAZE_INTERNAL */
 //! Partial specialization of the IsCharacter type trait 'volatile' qualified types.
 template< typename T >
-struct IsCharacter<volatile T> : public IsCharacter<T>::Type
+struct IsCharacter<volatile T>
+   : public IsCharacter<T>::Type
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -142,9 +148,28 @@ struct IsCharacter<volatile T> : public IsCharacter<T>::Type
 /*! \cond BLAZE_INTERNAL */
 //! Partial specialization of the IsCharacter type trait 'const volatile' types.
 template< typename T >
-struct IsCharacter<const volatile T> : public IsCharacter<T>::Type
+struct IsCharacter<const volatile T>
+   : public IsCharacter<T>::Type
 {};
 /*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsCharacter type trait.
+// \ingroup type_traits
+//
+// The IsCharacter_v variable template provides a convenient shortcut to access the nested
+// \a value of the IsCharacter class template. For instance, given the type \a T the following
+// two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsCharacter<T>::value;
+   constexpr bool value2 = blaze::IsCharacter_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsCharacter_v = IsCharacter<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze

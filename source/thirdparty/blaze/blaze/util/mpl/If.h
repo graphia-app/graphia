@@ -3,7 +3,7 @@
 //  \file blaze/util/mpl/If.h
 //  \brief Header file for the If class template
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -48,20 +48,19 @@ namespace blaze {
 /*!\brief Compile time type selection.
 // \ingroup mpl
 //
-// The IfTrue class template selects one of the two given types \a T1 and \a T2 depending
-// on the \a Condition template argument. In case the \a Condition compile time constant
-// expression evaluates to \a true, the member type definition \a Type is set to \a T1.
-// In case \a Condition evaluates to \a false, \a Type is set to \a T2.
+// The If class template selects one of the two given types \a T1 and \a T2 depending on the
+// \a Condition template argument. In case the \a Condition compile time constant expression
+// evaluates to \a true, the member type definition \a Type is set to \a T1. In case
+// \a Condition evaluates to \a false, \a Type is set to \a T2.
 */
-template< bool Condition  // Compile time selection
-        , typename T1     // Type to be selected if Condition=true
-        , typename T2 >   // Type to be selected if Condition=false
-struct IfTrue
+template< bool Condition >  // Compile time selection
+struct If
 {
  public:
    //**********************************************************************************************
    /*! \cond BLAZE_INTERNAL */
-   typedef T1  Type;  //!< The selected type.
+   template< typename T1, typename T2 >
+   using Type = T1;  //!< The selected type.
    /*! \endcond */
    //**********************************************************************************************
 };
@@ -70,20 +69,20 @@ struct IfTrue
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-/*!\brief Specialization of the IfTrue class template.
+/*!\brief Specialization of the If class template.
 // \ingroup mpl
 //
-// This specialization of the IfTrue template is selected in case the \a Condition compile time
+// This specialization of the If template is selected in case the \a Condition compile time
 // constant expression evaluates to \a false. The member type definition is set to the second
 // given type \a T2.
 */
-template< typename T1    // Type not to be selected
-        , typename T2 >  // Type to be selected
-struct IfTrue<false,T1,T2>
+template<>
+struct If<false>
 {
  public:
    //**********************************************************************************************
-   typedef T2  Type;  //!< The selected type.
+   template< typename T1, typename T2 >
+   using Type = T2;  //!< The selected type.
    //**********************************************************************************************
 };
 /*! \endcond */
@@ -91,73 +90,22 @@ struct IfTrue<false,T1,T2>
 
 
 //*************************************************************************************************
-/*!\brief Auxiliary alias declaration for the IfTrue class template.
+/*!\brief Auxiliary alias template for the If class template.
 // \ingroup util
 //
-// The IfTrue_ alias declaration provides a convenient shortcut to access the nested \a Type of
-// the IfTrue class template. For instance, given the types \a C, \a T1, and \a T2 the following
+// The If_t alias template provides a convenient shortcut to access the nested \a Type of
+// the If class template. For instance, given the types \a C, \a T1, and \a T2 the following
 // two type definitions are identical:
 
    \code
-   using Type1 = typename IfTrue< IsBuiltin<C>::value, T1, T2 >::Type;
-   using Type2 = IfTrue_< IsBuiltin<C>::value, T1, T2 >;
+   using Type1 = typename If< IsBuiltin_v<C>, T1, T2 >::Type;
+   using Type2 = If_t< IsBuiltin_v<C>, T1, T2 >;
    \endcode
 */
 template< bool Condition  // Compile time selection
         , typename T1     // Type to be selected if Condition=true
         , typename T2 >   // Type to be selected if Condition=false
-using IfTrue_ = typename IfTrue<Condition,T1,T2>::Type;
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  CLASS DEFINITION
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*!\brief Compile time type selection.
-// \ingroup mpl
-//
-// The If class template selects one of the two given types \a T2 and \a T3 depending on \a T1.
-// In case \a T1::value evaluates to \a true, the member type definition \a Type is set to \a T2.
-// In case \a T1::value evaluates to \a false, \a Type is set to \a T3.
-*/
-template< typename T1    // Type of the condition
-        , typename T2    // Type to be selected if T1::value=true
-        , typename T3 >  // Type to be selected if T1::value=false
-struct If
-{
- public:
-   //**********************************************************************************************
-   /*! \cond BLAZE_INTERNAL */
-   typedef typename IfTrue< T1::value, T2, T3 >::Type  Type;
-   /*! \endcond */
-   //**********************************************************************************************
-};
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Auxiliary alias declaration for the If class template.
-// \ingroup util
-//
-// The If_ alias declaration provides a convenient shortcut to access the nested \a Type of the
-// If class template. For instance, given the types \a T1, \a T2, and \a T3 the following two
-// type definitions are identical:
-
-   \code
-   using Type1 = typename If< IsBuiltin<T1>, T2, T3 >::Type;
-   using Type2 = If_< IsBuiltin<T1>, T2, T3 >;
-   \endcode
-*/
-template< typename T1    // Type of the condition
-        , typename T2    // Type to be selected if T1::value=true
-        , typename T3 >  // Type to be selected if T1::value=false
-using If_ = typename If<T1,T2,T3>::Type;
+using If_t = typename If<Condition>::template Type<T1,T2>;
 //*************************************************************************************************
 
 } // namespace blaze

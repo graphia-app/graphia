@@ -3,7 +3,7 @@
 //  \file blaze/math/simd/SIMDPack.h
 //  \brief Header file for the SIMDPack base class
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -60,28 +60,156 @@ namespace blaze {
 // back to this type via the 'Curiously Recurring Template Pattern' (CRTP).
 */
 template< typename T >  // Type of the SIMD pack
-struct SIMDPack
+class SIMDPack
 {
-   //**Non-const conversion operator***************************************************************
-   /*!\brief Conversion operator for non-constant vectors.
-   //
-   // \return Reference of the actual type of the vector.
-   */
-   BLAZE_ALWAYS_INLINE T& operator~() noexcept {
-      return *static_cast<T*>( this );
-   }
+ public:
+   //**Conversion operators************************************************************************
+   /*!\name Conversion operators */
+   //@{
+   [[deprecated]] BLAZE_ALWAYS_INLINE constexpr T&       operator~()       noexcept;
+   [[deprecated]] BLAZE_ALWAYS_INLINE constexpr const T& operator~() const noexcept;
+
+   constexpr T&       operator*()       noexcept;
+   constexpr const T& operator*() const noexcept;
+   //@}
    //**********************************************************************************************
 
-   //**Const conversion operators******************************************************************
-   /*!\brief Conversion operator for constant vectors.
-   //
-   // \return Const reference of the actual type of the vector.
-   */
-   BLAZE_ALWAYS_INLINE const T& operator~() const noexcept {
-      return *static_cast<const T*>( this );
-   }
+ protected:
+   //**Special member functions********************************************************************
+   /*!\name Special member functions */
+   //@{
+   SIMDPack() = default;
+   SIMDPack( const SIMDPack& ) = default;
+   SIMDPack( SIMDPack&& ) = default;
+   ~SIMDPack() = default;
+   SIMDPack& operator=( const SIMDPack& ) = default;
+   SIMDPack& operator=( SIMDPack&& ) = default;
+   //@}
    //**********************************************************************************************
 };
+//*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  CONVERSION OPERATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*!\brief Conversion operator for non-constant SIMD packs.
+//
+// \return Mutable reference of the actual type of the SIMD pack.
+//
+// This operator performs the CRTP-based type-safe downcast to the actual type \a T of the
+// SIMD pack. It will return a mutable reference to the actual type \a T.
+*/
+template< typename T >  // Type of the SIMD pack
+[[deprecated]] BLAZE_ALWAYS_INLINE constexpr T& SIMDPack<T>::operator~() noexcept
+{
+   return static_cast<T&>( *this );
+}
+//*************************************************************************************************
+
+//*************************************************************************************************
+/*!\brief Conversion operator for constant SIMD packs.
+//
+// \return Constant reference of the actual type of the SIMD pack.
+//
+// This operator performs the CRTP-based type-safe downcast to the actual type \a T of the
+// SIMD pack. It will return a constant reference to the actual type \a T.
+*/
+template< typename T >  // Type of the SIMD pack
+[[deprecated]] BLAZE_ALWAYS_INLINE constexpr const T& SIMDPack<T>::operator~() const noexcept
+{
+   return static_cast<const T&>( *this );
+}
+//*************************************************************************************************
+
+//*************************************************************************************************
+/*!\brief Conversion operator for non-constant SIMD packs.
+//
+// \return Mutable reference of the actual type of the SIMD pack.
+//
+// This operator performs the CRTP-based down-cast to the actual type \a T of the SIMD pack.
+// It will return a mutable reference to the actual type \a T.
+*/
+template< typename T >  // Type of the SIMD pack
+BLAZE_ALWAYS_INLINE constexpr T& SIMDPack<T>::operator*() noexcept
+{
+   return static_cast<T&>( *this );
+}
+//*************************************************************************************************
+
+//*************************************************************************************************
+/*!\brief Conversion operator for constant SIMD packs.
+//
+// \return Constant reference of the actual type of the SIMD pack.
+//
+// This operator performs the CRTP-based down-cast to the actual type \a T of the SIMD pack.
+// It will return a constant reference to the actual type \a T.
+*/
+template< typename T >  // Type of the SIMD pack
+BLAZE_ALWAYS_INLINE constexpr const T& SIMDPack<T>::operator*() const noexcept
+{
+   return static_cast<const T&>( *this );
+}
+//*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  GLOBAL FUNCTIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*!\name SIMDPack global functions */
+//@{
+template< typename T >
+T& crtp_cast( SIMDPack<T>& pack );
+
+template< typename T >
+const T& crtp_cast( const SIMDPack<T>& pack );
+//@}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief CRTP-based conversion operation for non-constant SIMD packs.
+//
+// \param pack The SIMD pack to be downcast.
+// \return Mutable reference of the actual type of the SIMD pack.
+//
+// This operator performs the CRTP-based type-safe downcast to the actual type \a T of the
+// SIMD pack. It will return a mutable reference to the actual type \a T.
+*/
+template< typename T >  // Type of the SIMD pack
+BLAZE_ALWAYS_INLINE T& crtp_cast( SIMDPack<T>& pack )
+{
+   return *pack;
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief CRTP-based conversion operation for constant SIMD packs.
+//
+// \param pack The SIMD pack to be downcast.
+// \return Const reference of the actual type of the SIMD pack.
+//
+// This operator performs the CRTP-based type-safe downcast to the actual type \a T of the
+// SIMD pack. It will return a constant reference to the actual type \a T.
+*/
+template< typename T >  // Type of the SIMD pack
+BLAZE_ALWAYS_INLINE const T& crtp_cast( const SIMDPack<T>& pack )
+{
+   return *pack;
+}
 //*************************************************************************************************
 
 } // namespace blaze

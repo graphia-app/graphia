@@ -3,7 +3,7 @@
 //  \file blaze/math/typetraits/IsGeneral.h
 //  \brief Header file for the IsGeneral type trait
 //
-//  Copyright (C) 2013 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2012-2020 Klaus Iglberger - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -44,8 +44,6 @@
 #include <blaze/math/typetraits/IsSymmetric.h>
 #include <blaze/math/typetraits/IsTriangular.h>
 #include <blaze/util/IntegralConstant.h>
-#include <blaze/util/mpl/And.h>
-#include <blaze/util/mpl/Not.h>
 
 
 namespace blaze {
@@ -70,13 +68,13 @@ namespace blaze {
    \code
    using blaze::rowMajor;
 
-   typedef blaze::StaticMatrix<double,3UL,3UL,rowMajor>  StaticMatrixType;
-   typedef blaze::DynamicMatrix<float,rowMajor>          DynamicMatrixType;
-   typedef blaze::CompressedMatrix<int,rowMajor>         CompressedMatrixType;
+   using StaticMatrixType     = blaze::StaticMatrix<double,3UL,3UL,rowMajor>;
+   using DynamicMatrixType    = blaze::DynamicMatrix<float,rowMajor>;
+   using CompressedMatrixType = blaze::CompressedMatrix<int,rowMajor>;
 
-   typedef blaze::SymmetricMatrix<StaticMatrixType>   SymmetricStaticType;
-   typedef blaze::HermitianMatrix<DynamicMatrixType>  HermitianDynamicType;
-   typedef blaze::LowerMatrix<CompressedMatrixType>   LowerCompressedType;
+   using SymmetricStaticType  = blaze::SymmetricMatrix<StaticMatrixType>;
+   using HermitianDynamicType = blaze::HermitianMatrix<DynamicMatrixType>;
+   using LowerCompressedType  = blaze::LowerMatrix<CompressedMatrixType>;
 
    blaze::IsGeneral< StaticMatrixType >::value           // Evaluates to 1
    blaze::IsGeneral< const DynamicMatrixType >::Type     // Results in TrueType
@@ -88,7 +86,7 @@ namespace blaze {
 */
 template< typename T >
 struct IsGeneral
-   : public BoolConstant< And< Not< IsSymmetric<T> >, Not< IsHermitian<T> >, Not< IsTriangular<T> > >::value >
+   : public BoolConstant< !IsSymmetric_v<T> && !IsHermitian_v<T> && !IsTriangular_v<T> >
 {};
 //*************************************************************************************************
 
@@ -99,7 +97,8 @@ struct IsGeneral
 // \ingroup math_type_traits
 */
 template< typename T >
-struct IsGeneral< const T > : public IsGeneral<T>
+struct IsGeneral< const T >
+   : public IsGeneral<T>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -111,7 +110,8 @@ struct IsGeneral< const T > : public IsGeneral<T>
 // \ingroup math_type_traits
 */
 template< typename T >
-struct IsGeneral< volatile T > : public IsGeneral<T>
+struct IsGeneral< volatile T >
+   : public IsGeneral<T>
 {};
 /*! \endcond */
 //*************************************************************************************************
@@ -123,9 +123,28 @@ struct IsGeneral< volatile T > : public IsGeneral<T>
 // \ingroup math_type_traits
 */
 template< typename T >
-struct IsGeneral< const volatile T > : public IsGeneral<T>
+struct IsGeneral< const volatile T >
+   : public IsGeneral<T>
 {};
 /*! \endcond */
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Auxiliary variable template for the IsGeneral type trait.
+// \ingroup math_type_traits
+//
+// The IsGeneral_v variable template provides a convenient shortcut to access the nested
+// \a value of the IsGeneral class template. For instance, given the type \a T the following
+// two statements are identical:
+
+   \code
+   constexpr bool value1 = blaze::IsGeneral<T>::value;
+   constexpr bool value2 = blaze::IsGeneral_v<T>;
+   \endcode
+*/
+template< typename T >
+constexpr bool IsGeneral_v = IsGeneral<T>::value;
 //*************************************************************************************************
 
 } // namespace blaze
