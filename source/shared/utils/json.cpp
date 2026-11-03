@@ -32,6 +32,7 @@
 #include <QVariantList>
 #include <QVariantMap>
 
+#include <string>
 #include <vector>
 
 #include <json.hpp>
@@ -130,6 +131,32 @@ json jsonArrayFrom(const std::vector<QString> &container, Progressable *progress
     return array;
 }
 
+namespace
+{
+// This exists to avoid having to use exceptions for error handling
+template<typename InputAdapter>
+class JsonDomParser : public nlohmann::detail::json_sax_dom_parser<json, InputAdapter>
+{
+public:
+    explicit JsonDomParser(json& result) :
+        nlohmann::detail::json_sax_dom_parser<json, InputAdapter>(result, false)
+    {}
+
+    template<typename Exception>
+    bool parse_error(std::size_t position, const std::string& lastToken, const Exception& exception)
+    {
+        _failureReason = exception.what();
+        return nlohmann::detail::json_sax_dom_parser<json, InputAdapter>::parse_error(
+            position, lastToken, exception);
+    }
+
+    const std::string& failureReason() const { return _failureReason; }
+
+private:
+    std::string _failureReason;
+};
+} // namespace
+
 json parseJsonFrom(const QByteArray &byteArray, IParser *parser)
 {
     json result;
@@ -150,18 +177,15 @@ json parseJsonFrom(const QByteArray &byteArray, IParser *parser)
         it.setCancelledFn([&parser] { return parser->cancelled(); });
     }
 
-    try
+    using InputAdapter = decltype(nlohmann::detail::input_adapter(it, end));
+    JsonDomParser<InputAdapter> domParser(result);
+
+    if(!json::sax_parse(it, end, &domParser))
     {
-#ifdef DISABLE_EXCEPTION_THROWING
-        result = json::parse(it, end, nullptr, false);
-#else
-        result = json::parse(it, end);
-#endif
-    }
-    catch(json::parse_error& e)
-    {
+        result = {};
+
         if(parser != nullptr)
-            parser->setFailureReason(QString::fromStdString(e.what()));
+            parser->setFailureReason(QString::fromStdString(domParser.failureReason()));
     }
 
     return result;

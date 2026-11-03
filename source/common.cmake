@@ -124,7 +124,6 @@ endif()
 if(EMSCRIPTEN)
     set(LINK_TYPE STATIC)
     set(QT_WASM_PTHREAD_POOL_SIZE navigator.hardwareConcurrency)
-    add_definitions(-DDISABLE_EXCEPTION_THROWING)
     add_definitions(-DOPENGL_ES)
 endif()
 
