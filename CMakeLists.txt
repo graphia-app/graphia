@@ -9,7 +9,7 @@ endif()
 find_package(Qt6 REQUIRED COMPONENTS Core LinguistTools)
 qt_standard_project_setup(REQUIRES 6.11
     I18N_SOURCE_LANGUAGE en_GB
-    I18N_TRANSLATED_LANGUAGES en_US)
+    I18N_TRANSLATED_LANGUAGES en_US zh_CN ru_RU fr_FR de_DE pl_PL el_GR it_IT pt_PT pt_BR es_ES nl_NL ja_JP)
 
 set(SHARED_I18N_OPTIONS
     NO_GENERATE_PLURALS_TS_FILE

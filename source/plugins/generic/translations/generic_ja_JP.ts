@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="ja_JP" sourcelanguage="en_GB">
+<context>
+    <name>GenericPlugin</name>
+    <message>
+        <source>Generic</source>
+        <translation>汎用</translation>
+    </message>
+    <message>
+        <source>A plugin that loads generic graphs from a variety of file formats.</source>
+        <translation>さまざまなファイル形式から汎用グラフを読み込むプラグインです。</translation>
+    </message>
+</context>
+<context>
+    <name>MatrixParameters</name>
+    <message>
+        <source>Matrix Parameters</source>
+        <translation>行列のパラメーター</translation>
+    </message>
+    <message>
+        <source>Failed to Load {0}</source>
+        <translation>{0} を読み込めませんでした</translation>
+    </message>
+    <message>
+        <source>:
+
+{0}</source>
+        <translation>:
+
+{0}</translation>
+    </message>
+    <message>
+        <source>.</source>
+        <translation>。</translation>
+    </message>
+    <message>
+        <source>Loading {0}…</source>
+        <translation>{0} を読み込み中…</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>閉じる</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>キャンセル</translation>
+    </message>
+    <message>
+        <source>An adjacency matrix is a square matrix used to represent a graph. The elements of the matrix indicate whether pairs of nodes are adjacent or not in the graph, i.e. the nodes are connected via edges.</source>
+        <translation>隣接行列は、グラフを表すために使われる正方行列です。行列の要素は、グラフ内のノードのペアが隣接しているかどうか、つまりノード同士がエッジでつながっているかどうかを示します。</translation>
+    </message>
+    <message>
+        <source>Filter Edges</source>
+        <translation>エッジをフィルタリング</translation>
+    </message>
+    <message>
+        <source>This matrix is non-binary, i.e. non-zero cells indicate the strength of the relationship between entities. In some circumstances it may be advantageous to filter edges below a specified minimum absolute threshold, which is enabled here.</source>
+        <translation>この行列は 2 値ではありません。つまり、ゼロでないセルはエンティティ間の関係の強さを表します。状況によっては、指定した最小の絶対値しきい値を下回るエッジを除外したほうがよい場合があり、ここで有効にできます。</translation>
+    </message>
+    <message>
+        <source>Minimum:</source>
+        <translation>最小:</translation>
+    </message>
+    <message>
+        <source>Minimum Threshold Value</source>
+        <translation>最小しきい値</translation>
+    </message>
+    <message>
+        <source>The minimum threshold value above which an edge will be created in the graph. Using a lower minimum value will increase the compute and memory requirements.</source>
+        <translation>グラフにエッジを作成する最小のしきい値です。最小値を低くすると、必要な計算量とメモリが増えます。</translation>
+    </message>
+    <message>
+        <source>Initial:</source>
+        <translation>初期値:</translation>
+    </message>
+    <message>
+        <source>Threshold</source>
+        <translation>しきい値</translation>
+    </message>
+    <message>
+        <source>The initial threshold determines the size of the resultant graph. A lower value filters fewer edges, and results in a larger graph. This value can be changed later, after the graph has been created.</source>
+        <translation>初期しきい値は、作成されるグラフのサイズを決めます。値が低いほど除外されるエッジが少なくなり、グラフは大きくなります。この値はグラフの作成後に変更できます。</translation>
+    </message>
+    <message>
+        <source>Ignore Duplicate Edges</source>
+        <translation>重複エッジを無視</translation>
+    </message>
+    <message>
+        <source>Adjacency matrices are often presented in a symmetric fashion; that is to say that for every non-zero cell in the matrix with a value, there exists a partner cell reflected across the matrix&apos;s diagonal. In terms of representing the matrix as a graph, the net result is that every pair of nodes are connected by two edges. Often this is undesirable. Selecting this option avoids this. In the case where the pair of weights differ, the larger of the absolute values is used.</source>
+        <translation>隣接行列は多くの場合対称です。つまり、値を持つゼロでないセルごとに、行列の対角線を挟んだ反対側に対になるセルがあります。行列をグラフとして表すと、結果としてノードのペアがそれぞれ 2 本のエッジで結ばれることになります。これは多くの場合望ましくないため、このオプションを選択すると回避できます。対になる重みが異なる場合は、絶対値の大きい方が使われます。</translation>
+    </message>
+    <message>
+        <source>Estimated Pre-Transform Graph Size: {0}{3} Nodes{2}, {1}{4} Edges{2}</source>
+        <translation>変換前の推定グラフサイズ: ノード {0}{3}{2}、エッジ {1}{4}{2}</translation>
+    </message>
+    <message>
+        <source>Estimated Graph Size: {0}{3} Nodes{2}, {1}{4} Edges{2}</source>
+        <translation>推定グラフサイズ: ノード {0}{3}{2}、エッジ {1}{4}{2}</translation>
+    </message>
+    <message>
+        <source>&lt;br&gt;&lt;br&gt;{0}WARNING: This is a very large graph which has the potential to exhaust system resources and lead to instability or freezes.</source>
+        <translation>&lt;br&gt;&lt;br&gt;{0}警告: これは非常に大きなグラフで、システムリソースを使い果たし、動作が不安定になったりフリーズしたりするおそれがあります。</translation>
+    </message>
+    <message>
+        <source>Increasing the Minimum Correlation Value will usually reduce the graph size.</source>
+        <translation>最小相関値を上げると、通常はグラフのサイズが小さくなります。</translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation>OK</translation>
+    </message>
+</context>
+<context>
+    <name>PairwiseParameters</name>
+    <message>
+        <source>Pairwise Parameters</source>
+        <translation>ペアワイズのパラメーター</translation>
+    </message>
+    <message>
+        <source>Edge Weight</source>
+        <translation>エッジの重み</translation>
+    </message>
+    <message>
+        <source>Failed to Load {0}</source>
+        <translation>{0} を読み込めませんでした</translation>
+    </message>
+    <message>
+        <source>:
+
+{0}</source>
+        <translation>:
+
+{0}</translation>
+    </message>
+    <message>
+        <source>.</source>
+        <translation>。</translation>
+    </message>
+    <message>
+        <source>Loading {0}…</source>
+        <translation>{0} を読み込み中…</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>閉じる</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>キャンセル</translation>
+    </message>
+    <message>
+        <source>A graph can be created from pairwise information, that is to say two columns in a table may be used to indicate pairs of nodes which are connected by an edge. These columns are selected by clicking on the table headers below. Furthermore, other columns can be interpreted as attributes, associated either with the edge or its connecting nodes.</source>
+        <translation>グラフはペアワイズの情報から作成できます。つまり、テーブルの 2 つの列で、エッジで結ばれるノードのペアを示すことができます。これらの列は、下のテーブルの見出しをクリックして選択します。さらに、他の列を、エッジまたはその両端のノードに関連付けられた属性として解釈することもできます。</translation>
+    </message>
+    <message>
+        <source>Treat First Row as Header</source>
+        <translation>先頭行を見出しとして扱う</translation>
+    </message>
+    <message>
+        <source>⨯ &lt;i&gt;Unused&lt;/i&gt;</source>
+        <translation>⨯ &lt;i&gt;未使用&lt;/i&gt;</translation>
+    </message>
+    <message>
+        <source>◯ &lt;i&gt;Source Node&lt;/i&gt;</source>
+        <translation>◯ &lt;i&gt;ソースノード&lt;/i&gt;</translation>
+    </message>
+    <message>
+        <source>⬤ &lt;i&gt;Target Node&lt;/i&gt;</source>
+        <translation>⬤ &lt;i&gt;ターゲットノード&lt;/i&gt;</translation>
+    </message>
+    <message>
+        <source>► {0}</source>
+        <translation>► {0}</translation>
+    </message>
+    <message>
+        <source>◇ {0}</source>
+        <translation>◇ {0}</translation>
+    </message>
+    <message>
+        <source>◆ {0}</source>
+        <translation>◆ {0}</translation>
+    </message>
+    <message>
+        <source>⨯ Unused</source>
+        <translation>⨯ 未使用</translation>
+    </message>
+    <message>
+        <source>○ Source Node</source>
+        <translation>○ ソースノード</translation>
+    </message>
+    <message>
+        <source>● Target Node</source>
+        <translation>● ターゲットノード</translation>
+    </message>
+    <message>
+        <source>► Edge Attribute</source>
+        <translation>► エッジ属性</translation>
+    </message>
+    <message>
+        <source>◇ Source Node Attribute</source>
+        <translation>◇ ソースノード属性</translation>
+    </message>
+    <message>
+        <source>◆ Target Node Attribute</source>
+        <translation>◆ ターゲットノード属性</translation>
+    </message>
+    <message>
+        <source>Attribute Name</source>
+        <translation>属性名</translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation>OK</translation>
+    </message>
+</context>
+</TS>
