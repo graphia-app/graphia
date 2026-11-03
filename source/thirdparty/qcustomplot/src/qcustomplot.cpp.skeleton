@@ -1,0 +1,77 @@
+/***************************************************************************
+**                                                                        **
+**  QCustomPlot, an easy to use, modern plotting widget for Qt            **
+**  Copyright (C) 2011-2022 Emanuel Eichhammer                            **
+**                                                                        **
+**  This program is free software: you can redistribute it and/or modify  **
+**  it under the terms of the GNU General Public License as published by  **
+**  the Free Software Foundation, either version 3 of the License, or     **
+**  (at your option) any later version.                                   **
+**                                                                        **
+**  This program is distributed in the hope that it will be useful,       **
+**  but WITHOUT ANY WARRANTY; without even the implied warranty of        **
+**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         **
+**  GNU General Public License for more details.                          **
+**                                                                        **
+**  You should have received a copy of the GNU General Public License     **
+**  along with this program.  If not, see http://www.gnu.org/licenses/.   **
+**                                                                        **
+****************************************************************************
+**           Author: Emanuel Eichhammer                                   **
+**  Website/Contact: https://www.qcustomplot.com/                         **
+**             Date: 06.11.22                                             **
+**          Version: 2.1.1                                                **
+****************************************************************************/
+
+#include "qcustomplot.h"
+//amalgamation: place implementation includes
+
+//amalgamation: add vector2d.cpp
+//amalgamation: add painter.cpp
+//amalgamation: add paintbuffer.cpp
+//amalgamation: add layer.cpp
+//amalgamation: add axis/range.cpp
+//amalgamation: add selection.cpp
+//amalgamation: add selectionrect.cpp
+//amalgamation: add layout.cpp
+//amalgamation: add lineending.cpp
+//amalgamation: add axis/labelpainter.cpp
+//amalgamation: add axis/axisticker.cpp
+//amalgamation: add axis/axistickerdatetime.cpp
+//amalgamation: add axis/axistickertime.cpp
+//amalgamation: add axis/axistickerfixed.cpp
+//amalgamation: add axis/axistickertext.cpp
+//amalgamation: add axis/axistickerpi.cpp
+//amalgamation: add axis/axistickerlog.cpp
+//amalgamation: add axis/axis.cpp
+//amalgamation: add scatterstyle.cpp
+//amalgamation: add plottable.cpp
+//amalgamation: add item.cpp
+//amalgamation: add core.cpp
+//amalgamation: add colorgradient.cpp
+//amalgamation: add selectiondecorator-bracket.cpp
+//amalgamation: add layoutelements/layoutelement-axisrect.cpp
+//amalgamation: add layoutelements/layoutelement-legend.cpp
+//amalgamation: add layoutelements/layoutelement-textelement.cpp
+//amalgamation: add layoutelements/layoutelement-colorscale.cpp
+//amalgamation: add plottables/plottable-graph.cpp
+//amalgamation: add plottables/plottable-curve.cpp
+//amalgamation: add plottables/plottable-bars.cpp
+//amalgamation: add plottables/plottable-statisticalbox.cpp
+//amalgamation: add plottables/plottable-colormap.cpp
+//amalgamation: add plottables/plottable-financial.cpp
+//amalgamation: add plottables/plottable-errorbar.cpp
+//amalgamation: add items/item-straightline.cpp
+//amalgamation: add items/item-line.cpp
+//amalgamation: add items/item-curve.cpp
+//amalgamation: add items/item-rect.cpp
+//amalgamation: add items/item-text.cpp
+//amalgamation: add items/item-ellipse.cpp
+//amalgamation: add items/item-pixmap.cpp
+//amalgamation: add items/item-tracer.cpp
+//amalgamation: add items/item-bracket.cpp
+//amalgamation: add polar/radialaxis.cpp
+//amalgamation: add polar/layoutelement-angularaxis.cpp
+//amalgamation: add polar/polargrid.cpp
+//amalgamation: add polar/polargraph.cpp
+

@@ -149,6 +149,16 @@ matio()
     esac
 }
 
+qcustomplot()
+{
+    local url=https://gitlab.com/ecme2/QCustomPlot.git
+    case $1 in
+        latest) latestTag $url '^v[0-9.]+$' ;;
+        stage) fetch $url "$2" "$WORK/upstream"; mv "$WORK/upstream/src" "$3/" ;;
+        own) echo qcustomplot.cmake qcustomplot.h qcustomplotcolorprovider.* qcustomplotquickitem.* ;;
+    esac
+}
+
 utfcpp()
 {
     local url=https://github.com/nemtrif/utfcpp.git
@@ -178,7 +188,7 @@ zlib()
     esac
 }
 
-libraries=(blaze breakpad cryptopp expat hdf5 json lexy matio utfcpp xlsxio zlib)
+libraries=(blaze breakpad cryptopp expat hdf5 json lexy matio qcustomplot utfcpp xlsxio zlib)
 
 # The repository stores thirdparty text with LF endings, which the patches assume
 normaliseLineEndings() # directory

@@ -1,0 +1,32 @@
+diff --git a/source/thirdparty/qcustomplot/src/axis/axis.cpp b/source/thirdparty/qcustomplot/src/axis/axis.cpp
+index 1c748c7..2db2b1f 100644
+--- a/source/thirdparty/qcustomplot/src/axis/axis.cpp
++++ b/source/thirdparty/qcustomplot/src/axis/axis.cpp
+@@ -2439,9 +2439,9 @@ void QCPAxisPainterPrivate::placeTickLabel(QCPPainter *painter, double position,
+         cachedLabel->pixmap = QPixmap(labelData.rotatedTotalBounds.size()*mParentPlot->bufferDevicePixelRatio());
+ #ifdef QCP_DEVICEPIXELRATIO_SUPPORTED
+ #  ifdef QCP_DEVICEPIXELRATIO_FLOAT
+-        cachedLabel->pixmap.setDevicePixelRatio(mParentPlot->devicePixelRatioF());
++        cachedLabel->pixmap.setDevicePixelRatio(mParentPlot->bufferDevicePixelRatio());
+ #  else
+-        cachedLabel->pixmap.setDevicePixelRatio(mParentPlot->devicePixelRatio());
++        cachedLabel->pixmap.setDevicePixelRatio(mParentPlot->bufferDevicePixelRatio());
+ #  endif
+ #endif
+       } else
+diff --git a/source/thirdparty/qcustomplot/src/axis/labelpainter.cpp b/source/thirdparty/qcustomplot/src/axis/labelpainter.cpp
+index 87786b1..b89e883 100644
+--- a/source/thirdparty/qcustomplot/src/axis/labelpainter.cpp
++++ b/source/thirdparty/qcustomplot/src/axis/labelpainter.cpp
+@@ -538,9 +538,9 @@ QCPLabelPainterPrivate::CachedLabel *QCPLabelPainterPrivate::createCachedLabel(c
+     result->pixmap = QPixmap(labelData.rotatedTotalBounds.size()*mParentPlot->bufferDevicePixelRatio());
+ #ifdef QCP_DEVICEPIXELRATIO_SUPPORTED
+ #  ifdef QCP_DEVICEPIXELRATIO_FLOAT
+-    result->pixmap.setDevicePixelRatio(mParentPlot->devicePixelRatioF());
++    result->pixmap.setDevicePixelRatio(mParentPlot->bufferDevicePixelRatio());
+ #  else
+-    result->pixmap.setDevicePixelRatio(mParentPlot->devicePixelRatio());
++    result->pixmap.setDevicePixelRatio(mParentPlot->bufferDevicePixelRatio());
+ #  endif
+ #endif
+   } else

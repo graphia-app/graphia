@@ -1,0 +1,108 @@
+/*! \page thelayoutsystem The Layout System
+ 
+  The layout system is responsible for positioning and scaling layout elements such as axis rects,
+  legends, or color scales in a QCustomPlot.
+
+  \section layoutsystem-classesandmechanisms Classes and mechanisms
+  
+  The layout system is based on the abstract base class \ref QCPLayoutElement. All objects that
+  take part in the layout system derive from this class, either directly or indirectly.
+  
+  Since QCPLayoutElement itself derives from \ref QCPLayerable, a layout element may draw its own
+  content. However, it is perfectly possible for a layout element to only serve as a structuring
+  and/or positioning element, not drawing anything on its own.
+  
+  \subsection layoutsystem-rects Rects of a layout element
+  
+  A layout element is a rectangular object described by two rects: the inner rect (\ref
+  QCPLayoutElement::rect) and the outer rect (\ref QCPLayoutElement::setOuterRect). The inner rect
+  is calculated automatically by applying the margin (\ref QCPLayoutElement::setMargins) inward
+  from the outer rect. The inner rect is meant for main content while the margin area may either be
+  left blank or serve for displaying peripheral graphics. For example, \ref QCPAxisRect positions
+  the four main axes at the sides of the inner rect, so graphs end up inside it and the axis labels
+  and tick labels are in the margin area.
+  
+  \subsection layoutsystem-margins Margins
+  
+  Each layout element may provide a mechanism to automatically determine its margins. Internally,
+  this is realized with the \ref QCPLayoutElement::calculateAutoMargin function which takes a \ref
+  QCP::MarginSide and returns an integer value which represents the ideal margin for the specified
+  side. The automatic margin will be used on the sides specified in \ref
+  QCPLayoutElement::setAutoMargins. By default, it is set to \ref QCP::msAll meaning automatic
+  margin calculation is enabled for all four sides. In this case, a minimum margin may be set with
+  \ref QCPLayoutElement::setMinimumMargins, to prevent the automatic margin mechanism from setting
+  margins smaller than desired for a specific situation. If automatic margin calculation is unset
+  for a specific side, the margin of that side can be controlled directy via \ref
+  QCPLayoutElement::setMargins.
+  
+  If multiple layout ements are arranged next to or beneath each other, it may be desirable to
+  align their inner rects on certain sides. Since they all might have different automatic margins,
+  this usually isn't the case. The class \ref QCPMarginGroup and \ref
+  QCPLayoutElement::setMarginGroup fix this by allowing to synchronize multiple margins. See the
+  documentation there for details.
+  
+  \subsection layoutsystem-layout Layouts
+  
+  As mentioned, a QCPLayoutElement may have an arbitrary number of child layout elements and in
+  princple can have the only purpose to manage/arrange those child elements. This is what the
+  subclass \ref QCPLayout specializes on. It is a QCPLayoutElement itself but has no visual
+  representation. It defines an interface to add, remove and manage child layout elements.
+  QCPLayout isn't a usable layout though, it's an abstract base class that concrete layouts derive
+  from, like \ref QCPLayoutGrid which arranges its child elements in a grid and \ref QCPLayoutInset
+  which allows placing child elements freely inside its rect.
+  
+  Since a QCPLayout is a layout element itself, it may be placed inside other layouts. This way,
+  complex hierarchies may be created, offering very flexible arrangements.
+  
+  Below is a sketch of the default \ref QCPLayoutGrid accessible via \ref QCustomPlot::plotLayout.
+  It shows how two child layout elements are placed inside the grid layout next to each other in
+  cells (0, 0) and (0, 1).
+  
+  \image html LayoutsystemSketch.png 
+  
+  \subsection layoutsystem-plotlayout The top level plot layout
+  
+  Every QCustomPlot has one top level layout of type \ref QCPLayoutGrid. It is accessible via \ref
+  QCustomPlot::plotLayout and contains (directly or indirectly via other sub-layouts) all layout
+  elements in the QCustomPlot. By default, this top level grid layout contains a single cell which
+  holds the main axis rect.
+
+  \subsection layoutsystem-examples Examples
+
+  <b>Adding a plot title</b> is a typical and simple case to demonstrate basic workings of the layout system.
+  <table><tr><td>
+    \image html layoutsystem-addingplottitle.png
+  </td><td>
+    \snippet documentation/doc-image-generator/mainwindow.cpp plottitle-example
+  </td></tr></table>
+
+  <br><br>
+  <b>Adding custom elements to the legend</b> is quite simple, since the \ref QCPLegend is itself
+  just a subclass of \ref QCPLayoutGrid. So we can manipulate it just like the main plot layout as
+  before:
+  <table><tr><td>
+    \image html layoutsystem-addinglegendtitle.png
+  </td><td>
+    \snippet documentation/doc-image-generator/mainwindow.cpp legendtitle-example
+  </td></tr></table>
+
+  <br><br>
+  <b>Moving the legend outside the axis rect</b> can be achieved as follows:
+  <table><tr><td>
+    \image html layoutsystem-movinglegend.png
+  </td><td>
+    \snippet documentation/doc-image-generator/mainwindow.cpp movinglegend-example
+  </td></tr></table>
+
+  <br><br>
+  <b>Arranging multiple axis rects</b> actually is the central purpose of the layout system.
+  A QCPMarginGroup can be used to align the axes across multiple axis rects (not shown here).
+  <table><tr><td>
+    \image html layoutsystem-multipleaxisrects.png
+  </td><td>
+    \snippet documentation/doc-image-generator/mainwindow.cpp layoutsystem-example
+  </td></tr></table>
+
+  <br><br><br>
+  <br><br><br>
+*/

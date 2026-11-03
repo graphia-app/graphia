@@ -6,6 +6,7 @@ include_directories(SYSTEM ${CMAKE_CURRENT_LIST_DIR}/hdf5)
 include_directories(SYSTEM ${CMAKE_CURRENT_LIST_DIR}/matio)
 include_directories(SYSTEM ${CMAKE_CURRENT_LIST_DIR}/zlib)
 include_directories(SYSTEM ${CMAKE_CURRENT_LIST_DIR}/qcustomplot)
+include_directories(SYSTEM ${CMAKE_CURRENT_LIST_DIR}/qcustomplot/src)
 include_directories(SYSTEM ${CMAKE_CURRENT_LIST_DIR}/breakpad/src)
 include_directories(SYSTEM ${CMAKE_CURRENT_LIST_DIR}/utfcpp/source)
 

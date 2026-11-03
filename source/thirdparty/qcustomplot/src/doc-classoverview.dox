@@ -1,0 +1,67 @@
+/*! \page classoverview Class Overview
+  
+  The following diagrams may help to gain a deeper understanding of the relationships between classes that make up
+  the QCustomPlot library. The diagrams are not exhaustive, so only the classes deemed most relevant are shown.
+  
+  \section classoverview-relations Class Relationship Diagram
+  \image html RelationOverview.png "Overview of most important classes and their relations"
+  \section classoverview-inheritance Class Inheritance Tree
+  \image html InheritanceOverview.png "Inheritance tree of most important classes"
+
+  <!-- The link between image maps and images will be created with the html postprocessing python script -->
+  \htmlonly
+  <map name="relationoverviewmap">
+  <area shape="rect" coords="229,15,528,56" href="./classQCustomPlot.html" />
+  <area shape="rect" coords="58,86,160,118" href="./classQCPLayer.html" />
+  <area shape="rect" coords="59,164,159,195" href="./classQCPLayerable.html" />
+  <area shape="rect" coords="230,85,369,116" href="./classQCPAbstractItem.html" />
+  <area shape="rect" coords="388,86,527,118" href="./classQCPAbstractPlottable.html" />
+  <area shape="rect" coords="246,145,354,163" href="./classQCPItemAnchor.html" />
+  <area shape="rect" coords="247,178,356,194" href="./classQCPItemPosition.html" />
+  <area shape="rect" coords="651,85,789,119" href="./classQCPLayoutGrid.html" />
+  <area shape="rect" coords="649,146,789,181" href="./classQCPLayoutElement.html" />
+  <area shape="rect" coords="397,202,510,220" href="./classQCPTextElement.html" />
+  <area shape="rect" coords="526,202,644,233" href="./classQCPAxisRect.html" />
+  <area shape="rect" coords="442,279,543,310" href="./classQCPAxis.html" />
+  <area shape="rect" coords="595,279,719,310" href="./classQCPLayoutInset.html" />
+  <area shape="rect" coords="430,329,500,350" href="./classQCPRange.html" />
+  <area shape="rect" coords="443,360,545,381" href="./classQCPGrid.html" />
+  <area shape="rect" coords="606,331,707,349" href="./classQCPLegend.html" />
+  <area shape="rect" coords="573,366,739,382" href="./classQCPAbstractLegendItem.html" />
+  <area shape="rect" coords="573,398,741,417" href="./classQCPPlottableLegendItem.html" />
+  </map>
+  <map name="inheritanceoverviewmap">
+  <area shape="rect" coords="17,334,184,380" href="./classQCPLayerable.html" />
+  <area shape="rect" coords="306,335,477,380" href="./classQCPLayoutElement.html" />
+  <area shape="rect" coords="306,404,444,434" href="./classQCPGrid.html" />
+  <area shape="rect" coords="306,445,443,475" href="./classQCPAxis.html" />
+  <area shape="rect" coords="306,242,445,272" href="./classQCPAbstractItem.html" />
+  <area shape="rect" coords="306,201,445,234" href="./classQCPAbstractPlottable.html" />
+  <area shape="rect" coords="472,14,609,36" href="./classQCPGraph.html" />
+  <area shape="rect" coords="471,40,610,59" href="./classQCPCurve.html" />
+  <area shape="rect" coords="472,65,609,85" href="./classQCPBars.html" />
+  <area shape="rect" coords="472,90,609,110" href="./classQCPStatisticalBox.html" />
+  <area shape="rect" coords="471,115,609,135" href="./classQCPColorMap.html" />
+  <area shape="rect" coords="471,140,610,161" href="./classQCPFinancial.html" />
+  <area shape="rect" coords="625,15,764,35" href="./classQCPItemStraightLine.html" />
+  <area shape="rect" coords="625,40,764,60" href="./classQCPItemLine.html" />
+  <area shape="rect" coords="626,64,765,84" href="./classQCPItemCurve.html" />
+  <area shape="rect" coords="624,88,763,108" href="./classQCPItemRect.html" />
+  <area shape="rect" coords="625,113,764,133" href="./classQCPItemEllipse.html" />
+  <area shape="rect" coords="624,137,763,157" href="./classQCPItemText.html" />
+  <area shape="rect" coords="624,163,763,183" href="./classQCPItemBracket.html" />
+  <area shape="rect" coords="624,187,763,207" href="./classQCPItemTracer.html" />
+  <area shape="rect" coords="624,213,763,233" href="./classQCPItemPixmap.html" />
+  <area shape="rect" coords="581,284,739,317" href="./classQCPAbstractLegendItem.html" />
+  <area shape="rect" coords="582,322,740,355" href="./classQCPLayout.html" />
+  <area shape="rect" coords="582,363,740,396" href="./classQCPAxisRect.html" />
+  <area shape="rect" coords="581,404,739,437" href="./classQCPTextElement.html" />
+  <area shape="rect" coords="580,443,738,476" href="./classQCPColorScale.html" />
+  <area shape="rect" coords="777,290,915,309" href="./classQCPPlottableLegendItem.html" />
+  <area shape="rect" coords="778,318,916,337" href="./classQCPLayoutGrid.html" />
+  <area shape="rect" coords="777,342,915,361" href="./classQCPLayoutInset.html" />
+  <area shape="rect" coords="942,318,1080,337" href="./classQCPLegend.html" />
+  </map>
+  \endhtmlonly
+  
+*/

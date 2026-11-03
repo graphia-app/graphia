@@ -1,0 +1,40 @@
+/*! \page specialqtflags Using QCustomPlot with special Qt define flags
+  
+  \section specialqtflags-noascii Safe string casts with QT_NO_CAST_FROM_ASCII and QT_NO_CAST_TO_ASCII
+  
+  QCustomPlot can be compiled with the special Qt flags <tt>QT_NO_CAST_FROM_ASCII</tt> and
+  <tt>QT_NO_CAST_TO_ASCII</tt> out of the box. All strings used in the library are wrapped in
+  QLatin1String to avoid casts from string/char literals. So if your project requires the added
+  cast safety from these Qt flags, you can use %QCustomPlot without any changes necessary.
+  
+  \section specialqtflags-nokeywords Avoiding Qt specific language extensions with QT_NO_KEYWORDS
+  
+  %QCustomPlot is a library based on and <i>written in</i> Qt. This means it uses Qt keywords such
+  as <tt>foreach</tt>, <tt>signal</tt>, <tt>slot</tt> and <tt>emit</tt> for improved readability.
+  
+  However, some projects wish to disable these Qt specific language extensions by using the define
+  flag <tt>QT_NO_KEYWORDS</tt>. To compile %QCustomPlot with that flag set, it is necessary to
+  replace all occurrences of Qt keywords. This is easily done with %QCustomPlot code, by using the
+  following regular expression replacements:
+  
+  <table>
+    <tr><td style="text-align:center;font-weight:bold">Search pattern</td><td style="text-align:center;font-weight:bold">Replace with</td></tr>
+    <tr><td><tt>(^|[^\\a_])emit\\s</tt></td><td><tt>\1Q_EMIT&nbsp;</tt>&mdash;<span style="font-size:0.9em">note the trailing space</span></td></tr>
+    <tr><td><tt>^( *)signals:</tt></td><td><tt>\\1Q_SIGNALS:</tt></td></tr>
+    <tr><td><tt>(^|[^\\a_])foreach( *)\\(</tt></td><td><tt>\1Q_FOREACH\2(</tt></td></tr>
+  </table>
+  
+  %QCustomPlot code is written with these replacements in mind. They always work and catch all
+  occurrences of used Qt keywords. Their functioning is also automatically tested upon every
+  release.
+  
+  The regular expressions can be applied in any IDE/Editor that supports them, including QtCreator
+  itself. Below is a python script that is used to test the functioning of the regular expressions.
+  It takes the names of the files to process (e.g. <i>qcustomplot.cpp qcustomplot.h</i>) from the
+  command line and performs the replacement on them.
+  
+  \include make-no-keywords-compatible.py
+  
+  <br><br><br>
+  <br><br><br>
+*/

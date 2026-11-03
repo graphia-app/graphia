@@ -1,0 +1,98 @@
+/*! \page dataselection Data Selection Mechanism
+  
+  In QCustomPlot, each plottable can be selected by the user, or programmatically. If the user shall
+  be able to select data in any way, the interaction flag \ref QCP::iSelectPlottables must be set
+  in \ref QCustomPlot::setInteractions.
+  
+  \section dataselection-granularity Data selection granularity
+  
+  The selection granularity can be controlled via \ref QCPAbstractPlottable::setSelectable, by
+  specifying an according \ref QCP::SelectionType. For example, when using \ref
+  QCP::stMultipleDataRanges, the user will have full freedom over which data points he selects and
+  which not. On the other hand if we use \ref QCP::stDataRange, the selection mechanism will
+  enforce that the selected data is always one contiguous range. So if the user selects two distant
+  data points (while holding the multi-select modifier, usually \c Ctrl), all data points in
+  between those two points will also become selected.
+  
+  These images show the effect of the different selection types, when the indicated selection rect
+  was dragged:
+    
+  <center>
+  <table>
+  <tr>
+    <td>\image html selectiontype-none.png stNone</td>
+    <td>\image html selectiontype-whole.png stWhole</td>
+    <td>\image html selectiontype-singledata.png stSingleData</td>
+    <td>\image html selectiontype-datarange.png stDataRange</td>
+    <td>\image html selectiontype-multipledataranges.png stMultipleDataRanges</td>
+  </tr>
+  </table>
+  </center>
+
+  \section dataselection-selectionmodes Selection by click and selection rect
+  
+  The user can select data points in two ways:
+  
+  The first method is to click on the data points with the mouse cursor. In this case, if the user
+  wants to select multiple data points one after the other, he has to press and hold the
+  multi-select modifier (\ref QCustomPlot::setMultiSelectModifier), and \ref QCP::iMultiSelect must
+  be set in \ref QCustomPlot::setInteractions.
+  
+  The other method is by dragging a selection rect over the data points that shall be selected.
+  This is possible if \ref QCustomPlot::setSelectionRectMode is set to \ref QCP::srmSelect. Note
+  that while the selection rect mode is set (is not \ref QCP::srmNone), mouse dragging will not be
+  forwarded to underlying layout elements. This also means that axis ranges can't be dragged with
+  the mouse anymore. If you wish to provide your user both with axis range dragging and data
+  selection/range zooming, use \ref QCustomPlot::setSelectionRectMode to switch between the modes
+  just before the interaction is processed, e.g. in reaction to the \ref QCustomPlot::mousePress or
+  \ref QCustomPlot::mouseMove signals. For example you could check whether the user is holding a
+  certain keyboard modifier, and then decide which mode shall be set.
+  
+  \section dataselection-selectioretrieving Retrieving the selected data
+  
+  Once the selection state of a plottable changes either by user interaction or programmatically,
+  the affected plottable emits the signal \ref QCPAbstractPlottable::selectionChanged, carrying the
+  currently selected data points in the form of a \ref QCPDataSelection. An overload of this signal
+  is available, which just indicates in a \c bool whether the plottable has any selected data
+  points.
+  
+  By calling \ref QCustomPlot::selectedPlottables you can retrieve a list of plottables which
+  currently have selected data points. The current selection of a plottable can be retrieved via
+  QCPAbstractPlottable::selection. There is also a method dedicated to \ref QCPGraph plottables
+  specifically, called \ref QCustomPlot::selectedGraphs.
+  
+  \section dataselection-accessing Accessing a data selection
+  
+  A \ref QCPDataSelection is a list of \ref QCPDataRange instances, which themselves hold the \a
+  begin and \a end index of the respective data range. In the case of a one-dimensional plottable
+  (deriving from \ref QCPAbstractPlottable1D, e.g. \ref QCPGraph, \ref QCPCurve, \ref QCPBars,
+  etc.) you can access the data points by index, using the data container's \ref
+  QCPDataContainer<DataType>::at "at(int index)" method. Alternatively you can simply add the integer index to the
+  data container's \ref QCPDataContainer::begin "begin()" iterator.
+  
+  As an example, the following code snippet calculates the average value of a graph's data
+  selection:
+  \snippet documentation/doc-code-snippets/mainwindow.cpp qcpdataselection-iterating-1
+
+  Since \ref QCPDataSelection instances are not tightly bound to a specific plottable, it is
+  possible that the indices they contain exceed the valid data range of a plottable. The valid data
+  range can be retrieved by accessing the plottable's data container and calling \ref
+  QCPDataContainer::dataRange. With this, you can check whether a given \ref QCPDataSelection is
+  contained in the valid range, and trim it if necessary, by using \ref QCPDataSelection::contains,
+  and \ref QCPDataSelection::intersection, respectively.
+  
+  Of course, the data selections returned by \ref QCPAbstractPlottable::selection are always within
+  the plottable's data bounds, as long as they aren't changed after retrieving the selection.
+  
+  \section dataselection-dataatpos Retrieving the data point at a given pixel position
+
+  If you only want to find out which data point of a plottable is at or close to a given pixel
+  position (without the need for a click or actual selection event), you can use \ref
+  QCPAbstractPlottable::selectTest. For example, the following code retrieves an iterator to the
+  data point closest to a given QPoint in pixel coordinates:
+  
+  \snippet documentation/doc-code-snippets/mainwindow.cpp qcpdataselection-pointatpos
+
+  <br><br><br>
+  <br><br><br>
+*/

@@ -1,0 +1,167 @@
+/*! \mainpage %QCustomPlot 2.1.1 Documentation
+
+  \image html qcp-doc-logo.png
+
+  If you are new to QCustomPlot and just want to start using it, it's recommended to look at the
+  tutorials and examples at
+
+  https://www.qcustomplot.com/
+ 
+  This documentation is especially helpful as a reference, when you're familiar with the basics of
+  data visualization with %QCustomPlot and you wish to learn more about specific functionality or
+  more advanced concepts. See the \ref classoverview "class overview" for diagrams explaining the
+  relationships between the most important classes of the %QCustomPlot library.
+
+  \section mainpage-plottables Plottables
+
+  \a Plottables are classes that display any kind of data in QCustomPlot. They all derive from \ref
+  QCPAbstractPlottable. For example, \ref QCPGraph is a plottable that displays a graph with
+  different line styles, scatter styles, filling etc.
+
+  Since plotting graphs is such a dominant use case, QCustomPlot has a special interface for
+  working with \ref QCPGraph plottables, that makes it very easy to handle them:\n A new graph can
+  be created with \ref QCustomPlot::addGraph and accessed with \ref QCustomPlot::graph.
+
+  For all other plottables, the normal plottable interface is used: First, an instance of the
+  respective plottable is created and added to the QCustomPlot, e.g.
+  \snippet documentation/doc-code-snippets/mainwindow.cpp qcpcurve-creation-1
+  The properties of the newly created plottable can then be accessed via the <tt>newCurve</tt>
+  pointer.
+
+  Plottables (including graphs) can be retrieved via \ref QCustomPlot::plottable. Since the return
+  type of that function is the abstract base class of all plottables, QCPAbstractPlottable, you
+  will probably want to <tt>qobject_cast</tt> the returned pointer to the respective plottable
+  subclass. As usual, the cast returns \c nullptr if the plottable wasn't of that specific
+  subclass.
+
+  All further interfacing with plottables (e.g how to set data) is specific to the plottable type.
+  See the documentations of the subclasses: QCPGraph, QCPCurve, QCPBars, QCPStatisticalBox,
+  QCPColorMap, QCPFinancial.
+
+  \section mainpage-axes Controlling the Axes
+
+  QCustomPlot has four default axes: \ref QCustomPlot::xAxis "xAxis" (bottom), \ref
+  QCustomPlot::yAxis "yAxis" (left), \ref QCustomPlot::xAxis2 "xAxis2" (top), \ref
+  QCustomPlot::yAxis2 "yAxis2" (right).
+
+  Their range is handled by the simple \ref QCPRange class which basically holds the lower and
+  upper axis coordinate. You can set the range with the \ref QCPAxis::setRange function. To change
+  the axis scale type from a linear scale to a logarithmic scale, set \ref QCPAxis::setScaleType to
+  \ref QCPAxis::stLogarithmic. In that case you will also want logarithmically spaced ticks and
+  tick labels, so set the axis ticker with \ref QCPAxis::setTicker to a \ref QCPAxisTickerLog
+  instance.
+
+  Each axis can be given an axis label (e.g. "Voltage (mV)") with \ref QCPAxis::setLabel.
+
+  By default, an axis automatically creates and labels ticks in a sensible manner. See the various
+  methods of the \ref QCPAxis documentation for fine-tuning. Ticks can be disabled for an axis via
+  \ref QCPAxis::setTicks. If you only wish to hide tick labels (the numbers), use \ref
+  QCPAxis::setTickLabels. Note that the default right and top axes start out with hidden tick
+  labels.
+
+  The distance of an axis backbone to the respective viewport/widget border is called its margin.
+  Normally, the margins are calculated automatically to fit the axis and tick labels. To change
+  this, set \ref QCPAxisRect::setAutoMargins to exclude the respective margin sides, and set the
+  margins manually with \ref QCPAxisRect::setMargins. The main axis rect can be accessed with \ref
+  QCustomPlot::axisRect(). A detailed explanation of the different margins/paddings/offset options
+  is given in the \ref QCPAxisRect and \ref QCPAxis documentation.
+
+  \section mainpage-legend Plot Legend
+
+  Every QCustomPlot has one \ref QCPLegend (as \ref QCustomPlot::legend) by default. A legend is a
+  small layout element inside the plot which lists the plottables with an icon of the plottable
+  line/symbol and a name (\ref QCPAbstractPlottable::setName). Plottables can be added and removed
+  from the legend via \ref QCPAbstractPlottable::addToLegend and \ref
+  QCPAbstractPlottable::removeFromLegend. By default, adding a plottable to QCustomPlot
+  automatically adds it to the legend, too. This behaviour can be changed with the \ref
+  QCustomPlot::setAutoAddPlottableToLegend property.
+
+  \ref QCPLegend provides an interface to access, add and remove legend items directly, too. See
+  \ref QCPLegend::item, \ref QCPLegend::itemWithPlottable, \ref QCPLegend::addItem, \ref
+  QCPLegend::removeItem for example.
+
+  Multiple legends are supported via the \ref thelayoutsystem "layout system" (since a \ref
+  QCPLegend is a normal layout element).
+
+  \section mainpage-userinteraction User Interaction
+
+  QCustomPlot supports dragging axis ranges with the mouse (\ref QCPAxisRect::setRangeDrag),
+  zooming axis ranges with the mouse wheel (\ref QCPAxisRect::setRangeZoom) and a complete
+  selection mechanism with configurable granularity down to data points and data ranges.
+
+  The availability of these interactions is controlled with \ref QCustomPlot::setInteractions. For
+  details about the interaction system, see the documentation there. The data selection is
+  discussed in detail on the dedicated \ref dataselection "Data Selection Mechanism" page.
+
+  Further, QCustomPlot always emits corresponding signals, when objects are clicked or
+  doubleClicked. See \ref QCustomPlot::plottableClick, \ref QCustomPlot::plottableDoubleClick
+  and \ref QCustomPlot::axisClick for example.
+
+  Finally on the lowest level you can work with the \ref QCPLayerable mouse event virtual methods
+  in own subclasses, that the QCustomPlot instance calls on the affected layerable.
+
+  \section mainpage-items Decorations and Auxiliary Items
+
+  Apart from plottables there is another category of plot objects that are important: Items. The
+  base class of all items is \ref QCPAbstractItem. An item sets itself apart from plottables in
+  that it's not necessarily bound to any axes. This means it may also be positioned in absolute
+  pixel coordinates or placed at a relative position on an axis rect. Further, it usually doesn't
+  represent data directly, but acts as decoration, emphasis, description etc.
+
+  Multiple items can be arranged in a parent-child-hierarchy allowing for dynamical behaviour. For
+  example, you could place the head of an arrow at a fixed plot coordinate, so it always points to
+  some important area in the plot. The tail of the arrow can be anchored to a text item which
+  always resides in the top center of the axis rect, independent of where the user drags the axis
+  ranges. This way the arrow stretches and turns so it always points from the label to the
+  specified plot coordinate, without any further code necessary.
+
+  For a more detailed introduction, see the \ref QCPAbstractItem documentation, and from there the
+  documentations of the individual standard items, to find out how to use them.
+
+  \section mainpage-layoutelements Layout Elements and Layouts
+
+  QCustomPlot uses an internal layout system to provide dynamic sizing and positioning of objects
+  like the axis rect(s), legends, color scales, and other layout elements. They are all based on
+  \ref QCPLayoutElement and are arranged by placing them inside a \ref QCPLayout subclass, like
+  \ref QCPLayoutGrid.
+
+  See the page about \ref thelayoutsystem "the layout system" for details.
+
+  \section mainpage-performanceimprovement OpenGL Accelerated Plotting and Performance Improvement
+
+  QCustomPlot has multiple OpenGL backends to provide OpenGL hardware accelerated plotting across
+  all supported Qt versions. If the computer supports OpenGL, you can enable it by compiling with
+  \c QCUSTOMPLOT_USE_OPENGL and simply calling \ref QCustomPlot::setOpenGl "setOpenGl(true)" on the
+  respective QCustomPlot instance. More details are given in the documentation of that method.
+
+  Information on maximizing plot performance for demanding visualization tasks can be found on the
+  dedicated page about \ref performanceimprovement "Plot Performance Improvement".
+
+  \section mainpage-flags Preprocessor Define Flags
+
+  QCustomPlot understands some preprocessor defines that are useful for debugging and compilation. The flags must be defined before including the QCustomPlot header. Usually it's best to add them
+  to your qmake project file, using e.g. <tt>DEFINES += QCUSTOMPLOT_USE_OPENGL</tt>
+
+  <dl>
+  <dt>\c QCUSTOMPLOT_USE_OPENGL </dt>
+  <dd>If this flag is defined, QCustomPlot can use OpenGL to improve plot performance for graphically
+      demanding plots, see \ref QCustomPlot::setOpenGl. </dd>
+  <dt>\c QCUSTOMPLOT_COMPILE_LIBRARY </dt>
+  <dd>Define this flag when compiling QCustomPlot as a shared library (.so/.dll)</dd>
+  <dt>\c QCUSTOMPLOT_USE_LIBRARY </dt>
+  <dd>Define this flag before including the header, when using QCustomPlot as a shared library</dd>
+  <dt>\c QCUSTOMPLOT_CHECK_DATA </dt>
+  <dd>If this flag is defined, the QCustomPlot plottables will perform data validity checks on every redraw.
+      They will give qDebug output when encountering \e inf or \e nan values (also if silent NaNs are used
+      intentionally to create gaps in graphs).</dd>
+  </dl>
+
+  \section mainpage-specialqtflags Using QCustomPlot with special Qt flags
+
+  See the page \link specialqtflags Special Qt Flags\endlink if your project uses
+  <tt>QT_NO_CAST_FROM_ASCII</tt>, <tt>QT_NO_CAST_TO_ASCII</tt> or <tt>QT_NO_KEYWORDS</tt>.
+
+
+  <br><br><br>
+  <br><br><br>
+*/

@@ -1,0 +1,73 @@
+/*! \page performanceimprovement Plot Performance Improvement
+
+  QCustomPlot employs various techniques like adaptive sampling and text object caching in order to
+  cut down the time required to replot. However, some features like complex translucent fills and
+  thick lines can still cause a significant slow down. If you notice this in your application, here
+  are some hints on how to increase replot performance (to benchmark performance, see \ref
+  QCustomPlot::replotTime).
+
+  By far the most time is spent in the drawing functions, specifically the drawing of high density
+  graphs and other plottables. For maximum performance, consider the following points:
+
+  \li Especially if you are using complex fills under/between graphs, thick lines, translucent
+  colors: enable QCustomPlot's OpenGL hardware accelerated rendering via \ref
+  QCustomPlot::setOpenGl. For details how to correctly enable OpenGL acceleration, see the
+  documentation there. OpenGL acceleration is available for all Qt versions that are supported by
+  QCustomPlot, and the respective backend is chosen appropriately. <br> For Qt versions before 5.0,
+  an alternative to QCustomPlot's own OpenGL acceleration is to supply "-graphicssystem opengl" as
+  command line argument or calling <tt>QApplication::setGraphicsSystem("opengl")</tt> before
+  creating the QApplication object. This enables application wide OpenGL acceleration. <br>Note
+  that with OpenGL acceleration, the maximum frame rate might be constrained by the vertical sync
+  frequency of your monitor (VSync can be disabled in the graphics card driver configuration). So
+  for simple plots (where the potential framerate is far above 60 frames per second), OpenGL
+  acceleration might achieve numerically lower frame rates than the default software renderer,
+  because it is not capped at the VSync frequency.
+
+  \li Avoid lines with a pen width greater than one. This is especially relevant with the default
+  software renderer, less so with OpenGL acceleration.
+
+  \li Avoid complex fills, e.g. channel fills between graphs with thousands of points. This
+  is especially relevant with the default software renderer, less so with OpenGL acceleration.
+
+  \li If you often need to call a full \ref QCustomPlot::replot only because a non-complex object
+  (e.g. an item) has changed while having relatively static but complex graphs in the plot,
+  consider placing the regularly changing objects onto an own layer and setting its mode (\ref
+  QCPLayer::setMode) to \ref QCPLayer::lmBuffered. This makes QCustomPlot allocate a dedicated
+  paint buffer for this layer, and allows it to be replotted individually with \ref
+  QCPLayer::replot, independent of the other layers containing the potentially complex and slow
+  graphs. See the documentation of the respective methods for details.
+
+  \li Qt4 only: Use Qt 4.8 or newer. Performance has doubled or tripled with respect to Qt 4.7.
+  However, QPainter was broken and drawing pixel precise elements like scatters doesn't look as
+  good as with Qt 4.7. So it's a performance vs. plot quality tradeoff when switching to Qt 4.8.
+  QCustomPlot internally tries to work around the worst glitches of this kind.
+
+  \li To increase responsiveness during range dragging, consider setting \ref
+  QCustomPlot::setNoAntialiasingOnDrag to true. This is only relevant if using the default software
+  renderer. (OpenGL antialiasing can't be toggled on-the-fly and would require an expensive
+  reallocation of the sample buffer.)
+  
+  \li Consider using setAttribute(Qt::WA_OpaquePaintEvent) on the QCustomPlot widget. This allows
+  to save one fill at every paint event. Note though that on embedded systems, this may prevent
+  Qt from graying out the widget together with the rest of the UI, when a modal dialog is shown.
+
+  \li Qt4 only: On X11 (GNU/Linux), avoid the slow native drawing system, use \a raster by
+  supplying "-graphicssystem raster" as command line argument or calling
+  <tt>QApplication::setGraphicsSystem("raster")</tt> before creating the QApplication object.
+
+  \li Avoid any kind of alpha (transparency) colors, especially in fills.
+
+  \li Avoid any kind of antialiasing, especially in graph lines (see \ref
+  QCustomPlot::setNotAntialiasedElements). This is only relevant if using the default software
+  renderer.
+
+  \li Avoid repeatedly setting the complete data set e.g. with \ref QCPGraph::setData. Use \ref
+  QCPGraph::addData instead, if most data points stay unchanged, e.g. in a running measurement. You
+  can access and manipulate existing data via \ref QCPGraph::data.
+
+  \li As a last resort, try to reduce the number of data points that are in the visible key range
+  at any given moment, e.g. by limiting the maximum key range span (see the \ref
+  QCPAxis::rangeChanged signal). QCustomPlot can optimize away millions of off-screen points very
+  efficiently.
+
+*/

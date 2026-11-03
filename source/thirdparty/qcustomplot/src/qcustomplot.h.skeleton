@@ -1,0 +1,85 @@
+/***************************************************************************
+**                                                                        **
+**  QCustomPlot, an easy to use, modern plotting widget for Qt            **
+**  Copyright (C) 2011-2022 Emanuel Eichhammer                            **
+**                                                                        **
+**  This program is free software: you can redistribute it and/or modify  **
+**  it under the terms of the GNU General Public License as published by  **
+**  the Free Software Foundation, either version 3 of the License, or     **
+**  (at your option) any later version.                                   **
+**                                                                        **
+**  This program is distributed in the hope that it will be useful,       **
+**  but WITHOUT ANY WARRANTY; without even the implied warranty of        **
+**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         **
+**  GNU General Public License for more details.                          **
+**                                                                        **
+**  You should have received a copy of the GNU General Public License     **
+**  along with this program.  If not, see http://www.gnu.org/licenses/.   **
+**                                                                        **
+****************************************************************************
+**           Author: Emanuel Eichhammer                                   **
+**  Website/Contact: https://www.qcustomplot.com/                         **
+**             Date: 06.11.22                                             **
+**          Version: 2.1.1                                                **
+****************************************************************************/
+
+#ifndef QCUSTOMPLOT_H
+#define QCUSTOMPLOT_H
+
+//amalgamation: place header includes
+
+//amalgamation: place forward declarations
+//amalgamation: add global.h
+//amalgamation: add vector2d.h
+//amalgamation: add painter.h
+//amalgamation: add paintbuffer.h
+//amalgamation: add layer.h
+//amalgamation: add axis/range.h
+//amalgamation: add selection.h
+//amalgamation: add selectionrect.h
+//amalgamation: add layout.h
+//amalgamation: add lineending.h
+//amalgamation: add axis/labelpainter.h
+//amalgamation: add axis/axisticker.h
+//amalgamation: add axis/axistickerdatetime.h
+//amalgamation: add axis/axistickertime.h
+//amalgamation: add axis/axistickerfixed.h
+//amalgamation: add axis/axistickertext.h
+//amalgamation: add axis/axistickerpi.h
+//amalgamation: add axis/axistickerlog.h
+//amalgamation: add axis/axis.h
+//amalgamation: add scatterstyle.h
+//amalgamation: add datacontainer.h
+//amalgamation: add plottable.h
+//amalgamation: add item.h
+//amalgamation: add core.h
+//amalgamation: add plottable1d.h
+//amalgamation: add colorgradient.h
+//amalgamation: add selectiondecorator-bracket.h
+//amalgamation: add layoutelements/layoutelement-axisrect.h
+//amalgamation: add layoutelements/layoutelement-legend.h
+//amalgamation: add layoutelements/layoutelement-textelement.h
+//amalgamation: add layoutelements/layoutelement-colorscale.h
+//amalgamation: add plottables/plottable-graph.h
+//amalgamation: add plottables/plottable-curve.h
+//amalgamation: add plottables/plottable-bars.h
+//amalgamation: add plottables/plottable-statisticalbox.h
+//amalgamation: add plottables/plottable-colormap.h
+//amalgamation: add plottables/plottable-financial.h
+//amalgamation: add plottables/plottable-errorbar.h
+//amalgamation: add items/item-straightline.h
+//amalgamation: add items/item-line.h
+//amalgamation: add items/item-curve.h
+//amalgamation: add items/item-rect.h
+//amalgamation: add items/item-text.h
+//amalgamation: add items/item-ellipse.h
+//amalgamation: add items/item-pixmap.h
+//amalgamation: add items/item-tracer.h
+//amalgamation: add items/item-bracket.h
+//amalgamation: add polar/radialaxis.h
+//amalgamation: add polar/layoutelement-angularaxis.h
+//amalgamation: add polar/polargrid.h
+//amalgamation: add polar/polargraph.h
+
+#endif // QCUSTOMPLOT_H
+
