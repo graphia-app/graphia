@@ -60,6 +60,16 @@ lexy()
     esac
 }
 
+xlsxio()
+{
+    local url=https://github.com/brechtsanders/xlsxio.git
+    case $1 in
+        latest) latestTag $url '^[0-9.]+$' ;;
+        stage) fetch $url "$2" "$3" ;;
+        own) echo xlsxio.cmake ;;
+    esac
+}
+
 zlib()
 {
     local url=https://github.com/madler/zlib.git
@@ -70,7 +80,7 @@ zlib()
     esac
 }
 
-libraries=(lexy zlib)
+libraries=(lexy xlsxio zlib)
 
 # The repository stores thirdparty text with LF endings, which the patches assume
 normaliseLineEndings() # directory

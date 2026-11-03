@@ -1,3 +1,160 @@
+0.2.37
+
+2026-09-24
+
+ * PR from PGZXB to fix integer underflow in minizip_io_memory_read_file_fn (#150)
+
+2026-06-28
+
+ * PR from uilianries to added Conan installation section in README (#145)
+ * PR from pppanghu77 to fix minizip reentry issue in lib/xlsxio_read.c (#148)
+
+0.2.36
+
+2025-09-12
+
+ * fix missing mz_compat.h when building against recent minizip-ng
+
+2025-01-07
+
+ * fixes by Tattersalt-Kanzaki to catch failed realloc() calls (#138)
+
+2024-07-24
+
+ * fixes by Václav Slavík to support modern MSVC
+
+2024-05-25
+
+ * fixed CMakeLists.txt to use EXPAT_INCLUDE_DIR instead of EXPAT_INCLUDE_DIRS (#108)
+ * added -u option to xlsxio_xlsx2csv to use sheet numbers instead of sheet names (#118)
+
+0.2.35
+
+2023-08-03  Brecht Sanders  https://github.com/brechtsanders/
+
+  * fix typos discovered by codespell (#122)
+
+2023-05-30  Brecht Sanders  https://github.com/brechtsanders/
+
+  * fix free of uninitialized pointer in xlsxioread_sheetlist_close() (#121)
+
+0.2.34
+
+2022-11-02  Brecht Sanders  https://github.com/brechtsanders/
+
+  * PR from captaingroove to add minizip-ng support (#115)
+
+0.2.33
+
+2022-07-05  Brecht Sanders  https://github.com/brechtsanders/
+
+  * PR from JackBoosY to export CMake targets automatically (to cmake folder under install path) (#105)
+
+0.2.32
+
+2022-04-15  Brecht Sanders  https://github.com/brechtsanders/
+
+  * fixed crash issue when sheet name is NULL (#109)
+
+0.2.31
+
+2022-02-16  Brecht Sanders  https://github.com/brechtsanders/
+
+  * changed free() to xlsxioread_free() in example_xlsxio_read.c (issue #73)
+
+0.2.30
+
+2021-09-01  Brecht Sanders  https://github.com/brechtsanders/
+
+  * added .pc and .cmake file generation and installation to CMakeLists.txt
+
+2021-03-12  Brecht Sanders  https://github.com/brechtsanders/
+
+  * remove <AppVersion> tag from xlsxio_write.c and put version information in <Application> (issue #91)
+
+2021-03-11  Brecht Sanders  https://github.com/brechtsanders/
+
+  * fix CMakeLists.txt to generate and install pkg-config .pc files
+
+2020-12-29  Viest  https://github.com/viest
+
+  * added XLSXIOREAD_SKIP_HIDDEN_ROWS to xlsxio_read.h, skipping hidden rows is no longer the default setting
+
+2020-12-29  akuhtr  https://github.com/akuhtr
+
+  * fixed example in README.md to use xlsxioread_free() instead of free()
+
+2020-07-12  Remi Collet  https://github.com/remicollet
+
+  * added XLSXIO_VERSION_ID to xlsxio_version.h
+
+0.2.29
+
+2020-07-10  Brecht Sanders  https://github.com/brechtsanders/
+
+  * only treat sheet as a table (with header rows) when XLSXIOREAD_SKIP_EXTRA_CELLS flag is used (issue #75)
+  * added xlsxioread_free() to fix crashes when calling library build with different compiler (issue #73)
+
+0.2.28
+
+2020-07-06  Brecht Sanders  https://github.com/brechtsanders/
+
+  * fixed issues with XLSXIOREAD_SKIP_EMPTY_CELLS/XLSXIOREAD_SKIP_EMPTY_ROWS/XLSXIOREAD_SKIP_ALL_EMPTY/XLSXIOREAD_SKIP_EXTRA_CELLS (issue #75)
+
+0.2.27
+
+2020-07-05  Brecht Sanders  https://github.com/brechtsanders/
+
+  * fixed issues with XLSXIOREAD_SKIP_EMPTY_CELLS/XLSXIOREAD_SKIP_EMPTY_ROWS/XLSXIOREAD_SKIP_ALL_EMPTY (issue #74)
+
+2020-05-08  Brecht Sanders  https://github.com/brechtsanders/
+
+  * changed Makefile to also generate .def files to be included in Windows packages
+
+2020-03-20  Brecht Sanders  https://github.com/brechtsanders/
+
+  * accepted patch (#63) to add xlsxioread_sheet_last_column_index() and xlsxioread_sheet_flags()
+  * when Doxygen is available HTML documentation is installed in {PREFIX}/share/xlsxio/html
+
+0.2.26
+
+2020-03-20  Brecht Sanders  https://github.com/brechtsanders/
+
+  * accepted patch (#63) to add xlsxioread_sheet_last_column_index() and xlsxioread_sheet_flags()
+  * added xlsxioread_sheet_last_row_index()
+
+0.2.25
+
+2020-03-20  Brecht Sanders  https://github.com/brechtsanders/
+
+  * fixed memory leaks in xlsxioread_sheet_next_cell_int/xlsxioread_sheet_next_cell_float/xlsxioread_sheet_next_cell_datetime (issue #54)
+  * added xml:space="preserve" to text cells to preserve spacing (issue #57)
+  * ran valgrind tests on xlsxio_xlsx2csv and xlsxio_csv2xlsx
+  * fixed memory leak in write_cell_data() in xlsxio_write.c (result of get_A1col was not freed)
+  * rewrote get_A1col() in in xlsxio_write.c to avoid issues on platforms where multiple calls to va_start()/va_end() don't work
+
+0.2.24
+
+2020-03-19  Brecht Sanders  https://github.com/brechtsanders/
+
+  * fixed memory leak (missing free(data->basepath) in main_sheet_get_sheetfile_callback when sheet filename not found)
+  * added support for .xlsm, .xltx and .xltm files (thanks to coproc for suggesting this in issue #61)
+
+0.2.23
+
+2020-03-09  Brecht Sanders  https://github.com/brechtsanders/
+
+  * fixed missing #include <stdio.h> in xlsxio_read.c, needed for sscanf()
+  * fixed clang warning "format string is not a string literal" in xlsxio_write.c
+
+0.2.22
+
+2020-03-09  Brecht Sanders  https://github.com/brechtsanders/
+
+  * fixed CMakeLists.txt issue where BUILD_XLSXIO_DLL was also defined for static libraries
+  * added .travis.yml to allow building with Travis CI (on Linux)
+  * changes to xlsxio_write.c to support minizip2
+
 0.2.21
 
 2018-12-14  Brecht Sanders  https://github.com/brechtsanders/
@@ -11,14 +168,14 @@
 2018-06-23  Brecht Sanders  https://github.com/brechtsanders/
 
   * fixed join_basepath_filename in xlsx_read.c to also support absolute paths (issue reported by Matthew James Briggs)
-  * added CMake options to specify custom dependancy paths: ZLIB_DIR/MINIZIP_DIR/LIBZIP_DIR/EXPAT_DIR (requested by Yann Ducruy)
+  * added CMake options to specify custom dependency paths: ZLIB_DIR/MINIZIP_DIR/LIBZIP_DIR/EXPAT_DIR (requested by Yann Ducruy)
 
 0.2.19
 
 2018-06-18  Brecht Sanders  https://github.com/brechtsanders/
 
   * fixed crash in xlsx_read.c when XML_Char_openzip is called with empty filename (crash reported by Matthew James Briggs)
-  
+
 2018-05-17  Brecht Sanders  https://github.com/brechtsanders/
 
   * fixed memory allocation issue when using minizip version of xlsx_read
@@ -28,7 +185,7 @@
 2018-04-27  Brecht Sanders  https://github.com/brechtsanders/
 
   * fixed formatting issue with cell coordinates
-  
+
 0.2.17
 
 2018-03-22  Brecht Sanders  https://github.com/brechtsanders/
@@ -40,7 +197,7 @@
 2018-03-18  Brecht Sanders  https://github.com/brechtsanders/
 
   * fixed formatting issue with cell coordinates
-  
+
 0.2.15
 
 2018-03-18  Brecht Sanders  https://github.com/brechtsanders/
@@ -111,7 +268,7 @@
 2017-07-12  Brecht Sanders  https://github.com/brechtsanders/
 
   * use strcasecmp instead of stricmp
-  * move shared strings functionality from xlsxio_read.c to seperate file
+  * move shared strings functionality from xlsxio_read.c to separate file
 
 0.2.8
 
@@ -168,7 +325,7 @@
 2016-05-05  Brecht Sanders  https://github.com/brechtsanders/
 
   * added CMake BUILD_DOCUMENTATION option (defaults to ON if Doxygen is detected)
-  * workaround for missing stdint.h/unistd.h on Visual C 
+  * workaround for missing stdint.h/unistd.h on Visual C
   * removed -pthread when building for Apple
   * released Windows binaries (32-bit and 64-bit)
 
@@ -230,8 +387,8 @@
 
 2016-03-20  Brecht Sanders  https://github.com/brechtsanders/
 
-  * fixed issue with detecting witdh of columns with NULL data
-  * changed witdh detection to only count first line of multiline data
+  * fixed issue with detecting width of columns with NULL data
+  * changed width detection to only count first line of multiline data
   * fixed issue with inserting empty rows
   * only freezes top row when columns were specified
 
@@ -240,8 +397,8 @@
 2016-03-19  Brecht Sanders  https://github.com/brechtsanders/
 
   * optimized code for writing cell data
-  * added witdh parameter to xlsxiowrite_add_column()
-  * added column witdh detection and xlsxiowrite_set_detection_rows()
+  * added width parameter to xlsxiowrite_add_column()
+  * added column width detection and xlsxiowrite_set_detection_rows()
   * added xlsxiowrite_set_row_height()
 
 0.1.3

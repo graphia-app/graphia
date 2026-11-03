@@ -142,7 +142,7 @@ int main (int argc, char* argv[])
   while (xlsxioread_sheet_next_row(sheet)) {
     while ((value = xlsxioread_sheet_next_cell(sheet)) != NULL) {
       XML_Char_printf(X("%s\t"), value);
-      free(value);
+      xlsxioread_free(value);
     }
     printf("\n");
   }

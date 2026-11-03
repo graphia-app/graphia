@@ -1,5 +1,7 @@
 XLSX I/O
 ========
+[![Mentioned in Awesome C](https://awesome.re/mentioned-badge-flat.svg)](https://github.com/oz123/awesome-c)
+
 Cross-platform C library for reading values from and writing values to .xlsx files.
 
 Description
@@ -14,7 +16,7 @@ The library was written with the following goals in mind:
 - simple interface
 - small footprint
 - portable across different platforms (Windows, *nix)
-- minimal dependancies: only depends on expat (only for reading) and minizip or libzip (which in turn depend on zlib)
+- minimal dependencies: only depends on expat (only for reading) and minizip or libzip (which in turn depend on zlib)
 - separate library for reading and writing .xlsx files
 - does not require Microsoft(R) Excel(TM) to be installed
 
@@ -27,7 +29,7 @@ Reading .xlsx files:
 - supports .xlsx files without shared string table
 - worksheet data itself is read on the fly without the need to buffer data in memory
 - 2 methods are provided
-  + a simple method that allows the application to iterate trough rows and cells
+  + a simple method that allows the application to iterate through rows and cells
   + an advanced method (with less overhead) which calls callback functions for each cell and after each row
 
 Writing .xlsx files:
@@ -51,15 +53,15 @@ Some command line utilities are included:
 - `xlsxio_xlsx2csv` - converts all sheets in all specified .xlsx files to individual CSV (Comma Separated Values) files.
 - `xlsxio_csv2xlsx` - converts all specified CSV (Comma Separated Values) files to .xlsx files.
 
-Dependancies
+Dependencies
 ------------
-This project has the following depencancies:
+This project has the following dependencies:
 - [expat](http://www.libexpat.org/) (only for libxlsxio_read)
 - [minizip](http://www.winimage.com/zLibDll/minizip.html) or [libzip](http://www.nih.at/libzip/) (libxlsxio_read and libxlsxio_write)
 
 Note that minizip is preferred, as there have been reports that .xlsx files generated with XLSX I/O built against libzip can't be opened with LibreOffice.
 
-There is no dependancy on Microsoft(R) Excel(TM).
+There is no dependency on Microsoft(R) Excel(TM).
 
 XLSX I/O was written with cross-platform portability in mind and works on multiple operating systems, including Windows, macOS and Linux.
 
@@ -67,7 +69,7 @@ Building from source
 --------------------
 Requirements:
 - a C compiler like gcc or clang, on Windows MinGW and MinGW-w64 are supported
-- the dependancy libraries (see Dependancies)
+- the dependency libraries (see Dependencies)
 - a shell environment, on Windows MSYS is supported
 - the make command
 - CMake version 2.6 or higher (optional, but preferred)
@@ -91,6 +93,8 @@ Building with CMake (preferred method)
   + `-DBUILD_TOOLS:BOOL=OFF` - Don't build tools (only libraries)
   + `-DBUILD_EXAMPLES:BOOL=OFF` - Don't build examples
   + `-DWITH_LIBZIP:BOOL=ON` - Use libzip instead of Minizip
+  + `-DLIBZIP_DIR:PATH=<path>` - Location of libzip library
+  + `-DMINIZIP_DIR:PATH=<path>` - Location of Minizip library
   + `-DWITH_WIDE:BOOL=ON` - Also build UTF-16 library (libxlsxio_readw)
 - build and install by running `make install` (or `make install/strip` to strip symbols)
 
@@ -118,6 +122,20 @@ lib /def:libxlsxio_read.def /out:libxlsxio_read.lib /machine:x64
 lib /def:libxlsxio_readw.def /out:libxlsxio_readw.lib /machine:x64
 ```
 
+Installing XLSX I/O using Conan
+-------------------------------
+
+You can install pre-built binaries for XLSX I/O or build it from source using
+[Conan](https://conan.io/). Use the following command:
+
+```bash
+conan install --requires="xlsxio/[*]" --build=missing
+```
+
+The XLSX I/O Conan recipe is kept up to date by Conan maintainers and community contributors.
+If the version is out of date, please [create an issue or pull request](https://github.com/conan-io/conan-center-index)
+on the ConanCenterIndex repository.
+
 Example C programs
 ------------------
 ### Reading from an .xlsx file
@@ -143,7 +161,7 @@ if ((sheet = xlsxioread_sheet_open(xlsxioread, sheetname, XLSXIOREAD_SKIP_EMPTY_
     //read all columns
     while ((value = xlsxioread_sheet_next_cell(sheet)) != NULL) {
       printf("%s\t", value);
-      free(value);
+      xlsxioread_free(value);
     }
     printf("\n");
   }

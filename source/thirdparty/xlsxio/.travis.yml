@@ -1,0 +1,32 @@
+language: c
+jobs:
+  include:
+    - name: "Linux GCC"
+      os: linux
+      compiler: gcc
+    - name: "Linux Clang"
+      os: linux
+      compiler: clang
+    - name: "Mac OS X Clang"
+      os: osx
+      compiler: clang
+
+addons:
+  apt:
+    packages:
+      - libexpat1-dev
+      - libminizip-dev
+  homebrew:
+    packages:
+      - expat
+      - minizip
+#      - minizip2
+    update: true
+
+script:
+#  - make install CC=$CC PREFIX=$(pwd)/build_result
+  - mkdir -p buildall build_result
+  - cd buildall
+  - cmake -Wno-dev -G"Unix Makefiles" -DCMAKE_INSTALL_PREFIX:PATH=$(pwd)/../build_result -DCMAKE_BUILD_TYPE:STRING=Release -DWITH_LIBZIP:BOOL=OFF ..
+  - cd ..
+  - make -Cbuildall install/strip

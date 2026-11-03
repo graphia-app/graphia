@@ -36,8 +36,11 @@ THE SOFTWARE.
 int append_buffer_data (char** pdata, size_t* pdatalen, const char* bufferdata, size_t bufferdatalen)
 {
   //allocate larger data buffer, abort in case of memory allocation error
-  if ((*pdata = (char*)realloc(*pdata, *pdatalen + bufferdatalen + 1)) == NULL)
+  if ((*pdata = (char*)realloc(*pdata, *pdatalen + bufferdatalen + 1)) == NULL) {
+    //memory allocation error
+    *pdatalen = 0;
     return 1;
+  }
   //append new data and adjust length
   memcpy(*pdata + *pdatalen, bufferdata, bufferdatalen);
   *pdatalen += bufferdatalen;

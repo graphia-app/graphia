@@ -49,7 +49,7 @@ THE SOFTWARE.
 /*! \brief minor version number */
 #define XLSXIO_VERSION_MINOR 2
 /*! \brief micro version number */
-#define XLSXIO_VERSION_MICRO 21
+#define XLSXIO_VERSION_MICRO 37
 /*! @} */
 
 /*! \cond PRIVATE */
@@ -63,6 +63,9 @@ THE SOFTWARE.
 
 /*! \brief string with dotted version number \hideinitializer */
 #define XLSXIO_VERSION_STRING XLSXIO_VERSION_STRINGIZE(XLSXIO_VERSION_MAJOR, XLSXIO_VERSION_MINOR, XLSXIO_VERSION_MICRO)
+
+/*! \brief integer version of the library \hideinitializer */
+#define XLSXIO_VERSION_ID (XLSXIO_VERSION_MAJOR * 10000 + XLSXIO_VERSION_MINOR * 100 + XLSXIO_VERSION_MICRO)
 
 /*! \brief string with name of XLSX I/O reading library */
 #define XLSXIOREAD_NAME "libxlsxio_read"
