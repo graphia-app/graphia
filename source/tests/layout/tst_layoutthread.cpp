@@ -152,11 +152,11 @@ private slots:
         create(path(u"n"_s, 10));
 
         const QSignalSpy pausedChanged(_layoutThread.get(), &LayoutThread::pausedChanged);
-        QSignalSpy initialised(_layoutThread.get(), &LayoutThread::initialised);
+        const QSignalSpy initialised(_layoutThread.get(), &LayoutThread::initialised);
         _layoutThread->start(true);
 
         // It's initialised once it has paused, before doing anything
-        QVERIFY(initialised.wait(Timeout));
+        QVERIFY(QTest::qWaitFor([&] { return !initialised.isEmpty(); }, Timeout));
         QVERIFY(_layoutThread->paused());
 
         // Nothing is laid out until resumed
@@ -286,9 +286,9 @@ private slots:
     {
         create(path(u"n"_s, 200));
 
-        QSignalSpy initialised(_layoutThread.get(), &LayoutThread::initialised);
+        const QSignalSpy initialised(_layoutThread.get(), &LayoutThread::initialised);
         _layoutThread->start(true);
-        QVERIFY(initialised.wait(Timeout));
+        QVERIFY(QTest::qWaitFor([&] { return !initialised.isEmpty(); }, Timeout));
 
         for(int i = 0; i < 20; i++)
         {
