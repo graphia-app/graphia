@@ -38,7 +38,7 @@ MatrixTypeResult AdjacencyMatrixTabularDataParser::onParseComplete()
 
     MatrixTypeResult result;
 
-    if((result = AdjacencyMatrixUtils::isEdgeList(data))) // NOLINT bugprone-assignment-in-if-condition
+    if(result = AdjacencyMatrixUtils::isEdgeList(data); result)
     {
         for(size_t rowIndex = 0; rowIndex < data.numRows(); rowIndex++)
         {
@@ -52,7 +52,7 @@ MatrixTypeResult AdjacencyMatrixTabularDataParser::onParseComplete()
             setProgress(static_cast<int>((rowIndex * 100) / data.numRows()));
         }
     }
-    else if((result = AdjacencyMatrixUtils::isAdjacencyMatrix(data, &topLeft))) // NOLINT bugprone-assignment-in-if-condition
+    else if(result = AdjacencyMatrixUtils::isAdjacencyMatrix(data, &topLeft); result)
     {
         for(auto rowIndex = static_cast<size_t>(topLeft.y()); rowIndex < data.numRows(); rowIndex++)
         {
