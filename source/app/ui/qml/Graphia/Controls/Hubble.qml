@@ -44,7 +44,6 @@ Item
     property bool displayNext: false
     property bool displayClose: false
     property bool tooltipMode: false
-    property HoverMousePassthrough _mouseCapture
 
     height: backRectangle.height
     width: backRectangle.width
@@ -67,11 +66,7 @@ Item
     z: 99
 
     onContentChanged: { content.parent = containerLayout; }
-    onTargetChanged:
-    {
-        unlinkFromTarget();
-        linkToTarget();
-    }
+    onTargetChanged: { linkToTarget(); }
 
     Behavior on opacity
     {
@@ -105,6 +100,27 @@ Item
         id: hoverTimer
         interval: 750
         onTriggered: { root.visible = true; }
+    }
+
+    HoverHandler
+    {
+        parent: root.tooltipMode && root.target ? root.target : root
+        enabled: parent !== root
+
+        onHoveredChanged:
+        {
+            if(hovered)
+            {
+                hoverTimer.start();
+                root.parent = root.mainWindow.header;
+                root.positionBubble();
+            }
+            else
+            {
+                hoverTimer.stop();
+                root.visible = false;
+            }
+        }
     }
 
     Rectangle
@@ -181,143 +197,12 @@ Item
         linkToTarget();
     }
 
-    function replaceInParent(replacee, replacer)
-    {
-        let parent = replacee.parent;
-
-        if(parent === null || parent === undefined)
-        {
-            console.log("replacee has no parent, giving up");
-            return;
-        }
-
-        let tail = [];
-        for(let index = 0; index < parent.children.length; index++)
-        {
-            let child = parent.children[index];
-            if(child === replacee)
-            {
-                // Make the replacee an orphan
-                child.parent = null;
-
-                // Move all the remaining children to an array
-                while(index < parent.children.length)
-                {
-                    child = parent.children[index];
-                    tail.push(child);
-                    child.parent = null;
-                }
-
-                break;
-            }
-        }
-
-        if(replacee.parent === null)
-        {
-            // Parent the replacer
-            replacer.parent = parent;
-
-            // Reattach the original children
-            for(const child of tail)
-                child.parent = parent;
-        }
-    }
-
-    function unlinkFromTarget()
-    {
-        // Remove the mouse capture shim
-        // Heirarchy was parent->mouseCapture->target
-        // Remove mouseCapture and reparent the child items to parent
-        // Results in parent->item
-        if(_mouseCapture !== null && _mouseCapture.children.length > 0)
-        {
-            if(_mouseCapture.children.length > 1)
-                console.log("HoverMousePassthrough has more than one child; it shouldn't");
-
-            replaceInParent(_mouseCapture, _mouseCapture.children[0]);
-        }
-    }
-
-    Component
-    {
-        id: hoverMousePassthroughComponent
-        HoverMousePassthrough {}
-    }
-
     function linkToTarget()
     {
-        if(target !== undefined && target !== null)
+        if(target !== null && !tooltipMode)
         {
-            if(tooltipMode)
-            {
-                // Use target's hoverChanged signal
-                let button = target as AbstractButton;
-                if(button)
-                {
-                    button.hoveredChanged.connect(onHover);
-                }
-                else
-                {
-                    // If the target doesn't have a hover signal, we'll
-                    // shim it with a HoverMousePassthrough item
-                    if(_mouseCapture === undefined || _mouseCapture === null)
-                    {
-                        // root as parent is temporary, until it gets set for real below
-                        _mouseCapture = hoverMousePassthroughComponent.createObject(root);
-                    }
-
-                    // Insert the mouse capture shim
-                    // Hierarchy was parent->target
-                    // Add mouseCapture below parent and reparent the child items to mousecapture
-                    // results in: parent->mouseCapture->target
-                    // This allows mouseCapture to access all mouse hover events!
-                    if(target.parent !== _mouseCapture)
-                    {
-                        // When the target item's visibility is false, our shim should also be invisible,
-                        // but we can't change its visible property because that would in turn explicity set the
-                        // child's visible property and obviously we don't want that. Instead therefore, we fake
-                        // visibility by making the shim's size very small. Unforunately, we can't use 0 for the
-                        // size since it means "invalid" in the context of implicit size.
-                        //
-                        // FIXME: This is a bit of a crap solution really, because it means that:
-                        //        a) the shim is never truly invisible, and at best will be a single pixel big
-                        //        b) in the case of the item being in a layout, it will potentially add the
-                        //           layout's spacing parameter to the sides of said single pixel when really
-                        //           the entire thing should be occupying zero space
-                        _mouseCapture.implicitWidth = Qt.binding(() => target.visible ? target.implicitWidth : 1);
-                        _mouseCapture.implicitHeight = Qt.binding(() => target.visible ? target.implicitHeight : 1);
-
-                        // If we can't see the target, disable the hubble
-                        _mouseCapture.enabled = Qt.binding(() => target.visible);
-
-                        replaceInParent(target, _mouseCapture);
-                        target.parent = _mouseCapture;
-
-                        _mouseCapture.hoveredChanged.connect(onHover);
-                    }
-                }
-            }
-            else
-            {
-                root.parent = root.mainWindow.header;
-                positionBubble();
-            }
-        }
-    }
-
-    function onHover()
-    {
-        let hovered = _mouseCapture ? _mouseCapture.hovered : (target as AbstractButton).hovered;
-        if(hovered)
-        {
-            hoverTimer.start();
             root.parent = root.mainWindow.header;
             positionBubble();
-        }
-        else
-        {
-            hoverTimer.stop();
-            root.visible = false;
         }
     }
 

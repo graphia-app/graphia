@@ -67,7 +67,6 @@ qt_add_qml_module(controls_qml
         +wasm/SaveFileDialog.qml
     SOURCES
         controlcolors.h controlcolors.cpp
-        hovermousepassthrough.h hovermousepassthrough.cpp
         namedicon.h namedicon.cpp
         outline.h outline.cpp
         visualisationmappingplot.h visualisationmappingplot.cpp
