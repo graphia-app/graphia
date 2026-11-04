@@ -326,47 +326,40 @@ GraphModel::GraphModel(Application* application, IPlugin* plugin) :
     connect(&_->_preferencesWatcher, &PreferencesWatcher::preferenceChanged,
         this, &GraphModel::onPreferenceChanged);
 
-    // NOLINTNEXTLINE clang-analyzer-optin.cplusplus.VirtualCall
-    createAttribute(nodeDegreeAttribute())
+    GraphModel::createAttribute(nodeDegreeAttribute())
         .setIntValueFn([this](NodeId nodeId) { return _->_transformedGraph.nodeById(nodeId).degree(); })
         .intRange().setMin(0)
         .setDescription(tr("A node's degree is its number of incident edges."));
 
     if(directed())
     {
-        // NOLINTNEXTLINE clang-analyzer-optin.cplusplus.VirtualCall
-        createAttribute(nodeInDegreeAttribute())
+        GraphModel::createAttribute(nodeInDegreeAttribute())
             .setIntValueFn([this](NodeId nodeId) { return _->_transformedGraph.nodeById(nodeId).inDegree(); })
             .intRange().setMin(0)
             .setDescription(tr("A node's in degree is its number of inbound edges."));
 
-        // NOLINTNEXTLINE clang-analyzer-optin.cplusplus.VirtualCall
-        createAttribute(nodeOutDegreeAttribute())
+        GraphModel::createAttribute(nodeOutDegreeAttribute())
             .setIntValueFn([this](NodeId nodeId) { return _->_transformedGraph.nodeById(nodeId).outDegree(); })
             .intRange().setMin(0)
             .setDescription(tr("A node's out degree is its number of outbound edges."));
     }
 
-    // NOLINTNEXTLINE clang-analyzer-optin.cplusplus.VirtualCall
-    createAttribute(nodeMultiplicityAttribute())
+    GraphModel::createAttribute(nodeMultiplicityAttribute())
         .setIntValueFn([this](NodeId nodeId) { return _->_transformedGraph.multiplicityOf(nodeId); })
         .intRange().setMin(0)
         .setDescription(tr("A node's multiplicity is how many nodes it represents."));
 
-    // NOLINTNEXTLINE clang-analyzer-optin.cplusplus.VirtualCall
-    createAttribute(edgeMultiplicityAttribute())
+    GraphModel::createAttribute(edgeMultiplicityAttribute())
         .setIntValueFn([this](EdgeId edgeId) { return _->_transformedGraph.multiplicityOf(edgeId); })
         .intRange().setMin(0)
         .setDescription(tr("An edge's multiplicity is how many edges it represents."));
 
-    // NOLINTNEXTLINE clang-analyzer-optin.cplusplus.VirtualCall
-    createAttribute(componentSizeAttribute())
+    GraphModel::createAttribute(componentSizeAttribute())
         .setIntValueFn([](const IGraphComponent& component) { return static_cast<int>(component.numNodes()); })
         .intRange().setMin(1)
         .setDescription(tr("Component Size refers to the number of nodes the component contains."));
 
-    // NOLINTNEXTLINE clang-analyzer-optin.cplusplus.VirtualCall
-    createAttribute(nodeComponentIdentifierAttribute())
+    GraphModel::createAttribute(nodeComponentIdentifierAttribute())
         .setStringValueFn([this](NodeId nodeId)
         {
             return u"Component %1"_s.arg(static_cast<int>(_->_transformedGraph.componentIdOfNode(nodeId) + 1));
@@ -375,8 +368,7 @@ GraphModel::GraphModel(Application* application, IPlugin* plugin) :
         .setDescription(tr("A node's component identifier indicates which component it is part of."))
         .setFlag(AttributeFlag::DisableDuringTransform);
 
-    // NOLINTNEXTLINE clang-analyzer-optin.cplusplus.VirtualCall
-    createAttribute(edgeComponentIdentifierAttribute())
+    GraphModel::createAttribute(edgeComponentIdentifierAttribute())
         .setStringValueFn([this](EdgeId edgeId)
         {
             return u"Component %1"_s.arg(static_cast<int>(_->_transformedGraph.componentIdOfEdge(edgeId) + 1));
