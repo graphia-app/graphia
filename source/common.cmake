@@ -62,7 +62,7 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 endif()
 
 if(MSVC)
-    add_definitions(-DUNICODE -D_UNICODE -DNOMINMAX)
+    add_definitions(-DUNICODE -D_UNICODE -DNOMINMAX -D_CRT_SECURE_NO_WARNINGS)
 
     # Enable some warnings
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3")
@@ -72,9 +72,6 @@ if(MSVC)
 
     # Disable inherits via dominance
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4250")
-
-    # Disable deprecated warnings
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996")
 
     if(NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         # Only do MSVC code analysis on CI
