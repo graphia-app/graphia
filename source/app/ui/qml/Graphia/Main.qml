@@ -740,7 +740,7 @@ ApplicationWindow
             errorOpeningFileMessageDialog.title = NativeUtils.urlIsFile(url) ?
                 qsTr("Can't Open File") : qsTr("Can't Open URL");
             errorOpeningFileMessageDialog.text = Utils.format(
-                qsTr("{0} cannot be loaded."), userTextForUrl(url)); //FIXME more elaborate error message
+                qsTr("{0} cannot be loaded."), userTextForUrl(url));
 
             errorOpeningFileMessageDialog.open();
             return;
