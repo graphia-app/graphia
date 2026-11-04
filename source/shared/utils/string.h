@@ -72,12 +72,9 @@ namespace u
         std::ostringstream ss;
 
         ss << std::hex << std::setfill('0');
-        for(int b : bytes) // NOLINT bugprone-signed-char-misuse
+        for(auto b : bytes)
         {
-            if(b < 0)
-                b += 0x100;
-
-            ss << std::setw(2) << b;
+            ss << std::setw(2) << static_cast<int>(static_cast<unsigned char>(b));
         }
 
         return ss.str();
