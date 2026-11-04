@@ -83,7 +83,7 @@ private:
     static Item* parentItem(const QModelIndex& index);
     static Item* itemForIndex(const QModelIndex& index);
 
-    enum Roles // NOLINT performance-enum-size
+    enum Roles
     {
         NameRole = Qt::UserRole + 1,
         ElementTypeRole,

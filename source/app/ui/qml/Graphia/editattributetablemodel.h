@@ -86,7 +86,7 @@ private:
 
     AttributeEdits _edits;
 
-    enum Roles // NOLINT performance-enum-size
+    enum Roles
     {
         LabelRole = Qt::UserRole + 1,
         AttributeRole,

@@ -38,7 +38,7 @@ class AvailableTransformsModel : public QAbstractListModel
     QML_ELEMENT
 
 private:
-    enum Roles // NOLINT performance-enum-size
+    enum Roles
     {
         TransformDisplayNameRole = Qt::UserRole + 1,
         TransformCategoryRole,

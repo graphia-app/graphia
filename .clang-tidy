@@ -64,6 +64,8 @@ Checks: >
     -readability-uppercase-literal-suffix
 
 CheckOptions:
+  - key:    performance-enum-size.EnumIgnoreList
+    value:  '.*::Roles$'
   - key:    misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
     value:  '1'
 

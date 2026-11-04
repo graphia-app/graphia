@@ -79,7 +79,7 @@ private:
     std::vector<bool> _rowSelected;
     QList<int> _selectedRows;
 
-    enum Roles // NOLINT performance-enum-size
+    enum Roles
     {
         SubSelectedRole = Qt::UserRole + 999
     };

@@ -60,7 +60,7 @@ public:
     };
     Q_ENUM(Results)
 
-    enum Roles // NOLINT performance-enum-size
+    enum Roles
     {
         EnrichedRole = Qt::UserRole + 1
     };

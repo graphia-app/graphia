@@ -90,7 +90,7 @@ public:
         _loadedPlugins(loadedPlugins)
     {}
 
-    enum Roles // NOLINT performance-enum-size
+    enum Roles
     {
         Name = Qt::UserRole + 1,
         IndividualDescription,
@@ -121,7 +121,7 @@ public:
         _loadedPlugins(loadedPlugins)
     {}
 
-    enum Roles // NOLINT performance-enum-size
+    enum Roles
     {
         Name = Qt::UserRole + 1,
         DisplayName,

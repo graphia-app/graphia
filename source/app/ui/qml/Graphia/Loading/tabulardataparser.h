@@ -57,7 +57,7 @@ public:
         ValueType valueTypes = ValueType::All, const QStringList& skip = {},
         HeaderModelType headerModelType = HeaderModelType::Rows);
 
-    enum Roles // NOLINT performance-enum-size
+    enum Roles
     {
         Index = Qt::UserRole + 1,
     };
