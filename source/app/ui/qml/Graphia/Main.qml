@@ -2320,8 +2320,8 @@ ApplicationWindow
 
                         onTriggered: (source) => // qmllint disable signal-handler-parameters
                         {
-                            if(source?.menu) // qmllint disable missing-property
-                                source.menu.dismiss(); // qmllint disable missing-property
+                            if(source instanceof MenuItem)
+                                (source as MenuItem).menu.dismiss();
 
                             mainWindow.currentTab.gotoBookmark(bookmarkMenuItem.text);
                         }
