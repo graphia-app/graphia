@@ -795,18 +795,10 @@ ApplicationWindow
                                 onTriggered: { preview.text = markdownChangelog.text; }
                             }
 
-                            //FIXME: not sure why this is necessary; first click on TextArea
-                            // fires textChanged, even though nothing changed... bug in TextArea?
-                            property string _lastText
                             onTextChanged:
                             {
-                                if(text === _lastText)
-                                    return;
-
                                 editTimer.restart();
                                 root.setSaveRequired();
-
-                                _lastText = text;
                             }
                         }
 
