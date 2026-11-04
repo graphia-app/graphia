@@ -33,6 +33,8 @@
 #include <QCoreApplication>
 #include <QDesktopServices>
 #include <QFile>
+#include <QFont>
+#include <QFontMetrics>
 #include <QHoverEvent>
 #include <QList>
 #include <QMetaObject>
@@ -41,6 +43,7 @@
 #include <QQmlComponent>
 #include <QQmlEngine>
 #include <QQuickItem>
+#include <QRegularExpression>
 #include <QSignalSpy>
 #include <QSizeF>
 #include <QString>
@@ -183,13 +186,37 @@ class TestCorrelationPlot : public DocumentTest
         return replot([&] { QMetaObject::invokeMethod(_plot.get(), method, args...); });
     }
 
+    static QByteArray manyColumnsCsv(int numColumns, const QString& rowPrefix)
+    {
+        QByteArray csv = "Name";
+        for(int column = 0; column < numColumns; column++)
+            csv.append(u",column%1"_s.arg(column).toUtf8());
+
+        csv.append("\nKind");
+        for(int column = 0; column < numColumns; column++)
+            csv.append(column % 2 == 0 ? ",x" : ",y");
+
+        csv.append('\n');
+
+        for(int row = 0; row < 6; row++)
+        {
+            csv.append(u"%1%2"_s.arg(rowPrefix).arg(row).toUtf8());
+            for(int column = 0; column < numColumns; column++)
+                csv.append(u",%1"_s.arg((column * (row + 1)) % 17).toUtf8());
+
+            csv.append('\n');
+        }
+
+        return csv;
+    }
+
     // A plot of some rows, as in the plugin's panel when they're selected
-    bool createPlot(const QList<int>& rows, const QSizeF& size = {800.0, 400.0})
+    bool createPlot(const QList<int>& rows, const QSizeF& size = {800.0, 400.0}, const QByteArray& properties = {})
     {
         const auto existingWidgets = QApplication::allWidgets();
 
         QQmlComponent component(_engine.get());
-        component.setData("import Graphia.Plugins.Correlation\nCorrelationPlot {}", {});
+        component.setData("import Graphia.Plugins.Correlation\nCorrelationPlot {" + properties + "}", {});
         _plot.reset(component.create());
         _item = qobject_cast<QQuickItem*>(_plot.get());
 
@@ -1336,6 +1363,105 @@ private slots:
         QVERIFY(set("rightPadding", 10));
         QVERIFY(set("bottomPadding", 10));
         QVERIFY(set("showGridLines", false));
+    }
+
+    void columnWidthWithLegend_data()
+    {
+        QTest::addColumn<QString>("rowPrefix");
+
+        QTest::newRow("legend takes its share of the width") << u"r"_s;
+        QTest::newRow("legend needs more than its share") <<
+            u"a row name long enough to need far more than the legend's share of the width "_s;
+    }
+
+    // However much room the legend takes, each column stays as wide as a line of text, for its name
+    void columnWidthWithLegend()
+    {
+        QFETCH(const QString, rowPrefix);
+
+        const int numColumns = 200;
+        QVERIFY(open(manyColumnsCsv(numColumns, rowPrefix)));
+        QVERIFY(createPlot({0, 1, 2}));
+
+        // Half a column of padding is added at each end of the range
+        auto columnWidth = [this]
+        {
+            const auto* axisRect = layoutElement<QCPAxisRect>();
+            return axisRect->width() / (axisRect->axis(QCPAxis::atBottom)->range().size() - 1.0);
+        };
+
+        auto checkColumnWidth = [&](double expected)
+        {
+            QVERIFY2(std::abs(columnWidth() - expected) < 0.2,
+                qPrintable(u"%1 != %2"_s.arg(columnWidth()).arg(expected)));
+
+            const auto expectedFraction = layoutElement<QCPAxisRect>()->width() / (expected * numColumns);
+            const auto fraction = _plot->property("visibleHorizontalFraction").toDouble();
+            QVERIFY2(std::abs(fraction - expectedFraction) < 0.002,
+                qPrintable(u"%1 != %2"_s.arg(fraction).arg(expectedFraction)));
+        };
+
+        // The first plot is laid out after its range is calculated, so needs calculating again
+        QVERIFY(set("horizontalScrollPosition", 0.5));
+        const auto widthWithoutLegend = columnWidth();
+        checkColumnWidth(widthWithoutLegend);
+
+        QVERIFY(set("showLegend", true));
+        checkColumnWidth(widthWithoutLegend);
+        if(QTest::currentTestFailed())
+            return;
+
+        QVERIFY(set("rightPadding", 20));
+        checkColumnWidth(widthWithoutLegend);
+        if(QTest::currentTestFailed())
+            return;
+
+        QVERIFY(invoke("showColumnAnnotations", Q_ARG(QStringList, QStringList{u"Kind"_s})));
+        checkColumnWidth(widthWithoutLegend);
+        if(QTest::currentTestFailed())
+            return;
+
+        QVERIFY(invoke("hideColumnAnnotations", Q_ARG(QStringList, QStringList{u"Kind"_s})));
+        QVERIFY(set("showLegend", false));
+        checkColumnWidth(widthWithoutLegend);
+    }
+
+    // As in the panel, where a scroll bar that appears changes the padding while the plot rebuilds
+    void legendShowsScrollBar()
+    {
+        QTest::failOnWarning(QRegularExpression(u"Binding loop"_s));
+
+        // These fit without the legend, but not with it
+        const int numColumns = 47;
+        const auto columnsWidth = numColumns * (QFontMetrics(QFont{}).height() + 1);
+        const QSizeF plotSize(columnsWidth * 1.1, 400.0);
+
+        QVERIFY(open(manyColumnsCsv(numColumns, u"r"_s)));
+        QVERIFY(createPlot({0, 1, 2}, plotSize, "bottomPadding: visibleHorizontalFraction < 1.0 ? 15 : 0"));
+
+        QCOMPARE(_plot->property("visibleHorizontalFraction").toDouble(), 1.0);
+        QCOMPARE(_plot->property("bottomPadding").toInt(), 0);
+
+        QVERIFY(set("showLegend", true));
+        QVERIFY(_plot->property("visibleHorizontalFraction").toDouble() < 1.0);
+        QCOMPARE(_plot->property("bottomPadding").toInt(), 15);
+        QVERIFY(layoutElement<QCPLegend>() != nullptr);
+
+        QVERIFY(set("showLegend", false));
+        QCOMPARE(_plot->property("visibleHorizontalFraction").toDouble(), 1.0);
+        QCOMPARE(_plot->property("bottomPadding").toInt(), 0);
+        QVERIFY(layoutElement<QCPLegend>() == nullptr);
+    }
+
+    // With no room left for the columns, some are still shown, in order
+    void legendWiderThanPlot()
+    {
+        QVERIFY(open(manyColumnsCsv(200, u"a row name long enough to need more width than the plot has "_s)));
+        QVERIFY(createPlot({0, 1, 2}, {200.0, 400.0}));
+        QVERIFY(set("showLegend", true));
+
+        QVERIFY(layoutElement<QCPAxisRect>()->axis(QCPAxis::atBottom)->range().size() > 0.0);
+        QVERIFY(_plot->property("visibleHorizontalFraction").toDouble() > 0.0);
     }
 
     // The average of rows whose nodes are different colours is drawn in black, or white

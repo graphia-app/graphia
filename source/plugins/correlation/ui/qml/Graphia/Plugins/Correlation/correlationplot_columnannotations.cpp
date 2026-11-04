@@ -70,7 +70,6 @@ QCPAxis* CorrelationPlot::configureColumnAnnotations(QCPAxisRect* axisRect)
         }
 
         axisRect->setAutoMargins(QCP::msLeft|QCP::msRight|QCP::msTop|QCP::msBottom);
-        axisRect->setMargins({});
         axisRect->setMarginGroup(QCP::msLeft|QCP::msRight, nullptr);
         xAxis->setTickLabels(true);
 
@@ -92,7 +91,9 @@ QCPAxis* CorrelationPlot::configureColumnAnnotations(QCPAxisRect* axisRect)
 
     const auto separation = 8;
     axisRect->setAutoMargins(QCP::msLeft|QCP::msRight|QCP::msTop);
-    axisRect->setMargins(QMargins(0, 0, 0, separation));
+    auto axisRectMargins = axisRect->margins();
+    axisRectMargins.setBottom(separation);
+    axisRect->setMargins(axisRectMargins);
     columnAnnotationsAxisRect->setAutoMargins(QCP::msLeft|QCP::msRight|QCP::msBottom);
     columnAnnotationsAxisRect->setMargins({0, 0, separation, 0});
 

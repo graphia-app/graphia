@@ -830,6 +830,8 @@ void CorrelationPlot::wheelEvent(QWheelEvent* event)
         event->ignore();
 }
 
+const double CorrelationPlot::LegendWidthFraction = 0.15;
+
 void CorrelationPlot::configureLegend()
 {
     if(_selectedRows.empty() || !_showLegend)
@@ -959,11 +961,12 @@ void CorrelationPlot::configureLegend()
         legend->setMargins(margins);
     }
 
-    // Make the plot take 85% of the width, and the legend the remaining 15%
-    _customPlot.plotLayout()->setColumnStretchFactor(0, 0.85);
-    _customPlot.plotLayout()->setColumnStretchFactor(1, 0.15);
+    _customPlot.plotLayout()->setColumnStretchFactor(0, 1.0 - LegendWidthFraction);
+    _customPlot.plotLayout()->setColumnStretchFactor(1, LegendWidthFraction);
 
     legend->setVisible(true);
+
+    _minimumLegendWidth = _legendLayoutGrid->minimumOuterSizeHint().width();
 }
 
 void CorrelationPlot::onClick(const QMouseEvent* event)
@@ -1041,6 +1044,8 @@ void CorrelationPlot::rebuildPlot(InvalidateCache invalidateCache)
 
     _rebuildRequired = RebuildRequired::None;
 
+    const auto previousColumnAxisWidth = columnAxisWidth();
+
     auto clearLineGraphCache = [this]
     {
         for(auto v : std::as_const(_lineGraphCache))
@@ -1091,7 +1096,14 @@ void CorrelationPlot::rebuildPlot(InvalidateCache invalidateCache)
     if(_debug)
         qDebug() << "buildPlot" << buildTimer.elapsed() << "ms";
 
+    computeXAxisRange();
     updatePixmap(CorrelationPlotUpdateType::ReplotAndRenderAndTooltips);
+
+    if(columnAxisWidth() != previousColumnAxisWidth)
+    {
+        emit visibleHorizontalFractionChanged();
+        emit isWideChanged();
+    }
 }
 
 size_t CorrelationPlot::numColumns() const
@@ -1670,8 +1682,15 @@ double CorrelationPlot::columnAxisWidth() const
             _continuousAxisRect->margins().right());
     }
 
-    //FIXME This value is wrong when the legend is enabled
-    return width() - marginWidth;
+    double plotColumnWidth = width() - _rightPadding;
+
+    if(_legendLayoutGrid != nullptr)
+    {
+        plotColumnWidth -= _customPlot.plotLayout()->columnSpacing();
+        plotColumnWidth -= std::max(plotColumnWidth * LegendWidthFraction, static_cast<double>(_minimumLegendWidth));
+    }
+
+    return std::max(plotColumnWidth - marginWidth, 1.0);
 }
 
 double CorrelationPlot::columnAnnotationsHeight() const
