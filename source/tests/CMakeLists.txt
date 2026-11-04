@@ -144,6 +144,16 @@ add_unit_test(tst_geometry maths/tst_geometry.cpp)
 # Only the updater uses the cryptography, and the web build has no updater
 add_unit_test(tst_crypto NO_WASM utils/tst_crypto.cpp)
 add_unit_test(tst_plots ui/tst_plots.cpp)
+
+add_unit_test(tst_namedicon ui/tst_namedicon.cpp)
+target_compile_definitions(tst_namedicon PRIVATE ICON_THEMES_DIR="${CMAKE_SOURCE_DIR}/source/app/icon-themes")
+if(NOT EMSCRIPTEN)
+    # Relative, as the platform's arguments are split at colons, which a Windows path contains
+    set(NAMEDICON_TESTS tst_namedicon tst_namedicon_scrambled)
+    set_property(TEST ${NAMEDICON_TESTS} APPEND PROPERTY ENVIRONMENT
+        "QT_QPA_PLATFORM=offscreen:configfile=namedicon_screens.json")
+    set_property(TEST ${NAMEDICON_TESTS} PROPERTY WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/ui)
+endif()
 target_link_libraries(tst_crypto PRIVATE thirdparty_static thirdparty)
 # The web build has no updater
 add_unit_test(tst_updates NO_WASM utils/tst_updates.cpp)

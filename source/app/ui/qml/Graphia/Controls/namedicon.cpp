@@ -28,6 +28,9 @@ NamedIcon::NamedIcon(QQuickItem* parent) : QQuickPaintedItem(parent)
     setWidth(24.0);
     setHeight(24.0);
 
+    // The texture is painted at device resolution, so maps directly onto the screen's pixels
+    setSmooth(false);
+
     connect(this, &NamedIcon::enabledChanged, [this] { update(); });
     connect(this, &NamedIcon::iconNameChanged, [this] { update(); });
     connect(this, &NamedIcon::onChanged, [this] { update(); });
@@ -40,7 +43,7 @@ void NamedIcon::paint(QPainter* painter)
     auto mode = _selected ? QIcon::Selected : QIcon::Normal;
     auto size = painter->viewport().size();
 
-    auto pixmap = _icon.pixmap(this->size().toSize(),
+    auto pixmap = _icon.pixmap(this->size().toSize(), window()->devicePixelRatio(),
         isEnabled() ? mode : QIcon::Disabled,
         _on ? QIcon::On : QIcon::Off);
 
@@ -51,7 +54,7 @@ void NamedIcon::paint(QPainter* painter)
         auto x = static_cast<double>((size.width() - pixmap.width())) / (2.0 * window()->devicePixelRatio());
         auto y = static_cast<double>((size.height() - pixmap.height())) / (2.0 * window()->devicePixelRatio());
 
-        painter->drawPixmap(static_cast<int>(x), static_cast<int>(y), pixmap);
+        painter->drawPixmap(QPointF{x, y}, pixmap);
     }
     else
     {
@@ -60,10 +63,6 @@ void NamedIcon::paint(QPainter* painter)
 
         painter->drawPixmap(boundingRect().toRect(), pixmap);
     }
-
-    //FIXME: there is clearly still some scaling going on here at non-1.0 DPRs, which
-    // appears like it's a scale up by the DPR, then a scale down by 1/DPR, so the
-    // image looks dimensionally correct, but has lost some fidelity in the process
 }
 
 void NamedIcon::setIconName(const QString& iconName)

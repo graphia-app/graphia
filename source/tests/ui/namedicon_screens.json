@@ -1,0 +1,9 @@
+{
+    "screens":
+    [
+        { "name": "1x", "x": 0, "y": 0, "width": 800, "height": 600, "logicalDpi": 96, "logicalBaseDpi": 96, "dpr": 1 },
+        { "name": "1.5x", "x": 800, "y": 0, "width": 800, "height": 600, "logicalDpi": 96, "logicalBaseDpi": 96, "dpr": 1.5 },
+        { "name": "1.75x", "x": 1600, "y": 0, "width": 800, "height": 600, "logicalDpi": 96, "logicalBaseDpi": 96, "dpr": 1.75 },
+        { "name": "2x", "x": 2400, "y": 0, "width": 800, "height": 600, "logicalDpi": 96, "logicalBaseDpi": 96, "dpr": 2 }
+    ]
+}
