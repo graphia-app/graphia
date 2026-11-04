@@ -19,6 +19,8 @@
 
 #include "typeidentity.h"
 
+#include "shared/utils/string.h"
+
 #include <QtGlobal>
 
 static TypeIdentity::Type typeOf(const QString& value)
@@ -27,18 +29,12 @@ static TypeIdentity::Type typeOf(const QString& value)
     if(value.isEmpty())
         return TypeIdentity::Type::Unknown;
 
-    bool conversionSucceeded = false;
-
-    auto intValue = value.toInt(&conversionSucceeded);
-    Q_UNUSED(intValue); // Keep cppcheck happy
-    if(conversionSucceeded)
+    if(u::isInteger(value))
         return TypeIdentity::Type::Int;
 
     // Values that are too large for an int fallthrough and are treated as floats
 
-    auto doubleValue = value.toDouble(&conversionSucceeded);
-    Q_UNUSED(doubleValue); // Keep cppcheck happy
-    if(conversionSucceeded)
+    if(u::isNumeric(value))
         return TypeIdentity::Type::Float;
 
     return TypeIdentity::Type::String;
