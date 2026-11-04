@@ -92,7 +92,7 @@ public:
     void resetChangeOccurred(const PassKey<GraphTransform>&) { _graphChangeOccurred = false; }
     bool changeOccurred(const PassKey<GraphTransform>&) const { return _graphChangeOccurred; }
 
-    std::vector<QString> addedOrChangedAttributeNamesAtTransformIndex(int index) const;
+    std::map<QString, QString> assignedAttributeNamesAtTransformIndex(int index) const;
 
 private:
     GraphModel* _graphModel = nullptr;
@@ -109,8 +109,8 @@ private:
 
     TransformCache _cache;
 
-    using AddedOrChangedAttributeNamesMap = std::map<int, std::vector<QString>>;
-    AddedOrChangedAttributeNamesMap _addedOrChangedAttributeNames;
+    using AssignedAttributeNamesMap = std::map<int, std::map<QString, QString>>;
+    AssignedAttributeNamesMap _assignedAttributeNames;
 
     bool _graphChangeOccurred = false;
     bool _changeSignalsEmitted = false;

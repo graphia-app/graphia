@@ -158,6 +158,7 @@ public:
     QStringList avaliableConditionFnOps(const QString& attributeName) const;
     bool hasTransformInfo() const;
     const TransformInfo& transformInfoAtIndex(int index) const;
+    std::map<QString, QString> assignedAttributeNamesAtTransformIndex(int index) const;
     std::vector<QString> addedOrChangedAttributeNamesAtTransformIndex(int index) const;
     std::vector<QString> addedOrChangedAttributeNamesAtTransformIndexOrLater(int firstIndex) const;
     ValueType valueTypeOfTransformAttributeName(const QString& attributeName) const;
@@ -258,8 +259,10 @@ private:
     QSet<QString> _added;
     QSet<QString> _removed;
     QSet<QString> _changed;
+    std::map<QString, QString> _assignedNames;
 
     // Called by GraphModel
+    void assignName(const QString& requestedName, const QString& assignedName);
     void add(const QString& name);
     void remove(const QString& name);
     void change(const QString& name);
@@ -273,6 +276,9 @@ public:
     QStringList removed() const { return {_removed.begin(), _removed.end()}; }
     QStringList changed() const { return {_changed.begin(), _changed.end()}; }
     QStringList addedOrChanged() const;
+
+    // Requested attribute name vs the name it was actually assigned
+    const std::map<QString, QString>& assignedNames() const { return _assignedNames; }
 
     void emitAttributesChanged();
 };

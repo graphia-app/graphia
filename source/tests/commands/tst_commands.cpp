@@ -40,10 +40,9 @@
 #include <QString>
 #include <QStringList>
 
-#include <algorithm>
 #include <functional>
+#include <map>
 #include <memory>
-#include <vector>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -62,6 +61,8 @@ const QByteArray Gml = R"(graph
 ])";
 
 // Whether two lists of visualisations are the same, ignoring formatting
+using AssignedNames = std::map<QString, QString>;
+
 bool visualisationsEquivalent(const QStringList& a, const QStringList& b)
 {
     if(a.size() != b.size())
@@ -575,40 +576,50 @@ private slots:
     {
         QTest::addColumn<QStringList>("previous");
         QTest::addColumn<QStringList>("visualisations");
-        QTest::addColumn<QStringList>("createdAttributeNames");
+        QTest::addColumn<AssignedNames>("assignedNames");
         QTest::addColumn<QStringList>("expected");
 
         const QStringList previous{uR"("score" "Size")"_s};
 
         QTest::newRow("nothing created") << previous <<
             QStringList{previous.at(0), uR"("Cluster" "Colour")"_s} <<
-            QStringList{} <<
+            AssignedNames{} <<
             QStringList{previous.at(0), uR"("Cluster" "Colour")"_s};
 
         QTest::newRow("name not in use") << previous <<
             QStringList{previous.at(0), uR"("Cluster" "Colour")"_s} <<
-            QStringList{u"Cluster"_s, u"Cluster Size"_s} <<
+            AssignedNames{{u"Cluster"_s, u"Cluster"_s}, {u"Cluster Size"_s, u"Cluster Size"_s}} <<
             QStringList{previous.at(0), uR"("Cluster" "Colour")"_s};
 
         QTest::newRow("name in use") << previous <<
             QStringList{previous.at(0), uR"("Cluster" "Colour")"_s, uR"("Cluster Size" "Size")"_s} <<
-            QStringList{u"Cluster(1)"_s, u"Cluster Size(2)"_s} <<
+            AssignedNames{{u"Cluster"_s, u"Cluster(1)"_s}, {u"Cluster Size"_s, u"Cluster Size(2)"_s}} <<
             QStringList{previous.at(0), u"\"Cluster(1)\" \"Colour\""_s, u"\"Cluster Size(2)\" \"Size\""_s};
 
         QTest::newRow("previous visualisations unchanged") <<
             QStringList{uR"("Cluster" "Size")"_s} <<
             QStringList{uR"("Cluster" "Size")"_s, uR"("Cluster" "Colour")"_s} <<
-            QStringList{u"Cluster(1)"_s} <<
+            AssignedNames{{u"Cluster"_s, u"Cluster(1)"_s}} <<
             QStringList{uR"("Cluster" "Size")"_s, u"\"Cluster(1)\" \"Colour\""_s};
 
-        QTest::newRow("regular expression characters in name") << QStringList{} <<
-            QStringList{u"\"Score (raw)\" \"Colour\""_s, uR"("A+B" "Size")"_s} <<
-            QStringList{u"Score (raw)(1)"_s, u"A+B(1)"_s} <<
-            QStringList{u"\"Score (raw)(1)\" \"Colour\""_s, u"\"A+B(1)\" \"Size\""_s};
+        QTest::newRow("requested name has a numeric suffix") << QStringList{} <<
+            QStringList{u"\"Mean of Flag(1)\" \"Colour\""_s} <<
+            AssignedNames{{u"Mean of Flag(1)"_s, u"Mean of Flag(2)"_s}} <<
+            QStringList{u"\"Mean of Flag(2)\" \"Colour\""_s};
+
+        QTest::newRow("assigned name resembles another request") << QStringList{} <<
+            QStringList{uR"("Cluster" "Colour")"_s} <<
+            AssignedNames{{u"Cluster"_s, u"Cluster"_s}, {u"Other"_s, u"Cluster(1)"_s}} <<
+            QStringList{uR"("Cluster" "Colour")"_s};
+
+        QTest::newRow("attribute not created") << QStringList{} <<
+            QStringList{uR"("score" "Colour")"_s} <<
+            AssignedNames{{u"Cluster"_s, u"Cluster(1)"_s}} <<
+            QStringList{uR"("score" "Colour")"_s};
 
         QTest::newRow("flags and parameters kept") << QStringList{} <<
             QStringList{uR"([component] "Cluster" "Colour" with gradient = "x")"_s} <<
-            QStringList{u"Cluster(1)"_s} <<
+            AssignedNames{{u"Cluster"_s, u"Cluster(1)"_s}} <<
             QStringList{u"[component] \"Cluster(1)\" \"Colour\" with gradient = \"x\""_s};
     }
 
@@ -616,11 +627,10 @@ private slots:
     {
         QFETCH(const QStringList, previous);
         QFETCH(const QStringList, visualisations);
-        QFETCH(QStringList, createdAttributeNames);
+        QFETCH(const AssignedNames, assignedNames);
         QFETCH(const QStringList, expected);
 
-        const std::vector<QString> created(createdAttributeNames.begin(), createdAttributeNames.end());
-        auto patched = ApplyVisualisationsCommand::patchedVisualisations(previous, visualisations, created);
+        auto patched = ApplyVisualisationsCommand::patchedVisualisations(previous, visualisations, assignedNames);
         QVERIFY2(visualisationsEquivalent(patched, expected), qPrintable(patched.join(u"\n"_s)));
     }
 
@@ -630,15 +640,24 @@ private slots:
         auto model = createModel();
         QCOMPARE(model->applyTransforms({u"LouvainCluster"_s, u"LouvainCluster"_s}), QStringList{});
 
-        auto created = model->graphModel().addedOrChangedAttributeNamesAtTransformIndex(1);
-        std::ranges::sort(created);
-        QCOMPARE(created, (std::vector<QString>{u"LouvainCluster(1)"_s, u"LouvainClusterSize(1)"_s}));
+        const AssignedNames expected
+        {
+            {u"LouvainCluster"_s, u"LouvainCluster(1)"_s},
+            {u"LouvainClusterSize"_s, u"LouvainClusterSize(1)"_s}
+        };
+
+        auto assignedNames = model->graphModel().assignedAttributeNamesAtTransformIndex(1);
+        QCOMPARE(assignedNames, expected);
 
         auto patched = ApplyVisualisationsCommand::patchedVisualisations({},
-            {u"LouvainCluster Colour"_s, u"LouvainClusterSize Size"_s}, created);
+            {u"LouvainCluster Colour"_s, u"LouvainClusterSize Size"_s}, assignedNames);
         QVERIFY2(visualisationsEquivalent(patched,
             {u"\"LouvainCluster(1)\" Colour"_s, u"\"LouvainClusterSize(1)\" Size"_s}),
             qPrintable(patched.join(u"\n"_s)));
+
+        // A transform that doesn't need to run again gives its attributes the same names
+        QCOMPARE(model->applyTransforms({u"LouvainCluster"_s, u"LouvainCluster"_s, u"PageRank"_s}), QStringList{});
+        QCOMPARE(model->graphModel().assignedAttributeNamesAtTransformIndex(1), expected);
     }
 
     void applyTransforms()

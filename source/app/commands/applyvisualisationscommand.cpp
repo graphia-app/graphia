@@ -24,9 +24,10 @@
 
 #include "app/ui/visualisations/visualisationconfigparser.h"
 
+#include "shared/utils/container.h"
+
 #include <QObject>
 #include <QSet>
-#include <QRegularExpression>
 #include <QtGlobal>
 
 #include <utility>
@@ -81,11 +82,9 @@ void ApplyVisualisationsCommand::apply(const QStringList& visualisations,
 }
 
 QStringList ApplyVisualisationsCommand::patchedVisualisations(const QStringList& previousVisualisations,
-    const QStringList& visualisations, const std::vector<QString>& createdAttributeNames)
+    const QStringList& visualisations, const std::map<QString, QString>& assignedAttributeNames)
 {
-    //FIXME This whole approach is pretty fragile and needs to be made more robust
-
-    if(createdAttributeNames.empty())
+    if(assignedAttributeNames.empty())
         return visualisations;
 
     QStringList patched;
@@ -109,15 +108,8 @@ QStringList ApplyVisualisationsCommand::patchedVisualisations(const QStringList&
 
         auto visualisationConfig = p.result();
 
-        // c.f. u::findUniqueName
-        const QRegularExpression re(uR"(^%1\(\d+\))"_s
-            .arg(QRegularExpression::escape(visualisationConfig._attributeName)));
-
-        for(const auto& createdAttributeName : createdAttributeNames)
-        {
-            if(re.match(createdAttributeName).hasMatch()) // clazy:exclude=use-static-qregularexpression
-                visualisationConfig._attributeName = createdAttributeName;
-        }
+        if(u::contains(assignedAttributeNames, visualisationConfig._attributeName))
+            visualisationConfig._attributeName = assignedAttributeNames.at(visualisationConfig._attributeName);
 
         patched.append(visualisationConfig.asString());
     }
@@ -132,7 +124,7 @@ QStringList ApplyVisualisationsCommand::patchedVisualisations() const
     if(_transformIndex >= 0 && _visualisations.size() > _previousVisualisations.size())
     {
         return patchedVisualisations(_previousVisualisations, _visualisations,
-            _graphModel->addedOrChangedAttributeNamesAtTransformIndex(_transformIndex));
+            _graphModel->assignedAttributeNamesAtTransformIndex(_transformIndex));
     }
 
     return _visualisations;

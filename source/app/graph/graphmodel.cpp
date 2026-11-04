@@ -728,9 +728,14 @@ const TransformInfo& GraphModel::transformInfoAtIndex(int index) const
     return nullTransformInfo;
 }
 
+std::map<QString, QString> GraphModel::assignedAttributeNamesAtTransformIndex(int index) const
+{
+    return _->_transformedGraph.assignedAttributeNamesAtTransformIndex(index);
+}
+
 std::vector<QString> GraphModel::addedOrChangedAttributeNamesAtTransformIndex(int index) const
 {
-    return _->_transformedGraph.addedOrChangedAttributeNamesAtTransformIndex(index);
+    return u::valuesFor(assignedAttributeNamesAtTransformIndex(index));
 }
 
 std::vector<QString> GraphModel::addedOrChangedAttributeNamesAtTransformIndexOrLater(int firstIndex) const
@@ -1036,6 +1041,7 @@ Attribute& GraphModel::createAttribute(const AttributeDeclaration& declaration)
 
 Attribute& GraphModel::createAttribute(QString name, QString* assignedName, QString clashHint)
 {
+    const QString requestedName = name;
     name = normalisedAttributeName(name, clashHint);
 
     if(assignedName != nullptr)
@@ -1051,6 +1057,8 @@ Attribute& GraphModel::createAttribute(QString name, QString* assignedName, QStr
 
     for(auto* tracker : _->_attributeChangesTrackers)
     {
+        tracker->assignName(requestedName, name);
+
         if(_graphTransformsAreChanging && _->_removedDynamicAttributeNames.contains(name))
             tracker->change(name);
         else
@@ -1816,6 +1824,11 @@ AttributeChangesTracker::~AttributeChangesTracker()
         emitAttributesChanged();
 
     _graphModel->_->_attributeChangesTrackers.erase(this);
+}
+
+void AttributeChangesTracker::assignName(const QString& requestedName, const QString& assignedName)
+{
+    _assignedNames[requestedName] = assignedName;
 }
 
 void AttributeChangesTracker::add(const QString& name)

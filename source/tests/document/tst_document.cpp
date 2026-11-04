@@ -754,6 +754,30 @@ private slots:
         QVERIFY(_document->visualisations().isEmpty());
     }
 
+    // A visualisation added with a transform follows the attribute it creates, when the name is in use
+    void visualisationOfRenamedAttribute()
+    {
+        QVERIFY(open());
+
+        QVERIFY(execute([this] { _document->update({u"MCLCluster"_s}, {u"MCLClusterSize Size"_s}); }));
+        QVERIFY(execute([this] { _document->update({u"MCLCluster"_s}, {u"MCLClusterSize Colour"_s}); }));
+
+        auto checkPatched = [this]
+        {
+            QCOMPARE(_document->visualisations().size(), 2);
+            QVERIFY(_document->visualisations().at(0).startsWith(u"MCLClusterSize Size"_s));
+            QVERIFY(_document->visualisations().at(1).startsWith(u"\"MCLClusterSize(1)\" Colour"_s));
+        };
+
+        checkPatched();
+
+        QVERIFY(execute([this] { _document->undo(); }));
+        QCOMPARE(_document->visualisations().size(), 1);
+
+        QVERIFY(execute([this] { _document->redo(); }));
+        checkPatched();
+    }
+
     // As when dragging one in the visualisation panel; there can be more visualisations than transforms
     void moveVisualisation()
     {

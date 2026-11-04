@@ -45,14 +45,16 @@ public:
             _index(other._index),
             _config(other._config),
             _graph(other._graph ? std::make_unique<MutableGraph>(*other._graph) : nullptr),
-            _addedOrChangedAttributes(other._addedOrChangedAttributes)
+            _addedOrChangedAttributes(other._addedOrChangedAttributes),
+            _assignedAttributeNames(other._assignedAttributeNames)
         {}
 
         Result(Result&& other) noexcept :
             _index(other._index),
             _config(std::move(other._config)),
             _graph(std::move(other._graph)),
-            _addedOrChangedAttributes(std::move(other._addedOrChangedAttributes))
+            _addedOrChangedAttributes(std::move(other._addedOrChangedAttributes)),
+            _assignedAttributeNames(std::move(other._assignedAttributeNames))
         {}
 
         Result& operator=(Result&& other) noexcept
@@ -61,6 +63,7 @@ public:
             _config = std::move(other._config);
             _graph = std::move(other._graph);
             _addedOrChangedAttributes = std::move(other._addedOrChangedAttributes);
+            _assignedAttributeNames = std::move(other._assignedAttributeNames);
 
             return *this;
         }
@@ -77,6 +80,7 @@ public:
         GraphTransformConfig _config;
         std::unique_ptr<MutableGraph> _graph;
         std::map<QString, Attribute> _addedOrChangedAttributes;
+        std::map<QString, QString> _assignedAttributeNames;
     };
 
     using ResultSet = std::vector<Result>;
