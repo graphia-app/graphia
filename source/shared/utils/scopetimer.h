@@ -72,7 +72,7 @@ private:
 
 #define SCOPE_TIMER_CONCAT2(a, b) a ## b
 #define SCOPE_TIMER_CONCAT(a, b) SCOPE_TIMER_CONCAT2(a, b)
-#define SCOPE_TIMER_INSTANCE_NAME SCOPE_TIMER_CONCAT(_scopeTimer, __COUNTER__)
+#define SCOPE_TIMER_INSTANCE_NAME SCOPE_TIMER_CONCAT(_scopeTimer, __LINE__)
 #define SCOPE_TIMER_FILE_LINE __FILE__ ## ":" ## __LINE__
 #define SCOPE_TIMER_MULTISAMPLES(samples) \
     const ScopeTimer SCOPE_TIMER_INSTANCE_NAME( \
