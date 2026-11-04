@@ -87,9 +87,9 @@ public:
     bool updating() const { return _updating; }
     bool initialised() const { return _initialised; }
     bool interacting() const { return _interacting; }
-    void setInteracting(bool interacting) const;
+    void setInteracting(bool interacting);
     bool transitioning() const { return _transitioning; }
-    void setTransitioning(bool transitioning) const;
+    void setTransitioning(bool transitioning);
     bool viewIsReset() const;
     bool inOverviewMode() const;
     bool canEnterOverviewMode() const;
@@ -143,8 +143,8 @@ private:
     Projection _projection = Projection::Perspective;
     Shading _shading2D = Shading::Flat;
     Shading _shading3D = Shading::Smooth;
-    mutable bool _interacting = false;
-    mutable bool _transitioning = false;
+    bool _interacting = false;
+    bool _transitioning = false;
     bool _viewIsReset = true;
     bool _canEnterOverviewMode = false;
     bool _inOverviewMode = true;
@@ -187,9 +187,9 @@ private slots:
     void onRendererInitialised();
     void onSynchronizeComplete();
     void onFPSChanged(float fps);
-    void onUserInteractionStarted() const;
+    void onUserInteractionStarted();
     void onUserInteractionFinished();
-    void onTransitionStarted() const;
+    void onTransitionStarted();
     void onTransitionFinished();
     void onScreenshotComplete(const QImage& screenshot, const QString& path);
     void onRendererCreated();
@@ -198,8 +198,8 @@ signals:
     void initialisedChanged();
 
     void updatingChanged();
-    void interactingChanged() const; // clazy:exclude=const-signal-or-slot
-    void transitioningChanged() const; // clazy:exclude=const-signal-or-slot
+    void interactingChanged();
+    void transitioningChanged();
     void viewIsResetChanged();
     void canEnterOverviewModeChanged();
     void inOverviewModeChanged();

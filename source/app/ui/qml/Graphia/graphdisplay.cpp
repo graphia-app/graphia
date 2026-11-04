@@ -120,7 +120,7 @@ void GraphDisplay::setShading3D(Shading shading3D)
     }
 }
 
-void GraphDisplay::setInteracting(bool interacting) const
+void GraphDisplay::setInteracting(bool interacting)
 {
     if(_interacting != interacting)
     {
@@ -129,7 +129,7 @@ void GraphDisplay::setInteracting(bool interacting) const
     }
 }
 
-void GraphDisplay::setTransitioning(bool transitioning) const
+void GraphDisplay::setTransitioning(bool transitioning)
 {
     if(_transitioning != transitioning)
     {
@@ -336,7 +336,7 @@ void GraphDisplay::onFPSChanged(float fps)
     emit fpsChanged();
 }
 
-void GraphDisplay::onUserInteractionStarted() const
+void GraphDisplay::onUserInteractionStarted()
 {
     setInteracting(true);
 }
@@ -350,7 +350,7 @@ void GraphDisplay::onUserInteractionFinished()
     update();
 }
 
-void GraphDisplay::onTransitionStarted() const
+void GraphDisplay::onTransitionStarted()
 {
     setTransitioning(true);
 }
