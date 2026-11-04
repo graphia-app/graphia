@@ -353,7 +353,8 @@ void GraphComponentRenderer::updateCameraProjection(Camera& camera)
     // so doing maximise the available depth buffer resolution
     const auto nearClip = std::max(minCameraDistance - _maxDistanceFromFocus, 0.3f);
 
-    //FIXME: ideally this should be calculated too, but it gets complicated with transitions etc.
+    // Nodes further away than this are too small to see. In theory it could
+    // be calculated too, but the gain in depth precision is questionable
     const auto farClip = 50000.0f;
 
     if(_projection == Projection::Perspective)
