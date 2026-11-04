@@ -22,8 +22,6 @@
 #include "app/transform/transformedgraph.h"
 #include "app/graph/graphmodel.h"
 
-#include "shared/utils/msvcwarningsuppress.h"
-
 #include <QtGlobal>
 
 #include <type_traits>
@@ -87,9 +85,7 @@ void ForwardMultiElementAttributeTransform::apply(TransformedGraph& target)
             default: break;
             }
 
-            MSVC_WARNING_SUPPRESS_NEXTLINE(6001)
-            auto mergedElementIds = (target.*mergedElementIdsForElementId)(elementId);
-            for(auto mergedElementId : mergedElementIds)
+            for(auto mergedElementId : (target.*mergedElementIdsForElementId)(elementId))
                 headMap[mergedElementId] = elementId;
         }
 
