@@ -386,10 +386,8 @@ GraphModel::GraphModel(Application* application, IPlugin* plugin) :
         .setFlag(AttributeFlag::DisableDuringTransform);
 }
 
-GraphModel::~GraphModel() // NOLINT modernize-use-equals-default
-{
-    // Only here so that we can have a unique_ptr to GraphModelImpl
-}
+// Only here so that we can have a unique_ptr to GraphModelImpl
+GraphModel::~GraphModel() = default;
 
 void GraphModel::removeDynamicAttributes()
 {

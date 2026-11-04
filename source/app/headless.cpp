@@ -73,10 +73,8 @@ Headless::Headless(const QStringList& sourceFilenames, const QString& parameters
     _(std::make_unique<HeadlessState>(sourceFilenames, parametersFilename))
 {}
 
-Headless::~Headless() // NOLINT modernize-use-equals-default
-{
-    // Only here so that we can have a unique_ptr to HeadlessImpl
-}
+// Only here so that we can have a unique_ptr to HeadlessImpl
+Headless::~Headless() = default;
 
 static std::string progressBarText(size_t width, int percent)
 {
