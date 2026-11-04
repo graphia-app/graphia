@@ -441,7 +441,7 @@ private slots:
             QStringList{u"a"_s, u"b"_s, u"c"_s, u"d"_s, u"e"_s, u"f"_s} <<
             QStringList{u"a-b"_s, u"a-c"_s, u"b-c"_s, u"d-e"_s, u"d-f"_s, u"e-f"_s} << QStringList{};
         QTest::newRow("DOT concatenation") << u"DOT"_s <<
-            QByteArray("digraph { \"a\" + \"b\" -> c [k=\"x\" + \"y\"] }") << // NOLINT modernize-raw-string-literal
+            QByteArray(R"(digraph { "a" + "b" -> c [k="x" + "y"] })") <<
             QStringList{u"ab"_s, u"c"_s} << QStringList{u"ab-c"_s} << QStringList{u"k|ab|c|xy"_s};
         QTest::newRow("DOT attribute lists") << u"DOT"_s << QByteArray("digraph { node [k=x][l=y] a [m=1][n=2] }") <<
             QStringList{u"a"_s} << QStringList{} <<
@@ -449,7 +449,7 @@ private slots:
         QTest::newRow("DOT HTML brackets") << u"DOT"_s << QByteArray("digraph { a [label=<x[1]>] }") <<
             QStringList{u"a"_s} << QStringList{} << QStringList{u"label|a|x[1]"_s};
         QTest::newRow("DOT trailing backslash") << u"DOT"_s <<
-            QByteArray("digraph { \"a\\\\\" -> \"b\\c\" }") << // NOLINT modernize-raw-string-literal
+            QByteArray(R"(digraph { "a\\" -> "b\c" })") <<
             QStringList{u"a\\\\"_s, u"b\\c"_s} << QStringList{u"a\\\\-b\\c"_s} << QStringList{};
         QTest::newRow("DOT preprocessor lines") << u"DOT"_s <<
             QByteArray("# 1 \"graph.gv\"\ndigraph {\n# 2\na -> b\n}\n") << // NOLINT modernize-raw-string-literal
@@ -606,7 +606,7 @@ private slots:
 
         // Attributes from files named like those a parser declares, which are kept apart from them
         QTest::newRow("GML declared name") << u"GML"_s <<
-            QByteArray("graph [ node [ id 1 label \"A\" NodeName \"x\" ] ]") << // NOLINT modernize-raw-string-literal
+            QByteArray(R"(graph [ node [ id 1 label "A" NodeName "x" ] ])") <<
             QStringList{u"A"_s} << QStringList{} << QStringList{u"NodeName|A|A"_s,
                 u"%1|A|x"_s.arg(userAttributeName(u"NodeName"_s))};
         QTest::newRow("GraphML declared name") << u"GraphML"_s << QByteArray(
@@ -994,13 +994,13 @@ private slots:
         QTest::newRow("GraphML node without id") << u"GraphML"_s <<
             QByteArray(graphml + "<node/></graph></graphml>") << translated("Node has no id.");
         QTest::newRow("GraphML duplicate id") << u"GraphML"_s <<
-            QByteArray(graphml + "<node id=\"a\"/><node id=\"a\"/></graph></graphml>") << translated("Duplicate node id: %1").arg(u"a"_s); // NOLINT modernize-raw-string-literal
+            QByteArray(graphml + R"(<node id="a"/><node id="a"/></graph></graphml>)") << translated("Duplicate node id: %1").arg(u"a"_s);
         QTest::newRow("GraphML edge without source") << u"GraphML"_s <<
-            QByteArray(graphml + "<node id=\"a\"/><edge target=\"a\"/></graph></graphml>") << translated("Edge missing source."); // NOLINT modernize-raw-string-literal
+            QByteArray(graphml + R"(<node id="a"/><edge target="a"/></graph></graphml>)") << translated("Edge missing source.");
         QTest::newRow("GraphML edge without target") << u"GraphML"_s <<
-            QByteArray(graphml + "<node id=\"a\"/><edge source=\"a\"/></graph></graphml>") << translated("Edge missing target."); // NOLINT modernize-raw-string-literal
+            QByteArray(graphml + R"(<node id="a"/><edge source="a"/></graph></graphml>)") << translated("Edge missing target.");
         QTest::newRow("GraphML edge within a node") << u"GraphML"_s <<
-            QByteArray(graphml + "<node id=\"a\"><edge source=\"a\" target=\"a\"/></node></graph></graphml>") << // NOLINT modernize-raw-string-literal
+            QByteArray(graphml + R"(<node id="a"><edge source="a" target="a"/></node></graph></graphml>)") <<
             translated("Node and edge both active: %1 %2").arg(0).arg(0);
         QTest::newRow("GraphML truncated") << u"GraphML"_s << QByteArray(graphml + "<node id=\"a\"/>") << // NOLINT modernize-raw-string-literal
             translated("XML parse error: %1").arg(translated("Premature end of document."));
