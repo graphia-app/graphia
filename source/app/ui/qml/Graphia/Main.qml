@@ -2115,10 +2115,9 @@ ApplicationWindow
                     model: mainWindow.recentFiles
                     delegate: PlatformMenuItem
                     {
-                        required property int index
+                        required property string modelData
 
-                        // FIXME: This fires with a -1 index onOpenFile
-                        text: index > -1 ? NativeUtils.fileNameForUrl(mainWindow.recentFiles[index]) : "";
+                        text: NativeUtils.fileNameForUrl(modelData)
                         onTriggered:
                         {
                             mainWindow.openUrl(NativeUtils.urlForFileName(text), true);
