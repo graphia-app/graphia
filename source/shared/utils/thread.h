@@ -110,51 +110,18 @@ QString u::parentProcessName()
 }
 
 #elif defined(_WIN32) && !defined(__MINGW32__)
-#include "shared/utils/msvcwarningsuppress.h"
-
 #include <windows.h>
 #include <tlhelp32.h>
 #include <Psapi.h>
 
-const DWORD MS_VC_EXCEPTION  =0x406D1388;
-
-#pragma pack(push,8)
-typedef struct tagTHREADNAME_INFO
-{
-    DWORD dwType; // Must be 0x1000.
-    LPCSTR szName; // Pointer to name (in user addr space).
-    DWORD dwThreadID; // Thread ID (-1=caller thread).
-    DWORD dwFlags; // Reserved for future use, must be zero.
-} THREADNAME_INFO;
-#pragma pack(pop)
-
-static void SetThreadName(char* threadName)
-{
-    THREADNAME_INFO info;
-    info.dwType = 0x1000;
-    info.szName = threadName;
-    info.dwThreadID = -1;
-    info.dwFlags = 0;
-
-    __try
-    {
-        RaiseException(MS_VC_EXCEPTION, 0, sizeof(info)/sizeof(ULONG_PTR), (ULONG_PTR*)&info);
-    }
-    MSVC_WARNING_SUPPRESS_NEXTLINE(6320)
-    __except(EXCEPTION_EXECUTE_HANDLER)
-    MSVC_WARNING_SUPPRESS_NEXTLINE(6322)
-    {
-    }
-}
-
 void u::setCurrentThreadName(const QString& name)
 {
-    SetThreadName(name.toLatin1().data());
+    SetThreadDescription(GetCurrentThread(), name.toStdWString().c_str());
 }
 
 QString u::currentThreadName()
 {
-    // Windows doesn't really have a concept of named threads (see above), so use the ID instead
+    // A thread's description is only for the benefit of debuggers, so identify it by its ID
     return QString::number(u::currentThreadId());
 }
 
