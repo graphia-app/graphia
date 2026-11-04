@@ -39,10 +39,6 @@ BaseParameterDialog
         return listPages[currentIndex];
     }
 
-    //FIXME Set these based on the content pages
-    //minimumWidth: 640
-    //minimumHeight: 480
-
     onWidthChanged: { content.x = currentIndex * -root.width }
     onHeightChanged: { content.x = currentIndex * -root.width }
 

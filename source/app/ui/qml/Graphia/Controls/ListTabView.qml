@@ -47,10 +47,6 @@ Item
         return listTabs[_currentIndex];
     }
 
-    //FIXME Set these based on the content tabs
-    //minimumWidth: 640
-    //minimumHeight: 480
-
     onWidthChanged: { content.x = _currentIndex * -contentContainer.width }
     onHeightChanged: { content.x = _currentIndex * -contentContainer.width }
 

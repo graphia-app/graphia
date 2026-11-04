@@ -31,7 +31,6 @@ import Graphia.SharedTypes
 BaseParameterDialog
 {
     id: root
-    //FIXME These should be set automatically by Wizard
     minimumWidth: 800
     minimumHeight: 500
 
