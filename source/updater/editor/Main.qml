@@ -128,10 +128,7 @@ ApplicationWindow
                 if(httpStatus >= 200 && httpStatus < 400)
                 {
                     // Success
-                    //FIXME for some reason, some combination of Qt's XMLHttpRequest implementation and github
-                    // conspire to return binary files prepended with an HTML fragment indicating a redirect
-                    // has taken place; this doesn't appear to be normal, hence NativeUtils.filterHtmlHack
-                    root.checksums[url] = NativeUtils.sha256(NativeUtils.filterHtmlHack(xhr.response));
+                    root.checksums[url] = NativeUtils.sha256(xhr.response);
                     onComplete(root.checksums[url]);
                 }
                 else

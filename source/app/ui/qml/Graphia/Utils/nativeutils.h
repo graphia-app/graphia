@@ -83,8 +83,6 @@ public:
 
     Q_INVOKABLE QString sha256(const QByteArray& data) const;
 
-    Q_INVOKABLE QByteArray filterHtmlHack(const QByteArray& data) const;
-
     Q_INVOKABLE QByteArray readFromFile(const QString& filename) const;
     Q_INVOKABLE bool writeToFile(const QString& filename, const QByteArray& data) const;
 

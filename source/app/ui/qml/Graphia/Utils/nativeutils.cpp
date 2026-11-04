@@ -221,15 +221,6 @@ QString NativeUtils::sha256(const QByteArray& data) const
     return QCryptographicHash::hash(data, QCryptographicHash::Sha256).toHex();
 }
 
-QByteArray NativeUtils::filterHtmlHack(const QByteArray& data) const
-{
-    if(!data.startsWith("<html>"))
-        return data;
-
-    auto index = data.indexOf("</html>") + 7;
-    return data.mid(index);
-}
-
 QByteArray NativeUtils::readFromFile(const QString& filename) const
 {
     QFile file(filename);
