@@ -49,15 +49,13 @@ EnrichmentTableModel::EnrichmentTableModel(QObject *parent)
     connect(this, &EnrichmentTableModel::ascendingSortOrderChanged, this, &EnrichmentTableModel::updateSortFilterMap);
 }
 
-int EnrichmentTableModel::rowCount(const QModelIndex& parent) const
+int EnrichmentTableModel::rowCount(const QModelIndex&) const
 {
-    Q_UNUSED(parent);
     return static_cast<int>(_sortFilterMap.size() + 1 /* header */);
 }
 
-int EnrichmentTableModel::columnCount(const QModelIndex& parent) const
+int EnrichmentTableModel::columnCount(const QModelIndex&) const
 {
-    Q_UNUSED(parent);
     return Results::NumResultColumns;
 }
 

@@ -148,10 +148,9 @@ void EnrichmentHeatmap::hoverMoveEvent(QHoverEvent *event)
         showTooltip();
 }
 
-void EnrichmentHeatmap::hoverLeaveEvent(QHoverEvent *event)
+void EnrichmentHeatmap::hoverLeaveEvent(QHoverEvent*)
 {
     hideTooltip();
-    Q_UNUSED(event);
 }
 
 void EnrichmentHeatmap::buildPlot()
