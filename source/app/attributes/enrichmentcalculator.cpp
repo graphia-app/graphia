@@ -24,7 +24,6 @@
 #include "shared/commands/icommand.h"
 
 #include "shared/utils/container.h"
-#include "shared/utils/msvcwarningsuppress.h"
 #include "shared/utils/random.h"
 
 #include "shared/attributes/iattribute.h"
@@ -32,7 +31,6 @@
 #include <QString>
 
 #include <algorithm>
-#include <array>
 #include <cmath>
 #include <cstdint>
 #include <map>
@@ -184,12 +182,11 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(
     return tableModel;
 }
 
-MSVC_WARNING_SUPPRESS_NEXTLINE(6262)
 std::vector<double> EnrichmentCalculator::doRandomSampling(int sampleCount, double expectedFrequency)
 {
     const size_t NUMBER_OF_TRIALS = 1000;
-    std::array<double, NUMBER_OF_TRIALS> observed{};
-    std::array<double, NUMBER_OF_TRIALS> overRepresentation{};
+    std::vector<double> observed(NUMBER_OF_TRIALS);
+    std::vector<double> overRepresentation(NUMBER_OF_TRIALS);
     double observationAvg = 0.0;
     double overRepresentationAvg = 0.0;
     double observationStdDev = 0.0;
