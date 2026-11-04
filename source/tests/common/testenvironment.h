@@ -21,6 +21,7 @@
 #define TESTENVIRONMENT_H
 
 #include "app/defaultpreferences.h"
+#include "app/ui/qml/Graphia/Utils/preferences.h"
 
 #include "shared/utils/random.h"
 #include "shared/utils/scopetimer.h"
@@ -41,13 +42,15 @@ inline void initialise()
 {
     using namespace Qt::Literals::StringLiterals;
 
-    static const ThreadPoolSingleton threadPool;
-    static const ScopeTimerManager scopeTimerManager;
     static const QTemporaryDir settingsDir;
 
     QCoreApplication::setOrganizationName(u"GraphiaTests"_s);
     QCoreApplication::setApplicationName(u"GraphiaTests"_s);
     QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, settingsDir.path());
+
+    static const PreferencesStore preferencesStore;
+    static const ThreadPoolSingleton threadPool;
+    static const ScopeTimerManager scopeTimerManager;
 
     initialisePreferences();
 

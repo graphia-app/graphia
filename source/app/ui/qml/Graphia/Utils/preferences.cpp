@@ -50,21 +50,19 @@ void u::definePref(const QString& key, const QVariant& defaultValue)
 
 QVariant u::pref(const QString& key)
 {
-    u::definePref(key, {});
-
-    return settings().value(key);
+    return PreferencesStore::instance()->value(key);
 }
 
 bool u::prefExists(const QString& key)
 {
-    return settings().contains(key);
+    return PreferencesStore::instance()->contains(key);
 }
 
 bool u::removePref(const QString& key)
 {
     if(u::prefExists(key))
     {
-        settings().remove(key);
+        PreferencesStore::instance()->remove(key);
         return true;
     }
 
@@ -73,18 +71,97 @@ bool u::removePref(const QString& key)
 
 void u::setPref(const QString& key, const QVariant& value)
 {
-    auto s = settings();
-    const bool changed = (value != s.value(key));
+    const bool changed = (value != u::pref(key));
 
-    s.setValue(key, value);
+    PreferencesStore::instance()->set(key, value);
 
     if(changed)
         PreferencesWatcher::setPref(key, value);
 }
 
+void u::savePendingPrefs()
+{
+    PreferencesStore::instance()->savePending();
+}
+
 QString u::settingsFileName()
 {
     return settings().fileName();
+}
+
+PreferencesStore::PreferencesStore()
+{
+    const auto s = settings();
+    const auto keys = s.allKeys();
+
+    for(const auto& key : keys)
+        _values.insert({key, s.value(key)});
+}
+
+PreferencesStore::~PreferencesStore()
+{
+    savePending();
+}
+
+QVariant PreferencesStore::value(const QString& key) const
+{
+    const std::unique_lock lock(_mutex);
+
+    if(!_values.contains(key))
+        return {};
+
+    return _values.at(key);
+}
+
+bool PreferencesStore::contains(const QString& key) const
+{
+    const std::unique_lock lock(_mutex);
+    return _values.contains(key);
+}
+
+void PreferencesStore::set(const QString& key, const QVariant& value)
+{
+    const std::unique_lock lock(_mutex);
+    _values.insert_or_assign(key, value);
+    markPending(key);
+}
+
+void PreferencesStore::remove(const QString& key)
+{
+    const std::unique_lock lock(_mutex);
+    _values.erase(key);
+    markPending(key);
+}
+
+void PreferencesStore::savePending()
+{
+    const std::unique_lock lock(_mutex);
+
+    if(_pendingKeys.empty())
+        return;
+
+    auto s = settings();
+
+    for(const auto& key : _pendingKeys)
+    {
+        if(_values.contains(key))
+            s.setValue(key, _values.at(key));
+        else
+            s.remove(key);
+    }
+
+    _pendingKeys.clear();
+}
+
+void PreferencesStore::markPending(const QString& key)
+{
+    if(_pendingKeys.empty())
+    {
+        QMetaObject::invokeMethod(QCoreApplication::instance(),
+            [this] { savePending(); }, Qt::QueuedConnection);
+    }
+
+    _pendingKeys.insert(key);
 }
 
 PreferencesWatcher::Watchers PreferencesWatcher::_watchers;

@@ -104,4 +104,8 @@ void initialisePreferences()
 #else
     u::definePref(u"system/uiTheme"_s,                          "Default");
 #endif
+
+    // Plugins and other processes read preferences directly from storage, so
+    // save them now so that they're able to get at them
+    u::savePendingPrefs();
 }

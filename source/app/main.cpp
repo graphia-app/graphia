@@ -303,12 +303,6 @@ static int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
     }
 #endif
 
-    if(commandLineParser.isSet(u"startMaximised"_s))
-        u::setPref(u"window/maximised"_s, true);
-
-    if(commandLineParser.isSet(u"skipWelcome"_s) && !u::prefExists(u"tracking/permission"_s))
-        u::setPref(u"tracking/permission"_s, u"anonymous"_s);
-
     QGuiApplication::styleHints()->setMousePressAndHoldInterval(500);
 
     QIcon mainIcon;
@@ -357,8 +351,15 @@ static int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
 
     execute_static_blocks();
 
+    const PreferencesStore preferencesStore;
     const ThreadPoolSingleton threadPool;
     const ScopeTimerManager scopeTimerManager;
+
+    if(commandLineParser.isSet(u"startMaximised"_s))
+        u::setPref(u"window/maximised"_s, true);
+
+    if(commandLineParser.isSet(u"skipWelcome"_s) && !u::prefExists(u"tracking/permission"_s))
+        u::setPref(u"tracking/permission"_s, u"anonymous"_s);
 
     if(commandLineParser.isSet(u"parameters"_s))
     {

@@ -20,6 +20,8 @@
 #ifndef PREFERENCES_H
 #define PREFERENCES_H
 
+#include "shared/utils/singleton.h"
+
 #include <QObject>
 #include <QQmlEngine>
 #include <QString>
@@ -28,6 +30,7 @@
 #include <QMetaProperty>
 
 #include <mutex>
+#include <map>
 #include <set>
 
 class QString;
@@ -41,8 +44,30 @@ namespace u
     bool removePref(const QString& key);
     void setPref(const QString& key, const QVariant& value);
 
+    void savePendingPrefs();
+
     QString settingsFileName();
 } // namespace u
+
+class PreferencesStore : public Singleton<PreferencesStore>
+{
+public:
+    PreferencesStore();
+    ~PreferencesStore() override;
+
+    QVariant value(const QString& key) const;
+    bool contains(const QString& key) const;
+    void set(const QString& key, const QVariant& value);
+    void remove(const QString& key);
+    void savePending();
+
+private:
+    mutable std::mutex _mutex;
+    std::map<QString, QVariant> _values;
+    std::set<QString> _pendingKeys;
+
+    void markPending(const QString& key);
+};
 
 class PreferencesWatcher : public QObject
 {
