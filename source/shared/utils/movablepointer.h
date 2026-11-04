@@ -38,7 +38,7 @@ public:
     MovablePointer(const MovablePointer& other) = delete;
     void operator=(const MovablePointer& other) = delete;
 
-    inline operator T*() const { return this->get(); } //NOLINT
+    operator T*() const { return this->get(); } // NOLINT(google-explicit-constructor)
 };
 
 #endif // MOVABLEPOINTER_H
