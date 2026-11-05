@@ -36,6 +36,7 @@
 #include <QFont>
 #include <QFontMetrics>
 #include <QHoverEvent>
+#include <QImage>
 #include <QList>
 #include <QMetaObject>
 #include <QMouseEvent>
@@ -1627,6 +1628,51 @@ private slots:
 
         // ...and then shown
         QCOMPARE(_urlCatcher._urls, QList<QUrl>{QUrl::fromLocalFile(_dir.filePath(savedFileName))});
+    }
+
+    void savedImageMatchesPlot_data()
+    {
+        QTest::addColumn<int>("numColumns");
+
+        QTest::newRow("All columns fit") << 5;
+        QTest::newRow("Scrolled part way") << 200;
+    }
+
+    void savedImageMatchesPlot()
+    {
+        QFETCH(const int, numColumns);
+
+        QVERIFY(open(manyColumnsCsv(numColumns, u"r"_s)));
+        QVERIFY(createPlot({0, 1, 2}));
+        QVERIFY(set("horizontalScrollPosition", 0.5));
+
+        const auto plotFileName = _dir.filePath(u"plot.png"_s);
+        QVERIFY(_customPlot->savePng(plotFileName));
+
+        const auto savedFileName = _dir.filePath(u"saved.png"_s);
+        QVERIFY(execute([&]
+        {
+            QMetaObject::invokeMethod(_plot.get(), "savePlotImage",
+                Q_ARG(QUrl, QUrl::fromLocalFile(savedFileName)), Q_ARG(QString, u"png"_s));
+        }));
+
+        const QImage plotImage(plotFileName);
+        const QImage savedImage(savedFileName);
+        QVERIFY(!plotImage.isNull());
+        QCOMPARE(savedImage.size(), plotImage.size());
+
+        int numDifferentPixels = 0;
+        for(int y = 0; y < plotImage.height(); y++)
+        {
+            for(int x = 0; x < plotImage.width(); x++)
+            {
+                if(savedImage.pixel(x, y) != plotImage.pixel(x, y))
+                    numDifferentPixels++;
+            }
+        }
+
+        const int maxDifferentPixels = (plotImage.width() * plotImage.height()) / 100;
+        QVERIFY2(numDifferentPixels <= maxDifferentPixels, qPrintable(QString::number(numDifferentPixels)));
     }
 
     // An image of each row, or each value of an attribute, named after it

@@ -1130,6 +1130,9 @@ size_t CorrelationPlot::numVisibleColumns() const
 
 void CorrelationPlot::computeXAxisRange()
 {
+    if(width() <= 0.0)
+        return;
+
     auto min = 0.0;
     auto max = static_cast<double>(numVisibleColumns() - 1);
     auto maxVisibleColumns = columnAxisWidth() / minColumnWidth();
