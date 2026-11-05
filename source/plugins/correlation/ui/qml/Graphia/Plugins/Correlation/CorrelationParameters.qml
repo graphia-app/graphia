@@ -84,7 +84,7 @@ BaseParameterDialog
         onDataLoaded:
         {
             tabularDataParser.autoDetectDataRectangle();
-            root.parameters.data = tabularDataParser.data; // qmllint disable unresolved-type
+            root.parameters.data = tabularDataParser.data;
 
             estimateGraphSize(root.parameters);
         }
