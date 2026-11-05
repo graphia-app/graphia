@@ -3320,7 +3320,7 @@ void Document::removeAttributes(const QStringList& attributeNames)
 }
 
 void Document::importAttributesFromTable(const QString& keyAttributeName,
-    std::shared_ptr<TabularData> data, // NOLINT performance-unnecessary-value-param
+    std::shared_ptr<TabularData> data, // NOLINT(performance-unnecessary-value-param)
     int keyColumnIndex, const std::vector<int>& importColumnIndices, bool replace)
 {
     if(busy())

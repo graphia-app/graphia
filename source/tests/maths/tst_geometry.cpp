@@ -42,7 +42,7 @@ static bool fuzzyEqual(const QVector3D& a, const QVector3D& b)
 }
 
 // A macro, like QCOMPARE, so that a failure returns from the test
-// NOLINTNEXTLINE cppcoreguidelines-macro-usage
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define QCOMPARE_VECTOR(actual, expected) \
     QVERIFY2(fuzzyEqual((actual), (expected)), \
         qPrintable(u"(%1, %2, %3) != (%4, %5, %6)"_s \

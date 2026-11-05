@@ -26,7 +26,7 @@
 // This is more or less directly lifted from N4189
 
 // modeled slightly after Andrescu’s talk and article(s)
-namespace std::experimental{ // NOLINT cert-dcl58-cpp
+namespace std::experimental{ // NOLINT(cert-dcl58-cpp)
 template<typename EF>
 struct scope_exit {
     // construction

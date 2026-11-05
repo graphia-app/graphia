@@ -82,7 +82,7 @@ class GraphComponentInteractor;
 class ICommand;
 
 template<typename Target>
-void initialiseFromGraph(const Graph*, Target&); // NOLINT readability-redundant-declaration
+void initialiseFromGraph(const Graph*, Target&); // NOLINT(readability-redundant-declaration)
 
 class GraphRenderer :
         public QObject,

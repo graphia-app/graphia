@@ -51,7 +51,7 @@ private:
 
 public:
     // cppcheck-suppress noExplicitConstructor
-    TerminalValueWrapper(GraphTransformConfig::TerminalValue terminalValue) : // NOLINT google-explicit-constructor
+    TerminalValueWrapper(GraphTransformConfig::TerminalValue terminalValue) : // NOLINT(google-explicit-constructor)
         _terminalValue(std::move(terminalValue))
     {}
 

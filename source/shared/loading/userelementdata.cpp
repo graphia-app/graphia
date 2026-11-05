@@ -343,7 +343,7 @@ json UserElementData<E>::save(const IMutableGraph &, const std::vector<E> &eleme
     json jsonObject = UserData::save(progressable, indexes);
     jsonObject["ids"] = jsonIds;
 
-    json jsonAttributes = json::object(); // NOLINT misc-const-correctness
+    json jsonAttributes = json::object(); // NOLINT(misc-const-correctness)
     for(const auto& [attributeName, override] : _exposedAttributeOverrides)
     {
         auto& jsonAttribute = jsonAttributes[attributeName.toStdString()];

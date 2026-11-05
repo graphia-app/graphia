@@ -127,7 +127,7 @@ json updateStringToJson(const QString& updateString, QString* status, const std:
 
     // nlohmann::json's iterator declares itself bidirectional, so the ranges
     // algorithms, which require random access to sort, won't accept it
-    // NOLINTNEXTLINE modernize-use-ranges
+    // NOLINTNEXTLINE(modernize-use-ranges)
     std::sort(updates.begin(), updates.end(),
     [](const auto& a, const auto& b)
     {

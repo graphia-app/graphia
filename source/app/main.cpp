@@ -388,7 +388,7 @@ static int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
 
     QQuickStyle::setStyle(u::pref(u"system/uiTheme"_s).toString());
 
-    QStringList selectors; // NOLINT misc-const-correctness
+    QStringList selectors; // NOLINT(misc-const-correctness)
 
 #ifdef Q_OS_MACOS
     selectors += u"nativemenu"_s;

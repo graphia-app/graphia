@@ -1486,7 +1486,7 @@ QString CorrelationPluginInstance::log() const
 }
 
 void CorrelationPluginInstance::importAnnotationsFromTable(
-    std::shared_ptr<TabularData> data, // NOLINT performance-unnecessary-value-param
+    std::shared_ptr<TabularData> data, // NOLINT(performance-unnecessary-value-param)
     int keyRowIndex, const std::vector<int>& importRowIndices, bool replace)
 {
     commandManager()->execute(ExecutePolicy::Add, std::make_unique<ImportAnnotationsCommand>(

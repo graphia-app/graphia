@@ -647,7 +647,8 @@ private slots:
     {
         const int version = 8;
         auto content = body(version);
-        content["transforms"] = {"\"Remove Nodes\" where $\"Type\" == \"a\\b\\\\c\\\"d\""}; // NOLINT modernize-raw-string-literal
+        // moc misparses this as a raw string
+        content["transforms"] = {"\"Remove Nodes\" where $\"Type\" == \"a\\b\\\\c\\\"d\""}; // NOLINT(modernize-raw-string-literal)
 
         TestPluginInstance pluginInstance(&_plugin);
         QString failureReason;

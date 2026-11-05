@@ -22,7 +22,7 @@
 
 #include <type_traits>
 
-namespace std::experimental{ // NOLINT cert-dcl58-cpp
+namespace std::experimental{ // NOLINT(cert-dcl58-cpp)
 
 // Copy and pasted from https://en.cppreference.com/w/cpp/experimental/is_detected
 namespace detail {

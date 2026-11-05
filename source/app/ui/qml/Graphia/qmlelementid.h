@@ -26,8 +26,8 @@
 
 #include <QQmlEngine>
 
-#define QML_TYPE(Type) Qml ## Type /* NOLINT cppcoreguidelines-macro-usage */
-#define QML_ELEMENTID(Type) /* NOLINT cppcoreguidelines-macro-usage */ \
+#define QML_TYPE(Type) Qml ## Type
+#define QML_ELEMENTID(Type) /* NOLINT(cppcoreguidelines-macro-usage) */ \
     class QML_TYPE(Type) \
     { \
         Q_GADGET \
@@ -36,7 +36,7 @@
         Q_PROPERTY(bool isNull READ isNull CONSTANT) \
     public: \
         QML_TYPE(Type)() = default; \
-        QML_TYPE(Type)(Type id) : _id(id) {} \
+        QML_TYPE(Type)(Type id) : _id(id) {} /* NOLINT(google-explicit-constructor) */ \
         operator Type() const { return _id; } \
         bool isNull() const { return _id.isNull(); } \
     private: \

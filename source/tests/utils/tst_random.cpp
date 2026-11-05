@@ -71,7 +71,7 @@ private slots:
 
         // A different seed gives a different sequence
         u::setRandomSeed(8);
-        QVERIFY(u::randomGenerator()() != std::mt19937(7)()); // NOLINT cert-msc32-c,cert-msc51-cpp
+        QVERIFY(u::randomGenerator()() != std::mt19937(7)()); // NOLINT(cert-msc32-c,cert-msc51-cpp)
     }
 
     void ranges()

@@ -27,7 +27,7 @@ struct String
 {
     char _data[N] = {0};
 
-    consteval String(const char (&string)[N]) // NOLINT google-explicit-constructor
+    consteval String(const char (&string)[N]) // NOLINT(google-explicit-constructor)
     {
         char *dst = _data;
         const char *src = string;

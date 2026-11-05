@@ -41,12 +41,12 @@ private:
 public:
     Flags() = default;
     // cppcheck-suppress noExplicitConstructor
-    Flags(Enum value) : // NOLINT google-explicit-constructor
+    Flags(Enum value) : // NOLINT(google-explicit-constructor)
         _value(underlyingValueOf(value))
     {}
 
     template<typename... Tail>
-    Flags(Enum value, Tail... values) // NOLINT google-explicit-constructor
+    Flags(Enum value, Tail... values) // NOLINT(google-explicit-constructor)
     {
         set(value);
         set(values...);
@@ -108,7 +108,7 @@ public:
         return allOf(value) && allOf(values...);
     }
 
-    // NOLINTNEXTLINE clang-analyzer-optin.core.EnumCastOutOfRange
+    // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
     Enum operator*() const { return static_cast<Enum>(_value); }
 };
 

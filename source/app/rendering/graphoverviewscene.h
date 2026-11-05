@@ -49,7 +49,7 @@ class CommandManager;
 class GraphRenderer;
 
 template<typename Target>
-void initialiseFromGraph(const Graph*, Target&); // NOLINT readability-redundant-declaration
+void initialiseFromGraph(const Graph*, Target&); // NOLINT(readability-redundant-declaration)
 
 class GraphOverviewScene :
         public Scene

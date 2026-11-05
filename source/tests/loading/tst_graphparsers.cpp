@@ -313,7 +313,7 @@ private slots:
 
         // Not a raw string, which moc misparses here, missing the test class
         QTest::newRow("GML strings") << u"GML"_s << QByteArray(
-            "graph [ node [ id 1 label \"A&amp;B\" a \"x < y\" b \"<b>two</b>  spaces\" c \"&quot;&#233;&#xe9;&eacute;&bogus;\" ] ]") << // NOLINT modernize-raw-string-literal
+            "graph [ node [ id 1 label \"A&amp;B\" a \"x < y\" b \"<b>two</b>  spaces\" c \"&quot;&#233;&#xe9;&eacute;&bogus;\" ] ]") << // NOLINT(modernize-raw-string-literal)
             QStringList{u"A&B"_s} << QStringList{} <<
             QStringList{u"a|A&B|x < y"_s, u"b|A&B|<b>two</b>  spaces"_s, u"c|A&B|\"ééé&bogus;"_s};
 
@@ -980,7 +980,7 @@ private slots:
             QByteArray(rdf + "<bp:Complex rdf:ID=\"x\"><bp:component/></bp:Complex></rdf:RDF>") <<
             translated("Edge element has no resource.");
         QTest::newRow("BioPAX unknown target") << u"BioPAX"_s <<
-            QByteArray(rdf + "<bp:Complex rdf:ID=\"x\"><bp:component rdf:resource=\"#y\"/></bp:Complex></rdf:RDF>") << // NOLINT modernize-raw-string-literal
+            QByteArray(rdf + "<bp:Complex rdf:ID=\"x\"><bp:component rdf:resource=\"#y\"/></bp:Complex></rdf:RDF>") << // NOLINT(modernize-raw-string-literal)
             translated("Invalid Edge Target. source node: %1, target node: %2").arg(u"x"_s, u"y"_s);
         QTest::newRow("BioPAX mismatched tags") << u"BioPAX"_s <<
             QByteArray(rdf + "<bp:Protein rdf:ID=\"p\"></rdf:RDF>") <<
@@ -1034,7 +1034,7 @@ private slots:
 
         // Not a raw string, which moc misparses here, missing the test class
         QTest::newRow("GraphML truncated") << u"GraphML"_s <<
-            QByteArray("<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\"><graph><node id=\"a\"/>"); // NOLINT modernize-raw-string-literal
+            QByteArray("<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\"><graph><node id=\"a\"/>"); // NOLINT(modernize-raw-string-literal)
         QTest::newRow("GraphML not GraphML") << u"GraphML"_s << QByteArray("<foo/>");
         QTest::newRow("GraphML duplicate id") << u"GraphML"_s <<
             QByteArray(R"(<graphml><graph><node id="a"/><node id="a"/></graph></graphml>)");

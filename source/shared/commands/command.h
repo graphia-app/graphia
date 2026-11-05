@@ -45,13 +45,13 @@ public:
 
     template<typename Fn, typename = EnableIfFnReturnTypeIs<Fn, bool>>
     // cppcheck-suppress noExplicitConstructor
-    CommandFn(Fn&& fn) : // NOLINT google-explicit-constructor
-        _boolFn(fn) {} // NOLINT cppcoreguidelines-missing-std-forward
+    CommandFn(Fn&& fn) : // NOLINT(cppcoreguidelines-missing-std-forward,google-explicit-constructor)
+        _boolFn(fn) {}
 
     template<typename Fn, typename = EnableIfFnReturnTypeIs<Fn, void>, typename = void>
     // cppcheck-suppress noExplicitConstructor
-    CommandFn(Fn&& fn) : // NOLINT google-explicit-constructor
-        _voidFn(fn) {} // NOLINT cppcoreguidelines-missing-std-forward
+    CommandFn(Fn&& fn) : // NOLINT(cppcoreguidelines-missing-std-forward,google-explicit-constructor)
+        _voidFn(fn) {}
 
     CommandFn() = default;
     CommandFn(const CommandFn& other) = default;
@@ -84,7 +84,7 @@ public:
         QString _verb;
         QString _pastParticiple;
 
-        CommandDescription(const QString& description = {}, // NOLINT google-explicit-constructor
+        CommandDescription(const QString& description = {}, // NOLINT(google-explicit-constructor)
                            const QString& verb = {},
                            const QString& pastParticiple = {}) :
             _description(description),

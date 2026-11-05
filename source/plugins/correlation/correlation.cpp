@@ -401,7 +401,7 @@ private:
             return *this;
         }
 
-        // NOLINTNEXTLINE google-explicit-constructor
+        // NOLINTNEXTLINE(google-explicit-constructor)
         operator double() const { return static_cast<double>(_numerator) / _denominator; }
     };
 

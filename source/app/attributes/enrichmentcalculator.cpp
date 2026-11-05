@@ -40,7 +40,7 @@ using namespace Qt::Literals::StringLiterals;
 
 static double combineLogs(double n, double r)
 {
-    // NOLINTNEXTLINE concurrency-mt-unsafe
+    // NOLINTNEXTLINE(concurrency-mt-unsafe)
     return std::lgamma(n + 1) - std::lgamma(r + 1) - std::lgamma(n - r + 1);
 }
 

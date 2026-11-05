@@ -260,7 +260,7 @@ void ComponentManager::update(const Graph* graph)
     {
         std::erase_if(mergees, [&](const auto& componentId)
         {
-            // NOLINTNEXTLINE clang-analyzer-core.CallAndMessage
+            // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage)
             return !componentIdsToBeRemoved.contains(componentId) && componentId != merger;
         });
     }

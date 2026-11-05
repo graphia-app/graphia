@@ -55,8 +55,7 @@ void SpanningTreeTransform::apply(TransformedGraph& target)
         routes.clear();
         size_t head = 0;
 
-        // NOLINTNEXTLINE modernize-use-emplace
-        routes.push_back({componentManager.componentById(componentId)->nodeIds().at(0), {}});
+        routes.push_back({componentManager.componentById(componentId)->nodeIds().at(0), {}}); // clazy:exclude=reserve-candidates
 
         while(head < routes.size())
         {

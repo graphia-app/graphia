@@ -759,8 +759,8 @@ void Application::testConsoleOutput()
     std::cout << "std::cout\n";
     std::cerr << "std::cerr\n";
 
-    fprintf(stdout, "stdout\n"); fflush(stdout); // NOLINT cert-err33-c
-    fprintf(stderr, "stderr\n"); fflush(stderr); // NOLINT cert-err33-c
+    fprintf(stdout, "stdout\n"); fflush(stdout); // NOLINT(cert-err33-c,modernize-use-std-print)
+    fprintf(stderr, "stderr\n"); fflush(stderr); // NOLINT(cert-err33-c,modernize-use-std-print)
 
     qInfo() << "qInfo()";
     qWarning() << "qWarning()";

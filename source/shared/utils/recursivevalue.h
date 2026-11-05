@@ -36,11 +36,11 @@ public:
     RecursiveValue() : _value(std::make_unique<T>()) {}
 
     // cppcheck-suppress noExplicitConstructor
-    RecursiveValue(const T& value) : // NOLINT google-explicit-constructor
+    RecursiveValue(const T& value) : // NOLINT(google-explicit-constructor)
         _value(std::make_unique<T>(value)) {}
 
     // cppcheck-suppress noExplicitConstructor
-    RecursiveValue(T&& value) : // NOLINT google-explicit-constructor
+    RecursiveValue(T&& value) : // NOLINT(google-explicit-constructor)
         _value(std::make_unique<T>(std::move(value))) {}
 
     RecursiveValue(const RecursiveValue& other) :

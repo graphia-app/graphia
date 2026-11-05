@@ -40,7 +40,7 @@ public:
     _singletonPtr = nullptr;
   }
 
-  Singleton(const Singleton&) = delete; // NOLINT bugprone-crtp-constructor-accessibility
+  Singleton(const Singleton&) = delete; // NOLINT(bugprone-crtp-constructor-accessibility)
   Singleton& operator=(const Singleton&) = delete;
 
   static T* instance()
