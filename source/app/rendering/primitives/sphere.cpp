@@ -24,7 +24,6 @@
 
 namespace Primitive
 {
-// modernize-use-equals-default
 Sphere::Sphere() :
     _positionBuffer(QOpenGLBuffer::VertexBuffer),
     _normalBuffer(QOpenGLBuffer::VertexBuffer),

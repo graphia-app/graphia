@@ -266,7 +266,6 @@ void BaseGenericPluginInstance::onSelectionChanged(const ISelectionManager*)
     _nodeAttributeTableModel.onSelectionChanged();
 }
 
-// modernize-use-equals-default
 BaseGenericPlugin::BaseGenericPlugin()
 {
     registerUrlType(u"GML"_s, QObject::tr("GML File"), QObject::tr("GML Files"), {"gml"});

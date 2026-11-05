@@ -27,7 +27,6 @@
 namespace Primitive
 {
 
-// modernize-use-equals-default
 Arrow::Arrow() :
     _positionBuffer(QOpenGLBuffer::VertexBuffer),
     _normalBuffer(QOpenGLBuffer::VertexBuffer),

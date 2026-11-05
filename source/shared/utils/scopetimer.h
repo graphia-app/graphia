@@ -67,7 +67,7 @@ private:
 #define SCOPE_TIMER_FILENAME QStringLiteral(__FILE__).replace( \
     QStringLiteral(BUILD_SOURCE_DIR), QString())
 #else
-#define SCOPE_TIMER_FILENAME QLatin1String(__FILE__) // cppcoreguidelines-macro-usage
+#define SCOPE_TIMER_FILENAME QLatin1String(__FILE__)
 #endif
 
 #define SCOPE_TIMER_CONCAT2(a, b) a ## b

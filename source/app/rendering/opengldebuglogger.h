@@ -30,7 +30,7 @@ class OpenGLDebugLogger : public QObject
     Q_OBJECT
 public:
     explicit OpenGLDebugLogger(QObject* parent = nullptr);
-    ~OpenGLDebugLogger() override; // modernize-use-equals-delete
+    ~OpenGLDebugLogger() override;
 
 private:
     int _debugLevel = 0;

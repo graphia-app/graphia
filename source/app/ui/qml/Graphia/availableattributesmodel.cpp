@@ -149,7 +149,6 @@ AvailableAttributesModel::AvailableAttributesModel(const GraphModel& graphModel,
     }
 }
 
-// modernize-use-equals-default
 AvailableAttributesModel::~AvailableAttributesModel()
 {
     delete _root;

@@ -87,7 +87,6 @@ static QPoint renderOffsetForFill(int imageWidth, int imageHeight, float aspect)
     return offset;
 }
 
-// modernize-use-equals-default
 ScreenshotRenderer::ScreenshotRenderer()
 {
     glGenFramebuffers(1, &_screenshotFBO);
@@ -95,7 +94,6 @@ ScreenshotRenderer::ScreenshotRenderer()
     glGenTextures(1, &_sdfTexture);
 }
 
-// modernize-use-equals-default
 ScreenshotRenderer::~ScreenshotRenderer()
 {
     glDeleteTextures(1, &_sdfTexture);

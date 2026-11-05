@@ -49,7 +49,6 @@ Watchdog::Watchdog()
     _thread.start();
 }
 
-// modernize-use-equals-default
 Watchdog::~Watchdog()
 {
     _thread.quit();
