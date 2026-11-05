@@ -470,6 +470,20 @@ private slots:
         _commandManager->cancel();
         QVERIFY(!_commandManager->commandIsCancellable());
     }
+
+    void commandFnSucceedsUnlessItReturnsFalse()
+    {
+        // NOLINTNEXTLINE(misc-const-correctness)
+        Command command(Command::CommandDescription{}, [](Command&) { return true; });
+
+        QVERIFY(!CommandFn([](Command&) { return false; })(command));
+        QVERIFY(CommandFn([](Command&) { return true; })(command));
+        QVERIFY(CommandFn([](Command&) {})(command));
+
+        const CommandFn failing([](Command&) { return false; });
+        const CommandFn copy(failing); // NOLINT(performance-unnecessary-copy-initialization)
+        QVERIFY(!copy(command));
+    }
 };
 
 QTEST_GUILESS_MAIN(TestCommandManager)

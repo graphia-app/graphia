@@ -73,10 +73,9 @@ private:
         return std::make_unique<CompoundCommand>(Command::CommandDescription(), std::move(commands));
     }
 
-    template<typename... Args>
-    using EnableIfArgsAreAllCommands = typename std::enable_if_t<(... &&
-        (std::is_convertible_v<Args, ICommandPtr> || std::is_convertible_v<Args, CommandFn&&>))
-    >;
+    template<typename T>
+    static constexpr bool ConvertibleToCommand =
+        std::is_convertible_v<T, ICommandPtr> || std::is_convertible_v<T, CommandFn&&>;
 
 public:
     virtual void execute(ExecutePolicy policy, ICommandPtr command) = 0;
@@ -87,7 +86,8 @@ public:
         execute(policy, std::make_unique<CompoundCommand>(commandDescription, std::move(commands)));
     }
 
-    template<typename Command, typename... Commands, typename = EnableIfArgsAreAllCommands<Command, Commands...>>
+    template<typename Command, typename... Commands>
+    requires (ConvertibleToCommand<Command> && ... && ConvertibleToCommand<Commands>)
     void execute(ExecutePolicy policy, Command&& command, Commands&&... commands)
     {
         if constexpr(sizeof...(commands) != 0)

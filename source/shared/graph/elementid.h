@@ -21,8 +21,8 @@
 #define ELEMENTID_H
 
 #include <cassert>
+#include <concepts>
 #include <cstddef>
-#include <type_traits>
 #include <compare>
 
 template<typename T> class ElementId
@@ -39,11 +39,8 @@ public:
         static_assert(sizeof(ElementId) == sizeof(_value), "ElementId should not be larger than an int");
     }
 
-    template<typename Integer> using EnableIfConvertibleToInt = typename std::enable_if_t<
-        std::is_integral_v<Integer> && std::is_convertible_v<Integer, int>>;
-
     // Prevent warnings when initialising an ElementId with other integral types
-    template<typename U, typename = EnableIfConvertibleToInt<U>>
+    template<std::integral U>
     explicit ElementId(U value) : ElementId(static_cast<int>(value)) {}
 
     explicit operator int() const { return _value; }

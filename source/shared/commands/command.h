@@ -33,22 +33,17 @@ class Command;
 class CommandFn
 {
 public:
-    template<typename Fn, typename ReturnType>
-    using EnableIfFnReturnTypeIs = typename std::enable_if_t<
-        std::is_same_v<
-            std::invoke_result_t<Fn, Command&>,
-            ReturnType
-        > &&
-        // Avoid enabling the universal move constructors if Fn is a CommandFn
-        !std::is_same_v<std::remove_reference_t<Fn>, CommandFn>
-    >;
-
-    template<typename Fn, typename = EnableIfFnReturnTypeIs<Fn, bool>>
+    // Avoid enabling the universal move constructors if Fn is a CommandFn
+    template<typename Fn>
+    requires (!std::is_same_v<std::remove_reference_t<Fn>, CommandFn> &&
+        std::is_same_v<std::invoke_result_t<Fn, Command&>, bool>)
     // cppcheck-suppress noExplicitConstructor
     CommandFn(Fn&& fn) : // NOLINT(cppcoreguidelines-missing-std-forward,google-explicit-constructor)
         _boolFn(fn) {}
 
-    template<typename Fn, typename = EnableIfFnReturnTypeIs<Fn, void>, typename = void>
+    template<typename Fn>
+    requires (!std::is_same_v<std::remove_reference_t<Fn>, CommandFn> &&
+        std::is_void_v<std::invoke_result_t<Fn, Command&>>)
     // cppcheck-suppress noExplicitConstructor
     CommandFn(Fn&& fn) : // NOLINT(cppcoreguidelines-missing-std-forward,google-explicit-constructor)
         _voidFn(fn) {}
