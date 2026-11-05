@@ -41,7 +41,6 @@ namespace u
             _future(std::move(future))
         {}
 
-        // NOLINTNEXTLINE cppcoreguidelines-missing-std-forward
         template<typename ThenFn> void then(ThenFn&& thenFn)
         {
             auto* watcher = new QFutureWatcher<AsyncFnResult>;

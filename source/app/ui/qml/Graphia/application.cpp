@@ -705,7 +705,7 @@ void Application::crash(int crashType)
     {
         int* p = nullptr;
         MSVC_WARNING_SUPPRESS_NEXTLINE(6011)
-        *p = 0; // NOLINT clang-analyzer-core.NullDereference
+        *p = 0;
         break;
     }
 

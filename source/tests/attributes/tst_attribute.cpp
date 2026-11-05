@@ -406,10 +406,10 @@ private slots:
 
         // Only the quotes around a name are removed, not those within it; these aren't
         // raw strings, as moc misparses those with escaped quotes, missing the test class
-        QTest::newRow("quotes in name") << u"Score \"raw\""_s << T::None // NOLINT modernize-raw-string-literal
-            << u"Score \"raw\""_s << u""_s << u"\"Score \\\"raw\\\"\""_s << u"Score raw"_s; // NOLINT modernize-raw-string-literal
-        QTest::newRow("quoted quotes in name") << u"$\"Score \\\"raw\\\"\""_s << T::None // NOLINT modernize-raw-string-literal
-            << u"Score \"raw\""_s << u""_s << u"\"Score \\\"raw\\\"\""_s << u"Score \\raw\\"_s; // NOLINT modernize-raw-string-literal
+        QTest::newRow("quotes in name") << u"Score \"raw\""_s << T::None
+            << u"Score \"raw\""_s << u""_s << u"\"Score \\\"raw\\\"\""_s << u"Score raw"_s;
+        QTest::newRow("quoted quotes in name") << u"$\"Score \\\"raw\\\"\""_s << T::None
+            << u"Score \"raw\""_s << u""_s << u"\"Score \\\"raw\\\"\""_s << u"Score \\raw\\"_s;
         QTest::newRow("dot in quotes") << uR"($"a.b".c)"_s << T::None << u"a.b"_s << u"c"_s
             << uR"("a.b".c)"_s << u"a\u2009›\u2009b\u2009›\u2009c"_s;
         QTest::newRow("not ASCII") << u"$\"新しい属性\""_s << T::None << u"新しい属性"_s << u""_s

@@ -54,13 +54,13 @@ private slots:
             u"\"Remove Nodes\" where $\"Node Name\" == \"say \\\"hi\\\"\""_s;
         // Not a raw string, which moc misparses here, missing the test class
         QTest::newRow("quotes in attribute name") <<
-            u"RemoveNodes where $\"Score \\\"raw\\\"\" > 1"_s; // NOLINT modernize-raw-string-literal
+            u"RemoveNodes where $\"Score \\\"raw\\\"\" > 1"_s;
         QTest::newRow("unquoted names") <<
             u"[pinned] RemoveComponents where $source.ComponentSize <= 1"_s;
         QTest::newRow("unquoted values") <<
             u"KNN using $Weight with k = 5 RankOrder = Ascending"_s;
         QTest::newRow("backslashes in values") <<
-            u"RemoveNodes where $Name == \"C:\\\\\" or $Name matches \"\\d+\""_s; // NOLINT modernize-raw-string-literal
+            u"RemoveNodes where $Name == \"C:\\\\\" or $Name matches \"\\d+\""_s;
     }
 
     void roundTrip()
@@ -133,7 +133,7 @@ private slots:
     void parsesBackslashes()
     {
         GraphTransformConfigParser parser;
-        QVERIFY(parser.parse(u"RemoveNodes where $Name == \"C:\\\\\" or $Name matches \"\\d+\""_s)); // NOLINT modernize-raw-string-literal
+        QVERIFY(parser.parse(u"RemoveNodes where $Name == \"C:\\\\\" or $Name matches \"\\d+\""_s));
 
         const auto* condition = std::get_if<RecursiveValue<GraphTransformConfig::CompoundCondition>>(
             &parser.result()._condition);

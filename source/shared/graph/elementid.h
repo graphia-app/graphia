@@ -23,7 +23,7 @@
 #include <cassert>
 #include <cstddef>
 #include <type_traits>
-#include <compare> // NOLINT misc-include-cleaner
+#include <compare>
 
 template<typename T> class ElementId
 {

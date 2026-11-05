@@ -41,7 +41,7 @@ using namespace Qt::Literals::StringLiterals;
 namespace
 {
 // Not a raw string, which moc misparses here, missing the test class
-const auto legacyTemplates = u"[{\"name\": \"t\", " // NOLINT modernize-raw-string-literal
+const auto legacyTemplates = u"[{\"name\": \"t\", "
     "\"transforms\": [\"\\\"Remove Nodes\\\" where $\\\"Node Degree\\\" < 2\"], "
     "\"visualisations\": [\"\\\"Node Degree\\\" \\\"Colour\\\"\"]}]"_s;
 } // namespace

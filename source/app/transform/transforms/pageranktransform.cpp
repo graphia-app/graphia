@@ -25,7 +25,7 @@
 #include "app/graph/graphmodel.h"
 #include "app/graph/componentmanager.h"
 
-#include <blaze/Blaze.h> // NOLINT misc-include-cleaner
+#include <blaze/Blaze.h>
 
 #include <QElapsedTimer>
 #include <QDebug>

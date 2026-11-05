@@ -26,7 +26,7 @@
 #include "app/attributes/attribute.h"
 #include "app/graph/graph.h"
 
-#include "shared/graph/igraphcomponent.h" // NOLINT misc-include-cleaner
+#include "shared/graph/igraphcomponent.h"
 
 #include "shared/utils/container.h"
 #include "shared/utils/statistics.h"

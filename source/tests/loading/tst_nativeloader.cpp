@@ -655,7 +655,7 @@ private slots:
         QVERIFY2(model != nullptr, qPrintable(failureReason));
 
         QCOMPARE(model->parser<Loader>()->transforms(),
-            QStringList{u"\"RemoveNodes\" where $\"Type\" == \"a\\\\b\\\\\\\\c\\\"d\""_s}); // NOLINT modernize-raw-string-literal
+            QStringList{u"\"RemoveNodes\" where $\"Type\" == \"a\\\\b\\\\\\\\c\\\"d\""_s});
     }
 
     // Loading can be cancelled part way through, as when the user closes its tab; the file's

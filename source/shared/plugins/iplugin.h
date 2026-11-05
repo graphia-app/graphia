@@ -105,7 +105,7 @@ public:
     virtual QObject* ptr() = 0;
 };
 
-#define IPluginIID(NAME) "Graphia.IPlugin:" #NAME "/" VERSION // NOLINT cppcoreguidelines-macro-usage
+#define IPluginIID(NAME) "Graphia.IPlugin:" #NAME "/" VERSION
 Q_DECLARE_INTERFACE(IPlugin, IPluginIID(Base))
 
 #endif // IPLUGIN_H

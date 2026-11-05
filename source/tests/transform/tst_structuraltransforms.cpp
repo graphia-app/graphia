@@ -128,15 +128,15 @@ private slots:
         QTest::addColumn<QString>("alert");
 
         QTest::newRow("unknown attribute") << u"RemoveNodes where $Unknown == 1"_s <<
-            TestEnvironment::translated("Unknown Attribute: \"%1\"").arg(u"Unknown"_s); // NOLINT modernize-raw-string-literal
+            TestEnvironment::translated("Unknown Attribute: \"%1\"").arg(u"Unknown"_s);
 
         const auto invalidCondition = TestEnvironment::translated("Invalid condition");
 
         // A regex that isn't valid; not raw strings, which moc misparses here
-        QTest::newRow("nodes") << u"RemoveNodes where $NodeDegree matches \"(\""_s << invalidCondition; // NOLINT modernize-raw-string-literal
-        QTest::newRow("edges") << u"RemoveEdges where $Weight matches \"(\""_s << invalidCondition; // NOLINT modernize-raw-string-literal
-        QTest::newRow("components") << u"RemoveComponents where $ComponentSize matches \"(\""_s << invalidCondition; // NOLINT modernize-raw-string-literal
-        QTest::newRow("keeping nodes") << u"KeepNodes where $NodeDegree matches \"(\""_s << invalidCondition; // NOLINT modernize-raw-string-literal
+        QTest::newRow("nodes") << u"RemoveNodes where $NodeDegree matches \"(\""_s << invalidCondition;
+        QTest::newRow("edges") << u"RemoveEdges where $Weight matches \"(\""_s << invalidCondition;
+        QTest::newRow("components") << u"RemoveComponents where $ComponentSize matches \"(\""_s << invalidCondition;
+        QTest::newRow("keeping nodes") << u"KeepNodes where $NodeDegree matches \"(\""_s << invalidCondition;
     }
 
     // A filter whose condition can't be made removes nothing, and says why

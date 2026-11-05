@@ -452,7 +452,7 @@ private slots:
             QByteArray(R"(digraph { "a\\" -> "b\c" })") <<
             QStringList{u"a\\\\"_s, u"b\\c"_s} << QStringList{u"a\\\\-b\\c"_s} << QStringList{};
         QTest::newRow("DOT preprocessor lines") << u"DOT"_s <<
-            QByteArray("# 1 \"graph.gv\"\ndigraph {\n# 2\na -> b\n}\n") << // NOLINT modernize-raw-string-literal
+            QByteArray("# 1 \"graph.gv\"\ndigraph {\n# 2\na -> b\n}\n") <<
             QStringList{u"a"_s, u"b"_s} << QStringList{u"a-b"_s} << QStringList{};
         QTest::newRow("DOT byte order mark") << u"DOT"_s << QByteArray("\xEF\xBB\xBF" "digraph { a -> b }") <<
             QStringList{u"a"_s, u"b"_s} << QStringList{u"a-b"_s} << QStringList{};
@@ -610,13 +610,13 @@ private slots:
             QStringList{u"A"_s} << QStringList{} << QStringList{u"NodeName|A|A"_s,
                 u"%1|A|x"_s.arg(userAttributeName(u"NodeName"_s))};
         QTest::newRow("GraphML declared name") << u"GraphML"_s << QByteArray(
-            "<graphml><key id=\"d0\" for=\"node\" attr.name=\"NodeName\"/><graph>" // NOLINT modernize-raw-string-literal
-            "<node id=\"a\"><data key=\"d0\">x</data></node>" // NOLINT modernize-raw-string-literal
+            "<graphml><key id=\"d0\" for=\"node\" attr.name=\"NodeName\"/><graph>"
+            "<node id=\"a\"><data key=\"d0\">x</data></node>"
             "</graph></graphml>") <<
             QStringList{u"a"_s} << QStringList{} << QStringList{u"NodeName|a|a"_s,
                 u"%1|a|x"_s.arg(userAttributeName(u"NodeName"_s))};
         QTest::newRow("DOT declared name") << u"DOT"_s <<
-            QByteArray("digraph { a [NodeName=\"x\"] }") << // NOLINT modernize-raw-string-literal
+            QByteArray("digraph { a [NodeName=\"x\"] }") <<
             QStringList{u"a"_s} << QStringList{} << QStringList{u"NodeName|a|a"_s,
                 u"%1|a|x"_s.arg(userAttributeName(u"NodeName"_s))};
     }
@@ -970,20 +970,20 @@ private slots:
         QTest::addColumn<QString>("expected");
 
         // Not raw strings, which moc misparses with these end tags in them
-        const QByteArray rdf = "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" " // NOLINT modernize-raw-string-literal
-            "xmlns:bp=\"http://www.biopax.org/release/biopax-level3.owl#\">\n"; // NOLINT modernize-raw-string-literal
+        const QByteArray rdf = "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" "
+            "xmlns:bp=\"http://www.biopax.org/release/biopax-level3.owl#\">\n";
 
         QTest::newRow("BioPAX empty") << u"BioPAX"_s << QByteArray() << translated("File is empty.");
         QTest::newRow("BioPAX node without id") << u"BioPAX"_s << QByteArray(rdf + "<bp:Protein/></rdf:RDF>") <<
             translated("Node element has no id.");
         QTest::newRow("BioPAX edge without resource") << u"BioPAX"_s <<
-            QByteArray(rdf + "<bp:Complex rdf:ID=\"x\"><bp:component/></bp:Complex></rdf:RDF>") << // NOLINT modernize-raw-string-literal
+            QByteArray(rdf + "<bp:Complex rdf:ID=\"x\"><bp:component/></bp:Complex></rdf:RDF>") <<
             translated("Edge element has no resource.");
         QTest::newRow("BioPAX unknown target") << u"BioPAX"_s <<
             QByteArray(rdf + "<bp:Complex rdf:ID=\"x\"><bp:component rdf:resource=\"#y\"/></bp:Complex></rdf:RDF>") << // NOLINT modernize-raw-string-literal
             translated("Invalid Edge Target. source node: %1, target node: %2").arg(u"x"_s, u"y"_s);
         QTest::newRow("BioPAX mismatched tags") << u"BioPAX"_s <<
-            QByteArray(rdf + "<bp:Protein rdf:ID=\"p\"></rdf:RDF>") << // NOLINT modernize-raw-string-literal
+            QByteArray(rdf + "<bp:Protein rdf:ID=\"p\"></rdf:RDF>") <<
             translated("XML parse error: %1").arg(translated("Opening and ending tag mismatch."));
 
         const QByteArray graphml = "<graphml><graph>";
@@ -1002,7 +1002,7 @@ private slots:
         QTest::newRow("GraphML edge within a node") << u"GraphML"_s <<
             QByteArray(graphml + R"(<node id="a"><edge source="a" target="a"/></node></graph></graphml>)") <<
             translated("Node and edge both active: %1 %2").arg(0).arg(0);
-        QTest::newRow("GraphML truncated") << u"GraphML"_s << QByteArray(graphml + "<node id=\"a\"/>") << // NOLINT modernize-raw-string-literal
+        QTest::newRow("GraphML truncated") << u"GraphML"_s << QByteArray(graphml + "<node id=\"a\"/>") <<
             translated("XML parse error: %1").arg(translated("Premature end of document."));
     }
 

@@ -20,7 +20,7 @@
 #include "editattributetablemodel.h"
 
 #include "app/ui/document.h"
-#include "app/ui/selectionmanager.h" // NOLINT misc-include-cleaner
+#include "app/ui/selectionmanager.h"
 
 #include "shared/graph/igraphmodel.h"
 

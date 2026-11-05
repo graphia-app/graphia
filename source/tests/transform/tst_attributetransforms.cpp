@@ -517,7 +517,7 @@ private slots:
         QTest::newRow("synthesis invalid name")
             << uR"(AttributeSynthesis using $Id with Name = "S!" RegularExpression = "(.*)$" AttributeValue = "\1")"_s << false;
         QTest::newRow("synthesis invalid regex")
-            << u"AttributeSynthesis using $Id with Name = \"S\" RegularExpression = \"(.*\" AttributeValue = \"\\1\""_s << false; // NOLINT modernize-raw-string-literal
+            << u"AttributeSynthesis using $Id with Name = \"S\" RegularExpression = \"(.*\" AttributeValue = \"\\1\""_s << false;
         QTest::newRow("combine")
             << uR"(CombineAttributes using $Group $Score with Name = "C")"_s << true;
         QTest::newRow("combine one attribute")

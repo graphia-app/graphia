@@ -81,7 +81,7 @@ public:
     static Application* application()
     {
         // Never destroyed, as that would be after the QGuiApplication
-        static auto* application = new Application(nullptr, false); // NOLINT cppcoreguidelines-owning-memory
+        static auto* application = new Application(nullptr, false);
         return application;
     }
 

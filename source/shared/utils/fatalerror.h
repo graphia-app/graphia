@@ -22,24 +22,24 @@
 
 #include "msvcwarningsuppress.h"
 
-#include <iostream> // NOLINT misc-include-cleaner
+#include <iostream>
 
 #if defined(_MSC_VER)
 #define NOINLINE __declspec(noinline)
 #elif defined(__GNUC__)
-#define NOINLINE __attribute__ ((noinline)) /* NOLINT cppcoreguidelines-macro-usage */
+#define NOINLINE __attribute__ ((noinline))
 #endif
 
 // Deliberately crash in order to help track down bugs
 // MESSAGE becomes a struct name, so quotes and spaces are not allowed
-#define FATAL_ERROR(MESSAGE) /* NOLINT cppcoreguidelines-macro-usage */ \
+#define FATAL_ERROR(MESSAGE) \
     do { struct MESSAGE \
         { \
             NOINLINE void operator()() \
             { \
                 std::cerr << "Fatal error: " #MESSAGE << "\n"; \
                 int* p = nullptr; \
-                MSVC_WARNING_SUPPRESS_NEXTLINE(6011) /* NOLINTNEXTLINE clang-analyzer-core.NullDereference */ \
+                MSVC_WARNING_SUPPRESS_NEXTLINE(6011) \
                 *p = 0; \
             } \
         } s; s(); \

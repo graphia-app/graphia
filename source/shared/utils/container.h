@@ -238,7 +238,6 @@ namespace u
     // std::ranges::iota isn't available in libc++ until version 21
     template<typename C, typename T> void iota(C& container, T value)
     {
-        // NOLINTNEXTLINE modernize-use-ranges
         std::iota(std::begin(container), std::end(container), value);
     }
 

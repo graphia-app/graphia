@@ -20,7 +20,7 @@
 #include "graph.h"
 #include "graphcomponent.h"
 
-#include "elementiddistinctsetcollection_debug.h" // NOLINT misc-include-cleaner
+#include "elementiddistinctsetcollection_debug.h"
 #include "shared/graph/igrapharray.h"
 #include "shared/graph/elementid_debug.h"
 #include "shared/utils/container.h"

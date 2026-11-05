@@ -79,7 +79,7 @@
 #include <QVariant>
 
 #if __has_include(<QtWebEngineQuick>)
-#include <QtWebEngineQuick> // NOLINT misc-include-cleaner
+#include <QtWebEngineQuick>
 #endif
 
 #include <iostream>
