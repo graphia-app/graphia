@@ -26,20 +26,6 @@
 #include <array>
 #include <cstddef>
 #include <type_traits>
-#include <utility>
-
-// Test if there is an operator* for T and Arg
-namespace Test
-{
-    struct NotFound {};
-    template<typename T, typename Arg> NotFound operator*(const T&, const Arg&);
-
-    template<typename T, typename Arg = T>
-    struct MultiplyExists
-    {
-        enum : unsigned char { value = !std::is_same_v<decltype(std::declval<T>() * std::declval<Arg>()), NotFound> };
-    };
-} // namespace Test
 
 template<typename T, size_t Size> class CircularBuffer
 {
@@ -104,7 +90,7 @@ public:
 
         T result = T();
 
-        using Reciprocal = std::conditional_t<Test::MultiplyExists<T, float>::value, float, double>;
+        using Reciprocal = std::conditional_t<requires(T t, float f) { t * f; }, float, double>;
         auto reciprocal = static_cast<Reciprocal>(1.0 / static_cast<double>(samples));
 
         for(auto i = _size - samples; i < _size; i++)
