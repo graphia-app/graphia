@@ -31,7 +31,7 @@
 
 using namespace Qt::Literals::StringLiterals;
 
-[[maybe_unused]] static bool transformsValid(const GraphModel& graphModel, const QStringList& transforms)
+static bool transformsValid(const GraphModel& graphModel, const QStringList& transforms)
 {
     return std::ranges::all_of(transforms, [&graphModel](const auto& transform)
     {

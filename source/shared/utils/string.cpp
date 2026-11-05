@@ -135,7 +135,6 @@ std::istream& u::getline(std::istream& is, std::string& t)
     // such as thread synchronization and updating the stream state.
 
     const std::istream::sentry se(is, true);
-    Q_UNUSED(se);
     std::streambuf* sb = is.rdbuf();
 
     while(true)

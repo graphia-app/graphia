@@ -71,7 +71,6 @@ static bool compress(const QByteArray& byteArray, const QString& filePath, Progr
         return false;
 
     auto atExit = std::experimental::make_scope_exit([&zstream] { deflateEnd(&zstream); });
-    Q_UNUSED(atExit);
 
     int flush = Z_ERRNO;
 

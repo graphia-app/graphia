@@ -449,7 +449,6 @@ private:
 
         uint64_t operator()(It it)
         {
-            Q_UNUSED(it);
 
             if constexpr(ItHasComputeCostHint<It>)
                 return it->computeCostHint();

@@ -135,7 +135,6 @@ std::string u::rsaSignString(const std::string& string, const std::string& priva
         auto* filter = new CryptoPP::SignerFilter(rng, signer, sink);
 
         const CryptoPP::StringSource ss(string, true, filter);
-        Q_UNUSED(ss);
     }
     catch(std::exception&)
     {
@@ -172,7 +171,6 @@ bool u::rsaVerifySignature(const std::string& signaturePlusString,
             CryptoPP::SignatureVerificationFilter::THROW_EXCEPTION);
 
         const CryptoPP::StringSource ss(signaturePlusString, true, filter);
-        Q_UNUSED(ss);
     }
     catch(std::exception&)
     {

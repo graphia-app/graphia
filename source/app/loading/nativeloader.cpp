@@ -98,7 +98,6 @@ static bool decompress(const QString& filePath, QByteArray& byteArray,
     {
        inflateEnd(&zstream);
     });
-    Q_UNUSED(atExit);
 
     do
     {
