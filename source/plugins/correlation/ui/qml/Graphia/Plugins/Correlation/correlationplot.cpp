@@ -1202,7 +1202,7 @@ void CorrelationPlot::setPluginInstance(CorrelationPluginInstance* pluginInstanc
 {
     _pluginInstance = pluginInstance;
 
-    connect(_pluginInstance, &CorrelationPluginInstance::visualsChanged, // clazy:exclude=connect-non-signal
+    connect(_pluginInstance, &CorrelationPluginInstance::visualsChanged,
         this, [this](VisualChangeFlags nodeChange, VisualChangeFlags)
     {
         if(::Flags<VisualChangeFlags>(nodeChange).test(VisualChangeFlags::Color))
@@ -1550,12 +1550,12 @@ void CorrelationPlot::sortBy(int type, const QString& text)
 
     if(!typeIsColumnAnnotation)
     {
-        _columnSortOrders.erase(std::ranges::remove_if(_columnSortOrders,  // clazy:exclude=strict-iterators,detaching-member
+        _columnSortOrders.erase(std::ranges::remove_if(_columnSortOrders,
         [](const auto& value)
         {
             return static_cast<PlotColumnSortType>(value[u"type"_s].toInt()) !=
                 PlotColumnSortType::ColumnAnnotation;
-        }).begin(), _columnSortOrders.end());  // clazy:exclude=strict-iterators,detaching-member
+        }).begin(), _columnSortOrders.end()); // clazy:exclude=detaching-member
     }
 
     QVariantMap newSortOrder;

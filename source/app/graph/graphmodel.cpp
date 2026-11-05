@@ -1735,12 +1735,12 @@ void GraphModel::onTransformedGraphChanged(const Graph*, bool changeOccurred)
 
     QStringList changedAttributeNames(std::move(_->_changedDynamicAttributeNames));
 
-    changedAttributeNames.erase(std::ranges::remove_if(changedAttributeNames, // clazy:exclude=strict-iterators
+    changedAttributeNames.erase(std::ranges::remove_if(changedAttributeNames,
     [&removedAttributeNames, &addedAttributeNames](const auto& dynamicAttributeName)
     {
         return u::contains(removedAttributeNames, dynamicAttributeName) ||
             u::contains(addedAttributeNames, dynamicAttributeName);
-    }).begin(), changedAttributeNames.end()); // clazy:exclude=strict-iterators
+    }).begin(), changedAttributeNames.end());
 
     // When the graph changes, every attribute's range and shared values also potentially change
     for(auto& [name, attribute] : _->_attributes)

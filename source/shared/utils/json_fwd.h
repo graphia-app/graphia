@@ -36,7 +36,7 @@ class Progressable;
 class QByteArray;
 class QString;
 class QUrl;
-class QVariant; //clazy:exclude=qt6-fwd-fixes
+class QVariant;
 
 void to_json(json& j, const QString& s);
 void to_json(json& j, NodeId nodeId);

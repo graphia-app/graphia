@@ -629,11 +629,11 @@ QStringList Application::linkArgumentsFor(const QUrl& url) const
     auto path = url.path(QUrl::FullyEncoded);
     auto arguments = path.split('/');
 
-    arguments.erase(std::ranges::remove_if(arguments, // clazy:exclude=strict-iterators
+    arguments.erase(std::ranges::remove_if(arguments,
     [](const auto& argument)
     {
         return argument.isEmpty();
-    }).begin(), arguments.end()); // clazy:exclude=strict-iterators
+    }).begin(), arguments.end());
 
     std::ranges::transform(arguments, arguments.begin(),
     [](const auto& argument)

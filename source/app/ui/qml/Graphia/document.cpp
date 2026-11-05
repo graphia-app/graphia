@@ -642,8 +642,8 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
 
     connect(this, &Document::taskAddedToExecutor, this, &Document::executeDeferred);
 
-    connect(_graphModel.get(), &GraphModel::attributesChanged, this, &Document::attributesChanged); // clazy:exclude=connect-non-signal
-    connect(_graphModel.get(), &GraphModel::attributesChanged, this, &Document::setSaveRequired); // clazy:exclude=connect-non-signal
+    connect(_graphModel.get(), &GraphModel::attributesChanged, this, &Document::attributesChanged);
+    connect(_graphModel.get(), &GraphModel::attributesChanged, this, &Document::setSaveRequired);
 
     emit pluginInstanceChanged();
 
@@ -1016,7 +1016,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
 
     connect(_layoutThread.get(), &LayoutThread::executed, _graphDisplay, &GraphDisplay::onLayoutChanged);
 
-    connect(_graphModel.get(), &GraphModel::visualsChanged, this, &Document::hasValidEdgeTextVisualisationChanged); // clazy:exclude=connect-non-signal
+    connect(_graphModel.get(), &GraphModel::visualsChanged, this, &Document::hasValidEdgeTextVisualisationChanged);
 
     connect(&_graphModel->graph(), &Graph::graphWillChange, this, &Document::graphWillChange);
     connect(&_graphModel->graph(), &Graph::graphChanged, this, &Document::graphChanged);

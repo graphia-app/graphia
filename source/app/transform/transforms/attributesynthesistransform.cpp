@@ -76,10 +76,10 @@ void AttributeSynthesisTransform::apply(TransformedGraph& target)
         {
             QString value = sourceAttribute.stringValueOf(elementId);
 
-            auto match = regex.match(value); // clazy:exclude=use-static-qregularexpression
+            auto match = regex.match(value);
             if(match.hasMatch())
             {
-                newValues[elementId] = value.replace(regex, attributeValue); // clazy:exclude=use-static-qregularexpression
+                newValues[elementId] = value.replace(regex, attributeValue);
                 missing.set(elementId, false);
                 typeIdentity.updateType(newValues[elementId]);
             }
