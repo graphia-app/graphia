@@ -1041,10 +1041,9 @@ private slots:
         // r1 and r3
         QMetaObject::invokeMethod(plugin(), "setHighlightedRows", Q_ARG(QList<int>, (QList<int>{0, 2})));
         QCOMPARE(highlightedRowsChanged.count(), 1);
-        QVERIFY(QTest::qWaitFor([&] { return unhighlighted(u"r2"_s); }, Timeout));
+        QVERIFY(QTest::qWaitFor([&] { return unhighlighted(u"r2"_s) && unhighlighted(u"r4"_s); }, Timeout));
         QVERIFY(!unhighlighted(u"r1"_s));
         QVERIFY(!unhighlighted(u"r3"_s));
-        QVERIFY(unhighlighted(u"r4"_s));
 
         QMetaObject::invokeMethod(plugin(), "setHighlightedRows", Q_ARG(QList<int>, {}));
         QCOMPARE(highlightedRowsChanged.count(), 2);
