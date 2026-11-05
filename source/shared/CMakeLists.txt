@@ -91,7 +91,6 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/utils/flags.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/function_traits.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/iterator_range.h
-    ${CMAKE_CURRENT_LIST_DIR}/utils/is_detected.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/is_std_container.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/json.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/json_fwd.h
