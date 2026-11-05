@@ -112,10 +112,9 @@ namespace u
     }
 
     template<Container C1, Container C2>
+        requires(std::is_same_v<typename C1::value_type, typename C2::value_type>)
     std::vector<typename C1::value_type> setDifference(const C1& a, const C2& b)
     {
-        static_assert(std::is_same_v<typename C1::value_type, typename C2::value_type>);
-
         std::vector<typename C1::value_type> result;
 
         std::copy_if(a.begin(), a.end(), std::back_inserter(result),
@@ -128,10 +127,9 @@ namespace u
     }
 
     template<Container C1, Container C2>
+        requires(std::is_same_v<typename C1::value_type, typename C2::value_type>)
     std::vector<typename C1::value_type> multisetDifference(const C1& a, const C2& b)
     {
-        static_assert(std::is_same_v<typename C1::value_type, typename C2::value_type>);
-
         std::vector<typename C1::value_type> remaining(b.begin(), b.end());
         std::vector<typename C1::value_type> result;
 
@@ -149,10 +147,9 @@ namespace u
     }
 
     template<Container C1, Container C2>
+        requires(std::is_same_v<typename C1::value_type, typename C2::value_type>)
     bool setsDiffer(const C1& a, const C2& b)
     {
-        static_assert(std::is_same_v<typename C1::value_type, typename C2::value_type>);
-
         if(a.size() != b.size())
             return true;
 
@@ -167,18 +164,16 @@ namespace u
     }
 
     template<Container C1, Container C2>
+        requires(std::is_same_v<typename C1::value_type, typename C2::value_type>)
     bool setsEqual(const C1& a, const C2& b)
     {
-        static_assert(std::is_same_v<typename C1::value_type, typename C2::value_type>);
-
         return !setsDiffer(a, b);
     }
 
     template<Container C1, Container C2>
+        requires(std::is_same_v<typename C1::value_type, typename C2::value_type>)
     std::vector<typename C1::value_type> setIntersection(const C1& a, const C2& b)
     {
-        static_assert(std::is_same_v<typename C1::value_type, typename C2::value_type>);
-
         std::vector<typename C1::value_type> result;
 
         std::copy_if(a.begin(), a.end(), std::back_inserter(result),
@@ -191,10 +186,9 @@ namespace u
     }
 
     template<Container C1, Container C2>
+        requires(std::is_same_v<typename C1::value_type, typename C2::value_type>)
     bool setsIntersect(const C1& a, const C2& b)
     {
-        static_assert(std::is_same_v<typename C1::value_type, typename C2::value_type>);
-
         return std::any_of(a.begin(), a.end(),
         [&b](const auto& value)
         {

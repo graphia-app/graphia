@@ -40,10 +40,10 @@ enum class MultiElementType : unsigned char
 template<typename C, typename T> class ElementIdDistinctSet;
 template<typename T> class ElementIdDistinctSets;
 
-template<typename T> class ElementIdDistinctSetCollection
+template<typename T>
+requires(std::is_base_of_v<ElementId<T>, T>)
+class ElementIdDistinctSetCollection
 {
-    static_assert(std::is_base_of_v<ElementId<T>, T>, "T must be an ElementId");
-
     friend class ElementIdDistinctSet<ElementIdDistinctSetCollection<T>, T>;
     friend class ElementIdDistinctSet<const ElementIdDistinctSetCollection<T>, T>;
     friend class ElementIdDistinctSets<ElementIdDistinctSet<ElementIdDistinctSetCollection<T>, T>>;

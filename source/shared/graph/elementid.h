@@ -25,7 +25,8 @@
 #include <cstddef>
 #include <compare>
 
-template<typename T> class ElementId
+template<typename T>
+class ElementId
 {
 private:
     static const int NullValue = -1;
