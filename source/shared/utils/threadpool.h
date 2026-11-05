@@ -110,6 +110,179 @@ private:
             _futures(std::move(futures))
         {}
 
+        template<typename T>
+        struct IteratorImpl {};
+
+        // If the concurrent function's return type is a sequence container, collapse its
+        // values down, so that from the iterator user's point of view, they work with a single
+        // homogenous sequence, rather than a vector of sequences
+        template<typename T>
+            requires(is_std_sequence_container_v<typename T::value_type>)
+        struct IteratorImpl<T>
+        {
+            typename std::vector<T>::iterator _threadIt;
+            typename std::vector<T>::iterator _threadEndIt;
+            typename T::iterator _resultsIt;
+            typename T::value_type::iterator _containerIt;
+
+            using value_type = typename T::value_type::value_type;
+
+            void increment()
+            {
+                if(_containerIt != _resultsIt->end())
+                    ++_containerIt;
+
+                while(_containerIt == _resultsIt->end())
+                {
+                    if(_resultsIt != _threadIt->end())
+                        ++_resultsIt;
+
+                    if(_resultsIt != _threadIt->end())
+                        _containerIt = _resultsIt->begin();
+                    else do
+                        {
+                            if(_threadIt != _threadEndIt)
+                                ++_threadIt;
+
+                            if(_threadIt == _threadEndIt)
+                                break;
+
+                            _resultsIt = _threadIt->begin();
+                            _containerIt = _resultsIt->begin();
+
+                        } while(_resultsIt == _threadIt->end());
+
+                    if(_threadIt == _threadEndIt)
+                    {
+                        _resultsIt = {};
+                        _containerIt = {};
+                        break;
+                    }
+                }
+            }
+
+            IteratorImpl(std::vector<T>& values, bool end)
+            {
+                if(!end)
+                {
+                    _threadIt = values.begin();
+                    _threadEndIt = values.end();
+
+                    if(_threadIt != _threadEndIt)
+                    {
+                        _resultsIt = _threadIt->begin();
+                        while(_threadIt != _threadEndIt && _resultsIt == _threadIt->end())
+                            increment();
+
+                        if(_threadIt != _threadEndIt && _resultsIt != _threadIt->end())
+                        {
+                            _containerIt = _resultsIt->begin();
+                            while(_threadIt != _threadEndIt && _containerIt == _resultsIt->end())
+                                increment();
+                        }
+                    }
+
+                    if(_threadIt == _threadEndIt)
+                    {
+                        _resultsIt = {};
+                        _containerIt = {};
+                    }
+                }
+                else
+                {
+                    _threadIt = _threadEndIt = values.end();
+                    _resultsIt = {};
+                    _containerIt = {};
+                }
+            }
+
+            auto& valueReference() const
+            {
+                Q_ASSERT(_containerIt != _resultsIt->end());
+                return *_containerIt;
+            }
+
+            bool operator==(const IteratorImpl& other) const
+            {
+                if(_threadIt != other._threadIt)
+                    return false;
+
+                if(_resultsIt != other._resultsIt)
+                    return false;
+
+                return _containerIt == other._containerIt;
+            }
+        };
+
+        template<typename T>
+            requires(!is_std_sequence_container_v<typename T::value_type>)
+        struct IteratorImpl<T>
+        {
+            typename std::vector<T>::iterator _threadIt;
+            typename std::vector<T>::iterator _threadEndIt;
+            typename T::iterator _resultsIt;
+
+            using value_type = typename T::value_type;
+
+            void increment()
+            {
+                if(_resultsIt != _threadIt->end())
+                    ++_resultsIt;
+
+                while(_resultsIt == _threadIt->end())
+                {
+                    if(_threadIt != _threadEndIt)
+                        ++_threadIt;
+
+                    if(_threadIt == _threadEndIt)
+                        break;
+
+                    _resultsIt = _threadIt->begin();
+                }
+
+                if(_threadIt == _threadEndIt)
+                    _resultsIt = {};
+            }
+
+            IteratorImpl(std::vector<T>& values, bool end)
+            {
+                if(!end)
+                {
+                    _threadIt = values.begin();
+                    _threadEndIt = values.end();
+
+                    if(_threadIt != _threadEndIt)
+                    {
+                        _resultsIt = _threadIt->begin();
+                        while(_threadIt != _threadEndIt && _resultsIt == _threadIt->end())
+                            increment();
+                    }
+
+                    if(_threadIt == _threadEndIt)
+                        _resultsIt = {};
+                }
+                else
+                {
+                    _threadIt = _threadEndIt = values.end();
+                    _resultsIt = {};
+                }
+            }
+
+            auto& valueReference() const
+            {
+                Q_ASSERT(_resultsIt != _threadIt->end());
+                return *_resultsIt;
+            }
+
+            bool operator==(const IteratorImpl& other) const
+            {
+                if(_threadIt != other._threadIt)
+                    return false;
+
+                return _resultsIt == other._resultsIt;
+            }
+        };
+
     public:
         void wait() const
         {
@@ -126,213 +299,40 @@ private:
         class iterator
         {
         private:
-            template<typename T>
-            struct impl {};
-
-            // If the concurrent function's return type is a sequence container, collapse its
-            // values down, so that from the iterator user's point of view, they work with a single
-            // homogenous sequence, rather than a vector of sequences
-            template<typename T>
-            requires is_std_sequence_container_v<typename T::value_type>
-            struct impl<T>
-            {
-                typename std::vector<T>::iterator _threadIt;
-                typename std::vector<T>::iterator _threadEndIt;
-                typename T::iterator _resultsIt;
-                typename T::value_type::iterator _containerIt;
-
-                using value_type = typename T::value_type::value_type;
-
-                void increment()
-                {
-                    if(_containerIt != _resultsIt->end())
-                        ++_containerIt;
-
-                    while(_containerIt == _resultsIt->end())
-                    {
-                        if(_resultsIt != _threadIt->end())
-                            ++_resultsIt;
-
-                        if(_resultsIt != _threadIt->end())
-                            _containerIt = _resultsIt->begin();
-                        else do
-                        {
-                            if(_threadIt != _threadEndIt)
-                                ++_threadIt;
-
-                            if(_threadIt == _threadEndIt)
-                                break;
-
-                            _resultsIt = _threadIt->begin();
-                            _containerIt = _resultsIt->begin();
-
-                        } while(_resultsIt == _threadIt->end());
-
-                        if(_threadIt == _threadEndIt)
-                        {
-                            _resultsIt = {};
-                            _containerIt = {};
-                            break;
-                        }
-                    }
-                }
-
-                impl(std::vector<T>& values, bool end)
-                {
-                    if(!end)
-                    {
-                        _threadIt = values.begin();
-                        _threadEndIt = values.end();
-
-                        if(_threadIt != _threadEndIt)
-                        {
-                            _resultsIt = _threadIt->begin();
-                            while(_threadIt != _threadEndIt && _resultsIt == _threadIt->end())
-                                increment();
-
-                            if(_threadIt != _threadEndIt && _resultsIt != _threadIt->end())
-                            {
-                                _containerIt = _resultsIt->begin();
-                                while(_threadIt != _threadEndIt && _containerIt == _resultsIt->end())
-                                    increment();
-                            }
-                        }
-
-                        if(_threadIt == _threadEndIt)
-                        {
-                            _resultsIt = {};
-                            _containerIt = {};
-                        }
-                    }
-                    else
-                    {
-                        _threadIt = _threadEndIt = values.end();
-                        _resultsIt = {};
-                        _containerIt = {};
-                    }
-                }
-
-                auto& valueReference() const
-                {
-                    Q_ASSERT(_containerIt != _resultsIt->end());
-                    return *_containerIt;
-                }
-
-                bool operator==(const impl& other) const
-                {
-                    if(_threadIt != other._threadIt)
-                        return false;
-
-                    if(_resultsIt != other._resultsIt)
-                        return false;
-
-                    return _containerIt == other._containerIt;
-                }
-            };
-
-            template<typename T>
-            requires (!is_std_sequence_container_v<typename T::value_type>)
-            struct impl<T>
-            {
-                typename std::vector<T>::iterator _threadIt;
-                typename std::vector<T>::iterator _threadEndIt;
-                typename T::iterator _resultsIt;
-
-                using value_type = typename T::value_type;
-
-                void increment()
-                {
-                    if(_resultsIt != _threadIt->end())
-                        ++_resultsIt;
-
-                    while(_resultsIt == _threadIt->end())
-                    {
-                        if(_threadIt != _threadEndIt)
-                            ++_threadIt;
-
-                        if(_threadIt == _threadEndIt)
-                            break;
-
-                        _resultsIt = _threadIt->begin();
-                    }
-
-                    if(_threadIt == _threadEndIt)
-                        _resultsIt = {};
-                }
-
-                impl(std::vector<T>& values, bool end)
-                {
-                    if(!end)
-                    {
-                        _threadIt = values.begin();
-                        _threadEndIt = values.end();
-
-                        if(_threadIt != _threadEndIt)
-                        {
-                            _resultsIt = _threadIt->begin();
-                            while(_threadIt != _threadEndIt && _resultsIt == _threadIt->end())
-                                increment();
-                        }
-
-                        if(_threadIt == _threadEndIt)
-                            _resultsIt = {};
-                    }
-                    else
-                    {
-                        _threadIt = _threadEndIt = values.end();
-                        _resultsIt = {};
-                    }
-                }
-
-                auto& valueReference() const
-                {
-                    Q_ASSERT(_resultsIt != _threadIt->end());
-                    return *_resultsIt;
-                }
-
-                bool operator==(const impl& other) const
-                {
-                    if(_threadIt != other._threadIt)
-                        return false;
-
-                    return _resultsIt == other._resultsIt;
-                }
-            };
-
-            impl<ResultsVectorOrVoid> _impl;
+            IteratorImpl<ResultsVectorOrVoid> _iteratorImpl;
 
         public:
-            using value_type = typename impl<ResultsVectorOrVoid>::value_type;
+            using value_type = typename IteratorImpl<ResultsVectorOrVoid>::value_type;
             using reference = value_type&;
             using pointer = value_type*;
             using iterator_category = std::forward_iterator_tag;
             using difference_type = std::ptrdiff_t;
 
             iterator(ResultsType* results, bool end) :
-                _impl(results->_values, end)
+                _iteratorImpl(results->_values, end)
             {}
 
             iterator& operator++()
             {
-                _impl.increment();
+                _iteratorImpl.increment();
                 return *this;
             }
 
             iterator operator++(int)
             {
                 iterator i = *this;
-                _impl.increment();
+                _iteratorImpl.increment();
                 return i;
             }
 
             auto& operator*() const
             {
-                return _impl.valueReference();
+                return _iteratorImpl.valueReference();
             }
 
             bool operator==(const iterator& other) const
             {
-                return _impl == other._impl;
+                return _iteratorImpl == other._iteratorImpl;
             }
         };
 
