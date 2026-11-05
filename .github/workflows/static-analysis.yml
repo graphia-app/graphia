@@ -58,6 +58,7 @@ jobs:
         CTCACHE_DIR: /tmp/clang-tidy-cache
         CTCACHE_CLANG_TIDY: clang-tidy-${{ env.CLANG_VERSION }}
         CTCACHE_SAVE_OUTPUT: 1
+        CTCACHE_KEEP_COMMENTS: 1
         BUILD_DIR: build/clang/
     - uses: actions/upload-artifact@v7
       with:
