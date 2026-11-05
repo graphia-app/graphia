@@ -28,6 +28,8 @@
 #include <qcustomplotcolorprovider.h>
 
 #include <QColor>
+#include <QFont>
+#include <QFontMetrics>
 #include <QObject>
 #include <QPoint>
 #include <QQmlEngine>
@@ -307,8 +309,7 @@ private:
     QCPItemText* _hoverLabel = nullptr;
     QCPItemRect* _hoverColorRect = nullptr;
     QCPItemTracer* _itemTracer = nullptr;
-    QFont _defaultFont9Pt;
-    QFontMetrics _defaultFontMetrics{_defaultFont9Pt};
+    QFontMetrics _defaultFontMetrics{QFont{}};
 
     QCustomPlot _customPlot;
     QCPLayoutGrid* _mainLayoutGrid = nullptr;

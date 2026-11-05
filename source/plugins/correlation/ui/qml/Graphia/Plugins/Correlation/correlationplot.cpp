@@ -343,8 +343,6 @@ CorrelationPlot::CorrelationPlot(QQuickItem* parent) :
 
     _customPlot.setAutoAddPlottableToLegend(false);
 
-    _defaultFont9Pt.setPointSize(9);
-
     _customPlot.setSelectionTolerance(24);
     _customPlot.setBackground(Qt::transparent);
 
