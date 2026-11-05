@@ -28,8 +28,6 @@
 #include "shared/loading/xlsxtabulardataparser.h"
 #include "shared/loading/matlabfileparser.h"
 
-#include "shared/utils/is_detected.h"
-
 #include <QObject>
 #include <QString>
 #include <QUrl>
@@ -98,19 +96,13 @@ private:
 public:
     using AdjacencyMatrixParser::AdjacencyMatrixParser;
 
-    template<typename Parser>
-    using setRowLimit_t = decltype(std::declval<Parser>().setRowLimit(0));
-
     static bool canLoad(const QUrl& url)
     {
         if(!TabularDataParserType::canLoad(url))
             return false;
 
-        constexpr bool TabularDataParserHasSetRowLimit =
-            std::experimental::is_detected_v<setRowLimit_t, TabularDataParserType>;
-
         // If TabularDataParserType has ::setRowLimit, do some additional checks
-        if constexpr(TabularDataParserHasSetRowLimit)
+        if constexpr(requires(TabularDataParserType parser) { parser.setRowLimit(0); })
         {
             TabularDataParserType parser;
             parser.setRowLimit(5);

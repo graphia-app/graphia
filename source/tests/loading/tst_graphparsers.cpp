@@ -1089,6 +1089,42 @@ private slots:
         QVERIFY(::parse(format, content, &failureReason) == nullptr);
         QVERIFY(!failureReason.isEmpty());
     }
+
+    void adjacencyMatrixCanLoad_data()
+    {
+        QTest::addColumn<QString>("format");
+        QTest::addColumn<QByteArray>("content");
+        QTest::addColumn<bool>("expected");
+
+        QTest::newRow("CSV matrix") << u"CSV"_s << QByteArray(",A,B\nA,0,1\nB,1,0\n") << true;
+        QTest::newRow("CSV edge list") << u"CSV"_s << QByteArray("1,2,0.5\n2,3,1\n") << true;
+        QTest::newRow("CSV neither") << u"CSV"_s << QByteArray(",A,B\nA,0,x\nB,1,0\n") << false;
+        QTest::newRow("XLSX matrix") << u"XLSX"_s <<
+            XlsxWriter::xlsx({{u""_s, u"A"_s, u"B"_s}, {u"A"_s, u"0"_s, u"1"_s}, {u"B"_s, u"1"_s, u"0"_s}}) << true;
+        QTest::newRow("XLSX neither") << u"XLSX"_s <<
+            XlsxWriter::xlsx({{u""_s, u"A"_s, u"B"_s}, {u"A"_s, u"0"_s, u"x"_s}, {u"B"_s, u"1"_s, u"0"_s}}) << false;
+    }
+
+    void adjacencyMatrixCanLoad()
+    {
+        QFETCH(const QString, format);
+        QFETCH(const QByteArray, content);
+        QFETCH(const bool, expected);
+
+        const QTemporaryDir dir;
+        const auto fileName = dir.filePath(u"data"_s);
+
+        {
+            QFile file(fileName);
+            QVERIFY(file.open(QIODevice::WriteOnly));
+            file.write(content);
+        }
+
+        const auto url = QUrl::fromLocalFile(fileName);
+
+        QCOMPARE(format == u"XLSX"_s ? AdjacencyMatrixXLSXFileParser::canLoad(url) :
+            AdjacencyMatrixCSVFileParser::canLoad(url), expected);
+    }
 };
 
 QTEST_MAIN(TestGraphParsers)
