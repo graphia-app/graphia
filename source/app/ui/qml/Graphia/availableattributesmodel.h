@@ -73,9 +73,7 @@ private:
     Item* _root = nullptr;
 
     // When listing edge attributes, we want their source and target node attributes too
-    // cppcheck-suppress unsafeClassCanLeak
     Item* _sourceNode = nullptr;
-    // cppcheck-suppress unsafeClassCanLeak
     Item* _targetNode = nullptr;
 
     std::set<Item*> _attributeItemsWithParameters;

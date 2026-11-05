@@ -81,7 +81,6 @@ private:
 public:
     virtual void execute(ExecutePolicy policy, ICommandPtr command) = 0;
 
-    // cppcheck-suppress passedByValue
     void execute(ExecutePolicy policy, ICommandPtrsVector commands,
         const Command::CommandDescription& commandDescription = {})
     {
