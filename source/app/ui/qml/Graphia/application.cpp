@@ -36,7 +36,6 @@
 #include "shared/utils/thread.h"
 #include "shared/utils/scopetimer.h"
 #include "shared/utils/msvcwarningsuppress.h"
-#include "shared/utils/static_block.h"
 #include "shared/utils/translator.h"
 
 #include "app/loading/graphmlsaver.h"
@@ -1005,9 +1004,6 @@ bool Application::initialisePlugin(IPlugin* plugin, std::unique_ptr<QPluginLoade
         .arg(pluginName, fileName);
 
     std::cerr << message.toStdString();
-
-    // Plugin might have static_blocks
-    execute_static_blocks();
 
     return true;
 }

@@ -23,7 +23,6 @@
 
 #include "app/rendering/openglfunctions.h"
 #include "shared/utils/preferences.h"
-#include "shared/utils/static_block.h"
 #include "shared/utils/translator.h"
 
 #include <google_breakpad/processor/minidump.h>
@@ -334,8 +333,6 @@ int main(int argc, char *argv[])
 {
     const QApplication app(argc, argv);
     u::installTranslator();
-
-    execute_static_blocks();
 
     QCoreApplication::setOrganizationName(u"Graphia"_s);
     QCoreApplication::setOrganizationDomain(u"graphia.app"_s);

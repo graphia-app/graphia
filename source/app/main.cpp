@@ -30,7 +30,6 @@
 #include "shared/utils/macosfileopeneventfilter.h"
 #include "shared/utils/debugger.h"
 #include "shared/utils/apppathname.h"
-#include "shared/utils/static_block.h"
 #include "shared/utils/thread.h"
 #include "shared/utils/console.h"
 #include "shared/utils/consolecapture.h"
@@ -348,8 +347,6 @@ static int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
     configureXDG();
 
     qRegisterMetaType<size_t>("size_t");
-
-    execute_static_blocks();
 
     const PreferencesStore preferencesStore;
     const ThreadPoolSingleton threadPool;

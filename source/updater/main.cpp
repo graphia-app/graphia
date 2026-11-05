@@ -25,7 +25,6 @@
 #include "shared/utils/container.h"
 #include "shared/utils/preferences.h"
 #include "shared/utils/consolecapture.h"
-#include "shared/utils/static_block.h"
 #include "shared/utils/translator.h"
 
 #include <qtsingleapplication/qtsingleapplication.h>
@@ -155,8 +154,6 @@ static QStringList showUpdater(int argc, char *argv[])
 // NOLINTNEXTLINE(bugprone-exception-escape)
 int main(int argc, char *argv[])
 {
-    execute_static_blocks();
-
     QApplication::setOrganizationName(u"Graphia"_s);
     QApplication::setOrganizationDomain(u"graphia.app"_s);
     QApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));

@@ -117,7 +117,6 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/utils/signalhandling.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/singleton.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/source_location.h
-    ${CMAKE_CURRENT_LIST_DIR}/utils/static_block.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/static_visitor.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/statistics.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/string.h
@@ -172,7 +171,6 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/utils/scopetimer.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/showinfolder.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/signalhandling.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/utils/static_block.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/string.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/threadpool.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/translator.cpp
