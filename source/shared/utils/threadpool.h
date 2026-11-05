@@ -63,7 +63,7 @@ public:
     ThreadPool& operator=(ThreadPool&& other) = delete;
 
 private:
-    template<typename Fn, typename... Args> using ReturnType = typename std::invoke_result_t<Fn, Args...>;
+    template<typename Fn, typename... Args> using ReturnType = std::invoke_result_t<Fn, Args...>;
 
     // NOLINTNEXTLINE(performance-unnecessary-value-param)
     template<typename Fn, typename... Args> std::future<ReturnType<Fn, Args...>> makeFuture(Fn f, Args&&... args)
@@ -84,15 +84,17 @@ private:
 
     // If the concurrent function returns a value, give the ResultsType class a std::vector _values
     // member, which contains the results from each thread
-    template<typename ResultsVectorOrVoid, bool = std::is_void_v<ResultsVectorOrVoid>>
+    template<typename ResultsVectorOrVoid>
     class ResultMember;
 
     template<typename ResultsVectorOrVoid>
-    class ResultMember<ResultsVectorOrVoid, true> {};
+    requires std::is_void_v<ResultsVectorOrVoid>
+    class ResultMember<ResultsVectorOrVoid> {};
 
     template<typename ResultsVectorOrVoid>
-    class ResultMember<ResultsVectorOrVoid, false>
-    {
+    requires (!std::is_void_v<ResultsVectorOrVoid>)
+    class ResultMember<ResultsVectorOrVoid>
+   {
     protected:
         mutable std::vector<ResultsVectorOrVoid> _values;
     };
@@ -116,7 +118,7 @@ private:
                 future.wait();
 
                 if constexpr(!std::is_void_v<ResultsVectorOrVoid>)
-                    this->_values.emplace_back(std::move(future.get()));
+                    this->_values.emplace_back(future.get());
             }
         }
 
@@ -124,14 +126,15 @@ private:
         class iterator
         {
         private:
-            template<typename T, bool = is_std_sequence_container_v<typename T::value_type>>
+            template<typename T>
             struct impl {};
 
             // If the concurrent function's return type is a sequence container, collapse its
             // values down, so that from the iterator user's point of view, they work with a single
             // homogenous sequence, rather than a vector of sequences
             template<typename T>
-            struct impl<T, true>
+            requires is_std_sequence_container_v<typename T::value_type>
+            struct impl<T>
             {
                 typename std::vector<T>::iterator _threadIt;
                 typename std::vector<T>::iterator _threadEndIt;
@@ -228,7 +231,8 @@ private:
             };
 
             template<typename T>
-            struct impl<T, false>
+            requires (!is_std_sequence_container_v<typename T::value_type>)
+            struct impl<T>
             {
                 typename std::vector<T>::iterator _threadIt;
                 typename std::vector<T>::iterator _threadEndIt;
@@ -298,7 +302,6 @@ private:
             impl<ResultsVectorOrVoid> _impl;
 
         public:
-            using self_type = iterator;
             using value_type = typename impl<ResultsVectorOrVoid>::value_type;
             using reference = value_type&;
             using pointer = value_type*;
@@ -309,15 +312,15 @@ private:
                 _impl(results->_values, end)
             {}
 
-            self_type& operator++()
+            iterator& operator++()
             {
                 _impl.increment();
                 return *this;
             }
 
-            self_type operator++(int)
+            iterator operator++(int)
             {
-                self_type i = *this;
+                iterator i = *this;
                 _impl.increment();
                 return i;
             }
@@ -327,8 +330,7 @@ private:
                 return _impl.valueReference();
             }
 
-            bool operator!=(const self_type& other) const { return !operator==(other); }
-            bool operator==(const self_type& other) const
+            bool operator==(const iterator& other) const
             {
                 return _impl == other._impl;
             }
@@ -342,15 +344,6 @@ private:
         requires (!std::is_void_v<T>)
         iterator end() { return iterator(this, true); }
     };
-
-    template<typename Fn> using FirstArgumentType =
-        typename function_traits<Fn>::template arg<0>::type;
-    template<typename Fn> using LastArgumentType =
-        typename function_traits<Fn>::template arg<function_traits<Fn>::arity - 1>::type;
-
-    template<typename Fn> static constexpr bool HasThreadIndexArgument =
-        function_traits<Fn>::arity == 2 &&
-        std::is_same_v<LastArgumentType<Fn>, size_t>;
 
     template<typename It, typename Fn>
     struct IteratorExecutor
@@ -382,7 +375,7 @@ private:
             values.reserve(static_cast<size_t>(std::distance(it, last)));
 
             for(; it != last; ++it)
-                values.emplace_back(std::move(IteratorExecutor<It, Fn>::execute(f, it, index)));
+                values.emplace_back(IteratorExecutor<It, Fn>::execute(f, it, index));
 
             return values;
         }
@@ -419,24 +412,23 @@ private:
         // When It->computeCostHint() does exist, we us it to hint how much computation
         // each element will cost, and balance the thread/work allocation accordingly
         // When there is no hinting available, each element is given equal weight
-        uint64_t total()
+        uint64_t total() const
         {
             if constexpr(requires(It it) { it->computeCostHint(); })
             {
                 uint64_t n = 0;
 
-                for(auto it = this->_first; it != this->_last; ++it)
+                for(auto it = _first; it != _last; ++it)
                     n += it->computeCostHint();
 
                 return n;
             }
             else
-                return static_cast<uint64_t>(std::distance(this->_first, this->_last));
+                return static_cast<uint64_t>(std::distance(_first, _last));
         }
 
-        uint64_t operator()(It it)
+        uint64_t operator()(It it) const
         {
-
             if constexpr(requires { it->computeCostHint(); })
                 return it->computeCostHint();
             else
@@ -467,24 +459,32 @@ public:
         return future;
     }
 
+    template<typename Fn> using FirstArgumentType =
+        typename function_traits<Fn>::template arg<0>::type;
+    template<typename Fn> using LastArgumentType =
+        typename function_traits<Fn>::template arg<function_traits<Fn>::arity - 1>::type;
+
+    template<typename Fn> static constexpr bool HasThreadIndexArgument =
+        function_traits<Fn>::arity == 2 &&
+        std::is_same_v<LastArgumentType<Fn>, size_t>;
+
     template<typename It, typename Fn>
+    requires
+    (
+        (std::is_convertible_v<FirstArgumentType<Fn>, It> ||
+            std::is_convertible_v<FirstArgumentType<Fn>, typename It::value_type>) &&
+        (function_traits<Fn>::arity == 1 || HasThreadIndexArgument<Fn>)
+    )
     auto parallel_for(It first, It last, Fn f, ResultsPolicy resultsPolicy = Blocking)
     {
         std::unique_lock<std::mutex> lock(_mutex);
 
-        Coster<It> coster(first, last);
+        const Coster<It> coster(first, last);
 
         const auto totalCost = coster.total(); Q_ASSERT(totalCost > 0);
         const auto numThreads = _threads.size();
         const auto costPerThread = totalCost / numThreads +
                 ((totalCost % numThreads) ? 1 : 0);
-
-        static_assert(std::is_convertible_v<FirstArgumentType<Fn>, It> ||
-            std::is_convertible_v<FirstArgumentType<Fn>, typename It::value_type>,
-            "Fn's argument must be an It or an It::value_type");
-
-        static_assert(function_traits<Fn>::arity == 1 || HasThreadIndexArgument<Fn>,
-            "Fn's (optional) second index argument must be size_t");
 
         std::vector<std::future<typename Executor<It, Fn>::ResultsVectorOrVoid>> futures;
         size_t threadIndex = 0;
@@ -515,8 +515,7 @@ public:
         }
 
         // Filter any futures that aren't valid (i.e. default constructed)
-        futures.erase(std::remove_if(futures.begin(), futures.end(),
-            [](const auto& future) { return !future.valid(); }), futures.end());
+        std::erase_if(futures, [](const auto& future) { return !future.valid(); });
 
         auto results = Results<It, Fn>(std::move(futures));
 
