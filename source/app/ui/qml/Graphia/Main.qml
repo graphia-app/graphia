@@ -2166,8 +2166,8 @@ ApplicationWindow
                     {
                         required property string modelData
 
-                        text: mainWindow.currentTab.document.attributeDisplayName(modelData)
-                        onTriggered: { mainWindow.currentTab.selectBySharedAttributeValue(modelData); }
+                        text: mainWindow.currentTab?.document.attributeDisplayName(modelData)
+                        onTriggered: { mainWindow.currentTab?.selectBySharedAttributeValue(modelData); }
                     }
                     onObjectAdded: (index, object) => { sharedValuesMenu.insertItem(index, object); }
                     onObjectRemoved: (index, object) => { sharedValuesMenu.removeItem(object); }
