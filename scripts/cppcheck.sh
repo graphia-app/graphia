@@ -36,10 +36,12 @@ then
 fi
 
 ${CPPCHECK} --version
-${CPPCHECK} --check-config ${SYSTEM_INCLUDE_DIRS} ${INCLUDE_DIRS} ${DEFINES} ${CPP_FILES}
+${CPPCHECK} --check-config ${INCLUDE_DIRS} ${DEFINES} ${CPP_FILES}
 ${CPPCHECK} --enable=all --xml \
   --suppress=*:*/source/thirdparty/* \
+  --suppress=missingIncludeSystem \
+  --suppress=missingInclude \
   --inline-suppr \
   --library=${SOURCE_DIR}/scripts/cppcheck.cfg \
-  ${SYSTEM_INCLUDE_DIRS} ${INCLUDE_DIRS} ${DEFINES} \
+  ${INCLUDE_DIRS} ${DEFINES} \
   ${CPP_FILES} 2>&1 | tee cppcheck-${VERSION}.log
