@@ -63,7 +63,7 @@ SYSTEM_INCLUDE_DIRS=$(cat ${BUILD_DIR}/compile_commands.json | \
 DEFINES=$(cat ${BUILD_DIR}/compile_commands.json | \
     jq '.[].command' | grep -oP '(?<= -D) *.*?(?= -\D)' | \
     sort | uniq | \
-    sed -e 's/\\//g' |
+    sed -e 's/\\\\\\"/\\"/g' |
     sed -e 's/\(.*\)/-D\1/')
 
 echo -e "export CPP_FILES=\"${CPP_FILES}\"\n" >> ${BUILD_DIR}/variables.sh
