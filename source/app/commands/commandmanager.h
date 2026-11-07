@@ -70,7 +70,9 @@ public:
     bool canRedo() const;
 
     int commandProgress() const { return _commandProgress; }
+    // cppcheck-suppress returnByReference
     QString commandPhase() const { return _commandPhase; }
+    // cppcheck-suppress returnByReference
     QString commandVerb() const { return _commandVerb; }
     bool commandIsCancellable() const;
     bool commandIsCancelling() const { return _cancelling; }

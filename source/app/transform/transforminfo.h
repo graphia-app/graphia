@@ -38,7 +38,7 @@ public:
         _alerts.emplace_back(std::forward<Args>(args)...);
     }
 
-    auto alerts() const { return _alerts; }
+    const auto& alerts() const { return _alerts; }
 };
 
 using TransformInfosMap = std::map<int, TransformInfo>;

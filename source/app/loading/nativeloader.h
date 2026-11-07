@@ -79,7 +79,9 @@ public:
     bool parse(const QUrl& url, IGraphModel* igraphModel) override;
     void setPluginInstance(IPluginInstance* pluginInstance);
 
+    // cppcheck-suppress returnByReference
     QStringList transforms() const { return _transforms; }
+    // cppcheck-suppress returnByReference
     QStringList visualisations() const { return _visualisations; }
     const auto& bookmarks() const { return _bookmarks; }
     QString log() const override { return _log; }
@@ -90,8 +92,9 @@ public:
     const QByteArray& pluginUiData() const { return _pluginUiData; }
     int pluginUiDataVersion() const { return _pluginUiDataVersion; }
 
+    // cppcheck-suppress returnByReference
     QString layoutName() const { return _layoutName; }
-    auto layoutSettings() const { return _layoutSettings; }
+    const auto& layoutSettings() const { return _layoutSettings; }
     const ExactNodePositions* nodePositions() const;
     bool layoutPaused() const { return _layoutPaused; }
 

@@ -76,11 +76,15 @@ public:
     int rowFromAttributeSets(const QString& attributeA, const QString& attributeB) const;
     QHash<int, QByteArray> roleNames() const override;
 
+    // cppcheck-suppress returnByReference
     QString selectionA() const { return _selectionA; }
     void setSelectionA(const QString& selectionA);
+    // cppcheck-suppress returnByReference
     QString selectionB() const { return _selectionB; }
     void setSelectionB(const QString& selectionB);
+    // cppcheck-suppress returnByReference
     QString selectionADisplayName() const { return _selectionADisplayName; }
+    // cppcheck-suppress returnByReference
     QString selectionBDisplayName() const { return _selectionBDisplayName; }
 
     void setTableData(Table data, QString selectionA, QString selectionB);

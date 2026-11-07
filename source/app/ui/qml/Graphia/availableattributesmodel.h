@@ -67,6 +67,7 @@ private:
         int row() const;
         Item* parent() const;
         bool hasAncestor(Item* potentialAncestor) const;
+        // cppcheck-suppress returnByReference
         QString attributeName() const;
     };
 

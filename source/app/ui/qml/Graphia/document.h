@@ -217,10 +217,12 @@ public:
     void setTitle(const QString& title);
     void setStatus(const QString& status);
 
+    // cppcheck-suppress returnByReference
     QStringList transforms() const { return _graphTransforms; }
     QStringList graphTransformConfigurationsFromUI() const;
     void setTransforms(const QStringList& transforms);
 
+    // cppcheck-suppress returnByReference
     QStringList visualisations() const { return _visualisations; }
     void setVisualisations(const QStringList& visualisations);
     void refreshVisualisations();

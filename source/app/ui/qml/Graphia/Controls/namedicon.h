@@ -41,6 +41,7 @@ public:
 
     void paint(QPainter *painter) override;
 
+    // cppcheck-suppress returnByReference
     QString iconName() const { return _iconName; }
     void setIconName(const QString& iconName);
     bool valid() const { return !_icon.isNull(); }

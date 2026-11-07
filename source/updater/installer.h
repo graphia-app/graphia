@@ -63,6 +63,7 @@ public:
     bool busy() const { return _busy; }
     bool complete() const { return _complete; }
     bool success() const { return _success; }
+    // cppcheck-suppress returnByReference
     QString error() const { return _error; }
 
 signals:

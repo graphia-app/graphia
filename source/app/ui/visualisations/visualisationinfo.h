@@ -49,7 +49,7 @@ public:
         _alerts.emplace_back(std::forward<Args>(args)...);
     }
 
-    auto alerts() const { return _alerts; }
+    const auto& alerts() const { return _alerts; }
 
     const u::Statistics& statistics() const { return _statistics; }
     void setStatistics(const u::Statistics& statistics) { _statistics = statistics; }
@@ -61,7 +61,7 @@ public:
     double mappedMaximum() const { return _mappedMaximum; }
 
     void addStringValue(const QString& value) { _stringValues.emplace_back(value); }
-    auto stringValues() const { return _stringValues; }
+    const auto& stringValues() const { return _stringValues; }
 
     void setNumApplications(size_t numApplications) { _numApplications = numApplications; }
     size_t numApplications() const { return _numApplications; }

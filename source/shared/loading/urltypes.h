@@ -45,6 +45,7 @@ private:
 
         const QString& individualDescription() const { return _individualDescription; }
         const QString& collectiveDescription() const { return _collectiveDescription; }
+        // cppcheck-suppress returnByReference
         QStringList extensions() const { return _extensions; }
 
     private:

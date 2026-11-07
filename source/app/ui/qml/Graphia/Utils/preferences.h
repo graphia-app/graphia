@@ -103,6 +103,7 @@ class Preferences : public QObject, public QQmlParserStatus
 public:
     explicit Preferences(QObject* parent = nullptr);
 
+    // cppcheck-suppress returnByReference
     QString section() const;
     void setSection(const QString& section);
 

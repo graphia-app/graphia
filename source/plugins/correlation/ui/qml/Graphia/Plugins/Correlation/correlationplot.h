@@ -256,6 +256,7 @@ public:
     Q_INVOKABLE void hideColumnAnnotations(const QStringList& annotations);
     Q_INVOKABLE void refreshColumnAnnotations();
 
+    // cppcheck-suppress returnByReference
     QList<int> selectedRows() const { return _selectedRows; }
     Q_INVOKABLE void setSelectedRows(const QList<int>& selectedRows);
     void setScaleType(int scaleType);

@@ -38,9 +38,11 @@ public:
         _valueType(valueType), _description(description)
     {}
 
+    // cppcheck-suppress returnByReference
     QString name() const { return _name; }
     ElementType elementType() const { return _elementType; }
     ValueType valueType() const { return _valueType; }
+    // cppcheck-suppress returnByReference
     QString description() const { return _description; }
 
 private:

@@ -358,7 +358,7 @@ void GraphRenderer::updateGPUDataIfRequired()
             }
         }
 
-        for(auto& edge : componentRenderer->edges())
+        for(const auto& edge : componentRenderer->edges())
         {
             if(_hiddenEdges.get(edge->id()) || _hiddenNodes.get(edge->sourceId()) || _hiddenNodes.get(edge->targetId()))
                 continue;

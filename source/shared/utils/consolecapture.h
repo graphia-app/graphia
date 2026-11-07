@@ -37,6 +37,7 @@ public:
     virtual ~IConsoleCapture() = default;
 
     virtual void close() {}
+    // cppcheck-suppress returnByReference
     QString filename() const;
 };
 

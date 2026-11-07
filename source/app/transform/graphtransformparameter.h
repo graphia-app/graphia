@@ -35,9 +35,11 @@ public:
     GraphTransformParameter() = default;
     explicit GraphTransformParameter(const QString& name) : _name(name) {}
 
+    // cppcheck-suppress returnByReference
     QString name() const { return _name; }
     QString displayName() const { return !_displayName.isEmpty() ? _displayName : _name; }
     ValueType type() const { return _type; }
+    // cppcheck-suppress returnByReference
     QString description() const { return _description; }
 
     GraphTransformParameter& setName(const QString& name) { _name = name; return *this; }
@@ -49,6 +51,7 @@ public:
     GraphTransformParameter& setInitialValue(const QVariant& initialValue) { _initialValue = initialValue; return *this; }
 
     // For a choice from a list, the text shown for each of the values in the initial value
+    // cppcheck-suppress returnByReference
     QStringList displayValues() const { return _displayValues; }
     GraphTransformParameter& setDisplayValues(const QStringList& displayValues) { _displayValues = displayValues; return *this; }
 
@@ -65,6 +68,7 @@ public:
     GraphTransformParameter& setMax(double max) { _max = max; return *this; }
     GraphTransformParameter& setRange(double min, double max) { _min = min; _max = max; return *this; }
 
+    // cppcheck-suppress returnByReference
     QString validatorRegex() const { return _validatorRegex; }
     GraphTransformParameter& setValidatorRegex(const QString& validatorRegex) { _validatorRegex = validatorRegex; return *this; }
 

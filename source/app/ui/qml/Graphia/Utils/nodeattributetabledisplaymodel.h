@@ -105,6 +105,7 @@ private:
     QVariantList sourceRowsAsVariantList() const;
     int numRows() const { return rowCount(); }
 
+    // cppcheck-suppress returnByReference
     QList<int> selectedRows() const { return _selectedRows; }
 
     template<typename Fn> void changeSelection(const Fn& fn);

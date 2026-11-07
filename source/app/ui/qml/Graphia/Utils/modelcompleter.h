@@ -44,7 +44,9 @@ private:
     QString _commonPrefix;
     QModelIndex _closestMatch;
 
+    // cppcheck-suppress returnByReference
     auto candidates() const { return _candidates; }
+    // cppcheck-suppress returnByReference
     auto commonPrefix() const { return _commonPrefix; }
     auto closestMatch() const { return _closestMatch; }
 

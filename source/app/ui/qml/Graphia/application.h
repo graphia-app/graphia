@@ -304,6 +304,7 @@ private:
     void collectAttributeDeclarations();
     QString attributeDisplayName(const QString& name, const IPlugin* plugin) const;
 
+    // cppcheck-suppress returnByReference
     QStringList nameFilters() const { return _nameFilters; }
     QStringListModel* loadableExtensions() { return &_loadableExtensions; }
     QStringListModel* ambiguousExtensions() { return &_ambiguousExtensions; }
