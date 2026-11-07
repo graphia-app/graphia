@@ -67,12 +67,13 @@ void NamedIcon::paint(QPainter* painter)
 
 void NamedIcon::setIconName(const QString& iconName)
 {
-    const bool wasValid = valid();
+    auto icon = QIcon::fromTheme(iconName);
+    const bool validityChanged = icon.isNull() != _icon.isNull();
 
     _iconName = iconName;
-    _icon = QIcon::fromTheme(iconName);
+    _icon = std::move(icon);
 
-    if(wasValid != valid())
+    if(validityChanged)
         emit validChanged();
 
     emit iconNameChanged();

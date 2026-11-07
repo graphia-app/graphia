@@ -459,7 +459,7 @@ struct DotGraph
 };
 } // namespace grammar
 
-static bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graphModel,
+static void build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graphModel,
     IUserNodeData& userNodeData, IUserEdgeData& userEdgeData)
 {
     std::map<QString, NodeId> dotNodeToNodeId;
@@ -635,8 +635,6 @@ static bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graph
     processStatementList(dot._statementList);
 
     parser.setProgress(-1);
-
-    return true;
 }
 
 } // namespace LexyDotParser
@@ -711,6 +709,8 @@ bool DotFileParser::parse(const QUrl& url, IGraphModel* graphModel)
     setPhase(QObject::tr("Building Graph"));
     setProgress(-1);
 
-    return LexyDotParser::build(*this, result.value(), *graphModel,
+    LexyDotParser::build(*this, result.value(), *graphModel,
         *_userNodeData, *_userEdgeData);
+
+    return true;
 }

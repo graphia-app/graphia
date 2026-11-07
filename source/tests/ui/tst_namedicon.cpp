@@ -26,6 +26,7 @@
 #include <QPainter>
 #include <QQuickWindow>
 #include <QScreen>
+#include <QSignalSpy>
 #include <QSize>
 #include <QString>
 #include <QTest>
@@ -112,6 +113,29 @@ private slots:
         expectedPainter.end();
 
         QCOMPARE(painted, expected);
+    }
+
+    void emitsValidChangedOnlyWhenValidityChanges()
+    {
+        NamedIcon namedIcon;
+        const QSignalSpy spy(&namedIcon, &NamedIcon::validChanged);
+        QVERIFY(!namedIcon.valid());
+
+        namedIcon.setIconName(u"document-open"_s);
+        QVERIFY(namedIcon.valid());
+        QCOMPARE(spy.count(), 1);
+
+        namedIcon.setIconName(u"document-save"_s);
+        QVERIFY(namedIcon.valid());
+        QCOMPARE(spy.count(), 1);
+
+        namedIcon.setIconName(u"no-such-icon"_s);
+        QVERIFY(!namedIcon.valid());
+        QCOMPARE(spy.count(), 2);
+
+        namedIcon.setIconName(u"another-missing-icon"_s);
+        QVERIFY(!namedIcon.valid());
+        QCOMPARE(spy.count(), 2);
     }
 };
 

@@ -43,12 +43,12 @@ ThreadPool::ThreadPool(const QString& threadNamePrefix, unsigned int numThreads)
 
             while(!_stop)
             {
-                while(_tasks.empty() && !_stop)
+                if(_tasks.empty())
                 {
                     u::setCurrentThreadName(u"%1 (idle)"_s.arg(threadName));
 
                     // Block until a new task is queued
-                    _waitForNewTask.wait(lock);
+                    _waitForNewTask.wait(lock, [this] { return !_tasks.empty() || _stop; });
                 }
 
                 if(_stop)
