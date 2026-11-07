@@ -353,15 +353,14 @@ private:
         {
             if constexpr(requires { f(it, index); })
                 return f(it, index);
-
-            if constexpr(requires { f(*it, index); })
+            else if constexpr(requires { f(*it, index); })
                 return f(*it, index);
-
-            if constexpr(requires { f(it); })
+            else if constexpr(requires { f(it); })
                 return f(it);
-
-            if constexpr(requires { f(*it); })
+            else if constexpr(requires { f(*it); })
                 return f(*it);
+            else
+                static_assert(false, "Fn must take an iterator or an element, optionally followed by an index");
         }
     };
 

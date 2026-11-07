@@ -85,6 +85,8 @@ private:
             _di = (_di + 1) % vs.size();
             return vs.at(_di);
         }
+        else
+            static_assert(false, "NumDimensions must be 2 or 3");
     }
 
     float _theta = 0.8f;

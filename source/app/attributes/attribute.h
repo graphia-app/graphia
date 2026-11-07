@@ -411,12 +411,12 @@ public:
     {
         if constexpr(std::is_same_v<E, NodeId>)
             return elementType() == ElementType::Node;
-
-        if constexpr(std::is_same_v<E, EdgeId>)
+        else if constexpr(std::is_same_v<E, EdgeId>)
             return elementType() == ElementType::Edge;
-
-        if constexpr(std::is_same_v<E, const IGraphComponent&>)
+        else if constexpr(std::is_same_v<E, const IGraphComponent&>)
             return elementType() == ElementType::Component;
+        else
+            static_assert(false, "E must be NodeId, EdgeId or const IGraphComponent&");
     }
 
     template<typename T>
