@@ -515,6 +515,7 @@ void CorrelationPluginInstance::setDimensions(size_t numContinuousColumns, size_
 {
     Q_ASSERT(_dataColumnNames.empty());
     Q_ASSERT(_userColumnData.empty());
+    // cppcheck-suppress assertWithSideEffect
     Q_ASSERT(_graphModel->userNodeData().numUserDataVectors() == 0);
 
     _numContinuousColumns = numContinuousColumns;
