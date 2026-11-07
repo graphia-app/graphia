@@ -44,6 +44,8 @@ ${CPPCHECK} --enable=all --xml \
   --suppress=missingInclude \
   --suppress=postfixOperator \
   --suppress=functionStatic \
+  --suppress=unusedFunction \
+  --suppress=shadowFunction \
   --inline-suppr \
   -i ${SOURCE_DIR}/source/tests/ \
   --library=qt \
