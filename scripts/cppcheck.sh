@@ -50,5 +50,5 @@ ${CPPCHECK} --enable=all --xml \
   --inline-suppr \
   -i ${SOURCE_DIR}/source/tests/ \
   --library=qt \
-  ${INCLUDE_DIRS} ${DEFINES} \
+  ${INCLUDE_DIRS} ${DEFINES} -D__linux__ \
   ${CPP_FILES} 2>&1 | tee cppcheck-${VERSION}.log
