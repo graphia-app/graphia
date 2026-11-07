@@ -66,7 +66,6 @@ private:
     {
         _tabularData.reset();
 
-        uint64_t progress = 0;
         setProgress(-1);
 
         if(v->class_type == MAT_C_SPARSE)
@@ -107,6 +106,7 @@ private:
             const size_t numRows = v->dims[0];
             const size_t numColumns = v->dims[1];
             auto totalIterations = static_cast<uint64_t>(numColumns * numRows);
+            uint64_t progress = 0;
 
             _tabularData.reserve(numColumns, numRows);
 
