@@ -63,7 +63,6 @@ public:
             .arg(u::redirectLink("pagerank", QObject::tr("PageRank")));
     }
     Category category() const override { return Category::Metrics; }
-    ElementType elementType() const override { return ElementType::None; }
     DefaultVisualisations defaultVisualisations() const override
     {
         return

@@ -59,7 +59,6 @@ public:
             "that pass through the node.").arg(u::redirectLink("betweenness", QObject::tr("Betweenness Centrality")));
     }
     Category category() const override { return Category::Metrics; }
-    ElementType elementType() const override { return ElementType::None; }
     DefaultVisualisations defaultVisualisations() const override
     {
         return

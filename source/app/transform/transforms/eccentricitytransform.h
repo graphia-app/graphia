@@ -57,7 +57,6 @@ public:
             "This is a measure of a node's position within the overall graph structure.");
     }
     Category category() const override { return Category::Metrics; }
-    ElementType elementType() const override { return ElementType::None; }
     DefaultVisualisations defaultVisualisations() const override
     {
         return
