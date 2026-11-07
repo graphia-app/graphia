@@ -718,6 +718,7 @@ void Application::crash(int crashType)
     case CrashType::StdException:
     {
         std::vector<int> v;
+        // cppcheck-suppress containerOutOfBounds
         auto unused = v.at(10000);
         Q_UNUSED(unused);
         break;
