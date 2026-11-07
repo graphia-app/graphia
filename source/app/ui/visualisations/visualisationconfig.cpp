@@ -29,6 +29,7 @@
 #include <QObject>
 #include <QVariantList>
 
+#include <algorithm>
 #include <map>
 
 using namespace Qt::Literals::StringLiterals;
@@ -144,11 +145,9 @@ QString VisualisationConfig::asString(NamedBool<"forDisplay"> forDisplay, const 
 
 QString VisualisationConfig::parameterValue(const QString& name) const
 {
-    for(const auto& parameter : _parameters)
-    {
-        if(parameter._name == name)
-            return parameter.valueAsString();
-    }
+    auto parameter = std::ranges::find(_parameters, name, &Parameter::_name);
+    if(parameter != _parameters.end())
+        return parameter->valueAsString();
 
     return {};
 }

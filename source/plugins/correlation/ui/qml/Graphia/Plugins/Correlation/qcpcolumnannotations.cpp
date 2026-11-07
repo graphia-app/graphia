@@ -131,13 +131,10 @@ const QCPColumnAnnotations::Rect* QCPColumnAnnotations::rectAt(size_t x, const C
 
     const auto& rects = _rects.at(name);
 
-    for(const auto& rect: rects)
-    {
-        if(x >= rect._x && x < (rect._x + rect._width))
-            return &rect;
-    }
+    auto rect = std::ranges::find_if(rects, [x](const auto& candidate)
+        { return x >= candidate._x && x < (candidate._x + candidate._width); });
 
-    return nullptr;
+    return rect != rects.end() ? &*rect : nullptr;
 }
 
 int QCPColumnAnnotations::widthForValue(const QCPPainter* painter, const QString& value)

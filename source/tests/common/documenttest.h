@@ -40,6 +40,7 @@
 #include <QVariant>
 #include <QVariantMap>
 
+#include <algorithm>
 #include <memory>
 
 // A base for tests of a Document, as the UI uses it, but with a GraphDisplay that isn't
@@ -137,13 +138,10 @@ protected:
 
     NodeId nodeId(const QString& name)
     {
-        for(auto nodeId : graphModel()->mutableGraph().nodeIds())
-        {
-            if(graphModel()->nodeName(nodeId) == name)
-                return nodeId;
-        }
+        const auto& nodeIds = graphModel()->mutableGraph().nodeIds();
+        auto nodeId = std::ranges::find_if(nodeIds, [&](NodeId candidate) { return graphModel()->nodeName(candidate) == name; });
 
-        return {};
+        return nodeId != nodeIds.end() ? *nodeId : NodeId{};
     }
 
     // The names of the selected nodes, sorted

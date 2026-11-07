@@ -139,12 +139,8 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(
 
             auto n = graphModel->graph().numNodes();
 
-            size_t selectedInCategory = 0;
-            for(auto nodeId : selectedNodes)
-            {
-                if(attributeB->stringValueOf(nodeId) == attributeValueB)
-                    selectedInCategory++;
-            }
+            auto selectedInCategory = static_cast<size_t>(std::ranges::count_if(selectedNodes,
+                [&](NodeId nodeId) { return attributeB->stringValueOf(nodeId) == attributeValueB; }));
 
             auto r1 = attributeValueEntryCountBTotal[attributeValueB];
             auto fexp = static_cast<double>(r1) / static_cast<double>(n);

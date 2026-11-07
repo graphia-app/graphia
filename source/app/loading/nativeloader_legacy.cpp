@@ -81,7 +81,7 @@ static void mergeUserData(const json& jsonFrom, json& jsonTo)
         for(const auto& jsonId : (*jsonUserData)[idsKeyFor(*jsonUserData)])
         {
             if(indexes.emplace(jsonId.get<int>(), indexes.size()).second)
-                jsonIds.push_back(jsonId);
+                jsonIds.push_back(jsonId); // cppcheck-suppress useStlAlgorithm
         }
     }
 

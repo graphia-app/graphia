@@ -26,6 +26,8 @@
 
 #include <utility>
 #include <array>
+#include <algorithm>
+#include <iterator>
 
 //#define EXPENSIVE_DEBUG_CHECKS
 
@@ -275,12 +277,7 @@ void SelectionManager::setNodesMask(const NodeIdSet& nodeIds, NamedBool<"applyMa
         if(applyMask)
         {
             std::vector<NodeId> nodeIdsToDeselect;
-
-            for(const auto& selectedNodeId : _selectedNodeIds)
-            {
-                if(!u::contains(_nodeIdsMask, selectedNodeId))
-                    nodeIdsToDeselect.emplace_back(selectedNodeId);
-            }
+            std::ranges::set_difference(_selectedNodeIds, _nodeIdsMask, std::back_inserter(nodeIdsToDeselect));
 
             deselectNodes(nodeIdsToDeselect);
         }

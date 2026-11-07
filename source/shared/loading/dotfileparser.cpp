@@ -525,7 +525,7 @@ static bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graph
             for(const auto& node : processStatement(s))
             {
                 if(nodesSeen.insert(node).second)
-                    nodes.emplace_back(node);
+                    nodes.emplace_back(node); // cppcheck-suppress useStlAlgorithm
             }
 
             parser.setProgress(static_cast<int>((i++ * 100) / l.size()));
@@ -584,17 +584,17 @@ static bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graph
 
                     sourceNodeIds.reserve(sourceNodes.size());
                     for(const auto& node : sourceNodes)
-                        sourceNodeIds.emplace_back(addNode(node));
+                        sourceNodeIds.emplace_back(addNode(node)); // cppcheck-suppress useStlAlgorithm
 
                     targetNodeIds.reserve(targetNodes.size());
                     for(const auto& node : targetNodes)
-                        targetNodeIds.emplace_back(addNode(node));
+                        targetNodeIds.emplace_back(addNode(node)); // cppcheck-suppress useStlAlgorithm
 
                     for(auto sourceNodeId : sourceNodeIds)
                     {
                         for(auto targetNodeId : targetNodeIds)
                         {
-                            addedEdgeIds.emplace_back(addEdge(sourceNodeId, targetNodeId));
+                            addedEdgeIds.emplace_back(addEdge(sourceNodeId, targetNodeId)); // cppcheck-suppress useStlAlgorithm
                         }
                     }
 

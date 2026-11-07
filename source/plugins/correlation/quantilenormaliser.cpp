@@ -67,11 +67,10 @@ bool QuantileNormaliser::process(ContinuousDataVectors& dataRows, IParser* parse
     // Populate row means
     for(size_t row = 0; row < rowMeans.size(); row++)
     {
-        double meanValue = 0.0;
-        for(size_t column = 0; column < numColumns; column++)
-            meanValue += sortedColumnValues[column][row];
+        const double rowSum = std::accumulate(sortedColumnValues.begin(), sortedColumnValues.end(), 0.0,
+            [row](double sum, const auto& columnValues) { return sum + columnValues[row]; });
 
-        rowMeans[row] = meanValue / static_cast<double>(numColumns);
+        rowMeans[row] = rowSum / static_cast<double>(numColumns);
     }
 
     // So that the mean of a range of row means can be found quickly

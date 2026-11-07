@@ -398,9 +398,8 @@ private:
         if(progressable != nullptr)
             progressable->setProgress(-1);
 
-        uint64_t totalCost = 0;
-        for(const auto& vector : vectors)
-            totalCost += vector.computeCostHint();
+        auto totalCost = std::accumulate(vectors.begin(), vectors.end(), uint64_t{0},
+            [](uint64_t sum, const auto& vector) { return sum + vector.computeCostHint(); });
 
         using FM = FilterMethod<TokenisedDataVectors>;
         FM filterMethod(vectors, parameters);

@@ -358,11 +358,11 @@ QStringList Application::urlTypesFor(const QString& extension) const
 
 QString Application::descriptionForUrlType(const QString& urlType) const
 {
-    for(const auto& loadedPlugin : _loadedPlugins)
-    {
-        if(u::contains(loadedPlugin._interface->loadableUrlTypeNames(), urlType))
-            return loadedPlugin._interface->collectiveDescriptionForUrlTypeName(urlType);
-    }
+    auto loadedPlugin = std::ranges::find_if(_loadedPlugins, [&urlType](const auto& candidate)
+        { return u::contains(candidate._interface->loadableUrlTypeNames(), urlType); });
+
+    if(loadedPlugin != _loadedPlugins.end())
+        return loadedPlugin->_interface->collectiveDescriptionForUrlTypeName(urlType);
 
     return {};
 }

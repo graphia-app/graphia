@@ -654,6 +654,7 @@ GPUGraphData* GraphRendererCore::gpuGraphDataForAlpha(float componentAlpha, floa
 {
     for(auto& gpuGraphData : _gpuGraphData)
     {
+        // cppcheck-suppress useStlAlgorithm
         if(qFuzzyCompare(gpuGraphData._componentAlpha, componentAlpha) && qFuzzyCompare(gpuGraphData._unhighlightAlpha, unhighlightAlpha))
             return &gpuGraphData;
     }
@@ -661,7 +662,7 @@ GPUGraphData* GraphRendererCore::gpuGraphDataForAlpha(float componentAlpha, floa
     for(auto& gpuGraphData : _gpuGraphData)
     {
         if(gpuGraphData.unused())
-        {
+        { // cppcheck-suppress useStlAlgorithm
             gpuGraphData._componentAlpha = componentAlpha;
             gpuGraphData._unhighlightAlpha = unhighlightAlpha;
             return &gpuGraphData;
@@ -679,6 +680,7 @@ GPUGraphData* GraphRendererCore::gpuGraphDataForOverlay(float alpha)
 {
     for(auto& gpuGraphData : _gpuGraphData)
     {
+        // cppcheck-suppress useStlAlgorithm
         if(gpuGraphData._isOverlay && qFuzzyCompare(gpuGraphData._componentAlpha, alpha))
             return &gpuGraphData;
     }
@@ -686,7 +688,7 @@ GPUGraphData* GraphRendererCore::gpuGraphDataForOverlay(float alpha)
     for(auto& gpuGraphData : _gpuGraphData)
     {
         if(gpuGraphData.unused())
-        {
+        { // cppcheck-suppress useStlAlgorithm
             gpuGraphData._componentAlpha = alpha;
             gpuGraphData._unhighlightAlpha = 1.0f;
             gpuGraphData._isOverlay = true;

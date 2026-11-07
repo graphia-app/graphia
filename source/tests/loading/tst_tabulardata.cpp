@@ -35,6 +35,8 @@
 #include <QTemporaryDir>
 #include <QUrl>
 
+#include <algorithm>
+#include <iterator>
 #include <memory>
 #include <vector>
 
@@ -401,8 +403,7 @@ private slots:
         const auto columnTypeIdentities = tabularData.columnTypeIdentities();
         std::vector<Type> columnTypes;
         columnTypes.reserve(columnTypeIdentities.size());
-        for(const auto& identity : columnTypeIdentities)
-            columnTypes.push_back(identity.type());
+        std::ranges::transform(columnTypeIdentities, std::back_inserter(columnTypes), &TypeIdentity::type);
 
         QCOMPARE(columnTypes, (std::vector<Type>{Type::String, Type::Int, Type::Float,
             Type::String, Type::Unknown, Type::String}));
@@ -414,8 +415,7 @@ private slots:
         const auto rowTypeIdentities = tabularData.rowTypeIdentities();
         std::vector<Type> rowTypes;
         rowTypes.reserve(rowTypeIdentities.size());
-        for(const auto& identity : rowTypeIdentities)
-            rowTypes.push_back(identity.type());
+        std::ranges::transform(rowTypeIdentities, std::back_inserter(rowTypes), &TypeIdentity::type);
 
         QCOMPARE(rowTypes, (std::vector<Type>{Type::String, Type::String, Type::String, Type::Float}));
         QCOMPARE(tabularData.rowTypeIdentity(1, 4).type(), Type::Int);

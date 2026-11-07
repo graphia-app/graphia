@@ -27,8 +27,8 @@
 #include <QDebug>
 
 #include <cstddef>
+#include <numeric>
 #include <string>
-#include <utility>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -155,8 +155,8 @@ QColor ColorPalette::get(const QString& value, int index) const
         }
 
         // Add the unicode values of each non-digit character to the total
-        for(const auto& c : std::as_const(nonDigitValue))
-            index += c.unicode();
+        index = std::accumulate(nonDigitValue.cbegin(), nonDigitValue.cend(), index,
+            [](int sum, QChar c) { return sum + c.unicode(); });
     }
 
     if(!_colors.empty())

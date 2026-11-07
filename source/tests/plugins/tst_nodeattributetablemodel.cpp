@@ -40,6 +40,7 @@
 #include <QVariant>
 
 #include <algorithm>
+#include <iterator>
 #include <memory>
 #include <vector>
 
@@ -137,8 +138,7 @@ class TestNodeAttributeTableModel : public QObject
     {
         std::vector<int> result;
         result.reserve(static_cast<size_t>(nodeNames.size()));
-        for(const auto& nodeName : nodeNames)
-            result.push_back(rowFor(nodeName));
+        std::ranges::transform(nodeNames, std::back_inserter(result), [this](const QString& nodeName) { return rowFor(nodeName); });
 
         std::ranges::sort(result);
         return result;

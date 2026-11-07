@@ -140,8 +140,7 @@ void CorrelationFileParser::clipValues(ClippingType clippingType, double clippin
     switch(clippingType)
     {
     case ClippingType::Constant:
-        for(auto& value : data)
-            value = std::min(value, clippingValue);
+        std::ranges::replace_if(data, [clippingValue](double value) { return value > clippingValue; }, clippingValue);
         break;
 
     case ClippingType::Winsorization:

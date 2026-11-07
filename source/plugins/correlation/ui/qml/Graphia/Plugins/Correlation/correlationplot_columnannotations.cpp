@@ -141,8 +141,8 @@ QCPAxis* CorrelationPlot::configureColumnAnnotations(QCPAxisRect* axisRect)
     if(_groupByAnnotation)
     {
         indices.reserve(_annotationGroupMap.size());
-        for(const auto& columnMap : _annotationGroupMap)
-            indices.push_back(columnMap.front());
+        std::ranges::transform(_annotationGroupMap, std::back_inserter(indices),
+            [](const auto& columnMap) { return columnMap.front(); });
     }
     else
         indices = _sortMap;
@@ -558,10 +558,7 @@ void CorrelationPlot::onClickColumnAnnotation(const QCPAxisRect* axisRect, const
         for(size_t i = rect->_x; i < rect->_x + rect->_width; i++)
         {
             if(_groupByAnnotation)
-            {
-                for(auto j : _annotationGroupMap.at(i))
-                    indices.push_back(j);
-            }
+                u::append(indices, _annotationGroupMap.at(i));
             else
                 indices.push_back(_sortMap.at(i));
         }

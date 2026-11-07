@@ -50,6 +50,7 @@
 #include <cmath>
 #include <cstdint>
 #include <iterator>
+#include <numeric>
 #include <set>
 #include <utility>
 
@@ -930,8 +931,8 @@ std::vector<size_t> CorrelationPluginInstance::rowsForGraph() const
     std::vector<size_t> rows;
     rows.reserve(_graphModel->graph().numNodes());
 
-    for(auto nodeId : _graphModel->graph().nodeIds())
-        rows.push_back(_graphModel->userNodeData().indexFor(nodeId));
+    std::ranges::transform(_graphModel->graph().nodeIds(), std::back_inserter(rows),
+        [this](NodeId nodeId) { return _graphModel->userNodeData().indexFor(nodeId); });
 
     return rows;
 }
@@ -994,9 +995,8 @@ std::vector<int> CorrelationPluginInstance::rowsOfInterestByColumns(const std::v
     {
         const auto& dataRow = _continuousDataRows.at(static_cast<size_t>(row));
 
-        double columnsSum = 0.0;
-        for(auto column : columns)
-            columnsSum += dataRow.valueAt(static_cast<size_t>(column));
+        const double columnsSum = std::accumulate(columns.begin(), columns.end(), 0.0,
+            [&dataRow](double sum, auto column) { return sum + dataRow.valueAt(static_cast<size_t>(column)); });
 
         const double otherColumnsSum = dataRow.sum() - columnsSum;
 
@@ -1024,8 +1024,7 @@ std::vector<int> CorrelationPluginInstance::rowsOfInterestByColumns(const std::v
 
     std::vector<int> outRows;
     outRows.reserve(rowScores.size());
-    for(const auto& rowMean : rowScores)
-        outRows.push_back(rowMean._row);
+    std::ranges::transform(rowScores, std::back_inserter(outRows), &RowScore::_row);
 
     return outRows;
 }

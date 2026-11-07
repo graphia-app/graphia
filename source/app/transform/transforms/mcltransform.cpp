@@ -38,6 +38,7 @@
 #include <cstdint>
 #include <iterator>
 #include <limits>
+#include <numeric>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -481,9 +482,8 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target)
         if(cancelled())
             return;
 
-        size_t newNNZCount = 0;
-        for(const auto& column : matrixStorage)
-            newNNZCount += column.size();
+        auto newNNZCount = std::accumulate(matrixStorage.begin(), matrixStorage.end(), size_t{0},
+            [](size_t sum, const auto& column) { return sum + column.size(); });
 
         MatrixType dstMatrix(clusterMatrix.rows(), clusterMatrix.rows());
         dstMatrix.reserve(newNNZCount);

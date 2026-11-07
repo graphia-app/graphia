@@ -1707,8 +1707,7 @@ std::vector<int> CorrelationPlot::selectedColumns() const
     std::vector<int> v;
     v.reserve(_selectedColumns.size());
 
-    for(auto column : _selectedColumns)
-        v.push_back(static_cast<int>(column));
+    std::ranges::transform(_selectedColumns, std::back_inserter(v), [](size_t column) { return static_cast<int>(column); });
 
     return v;
 }

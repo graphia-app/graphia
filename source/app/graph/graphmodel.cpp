@@ -187,13 +187,12 @@ private:
         std::vector<AttributeIdentity> attributeIdentities;
         attributeIdentities.reserve(_attributes.size());
 
-        for(const auto& attribute : _attributes)
+        std::ranges::transform(_attributes, std::back_inserter(attributeIdentities), [](const auto& attribute)
         {
-            attributeIdentities.emplace_back(
-                attribute.first,
+            return AttributeIdentity(attribute.first,
                 attribute.second.valueType(),
                 attribute.second.elementType());
-        }
+        });
 
         return attributeIdentities;
     }
@@ -484,8 +483,7 @@ std::vector<ElementVisual> GraphModel::nodeVisuals(const std::vector<NodeId>& no
     std::vector<ElementVisual> visuals;
     visuals.reserve(nodeIds.size());
 
-    for(auto nodeId : nodeIds)
-        visuals.emplace_back(nodeVisual(nodeId));
+    std::ranges::transform(nodeIds, std::back_inserter(visuals), [this](NodeId nodeId) { return nodeVisual(nodeId); });
 
     return visuals;
 }
@@ -495,8 +493,7 @@ std::vector<ElementVisual> GraphModel::edgeVisuals(const std::vector<EdgeId>& ed
     std::vector<ElementVisual> visuals;
     visuals.reserve(edgeIds.size());
 
-    for(auto edgeId : edgeIds)
-        visuals.emplace_back(edgeVisual(edgeId));
+    std::ranges::transform(edgeIds, std::back_inserter(visuals), [this](EdgeId edgeId) { return edgeVisual(edgeId); });
 
     return visuals;
 }
@@ -747,12 +744,10 @@ ValueType GraphModel::valueTypeOfTransformAttributeName(const QString& attribute
     for(const auto& [transformName, factory] : _->_application->transformFactories())
     {
         const auto& defaultVisualisations = factory->defaultVisualisations();
+        auto v = std::ranges::find(defaultVisualisations, attributeName, &DefaultVisualisation::_attributeName);
 
-        for(const auto& v : defaultVisualisations)
-        {
-            if(v._attributeName == attributeName)
-                return v._attributeValueType;
-        }
+        if(v != defaultVisualisations.end())
+            return v->_attributeValueType;
     }
 
     return ValueType::Unknown;
@@ -1565,18 +1560,8 @@ void GraphModel::updateVisuals(bool force)
 void GraphModel::updateSelectionVisuals(const NodeIdSet& previousSelectedNodeIds)
 {
     std::vector<NodeId> changedNodeIds;
-
-    for(auto nodeId : _->_selectedNodeIds)
-    {
-        if(!u::contains(previousSelectedNodeIds, nodeId))
-            changedNodeIds.emplace_back(nodeId);
-    }
-
-    for(auto nodeId : previousSelectedNodeIds)
-    {
-        if(!u::contains(_->_selectedNodeIds, nodeId))
-            changedNodeIds.emplace_back(nodeId);
-    }
+    std::ranges::set_symmetric_difference(_->_selectedNodeIds, previousSelectedNodeIds,
+        std::back_inserter(changedNodeIds));
 
     if(changedNodeIds.empty())
         return;

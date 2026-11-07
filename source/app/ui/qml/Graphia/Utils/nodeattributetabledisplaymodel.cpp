@@ -29,6 +29,7 @@
 #include <QtGlobal>
 
 #include <algorithm>
+#include <iterator>
 #include <limits>
 
 NodeAttributeTableDisplayModel::NodeAttributeTableDisplayModel(QObject* parent) :
@@ -424,8 +425,8 @@ void NodeAttributeTableDisplayModel::sortSourceRows()
         auto& values = sortValues.emplace_back(std::vector<QVariant>{}, order).first;
         values.reserve(_sourceRows.size());
 
-        for(auto sourceRow : _sourceRows)
-            values.emplace_back(_sourceModel->data(_sourceModel->index(sourceRow, static_cast<int>(column)), Qt::DisplayRole));
+        std::ranges::transform(_sourceRows, std::back_inserter(values), [&](int sourceRow)
+            { return _sourceModel->data(_sourceModel->index(sourceRow, static_cast<int>(column)), Qt::DisplayRole); });
     }
 
     if(_rowOrderMap.empty() && sortValues.empty())
@@ -484,8 +485,7 @@ void NodeAttributeTableDisplayModel::sortSourceRows()
     std::vector<int> sortedSourceRows;
     sortedSourceRows.reserve(_sourceRows.size());
 
-    for(auto i : order)
-        sortedSourceRows.push_back(_sourceRows[i]);
+    std::ranges::transform(order, std::back_inserter(sortedSourceRows), [this](size_t i) { return _sourceRows[i]; });
 
     _sourceRows = std::move(sortedSourceRows);
 }

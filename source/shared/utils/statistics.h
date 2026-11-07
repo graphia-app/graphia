@@ -72,8 +72,7 @@ Statistics findStatisticsFor(const C& container,
 
     std::vector<double> values;
     values.reserve(static_cast<size_t>(std::distance(std::begin(container), std::end(container))));
-    for(const auto& element : container)
-        values.emplace_back(fn(element));
+    std::ranges::transform(container, std::back_inserter(values), fn);
 
     for(auto value : values)
     {

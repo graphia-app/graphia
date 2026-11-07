@@ -58,7 +58,7 @@ inline uint32_t crc32(const QByteArray& data)
 
     uint32_t crc = 0xFFFFFFFFu;
     for(auto byte : data)
-        crc = table.at((crc ^ static_cast<uint8_t>(byte)) & 0xFFu) ^ (crc >> 8u);
+        crc = table.at((crc ^ static_cast<uint8_t>(byte)) & 0xFFu) ^ (crc >> 8u); // cppcheck-suppress useStlAlgorithm
 
     return crc ^ 0xFFFFFFFFu;
 }

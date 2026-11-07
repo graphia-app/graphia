@@ -31,6 +31,7 @@
 #include <QXmlStreamWriter>
 #include <QtGlobal>
 
+#include <algorithm>
 #include <cstddef>
 #include <map>
 #include <set>
@@ -154,16 +155,11 @@ bool GraphMLSaver::save()
 
     // Nodes are identified by their names, so they keep them when the file is loaded
     // again, unless any are the same as another's
-    bool idsAreNames = true;
     std::set<QString> nodeNames;
-    for(auto nodeId : _graphModel->graph().nodeIds())
+    const bool idsAreNames = std::ranges::all_of(_graphModel->graph().nodeIds(), [&](auto nodeId)
     {
-        if(!nodeNames.insert(_graphModel->nodeName(nodeId)).second)
-        {
-            idsAreNames = false;
-            break;
-        }
-    }
+        return nodeNames.insert(_graphModel->nodeName(nodeId)).second;
+    });
 
     auto idOf = [&](NodeId nodeId)
     {

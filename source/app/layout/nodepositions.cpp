@@ -19,7 +19,9 @@
 
 #include "nodepositions.h"
 
+#include <algorithm>
 #include <cmath>
+#include <iterator>
 #include <numeric>
 
 QVector3D NodePositions::getNoLocking(NodeId nodeId) const
@@ -72,8 +74,7 @@ std::vector<QVector3D> NodePositions::get(const std::vector<NodeId>& nodeIds) co
     std::vector<QVector3D> positions;
     positions.reserve(nodeIds.size());
 
-    for(auto nodeId : nodeIds)
-        positions.emplace_back(getNoLocking(nodeId));
+    std::ranges::transform(nodeIds, std::back_inserter(positions), [this](NodeId nodeId) { return getNoLocking(nodeId); });
 
     return positions;
 }

@@ -3075,11 +3075,8 @@ void Document::gotoBookmark(const QString& name)
     if(_selectionManager != nullptr && u::containsKey(_bookmarks, name))
     {
         std::vector<NodeId> nodeIds;
-        for(auto nodeId : _graphModel->graph().nodeIds())
-        {
-            if(_graphModel->graph().typeOf(nodeId) != MultiElementType::Tail)
-                nodeIds.emplace_back(nodeId);
-        }
+        std::ranges::copy_if(_graphModel->graph().nodeIds(), std::back_inserter(nodeIds),
+            [this](NodeId nodeId) { return _graphModel->graph().typeOf(nodeId) != MultiElementType::Tail; });
 
         nodeIds = u::setIntersection(nodeIds, _bookmarks[name]);
         selectAndFocusNodes(nodeIds);
@@ -3096,11 +3093,8 @@ void Document::gotoAllBookmarks()
             bookmarkedNodeIds.insert(bookmark.second.begin(), bookmark.second.end());
 
         std::vector<NodeId> nodeIds;
-        for(auto nodeId : _graphModel->graph().nodeIds())
-        {
-            if(_graphModel->graph().typeOf(nodeId) != MultiElementType::Tail)
-                nodeIds.emplace_back(nodeId);
-        }
+        std::ranges::copy_if(_graphModel->graph().nodeIds(), std::back_inserter(nodeIds),
+            [this](NodeId nodeId) { return _graphModel->graph().typeOf(nodeId) != MultiElementType::Tail; });
 
         nodeIds = u::setIntersection(nodeIds, bookmarkedNodeIds);
         selectAndFocusNodes(nodeIds);

@@ -248,7 +248,7 @@ bool UserData::load(const json& jsonObject, Progressable& progressable)
     progressable.setProgress(-1);
 
     for(const auto& userDataVector : _userDataVectors)
-        _numValues = std::max(_numValues, userDataVector.second.numValues());
+        _numValues = std::max(_numValues, userDataVector.second.numValues()); // cppcheck-suppress useStlAlgorithm
 
     return true;
 }

@@ -22,6 +22,7 @@
 #include "shared/utils/json.h"
 
 #include <algorithm>
+#include <iterator>
 
 QStringList UserDataVector::toStringList() const
 {
@@ -102,8 +103,8 @@ bool UserDataVector::load(const QString& name, const json& jsonObject)
         return false;
 
     _values.clear();
-    for(const auto& value : jsonObject["values"])
-        _values.push_back(value);
+    std::ranges::transform(jsonObject["values"], std::back_inserter(_values),
+        [](const json& value) { return value.get<QString>(); });
 
     updateType(_values);
 

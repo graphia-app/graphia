@@ -171,10 +171,7 @@ private slots:
         QCOMPARE(customPlot->xAxis->label(), estimate(160, 500));
         QCOMPARE(customPlot->graph(1)->data()->size(), 5);
 
-        double maxEdges = 0.0;
-        for(const auto& data : *customPlot->graph(1)->data())
-            maxEdges = std::max(maxEdges, data.value);
-        QCOMPARE(maxEdges, 500.0);
+        QCOMPARE(std::ranges::max(*customPlot->graph(1)->data(), {}, &QCPGraphData::value).value, 500.0);
 
         // Beyond the keys, the nearest is the last
         plot->setProperty("threshold", 10.0);

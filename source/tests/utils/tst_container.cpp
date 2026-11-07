@@ -125,7 +125,7 @@ private slots:
         reversed.reserve(v.size());
 
         for(auto i : u::reverse(v))
-            reversed.push_back(i);
+            reversed.push_back(i); // cppcheck-suppress useStlAlgorithm
 
         QCOMPARE(reversed, (std::vector<int>{3, 2, 1}));
     }

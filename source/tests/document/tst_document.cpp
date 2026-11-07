@@ -57,6 +57,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <iterator>
 #include <map>
 #include <memory>
 #include <vector>
@@ -1278,8 +1279,8 @@ private slots:
 
         std::vector<double> weights;
         weights.reserve(graph().edgeIds().size());
-        for(auto edgeId : graph().edgeIds())
-            weights.push_back(graphModel()->attributeValueByName(u"EdgeWeight"_s).numericValueOf(edgeId));
+        std::ranges::transform(graph().edgeIds(), std::back_inserter(weights),
+            [this](EdgeId edgeId) { return graphModel()->attributeValueByName(u"EdgeWeight"_s).numericValueOf(edgeId); });
         std::ranges::sort(weights);
         QCOMPARE(weights.size(), 2u);
         QVERIFY(std::abs(weights.at(0) - 0.6) < 1e-6);
@@ -1496,8 +1497,8 @@ private slots:
     {
         std::vector<QVector3D> v;
         v.reserve(graph().nodeIds().size());
-        for(auto nodeId : graph().nodeIds())
-            v.push_back(graphModel()->nodePositions().get(nodeId));
+        std::ranges::transform(graph().nodeIds(), std::back_inserter(v),
+            [this](NodeId nodeId) { return graphModel()->nodePositions().get(nodeId); });
 
         return v;
     }

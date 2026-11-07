@@ -34,6 +34,7 @@
 #include <cstddef>
 #include <deque>
 #include <limits>
+#include <numeric>
 #include <sstream>
 
 using namespace Qt::Literals::StringLiterals;
@@ -120,10 +121,8 @@ void PageRankTransform::calculatePageRank(TransformedGraph& target)
             }
 
             // Normalise result
-            float sum = 0.0f;
-            for(auto value : newPageRankVector)
-                sum += value;
-             newPageRankVector = newPageRankVector / sum;
+            newPageRankVector = newPageRankVector /
+                std::accumulate(newPageRankVector.begin(), newPageRankVector.end(), 0.0f);
 
             // Detect PR Change
             change = 0.0f;
@@ -137,10 +136,8 @@ void PageRankTransform::calculatePageRank(TransformedGraph& target)
                 changeBuffer.pop_back();
 
             // Average the last 10 steps
-            float bufferChangeAverage = 0.0f;
-            for(auto changes : changeBuffer)
-                bufferChangeAverage += changes;
-            bufferChangeAverage /= static_cast<float>(AVG_COUNT);
+            const float bufferChangeAverage = std::accumulate(changeBuffer.begin(), changeBuffer.end(), 0.0f) /
+                static_cast<float>(AVG_COUNT);
 
             pagerankAcceleration = std::abs(previousBufferChangeAverage - bufferChangeAverage);
 

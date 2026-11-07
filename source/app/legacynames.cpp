@@ -32,6 +32,7 @@
 #include <QStringList>
 
 #include <algorithm>
+#include <iterator>
 #include <string>
 #include <utility>
 
@@ -224,8 +225,7 @@ QString LegacyNames::visualisation(const QString& visualisation) const
     std::vector<QString> newContents;
     newContents.reserve(quotedStrings.size());
 
-    for(const auto& quotedString : quotedStrings)
-        newContents.push_back(quotedString._content);
+    std::ranges::transform(quotedStrings, std::back_inserter(newContents), &QuotedString::_content);
 
     size_t channelIndex = 0;
 

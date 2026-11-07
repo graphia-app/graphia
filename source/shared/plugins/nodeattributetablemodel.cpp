@@ -277,8 +277,8 @@ void NodeAttributeTableModel::moveFocusToNodesForRowIndices(const std::vector<in
     std::vector<NodeId> nodeIds;
     nodeIds.reserve(rows.size());
 
-    for(auto row : rows)
-        nodeIds.push_back(_userNodeData->elementIdForIndex(static_cast<size_t>(row)));
+    std::ranges::transform(rows, std::back_inserter(nodeIds),
+        [this](int row) { return _userNodeData->elementIdForIndex(static_cast<size_t>(row)); });
 
     _document->moveFocusToNodes(nodeIds);
 }

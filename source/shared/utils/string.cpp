@@ -286,17 +286,11 @@ QString u::formatNumberSIPostfix(double value)
         {._threshold = 1e4, ._divider = 1e3, ._symbol = 'k'},
     };
 
-    for(const auto& postfix : postfixes)
-    {
-        if(value >= postfix._threshold)
-        {
-            auto d = value / postfix._divider;
-            auto s = QString::number(d, 'f', 1);
-            return s + postfix._symbol;
-        }
-    }
+    auto postfix = std::ranges::find_if(postfixes, [value](const auto& p) { return value >= p._threshold; });
+    if(postfix == postfixes.end())
+        return QString::number(value);
 
-    return QString::number(value);
+    return QString::number(value / postfix->_divider, 'f', 1) + postfix->_symbol;
 }
 
 bool u::isHex(const std::string& string)

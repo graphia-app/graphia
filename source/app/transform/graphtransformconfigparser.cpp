@@ -31,6 +31,8 @@
 #include <QByteArray>
 #include <QDebug>
 
+#include <algorithm>
+#include <iterator>
 #include <utility>
 #include <vector>
 
@@ -241,13 +243,8 @@ static void appendOps(QStringList& list, const Table& table)
 template<typename Table, typename Op>
 static QString opAsString(const Table& table, Op op)
 {
-    for(const auto& entry : table)
-    {
-        if(entry.value == op)
-            return QString::fromUtf8(entry.symbol);
-    }
-
-    return {};
+    auto entry = std::ranges::find_if(table, [op](const auto& candidate) { return candidate.value == op; });
+    return entry != std::ranges::end(table) ? QString::fromUtf8(entry->symbol) : QString{};
 }
 
 template<typename Table>
