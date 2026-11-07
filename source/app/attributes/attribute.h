@@ -296,6 +296,7 @@ public:
         return {};
     }
 
+    // cppcheck-suppress [constParameterReference,constParameterCallback]
     template<typename E> double floatValueOf(E& elementId) const
     {
         switch(valueType())
@@ -309,6 +310,7 @@ public:
         return {};
     }
 
+    // cppcheck-suppress [constParameterReference,constParameterCallback]
     template<typename E> QString stringValueOf(E& elementId) const
     {
         switch(valueType())
