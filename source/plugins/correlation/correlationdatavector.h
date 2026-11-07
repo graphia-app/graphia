@@ -117,7 +117,6 @@ public:
     using CorrelationDataVector::CorrelationDataVector;
 
     double sum() const { return _statistics._sum; }
-    double sumSq() const { return _statistics._sumSq; }
     double variability() const { return _statistics._variability; }
     double magnitude() const { return _statistics._magnitude; }
     double mean() const { return _statistics._mean; }

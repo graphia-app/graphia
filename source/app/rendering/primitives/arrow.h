@@ -37,7 +37,6 @@ public:
 
     float radius() const { return _radius; }
     auto length() const { return _length; }
-    auto slices() const { return _slices; }
 
     QOpenGLVertexArrayObject* vertexArrayObject() { return &_vao; }
 

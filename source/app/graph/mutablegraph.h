@@ -117,10 +117,7 @@ private:
     void releaseEdgeId(EdgeId edgeId);
 
     NodeId mergeNodes(NodeId nodeIdA, NodeId nodeIdB);
-    EdgeId mergeEdges(EdgeId edgeIdA, EdgeId edgeIdB);
-
     NodeId mergeNodes(const std::vector<NodeId>& nodeIds);
-    EdgeId mergeEdges(const std::vector<EdgeId>& edgeIds);
 
     MutableGraph& clone(const MutableGraph& other);
 

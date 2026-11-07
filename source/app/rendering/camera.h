@@ -59,8 +59,6 @@ public:
     void setRotation(const QQuaternion& rotation);
     void setDistance(float distance);
 
-    ProjectionType projectionType() const;
-
     void setOrthographicProjection(float left, float right,
                                    float bottom, float top,
                                    float nearPlane, float farPlane);
@@ -74,7 +72,6 @@ public:
     QMatrix4x4 viewMatrix() const;
     QMatrix4x4 projectionMatrix() const;
     void setProjectionMatrix(const QMatrix4x4& projectionMatrix);
-    QMatrix4x4 viewProjectionMatrix() const;
 
     Ray rayForViewportCoordinates(int x, int y) const;
     Line3D lineForViewportCoordinates(int x, int y) const;
@@ -108,10 +105,8 @@ private:
 
     mutable QMatrix4x4 _viewMatrix;
     mutable QMatrix4x4 _projectionMatrix;
-    mutable QMatrix4x4 _viewProjectionMatrix;
 
     mutable bool _viewMatrixDirty = true;
-    mutable bool _viewProjectionMatrixDirty = true;
 };
 
 #endif // CAMERA_H

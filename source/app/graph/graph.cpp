@@ -91,19 +91,9 @@ Graph::~Graph()
         edgeArray->invalidate();
 }
 
-NodeId Graph::firstNodeId() const
-{
-    return !nodeIds().empty() ? nodeIds().at(0) : NodeId();
-}
-
 bool Graph::containsNodeId(NodeId nodeId) const
 {
     return u::contains(nodeIds(), nodeId);
-}
-
-EdgeId Graph::firstEdgeId() const
-{
-    return !edgeIds().empty() ? edgeIds().at(0) : EdgeId();
 }
 
 bool Graph::containsEdgeId(EdgeId edgeId) const

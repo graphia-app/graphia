@@ -122,13 +122,6 @@ void DeferredExecutor::resume()
     _paused = false;
 }
 
-bool DeferredExecutor::hasTasks() const
-{
-    const std::unique_lock<std::recursive_mutex> lock(_mutex);
-
-    return !_tasks.empty();
-}
-
 void DeferredExecutor::waitFor(size_t numTasks)
 {
     std::unique_lock<std::recursive_mutex> lock(_mutex);

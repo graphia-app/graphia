@@ -42,8 +42,7 @@ Camera::Camera(const Camera& other) :
     _top(other._top),
     _viewport(other._viewport),
     _viewMatrix(other._viewMatrix),
-    _viewMatrixDirty(other._viewMatrixDirty),
-    _viewProjectionMatrixDirty(other._viewProjectionMatrixDirty)
+    _viewMatrixDirty(other._viewMatrixDirty)
 {
     switch(_projectionType)
     {
@@ -56,8 +55,6 @@ Camera::Camera(const Camera& other) :
         updatePerspectiveProjection();
         break;
     }
-
-    _viewProjectionMatrix = other._viewProjectionMatrix;
 }
 
 QVector3D Camera::viewVector() const
@@ -112,11 +109,6 @@ void Camera::setRotation(const QQuaternion& rotation)
     }
 }
 
-Camera::ProjectionType Camera::projectionType() const
-{
-    return _projectionType;
-}
-
 void Camera::setOrthographicProjection(float left, float right,
                                        float bottom, float top,
                                        float nearPlane, float farPlane)
@@ -168,18 +160,6 @@ QMatrix4x4 Camera::projectionMatrix() const
 void Camera::setProjectionMatrix(const QMatrix4x4& projectionMatrix)
 {
     _projectionMatrix = projectionMatrix;
-    _viewProjectionMatrixDirty = true;
-}
-
-QMatrix4x4 Camera::viewProjectionMatrix() const
-{
-    if(_viewMatrixDirty || _viewProjectionMatrixDirty)
-    {
-        _viewProjectionMatrix = _projectionMatrix * viewMatrix();
-        _viewProjectionMatrixDirty = false;
-    }
-
-    return _viewProjectionMatrix;
 }
 
 bool Camera::unproject(int x, int y, int z, QVector3D& result) const
@@ -220,8 +200,6 @@ void Camera::updatePerspectiveProjection()
 
     if(_fieldOfView > 0.0f && _aspectRatio > 0.0f && _nearPlane < _farPlane)
         _projectionMatrix.perspective(_fieldOfView, _aspectRatio, _nearPlane, _farPlane);
-
-    _viewProjectionMatrixDirty = true;
 }
 
 void Camera::updateOrthogonalProjection()
@@ -230,8 +208,6 @@ void Camera::updateOrthogonalProjection()
 
     if(_left < _right && _bottom < _top && _nearPlane < _farPlane)
         _projectionMatrix.ortho(_left, _right, _bottom, _top, _nearPlane, _farPlane);
-
-    _viewProjectionMatrixDirty = true;
 }
 
 Ray Camera::rayForViewportCoordinates(int x, int y) const

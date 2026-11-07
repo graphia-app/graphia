@@ -34,8 +34,6 @@ public:
     Sphere();
 
     float radius() const { return _radius; }
-    auto rings() const { return _rings; }
-    auto slices() const { return _slices; }
 
     QOpenGLVertexArrayObject* vertexArrayObject() { return &_vao; }
 

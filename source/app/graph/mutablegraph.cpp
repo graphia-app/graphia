@@ -351,27 +351,12 @@ NodeId MutableGraph::mergeNodes(NodeId nodeIdA, NodeId nodeIdB)
     return _n._mergedNodeIds.add(nodeIdA, nodeIdB);
 }
 
-EdgeId MutableGraph::mergeEdges(EdgeId edgeIdA, EdgeId edgeIdB)
-{
-    return _e._mergedEdgeIds.add(edgeIdA, edgeIdB);
-}
-
 NodeId MutableGraph::mergeNodes(const std::vector<NodeId>& nodeIds)
 {
     auto setId = *std::ranges::min_element(nodeIds);
 
     for(auto nodeId : nodeIds)
         _n._mergedNodeIds.add(setId, nodeId);
-
-    return setId;
-}
-
-EdgeId MutableGraph::mergeEdges(const std::vector<EdgeId>& edgeIds)
-{
-    auto setId = *std::ranges::min_element(edgeIds);
-
-    for(auto edgeId : edgeIds)
-        _e._mergedEdgeIds.add(setId, edgeId);
 
     return setId;
 }

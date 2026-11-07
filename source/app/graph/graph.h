@@ -117,7 +117,6 @@ public:
     Graph();
     ~Graph() override;
 
-    NodeId firstNodeId() const;
     bool containsNodeId(NodeId nodeId) const override;
 
     virtual MultiElementType typeOf(NodeId nodeId) const = 0;
@@ -139,7 +138,6 @@ public:
     }
     virtual int multiplicityOf(NodeId nodeId) const = 0;
 
-    EdgeId firstEdgeId() const;
     bool containsEdgeId(EdgeId edgeId) const override;
 
     virtual MultiElementType typeOf(EdgeId edgeId) const = 0;

@@ -63,8 +63,6 @@ public:
     void pause();
     void resume();
 
-    bool hasTasks() const;
-
     void waitFor(size_t numTasks);
 };
 
