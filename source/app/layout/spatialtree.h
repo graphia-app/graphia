@@ -189,7 +189,7 @@ private:
         initialiseSubVolumes();
 
         bool distinctPositions = false;
-        QVector3D lastPosition = nodePositions.get(nodeIds[0]);
+        const QVector3D lastPosition = nodePositions.get(nodeIds[0]);
 
         // Distribute NodeIds over SubVolumes
         for(const NodeId nodeId : nodeIds)
@@ -199,13 +199,8 @@ private:
 
             subVolume._nodeIds.push_back(nodeId);
 
-            if(!distinctPositions)
-            {
-                if(nodePosition != lastPosition)
-                    distinctPositions = true;
-                else
-                    lastPosition = nodePosition;
-            }
+            if(!distinctPositions && nodePosition != lastPosition)
+                distinctPositions = true;
         }
 
         // Decide if the SubVolumes need further sub-division
