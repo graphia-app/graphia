@@ -20,15 +20,24 @@
 #ifndef FATALERROR_H
 #define FATALERROR_H
 
-#include "msvcwarningsuppress.h"
-
 #include <iostream>
 
 #if defined(_MSC_VER)
+#include <intrin.h>
 #define NOINLINE __declspec(noinline)
 #elif defined(__GNUC__)
 #define NOINLINE __attribute__ ((noinline))
 #endif
+
+namespace u
+{
+// Inlined so that the crashing frame is the one FATAL_ERROR names
+#if defined(_MSC_VER)
+__forceinline void trap() { __ud2(); }
+#elif defined(__GNUC__)
+__attribute__ ((always_inline)) inline void trap() { __builtin_trap(); }
+#endif
+} // namespace u
 
 // Deliberately crash in order to help track down bugs
 // MESSAGE becomes a struct name, so quotes and spaces are not allowed
@@ -38,9 +47,7 @@
             NOINLINE void operator()() \
             { \
                 std::cerr << "Fatal error: " #MESSAGE << "\n"; \
-                int* p = nullptr; \
-                MSVC_WARNING_SUPPRESS_NEXTLINE(6011) \
-                *p = 0; \
+                u::trap(); \
             } \
         } s; s(); \
     } while(0)

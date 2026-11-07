@@ -704,6 +704,7 @@ void Application::crash(int crashType)
     {
         int* p = nullptr;
         MSVC_WARNING_SUPPRESS_NEXTLINE(6011)
+        // cppcheck-suppress nullPointer
         *p = 0;
         break;
     }
