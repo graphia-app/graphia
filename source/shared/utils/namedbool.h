@@ -27,6 +27,7 @@ struct String
 {
     char _data[N] = {0};
 
+    // cppcheck-suppress noExplicitConstructor
     consteval String(const char (&string)[N]) // NOLINT(google-explicit-constructor)
     {
         char *dst = _data;

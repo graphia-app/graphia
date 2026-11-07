@@ -79,6 +79,7 @@ public:
         QString _verb;
         QString _pastParticiple;
 
+        // cppcheck-suppress noExplicitConstructor
         CommandDescription(const QString& description = {}, // NOLINT(google-explicit-constructor)
                            const QString& verb = {},
                            const QString& pastParticiple = {}) :
