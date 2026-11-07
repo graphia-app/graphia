@@ -100,6 +100,7 @@ using StatementList = std::vector<Statement>;
 
 struct DotSubGraph
 {
+    // cppcheck-suppress unusedStructMember
     QString _id;
     StatementList _statementList;
 };
@@ -108,6 +109,7 @@ struct DotGraph
 {
     bool _strict = false;
     bool _directed = false;
+    // cppcheck-suppress unusedStructMember
     QString _id;
     StatementList _statementList;
 };
