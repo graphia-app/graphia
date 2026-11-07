@@ -261,6 +261,5 @@ void DownloadQueue::reset()
         emit idleChanged();
     }
 
-    if(_temporaryFile != nullptr)
-        _temporaryFile = nullptr;
+    _temporaryFile = nullptr;
 }
