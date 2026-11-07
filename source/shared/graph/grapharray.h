@@ -37,6 +37,9 @@ struct LockingGraphArray {};
 template<typename Mutex, typename L> struct _MaybeLock
 {
     explicit _MaybeLock(Mutex&) {}
+
+    // Declared so that cppcheck treats a _MaybeLock variable as a scoped guard
+    ~_MaybeLock() = default;
 };
 
 template<typename Mutex> struct _MaybeLock<Mutex, LockingGraphArray>
