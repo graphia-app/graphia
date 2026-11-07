@@ -38,12 +38,6 @@ public:
     void apply(TransformedGraph& target) override;
 
 private:
-    void enableDebugIteration(){ _debugIteration = true; }
-    void enableDebugMatrices(){ _debugMatrices = true; }
-    void disableDebugIteration(){ _debugIteration = false; }
-    void disableDebugMatrices(){ _debugMatrices = false; }
-
-private:
     bool _debugIteration = false;
     bool _debugMatrices = false;
 
