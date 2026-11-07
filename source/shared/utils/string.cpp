@@ -48,6 +48,7 @@ bool u::isNumeric(const QString& string)
 {
     bool success = false;
 
+    // cppcheck-suppress ignoredReturnValue
     string.toDouble(&success); // clazy:exclude=unused-result-check
 
     return success;
@@ -71,6 +72,7 @@ bool u::isInteger(const QString& string)
 {
     bool success = false;
 
+    // cppcheck-suppress ignoredReturnValue
     string.toInt(&success); // clazy:exclude=unused-result-check
 
     return success;
