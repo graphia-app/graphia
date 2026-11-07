@@ -153,6 +153,7 @@ static std::vector<UrlType> urlTypesForPlugins(const std::vector<LoadedPlugin>& 
         return a._collectiveDescription.compare(b._collectiveDescription, Qt::CaseInsensitive) < 0;
     });
 
+    // cppcheck-suppress mismatchingContainerExpression
     fileTypes.erase(std::ranges::unique(fileTypes).begin(), fileTypes.end());
 
     return fileTypes;
@@ -371,11 +372,10 @@ QString Application::urlTypeFor(const QString& description, const QStringList& e
 {
     auto pluginFileTypes = urlTypesForPlugins(_loadedPlugins);
 
-    pluginFileTypes.erase(std::ranges::remove_if(pluginFileTypes,
-    [&](const auto& type)
+    std::erase_if(pluginFileTypes, [&](const auto& type)
     {
         return type._collectiveDescription != description || type._extensions != extensions;
-    }).begin(), pluginFileTypes.end());
+    });
 
     if(pluginFileTypes.size() == 1)
         return pluginFileTypes.at(0)._name;

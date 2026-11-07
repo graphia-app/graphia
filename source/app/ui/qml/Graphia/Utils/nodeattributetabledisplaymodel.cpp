@@ -348,11 +348,10 @@ void NodeAttributeTableDisplayModel::reset()
     beginResetModel();
 
     // Remove any sorting criteria that might not exist any more
-    _sortColumnAndOrders.erase(std::ranges::remove_if(_sortColumnAndOrders,
-    [this](const auto& sortColumnAndOrder)
+    std::erase_if(_sortColumnAndOrders, [this](const auto& sortColumnAndOrder)
     {
         return _columnNames.indexOf(sortColumnAndOrder.first) < 0;
-    }).begin(), _sortColumnAndOrders.end());
+    });
 
     updateSourceColumns();
     auto rowsChanged = updateSourceRows();

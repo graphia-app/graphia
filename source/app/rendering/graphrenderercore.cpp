@@ -925,11 +925,10 @@ std::vector<size_t> GraphRendererCore::gpuGraphDataRenderOrder() const
     });
 
     // Filter out any invisible layers
-    renderOrder.erase(std::ranges::remove_if(renderOrder,
-    [this](auto index)
+    std::erase_if(renderOrder, [this](auto index)
     {
         return _gpuGraphData.at(index).invisible();
-    }).begin(), renderOrder.end());
+    });
 
     return renderOrder;
 }

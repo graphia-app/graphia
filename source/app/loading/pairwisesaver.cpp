@@ -47,11 +47,10 @@ static QString findEdgeWeightAttributeName(const IGraphModel* graphModel)
     auto isWeight = [](const QString& attributeName) { return attributeName.contains(u"weight"_s, Qt::CaseInsensitive); };
     auto isValue = [](const QString& attributeName) { return attributeName.contains(u"value"_s, Qt::CaseInsensitive); };
 
-    edgeAttributeNames.erase(std::ranges::remove_if(edgeAttributeNames,
-    [&isWeight, &isValue](const auto& attributeName)
+    std::erase_if(edgeAttributeNames, [&isWeight, &isValue](const auto& attributeName)
     {
         return !isWeight(attributeName) && !isValue(attributeName);
-    }).begin(), edgeAttributeNames.end());
+    });
 
     std::ranges::sort(edgeAttributeNames,
     [&isWeight, &isValue](const auto& a, const auto& b)

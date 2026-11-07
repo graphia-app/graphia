@@ -40,6 +40,7 @@ size_t UserDataVector::numUniqueValues() const
     auto v = _values;
     std::ranges::sort(v);
     auto last = std::ranges::unique(v);
+    // cppcheck-suppress mismatchingContainerExpression
     v.erase(last.begin(), v.end());
 
     return v.size();

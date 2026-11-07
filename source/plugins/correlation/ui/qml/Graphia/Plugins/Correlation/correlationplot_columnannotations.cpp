@@ -491,11 +491,10 @@ void CorrelationPlot::onClickColumnAnnotation(const QCPAxisRect* axisRect, const
     if(_plotMode != PlotMode::ColumnAnnotationSelection)
     {
         // Remove any annotations not currently visible, so that looking up by index works
-        columnAnnotations.erase(std::ranges::remove_if(columnAnnotations,
-        [this](const auto* v)
+        std::erase_if(columnAnnotations, [this](const auto* v)
         {
             return !u::contains(_visibleColumnAnnotationNames, v->name());
-        }).begin(), columnAnnotations.end());
+        });
     }
 
     auto pos = event->pos() - axisRect->topLeft();
