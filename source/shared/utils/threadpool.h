@@ -348,6 +348,7 @@ private:
     template<typename It, typename Fn>
     struct IteratorExecutor
     {
+        // cppcheck-suppress constParameterReference
         static auto execute(Fn& f, It it, size_t index)
         {
             if constexpr(requires { f(it, index); })

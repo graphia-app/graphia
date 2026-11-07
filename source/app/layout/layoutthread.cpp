@@ -56,7 +56,7 @@ LayoutThread::LayoutThread(GraphModel& graphModel,
         if(_debug > 1)
         {
             auto activeLayouts = std::count_if(_layouts.begin(), _layouts.end(),
-                                               [](auto& layout) { return !layoutIsFinished(*layout.second); });
+                                               [](const auto& layout) { return !layoutIsFinished(*layout.second); });
             qDebug() << activeLayouts << "layouts\t" << ticksPerSecond << "ips";
         }
     });

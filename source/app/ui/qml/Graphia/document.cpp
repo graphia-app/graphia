@@ -2105,7 +2105,7 @@ QVariantMap Document::transformInfoAtIndex(int index) const
         return map;
 
     std::ranges::sort(alerts,
-    [](auto& a, auto& b)
+    [](const auto& a, const auto& b)
     {
         return a._type > b._type;
     });
@@ -2530,7 +2530,7 @@ QVariantMap Document::visualisationInfoAtIndex(int index) const
         return map;
 
     std::ranges::sort(alerts,
-    [](auto& a, auto& b)
+    [](const auto& a, const auto& b)
     {
         return a._type > b._type;
     });

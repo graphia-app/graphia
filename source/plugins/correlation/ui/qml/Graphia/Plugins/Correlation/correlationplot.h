@@ -401,13 +401,13 @@ private:
         const QVector<double>& stdDevs, const QString& name);
     void populateStdDevPlot(QCPAbstractPlottable* meanPlot,
         double& minY, double& maxY,
-        const QVector<int>& rows, QVector<double>& means);
+        const QVector<int>& rows, const QVector<double>& means);
     void populateStdErrorPlot(QCPAbstractPlottable* meanPlot,
         double& minY, double& maxY,
-        const QVector<int>& rows, QVector<double>& means);
+        const QVector<int>& rows, const QVector<double>& means);
     void populateDispersion(QCPAbstractPlottable* meanPlot,
         double& minY, double& maxY,
-        const QVector<int>& rows, QVector<double>& means);
+        const QVector<int>& rows, const QVector<double>& means);
 
     bool busy() const { return _worker != nullptr ? _worker->busy() : false; }
     bool zoomed() const { return _worker != nullptr ? _worker->zoomed() : false; }

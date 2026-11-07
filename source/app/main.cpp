@@ -221,7 +221,7 @@ using ApplicationClass = QApplication;
 using ApplicationClass = SharedTools::QtSingleApplication;
 #endif
 
-static int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
+static int start(int argc, char *argv[], const ConsoleOutputFiles& consoleOutputFiles)
 {
     if(u::currentThreadName().isEmpty())
         u::setCurrentThreadName(QStringLiteral(PRODUCT_NAME));

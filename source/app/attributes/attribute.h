@@ -282,6 +282,7 @@ public:
         return valueOf(Helper<T>(), elementId);
     }
 
+    // cppcheck-suppress constParameterReference
     template<typename E> int intValueOf(E& elementId) const
     {
         switch(valueType())
@@ -321,6 +322,7 @@ public:
         return {};
     }
 
+    // cppcheck-suppress constParameterReference
     template<typename E> double numericValueOf(E& elementId) const
     {
         switch(valueType())

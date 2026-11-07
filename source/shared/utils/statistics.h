@@ -120,7 +120,7 @@ Statistics findStatisticsFor(const C& container,
 template<typename C>
 Statistics findStatisticsFor(const C& container, NamedBool<"includeValues"> includeValues = "includeValues"_no)
 {
-    return findStatisticsFor(container, [](typename C::const_reference& t) { return t; }, includeValues);
+    return findStatisticsFor(container, [](typename C::const_reference t) { return t; }, includeValues);
 }
 
 template<typename C>

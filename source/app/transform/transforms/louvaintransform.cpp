@@ -110,7 +110,7 @@ void LouvainTransform::apply(TransformedGraph& target)
         communityDegrees[community] -= weightedDegrees[nodeId];
     };
 
-    auto relabel = [&](MutableGraph& graph)
+    auto relabel = [&](const MutableGraph& graph)
     {
         std::map<CommunityId, CommunityId> idMap;
         CommunityId nextCommunityId = 0;
@@ -181,7 +181,7 @@ void LouvainTransform::apply(TransformedGraph& target)
         weights = newWeights;
     };
 
-    auto moveNodes = [&](MutableGraph& graph)
+    auto moveNodes = [&](const MutableGraph& graph)
     {
         if(cancelled())
             return false;

@@ -310,7 +310,7 @@ void CorrelationPlot::populateMeanLinePlot()
         u::iota(xData, 0);
 
         // Use Average Calculation and set min / max
-        QVector<double> yDataAvg = meanAverageData(minY, maxY, rows);
+        const QVector<double> yDataAvg = meanAverageData(minY, maxY, rows);
 
         graph->setData(xData, yDataAvg, true);
 
@@ -409,7 +409,7 @@ void CorrelationPlot::populateMeanHistogramPlot()
         u::iota(xData, 0);
 
         // Use Average Calculation and set min / max
-        QVector<double> yDataAvg = meanAverageData(minY, maxY, rows);
+        const QVector<double> yDataAvg = meanAverageData(minY, maxY, rows);
 
         auto* histogramBars = new QCPBars(_continuousXAxis, _continuousYAxis);
         histogramBars->setName(name);
@@ -637,7 +637,7 @@ void CorrelationPlot::plotDispersion(QCPAbstractPlottable* meanPlot,
 
 void CorrelationPlot::populateStdDevPlot(QCPAbstractPlottable* meanPlot,
     double& minY, double& maxY,
-    const QVector<int>& rows, QVector<double>& means)
+    const QVector<int>& rows, const QVector<double>& means)
 {
     QVector<double> stdDevs(static_cast<int>(_pluginInstance->numContinuousColumns()));
 
@@ -663,7 +663,7 @@ void CorrelationPlot::populateStdDevPlot(QCPAbstractPlottable* meanPlot,
 
 void CorrelationPlot::populateStdErrorPlot(QCPAbstractPlottable* meanPlot,
     double& minY, double& maxY,
-    const QVector<int>& rows, QVector<double>& means)
+    const QVector<int>& rows, const QVector<double>& means)
 {
     QVector<double> stdErrs(static_cast<int>(_pluginInstance->numContinuousColumns()));
 
@@ -689,7 +689,7 @@ void CorrelationPlot::populateStdErrorPlot(QCPAbstractPlottable* meanPlot,
 
 void CorrelationPlot::populateDispersion(QCPAbstractPlottable* meanPlot,
     double& minY, double& maxY,
-    const QVector<int>& rows, QVector<double>& means)
+    const QVector<int>& rows, const QVector<double>& means)
 {
     if(_groupByAnnotation)
         return;

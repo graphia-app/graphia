@@ -921,7 +921,7 @@ void CorrelationPlot::configureLegend()
     std::vector<QCPAbstractPlottable*> plottables;
 
     std::ranges::transform(plottablesMap, std::back_inserter(plottables),
-        [](auto& pair){ return pair.second; });
+        [](const auto& pair){ return pair.second; });
     std::ranges::sort(plottables,
         [](const auto& a, const auto& b) { return a->name() < b->name(); });
 
