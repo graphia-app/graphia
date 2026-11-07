@@ -462,7 +462,7 @@ const VisualisationChannelFactory* Application::visualisationChannelFactory(cons
 QVariantList Application::saverFileTypes()
 {
     QVariantList saverData;
-    for(auto& saver : _factories)
+    for(const auto& saver : _factories)
     {
         QVariantMap map;
         map.insert(u"name"_s, saver->name());
@@ -1168,7 +1168,7 @@ QVariant UrlTypeDetailsModel::data(const QModelIndex& index, int role) const
     if(row < 0 || row >= static_cast<int>(urlTypes.size()))
         return {};
 
-    auto& urlType = urlTypes.at(static_cast<size_t>(row));
+    const auto& urlType = urlTypes.at(static_cast<size_t>(row));
 
     switch(role)
     {
@@ -1217,7 +1217,8 @@ QVariant PluginDetailsModel::data(const QModelIndex& index, int role) const
     case Description:
     {
         QString urlTypes;
-        for(auto& loadbleUrlTypeName : plugin->loadableUrlTypeNames())
+        const auto loadableUrlTypeNames = plugin->loadableUrlTypeNames();
+        for(const auto& loadbleUrlTypeName : loadableUrlTypeNames)
         {
             if(!urlTypes.isEmpty())
                 urlTypes += tr(", ");

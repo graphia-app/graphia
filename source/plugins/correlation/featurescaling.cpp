@@ -223,7 +223,7 @@ bool UnitScalingNormaliser::process(ContinuousDataVectors& dataRows, IParser* pa
 
     uint64_t i = 0;
 
-    for(auto& dataRow : dataRows)
+    for(const auto& dataRow : dataRows)
     {
         if(parser != nullptr && parser->cancelled())
             return false;

@@ -64,7 +64,7 @@ void DeferredExecutor::execute()
     {
         qDebug() << "execute() thread" << u::currentThreadName();
 
-        for(auto& task : _tasks)
+        for(const auto& task : _tasks)
             qDebug() << "\t" << task._description;
     }
 

@@ -278,7 +278,7 @@ static void uploadReport(const QString& email, const QString& text,
 
         // The event loop has exited, perhaps due to timeout; in this case
         // we don't want any pending replies so we disconnect them
-        for(auto& connection : connections)
+        for(const auto& connection : connections)
             QObject::disconnect(connection);
 
         // Timer expired

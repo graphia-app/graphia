@@ -64,7 +64,7 @@ void SearchManager::findNodes(QString term, Flags<FindOptions> options,
     }
 
     std::vector<Attribute> attributes;
-    for(auto& attributeName : attributeNamesToSearch)
+    for(const auto& attributeName : std::as_const(attributeNamesToSearch))
     {
         if(!_graphModel->attributeExists(attributeName))
             continue;
@@ -113,7 +113,7 @@ void SearchManager::findNodes(QString term, Flags<FindOptions> options,
             op = ConditionFnOp::String::MatchesRegexCaseInsensitive;
 
         std::vector<NodeConditionFn> conditionFns;
-        for(auto& attribute : attributes)
+        for(const auto& attribute : attributes)
         {
             if(attribute.hasDisplayValues())
             {

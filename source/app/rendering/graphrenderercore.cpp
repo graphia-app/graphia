@@ -669,7 +669,7 @@ GPUGraphData* GraphRendererCore::gpuGraphDataForAlpha(float componentAlpha, floa
     }
 
     qWarning() << "Not enough gpuGraphData instances for" << componentAlpha << unhighlightAlpha;
-    for(auto& gpuGraphData : _gpuGraphData)
+    for(const auto& gpuGraphData : _gpuGraphData)
         qWarning() << "  " << gpuGraphData._componentAlpha << gpuGraphData._unhighlightAlpha;
 
     return nullptr;
@@ -695,7 +695,7 @@ GPUGraphData* GraphRendererCore::gpuGraphDataForOverlay(float alpha)
     }
 
     qWarning() << "Not enough gpuGraphData instances for overlay" << alpha;
-    for(auto& gpuGraphData : _gpuGraphData)
+    for(const auto& gpuGraphData : _gpuGraphData)
     {
         qWarning() << "  " << gpuGraphData._componentAlpha <<
             gpuGraphData._unhighlightAlpha << gpuGraphData._isOverlay;

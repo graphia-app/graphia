@@ -67,7 +67,7 @@ QStringList NodeAttributeTableModel::columnNames() const
     // is because we want to preserve the order in which the attributes were created
     QStringList list = u::toQStringList(_userNodeData->exposedAttributeNames());
 
-    for(auto& attributeName : _document->graphModel()->attributeNames(ElementType::Node))
+    for(const auto& attributeName : _document->graphModel()->attributeNames(ElementType::Node))
     {
         const auto* attribute = _document->graphModel()->attributeByName(attributeName);
         Q_ASSERT(attribute != nullptr);

@@ -127,11 +127,11 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(
             nodeIdsForAttributeValue[value].push_back(nodeId); // clazy:exclude=reserve-candidates
     }
 
-    for(auto& attributeValueA : u::keysFor(attributeValueEntryCountATotal))
+    for(const auto& attributeValueA : u::keysFor(attributeValueEntryCountATotal))
     {
-        auto& selectedNodes = nodeIdsForAttributeValue[attributeValueA];
+        const auto& selectedNodes = nodeIdsForAttributeValue[attributeValueA];
 
-        for(auto& attributeValueB : u::keysFor(attributeValueEntryCountBTotal))
+        for(const auto& attributeValueB : u::keysFor(attributeValueEntryCountBTotal))
         {
             EnrichmentTableModel::Row row(EnrichmentTableModel::Results::NumResultColumns);
             command.setProgress(static_cast<int>(progress * 100U / iterations));
