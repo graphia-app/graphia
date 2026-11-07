@@ -510,7 +510,7 @@ QString Application::pluginDisplayName(const QString& pluginName) const
 
 QString Application::qmlModuleForPlugin(const QString& pluginName) const
 {
-    auto* plugin = pluginForName(pluginName);
+    const auto* plugin = pluginForName(pluginName);
 
     if(plugin != nullptr)
         return plugin->qmlModule();
@@ -521,7 +521,7 @@ QString Application::qmlModuleForPlugin(const QString& pluginName) const
 QString Application::parametersQmlTypeForPlugin(const QString& pluginName,
     const QString& urlType) const
 {
-    auto* plugin = pluginForName(pluginName);
+    const auto* plugin = pluginForName(pluginName);
 
     if(plugin != nullptr)
         return plugin->parametersQmlType(urlType);

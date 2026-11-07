@@ -611,7 +611,7 @@ void GraphOverviewScene::onComponentSplit(const Graph*, const ComponentSplitSet&
         if(visible())
         {
             auto oldComponentId = componentSplitSet.oldComponentId();
-            auto* oldGraphComponentRenderer = _graphRenderer->componentRendererForId(oldComponentId);
+            const auto* oldGraphComponentRenderer = _graphRenderer->componentRendererForId(oldComponentId);
 
             for(auto splitter : componentSplitSet.splitters())
             {

@@ -76,7 +76,7 @@ private:
             _tabularData.reserve(3, static_cast<size_t>(sparseMatrix->njc));
             size_t tabularDataRow = 0;
 
-            auto* dataPtr = reinterpret_cast<T*>(sparseMatrix->data);
+            const auto* dataPtr = reinterpret_cast<const T*>(sparseMatrix->data);
 
             for(mat_uint32_t i = 0; i < sparseMatrix->njc - 1; i++ )
             {

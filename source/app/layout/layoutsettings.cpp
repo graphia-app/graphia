@@ -76,6 +76,7 @@ void LayoutSettings::resetValue(const QString& name)
 
 const LayoutSetting* LayoutSettings::setting(const QString& name) const
 {
+    // cppcheck-suppress constVariablePointer
     auto* mutableThis = const_cast<LayoutSettings*>(this);
     return mutableThis->setting(name);
 }

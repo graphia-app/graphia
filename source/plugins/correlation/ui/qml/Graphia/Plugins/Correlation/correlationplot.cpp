@@ -665,7 +665,7 @@ bool CorrelationPlot::updateTooltip()
         return false;
 
     QCPAbstractPlottable* plottableUnderCursor = nullptr;
-    QCPAxisRect* axisRectUnderCursor = nullptr;
+    const QCPAxisRect* axisRectUnderCursor = nullptr;
 
     double xCoord = -1.0;
 

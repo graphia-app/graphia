@@ -159,7 +159,7 @@ QVariant AvailableAttributesModel::data(const QModelIndex& index, int role) cons
     if(!index.isValid())
         return {};
 
-    auto* item = itemForIndex(index);
+    const auto* item = itemForIndex(index);
 
     if(role == Roles::NameRole)
         return item->attributeName();
@@ -267,7 +267,7 @@ QModelIndex AvailableAttributesModel::index(int row, int column, const QModelInd
     if(!hasIndex(row, column, parentIndex))
         return {};
 
-    AvailableAttributesModel::Item* parent = nullptr;
+    const AvailableAttributesModel::Item* parent = nullptr;
 
     if(!parentIndex.isValid())
         parent = _root;
@@ -309,7 +309,7 @@ QModelIndex AvailableAttributesModel::parent(const QModelIndex& index) const
 
 int AvailableAttributesModel::rowCount(const QModelIndex& parentIndex) const
 {
-    AvailableAttributesModel::Item* parent = nullptr;
+    const AvailableAttributesModel::Item* parent = nullptr;
     if(parentIndex.column() > 0)
         return 0;
 
@@ -331,7 +331,7 @@ QString AvailableAttributesModel::get(const QModelIndex& index) const
     if(!index.isValid())
         return {};
 
-    auto* item = itemForIndex(index);
+    const auto* item = itemForIndex(index);
     if(item == nullptr)
         return {};
 
@@ -355,7 +355,7 @@ QModelIndex AvailableAttributesModel::find(const QString& name) const
 {
     auto attributeName = Attribute::parseAttributeName(name);
 
-    AvailableAttributesModel::Item* rootItem = nullptr;
+    const AvailableAttributesModel::Item* rootItem = nullptr;
 
     switch(attributeName._type)
     {

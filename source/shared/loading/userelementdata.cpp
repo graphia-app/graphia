@@ -112,7 +112,7 @@ bool UserElementData<E>::setAttributeType(IGraphModel& graphModel,
         return false;
 
     auto userDataVectorName = _inverseExposedAsAttributes.at(attributeName);
-    auto* userDataVector = vector(userDataVectorName);
+    const auto* userDataVector = vector(userDataVectorName);
     auto* attribute = graphModel.attributeByName(attributeName);
 
     if(!userDataVector->canConvertTo(type))

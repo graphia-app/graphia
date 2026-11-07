@@ -500,7 +500,7 @@ QString TabularData::contentIdentityOf(const QUrl& url)
     int numLinesScanned = 0;
     std::map<char, size_t> counts;
 
-    std::istream* is = nullptr;
+    const std::istream* is = nullptr;
     do
     {
         std::string line;
