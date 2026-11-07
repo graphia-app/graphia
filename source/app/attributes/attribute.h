@@ -348,9 +348,6 @@ public:
 
     bool hasMissingValues() const;
 
-    template<typename T, typename E>
-    using ValueOfFn = T(Attribute::*)(E&) const;
-
     int intValueOf(NodeId nodeId) const override { return intValueOf<NodeId>(nodeId); }
     int intValueOf(EdgeId edgeId) const override { return intValueOf<EdgeId>(edgeId); }
     int intValueOf(const IGraphComponent& graphComponent) const override

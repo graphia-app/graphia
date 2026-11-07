@@ -190,7 +190,7 @@ struct AttributesOpVistor
         auto lhs = _lhs;
         auto rhs = _rhs;
 
-        Attribute::ValueOfFn<QString, E> valueOfFn = &Attribute::valueOf<QString, E>;
+        auto valueOfFn = &Attribute::valueOf<QString, E>;
 
         if(lhs.valueType() != ValueType::String || rhs.valueType() != ValueType::String)
             valueOfFn = &Attribute::stringValueOf<E>;
@@ -330,7 +330,7 @@ struct AttributeValueOpVistor
     {
         auto attribute = _lhs;
 
-        Attribute::ValueOfFn<QString, E> valueOfFn = &Attribute::valueOf<QString, E>;
+        auto valueOfFn = &Attribute::valueOf<QString, E>;
 
         if(attribute.valueType() != ValueType::String)
             valueOfFn = &Attribute::stringValueOf<E>;
