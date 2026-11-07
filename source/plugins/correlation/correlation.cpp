@@ -106,7 +106,7 @@ class CovarianceCorrelation : public ContinuousCorrelation
 {
 private:
     auto process(const ContinuousDataVectors& vectors, const QVariantMap& parameters,
-        Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const
+        const Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const
     {
         size_t size = vectors.front().size();
 
@@ -390,7 +390,7 @@ private:
     };
 
     auto process(const TokenisedDataVectors& vectors, const QVariantMap& parameters,
-        Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const
+        const Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const
     {
         const size_t size = vectors.front().size();
         auto treatAsBinary = parameters[u"treatAsBinary"_s].toBool();
