@@ -121,8 +121,8 @@ public:
     {
     private:
         const KnnProtoGraph* _protoGraph = nullptr;
-        typename std::vector<ProtoNode>::const_iterator _protoNodeIt;
-        typename std::vector<typename ProtoNode::ProtoEdge>::const_iterator _protoEdgeIt;
+        typename std::vector<ProtoNode>::const_iterator _protoNodeIt{};
+        typename std::vector<typename ProtoNode::ProtoEdge>::const_iterator _protoEdgeIt{};
 
     public:
         using self_type = iterator;
