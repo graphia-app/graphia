@@ -322,8 +322,17 @@ private slots:
         QCOMPARE(model.nodePartition(u"MCLCluster"_s), partition);
     }
 
-    void weightedLouvain()
+    void weightedClustering_data()
     {
+        QTest::addColumn<QString>("transform");
+
+        QTest::newRow("louvain") << u"WeightedLouvainCluster"_s;
+    }
+
+    void weightedClustering()
+    {
+        QFETCH(const QString, transform);
+
         auto model = createTwoCliquesGraph();
 
         // Weight the edges so that the strongest grouping no longer follows the cliques
@@ -337,9 +346,9 @@ private slots:
         weights[{u"a1"_s, u"b1"_s}] = 100.0;
         model->addEdgeAttribute(u"Weight"_s, weights);
 
-        QCOMPARE(model->applyTransforms({u"WeightedLouvainCluster using $Weight"_s}), QStringList{});
+        QCOMPARE(model->applyTransforms({u"%1 using $Weight"_s.arg(transform)}), QStringList{});
 
-        auto partition = model->nodePartition(u"WeightedLouvainCluster"_s);
+        auto partition = model->nodePartition(transform);
         QVERIFY2(partition.contains(u"a1 b1"_s), qPrintable(partition.join(u", "_s)));
     }
 
