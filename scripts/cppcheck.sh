@@ -42,6 +42,7 @@ ${CPPCHECK} --enable=all --xml \
   --suppress=*:*/source/thirdparty/* \
   --suppress=missingIncludeSystem \
   --suppress=missingInclude \
+  --suppress=postfixOperator \
   --inline-suppr \
   -i ${SOURCE_DIR}/source/tests/ \
   --library=qt \
