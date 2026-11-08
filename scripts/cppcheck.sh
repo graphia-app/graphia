@@ -38,6 +38,7 @@ fi
 ${CPPCHECK} --version
 ${CPPCHECK} --check-config ${SYSTEM_INCLUDE_DIRS} ${INCLUDE_DIRS} ${DEFINES} ${CPP_FILES}
 ${CPPCHECK} --enable=all --xml \
+  --check-level=exhaustive \
   --suppress=*:*/source/thirdparty/* \
   --inline-suppr \
   -i ${SOURCE_DIR}/source/tests/ \
