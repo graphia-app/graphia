@@ -223,6 +223,35 @@ private slots:
         }
     }
 
+    void clusteringGranularityTypes_data()
+    {
+        QTest::addColumn<QString>("transform");
+
+        QTest::newRow("louvain") << u"LouvainCluster"_s;
+    }
+
+    // A granularity written as an integer is the same number written with a decimal point
+    void clusteringGranularityTypes()
+    {
+        QFETCH(const QString, transform);
+
+        for(const auto& granularity : {u"0"_s, u"1"_s})
+        {
+            auto integerModel = createTwoCliquesGraph();
+            QCOMPARE(integerModel->applyTransforms({u"%1 with Granularity = %2"_s.arg(transform, granularity)}), QStringList{});
+
+            auto decimalModel = createTwoCliquesGraph();
+            QCOMPARE(decimalModel->applyTransforms({u"%1 with Granularity = %2.0"_s.arg(transform, granularity)}), QStringList{});
+
+            QCOMPARE(integerModel->nodePartition(transform), decimalModel->nodePartition(transform));
+        }
+
+        auto model = createTwoCliquesGraph();
+        const auto attributeNames = model->graphModel().attributeNames();
+        QVERIFY(!model->applyTransforms({u"%1 with Granularity = \"fine\""_s.arg(transform)}).isEmpty());
+        QVERIFY(model->graphModel().attributeNames() == attributeNames);
+    }
+
     // A node whose neighbours include a hub with a little over a thousand neighbours of its
     // own: after expansion, its column has over 10% of its mass in values small enough to be
     // pruned, but fewer values in all than MCL keeps when it recovers pruned mass

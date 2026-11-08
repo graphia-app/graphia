@@ -23,6 +23,7 @@
 
 #include "shared/graph/grapharray.h"
 #include "shared/utils/container.h"
+#include "shared/utils/visitor.h"
 
 #include "app/graph/graphmodel.h"
 
@@ -44,8 +45,15 @@ using namespace Qt::Literals::StringLiterals;
 
 void LouvainTransform::apply(TransformedGraph& target)
 {
-    auto resolution = 1.0 - std::get<double>(
-        config().parameterByName(u"Granularity"_s)->_value);
+    auto granularity = config().parameterByName(u"Granularity"_s)->valueAsNumber();
+
+    if(std::isnan(granularity))
+    {
+        addAlert(AlertType::Error, QObject::tr("Invalid parameter"));
+        return;
+    }
+
+    auto resolution = 1.0 - granularity;
 
     const auto minResolution = 0.5;
     const auto maxResolution = 30.0;
