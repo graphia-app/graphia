@@ -40,6 +40,7 @@ ${CPPCHECK} --check-config ${SYSTEM_INCLUDE_DIRS} ${INCLUDE_DIRS} ${DEFINES} ${C
 ${CPPCHECK} --enable=all --xml \
   --suppress=*:*/source/thirdparty/* \
   --inline-suppr \
-  --library=${SOURCE_DIR}/scripts/cppcheck.cfg \
+  -i ${SOURCE_DIR}/source/tests/ \
+  --library=qt \
   ${SYSTEM_INCLUDE_DIRS} ${INCLUDE_DIRS} ${DEFINES} \
   ${CPP_FILES} 2>&1 | tee cppcheck-${VERSION}.log

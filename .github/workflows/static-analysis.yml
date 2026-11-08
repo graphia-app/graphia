@@ -67,12 +67,13 @@ jobs:
 
   cppcheck:
     name: cppcheck
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
     - uses: actions/checkout@v7
     - name: Install Tools
       run: |
-        scripts/install-llvm.sh ${{ env.CLANG_VERSION }} cppcheck
+        sudo apt-get update
+        sudo apt-get install -y cppcheck
     - name: Install Qt
       uses: ./.github/actions/install-qt
     - uses: actions/download-artifact@v8

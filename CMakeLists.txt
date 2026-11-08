@@ -99,7 +99,6 @@ list(APPEND MISC
     ${CMAKE_CURRENT_LIST_DIR}/scripts/clazy.sh
     ${CMAKE_CURRENT_LIST_DIR}/scripts/cloc.sh
     ${CMAKE_CURRENT_LIST_DIR}/scripts/coverage.sh
-    ${CMAKE_CURRENT_LIST_DIR}/scripts/cppcheck.cfg
     ${CMAKE_CURRENT_LIST_DIR}/scripts/cppcheck.sh
     ${CMAKE_CURRENT_LIST_DIR}/scripts/emsdk-version-for-qt-version.sh
     ${CMAKE_CURRENT_LIST_DIR}/scripts/install-llvm.sh
