@@ -96,18 +96,18 @@ void LouvainTransform::apply(TransformedGraph& target)
 
     NodeArray<CommunityId> communities(target);
     NodeArray<double> weightedDegrees(target);
-    std::map<CommunityId, int> communityDegrees;
+    std::map<CommunityId, double> communityDegrees;
 
     auto add = [&](CommunityId community, NodeId nodeId)
     {
         communities[nodeId] = community;
-        communityDegrees[community] += static_cast<int>(weightedDegrees[nodeId]);
+        communityDegrees[community] += weightedDegrees[nodeId];
     };
 
     auto remove = [&](CommunityId community, NodeId nodeId)
     {
         communities[nodeId].setToNull();
-        communityDegrees[community] -= static_cast<int>(weightedDegrees[nodeId]);
+        communityDegrees[community] -= weightedDegrees[nodeId];
     };
 
     auto relabel = [&](MutableGraph& graph)

@@ -342,6 +342,36 @@ private slots:
         auto partition = model->nodePartition(u"WeightedLouvainCluster"_s);
         QVERIFY2(partition.contains(u"a1 b1"_s), qPrintable(partition.join(u", "_s)));
     }
+
+    void weightedClusteringIsScaleInvariant_data()
+    {
+        QTest::addColumn<QString>("transform");
+
+        QTest::newRow("louvain") << u"WeightedLouvainCluster"_s;
+    }
+
+    // Weighting every edge equally gives the clusters of the unweighted graph, whatever the weight
+    void weightedClusteringIsScaleInvariant()
+    {
+        QFETCH(const QString, transform);
+
+        for(auto weight : {0.1, 1.0, 10.0})
+        {
+            auto model = createTwoCliquesGraph();
+
+            std::map<std::pair<QString, QString>, double> weights;
+            for(const auto& edgeName : twoCliquesEdges)
+            {
+                auto nodes = edgeName.split(u'-');
+                weights[{nodes.at(0), nodes.at(1)}] = weight;
+            }
+
+            model->addEdgeAttribute(u"Weight"_s, weights);
+
+            QCOMPARE(model->applyTransforms({u"%1 using $Weight"_s.arg(transform)}), QStringList{});
+            QCOMPARE(model->nodePartition(transform), twoCliquesPartition);
+        }
+    }
 };
 
 QTEST_MAIN(TestAnalysisTransforms)
