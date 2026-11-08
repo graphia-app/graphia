@@ -86,6 +86,7 @@ private:
 
     Cancellable _graphSizeEstimateCancellable;
     QFutureWatcher<QVariantMap> _graphSizeEstimateFutureWatcher;
+    bool _graphSizeEstimatePending = false;
     QVariantMap _graphSizeEstimate;
 
     QVariantMap dataRect() const;

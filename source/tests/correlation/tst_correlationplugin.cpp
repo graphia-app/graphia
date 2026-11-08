@@ -41,6 +41,7 @@
 #include <QString>
 #include <QStringList>
 #include <QTest>
+#include <QThread>
 #include <QUrl>
 #include <QVariantMap>
 #include <QVector>
@@ -1442,9 +1443,21 @@ private slots:
         QCOMPARE(estimate.value(u"numUniqueEdges"_s).value<QVector<double>>(), QVector<double>{1.0});
     }
 
-    // An estimate asked for while another is being made is made after it
+    void importParserQueuedEstimate_data()
+    {
+        QTest::addColumn<bool>("firstFinishesFirst");
+
+        QTest::newRow("Asked for while the first is being made") << false;
+
+        // The first's result is still to be handled, as no events are processed in between
+        QTest::newRow("Asked for once the first is made") << true;
+    }
+
+    // An estimate asked for before another's result is given is made after it
     void importParserQueuedEstimate()
     {
+        QFETCH(const bool, firstFinishesFirst);
+
         auto parser = parse(write(u"data.csv"_s, Csv));
         QVERIFY(parser != nullptr);
         QCOMPARE(rect(dataRect(parser.get(), "autoDetectDataRectangle")), QRect(2, 2, 6, 5));
@@ -1458,6 +1471,9 @@ private slots:
             {u"correlationDataType"_s, static_cast<int>(CorrelationDataType::Continuous)},
             {u"continuousCorrelationType"_s, static_cast<int>(CorrelationType::Pearson)},
         })));
+
+        while(firstFinishesFirst && parser->property("graphSizeEstimateInProgress").toBool())
+            QThread::yieldCurrentThread();
 
         QMetaObject::invokeMethod(parser.get(), "estimateGraphSize", Q_ARG(QVariantMap, (QVariantMap
         {

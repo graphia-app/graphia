@@ -268,6 +268,7 @@ CorrelationTabularDataParser::CorrelationTabularDataParser()
 
     connect(&_graphSizeEstimateFutureWatcher, &QFutureWatcher<QVariantMap>::finished, [this]
     {
+        _graphSizeEstimatePending = false;
         _graphSizeEstimate = _graphSizeEstimateFutureWatcher.result();
         emit graphSizeEstimateChanged();
 
@@ -550,7 +551,7 @@ void CorrelationTabularDataParser::estimateGraphSize(const QVariantMap& paramete
     if(_dataPtr == nullptr)
         return;
 
-    if(_graphSizeEstimateFutureWatcher.isRunning() || _dataRectangleFutureWatcher.isRunning())
+    if(_graphSizeEstimatePending || _dataRectangleFutureWatcher.isRunning())
     {
         _graphSizeEstimateQueuedParameters = parameters;
         return;
@@ -617,6 +618,7 @@ void CorrelationTabularDataParser::estimateGraphSize(const QVariantMap& paramete
     _graphSizeEstimateQueuedParameters.clear();
     _graphSizeEstimateCancellable.uncancel();
 
+    _graphSizeEstimatePending = true;
     _graphSizeEstimateFutureWatcher.setFuture(future);
 }
 
