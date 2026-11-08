@@ -165,6 +165,18 @@ QString GraphTransformConfig::Parameter::valueAsString(NamedBool<"forExpression"
     return std::visit(Visitor(forExpression), _value);
 }
 
+double GraphTransformConfig::Parameter::valueAsNumber() const
+{
+    struct Visitor
+    {
+        double operator()(double d) const       { return d; }
+        double operator()(int i) const          { return static_cast<double>(i); }
+        double operator()(const QString&) const { return std::nan(""); }
+    };
+
+    return std::visit(Visitor(), _value);
+}
+
 bool GraphTransformConfig::hasCondition() const
 {
     struct ConditionVisitor
