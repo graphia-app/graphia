@@ -68,7 +68,7 @@ inline MatrixTypeResult isAdjacencyMatrix(const TabularData& tabularData, QPoint
                     headerMatch = false;
                 }
 
-                       // The first entry could be headers so don't enforce check for a double
+                // The first entry could be headers so don't enforce check for a double
                 if(rowIndex > 0)
                 {
                     if(!u::isNumeric(value) && !value.isEmpty())
@@ -100,11 +100,11 @@ inline MatrixTypeResult isAdjacencyMatrix(const TabularData& tabularData, QPoint
         topLeft->setY(firstRowAllDouble ? 0 : 1);
     }
 
-    if(headerMatch || firstColumnAllDouble || firstRowAllDouble)
-        return {._isMatrix = true, ._reason = {}};
+    const bool neitherSideAllDoubles = !firstColumnAllDouble && !firstRowAllDouble;
+    if(neitherSideAllDoubles && !headerMatch)
+        return {._isMatrix = false, ._reason = QObject::tr("Matrix headers don't match.")};
 
-    return {._isMatrix = false, ._reason = !headerMatch ? QObject::tr("Matrix headers don't match.") :
-        QObject::tr("Matrix doesn't have numeric first row or column.")};
+    return {._isMatrix = true, ._reason = {}};
 }
 
 inline MatrixTypeResult isEdgeList(const TabularData& tabularData, size_t maxRows = 5)

@@ -3151,10 +3151,6 @@ Supported data types: %2</translation>
         <translation>Matrix headers don&apos;t match.</translation>
     </message>
     <message>
-        <source>Matrix doesn&apos;t have numeric first row or column.</source>
-        <translation>Matrix doesn&apos;t have numeric first row or column.</translation>
-    </message>
-    <message>
         <source>Edge list doesn&apos;t have 3 columns.</source>
         <translation>Edge list doesn&apos;t have 3 columns.</translation>
     </message>
