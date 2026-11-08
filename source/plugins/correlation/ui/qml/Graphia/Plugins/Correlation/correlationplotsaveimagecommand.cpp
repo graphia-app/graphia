@@ -132,7 +132,9 @@ bool CorrelationPlotSaveImageCommand::execute()
     std::unique_lock<std::mutex> lock(_mutex);
     auto totalImages = _images.size();
 
-    Q_ASSERT(!_images.empty());
+    if(totalImages == 0)
+        return true;
+
     saveNextImage();
 
     while(!_images.empty())
