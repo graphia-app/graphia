@@ -43,6 +43,7 @@ ${CPPCHECK} --enable=all --xml \
   --suppress=missingIncludeSystem \
   --suppress=missingInclude \
   --suppress=postfixOperator \
+  --suppress=functionStatic \
   --inline-suppr \
   -i ${SOURCE_DIR}/source/tests/ \
   --library=qt \
