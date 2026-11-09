@@ -117,21 +117,12 @@ std::vector<EdgeId> MutableGraph::edgeIdsBetween(NodeId nodeIdA, NodeId nodeIdB)
 
 EdgeId MutableGraph::firstEdgeIdBetween(NodeId nodeIdA, NodeId nodeIdB) const
 {
-    const auto& nodeA = nodeById(nodeIdA);
+    auto connection = _e._connections.find(UndirectedEdge(nodeIdA, nodeIdB));
 
-    for(auto edgeId : nodeA._outEdgeIds)
-    {
-        if(edgeById(edgeId).targetId() == nodeIdB)
-            return edgeId;
-    }
+    if(connection == _e._connections.end())
+        return {};
 
-    for(auto edgeId : nodeA._inEdgeIds)
-    {
-        if(edgeById(edgeId).sourceId() == nodeIdB)
-            return edgeId;
-    }
-
-    return {};
+    return *connection->second.begin();
 }
 
 bool MutableGraph::edgeExistsBetween(NodeId nodeIdA, NodeId nodeIdB) const
@@ -385,11 +376,9 @@ EdgeId MutableGraph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
     nodeBy(sourceId)._outEdgeIds.add(edgeId);
     nodeBy(targetId)._inEdgeIds.add(edgeId);
 
-    auto undirectedEdge = UndirectedEdge(sourceId, targetId);
-    if(!u::contains(_e._connections, undirectedEdge))
-        _e._connections.emplace(undirectedEdge, EdgeIdDistinctSet(&_e._mergedEdgeIds));
-
-    _e._connections[undirectedEdge].add(edgeId);
+    auto& connection = _e._connections.try_emplace(
+        UndirectedEdge(sourceId, targetId), &_e._mergedEdgeIds).first->second;
+    connection.add(edgeId);
 
     emit edgeAdded(this, edgeId);
     _updateRequired = true;

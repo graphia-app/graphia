@@ -24,6 +24,9 @@
 
 #include <tuple>
 #include <algorithm>
+#include <cstddef>
+#include <cstdint>
+#include <functional>
 
 class UndirectedEdge
 {
@@ -44,6 +47,19 @@ public:
 
         return lo < other.lo;
     }
+
+    bool operator==(const UndirectedEdge& other) const = default;
+
+    struct Hash
+    {
+        size_t operator()(const UndirectedEdge& edge) const noexcept
+        {
+            auto low = static_cast<uint32_t>(static_cast<int>(edge.lo));
+            auto high = static_cast<uint32_t>(static_cast<int>(edge.hi));
+
+            return std::hash<uint64_t>{}((static_cast<uint64_t>(low) << 32U) | high);
+        }
+    };
 };
 
 #endif // UNDIRECTEDEDGE_H

@@ -28,7 +28,7 @@
 #include <cstddef>
 #include <mutex>
 #include <vector>
-#include <map>
+#include <unordered_map>
 
 class MutableGraph : public Graph, public virtual IMutableGraph
 {
@@ -78,7 +78,7 @@ private:
         EdgeIdDistinctSetCollection _inEdgeIdsCollection;
         EdgeIdDistinctSetCollection _outEdgeIdsCollection;
 
-        std::map<UndirectedEdge, EdgeIdDistinctSet> _connections;
+        std::unordered_map<UndirectedEdge, EdgeIdDistinctSet, UndirectedEdge::Hash> _connections;
 
         void resize(std::size_t size)
         {
