@@ -265,6 +265,12 @@ jobs:
       run: |
         . .\scripts\enter-vs-dev-shell.ps1
         ctest --test-dir build --output-on-failure
+    - name: Repeat Command Manager Tests
+      if: ${{ success() || failure() }}
+      shell: pwsh
+      run: |
+        . .\scripts\enter-vs-dev-shell.ps1
+        ctest --test-dir build -R '^tst_commandmanager' --repeat until-fail:200 --output-on-failure
     - uses: actions/upload-artifact@v7
       with:
         name: windows-asan-logs
