@@ -3784,8 +3784,36 @@ Supported data types: %2</translation>
         <translation>The Louvain cluster in which the node resides.</translation>
     </message>
     <message>
+        <source>Leiden Iteration %1.%2</source>
+        <translation>Leiden Iteration %1.%2</translation>
+    </message>
+    <message>
+        <source>Leiden Iteration %1.%2 Refining</source>
+        <translation>Leiden Iteration %1.%2 Refining</translation>
+    </message>
+    <message>
+        <source>Leiden Iteration %1.%2 Coarsening</source>
+        <translation>Leiden Iteration %1.%2 Coarsening</translation>
+    </message>
+    <message>
+        <source>Leiden Initialising</source>
+        <translation>Leiden Initializing</translation>
+    </message>
+    <message>
+        <source>Leiden Finalising</source>
+        <translation>Leiden Finalizing</translation>
+    </message>
+    <message>
+        <source>The Leiden cluster in which the node resides.</source>
+        <translation>The Leiden cluster in which the node resides.</translation>
+    </message>
+    <message>
         <source>Cluster %1</source>
         <translation>Cluster %1</translation>
+    </message>
+    <message>
+        <source>The size of the Leiden cluster in which the node resides.</source>
+        <translation>The size of the Leiden cluster in which the node resides.</translation>
     </message>
     <message>
         <source>The size of the Louvain cluster in which the node resides.</source>
@@ -4211,6 +4239,30 @@ Supported data types: %2</translation>
     <message>
         <source>Louvain Modularity</source>
         <translation>Louvain Modularity</translation>
+    </message>
+    <message>
+        <source>Leiden Cluster</source>
+        <translation>Leiden Cluster</translation>
+    </message>
+    <message>
+        <source>Weighted Leiden Cluster</source>
+        <translation>Weighted Leiden Cluster</translation>
+    </message>
+    <message>
+        <source>Weighted Leiden Cluster Size</source>
+        <translation>Weighted Leiden Cluster Size</translation>
+    </message>
+    <message>
+        <source>Leiden Cluster Size</source>
+        <translation>Leiden Cluster Size</translation>
+    </message>
+    <message>
+        <source>%1 is a method for finding clusters by measuring edge density from within communities to neighbouring communities. Unlike Louvain, every cluster it finds is guaranteed to be well connected.</source>
+        <translation>%1 is a method for finding clusters by measuring edge density from within communities to neighboring communities. Unlike Louvain, every cluster it finds is guaranteed to be well connected.</translation>
+    </message>
+    <message>
+        <source>Leiden Clustering</source>
+        <translation>Leiden Clustering</translation>
     </message>
     <message>
         <source>Granularity</source>

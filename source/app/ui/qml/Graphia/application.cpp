@@ -56,6 +56,7 @@
 #include "app/transform/transforms/edgecontractiontransform.h"
 #include "app/transform/transforms/mcltransform.h"
 #include "app/transform/transforms/louvaintransform.h"
+#include "app/transform/transforms/leidentransform.h"
 #include "app/transform/transforms/pageranktransform.h"
 #include "app/transform/transforms/eccentricitytransform.h"
 #include "app/transform/transforms/betweennesstransform.h"
@@ -202,6 +203,8 @@ Application::Application(QObject *parent, bool enableUpdateCheck) :
     addTransformFactory(std::make_unique<MCLTransformFactory>());
     addTransformFactory(std::make_unique<LouvainTransformFactory>());
     addTransformFactory(std::make_unique<WeightedLouvainTransformFactory>());
+    addTransformFactory(std::make_unique<LeidenTransformFactory>());
+    addTransformFactory(std::make_unique<WeightedLeidenTransformFactory>());
     addTransformFactory(std::make_unique<PageRankTransformFactory>());
     addTransformFactory(std::make_unique<EccentricityTransformFactory>());
     addTransformFactory(std::make_unique<BetweennessTransformFactory>());

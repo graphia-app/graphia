@@ -25,7 +25,10 @@
 #include <QStringList>
 
 #include <cmath>
+#include <map>
 #include <memory>
+#include <set>
+#include <vector>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -68,7 +71,53 @@ QStringList cliqueEdges(const QString& prefix, int n)
     return edges;
 }
 
+// The nodes of a clique as cliqueEdges names them, separated by spaces
+QString cliqueNodes(const QString& prefix, int n)
+{
+    QStringList nodes;
+    nodes.reserve(n);
+    for(int i = 0; i < n; i++)
+        nodes.append(u"%1%2"_s.arg(prefix).arg(i));
+
+    return nodes.join(u' ');
+}
+
 const QStringList twoCliquesPartition = {u"a1 a2 a3 a4"_s, u"b1 b2 b3 b4"_s};
+
+// The clusters whose nodes can't all reach each other through edges within the cluster
+QStringList disconnectedClusters(TestGraphModel& model, const QString& attributeName)
+{
+    const auto& graph = model.graph();
+    auto attribute = model.graphModel().attributeValueByName(attributeName);
+
+    std::map<QString, std::vector<NodeId>> clusters;
+    for(auto nodeId : graph.nodeIds())
+        clusters[attribute.stringValueOf(nodeId)].push_back(nodeId);
+
+    QStringList disconnected;
+    for(const auto& [cluster, nodeIds] : clusters)
+    {
+        std::set<NodeId> reached{nodeIds.front()};
+        std::vector<NodeId> toVisit{nodeIds.front()};
+
+        while(!toVisit.empty())
+        {
+            auto nodeId = toVisit.back();
+            toVisit.pop_back();
+
+            for(auto neighbourId : graph.neighboursOf(nodeId))
+            {
+                if(attribute.stringValueOf(neighbourId) == cluster && reached.insert(neighbourId).second)
+                    toVisit.push_back(neighbourId);
+            }
+        }
+
+        if(reached.size() != nodeIds.size())
+            disconnected.append(cluster); // clazy:exclude=reserve-candidates
+    }
+
+    return disconnected;
+}
 } // namespace
 
 class TestAnalysisTransforms : public QObject
@@ -202,6 +251,8 @@ private slots:
 
         QTest::newRow("louvain") << u"LouvainCluster"_s
             << u"LouvainCluster"_s << u"LouvainClusterSize"_s;
+        QTest::newRow("leiden") << u"LeidenCluster"_s
+            << u"LeidenCluster"_s << u"LeidenClusterSize"_s;
         QTest::newRow("mcl") << u"MCLCluster"_s
             << u"MCLCluster"_s << u"MCLClusterSize"_s;
     }
@@ -228,6 +279,7 @@ private slots:
         QTest::addColumn<QString>("transform");
 
         QTest::newRow("louvain") << u"LouvainCluster"_s;
+        QTest::newRow("leiden") << u"LeidenCluster"_s;
     }
 
     // A granularity written as an integer is the same number written with a decimal point
@@ -327,6 +379,7 @@ private slots:
         QTest::addColumn<QString>("transform");
 
         QTest::newRow("louvain") << u"WeightedLouvainCluster"_s;
+        QTest::newRow("leiden") << u"WeightedLeidenCluster"_s;
     }
 
     void weightedClustering()
@@ -357,6 +410,7 @@ private slots:
         QTest::addColumn<QString>("transform");
 
         QTest::newRow("louvain") << u"WeightedLouvainCluster"_s;
+        QTest::newRow("leiden") << u"WeightedLeidenCluster"_s;
     }
 
     // Weighting every edge equally gives the clusters of the unweighted graph, whatever the weight
@@ -379,6 +433,58 @@ private slots:
 
             QCOMPARE(model->applyTransforms({u"%1 using $Weight"_s.arg(transform)}), QStringList{});
             QCOMPARE(model->nodePartition(transform), twoCliquesPartition);
+        }
+    }
+
+    // Cliques in a ring, each joined to the next by a single edge
+    void leidenRingOfCliques()
+    {
+        const int numCliques = 6;
+        QStringList edges;
+        QStringList partition;
+        partition.reserve(numCliques);
+
+        for(int i = 0; i < numCliques; i++)
+        {
+            auto prefix = QString(QChar(u'a' + i));
+            auto nextPrefix = QString(QChar(u'a' + ((i + 1) % numCliques)));
+            edges.append(cliqueEdges(prefix, 5));
+            edges.append(u"%1%2-%3%4"_s.arg(prefix).arg(0).arg(nextPrefix).arg(4)); // clazy:exclude=reserve-candidates
+
+            partition.append(cliqueNodes(prefix, 5));
+        }
+
+        TestGraphModel model(edges);
+        QCOMPARE(model.applyTransforms({u"LeidenCluster"_s}), QStringList{});
+        QCOMPARE(model.nodePartition(u"LeidenCluster"_s), partition);
+    }
+
+    void leidenClustersAreConnected_data()
+    {
+        QTest::addColumn<QStringList>("edges");
+
+        // Louvain, at the default granularity, puts two parts of this graph with no edge between them in one cluster
+        QTest::newRow("disconnected by Louvain") << u"n0-n14 n0-n16 n1-n9 n1-n10 n1-n14 n1-n15 n2-n8 n2-n12 n2-n20 n3-n11 "
+            "n3-n17 n4-n16 n5-n13 n5-n20 n6-n17 n7-n8 n7-n18 n10-n11 n10-n13 n10-n18 n11-n14 n11-n18 n15-n18"_s.split(u' ');
+
+        // Moving nodes alone, without the refinement, does the same to this one
+        QTest::newRow("disconnected without refinement") << u"n0-n2 n0-n15 n0-n23 n1-n4 n1-n24 n2-n11 n2-n20 n2-n23 "
+            "n4-n6 n6-n9 n6-n23 n8-n11 n8-n21 n9-n17 n10-n16 n10-n23 n12-n15 n17-n18 n18-n22 n18-n24 n20-n21"_s.split(u' ');
+    }
+
+    void leidenClustersAreConnected()
+    {
+        QFETCH(const QStringList, edges);
+
+        for(int granularity = 0; granularity <= 10; granularity++)
+        {
+            auto granularityText = QString::number(granularity / 10.0, 'f', 1);
+
+            TestGraphModel model(edges);
+            QCOMPARE(model.applyTransforms({u"LeidenCluster with Granularity = %1"_s.arg(granularityText)}), QStringList{});
+
+            auto disconnected = disconnectedClusters(model, u"LeidenCluster"_s);
+            QVERIFY2(disconnected.isEmpty(), qPrintable(u"Granularity %1: %2"_s.arg(granularityText, disconnected.join(u", "_s))));
         }
     }
 };
