@@ -46,6 +46,7 @@ ${CPPCHECK} --enable=all --xml \
   --suppress=functionStatic \
   --suppress=unusedFunction \
   --suppress=shadowFunction \
+  --suppress=duplInheritedMember \
   --inline-suppr \
   -i ${SOURCE_DIR}/source/tests/ \
   --library=qt \
