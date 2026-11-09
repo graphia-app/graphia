@@ -41,7 +41,6 @@ class MeanPosition : public CircularBuffer<QVector3D, MAX_SMOOTHING>
 class NodePositions : public NodeArray<MeanPosition>
 {
 private:
-    mutable std::recursive_mutex _mutex;
     mutable std::thread::id _threadId;
 
     float _scale = 1.0f;
