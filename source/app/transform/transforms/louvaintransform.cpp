@@ -22,8 +22,6 @@
 #include "app/transform/transformedgraph.h"
 
 #include "shared/graph/grapharray.h"
-#include "shared/utils/container.h"
-#include "shared/utils/visitor.h"
 
 #include "app/graph/graphmodel.h"
 
@@ -37,6 +35,7 @@
 #include <cstdint>
 #include <iterator>
 #include <numeric>
+#include <span>
 #include <utility>
 
 using namespace Qt::Literals::StringLiterals;
@@ -96,7 +95,56 @@ void LouvainTransform::apply(TransformedGraph& target)
 
     NodeArray<CommunityId> communities(target);
     NodeArray<double> weightedDegrees(target);
-    std::map<CommunityId, double> communityDegrees;
+    NodeArray<double> communityDegrees(target, 0.0);
+
+    // The weight from one node to each community it neighbours
+    NodeArray<double> neighbourCommunityWeights(target, 0.0);
+    NodeArray<bool> isNeighbourCommunity(target, false);
+    std::vector<CommunityId> neighbourCommunityIds;
+
+    struct Neighbour
+    {
+        NodeId _nodeId;
+        double _weight;
+    };
+
+    // A graph reduced to its nodes and their neighbours, each node's neighbours being contiguous
+    struct Level
+    {
+        std::vector<NodeId> _nodeIds;
+        std::vector<Neighbour> _neighbours;
+        NodeArray<size_t> _neighbourStarts;
+        NodeArray<size_t> _neighbourEnds;
+    };
+
+    auto emptyLevel = [&]
+    {
+        return Level{._nodeIds = {}, ._neighbours = {},
+            ._neighbourStarts = NodeArray<size_t>(target), ._neighbourEnds = NodeArray<size_t>(target)};
+    };
+
+    auto targetLevel = [&]
+    {
+        auto level = emptyLevel();
+
+        for(auto nodeId : target.nodeIds())
+        {
+            if(target.typeOf(nodeId) == MultiElementType::Tail)
+                continue;
+
+            level._nodeIds.push_back(nodeId);
+            level._neighbourStarts[nodeId] = level._neighbours.size();
+
+            for(auto edgeId : target.nodeById(nodeId).edgeIds())
+                level._neighbours.push_back({target.edgeById(edgeId).oppositeId(nodeId), weights[edgeId]});
+
+            level._neighbourEnds[nodeId] = level._neighbours.size();
+        }
+
+        return level;
+    };
+
+    auto level = targetLevel();
 
     auto add = [&](CommunityId community, NodeId nodeId)
     {
@@ -110,90 +158,107 @@ void LouvainTransform::apply(TransformedGraph& target)
         communityDegrees[community] -= weightedDegrees[nodeId];
     };
 
-    auto relabel = [&](const MutableGraph& graph)
+    auto addNeighbourWeight = [&](CommunityId community, double weight)
     {
-        std::map<CommunityId, CommunityId> idMap;
+        if(!isNeighbourCommunity.get(community))
+        {
+            isNeighbourCommunity.set(community, true);
+            neighbourCommunityIds.push_back(community);
+        }
+
+        neighbourCommunityWeights[community] += weight;
+    };
+
+    auto clearNeighbourWeights = [&]
+    {
+        for(auto community : neighbourCommunityIds)
+        {
+            neighbourCommunityWeights[community] = 0.0;
+            isNeighbourCommunity.set(community, false);
+        }
+
+        neighbourCommunityIds.clear();
+    };
+
+    auto neighboursOf = [&](NodeId nodeId)
+    {
+        auto start = level._neighbourStarts[nodeId];
+        return std::span(level._neighbours).subspan(start, level._neighbourEnds[nodeId] - start);
+    };
+
+    auto relabel = [&]
+    {
+        NodeArray<CommunityId> idMap(target);
         CommunityId nextCommunityId = 0;
 
-        for(auto nodeId : graph.nodeIds())
+        for(auto nodeId : level._nodeIds)
         {
-            if(graph.typeOf(nodeId) == MultiElementType::Tail)
-                continue;
-
             auto oldCommunityId = communities[nodeId];
 
-            if(!u::contains(idMap, oldCommunityId))
-                communities[nodeId] = idMap[oldCommunityId] = nextCommunityId++;
-            else
-                communities[nodeId] = idMap.at(oldCommunityId);
+            if(idMap[oldCommunityId].isNull())
+                idMap[oldCommunityId] = nextCommunityId++;
+
+            communities[nodeId] = idMap[oldCommunityId];
         }
     };
 
-    auto coarsen = [&](MutableGraph& graph)
+    // Each community becomes a node, whose neighbours are the communities its members neighbour
+    auto coarsen = [&]
     {
-        MutableGraph coarseGraph;
-        EdgeArray<double> newWeights(target, 0.0);
-
-        coarseGraph.performTransaction([&](IMutableGraph&)
+        std::vector<std::vector<NodeId>> communityMembers;
+        for(auto nodeId : level._nodeIds)
         {
-            // Create a node for each community
-            for(auto nodeId : graph.nodeIds())
+            auto index = static_cast<size_t>(communities[nodeId]);
+            if(index >= communityMembers.size())
+                communityMembers.resize(index + 1);
+
+            communityMembers[index].push_back(nodeId); // clazy:exclude=reserve-candidates
+        }
+
+        auto coarseLevel = emptyLevel();
+        uint64_t communityIndex = 0;
+
+        for(const auto& members : communityMembers)
+        {
+            setProgress(static_cast<int>((communityIndex++ * 100) /
+                static_cast<uint64_t>(communityMembers.size())));
+
+            if(cancelled())
+                break;
+
+            clearNeighbourWeights();
+            for(auto nodeId : members)
             {
-                if(graph.typeOf(nodeId) == MultiElementType::Tail)
-                    continue;
-
-                auto newNodeId = communities[nodeId];
-
-                if(coarseGraph.containsNodeId(newNodeId))
-                    continue;
-
-                coarseGraph.reserveNodeId(newNodeId);
-                auto assignedNodeId = coarseGraph.addNode(newNodeId);
-                Q_ASSERT(assignedNodeId == newNodeId);
+                for(auto [neighbourNodeId, weight] : neighboursOf(nodeId))
+                    addNeighbourWeight(communities[neighbourNodeId], weight);
             }
 
-            uint64_t edgeIndex = 0;
+            auto communityId = communities[members.front()];
+            coarseLevel._nodeIds.push_back(communityId);
+            coarseLevel._neighbourStarts[communityId] = coarseLevel._neighbours.size();
 
-            // Create an edge between community nodes for each
-            // pair of connected communities in the base graph
-            for(auto edgeId : graph.edgeIds())
+            for(auto neighbourCommunityId : neighbourCommunityIds)
             {
-                setProgress(static_cast<int>((edgeIndex++ * 100) /
-                    static_cast<uint64_t>(graph.numEdges())));
-
-                if(cancelled())
-                    break;
-
-                const auto& edge = graph.edgeById(edgeId);
-                auto sourceId = communities.at(edge.sourceId());
-                auto targetId = communities.at(edge.targetId());
-                const double newWeight = weights[edgeId];
-
-                auto newEdgeId = coarseGraph.firstEdgeIdBetween(sourceId, targetId);
-                if(newEdgeId.isNull())
-                    newEdgeId = coarseGraph.addEdge(sourceId, targetId);
-
-                newWeights[newEdgeId] += newWeight;
+                coarseLevel._neighbours.push_back({neighbourCommunityId,
+                    neighbourCommunityWeights[neighbourCommunityId]});
             }
-        });
 
-        graph = coarseGraph;
-        weights = newWeights;
+            coarseLevel._neighbourEnds[communityId] = coarseLevel._neighbours.size();
+        }
+
+        return coarseLevel;
     };
 
-    auto moveNodes = [&](const MutableGraph& graph)
+    auto moveNodes = [&]
     {
         if(cancelled())
             return false;
 
         CommunityId nextCommunityId = 0;
-        for(auto nodeId : graph.nodeIds())
+        for(auto nodeId : level._nodeIds)
         {
-            if(graph.typeOf(nodeId) == MultiElementType::Tail)
-                continue;
-
-            for(auto edgeId : graph.nodeById(nodeId).edgeIds())
-                weightedDegrees[nodeId] += weights[edgeId];
+            for(const auto& neighbour : neighboursOf(nodeId))
+                weightedDegrees[nodeId] += neighbour._weight;
 
             add(nextCommunityId++, nodeId);
         }
@@ -210,54 +275,47 @@ void LouvainTransform::apply(TransformedGraph& target)
             setPhase(QObject::tr("Louvain Iteration %1.%2")
                 .arg(QString::number(progressIteration), QString::number(subProgressIteration++)));
 
-            for(auto nodeId : graph.nodeIds())
+            for(auto nodeId : level._nodeIds)
             {
                 setProgress(static_cast<int>((nodeIndex++ * 100) /
-                    static_cast<uint64_t>(graph.numNodes())));
-
-                if(graph.typeOf(nodeId) == MultiElementType::Tail)
-                    continue;
+                    static_cast<uint64_t>(level._nodeIds.size())));
 
                 // Find total weights of neighbour communities
-                std::map<CommunityId, double> neighbourCommunityWeights;
-                for(auto edgeId : graph.nodeById(nodeId).edgeIds())
+                clearNeighbourWeights();
+                for(auto [neighbourNodeId, weight] : neighboursOf(nodeId))
                 {
-                    auto neighbourNodeId = graph.edgeById(edgeId).oppositeId(nodeId);
-
                     // Skip loop edges
                     if(neighbourNodeId == nodeId)
                         continue;
 
-                    if(graph.typeOf(neighbourNodeId) == MultiElementType::Tail)
-                        continue;
-
-                    auto neighbourCommunityId = communities.at(neighbourNodeId);
-
-                    neighbourCommunityWeights[neighbourCommunityId] += weights[edgeId];
+                    addNeighbourWeight(communities.at(neighbourNodeId), weight);
                 }
 
                 auto communityId = communities[nodeId];
                 remove(communityId, nodeId);
 
                 double maxDeltaQ = 0.0;
-                auto newCommunityId = communityId;
+                CommunityId bestCommunityId;
 
-                // Find the neighbouring community with the greatest delta Q
-                for(auto [neighbourCommunityId, weight] : neighbourCommunityWeights)
+                // Find the neighbouring community with the greatest delta Q, the lowest id among equals
+                for(auto neighbourCommunityId : neighbourCommunityIds)
                 {
+                    auto weight = neighbourCommunityWeights[neighbourCommunityId];
                     auto communityWeight = communityDegrees.at(neighbourCommunityId);
                     auto nodeWeight = weightedDegrees[nodeId];
 
                     auto deltaQ = (resolution * weight) -
                         ((communityWeight * nodeWeight) / totalWeight);
 
-                    if(deltaQ > maxDeltaQ)
+                    if(deltaQ > maxDeltaQ || (deltaQ == maxDeltaQ && !bestCommunityId.isNull() &&
+                        neighbourCommunityId < bestCommunityId))
                     {
                         maxDeltaQ = deltaQ;
-                        newCommunityId = neighbourCommunityId;
+                        bestCommunityId = neighbourCommunityId;
                     }
                 }
 
+                auto newCommunityId = bestCommunityId.isNull() ? communityId : bestCommunityId;
                 add(newCommunityId, nodeId);
 
                 if(newCommunityId != communityId)
@@ -274,8 +332,6 @@ void LouvainTransform::apply(TransformedGraph& target)
         return modified;
     };
 
-    MutableGraph graph(target.mutableGraph());
-
     bool finished = false;
     do
     {
@@ -283,18 +339,18 @@ void LouvainTransform::apply(TransformedGraph& target)
 
         communities.resetElements();
         weightedDegrees.resetElements();
-        communityDegrees.clear();
+        communityDegrees.resetElements();
 
-        finished = !moveNodes(graph);
+        finished = !moveNodes();
 
         if(!finished && !cancelled())
         {
-            relabel(graph);
+            relabel();
             iterations.emplace_back(communities);
 
             setPhase(QObject::tr("Louvain Iteration %1 Coarsening")
                 .arg(QString::number(progressIteration)));
-            coarsen(graph);
+            level = coarsen();
         }
 
         progressIteration++;
@@ -309,10 +365,10 @@ void LouvainTransform::apply(TransformedGraph& target)
     // Set each CommunityId to be the same as the NodeId, initially
     for(auto nodeId : target.nodeIds())
     {
-        if(graph.typeOf(nodeId) == MultiElementType::Tail)
-            continue;
-
-        communities[nodeId] = nodeId;
+        if(target.typeOf(nodeId) == MultiElementType::Tail)
+            communities[nodeId].setToNull();
+        else
+            communities[nodeId] = nodeId;
     }
 
     // Walk back over our iterations to build the final communities
