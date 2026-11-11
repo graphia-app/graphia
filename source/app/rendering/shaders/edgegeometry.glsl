@@ -130,6 +130,16 @@ float outlineRadiusPixels(vec3 centre, float radius, float pixelsPerUnit)
         (tangentDistance * closing), widestUseful);
 }
 
+// The point on the part's axis a fraction of the way along it on screen
+// On screen, 1/w varies evenly along it, but distance doesn't
+vec3 axisPointAt(EdgePart part, float fraction)
+{
+    float wFrom = clipWAt(zToClip, part.from.z);
+    float wTo = clipWAt(zToClip, part.to.z);
+
+    return mix(part.from, part.to, (fraction * wFrom) / mix(wTo, wFrom, fraction));
+}
+
 // The edge's ends in view space, and how wide its shaft is on screen at its
 // midpoint, in pixels
 struct EdgeEnds

@@ -20,6 +20,8 @@
 #ifndef GRAPHRENDERERCORE_H
 #define GRAPHRENDERERCORE_H
 
+#include "depthprepass.h"
+#include "edgecullresults.h"
 #include "openglfunctions.h"
 #include "graphrenderertypes.h"
 #include "elementshaders.h"
@@ -88,6 +90,7 @@ struct GPUGraphData : OpenGLFunctions
 
     Primitive::ImpostorQuads _nodeQuad{1};
     Primitive::ImpostorQuads _edgeQuads{2};
+    EdgeCullResults _edgeCullResults;
     Primitive::Rectangle _rectangle;
 
     float alpha() const;
@@ -216,6 +219,8 @@ private:
 
     GLuint _depthTexture = 0;
 
+    DepthPrepass _depthPrepass;
+
     struct ComponentData
     {
         QMatrix4x4 _modelViewMatrix;
@@ -263,8 +268,18 @@ private:
     };
 
     DetailPasses detailPasses(const GPUGraphData& gpuGraphData, const PixelScaleRange& pixelScale) const;
-    void renderEdgesWithShader(QOpenGLShaderProgram& shader, GPUGraphData& gpuGraphData);
     void renderEdges(GPUGraphData& gpuGraphData, const DetailPasses& passes);
+
+    void renderToLayer(GPUGraphData& gpuGraphData);
+    void renderNodesWithShader(QOpenGLShaderProgram& shader, GPUGraphData& gpuGraphData);
+    void bindEdgeParameters(GPUGraphData& gpuGraphData);
+    void releaseEdgeParameters(GPUGraphData& gpuGraphData);
+
+    enum class CullingResults : uint8_t { None, VisibleRanges };
+
+    void renderEdgesWithShader(QOpenGLShaderProgram& shader, GPUGraphData& gpuGraphData,
+        CullingResults cullingResults = CullingResults::None);
+    bool cullHiddenEdgeStretches(GPUGraphData& gpuGraphData);
 
     void compositeElements();
     void compositeLayer(QOpenGLShaderProgram& shader, float alpha,
@@ -297,7 +312,6 @@ protected:
     Shading shading() const;
     void setShading(Shading shading);
 
-    void renderNodes(GPUGraphData& gpuGraphData);
     void renderText(GPUGraphData& gpuGraphData, const PixelScaleRange& pixelScale);
     void renderGraph();
     void render2D(QRect selectionRect = {});

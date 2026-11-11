@@ -41,14 +41,19 @@ struct ElementShaders
     {
         ComponentData,
         NodeGeometry,
+        VisibleRanges,
+        DepthPyramid,
     };
 
     static GLenum glUnit(Unit unit) { return GL_TEXTURE0 + static_cast<GLenum>(unit); }
 
     QOpenGLShaderProgram _nodes;
+    QOpenGLShaderProgram _nodeDepthPrepass;
 
     QOpenGLShaderProgram _approximateTracedEdges;
     QOpenGLShaderProgram _tracedEdges;
+    QOpenGLShaderProgram _edgeDepthPrepass;
+    QOpenGLShaderProgram _edgeCull;
 
     struct FrameUniforms
     {

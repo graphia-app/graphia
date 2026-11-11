@@ -37,6 +37,7 @@ out float projectionScale;
 out vec3 impostorPosition; // In view space
 
 #include "edgegeometry.glsl"
+#include "edgedatatexels.glsl"
 #include "element.glsl"
 
 // The part's cross-section about a point on its axis; the head's narrows to
@@ -135,6 +136,17 @@ vec2 nearClippedSpan(mat4 projectionMatrix, vec3 from, vec3 to, float radius, ve
     return clamp(span, -length(viewportSize), length(viewportSize));
 }
 
+#ifdef EDGE_TRACED
+// What the cull found; the depth prepass reads the last walk's
+uniform sampler2D visibleRanges;
+uniform bool hasVisibleRanges;
+
+vec2 visibleRangeOfPart(bool isHead)
+{
+    return texelFetch(visibleRanges, visibleRangeTexel(isHead), 0).rg;
+}
+#endif
+
 void collapse()
 {
     gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
@@ -152,6 +164,16 @@ void main()
         collapse();
         return;
     }
+
+#ifdef EDGE_DEPTH_PREPASS
+    // A part the last walk found hidden is very likely hidden still
+    // Leaving it out of the prepass can only make the cull find less
+    if(hasVisibleRanges && visibleRangeEmpty(visibleRangeOfPart(isHead)))
+    {
+        collapse();
+        return;
+    }
+#endif
 
     EdgeEnds ends = edgeEnds();
 
@@ -176,12 +198,30 @@ void main()
     vec2 along = length(between) > 0.0001 ? normalize(between) : vec2(1.0, 0.0);
     vec2 across = vec2(along.y, -along.x);
 
-    float end = (vertexPosition.y + 1.0) * 0.5;
+    // The stretch of the part the quad covers, in fractions of it on screen
+    vec2 stretch = vec2(0.0, 1.0);
+
+#if defined(EDGE_TRACED) && !defined(EDGE_DEPTH_PREPASS)
+    if(hasVisibleRanges)
+    {
+        // The quad covers only the stretch that may be seen, but the shape
+        // traced through it is the whole of it
+        stretch = visibleRangeOfPart(isHead);
+
+        if(visibleRangeEmpty(stretch))
+        {
+            collapse();
+            return;
+        }
+    }
+#endif
+
+    float end = mix(stretch.x, stretch.y, (vertexPosition.y + 1.0) * 0.5);
     vec3 onAxis = mix(part.from, part.to, end);
 
     // As little as covers the shape between the cross-sections at each end
-    CrossSection fromSection = crossSectionAt(part, isHead, part.from);
-    CrossSection toSection = crossSectionAt(part, isHead, part.to);
+    CrossSection fromSection = crossSectionAt(part, isHead, axisPointAt(part, stretch.x));
+    CrossSection toSection = crossSectionAt(part, isHead, axisPointAt(part, stretch.y));
     vec2 alongSpan;
     vec2 acrossSpan;
 
@@ -189,8 +229,8 @@ void main()
     {
         // Where the part was cut at the near plane, its surface reaches in
         // front of it from further back along the axis
-        vec3 boxFrom = onScreen.uncutPart.from;
-        vec3 boxTo = onScreen.uncutPart.to;
+        vec3 boxFrom = stretch.x <= 0.0 ? onScreen.uncutPart.from : fromSection.centre;
+        vec3 boxTo = stretch.y >= 1.0 ? onScreen.uncutPart.to : toSection.centre;
 
         alongSpan = nearClippedSpan(projectionMatrix, boxFrom, boxTo, part.radius, along, onScreen.nearZ);
         acrossSpan = nearClippedSpan(projectionMatrix, boxFrom, boxTo, part.radius, across, onScreen.nearZ);
