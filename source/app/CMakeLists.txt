@@ -90,6 +90,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/rendering/edgecullresults.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/edgedatatexels.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/elementshaders.h
+    ${CMAKE_CURRENT_LIST_DIR}/rendering/frameaccumulator.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/glyphmap.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/graphcomponentrenderer.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/graphcomponentscene.h
@@ -225,6 +226,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/rendering/edgecullresults.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/edgedatatexels.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/elementshaders.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/rendering/frameaccumulator.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/glyphmap.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/graphcomponentrenderer.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/graphcomponentscene.cpp
