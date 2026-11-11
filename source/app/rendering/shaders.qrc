@@ -14,6 +14,7 @@
         <file>shaders/nodeimpostor.frag</file>
         <file>shaders/edgeimpostor.vert</file>
         <file>shaders/edgeimpostor.frag</file>
+        <file>shaders/depthpyramid.frag</file>
         <file>shaders/fullscreen.vert</file>
         <file>shaders/marker.frag</file>
         <file>shaders/debuglines.frag</file>
