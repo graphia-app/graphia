@@ -38,6 +38,7 @@ void ElementShaders::setLighting(QOpenGLShaderProgram& program)
     {
         QVector3D _position;
         QColor _color;
+        float _specular = 1.0f;
     };
 
     const std::vector<Light> lights
@@ -54,9 +55,11 @@ void ElementShaders::setLighting(QOpenGLShaderProgram& program)
         const QByteArray light = u"lights[%1]"_s.arg(i).toLatin1();
         program.setUniformValue((light + ".position").constData(), lights.at(i)._position);
         program.setUniformValue((light + ".color").constData(), lights.at(i)._color);
+        program.setUniformValue((light + ".specular").constData(), lights.at(i)._specular);
     }
 
     program.setUniformValue("material.ks", QVector3D(1.0f, 1.0f, 1.0f));
+    program.setUniformValue("material.kd", QVector3D(1.0f, 1.0f, 1.0f));
     program.setUniformValue("material.ka", QVector3D(0.02f, 0.02f, 0.02f));
     program.setUniformValue("material.shininess", 50.0f);
 }
