@@ -925,17 +925,6 @@ void GraphRendererCore::renderGraph()
     glDisable(GL_BLEND);
     glDisable(GL_DITHER);
 
-#ifndef OPENGL_ES
-    glEnable(GL_MULTISAMPLE);
-#endif
-
-    if(hasSampleShading())
-    {
-        // Traced shapes are cut out by discarding fragments, which leaves their
-        // edges aliased unless every sample is shaded
-        glEnable(GL_SAMPLE_SHADING_ARB);
-    }
-
     for(auto& gpuGraphData : _gpuGraphData)
         gpuGraphData.clearFramebuffer();
 
@@ -951,12 +940,6 @@ void GraphRendererCore::renderGraph()
         if(gpuGraphData._unhighlightAlpha >= 1.0f)
             gpuGraphData.clearDepthbuffer();
 
-        if(hasSampleShading())
-        {
-            // Shade all samples in multi-sampling
-            glMinSampleShading(1.0f);
-        }
-
         gpuGraphData.clearFramebuffer(GL_COLOR_BUFFER_BIT);
         gpuGraphData.drawToFramebuffer();
 
@@ -965,13 +948,6 @@ void GraphRendererCore::renderGraph()
 
         renderText(gpuGraphData, pixelScale);
     }
-
-    if(hasSampleShading())
-        glDisable(GL_SAMPLE_SHADING_ARB);
-
-#ifndef OPENGL_ES
-    glDisable(GL_MULTISAMPLE);
-#endif
 }
 
 void GraphRendererCore::render2D(QRect selectionRect)
