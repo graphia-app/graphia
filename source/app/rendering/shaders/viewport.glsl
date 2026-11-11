@@ -17,12 +17,19 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// The viewport
+// The viewport, and the whole view it is part of
 
 uniform vec2 viewportSize;
+uniform float viewportFraction;
 
 // How many pixels a unit is across, where clip w is 1
 float focalLengthPixels(mat4 projectionMatrix)
 {
     return projectionMatrix[1][1] * viewportSize.y * 0.5;
+}
+
+// projectionScaleFor across the whole view, which a screenshot's tile is only part of
+float viewProjectionScale(mat4 projectionMatrix, vec3 position, float extent)
+{
+    return viewportFraction * projectionScaleFor(projectionMatrix, position, extent);
 }

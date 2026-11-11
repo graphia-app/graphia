@@ -17,6 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "outline.glsl"
+
 layout (location = 0) out vec4 fragColor;
 
 uniform sampler2D selectionTexture;
@@ -38,6 +40,9 @@ float selectedAt(vec2 offset)
 
 void main()
 {
+    float outside = OUTSIDE * outlinePixel();
+    float inside = INSIDE * outlinePixel();
+
     mat3 G[2] = mat3[](
         mat3( 1.0,  2.0,  1.0,
               0.0,  0.0,  0.0,
@@ -55,7 +60,7 @@ void main()
     {
         for(int j = -1; j <= 1; j++)
         {
-            float tap = selectedAt(vec2(i, j) * OUTSIDE);
+            float tap = selectedAt(vec2(i, j) * outside);
             gradient += vec2(G[0][i + 1][j + 1], G[1][i + 1][j + 1]) * tap;
         }
     }
@@ -67,7 +72,7 @@ void main()
     {
         // The outline is what lies between OUTSIDE out from the boundary and INSIDE in
         vec2 inward = -gradient / gradientLength;
-        outlineAlpha = clamp(selectedAt(inward * OUTSIDE) - selectedAt(-inward * INSIDE), 0.0, 1.0);
+        outlineAlpha = clamp(selectedAt(inward * outside) - selectedAt(-inward * inside), 0.0, 1.0);
     }
 
     // The interior shows only through what the outline leaves, as it does where

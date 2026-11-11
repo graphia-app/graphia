@@ -122,9 +122,7 @@ void main()
     vec3 shaded = inner ? averagedInnerColor : averagedOuterColor;
 #endif
 
-    // outline.frag counts all the neighbours along a line one pixel wide differing,
-    // and three of five along one two wide
-    float differing = clamp(1.4 - (0.8 * halfWidth), 0.6, 1.0);
+    float differing = clamp(1.4 - (0.8 * halfWidth / outlinePixel()), 0.6, 1.0);
     shaded = mix(shaded, outlineColor.rgb,
         flatness * outlineOpacityInside(halfWidth - abs(fromAxis), differing, projectionScale));
 

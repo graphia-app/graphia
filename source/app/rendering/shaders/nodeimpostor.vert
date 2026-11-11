@@ -153,6 +153,6 @@ void main()
     quadCoordinate = vertexPosition.xy;
 #endif
 
-    projectionScale = projectionScaleFor(projectionMatrix, nodeCentre,
+    projectionScale = viewProjectionScale(projectionMatrix, nodeCentre,
         widestEdgeSize > 0.0 ? widestEdgeSize : nodeRadius);
 }

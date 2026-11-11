@@ -995,6 +995,15 @@ void GraphRendererCore::setShading(Shading shading)
     }
 }
 
+void GraphRendererCore::setOutlineScale(float outlineScale)
+{
+    if(outlineScale != _outlineScale)
+    {
+        _outlineScale = outlineScale;
+        restartGathering();
+    }
+}
+
 void GraphRendererCore::resizeScreenQuad(int width, int height)
 {
     auto w = static_cast<GLfloat>(width);
@@ -1168,8 +1177,10 @@ void GraphRendererCore::renderGraph()
     _elementShaders.setFrameUniforms(
     {
         ._viewportSize = QVector2D(static_cast<float>(_width), static_cast<float>(_height)),
+        ._viewportFraction = _viewportFraction,
         ._flatness = shading() == Shading::Flat ? 1.0f : 0.0f,
         ._outlineColor = Document::contrastingColorForBackground(),
+        ._outlineScale = _outlineScale,
         ._widestEdgeSize = std::ranges::max(_gpuGraphData | std::views::transform(
             [](const auto& gpuGraphData) { return gpuGraphData._extents._largestEdgeSize; })),
         ._thresholds = detailThresholds(),
@@ -1350,12 +1361,14 @@ void GraphRendererCore::compositeInto(GLuint framebuffer, Flags<Type> type)
     _selectionShader.bind();
     _selectionShader.setUniformValue("highlightColor",
         u::pref(u"visuals/highlightColor"_s).value<QColor>());
+    _selectionShader.setUniformValue("outlineScale", _outlineScale);
     _selectionShader.release();
 
     _outlineShader.bind();
     _outlineShader.setUniformValue("outlineColor",
         Document::contrastingColorForBackground());
     _outlineShader.setUniformValue("smoothed", smoothed ? 1 : 0);
+    _outlineShader.setUniformValue("outlineScale", _outlineScale);
     _outlineShader.release();
 
     for(auto i : gpuGraphDataRenderOrder())

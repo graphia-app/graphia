@@ -379,5 +379,5 @@ void main()
     coverageDepths = coverageDepthsOf(component);
 #endif
 
-    projectionScale = projectionScaleFor(projectionMatrix, onAxis, size);
+    projectionScale = viewProjectionScale(projectionMatrix, onAxis, size);
 }

@@ -113,9 +113,9 @@ void main()
         shaded = mix(shaded, flattened(lit, color), local);
     }
 
-    // As for edges: every neighbour differs on a disc two pixels across
+    // As for edges: every neighbour differs on a disc two outline pixels across
     // This falls to three of five by about five across
-    float differing = clamp(1.3 - (0.3 * radius), 0.6, 1.0);
+    float differing = clamp(1.3 - (0.3 * radius / outlinePixel()), 0.6, 1.0);
     float inside = radius - length(fromCentre);
     shaded = mix(shaded, outlineColor.rgb, flatness * outlineOpacityInside(inside, differing, projectionScale));
 
