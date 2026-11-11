@@ -1310,6 +1310,7 @@ void GraphRenderer::render()
 void GraphRenderer::synchronize(QQuickFramebufferObject* item)
 {
     _devicePixelRatio = item->window()->devicePixelRatio();
+    setOutlineScale(static_cast<float>(_devicePixelRatio));
 
     auto* graphDisplay = qobject_cast<GraphDisplay*>(item);
 

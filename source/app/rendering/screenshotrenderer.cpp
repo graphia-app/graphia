@@ -48,7 +48,7 @@ static const int TILE_SIZE = 1024;
 // cause artefacts. Normally this isn't much of a problem, but when tile rendering,
 // said artefacts show up at every tile boundary. The solution is to overscan the
 // tile, but only use the centre pixels when composing the final image.
-static const int TILE_EXTRA = 2;
+static const int TILE_EXTRA = TILE_SIZE / 2;
 static const int TILE_SIZE_PLUS_EXTRA = TILE_SIZE + (2 * TILE_EXTRA);
 
 static QString fetchPreview(QSize screenshotSize)
@@ -127,6 +127,8 @@ void ScreenshotRenderer::requestPreview(const GraphRenderer& renderer, int image
     }
 
     auto scale = static_cast<float>(screenshotSize.height()) / static_cast<float>(renderer.height());
+    setOutlineScale(renderer.outlineScale() * scale);
+    setViewportFraction(static_cast<float>(screenshotSize.width()) / (static_cast<float>(renderer.width()) * scale));
 
     // Update Scene
     updateComponentGPUData(ScreenshotType::Preview, screenshotSize, renderOffset, scale);
@@ -186,13 +188,15 @@ void ScreenshotRenderer::requestScreenshot(const GraphRenderer& renderer, int im
         tileOffset.setY((imageHeight - screenshotSize.height()) / 2);
     }
 
+    auto scale = static_cast<float>(screenshotSize.height()) / static_cast<float>(renderer.height());
+    setOutlineScale(renderer.outlineScale() * scale);
+    setViewportFraction(static_cast<float>(TILE_SIZE_PLUS_EXTRA) / (static_cast<float>(renderer.width()) * scale));
+
     if(!resize(TILE_SIZE_PLUS_EXTRA, TILE_SIZE_PLUS_EXTRA))
     {
         qWarning() << "Attempting to render incomplete FBO";
         return;
     }
-
-    auto scale = static_cast<float>(screenshotSize.height()) / static_cast<float>(renderer.height());
 
     // Need a pixmap to construct the full image
     auto pixmap = QPixmap(imageWidth, imageHeight);

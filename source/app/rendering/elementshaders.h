@@ -80,8 +80,10 @@ struct ElementShaders
     struct FrameUniforms
     {
         QVector2D _viewportSize;
+        float _viewportFraction = 1.0f;
         float _flatness = 0.0f;
         QColor _outlineColor;
+        float _outlineScale = 1.0f;
         float _widestEdgeSize = 0.0f;
         DetailThresholds _thresholds;
     };

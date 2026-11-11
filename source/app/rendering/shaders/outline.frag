@@ -149,8 +149,87 @@ float edgeStrengthAt(ivec2 p)
     return outlineOpacity(numDiffPixels / maxNumDiffPixels, outlineProjection(projectionScale));
 }
 
+float wideEdgeStrengthAt(ivec2 p, int apart)
+{
+    vec2 own = elementAt(p);
+
+    // The nearest pixel of another element, as far out as anything shown within
+    // the outline's pixel can be blended from
+    int reach = smoothed ? apart + 1 : apart;
+    float nearest = float(reach) + 1.0;
+    ivec2 towards = ivec2(0);
+
+    for(int i = -reach; i <= reach; i++)
+    {
+        for(int j = -reach; j <= reach; j++)
+        {
+            float d = length(vec2(i, j));
+
+            if(d < nearest && elementAt(p + ivec2(i, j)).r != own.r)
+            {
+                nearest = d;
+                towards = ivec2(i, j);
+            }
+        }
+    }
+
+    if(nearest > float(reach) || (!smoothed && nearest > float(apart)))
+        discard;
+
+    // How much of the outline's pixel about it is likely to show another element
+    float within = 1.0;
+
+    if(smoothed)
+    {
+        vec3 elements, projectionScales, amounts;
+        shownAt(p, elements, projectionScales, amounts);
+        within = 0.0;
+
+        for(int i = -apart; i <= apart; i++)
+        {
+            for(int j = -apart; j <= apart; j++)
+            {
+                if(length(vec2(i, j)) > float(apart))
+                    continue;
+
+                vec3 otherElements, otherProjectionScales, otherAmounts;
+                shownAt(p + ivec2(i, j), otherElements, otherProjectionScales, otherAmounts);
+                within = max(within, 1.0 - sameShown(elements, amounts, otherElements, otherAmounts));
+            }
+        }
+
+        if(within < 1e-4)
+            discard;
+    }
+
+    vec2 other = elementAt(p + towards);
+    float projectionScale = max(own.g, other.g);
+
+    // Another element the other way, within two of the outline's pixels, makes
+    // what is between them a line that thin, with more of its neighbours differing
+    vec2 away = -normalize(vec2(towards));
+    float differing = 0.6;
+
+    for(int k = 1; k <= 2 * apart; k++)
+    {
+        vec2 beyond = elementAt(p + ivec2(round(away * float(k))));
+
+        if(beyond.r != own.r)
+        {
+            float halfWidth = (nearest + float(k) - 1.0) / (2.0 * float(apart));
+            differing = clamp(1.4 - (0.8 * halfWidth), 0.6, 1.0);
+            projectionScale = max(projectionScale, beyond.g);
+            break;
+        }
+    }
+
+    return within * outlineOpacity(differing, outlineProjection(projectionScale));
+}
+
 void main()
 {
-    float outlineAlpha = edgeStrengthAt(ivec2(gl_FragCoord.xy));
+    int apart = int(outlinePixel());
+    float outlineAlpha = apart > 1 ? wideEdgeStrengthAt(ivec2(gl_FragCoord.xy), apart) :
+        edgeStrengthAt(ivec2(gl_FragCoord.xy));
     fragColor = vec4(outlineColor.rgb, 1.0) * (outlineAlpha * alpha);
 }

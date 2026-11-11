@@ -17,6 +17,16 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// How many pixels drawn stand for each of the outline's, which are logical
+// pixels on screen; more on a high DPI display and in a screenshot
+uniform float outlineScale;
+
+// The outline's pixel, in whole pixels drawn, as far as its neighbours are apart
+float outlinePixel()
+{
+    return max(round(outlineScale), 1.0);
+}
+
 // Determines how much of an element's outline is visible based on its
 // projected size
 float outlineProjection(float projectionScale)
@@ -44,5 +54,6 @@ float outlineOpacity(float differing, float projection)
 // current pixel lies
 float outlineOpacityInside(float inside, float differing, float projectionScale)
 {
-    return clamp(1.5 - inside, 0.0, 1.0) * outlineOpacity(differing, outlineProjection(projectionScale));
+    return clamp(1.5 - (inside / outlinePixel()), 0.0, 1.0) *
+        outlineOpacity(differing, outlineProjection(projectionScale));
 }

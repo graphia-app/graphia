@@ -257,6 +257,9 @@ private:
 
     Shading _shading = Shading::Smooth;
 
+    float _outlineScale = 1.0f;
+    float _viewportFraction = 1.0f;
+
     QOpenGLShaderProgram _selectionMarkerShader;
     QOpenGLBuffer _selectionMarkerDataBuffer;
     QOpenGLVertexArrayObject _selectionMarkerDataVAO;
@@ -355,6 +358,11 @@ protected:
 
     Shading shading() const;
     void setShading(Shading shading);
+
+    float outlineScale() const { return _outlineScale; }
+    void setOutlineScale(float outlineScale);
+
+    void setViewportFraction(float viewportFraction) { _viewportFraction = viewportFraction; }
 
     void renderText(GPUGraphData& gpuGraphData, const PixelScaleRange& pixelScale);
     void renderGraph();

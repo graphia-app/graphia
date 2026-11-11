@@ -131,8 +131,10 @@ void ElementShaders::setFrameUniforms(const FrameUniforms& uniforms)
     const auto setShared = [&](QOpenGLShaderProgram& program)
     {
         program.setUniformValue("viewportSize", uniforms._viewportSize);
+        program.setUniformValue("viewportFraction", uniforms._viewportFraction);
         program.setUniformValue("flatness", uniforms._flatness);
         program.setUniformValue("outlineColor", uniforms._outlineColor);
+        program.setUniformValue("outlineScale", uniforms._outlineScale);
     };
 
     for(auto* program : nodeShaders())
