@@ -110,6 +110,7 @@ void GPUGraphData::initialise(QOpenGLShaderProgram& nodesShader,
     _sphere.setRings(16 * tessellationFactor);
     _sphere.setSlices(16 * tessellationFactor);
     _sphere.create(nodesShader);
+    _nodeQuad.create(nodesShader);
 
     _arrow.setRadius(1.0f);
     _arrow.setLength(1.0f);
@@ -220,7 +221,7 @@ void GPUGraphData::prepareTextVAO(QOpenGLShaderProgram& shader)
 
 void GPUGraphData::prepareNodeVAO(QOpenGLShaderProgram& shader)
 {
-    _sphere.vertexArrayObject()->bind();
+    _nodeQuad.vertexArrayObject()->bind();
     shader.bind();
 
     _nodeVBO.bind();
@@ -246,7 +247,7 @@ void GPUGraphData::prepareNodeVAO(QOpenGLShaderProgram& shader)
     _nodeVBO.release();
 
     shader.release();
-    _sphere.vertexArrayObject()->release();
+    _nodeQuad.vertexArrayObject()->release();
 }
 
 void GPUGraphData::prepareEdgeVAO(QOpenGLShaderProgram& shader)
@@ -494,7 +495,7 @@ GraphRendererCore::GraphRendererCore() :
     ShaderTools::loadShaderProgram(_outlineShader, u":/shaders/screen.vert"_s, u":/shaders/outline.frag"_s);
     ShaderTools::loadShaderProgram(_selectionShader, u":/shaders/screen.vert"_s, u":/shaders/selection.frag"_s);
 
-    ShaderTools::loadShaderProgram(_nodesShader, u":/shaders/instancednodes.vert"_s, u":/shaders/nodecolorads.frag"_s);
+    ShaderTools::loadShaderProgram(_nodesShader, u":/shaders/nodeimpostor.vert"_s, u":/shaders/nodeimpostor.frag"_s);
     ShaderTools::loadShaderProgram(_edgesShader, u":/shaders/instancededges.vert"_s, u":/shaders/edgecolorads.frag"_s);
 
     ShaderTools::loadShaderProgram(_selectionMarkerShader, u":/shaders/2d.vert"_s, u":/shaders/selectionMarker.frag"_s);
@@ -586,10 +587,10 @@ void GraphRendererCore::renderNodes(GPUGraphData& gpuGraphData)
 
     _nodesShader.setUniformValue("flatness", shading() == Shading::Flat ? 1.0f : 0.0f);
 
-    gpuGraphData._sphere.vertexArrayObject()->bind();
-    glDrawElementsInstanced(GL_TRIANGLES, gpuGraphData._sphere.glIndexCount(),
+    gpuGraphData._nodeQuad.vertexArrayObject()->bind();
+    glDrawElementsInstanced(GL_TRIANGLES, Primitive::ImpostorQuads::glIndexCount(1),
         GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(gpuGraphData.numNodes()));
-    gpuGraphData._sphere.vertexArrayObject()->release();
+    gpuGraphData._nodeQuad.vertexArrayObject()->release();
 
     _nodeGeometry.release(GL_TEXTURE0 + 1);
     _componentDataTexels.release(GL_TEXTURE0);
@@ -963,7 +964,8 @@ void GraphRendererCore::renderGraph()
 
     if(hasSampleShading())
     {
-        // Enable per-sample shading, this makes small text look nice
+        // Traced shapes are cut out by discarding fragments, which leaves their
+        // edges aliased unless every sample is shaded
         glEnable(GL_SAMPLE_SHADING_ARB);
     }
 
