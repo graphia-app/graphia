@@ -42,6 +42,10 @@ flat out mat2  zToClip;
 
 out vec3 impostorPosition; // In view space
 
+#ifdef NODE_DEPTH_PREPASS
+out vec2 quadCoordinate;
+#endif
+
 #include "componentdata.glsl"
 #include "element.glsl"
 #include "nodegeometry.glsl"
@@ -78,6 +82,10 @@ void main()
 
     impostorPosition = nodeCentre + (silhouetteRadius * ((right * vertexPosition.x) + (up * vertexPosition.y)));
     gl_Position = projectionMatrix * vec4(impostorPosition, 1.0);
+
+#ifdef NODE_DEPTH_PREPASS
+    quadCoordinate = vertexPosition.xy;
+#endif
 
     projectionScale = projectionScaleFor(projectionMatrix, nodeCentre, nodeRadius);
 }

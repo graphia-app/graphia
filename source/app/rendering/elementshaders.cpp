@@ -70,11 +70,17 @@ void ElementShaders::setSamplerUnits(QOpenGLShaderProgram& program)
 
     setUnit("componentData", Unit::ComponentData);
     setUnit("nodeGeometry", Unit::NodeGeometry);
+    setUnit("visibleRanges", Unit::VisibleRanges);
+    setUnit("depthPyramid", Unit::DepthPyramid);
 }
 
 ElementShaders::ElementShaders()
 {
-    ShaderTools::loadShaderProgram(_nodes, u":/shaders/nodeimpostor.vert"_s, u":/shaders/nodeimpostor.frag"_s);
+    const auto nodeVertexShader = u":/shaders/nodeimpostor.vert"_s;
+    const auto nodeImpostor = u":/shaders/nodeimpostor.frag"_s;
+
+    ShaderTools::loadShaderProgram(_nodes, nodeVertexShader, nodeImpostor);
+    ShaderTools::loadShaderProgram(_nodeDepthPrepass, nodeVertexShader, nodeImpostor, {u"NODE_DEPTH_PREPASS"_s});
 
     const auto edgeVertexShader = u":/shaders/edgeimpostor.vert"_s;
     const auto edgeImpostor = u":/shaders/edgeimpostor.frag"_s;
@@ -82,6 +88,9 @@ ElementShaders::ElementShaders()
     ShaderTools::loadShaderProgram(_approximateTracedEdges, edgeVertexShader, edgeImpostor,
         {u"EDGE_APPROXIMATE_TRACED"_s});
     ShaderTools::loadShaderProgram(_tracedEdges, edgeVertexShader, edgeImpostor, {u"EDGE_TRACED"_s});
+    ShaderTools::loadShaderProgram(_edgeDepthPrepass, edgeVertexShader, edgeImpostor,
+        {u"EDGE_TRACED"_s, u"EDGE_DEPTH_PREPASS"_s});
+    ShaderTools::loadShaderProgram(_edgeCull, u":/shaders/edgecull.vert"_s, u":/shaders/edgecull.frag"_s);
 
     const auto setConstants = [](QOpenGLShaderProgram* program)
     {
@@ -121,10 +130,10 @@ void ElementShaders::setFrameUniforms(const FrameUniforms& uniforms)
 
 std::vector<QOpenGLShaderProgram*> ElementShaders::nodeShaders()
 {
-    return {&_nodes};
+    return {&_nodes, &_nodeDepthPrepass};
 }
 
 std::vector<QOpenGLShaderProgram*> ElementShaders::edgeShaders()
 {
-    return {&_approximateTracedEdges, &_tracedEdges};
+    return {&_approximateTracedEdges, &_tracedEdges, &_edgeDepthPrepass, &_edgeCull};
 }

@@ -522,12 +522,17 @@ bool GraphRendererCore::makeContextCurrent()
     return _context->makeCurrent(_context->surface());
 }
 
-void GraphRendererCore::renderNodes(GPUGraphData& gpuGraphData)
+void GraphRendererCore::renderToLayer(GPUGraphData& gpuGraphData)
+{
+    gpuGraphData.drawToFramebuffer();
+    glViewport(0, 0, _width, _height);
+}
+
+void GraphRendererCore::renderNodesWithShader(QOpenGLShaderProgram& shader, GPUGraphData& gpuGraphData)
 {
     if(gpuGraphData.numNodes() == 0)
         return;
 
-    auto& shader = _elementShaders._nodes;
     shader.bind();
     gpuGraphData._nodeVBO.bind();
 
@@ -545,13 +550,29 @@ void GraphRendererCore::renderNodes(GPUGraphData& gpuGraphData)
     shader.release();
 }
 
-void GraphRendererCore::renderEdgesWithShader(QOpenGLShaderProgram& shader, GPUGraphData& gpuGraphData)
+void GraphRendererCore::bindEdgeParameters(GPUGraphData& gpuGraphData)
 {
-    shader.bind();
     gpuGraphData._edgeVBO.bind();
 
     _componentDataTexels.bind(ElementShaders::glUnit(ElementShaders::Unit::ComponentData));
     _nodeGeometry.bind(ElementShaders::glUnit(ElementShaders::Unit::NodeGeometry));
+}
+
+void GraphRendererCore::releaseEdgeParameters(GPUGraphData& gpuGraphData)
+{
+    _nodeGeometry.release(ElementShaders::glUnit(ElementShaders::Unit::NodeGeometry));
+    _componentDataTexels.release(ElementShaders::glUnit(ElementShaders::Unit::ComponentData));
+    gpuGraphData._edgeVBO.release();
+}
+
+void GraphRendererCore::renderEdgesWithShader(QOpenGLShaderProgram& shader, GPUGraphData& gpuGraphData,
+    CullingResults cullingResults)
+{
+    shader.bind();
+    bindEdgeParameters(gpuGraphData);
+    gpuGraphData._edgeCullResults.bind(ElementShaders::glUnit(ElementShaders::Unit::VisibleRanges), shader);
+
+    shader.setUniformValue("hasVisibleRanges", cullingResults != CullingResults::None ? 1 : 0);
 
     gpuGraphData._edgeQuads.vertexArrayObject()->bind();
     glDrawElementsInstanced(GL_TRIANGLES,
@@ -559,10 +580,52 @@ void GraphRendererCore::renderEdgesWithShader(QOpenGLShaderProgram& shader, GPUG
         GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(gpuGraphData.numEdges()));
     gpuGraphData._edgeQuads.vertexArrayObject()->release();
 
-    _nodeGeometry.release(ElementShaders::glUnit(ElementShaders::Unit::NodeGeometry));
-    _componentDataTexels.release(ElementShaders::glUnit(ElementShaders::Unit::ComponentData));
-    gpuGraphData._edgeVBO.release();
+    gpuGraphData._edgeCullResults.release(ElementShaders::glUnit(ElementShaders::Unit::VisibleRanges));
+    releaseEdgeParameters(gpuGraphData);
     shader.release();
+}
+
+// Traced edges write their depth, which turns off the early depth test
+// So the stretch of each that may be seen is found first, by walking it along the depth prepass
+bool GraphRendererCore::cullHiddenEdgeStretches(GPUGraphData& gpuGraphData)
+{
+    auto& cullResults = gpuGraphData._edgeCullResults;
+    cullResults.reserve(gpuGraphData.numEdges());
+
+    if(!_depthPrepass.usable() || !cullResults.usable())
+        return false;
+
+    _depthPrepass.begin();
+
+    renderNodesWithShader(_elementShaders._nodeDepthPrepass, gpuGraphData);
+    renderEdgesWithShader(_elementShaders._edgeDepthPrepass, gpuGraphData,
+        cullResults.written() ? CullingResults::VisibleRanges : CullingResults::None);
+
+    _depthPrepass.buildPyramid();
+
+    auto& cullShader = _elementShaders._edgeCull;
+    cullShader.bind();
+    cullResults.bindForWriting(cullShader);
+    bindEdgeParameters(gpuGraphData);
+    _depthPrepass.bindPyramid(ElementShaders::glUnit(ElementShaders::Unit::DepthPyramid), cullShader);
+
+    glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
+
+    // A point for each part of each edge
+    gpuGraphData._edgeQuads.vertexArrayObject()->bind();
+    glDrawArraysInstanced(GL_POINTS, 0, gpuGraphData._extents._hasArrowHeads ? 2 : 1,
+        static_cast<GLsizei>(gpuGraphData.numEdges()));
+    gpuGraphData._edgeQuads.vertexArrayObject()->release();
+
+    glDepthMask(GL_TRUE);
+    glEnable(GL_DEPTH_TEST);
+
+    _depthPrepass.releasePyramid(ElementShaders::glUnit(ElementShaders::Unit::DepthPyramid));
+    releaseEdgeParameters(gpuGraphData);
+    cullShader.release();
+
+    return true;
 }
 
 GraphRendererCore::DetailPasses GraphRendererCore::detailPasses(const GPUGraphData& gpuGraphData,
@@ -585,11 +648,18 @@ GraphRendererCore::DetailPasses GraphRendererCore::detailPasses(const GPUGraphDa
 
 void GraphRendererCore::renderEdges(GPUGraphData& gpuGraphData, const DetailPasses& passes)
 {
+    const bool culled = passes._tracedEdges && cullHiddenEdgeStretches(gpuGraphData);
+
+    renderToLayer(gpuGraphData);
+
     if(passes._approximateTracedEdges)
         renderEdgesWithShader(_elementShaders._approximateTracedEdges, gpuGraphData);
 
     if(passes._tracedEdges)
-        renderEdgesWithShader(_elementShaders._tracedEdges, gpuGraphData);
+    {
+        renderEdgesWithShader(_elementShaders._tracedEdges, gpuGraphData,
+            culled ? CullingResults::VisibleRanges : CullingResults::None);
+    }
 }
 
 void GraphRendererCore::renderText(GPUGraphData& gpuGraphData, const PixelScaleRange& pixelScale)
@@ -786,6 +856,7 @@ bool GraphRendererCore::resize(int width, int height)
     if(width > 0 && height > 0)
     {
         setupTexture(this, _depthTexture, width, height, GL_DEPTH_COMPONENT32F);
+        _depthPrepass.resize(width, height);
 
         if(!_gpuGraphData.empty())
         {
@@ -941,9 +1012,9 @@ void GraphRendererCore::renderGraph()
             gpuGraphData.clearDepthbuffer();
 
         gpuGraphData.clearFramebuffer(GL_COLOR_BUFFER_BIT);
-        gpuGraphData.drawToFramebuffer();
+        renderToLayer(gpuGraphData);
 
-        renderNodes(gpuGraphData);
+        renderNodesWithShader(_elementShaders._nodes, gpuGraphData);
         renderEdges(gpuGraphData, detailPasses(gpuGraphData, pixelScale));
 
         renderText(gpuGraphData, pixelScale);

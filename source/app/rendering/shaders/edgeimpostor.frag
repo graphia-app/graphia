@@ -204,9 +204,11 @@ void main()
     if(nearest.t == NO_HIT)
         discard;
 
+#ifndef EDGE_DEPTH_PREPASS
     float along = dot(nearest.position - shaftBase, edgeAxis);
     bool inner = along >= innerColorStretch.x && along <= innerColorStretch.y;
     shade(nearest, inner);
+#endif
 
 #ifdef EDGE_TRACED
     // Where a near end's outline reaches past the far end on screen, the quad's depth
