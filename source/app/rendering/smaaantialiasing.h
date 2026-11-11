@@ -48,6 +48,9 @@ public:
     // colors must filter linearly
     void blend(GLuint colors, GLuint framebuffer);
 
+    // How much each pixel is blended with which neighbour, by the silhouettes last found
+    GLuint weights() const { return _weights.texture(); }
+
 private:
     int _width = 0;
     int _height = 0;

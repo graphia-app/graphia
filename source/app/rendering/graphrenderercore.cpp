@@ -491,6 +491,9 @@ GraphRendererCore::GraphRendererCore(DetailThresholds detailThresholds) :
 
     ShaderTools::loadShaderProgram(_screenShader, u":/shaders/fullscreen.vert"_s, u":/shaders/screen.frag"_s);
     ShaderTools::loadShaderProgram(_outlineShader, u":/shaders/fullscreen.vert"_s, u":/shaders/outline.frag"_s);
+    _outlineShader.bind();
+    _outlineShader.setUniformValue("blendWeights", 1);
+    _outlineShader.release();
     ShaderTools::loadShaderProgram(_selectionShader, u":/shaders/fullscreen.vert"_s, u":/shaders/selection.frag"_s);
     ShaderTools::loadShaderProgram(_compositeElementShader, u":/shaders/fullscreen.vert"_s,
         u":/shaders/compositeelement.frag"_s);
@@ -1271,8 +1274,8 @@ void GraphRendererCore::compositeInto(GLuint framebuffer, Flags<Type> type)
 
     glDisable(GL_DEPTH_TEST);
 
-    // The selection's outline is drawn from where the selection is within each
-    // pixel, which SMAA estimates from the silhouettes
+    // The outlines are drawn from where the selection and the elements are
+    // within each pixel, which SMAA estimates from the silhouettes
     if(antialiasing)
     {
         compositeElements();
@@ -1301,6 +1304,7 @@ void GraphRendererCore::compositeInto(GLuint framebuffer, Flags<Type> type)
     _outlineShader.bind();
     _outlineShader.setUniformValue("outlineColor",
         Document::contrastingColorForBackground());
+    _outlineShader.setUniformValue("smoothed", antialiasing ? 1 : 0);
     _outlineShader.release();
 
     for(auto i : gpuGraphDataRenderOrder())
@@ -1312,7 +1316,10 @@ void GraphRendererCore::compositeInto(GLuint framebuffer, Flags<Type> type)
             compositeLayer(_screenShader, graphData.alpha(), {graphData._colorTexture});
 
             if(_shading == Shading::Flat && graphData.hasGraphElements())
-                compositeLayer(_outlineShader, graphData.alpha(), {graphData._elementTexture});
+            {
+                compositeLayer(_outlineShader, graphData.alpha(),
+                    {graphData._elementTexture, antialiasing ? _smaaAntialiasing.weights() : 0});
+            }
         }
 
         if(type.test(GraphRendererCore::Type::Selection) && graphData._elementsSelected)
