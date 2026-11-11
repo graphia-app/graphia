@@ -3,8 +3,12 @@
         <file>shaders/componentdata.glsl</file>
         <file>shaders/lighting.glsl</file>
         <file>shaders/nodegeometry.glsl</file>
+        <file>shaders/nodeimpostor.glsl</file>
+        <file>shaders/projection.glsl</file>
         <file>shaders/texelbuffer.glsl</file>
         <file>shaders/instancednodes.vert</file>
+        <file>shaders/nodeimpostor.vert</file>
+        <file>shaders/nodeimpostor.frag</file>
         <file>shaders/instancededges.vert</file>
         <file>shaders/marker.frag</file>
         <file>shaders/debuglines.frag</file>

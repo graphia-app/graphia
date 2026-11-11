@@ -26,6 +26,7 @@
 #include "texelbuffer.h"
 
 #include "primitives/arrow.h"
+#include "primitives/impostorquads.h"
 #include "primitives/rectangle.h"
 #include "primitives/sphere.h"
 
@@ -83,6 +84,7 @@ struct GPUGraphData : OpenGLFunctions
     size_t numGlyphs() const;
 
     Primitive::Sphere _sphere;
+    Primitive::ImpostorQuads _nodeQuad{1};
     Primitive::Arrow _arrow;
     Primitive::Rectangle _rectangle;
 
