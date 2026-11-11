@@ -94,7 +94,6 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/rendering/opengldebuglogger.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/nodegeometry.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/openglfunctions.h
-    ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/arrow.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/impostorquads.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/rectangle.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/scene.h
@@ -219,7 +218,6 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/rendering/opengldebuglogger.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/nodegeometry.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/openglfunctions.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/arrow.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/impostorquads.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/rectangle.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/screenshotrenderer.cpp
