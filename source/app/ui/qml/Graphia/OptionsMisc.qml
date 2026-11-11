@@ -50,6 +50,7 @@ Item
         section: "visuals"
         property alias enableAntialiasing: enableAntialiasingCheckbox.checked
         property alias improveStaticImages: improveStaticImagesCheckbox.checked
+        property int ambientOcclusion
     }
 
     Preferences
@@ -168,6 +169,29 @@ Item
                 id: improveStaticImagesCheckbox
                 enabled: enableAntialiasingCheckbox.checked
                 text: qsTr("Improve Static Images")
+            }
+
+            RowLayout
+            {
+                Label { text: qsTr("Ambient Occlusion:") }
+
+                ComboBox
+                {
+                    id: ambientOcclusionCombobox
+
+                    model:
+                    [
+                        {text: qsTr("Off"), value: AmbientOcclusionMode.Off},
+                        {text: qsTr("Smooth Shading Only"), value: AmbientOcclusionMode.SmoothShadingOnly},
+                        {text: qsTr("Flat Shading Only"), value: AmbientOcclusionMode.FlatShadingOnly},
+                        {text: qsTr("On"), value: AmbientOcclusionMode.On}
+                    ]
+                    textRole: "text"
+                    valueRole: "value"
+
+                    Component.onCompleted: { currentIndex = indexOfValue(visuals.ambientOcclusion); }
+                    onActivated: { visuals.ambientOcclusion = currentValue; }
+                }
             }
 
             Text

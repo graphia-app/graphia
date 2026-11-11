@@ -20,11 +20,12 @@
 #ifndef GRAPHRENDERERCORE_H
 #define GRAPHRENDERERCORE_H
 
+#include "openglfunctions.h"
+#include "graphrenderertypes.h"
+#include "ambientocclusion.h"
 #include "approximateedgeshading.h"
 #include "depthprepass.h"
 #include "edgecullresults.h"
-#include "openglfunctions.h"
-#include "graphrenderertypes.h"
 #include "elementshaders.h"
 #include "frameaccumulator.h"
 #include "nodegeometry.h"
@@ -164,6 +165,7 @@ struct GPUGraphData : OpenGLFunctions
     {
         float _smallestNodeSize = std::numeric_limits<float>::max();
         float _largestNodeSize = 0.0f;
+        float _totalNodeSize = 0.0f;
 
         bool _hasArrowHeads = false;
         float _smallestEdgeSize = std::numeric_limits<float>::max();
@@ -181,6 +183,10 @@ struct GPUGraphData : OpenGLFunctions
 
     std::vector<EdgeData> _edgeData;
     QOpenGLBuffer _edgeVBO;
+
+    TexelBuffer& elementComponents();
+    TexelBuffer _elementComponents;
+    bool _elementComponentsStale = true;
 
     bool _elementsSelected = false;
 
@@ -230,6 +236,9 @@ private:
 
     ScreenTexture _smoothedSelection{GL_R8, GL_RED, GL_UNSIGNED_BYTE, GL_LINEAR};
     SplatCompositor _splatCompositor{ElementShaders::glUnit(ElementShaders::Unit::NearestNode)};
+
+    AmbientOcclusion _ambientOcclusion;
+    AmbientOcclusionMode _ambientOcclusionMode = AmbientOcclusionMode::SmoothShadingOnly;
 
     GLuint _depthTexture = 0;
 
@@ -294,6 +303,7 @@ private:
         bool _approximateTracedEdges = false;
         bool _tracedEdges = false;
 
+        bool anyTraced() const { return _tracedNodes || _approximateTracedEdges || _tracedEdges; }
         bool anySplatted() const { return _splattedNodes || _fastSplattedEdges || _splattedEdges; }
     };
 
@@ -313,6 +323,9 @@ private:
         CullingResults cullingResults = CullingResults::None);
     bool cullHiddenEdgeStretches(GPUGraphData& gpuGraphData);
     void fitEdgeShading(GPUGraphData& gpuGraphData);
+    void renderAmbientOcclusion(GPUGraphData& gpuGraphData, float radius);
+    bool ambientOcclusionApplied() const;
+    float ambientOcclusionRadius() const;
 
     void uploadComponentDataWithOffset(QVector2D sampleOffset);
     DetailThresholds detailThresholds() const;
@@ -358,6 +371,10 @@ protected:
 
     Shading shading() const;
     void setShading(Shading shading);
+
+    AmbientOcclusionMode ambientOcclusionMode() const { return _ambientOcclusionMode; }
+    void setAmbientOcclusionMode(AmbientOcclusionMode ambientOcclusionMode);
+    void setMaximumAmbientOcclusionReach(int pixels) { _ambientOcclusion.setMaximumReach(pixels); }
 
     float outlineScale() const { return _outlineScale; }
     void setOutlineScale(float outlineScale);

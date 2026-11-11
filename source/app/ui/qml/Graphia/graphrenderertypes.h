@@ -50,4 +50,10 @@ DEFINE_QML_ENUM(Shading,
     Smooth,
     Flat);
 
+DEFINE_QML_ENUM(AmbientOcclusionMode,
+    Off,
+    SmoothShadingOnly,
+    FlatShadingOnly,
+    On);
+
 #endif // GRAPHRENDERERTYPES_H
