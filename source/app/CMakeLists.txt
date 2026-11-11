@@ -86,6 +86,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/rendering/depthprepass.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/depthpyramid.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/doublebufferedtexture.h
+    ${CMAKE_CURRENT_LIST_DIR}/rendering/edgecullresults.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/edgedatatexels.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/elementshaders.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/glyphmap.h
@@ -218,6 +219,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/rendering/depthprepass.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/depthpyramid.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/doublebufferedtexture.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/rendering/edgecullresults.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/edgedatatexels.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/elementshaders.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/glyphmap.cpp
