@@ -39,6 +39,7 @@
 #include <QtGlobal>
 
 #include <algorithm>
+#include <iterator>
 #include <limits>
 #include <ranges>
 
@@ -370,6 +371,28 @@ void GPUGraphData::upload()
     _textVBO.bind();
     _textVBO.allocate(_glyphData.data(), static_cast<int>(_glyphData.size() * sizeof(GlyphData)));
     _textVBO.release();
+
+    _elementComponentsStale = true;
+}
+
+TexelBuffer& GPUGraphData::elementComponents()
+{
+    if(!_elementComponentsStale)
+        return _elementComponents;
+
+    // Padded out to whole texels
+    std::vector<GLfloat> elementComponents;
+    elementComponents.reserve(_nodeData.size() + _edgeData.size() + 3);
+
+    auto componentOf = [](const auto& elementData) { return static_cast<GLfloat>(elementData._component); };
+    std::ranges::transform(_nodeData, std::back_inserter(elementComponents), componentOf);
+    std::ranges::transform(_edgeData, std::back_inserter(elementComponents), componentOf);
+
+    elementComponents.resize((elementComponents.size() + 3) / 4 * 4);
+    _elementComponents.upload(elementComponents);
+    _elementComponentsStale = false;
+
+    return _elementComponents;
 }
 
 size_t GPUGraphData::numNodes() const
@@ -387,6 +410,7 @@ void GPUGraphData::addNode(const NodeData& nodeData, float size)
     _nodeData.push_back(nodeData);
     _extents._smallestNodeSize = std::min(_extents._smallestNodeSize, size);
     _extents._largestNodeSize = std::max(_extents._largestNodeSize, size);
+    _extents._totalNodeSize += size;
 }
 
 void GPUGraphData::addEdge(const EdgeData& edgeData)
@@ -799,6 +823,42 @@ void GraphRendererCore::renderSplats(GPUGraphData& gpuGraphData, const DetailPas
     _splatCompositor.resolveInto(gpuGraphData._fbo);
 }
 
+void GraphRendererCore::renderAmbientOcclusion(GPUGraphData& gpuGraphData, float radius)
+{
+    const auto rotation = _frameAccumulator.nextSampleOffset().x() + 0.5f;
+
+    const AmbientOcclusion::Layer layer
+    {
+        ._colorTexture = gpuGraphData._colorTexture,
+        ._elementTexture = gpuGraphData._elementTexture,
+        ._depthTexture = _depthTexture,
+        ._elementComponents = &gpuGraphData.elementComponents(),
+        ._numNodes = static_cast<int>(gpuGraphData.numNodes())
+    };
+
+    _ambientOcclusion.darken(layer, _componentDataTexels, radius, rotation, _outlineScale);
+}
+
+float GraphRendererCore::ambientOcclusionRadius() const
+{
+    float totalNodeSize = 0.0f;
+    size_t numNodes = 0;
+
+    for(const auto& gpuGraphData : _gpuGraphData)
+    {
+        if(gpuGraphData.invisible())
+            continue;
+
+        totalNodeSize += gpuGraphData._extents._totalNodeSize;
+        numNodes += gpuGraphData.numNodes();
+    }
+
+    if(numNodes == 0)
+        return 0.0f;
+
+    return 2.0f * totalNodeSize / static_cast<float>(numNodes);
+}
+
 void GraphRendererCore::renderText(GPUGraphData& gpuGraphData, const PixelScaleRange& pixelScale)
 {
     // Text whose x-height is shorter than this on screen can't be read, so isn't drawn...
@@ -995,6 +1055,22 @@ void GraphRendererCore::setShading(Shading shading)
     }
 }
 
+void GraphRendererCore::setAmbientOcclusionMode(AmbientOcclusionMode ambientOcclusionMode)
+{
+    if(ambientOcclusionMode != _ambientOcclusionMode)
+    {
+        _ambientOcclusionMode = ambientOcclusionMode;
+        restartGathering();
+    }
+}
+
+bool GraphRendererCore::ambientOcclusionApplied() const
+{
+    return _ambientOcclusionMode == AmbientOcclusionMode::On ||
+        (_ambientOcclusionMode == AmbientOcclusionMode::SmoothShadingOnly && _shading == Shading::Smooth) ||
+        (_ambientOcclusionMode == AmbientOcclusionMode::FlatShadingOnly && _shading == Shading::Flat);
+}
+
 void GraphRendererCore::setOutlineScale(float outlineScale)
 {
     if(outlineScale != _outlineScale)
@@ -1040,7 +1116,8 @@ bool GraphRendererCore::resize(int width, int height)
         {
             FBOcomplete = _composite.resize(width, height) && _compositeElements.resize(width, height) &&
                 _smaaAntialiasing.resize(width, height) && _frameAccumulator.resize(width, height) &&
-                _smoothedSelection.resize(width, height) && _splatCompositor.resize(width, height, _depthTexture);
+                _smoothedSelection.resize(width, height) && _splatCompositor.resize(width, height, _depthTexture) &&
+                _ambientOcclusion.resize(width, height);
 
             for(auto& gpuGraphData : _gpuGraphData)
                 FBOcomplete = FBOcomplete && gpuGraphData.prepareRenderBuffers(width, height, _depthTexture);
@@ -1198,6 +1275,8 @@ void GraphRendererCore::renderGraph()
 
     const auto pixelScale = pixelScaleRange();
 
+    const auto ambientOcclusionRadius = ambientOcclusionApplied() ? this->ambientOcclusionRadius() : 0.0f;
+
     for(auto i : gpuGraphDataRenderOrder())
     {
         auto& gpuGraphData = _gpuGraphData.at(i);
@@ -1217,6 +1296,11 @@ void GraphRendererCore::renderGraph()
             renderNodesWithShader(_elementShaders._nodes, gpuGraphData);
 
         renderEdges(gpuGraphData, passes);
+
+        // Ambient occlusion works from depth, which only traced elements write
+        if(ambientOcclusionRadius > 0.0f && passes.anyTraced())
+            renderAmbientOcclusion(gpuGraphData, ambientOcclusionRadius);
+
         renderSplats(gpuGraphData, passes);
         renderText(gpuGraphData, pixelScale);
     }

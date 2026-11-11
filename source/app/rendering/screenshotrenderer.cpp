@@ -92,6 +92,9 @@ ScreenshotRenderer::ScreenshotRenderer()
     // Only the finished picture is taken
     setFinishedOnly(true);
 
+    // Ambient occlusion reading past the overscan would show at the seams between tiles
+    setMaximumAmbientOcclusionReach(TILE_EXTRA);
+
     glGenFramebuffers(1, &_screenshotFBO);
     glGenTextures(1, &_screenshotTex);
     glGenTextures(1, &_sdfTexture);
@@ -283,6 +286,7 @@ bool ScreenshotRenderer::copyState(const GraphRenderer& renderer)
     }
 
     setShading(renderer.shading());
+    setAmbientOcclusionMode(renderer.ambientOcclusionMode());
 
     // Just copy the SDF texture
     GLuint textureFBO = 0;

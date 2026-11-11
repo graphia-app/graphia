@@ -70,6 +70,7 @@ void initialisePreferences()
 
     u::definePref(u"visuals/enableAntialiasing"_s,              true);
     u::definePref(u"visuals/improveStaticImages"_s,             true);
+    u::definePref(u"visuals/ambientOcclusion"_s,                QVariant::fromValue(static_cast<int>(AmbientOcclusionMode::SmoothShadingOnly)));
 
     u::definePref(u"misc/maxUndoLevels"_s,                      25);
 

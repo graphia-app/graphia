@@ -935,7 +935,7 @@ void GraphRenderer::onComponentWillBeRemoved(const Graph*, ComponentId component
 void GraphRenderer::onPreferenceChanged(const QString& key, const QVariant&)
 {
     if(key == u"visuals/backgroundColor"_s || key == u"visuals/enableAntialiasing"_s ||
-        key == u"visuals/improveStaticImages"_s)
+        key == u"visuals/improveStaticImages"_s || key == u"visuals/ambientOcclusion"_s)
         update();
 }
 
@@ -1275,6 +1275,7 @@ void GraphRenderer::render()
     setAntialiasing(antialiasing);
     // The selection rectangle is drawn into each frame, so nothing is gathered under it
     setGatherWhenStill(antialiasing && u::pref(u"visuals/improveStaticImages"_s).toBool() && _selectionRect.isNull());
+    setAmbientOcclusionMode(normaliseQmlEnum<AmbientOcclusionMode>(u::pref(u"visuals/ambientOcclusion"_s).toInt()));
 
     updateScene();
 

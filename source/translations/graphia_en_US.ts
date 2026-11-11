@@ -2536,6 +2536,26 @@ Process failed (%1, %2)</translation>
         <translation>Improve Static Images</translation>
     </message>
     <message>
+        <source>Ambient Occlusion:</source>
+        <translation>Ambient Occlusion:</translation>
+    </message>
+    <message>
+        <source>Off</source>
+        <translation>Off</translation>
+    </message>
+    <message>
+        <source>Smooth Shading Only</source>
+        <translation>Smooth Shading Only</translation>
+    </message>
+    <message>
+        <source>Flat Shading Only</source>
+        <translation>Flat Shading Only</translation>
+    </message>
+    <message>
+        <source>On</source>
+        <translation>On</translation>
+    </message>
+    <message>
         <source>Particularly on older hardware, further performance may be gained by running the application in Low Resolution: &lt;a href=&quot;dummy&quot;&gt;Locate {0} in Finder&lt;/a&gt; and choose &lt;b&gt;Get Info&lt;/b&gt; from its context menu, then select &lt;b&gt;Open In Low Resolution&lt;/b&gt;. Restart {0}.</source>
         <translation>Particularly on older hardware, further performance may be gained by running the application in Low Resolution: &lt;a href=&quot;dummy&quot;&gt;Locate {0} in Finder&lt;/a&gt; and choose &lt;b&gt;Get Info&lt;/b&gt; from its context menu, then select &lt;b&gt;Open In Low Resolution&lt;/b&gt;. Restart {0}.</translation>
     </message>
