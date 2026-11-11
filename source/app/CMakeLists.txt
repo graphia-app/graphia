@@ -98,6 +98,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/impostorquads.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/rectangle.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/scene.h
+    ${CMAKE_CURRENT_LIST_DIR}/rendering/screenpass.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/screenshotrenderer.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/shadertools.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/texelbuffer.h
@@ -222,6 +223,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/rendering/openglfunctions.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/impostorquads.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/rectangle.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/rendering/screenpass.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/screenshotrenderer.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/shadertools.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/texelbuffer.cpp
