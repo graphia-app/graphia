@@ -7,6 +7,7 @@
         <file>shaders/nodegeometry.glsl</file>
         <file>shaders/nodeimpostor.glsl</file>
         <file>shaders/projection.glsl</file>
+        <file>shaders/smaablending.glsl</file>
         <file>shaders/texelbuffer.glsl</file>
         <file>shaders/viewport.glsl</file>
         <file>shaders/nodeimpostor.vert</file>
@@ -26,5 +27,10 @@
         <file>shaders/textrender.vert</file>
         <file>shaders/sdf.frag</file>
         <file>shaders/outline.frag</file>
+        <file>shaders/smaaedges.frag</file>
+        <file>shaders/smaaweights.frag</file>
+        <file>shaders/smaablend.frag</file>
+        <file>textures/smaaarea.png</file>
+        <file>textures/smaasearch.png</file>
     </qresource>
 </RCC>

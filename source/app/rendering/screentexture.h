@@ -34,6 +34,8 @@ public:
 
     bool resize(int width, int height);
 
+    GLuint texture() const { return _texture; }
+
     void bindForDrawing();
 
     // Leaves framebuffer bound
