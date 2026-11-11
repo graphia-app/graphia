@@ -18,7 +18,7 @@
  */
 
 // Each component's model view matrix, projection matrix, lighting parameters and
-// radius, in that order, as laid out by GraphRendererCore::uploadGPUComponentData
+// radius, in that order, as laid out by GraphRendererCore::uploadComponentDataWithOffset
 
 #include "texelbuffer.glsl"
 

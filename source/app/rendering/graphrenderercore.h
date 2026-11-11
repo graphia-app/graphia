@@ -26,6 +26,7 @@
 #include "openglfunctions.h"
 #include "graphrenderertypes.h"
 #include "elementshaders.h"
+#include "frameaccumulator.h"
 #include "nodegeometry.h"
 #include "screenpass.h"
 #include "screentexture.h"
@@ -46,6 +47,7 @@
 #include <QRect>
 #include <QSize>
 #include <QMatrix4x4>
+#include <QVector2D>
 
 #include <array>
 #include <cstddef>
@@ -224,6 +226,7 @@ private:
     ScreenTexture _composite{GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_LINEAR};
     ScreenTexture _compositeElements{GL_RG32F, GL_RG, GL_FLOAT, GL_NEAREST};
     SmaaAntialiasing _smaaAntialiasing;
+    FrameAccumulator _frameAccumulator;
 
     ScreenTexture _smoothedSelection{GL_R8, GL_RED, GL_UNSIGNED_BYTE, GL_LINEAR};
     SplatCompositor _splatCompositor{ElementShaders::glUnit(ElementShaders::Unit::NearestNode)};
@@ -241,10 +244,14 @@ private:
         float _distance = 0.0f;
         float _lightScale = 0.0f;
         float _radius = 0.0f;
+
+        bool operator==(const ComponentData&) const = default; // clazy:exclude=compare-member-check
     };
 
     std::vector<ComponentData> _componentData;
+    std::vector<ComponentData> _gatheredComponentData;
     TexelBuffer _componentDataTexels;
+    QVector2D _componentDataSampleOffset;
 
     NodeGeometry _nodeGeometry;
 
@@ -304,6 +311,9 @@ private:
     bool cullHiddenEdgeStretches(GPUGraphData& gpuGraphData);
     void fitEdgeShading(GPUGraphData& gpuGraphData);
 
+    void uploadComponentDataWithOffset(QVector2D sampleOffset);
+    DetailThresholds detailThresholds() const;
+
     void compositeElements();
     void compositeLayer(QOpenGLShaderProgram& shader, float alpha,
         std::initializer_list<GLuint> textures);
@@ -331,6 +341,9 @@ protected:
     void uploadGPUComponentData();
 
     NodeGeometry& nodeGeometry() { return _nodeGeometry; }
+    void uploadNodeGeometry();
+
+    void restartGathering() { _frameAccumulator.restart(); }
 
     Shading shading() const;
     void setShading(Shading shading);
