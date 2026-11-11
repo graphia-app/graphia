@@ -20,13 +20,16 @@
 #ifndef SHADERTOOLS_H
 #define SHADERTOOLS_H
 
+#include <QStringList>
+
 class QOpenGLShaderProgram;
 class QString;
 
 namespace ShaderTools
 {
     void loadShaderProgram(QOpenGLShaderProgram& program,
-        const QString& vertexShader, const QString& fragmentShader);
+        const QString& vertexShader, const QString& fragmentShader,
+        const QStringList& defines = {});
 } // namespace ShaderTools
 
 #endif // SHADERTOOLS_H
