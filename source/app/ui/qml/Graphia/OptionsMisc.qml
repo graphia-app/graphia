@@ -48,7 +48,7 @@ Item
     {
         id: visuals
         section: "visuals"
-        property alias disableMultisampling: disableMultisamplingCheckbox.checked
+        property alias enableAntialiasing: enableAntialiasingCheckbox.checked
     }
 
     Preferences
@@ -154,15 +154,12 @@ Item
             {
                 font.bold: true
                 text: qsTr("Performance")
-
-                visible: disableMultisamplingCheckbox.visible || macOsOldHardwareText.visible
             }
 
             CheckBox
             {
-                id: disableMultisamplingCheckbox
-                visible: Qt.platform.os !== "wasm"
-                text: qsTr("Disable Multisampling (Restart Required)")
+                id: enableAntialiasingCheckbox
+                text: qsTr("Enable Antialiasing")
             }
 
             Text

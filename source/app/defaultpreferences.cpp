@@ -68,7 +68,7 @@ void initialisePreferences()
     u::definePref(u"visuals/minimumComponentRadius"_s,          2.0);
     u::definePref(u"visuals/transitionTime"_s,                  1.0);
 
-    u::definePref(u"visuals/disableMultisampling"_s,            false);
+    u::definePref(u"visuals/enableAntialiasing"_s,              true);
 
     u::definePref(u"misc/maxUndoLevels"_s,                      25);
 

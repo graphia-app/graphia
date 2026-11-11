@@ -40,7 +40,8 @@ in vec3 impostorPosition;
 
 layout (location = 0) out vec4  outColor;
 layout (location = 1) out vec2  outElement;
-layout (location = 2) out vec4  outSelection;
+layout (location = 2) out float outSubElement;
+layout (location = 3) out vec4  outSelection;
 
 void main()
 {
@@ -81,5 +82,6 @@ void main()
     outColor = vec4(color, 1.0);
     outElement.r = element;
     outElement.g = projectionScale;
+    outSubElement = 0.0;
     outSelection = vec4(vec3(vSelected), 1.0);
 }

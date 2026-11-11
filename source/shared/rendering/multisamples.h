@@ -33,7 +33,9 @@ int multisamples()
 #ifdef OPENGL_ES
     return 1;
 #else
-    if(u::getPref(u"visuals/disableMultisampling"_s).toBool())
+    const auto antialiasing = u::getPref(u"visuals/enableAntialiasing"_s);
+
+    if(antialiasing.isValid() && !antialiasing.toBool())
         return 1;
 
     // This is the place where the default number of multisamples is set

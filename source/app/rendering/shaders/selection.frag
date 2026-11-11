@@ -17,44 +17,18 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-in vec2 vPosition;
-
 layout (location = 0) out vec4 fragColor;
 
-#ifdef GL_ES
-uniform sampler2D frameBufferTexture;
-#else
-uniform sampler2DMS frameBufferTexture;
-#endif
+uniform sampler2D selectionTexture;
 
-uniform int width;
-uniform int height;
-uniform int multisamples;
 uniform vec4 highlightColor;
 uniform float alpha;
 
-#ifdef GL_ES
-vec4 resolvedValue(vec2 coord)
+float selectedAt(ivec2 p)
 {
-    vec4 value = texture(frameBufferTexture, coord);
-    value.a *= alpha;
-
-    return value;
+    ivec2 highest = textureSize(selectionTexture, 0) - ivec2(1);
+    return texelFetch(selectionTexture, clamp(p, ivec2(0), highest), 0).r;
 }
-#else
-vec4 resolvedValue(vec2 coord)
-{
-    vec4 accumulator = vec4(0.0);
-    for(int s = 0; s < multisamples; s++)
-    {
-        accumulator += texelFetch(frameBufferTexture, ivec2(coord), s);
-    }
-    accumulator /= float(multisamples);
-    accumulator.a *= alpha;
-
-    return accumulator;
-}
-#endif
 
 void main()
 {
@@ -67,14 +41,6 @@ void main()
               1.0,  0.0, -1.0)
     );
 
-    float pixelWidth = 1.0;
-    float pixelHeight = 1.0;
-
-#ifdef GL_ES
-    pixelWidth /= float(width);
-    pixelHeight /= float(height);
-#endif
-
     // Sobel edge detection
     mat3 I;
     float cnv[2];
@@ -83,9 +49,7 @@ void main()
     {
         for(int j = -1; j <= 1; j++)
         {
-            vec2 offset = vec2(float(i) * pixelWidth, float(j) * pixelHeight);
-            vec2 offsetPosition = vPosition + offset;
-            I[i + 1][j + 1] = resolvedValue(offsetPosition).r;
+            I[i + 1][j + 1] = selectedAt(ivec2(gl_FragCoord.xy) + ivec2(i, j));
         }
     }
 

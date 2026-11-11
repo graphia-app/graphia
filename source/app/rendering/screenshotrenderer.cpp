@@ -47,8 +47,8 @@ static const int TILE_SIZE = 1024;
 // With some of the post-process fragment shaders, rendering at the edges may
 // cause artefacts. Normally this isn't much of a problem, but when tile rendering,
 // said artefacts show up at every tile boundary. The solution is to overscan the
-// tile slightly, but only use the centre pixels when composing the final image.
-static const int TILE_EXTRA = 2;
+// tile, but only use the centre pixels when composing the final image.
+static const int TILE_EXTRA = 72;
 static const int TILE_SIZE_PLUS_EXTRA = TILE_SIZE + (2 * TILE_EXTRA);
 
 static QString fetchPreview(QSize screenshotSize)

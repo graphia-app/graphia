@@ -17,8 +17,10 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// How a pixel says which element it shows: a node's index plus 1, or an edge's
-// index plus 1, negated
+// How a pixel says which element it shows: 0 for none, a node's index plus 1,
+// or an edge's index plus 1, negated
+
+const float NO_ELEMENT = 0.0;
 
 float nodeElement(int index) { return float(index + 1); }
 float edgeElement(int index) { return float(-(index + 1)); }
