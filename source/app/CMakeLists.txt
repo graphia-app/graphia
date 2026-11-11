@@ -84,6 +84,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/maths/ray.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/camera.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/doublebufferedtexture.h
+    ${CMAKE_CURRENT_LIST_DIR}/rendering/elementshaders.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/glyphmap.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/graphcomponentrenderer.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/graphcomponentscene.h
@@ -209,6 +210,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/maths/ray.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/camera.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/doublebufferedtexture.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/rendering/elementshaders.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/glyphmap.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/graphcomponentrenderer.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/graphcomponentscene.cpp

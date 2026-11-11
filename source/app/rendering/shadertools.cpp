@@ -64,7 +64,7 @@ static QString sourceFromFile(const QString& filename)
     return source;
 }
 
-static QString shaderStringFromFile(const QString& filename)
+static QString shaderStringFromFile(const QString& filename, const QStringList& defines)
 {
     const QSurfaceFormat minimumFormat = OpenGLFunctions::minimumFormat();
     const int shaderVersionNumber = (minimumFormat.majorVersion() * 100) +
@@ -77,11 +77,17 @@ static QString shaderStringFromFile(const QString& filename)
         u"#version %1 es\nprecision mediump float;\n"_s.arg(shaderVersionNumber) :
         u"#version %1 core\n#define mediump\n"_s.arg(shaderVersionNumber);
 
-    return version + contents;
+    QString definitions;
+
+    for(const auto& define : defines)
+        definitions += u"#define %1\n"_s.arg(define);
+
+    return version + definitions + contents;
 }
 
 void ShaderTools::loadShaderProgram(QOpenGLShaderProgram& program,
-    const QString& vertexShader, const QString& fragmentShader)
+    const QString& vertexShader, const QString& fragmentShader,
+    const QStringList& defines)
 {
     // Temporary message handler that prepends the shader name to any error output
     // that the Qt shader compilation code produces
@@ -95,11 +101,11 @@ void ShaderTools::loadShaderProgram(QOpenGLShaderProgram& program,
     auto atExit = std::experimental::make_scope_exit([] { qInstallMessageHandler(nullptr); });
 
     shaderName = vertexShader;
-    if(!program.addShaderFromSourceCode(QOpenGLShader::Vertex, shaderStringFromFile(vertexShader)))
+    if(!program.addShaderFromSourceCode(QOpenGLShader::Vertex, shaderStringFromFile(vertexShader, defines)))
         qFatal("Vertex shader compilation failure");
 
     shaderName = fragmentShader;
-    if(!program.addShaderFromSourceCode(QOpenGLShader::Fragment, shaderStringFromFile(fragmentShader)))
+    if(!program.addShaderFromSourceCode(QOpenGLShader::Fragment, shaderStringFromFile(fragmentShader, defines)))
         qFatal("Fragment shader compilation failure");
 
     shaderName = u"%1, %2"_s.arg(vertexShader, fragmentShader);
