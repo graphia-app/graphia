@@ -89,9 +89,8 @@ static QPoint renderOffsetForFill(int imageWidth, int imageHeight, float aspect)
 
 ScreenshotRenderer::ScreenshotRenderer()
 {
-    // Whatever the preferences say of the picture on screen
-    setAntialiasing(true);
-    setGatherWhenStill(true);
+    // Only the finished picture is taken
+    setFinishedOnly(true);
 
     glGenFramebuffers(1, &_screenshotFBO);
     glGenTextures(1, &_screenshotTex);

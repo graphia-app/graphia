@@ -117,8 +117,8 @@ public:
     GraphModel* graphModel() const { return _graphModel; }
 
     QRect selectionRect() { return _selectionRect; }
-    void setSelectionRect(const QRect& selectionRect) { _selectionRect = selectionRect; }
-    void clearSelectionRect() { _selectionRect = QRect(); }
+    void setSelectionRect(const QRect& selectionRect);
+    void clearSelectionRect() { setSelectionRect({}); }
 
     void resetView();
     bool viewIsReset() const;
