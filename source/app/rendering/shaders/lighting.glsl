@@ -25,6 +25,7 @@ struct LightInfo
 {
     vec3 position;  // Light position in camera coords
     vec4 color;
+    float specular;
 };
 uniform LightInfo lights[MAX_LIGHTS];
 
@@ -84,7 +85,7 @@ vec3 adsModel(const in vec3 pos, const in vec3 n, const in vec3 diffuseColor,
             specular = pow(max(dot(r, v), 0.0), material.shininess);
 
         // Combine the ambient, diffuse and specular contributions
-        result += lights[i].color.rgb * (material.ka + diffuseColor.rgb * diffuse + material.ks * specular);
+        result += lights[i].color.rgb * (material.ka + material.kd * diffuseColor.rgb * diffuse + material.ks * lights[i].specular * specular);
     }
 
     return result;
@@ -176,7 +177,7 @@ vec3 adsModelAcrossCylinder(const in vec3 pos, const in vec3 across, const in ve
         }
 
         // Both are integrated over a width of 2
-        result += lights[i].color.rgb * (material.ka + (((diffuseColor * diffuse) + (material.ks * specular)) * 0.5));
+        result += lights[i].color.rgb * (material.ka + (((material.kd * diffuseColor * diffuse) + (material.ks * lights[i].specular * specular)) * 0.5));
     }
 
     return result;
@@ -209,7 +210,7 @@ void adsModelAcrossCylinderThirds(const in vec3 pos, const in vec3 across, const
         vec3 s = normalize(lightPosition(i, lightPlacement) - pos);
         vec2 sIn = vec2(dot(s, across), dot(s, facing));
         vec3 ambient = lights[i].color.rgb * material.ka;
-        vec3 diffuse = lights[i].color.rgb * diffuseColor;
+        vec3 diffuse = lights[i].color.rgb * material.kd * diffuseColor;
 
         under0 += ambient + (diffuse * max(-sIn.x, 0.0));
         under1 += ambient + (diffuse * max(SIN_QUARTER_PI * (sIn.y - sIn.x), 0.0));
@@ -236,7 +237,7 @@ void adsModelAcrossCylinderThirds(const in vec3 pos, const in vec3 across, const
 
         if(highlight.height > 0.0)
         {
-            vec3 height = lights[i].color.rgb * material.ks * highlight.height;
+            vec3 height = lights[i].color.rgb * material.ks * lights[i].specular * highlight.height;
 
             // Where the peak is between the five, and so the light under it
             float at = (highlight.peak / (0.5 * HALF_PI)) + 2.0;
@@ -256,7 +257,7 @@ void adsModelAcrossCylinderThirds(const in vec3 pos, const in vec3 across, const
         vec3 diffuseIn = diffuseTo.yzw - diffuseTo.xyz;
         vec3 highlightIn = highlightTo.yzw - highlightTo.xyz;
         vec3 ambient = lights[i].color.rgb * material.ka * THIRD_WIDTH;
-        vec3 diffuseLit = lights[i].color.rgb * diffuseColor;
+        vec3 diffuseLit = lights[i].color.rgb * material.kd * diffuseColor;
 
         thirds[0] += ambient + (diffuseLit * diffuseIn.x) + (clipped * highlightIn.x);
         thirds[1] += ambient + (diffuseLit * diffuseIn.y) + (clipped * highlightIn.y);
