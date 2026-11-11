@@ -286,6 +286,12 @@ bool GPUGraphData::prepareRenderBuffers(int width, int height, GLuint depthTextu
     setupTexture(this, _subElementTexture, width, height, GL_R8);
     setupTexture(this, _selectionTexture,  width, height, GL_RGBA);
 
+    // SMAA and the outline read the selection part way between its texels
+    glBindTexture(GL_TEXTURE_2D, _selectionTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     if(_fbo == 0)
         glGenFramebuffers(1, &_fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
@@ -992,7 +998,8 @@ bool GraphRendererCore::resize(int width, int height)
         if(!_gpuGraphData.empty())
         {
             FBOcomplete = _composite.resize(width, height) && _compositeElements.resize(width, height) &&
-                _smaaAntialiasing.resize(width, height) && _splatCompositor.resize(width, height, _depthTexture);
+                _smaaAntialiasing.resize(width, height) && _smoothedSelection.resize(width, height) &&
+                _splatCompositor.resize(width, height, _depthTexture);
 
             for(auto& gpuGraphData : _gpuGraphData)
                 FBOcomplete = FBOcomplete && gpuGraphData.prepareRenderBuffers(width, height, _depthTexture);
@@ -1264,6 +1271,8 @@ void GraphRendererCore::compositeInto(GLuint framebuffer, Flags<Type> type)
 
     glDisable(GL_DEPTH_TEST);
 
+    // The selection's outline is drawn from where the selection is within each
+    // pixel, which SMAA estimates from the silhouettes
     if(antialiasing)
     {
         compositeElements();
@@ -1307,7 +1316,20 @@ void GraphRendererCore::compositeInto(GLuint framebuffer, Flags<Type> type)
         }
 
         if(type.test(GraphRendererCore::Type::Selection) && graphData._elementsSelected)
-            compositeLayer(_selectionShader, graphData.selectionAlpha(), {graphData._selectionTexture});
+        {
+            auto selectionTexture = graphData._selectionTexture;
+
+            if(antialiasing)
+            {
+                _smaaAntialiasing.blend(selectionTexture, _smoothedSelection.framebuffer());
+                selectionTexture = _smoothedSelection.texture();
+
+                _composite.bindForDrawing();
+                glEnable(GL_BLEND);
+            }
+
+            compositeLayer(_selectionShader, graphData.selectionAlpha(), {selectionTexture});
+        }
     }
 
     if(antialiasing)

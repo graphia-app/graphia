@@ -24,10 +24,16 @@ uniform sampler2D selectionTexture;
 uniform vec4 highlightColor;
 uniform float alpha;
 
-float selectedAt(ivec2 p)
+// Whole pixels, so that the outline is hard in each sample gathered, wherever
+// between pixels the selection ends
+const float OUTSIDE = 2.0;
+const float INSIDE = 1.0;
+
+float selectedAt(vec2 offset)
 {
-    ivec2 highest = textureSize(selectionTexture, 0) - ivec2(1);
-    return texelFetch(selectionTexture, clamp(p, ivec2(0), highest), 0).r;
+    vec2 size = vec2(textureSize(selectionTexture, 0));
+    vec2 p = clamp(gl_FragCoord.xy + offset, vec2(0.5), size - vec2(0.5));
+    return textureLod(selectionTexture, p / size, 0.0).r;
 }
 
 void main()
@@ -41,28 +47,33 @@ void main()
               1.0,  0.0, -1.0)
     );
 
-    // Sobel edge detection
-    mat3 I;
-    float cnv[2];
+    // Sobel, with its taps far enough apart to reach the selection from the
+    // outline's outer side, for which way is out
+    vec2 gradient = vec2(0.0);
 
     for(int i = -1; i <= 1; i++)
     {
         for(int j = -1; j <= 1; j++)
         {
-            I[i + 1][j + 1] = selectedAt(ivec2(gl_FragCoord.xy) + ivec2(i, j));
+            float tap = selectedAt(vec2(i, j) * OUTSIDE);
+            gradient += vec2(G[0][i + 1][j + 1], G[1][i + 1][j + 1]) * tap;
         }
     }
 
-    for(int i = 0; i < 2; i++)
+    float outlineAlpha = 0.0;
+    float gradientLength = length(gradient);
+
+    if(gradientLength > 0.05)
     {
-        float dp3 = dot(G[i][0], I[0]) + dot(G[i][1], I[1]) + dot(G[i][2], I[2]);
-        cnv[i] = dp3;
+        // The outline is what lies between OUTSIDE out from the boundary and INSIDE in
+        vec2 inward = -gradient / gradientLength;
+        outlineAlpha = clamp(selectedAt(inward * OUTSIDE) - selectedAt(-inward * INSIDE), 0.0, 1.0);
     }
 
-    float outlineAlpha = 1.0 / inversesqrt(cnv[0] * cnv[0] + cnv[1] * cnv[1]);
-    outlineAlpha *= 0.25;
-
-    float interiorAlpha = I[1][1] * 0.2;
+    // The interior shows only through what the outline leaves, as it does where
+    // each of the samples gathered is clamped
+    float selected = texelFetch(selectionTexture, ivec2(gl_FragCoord.xy), 0).r;
+    float interiorAlpha = selected * 0.2 * (1.0 - outlineAlpha);
 
     fragColor = vec4(highlightColor.rgb, 1.0) * ((interiorAlpha + outlineAlpha) * alpha);
 }

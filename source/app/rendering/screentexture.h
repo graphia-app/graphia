@@ -35,6 +35,7 @@ public:
     bool resize(int width, int height);
 
     GLuint texture() const { return _texture; }
+    GLuint framebuffer() const { return _framebuffer; }
 
     void bindForDrawing();
 
