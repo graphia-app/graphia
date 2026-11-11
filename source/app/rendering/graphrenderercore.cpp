@@ -733,6 +733,17 @@ void GraphRendererCore::renderSplats(GPUGraphData& gpuGraphData, const DetailPas
     if(passes._splattedEdges)
         fitEdgeShading(gpuGraphData);
 
+    _splatCompositor.beginNearestNodes();
+
+    if(passes._splattedNodes)
+    {
+        renderNodesWithShader(_elementShaders._nodeDepths, gpuGraphData, "asPoints"_yes);
+        _splatCompositor.beginFarthestNodes();
+        renderNodesWithShader(_elementShaders._nodeDepths, gpuGraphData, "asPoints"_yes);
+        _splatCompositor.beginNodeOcclusion();
+        renderNodesWithShader(_elementShaders._nodeOcclusion, gpuGraphData, "asPoints"_yes);
+    }
+
     _splatCompositor.begin();
 
     if(passes._splattedNodes)

@@ -224,7 +224,7 @@ private:
     ScreenTexture _composite{GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_LINEAR};
     ScreenTexture _compositeElements{GL_RG32F, GL_RG, GL_FLOAT, GL_NEAREST};
     SmaaAntialiasing _smaaAntialiasing;
-    SplatCompositor _splatCompositor;
+    SplatCompositor _splatCompositor{ElementShaders::glUnit(ElementShaders::Unit::NearestNode)};
 
     GLuint _depthTexture = 0;
 

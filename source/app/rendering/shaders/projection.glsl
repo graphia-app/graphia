@@ -37,6 +37,13 @@ float depthAt(mat2 zToClip, float z)
     return ((clip.x / clip.y) * 0.5) + 0.5;
 }
 
+// The view space z at a depth, as depthAt gives it
+float zAtDepth(mat2 zToClip, float depth)
+{
+    float ndc = (depth * 2.0) - 1.0;
+    return (zToClip[1].x - (ndc * zToClip[1].y)) / ((ndc * zToClip[0].y) - zToClip[0].x);
+}
+
 // The view space z of the near plane
 float nearPlaneZ(mat2 zToClip)
 {

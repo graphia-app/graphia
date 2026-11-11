@@ -50,7 +50,7 @@ out vec2 quadCoordinate;
 const bool DRAWS_NARROW_NODES = true;
 
 flat out vec3 coveredDisc; // Where on screen, and its radius, in pixels
-flat out float coverageWeight;
+flat out vec2 coverageDepths;
 flat out vec3 averagedColor;
 
 #include "lighting.glsl"
@@ -121,8 +121,9 @@ void main()
     vec2 centrePixel = (centreClip.xy / centreClip.w) * viewportSize * 0.5;
     float radiusPixels = silhouetteRadius * pixelsPerUnit;
     coveredDisc = vec3(centrePixel + (viewportSize * 0.5), radiusPixels);
-    coverageWeight = coverageWeightAt(component, nodeCentre.z);
+    coverageDepths = coverageDepthsOf(component);
 
+#if !defined(NODE_DEPTHS) && !defined(NODE_OCCLUSION)
     // Shaded as a sphere, averaged over four points that integrate a cubic over
     // the disc exactly, each clipped at 1 first as a traced picture's would be
     vec3 color = mix(outerVColor, innerVColor, DOT_AREA);
@@ -137,6 +138,7 @@ void main()
     }
 
     averagedColor *= 0.25;
+#endif
 
     // A point sprite, which is a quarter of the vertices a quad is, at the
     // sphere's near side, so that what leaves its surface is behind it

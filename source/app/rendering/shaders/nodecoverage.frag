@@ -17,11 +17,13 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// Draws a node too small to trace by how much of each pixel its disc covers
+// Draws a node too small to trace by how much of each pixel its disc covers,
+// or for SplatCompositor's passes, the nodes' depths and their occlusion
 
 #include "lighting.glsl"
 #include "nodeimpostor.glsl"
 #include "projection.glsl"
+#include "nodeocclusion.glsl"
 #include "outline.glsl"
 
 flat in vec3  innerVColor;
@@ -39,13 +41,21 @@ in vec3 impostorPosition;
 uniform vec4 outlineColor;
 
 flat in vec3 coveredDisc;
-flat in float coverageWeight;
+flat in vec2 coverageDepths;
 flat in vec3 averagedColor;
 
+#if defined(NODE_DEPTHS)
+// For SplatCompositor's passes finding the nodes' depths, which take nothing else
+#elif defined(NODE_OCCLUSION)
+// For SplatCompositor's pass finding the nodes' occlusion, which it takes from
+// the third output
+layout (location = 2) out vec4 outNodeOcclusion;
+#else
 // For SplatCompositor
 layout (location = 0) out vec4 outCoveredColor;
 layout (location = 1) out vec4 outCoverage;
 layout (location = 2) out vec4 outOverlap;
+#endif
 
 // How much of a pixel's width a span covers, the span's middle being offset from the pixel's
 float boxOverlap(float offset, float width)
@@ -74,6 +84,14 @@ void main()
     if(covered <= 0.0)
         discard;
 
+    float depth = gl_FragCoord.z;
+
+#if defined(NODE_OCCLUSION)
+    // Summed logarithms multiply what each leaves uncovered without leaving the range
+    float occlusion = -log(max(1.0 - covered, 0.0001));
+    float among = amongNodes(depth, texelFetch(nearestNode, ivec2(gl_FragCoord.xy), 0).r);
+    outNodeOcclusion = vec4(occlusion, occlusion * among, occlusion * among * among, 0.0);
+#elif !defined(NODE_DEPTHS)
     // Where the pixel is over little of the disc the local shading shows, but a disc
     // under half a pixel across is only ever averaged
     float ofDisc = min(covered / (PI * radius * radius), 1.0);
@@ -101,11 +119,11 @@ void main()
     float inside = radius - length(fromCentre);
     shaded = mix(shaded, outlineColor.rgb, flatness * outlineOpacityInside(inside, differing, projectionScale));
 
-    // Blending by coverage can't tell that a node is in front of its edges' ends,
-    // so the more of a pixel it covers the more it counts, up to about as solid
-    // as it is once traced
-    const float SOLIDITY = 8.0;
-    float weighted = covered * coverageWeight * (1.0 + (SOLIDITY * smoothstep(0.5, 1.0, covered)));
+    // The node occlusion spreads a stack's occlusion too thinly to hide the edges among it,
+    // so the more of a pixel a node covers the more it counts
+    const float SOLIDITY = 4.0;
+    float weighted = covered * coverageWeight(nodeCentre.z, coverageDepths, zToClip) * leftByNodes(depth) *
+        (1.0 + (SOLIDITY * smoothstep(0.5, 1.0, covered)));
     outCoveredColor = vec4(shaded * weighted, -log(max(1.0 - covered, 0.0001)));
     outCoverage = vec4(weighted, weighted * vSelected, covered, covered * covered);
 
@@ -113,4 +131,5 @@ void main()
     float side = radius * sqrt(PI);
     vec2 where = 0.5 * (max(-fromCentre - (side * 0.5), -0.5) + min(-fromCentre + (side * 0.5), 0.5));
     outOverlap = vec4(where * covered, dot(where, where) * covered, 0.0);
+#endif
 }

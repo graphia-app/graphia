@@ -20,12 +20,18 @@
 // Draws an edge too narrow to trace by how much of each pixel its shaft covers
 
 #include "lighting.glsl"
+#include "projection.glsl"
+#include "nodeocclusion.glsl"
 #include "outline.glsl"
 
 flat in vec3  innerVColor;
 flat in vec3  outerVColor;
 flat in float vSelected;
 in float projectionScale;
+
+flat in mat2  zToClip;
+
+in vec3 impostorPosition;
 
 uniform vec4 outlineColor;
 
@@ -49,7 +55,7 @@ flat in vec3 averagedOuterColor;
 
 flat in vec3 averagedInnerColor;
 in vec3 shaftCoordinate;
-in float coverageWeight;
+flat in vec2 coverageDepths;
 flat in vec2 acrossScreen;
 
 // For SplatCompositor
@@ -116,7 +122,8 @@ void main()
     shaded = mix(shaded, outlineColor.rgb,
         flatness * outlineOpacityInside(halfWidth - abs(fromAxis), differing, projectionScale));
 
-    float weighted = covered * coverageWeight;
+    float weighted = covered * coverageWeight(impostorPosition.z, coverageDepths, zToClip) *
+        leftByNodes(gl_FragCoord.z);
     outCoveredColor = vec4(shaded * weighted, -log(max(1.0 - covered, 0.0001)));
     outCoverage = vec4(weighted, weighted * vSelected, covered, covered * covered);
 
