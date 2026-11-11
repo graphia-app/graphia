@@ -17,7 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// The edge's attributes, its shape in view space, and where each of its parts lies on screen
+// What the edge shader's builds share: the edge's attributes, its shape in view
+// space, and where each of its parts lies on screen
 
 layout (location = 0) in vec3 vertexPosition; // x: which side, y: which end, z: 0 shaft, 1 head
 
@@ -52,6 +53,11 @@ flat out vec2  innerColorStretch;
 #include "projection.glsl"
 #include "viewport.glsl"
 
+uniform float minimumTracedWidthPixels;
+
+const int APPROXIMATE_TRACED_DETAIL = 0;
+const int TRACED_DETAIL = 1;
+
 const int EDGE_VISUAL_TYPE_ARROW = 1;
 
 // A stretch of the edge's axis, and the radius of the cylinder that contains
@@ -69,6 +75,11 @@ struct CrossSection
     vec3 centre;
     float radius;
 };
+
+int detailFor(float shaftWidth)
+{
+    return shaftWidth < minimumTracedWidthPixels ? APPROXIMATE_TRACED_DETAIL : TRACED_DETAIL;
+}
 
 // How far from a node's centre a cylinder of the given radius leaves its surface
 float surfaceInset(float nodeRadius, float radius)
@@ -119,7 +130,8 @@ float outlineRadiusPixels(vec3 centre, float radius, float pixelsPerUnit)
         (tangentDistance * closing), widestUseful);
 }
 
-// The edge's ends in view space
+// The edge's ends in view space, and how wide its shaft is on screen at its
+// midpoint, in pixels
 struct EdgeEnds
 {
     mat4 projectionMatrix;
@@ -127,6 +139,7 @@ struct EdgeEnds
     vec3 target;
     float length;
     float pixelsPerUnit;
+    float shaftWidth;
 };
 
 EdgeEnds edgeEnds()
@@ -142,6 +155,9 @@ EdgeEnds edgeEnds()
     ends.target = (modelViewMatrix * vec4(nodePosition(targetIndex), 1.0)).xyz;
     ends.length = distance(ends.source, ends.target);
     ends.pixelsPerUnit = focalLengthPixels(ends.projectionMatrix);
+
+    float midpointW = clipWAt(zToClip, mix(ends.source.z, ends.target.z, 0.5));
+    ends.shaftWidth = 2.0 * size * ends.pixelsPerUnit / max(abs(midpointW), 0.0001);
 
     return ends;
 }
