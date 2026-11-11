@@ -21,6 +21,8 @@
         <file>shaders/edgecoverage.frag</file>
         <file>shaders/edgecull.vert</file>
         <file>shaders/edgecull.frag</file>
+        <file>shaders/edgefit.vert</file>
+        <file>shaders/edgefit.frag</file>
         <file>shaders/depthpyramid.frag</file>
         <file>shaders/fullscreen.vert</file>
         <file>shaders/marker.frag</file>

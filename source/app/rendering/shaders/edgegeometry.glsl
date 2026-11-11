@@ -55,10 +55,12 @@ flat out vec2  innerColorStretch;
 
 uniform float minimumApproximateTracedWidthPixels;
 uniform float minimumTracedWidthPixels;
+uniform float minimumSplattedWidthPixels;
 
 const int FAST_SPLATTED_DETAIL = 0;
-const int APPROXIMATE_TRACED_DETAIL = 1;
-const int TRACED_DETAIL = 2;
+const int SPLATTED_DETAIL = 1;
+const int APPROXIMATE_TRACED_DETAIL = 2;
+const int TRACED_DETAIL = 3;
 
 const int EDGE_VISUAL_TYPE_ARROW = 1;
 
@@ -81,7 +83,7 @@ struct CrossSection
 int detailFor(float shaftWidth, float widestWidth)
 {
     if(widestWidth < minimumApproximateTracedWidthPixels)
-        return FAST_SPLATTED_DETAIL;
+        return shaftWidth < minimumSplattedWidthPixels ? FAST_SPLATTED_DETAIL : SPLATTED_DETAIL;
 
     if(shaftWidth < minimumTracedWidthPixels)
         return APPROXIMATE_TRACED_DETAIL;

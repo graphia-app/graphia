@@ -20,6 +20,7 @@
 #ifndef GRAPHRENDERERCORE_H
 #define GRAPHRENDERERCORE_H
 
+#include "approximateedgeshading.h"
 #include "depthprepass.h"
 #include "edgecullresults.h"
 #include "openglfunctions.h"
@@ -229,6 +230,8 @@ private:
 
     DepthPrepass _depthPrepass;
 
+    ApproximateEdgeShading _approximateEdgeShading;
+
     struct ComponentData
     {
         QMatrix4x4 _modelViewMatrix;
@@ -275,10 +278,11 @@ private:
         bool _tracedNodes = false;
         bool _splattedNodes = false;
         bool _fastSplattedEdges = false;
+        bool _splattedEdges = false;
         bool _approximateTracedEdges = false;
         bool _tracedEdges = false;
 
-        bool anySplatted() const { return _splattedNodes || _fastSplattedEdges; }
+        bool anySplatted() const { return _splattedNodes || _fastSplattedEdges || _splattedEdges; }
     };
 
     DetailPasses detailPasses(const GPUGraphData& gpuGraphData, const PixelScaleRange& pixelScale) const;
@@ -296,6 +300,7 @@ private:
     void renderEdgesWithShader(QOpenGLShaderProgram& shader, GPUGraphData& gpuGraphData,
         CullingResults cullingResults = CullingResults::None);
     bool cullHiddenEdgeStretches(GPUGraphData& gpuGraphData);
+    void fitEdgeShading(GPUGraphData& gpuGraphData);
 
     void compositeElements();
     void compositeLayer(QOpenGLShaderProgram& shader, float alpha,

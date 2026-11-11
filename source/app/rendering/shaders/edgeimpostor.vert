@@ -20,7 +20,9 @@
 // An edge is two quads, one each for its shaft and head, each as small as covers it
 // An edge's width on screen picks the one build that draws it; the others collapse it
 
-#if defined(EDGE_COVERAGE)
+#if defined(EDGE_COVERAGE) && defined(EDGE_ACROSS)
+#define DRAWN_DETAIL SPLATTED_DETAIL
+#elif defined(EDGE_COVERAGE)
 #define DRAWN_DETAIL FAST_SPLATTED_DETAIL
 #elif defined(EDGE_APPROXIMATE_TRACED)
 #define DRAWN_DETAIL APPROXIMATE_TRACED_DETAIL
@@ -42,11 +44,38 @@ out vec3 impostorPosition; // In view space
 #include "edgedatatexels.glsl"
 #include "element.glsl"
 
+#ifdef EDGE_ACROSS
+// What the fit build found, a texel per edge in each of three textures
+uniform sampler2D approximateShadingThirds0;
+uniform sampler2D approximateShadingThirds1;
+uniform sampler2D approximateShadingThirds2;
+
+// The outer colour's shading across the width, as a + b u + c u², u the
+// fraction of the half width across, fitted to its average over each third
+flat out vec3 shadingAcross[3];
+
+// A quadratic with the averages over the thirds of the width the fit build found
+void readShadingAcross()
+{
+    ivec2 texel = approximateShadingThirdsTexel();
+    vec3 first = texelFetch(approximateShadingThirds0, texel, 0).rgb;
+    vec3 second = texelFetch(approximateShadingThirds1, texel, 0).rgb;
+    vec3 third = texelFetch(approximateShadingThirds2, texel, 0).rgb;
+
+    shadingAcross[2] = 1.125 * (first + third - (2.0 * second));
+    shadingAcross[1] = 0.75 * (third - first);
+    shadingAcross[0] = second - (shadingAcross[2] / 27.0);
+}
+#endif
+
 #ifdef EDGE_COVERAGE
 #include "splatcompositor.glsl"
 #include "lighting.glsl"
 
+#ifndef EDGE_ACROSS
 flat out vec3 averagedOuterColor;
+#endif
+
 flat out vec3 averagedInnerColor;
 out vec3 shaftCoordinate;
 out float coverageWeight;
@@ -255,7 +284,13 @@ void main()
     shaftCoordinate = vec3(side * quadRadius, alongInnerColor, endRadius);
     acrossScreen = across;
 
+#ifdef EDGE_ACROSS
+    readShadingAcross();
+    vec3 averagedOuterColor = shadingAcross[0] + (shadingAcross[2] / 3.0);
+#else
     averagedOuterColor = averagedColor(outerColor.rgb, onAxis);
+#endif
+
     averagedInnerColor = innerColor.rgb == outerColor.rgb ? averagedOuterColor : averagedColor(innerColor.rgb, onAxis);
 #else
     // As little as covers the shape between the cross-sections at each end

@@ -23,6 +23,9 @@
 // Two texels an edge, for its shaft and for its head
 uniform vec2 visibleRangesSize;
 
+// A texel an edge in each of three textures
+uniform vec2 approximateShadingThirdsSize;
+
 ivec2 edgeTexel(int index, vec2 texturesSize)
 {
     int width = int(texturesSize.x);
@@ -32,6 +35,11 @@ ivec2 edgeTexel(int index, vec2 texturesSize)
 ivec2 visibleRangeTexel(bool isHead)
 {
     return edgeTexel((gl_InstanceID * 2) + (isHead ? 1 : 0), visibleRangesSize);
+}
+
+ivec2 approximateShadingThirdsTexel()
+{
+    return edgeTexel(gl_InstanceID, approximateShadingThirdsSize);
 }
 
 void drawPointAt(ivec2 texel, vec2 texturesSize)

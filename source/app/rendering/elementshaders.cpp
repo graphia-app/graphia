@@ -63,15 +63,18 @@ void ElementShaders::setLighting(QOpenGLShaderProgram& program)
 
 void ElementShaders::setSamplerUnits(QOpenGLShaderProgram& program)
 {
-    const auto setUnit = [&](const char* name, Unit unit)
+    const auto setUnit = [&](const char* name, Unit unit, int offset = 0)
     {
-        program.setUniformValue(name, static_cast<GLint>(unit));
+        program.setUniformValue(name, static_cast<GLint>(unit) + offset);
     };
 
     setUnit("componentData", Unit::ComponentData);
     setUnit("nodeGeometry", Unit::NodeGeometry);
     setUnit("visibleRanges", Unit::VisibleRanges);
     setUnit("depthPyramid", Unit::DepthPyramid);
+    setUnit("approximateShadingThirds0", Unit::ApproximateShadingThirds);
+    setUnit("approximateShadingThirds1", Unit::ApproximateShadingThirds, 1);
+    setUnit("approximateShadingThirds2", Unit::ApproximateShadingThirds, 2);
 }
 
 ElementShaders::ElementShaders()
@@ -89,12 +92,15 @@ ElementShaders::ElementShaders()
     const auto edgeCoverage = u":/shaders/edgecoverage.frag"_s;
 
     ShaderTools::loadShaderProgram(_fastSplattedEdges, edgeVertexShader, edgeCoverage, {u"EDGE_COVERAGE"_s});
+    ShaderTools::loadShaderProgram(_splattedEdges, edgeVertexShader, edgeCoverage,
+        {u"EDGE_COVERAGE"_s, u"EDGE_ACROSS"_s});
     ShaderTools::loadShaderProgram(_approximateTracedEdges, edgeVertexShader, edgeImpostor,
         {u"EDGE_APPROXIMATE_TRACED"_s});
     ShaderTools::loadShaderProgram(_tracedEdges, edgeVertexShader, edgeImpostor, {u"EDGE_TRACED"_s});
     ShaderTools::loadShaderProgram(_edgeDepthPrepass, edgeVertexShader, edgeImpostor,
         {u"EDGE_TRACED"_s, u"EDGE_DEPTH_PREPASS"_s});
     ShaderTools::loadShaderProgram(_edgeCull, u":/shaders/edgecull.vert"_s, u":/shaders/edgecull.frag"_s);
+    ShaderTools::loadShaderProgram(_edgeFit, u":/shaders/edgefit.vert"_s, u":/shaders/edgefit.frag"_s);
 
     const auto setConstants = [](QOpenGLShaderProgram* program)
     {
@@ -133,6 +139,7 @@ void ElementShaders::setFrameUniforms(const FrameUniforms& uniforms)
         program->setUniformValue("minimumApproximateTracedWidthPixels",
             uniforms._thresholds._minimumApproximateTracedEdgeWidth);
         program->setUniformValue("minimumTracedWidthPixels", uniforms._thresholds._minimumTracedEdgeWidth);
+        program->setUniformValue("minimumSplattedWidthPixels", uniforms._thresholds._minimumSplattedEdgeWidth);
         program->release();
     }
 }
@@ -144,5 +151,6 @@ std::vector<QOpenGLShaderProgram*> ElementShaders::nodeShaders()
 
 std::vector<QOpenGLShaderProgram*> ElementShaders::edgeShaders()
 {
-    return {&_fastSplattedEdges, &_approximateTracedEdges, &_tracedEdges, &_edgeDepthPrepass, &_edgeCull};
+    return {&_fastSplattedEdges, &_splattedEdges, &_approximateTracedEdges, &_tracedEdges,
+        &_edgeDepthPrepass, &_edgeCull, &_edgeFit};
 }
