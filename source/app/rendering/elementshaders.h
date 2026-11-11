@@ -52,6 +52,8 @@ struct ElementShaders
         ComponentData,
         NodeGeometry,
         VisibleRanges,
+        PreviousVisibleRanges,
+        PrepassHits,
         DepthPyramid,
         NearestNode,
         FarthestNode,

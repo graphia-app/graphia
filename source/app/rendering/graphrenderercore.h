@@ -295,7 +295,7 @@ private:
     void bindEdgeParameters(GPUGraphData& gpuGraphData);
     void releaseEdgeParameters(GPUGraphData& gpuGraphData);
 
-    enum class CullingResults : uint8_t { None, VisibleRanges };
+    enum class CullingResults : uint8_t { None, VisibleRanges, VisibleRangesAndPrepassHits };
 
     void renderEdgesWithShader(QOpenGLShaderProgram& shader, GPUGraphData& gpuGraphData,
         CullingResults cullingResults = CullingResults::None);

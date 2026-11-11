@@ -18,7 +18,7 @@
  */
 
 // Traces the node's sphere through each fragment of the quad the vertex shader
-// laid out, or in the depth prepass, keeps its depth
+// laid out, or in the depth prepass, keeps its depth and which node it is
 
 #include "lighting.glsl"
 #include "nodeimpostor.glsl"
@@ -53,6 +53,8 @@ void main()
     // can be seen is in front of, and its inscribed circle is the sphere's outline
     if(dot(quadCoordinate, quadCoordinate) > 1.0)
         discard;
+
+    outElement = vec2(element, impostorPosition.z);
 #else
     vec3 rayDirection = -normalize(towardsEye(zToClip, impostorPosition));
 

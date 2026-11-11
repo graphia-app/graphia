@@ -60,6 +60,13 @@ layout (location = 1) out vec2  outElement;
 layout (location = 2) out float outSubElement;
 layout (location = 3) out vec4  outSelection;
 
+#if defined(EDGE_TRACED) && !defined(EDGE_DEPTH_PREPASS)
+flat in int inDepthPrepass;
+
+// The element nearest in each pixel of the depth prepass, and the z it was hit at
+uniform sampler2D prepassHits;
+#endif
+
 const float EPSILON = 0.000001;
 const float NO_HIT = 3.402823466e+38;
 
@@ -182,6 +189,19 @@ void traceHead(vec3 rayOrigin, vec3 rayDirection, inout Hit nearest)
     }
 }
 
+#if defined(EDGE_TRACED) && !defined(EDGE_DEPTH_PREPASS)
+// Where the ray reaches a z, as though there on the surface straight out from the axis
+Hit hitAtZ(vec3 rayDirection, float z)
+{
+    float t = (z - impostorPosition.z) / rayDirection.z;
+    vec3 position = impostorPosition + (rayDirection * t);
+    float along = clamp(dot(position - shaftBase, edgeAxis), 0.0, distance(shaftBase, headApex));
+    vec3 outward = position - (shaftBase + (edgeAxis * along));
+
+    return Hit(t, position, length(outward) > EPSILON ? normalize(outward) : -rayDirection, SHAFT_SUB_ELEMENT);
+}
+#endif
+
 void shade(Hit hit, bool inner)
 {
     vec3 color = inner ? innerVColor : outerVColor;
@@ -220,6 +240,15 @@ void main()
 
     vec3 rayDirection = -normalize(towardsEye(zToClip, impostorPosition));
 
+#if defined(EDGE_TRACED) && !defined(EDGE_DEPTH_PREPASS)
+    // What is nearest in each pixel was found by the depth prepass, so a part
+    // that was in it need only be traced where that is its own edge
+    vec2 prepassHit = texelFetch(prepassHits, ivec2(gl_FragCoord.xy), 0).rg;
+
+    if(inDepthPrepass != 0 && prepassHit.x != element)
+        discard;
+#endif
+
     // Far enough back to be outside the shape, so its nearer crossings are ahead
     vec3 shaftEnd = shaftBase + (edgeAxis * shaftLength);
     float reach = max(max(distance(impostorPosition, shaftBase), distance(impostorPosition, shaftEnd)),
@@ -236,10 +265,19 @@ void main()
     if(headLength > 0.0)
         traceHead(rayOrigin, rayDirection, nearest);
 
+#if defined(EDGE_TRACED) && !defined(EDGE_DEPTH_PREPASS)
+    // At the outline, rounding can make this trace disagree with the depth prepass
+    // The prepass decides, since every other edge here has already been discarded
+    if(nearest.t == NO_HIT && inDepthPrepass != 0)
+        nearest = hitAtZ(rayDirection, prepassHit.y);
+#endif
+
     if(nearest.t == NO_HIT)
         discard;
 
-#ifndef EDGE_DEPTH_PREPASS
+#ifdef EDGE_DEPTH_PREPASS
+    outElement = vec2(element, nearest.position.z);
+#else
     float along = dot(nearest.position - shaftBase, edgeAxis);
     bool inner = along >= innerColorStretch.x && along <= innerColorStretch.y;
     shade(nearest, inner);

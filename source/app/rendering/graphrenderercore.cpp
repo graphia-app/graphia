@@ -596,6 +596,15 @@ void GraphRendererCore::renderEdgesWithShader(QOpenGLShaderProgram& shader, GPUG
     bindEdgeParameters(gpuGraphData);
     gpuGraphData._edgeCullResults.bind(ElementShaders::glUnit(ElementShaders::Unit::VisibleRanges), shader);
 
+    const bool withPrepassHits = cullingResults == CullingResults::VisibleRangesAndPrepassHits;
+
+    if(withPrepassHits)
+    {
+        gpuGraphData._edgeCullResults.bindPrevious(ElementShaders::glUnit(ElementShaders::Unit::PreviousVisibleRanges),
+            shader);
+        _depthPrepass.bindHits(ElementShaders::glUnit(ElementShaders::Unit::PrepassHits));
+    }
+
     shader.setUniformValue("hasVisibleRanges", cullingResults != CullingResults::None ? 1 : 0);
 
     gpuGraphData._edgeQuads.vertexArrayObject()->bind();
@@ -603,6 +612,12 @@ void GraphRendererCore::renderEdgesWithShader(QOpenGLShaderProgram& shader, GPUG
         Primitive::ImpostorQuads::glIndexCount(gpuGraphData._extents._hasArrowHeads ? 2 : 1),
         GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(gpuGraphData.numEdges()));
     gpuGraphData._edgeQuads.vertexArrayObject()->release();
+
+    if(withPrepassHits)
+    {
+        _depthPrepass.releaseHits(ElementShaders::glUnit(ElementShaders::Unit::PrepassHits));
+        gpuGraphData._edgeCullResults.release(ElementShaders::glUnit(ElementShaders::Unit::PreviousVisibleRanges));
+    }
 
     gpuGraphData._edgeCullResults.release(ElementShaders::glUnit(ElementShaders::Unit::VisibleRanges));
     releaseEdgeParameters(gpuGraphData);
@@ -733,7 +748,7 @@ void GraphRendererCore::renderEdges(GPUGraphData& gpuGraphData, const DetailPass
     if(passes._tracedEdges)
     {
         renderEdgesWithShader(_elementShaders._tracedEdges, gpuGraphData,
-            culled ? CullingResults::VisibleRanges : CullingResults::None);
+            culled ? CullingResults::VisibleRangesAndPrepassHits : CullingResults::None);
     }
 }
 

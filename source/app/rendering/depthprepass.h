@@ -44,8 +44,15 @@ public:
     void bindPyramid(GLenum textureUnit, QOpenGLShaderProgram& shader) { _depthPyramid.bind(textureUnit, shader); }
     void releasePyramid(GLenum textureUnit) { _depthPyramid.release(textureUnit); }
 
+    void bindHits(GLenum textureUnit);
+    void releaseHits(GLenum textureUnit);
+
 private:
     GLuint _depthTexture = 0;
+
+    // The element nearest in each pixel, and the z it was hit at
+    GLuint _hitsTexture = 0;
+
     GLuint _fbo = 0;
     int _width = 0;
     int _height = 0;

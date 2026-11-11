@@ -206,6 +206,15 @@ vec2 visibleRangeOfPart(bool isHead)
 {
     return texelFetch(visibleRanges, visibleRangeTexel(isHead), 0).rg;
 }
+
+#ifndef EDGE_DEPTH_PREPASS
+uniform sampler2D previousVisibleRanges;
+uniform bool hasPreviousVisibleRanges;
+
+// Whether the part was drawn in the depth prepass, whose hits then say where it
+// is nearest
+flat out int inDepthPrepass;
+#endif
 #endif
 
 void collapse()
@@ -280,6 +289,8 @@ void main()
     vec2 stretch = vec2(0.0, 1.0);
 
 #if defined(EDGE_TRACED) && !defined(EDGE_DEPTH_PREPASS)
+    inDepthPrepass = 0;
+
     if(hasVisibleRanges)
     {
         // The quad covers only the stretch that may be seen, but the shape
@@ -291,6 +302,10 @@ void main()
             collapse();
             return;
         }
+
+        // The depth prepass leaves out what the walk before this one found hidden
+        inDepthPrepass = !hasPreviousVisibleRanges ||
+            !visibleRangeEmpty(texelFetch(previousVisibleRanges, visibleRangeTexel(isHead), 0).rg) ? 1 : 0;
     }
 #endif
 
