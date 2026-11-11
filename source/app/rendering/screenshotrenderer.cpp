@@ -48,7 +48,7 @@ static const int TILE_SIZE = 1024;
 // cause artefacts. Normally this isn't much of a problem, but when tile rendering,
 // said artefacts show up at every tile boundary. The solution is to overscan the
 // tile, but only use the centre pixels when composing the final image.
-static const int TILE_EXTRA = 72;
+static const int TILE_EXTRA = 2;
 static const int TILE_SIZE_PLUS_EXTRA = TILE_SIZE + (2 * TILE_EXTRA);
 
 static QString fetchPreview(QSize screenshotSize)
@@ -87,10 +87,12 @@ static QPoint renderOffsetForFill(int imageWidth, int imageHeight, float aspect)
     return offset;
 }
 
-// A screenshot isn't drawn to a deadline, so it draws every edge as exactly as it can
-ScreenshotRenderer::ScreenshotRenderer() :
-    GraphRendererCore(DetailThresholds::exact())
+ScreenshotRenderer::ScreenshotRenderer()
 {
+    // Whatever the preferences say of the picture on screen
+    setAntialiasing(true);
+    setGatherWhenStill(true);
+
     glGenFramebuffers(1, &_screenshotFBO);
     glGenTextures(1, &_screenshotTex);
     glGenTextures(1, &_sdfTexture);
@@ -145,10 +147,6 @@ void ScreenshotRenderer::render()
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->width(), this->height(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
                  nullptr);
 
-    renderGraph();
-
-    render2D();
-
     // Bind to screenshot FBO
     glBindFramebuffer(GL_FRAMEBUFFER, _screenshotFBO);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _screenshotTex, 0);
@@ -156,7 +154,13 @@ void ScreenshotRenderer::render()
     GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0};
     glDrawBuffers(1, static_cast<GLenum*>(drawBuffers));
 
-    compositeInto(_screenshotFBO, GraphRendererCore::Type::Color);
+    do
+    {
+        renderGraph();
+        render2D();
+        compositeInto(_screenshotFBO, GraphRendererCore::Type::Color);
+    }
+    while(gathering());
 }
 
 void ScreenshotRenderer::requestScreenshot(const GraphRenderer& renderer, int imageWidth, int imageHeight,

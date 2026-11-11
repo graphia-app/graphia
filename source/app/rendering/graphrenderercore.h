@@ -199,7 +199,7 @@ class GraphRendererCore : public OpenGLFunctions
     friend class ScreenshotRenderer;
 
 public:
-    explicit GraphRendererCore(DetailThresholds detailThresholds = {});
+    GraphRendererCore();
     ~GraphRendererCore() override;
 
 private:
@@ -213,7 +213,6 @@ private:
     QOpenGLShaderProgram _sdfShader;
 
     ElementShaders _elementShaders;
-    DetailThresholds _detailThresholds;
     QOpenGLShaderProgram _textShader;
 
     QOpenGLShaderProgram _screenShader;
@@ -225,6 +224,7 @@ private:
 
     ScreenTexture _composite{GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_LINEAR};
     ScreenTexture _compositeElements{GL_RG32F, GL_RG, GL_FLOAT, GL_NEAREST};
+    bool _antialiasing = true;
     SmaaAntialiasing _smaaAntialiasing;
     FrameAccumulator _frameAccumulator;
 
@@ -344,6 +344,11 @@ protected:
     void uploadNodeGeometry();
 
     void restartGathering() { _frameAccumulator.restart(); }
+    bool gathering() const { return _frameAccumulator.nextIsSample(); }
+
+    // Antialiased, but not gathered, unless set otherwise
+    void setAntialiasing(bool enabled) { _antialiasing = enabled; }
+    void setGatherWhenStill(bool gatherWhenStill) { _frameAccumulator.setEnabled(gatherWhenStill); }
 
     Shading shading() const;
     void setShading(Shading shading);

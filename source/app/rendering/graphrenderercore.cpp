@@ -483,9 +483,8 @@ void GPUGraphData::copyState(const GPUGraphData& gpuGraphData,
     initialise(nodesShader, edgesShader, textShader);
 }
 
-GraphRendererCore::GraphRendererCore(DetailThresholds detailThresholds) :
-    _context(QOpenGLContext::currentContext()),
-    _detailThresholds(detailThresholds)
+GraphRendererCore::GraphRendererCore() :
+    _context(QOpenGLContext::currentContext())
 {
     resolveOpenGLFunctions();
 
@@ -1123,7 +1122,7 @@ GraphRendererCore::PixelScaleRange GraphRendererCore::pixelScaleRange() const
 // A static image can take as long as it needs, so everything is traced
 DetailThresholds GraphRendererCore::detailThresholds() const
 {
-    return _frameAccumulator.nextIsSample() ? DetailThresholds::exact() : _detailThresholds;
+    return _frameAccumulator.nextIsSample() ? DetailThresholds::exact() : DetailThresholds{};
 }
 
 std::vector<size_t> GraphRendererCore::gpuGraphDataRenderOrder() const
@@ -1326,8 +1325,7 @@ void GraphRendererCore::compositeInto(GLuint framebuffer, Flags<Type> type)
 
     // The outlines are drawn from where the selection and the elements are
     // within each pixel, which SMAA estimates from the silhouettes
-    const bool smoothed = u::pref(u"visuals/enableAntialiasing"_s).toBool() &&
-        !_frameAccumulator.nextIsSample();
+    const bool smoothed = _antialiasing && !_frameAccumulator.nextIsSample();
 
     if(smoothed)
     {

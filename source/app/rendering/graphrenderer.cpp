@@ -1259,6 +1259,9 @@ void GraphRenderer::render()
         return;
     }
 
+    // Read each frame, so that changing it takes effect at once
+    setAntialiasing(u::pref(u"visuals/enableAntialiasing"_s).toBool());
+
     updateScene();
 
     QQuickOpenGLUtils::resetOpenGLState();
