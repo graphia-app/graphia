@@ -106,10 +106,6 @@ void GPUGraphData::initialise(QOpenGLShaderProgram& nodesShader,
                               QOpenGLShaderProgram& textShader,
                               size_t tessellationFactor)
 {
-    _sphere.setRadius(1.0f);
-    _sphere.setRings(16 * tessellationFactor);
-    _sphere.setSlices(16 * tessellationFactor);
-    _sphere.create(nodesShader);
     _nodeQuad.create(nodesShader);
 
     _arrow.setRadius(1.0f);

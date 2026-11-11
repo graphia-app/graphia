@@ -6,7 +6,6 @@
         <file>shaders/nodeimpostor.glsl</file>
         <file>shaders/projection.glsl</file>
         <file>shaders/texelbuffer.glsl</file>
-        <file>shaders/instancednodes.vert</file>
         <file>shaders/nodeimpostor.vert</file>
         <file>shaders/nodeimpostor.frag</file>
         <file>shaders/instancededges.vert</file>
@@ -21,7 +20,6 @@
         <file>shaders/textrender.frag</file>
         <file>shaders/textrender.vert</file>
         <file>shaders/sdf.frag</file>
-        <file>shaders/nodecolorads.frag</file>
         <file>shaders/edgecolorads.frag</file>
         <file>shaders/outline.frag</file>
     </qresource>

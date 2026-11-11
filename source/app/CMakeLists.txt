@@ -97,7 +97,6 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/arrow.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/impostorquads.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/rectangle.h
-    ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/sphere.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/scene.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/screenshotrenderer.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/shadertools.h
@@ -223,7 +222,6 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/arrow.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/impostorquads.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/rectangle.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/sphere.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/screenshotrenderer.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/shadertools.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/texelbuffer.cpp
