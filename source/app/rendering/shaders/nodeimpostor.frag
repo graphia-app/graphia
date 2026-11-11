@@ -74,7 +74,7 @@ void main()
     vec3 fragColor = mix(outerVColor, innerVColor, step(length(scaledUV), DOT_REACH));
 
     vec3 color = (flatness * fragColor) +
-        ((1.0 - flatness) * adsModel(position, normal, fragColor, lightPlacement.x, lightPlacement.y));
+        ((1.0 - flatness) * adsModel(position, normal, fragColor, lightPlacement));
 
     gl_FragDepth = depthAt(zToClip, position.z);
 

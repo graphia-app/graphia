@@ -37,6 +37,12 @@ float depthAt(mat2 zToClip, float z)
     return ((clip.x / clip.y) * 0.5) + 0.5;
 }
 
+// The view space z of the near plane
+float nearPlaneZ(mat2 zToClip)
+{
+    return -(zToClip[1].x + zToClip[1].y) / (zToClip[0].x + zToClip[0].y);
+}
+
 // From a point towards where the rays meet, scaled by w per unit of z,
 // which keeps it finite when that is infinitely far away
 vec3 towardsEye(mat2 zToClip, vec3 position)
@@ -51,4 +57,15 @@ float projectionScaleFor(mat4 projectionMatrix, vec3 position, float extent)
     vec4 b = projectionMatrix * vec4(position.x - extent, position.y, position.z, 1.0);
 
     return abs((a.x / a.w) - (b.x / b.w)) / 2.0;
+}
+
+// The view space position at a point in normalised device coordinates and a z
+vec3 unproject(mat4 projectionMatrix, mat2 zToClip, vec2 ndc, float z)
+{
+    float w = clipWAt(zToClip, z);
+
+    return vec3(
+        ((ndc.x * w) - (projectionMatrix[2][0] * z) - projectionMatrix[3][0]) / projectionMatrix[0][0],
+        ((ndc.y * w) - (projectionMatrix[2][1] * z) - projectionMatrix[3][1]) / projectionMatrix[1][1],
+        z);
 }

@@ -38,7 +38,7 @@ struct MaterialInfo
 uniform MaterialInfo material;
 
 vec3 adsModel(const in vec3 pos, const in vec3 n, const in vec3 diffuseColor,
-    const in float lightOffset, const in float lightScale)
+    const in vec2 lightPlacement)
 {
     vec3 result = vec3(0.0);
     vec3 v = normalize(-pos);
@@ -48,8 +48,8 @@ vec3 adsModel(const in vec3 pos, const in vec3 n, const in vec3 diffuseColor,
     for(int i = 0; i < minNumberOfLights; i++)
     {
         LightInfo light = lights[i];
-        light.position *= lightScale;
-        light.position.z -= lightOffset;
+        light.position *= lightPlacement.y;
+        light.position.z -= lightPlacement.x;
 
         vec3 l = vec3(light.position) - pos;
 

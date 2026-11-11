@@ -426,7 +426,7 @@ void GraphRenderer::updateGPUDataIfRequired()
 
             if(gpuGraphData != nullptr)
             {
-                gpuGraphData->_edgeData.push_back(edgeData);
+                gpuGraphData->addEdge(edgeData);
 
                 if(edgeData._selected != 0.0f)
                     gpuGraphData->_elementsSelected = true;

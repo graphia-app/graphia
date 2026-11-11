@@ -35,6 +35,7 @@
 #include <QOpenGLContext>
 #include <QPoint>
 #include <QString>
+#include <QVector2D>
 #include <QVector3D>
 #include <QVector4D>
 #include <QtGlobal>
@@ -112,6 +113,7 @@ void GPUGraphData::initialise(QOpenGLShaderProgram& nodesShader,
     _arrow.setLength(1.0f);
     _arrow.setSlices(8 * tessellationFactor);
     _arrow.create(edgesShader);
+    _edgeQuads.create(edgesShader);
 
     _rectangle.create(textShader);
 
@@ -248,7 +250,7 @@ void GPUGraphData::prepareNodeVAO(QOpenGLShaderProgram& shader)
 
 void GPUGraphData::prepareEdgeVAO(QOpenGLShaderProgram& shader)
 {
-    _arrow.vertexArrayObject()->bind();
+    _edgeQuads.vertexArrayObject()->bind();
     shader.bind();
 
     _edgeVBO.bind();
@@ -285,7 +287,7 @@ void GPUGraphData::prepareEdgeVAO(QOpenGLShaderProgram& shader)
     _edgeVBO.release();
 
     shader.release();
-    _arrow.vertexArrayObject()->release();
+    _edgeQuads.vertexArrayObject()->release();
 }
 
 bool GPUGraphData::prepareRenderBuffers(int width, int height, GLuint depthTexture, GLint numMultiSamples)
@@ -317,6 +319,7 @@ void GPUGraphData::reset()
     _unhighlightAlpha = 0.0f;
     _isOverlay = false;
     _elementsSelected = false;
+    _extents = {};
     _nodeData.clear();
     _edgeData.clear();
     _glyphData.clear();
@@ -380,6 +383,12 @@ size_t GPUGraphData::numNodes() const
 size_t GPUGraphData::numEdges() const
 {
     return _edgeData.size();
+}
+
+void GPUGraphData::addEdge(const EdgeData& edgeData)
+{
+    _edgeData.push_back(edgeData);
+    _extents._hasArrowHeads = _extents._hasArrowHeads || edgeData._edgeType == static_cast<int>(EdgeVisualType::Arrow);
 }
 
 void GPUGraphData::addGlyph(const GlyphData& glyphData)
@@ -448,6 +457,7 @@ void GPUGraphData::copyState(const GPUGraphData& gpuGraphData,
     _componentAlpha = gpuGraphData._componentAlpha;
     _unhighlightAlpha = gpuGraphData._unhighlightAlpha;
     _isOverlay = gpuGraphData._isOverlay;
+    _extents = gpuGraphData._extents;
     _nodeData = gpuGraphData._nodeData;
     _glyphData = gpuGraphData._glyphData;
     _tallestTextHeight = gpuGraphData._tallestTextHeight;
@@ -492,7 +502,7 @@ GraphRendererCore::GraphRendererCore() :
     ShaderTools::loadShaderProgram(_selectionShader, u":/shaders/screen.vert"_s, u":/shaders/selection.frag"_s);
 
     ShaderTools::loadShaderProgram(_nodesShader, u":/shaders/nodeimpostor.vert"_s, u":/shaders/nodeimpostor.frag"_s);
-    ShaderTools::loadShaderProgram(_edgesShader, u":/shaders/instancededges.vert"_s, u":/shaders/edgecolorads.frag"_s);
+    ShaderTools::loadShaderProgram(_edgesShader, u":/shaders/edgeimpostor.vert"_s, u":/shaders/edgeimpostor.frag"_s);
 
     ShaderTools::loadShaderProgram(_selectionMarkerShader, u":/shaders/2d.vert"_s, u":/shaders/selectionMarker.frag"_s);
 
@@ -609,10 +619,13 @@ void GraphRendererCore::renderEdges(GPUGraphData& gpuGraphData)
 
     _edgesShader.setUniformValue("flatness", shading() == Shading::Flat ? 1.0f : 0.0f);
 
-    gpuGraphData._arrow.vertexArrayObject()->bind();
-    glDrawElementsInstanced(GL_TRIANGLES, gpuGraphData._arrow.glIndexCount(),
+    _edgesShader.setUniformValue("viewportSize", QVector2D(static_cast<float>(_width), static_cast<float>(_height)));
+
+    gpuGraphData._edgeQuads.vertexArrayObject()->bind();
+    glDrawElementsInstanced(GL_TRIANGLES,
+        Primitive::ImpostorQuads::glIndexCount(gpuGraphData._extents._hasArrowHeads ? 2 : 1),
         GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(gpuGraphData.numEdges()));
-    gpuGraphData._arrow.vertexArrayObject()->release();
+    gpuGraphData._edgeQuads.vertexArrayObject()->release();
 
     _nodeGeometry.release(GL_TEXTURE0 + 1);
     _componentDataTexels.release(GL_TEXTURE0);

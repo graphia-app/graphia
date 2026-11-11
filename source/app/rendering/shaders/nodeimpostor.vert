@@ -43,17 +43,18 @@ flat out mat2  zToClip;
 out vec3 impostorPosition; // In view space
 
 #include "componentdata.glsl"
+#include "element.glsl"
 #include "nodegeometry.glsl"
 #include "nodeimpostor.glsl"
 #include "projection.glsl"
 
 void main()
 {
-    element = float(gl_InstanceID + 1);
+    element = nodeElement(gl_InstanceID);
 
     mat4 modelViewMatrix = componentModelViewMatrix(component);
     mat4 projectionMatrix = componentProjectionMatrix(component);
-    lightPlacement = vec2(componentLightOffset(component), componentLightScale(component));
+    lightPlacement = componentLightPlacement(component);
 
     outerVColor = outerColor.rgb;
     innerVColor = innerColor.rgb;

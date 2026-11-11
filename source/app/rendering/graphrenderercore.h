@@ -74,8 +74,10 @@ struct GPUGraphData : OpenGLFunctions
 
     void upload();
 
+    struct EdgeData;
     struct GlyphData;
 
+    void addEdge(const EdgeData& edgeData);
     void addGlyph(const GlyphData& glyphData);
 
     size_t numNodes() const;
@@ -84,6 +86,7 @@ struct GPUGraphData : OpenGLFunctions
 
     Primitive::ImpostorQuads _nodeQuad{1};
     Primitive::Arrow _arrow;
+    Primitive::ImpostorQuads _edgeQuads{2};
     Primitive::Rectangle _rectangle;
 
     float alpha() const;
@@ -145,6 +148,13 @@ struct GPUGraphData : OpenGLFunctions
     float _unhighlightAlpha = 0.0f;
 
     bool _isOverlay = false;
+
+    struct ElementExtents
+    {
+        bool _hasArrowHeads = false;
+    };
+
+    ElementExtents _extents;
 
     std::vector<NodeData> _nodeData;
     QOpenGLBuffer _nodeVBO;
