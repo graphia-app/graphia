@@ -40,6 +40,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <ranges>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -986,6 +987,8 @@ void GraphRendererCore::renderGraph()
     {
         ._viewportSize = QVector2D(static_cast<float>(_width), static_cast<float>(_height)),
         ._flatness = shading() == Shading::Flat ? 1.0f : 0.0f,
+        ._widestEdgeSize = std::ranges::max(_gpuGraphData | std::views::transform(
+            [](const auto& gpuGraphData) { return gpuGraphData._extents._largestEdgeSize; })),
         ._thresholds = _detailThresholds,
     });
 

@@ -46,6 +46,10 @@ out vec3 impostorPosition; // In view space
 out vec2 quadCoordinate;
 #endif
 
+// Outlines are measured at the width of the widest edge, so that a node's
+// matches an edge's at the same depth
+uniform float widestEdgeSize;
+
 #include "componentdata.glsl"
 #include "element.glsl"
 #include "nodegeometry.glsl"
@@ -87,5 +91,6 @@ void main()
     quadCoordinate = vertexPosition.xy;
 #endif
 
-    projectionScale = projectionScaleFor(projectionMatrix, nodeCentre, nodeRadius);
+    projectionScale = projectionScaleFor(projectionMatrix, nodeCentre,
+        widestEdgeSize > 0.0 ? widestEdgeSize : nodeRadius);
 }

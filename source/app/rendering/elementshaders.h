@@ -59,6 +59,7 @@ struct ElementShaders
     {
         QVector2D _viewportSize;
         float _flatness = 0.0f;
+        float _widestEdgeSize = 0.0f;
         DetailThresholds _thresholds;
     };
 

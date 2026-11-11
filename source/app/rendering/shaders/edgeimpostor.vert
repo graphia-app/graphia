@@ -254,7 +254,5 @@ void main()
     impostorPosition = unproject(projectionMatrix, zToClip, cornerPixel / (viewportSize * 0.5), cornerZ);
     gl_Position = projectionMatrix * vec4(impostorPosition, 1.0);
 
-    float fractionAlong = clamp(distance(ends.source, onAxis) / ends.length, 0.0, 1.0);
-    projectionScale = projectionScaleFor(projectionMatrix, onAxis,
-        mix(nodeSize(sourceIndex), nodeSize(targetIndex), fractionAlong));
+    projectionScale = projectionScaleFor(projectionMatrix, onAxis, size);
 }
