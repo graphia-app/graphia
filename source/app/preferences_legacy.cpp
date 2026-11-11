@@ -56,6 +56,15 @@ static void normaliseDefaultSizes()
     }
 }
 
+static void invertAntiAliasingPreference()
+{
+    if(u::prefExists(u"visuals/disableMultisampling"_s))
+    {
+        u::setPref(u"visuals/enableAntialiasing"_s, !u::pref(u"visuals/disableMultisampling"_s).toBool());
+        u::removePref(u"visuals/disableMultisampling"_s);
+    }
+}
+
 static void renameInJsonPreference(const QString& key, const std::function<void(json&)>& renameFn)
 {
     if(!u::prefExists(key))
@@ -75,6 +84,7 @@ static void renameInJsonPreference(const QString& key, const std::function<void(
 void upgradeLegacyPreferences(const Application* application)
 {
     normaliseDefaultSizes();
+    invertAntiAliasingPreference();
 
     LegacyNames legacyNames(
         [application](const QString& name) { return application->transformFactory(name); },

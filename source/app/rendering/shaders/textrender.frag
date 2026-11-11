@@ -24,7 +24,8 @@ flat in float legibility;
 
 layout (location = 0) out vec4  outColor;
 layout (location = 1) out vec2  outElement;
-layout (location = 2) out vec4  outSelection;
+layout (location = 2) out float outSubElement;
+layout (location = 3) out vec4  outSelection;
 
 uniform mediump sampler2DArray tex;
 
@@ -41,5 +42,6 @@ void main()
 
     outColor = vec4(textColor.rgb, alpha * legibility);
     outElement = vec2(0.0, 0.0);
+    outSubElement = 0.0;
     outSelection = vec4(0, 0, 0, 0);
 }

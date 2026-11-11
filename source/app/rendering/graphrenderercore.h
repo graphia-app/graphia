@@ -24,7 +24,9 @@
 #include "graphrenderertypes.h"
 #include "elementshaders.h"
 #include "nodegeometry.h"
+#include "screenpass.h"
 #include "screentexture.h"
+#include "smaaantialiasing.h"
 #include "texelbuffer.h"
 
 #include "primitives/impostorquads.h"
@@ -63,7 +65,7 @@ struct GPUGraphData : OpenGLFunctions
     void prepareEdgeVAO(QOpenGLShaderProgram& shader);
     void prepareTextVAO(QOpenGLShaderProgram& shader);
 
-    bool prepareRenderBuffers(int width, int height, GLuint depthTexture, GLint numMultiSamples);
+    bool prepareRenderBuffers(int width, int height, GLuint depthTexture);
     void copyState(const GPUGraphData &gpuGraphData, QOpenGLShaderProgram &nodesShader,
         QOpenGLShaderProgram &edgesShader, QOpenGLShaderProgram &textShader);
 
@@ -172,6 +174,10 @@ struct GPUGraphData : OpenGLFunctions
     GLuint _fbo = 0;
     GLuint _colorTexture = 0;
     GLuint _elementTexture = 0;
+
+    // Which part of its element each pixel shows
+    GLuint _subElementTexture = 0;
+
     GLuint _selectionTexture = 0;
 };
 
@@ -185,8 +191,6 @@ public:
 
 private:
     QOpenGLContext* _context = nullptr;
-
-    GLint _numMultiSamples = 0;
 
     int _width = 0;
     int _height = 0;
@@ -203,7 +207,12 @@ private:
     QOpenGLShaderProgram _outlineShader;
     QOpenGLShaderProgram _selectionShader;
 
-    ScreenTexture _composite{GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST};
+    QOpenGLShaderProgram _compositeElementShader;
+    ScreenPass _screenPass;
+
+    ScreenTexture _composite{GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_LINEAR};
+    ScreenTexture _compositeElements{GL_RG32F, GL_RG, GL_FLOAT, GL_NEAREST};
+    SmaaAntialiasing _smaaAntialiasing;
 
     GLuint _depthTexture = 0;
 
@@ -256,6 +265,10 @@ private:
     DetailPasses detailPasses(const GPUGraphData& gpuGraphData, const PixelScaleRange& pixelScale) const;
     void renderEdgesWithShader(QOpenGLShaderProgram& shader, GPUGraphData& gpuGraphData);
     void renderEdges(GPUGraphData& gpuGraphData, const DetailPasses& passes);
+
+    void compositeElements();
+    void compositeLayer(QOpenGLShaderProgram& shader, float alpha,
+        std::initializer_list<GLuint> textures);
 
     void prepare();
 

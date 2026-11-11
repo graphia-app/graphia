@@ -17,115 +17,27 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-in vec2 vPosition;
+#ifdef GL_ES
+// Element numbers are too large for medium precision to hold exactly
+precision highp float;
+#endif
 
 layout (location = 0) out vec4 fragColor;
 
-#ifdef GL_ES
-uniform sampler2D frameBufferTexture;
-#else
-uniform sampler2DMS frameBufferTexture;
-#endif
+uniform sampler2D elementTexture;
 
-uniform int width;
-uniform int height;
-uniform int multisamples;
 uniform vec4 outlineColor;
 uniform float alpha;
 
-#ifdef GL_ES
-float meanOfNonZeroMSFor(vec2 coord, int channel)
+vec2 elementAt(ivec2 p)
 {
-    return texture(frameBufferTexture, coord)[channel];
+    ivec2 highest = textureSize(elementTexture, 0) - ivec2(1);
+    return texelFetch(elementTexture, clamp(p, ivec2(0), highest), 0).rg;
 }
 
-float quantOfMSFor(vec2 coord, int channel)
+float edgeStrengthAt(ivec2 p)
 {
-    return texture(frameBufferTexture, coord)[channel];
-}
-#else
-vec2 clampCoord(vec2 coord)
-{
-    vec2 clamped;
-
-    clamped.x = clamp(coord.x, 0.0, float(width - 1));
-    clamped.y = clamp(coord.y, 0.0, float(height - 1));
-
-    return clamped;
-}
-
-float meanOfMSFor(vec2 coord, int channel, uint s)
-{
-    coord = clampCoord(coord);
-
-    float mean = 0.0;
-    for(int i = 0; i < multisamples; i++)
-    {
-        float v = texelFetch(frameBufferTexture, ivec2(coord), i)[channel];
-        mean += (v / float(s));
-    }
-
-    return mean;
-}
-
-float meanOfNonZeroMSFor(vec2 coord, int channel)
-{
-    coord = clampCoord(coord);
-
-    uint numNonZeroSamples = 0u;
-    for(int i = 0; i < multisamples; i++)
-    {
-        float v = texelFetch(frameBufferTexture, ivec2(coord), i)[channel];
-
-        if(v > 0.0)
-            numNonZeroSamples++;
-    }
-
-    if(numNonZeroSamples == 0u)
-        return 0.0;
-
-    return meanOfMSFor(coord, channel, numNonZeroSamples);
-}
-
-float quantOfMSFor(vec2 coord, int channel)
-{
-    coord = clampCoord(coord);
-
-    float mean = meanOfMSFor(coord, channel, uint(multisamples));
-
-    // Find the sample value closest to the mean,
-    // thereby quantising it, so that we can identify the
-    // most representative sample from those available
-    float min = 1.0 / 0.0; //3.402823466e+38;
-    int qi = 0;
-
-    for(int i = 0; i < multisamples; i++)
-    {
-        float v = texelFetch(frameBufferTexture, ivec2(coord), i)[channel];
-        float diff = v < mean ? mean - v : v - mean;
-
-        if(diff < min)
-        {
-            min = diff;
-            qi = i;
-        }
-    }
-
-    return texelFetch(frameBufferTexture, ivec2(coord), qi)[channel];
-}
-#endif
-
-float edgeStrengthAt(vec2 coord)
-{
-    float pixelWidth = 1.0;
-    float pixelHeight = 1.0;
-
-#ifdef GL_ES
-    pixelWidth /= float(width);
-    pixelHeight /= float(height);
-#endif
-
-    float s = quantOfMSFor(coord, 0);
+    float s = elementAt(p).r;
 
     float numDiffPixels = 0.0;
     float projectionScale = 0.0;
@@ -137,9 +49,7 @@ float edgeStrengthAt(vec2 coord)
             if(i == 0 && j == 0)
                 continue;
 
-            vec2 offset = vec2(float(i) * pixelWidth, float(j) * pixelHeight);
-
-            if(s != quantOfMSFor(coord + offset, 0))
+            if(s != elementAt(p + ivec2(i, j)).r)
                 numDiffPixels += 1.0;
         }
     }
@@ -154,12 +64,7 @@ float edgeStrengthAt(vec2 coord)
             if(i == 0 && j == 0)
                 continue;
 
-            vec2 offset = vec2(float(i) * pixelWidth, float(j) * pixelHeight);
-
-            float p = float(meanOfNonZeroMSFor(coord + offset, 1));
-
-            if(p > projectionScale)
-                projectionScale = p;
+            projectionScale = max(projectionScale, elementAt(p + ivec2(i, j)).g);
         }
     }
 
@@ -188,6 +93,6 @@ float edgeStrengthAt(vec2 coord)
 
 void main()
 {
-    float outlineAlpha = edgeStrengthAt(vPosition);
+    float outlineAlpha = edgeStrengthAt(ivec2(gl_FragCoord.xy));
     fragColor = vec4(outlineColor.rgb, outlineAlpha * alpha);
 }

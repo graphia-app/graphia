@@ -27,6 +27,7 @@
         <file>shaders/textrender.vert</file>
         <file>shaders/sdf.frag</file>
         <file>shaders/outline.frag</file>
+        <file>shaders/compositeelement.frag</file>
         <file>shaders/smaaedges.frag</file>
         <file>shaders/smaaweights.frag</file>
         <file>shaders/smaablend.frag</file>

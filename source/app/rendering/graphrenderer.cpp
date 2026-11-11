@@ -923,7 +923,7 @@ void GraphRenderer::onComponentWillBeRemoved(const Graph*, ComponentId component
 
 void GraphRenderer::onPreferenceChanged(const QString& key, const QVariant&)
 {
-    if(key == u"visuals/backgroundColor"_s)
+    if(key == u"visuals/backgroundColor"_s || key == u"visuals/enableAntialiasing"_s)
         update();
 }
 
@@ -1265,7 +1265,6 @@ void GraphRenderer::render()
 
     renderGraph();
     render2D(_selectionRect);
-
     compositeInto(framebufferObject()->handle());
 
     QQuickOpenGLUtils::resetOpenGLState();

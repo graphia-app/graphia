@@ -48,24 +48,31 @@ in vec3 impostorPosition;
 
 layout (location = 0) out vec4  outColor;
 layout (location = 1) out vec2  outElement;
-layout (location = 2) out vec4  outSelection;
+layout (location = 2) out float outSubElement;
+layout (location = 3) out vec4  outSelection;
 
 const float EPSILON = 0.000001;
 const float NO_HIT = 3.402823466e+38;
+
+const float SHAFT_SUB_ELEMENT = 0.0;
+const float INNER_COLOR_SUB_ELEMENT = 1.0;
+const float HEAD_BASE_SUB_ELEMENT = 2.0;
+const float HEAD_SIDE_SUB_ELEMENT = 3.0;
 
 struct Hit
 {
     float t;
     vec3 position;
     vec3 normal;
+    float subElement;
 };
 
 // Only surfaces facing the ray count: the shapes are open where the nodes
 // swallow them, and what would show through is their inside
-void consider(inout Hit nearest, float t, vec3 position, vec3 normal, vec3 rayDirection)
+void consider(inout Hit nearest, float t, vec3 position, vec3 normal, float subElement, vec3 rayDirection)
 {
     if(t > 0.0 && t < nearest.t && dot(normal, rayDirection) < 0.0)
-        nearest = Hit(t, position, normal);
+        nearest = Hit(t, position, normal, subElement);
 }
 
 // The rays start so far back that the quadratics lose the radius to rounding, so each
@@ -101,7 +108,8 @@ void traceShaft(vec3 rayOrigin, vec3 rayDirection, inout Hit nearest)
         return;
 
     vec3 position = rayOrigin + (rayDirection * t);
-    consider(nearest, t, position, normalize(position - (shaftBase + (edgeAxis * along))), rayDirection);
+    consider(nearest, t, position, normalize(position - (shaftBase + (edgeAxis * along))), SHAFT_SUB_ELEMENT,
+        rayDirection);
 }
 
 void traceHeadBase(vec3 rayOrigin, vec3 rayDirection, vec3 centre, vec3 normal, inout Hit nearest)
@@ -115,7 +123,7 @@ void traceHeadBase(vec3 rayOrigin, vec3 rayDirection, vec3 centre, vec3 normal, 
     vec3 position = rayOrigin + (rayDirection * t);
 
     if(distance(position, centre) <= headRadius)
-        consider(nearest, t, position, normal, rayDirection);
+        consider(nearest, t, position, normal, HEAD_BASE_SUB_ELEMENT, rayDirection);
 }
 
 void traceHead(vec3 rayOrigin, vec3 rayDirection, inout Hit nearest)
@@ -159,7 +167,7 @@ void traceHead(vec3 rayOrigin, vec3 rayDirection, inout Hit nearest)
             vec3 normal = radialLength > EPSILON ?
                 normalize(((radial / radialLength) * headLength) - (axis * headRadius)) : -axis;
 
-            consider(nearest, t[i], position, normal, rayDirection);
+            consider(nearest, t[i], position, normal, HEAD_SIDE_SUB_ELEMENT, rayDirection);
             return;
         }
     }
@@ -173,6 +181,7 @@ void shade(Hit hit, bool inner)
         ((1.0 - flatness) * adsModel(hit.position, hit.normal, color, lightPlacement)), 1.0);
     outElement.r = element;
     outElement.g = projectionScale;
+    outSubElement = (inner && innerVColor != outerVColor ? INNER_COLOR_SUB_ELEMENT : hit.subElement) / 255.0;
     outSelection = vec4(vec3(vSelected), 1.0);
 }
 
@@ -186,7 +195,7 @@ void main()
         distance(impostorPosition, headApex)) + max(shaftRadius, headRadius);
     vec3 rayOrigin = impostorPosition - (rayDirection * reach);
 
-    Hit nearest = Hit(NO_HIT, vec3(0.0), vec3(0.0));
+    Hit nearest = Hit(NO_HIT, vec3(0.0), vec3(0.0), SHAFT_SUB_ELEMENT);
     traceShaft(rayOrigin, rayDirection, nearest);
 
     if(headLength > 0.0)

@@ -17,52 +17,19 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-in vec2 vPosition;
-
 layout (location = 0) out vec4 fragColor;
 
-#ifdef GL_ES
-uniform sampler2D frameBufferTexture;
-#else
-uniform sampler2DMS frameBufferTexture;
-#endif
+uniform sampler2D colorTexture;
 
-uniform int multisamples;
 uniform float alpha;
 uniform int disableAlphaBlending;
 
-#ifdef GL_ES
-vec4 resolvedValue(vec2 coord)
-{
-    return texture(frameBufferTexture, coord);
-}
-#else
-vec4 resolvedValue(vec2 coord)
-{
-    vec3 rgb = vec3(0.0);
-    float a = 0.0;
-    int numTexels = 0;
-    for(int s = 0; s < multisamples; s++)
-    {
-        vec4 texel = texelFetch(frameBufferTexture, ivec2(coord), s);
-
-        if(texel.a > 0.0)
-        {
-            rgb += texel.rgb;
-            a += (texel.a / float(multisamples));
-            numTexels++;
-        }
-    }
-
-    if(disableAlphaBlending != 0 && numTexels > 0)
-        a = 1.0;
-
-    return vec4(rgb / float(numTexels), a);
-}
-#endif
-
 void main()
 {
-    vec4 color = resolvedValue(vPosition);
+    vec4 color = texelFetch(colorTexture, ivec2(gl_FragCoord.xy), 0);
+
+    if(disableAlphaBlending != 0 && color.a > 0.0)
+        color.a = 1.0;
+
     fragColor = vec4(color.rgb, color.a * alpha);
 }
