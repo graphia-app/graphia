@@ -19,30 +19,51 @@
 
 #include "edgecullresults.h"
 
-EdgeCullResults::EdgeCullResults()
+#include <algorithm>
+
+EdgeCullResults::EdgeCullResults() :
+    _walks{{{2, GL_RG32F, GL_RG, 1}, {2, GL_RG32F, GL_RG, 1}}}
 {
     resolveOpenGLFunctions();
 }
 
 void EdgeCullResults::reserve(size_t numEdges)
 {
-    if(_walk.reserve(numEdges))
-        _written = false;
+    bool reallocated = false;
+
+    for(auto& walk : _walks)
+        reallocated = walk.reserve(numEdges) || reallocated;
+
+    if(reallocated)
+        _numWritten = 0;
+}
+
+bool EdgeCullResults::usable() const
+{
+    return std::ranges::all_of(_walks, [](const auto& walk) { return walk.usable(); });
 }
 
 void EdgeCullResults::bindForWriting(QOpenGLShaderProgram& shader)
 {
-    _walk.bindForWriting();
+    _latest = 1 - _latest;
+    _walks.at(_latest).bindForWriting();
     setSizeUniform(shader);
 
-    _written = true;
+    _numWritten = std::min(_numWritten + 1, static_cast<int>(_walks.size()));
 }
 
 void EdgeCullResults::bind(GLenum textureUnit, QOpenGLShaderProgram& shader)
 {
     glActiveTexture(textureUnit);
-    glBindTexture(GL_TEXTURE_2D, _walk.texture(0));
+    glBindTexture(GL_TEXTURE_2D, _walks.at(_latest).texture(0));
     setSizeUniform(shader);
+}
+
+void EdgeCullResults::bindPrevious(GLenum textureUnit, QOpenGLShaderProgram& shader)
+{
+    glActiveTexture(textureUnit);
+    glBindTexture(GL_TEXTURE_2D, _walks.at(1 - _latest).texture(0));
+    shader.setUniformValue("hasPreviousVisibleRanges", _numWritten > 1 ? 1 : 0);
 }
 
 void EdgeCullResults::release(GLenum textureUnit)
@@ -53,5 +74,5 @@ void EdgeCullResults::release(GLenum textureUnit)
 
 void EdgeCullResults::setSizeUniform(QOpenGLShaderProgram& shader) const
 {
-    shader.setUniformValue("visibleRangesSize", _walk.size());
+    shader.setUniformValue("visibleRangesSize", _walks.at(_latest).size());
 }

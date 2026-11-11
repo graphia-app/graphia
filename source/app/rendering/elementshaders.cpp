@@ -71,6 +71,8 @@ void ElementShaders::setSamplerUnits(QOpenGLShaderProgram& program)
     setUnit("componentData", Unit::ComponentData);
     setUnit("nodeGeometry", Unit::NodeGeometry);
     setUnit("visibleRanges", Unit::VisibleRanges);
+    setUnit("previousVisibleRanges", Unit::PreviousVisibleRanges);
+    setUnit("prepassHits", Unit::PrepassHits);
     setUnit("depthPyramid", Unit::DepthPyramid);
     setUnit("nearestNode", Unit::NearestNode);
     setUnit("farthestNode", Unit::FarthestNode);

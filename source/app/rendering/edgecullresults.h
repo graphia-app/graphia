@@ -24,6 +24,7 @@
 
 #include <QOpenGLShaderProgram>
 
+#include <array>
 #include <cstddef>
 
 class EdgeCullResults : public OpenGLFunctions
@@ -33,17 +34,19 @@ public:
 
     // Anything written is lost if more room is needed
     void reserve(size_t numEdges);
-    bool usable() const { return _walk.usable(); }
+    bool usable() const;
 
-    bool written() const { return _written; }
+    bool written() const { return _numWritten > 0; }
     void bindForWriting(QOpenGLShaderProgram& shader);
 
     void bind(GLenum textureUnit, QOpenGLShaderProgram& shader);
+    void bindPrevious(GLenum textureUnit, QOpenGLShaderProgram& shader);
     void release(GLenum textureUnit);
 
 private:
-    EdgeDataTexels _walk{2, GL_RG32F, GL_RG, 1};
-    bool _written = false;
+    std::array<EdgeDataTexels, 2> _walks;
+    size_t _latest = 0;
+    int _numWritten = 0;
 
     void setSizeUniform(QOpenGLShaderProgram& shader) const;
 };
