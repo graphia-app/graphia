@@ -19,14 +19,10 @@
 
 // What the shapes drawn into SplatCompositor share; include after componentdata.glsl
 
-// How much what is drawn by coverage at a depth counts, falling by e³ for each
-// radius of its component it is behind the front, so that the front hides the back
-float coverageWeightAt(int component, float viewZ)
+// The distance to the front of a component, and its radius
+// Splatted shapes are weighted by their depth across this range
+vec2 coverageDepthsOf(int component)
 {
-    const float FALLOFF = 3.0;
-
     float radius = max(componentRadius(component), 0.0001);
-    float front = componentDistance(component) - radius;
-
-    return exp(-FALLOFF * max(-viewZ - front, 0.0) / radius);
+    return vec2(componentDistance(component) - radius, radius);
 }

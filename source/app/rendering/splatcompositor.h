@@ -30,7 +30,9 @@
 class SplatCompositor : public OpenGLFunctions
 {
 public:
-    SplatCompositor();
+    // The nodes' nearest and farthest depths and their occlusion are read from
+    // three units from firstNodeUnit
+    explicit SplatCompositor(GLenum firstNodeUnit);
     ~SplatCompositor() override;
 
     SplatCompositor(const SplatCompositor&) = delete;
@@ -38,10 +40,20 @@ public:
 
     bool resize(int width, int height, GLuint depthTexture);
 
+    // The node passes, which come before begin()
+    // The shader tells them apart by which of its outputs are drawn
+    void beginNearestNodes();
+    void beginFarthestNodes();
+    void beginNodeOcclusion();
+
     void begin();
     void resolveInto(GLuint layerFramebuffer);
 
 private:
+    GLenum _nearestNodeUnit;
+    GLenum _farthestNodeUnit;
+    GLenum _nodeOcclusionUnit;
+
     GLuint _sums = 0;
     GLuint _weights = 0;
     GLuint _overlap = 0;
@@ -49,6 +61,15 @@ private:
     GLuint _framebuffer = 0;
     int _width = 0;
     int _height = 0;
+
+    // The depths of the nearest and farthest node in each pixel, and what the
+    // nodes leave uncovered, with where among them that is
+    GLuint _nearestNode = 0;
+    GLuint _farthestNode = 0;
+    GLuint _nodeOcclusion = 0;
+    GLuint _nearestNodeFramebuffer = 0;
+    GLuint _farthestNodeFramebuffer = 0;
+    GLuint _nodeOcclusionFramebuffer = 0;
 
     QOpenGLShaderProgram _resolveShader;
     ScreenPass _screenPass;

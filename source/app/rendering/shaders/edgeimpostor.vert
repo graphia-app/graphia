@@ -78,7 +78,7 @@ flat out vec3 averagedOuterColor;
 
 flat out vec3 averagedInnerColor;
 out vec3 shaftCoordinate;
-out float coverageWeight;
+flat out vec2 coverageDepths;
 
 // The direction across the shaft on screen
 flat out vec2 acrossScreen;
@@ -330,7 +330,7 @@ void main()
     gl_Position = projectionMatrix * vec4(impostorPosition, 1.0);
 
 #ifdef EDGE_COVERAGE
-    coverageWeight = coverageWeightAt(component, impostorPosition.z);
+    coverageDepths = coverageDepthsOf(component);
 #endif
 
     projectionScale = projectionScaleFor(projectionMatrix, onAxis, size);

@@ -72,6 +72,9 @@ void ElementShaders::setSamplerUnits(QOpenGLShaderProgram& program)
     setUnit("nodeGeometry", Unit::NodeGeometry);
     setUnit("visibleRanges", Unit::VisibleRanges);
     setUnit("depthPyramid", Unit::DepthPyramid);
+    setUnit("nearestNode", Unit::NearestNode);
+    setUnit("farthestNode", Unit::FarthestNode);
+    setUnit("nodeOcclusion", Unit::NodeOcclusion);
     setUnit("approximateShadingThirds0", Unit::ApproximateShadingThirds);
     setUnit("approximateShadingThirds1", Unit::ApproximateShadingThirds, 1);
     setUnit("approximateShadingThirds2", Unit::ApproximateShadingThirds, 2);
@@ -86,6 +89,10 @@ ElementShaders::ElementShaders()
     ShaderTools::loadShaderProgram(_nodes, nodeVertexShader, nodeImpostor);
     ShaderTools::loadShaderProgram(_nodeDepthPrepass, nodeVertexShader, nodeImpostor, {u"NODE_DEPTH_PREPASS"_s});
     ShaderTools::loadShaderProgram(_splattedNodes, nodeVertexShader, nodeCoverage, {u"NODE_COVERAGE"_s});
+    ShaderTools::loadShaderProgram(_nodeDepths, nodeVertexShader, nodeCoverage,
+        {u"NODE_COVERAGE"_s, u"NODE_DEPTHS"_s});
+    ShaderTools::loadShaderProgram(_nodeOcclusion, nodeVertexShader, nodeCoverage,
+        {u"NODE_COVERAGE"_s, u"NODE_OCCLUSION"_s});
 
     const auto edgeVertexShader = u":/shaders/edgeimpostor.vert"_s;
     const auto edgeImpostor = u":/shaders/edgeimpostor.frag"_s;
@@ -146,7 +153,7 @@ void ElementShaders::setFrameUniforms(const FrameUniforms& uniforms)
 
 std::vector<QOpenGLShaderProgram*> ElementShaders::nodeShaders()
 {
-    return {&_nodes, &_nodeDepthPrepass, &_splattedNodes};
+    return {&_nodes, &_nodeDepthPrepass, &_splattedNodes, &_nodeDepths, &_nodeOcclusion};
 }
 
 std::vector<QOpenGLShaderProgram*> ElementShaders::edgeShaders()

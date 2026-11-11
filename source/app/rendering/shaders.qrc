@@ -7,6 +7,7 @@
         <file>shaders/lighting.glsl</file>
         <file>shaders/nodegeometry.glsl</file>
         <file>shaders/nodeimpostor.glsl</file>
+        <file>shaders/nodeocclusion.glsl</file>
         <file>shaders/outline.glsl</file>
         <file>shaders/projection.glsl</file>
         <file>shaders/smaablending.glsl</file>

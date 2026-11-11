@@ -53,6 +53,9 @@ struct ElementShaders
         NodeGeometry,
         VisibleRanges,
         DepthPyramid,
+        NearestNode,
+        FarthestNode,
+        NodeOcclusion,
         ApproximateShadingThirds, // and the two units after it
     };
 
@@ -61,6 +64,8 @@ struct ElementShaders
     QOpenGLShaderProgram _nodes;
     QOpenGLShaderProgram _nodeDepthPrepass;
     QOpenGLShaderProgram _splattedNodes;
+    QOpenGLShaderProgram _nodeDepths;
+    QOpenGLShaderProgram _nodeOcclusion;
 
     QOpenGLShaderProgram _fastSplattedEdges;
     QOpenGLShaderProgram _splattedEdges;
