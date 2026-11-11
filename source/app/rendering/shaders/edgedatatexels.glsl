@@ -23,7 +23,6 @@
 // Two texels an edge, for its shaft and for its head
 uniform vec2 visibleRangesSize;
 
-// A texel an edge in each of three textures
 uniform vec2 approximateShadingThirdsSize;
 
 ivec2 edgeTexel(int index, vec2 texturesSize)

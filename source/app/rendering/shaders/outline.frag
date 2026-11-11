@@ -25,11 +25,16 @@ precision highp float;
 layout (location = 0) out vec4 fragColor;
 
 #include "outline.glsl"
+#include "smaablending.glsl"
 
 uniform sampler2D elementTexture;
+uniform sampler2D blendWeights;
 
 uniform vec4 outlineColor;
 uniform float alpha;
+
+// Whether the picture is to be blended across its silhouettes, by blendWeights
+uniform bool smoothed;
 
 vec2 elementAt(ivec2 p)
 {
@@ -37,10 +42,77 @@ vec2 elementAt(ivec2 p)
     return texelFetch(elementTexture, clamp(p, ivec2(0), highest), 0).rg;
 }
 
+// The elements a pixel shows once blended across the silhouettes
+void shownAt(ivec2 p, out vec3 elements, out vec3 projectionScales, out vec3 amounts)
+{
+    vec2 own = elementAt(p);
+    elements = vec3(own.r);
+    projectionScales = vec3(own.g);
+    amounts = vec3(1.0, 0.0, 0.0);
+
+    if(!smoothed)
+        return;
+
+    vec4 a = smaaBlendingWeights(blendWeights, p);
+
+    if(dot(a, vec4(1.0)) < 1e-5)
+        return;
+
+    bool horizontal = smaaBlendsHorizontally(a);
+    vec2 weights = horizontal ? a.xz : a.yw;
+    ivec2 along = horizontal ? ivec2(1, 0) : ivec2(0, 1);
+
+    // Each neighbour is read part of the way towards it, by its share of the blend
+    vec2 toward = (weights * weights) / dot(weights, vec2(1.0));
+
+    vec2 positive = elementAt(p + along);
+    vec2 negative = elementAt(p - along);
+
+    elements = vec3(own.r, positive.r, negative.r);
+    projectionScales = vec3(own.g, positive.g, negative.g);
+    amounts = vec3(1.0 - toward.x - toward.y, toward.x, toward.y);
+}
+
+// How much of what two pixels will show is the same element
+float sameShown(vec3 elements, vec3 amounts, vec3 otherElements, vec3 otherAmounts)
+{
+    float same = 0.0;
+
+    for(int k = 0; k < 3; k++)
+    {
+        for(int l = 0; l < 3; l++)
+        {
+            if(elements[k] == otherElements[l])
+                same += amounts[k] * otherAmounts[l];
+        }
+    }
+
+    return same;
+}
+
 float edgeStrengthAt(ivec2 p)
 {
-    float s = elementAt(p).r;
+    // What a pixel and its neighbours show is blended from no further than
+    // two pixels away, so where all of that is one element there is no outline
+    if(smoothed)
+    {
+        float own = elementAt(p).r;
+        bool alone = true;
 
+        for(int i = -2; i <= 2; i++)
+        {
+            for(int j = -2; j <= 2; j++)
+                alone = alone && elementAt(p + ivec2(i, j)).r == own;
+        }
+
+        if(alone)
+            discard;
+    }
+
+    vec3 elements, projectionScales, amounts;
+    shownAt(p, elements, projectionScales, amounts);
+
+    // How many neighbours are likely to show another element than the pixel
     float numDiffPixels = 0.0;
     float projectionScale = 0.0;
 
@@ -51,24 +123,23 @@ float edgeStrengthAt(ivec2 p)
             if(i == 0 && j == 0)
                 continue;
 
-            if(s != elementAt(p + ivec2(i, j)).r)
-                numDiffPixels += 1.0;
+            vec3 neighbourElements, neighbourProjectionScales, neighbourAmounts;
+            shownAt(p + ivec2(i, j), neighbourElements, neighbourProjectionScales, neighbourAmounts);
+
+            float same = sameShown(elements, amounts, neighbourElements, neighbourAmounts);
+
+            for(int k = 0; k < 3; k++)
+            {
+                if(neighbourAmounts[k] > 0.0)
+                    projectionScale = max(projectionScale, neighbourProjectionScales[k]);
+            }
+
+            numDiffPixels += max(1.0 - same, 0.0);
         }
     }
 
-    if(numDiffPixels == 0.0)
+    if(numDiffPixels < 1e-4)
         discard;
-
-    for(int i = -1; i <= 1; i++)
-    {
-        for(int j = -1; j <= 1; j++)
-        {
-            if(i == 0 && j == 0)
-                continue;
-
-            projectionScale = max(projectionScale, elementAt(p + ivec2(i, j)).g);
-        }
-    }
 
     // Clamp to a maximum difference, otherwise we get abnormally dark
     // spots at the junction of many elements
