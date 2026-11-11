@@ -22,12 +22,31 @@
 #include "lighting.glsl"
 #include "outline.glsl"
 
+flat in vec3  innerVColor;
+flat in vec3  outerVColor;
 flat in float vSelected;
 in float projectionScale;
 
 uniform vec4 outlineColor;
 
+#ifdef EDGE_ACROSS
+flat in vec3 shadingAcross[3];
+
+// The narrowest edge this build draws
+uniform float minimumSplattedWidthPixels;
+
+// The shading's mean over a stretch of the width
+vec3 meanShadingAcross(vec2 covering)
+{
+    float meanU = 0.5 * (covering.x + covering.y);
+    float meanUU = (dot(covering, covering) + (covering.x * covering.y)) / 3.0;
+
+    return shadingAcross[0] + (shadingAcross[1] * meanU) + (shadingAcross[2] * meanUU);
+}
+#else
 flat in vec3 averagedOuterColor;
+#endif
+
 flat in vec3 averagedInnerColor;
 in vec3 shaftCoordinate;
 in float coverageWeight;
@@ -77,7 +96,19 @@ void main()
 
     bool inner = shaftCoordinate.y >= 0.0 && shaftCoordinate.y <= 1.0;
 
+#ifdef EDGE_ACROSS
+    // The mean over the part of the width the pixel covers, faded in from the
+    // mean over all of the width as the edge widens past the threshold
+    vec2 covering = clamp(vec2(max(fromAxis - 0.5, -halfWidth), min(fromAxis + 0.5, halfWidth)) / halfWidth,
+        -1.0, 1.0);
+    vec3 overAll = shadingAcross[0] + (shadingAcross[2] / 3.0);
+    vec3 overPart = meanShadingAcross(covering);
+    vec3 shaded = inner && innerVColor != outerVColor ? averagedInnerColor :
+        mix(overAll, clamp(overPart, 0.0, 1.0),
+            smoothstep(minimumSplattedWidthPixels, 2.0 * minimumSplattedWidthPixels, 2.0 * halfWidth));
+#else
     vec3 shaded = inner ? averagedInnerColor : averagedOuterColor;
+#endif
 
     // outline.frag counts all the neighbours along a line one pixel wide differing,
     // and three of five along one two wide

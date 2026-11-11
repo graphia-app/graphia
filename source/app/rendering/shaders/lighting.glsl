@@ -96,6 +96,7 @@ vec4 normalCumulative(vec4 x)
     return 0.5 * (1.0 + tanh(SQRT_TWO_OVER_PI * (x + (0.044715 * x * x * x))));
 }
 
+vec3 normalCumulative(vec3 x) { return normalCumulative(vec4(x, 0.0)).xyz; }
 vec2 normalCumulative(vec2 x) { return normalCumulative(vec4(x, 0.0, 0.0)).xy; }
 
 // A cylinder's diffuse term across it, |sIn| cos(angle - toLight) where that is
@@ -179,4 +180,90 @@ vec3 adsModelAcrossCylinder(const in vec3 pos, const in vec3 across, const in ve
     }
 
     return result;
+}
+
+// adsModelAcrossCylinder over each third of the width, each highlight clipped
+// at 1 over the diffuse light under its peak
+void adsModelAcrossCylinderThirds(const in vec3 pos, const in vec3 across, const in vec3 facing,
+    const in vec3 diffuseColor, const in vec2 lightPlacement, out vec3 thirds[3])
+{
+    // Where the thirds start and end, as angles: asin(-1, -1/3, 1/3, 1)
+    const vec4 ENDS = vec4(-HALF_PI, -0.3398369, 0.3398369, HALF_PI);
+    const float THIRD_WIDTH = 2.0 / 3.0;
+    const float SIN_QUARTER_PI = 0.7071068;
+
+    vec3 v = normalize(-pos);
+    vec2 vIn = vec2(dot(v, across), dot(v, facing));
+
+    int minNumberOfLights = min(numberOfLights, MAX_LIGHTS);
+
+    // The ambient and diffuse light at -π/2, -π/4, 0, π/4 and π/2, for what is under a peak
+    vec3 under0 = vec3(0.0);
+    vec3 under1 = vec3(0.0);
+    vec3 under2 = vec3(0.0);
+    vec3 under3 = vec3(0.0);
+    vec3 under4 = vec3(0.0);
+
+    for(int i = 0; i < minNumberOfLights; i++)
+    {
+        vec3 s = normalize(lightPosition(i, lightPlacement) - pos);
+        vec2 sIn = vec2(dot(s, across), dot(s, facing));
+        vec3 ambient = lights[i].color.rgb * material.ka;
+        vec3 diffuse = lights[i].color.rgb * diffuseColor;
+
+        under0 += ambient + (diffuse * max(-sIn.x, 0.0));
+        under1 += ambient + (diffuse * max(SIN_QUARTER_PI * (sIn.y - sIn.x), 0.0));
+        under2 += ambient + (diffuse * max(sIn.y, 0.0));
+        under3 += ambient + (diffuse * max(SIN_QUARTER_PI * (sIn.y + sIn.x), 0.0));
+        under4 += ambient + (diffuse * max(sIn.x, 0.0));
+    }
+
+    thirds[0] = vec3(0.0);
+    thirds[1] = vec3(0.0);
+    thirds[2] = vec3(0.0);
+
+    for(int i = 0; i < minNumberOfLights; i++)
+    {
+        vec3 s = normalize(lightPosition(i, lightPlacement) - pos);
+
+        // The light in the plane the normal turns in
+        vec2 sIn = vec2(dot(s, across), dot(s, facing));
+
+        vec4 diffuseTo = diffuseAcrossCylinderTo(sIn, ENDS);
+        vec3 clipped = vec3(0.0);
+        vec4 highlightTo = vec4(0.0);
+        Highlight highlight = highlightAcrossCylinder(s, v, sIn, vIn);
+
+        if(highlight.height > 0.0)
+        {
+            vec3 height = lights[i].color.rgb * material.ks * highlight.height;
+
+            // Where the peak is between the five, and so the light under it
+            float at = (highlight.peak / (0.5 * HALF_PI)) + 2.0;
+            vec3 under = (under0 * max(1.0 - abs(at), 0.0)) + (under1 * max(1.0 - abs(at - 1.0), 0.0)) +
+                (under2 * max(1.0 - abs(at - 2.0), 0.0)) + (under3 * max(1.0 - abs(at - 3.0), 0.0)) +
+                (under4 * max(1.0 - abs(at - 4.0), 0.0));
+
+            // Where the highlight exceeds the room left below 1, a band r spreads either side of the peak is clipped
+            vec3 room = max(1.0 - under, 0.0);
+            vec3 r = sqrt(2.0 * log(max(height / max(room, 0.00001), 1.0)));
+            vec3 over = (height * ((2.0 * normalCumulative(r)) - 1.0)) - (room * r * SQRT_TWO_OVER_PI);
+
+            clipped = (height - over) * cos(highlight.peak) * highlight.spread * SQRT_TWO_PI;
+            highlightTo = normalCumulative((ENDS - highlight.peak) / highlight.spread);
+        }
+
+        vec3 diffuseIn = diffuseTo.yzw - diffuseTo.xyz;
+        vec3 highlightIn = highlightTo.yzw - highlightTo.xyz;
+        vec3 ambient = lights[i].color.rgb * material.ka * THIRD_WIDTH;
+        vec3 diffuseLit = lights[i].color.rgb * diffuseColor;
+
+        thirds[0] += ambient + (diffuseLit * diffuseIn.x) + (clipped * highlightIn.x);
+        thirds[1] += ambient + (diffuseLit * diffuseIn.y) + (clipped * highlightIn.y);
+        thirds[2] += ambient + (diffuseLit * diffuseIn.z) + (clipped * highlightIn.z);
+    }
+
+    thirds[0] /= THIRD_WIDTH;
+    thirds[1] /= THIRD_WIDTH;
+    thirds[2] /= THIRD_WIDTH;
 }

@@ -652,6 +652,29 @@ bool GraphRendererCore::cullHiddenEdgeStretches(GPUGraphData& gpuGraphData)
     return true;
 }
 
+void GraphRendererCore::fitEdgeShading(GPUGraphData& gpuGraphData)
+{
+    _approximateEdgeShading.reserve(gpuGraphData.numEdges());
+
+    auto& fitShader = _elementShaders._edgeFit;
+    fitShader.bind();
+    _approximateEdgeShading.bindForWriting(fitShader);
+    bindEdgeParameters(gpuGraphData);
+
+    glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
+
+    gpuGraphData._edgeQuads.vertexArrayObject()->bind();
+    glDrawArraysInstanced(GL_POINTS, 0, 1, static_cast<GLsizei>(gpuGraphData.numEdges()));
+    gpuGraphData._edgeQuads.vertexArrayObject()->release();
+
+    glDepthMask(GL_TRUE);
+    glEnable(GL_DEPTH_TEST);
+
+    releaseEdgeParameters(gpuGraphData);
+    fitShader.release();
+}
+
 GraphRendererCore::DetailPasses GraphRendererCore::detailPasses(const GPUGraphData& gpuGraphData,
     const PixelScaleRange& pixelScale) const
 {
@@ -674,10 +697,12 @@ GraphRendererCore::DetailPasses GraphRendererCore::detailPasses(const GPUGraphDa
     const auto widening = extents._hasArrowHeads ? 2.0f : 1.0f;
 
     const auto anyTracedEdges = widestShaft * widening >= thresholds._minimumApproximateTracedEdgeWidth;
+    const auto anySplattedEdges = narrowestShaft * widening < thresholds._minimumApproximateTracedEdgeWidth;
 
     passes._approximateTracedEdges = anyTracedEdges && narrowestShaft < thresholds._minimumTracedEdgeWidth;
     passes._tracedEdges = anyTracedEdges && widestShaft >= thresholds._minimumTracedEdgeWidth;
-    passes._fastSplattedEdges = narrowestShaft * widening < thresholds._minimumApproximateTracedEdgeWidth;
+    passes._fastSplattedEdges = anySplattedEdges && narrowestShaft < thresholds._minimumSplattedEdgeWidth;
+    passes._splattedEdges = anySplattedEdges && widestShaft >= thresholds._minimumSplattedEdgeWidth;
 
     return passes;
 }
@@ -705,6 +730,9 @@ void GraphRendererCore::renderSplats(GPUGraphData& gpuGraphData, const DetailPas
     if(!passes.anySplatted())
         return;
 
+    if(passes._splattedEdges)
+        fitEdgeShading(gpuGraphData);
+
     _splatCompositor.begin();
 
     if(passes._splattedNodes)
@@ -712,6 +740,16 @@ void GraphRendererCore::renderSplats(GPUGraphData& gpuGraphData, const DetailPas
 
     if(passes._fastSplattedEdges)
         renderEdgesWithShader(_elementShaders._fastSplattedEdges, gpuGraphData);
+
+    if(passes._splattedEdges)
+    {
+        auto& splattedShader = _elementShaders._splattedEdges;
+        splattedShader.bind();
+        _approximateEdgeShading.bind(ElementShaders::glUnit(ElementShaders::Unit::ApproximateShadingThirds),
+            splattedShader);
+        renderEdgesWithShader(splattedShader, gpuGraphData);
+        _approximateEdgeShading.release(ElementShaders::glUnit(ElementShaders::Unit::ApproximateShadingThirds));
+    }
 
     _splatCompositor.resolveInto(gpuGraphData._fbo);
 }

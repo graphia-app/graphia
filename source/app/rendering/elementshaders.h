@@ -36,11 +36,12 @@ struct DetailThresholds
 
     // Edges this wide are traced, since splatting blends overlapping edges that ought to hide each other
     float _minimumApproximateTracedEdgeWidth = 2.0f;
+    float _minimumSplattedEdgeWidth = 0.5f;
 
     static DetailThresholds exact()
     {
         return {._minimumTracedEdgeWidth = 0.0f, ._minimumTracedNodeWidth = 0.0f,
-            ._minimumApproximateTracedEdgeWidth = 0.0f};
+            ._minimumApproximateTracedEdgeWidth = 0.0f, ._minimumSplattedEdgeWidth = 0.0f};
     }
 };
 
@@ -52,6 +53,7 @@ struct ElementShaders
         NodeGeometry,
         VisibleRanges,
         DepthPyramid,
+        ApproximateShadingThirds, // and the two units after it
     };
 
     static GLenum glUnit(Unit unit) { return GL_TEXTURE0 + static_cast<GLenum>(unit); }
@@ -61,10 +63,12 @@ struct ElementShaders
     QOpenGLShaderProgram _splattedNodes;
 
     QOpenGLShaderProgram _fastSplattedEdges;
+    QOpenGLShaderProgram _splattedEdges;
     QOpenGLShaderProgram _approximateTracedEdges;
     QOpenGLShaderProgram _tracedEdges;
     QOpenGLShaderProgram _edgeDepthPrepass;
     QOpenGLShaderProgram _edgeCull;
+    QOpenGLShaderProgram _edgeFit;
 
     struct FrameUniforms
     {
