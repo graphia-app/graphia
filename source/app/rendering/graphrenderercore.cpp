@@ -801,7 +801,7 @@ bool GraphRendererCore::resize(int width, int height)
 
         if(!_gpuGraphData.empty())
         {
-            FBOcomplete = true;
+            FBOcomplete = _composite.resize(width, height);
             for(auto& gpuGraphData : _gpuGraphData)
             {
                 FBOcomplete = FBOcomplete && gpuGraphData.prepareRenderBuffers(width, height,
@@ -1081,9 +1081,9 @@ static void render2DComposite(OpenGLFunctions& f, QOpenGLShaderProgram& shader, 
     shader.release();
 }
 
-void GraphRendererCore::renderToScreen(Flags<Type> type)
+void GraphRendererCore::compositeInto(GLuint framebuffer, Flags<Type> type)
 {
-    glViewport(0, 0, _width, _height);
+    _composite.bindForDrawing();
 
     auto backgroundColor = u::pref(u"visuals/backgroundColor"_s).value<QColor>();
 
@@ -1161,6 +1161,8 @@ void GraphRendererCore::renderToScreen(Flags<Type> type)
 
     _screenQuadDataBuffer.release();
     _screenQuadVAO.release();
+
+    _composite.copyTo(framebuffer);
 }
 
 QSize GraphRendererCore::renderSdfTexture(const GlyphMap& glyphMap, GLuint texture)

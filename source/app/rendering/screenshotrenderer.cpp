@@ -156,7 +156,7 @@ void ScreenshotRenderer::render()
     GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0};
     glDrawBuffers(1, static_cast<GLenum*>(drawBuffers));
 
-    renderToScreen(GraphRendererCore::Type::Color);
+    compositeInto(_screenshotFBO, GraphRendererCore::Type::Color);
 }
 
 void ScreenshotRenderer::requestScreenshot(const GraphRenderer& renderer, int imageWidth, int imageHeight,
