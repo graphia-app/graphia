@@ -296,7 +296,7 @@ void GraphRenderer::updateGPUDataIfRequired()
     if(update == GPUDataUpdate::NodePositions && !_graphModel->hasTextVisuals())
     {
         updateGPUNodePositions();
-        nodeGeometry().upload();
+        uploadNodeGeometry();
         return;
     }
 
@@ -461,7 +461,7 @@ void GraphRenderer::updateGPUDataIfRequired()
         componentIndex++;
     }
 
-    nodeGeometry().upload();
+    uploadNodeGeometry();
     uploadGPUGraphData();
 }
 

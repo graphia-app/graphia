@@ -702,7 +702,7 @@ void GraphRendererCore::fitEdgeShading(GPUGraphData& gpuGraphData)
 GraphRendererCore::DetailPasses GraphRendererCore::detailPasses(const GPUGraphData& gpuGraphData,
     const PixelScaleRange& pixelScale) const
 {
-    const auto& thresholds = _detailThresholds;
+    const auto thresholds = detailThresholds();
     const auto& extents = gpuGraphData._extents;
     DetailPasses passes;
 
@@ -919,6 +919,8 @@ void GraphRendererCore::resetGPUGraphData()
 
 void GraphRendererCore::uploadGPUGraphData()
 {
+    restartGathering();
+
     for(auto& gpuGraphData : _gpuGraphData)
     {
         if(gpuGraphData.alpha() > 0.0f)
@@ -939,20 +941,45 @@ void GraphRendererCore::appendGPUComponentData(const QMatrix4x4& modelViewMatrix
 
 void GraphRendererCore::uploadGPUComponentData()
 {
+    if(_componentData != _gatheredComponentData)
+    {
+        restartGathering();
+        _gatheredComponentData = _componentData;
+    }
+
+    uploadComponentDataWithOffset(_frameAccumulator.nextSampleOffset());
+}
+
+void GraphRendererCore::uploadComponentDataWithOffset(QVector2D sampleOffset)
+{
+    const auto shiftX = 2.0f * sampleOffset.x() / static_cast<float>(_width);
+    const auto shiftY = 2.0f * sampleOffset.y() / static_cast<float>(_height);
+
     std::vector<GLfloat> texels;
     texels.reserve(_componentData.size() * (16 + 16 + 4));
 
     for(const auto& componentData : _componentData)
     {
-        const auto* modelViewMatrix = componentData._modelViewMatrix.constData();
-        const auto* projectionMatrix = componentData._projectionMatrix.constData();
+        auto projectionMatrix = componentData._projectionMatrix;
+        projectionMatrix.setRow(0, projectionMatrix.row(0) + (shiftX * projectionMatrix.row(3)));
+        projectionMatrix.setRow(1, projectionMatrix.row(1) + (shiftY * projectionMatrix.row(3)));
 
-        texels.insert(texels.end(), modelViewMatrix, modelViewMatrix + 16);
-        texels.insert(texels.end(), projectionMatrix, projectionMatrix + 16);
+        const auto* modelView = componentData._modelViewMatrix.constData();
+        const auto* projection = projectionMatrix.constData();
+
+        texels.insert(texels.end(), modelView, modelView + 16);
+        texels.insert(texels.end(), projection, projection + 16);
         texels.insert(texels.end(), {componentData._distance, componentData._lightScale, componentData._radius, 0.0f});
     }
 
     _componentDataTexels.upload(texels);
+    _componentDataSampleOffset = sampleOffset;
+}
+
+void GraphRendererCore::uploadNodeGeometry()
+{
+    restartGathering();
+    _nodeGeometry.upload();
 }
 
 Shading GraphRendererCore::shading() const
@@ -963,7 +990,10 @@ Shading GraphRendererCore::shading() const
 void GraphRendererCore::setShading(Shading shading)
 {
     if(shading != _shading)
+    {
         _shading = shading;
+        restartGathering();
+    }
 }
 
 void GraphRendererCore::resizeScreenQuad(int width, int height)
@@ -1001,8 +1031,8 @@ bool GraphRendererCore::resize(int width, int height)
         if(!_gpuGraphData.empty())
         {
             FBOcomplete = _composite.resize(width, height) && _compositeElements.resize(width, height) &&
-                _smaaAntialiasing.resize(width, height) && _smoothedSelection.resize(width, height) &&
-                _splatCompositor.resize(width, height, _depthTexture);
+                _smaaAntialiasing.resize(width, height) && _frameAccumulator.resize(width, height) &&
+                _smoothedSelection.resize(width, height) && _splatCompositor.resize(width, height, _depthTexture);
 
             for(auto& gpuGraphData : _gpuGraphData)
                 FBOcomplete = FBOcomplete && gpuGraphData.prepareRenderBuffers(width, height, _depthTexture);
@@ -1090,6 +1120,12 @@ GraphRendererCore::PixelScaleRange GraphRendererCore::pixelScaleRange() const
     return range;
 }
 
+// A static image can take as long as it needs, so everything is traced
+DetailThresholds GraphRendererCore::detailThresholds() const
+{
+    return _frameAccumulator.nextIsSample() ? DetailThresholds::exact() : _detailThresholds;
+}
+
 std::vector<size_t> GraphRendererCore::gpuGraphDataRenderOrder() const
 {
     std::vector<size_t> renderOrder;
@@ -1123,6 +1159,13 @@ std::vector<size_t> GraphRendererCore::gpuGraphDataRenderOrder() const
 
 void GraphRendererCore::renderGraph()
 {
+    if(_frameAccumulator.complete())
+        return;
+
+    // Gathering may have restarted since the component data was uploaded
+    if(_frameAccumulator.nextSampleOffset() != _componentDataSampleOffset)
+        uploadComponentDataWithOffset(_frameAccumulator.nextSampleOffset());
+
     _elementShaders.setFrameUniforms(
     {
         ._viewportSize = QVector2D(static_cast<float>(_width), static_cast<float>(_height)),
@@ -1130,7 +1173,7 @@ void GraphRendererCore::renderGraph()
         ._outlineColor = Document::contrastingColorForBackground(),
         ._widestEdgeSize = std::ranges::max(_gpuGraphData | std::views::transform(
             [](const auto& gpuGraphData) { return gpuGraphData._extents._largestEdgeSize; })),
-        ._thresholds = _detailThresholds,
+        ._thresholds = detailThresholds(),
     });
 
     glEnable(GL_DEPTH_TEST);
@@ -1171,6 +1214,9 @@ void GraphRendererCore::renderGraph()
 
 void GraphRendererCore::render2D(QRect selectionRect)
 {
+    if(_frameAccumulator.complete())
+        return;
+
     const auto& renderOrder = gpuGraphDataRenderOrder();
     auto index = !renderOrder.empty() ? renderOrder.front() : 0;
     auto& gpuGraphData = _gpuGraphData.at(index);
@@ -1270,13 +1316,20 @@ void GraphRendererCore::compositeElements()
 
 void GraphRendererCore::compositeInto(GLuint framebuffer, Flags<Type> type)
 {
-    const bool antialiasing = u::pref(u"visuals/enableAntialiasing"_s).toBool();
+    if(_frameAccumulator.complete())
+    {
+        _frameAccumulator.draw(framebuffer);
+        return;
+    }
 
     glDisable(GL_DEPTH_TEST);
 
     // The outlines are drawn from where the selection and the elements are
     // within each pixel, which SMAA estimates from the silhouettes
-    if(antialiasing)
+    const bool smoothed = u::pref(u"visuals/enableAntialiasing"_s).toBool() &&
+        !_frameAccumulator.nextIsSample();
+
+    if(smoothed)
     {
         compositeElements();
         _smaaAntialiasing.findSilhouettes(_compositeElements.texture());
@@ -1304,7 +1357,7 @@ void GraphRendererCore::compositeInto(GLuint framebuffer, Flags<Type> type)
     _outlineShader.bind();
     _outlineShader.setUniformValue("outlineColor",
         Document::contrastingColorForBackground());
-    _outlineShader.setUniformValue("smoothed", antialiasing ? 1 : 0);
+    _outlineShader.setUniformValue("smoothed", smoothed ? 1 : 0);
     _outlineShader.release();
 
     for(auto i : gpuGraphDataRenderOrder())
@@ -1318,7 +1371,7 @@ void GraphRendererCore::compositeInto(GLuint framebuffer, Flags<Type> type)
             if(_shading == Shading::Flat && graphData.hasGraphElements())
             {
                 compositeLayer(_outlineShader, graphData.alpha(),
-                    {graphData._elementTexture, antialiasing ? _smaaAntialiasing.weights() : 0});
+                    {graphData._elementTexture, smoothed ? _smaaAntialiasing.weights() : 0});
             }
         }
 
@@ -1326,7 +1379,7 @@ void GraphRendererCore::compositeInto(GLuint framebuffer, Flags<Type> type)
         {
             auto selectionTexture = graphData._selectionTexture;
 
-            if(antialiasing)
+            if(smoothed)
             {
                 _smaaAntialiasing.blend(selectionTexture, _smoothedSelection.framebuffer());
                 selectionTexture = _smoothedSelection.texture();
@@ -1339,7 +1392,12 @@ void GraphRendererCore::compositeInto(GLuint framebuffer, Flags<Type> type)
         }
     }
 
-    if(antialiasing)
+    if(_frameAccumulator.nextIsSample())
+    {
+        _frameAccumulator.add(_composite.texture());
+        _frameAccumulator.draw(framebuffer);
+    }
+    else if(smoothed)
         _smaaAntialiasing.blend(_composite.texture(), framebuffer);
     else
         _composite.copyTo(framebuffer);
