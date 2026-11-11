@@ -22,6 +22,7 @@
 
 #include "openglfunctions.h"
 #include "graphrenderertypes.h"
+#include "elementshaders.h"
 #include "nodegeometry.h"
 #include "texelbuffer.h"
 
@@ -41,6 +42,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <vector>
 
 class ScreenshotRenderer;
@@ -148,6 +150,8 @@ struct GPUGraphData : OpenGLFunctions
     struct ElementExtents
     {
         bool _hasArrowHeads = false;
+        float _smallestEdgeSize = std::numeric_limits<float>::max();
+        float _largestEdgeSize = 0.0f;
     };
 
     ElementExtents _extents;
@@ -175,7 +179,7 @@ class GraphRendererCore : public OpenGLFunctions
     friend class ScreenshotRenderer;
 
 public:
-    GraphRendererCore();
+    explicit GraphRendererCore(DetailThresholds detailThresholds = {});
     ~GraphRendererCore() override;
 
 private:
@@ -190,8 +194,8 @@ private:
 
     QOpenGLShaderProgram _sdfShader;
 
-    QOpenGLShaderProgram _nodesShader;
-    QOpenGLShaderProgram _edgesShader;
+    ElementShaders _elementShaders;
+    DetailThresholds _detailThresholds;
     QOpenGLShaderProgram _textShader;
 
     QOpenGLShaderProgram _screenShader;
@@ -238,6 +242,18 @@ private:
 
     PixelScaleRange pixelScaleRange() const;
 
+    // Which levels of detail a layer may draw, from how narrow and wide its elements
+    // can be on screen; each element picks its own level in the shader
+    struct DetailPasses
+    {
+        bool _approximateTracedEdges = false;
+        bool _tracedEdges = false;
+    };
+
+    DetailPasses detailPasses(const GPUGraphData& gpuGraphData, const PixelScaleRange& pixelScale) const;
+    void renderEdgesWithShader(QOpenGLShaderProgram& shader, GPUGraphData& gpuGraphData);
+    void renderEdges(GPUGraphData& gpuGraphData, const DetailPasses& passes);
+
     void prepare();
 
 protected:
@@ -266,7 +282,6 @@ protected:
     void setShading(Shading shading);
 
     void renderNodes(GPUGraphData& gpuGraphData);
-    void renderEdges(GPUGraphData& gpuGraphData);
     void renderText(GPUGraphData& gpuGraphData, const PixelScaleRange& pixelScale);
     void renderGraph();
     void render2D(QRect selectionRect = {});

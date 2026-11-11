@@ -165,6 +165,17 @@ void traceHead(vec3 rayOrigin, vec3 rayDirection, inout Hit nearest)
     }
 }
 
+void shade(Hit hit, bool inner)
+{
+    vec3 color = inner ? innerVColor : outerVColor;
+
+    outColor = vec4((flatness * color) +
+        ((1.0 - flatness) * adsModel(hit.position, hit.normal, color, lightPlacement)), 1.0);
+    outElement.r = element;
+    outElement.g = projectionScale;
+    outSelection = vec4(vec3(vSelected), 1.0);
+}
+
 void main()
 {
     vec3 rayDirection = -normalize(towardsEye(zToClip, impostorPosition));
@@ -186,15 +197,11 @@ void main()
 
     float along = dot(nearest.position - shaftBase, edgeAxis);
     bool inner = along >= innerColorStretch.x && along <= innerColorStretch.y;
-    vec3 fragColor = inner ? innerVColor : outerVColor;
+    shade(nearest, inner);
 
-    vec3 color = (flatness * fragColor) +
-        ((1.0 - flatness) * adsModel(nearest.position, nearest.normal, fragColor, lightPlacement));
-
+#ifdef EDGE_TRACED
+    // Where a near end's outline reaches past the far end on screen, the quad's depth
+    // is nearer than the surface, and would hide what is in front of it
     gl_FragDepth = depthAt(zToClip, nearest.position.z);
-
-    outColor = vec4(color, 1.0);
-    outElement.r = element;
-    outElement.g = projectionScale;
-    outSelection = vec4(vec3(vSelected), 1.0);
+#endif
 }

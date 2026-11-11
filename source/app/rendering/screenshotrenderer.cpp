@@ -87,7 +87,9 @@ static QPoint renderOffsetForFill(int imageWidth, int imageHeight, float aspect)
     return offset;
 }
 
-ScreenshotRenderer::ScreenshotRenderer()
+// A screenshot isn't drawn to a deadline, so it draws every edge as exactly as it can
+ScreenshotRenderer::ScreenshotRenderer() :
+    GraphRendererCore(DetailThresholds::exact())
 {
     glGenFramebuffers(1, &_screenshotFBO);
     glGenTextures(1, &_screenshotTex);
@@ -256,7 +258,7 @@ bool ScreenshotRenderer::copyState(const GraphRenderer& renderer)
     _componentCameraAndLightings.clear();
 
     for(size_t i = 0; i < renderer._gpuGraphData.size(); ++i)
-        _gpuGraphData.at(i).copyState(renderer._gpuGraphData.at(i), _nodesShader, _edgesShader, _textShader);
+        _gpuGraphData.at(i).copyState(renderer._gpuGraphData.at(i), _elementShaders._nodes, _elementShaders._tracedEdges, _textShader);
 
     _nodeGeometry.copyFrom(renderer._nodeGeometry);
 

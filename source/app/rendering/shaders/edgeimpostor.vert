@@ -18,6 +18,15 @@
  */
 
 // An edge is two quads, one each for its shaft and head, each as small as covers it
+// An edge's width on screen picks the one build that draws it; the others collapse it
+
+#if defined(EDGE_APPROXIMATE_TRACED)
+#define DRAWN_DETAIL APPROXIMATE_TRACED_DETAIL
+#elif defined(EDGE_TRACED)
+#define DRAWN_DETAIL TRACED_DETAIL
+#else
+#error "No edge detail is defined"
+#endif
 
 flat out float element;
 flat out vec3  innerVColor;
@@ -150,9 +159,11 @@ void main()
     innerVColor = innerColor.rgb;
     vSelected = selected;
 
+    int detail = detailFor(ends.shaftWidth);
+
     PartOnScreen onScreen;
 
-    if(ends.length <= 0.0 || !partOnScreen(ends, isHead, isArrow, onScreen))
+    if(ends.length <= 0.0 || detail != DRAWN_DETAIL || !partOnScreen(ends, isHead, isArrow, onScreen))
     {
         collapse();
         return;
@@ -193,7 +204,14 @@ void main()
     vec2 cornerPixel = (along * (vertexPosition.y < 0.0 ? alongSpan.x : alongSpan.y)) +
         (across * (vertexPosition.x < 0.0 ? acrossSpan.x : acrossSpan.y));
 
-    impostorPosition = unproject(projectionMatrix, zToClip, cornerPixel / (viewportSize * 0.5), onAxis.z);
+#ifdef EDGE_TRACED
+    float cornerZ = onAxis.z;
+#else
+    // The depth is interpolated, which is nearest right on the shape's near surface
+    float cornerZ = min(onAxis.z + part.radius, onScreen.nearZ);
+#endif
+
+    impostorPosition = unproject(projectionMatrix, zToClip, cornerPixel / (viewportSize * 0.5), cornerZ);
     gl_Position = projectionMatrix * vec4(impostorPosition, 1.0);
 
     float fractionAlong = clamp(distance(ends.source, onAxis) / ends.length, 0.0, 1.0);

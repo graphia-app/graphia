@@ -27,7 +27,6 @@
 
 #include "app/ui/document.h"
 
-#include <QByteArray>
 #include <QColor>
 #include <QDebug>
 #include <QDir>
@@ -383,6 +382,8 @@ void GPUGraphData::addEdge(const EdgeData& edgeData)
 {
     _edgeData.push_back(edgeData);
     _extents._hasArrowHeads = _extents._hasArrowHeads || edgeData._edgeType == static_cast<int>(EdgeVisualType::Arrow);
+    _extents._smallestEdgeSize = std::min(_extents._smallestEdgeSize, edgeData._size);
+    _extents._largestEdgeSize = std::max(_extents._largestEdgeSize, edgeData._size);
 }
 
 void GPUGraphData::addGlyph(const GlyphData& glyphData)
@@ -470,9 +471,10 @@ void GPUGraphData::copyState(const GPUGraphData& gpuGraphData,
     initialise(nodesShader, edgesShader, textShader);
 }
 
-GraphRendererCore::GraphRendererCore() :
+GraphRendererCore::GraphRendererCore(DetailThresholds detailThresholds) :
     _context(QOpenGLContext::currentContext()),
-    _numMultiSamples(multisamples())
+    _numMultiSamples(multisamples()),
+    _detailThresholds(detailThresholds)
 {
     resolveOpenGLFunctions();
 
@@ -494,16 +496,13 @@ GraphRendererCore::GraphRendererCore() :
     ShaderTools::loadShaderProgram(_outlineShader, u":/shaders/screen.vert"_s, u":/shaders/outline.frag"_s);
     ShaderTools::loadShaderProgram(_selectionShader, u":/shaders/screen.vert"_s, u":/shaders/selection.frag"_s);
 
-    ShaderTools::loadShaderProgram(_nodesShader, u":/shaders/nodeimpostor.vert"_s, u":/shaders/nodeimpostor.frag"_s);
-    ShaderTools::loadShaderProgram(_edgesShader, u":/shaders/edgeimpostor.vert"_s, u":/shaders/edgeimpostor.frag"_s);
-
     ShaderTools::loadShaderProgram(_selectionMarkerShader, u":/shaders/2d.vert"_s, u":/shaders/selectionMarker.frag"_s);
 
     ShaderTools::loadShaderProgram(_sdfShader, u":/shaders/screen.vert"_s, u":/shaders/sdf.frag"_s);
     ShaderTools::loadShaderProgram(_textShader, u":/shaders/textrender.vert"_s, u":/shaders/textrender.frag"_s);
 
     for(auto& gpuGraphData : _gpuGraphData)
-        gpuGraphData.initialise(_nodesShader, _edgesShader, _textShader);
+        gpuGraphData.initialise(_elementShaders._nodes, _elementShaders._tracedEdges, _textShader);
 
     prepareSelectionMarkerVAO();
     prepareScreenQuad();
@@ -516,42 +515,6 @@ GraphRendererCore::~GraphRendererCore()
         glDeleteTextures(1, &_depthTexture);
         _depthTexture = 0;
     }
-}
-
-static void setShaderLightingParameters(QOpenGLShaderProgram& program)
-{
-    struct Light
-    {
-        Light() = default;
-        Light(const QVector3D& _position, QColor _color) :
-            position(_position), color(_color)
-        {}
-
-        QVector3D position;
-        QColor color;
-    };
-
-    std::vector<Light> lights;
-    lights.push_back({{-0.707f,  0.0f,    0.707f}, {100, 100, 100}});
-    lights.push_back({{ 0.0f,    0.0f,    1.0f  }, {150, 150, 150}});
-    lights.push_back({{ 0.707f, -0.707f,  0.0f  }, {100, 100, 100}});
-
-    auto numberOfLights = lights.size();
-
-    program.setUniformValue("numberOfLights", static_cast<GLuint>(numberOfLights));
-
-    for(size_t i = 0; i < numberOfLights; i++)
-    {
-        QByteArray positionId = u"lights[%1].position"_s.arg(i).toLatin1();
-        program.setUniformValue(positionId.data(), lights.at(i).position);
-
-        QByteArray colorId = u"lights[%1].color"_s.arg(i).toLatin1();
-        program.setUniformValue(colorId.data(), lights.at(i).color);
-    }
-
-    program.setUniformValue("material.ks", QVector3D(1.0f, 1.0f, 1.0f));
-    program.setUniformValue("material.ka", QVector3D(0.02f, 0.02f, 0.02f));
-    program.setUniformValue("material.shininess", 50.0f);
 }
 
 void GraphRendererCore::bindComponentDataTexture(GLenum textureUnit, QOpenGLShaderProgram& shader)
@@ -576,43 +539,31 @@ void GraphRendererCore::renderNodes(GPUGraphData& gpuGraphData)
     if(gpuGraphData.numNodes() == 0)
         return;
 
-    _nodesShader.bind();
-    setShaderLightingParameters(_nodesShader);
-
+    auto& shader = _elementShaders._nodes;
+    shader.bind();
     gpuGraphData._nodeVBO.bind();
 
-    bindComponentDataTexture(GL_TEXTURE0, _nodesShader);
-    bindNodeGeometryTexture(GL_TEXTURE0 + 1, _nodesShader);
-
-    _nodesShader.setUniformValue("flatness", shading() == Shading::Flat ? 1.0f : 0.0f);
+    _componentDataTexels.bind(ElementShaders::glUnit(ElementShaders::Unit::ComponentData));
+    _nodeGeometry.bind(ElementShaders::glUnit(ElementShaders::Unit::NodeGeometry));
 
     gpuGraphData._nodeQuad.vertexArrayObject()->bind();
     glDrawElementsInstanced(GL_TRIANGLES, Primitive::ImpostorQuads::glIndexCount(1),
         GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(gpuGraphData.numNodes()));
     gpuGraphData._nodeQuad.vertexArrayObject()->release();
 
-    _nodeGeometry.release(GL_TEXTURE0 + 1);
-    _componentDataTexels.release(GL_TEXTURE0);
+    _nodeGeometry.release(ElementShaders::glUnit(ElementShaders::Unit::NodeGeometry));
+    _componentDataTexels.release(ElementShaders::glUnit(ElementShaders::Unit::ComponentData));
     gpuGraphData._nodeVBO.release();
-    _nodesShader.release();
+    shader.release();
 }
 
-void GraphRendererCore::renderEdges(GPUGraphData& gpuGraphData)
+void GraphRendererCore::renderEdgesWithShader(QOpenGLShaderProgram& shader, GPUGraphData& gpuGraphData)
 {
-    if(gpuGraphData.numEdges() == 0)
-        return;
-
-    _edgesShader.bind();
-    setShaderLightingParameters(_edgesShader);
-
+    shader.bind();
     gpuGraphData._edgeVBO.bind();
 
-    bindComponentDataTexture(GL_TEXTURE0, _edgesShader);
-    bindNodeGeometryTexture(GL_TEXTURE0 + 1, _edgesShader);
-
-    _edgesShader.setUniformValue("flatness", shading() == Shading::Flat ? 1.0f : 0.0f);
-
-    _edgesShader.setUniformValue("viewportSize", QVector2D(static_cast<float>(_width), static_cast<float>(_height)));
+    _componentDataTexels.bind(ElementShaders::glUnit(ElementShaders::Unit::ComponentData));
+    _nodeGeometry.bind(ElementShaders::glUnit(ElementShaders::Unit::NodeGeometry));
 
     gpuGraphData._edgeQuads.vertexArrayObject()->bind();
     glDrawElementsInstanced(GL_TRIANGLES,
@@ -620,10 +571,37 @@ void GraphRendererCore::renderEdges(GPUGraphData& gpuGraphData)
         GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(gpuGraphData.numEdges()));
     gpuGraphData._edgeQuads.vertexArrayObject()->release();
 
-    _nodeGeometry.release(GL_TEXTURE0 + 1);
-    _componentDataTexels.release(GL_TEXTURE0);
+    _nodeGeometry.release(ElementShaders::glUnit(ElementShaders::Unit::NodeGeometry));
+    _componentDataTexels.release(ElementShaders::glUnit(ElementShaders::Unit::ComponentData));
     gpuGraphData._edgeVBO.release();
-    _edgesShader.release();
+    shader.release();
+}
+
+GraphRendererCore::DetailPasses GraphRendererCore::detailPasses(const GPUGraphData& gpuGraphData,
+    const PixelScaleRange& pixelScale) const
+{
+    const auto& extents = gpuGraphData._extents;
+    DetailPasses passes;
+
+    if(!u::pref(u"visuals/showEdges"_s).toBool() || gpuGraphData.numEdges() == 0)
+        return passes;
+
+    const auto narrowestShaft = 2.0f * extents._smallestEdgeSize * pixelScale._minimum;
+    const auto widestShaft = 2.0f * extents._largestEdgeSize * pixelScale._maximum;
+
+    passes._approximateTracedEdges = narrowestShaft < _detailThresholds._minimumTracedEdgeWidth;
+    passes._tracedEdges = widestShaft >= _detailThresholds._minimumTracedEdgeWidth;
+
+    return passes;
+}
+
+void GraphRendererCore::renderEdges(GPUGraphData& gpuGraphData, const DetailPasses& passes)
+{
+    if(passes._approximateTracedEdges)
+        renderEdgesWithShader(_elementShaders._approximateTracedEdges, gpuGraphData);
+
+    if(passes._tracedEdges)
+        renderEdgesWithShader(_elementShaders._tracedEdges, gpuGraphData);
 }
 
 void GraphRendererCore::renderText(GPUGraphData& gpuGraphData, const PixelScaleRange& pixelScale)
@@ -908,9 +886,13 @@ GraphRendererCore::PixelScaleRange GraphRendererCore::pixelScaleRange() const
         {
             const auto w = (modelViewProjectionMatrix * QVector4D(corner, 1.0f)).w();
 
-            // At or behind the eye, where something can be any size at all
+            // A corner at or behind the eye leaves no bound on how large anything is
+            // The farthest corner still bounds how small
             if(w <= 0.0f)
-                return {._minimum = 0.0f, ._maximum = std::numeric_limits<float>::infinity()};
+            {
+                range._maximum = std::numeric_limits<float>::infinity();
+                continue;
+            }
 
             range._minimum = std::min(range._minimum, focalLengthPixels / w);
             range._maximum = std::max(range._maximum, focalLengthPixels / w);
@@ -953,6 +935,13 @@ std::vector<size_t> GraphRendererCore::gpuGraphDataRenderOrder() const
 
 void GraphRendererCore::renderGraph()
 {
+    _elementShaders.setFrameUniforms(
+    {
+        ._viewportSize = QVector2D(static_cast<float>(_width), static_cast<float>(_height)),
+        ._flatness = shading() == Shading::Flat ? 1.0f : 0.0f,
+        ._thresholds = _detailThresholds,
+    });
+
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
@@ -996,9 +985,7 @@ void GraphRendererCore::renderGraph()
         gpuGraphData.drawToFramebuffer();
 
         renderNodes(gpuGraphData);
-
-        if(u::pref(u"visuals/showEdges"_s).toBool())
-            renderEdges(gpuGraphData);
+        renderEdges(gpuGraphData, detailPasses(gpuGraphData, pixelScale));
 
         renderText(gpuGraphData, pixelScale);
     }
