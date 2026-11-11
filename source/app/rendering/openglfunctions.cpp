@@ -19,8 +19,6 @@
 
 #include "openglfunctions.h"
 
-#include <QByteArray>
-#include <QDebug>
 #include <QOpenGLExtraFunctions>
 #include <QOpenGLContext>
 #include <QOffscreenSurface>
@@ -32,22 +30,12 @@ using namespace Qt::Literals::StringLiterals;
 
 void OpenGLFunctions::resolveOpenGLFunctions()
 {
-    const auto* context = QOpenGLContext::currentContext();
-    Q_ASSERT(context != nullptr);
+    Q_ASSERT(QOpenGLContext::currentContext() != nullptr);
 
     if(!initializeOpenGLFunctions())
     {
         // This should never happen if hasOpenGLSupport has returned true
         qFatal("Could not obtain required OpenGL context version");
-    }
-
-    if(context->hasExtension(QByteArrayLiteral("GL_ARB_sample_shading")))
-    {
-        _glMinSampleShadingARBFnPtr = reinterpret_cast<PFNGLMINSAMPLESHADINGARBPROC>(
-            context->getProcAddress("glMinSampleShadingARB"));
-
-        if(_glMinSampleShadingARBFnPtr == nullptr)
-            qDebug() << "Failed to resolve glMinSampleShadingARB";
     }
 }
 
