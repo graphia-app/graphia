@@ -26,6 +26,7 @@
         <file>shaders/edgefit.vert</file>
         <file>shaders/edgefit.frag</file>
         <file>shaders/depthpyramid.frag</file>
+        <file>shaders/ambientocclusion.frag</file>
         <file>shaders/fullscreen.vert</file>
         <file>shaders/marker.frag</file>
         <file>shaders/debuglines.frag</file>

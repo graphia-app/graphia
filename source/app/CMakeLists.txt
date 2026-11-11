@@ -82,6 +82,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/maths/line.h
     ${CMAKE_CURRENT_LIST_DIR}/maths/plane.h
     ${CMAKE_CURRENT_LIST_DIR}/maths/ray.h
+    ${CMAKE_CURRENT_LIST_DIR}/rendering/ambientocclusion.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/approximateedgeshading.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/camera.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/depthprepass.h
@@ -218,6 +219,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/maths/frustum.cpp
     ${CMAKE_CURRENT_LIST_DIR}/maths/plane.cpp
     ${CMAKE_CURRENT_LIST_DIR}/maths/ray.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/rendering/ambientocclusion.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/approximateedgeshading.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/camera.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/depthprepass.cpp

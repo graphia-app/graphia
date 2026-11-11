@@ -24,3 +24,6 @@ const float NO_ELEMENT = 0.0;
 
 float nodeElement(int index) { return float(index + 1); }
 float edgeElement(int index) { return float(-(index + 1)); }
+
+bool isNodeElement(float element) { return element > 0.0; }
+int elementIndex(float element) { return int(abs(element)) - 1; }
