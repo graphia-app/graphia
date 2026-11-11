@@ -24,6 +24,7 @@
 #include "graphrenderertypes.h"
 #include "elementshaders.h"
 #include "nodegeometry.h"
+#include "screentexture.h"
 #include "texelbuffer.h"
 
 #include "primitives/impostorquads.h"
@@ -202,6 +203,8 @@ private:
     QOpenGLShaderProgram _outlineShader;
     QOpenGLShaderProgram _selectionShader;
 
+    ScreenTexture _composite{GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST};
+
     GLuint _depthTexture = 0;
 
     struct ComponentData
@@ -294,7 +297,7 @@ protected:
         All = Color | Selection
     };
 
-    void renderToScreen(Flags<Type> type = Type::All);
+    void compositeInto(GLuint framebuffer, Flags<Type> type = Type::All);
 
     QSize renderSdfTexture(const GlyphMap& glyphMap, GLuint texture);
     virtual GLuint sdfTexture() const = 0;

@@ -1266,11 +1266,7 @@ void GraphRenderer::render()
     renderGraph();
     render2D(_selectionRect);
 
-    // Check the normal FBO
-    if(!framebufferObject()->bind())
-        qWarning() << "QQuickFrameBufferobject::Renderer FBO not bound";
-
-    renderToScreen();
+    compositeInto(framebufferObject()->handle());
 
     QQuickOpenGLUtils::resetOpenGLState();
 
