@@ -1,0 +1,5 @@
+The shaders source/app/rendering/shaders/smaa*.frag are transcribed from SMAA,
+and source/app/rendering/textures/smaa*.png are its two lookup tables, converted
+from the C headers it distributes them as.
+
+  https://github.com/iryoku/smaa

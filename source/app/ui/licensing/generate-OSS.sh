@@ -104,6 +104,8 @@ appendLicenseFromUrl Matio https://raw.githubusercontent.com/tbeu/matio/master/C
 
 appendOpenSSLLicense
 
+appendLicenseFromFile SMAA ../../../thirdparty/smaa/LICENSE
+
 appendLicense Tango \
   "Icons courtesy of the <a href=\"http://tango.freedesktop.org\">Tango Desktop Project</a>."
 
