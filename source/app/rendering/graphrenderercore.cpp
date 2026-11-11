@@ -376,6 +376,13 @@ size_t GPUGraphData::numEdges() const
     return _edgeData.size();
 }
 
+void GPUGraphData::addNode(const NodeData& nodeData, float size)
+{
+    _nodeData.push_back(nodeData);
+    _extents._smallestNodeSize = std::min(_extents._smallestNodeSize, size);
+    _extents._largestNodeSize = std::max(_extents._largestNodeSize, size);
+}
+
 void GPUGraphData::addEdge(const EdgeData& edgeData)
 {
     _edgeData.push_back(edgeData);
@@ -529,7 +536,8 @@ void GraphRendererCore::renderToLayer(GPUGraphData& gpuGraphData)
     glViewport(0, 0, _width, _height);
 }
 
-void GraphRendererCore::renderNodesWithShader(QOpenGLShaderProgram& shader, GPUGraphData& gpuGraphData)
+void GraphRendererCore::renderNodesWithShader(QOpenGLShaderProgram& shader, GPUGraphData& gpuGraphData,
+    NamedBool<"asPoints"> asPoints)
 {
     if(gpuGraphData.numNodes() == 0)
         return;
@@ -541,8 +549,23 @@ void GraphRendererCore::renderNodesWithShader(QOpenGLShaderProgram& shader, GPUG
     _nodeGeometry.bind(ElementShaders::glUnit(ElementShaders::Unit::NodeGeometry));
 
     gpuGraphData._nodeQuad.vertexArrayObject()->bind();
-    glDrawElementsInstanced(GL_TRIANGLES, Primitive::ImpostorQuads::glIndexCount(1),
-        GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(gpuGraphData.numNodes()));
+
+    if(asPoints)
+    {
+#ifndef OPENGL_ES
+        glEnable(GL_PROGRAM_POINT_SIZE);
+#endif
+        glDrawArraysInstanced(GL_POINTS, 0, 1, static_cast<GLsizei>(gpuGraphData.numNodes()));
+#ifndef OPENGL_ES
+        glDisable(GL_PROGRAM_POINT_SIZE);
+#endif
+    }
+    else
+    {
+        glDrawElementsInstanced(GL_TRIANGLES, Primitive::ImpostorQuads::glIndexCount(1),
+            GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(gpuGraphData.numNodes()));
+    }
+
     gpuGraphData._nodeQuad.vertexArrayObject()->release();
 
     _nodeGeometry.release(ElementShaders::glUnit(ElementShaders::Unit::NodeGeometry));
@@ -632,8 +655,14 @@ bool GraphRendererCore::cullHiddenEdgeStretches(GPUGraphData& gpuGraphData)
 GraphRendererCore::DetailPasses GraphRendererCore::detailPasses(const GPUGraphData& gpuGraphData,
     const PixelScaleRange& pixelScale) const
 {
+    const auto& thresholds = _detailThresholds;
     const auto& extents = gpuGraphData._extents;
     DetailPasses passes;
+
+    const auto narrowestNode = 2.0f * extents._smallestNodeSize * pixelScale._minimum;
+    const auto widestNode = 2.0f * extents._largestNodeSize * pixelScale._maximum;
+    passes._tracedNodes = widestNode >= thresholds._minimumTracedNodeWidth;
+    passes._splattedNodes = narrowestNode < thresholds._minimumTracedNodeWidth;
 
     if(!u::pref(u"visuals/showEdges"_s).toBool() || gpuGraphData.numEdges() == 0)
         return passes;
@@ -641,8 +670,14 @@ GraphRendererCore::DetailPasses GraphRendererCore::detailPasses(const GPUGraphDa
     const auto narrowestShaft = 2.0f * extents._smallestEdgeSize * pixelScale._minimum;
     const auto widestShaft = 2.0f * extents._largestEdgeSize * pixelScale._maximum;
 
-    passes._approximateTracedEdges = narrowestShaft < _detailThresholds._minimumTracedEdgeWidth;
-    passes._tracedEdges = widestShaft >= _detailThresholds._minimumTracedEdgeWidth;
+    // An arrow's head is twice as wide as its shaft
+    const auto widening = extents._hasArrowHeads ? 2.0f : 1.0f;
+
+    const auto anyTracedEdges = widestShaft * widening >= thresholds._minimumApproximateTracedEdgeWidth;
+
+    passes._approximateTracedEdges = anyTracedEdges && narrowestShaft < thresholds._minimumTracedEdgeWidth;
+    passes._tracedEdges = anyTracedEdges && widestShaft >= thresholds._minimumTracedEdgeWidth;
+    passes._fastSplattedEdges = narrowestShaft * widening < thresholds._minimumApproximateTracedEdgeWidth;
 
     return passes;
 }
@@ -663,6 +698,24 @@ void GraphRendererCore::renderEdges(GPUGraphData& gpuGraphData, const DetailPass
     }
 }
 
+// What is too narrow to trace is drawn by how much of each pixel it covers,
+// over everything else in the layer and in any order
+void GraphRendererCore::renderSplats(GPUGraphData& gpuGraphData, const DetailPasses& passes)
+{
+    if(!passes.anySplatted())
+        return;
+
+    _splatCompositor.begin();
+
+    if(passes._splattedNodes)
+        renderNodesWithShader(_elementShaders._splattedNodes, gpuGraphData, "asPoints"_yes);
+
+    if(passes._fastSplattedEdges)
+        renderEdgesWithShader(_elementShaders._fastSplattedEdges, gpuGraphData);
+
+    _splatCompositor.resolveInto(gpuGraphData._fbo);
+}
+
 void GraphRendererCore::renderText(GPUGraphData& gpuGraphData, const PixelScaleRange& pixelScale)
 {
     // Text whose x-height is shorter than this on screen can't be read, so isn't drawn...
@@ -676,6 +729,8 @@ void GraphRendererCore::renderText(GPUGraphData& gpuGraphData, const PixelScaleR
 
     if(gpuGraphData._tallestTextHeight * pixelScale._maximum <= IllegibleTextPixels)
         return;
+
+    renderToLayer(gpuGraphData);
 
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
@@ -793,9 +848,9 @@ void GraphRendererCore::resetGPUComponentData()
 }
 
 void GraphRendererCore::appendGPUComponentData(const QMatrix4x4& modelViewMatrix,
-    const QMatrix4x4& projectionMatrix, float distance, float lightScale)
+    const QMatrix4x4& projectionMatrix, float distance, float lightScale, float radius)
 {
-    _componentData.push_back({modelViewMatrix, projectionMatrix, distance, lightScale});
+    _componentData.push_back({modelViewMatrix, projectionMatrix, distance, lightScale, radius});
 }
 
 void GraphRendererCore::uploadGPUComponentData()
@@ -810,7 +865,7 @@ void GraphRendererCore::uploadGPUComponentData()
 
         texels.insert(texels.end(), modelViewMatrix, modelViewMatrix + 16);
         texels.insert(texels.end(), projectionMatrix, projectionMatrix + 16);
-        texels.insert(texels.end(), {componentData._distance, componentData._lightScale, 0.0f, 0.0f});
+        texels.insert(texels.end(), {componentData._distance, componentData._lightScale, componentData._radius, 0.0f});
     }
 
     _componentDataTexels.upload(texels);
@@ -861,8 +916,8 @@ bool GraphRendererCore::resize(int width, int height)
 
         if(!_gpuGraphData.empty())
         {
-            FBOcomplete = _composite.resize(width, height) &&
-                _compositeElements.resize(width, height) && _smaaAntialiasing.resize(width, height);
+            FBOcomplete = _composite.resize(width, height) && _compositeElements.resize(width, height) &&
+                _smaaAntialiasing.resize(width, height) && _splatCompositor.resize(width, height, _depthTexture);
 
             for(auto& gpuGraphData : _gpuGraphData)
                 FBOcomplete = FBOcomplete && gpuGraphData.prepareRenderBuffers(width, height, _depthTexture);
@@ -987,6 +1042,7 @@ void GraphRendererCore::renderGraph()
     {
         ._viewportSize = QVector2D(static_cast<float>(_width), static_cast<float>(_height)),
         ._flatness = shading() == Shading::Flat ? 1.0f : 0.0f,
+        ._outlineColor = Document::contrastingColorForBackground(),
         ._widestEdgeSize = std::ranges::max(_gpuGraphData | std::views::transform(
             [](const auto& gpuGraphData) { return gpuGraphData._extents._largestEdgeSize; })),
         ._thresholds = _detailThresholds,
@@ -1017,9 +1073,13 @@ void GraphRendererCore::renderGraph()
         gpuGraphData.clearFramebuffer(GL_COLOR_BUFFER_BIT);
         renderToLayer(gpuGraphData);
 
-        renderNodesWithShader(_elementShaders._nodes, gpuGraphData);
-        renderEdges(gpuGraphData, detailPasses(gpuGraphData, pixelScale));
+        const auto passes = detailPasses(gpuGraphData, pixelScale);
 
+        if(passes._tracedNodes)
+            renderNodesWithShader(_elementShaders._nodes, gpuGraphData);
+
+        renderEdges(gpuGraphData, passes);
+        renderSplats(gpuGraphData, passes);
         renderText(gpuGraphData, pixelScale);
     }
 }
@@ -1145,7 +1205,8 @@ void GraphRendererCore::compositeInto(GLuint framebuffer, Flags<Type> type)
 
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ZERO, GL_ONE);
+    // Layers hold premultiplied colour, since what covers part of a pixel is blended into them
+    glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_ZERO, GL_ONE);
     glEnable(GL_BLEND);
 
     _selectionShader.bind();
@@ -1164,11 +1225,6 @@ void GraphRendererCore::compositeInto(GLuint framebuffer, Flags<Type> type)
 
         if(type.test(GraphRendererCore::Type::Color))
         {
-            const bool disableAlphaBlending =
-                _shading == Shading::Flat && !graphData._isOverlay;
-
-            _screenShader.bind();
-            _screenShader.setUniformValue("disableAlphaBlending", disableAlphaBlending ? 1 : 0);
             compositeLayer(_screenShader, graphData.alpha(), {graphData._colorTexture});
 
             if(_shading == Shading::Flat && graphData.hasGraphElements())

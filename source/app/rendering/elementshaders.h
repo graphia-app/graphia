@@ -22,6 +22,7 @@
 
 #include "openglfunctions.h"
 
+#include <QColor>
 #include <QOpenGLShaderProgram>
 #include <QVector2D>
 
@@ -31,8 +32,16 @@
 struct DetailThresholds
 {
     float _minimumTracedEdgeWidth = 4.0f;
+    float _minimumTracedNodeWidth = 3.0f;
 
-    static DetailThresholds exact() { return {._minimumTracedEdgeWidth = 0.0f}; }
+    // Edges this wide are traced, since splatting blends overlapping edges that ought to hide each other
+    float _minimumApproximateTracedEdgeWidth = 2.0f;
+
+    static DetailThresholds exact()
+    {
+        return {._minimumTracedEdgeWidth = 0.0f, ._minimumTracedNodeWidth = 0.0f,
+            ._minimumApproximateTracedEdgeWidth = 0.0f};
+    }
 };
 
 struct ElementShaders
@@ -49,7 +58,9 @@ struct ElementShaders
 
     QOpenGLShaderProgram _nodes;
     QOpenGLShaderProgram _nodeDepthPrepass;
+    QOpenGLShaderProgram _splattedNodes;
 
+    QOpenGLShaderProgram _fastSplattedEdges;
     QOpenGLShaderProgram _approximateTracedEdges;
     QOpenGLShaderProgram _tracedEdges;
     QOpenGLShaderProgram _edgeDepthPrepass;
@@ -59,6 +70,7 @@ struct ElementShaders
     {
         QVector2D _viewportSize;
         float _flatness = 0.0f;
+        QColor _outlineColor;
         float _widestEdgeSize = 0.0f;
         DetailThresholds _thresholds;
     };

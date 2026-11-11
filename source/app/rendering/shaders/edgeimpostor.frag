@@ -23,8 +23,6 @@
 #include "lighting.glsl"
 #include "projection.glsl"
 
-uniform float flatness;
-
 flat in float element;
 flat in vec3  innerVColor;
 flat in vec3  outerVColor;
@@ -177,8 +175,7 @@ void shade(Hit hit, bool inner)
 {
     vec3 color = inner ? innerVColor : outerVColor;
 
-    outColor = vec4((flatness * color) +
-        ((1.0 - flatness) * adsModel(hit.position, hit.normal, color, lightPlacement)), 1.0);
+    outColor = vec4(flattened(adsModel(hit.position, hit.normal, color, lightPlacement), color), 1.0);
     outElement.r = element;
     outElement.g = projectionScale;
     outSubElement = (inner && innerVColor != outerVColor ? INNER_COLOR_SUB_ELEMENT : hit.subElement) / 255.0;

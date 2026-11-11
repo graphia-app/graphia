@@ -223,9 +223,9 @@ void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, Q
 {
     resetGPUComponentData();
 
-    for(const auto& componentCameraAndLighting : _componentCameraAndLightings)
+    for(const auto& componentView : _componentViews)
     {
-        const Camera& componentCamera = componentCameraAndLighting._camera;
+        const Camera& componentCamera = componentView._cameraAndLighting._camera;
         const QRectF componentViewport(
             componentCamera.viewport().topLeft() * static_cast<double>(scale),
             componentCamera.viewport().size() * static_cast<double>(scale));
@@ -247,7 +247,8 @@ void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, Q
         appendGPUComponentData(componentCamera.viewMatrix(),
             projectionMatrix,
             componentCamera.distance(),
-            componentCameraAndLighting._lightScale);
+            componentView._cameraAndLighting._lightScale,
+            componentView._radius);
     }
 
     uploadGPUComponentData();
@@ -255,7 +256,7 @@ void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, Q
 
 bool ScreenshotRenderer::copyState(const GraphRenderer& renderer)
 {
-    _componentCameraAndLightings.clear();
+    _componentViews.clear();
 
     for(size_t i = 0; i < renderer._gpuGraphData.size(); ++i)
         _gpuGraphData.at(i).copyState(renderer._gpuGraphData.at(i), _elementShaders._nodes, _elementShaders._tracedEdges, _textShader);
@@ -271,7 +272,7 @@ bool ScreenshotRenderer::copyState(const GraphRenderer& renderer)
             continue;
 
         // This order MUST match graphrenderer component order!
-        _componentCameraAndLightings.emplace_back(*componentRenderer->cameraAndLighting());
+        _componentViews.push_back({*componentRenderer->cameraAndLighting(), componentRenderer->maxDistanceFromFocus()});
     }
 
     setShading(renderer.shading());

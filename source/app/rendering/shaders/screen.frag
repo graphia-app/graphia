@@ -22,14 +22,8 @@ layout (location = 0) out vec4 fragColor;
 uniform sampler2D colorTexture;
 
 uniform float alpha;
-uniform int disableAlphaBlending;
 
 void main()
 {
-    vec4 color = texelFetch(colorTexture, ivec2(gl_FragCoord.xy), 0);
-
-    if(disableAlphaBlending != 0 && color.a > 0.0)
-        color.a = 1.0;
-
-    fragColor = vec4(color.rgb, color.a * alpha);
+    fragColor = texelFetch(colorTexture, ivec2(gl_FragCoord.xy), 0) * alpha;
 }

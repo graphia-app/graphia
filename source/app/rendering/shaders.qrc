@@ -7,14 +7,18 @@
         <file>shaders/lighting.glsl</file>
         <file>shaders/nodegeometry.glsl</file>
         <file>shaders/nodeimpostor.glsl</file>
+        <file>shaders/outline.glsl</file>
         <file>shaders/projection.glsl</file>
         <file>shaders/smaablending.glsl</file>
+        <file>shaders/splatcompositor.glsl</file>
         <file>shaders/texelbuffer.glsl</file>
         <file>shaders/viewport.glsl</file>
         <file>shaders/nodeimpostor.vert</file>
         <file>shaders/nodeimpostor.frag</file>
+        <file>shaders/nodecoverage.frag</file>
         <file>shaders/edgeimpostor.vert</file>
         <file>shaders/edgeimpostor.frag</file>
+        <file>shaders/edgecoverage.frag</file>
         <file>shaders/edgecull.vert</file>
         <file>shaders/edgecull.frag</file>
         <file>shaders/depthpyramid.frag</file>

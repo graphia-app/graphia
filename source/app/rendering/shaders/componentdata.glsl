@@ -17,8 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// Each component's model view matrix, projection matrix and lighting parameters,
-// in that order, as laid out by GraphRendererCore::uploadGPUComponentData
+// Each component's model view matrix, projection matrix, lighting parameters and
+// radius, in that order, as laid out by GraphRendererCore::uploadGPUComponentData
 
 #include "texelbuffer.glsl"
 
@@ -43,3 +43,7 @@ mat4 componentProjectionMatrix(int component)
 }
 
 vec2 componentLightPlacement(int component) { return componentDataTexel(component, 8).xy; }
+
+// How far the component's centre is from the eye, and its radius
+float componentDistance(int component) { return componentDataTexel(component, 8).x; }
+float componentRadius(int component)   { return componentDataTexel(component, 8).z; }

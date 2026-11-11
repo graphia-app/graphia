@@ -20,7 +20,9 @@
 // An edge is two quads, one each for its shaft and head, each as small as covers it
 // An edge's width on screen picks the one build that draws it; the others collapse it
 
-#if defined(EDGE_APPROXIMATE_TRACED)
+#if defined(EDGE_COVERAGE)
+#define DRAWN_DETAIL FAST_SPLATTED_DETAIL
+#elif defined(EDGE_APPROXIMATE_TRACED)
 #define DRAWN_DETAIL APPROXIMATE_TRACED_DETAIL
 #elif defined(EDGE_TRACED)
 #define DRAWN_DETAIL TRACED_DETAIL
@@ -40,6 +42,26 @@ out vec3 impostorPosition; // In view space
 #include "edgedatatexels.glsl"
 #include "element.glsl"
 
+#ifdef EDGE_COVERAGE
+#include "splatcompositor.glsl"
+#include "lighting.glsl"
+
+flat out vec3 averagedOuterColor;
+flat out vec3 averagedInnerColor;
+out vec3 shaftCoordinate;
+out float coverageWeight;
+
+// The direction across the shaft on screen
+flat out vec2 acrossScreen;
+
+vec3 averagedColor(vec3 color, vec3 onAxis)
+{
+    vec3 across, facing;
+    crossSectionFacingEye(onAxis, across, facing);
+
+    return flattened(adsModelAcrossCylinder(onAxis, across, facing, color, lightPlacement), color);
+}
+#else
 // The part's cross-section about a point on its axis; the head's narrows to
 // nothing at its apex
 CrossSection crossSectionAt(EdgePart part, bool isHead, vec3 centre)
@@ -135,6 +157,7 @@ vec2 nearClippedSpan(mat4 projectionMatrix, vec3 from, vec3 to, float radius, ve
 
     return clamp(span, -length(viewportSize), length(viewportSize));
 }
+#endif
 
 #ifdef EDGE_TRACED
 // What the cull found; the depth prepass reads the last walk's
@@ -181,7 +204,7 @@ void main()
     innerVColor = innerColor.rgb;
     vSelected = selected;
 
-    int detail = detailFor(ends.shaftWidth);
+    int detail = detailFor(ends.shaftWidth, isArrow ? 2.0 * ends.shaftWidth : ends.shaftWidth);
 
     PartOnScreen onScreen;
 
@@ -219,6 +242,22 @@ void main()
     float end = mix(stretch.x, stretch.y, (vertexPosition.y + 1.0) * 0.5);
     vec3 onAxis = mix(part.from, part.to, end);
 
+#ifdef EDGE_COVERAGE
+    float endRadius = mix(onScreen.radiusFrom, onScreen.radiusTo, end);
+    float quadRadius = endRadius + (0.5 * (abs(across.x) + abs(across.y)));
+    float side = vertexPosition.x;
+    vec2 cornerPixel = mix(onScreen.pixelFrom, onScreen.pixelTo, end) + (across * (side * quadRadius));
+
+    float innerColorLength = innerColorStretch.y - innerColorStretch.x;
+    float alongInnerColor = innerColorLength > 0.0 ?
+        (dot(onAxis - shaftBase, edgeAxis) - innerColorStretch.x) / innerColorLength : -1.0;
+
+    shaftCoordinate = vec3(side * quadRadius, alongInnerColor, endRadius);
+    acrossScreen = across;
+
+    averagedOuterColor = averagedColor(outerColor.rgb, onAxis);
+    averagedInnerColor = innerColor.rgb == outerColor.rgb ? averagedOuterColor : averagedColor(innerColor.rgb, onAxis);
+#else
     // As little as covers the shape between the cross-sections at each end
     CrossSection fromSection = crossSectionAt(part, isHead, axisPointAt(part, stretch.x));
     CrossSection toSection = crossSectionAt(part, isHead, axisPointAt(part, stretch.y));
@@ -243,6 +282,7 @@ void main()
 
     vec2 cornerPixel = (along * (vertexPosition.y < 0.0 ? alongSpan.x : alongSpan.y)) +
         (across * (vertexPosition.x < 0.0 ? acrossSpan.x : acrossSpan.y));
+#endif
 
 #ifdef EDGE_TRACED
     float cornerZ = onAxis.z;
@@ -253,6 +293,10 @@ void main()
 
     impostorPosition = unproject(projectionMatrix, zToClip, cornerPixel / (viewportSize * 0.5), cornerZ);
     gl_Position = projectionMatrix * vec4(impostorPosition, 1.0);
+
+#ifdef EDGE_COVERAGE
+    coverageWeight = coverageWeightAt(component, impostorPosition.z);
+#endif
 
     projectionScale = projectionScaleFor(projectionMatrix, onAxis, size);
 }

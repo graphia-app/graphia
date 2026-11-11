@@ -114,6 +114,7 @@ public:
     Camera* camera() { return &_viewData.camera(); }
     const Camera* camera() const { return &_viewData.camera(); }
     float lightScale() const { return _viewData.lightScale(); }
+    float maxDistanceFromFocus() const { return _maxDistanceFromFocus; }
     CameraAndLighting* cameraAndLighting() { return &_viewData._cameraAndLighting; }
     const CameraAndLighting* cameraAndLighting() const { return &_viewData._cameraAndLighting; }
 

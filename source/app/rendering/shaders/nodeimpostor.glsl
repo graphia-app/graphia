@@ -25,6 +25,9 @@
 // the normal turns through from the middle to the rim
 const float DOT_REACH = 0.2;
 
+// About how much of the disc the dot covers
+const float DOT_AREA = pow(sin(DOT_REACH * PI * 0.5), 2.0);
+
 // Right and up across a direction facing the eye, square to it and each other
 void facingBasis(vec3 facing, out vec3 right, out vec3 up)
 {

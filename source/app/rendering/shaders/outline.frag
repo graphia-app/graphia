@@ -24,6 +24,8 @@ precision highp float;
 
 layout (location = 0) out vec4 fragColor;
 
+#include "outline.glsl"
+
 uniform sampler2D elementTexture;
 
 uniform vec4 outlineColor;
@@ -68,31 +70,16 @@ float edgeStrengthAt(ivec2 p)
         }
     }
 
-    const float MIN_PS = 0.001;
-    const float MAX_PS = 0.015;
-    projectionScale = clamp((projectionScale - MIN_PS) / (MAX_PS - MIN_PS), 0.0, 1.0);
-
     // Clamp to a maximum difference, otherwise we get abnormally dark
     // spots at the junction of many elements
     const float maxNumDiffPixels = 5.0;
     numDiffPixels = min(numDiffPixels, maxNumDiffPixels);
 
-    // Normalise
-    float value = numDiffPixels / maxNumDiffPixels;
-
-    // Give the value a bit of ramp; this thins the edges out a bit
-    value = pow(value, 1.0 + ((1.0 - projectionScale) * 2.0));
-
-    // Dial the value back a bit, helping the color come through
-    // when edges are densely packed
-    const float MIN_VALUE = 0.1;
-    value *= MIN_VALUE + (projectionScale * (1.0 - MIN_VALUE));
-
-    return value;
+    return outlineOpacity(numDiffPixels / maxNumDiffPixels, outlineProjection(projectionScale));
 }
 
 void main()
 {
     float outlineAlpha = edgeStrengthAt(ivec2(gl_FragCoord.xy));
-    fragColor = vec4(outlineColor.rgb, outlineAlpha * alpha);
+    fragColor = vec4(outlineColor.rgb, 1.0) * (outlineAlpha * alpha);
 }

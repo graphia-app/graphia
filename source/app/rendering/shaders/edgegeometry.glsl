@@ -53,10 +53,12 @@ flat out vec2  innerColorStretch;
 #include "projection.glsl"
 #include "viewport.glsl"
 
+uniform float minimumApproximateTracedWidthPixels;
 uniform float minimumTracedWidthPixels;
 
-const int APPROXIMATE_TRACED_DETAIL = 0;
-const int TRACED_DETAIL = 1;
+const int FAST_SPLATTED_DETAIL = 0;
+const int APPROXIMATE_TRACED_DETAIL = 1;
+const int TRACED_DETAIL = 2;
 
 const int EDGE_VISUAL_TYPE_ARROW = 1;
 
@@ -76,9 +78,15 @@ struct CrossSection
     float radius;
 };
 
-int detailFor(float shaftWidth)
+int detailFor(float shaftWidth, float widestWidth)
 {
-    return shaftWidth < minimumTracedWidthPixels ? APPROXIMATE_TRACED_DETAIL : TRACED_DETAIL;
+    if(widestWidth < minimumApproximateTracedWidthPixels)
+        return FAST_SPLATTED_DETAIL;
+
+    if(shaftWidth < minimumTracedWidthPixels)
+        return APPROXIMATE_TRACED_DETAIL;
+
+    return TRACED_DETAIL;
 }
 
 // How far from a node's centre a cylinder of the given radius leaves its surface
@@ -138,6 +146,14 @@ vec3 axisPointAt(EdgePart part, float fraction)
     float wTo = clipWAt(zToClip, part.to.z);
 
     return mix(part.from, part.to, (fraction * wFrom) / mix(wTo, wFrom, fraction));
+}
+
+// Across the edge, and towards the eye, at a point on its axis and square to it
+void crossSectionFacingEye(vec3 onAxis, out vec3 across, out vec3 facing)
+{
+    vec3 toEye = normalize(towardsEye(zToClip, onAxis));
+    facing = normalize(toEye - (edgeAxis * dot(toEye, edgeAxis)));
+    across = normalize(cross(edgeAxis, toEye));
 }
 
 // The edge's ends in view space, and how wide its shaft is on screen at its
