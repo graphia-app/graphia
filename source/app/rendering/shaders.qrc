@@ -11,7 +11,6 @@
         <file>shaders/viewport.glsl</file>
         <file>shaders/nodeimpostor.vert</file>
         <file>shaders/nodeimpostor.frag</file>
-        <file>shaders/instancededges.vert</file>
         <file>shaders/edgeimpostor.vert</file>
         <file>shaders/edgeimpostor.frag</file>
         <file>shaders/marker.frag</file>
@@ -25,7 +24,6 @@
         <file>shaders/textrender.frag</file>
         <file>shaders/textrender.vert</file>
         <file>shaders/sdf.frag</file>
-        <file>shaders/edgecolorads.frag</file>
         <file>shaders/outline.frag</file>
     </qresource>
 </RCC>

@@ -25,7 +25,6 @@
 #include "nodegeometry.h"
 #include "texelbuffer.h"
 
-#include "primitives/arrow.h"
 #include "primitives/impostorquads.h"
 #include "primitives/rectangle.h"
 
@@ -55,8 +54,7 @@ struct GPUGraphData : OpenGLFunctions
 
     void initialise(QOpenGLShaderProgram& nodesShader,
         QOpenGLShaderProgram& edgesShader,
-        QOpenGLShaderProgram& textShader,
-        size_t tessellationFactor = 1);
+        QOpenGLShaderProgram& textShader);
     void prepareVertexBuffers();
     void prepareNodeVAO(QOpenGLShaderProgram& shader);
     void prepareEdgeVAO(QOpenGLShaderProgram& shader);
@@ -64,8 +62,7 @@ struct GPUGraphData : OpenGLFunctions
 
     bool prepareRenderBuffers(int width, int height, GLuint depthTexture, GLint numMultiSamples);
     void copyState(const GPUGraphData &gpuGraphData, QOpenGLShaderProgram &nodesShader,
-        QOpenGLShaderProgram &edgesShader, QOpenGLShaderProgram &textShader,
-        size_t tessellationFactor = 1);
+        QOpenGLShaderProgram &edgesShader, QOpenGLShaderProgram &textShader);
 
     void reset();
     void clearFramebuffer(GLbitfield buffers = GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
@@ -85,7 +82,6 @@ struct GPUGraphData : OpenGLFunctions
     size_t numGlyphs() const;
 
     Primitive::ImpostorQuads _nodeQuad{1};
-    Primitive::Arrow _arrow;
     Primitive::ImpostorQuads _edgeQuads{2};
     Primitive::Rectangle _rectangle;
 
