@@ -702,19 +702,33 @@ GraphRendererCore::DetailPasses GraphRendererCore::detailPasses(const GPUGraphDa
     passes._approximateTracedEdges = anyTracedEdges && narrowestShaft < thresholds._minimumTracedEdgeWidth;
     passes._tracedEdges = anyTracedEdges && widestShaft >= thresholds._minimumTracedEdgeWidth;
     passes._fastSplattedEdges = anySplattedEdges && narrowestShaft < thresholds._minimumSplattedEdgeWidth;
-    passes._splattedEdges = anySplattedEdges && widestShaft >= thresholds._minimumSplattedEdgeWidth;
+
+    // The pixels at an approximate traced edge's boundaries are drawn by their coverage
+    passes._splattedEdges = (anySplattedEdges && widestShaft >= thresholds._minimumSplattedEdgeWidth) ||
+        passes._approximateTracedEdges;
 
     return passes;
 }
 
 void GraphRendererCore::renderEdges(GPUGraphData& gpuGraphData, const DetailPasses& passes)
 {
+    // Both the approximate traced build and renderSplats read the fit
+    if(passes._splattedEdges)
+        fitEdgeShading(gpuGraphData);
+
     const bool culled = passes._tracedEdges && cullHiddenEdgeStretches(gpuGraphData);
 
     renderToLayer(gpuGraphData);
 
     if(passes._approximateTracedEdges)
-        renderEdgesWithShader(_elementShaders._approximateTracedEdges, gpuGraphData);
+    {
+        auto& approximateTracedShader = _elementShaders._approximateTracedEdges;
+        approximateTracedShader.bind();
+        _approximateEdgeShading.bind(ElementShaders::glUnit(ElementShaders::Unit::ApproximateShadingThirds),
+            approximateTracedShader);
+        renderEdgesWithShader(approximateTracedShader, gpuGraphData);
+        _approximateEdgeShading.release(ElementShaders::glUnit(ElementShaders::Unit::ApproximateShadingThirds));
+    }
 
     if(passes._tracedEdges)
     {
@@ -729,9 +743,6 @@ void GraphRendererCore::renderSplats(GPUGraphData& gpuGraphData, const DetailPas
 {
     if(!passes.anySplatted())
         return;
-
-    if(passes._splattedEdges)
-        fitEdgeShading(gpuGraphData);
 
     _splatCompositor.beginNearestNodes();
 

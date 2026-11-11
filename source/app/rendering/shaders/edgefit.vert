@@ -36,7 +36,7 @@ void main()
     EdgeEnds ends = edgeEnds();
     int detail = detailFor(ends.shaftWidth, isArrow ? 2.0 * ends.shaftWidth : ends.shaftWidth);
 
-    if(ends.length <= 0.0 || detail != SPLATTED_DETAIL)
+    if(ends.length <= 0.0 || (detail != SPLATTED_DETAIL && detail != APPROXIMATE_TRACED_DETAIL))
         return;
 
     edgeAxis = (ends.target - ends.source) / ends.length;

@@ -44,7 +44,7 @@ out vec3 impostorPosition; // In view space
 #include "edgedatatexels.glsl"
 #include "element.glsl"
 
-#ifdef EDGE_ACROSS
+#if defined(EDGE_ACROSS) || defined(EDGE_APPROXIMATE_TRACED)
 // What the fit build found, a texel per edge in each of three textures
 uniform sampler2D approximateShadingThirds0;
 uniform sampler2D approximateShadingThirds1;
@@ -53,6 +53,10 @@ uniform sampler2D approximateShadingThirds2;
 // The outer colour's shading across the width, as a + b u + c u², u the
 // fraction of the half width across, fitted to its average over each third
 flat out vec3 shadingAcross[3];
+
+flat out float splitAtBoundaries; // An approximate traced edge, whose boundaries are splatted
+flat out vec4 axisPixels; // Where the axis runs on screen, in pixels
+flat out vec2 radiusPixels; // How far the shaft reaches either side
 
 // A quadratic with the averages over the thirds of the width the fit build found
 void readShadingAcross()
@@ -66,6 +70,11 @@ void readShadingAcross()
     shadingAcross[1] = 0.75 * (third - first);
     shadingAcross[0] = second - (shadingAcross[2] / 27.0);
 }
+#endif
+
+#ifdef EDGE_APPROXIMATE_TRACED
+// The shaft's radius in pixels at a point, times w there
+flat out float shaftRadiusPixelsW;
 #endif
 
 #ifdef EDGE_COVERAGE
@@ -235,6 +244,18 @@ void main()
 
     int detail = detailFor(ends.shaftWidth, isArrow ? 2.0 * ends.shaftWidth : ends.shaftWidth);
 
+#if defined(EDGE_ACROSS) || defined(EDGE_APPROXIMATE_TRACED)
+    // Tracing a pixel an edge only partly covers finds all of it or none of
+    // it, which along an edge a few pixels wide steps as it crosses the rows
+    bool split = !isArrow && detail == APPROXIMATE_TRACED_DETAIL;
+    splitAtBoundaries = split ? 1.0 : 0.0;
+
+#ifdef EDGE_ACROSS
+    if(split)
+        detail = DRAWN_DETAIL;
+#endif
+#endif
+
     PartOnScreen onScreen;
 
     if(ends.length <= 0.0 || detail != DRAWN_DETAIL || !partOnScreen(ends, isHead, isArrow, onScreen))
@@ -245,6 +266,11 @@ void main()
 
     mat4 projectionMatrix = ends.projectionMatrix;
     EdgePart part = onScreen.part;
+
+#if defined(EDGE_ACROSS) || defined(EDGE_APPROXIMATE_TRACED)
+    axisPixels = vec4(onScreen.pixelFrom, onScreen.pixelTo);
+    radiusPixels = vec2(onScreen.radiusFrom, onScreen.radiusTo);
+#endif
 
     vec2 between = onScreen.pixelTo - onScreen.pixelFrom;
     vec2 along = length(between) > 0.0001 ? normalize(between) : vec2(1.0, 0.0);
@@ -317,6 +343,11 @@ void main()
 
     vec2 cornerPixel = (along * (vertexPosition.y < 0.0 ? alongSpan.x : alongSpan.y)) +
         (across * (vertexPosition.x < 0.0 ? acrossSpan.x : acrossSpan.y));
+
+#ifdef EDGE_APPROXIMATE_TRACED
+    readShadingAcross();
+    shaftRadiusPixelsW = size * ends.pixelsPerUnit;
+#endif
 #endif
 
 #ifdef EDGE_TRACED
