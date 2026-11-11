@@ -116,6 +116,7 @@ void ElementShaders::setFrameUniforms(const FrameUniforms& uniforms)
     {
         program->bind();
         setShared(*program);
+        program->setUniformValue("widestEdgeSize", uniforms._widestEdgeSize);
         program->release();
     }
 
