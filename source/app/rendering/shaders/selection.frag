@@ -64,5 +64,5 @@ void main()
 
     float interiorAlpha = I[1][1] * 0.2;
 
-    fragColor = vec4(highlightColor.rgb, (interiorAlpha + outlineAlpha) * alpha);
+    fragColor = vec4(highlightColor.rgb, 1.0) * ((interiorAlpha + outlineAlpha) * alpha);
 }

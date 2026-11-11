@@ -40,7 +40,7 @@ void main()
     if(firstData.r < 0.5 - smoothing)
         discard;
 
-    outColor = vec4(textColor.rgb, alpha * legibility);
+    outColor = vec4(textColor.rgb, 1.0) * (alpha * legibility);
     outElement = vec2(0.0, 0.0);
     outSubElement = 0.0;
     outSelection = vec4(0, 0, 0, 0);

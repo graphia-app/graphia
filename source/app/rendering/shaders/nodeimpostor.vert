@@ -17,7 +17,7 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// A camera facing quad over the node's sphere, for the fragment shader to trace
+// A camera facing quad over the node's sphere
 
 layout (location = 0) in vec3 vertexPosition; // Which corner of the quad
 
@@ -46,15 +46,35 @@ out vec3 impostorPosition; // In view space
 out vec2 quadCoordinate;
 #endif
 
+#ifdef NODE_COVERAGE
+const bool DRAWS_NARROW_NODES = true;
+
+flat out vec3 coveredDisc; // Where on screen, and its radius, in pixels
+flat out float coverageWeight;
+flat out vec3 averagedColor;
+
+#include "lighting.glsl"
+
+// A pixel partly covered by the disc can be this far from it
+const float COVERAGE_MARGIN = 0.75;
+#else
+const bool DRAWS_NARROW_NODES = false;
+#endif
+
 // Outlines are measured at the width of the widest edge, so that a node's
 // matches an edge's at the same depth
 uniform float widestEdgeSize;
 
+// Narrower than this on screen, a node is drawn by its coverage
+uniform float minimumTracedWidthPixels;
+
 #include "componentdata.glsl"
+#include "splatcompositor.glsl"
 #include "element.glsl"
 #include "nodegeometry.glsl"
 #include "nodeimpostor.glsl"
 #include "projection.glsl"
+#include "viewport.glsl"
 
 void main()
 {
@@ -80,12 +100,52 @@ void main()
     float silhouetteRadius = nodeRadius * eyeDistance /
         sqrt(max((eyeDistance * eyeDistance) - (nodeRadius * nodeRadius * wPerZ * wPerZ), 0.0001));
 
+    vec4 centreClip = projectionMatrix * vec4(nodeCentre, 1.0);
+    float pixelsPerUnit = focalLengthPixels(projectionMatrix) / max(abs(centreClip.w), 0.0001);
+    bool narrow = 2.0 * nodeRadius * pixelsPerUnit < minimumTracedWidthPixels;
+
+    // Moved outside the view, since a point is drawn wherever it lands
+    if(narrow != DRAWS_NARROW_NODES)
+    {
+        gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+        return;
+    }
+
     vec3 facing = towards / eyeDistance;
     vec3 right, up;
     facingBasis(facing, right, up);
 
+#ifdef NODE_COVERAGE
+    impostorPosition = nodeCentre;
+
+    vec2 centrePixel = (centreClip.xy / centreClip.w) * viewportSize * 0.5;
+    float radiusPixels = silhouetteRadius * pixelsPerUnit;
+    coveredDisc = vec3(centrePixel + (viewportSize * 0.5), radiusPixels);
+    coverageWeight = coverageWeightAt(component, nodeCentre.z);
+
+    // Shaded as a sphere, averaged over four points that integrate a cubic over
+    // the disc exactly, each clipped at 1 first as a traced picture's would be
+    vec3 color = mix(outerVColor, innerVColor, DOT_AREA);
+    averagedColor = vec3(0.0);
+
+    for(int i = 0; i < 4; i++)
+    {
+        vec2 onDisc = vec2((i % 2 == 0) ? 0.5 : -0.5, (i < 2) ? 0.5 : -0.5);
+        vec3 normal = (right * onDisc.x) + (up * onDisc.y) + (facing * sqrt(0.5));
+        vec3 lit = min(adsModel(nodeCentre + (normal * nodeRadius), normal, color, lightPlacement), 1.0);
+        averagedColor += flattened(lit, color);
+    }
+
+    averagedColor *= 0.25;
+
+    // A point sprite, which is a quarter of the vertices a quad is, at the
+    // sphere's near side, so that what leaves its surface is behind it
+    gl_Position = projectionMatrix * vec4(nodeCentre + (facing * nodeRadius), 1.0);
+    gl_PointSize = 2.0 * (radiusPixels + COVERAGE_MARGIN);
+#else
     impostorPosition = nodeCentre + (silhouetteRadius * ((right * vertexPosition.x) + (up * vertexPosition.y)));
     gl_Position = projectionMatrix * vec4(impostorPosition, 1.0);
+#endif
 
 #ifdef NODE_DEPTH_PREPASS
     quadCoordinate = vertexPosition.xy;

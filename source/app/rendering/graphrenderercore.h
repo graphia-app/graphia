@@ -29,12 +29,14 @@
 #include "screenpass.h"
 #include "screentexture.h"
 #include "smaaantialiasing.h"
+#include "splatcompositor.h"
 #include "texelbuffer.h"
 
 #include "primitives/impostorquads.h"
 #include "primitives/rectangle.h"
 
 #include "shared/utils/flags.h"
+#include "shared/utils/namedbool.h"
 
 #include <QColor>
 #include <QOpenGLBuffer>
@@ -78,9 +80,11 @@ struct GPUGraphData : OpenGLFunctions
 
     void upload();
 
+    struct NodeData;
     struct EdgeData;
     struct GlyphData;
 
+    void addNode(const NodeData& nodeData, float size);
     void addEdge(const EdgeData& edgeData);
     void addGlyph(const GlyphData& glyphData);
 
@@ -155,6 +159,9 @@ struct GPUGraphData : OpenGLFunctions
 
     struct ElementExtents
     {
+        float _smallestNodeSize = std::numeric_limits<float>::max();
+        float _largestNodeSize = 0.0f;
+
         bool _hasArrowHeads = false;
         float _smallestEdgeSize = std::numeric_limits<float>::max();
         float _largestEdgeSize = 0.0f;
@@ -216,6 +223,7 @@ private:
     ScreenTexture _composite{GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_LINEAR};
     ScreenTexture _compositeElements{GL_RG32F, GL_RG, GL_FLOAT, GL_NEAREST};
     SmaaAntialiasing _smaaAntialiasing;
+    SplatCompositor _splatCompositor;
 
     GLuint _depthTexture = 0;
 
@@ -227,6 +235,7 @@ private:
         QMatrix4x4 _projectionMatrix;
         float _distance = 0.0f;
         float _lightScale = 0.0f;
+        float _radius = 0.0f;
     };
 
     std::vector<ComponentData> _componentData;
@@ -263,15 +272,22 @@ private:
     // can be on screen; each element picks its own level in the shader
     struct DetailPasses
     {
+        bool _tracedNodes = false;
+        bool _splattedNodes = false;
+        bool _fastSplattedEdges = false;
         bool _approximateTracedEdges = false;
         bool _tracedEdges = false;
+
+        bool anySplatted() const { return _splattedNodes || _fastSplattedEdges; }
     };
 
     DetailPasses detailPasses(const GPUGraphData& gpuGraphData, const PixelScaleRange& pixelScale) const;
     void renderEdges(GPUGraphData& gpuGraphData, const DetailPasses& passes);
+    void renderSplats(GPUGraphData& gpuGraphData, const DetailPasses& passes);
 
     void renderToLayer(GPUGraphData& gpuGraphData);
-    void renderNodesWithShader(QOpenGLShaderProgram& shader, GPUGraphData& gpuGraphData);
+    void renderNodesWithShader(QOpenGLShaderProgram& shader, GPUGraphData& gpuGraphData,
+        NamedBool<"asPoints"> asPoints = "asPoints"_no);
     void bindEdgeParameters(GPUGraphData& gpuGraphData);
     void releaseEdgeParameters(GPUGraphData& gpuGraphData);
 
@@ -304,7 +320,7 @@ protected:
     void resetGPUComponentData();
     void appendGPUComponentData(const QMatrix4x4& modelViewMatrix,
         const QMatrix4x4& projectionMatrix,
-        float distance, float lightScale);
+        float distance, float lightScale, float radius);
     void uploadGPUComponentData();
 
     NodeGeometry& nodeGeometry() { return _nodeGeometry; }

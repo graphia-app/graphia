@@ -24,8 +24,6 @@
 #include "nodeimpostor.glsl"
 #include "projection.glsl"
 
-uniform float flatness;
-
 flat in float element;
 flat in vec3  innerVColor;
 flat in vec3  outerVColor;
@@ -85,8 +83,7 @@ void main()
     // Step threshold indicates the size of dot
     vec3 fragColor = mix(outerVColor, innerVColor, step(length(scaledUV), DOT_REACH));
 
-    vec3 color = (flatness * fragColor) +
-        ((1.0 - flatness) * adsModel(position, normal, fragColor, lightPlacement));
+    vec3 color = flattened(adsModel(position, normal, fragColor, lightPlacement), fragColor);
 
     gl_FragDepth = depthAt(zToClip, position.z);
 

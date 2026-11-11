@@ -55,7 +55,13 @@ private:
     GLuint _screenshotTex = 0;
     GLuint _sdfTexture = 0;
 
-    std::vector<GraphComponentRenderer::CameraAndLighting> _componentCameraAndLightings;
+    struct ComponentView
+    {
+        GraphComponentRenderer::CameraAndLighting _cameraAndLighting;
+        float _radius = 0.0f;
+    };
+
+    std::vector<ComponentView> _componentViews;
 
     GLuint sdfTexture() const override;
 

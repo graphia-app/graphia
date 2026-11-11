@@ -380,7 +380,7 @@ void GraphRenderer::updateGPUDataIfRequired()
 
             if(gpuGraphData != nullptr)
             {
-                gpuGraphData->_nodeData.push_back(nodeData);
+                gpuGraphData->addNode(nodeData, nodeVisual._size);
 
                 if(nodeData._selected != 0.0f)
                     gpuGraphData->_elementsSelected = true;
@@ -509,7 +509,8 @@ void GraphRenderer::updateComponentGPUData()
         appendGPUComponentData(componentRenderer->modelViewMatrix(),
             componentRenderer->projectionMatrix(),
             componentRenderer->camera()->distance(),
-            componentRenderer->lightScale());
+            componentRenderer->lightScale(),
+            componentRenderer->maxDistanceFromFocus());
     }
 
     uploadGPUComponentData();

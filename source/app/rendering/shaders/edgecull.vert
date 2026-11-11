@@ -132,7 +132,7 @@ void main()
         return;
 
     EdgeEnds ends = edgeEnds();
-    int detail = detailFor(ends.shaftWidth);
+    int detail = detailFor(ends.shaftWidth, isArrow ? 2.0 * ends.shaftWidth : ends.shaftWidth);
 
     PartOnScreen onScreen;
 
