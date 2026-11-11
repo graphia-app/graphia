@@ -42,5 +42,4 @@ mat4 componentProjectionMatrix(int component)
         componentDataTexel(component, 6), componentDataTexel(component, 7));
 }
 
-float componentLightOffset(int component)   { return componentDataTexel(component, 8).x; }
-float componentLightScale(int component)    { return componentDataTexel(component, 8).y; }
+vec2 componentLightPlacement(int component) { return componentDataTexel(component, 8).xy; }
