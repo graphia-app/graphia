@@ -44,6 +44,17 @@ flat in mat2  zToClip;
 
 in vec3 impostorPosition;
 
+#ifdef EDGE_APPROXIMATE_TRACED
+#include "viewport.glsl"
+#include "edgeacross.glsl"
+
+flat in float shaftRadiusPixelsW;
+
+// The widths between which this build draws an edge
+uniform float minimumApproximateTracedWidthPixels;
+uniform float minimumTracedWidthPixels;
+#endif
+
 layout (location = 0) out vec4  outColor;
 layout (location = 1) out vec2  outElement;
 layout (location = 2) out float outSubElement;
@@ -182,8 +193,31 @@ void shade(Hit hit, bool inner)
     outSelection = vec4(vec3(vSelected), 1.0);
 }
 
+#ifdef EDGE_APPROXIMATE_TRACED
+// A highlight narrower than a pixel shows as dots along a narrow edge, so each pixel
+// shows the shading's mean over the stretch of the width it sees
+vec3 shadedAcrossPixel(Hit hit, vec3 rayDirection, vec3 hitColor)
+{
+    vec3 across = normalize(cross(edgeAxis, -rayDirection));
+    vec3 onAxis = hit.position - (hit.normal * shaftRadius);
+    float halfWidth = shaftRadiusPixelsW / max(abs(clipWAt(zToClip, onAxis.z)), 0.0001);
+    float fromAxis = clamp(dot(hit.normal, across), -1.0, 1.0) * halfWidth;
+
+    vec2 covering = clamp(vec2(fromAxis - 0.5, fromAxis + 0.5) / halfWidth, -1.0, 1.0);
+    vec3 overPart = meanShadingAcross(covering);
+
+    return mix(clamp(overPart, 0.0, 1.0), hitColor,
+        smoothstep(minimumApproximateTracedWidthPixels, minimumTracedWidthPixels, 2.0 * halfWidth));
+}
+#endif
+
 void main()
 {
+#ifdef EDGE_APPROXIMATE_TRACED
+    if(splitAtBoundaries > 0.5 && boundaryAt().z > 0.5)
+        discard;
+#endif
+
     vec3 rayDirection = -normalize(towardsEye(zToClip, impostorPosition));
 
     // Far enough back to be outside the shape, so its nearer crossings are ahead
@@ -195,6 +229,10 @@ void main()
     Hit nearest = Hit(NO_HIT, vec3(0.0), vec3(0.0), SHAFT_SUB_ELEMENT);
     traceShaft(rayOrigin, rayDirection, nearest);
 
+#ifdef EDGE_APPROXIMATE_TRACED
+    float shaftT = nearest.t;
+#endif
+
     if(headLength > 0.0)
         traceHead(rayOrigin, rayDirection, nearest);
 
@@ -205,6 +243,12 @@ void main()
     float along = dot(nearest.position - shaftBase, edgeAxis);
     bool inner = along >= innerColorStretch.x && along <= innerColorStretch.y;
     shade(nearest, inner);
+
+#ifdef EDGE_APPROXIMATE_TRACED
+    // The fit is of the outer colour, and of the shaft, not the head
+    if(nearest.t == shaftT && !(inner && innerVColor != outerVColor))
+        outColor.rgb = shadedAcrossPixel(nearest, rayDirection, outColor.rgb);
+#endif
 #endif
 
 #ifdef EDGE_TRACED

@@ -21,6 +21,7 @@
 
 #include "lighting.glsl"
 #include "projection.glsl"
+#include "viewport.glsl"
 #include "nodeocclusion.glsl"
 #include "outline.glsl"
 
@@ -36,19 +37,11 @@ in vec3 impostorPosition;
 uniform vec4 outlineColor;
 
 #ifdef EDGE_ACROSS
-flat in vec3 shadingAcross[3];
+#include "edgeacross.glsl"
 
 // The narrowest edge this build draws
 uniform float minimumSplattedWidthPixels;
 
-// The shading's mean over a stretch of the width
-vec3 meanShadingAcross(vec2 covering)
-{
-    float meanU = 0.5 * (covering.x + covering.y);
-    float meanUU = (dot(covering, covering) + (covering.x * covering.y)) / 3.0;
-
-    return shadingAcross[0] + (shadingAcross[1] * meanU) + (shadingAcross[2] * meanUU);
-}
 #else
 flat in vec3 averagedOuterColor;
 #endif
@@ -95,6 +88,19 @@ void main()
 {
     float fromAxis = shaftCoordinate.x;
     float halfWidth = max(shaftCoordinate.z, 0.00001);
+
+#ifdef EDGE_ACROSS
+    if(splitAtBoundaries > 0.5)
+    {
+        vec3 boundary = boundaryAt();
+
+        if(boundary.z < 0.5)
+            discard;
+
+        fromAxis = boundary.x;
+        halfWidth = max(boundary.y, 0.00001);
+    }
+#endif
     float covered = boxWithin(halfWidth - fromAxis) - boxWithin(-halfWidth - fromAxis);
 
     if(covered <= 0.0)

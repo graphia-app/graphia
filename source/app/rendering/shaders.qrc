@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>shaders/componentdata.glsl</file>
+        <file>shaders/edgeacross.glsl</file>
         <file>shaders/edgedatatexels.glsl</file>
         <file>shaders/edgegeometry.glsl</file>
         <file>shaders/element.glsl</file>
