@@ -1122,7 +1122,7 @@ GraphRendererCore::PixelScaleRange GraphRendererCore::pixelScaleRange() const
 // A static image can take as long as it needs, so everything is traced
 DetailThresholds GraphRendererCore::detailThresholds() const
 {
-    return _frameAccumulator.nextIsSample() ? DetailThresholds::exact() : DetailThresholds{};
+    return _frameAccumulator.nextFrameIsSample() ? DetailThresholds::exact() : DetailThresholds{};
 }
 
 std::vector<size_t> GraphRendererCore::gpuGraphDataRenderOrder() const
@@ -1325,7 +1325,7 @@ void GraphRendererCore::compositeInto(GLuint framebuffer, Flags<Type> type)
 
     // The outlines are drawn from where the selection and the elements are
     // within each pixel, which SMAA estimates from the silhouettes
-    const bool smoothed = _antialiasing && !_frameAccumulator.nextIsSample();
+    const bool smoothed = _antialiasing && !_frameAccumulator.nextFrameIsSample();
 
     if(smoothed)
     {
@@ -1390,15 +1390,22 @@ void GraphRendererCore::compositeInto(GLuint framebuffer, Flags<Type> type)
         }
     }
 
-    if(_frameAccumulator.nextIsSample())
+    if(!_frameAccumulator.gathering())
     {
-        _frameAccumulator.add(_composite.texture());
-        _frameAccumulator.draw(framebuffer);
+        if(smoothed)
+            _smaaAntialiasing.blend(_composite.texture(), framebuffer);
+        else
+            _composite.copyTo(framebuffer);
+
+        return;
     }
-    else if(smoothed)
-        _smaaAntialiasing.blend(_composite.texture(), framebuffer);
+
+    if(_frameAccumulator.nextFrameIsSample())
+        _frameAccumulator.add(_composite.texture());
     else
-        _composite.copyTo(framebuffer);
+        _smaaAntialiasing.blend(_composite.texture(), _frameAccumulator.beginInterimFrame());
+
+    _frameAccumulator.draw(framebuffer);
 }
 
 QSize GraphRendererCore::renderSdfTexture(const GlyphMap& glyphMap, GLuint texture)

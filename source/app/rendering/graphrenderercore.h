@@ -344,11 +344,14 @@ protected:
     void uploadNodeGeometry();
 
     void restartGathering() { _frameAccumulator.restart(); }
-    bool gathering() const { return _frameAccumulator.nextIsSample(); }
+    bool gathering() const { return _frameAccumulator.gathering(); }
+    bool nextFrameIsSample() const { return _frameAccumulator.nextFrameIsSample(); }
+    bool handingOver() const { return _frameAccumulator.handingOver(); }
 
-    // Antialiased, but not gathered, unless set otherwise
+    // Antialiasing and gathering are on by default
     void setAntialiasing(bool enabled) { _antialiasing = enabled; }
     void setGatherWhenStill(bool gatherWhenStill) { _frameAccumulator.setEnabled(gatherWhenStill); }
+    void setFinishedOnly(bool finishedOnly) { _frameAccumulator.setFinishedOnly(finishedOnly); }
 
     Shading shading() const;
     void setShading(Shading shading);

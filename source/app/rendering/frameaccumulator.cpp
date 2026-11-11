@@ -22,6 +22,8 @@
 
 #include <QString>
 
+#include <algorithm>
+
 using namespace Qt::Literals::StringLiterals;
 
 const int FrameAccumulator::MAX_SAMPLES = 32;
@@ -40,7 +42,7 @@ bool FrameAccumulator::resize(int width, int height)
     _width = width;
     _height = height;
 
-    return _mean.resize(width, height);
+    return _mean.resize(width, height) && _interimFrame.resize(width, height);
 }
 
 void FrameAccumulator::setEnabled(bool enabled)
@@ -52,9 +54,21 @@ void FrameAccumulator::setEnabled(bool enabled)
     restart();
 }
 
+void FrameAccumulator::setFinishedOnly(bool finishedOnly)
+{
+    if(finishedOnly == _finishedOnly)
+        return;
+
+    _finishedOnly = finishedOnly;
+    restart();
+}
+
 void FrameAccumulator::restart()
 {
     _numSamples = 0;
+    _interimFrameDrawn = false;
+    _handover.invalidate();
+    _gatheredAlpha = 0.0f;
 }
 
 QVector2D FrameAccumulator::nextSampleOffset() const
@@ -89,12 +103,46 @@ void FrameAccumulator::add(GLuint image)
     _numSamples++;
 }
 
+GLuint FrameAccumulator::beginInterimFrame()
+{
+    _interimFrameDrawn = true;
+    return _interimFrame.framebuffer();
+}
+
 void FrameAccumulator::draw(GLuint framebuffer)
+{
+    if(_finishedOnly)
+    {
+        drawMean(framebuffer, 1.0f);
+        return;
+    }
+
+    if(!complete())
+    {
+        _interimFrame.copyTo(framebuffer);
+        return;
+    }
+
+    const qint64 HANDOVER_MILLISECONDS = 600;
+
+    if(!_handover.isValid())
+        _handover.start();
+
+    _gatheredAlpha = std::min(static_cast<float>(_handover.elapsed()) /
+        static_cast<float>(HANDOVER_MILLISECONDS), 1.0f);
+
+    if(_gatheredAlpha < 1.0f)
+        _interimFrame.copyTo(framebuffer);
+
+    drawMean(framebuffer, _gatheredAlpha);
+}
+
+void FrameAccumulator::drawMean(GLuint framebuffer, float alpha)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
     glViewport(0, 0, _width, _height);
 
-    blend(_mean.texture(), 1.0f);
+    blend(_mean.texture(), alpha);
 }
 
 void FrameAccumulator::blend(GLuint image, float alpha)

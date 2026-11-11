@@ -2532,6 +2532,10 @@ Process failed (%1, %2)</translation>
         <translation>Enable Antialiasing</translation>
     </message>
     <message>
+        <source>Improve Static Images</source>
+        <translation>Improve Static Images</translation>
+    </message>
+    <message>
         <source>Particularly on older hardware, further performance may be gained by running the application in Low Resolution: &lt;a href=&quot;dummy&quot;&gt;Locate {0} in Finder&lt;/a&gt; and choose &lt;b&gt;Get Info&lt;/b&gt; from its context menu, then select &lt;b&gt;Open In Low Resolution&lt;/b&gt;. Restart {0}.</source>
         <translation>Particularly on older hardware, further performance may be gained by running the application in Low Resolution: &lt;a href=&quot;dummy&quot;&gt;Locate {0} in Finder&lt;/a&gt; and choose &lt;b&gt;Get Info&lt;/b&gt; from its context menu, then select &lt;b&gt;Open In Low Resolution&lt;/b&gt;. Restart {0}.</translation>
     </message>

@@ -516,6 +516,16 @@ void GraphRenderer::updateComponentGPUData()
     uploadGPUComponentData();
 }
 
+// The selection rectangle is drawn into the gathered picture, so moving it restarts gathering
+void GraphRenderer::setSelectionRect(const QRect& selectionRect)
+{
+    if(selectionRect == _selectionRect)
+        return;
+
+    _selectionRect = selectionRect;
+    restartGathering();
+}
+
 void GraphRenderer::setScene(Scene* scene)
 {
     if(_scene != nullptr)
@@ -924,7 +934,8 @@ void GraphRenderer::onComponentWillBeRemoved(const Graph*, ComponentId component
 
 void GraphRenderer::onPreferenceChanged(const QString& key, const QVariant&)
 {
-    if(key == u"visuals/backgroundColor"_s || key == u"visuals/enableAntialiasing"_s)
+    if(key == u"visuals/backgroundColor"_s || key == u"visuals/enableAntialiasing"_s ||
+        key == u"visuals/improveStaticImages"_s)
         update();
 }
 
@@ -1259,17 +1270,37 @@ void GraphRenderer::render()
         return;
     }
 
-    // Read each frame, so that changing it takes effect at once
-    setAntialiasing(u::pref(u"visuals/enableAntialiasing"_s).toBool());
+    // Read each frame, so that changing them takes effect at once
+    const bool antialiasing = u::pref(u"visuals/enableAntialiasing"_s).toBool();
+    setAntialiasing(antialiasing);
+    // The selection rectangle is drawn into each frame, so nothing is gathered under it
+    setGatherWhenStill(antialiasing && u::pref(u"visuals/improveStaticImages"_s).toBool() && _selectionRect.isNull());
 
     updateScene();
 
     QQuickOpenGLUtils::resetOpenGLState();
     glViewport(0, 0, width(), height());
 
-    renderGraph();
-    render2D(_selectionRect);
-    compositeInto(framebufferObject()->handle());
+    auto renderFrame = [this]
+    {
+        renderGraph();
+        render2D(_selectionRect);
+        compositeInto(framebufferObject()->handle());
+    };
+
+    if(nextFrameIsSample())
+    {
+        // Gather several frames at once
+        // cppcheck-suppress knownConditionTrueFalse
+        for(int i = 0; i < 4 && nextFrameIsSample(); i++)
+            renderFrame();
+    }
+    else
+        renderFrame();
+
+    // Nothing asks for a frame once the image is static, so force an update if necessary
+    if(gathering() || handingOver())
+        update(); // QQuickFramebufferObject::Renderer::update
 
     QQuickOpenGLUtils::resetOpenGLState();
 

@@ -69,6 +69,7 @@ void initialisePreferences()
     u::definePref(u"visuals/transitionTime"_s,                  1.0);
 
     u::definePref(u"visuals/enableAntialiasing"_s,              true);
+    u::definePref(u"visuals/improveStaticImages"_s,             true);
 
     u::definePref(u"misc/maxUndoLevels"_s,                      25);
 

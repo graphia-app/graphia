@@ -49,6 +49,7 @@ Item
         id: visuals
         section: "visuals"
         property alias enableAntialiasing: enableAntialiasingCheckbox.checked
+        property alias improveStaticImages: improveStaticImagesCheckbox.checked
     }
 
     Preferences
@@ -160,6 +161,13 @@ Item
             {
                 id: enableAntialiasingCheckbox
                 text: qsTr("Enable Antialiasing")
+            }
+
+            CheckBox
+            {
+                id: improveStaticImagesCheckbox
+                enabled: enableAntialiasingCheckbox.checked
+                text: qsTr("Improve Static Images")
             }
 
             Text
