@@ -69,6 +69,12 @@ ApplicationWindow
 
     property list<string> recentFiles: []
 
+    // The last level on in each is kept on, so that everything is still drawn
+    readonly property int nodeDetailLevelsOn: [toggleTracedNodesAction, toggleSplattedNodesAction]
+        .filter(action => action.checked).length
+    readonly property int edgeDetailLevelsOn: [toggleTracedEdgesAction, toggleApproximateTracedEdgesAction,
+        toggleSplattedEdgesAction, toggleFastSplattedEdgesAction].filter(action => action.checked).length
+
     property bool _anyTabsBusy:
     {
         for(let index = 0; index < tabBar.count; index++)
@@ -627,6 +633,12 @@ ApplicationWindow
         section: "debug"
         property alias showFpsMeter: toggleFpsMeterAction.checked
         property alias saveGlyphMaps: toggleGlyphmapSaveAction.checked
+        property alias tracedNodes: toggleTracedNodesAction.checked
+        property alias splattedNodes: toggleSplattedNodesAction.checked
+        property alias tracedEdges: toggleTracedEdgesAction.checked
+        property alias approximateTracedEdges: toggleApproximateTracedEdgesAction.checked
+        property alias splattedEdges: toggleSplattedEdgesAction.checked
+        property alias fastSplattedEdges: toggleFastSplattedEdgesAction.checked
     }
 
     function addToRecentFiles(fileUrl)
@@ -1950,6 +1962,54 @@ ApplicationWindow
 
     Action
     {
+        id: toggleTracedNodesAction
+        text: qsTr("Traced Nodes")
+        checkable: true
+        enabled: !checked || mainWindow.nodeDetailLevelsOn > 1
+    }
+
+    Action
+    {
+        id: toggleSplattedNodesAction
+        text: qsTr("Splatted Nodes")
+        checkable: true
+        enabled: !checked || mainWindow.nodeDetailLevelsOn > 1
+    }
+
+    Action
+    {
+        id: toggleTracedEdgesAction
+        text: qsTr("Traced Edges")
+        checkable: true
+        enabled: !checked || mainWindow.edgeDetailLevelsOn > 1
+    }
+
+    Action
+    {
+        id: toggleApproximateTracedEdgesAction
+        text: qsTr("Approximate Traced Edges")
+        checkable: true
+        enabled: !checked || mainWindow.edgeDetailLevelsOn > 1
+    }
+
+    Action
+    {
+        id: toggleSplattedEdgesAction
+        text: qsTr("Splatted Edges")
+        checkable: true
+        enabled: !checked || mainWindow.edgeDetailLevelsOn > 1
+    }
+
+    Action
+    {
+        id: toggleFastSplattedEdgesAction
+        text: qsTr("Fast Splatted Edges")
+        checkable: true
+        enabled: !checked || mainWindow.edgeDetailLevelsOn > 1
+    }
+
+    Action
+    {
         id: togglePluginMinimiseAction
         shortcut: "Ctrl+M"
         icon.name: mainWindow.currentTab?.pluginMinimised ? "go-top" : "go-bottom"
@@ -2447,6 +2507,17 @@ ApplicationWindow
             PlatformMenuItem { action: dumpCommandStackAction }
             PlatformMenuItem { action: toggleFpsMeterAction }
             PlatformMenuItem { action: toggleGlyphmapSaveAction }
+            PlatformMenu
+            {
+                title: qsTr("Detail &Levels")
+                PlatformMenuItem { action: toggleTracedNodesAction }
+                PlatformMenuItem { action: toggleSplattedNodesAction }
+                PlatformMenuSeparator {}
+                PlatformMenuItem { action: toggleTracedEdgesAction }
+                PlatformMenuItem { action: toggleApproximateTracedEdgesAction }
+                PlatformMenuItem { action: toggleSplattedEdgesAction }
+                PlatformMenuItem { action: toggleFastSplattedEdgesAction }
+            }
             PlatformMenuItem { action: reportScopeTimersAction }
             PlatformMenuItem { action: showCommandLineArgumentsAction }
             PlatformMenuItem { action: showEnvironmentAction }

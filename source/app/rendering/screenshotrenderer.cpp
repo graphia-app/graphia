@@ -287,6 +287,7 @@ bool ScreenshotRenderer::copyState(const GraphRenderer& renderer)
 
     setShading(renderer.shading());
     setAmbientOcclusionMode(renderer.ambientOcclusionMode());
+    setDetailLevels(renderer.detailLevels());
 
     // Just copy the SDF texture
     GLuint textureFBO = 0;
