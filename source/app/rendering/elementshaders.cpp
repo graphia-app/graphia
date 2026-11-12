@@ -28,9 +28,43 @@
 #include <QVector3D>
 
 #include <algorithm>
+#include <array>
+#include <limits>
+#include <span>
 #include <vector>
 
 using namespace Qt::Literals::StringLiterals;
+
+DetailThresholds DetailThresholds::restrictedTo(const DetailLevels& levels) const
+{
+    // Levels run from the least detailed, and each threshold is the narrowest width of the level after it
+    const auto giveWidthsAway = [](std::span<float* const> thresholds, std::span<const bool> on)
+    {
+        auto mostDetailedOn = on.size() - 1;
+        while(mostDetailedOn > 0 && !on[mostDetailedOn])
+            mostDetailedOn--;
+
+        for(size_t level = 0; level < thresholds.size(); level++)
+        {
+            if(level >= mostDetailedOn)
+                *thresholds[level] = std::numeric_limits<float>::max();
+            else if(!on[level])
+                *thresholds[level] = level > 0 ? *thresholds[level - 1] : 0.0f;
+        }
+    };
+
+    auto restricted = *this;
+
+    giveWidthsAway(std::array{&restricted._minimumTracedNodeWidth},
+        std::array{levels._splattedNodes, levels._tracedNodes});
+
+    giveWidthsAway(std::array{&restricted._minimumSplattedEdgeWidth, &restricted._minimumApproximateTracedEdgeWidth,
+        &restricted._minimumTracedEdgeWidth},
+        std::array{levels._fastSplattedEdges, levels._splattedEdges, levels._approximateTracedEdges,
+            levels._tracedEdges});
+
+    return restricted;
+}
 
 void ElementShaders::setLighting(QOpenGLShaderProgram& program)
 {

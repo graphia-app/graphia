@@ -1055,6 +1055,15 @@ void GraphRendererCore::setShading(Shading shading)
     }
 }
 
+void GraphRendererCore::setDetailLevels(const DetailLevels& detailLevels)
+{
+    if(detailLevels != _detailLevels) // clazy:exclude=compare-member-check
+    {
+        _detailLevels = detailLevels;
+        restartGathering();
+    }
+}
+
 void GraphRendererCore::setAmbientOcclusionMode(AmbientOcclusionMode ambientOcclusionMode)
 {
     if(ambientOcclusionMode != _ambientOcclusionMode)
@@ -1208,7 +1217,8 @@ GraphRendererCore::PixelScaleRange GraphRendererCore::pixelScaleRange() const
 // A static image can take as long as it needs, so everything is traced
 DetailThresholds GraphRendererCore::detailThresholds() const
 {
-    return _frameAccumulator.nextFrameIsSample() ? DetailThresholds::exact() : DetailThresholds{};
+    const auto thresholds = _frameAccumulator.nextFrameIsSample() ? DetailThresholds::exact() : DetailThresholds{};
+    return thresholds.restrictedTo(_detailLevels);
 }
 
 std::vector<size_t> GraphRendererCore::gpuGraphDataRenderOrder() const

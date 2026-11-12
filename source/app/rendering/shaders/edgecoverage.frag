@@ -115,9 +115,12 @@ void main()
         -1.0, 1.0);
     vec3 overAll = shadingAcross[0] + (shadingAcross[2] / 3.0);
     vec3 overPart = meanShadingAcross(covering);
+
+    // A zero threshold, where smoothstep is undefined, leaves no width averaged over all
+    float fadeIn = minimumSplattedWidthPixels > 0.0 ?
+        smoothstep(minimumSplattedWidthPixels, 2.0 * minimumSplattedWidthPixels, 2.0 * halfWidth) : 1.0;
     vec3 shaded = inner && innerVColor != outerVColor ? averagedInnerColor :
-        mix(overAll, clamp(overPart, 0.0, 1.0),
-            smoothstep(minimumSplattedWidthPixels, 2.0 * minimumSplattedWidthPixels, 2.0 * halfWidth));
+        mix(overAll, clamp(overPart, 0.0, 1.0), fadeIn);
 #else
     vec3 shaded = inner ? averagedInnerColor : averagedOuterColor;
 #endif

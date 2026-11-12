@@ -935,8 +935,11 @@ void GraphRenderer::onComponentWillBeRemoved(const Graph*, ComponentId component
 void GraphRenderer::onPreferenceChanged(const QString& key, const QVariant&)
 {
     if(key == u"visuals/backgroundColor"_s || key == u"visuals/enableAntialiasing"_s ||
-        key == u"visuals/improveStaticImages"_s || key == u"visuals/ambientOcclusion"_s)
+        key == u"visuals/improveStaticImages"_s || key == u"visuals/ambientOcclusion"_s ||
+        key.startsWith(u"debug/"_s))
+    {
         update();
+    }
 }
 
 void GraphRenderer::onCommandsStarted()
@@ -1276,6 +1279,14 @@ void GraphRenderer::render()
     // The selection rectangle is drawn into each frame, so nothing is gathered under it
     setGatherWhenStill(antialiasing && u::pref(u"visuals/improveStaticImages"_s).toBool() && _selectionRect.isNull());
     setAmbientOcclusionMode(normaliseQmlEnum<AmbientOcclusionMode>(u::pref(u"visuals/ambientOcclusion"_s).toInt()));
+    setDetailLevels({
+        ._tracedNodes = u::pref(u"debug/tracedNodes"_s).toBool(),
+        ._splattedNodes = u::pref(u"debug/splattedNodes"_s).toBool(),
+        ._tracedEdges = u::pref(u"debug/tracedEdges"_s).toBool(),
+        ._approximateTracedEdges = u::pref(u"debug/approximateTracedEdges"_s).toBool(),
+        ._splattedEdges = u::pref(u"debug/splattedEdges"_s).toBool(),
+        ._fastSplattedEdges = u::pref(u"debug/fastSplattedEdges"_s).toBool(),
+    });
 
     updateScene();
 

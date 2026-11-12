@@ -265,6 +265,7 @@ private:
     NodeGeometry _nodeGeometry;
 
     Shading _shading = Shading::Smooth;
+    DetailLevels _detailLevels;
 
     float _outlineScale = 1.0f;
     float _viewportFraction = 1.0f;
@@ -371,6 +372,9 @@ protected:
 
     Shading shading() const;
     void setShading(Shading shading);
+
+    const DetailLevels& detailLevels() const { return _detailLevels; }
+    void setDetailLevels(const DetailLevels& detailLevels);
 
     AmbientOcclusionMode ambientOcclusionMode() const { return _ambientOcclusionMode; }
     void setAmbientOcclusionMode(AmbientOcclusionMode ambientOcclusionMode);

@@ -29,6 +29,19 @@
 #include <cstdint>
 #include <vector>
 
+// The levels of detail an element may be drawn at
+struct DetailLevels
+{
+    bool _tracedNodes = true;
+    bool _splattedNodes = true;
+    bool _tracedEdges = true;
+    bool _approximateTracedEdges = true;
+    bool _splattedEdges = true;
+    bool _fastSplattedEdges = true;
+
+    bool operator==(const DetailLevels&) const = default;
+};
+
 struct DetailThresholds
 {
     float _minimumTracedEdgeWidth = 4.0f;
@@ -43,6 +56,10 @@ struct DetailThresholds
         return {._minimumTracedEdgeWidth = 0.0f, ._minimumTracedNodeWidth = 0.0f,
             ._minimumApproximateTracedEdgeWidth = 0.0f, ._minimumSplattedEdgeWidth = 0.0f};
     }
+
+    // A level that is off gives its widths to the next more detailed level that is on,
+    // or else the next less detailed
+    DetailThresholds restrictedTo(const DetailLevels& levels) const;
 };
 
 struct ElementShaders

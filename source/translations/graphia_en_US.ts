@@ -1761,6 +1761,30 @@ Process failed (%1, %2)</translation>
         <translation>Save Glyphmaps on Regeneration</translation>
     </message>
     <message>
+        <source>Traced Nodes</source>
+        <translation>Traced Nodes</translation>
+    </message>
+    <message>
+        <source>Splatted Nodes</source>
+        <translation>Splatted Nodes</translation>
+    </message>
+    <message>
+        <source>Traced Edges</source>
+        <translation>Traced Edges</translation>
+    </message>
+    <message>
+        <source>Approximate Traced Edges</source>
+        <translation>Approximate Traced Edges</translation>
+    </message>
+    <message>
+        <source>Splatted Edges</source>
+        <translation>Splatted Edges</translation>
+    </message>
+    <message>
+        <source>Fast Splatted Edges</source>
+        <translation>Fast Splatted Edges</translation>
+    </message>
+    <message>
         <source>Restore {0}</source>
         <translation>Restore {0}</translation>
     </message>
@@ -1911,6 +1935,10 @@ Process failed (%1, %2)</translation>
     <message>
         <source>Silent Submit</source>
         <translation>Silent Submit</translation>
+    </message>
+    <message>
+        <source>Detail &amp;Levels</source>
+        <translation>Detail &amp;Levels</translation>
     </message>
     <message>
         <source>&amp;Help</source>

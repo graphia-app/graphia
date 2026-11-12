@@ -72,6 +72,13 @@ void initialisePreferences()
     u::definePref(u"visuals/improveStaticImages"_s,             true);
     u::definePref(u"visuals/ambientOcclusion"_s,                QVariant::fromValue(static_cast<int>(AmbientOcclusionMode::SmoothShadingOnly)));
 
+    u::definePref(u"debug/tracedNodes"_s,                       true);
+    u::definePref(u"debug/splattedNodes"_s,                     true);
+    u::definePref(u"debug/tracedEdges"_s,                       true);
+    u::definePref(u"debug/approximateTracedEdges"_s,            true);
+    u::definePref(u"debug/splattedEdges"_s,                     true);
+    u::definePref(u"debug/fastSplattedEdges"_s,                 true);
+
     u::definePref(u"misc/maxUndoLevels"_s,                      25);
 
     u::definePref(u"misc/showGraphMetrics"_s,                   false);
