@@ -110,6 +110,38 @@ bool clipToNearPlane(inout EdgePart part, float nearZ)
     return true;
 }
 
+// The edge's ends in view space, and how wide its shaft is on screen at its
+// midpoint, in pixels
+struct EdgeEnds
+{
+    mat4 projectionMatrix;
+    vec3 source;
+    vec3 target;
+    float length;
+    float pixelsPerUnit;
+    float shaftWidth;
+};
+
+EdgeEnds edgeEnds()
+{
+    EdgeEnds ends;
+
+    mat4 modelViewMatrix = componentModelViewMatrix(component);
+    ends.projectionMatrix = componentProjectionMatrix(component);
+    lightPlacement = componentLightPlacement(component);
+    zToClip = zToClipOf(ends.projectionMatrix);
+
+    ends.source = (modelViewMatrix * vec4(nodePosition(sourceIndex), 1.0)).xyz;
+    ends.target = (modelViewMatrix * vec4(nodePosition(targetIndex), 1.0)).xyz;
+    ends.length = distance(ends.source, ends.target);
+    ends.pixelsPerUnit = focalLengthPixels(ends.projectionMatrix);
+
+    float midpointW = clipWAt(zToClip, mix(ends.source.z, ends.target.z, 0.5));
+    ends.shaftWidth = 2.0 * size * ends.pixelsPerUnit / max(abs(midpointW), 0.0001);
+
+    return ends;
+}
+
 vec2 pixelPosition(mat4 projectionMatrix, vec3 position)
 {
     vec4 clip = projectionMatrix * vec4(position, 1.0);
@@ -148,46 +180,6 @@ vec3 axisPointAt(EdgePart part, float fraction)
     float wTo = clipWAt(zToClip, part.to.z);
 
     return mix(part.from, part.to, (fraction * wFrom) / mix(wTo, wFrom, fraction));
-}
-
-// Across the edge, and towards the eye, at a point on its axis and square to it
-void crossSectionFacingEye(vec3 onAxis, out vec3 across, out vec3 facing)
-{
-    vec3 toEye = normalize(towardsEye(zToClip, onAxis));
-    facing = normalize(toEye - (edgeAxis * dot(toEye, edgeAxis)));
-    across = normalize(cross(edgeAxis, toEye));
-}
-
-// The edge's ends in view space, and how wide its shaft is on screen at its
-// midpoint, in pixels
-struct EdgeEnds
-{
-    mat4 projectionMatrix;
-    vec3 source;
-    vec3 target;
-    float length;
-    float pixelsPerUnit;
-    float shaftWidth;
-};
-
-EdgeEnds edgeEnds()
-{
-    EdgeEnds ends;
-
-    mat4 modelViewMatrix = componentModelViewMatrix(component);
-    ends.projectionMatrix = componentProjectionMatrix(component);
-    lightPlacement = componentLightPlacement(component);
-    zToClip = zToClipOf(ends.projectionMatrix);
-
-    ends.source = (modelViewMatrix * vec4(nodePosition(sourceIndex), 1.0)).xyz;
-    ends.target = (modelViewMatrix * vec4(nodePosition(targetIndex), 1.0)).xyz;
-    ends.length = distance(ends.source, ends.target);
-    ends.pixelsPerUnit = focalLengthPixels(ends.projectionMatrix);
-
-    float midpointW = clipWAt(zToClip, mix(ends.source.z, ends.target.z, 0.5));
-    ends.shaftWidth = 2.0 * size * ends.pixelsPerUnit / max(abs(midpointW), 0.0001);
-
-    return ends;
 }
 
 // Where a part of the edge lies on screen, in pixels from the middle of the
@@ -256,4 +248,12 @@ bool partOnScreen(EdgeEnds ends, bool isHead, bool isArrow, out PartOnScreen onS
     vec2 highest = max(onScreen.pixelFrom, onScreen.pixelTo) + vec2(widestRadius);
 
     return !any(lessThan(highest, -viewportSize * 0.5)) && !any(greaterThan(lowest, viewportSize * 0.5));
+}
+
+// Across the edge, and towards the eye, at a point on its axis and square to it
+void crossSectionFacingEye(vec3 onAxis, out vec3 across, out vec3 facing)
+{
+    vec3 toEye = normalize(towardsEye(zToClip, onAxis));
+    facing = normalize(toEye - (edgeAxis * dot(toEye, edgeAxis)));
+    across = normalize(cross(edgeAxis, toEye));
 }
