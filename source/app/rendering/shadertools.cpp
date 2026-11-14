@@ -92,13 +92,13 @@ void ShaderTools::loadShaderProgram(QOpenGLShaderProgram& program,
     // Temporary message handler that prepends the shader name to any error output
     // that the Qt shader compilation code produces
     static QString shaderName;
-    qInstallMessageHandler([](QtMsgType, const QMessageLogContext&, const QString& msg)
+    auto* previousHandler = qInstallMessageHandler([](QtMsgType, const QMessageLogContext&, const QString& msg)
     {
         const std::string lineEnding = !msg.endsWith('\n') ? "\n" : "";
         std::cerr << shaderName.toStdString() << ": " << msg.toStdString() << lineEnding;
     });
 
-    auto atExit = std::experimental::make_scope_exit([] { qInstallMessageHandler(nullptr); });
+    auto atExit = std::experimental::make_scope_exit([previousHandler] { qInstallMessageHandler(previousHandler); });
 
     shaderName = vertexShader;
     if(!program.addShaderFromSourceCode(QOpenGLShader::Vertex, shaderStringFromFile(vertexShader, defines)))
