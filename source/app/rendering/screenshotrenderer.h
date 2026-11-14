@@ -33,6 +33,7 @@
 
 class GraphModel;
 class GraphRenderer;
+class QPixmap;
 
 class ScreenshotRenderer : public QObject, public GraphRendererCore
 {
@@ -66,6 +67,8 @@ private:
     GLuint sdfTexture() const override;
 
     void render();
+    QString fetchPreview(QSize screenshotSize);
+    void fetchAndDrawTile(QPixmap& fullScreenshot, int tileX, int tileY, QPoint offset);
     bool copyState(const GraphRenderer& renderer);
     void updateComponentGPUData(ScreenshotType screenshotType, QSize screenshotSize,
         QPoint offset, float scale, int tileX = 0, int tileY = 0);

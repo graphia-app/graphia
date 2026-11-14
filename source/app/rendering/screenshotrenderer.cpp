@@ -51,7 +51,7 @@ static const int TILE_SIZE = 1024;
 static const int TILE_EXTRA = TILE_SIZE / 2;
 static const int TILE_SIZE_PLUS_EXTRA = TILE_SIZE + (2 * TILE_EXTRA);
 
-static QString fetchPreview(QSize screenshotSize)
+QString ScreenshotRenderer::fetchPreview(QSize screenshotSize)
 {
     auto pixelCount = screenshotSize.width() * screenshotSize.height() * 4;
     std::vector<GLubyte> pixels(static_cast<size_t>(pixelCount));
@@ -66,7 +66,7 @@ static QString fetchPreview(QSize screenshotSize)
     return QString::fromLatin1(byteArray.toBase64().data());
 }
 
-static void fetchAndDrawTile(QPixmap& fullScreenshot, int tileX, int tileY, QPoint offset)
+void ScreenshotRenderer::fetchAndDrawTile(QPixmap& fullScreenshot, int tileX, int tileY, QPoint offset)
 {
     std::vector<GLubyte> pixelBytes(static_cast<size_t>(TILE_SIZE * TILE_SIZE) * 4ul);
     glReadPixels(TILE_EXTRA, TILE_EXTRA, TILE_SIZE, TILE_SIZE, GL_RGBA, GL_UNSIGNED_BYTE, pixelBytes.data());
