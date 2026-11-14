@@ -33,8 +33,12 @@ endif()
 add_library(scrambling_translator OBJECT common/scramblingtranslator.cpp)
 target_link_libraries(scrambling_translator PRIVATE Qt6::Core)
 
+if(UNIX AND NOT APPLE)
+    find_program(XVFB_RUN xvfb-run)
+endif()
+
 function(add_unit_test NAME)
-    cmake_parse_arguments(PARSE_ARGV 1 UNIT_TEST "NO_WASM" "" "")
+    cmake_parse_arguments(PARSE_ARGV 1 UNIT_TEST "NO_WASM;OPENGL_WINDOWS" "" "")
     set(SOURCES ${UNIT_TEST_UNPARSED_ARGUMENTS})
 
     qt_add_executable(${NAME} ${SOURCES})
@@ -61,17 +65,33 @@ function(add_unit_test NAME)
 
     # Each test also runs with every translatable string scrambled, which exposes
     # anything that relies on a translation's text, or on its word order
-    add_test(NAME ${NAME} COMMAND ${NAME})
-    add_test(NAME ${NAME}_scrambled COMMAND ${NAME})
+    set(COMMAND ${NAME})
+    if(UNIT_TEST_OPENGL_WINDOWS AND XVFB_RUN)
+        # A display of its own, so that the windows never appear on the desktop
+        set(COMMAND ${XVFB_RUN} -a $<TARGET_FILE:${NAME}>)
+    endif()
+
+    add_test(NAME ${NAME} COMMAND ${COMMAND})
+    add_test(NAME ${NAME}_scrambled COMMAND ${COMMAND})
     set(TESTS ${NAME} ${NAME}_scrambled)
+
+    if(UNIT_TEST_OPENGL_WINDOWS AND XVFB_RUN)
+        # xvfb-run -a picks a free display number racily when started concurrently
+        set_tests_properties(${TESTS} PROPERTIES RESOURCE_LOCK xvfb)
+    endif()
     set_property(TEST ${NAME}_scrambled APPEND PROPERTY ENVIRONMENT "GRAPHIA_SCRAMBLE_TRANSLATIONS=1")
 
     # Without a console, Qt and QtTest log to the debugger or the journal instead
     set_property(TEST ${TESTS} APPEND PROPERTY ENVIRONMENT "QT_FORCE_STDERR_LOGGING=1")
 
     if(UNIX AND NOT APPLE)
-        # The offscreen platform only has OpenGL through GLX, so elsewhere the native one is used
-        set_property(TEST ${TESTS} APPEND PROPERTY ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+        if(UNIT_TEST_OPENGL_WINDOWS)
+            # Qt Quick has only its software renderer on the offscreen platform
+            set_property(TEST ${TESTS} APPEND PROPERTY ENVIRONMENT "QT_QPA_PLATFORM=xcb")
+        else()
+            # The offscreen platform only has OpenGL through GLX, so elsewhere the native one is used
+            set_property(TEST ${TESTS} APPEND PROPERTY ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+        endif()
     endif()
 
     if(WIN32)
