@@ -214,6 +214,9 @@ add_unit_test(tst_transition rendering/tst_transition.cpp)
 add_unit_test(tst_rendering rendering/tst_rendering.cpp OPENGL_WINDOWS)
 target_compile_definitions(tst_rendering PRIVATE BUILD_DIR="${CMAKE_BINARY_DIR}")
 add_dependencies(tst_rendering generic)
+add_unit_test(tst_interaction ui/tst_interaction.cpp OPENGL_WINDOWS)
+target_compile_definitions(tst_interaction PRIVATE BUILD_DIR="${CMAKE_BINARY_DIR}")
+add_dependencies(tst_interaction generic)
 
 # Headless mode loads the real plugins, from the build directory
 add_unit_test(tst_headless headless/tst_headless.cpp)
