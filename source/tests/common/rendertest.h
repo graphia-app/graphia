@@ -47,8 +47,10 @@
 #include <QtLogging>
 
 #include <algorithm>
+#include <cmath>
 #include <map>
 #include <memory>
+#include <numbers>
 #include <utility>
 
 // A DocumentTest whose GraphDisplay is shown in a window, so that the real renderer draws it
@@ -77,8 +79,9 @@ protected:
     // The pixels showing one colour in a grab, and where they are
     struct Patch
     {
-        int _pixels = 0;
+        int _pixels = 0; // In device pixels
         QPointF _centre;
+        qreal _radius = 0.0; // Of a disc covering as many pixels, in device independent units
     };
 
     bool open(const QByteArray& gml)
@@ -271,7 +274,10 @@ protected:
         }
 
         if(patch._pixels > 0)
+        {
             patch._centre = (sum / patch._pixels) / image.devicePixelRatio();
+            patch._radius = std::sqrt(static_cast<qreal>(patch._pixels) / std::numbers::pi) / image.devicePixelRatio();
+        }
 
         return patch;
     }

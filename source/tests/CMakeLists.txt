@@ -210,6 +210,11 @@ add_unit_test(tst_opengl rendering/tst_opengl.cpp)
 add_unit_test(tst_camera rendering/tst_camera.cpp)
 add_unit_test(tst_transition rendering/tst_transition.cpp)
 
+# A Document shown in a window, drawn by the real renderer
+add_unit_test(tst_rendering rendering/tst_rendering.cpp OPENGL_WINDOWS)
+target_compile_definitions(tst_rendering PRIVATE BUILD_DIR="${CMAKE_BINARY_DIR}")
+add_dependencies(tst_rendering generic)
+
 # Headless mode loads the real plugins, from the build directory
 add_unit_test(tst_headless headless/tst_headless.cpp)
 target_compile_definitions(tst_headless PRIVATE BUILD_DIR="${CMAKE_BINARY_DIR}")
