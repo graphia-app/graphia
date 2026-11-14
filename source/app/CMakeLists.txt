@@ -300,7 +300,6 @@ list(APPEND APP_SOURCES
 list(APPEND RESOURCES
     ${CMAKE_CURRENT_LIST_DIR}/icon/mainicon.qrc
     ${CMAKE_CURRENT_LIST_DIR}/icon-themes/icons.qrc
-    ${CMAKE_CURRENT_LIST_DIR}/rendering/shaders.qrc
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/images.qrc
     ${CMAKE_CURRENT_LIST_DIR}/ui/imagery.qrc
     ${CMAKE_CURRENT_LIST_DIR}/ui/licensing.qrc
@@ -323,7 +322,7 @@ list(APPEND SOURCES ${APP_SOURCES})
 
 # Everything except main() is built as an object library, so that the unit tests
 # can link against the same code as the application
-add_library(app_core OBJECT ${SOURCES} ${HEADERS})
+add_library(app_core OBJECT ${SOURCES} ${HEADERS} ${CMAKE_CURRENT_LIST_DIR}/rendering/shaders.qrc)
 
 if(APPLE)
     set(MACOSX_BUNDLE_ICON_FILE Icon.icns)
