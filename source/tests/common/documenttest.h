@@ -87,8 +87,9 @@ protected:
         return QUrl::fromLocalFile(filePath);
     }
 
-    bool open(const QUrl& url, const QString& type, const QString& pluginName,
-        const QVariantMap& parameters = {})
+    // Loads a Document whose GraphDisplay has no renderer yet
+    bool load(const QUrl& url, const QString& type, const QString& pluginName,
+        const QVariantMap& parameters)
     {
         // Destroy any previous Document first, as the UI does when its tab is closed
         _document.reset();
@@ -105,7 +106,13 @@ protected:
         if(!QTest::qWaitFor([&] { return !loadComplete.isEmpty(); }, Timeout))
             return false;
 
-        if(!loadComplete.at(0).at(1).toBool())
+        return loadComplete.at(0).at(1).toBool();
+    }
+
+    bool open(const QUrl& url, const QString& type, const QString& pluginName,
+        const QVariantMap& parameters = {})
+    {
+        if(!load(url, type, pluginName, parameters))
             return false;
 
         // As the renderer does once it has been created, which is otherwise never, as
