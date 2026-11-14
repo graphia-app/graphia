@@ -208,6 +208,7 @@ qt_add_resources(tst_translator test_catalogues PREFIX /i18n
 
 add_unit_test(tst_opengl rendering/tst_opengl.cpp)
 add_unit_test(tst_camera rendering/tst_camera.cpp)
+add_unit_test(tst_transition rendering/tst_transition.cpp)
 
 # Headless mode loads the real plugins, from the build directory
 add_unit_test(tst_headless headless/tst_headless.cpp)
