@@ -323,7 +323,7 @@ list(APPEND SOURCES ${APP_SOURCES})
 
 # Everything except main() is built as an object library, so that the unit tests
 # can link against the same code as the application
-add_library(app_core OBJECT ${SOURCES} ${HEADERS})
+add_library(app_core OBJECT ${SOURCES} ${HEADERS} ${RESOURCES})
 
 if(APPLE)
     set(MACOSX_BUNDLE_ICON_FILE Icon.icns)
@@ -341,16 +341,16 @@ if(APPLE)
     set(ICON ${CMAKE_CURRENT_LIST_DIR}/icon/Icon.icns)
     set_source_files_properties(${ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 
-    qt_add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${CMAKE_CURRENT_LIST_DIR}/main.cpp ${RESOURCES} ${ICON})
+    qt_add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${CMAKE_CURRENT_LIST_DIR}/main.cpp ${ICON})
 
     set_target_properties(${PROJECT_NAME} PROPERTIES
         MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/misc/MacOSXBundleInfo.plist.in)
 elseif(MSVC)
     set(ICON ${CMAKE_CURRENT_LIST_DIR}/icon/Icon.rc)
 
-    qt_add_executable(${PROJECT_NAME} WIN32 ${CMAKE_CURRENT_LIST_DIR}/main.cpp ${RESOURCES} ${ICON})
+    qt_add_executable(${PROJECT_NAME} WIN32 ${CMAKE_CURRENT_LIST_DIR}/main.cpp ${ICON})
 else()
-    qt_add_executable(${PROJECT_NAME} ${CMAKE_CURRENT_LIST_DIR}/main.cpp ${RESOURCES})
+    qt_add_executable(${PROJECT_NAME} ${CMAKE_CURRENT_LIST_DIR}/main.cpp)
     install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
 
     foreach(RESOLUTION 1024x1024 512x512 256x256 128x128 64x64 48x48 32x32 16x16)
