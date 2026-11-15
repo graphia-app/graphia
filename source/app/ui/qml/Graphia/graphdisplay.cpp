@@ -369,11 +369,13 @@ void GraphDisplay::onScreenshotComplete(const QImage& screenshot, const QString&
     _commandManager->executeOnce([screenshot, path](Command&)
     {
         const auto localFile = QUrl(path).toLocalFile();
-        screenshot.save(localFile);
+        if(!screenshot.save(localFile))
+            return false;
 #ifndef Q_OS_WASM
         QDesktopServices::openUrl(QUrl::fromLocalFile(localFile));
 #endif
-    }, {tr("Save Screenshot"), tr("Saving Screenshot"), tr("Screenshot Saved")});
+        return true;
+    },{tr("Save Screenshot"), tr("Saving Screenshot"), tr("Screenshot Saved")});
 }
 
 void GraphDisplay::onRendererCreated()
