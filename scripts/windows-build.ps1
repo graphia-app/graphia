@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
 
+#Requires -Version 7.4
+
 $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $true
 
