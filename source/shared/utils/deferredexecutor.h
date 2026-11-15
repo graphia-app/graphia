@@ -59,6 +59,7 @@ public:
     void execute();
     void executeOne();
     void cancel();
+    bool hasTasks() const;
 
     void pause();
     void resume();

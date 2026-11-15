@@ -187,6 +187,7 @@ private:
     // moved around, as opposed to just the storage for the pointers.
     ComponentArray<MovablePointer<GraphComponentRenderer>, LockingGraphArray> _componentRenderers;
     bool _transitionPotentiallyInProgress = false;
+    bool _transitionFinishAwaitsTasks = false;
     DeferredExecutor _preUpdateExecutor;
 
     std::queue<std::unique_ptr<QEvent>> _eventQueue;

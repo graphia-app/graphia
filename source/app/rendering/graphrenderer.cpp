@@ -646,6 +646,14 @@ void GraphRenderer::rendererFinishedTransition()
     if(transitionActive())
         return;
 
+    // A queued task may start the next transition of a chain
+    if(_preUpdateExecutor.hasTasks())
+    {
+        _transitionFinishAwaitsTasks = true;
+        update(); // QQuickFramebufferObject::Renderer::update
+        return;
+    }
+
     // The transition may have been initiated by changes that
     // require the GPU data to be updated, so ensure this is done
     updateGPUData(When::Later);
@@ -1132,6 +1140,9 @@ void GraphRenderer::updateScene()
     ifSceneUpdateEnabled([this]
     {
         _preUpdateExecutor.execute();
+
+        if(std::exchange(_transitionFinishAwaitsTasks, false))
+            rendererFinishedTransition();
     });
 
     if(_scene == nullptr)

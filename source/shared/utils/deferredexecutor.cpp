@@ -110,6 +110,12 @@ void DeferredExecutor::cancel()
         _tasks.pop_front();
 }
 
+bool DeferredExecutor::hasTasks() const
+{
+    const std::unique_lock<std::recursive_mutex> lock(_mutex);
+    return !_tasks.empty();
+}
+
 void DeferredExecutor::pause()
 {
     const std::unique_lock<std::recursive_mutex> lock(_mutex);
