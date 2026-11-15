@@ -202,6 +202,8 @@ jobs:
         APPLE_NOTARIZATION_PASSWORD: ${{ secrets.APPLE_NOTARIZATION_PASSWORD }}
         APPLE_NOTARIZATION_USERNAME: ${{ secrets.APPLE_NOTARIZATION_USERNAME }}
         APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+    - name: Test Disk Image
+      run: installers/macos/test-dmg.sh
     - uses: actions/upload-artifact@v7
       if: github.event_name != 'pull_request'
       with:
