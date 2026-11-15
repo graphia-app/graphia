@@ -102,6 +102,40 @@ Get-Content "$INSTALLER_DIR\Updater.deps" | ForEach-Object {
     }
 }
 
+Write-Host "------ checking dependencies"
+$SHIPPED_DLLS = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+Get-ChildItem $INSTALLER_DIR -File -Filter *.dll | ForEach-Object { $SHIPPED_DLLS.Add($_.Name) | Out-Null }
+
+$REDISTRIBUTABLE_DLLS = '^(qt6|msvcp|vcruntime|concrt|vccorlib|ucrtbase)'
+$INSTALLER_ROOT = (Resolve-Path $INSTALLER_DIR).Path
+
+$MISSING_DLLS = @()
+Get-ChildItem $INSTALLER_DIR -Recurse -File -Include *.exe, *.dll | ForEach-Object {
+    $binary = $_
+    $inDependencies = $false
+
+    # Delay loaded dependencies are deliberately ignored, as they're often optional
+    foreach($line in (& dumpbin /nologo /dependents $binary.FullName))
+    {
+        if($line -match 'following dependencies:') { $inDependencies = $true; continue }
+        if($line -match 'delay load dependencies:|^\s*Summary') { $inDependencies = $false; continue }
+        if(-not $inDependencies -or $line -notmatch '^\s+(\S+\.dll)\s*$') { continue }
+
+        $dll = $Matches[1]
+        if($SHIPPED_DLLS.Contains($dll)) { continue }
+        if(Test-Path (Join-Path $binary.DirectoryName $dll)) { continue }
+        if($dll -like 'api-ms-*' -or $dll -like 'ext-ms-*') { continue } # API sets, resolved by Windows
+        if($dll -notmatch $REDISTRIBUTABLE_DLLS -and (Test-Path "$Env:SystemRoot\System32\$dll")) { continue }
+
+        $MISSING_DLLS += "$($binary.FullName.Substring($INSTALLER_ROOT.Length + 1)) needs $dll"
+    }
+}
+
+if($MISSING_DLLS.Count -gt 0)
+{
+    throw "Missing dependencies:`n$($MISSING_DLLS -join "`n")"
+}
+
 $RM_NSH = "installers\windows\rm.nsh"
 Set-Content $RM_NSH ""
 
