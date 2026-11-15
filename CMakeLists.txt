@@ -113,6 +113,7 @@ list(APPEND MISC
 
 list(APPEND MISC
     ${CMAKE_CURRENT_LIST_DIR}/installers/linux/build.sh
+    ${CMAKE_CURRENT_LIST_DIR}/installers/linux/test-appimage.sh
     ${CMAKE_CURRENT_LIST_DIR}/installers/macos/build.sh
     ${CMAKE_CURRENT_LIST_DIR}/installers/wasm/build.sh
     ${CMAKE_CURRENT_LIST_DIR}/installers/windows/installer.nsi

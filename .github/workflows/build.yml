@@ -25,7 +25,7 @@ jobs:
         sudo apt-get update
         sudo apt install gcc-${{ env.GCC_VERSION }} g++-${{ env.GCC_VERSION }} mold
     - name: Install Dependencies
-      run: sudo apt install libxcb-cursor0 xvfb
+      run: sudo apt install libxcb-cursor0 xvfb xdotool
     - name: Install Qt
       uses: ./.github/actions/install-qt
       with:
@@ -50,6 +50,10 @@ jobs:
       env:
         CC: gcc-${{ env.GCC_VERSION }}
         CXX: g++-${{ env.GCC_VERSION }}
+    - name: Test AppImage
+      run: xvfb-run -a installers/linux/test-appimage.sh
+      env:
+        CC: gcc-${{ env.GCC_VERSION }}
     - uses: actions/upload-artifact@v7
       if: github.event_name != 'pull_request'
       with:
