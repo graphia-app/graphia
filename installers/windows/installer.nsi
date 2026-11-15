@@ -142,7 +142,17 @@ RequestExecutionLevel highest
                 ${EndIf}
             ${EndIf}
         ${ElseIf} "${un}" == "un"
-            ${If} $ACCOUNT_TYPE == "Admin"
+            ; Remove whichever registration belongs to this installation, regardless of who is
+            ; uninstalling it, otherwise an admin removing a user install deletes the admin install's
+            !insertmacro NormalisePath $INSTDIR
+
+            ${If} $INSTDIR == $ADMIN_INSTALL
+                SetShellVarContext all
+                !insertmacro ConsoleLog "Uninstalling admin installation: $INSTDIR"
+            ${ElseIf} $INSTDIR == $USER_INSTALL
+                SetShellVarContext current
+                !insertmacro ConsoleLog "Uninstalling user installation: $INSTDIR"
+            ${ElseIf} $ACCOUNT_TYPE == "Admin"
                 SetShellVarContext all
             ${Else}
                 SetShellVarContext current
