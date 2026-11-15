@@ -53,21 +53,21 @@ Get-ChildItem -Recurse -Directory | ForEach-Object {
 
 $WINDEPLOYQT_ARGS = @("--no-compiler-runtime", "--no-opengl-sw")
 
-Write-Host "------ windeployqt"
-& {
-    $PSNativeCommandUseErrorActionPreference = $false
-
-    & windeployqt @QML_DIRS @WINDEPLOYQT_ARGS --dir $INSTALLER_DIR "$INSTALLER_DIR\${PRODUCT_NAME}.exe"
-    & windeployqt @WINDEPLOYQT_ARGS --dir $INSTALLER_DIR "$INSTALLER_DIR\thirdparty.dll"
-
-    Get-ChildItem "$INSTALLER_DIR\plugins\*.dll" | ForEach-Object {
-        & windeployqt @WINDEPLOYQT_ARGS --dir $INSTALLER_DIR $_.FullName
-    }
-
-    $QML_DIR = "source\crashreporter"
-    & windeployqt --qmldir $QML_DIR @WINDEPLOYQT_ARGS "$INSTALLER_DIR\CrashReporter.exe"
-    & windeployqt @WINDEPLOYQT_ARGS "$INSTALLER_DIR\MessageBox.exe"
+function Invoke-Windeployqt
+{
+    & windeployqt @WINDEPLOYQT_ARGS @args
 }
+
+Write-Host "------ windeployqt"
+Invoke-Windeployqt @QML_DIRS --dir $INSTALLER_DIR "$INSTALLER_DIR\${PRODUCT_NAME}.exe"
+Invoke-Windeployqt --dir $INSTALLER_DIR "$INSTALLER_DIR\thirdparty.dll"
+
+Get-ChildItem "$INSTALLER_DIR\plugins\*.dll" | ForEach-Object {
+    Invoke-Windeployqt --dir $INSTALLER_DIR $_.FullName
+}
+
+Invoke-Windeployqt --qmldir "source\crashreporter" "$INSTALLER_DIR\CrashReporter.exe"
+Invoke-Windeployqt "$INSTALLER_DIR\MessageBox.exe"
 
 Write-Host "------ copying runtime + extras"
 Copy-Item "$CRT_DIR\*.*" $INSTALLER_DIR -Recurse -Verbose
@@ -79,13 +79,8 @@ $UPDATER_DIR = "$INSTALLER_DIR\Updater"
 New-Item -ItemType Directory -Path $UPDATER_DIR | Out-Null
 Copy-Item "$BUILD_DIR\Updater.exe", "$BUILD_DIR\thirdparty.dll" $UPDATER_DIR -Verbose
 
-& {
-    $PSNativeCommandUseErrorActionPreference = $false
-
-    $QML_DIR = "source\updater"
-    & windeployqt --qmldir $QML_DIR @WINDEPLOYQT_ARGS "$UPDATER_DIR\Updater.exe"
-    & windeployqt @WINDEPLOYQT_ARGS --dir $UPDATER_DIR "$UPDATER_DIR\thirdparty.dll"
-}
+Invoke-Windeployqt --qmldir "source\updater" "$UPDATER_DIR\Updater.exe"
+Invoke-Windeployqt --dir $UPDATER_DIR "$UPDATER_DIR\thirdparty.dll"
 
 Copy-Item "$CRT_DIR\*.*", "${Env:WindowsSdkDir}\redist\ucrt\DLLs\x64\*.*" $UPDATER_DIR -Recurse -Verbose
 
