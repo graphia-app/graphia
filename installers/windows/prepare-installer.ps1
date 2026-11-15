@@ -47,7 +47,7 @@ Get-ChildItem -Recurse -Directory | ForEach-Object {
     if(Test-Path "$($_.FullName)\*.qml")
     {
         $QML_DIRS += "--qmldir"
-        $QML_DIRS += "`"$($_.FullName)`""
+        $QML_DIRS += $_.FullName
     }
 }
 
