@@ -10,7 +10,7 @@ jobs:
   wasm-deploy:
     name: Deploy wasm
     if: inputs.is-release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v7
     - uses: actions/checkout@v7
@@ -28,7 +28,7 @@ jobs:
   release:
     name: GitHub Release
     if: inputs.is-release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/download-artifact@v8
       with:
@@ -59,7 +59,7 @@ jobs:
 
   prereleasebuilds:
     name: Upload Builds
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/download-artifact@v8
       with:

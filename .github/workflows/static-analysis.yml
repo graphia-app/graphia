@@ -19,7 +19,7 @@ env:
 jobs:
   clang-tidy:
     name: clang-tidy
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v7
     - name: Install Tools
@@ -92,7 +92,7 @@ jobs:
 
   clazy:
     name: Clazy
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v7
     - name: Install Tools
@@ -135,7 +135,7 @@ jobs:
 
   qmllint:
     name: QML Lint
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v7
     - name: Install Qt
@@ -155,7 +155,7 @@ jobs:
 
   iwyu:
     name: IWYU
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v7
     - name: Install Tools
@@ -196,7 +196,7 @@ jobs:
   prereleasestaticanalysislogs:
     if: github.event_name != 'pull_request'
     name: Upload Logs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs:
       - clang-tidy
       - cppcheck
