@@ -30,6 +30,11 @@ export DEPLOY_PLATFORM_THEMES=1 # For platformthemes/libqgtk3.so
 export DEPLOY_GTK_VERSION=3
 export LD_LIBRARY_PATH="AppDir/usr/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
+# linuxdeploy-plugin-qt only finds modules the executables link directly, and WebEngine
+# (and Positioning, which it uses) is only used via QML, so its process, resources and
+# plugins wouldn't otherwise be deployed
+export EXTRA_QT_MODULES="webenginecore;positioning"
+
 # Qt Positioning's NMEA plugin links Qt Serial Port; neither is shipped (see below)
 # Unlike --exclude-library, this reaches linuxdeploy's plugins
 export LINUXDEPLOY_EXCLUDED_LIBRARIES="libQt6SerialPort.so*"

@@ -77,10 +77,6 @@
 #include <QStringList>
 #include <QVariant>
 
-#if __has_include(<QtWebEngineQuick>)
-#include <QtWebEngineQuick>
-#endif
-
 #include <iostream>
 #include <chrono>
 #include <cstddef>
@@ -234,10 +230,6 @@ static int start(int argc, char *argv[], const ConsoleOutputFiles& consoleOutput
     QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
     QQuickWindow::setDefaultAlphaBuffer(true);
     OpenGLFunctions::requestMinimumFormat();
-
-#ifdef QTWEBENGINEQUICK_VERSION
-    QtWebEngineQuick::initialize();
-#endif
 
 #ifndef Q_OS_WASM
     ApplicationClass app(QStringLiteral(PRODUCT_NAME), argc, argv);
