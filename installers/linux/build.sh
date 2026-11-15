@@ -30,6 +30,10 @@ export DEPLOY_PLATFORM_THEMES=1 # For platformthemes/libqgtk3.so
 export DEPLOY_GTK_VERSION=3
 export LD_LIBRARY_PATH="AppDir/usr/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
+# Qt Positioning's NMEA plugin links Qt Serial Port; neither is shipped (see below)
+# Unlike --exclude-library, this reaches linuxdeploy's plugins
+export LINUXDEPLOY_EXCLUDED_LIBRARIES="libQt6SerialPort.so*"
+
 mkdir -p ${BUILD_DIR}/AppDir/usr/share/${PRODUCT_NAME}
 cp -r source/app/examples \
   ${BUILD_DIR}/AppDir/usr/share/${PRODUCT_NAME}
@@ -63,6 +67,10 @@ LINUXDEPLOY=${PWD}/linuxdeploy-x86_64.AppImage
   # Manually exclude libnss since linuxdeploy --exclude-library doesn't, for whatever reason
   # See also: https://github.com/probonopd/linuxdeployqt/issues/35
   rm AppDir/usr/lib/libnss*
+
+  # linuxdeploy-plugin-qt can't skip individual plugins, and the NMEA plugin
+  # can't load without Qt Serial Port, so remove it after the fact
+  rm AppDir/usr/plugins/position/libqtposition_nmea.so || exit $?
 
   # appimagetool only creates .DirIcon from a PNG or XPM at the top level
   cp AppDir/usr/share/icons/hicolor/256x256/apps/${PRODUCT_NAME}.png AppDir/ || exit $?

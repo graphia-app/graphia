@@ -53,7 +53,8 @@ Get-ChildItem -Recurse -Directory | ForEach-Object {
     }
 }
 
-$WINDEPLOYQT_ARGS = @("--no-compiler-runtime", "--no-opengl-sw")
+# qtposition_nmea needs Qt6SerialPort, which we don't deploy
+$WINDEPLOYQT_ARGS = @("--no-compiler-runtime", "--no-opengl-sw", "--exclude-plugins", "qtposition_nmea")
 
 function Invoke-Windeployqt
 {
