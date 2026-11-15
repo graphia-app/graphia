@@ -95,6 +95,13 @@ Get-ChildItem -Path $UPDATER_DIR -File -Recurse | ForEach-Object {
 Move-Item "$UPDATER_DIR\*.*" $INSTALLER_DIR -Verbose -Force
 Remove-Item $UPDATER_DIR -Recurse -Force
 
+Get-Content "$INSTALLER_DIR\Updater.deps" | ForEach-Object {
+    if(-not (Test-Path "$INSTALLER_DIR\$_" -PathType Leaf))
+    {
+        throw "Updater dependency $_ is missing from $INSTALLER_DIR"
+    }
+}
+
 $RM_NSH = "installers\windows\rm.nsh"
 Set-Content $RM_NSH ""
 
