@@ -118,6 +118,7 @@ list(APPEND MISC
     ${CMAKE_CURRENT_LIST_DIR}/installers/windows/installer.nsi
     ${CMAKE_CURRENT_LIST_DIR}/installers/windows/make-installer.ps1
     ${CMAKE_CURRENT_LIST_DIR}/installers/windows/prepare-installer.ps1
+    ${CMAKE_CURRENT_LIST_DIR}/installers/windows/test-installer.ps1
 )
 
 list(APPEND MISC

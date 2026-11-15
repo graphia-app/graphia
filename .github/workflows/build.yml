@@ -145,6 +145,9 @@ jobs:
         organization-id: ${{ secrets.WINDOWS_SIGNPATH_ORGANIZATION_ID }}
         project-slug: ${{ secrets.WINDOWS_SIGNPATH_PROJECT_SLUG }}
         signing-policy-slug: ${{ secrets.WINDOWS_SIGNPATH_SIGNING_POLICY_SLUG }}
+    - name: Test NSIS Installer
+      shell: pwsh
+      run: .\installers\windows\test-installer.ps1
     - uses: actions/upload-artifact@v7
       if: github.event_name != 'pull_request'
       with:
