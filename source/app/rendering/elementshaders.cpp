@@ -23,6 +23,8 @@
 
 #include <QByteArray>
 #include <QColor>
+#include <QOpenGLContext>
+#include <QOpenGLContextGroup>
 #include <QString>
 #include <QStringList>
 #include <QVector3D>
@@ -30,6 +32,9 @@
 #include <algorithm>
 #include <array>
 #include <limits>
+#include <map>
+#include <memory>
+#include <mutex>
 #include <span>
 #include <vector>
 
@@ -158,6 +163,30 @@ ElementShaders::ElementShaders()
 
     std::ranges::for_each(nodeShaders(), setConstants);
     std::ranges::for_each(edgeShaders(), setConstants);
+}
+
+ElementShaders& ElementShaders::forCurrentShareGroup()
+{
+    static std::mutex mutex;
+    const std::unique_lock<std::mutex> lock(mutex);
+
+    static std::map<QOpenGLContextGroup*, std::unique_ptr<ElementShaders>> sharedShaders;
+
+    auto* contextGroup = QOpenGLContext::currentContext()->shareGroup();
+
+    if(!sharedShaders.contains(contextGroup))
+    {
+        sharedShaders[contextGroup] = std::make_unique<ElementShaders>();
+
+        // By the time the group is destroyed, it has detached the programs from their GL objects
+        QObject::connect(contextGroup, &QObject::destroyed, contextGroup, [contextGroup]
+        {
+            const std::unique_lock<std::mutex> destroyedLock(mutex);
+            sharedShaders.erase(contextGroup);
+        });
+    }
+
+    return *sharedShaders.at(contextGroup);
 }
 
 void ElementShaders::setFrameUniforms(const FrameUniforms& uniforms)

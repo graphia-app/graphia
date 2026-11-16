@@ -106,6 +106,9 @@ struct ElementShaders
     };
 
     ElementShaders();
+
+    static ElementShaders& forCurrentShareGroup();
+
     void setFrameUniforms(const FrameUniforms& uniforms);
 
 private:

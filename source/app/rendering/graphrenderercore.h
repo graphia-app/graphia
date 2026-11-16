@@ -236,7 +236,7 @@ private:
 
     static SdfCache _sdfCache;
 
-    ElementShaders _elementShaders;
+    ElementShaders& _elementShaders = ElementShaders::forCurrentShareGroup();
     QOpenGLShaderProgram _textShader;
 
     QOpenGLShaderProgram _screenShader;
