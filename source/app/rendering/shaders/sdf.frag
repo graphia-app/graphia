@@ -27,6 +27,11 @@ uniform sampler2D tex;
 uniform vec2 texSize;
 uniform float scaleFactor;
 
+// For each block of source texels: its minimum coverage, its maximum coverage,
+// and whether any of its texels is partially covered
+uniform sampler2D blocks;
+uniform int blockSize;
+
 layout(location = 0) out vec4 outColor;
 
 in vec2 vPosition;
@@ -38,6 +43,19 @@ in vec2 vPosition;
 float coverageAt(vec2 index)
 {
     return texture(tex, (index + 0.5) / texSize.xy).a;
+}
+
+// Indices beyond the texture read its clamped edge, which the block summaries don't describe
+bool blockWithinTexture(ivec2 block)
+{
+    return all(greaterThanEqual(block, ivec2(0))) &&
+        all(lessThanEqual((block + 1) * blockSize, ivec2(texSize)));
+}
+
+// Whichever of two equally distant texels the search reaches first in column order wins
+bool precedes(vec2 index, vec2 other)
+{
+    return index.x < other.x || (index.x == other.x && index.y < other.y);
 }
 
 void main()
@@ -63,39 +81,46 @@ void main()
 
     bool fragIsIn = coverageAt(floor(fragPosition)) > 0.5;
 
-    // Find the nearest partially covered texel, which the edge passes through, and
-    // the nearest texel on the other side of the edge, the latter being a fallback
-    // for where the source has no partial coverage to work with
+    vec2 endIndex = startIndex + float(scalediRange - 1);
+
+    // Only a partially covered texel within fitDistance is fitted, so the search for one
+    // covers just the texels whose centres can be that near
+    vec2 edgeStart = max(startIndex, ceil(fragPosition - fitDistance - 0.5));
+    vec2 edgeEnd = min(endIndex, floor(fragPosition + fitDistance - 0.5));
+
+    bool anyPartial = false;
+    for(int bx = int(floor(edgeStart.x / float(blockSize))); bx <= int(floor(edgeEnd.x / float(blockSize))); bx++)
+    {
+        for(int by = int(floor(edgeStart.y / float(blockSize))); by <= int(floor(edgeEnd.y / float(blockSize))); by++)
+        {
+            ivec2 block = ivec2(bx, by);
+            if(!blockWithinTexture(block) || texelFetch(blocks, block, 0).b > 0.5)
+                anyPartial = true;
+        }
+    }
+
     vec2 edgeIndex = vec2(0.0);
     float edgeDistance = maxDistance;
     bool edgeFound = false;
 
-    float oppositeDistance = maxDistance;
-    float oppositeCoverage = 0.0;
-    bool oppositeFound = false;
-
-    for(int dx = 0; dx < scalediRange; dx++)
+    if(anyPartial)
     {
-        for(int dy = 0; dy < scalediRange; dy++)
+        for(float x = edgeStart.x; x <= edgeEnd.x; x++)
         {
-            vec2 index = startIndex + vec2(dx, dy);
-            float coverage = coverageAt(index);
-
-            // Distances are measured to the texel's centre, not its index
-            float d = distance(fragPosition, index + 0.5);
-
-            if(coverage > 0.0 && coverage < 1.0 && d < edgeDistance)
+            for(float y = edgeStart.y; y <= edgeEnd.y; y++)
             {
-                edgeDistance = d;
-                edgeIndex = index;
-                edgeFound = true;
-            }
+                vec2 index = vec2(x, y);
+                float coverage = coverageAt(index);
 
-            if((coverage > 0.5) != fragIsIn && d < oppositeDistance)
-            {
-                oppositeDistance = d;
-                oppositeCoverage = coverage;
-                oppositeFound = true;
+                // Distances are measured to the texel's centre, not its index
+                float d = distance(fragPosition, index + 0.5);
+
+                if(coverage > 0.0 && coverage < 1.0 && d < edgeDistance)
+                {
+                    edgeDistance = d;
+                    edgeIndex = index;
+                    edgeFound = true;
+                }
             }
         }
     }
@@ -122,6 +147,64 @@ void main()
             float centreToEdge = coverageAt(edgeIndex) - 0.5;
             distanceToEdge = -(centreToEdge + dot(fragPosition - (edgeIndex + 0.5), inwards));
             fitted = true;
+        }
+    }
+
+    // Without an edge to fit, find the nearest texel on the other side of the edge,
+    // passing over the blocks that have none
+    float oppositeDistance = maxDistance;
+    float oppositeCoverage = 0.0;
+    vec2 oppositeIndex = vec2(0.0);
+    bool oppositeFound = false;
+
+    if(!fitted)
+    {
+        ivec2 firstBlock = ivec2(floor(startIndex / float(blockSize)));
+        ivec2 lastBlock = ivec2(floor(endIndex / float(blockSize)));
+
+        for(int bx = firstBlock.x; bx <= lastBlock.x; bx++)
+        {
+            for(int by = firstBlock.y; by <= lastBlock.y; by++)
+            {
+                ivec2 block = ivec2(bx, by);
+
+                if(blockWithinTexture(block))
+                {
+                    vec4 summary = texelFetch(blocks, block, 0);
+                    bool hasOpposite = fragIsIn ? !(summary.r > 0.5) : summary.g > 0.5;
+                    if(!hasOpposite)
+                        continue;
+                }
+
+                vec2 blockStart = max(startIndex, vec2(block * blockSize));
+                vec2 blockEnd = min(endIndex, vec2(block * blockSize + blockSize - 1));
+
+                vec2 nearestCentre = clamp(fragPosition, blockStart + 0.5, blockEnd + 0.5);
+                if(distance(fragPosition, nearestCentre) > oppositeDistance)
+                    continue;
+
+                for(float x = blockStart.x; x <= blockEnd.x; x++)
+                {
+                    for(float y = blockStart.y; y <= blockEnd.y; y++)
+                    {
+                        vec2 index = vec2(x, y);
+                        float coverage = coverageAt(index);
+
+                        if((coverage > 0.5) == fragIsIn)
+                            continue;
+
+                        float d = distance(fragPosition, index + 0.5);
+
+                        if(d < oppositeDistance || (oppositeFound && d == oppositeDistance && precedes(index, oppositeIndex)))
+                        {
+                            oppositeDistance = d;
+                            oppositeCoverage = coverage;
+                            oppositeIndex = index;
+                            oppositeFound = true;
+                        }
+                    }
+                }
+            }
         }
     }
 

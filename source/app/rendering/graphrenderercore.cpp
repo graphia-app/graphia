@@ -527,6 +527,7 @@ GraphRendererCore::GraphRendererCore() :
     ShaderTools::loadShaderProgram(_selectionMarkerShader, u":/shaders/2d.vert"_s, u":/shaders/selectionMarker.frag"_s);
 
     ShaderTools::loadShaderProgram(_sdfShader, u":/shaders/screen.vert"_s, u":/shaders/sdf.frag"_s);
+    ShaderTools::loadShaderProgram(_sdfBlocksShader, u":/shaders/screen.vert"_s, u":/shaders/sdfblocks.frag"_s);
     ShaderTools::loadShaderProgram(_textShader, u":/shaders/textrender.vert"_s, u":/shaders/textrender.frag"_s);
 
     for(auto& gpuGraphData : _gpuGraphData)
@@ -1532,8 +1533,19 @@ QSize GraphRendererCore::renderSdfTexture(const GlyphMap& glyphMap, GLuint textu
     QMatrix4x4 m;
     m.ortho(0, static_cast<float>(renderWidth), 0, static_cast<float>(renderHeight), -1.0f, 1.0f);
 
+    const int blockSize = 8;
+    const auto blocksWide = sourceWidth / blockSize;
+    const auto blocksHigh = sourceHeight / blockSize;
+
+    _sdfBlocksShader.bind();
+    _sdfBlocksShader.setUniformValue("tex", 0);
+    _sdfBlocksShader.setUniformValue("projectionMatrix", m);
+    _sdfBlocksShader.setUniformValue("blockSize", blockSize);
+
     _sdfShader.bind();
     _sdfShader.setUniformValue("tex", 0);
+    _sdfShader.setUniformValue("blocks", 1);
+    _sdfShader.setUniformValue("blockSize", blockSize);
     _sdfShader.setUniformValue("projectionMatrix", m);
     _sdfShader.setUniformValue("scaleFactor", static_cast<GLfloat>(scaleFactor));
     _sdfShader.setUniformValue("texSize", QPoint(sourceWidth, sourceHeight));
@@ -1572,6 +1584,18 @@ QSize GraphRendererCore::renderSdfTexture(const GlyphMap& glyphMap, GLuint textu
     // not be given an interpolation of the texels surrounding the sample point
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
+    GLuint blocksTexture;
+    glGenTextures(1, &blocksTexture);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, blocksTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, blocksWide, blocksHigh, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glActiveTexture(GL_TEXTURE0);
+
     // Render an SDF texture for each source glyph layer
     for(size_t layer = 0; layer < numImages; layer++)
     {
@@ -1591,6 +1615,17 @@ QSize GraphRendererCore::renderSdfTexture(const GlyphMap& glyphMap, GLuint textu
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width(), image.height(),
             0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
 
+        // Summarise each block of the source, which the SDF shader then reads
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, blocksTexture, 0);
+        glViewport(0, 0, blocksWide, blocksHigh);
+        glDisable(GL_BLEND);
+        _sdfBlocksShader.bind();
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture, 0, static_cast<GLint>(layer));
+        glViewport(0, 0, renderWidth, renderHeight);
+        glEnable(GL_BLEND);
+        _sdfShader.bind();
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
         if(u::pref(u"debug/saveGlyphMaps"_s).toBool())
@@ -1604,6 +1639,11 @@ QSize GraphRendererCore::renderSdfTexture(const GlyphMap& glyphMap, GLuint textu
             sdfImage.save(u"%1/graphia-SDF%2.png"_s.arg(QDir::tempPath(), QString::number(layer)));
         }
     }
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDeleteTextures(1, &blocksTexture);
+    glActiveTexture(GL_TEXTURE0);
 
     glBindTexture(GL_TEXTURE_2D, 0);
     glDeleteTextures(1, &sourceTexture);

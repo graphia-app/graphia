@@ -39,6 +39,7 @@
         <file>shaders/textrender.frag</file>
         <file>shaders/textrender.vert</file>
         <file>shaders/sdf.frag</file>
+        <file>shaders/sdfblocks.frag</file>
         <file>shaders/outline.frag</file>
         <file>shaders/compositeelement.frag</file>
         <file>shaders/copy.frag</file>

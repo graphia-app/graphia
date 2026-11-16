@@ -217,6 +217,7 @@ private:
     std::array<GPUGraphData, 7> _gpuGraphData;
 
     QOpenGLShaderProgram _sdfShader;
+    QOpenGLShaderProgram _sdfBlocksShader;
 
     ElementShaders _elementShaders;
     QOpenGLShaderProgram _textShader;
