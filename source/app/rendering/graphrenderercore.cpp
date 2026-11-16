@@ -29,6 +29,7 @@
 #include <QColor>
 #include <QDebug>
 #include <QDir>
+#include <QHashFunctions>
 #include <QImage>
 #include <QOpenGLContext>
 #include <QPoint>
@@ -1516,6 +1517,29 @@ void GraphRendererCore::compositeInto(GLuint framebuffer, Flags<Type> type)
     _frameAccumulator.draw(framebuffer);
 }
 
+std::optional<std::vector<uchar>> GraphRendererCore::SdfCache::find(size_t key) const
+{
+    const std::unique_lock<std::mutex> lock(_mutex);
+
+    auto it = std::ranges::find(_entries, key, &decltype(_entries)::value_type::first);
+    if(it == _entries.end())
+        return std::nullopt;
+
+    return it->second;
+}
+
+void GraphRendererCore::SdfCache::add(size_t key, std::vector<uchar> pixels)
+{
+    const size_t MaximumEntries = 4;
+    const std::unique_lock<std::mutex> lock(_mutex);
+
+    _entries.emplace_front(key, std::move(pixels));
+    if(_entries.size() > MaximumEntries)
+        _entries.pop_back();
+}
+
+GraphRendererCore::SdfCache GraphRendererCore::_sdfCache{};
+
 QSize GraphRendererCore::renderSdfTexture(const GlyphMap& glyphMap, GLuint texture)
 {
     if(glyphMap.images().empty())
@@ -1527,6 +1551,27 @@ QSize GraphRendererCore::renderSdfTexture(const GlyphMap& glyphMap, GLuint textu
     const auto renderWidth = glyphMap.images().at(0).width() / scaleFactor;
     const auto renderHeight = glyphMap.images().at(0).height() / scaleFactor;
     const auto numImages = glyphMap.images().size();
+
+    size_t key = qHashMulti(0, numImages, sourceWidth, sourceHeight);
+    for(const auto& image : glyphMap.images())
+        key = qHashBits(image.constBits(), static_cast<size_t>(image.sizeInBytes()), key);
+
+    const auto cachedPixels = _sdfCache.find(key);
+
+    glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA,
+        renderWidth, renderHeight, static_cast<GLsizei>(numImages),
+        0, GL_RGBA, GL_UNSIGNED_BYTE, cachedPixels ? cachedPixels->data() : nullptr);
+
+    glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+
+    if(cachedPixels)
+        return {renderWidth, renderHeight};
 
     glViewport(0, 0, renderWidth, renderHeight);
 
@@ -1562,15 +1607,9 @@ QSize GraphRendererCore::renderSdfTexture(const GlyphMap& glyphMap, GLuint textu
     glGenFramebuffers(1, &fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
-    glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA,
-        renderWidth, renderHeight, static_cast<GLsizei>(numImages),
-        0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    const auto layerBytes = static_cast<size_t>(renderWidth) * static_cast<size_t>(renderHeight) * 4;
+    std::vector<uchar> pixels(layerBytes * numImages);
+    bool complete = true;
 
     GLuint sourceTexture;
     glGenTextures(1, &sourceTexture);
@@ -1607,6 +1646,7 @@ QSize GraphRendererCore::renderSdfTexture(const GlyphMap& glyphMap, GLuint textu
         if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         {
             qWarning() << "FBO incomplete while rendering SDF textures";
+            complete = false;
             break;
         }
 
@@ -1628,17 +1668,18 @@ QSize GraphRendererCore::renderSdfTexture(const GlyphMap& glyphMap, GLuint textu
         _sdfShader.bind();
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
+        auto* layerPixels = &pixels.at(layer * layerBytes);
+        glReadPixels(0, 0, renderWidth, renderHeight, GL_RGBA, GL_UNSIGNED_BYTE, layerPixels);
+
         if(u::pref(u"debug/saveGlyphMaps"_s).toBool())
         {
-            glFinish();
-
-            std::vector<uchar> pixels(static_cast<size_t>(renderWidth * renderHeight * 4));
-            glReadPixels(0, 0, renderWidth, renderHeight, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
-            QImage sdfImage(pixels.data(), renderWidth, renderHeight, QImage::Format_RGBA8888);
-            sdfImage.flip();
-            sdfImage.save(u"%1/graphia-SDF%2.png"_s.arg(QDir::tempPath(), QString::number(layer)));
+            const QImage sdfImage(layerPixels, renderWidth, renderHeight, QImage::Format_RGBA8888);
+            sdfImage.flipped().save(u"%1/graphia-SDF%2.png"_s.arg(QDir::tempPath(), QString::number(layer)));
         }
     }
+
+    if(complete)
+        _sdfCache.add(key, std::move(pixels));
 
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, 0);

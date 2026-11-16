@@ -53,7 +53,11 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <deque>
 #include <limits>
+#include <mutex>
+#include <optional>
+#include <utility>
 #include <vector>
 
 class ScreenshotRenderer;
@@ -218,6 +222,19 @@ private:
 
     QOpenGLShaderProgram _sdfShader;
     QOpenGLShaderProgram _sdfBlocksShader;
+
+    class SdfCache
+    {
+    public:
+        std::optional<std::vector<uchar>> find(size_t key) const;
+        void add(size_t key, std::vector<uchar> pixels);
+
+    private:
+        mutable std::mutex _mutex;
+        std::deque<std::pair<size_t, std::vector<uchar>>> _entries;
+    };
+
+    static SdfCache _sdfCache;
 
     ElementShaders _elementShaders;
     QOpenGLShaderProgram _textShader;
