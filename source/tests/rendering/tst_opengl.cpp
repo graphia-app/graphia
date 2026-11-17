@@ -17,13 +17,17 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "app/rendering/elementshaders.h"
 #include "app/rendering/openglfunctions.h"
 
+#include <QCoreApplication>
+#include <QEvent>
 #include <QOffscreenSurface>
 #include <QOpenGLContext>
 #include <QOpenGLVertexArrayObject>
 #include <QTest>
 
+#include <memory>
 #include <thread>
 #include <utility>
 
@@ -94,6 +98,43 @@ private slots:
         QVERIFY(created);
         QVERIFY(current);
         QVERIFY(vertexArrayCreated);
+    }
+
+    void elementShadersAreSharedWithinAShareGroup()
+    {
+        QOffscreenSurface surface;
+        surface.setFormat(OpenGLFunctions::minimumFormat());
+        surface.create();
+
+        auto createContext = [](QOpenGLContext* shareContext)
+        {
+            auto context = std::make_unique<QOpenGLContext>();
+            context->setFormat(OpenGLFunctions::minimumFormat());
+            context->setShareContext(shareContext);
+            return context->create() ? std::move(context) : nullptr;
+        };
+
+        auto first = createContext(nullptr);
+        auto sharing = createContext(first.get());
+        auto separate = createContext(nullptr);
+        QVERIFY(first != nullptr && sharing != nullptr && separate != nullptr);
+        QCOMPARE(sharing->shareGroup(), first->shareGroup());
+
+        QVERIFY(first->makeCurrent(&surface));
+        const auto* shaders = &ElementShaders::forCurrentShareGroup();
+
+        QVERIFY(sharing->makeCurrent(&surface));
+        QCOMPARE(&ElementShaders::forCurrentShareGroup(), shaders);
+
+        QVERIFY(separate->makeCurrent(&surface));
+        QVERIFY(&ElementShaders::forCurrentShareGroup() != shaders);
+        separate->doneCurrent();
+
+        // So that the groups, and their programs with them, are destroyed while the test runs
+        separate.reset();
+        sharing.reset();
+        first.reset();
+        QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
     }
 };
 
