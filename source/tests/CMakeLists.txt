@@ -208,6 +208,8 @@ qt_add_resources(tst_translator test_catalogues PREFIX /i18n
 
 add_unit_test(tst_opengl rendering/tst_opengl.cpp)
 add_unit_test(tst_camera rendering/tst_camera.cpp)
+add_unit_test(tst_sdf rendering/tst_sdf.cpp)
+qt_add_resources(tst_sdf "sdf_reference" PREFIX "/" FILES rendering/sdfreference.frag)
 add_unit_test(tst_transition rendering/tst_transition.cpp)
 
 # A Document shown in a window, drawn by the real renderer
